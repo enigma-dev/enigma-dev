@@ -10,6 +10,6 @@ ifeq ($(OS), Linux)
 endif
 
 CXXFLAGS += -I../ $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -fPIC
-LDFLAGS += -shared -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -lENIGMAShared -lpng $(FS_LIBS)
+LDFLAGS += -shared -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols$(SUFFIX) -lprotobuf -lENIGMAShared$(SUFFIX) -lpng $(FS_LIBS)
 
 include ../../Default.mk

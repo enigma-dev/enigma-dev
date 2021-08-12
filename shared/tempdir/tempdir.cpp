@@ -1,3 +1,5 @@
+#include <string>
+
 #if defined(_WIN32)
 #include <windows.h>
 #include "../strings_util.h"
@@ -19,10 +21,10 @@ const char *DirectoryGetTemporaryPath() {
   }
   return CrossProcess::DirectoryGetCurrentWorking();
   #else
-  tempdir = CrossProcess::EnviromentGetVariable("TMPDIR"); 
-  if (tempdir.empty()) tempdir = CrossProcess::EnviromentGetVariable("TMP");
-  if (tempdir.empty()) tempdir = CrossProcess::EnviromentGetVariable("TEMP");
-  if (tempdir.empty()) tempdir = CrossProcess::EnviromentGetVariable("TEMPDIR");
+  tempdir = CrossProcess::EnvironmentGetVariable("TMPDIR"); 
+  if (tempdir.empty()) tempdir = CrossProcess::EnvironmentGetVariable("TMP");
+  if (tempdir.empty()) tempdir = CrossProcess::EnvironmentGetVariable("TEMP");
+  if (tempdir.empty()) tempdir = CrossProcess::EnvironmentGetVariable("TEMPDIR");
   if (tempdir.empty()) tempdir = "/tmp/";
   if (tempdir.back() != '/') tempdir += "/";
   struct stat sb = { 0 };

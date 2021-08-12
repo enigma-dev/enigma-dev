@@ -1,5 +1,7 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 OS := $(shell uname -s)
+ARCH := $(shell uname -m)
+SUFFIX := -$(OS)-$(ARCH)
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
@@ -19,31 +21,31 @@ ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := .dylib
-	BIN_EXT :=
+	LIB_EXT := $(SUFFIX).dylib
+	BIN_EXT := $(SUFFIX)
 else ifeq ($(UNIX_BASED), true)
 	PLATFORM := xlib
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := .so
-	BIN_EXT :=
+	LIB_EXT := $(SUFFIX).so
+	BIN_EXT := $(SUFFIX)
 else
 	PLATFORM := Win32
 	MKDIR := mkdir.exe
 	LIB_PFX := lib
-	LIB_EXT := .dll
-	BIN_EXT := .exe
+	LIB_EXT := $(SUFFIX).dll
+	BIN_EXT := $(SUFFIX).exe
 endif
 
 # Global g++ flags
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
 
-# macOS brew include and lib folders
+# MacPorts include and lib folders
 ifeq ($(OS), Darwin)
-	CXXFLAGS += -I/usr/local/include
-	CFLAGS   += -I/usr/local/include
-	LDFLAGS  += -L/usr/local/lib
+	CXXFLAGS += -I/opt/local/include
+	CFLAGS   += -I/opt/local/include
+	LDFLAGS  += -L/opt/local/lib
 endif
 
 # FreeBSD include and lib folders
