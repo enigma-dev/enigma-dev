@@ -45,8 +45,8 @@ string execute_shell_for_output(const string &command) {
 
 void url_open(string url) {
   #if defined(_WIN32)
-  std::wstring tstr_url = strings_util::widen(url);
-  ShellExecuteW(nullptr, L"open", tstr_url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+  std::wstring wurl = strings_util::widen(url);
+  ShellExecuteW(nullptr, L"open", wurl.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
   #else
   execute_program("xdg-open", url, false);
   #end
