@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "Platforms/General/PFmain.h"
+#include "strings_util.h"
 
 using std::string;
 
@@ -40,6 +41,19 @@ string execute_shell_for_output(const string &command) {
     CrossProcess::FreeExecutedProcessStandardOutput(pid);
   }
   return output;
+}
+
+void url_open(string url) {
+  #if defined(_WIN32)
+  std::wstring wurl = strings_util::widen(url);
+  ShellExecuteW(nullptr, L"open", wurl.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+  #else
+  execute_program("xdg-open", url, false);
+  #end
+}
+
+void action_webpage(const string& url) {
+  url_open(url);
 }
 
 } // namespace enigma_user

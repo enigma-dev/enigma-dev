@@ -1,5 +1,4 @@
 #include "Platforms/General/PFmain.h"
-#include "Platforms/General/PFshell.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 using std::string;
@@ -7,7 +6,7 @@ using std::string;
 namespace enigma_user {
 
 void url_open(string url) {
-  enigma_insecure::execute_program("xdg-open", url, false);
+  execute_program("xdg-open", url, false);
 }
 
 void action_webpage(const string& url) {
