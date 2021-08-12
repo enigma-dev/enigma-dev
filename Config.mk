@@ -41,11 +41,11 @@ endif
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
 
-# macOS brew include and lib folders
+# MacPorts include and lib folders
 ifeq ($(OS), Darwin)
-	CXXFLAGS += -I/usr/local/include
-	CFLAGS   += -I/usr/local/include
-	LDFLAGS  += -L/usr/local/lib
+	CXXFLAGS += -I/opt/local/include
+	CFLAGS   += -I/opt/local/include
+	LDFLAGS  += -L/opt/local/lib
 endif
 
 # FreeBSD include and lib folders
