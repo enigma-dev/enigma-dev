@@ -23,7 +23,11 @@
 
 #include <string>
 
+#if !defined(HIDE_DEBUG_MESSAGES)
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#else
+inline void DEBUG_MESSAGE(msg, severity) { /* lel */ }
+#endif
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
