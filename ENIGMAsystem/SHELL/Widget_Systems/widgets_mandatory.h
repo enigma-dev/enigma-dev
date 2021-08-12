@@ -26,7 +26,7 @@
 #if !defined(HIDE_DEBUG_MESSAGES)
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 #else
-inline void DEBUG_MESSAGE(msg, severity) { /* lel */ }
+#define DEBUG_MESSAGE(msg, severity) ::enigma_user::lel(msg, severity)
 #endif
 
 enum MESSAGE_TYPE : int {
@@ -86,6 +86,10 @@ void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
 inline void show_error(std::string msg, const bool fatal) {
    show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
+
+#if defined(HIDE_DEBUG_MESSAGES)
+inline void lel(std::string msg, MESSAGE_TYPE severity) { }
+#endif
 
 int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
