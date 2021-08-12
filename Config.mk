@@ -68,7 +68,7 @@ endif
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Linux)
 	else ifeq ($(GMODE), Compile)
-		LDLIBS += $(SLIBPATH)libX11.a $(SLIBPATH)libxcb.a $(SLIBPATH)libXau.a $(SLIBPATH)libXdmcp.a $(SLIBPATH)libXrandr.a $(SLIBPATH)libXrender.a $(SLIBPATH)libXinerama.a $(SLIBPATH)libXext.a $(SLIBPATH)libOpenGL.a $(SLIBPATH)libGLX.a $(SLIBPATH)libGLEW.a $(SLIBPATH)libGL.a $(SLIBPATH)libGLU.a $(SLIBPATH)libopenal.a $(SLIBPATH)libalure.a $(SLIBPATH)libvorbisfile.a $(SLIBPATH)libvorbis.a $(SLIBPATH)libogg.a $(SLIBPATH)libpng.a $(SLIBPATH)libz.a $(SLIBPATH)libpthread.a $(SLIBPATH)libm.a
+		SOURCES += $(SLIBPATH)libX11.a $(SLIBPATH)libxcb.a $(SLIBPATH)libXau.a $(SLIBPATH)libXdmcp.a $(SLIBPATH)libXrandr.a $(SLIBPATH)libXrender.a $(SLIBPATH)libXinerama.a $(SLIBPATH)libXext.a $(SLIBPATH)libOpenGL.a $(SLIBPATH)libGLX.a $(SLIBPATH)libGLEW.a $(SLIBPATH)libGL.a $(SLIBPATH)libGLU.a $(SLIBPATH)libopenal.a $(SLIBPATH)libalure.a $(SLIBPATH)libvorbisfile.a $(SLIBPATH)libvorbis.a $(SLIBPATH)libogg.a $(SLIBPATH)libpng.a $(SLIBPATH)libz.a $(SLIBPATH)libpthread.a $(SLIBPATH)libm.a
 	endif
 endif
 
