@@ -31,6 +31,10 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #include <ctime>
 #include <cstdio>
 
@@ -73,14 +77,15 @@ namespace enigma
 
     // Open the exe for resource load
     do { // Allows break
-      FILE* resfile; 
+      FILE* resfile = nullptr; 
+      #if !defined(_WIN32)
       char *exename = nullptr;
       windowsystem_write_exename(&exename);
-      #if !defined(_WIN32)
       if (!(resfile = fopen(exename,"rb"))) {
       #else
-      std::wstring wexename = strings_util::widen(exename);
-      if (!(resfile = _wfopen(wexename.c_str(),L"rb"))) {
+      wchar_t exename[MAX_PATH];
+      GetModuleFileNameW(nullptr, exename, MAX_PATH);
+      if (!(resfile = _wfopen(exename,L"rb"))) {
       #endif
         DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
         break;
@@ -88,16 +93,10 @@ namespace enigma
       int nullhere;
       // Read the magic number so we know we're looking at our own data
       fseek(resfile,-8,SEEK_END);
-      #if !defined(_WIN32)
       char str_quad[4];
       if (!fread(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-      #else
-      wchar_t str_quad[4];
-      if (!fread(str_quad,4,1,resfile) or str_quad[0] != L'r' or str_quad[1] != L'e' or str_quad[2] != L's' or str_quad[3] != L'0') {
-      #endif
-        //this error message is a lie full of bullshit; commented it out.
-        //DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR); 
-        //break;
+        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR); 
+        break;
       }
 
       // Get where our resources are located in the module
