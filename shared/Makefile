@@ -8,4 +8,28 @@ PROTO_DIR := ./protos/.eobjs
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR)
 LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols -lprotobuf
 
+ifeq ($(UNIX_BASED), true)
+	ifeq ($(OS), Darwin)
+		override LDLIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+		override CXXFLAGS += -ObjC++
+		override CFLAGS += -ObjC++
+	else ifeq ($(OS), Linux)
+		override LDLIBS += -lprocps
+	else ifeq ($(OS), FreeBSD)
+		override LDLIBS += -lprocstat -lutil -lc
+	else ifeq ($(OS), DragonFly)
+		override LDLIBS += -lkvm -lutil -lc
+	endif
+else
+	CROSSPROCESS := $(shell CROSSPROCESS=crossprocess32.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ crossprocess/crossprocess.cpp -o crossprocess/crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";fi)
+	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess64.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ crossprocess/crossprocess.cpp -o crossprocess/crossprocess64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";fi)
+	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess32.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else cd crossprocess;xxd -i crossprocess32 > crossprocess32.h;fi)
+	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess64.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else cd crossprocess;xxd -i crossprocess64 > crossprocess64.h;fi)
+	CROSSPROCESS += $(shell rm -f "crossprocess/crossprocess32.exe" "crossprocess/crossprocess64.exe")
+	override CXXFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+endif
+
+SHARED_SOURCES += $(call rwildcard,crossprocess,*.cpp) $(call rwildcard,tempdir,*.cpp)
+
 include ../Default.mk

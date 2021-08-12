@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: Shell Execution
+Identifier: ShellExecution
+Author: Samuel Venable
+Description: Adds shell execution functions.
+Icon: shell.png
+
+Depends: None
+Dependencies: None

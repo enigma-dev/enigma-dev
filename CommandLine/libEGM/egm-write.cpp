@@ -129,7 +129,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
 }
 
 bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m) {
-  if (!CreateDirectory(dir))
+  if (!CreateDirectoryRegular(dir))
     return false;
 
   YAML::Emitter yaml;
@@ -194,7 +194,7 @@ bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
 
 bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
                buffers::resources::Room *room) {
-  if (!CreateDirectory(dir))
+  if (!CreateDirectoryRegular(dir))
     return false;
 
   buffers::resources::Room cleaned = *room;
@@ -284,7 +284,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
 bool WriteTimeline(const fs::path &/*egm_root*/, const fs::path &dir,
                    const buffers::resources::Timeline& timeline) {
-  if (!CreateDirectory(dir))
+  if (!CreateDirectoryRegular(dir))
     return false;
 
   for (auto &m : timeline.moments()) {
@@ -424,7 +424,7 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
       }
 
       if (child->has_folder()) {
-        if (!CreateDirectory(dir + "/" + child->name()))
+        if (!CreateDirectoryRegular(dir + "/" + child->name()))
           return false;
 
         string lastDir = dir;
@@ -453,7 +453,7 @@ bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const 
   if (fName.back() != '/')
     fName += '/';
 
-  if (!CreateDirectory(fName))
+  if (!CreateDirectoryRegular(fName))
     return false;
 
   // need to remove the '/' here

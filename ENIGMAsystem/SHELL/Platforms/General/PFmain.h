@@ -19,6 +19,8 @@
 #ifndef ENIGMA_PLATFORM_MAIN
 #define ENIGMA_PLATFORM_MAIN
 
+#include "Universal_System/directoryglobals.h"
+
 #include <string>
 
 namespace enigma {
@@ -50,9 +52,6 @@ namespace enigma {
   
 namespace enigma_user {
 
-extern std::string working_directory;
-extern std::string program_directory;
-extern std::string temp_directory;
 extern std::string keyboard_string;
 extern double fps;
 extern unsigned long delta_time;
@@ -84,6 +83,7 @@ std::string filename_absolute(std::string fname);
 std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
 bool environment_set_variable(const std::string &name, const std::string &value);
+bool environment_unset_variable(const std::string &name);
 bool set_working_directory(std::string dname);
 
 } // namespace enigma_user

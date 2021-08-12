@@ -65,9 +65,6 @@ void set_program_args(int argc, char** argv) {
 }
 
 int enigma_main(int argc, char** argv) {
-  // Initialize directory globals
-  initialize_directory_globals();
-
   // Copy our parameters
   set_program_args(argc, argv);
 
@@ -114,9 +111,6 @@ int enigma_main(int argc, char** argv) {
 namespace enigma_user {
 
 const int os_browser = browser_not_a_browser;
-std::string working_directory = "";
-std::string program_directory = "";
-std::string temp_directory = "";
 std::string game_save_id = "";
 std::string keyboard_string = "";
 double fps = 0;

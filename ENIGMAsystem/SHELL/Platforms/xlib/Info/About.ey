@@ -4,9 +4,9 @@
 Name: X11
 Identifier: xlib
 Represents:
-	Build-Platforms: Linux, FreeBSD
-Description: Run on any Mac, Linux, FreeBSD, or DragonFlyBSD environment with the X Window System.
+	Build-Platforms: Linux, FreeBSD, DragonFlyBSD
+Description: Run on any Linux, FreeBSD, or DragonFlyBSD environment with the X Window System.
 Author: IsmAvatar, Josh Ventura
 
 Depends:
-	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD
+	Build-Platforms: Linux, FreeBSD, DragonFlyBSD

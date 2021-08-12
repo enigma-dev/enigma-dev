@@ -55,7 +55,7 @@ static void atexit_tempdata_cleanup() {
   for (const std::filesystem::path &tempFile : tempFilesCreated) {
     if (tempFile.parent_path().u8string().find(gmk_data) != std::string::npos)
       DeleteFolder(tempFile.parent_path());
-    else if (std::filesystem::is_regular_file(tempFile)) DeleteFile(tempFile);
+    else if (std::filesystem::is_regular_file(tempFile)) DeleteFileRegular(tempFile);
   }
 }
 

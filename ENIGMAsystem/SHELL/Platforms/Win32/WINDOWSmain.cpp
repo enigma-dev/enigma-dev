@@ -74,24 +74,6 @@ static inline string add_slash(const string& dir) {
   return dir;
 }
 
-namespace enigma_user {
-
-bool set_working_directory(string dname) {
-  tstring tstr_dname = widen(dname);
-  replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
-  if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-    WCHAR wstr_buffer[MAX_PATH];
-    if (GetCurrentDirectoryW(MAX_PATH, wstr_buffer) != 0) {
-      working_directory = add_slash(shorten(wstr_buffer));
-      return true;
-    }
-  }
-
-  return false;
-}
-
-} // enigma_user
-
 namespace enigma {
 bool use_pc;
 // Filetime.
@@ -316,28 +298,6 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
-void initialize_directory_globals() {
-  // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = add_slash(shorten(buffer));
-
-  // Set the program_directory
-  buffer[0] = 0;
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
-  enigma_user::program_directory = shorten(buffer);
-  enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
-
-  // Set the temp_directory
-  buffer[0] = 0;
-  GetTempPathW(MAX_PATH, buffer);
-  enigma_user::temp_directory = add_slash(shorten(buffer));
-  
-  // Set the game_save_id
-  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-    add_slash(std::to_string(enigma_user::game_id));
-}
-
 }  // namespace enigma
 
 namespace enigma_user {
@@ -419,21 +379,6 @@ std::string filename_absolute(std::string fname) {
 
 std::string filename_join(std::string prefix, std::string suffix) {
   return add_slash(prefix) + suffix;
-}
-
-std::string environment_get_variable(std::string name) {
-  WCHAR buffer[1024];
-  tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
-  return shorten(buffer);
-}
-
-// deletes the environment variable if set to empty string
-bool environment_set_variable(const std::string &name, const std::string &value) {
-  tstring tstr_name = widen(name);
-  tstring tstr_value = widen(value);
-  if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
-  return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
 }
 
 }  // namespace enigma_user

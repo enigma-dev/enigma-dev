@@ -35,18 +35,6 @@ static inline string add_slash(const string& dir) {
 
 namespace enigma_user {
 
-bool set_working_directory(string dname) {
-  if (chdir((char *)dname.c_str()) == 0) {
-    char buffer[PATH_MAX]; 
-    if (getcwd(buffer, PATH_MAX) != NULL) {
-      working_directory = add_slash(buffer);
-      return true;
-    }
-  }
-
-  return false;
-}
-
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
@@ -61,17 +49,6 @@ std::string filename_absolute(std::string fname) {
 
 std::string filename_join(std::string prefix, std::string suffix) {
   return add_slash(prefix) + suffix;
-}
-
-string environment_get_variable(string name) {
-  char *env = getenv(name.c_str());
-  return env ? env : "";
-}
-
-// deletes the environment variable if set to empty string
-bool environment_set_variable(const string &name, const string &value) {
-  if (value == "") return (unsetenv(name.c_str()) == 0);
-  return (setenv(name.c_str(), value.c_str(), 1) == 0);
 }
 
 } // namespace enigma_user

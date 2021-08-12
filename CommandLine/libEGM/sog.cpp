@@ -77,7 +77,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
 }
 
 bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const {
-  if (!CreateDirectory(fName))
+  if (!CreateDirectoryRegular(fName))
     return false;
   
   bool foundObj = false;

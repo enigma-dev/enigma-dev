@@ -126,6 +126,26 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
+ifeq ($(UNIX_BASED), true)
+	ifeq ($(OS), Darwin)
+		override LDLIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+		override CXXFLAGS += -ObjC++
+		override CFLAGS += -ObjC++
+	else ifeq ($(OS), Linux)
+		override LDLIBS += -lprocps
+	else ifeq ($(OS), FreeBSD)
+		override LDLIBS += -lprocstat -lutil -lc
+	else ifeq ($(OS), DragonFly)
+		override LDLIBS += -lkvm -lutil -lc
+	endif
+else
+	override CXXFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+endif
+
+SOURCES += $(wildcard ../../shared/crossprocess/*.cpp)
+SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
+
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
 #RCFILES := $(addprefix $(WORKDIR),$(RESOURCES))

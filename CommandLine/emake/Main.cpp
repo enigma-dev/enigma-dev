@@ -10,6 +10,7 @@
 #include "sog.h"
 
 #include "strings_util.h"
+#include "tempdir/tempdir.h"
 
 #include <filesystem>
 namespace fs = std::filesystem;
@@ -24,8 +25,8 @@ std::ostream errorStream(nullptr);
 
 int main(int argc, char* argv[])
 {
-  std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
-  std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
+  std::ofstream egmlog(temp_directory + "/enigma_libegm.log", std::ofstream::out);
+  std::ofstream elog(temp_directory + "/enigma_compiler.log", std::ofstream::out);
 
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
@@ -34,8 +35,8 @@ int main(int argc, char* argv[])
   } else {
     outputStream.rdbuf(egmlog.rdbuf());
     errorStream.rdbuf(egmlog.rdbuf());
-    std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
-    std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
+    std::cout << "LibEGM parsing log at: " << temp_directory << "/enigma_libegm.log" << std::endl;
+    std::cout << "ENIGMA compiler log at: " << temp_directory << "/enigma_compiler.log" << std::endl;
   }
   
   
