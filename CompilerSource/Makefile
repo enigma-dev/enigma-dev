@@ -3,14 +3,14 @@ include ../Config.mk
 # "Shared" includes.
 SHARED_SRC_DIR := ../shared
 
-BASE = compileEGMf$(SUFFIX)
+BASE = compileEGMf
 
 ifeq ($(OS), Darwin)
-	TARGET := ../lib$(BASE).dylib
+	TARGET := ../lib$(BASE)$(SUFFIX).dylib
 else ifeq ($(UNIX_BASED), true)
-	TARGET := ../lib$(BASE).so
+	TARGET := ../lib$(BASE)$(SUFFIX).so
 else
-	TARGET := ../$(BASE).dll
+	TARGET := ../lib$(BASE)$(SUFFIX).dll
 	LDFLAGS += -static-libgcc
 endif
 
@@ -27,5 +27,13 @@ ifeq ($(OS), DragonFly)
 	LDFLAGS += -lc -lutil -lkvm
 endif
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
+
+ifeq ($(OS), Darwin)
+	CPYCOMPEGM := $(shell cp -f ../libcompileEGMf-`uname -m`-`uname -n`.dylib ../libcompileEGMf.dylib)
+else ifeq ($(UNIX_BASED), true)
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -n`-`uname -m`.so ../libcompileEGMf.so")
+else
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -n`-`uname -m`.dll ../libcompileEGMf.dll")
+endif
 
 include ../Default.mk
