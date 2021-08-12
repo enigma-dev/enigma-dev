@@ -39,8 +39,6 @@ namespace enigma {
   void Sleep(int ms);
   void compute_window_scaling();
   void compute_window_size();
-  void initialize_program_directory();
-  void initialize_directory_globals();
   void set_program_args(int argc, char** argv);
   void platform_focus_lost();
   void platform_focus_gained();
@@ -48,6 +46,12 @@ namespace enigma {
   int updateTimer();
   int gameWait();
   void set_room_speed(int rs);
+
+  // This method should write the name of the running module to exenamehere.
+  inline void windowsystem_write_exename(char **exenamehere) { 
+    *exenamehere = (char *)enigma_user::program_pathname.c_str(); 
+  }
+
 }
   
 namespace enigma_user {

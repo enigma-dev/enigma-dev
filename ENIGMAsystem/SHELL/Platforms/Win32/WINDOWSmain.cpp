@@ -61,8 +61,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
-void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exenamehere, 1024); }
-
 void Sleep(int ms) { ::Sleep(ms); }
 
 void initInput(){};

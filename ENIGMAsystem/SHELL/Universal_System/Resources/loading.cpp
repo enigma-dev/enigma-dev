@@ -21,8 +21,10 @@
 #include "backgrounds_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Object_Tiers/object.h"
+#include "strings_util.h"
 #include "libEGMstd.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
@@ -71,27 +73,31 @@ namespace enigma
 
     // Open the exe for resource load
     do { // Allows break
-      FILE* resfile;
-      if (resource_file_path != std::string("$exe")) {
-        if (!(resfile = fopen(resource_file_path,"rb"))) {
-          DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
-          break;
-        }
-      } else {
-        char exename[4097];
-        windowsystem_write_exename(exename);
-        if (!(resfile = fopen(exename,"rb"))) {
-          DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
-          break;
-        }
+      FILE* resfile; 
+      char *exename = nullptr;
+      windowsystem_write_exename(&exename);
+      #if !defined(_WIN32)
+      if (!(resfile = fopen(exename,"rb"))) {
+      #else
+      std::wstring wexename = strings_util::widen(exename);
+      if (!(resfile = _wfopen(wexename.c_str(),L"rb"))) {
+      #endif
+        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
+        break;
       }
       int nullhere;
       // Read the magic number so we know we're looking at our own data
       fseek(resfile,-8,SEEK_END);
+      #if !defined(_WIN32)
       char str_quad[4];
       if (!fread(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
-        break;
+      #else
+      wchar_t str_quad[4];
+      if (!fread(str_quad,4,1,resfile) or str_quad[0] != L'r' or str_quad[1] != L'e' or str_quad[2] != L's' or str_quad[3] != L'0') {
+      #endif
+        //this error message is a lie full of bullshit; commented it out.
+        //DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR); 
+        //break;
       }
 
       // Get where our resources are located in the module
