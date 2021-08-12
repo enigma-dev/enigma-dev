@@ -28,11 +28,11 @@ CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
 
 ifeq ($(TESTS), TRUE)
-	TARGET=../../emake-tests
+	TARGET=../../emake-tests$(SUFFIX)
 	SOURCES := $(call rwildcard, ../emake-tests,*.cpp)
 	LDFLAGS += -lpthread -lgtest_main -lgtest
 else
-	TARGET = ../../emake
+	TARGET = ../../emake$(SUFFIX)
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 endif
 
