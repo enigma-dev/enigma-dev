@@ -1,3 +1,5 @@
+#include <string>
+
 #if defined(_WIN32)
 #include <windows.h>
 #include "../strings_util.h"
