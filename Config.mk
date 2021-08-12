@@ -1,5 +1,6 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 OS := $(shell uname -s)
+ARCH := $(shell uname -m)
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
@@ -19,20 +20,26 @@ ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := .dylib
-	BIN_EXT :=
+	LIB_EXT := -$(OS)-$(ARCH).dylib
+	BIN_EXT := -$(OS)-$(ARCH)
 else ifeq ($(UNIX_BASED), true)
 	PLATFORM := xlib
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := .so
-	BIN_EXT :=
+	ifeq ($(OS), Linux)
+	LIB_EXT := -$(OS)-$(ARCH).so
+	else ifeq ($(OS), FreeBSD)
+	LIB_EXT := -$(OS)-$(ARCH).so
+	else ifeq ($(OS), DragonFly)
+	LIB_EXT := -$(OS)-$(ARCH).so
+	endif
+	BIN_EXT := -$(OS)-$(ARCH)
 else
 	PLATFORM := Win32
 	MKDIR := mkdir.exe
 	LIB_PFX := lib
-	LIB_EXT := .dll
-	BIN_EXT := .exe
+	LIB_EXT := -$(OS)-$(ARCH).dll
+	BIN_EXT := -$(OS)-$(ARCH).exe
 endif
 
 # Global g++ flags
