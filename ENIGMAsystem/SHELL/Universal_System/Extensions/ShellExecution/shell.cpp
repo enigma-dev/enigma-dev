@@ -49,7 +49,7 @@ void url_open(string url) {
   ShellExecuteW(nullptr, L"open", wurl.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
   #else
   execute_program("xdg-open", url, false);
-  #end
+  #endif
 }
 
 void action_webpage(const string& url) {
