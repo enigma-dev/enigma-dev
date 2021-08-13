@@ -20,6 +20,10 @@ int current_room_speed;
 std::string* parameters;
 int parameterc;
 int frames_count = 0;
+std::chrono::steady_clock::time_point timer_start;
+std::chrono::steady_clock::time_point timer_offset;
+std::chrono::steady_clock::time_point timer_offset_slowing;
+std::chrono::steady_clock::time_point timer_current;
 unsigned long current_time_mcs = 0;
 bool game_window_focused = true;
 
@@ -62,6 +66,98 @@ void set_program_args(int argc, char** argv) {
   parameters = new std::string[argc];
   parameterc = argc;
   for (int i = 0; i < argc; i++) parameters[i] = argv[i];
+}
+
+void initTimer() {
+  timer_start = std::chrono::steady_clock::now();
+  timer_offset = timer_start;
+  timer_offset_slowing = timer_start;
+  timer_current = timer_start;
+}
+
+void update_current_time() {
+  timer_current = std::chrono::steady_clock::now();
+}
+
+long get_current_offset_difference_mcs() {
+  return std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset).count();
+}
+
+long get_current_offset_slowing_difference_mcs() {
+  return std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset_slowing).count();
+}
+
+void increase_offset_slowing(long increase_mcs) {
+  timer_offset_slowing += std::chrono::microseconds(increase_mcs);
+}
+
+void offset_modulus_one_second() {
+  long passed_mcs = get_current_offset_difference_mcs();
+  timer_offset += std::chrono::microseconds(passed_mcs);
+  timer_offset_slowing = timer_offset;
+}
+
+long last_mcs = 0;
+long spent_mcs = 0;
+long remaining_mcs = 0;
+long needed_mcs = 0;
+
+int updateTimer() {
+  // Update current time.
+  update_current_time();
+  {
+    // Find diff between current and offset.
+
+    long passed_mcs = enigma::get_current_offset_difference_mcs();
+    if (passed_mcs >= 1000000) {  // Handle resetting.
+      // If more than one second has passed, update fps variable, reset frames count,
+      // and advance offset by difference in seconds, rounded down.
+
+      enigma_user::fps = frames_count;
+      frames_count = 0;
+      enigma::offset_modulus_one_second();
+    }
+  }
+
+  if (current_room_speed > 0) {
+    spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+
+    remaining_mcs = 1000000 - spent_mcs;
+    needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
+    const int catchup_limit_ms = 50;
+    if (needed_mcs > remaining_mcs + catchup_limit_ms * 1000) {
+      // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
+      // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
+      // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
+      // without any sleep.
+      // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
+      enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms * 1000));
+
+      spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+      remaining_mcs = 1000000 - spent_mcs;
+      needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
+    }
+    if (remaining_mcs > needed_mcs) {
+      const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
+      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
+      return -1;
+    }
+  }
+
+  //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
+  unsigned long dt = 0;
+  if (spent_mcs > last_mcs) {
+    dt = (spent_mcs - last_mcs);
+  } else {
+    //TODO: figure out what to do here this happens when the fps is reached and the timers start over
+    dt = enigma_user::delta_time;
+  }
+  last_mcs = spent_mcs;
+  enigma_user::delta_time = dt;
+  current_time_mcs += enigma_user::delta_time;
+  enigma_user::current_time += enigma_user::delta_time / 1000;
+
+  return 0;
 }
 
 int enigma_main(int argc, char** argv) {
@@ -130,6 +226,12 @@ std::string parameter_string(int num) { return num < enigma::parameterc ? enigma
 int parameter_count() { return enigma::parameterc; }
 
 void sleep(int ms) { enigma::Sleep(ms); }
+
+unsigned long get_timer() {
+  enigma::update_current_time();
+
+  return std::chrono::duration_cast<std::chrono::microseconds>(enigma::timer_current - enigma::timer_start).count();
+}
 
 void game_end(int ret) {
   enigma::game_isending = true;

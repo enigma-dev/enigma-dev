@@ -93,74 +93,6 @@ bool set_working_directory(string dname) {
 } // enigma_user
 
 namespace enigma {
-bool use_pc;
-// Filetime.
-ULARGE_INTEGER time_offset_ft;
-ULARGE_INTEGER time_offset_slowing_ft;
-ULARGE_INTEGER time_current_ft;
-// High-resolution performance counter.
-LARGE_INTEGER time_offset_pc;
-LARGE_INTEGER time_offset_slowing_pc;
-LARGE_INTEGER time_current_pc;
-LARGE_INTEGER frequency_pc;
-// Timing functions.
-
-void initialize_timing() {
-  use_pc = QueryPerformanceFrequency(&frequency_pc);
-  if (use_pc) {
-    QueryPerformanceCounter(&time_offset_pc);
-    time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
-  } else {
-    FILETIME time_values;
-    GetSystemTimeAsFileTime(&time_values);
-    time_offset_ft.LowPart = time_values.dwLowDateTime;
-    time_offset_ft.HighPart = time_values.dwHighDateTime;
-    time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
-  }
-}
-void update_current_time() {
-  if (use_pc) {
-    QueryPerformanceCounter(&time_current_pc);
-  } else {
-    FILETIME time_values;
-    GetSystemTimeAsFileTime(&time_values);
-    time_current_ft.LowPart = time_values.dwLowDateTime;
-    time_current_ft.HighPart = time_values.dwHighDateTime;
-  }
-}
-long get_current_offset_difference_mcs() {
-  if (use_pc) {
-    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0, 1000000);
-  } else {
-    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_ft.QuadPart) / 10, 0, 1000000);
-  }
-}
-long get_current_offset_slowing_difference_mcs() {
-  if (use_pc) {
-    return enigma_user::clamp((time_current_pc.QuadPart - time_offset_slowing_pc.QuadPart) * 1000000 / frequency_pc.QuadPart, 0,
-                 1000000);
-  } else {
-    return enigma_user::clamp((time_current_ft.QuadPart - time_offset_slowing_ft.QuadPart) / 10, 0, 1000000);
-  }
-}
-void increase_offset_slowing(long increase_mcs) {
-  if (use_pc) {
-    time_offset_slowing_pc.QuadPart += frequency_pc.QuadPart * increase_mcs / 1000000;
-  } else {
-    time_offset_slowing_ft.QuadPart += 10 * increase_mcs;
-  }
-}
-void offset_modulus_one_second() {
-  if (use_pc) {
-    long passed_mcs = get_current_offset_difference_mcs();
-    time_offset_pc.QuadPart += (passed_mcs / 1000000) * frequency_pc.QuadPart;
-    time_offset_slowing_pc.QuadPart = time_offset_pc.QuadPart;
-  } else {
-    long passed_mcs = get_current_offset_difference_mcs();
-    time_offset_ft.QuadPart += (passed_mcs / 1000000) * 10000000;
-    time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
-  }
-}
 
 static LONG_PTR ComputeInitialWindowStyle() {
   LONG_PTR newlong = 0;
@@ -223,79 +155,6 @@ bool initGameWindow() {
   return true;
 }
 
-long last_mcs = 0;
-long spent_mcs = 0;
-long remaining_mcs = 0;
-long needed_mcs = 0;
-
-void initTimer() {
-  UINT minimum_resolution = 1;
-  TIMECAPS timer_resolution_info;
-  if (timeGetDevCaps(&timer_resolution_info, sizeof(timer_resolution_info)) == MMSYSERR_NOERROR) {
-    minimum_resolution = timer_resolution_info.wPeriodMin;
-  }
-  timeBeginPeriod(minimum_resolution);
-  enigma::initialize_timing();
-}
-
-int updateTimer() {
-  // Update current time.
-  update_current_time();
-  {
-    // Find diff between current and offset.
-
-    long passed_mcs = enigma::get_current_offset_difference_mcs();
-    if (passed_mcs >= 1000000) {  // Handle resetting.
-      // If more than one second has passed, update fps variable, reset frames count,
-      // and advance offset by difference in seconds, rounded down.
-
-      enigma_user::fps = frames_count;
-      frames_count = 0;
-      enigma::offset_modulus_one_second();
-    }
-  }
-
-  if (current_room_speed > 0) {
-    spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-
-    remaining_mcs = 1000000 - spent_mcs;
-    needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
-    const int catchup_limit_ms = 50;
-    if (needed_mcs > remaining_mcs + catchup_limit_ms * 1000) {
-      // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
-      // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
-      // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
-      // without any sleep.
-      // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
-      enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms * 1000));
-
-      spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-      remaining_mcs = 1000000 - spent_mcs;
-      needed_mcs = long((1.0 - 1.0 * frames_count / current_room_speed) * 1e6);
-    }
-    if (remaining_mcs > needed_mcs) {
-      const long sleeping_time = std::min((remaining_mcs - needed_mcs) / 5, long(999999));
-      std::this_thread::sleep_for(std::chrono::microseconds(std::max(long(1), sleeping_time)));
-      return -1;
-    }
-  }
-
-  //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
-  unsigned long dt = 0;
-  if (spent_mcs > last_mcs) {
-    dt = (spent_mcs - last_mcs);
-  } else {
-    //TODO: figure out what to do here this happens when the fps is reached and the timers start over
-    dt = enigma_user::delta_time;
-  }
-  last_mcs = spent_mcs;
-  enigma_user::delta_time = dt;
-  current_time_mcs += enigma_user::delta_time;
-  enigma_user::current_time += enigma_user::delta_time / 1000;
-
-  return 0;
-}
-
 int handleEvents() {
   if (enigma::game_isending) PostQuitMessage(enigma::game_return);
 
@@ -341,19 +200,6 @@ void initialize_directory_globals() {
 }  // namespace enigma
 
 namespace enigma_user {
-
-unsigned long get_timer() {  // microseconds since the start of the game
-  enigma::update_current_time();
-
-  LARGE_INTEGER time;
-  if (enigma::use_pc) {
-    time.QuadPart = enigma::time_current_pc.QuadPart * 1000000 / enigma::frequency_pc.QuadPart;
-  } else {
-    time.QuadPart = enigma::time_current_ft.QuadPart / 10;
-  }
-
-  return time.QuadPart;
-}
 
 unsigned long long disk_size(std::string drive) {
   DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
