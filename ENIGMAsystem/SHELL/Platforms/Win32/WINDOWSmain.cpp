@@ -30,8 +30,6 @@
 #include "Universal_System/var4.h"
 
 #include <mmsystem.h>
-#include <time.h>
-#include <chrono>
 #include <thread>
 #include <algorithm>
 #include <cstdio>

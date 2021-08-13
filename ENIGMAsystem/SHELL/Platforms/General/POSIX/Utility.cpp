@@ -3,7 +3,6 @@
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include <time.h> //CLOCK_MONOTONIC
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
 
