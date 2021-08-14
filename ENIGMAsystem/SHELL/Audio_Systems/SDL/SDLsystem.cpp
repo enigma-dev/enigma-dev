@@ -1,10 +1,10 @@
 #include "SDLsystem.h"
 #include "SoundResource.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include <SDL.h>
 #include <map>
 #include <vector>
 #include <stdio.h>
-#include <SDL.h>
 
 AssetArray<Sound> sounds;
 namespace enigma {
