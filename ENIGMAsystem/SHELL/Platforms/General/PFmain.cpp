@@ -233,7 +233,6 @@ void sleep(int ms) { enigma::Sleep(ms); }
 
 unsigned long get_timer() {
   enigma::update_current_time();
-
   return std::chrono::duration_cast<std::chrono::microseconds>(enigma::timer_current - enigma::timer_start).count();
 }
 
