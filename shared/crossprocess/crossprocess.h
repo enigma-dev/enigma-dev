@@ -27,7 +27,9 @@
 
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
 #else
 #if (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
 #include <Cocoa/Cocoa.h>
