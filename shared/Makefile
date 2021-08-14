@@ -32,13 +32,8 @@ ifeq ($(UNIX_BASED), false)
 	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif
 
-<<<<<<< HEAD
 override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
 override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
-=======
-override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL
-override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL
->>>>>>> 099d65decbd313acaf6b1e4732340e7ddf281097
 SHARED_SOURCES += $(call rwildcard,crossprocess,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
