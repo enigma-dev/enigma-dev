@@ -5,6 +5,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/mathnc.h" // enigma_user::clamp
 
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
@@ -80,11 +81,13 @@ void update_current_time() {
 }
 
 long get_current_offset_difference_mcs() {
-  return std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset).count();
+  auto delta = std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset).count();
+  return enigma_user::clamp(delta, 0, 1000000);
 }
 
 long get_current_offset_slowing_difference_mcs() {
-  return std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset_slowing).count();
+  auto delta = std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset_slowing).count();
+  return enigma_user::clamp(delta, 0, 1000000);
 }
 
 void increase_offset_slowing(long increase_mcs) {
