@@ -228,7 +228,6 @@ bool EnvironmentUnsetVariable(std::string name) {
   return CrossProcess::EnvironmentUnsetVariable(name.c_str());
 }
 
-#if defined(XPROCESS_GUIWINDOW_IMPL)
 // get owned window id string from process info at index
 wid_t OwnedWindowId(PROCINFO procInfo, int i) {
   return CrossProcess::OwnedWindowId(procInfo, i);
@@ -253,6 +252,5 @@ bool WindowIdKill(wid_t winId) {
 wid_t WindowIdFromNativeWindow(window_t window) {
   return CrossProcess::WindowIdFromNativeWindow((window_t)(void *)window);
 } 
-#endif
 
 } // namespace enigma_user
