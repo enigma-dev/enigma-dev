@@ -269,6 +269,7 @@ void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int 
 }
 
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  //TODO: Add mode, offset, and modulo
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
@@ -278,6 +279,25 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
     DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
   }
 }
+
+void buffer_get_surface(int buffer, int surface, unsigned offset) {
+  //get_buffer(binbuff, buffer);
+  //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
+}
+
+void buffer_set_surface(int buffer, int surface, unsigned offset) {
+  //TODO: Add offset
+  int tex = surface_get_texture(surface);
+  int wid = surface_get_width(surface);
+  int hgt = surface_get_height(surface);
+  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
+    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
+  } else { // execution can not continue safely with wrong buffer size
+    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
+  }
+}
+
 
 void buffer_resize(int buffer, unsigned size) {
   get_buffer(binbuff, buffer);
