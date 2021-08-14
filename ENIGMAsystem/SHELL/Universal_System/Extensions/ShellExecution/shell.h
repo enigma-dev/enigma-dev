@@ -61,7 +61,7 @@ void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, i);
+PROCID ProcessId(PROCLIST procList, int i);
 
 // get amount of process id's in process list
 int ProcessIdLength(PROCLIST procList);
