@@ -5,9 +5,9 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "../General/ASutil.h"
+#include <SDL_mixer.h>
 #include <string>
 #include <stdio.h>
-#include <SDL_mixer.h>
 
 const int AUDIO_CHANNEL_OFFSET = 400000;
 const int AUDIO_CHANNEL_COUNT = 128;
