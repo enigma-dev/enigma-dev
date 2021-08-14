@@ -101,7 +101,7 @@ int EnvironmentLength(PROCINFO procInfo);
 std::string DirectoryGetCurrentWorking();
 
 // set current working directory based on a given dname
-double DirectorySetCurrentWorking(std::string dname);
+bool DirectorySetCurrentWorking(std::string dname);
 
 // get the environment variable of the given name
 std::string EnvironmentGetVariable(std::string name);
