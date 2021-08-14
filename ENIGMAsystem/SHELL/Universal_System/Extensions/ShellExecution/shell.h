@@ -7,6 +7,8 @@ using CrossProcess::PROCLIST;
 using CrossProcess::WINDOWID;
 using CrossProcess::WINDOW;
 
+namespace enigma_user {
+
 // execute process from the shell, return process id
 PROCESS ProcessExecute(std::string command);
 
@@ -123,3 +125,6 @@ bool WindowIdKill(wid_t winId);
 
 // return a window id from native window handle
 wid_t WindowIdFromNativeWindow(window_t window); 
+
+} // namespace enigma_user
+
