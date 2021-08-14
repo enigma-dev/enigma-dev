@@ -1,6 +1,6 @@
-#include "Platforms/General/PFmain.h"
-
 #define XPROCESS_GUIWINDOW_IMPL
+
+#include "Platforms/General/PFmain.h"
 
 using CrossProcess::PROCID;
 using CrossProcess::PROCESS;
