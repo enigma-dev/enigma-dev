@@ -144,7 +144,7 @@ PROCLIST ProcListCreate() {
 }
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, i) {
+PROCID ProcessId(PROCLIST procList, int i) {
   return CrossProcess::ProcessId(procList, i);
 }
 
