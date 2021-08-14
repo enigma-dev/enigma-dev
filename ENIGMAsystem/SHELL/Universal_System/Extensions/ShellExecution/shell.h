@@ -1,3 +1,5 @@
+#include "Platforms/General/PFmain.h"
+
 #define XPROCESS_GUIWINDOW_IMPL
 
 using CrossProcess::PROCID;
@@ -61,7 +63,7 @@ void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, int i);
+PROCID ProcessId(PROCLIST procList, i);
 
 // get amount of process id's in process list
 int ProcessIdLength(PROCLIST procList);
