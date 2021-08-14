@@ -96,7 +96,8 @@ void increase_offset_slowing(long increase_mcs) {
 
 void offset_modulus_one_second() {
   long passed_mcs = get_current_offset_difference_mcs();
-  timer_offset += std::chrono::microseconds(passed_mcs);
+  // rounds towards 0
+  timer_offset += std::chrono::duration_cast<std::chrono::seconds>(std::chrono::microseconds(passed_mcs));
   timer_offset_slowing = timer_offset;
 }
 
