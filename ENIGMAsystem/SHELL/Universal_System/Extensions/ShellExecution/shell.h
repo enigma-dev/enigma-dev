@@ -128,6 +128,3 @@ bool WindowIdKill(wid_t winId);
 wid_t WindowIdFromNativeWindow(window_t window); 
 
 } // namespace enigma_user
-
-// namespace enigma_user
-

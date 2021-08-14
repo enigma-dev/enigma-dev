@@ -1,6 +1,7 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <cstdint>
 
 #include "shell.h"
 #include "strings_util.h"
@@ -207,7 +208,7 @@ string DirectoryGetCurrentWorking() {
 }
 
 // set current working directory based on a given dname
-double DirectorySetCurrentWorking(string dname) {
+bool DirectorySetCurrentWorking(string dname) {
   return CrossProcess::DirectorySetCurrentWorking(dname.c_str());
 }
 
