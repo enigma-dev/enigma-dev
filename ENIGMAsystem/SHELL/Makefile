@@ -155,10 +155,12 @@ write_src_files:
 	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/libs.in
 	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/ldlibs.in
 	@echo "$(ANDROID_MAKEFILES)" > $(WORKDIR)/makefiles.in
+	@cat ../../android/enigma/build.gradle.template | sed -e 's/%ANDROID_API_LEVEL%/$(ANDROID_API_LEVEL)/g' | sed -e 's/%ANDROID_NDK_VERSION%/$(ANDROID_NDK_VERSION)/g' > ../../android/enigma/build.gradle
 
 android_game: write_src_files
 	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
 	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
+	@rm -rf ../../android/enigma/src/main/assets/*
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"

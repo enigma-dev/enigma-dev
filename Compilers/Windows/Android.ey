@@ -12,7 +12,7 @@ Make-Vars:
   cc: gcc
   cxx: g++
   cppflags:
-  cxxflags: -std=c++11
+  cxxflags:
   cflags:
   ldflags:
   links:
@@ -27,6 +27,6 @@ EXE-Vars:
   resources: android/enigma/src/main/assets/resources.res
   resources_in: resources.res
   Build-Extension: .apk
-  Run-output: $tempfile
-  Run-Program:
+  Run-output:
+  Run-Program: adb shell am start -n enigma.game/.ENIGMAActivity
   Run-Params:
