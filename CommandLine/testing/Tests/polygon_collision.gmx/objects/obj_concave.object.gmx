@@ -176,11 +176,6 @@
 	// Activating Circle&#13;
 	instance_activate_circle(enemy_x, enemy_y, 128, true);&#13;
 	gtest_expect_eq(place_meeting(enemy_x, enemy_y, obj_concave_against), 1); // Should collide&#13;
-	&#13;
-	// =============&#13;
-	// GAME END&#13;
-	// =============&#13;
-	game_end();&#13;
 }</string>
           </argument>
         </arguments>
