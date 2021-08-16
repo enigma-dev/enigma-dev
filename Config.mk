@@ -3,7 +3,7 @@ OS := $(shell uname -s)
 ifeq ($(UNIX_BASED), true)
 	ARCH := $(shell uname -m)
 else
-	ARCH := $(shell echo $MINGW_PACKAGE_PREFIX | sed 's/mingw-w64-//')
+	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
 endif
 SUFFIX := -$(shell uname -n)-$(ARCH)
 
