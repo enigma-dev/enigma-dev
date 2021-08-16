@@ -87,6 +87,8 @@ inline void show_error(std::string msg, const bool fatal) {
    show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
 
+void show_error(string errortext, const bool fatal);
+
 #if defined(HIDE_DEBUG_MESSAGES)
 inline void lel(std::string msg, MESSAGE_TYPE severity) { }
 #endif

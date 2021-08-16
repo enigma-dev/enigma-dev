@@ -111,7 +111,7 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   if (status != FFI_OK)
   {
-    DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
+    // DEBUG_MESSAGE("Defining DLL failed.", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -121,20 +121,20 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = enigma::ExternalLoad(dll.c_str());
   else
   {
-    DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
+    // DEBUG_MESSAGE("LOADING PREEXISTING HANDLE", MESSAGE_TYPE::M_WARNING);
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
-    DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
+    // DEBUG_MESSAGE("Cannot load library \"" + dll + "\"", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
   void *funcptr = enigma::ExternalFunc(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-    DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
+    // DEBUG_MESSAGE("No such function" + func, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
@@ -160,7 +160,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
-    DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
+    // DEBUG_MESSAGE("Unknown external function called", MESSAGE_TYPE::M_ERROR);
     return 0;
   }
   external* a=it->second;
