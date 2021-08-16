@@ -1,6 +1,10 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 OS := $(shell uname -s)
-ARCH := $(shell uname -m)
+ifeq ($(UNIX_BASED), true)
+	ARCH := $(shell uname -m)
+else
+	ARCH := $(shell echo $MINGW_PACKAGE_PREFIX | sed 's/mingw-w64-//')
+endif
 SUFFIX := -$(shell uname -n)-$(ARCH)
 
 # Determine whether Unix-based
