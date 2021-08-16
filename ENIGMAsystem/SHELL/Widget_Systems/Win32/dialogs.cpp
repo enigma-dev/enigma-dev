@@ -27,7 +27,7 @@ namespace enigma {
 
 bool widget_system_initialize() { 
   FILE *file = nullptr;
-  std::wstring widen(enigma_user::temp_directory + "libdlgmod.dll");
+  std::wstring wdll = widen(enigma_user::temp_directory + "libdlgmod.dll");
   std::wofstream strm(wdll.c_str());
   strm.close();
   if (_wfopen_s(&file, wdll.c_str(), L"wb") == 0) {
