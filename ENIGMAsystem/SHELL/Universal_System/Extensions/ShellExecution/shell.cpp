@@ -1,7 +1,6 @@
 #include <string>
 #include <thread>
 #include <chrono>
-#include <cstdint>
 
 #include "shell.h"
 #include "strings_util.h"
