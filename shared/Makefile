@@ -10,19 +10,19 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf
 
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
-		override LDLIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+		override LDFLAGS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
 		override CXXFLAGS += -ObjC++
 		override CFLAGS += -ObjC++
 	else ifeq ($(OS), Linux)
-		override LDLIBS += -lprocps $(shell pkg-config --libs x11)
+		override LDFLAGS += -lprocps $(shell pkg-config --libs x11)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
 		override CFLAGS += $(shell pkg-config --cflags x11)
 	else ifeq ($(OS), FreeBSD)
-		override LDLIBS += -lprocstat -lutil -lc $(shell pkg-config --libs x11)
+		override LDFLAGS += -lprocstat -lutil -lc $(shell pkg-config --libs x11)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
 		override CFLAGS += $(shell pkg-config --cflags x11)
 	else ifeq ($(OS), DragonFly)
-		override LDLIBS += -lkvm -lutil -lc $(shell pkg-config --libs x11)
+		override LDFLAGS += -lkvm -lutil -lc $(shell pkg-config --libs x11)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
 		override CFLAGS += $(shell pkg-config --cflags x11)
 	endif
