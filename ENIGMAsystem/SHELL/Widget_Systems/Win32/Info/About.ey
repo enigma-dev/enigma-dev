@@ -9,7 +9,7 @@ Description: Create Widgets using Win32 API on Windows. Requires External Functi
 Author: Josh Ventura, Samuel Venable
 
 Depends:
-  Build-Platforms: Windows, SDL
+  Build-Platforms: Windows
 
 Represents:
   Build-Platforms: Windows
