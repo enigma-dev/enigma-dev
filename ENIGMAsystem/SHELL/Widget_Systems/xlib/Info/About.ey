@@ -12,4 +12,4 @@ Depends:
   Build-Platforms: Linux, FreeBSD, DragonFlyBSD
 
 Represents:
-	Windowing: xlib
+  Build-Platforms: Linux, FreeBSD, DragonFlyBSD
