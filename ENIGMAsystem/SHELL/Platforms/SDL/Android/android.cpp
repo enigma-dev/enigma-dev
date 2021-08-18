@@ -18,7 +18,6 @@ float device_get_tilt_y()
   Android_JNI_GetAccelerometerValues(Values);
   tilt_y = Values[1];
   return tilt_y;
-
 }
 
 float device_get_tilt_z()
