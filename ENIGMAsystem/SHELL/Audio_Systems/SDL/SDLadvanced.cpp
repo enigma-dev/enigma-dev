@@ -46,7 +46,7 @@ int audio_play_sound(int index, double priority, bool loop) {
     sc->soundIndex = index;
     sound_channels.push_back(sc);
     if (Mix_PlayChannel(sound_channels.size() -1,snd.mc, loop) == -1) {
-      DEBUG_MESSAGE( std::string("Mix_PlayChannel : ")+std::string(Mix_GetError()), MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE( std::string("Mix_PlayChannel failed: ")+std::to_string(index), MESSAGE_TYPE::M_ERROR);
     }
     return (sound_channels.size() -1 + AUDIO_CHANNEL_OFFSET);
   }
