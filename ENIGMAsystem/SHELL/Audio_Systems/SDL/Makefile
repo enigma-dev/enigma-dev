@@ -9,6 +9,6 @@ ifeq ($(TARGET-PLATFORM), Android)
   override ANDROID_SHARED_LIBRARIES += SDL2_mixer
 endif
 
-override CXXFLAGS += $(shell pkg-config --cflags sdl)
-override LDLIBS += $(shell pkg-config --libs sdl2 SDL2_mixer) -lopusfile -lopus -lvorbisfile -lvorbis -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lole32 -lwinmm -lm -lshlwapi -lssp
+override CXXFLAGS += $(shell pkg-config --cflags SDL2_mixer)
+override LDLIBS += $(shell pkg-config --libs SDL2_mixer) -lopusfile -lopus -lvorbisfile -lvorbis -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lole32 -lwinmm -lm -lshlwapi -lssp
 
