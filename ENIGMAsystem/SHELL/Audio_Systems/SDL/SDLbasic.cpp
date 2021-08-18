@@ -104,7 +104,6 @@ void sound_pan(int sound, float value) {
   for(int i = 0;i <= channel_count ; i++) {
     if (Mix_GetChunk(i) == snd.mc) {
       Mix_SetPanning(i, (Uint8)(value*254), (Uint8)(254 - (value * 254)));
-      DEBUG_MESSAGE( Mix_GetError(), MESSAGE_TYPE::M_ERROR);
     }
   }
 }
