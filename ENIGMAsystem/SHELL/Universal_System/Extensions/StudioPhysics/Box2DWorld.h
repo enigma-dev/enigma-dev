@@ -27,10 +27,10 @@ struct worldInstance {
   // Prepare for simulation. Typically we use a time step of 1/60 of a
   // second (60Hz) and 10 iterations. This provides a high quality simulation
   // in most game scenarios.
-  float32 timeStep;
-  int32 velocityIterations;
-  int32 positionIterations;
-  int32 pixelstometers;
+  float timeStep;
+  int32_t velocityIterations;
+  int32_t positionIterations;
+  int32_t pixelstometers;
   bool paused;
 
   worldInstance()
