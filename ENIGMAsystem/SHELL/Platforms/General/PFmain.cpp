@@ -83,7 +83,8 @@ int enigma_main(int argc, char** argv) {
 
   while (!game_isending) {
 
-    if (!((std::string)enigma_user::room_caption).empty())
+    if (!((std::string)enigma_user::room_caption).empty() && 
+      enigma_user::window_get_caption() != enigma_user::room_caption)
       enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
 

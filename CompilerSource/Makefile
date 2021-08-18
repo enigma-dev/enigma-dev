@@ -10,7 +10,7 @@ ifeq ($(OS), Darwin)
 else ifeq ($(UNIX_BASED), true)
 	TARGET := ../lib$(BASE)$(SUFFIX).so
 else
-	TARGET := ../$(BASE)$(SUFFIX).dll
+	TARGET := ../lib$(BASE)$(SUFFIX).dll
 	LDFLAGS += -static-libgcc
 endif
 
@@ -33,7 +33,7 @@ ifeq ($(OS), Darwin)
 else ifeq ($(UNIX_BASED), true)
 	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -n`-`uname -m`.so ../libcompileEGMf.so")
 else
-	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../compileEGMf-`uname -n`-`uname -m`.dll ../compileEGMf.dll")
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -n`-`gcc -dumpmachine | sed 's/-w.*//'`.dll ../compileEGMf.dll")
 endif
 
 include ../Default.mk

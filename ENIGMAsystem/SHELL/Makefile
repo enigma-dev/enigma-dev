@@ -67,6 +67,12 @@ CXX := g++
 CC := gcc
 DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
+
+# needed for joysticks functions and audio playback in webm extension
+override CXXFLAGS += $(shell pkg-config --cflags sdl2)
+override CFLAGS += $(shell pkg-config --cflags sdl2)
+override LDLIBS += $(shell pkg-config --libs --static sdl2)
+override LDFLAGS += $(shell pkg-config --libs --static sdl2)
  
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE

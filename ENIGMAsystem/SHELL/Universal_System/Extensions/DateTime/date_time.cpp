@@ -25,14 +25,57 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <time.h>
+#include <ctime>
 #include <string>
+
 using std::string;
 
 #include "include.h"
 
+#if defined(_WIN32)
+#include "Universal_System/estring.h"
+#endif
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+namespace {
+
+enum dt_type {
+  dt_year, 
+  dt_month, 
+  dt_day, 
+  dt_hour, 
+  dt_minute, 
+  dt_second
+};
+
+int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
+  int result = -1; // returns -1 on failure
+  #if defined(_WIN32)
+  std::wstring wfname = widen(fname);
+  struct _stat info = { 0 }; result = _wstat(wfname.c_str(), &info);
+  time_t time = modified ? info.st_mtime : info.st_atime;
+  #else
+  struct stat info = { 0 }; result = stat(fname, &info);
+  time_t time = modified ? info.st_mtime : info.st_atime;
+  #endif
+  if (result == -1) return result; // failure: stat errored
+  struct tm *timeinfo = std::localtime(&time);
+  if      (type == dt_year)   return timeinfo->tm_year + 1900;
+  else if (type == dt_month)  return timeinfo->tm_mon  + 1;
+  else if (type == dt_day)    return timeinfo->tm_mday;
+  else if (type == dt_hour)   return timeinfo->tm_hour;
+  else if (type == dt_minute) return timeinfo->tm_min;
+  else if (type == dt_second) return timeinfo->tm_sec;
+  else return result; // failure: enum value not found
+}
+
+} // anonymous namepsace
+
 namespace enigma_user
 {
+
 time_t date_current_datetime()
 {
     return time(NULL);
@@ -476,5 +519,54 @@ string date_datetime_stringf(time_t date,string format)
     strftime(buffer,80,format.c_str(),localtime(&date));
     return string(buffer);
 }
+
+int file_get_date_accessed_year(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_year);
 }
+
+int file_get_date_accessed_month(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_month);
+}
+
+int file_get_date_accessed_day(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_day);
+}
+
+int file_get_date_accessed_hour(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_hour);
+}
+
+int file_get_date_accessed_minute(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_minute);
+}
+
+int file_get_date_accessed_second(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), false, dt_second);
+}
+
+int file_get_date_modified_year(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_year);
+}
+
+int file_get_date_modified_month(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_month);
+}
+
+int file_get_date_modified_day(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_day);
+}
+
+int file_get_date_modified_hour(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_hour);
+}
+
+int file_get_date_modified_minute(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_minute);
+}
+
+int file_get_date_modified_second(string fname) {
+  return file_get_date_accessed_modified(fname.c_str(), true, dt_second);
+}
+
+} // namespace enigma_user
 

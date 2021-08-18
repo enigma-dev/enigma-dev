@@ -1,6 +1,10 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 OS := $(shell uname -s)
-ARCH := $(shell uname -m)
+ifeq ($(UNIX_BASED), true)
+	ARCH := $(shell uname -m)
+else
+	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
+endif
 SUFFIX := -$(shell uname -n)-$(ARCH)
 
 # Determine whether Unix-based

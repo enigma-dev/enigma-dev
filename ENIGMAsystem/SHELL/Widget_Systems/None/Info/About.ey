@@ -7,7 +7,3 @@ Build-Platforms: Windows, Linux, FreeBSD, DragonFlyBSD
 Represents: None
 Description: Console based output and filler functions.
 Author: Josh Ventura
-
-Represents:
-	Windowing: All
-

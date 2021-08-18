@@ -24,6 +24,7 @@
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
+#include "Universal_System/joysticks.h"
 #include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -173,7 +174,7 @@ void initInput() {
 }
 
 void handleInput() {
-  handle_joysticks();
+  joystick_update();
   input_push();
 }
 

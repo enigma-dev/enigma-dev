@@ -26,6 +26,7 @@
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 #include "Universal_System/estring.h"
+#include "Universal_System/joysticks.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
@@ -292,7 +293,10 @@ int handleEvents() {
   return 0;
 }
 
-void handleInput() { input_push(); }
+void handleInput() {
+  joystick_update(); 
+  input_push(); 
+}
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
@@ -381,24 +385,24 @@ std::string filename_join(std::string prefix, std::string suffix) {
 
 }  // namespace enigma_user
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
+int main(int argc, char *argv[]) {
   // DO NOT move this out of WinMain like a fucking idiot
   // we are setting the hInstance in the enigma namespace
   // to the local one passed as a parameter here so that
   // we can use it for the CreateWindow call and icon
-  enigma::hInstance = hInstance;
+  enigma::hInstance = GetModuleHandle(0);
 
-  int argc = 0;
-  std::vector<const char*> argv;
+  int cnt = 0;
+  std::vector<const char*> vec;
   std::vector<string> shortened;
-  if (LPWSTR *_argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
-    for (int i = 0; i < argc; ++i) {
-      shortened.push_back(shorten(_argv[i]));
-      argv.push_back(shortened[i].c_str());
+  if (wchar_t **_vec = CommandLineToArgvW(GetCommandLineW(), &cnt)) {
+    for (int i = 0; i < cnt; ++i) {
+      shortened.push_back(shorten(_vec[i]));
+      vec.push_back(shortened[i].c_str());
     }
-    LocalFree (_argv);
+    LocalFree(_vec);
   }
 
   //Main loop
-  return enigma::enigma_main(argc, const_cast<char**>(argv.data()));
+  return enigma::enigma_main(cnt, const_cast<char**>(vec.data()));
 }

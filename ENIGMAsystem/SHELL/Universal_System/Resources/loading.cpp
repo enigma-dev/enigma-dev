@@ -25,6 +25,7 @@
 #include "libEGMstd.h"
 
 #include "Platforms/General/PFmain.h"
+#include "Universal_System/joysticks.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
@@ -73,6 +74,7 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
+    joystick_init();
     widget_system_initialize();
 
     // Open the exe for resource load

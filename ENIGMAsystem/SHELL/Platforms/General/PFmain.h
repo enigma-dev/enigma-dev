@@ -21,6 +21,13 @@
 
 #include "Universal_System/directoryglobals.h"
 
+// because sdl is a stupid library
+#if defined(_WIN32)
+#undef main
+#endif
+
+#include <SDL2/SDL.h>
+
 #include <string>
 
 namespace enigma {

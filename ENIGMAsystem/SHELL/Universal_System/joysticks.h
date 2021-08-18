@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 Robert Colton
+/** Copyright (C) 2018 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,4 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/WSdialogs.h"
+namespace enigma {
+
+bool joystick_init();
+void joystick_uninit();
+void joystick_update();
+
+}

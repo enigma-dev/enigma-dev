@@ -10,3 +10,6 @@ Author: Samuel Venable
 
 Depends:
   Build-Platforms: Linux, FreeBSD, DragonFlyBSD
+
+Represents:
+  Build-Platforms: Linux, FreeBSD, DragonFlyBSD
