@@ -275,8 +275,7 @@ int window_get_width() {
 }
 
 int window_get_height() {
-  int viewportWidth;
-  int viewportHeight;
+  int viewportWidth, viewportHeight;
   SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportHeight;
 
