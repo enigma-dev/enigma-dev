@@ -54,7 +54,8 @@ int audio_play_sound(int index, double priority, bool loop) {
     for(size_t i = 0; i < sound_channels.size() ; i++) {
       if (Mix_Playing(i) == 0 || sound_channels[i]->priority < priority) {
         if (Mix_PlayChannel(i,snd.mc, loop) == -1) {
-          DEBUG_MESSAGE( std::string("Mix_PlayChannel : ")+std::string(Mix_GetError()), MESSAGE_TYPE::M_ERROR);
+          DEBUG_MESSAGE( std::string("Mix_PlayChannel failed: ")+std::to_string(index), MESSAGE_TYPE::M_ERROR);
+
         }
         sound_channels[i]->mchunk = snd.mc;
         sound_channels[i]->priority = priority;
