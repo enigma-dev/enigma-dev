@@ -280,7 +280,7 @@ void physics_fixture_set_edge_shape(int id, bool adjstart, bool adjend)
     shape.m_vertex0 = sb2dfixture->vertices[vid];
     vid += 1;
   }
-  shape.Set(sb2dfixture->vertices[vid],  sb2dfixture->vertices[vid + 1]);
+  shape.SetTwoSided(sb2dfixture->vertices[vid],  sb2dfixture->vertices[vid + 1]);
   vid += 2;
   if (adjend) {
     shape.m_vertex3 = sb2dfixture->vertices[vid];
