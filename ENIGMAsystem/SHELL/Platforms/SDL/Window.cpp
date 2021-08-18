@@ -268,8 +268,7 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  int viewportWidth;
-  int viewportHeight;
+  int viewportWidth, viewportHeight;
   SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportWidth;
 
