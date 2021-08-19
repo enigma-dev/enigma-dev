@@ -23,3 +23,5 @@ extern unsigned long xwindow_icon_default[];
 void XSetIconFromSprite(Display *display, Window window, int ind, int subimg);
 
 } // namespace enigma
+
+using enigma::xwindow_icon_default;
