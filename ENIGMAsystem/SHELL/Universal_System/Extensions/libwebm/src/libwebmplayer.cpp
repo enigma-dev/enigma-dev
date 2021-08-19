@@ -24,9 +24,9 @@ void convert_rgb_to_rgba(const unsigned char *RGB, unsigned width, unsigned heig
     if (y > dispHeight) break;
     for (uint32_t x = 0; x < width; ++x) {
       if (x > dispWidth) break;
-      (*RGBA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3 + (reverse) ? 2 : 0];
+      (*RGBA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3 + ((reverse) ? 2 : 0)];
       (*RGBA)[(y * dispWidth + x) * 4 + 1] = RGB[(y * width + x) * 3 + 1];
-      (*RGBA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3 + (!reverse) ? 2 : 0];
+      (*RGBA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3 + ((!reverse) ? 2 : 0)];
       (*RGBA)[(y * dispWidth + x) * 4 + 3] = 255;
     }
   }
