@@ -104,7 +104,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             case enigma::POLYGON_VS_POLYGON: 
             {
                 // Collision function call
-                return enigma::get_polygon_inst_collision(inst1, inst2, x, y)? inst2: NULL;
+                if (enigma::get_polygon_inst_collision(inst1, inst2, x, y))
+                    return inst2;
+                break;
             }
             case enigma::POLYGON_VS_BBOX: 
             {
@@ -311,7 +313,8 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
             }
 
             // Collision detection
-            return enigma::get_polygon_point_collision(inst, x1, y1)? inst : NULL;
+            if (enigma::get_polygon_point_collision(inst, x1, y1))
+                return inst;
         }
     }
     return NULL;
