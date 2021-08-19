@@ -1,3 +1,5 @@
 # Welcome to the STIGMA Development Environment!
 
-The Sexually Transmitted Integrity of Game Making Assholes. The name of the software is just a light-hearted joke, please don't get butthurt.
+The Sexually Transmitted Integrity of Game Making Assholes. 
+
+The name of this ENIGMA fork is just a light-hearted joke guys, please don't get butthurt.
