@@ -40,6 +40,9 @@ endif
 
 override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
 override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
+ifeq ($(UNIX_BASED), true)
+	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
+endif
 SHARED_SOURCES += $(call rwildcard,crossprocess,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
