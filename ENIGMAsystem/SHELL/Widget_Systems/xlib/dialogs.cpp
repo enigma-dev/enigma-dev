@@ -256,9 +256,8 @@ static void *modify_shell_dialog(void *pid) {
     XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
   } else {
     XSynchronize(display, true);
-    unsigned long xwindow_icon_default[] = { 1, 1, 0x0 };
     Atom property = XInternAtom(display, "_NET_WM_ICON", false);
-    XChangeProperty(display, wid, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
+    XChangeProperty(display, wid, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 2 + 64 * 64);
     XFlush(display);
   }
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
