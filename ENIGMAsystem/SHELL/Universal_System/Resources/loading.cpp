@@ -34,6 +34,8 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#elif defined(__linux__)
+#include <climits>
 #endif
 
 #include <ctime>
@@ -81,8 +83,13 @@ namespace enigma
     do { // Allows break
       FILE* resfile = nullptr; 
       #if !defined(_WIN32)
+      #if defined(__linux__)
+      char exename[PATH_MAX];
+      realpath("/proc/self/exe", exename);
+      #else
       char *exename = nullptr;
       windowsystem_write_exename(&exename);
+      #endif
       if (!(resfile = fopen(exename,"rb"))) {
       #else
       wchar_t exename[MAX_PATH];
