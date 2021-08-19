@@ -14,7 +14,7 @@ int id = -1;
 std::unordered_map<int,   uvpx::Player *> videos;
 std::unordered_map<int, wp::WebmPlayer *> audios;
 
-void convert_rgb_to_rgba(const unsigned char *RGB, unsigned width, unsigned height, unsigned char **RGBA, unsigned dispWidth, unsigned dispHeight) {
+void convert_rgb_to_rgba(const unsigned char *RGB, unsigned width, unsigned height, unsigned char **RGBA, unsigned dispWidth, unsigned dispHeight, bool reverse = true) {
   if ((*RGBA) == nullptr) {
     printf("RGBA buffer given is nullptr, allocating a new one.\n");
     *RGBA = (unsigned char *)malloc(4 * dispWidth * dispHeight);
@@ -24,9 +24,9 @@ void convert_rgb_to_rgba(const unsigned char *RGB, unsigned width, unsigned heig
     if (y > dispHeight) break;
     for (uint32_t x = 0; x < width; ++x) {
       if (x > dispWidth) break;
-      (*RGBA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3 + 2];
+      (*RGBA)[(y * dispWidth + x) * 4] = RGB[(y * width + x) * 3 + (reverse) ? 2 : 0];
       (*RGBA)[(y * dispWidth + x) * 4 + 1] = RGB[(y * width + x) * 3 + 1];
-      (*RGBA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3];
+      (*RGBA)[(y * dispWidth + x) * 4 + 2] = RGB[(y * width + x) * 3 + (!reverse) ? 2 : 0];
       (*RGBA)[(y * dispWidth + x) * 4 + 3] = 255;
     }
   }
@@ -165,7 +165,7 @@ bool video_grab_frame_image(int ind, std::string fname) {
       yuv->yPitch(), yuv->uvPitch(), rgb, yuv->width() * 3, YCBCR_JPEG);
       if (rgb) {
         unsigned char *rgba = nullptr;
-        convert_rgb_to_rgba(rgb, yuv->width(), yuv->height(), &rgba, yuv->displayWidth(), yuv->displayHeight());
+        convert_rgb_to_rgba(rgb, yuv->width(), yuv->height(), &rgba, yuv->displayWidth(), yuv->displayHeight(), false);
         free(rgb);
         videos[ind]->unlockRead();
         if (rgba) {
