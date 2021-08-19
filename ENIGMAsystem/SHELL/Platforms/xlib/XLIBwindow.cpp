@@ -196,9 +196,8 @@ void window_set_icon(int ind, unsigned subimg) {
     enigma::currentIconFrame = subimg;
   } else {
     XSynchronize(disp, true); 
-    unsigned long xwindow_icon_default[] = { 1, 1, 0x0 };
     Atom property = XInternAtom(disp, "_NET_WM_ICON", false);
-    XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 3);
+    XChangeProperty(disp, win, property, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)xwindow_icon_default, 2 + 64 * 64);
     enigma::currentIconIndex = -1;
     enigma::currentIconFrame =  0;
     XFlush(disp);
