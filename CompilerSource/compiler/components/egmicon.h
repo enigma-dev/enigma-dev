@@ -1,5 +1,5 @@
 #define EGMICON \
-  wto << "  unsigned long xwindow_icon_default[] = {" << end; \
+  wto << "  unsigned long xwindow_icon_default[] = {" << endl; \
   wto << "    64," << endl; \
   wto << "    64," << endl; \
   wto << "    0x0," << endl; \
