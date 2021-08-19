@@ -1,11 +1,5 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 OS := $(shell uname -s)
-ifeq ($(UNIX_BASED), true)
-	ARCH := $(shell uname -m)
-else
-	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
-endif
-SUFFIX := -$(shell uname -n)-$(ARCH)
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
@@ -19,6 +13,13 @@ else ifeq ($(OS), DragonFly)
 else 
 	UNIX_BASED := false
 endif
+
+ifeq ($(UNIX_BASED), true)
+	ARCH := $(shell uname -m)
+else
+	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
+endif
+SUFFIX := -$(shell uname -n)-$(ARCH)
 
 # Determine current platform
 ifeq ($(OS), Darwin)
