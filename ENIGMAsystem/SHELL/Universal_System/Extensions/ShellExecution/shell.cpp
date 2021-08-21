@@ -226,29 +226,4 @@ bool EnvironmentUnsetVariable(string name) {
   return CrossProcess::EnvironmentUnsetVariable(name.c_str());
 }
 
-// get owned window id string from process info at index
-wid_t OwnedWindowId(PROCINFO procInfo, int i) {
-  return CrossProcess::OwnedWindowId(procInfo, i);
-}
-
-// get amount of owned window id's from process info at index
-int OwnedWindowIdLength(PROCINFO procInfo) {
-  return CrossProcess::OwnedWindowIdLength(procInfo);
-}
-
-// get whether a process exists based on one of its window id's
-bool WindowIdExists(wid_t winId) {
-  return CrossProcess::WindowIdExists((WINDOWID)winId.c_str());
-}
-
-// kill a process based on one of its window id's, return whether succeeded
-bool WindowIdKill(wid_t winId) {
-  return CrossProcess::WindowIdKill((WINDOWID)winId.c_str());
-}
-
-// return a window id from native window handle
-wid_t WindowIdFromNativeWindow(window_t window) {
-  return CrossProcess::WindowIdFromNativeWindow((WINDOW)(void *)window);
-} 
-
 } // namespace enigma_user
