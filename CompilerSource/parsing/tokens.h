@@ -78,28 +78,36 @@ enum TokenType {
   TT_BINLITERAL,      // 0b0 0b1 0b10 0b11 0b100 0b101 0b110 ...
   TT_OCTLITERAL,      // 0o0 0o1 0o2... 0o6 0o7 0o10 0o11... 0o76543210 ...
   TT_HEXLITERAL,      // 0x0 $1 0x2... 0x9 0xA... $F $10... $FEDCBA9876543210...
-  TT_STRING,          // "", ''
+  TT_STRINGLIT,       // "", ''
+  TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::
   TT_FUNCTION,        // game_end
   TT_TYPE_NAME,       // int, double, whatever
   TT_NAMESPACE,       // std, enigma, sf
-  TT_LOCGLOBAL,       // global/local
-  TT_SHORTSTATEMENT,  // Short statements; return, mostly
-  TT_TINYSTATEMENT,   // break, continue, exit...
+  TT_LOCAL,           // `local` storage specifier
+  TT_GLOBAL,          // `global` storage specifier
+  TT_RETURN,          // The `return` keyword
+  TT_EXIT,            // Legacy `exit` keyword (return void)
+  TT_BREAK,           // The `break` keyword
+  TT_CONTINUE,        // The `continue` keyword
   TT_S_SWITCH,        // switch
   TT_S_REPEAT,        // repeat
   TT_S_CASE,          // case
   TT_S_DEFAULT,       // default
   TT_S_FOR,           // for
   TT_S_IF,            // if
+  TT_S_THEN,          // legacy "then" keyword; some idiots use this
   TT_S_ELSE,          // else
   TT_S_DO,            // do
   TT_S_WHILE,         // while
-  TT_S_UNTIL,         // while
+  TT_S_UNTIL,         // until - means while not
   TT_S_WITH,          // with
   TT_S_TRY,           // try
   TT_S_CATCH,         // catch
-  TT_S_NEW,           // new
+  TT_S_NEW,           // C++ memory management `new` keyword
+  TT_S_DELETE,        // C++ memory management `delete` keyword
+  TT_CLASS,           // class declaration keyword
+  TT_STRUCT,          // struct declaration keyword
 
   TTM_WHITESPACE,     // Preprocessing token: whitespace
   TTM_CONCAT,         // Preprocessing token: ##

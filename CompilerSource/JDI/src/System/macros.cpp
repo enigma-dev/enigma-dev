@@ -62,6 +62,10 @@ void macro_type::free(const macro_type* whom) {
   }
 }
 
+bool macro_type::is_variadic() const {
+  return argc > 0 && argc > ((macro_function*) this)->args.size();
+}
+
 
 //======================================================================================================
 //=====: Macro function data chunk constructors :=======================================================
@@ -188,6 +192,18 @@ string macro_type::toString() const {
   }
   else {
     return "#define " + name + "\n  " + ((macro_scalar*)this)->value;
+  }
+}
+
+string macro_type::valueString() const {
+  if (argc >= 0) {
+    macro_function *mf = (macro_function*)this;
+    string res;
+    for (size_t i = 0; i < mf->value.size(); i++)
+      res += mf->value[i].toString(mf) + (i+1 < mf->value.size()? " " : "");
+    return res;
+  } else {
+    return ((macro_scalar*)this)->value;
   }
 }
 

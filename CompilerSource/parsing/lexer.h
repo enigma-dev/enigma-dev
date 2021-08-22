@@ -69,6 +69,10 @@ class Lexer {
   const ParseContext &GetContext() const { return *context; }
   size_t LineNumber() const { return line_number; }
 
+  // Looks up an operator string in the default operator trie.
+  // The entire given string must match the operator, or TT_ERROR is returned.
+  static TokenType LookUpOperator(std::string_view op);
+
   Lexer(std::string &&code_, const ParseContext *ctx, ErrorHandler *herr_):
       code(code_), context(ctx), herr(herr_) {}
   Lexer(TokenVector tokens, const ParseContext *ctx, ErrorHandler *herr_);

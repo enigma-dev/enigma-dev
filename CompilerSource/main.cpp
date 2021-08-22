@@ -138,6 +138,12 @@ extern void print_definition(string n);
 DLLEXPORT syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
   current_language->definitionsModified(wscode, targetYaml);
+
+  std::cout << "List of all built-in macros:" << std::endl;
+  for (const auto &m : current_language->builtin_macros()) {
+    std::cout << " - " << m.first << " = " << m.second.ToString() << std::endl;
+  }
+
   return &ide_passback_error;
 }
 
