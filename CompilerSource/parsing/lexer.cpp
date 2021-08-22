@@ -108,23 +108,23 @@ static TokenTrie token_lookup {
 };
 
 static std::map<std::string, TokenType, std::less<>> keyword_lookup {
-  { "break",    TT_TINYSTATEMENT  },
-  { "case",     TT_S_CASE         },
-  { "catch",    TT_S_CATCH        }, 
-  { "continue", TT_TINYSTATEMENT  },
-  { "default",  TT_S_DEFAULT      },
-  { "do",       TT_S_DO           },
-  { "else",     TT_S_ELSE         },
-  { "exit",     TT_TINYSTATEMENT  },
-  { "for",      TT_S_FOR          },
-  { "if",       TT_S_IF           },
-  { "return",   TT_SHORTSTATEMENT },
-  { "repeat",   TT_S_REPEAT       },
-  { "switch",   TT_S_SWITCH       },
-  { "try",      TT_S_TRY          },
-  { "until",    TT_S_UNTIL        },
-  { "while",    TT_S_WHILE        },
-  { "with",     TT_S_WITH         },
+  { "break",    TT_BREAK     },
+  { "case",     TT_S_CASE    },
+  { "catch",    TT_S_CATCH   },
+  { "continue", TT_CONTINUE  },
+  { "default",  TT_S_DEFAULT },
+  { "do",       TT_S_DO      },
+  { "else",     TT_S_ELSE    },
+  { "exit",     TT_EXIT      },
+  { "for",      TT_S_FOR     },
+  { "if",       TT_S_IF      },
+  { "return",   TT_RETURN    },
+  { "repeat",   TT_S_REPEAT  },
+  { "switch",   TT_S_SWITCH  },
+  { "try",      TT_S_TRY     },
+  { "until",    TT_S_UNTIL   },
+  { "while",    TT_S_WHILE   },
+  { "with",     TT_S_WITH    },
 
   { "and", TT_AND },
   { "div", TT_DIV },
@@ -265,6 +265,12 @@ CodeSnippet Lexer::Mark(size_t pos, size_t length) {
                      line_number, pos - last_line_position};
 }
 
+TokenType Lexer::LookUpOperator(std::string_view op) {
+  auto tnode = token_lookup.Get(op, 0);
+  if (tnode.second != op.length()) return TT_ERROR;
+  return tnode.first;
+}
+
 Token Lexer::ReadRawToken() {
   if (pos >= code.length()) {
     // We need custom logic for this because string_view::substr checks bounds
@@ -310,25 +316,27 @@ Token Lexer::ReadRawToken() {
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
-          return Token(TT_STRING, Mark(spos, pos - spos));
+          return Token(TT_STRINGLIT, Mark(spos, pos - spos));
         }
         if (use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '"') {
-          return Token(TT_STRING, Mark(spos, ++pos - spos));
+          return Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
         }
       }
     }
 
     case '\'': {
       const bool use_escapes = context->compatibility_opts.use_cpp_escapes;
+      const TokenType token_type = context->compatibility_opts.use_cpp_strings
+            ? TT_STRINGLIT : TT_CHARLIT;
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
-          return Token(TT_STRING, Mark(spos, pos - spos));
+          return Token(token_type, Mark(spos, pos - spos));
         }
         if (use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '\'') {
-          return Token(TT_STRING, Mark(spos, ++pos - spos));
+          return Token(token_type, Mark(spos, ++pos - spos));
         }
       }
     }

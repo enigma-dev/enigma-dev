@@ -72,6 +72,12 @@ namespace jdip {
     
     /// Convert this macro to a string
     string toString() const;
+
+    // Generate a string with the unexpanded value of this macro.
+    string valueString() const;
+    
+    bool is_function() const { return argc >= 0; }
+    bool is_variadic() const;
     
     protected:
       /**

@@ -18,6 +18,7 @@
 #ifndef ENIGMA_COMPILER_PARSING_ERROR_REPORTING_h
 #define ENIGMA_COMPILER_PARSING_ERROR_REPORTING_h
 
+#include <iostream>
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -114,6 +115,17 @@ struct ErrorCollector : ErrorHandler {
   }
   void ReportWarning(CodeSnippet snippet, std::string_view warning) override {
     warnings.emplace_back(snippet, std::string{warning});
+  }
+};
+
+class StdErrorHandler : public ErrorHandler {
+  void ReportError(CodeSnippet snippet, std::string_view error) override {
+    std::cerr << "Error on line " << snippet.line << ", position "
+              << snippet.position << ": " << error << std::endl;
+  }
+  void ReportWarning(CodeSnippet snippet, std::string_view warning) override {
+    std::cerr << "Warning on line " << snippet.line << ", position "
+              << snippet.position << ": " << warning << std::endl;
   }
 };
 
