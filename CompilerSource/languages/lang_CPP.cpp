@@ -167,19 +167,13 @@ enigma::parsing::TokenType TranslateTokenType(jdip::token_t token,
 enigma::parsing::Macro TranslateMacro(const jdip::macro_type &macro,
                                       enigma::parsing::ErrorHandler *herr) {
   using namespace enigma::parsing;
-  TokenVector definiens;
-  Lexer lexer(macro.valueString(), &ParseContext::ForPreprocessorEvaluation(),
-              herr);
-  for (auto t = lexer.ReadToken(); t.type != TT_ENDOFCODE; t = lexer.ReadToken()) {
-    definiens.push_back(t);
-  }
   if (macro.is_function()) {
     std::vector<std::string> arg_list =
         ((const jdip::macro_function*) &macro)->args;
     return enigma::parsing::Macro(macro.name, std::move(arg_list),
-          macro.is_variadic(), std::move(definiens), herr);
+          macro.is_variadic(), macro.valueString(), herr);
   }
-  return enigma::parsing::Macro(macro.name, std::move(definiens));
+  return enigma::parsing::Macro(macro.name, macro.valueString(), herr);
 }
 
 }  // namespace

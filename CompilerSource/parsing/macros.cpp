@@ -294,5 +294,15 @@ TokenVector Macro::SubstituteAndUnroll(
   return res;
 }
 
+TokenVector Macro::ParseTokens(
+    std::shared_ptr<const std::string> owned_raw_string, ErrorHandler *herr) {
+  TokenVector definiens;
+  Lexer lex(owned_raw_string, &ParseContext::ForPreprocessorEvaluation(), herr);
+  for (auto t = lex.ReadToken(); t.type != TT_ENDOFCODE; t = lex.ReadToken()) {
+    definiens.push_back(t);
+  }
+  return definiens;
+}
+
 }  // namespace parsing
 }  // namespace enigma
