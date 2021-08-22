@@ -22,6 +22,7 @@
 #include "error_reporting.h"
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -41,6 +42,14 @@ typedef std::vector<Token> TokenVector;
 **/
 struct Macro {
   std::string name;
+
+ private:
+  // For macros constructed by the system (namely, JDI translations), this is
+  // the value string from which tokens were originally parsed.
+  // For other macros, this will be null.
+  std::shared_ptr<const std::string> owned_raw_string;
+
+ public:
   std::vector<Token> value;
   std::optional<std::vector<std::string>> parameters;
   bool is_variadic;
@@ -107,9 +116,16 @@ struct Macro {
   /// function-like macros.
   std::string NameAndPrototype() const;
 
-  /// Default constructor; defines an object-like macro with the given value.
-  Macro(const std::string &definiendum, TokenVector &&definiens):
+  /// Most basic constructor; defines an object-like macro with the given value.
+  Macro(std::string_view definiendum, TokenVector &&definiens):
       name(definiendum), value(std::move(definiens)), is_variadic(false) {}
+
+  // Like the basic constructor, but tokenizes the given string, reporting any
+  // errors to the given ErrorHandler.
+  Macro(std::string_view definiendum, std::string definiens, ErrorHandler *herr)
+      : name(definiendum),
+        owned_raw_string(std::make_shared<std::string>(std::move(definiens))),
+        value(ParseTokens(owned_raw_string, herr)), is_variadic(false) {}
 
   /** Construct a macro function taking the arguments in arg_list.
       This function parses the given value based on the argument list.
@@ -125,13 +141,25 @@ struct Macro {
         If \p arg_list is empty, and \p variadic is false, the behavior is the
         same as the default constructor. 
   **/
-  Macro(std::string_view name_, std::vector<std::string> &&arg_list,
+  Macro(std::string_view definiendum, std::vector<std::string> &&arg_list,
         bool variadic, TokenVector &&definiens, ErrorHandler *herr):
-      name(name_), value(std::move(definiens)),
+      name(definiendum), value(std::move(definiens)),
+      parameters(std::move(arg_list)), is_variadic(variadic),
+      parts(Componentize(value, *parameters, herr)) {}
+  // Like the function-like constructor, but parses tokens from a given string.
+  Macro(std::string_view definiendum, std::vector<std::string> &&arg_list,
+        bool variadic, std::string definiens, ErrorHandler *herr):
+      name(definiendum),
+      owned_raw_string(std::make_shared<std::string>(std::move(definiens))),
+      value(ParseTokens(owned_raw_string, herr)),
       parameters(std::move(arg_list)), is_variadic(variadic),
       parts(Componentize(value, *parameters, herr)) {}
 
   ~Macro() {}
+
+ private:
+  static TokenVector ParseTokens(
+      std::shared_ptr<const std::string> owned_raw_string, ErrorHandler *herr);
 };
 
 typedef std::map<std::string, Macro, std::less<>> MacroMap;

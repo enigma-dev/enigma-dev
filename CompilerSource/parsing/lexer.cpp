@@ -491,6 +491,7 @@ Token Lexer::ReadToken() {
 }
 
 Lexer::Lexer(TokenVector tokens, const ParseContext *ctex, ErrorHandler *herr_):
+    owned_code(std::make_unique<std::string>()), code(*owned_code),
     context(ctex), herr(herr_) {
   PushMacro("", std::move(tokens));
 }

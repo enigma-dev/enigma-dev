@@ -73,8 +73,12 @@ class Lexer {
   // The entire given string must match the operator, or TT_ERROR is returned.
   static TokenType LookUpOperator(std::string_view op);
 
-  Lexer(std::string &&code_, const ParseContext *ctx, ErrorHandler *herr_):
-      code(code_), context(ctx), herr(herr_) {}
+  Lexer(std::string code_, const ParseContext *ctx, ErrorHandler *herr_):
+      owned_code(std::make_shared<std::string>(std::move(code_))),
+      code(*owned_code), context(ctx), herr(herr_) {}
+  Lexer(std::shared_ptr<const std::string> code_, const ParseContext *ctx,
+        ErrorHandler *herr_):
+      owned_code(code_), code(*owned_code), context(ctx), herr(herr_) {}
   Lexer(TokenVector tokens, const ParseContext *ctx, ErrorHandler *herr_);
 
  private:
@@ -106,7 +110,12 @@ class Lexer {
   size_t ComputeLineNumber(size_t lpos);
   CodeSnippet Mark(size_t pos, size_t length);
 
-  std::string code;
+  // Allows this lexer to own the code it and its output tokens point into.
+  // May be null if the code is stack-alloc'd and owned by another entity.
+  // Always prefer `code`.
+  std::shared_ptr<const std::string> owned_code;
+
+  const std::string &code;
   size_t pos = 0;
   size_t line_number = 1;
   size_t line_last_evaluated_at_ = 0;
