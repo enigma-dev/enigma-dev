@@ -83,7 +83,7 @@ TEST(LexerTest, EmptyCppComment) {
 TEST(LexerTest, StringThenComment) {
   LexerTester lex("{\"string\"/**/}");
   EXPECT_EQ(lex->ReadToken().type, TT_BEGINBRACE);
-  EXPECT_EQ(lex->ReadToken().type, TT_STRING);
+  EXPECT_EQ(lex->ReadToken().type, TT_STRINGLIT);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
