@@ -36,7 +36,6 @@
 #include <X11/Xutil.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
-#include <time.h>    //clock
 #include <unistd.h>  //usleep
 #include <climits>
 #include <map>

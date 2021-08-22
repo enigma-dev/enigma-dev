@@ -69,6 +69,7 @@ extern unsigned long delta_time;
 extern unsigned long current_time;
 
 void sleep(int ms);
+unsigned long get_timer(); // number of microseconds since the game started
 void game_end();
 void game_end(int ret);
 void action_end_game();
