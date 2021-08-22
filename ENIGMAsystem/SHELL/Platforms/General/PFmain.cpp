@@ -21,6 +21,8 @@ int current_room_speed;
 std::string* parameters;
 int parameterc;
 int frames_count = 0;
+// Monotic non-wall clock timer is required for accurate frame limiting.
+// https://github.com/enigma-dev/enigma-dev/pull/2259
 std::chrono::steady_clock::time_point timer_start;
 std::chrono::steady_clock::time_point timer_offset;
 std::chrono::steady_clock::time_point timer_offset_slowing;
