@@ -26,24 +26,31 @@
 \********************************************************************************/
 
 #include <string>
+#include <climits>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-
-using namespace std;
 
 #include "bettersystem.h"
 #include "OS_Switchboard.h"
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
-#if CURRENT_PLATFORM_ID == OS_FREEBSD
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY
     #include <sys/user.h>
     #include <libutil.h>
+    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+        #include <sys/param.h>
+        #include <sys/sysctl.h>
+        #include <kvm.h>
+    #endif
 #endif
 
 using std::string;
-typedef size_t pt;
+
+#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+kvm_t *kd = nullptr;
+#endif
 
 inline char* scopy(string& str)
 {
@@ -58,9 +65,9 @@ inline char* scopy(string& str)
   #define cut_beginning_string(x) ((x)+1)
   #define cut_termining_string(x) ((x)-1)
 #endif
-inline string cutout_block(const char* source, pt& pos, bool& qed)
+inline string cutout_block(const char* source, size_t& pos, bool& qed)
 {
-  pt spos = pos;
+  size_t spos = pos;
   qed = false;
   string ret;
 
@@ -120,7 +127,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         return 0;
 
       DWORD result;
-      bool qued; pt pos = 0;
+      bool qued; size_t pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
@@ -259,17 +266,99 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return e_exec(cmd, eCenviron);
     }
 #else
+    #include <vector>
+    #include <algorithm>
+    #include <cstdlib>
+    #include <csignal>
+
     #include <fcntl.h>
     #include <unistd.h>
     #include <sys/wait.h>
     #include <sys/stat.h>
+    #include <sys/types.h>
 
+    extern char **environ;
     const mode_t laxpermissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
-#if CURRENT_PLATFORM_ID ==  OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_MACOSX
+    #include <libproc.h>
+    #include <sys/proc_info.h>
     #include <crt_externs.h>
     #define environ (*_NSGetEnviron())
     extern char **environ;
+#endif
+
+    using std::vector;
+
+#if CURRENT_PLATFORM_ID == OS_FREEBSD
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec; int cntp;
+      if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].ki_ppid == parentProcId) {
+            vec.push_back(proc_info[i].ki_pid);
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
+#elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      char errbuf[_POSIX2_LINE_MAX];
+      vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
+      const char *nlistf, *memf; nlistf = memf = "/dev/null";
+      kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
+      int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+        for (int i = 0; i < cntp; i++) {
+          if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 && 
+            proc_info[i].kp_ppid == parentProcId) {
+            vec.push_back(proc_info[i].kp_pid);
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+    pid_t ParentProcIdFromProcId(pid_t procId) {
+      proc_bsdinfo proc_info;
+      if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
+        return proc_info.pbi_ppid;
+      }
+      return -1;
+    }
+
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      vector<pid_t> vec;
+      int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+      vector<pid_t> proc_info(cntp);
+      std::fill(proc_info.begin(), proc_info.end(), 0);
+      proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
+      for (int i = cntp; i > 0; i--) {
+        if (proc_info[i] == 0) { continue; }
+        if (parentProcId == ParentProcIdFromProcId(proc_info[i])) {
+          vec.push_back(proc_info[i]);
+        }
+      }
+      return vec;
+    }
+#endif
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_MACOSX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      vector<pid_t> procId = ProcIdFromParentProcId(pid);
+      if (procId.size()) {
+        for (int i = 0; i < procId.size(); i++) {
+          if (procId[i] == 0) { break; }
+          WaitForAllChildrenToDie(procId[i], status);
+          waitpid(procId[i], status, 0);
+        }
+      }
+    }
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+    void WaitForAllChildrenToDie(pid_t pid, int *status) {
+      waitpid(pid, status, __WALL);
+    }
 #endif
 
     void path_coerce(string &ename)
@@ -304,7 +393,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       if (!*fcmd)
         return 0;
 
-      bool qued; pt pos = 0;
+      bool qued; size_t pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
@@ -419,7 +508,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           // wait for entire process group to signal,
           // important for GNU make to stop outputting
           // before run buttons are enabled again
-          waitpid(-fk,&result,__WALL);
+          WaitForAllChildrenToDie(-fk, &result);
           break;
         }
         usleep(10000); // hundredth of a second
@@ -435,7 +524,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       cout << "TRUE\n\n";
       path.insert(0, "PATH=");
       if (path != "PATH=") path += ":";
-      path += getenv("PATH");
+      path += getenv("PATH") ? : "";
       const char *Cenviron[2] = { path.c_str(), NULL };
       return e_exec(cmd, Cenviron);
     }
