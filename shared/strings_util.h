@@ -156,10 +156,6 @@ inline std::string FileToString(const std::string &fName) {
   return buffer.str();
 }
 
-inline std::string FileToString(const std::filesystem::path &path) {
-  return FileToString(path.string());
-}
-
 inline bool IsNumber(const std::string& s) {
   return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); }) == s.end();
 }
