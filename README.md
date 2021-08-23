@@ -11,4 +11,5 @@ Special thanks to the original authors, most notably among them:
 See the copyight comments in the headers and sources for the complete list of past and current contributors.
 
 Regards,
+
 Samuel Venable
