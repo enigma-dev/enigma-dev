@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0.0.0
+Name=STIGMA
+GenericName=Development Environment
+Exec=/usr/local/bin/stigma-dev/start.sh
+Icon=/usr/local/bin/stigma-dev/Resources/logo.png
+Terminal=false
+Type=Application
+Categories=Game;Development;
