@@ -7,4 +7,4 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 - **Greg Williamson**, major ENIGMA contributor
 - **Harijs Grinbergs**, major ENIGMA contributor
 - **Samuel Venable**, major ENIGMA contributor
-- **polygone**, major ENIGMA contributor  
+- **polygoned**, major ENIGMA contributor  
