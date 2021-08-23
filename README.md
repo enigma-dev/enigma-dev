@@ -12,4 +12,4 @@ See the copyight comments in the headers and sources for the complete list of pa
 
 Regards,
 
-Samuel Venable
+**Samuel Venable**
