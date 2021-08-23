@@ -28,7 +28,7 @@ void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const
 
       buffers::resources::Object::EgmEvent event_proto;
       event_proto.set_id(event.bare_id());
-      event_proto.set_code(FileToString(f.u8string()));
+      event_proto.set_code(FileToString(f.path().u8string()));
       for (const auto &arg : event.arguments)
         event_proto.add_arguments(arg.name);
 
