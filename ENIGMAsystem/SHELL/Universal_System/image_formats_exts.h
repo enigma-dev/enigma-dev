@@ -25,11 +25,11 @@
 namespace enigma
 {
 
-using ImageLoadFunction = std::function<std::vector<RawImage>(const std::filesystem::path&)>;
-using ImageSaveFunction = std::function<int(const std::filesystem::path&, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
+using ImageLoadFunction = std::function<std::vector<RawImage>(const std::string&)>;
+using ImageSaveFunction = std::function<int(const std::string&, const unsigned char*, unsigned, unsigned, unsigned, unsigned, bool)>;
 
-void image_add_loader(const std::filesystem::path&, ImageLoadFunction fnc);
-void image_add_saver(const std::filesystem::path&, ImageSaveFunction fnc);
+void image_add_loader(const std::string&, ImageLoadFunction fnc);
+void image_add_saver(const std::string&, ImageSaveFunction fnc);
 
 } //namespace enigma
 
