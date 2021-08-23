@@ -31,9 +31,9 @@ SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 ifeq ($(OS), Darwin)
 	CPYCOMPEGM := $(shell cp -f ../libcompileEGMf-`uname`-`uname -m`.dylib ../libcompileEGMf.dylib)
 else ifeq ($(UNIX_BASED), true)
-	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname`-`uname -m`.so ../libcompileEGMf.so")
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -s`-`uname -m`.so ../libcompileEGMf.so")
 else
-	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname`-`gcc -dumpmachine | sed 's/-w.*//'`.dll ../compileEGMf.dll")
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -s`-`gcc -dumpmachine | sed 's/-w.*//'`.dll ../compileEGMf.dll")
 endif
 
 include ../Default.mk
