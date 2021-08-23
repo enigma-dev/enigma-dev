@@ -214,7 +214,7 @@ class gmx_root_walker {
 
 void PackScript(const fs::path& fName, int id, buffers::resources::Script *script) {
   outStream << "Parsing " << fName << std::endl;
-  std::string code = FileToString(fName);
+  std::string code = FileToString(fName.u8string());
 
   outStream << "Setting id as:" << std::endl << id << std::endl;
   script->set_id(id);
@@ -227,7 +227,7 @@ void PackScript(const fs::path& fName, int id, buffers::resources::Script *scrip
 
 void PackShader(const fs::path& fName, int id, buffers::resources::Shader *shader) {
   outStream << "Parsing " << fName << std::endl;
-  std::string code = FileToString(fName);
+  std::string code = FileToString(fName.u8string());
 
   outStream << "Setting id as:" << std::endl << id << std::endl;
   shader->set_id(id);
