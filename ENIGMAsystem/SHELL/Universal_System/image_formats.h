@@ -20,7 +20,7 @@
 #define ENIGMA_IMAGEFORMATS_H
 
 #include <vector>
-#include <filesystem>
+#include <string>
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
@@ -71,14 +71,14 @@ unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned heig
 void image_flip(RawImage& in);
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-std::vector<RawImage> image_load(const std::filesystem::path& filename);
+std::vector<RawImage> image_load(const std::string& filename);
 /// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
-int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+int image_save(const std::string& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
-std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename);
+std::vector<RawImage> image_load_bmp(const std::string& filename);
 std::vector<RawImage> image_decode_bmp(const std::string& image_data);
-std::vector<RawImage> image_load_gif(const std::filesystem::path& filename);
-int image_save_bmp(const std::filesystem::path&, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
+std::vector<RawImage> image_load_gif(const std::string& filename);
+int image_save_bmp(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 
 } //namespace enigma
 

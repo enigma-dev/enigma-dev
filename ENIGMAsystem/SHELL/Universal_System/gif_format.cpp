@@ -27,6 +27,7 @@
 #include <cmath>
 #include <sstream>
 #include <iostream>
+#include <memory>
 
 namespace {
 const unsigned int ERR_SUCCESS          = 0; //No error (easy boolean checK)
@@ -210,7 +211,7 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
 
 namespace enigma
 {
-std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
+std::vector<RawImage> image_load_gif(const std::string& filename)
 {
   // Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
@@ -219,7 +220,7 @@ std::vector<RawImage> image_load_gif(const std::filesystem::path& filename)
   std::vector<RawImage> res;
 
   //File input
-  std::unique_ptr<unsigned char[]> bytes_c(read_entire_file(filename.u8string().c_str(), size));
+  std::unique_ptr<unsigned char[]> bytes_c(read_entire_file(filename.c_str(), size));
   unsigned char *bytes = bytes_c.get();
   if (!bytes) { errno = ERR_FILE_CANT_OPEN; return res; }
 

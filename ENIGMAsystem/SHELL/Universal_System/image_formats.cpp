@@ -17,6 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "estring.h"
 #include "image_formats.h"
 #include "strings_util.h"
 #include "image_formats_exts.h"
@@ -41,8 +42,8 @@ using namespace std;
 namespace enigma
 {
 
-std::map<std::filesystem::path, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
-std::map<std::filesystem::path, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
+std::map<std::string, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
+std::map<std::string, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
 Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y) {
   Color c;
@@ -205,11 +206,11 @@ unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned heig
   return rgba;
 }
 
-void image_add_loader(const std::filesystem::path& extension, ImageLoadFunction fnc) {
+void image_add_loader(const std::string &extension, ImageLoadFunction fnc) {
   image_load_handlers[extension] = fnc;
 }
 
-void image_add_saver(const std::filesystem::path& extension, ImageSaveFunction fnc) {
+void image_add_saver(const std::string &extension, ImageSaveFunction fnc) {
   image_save_handlers[extension] = fnc;
 }
 
@@ -229,36 +230,36 @@ void image_flip(RawImage& in) {
 }
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-std::vector<RawImage> image_load(const std::filesystem::path& filename) {
-  std::filesystem::path extension = filename.extension();
+std::vector<RawImage> image_load(const std::string &filename) {
+  std::string extension = enigma_user::filename_ext(filename);
   if (extension.empty()) {
-    DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
+    DEBUG_MESSAGE("No extension in image filename: " + filename + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
     extension = ".bmp";
   }
   
-  auto handler = image_load_handlers.find(ToLower(extension.u8string()));
+  auto handler = image_load_handlers.find(ToLower(extension));
   if (handler != image_load_handlers.end()) {
     return (*handler).second(filename);
   } else {
-    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename , MESSAGE_TYPE::M_ERROR);
     return std::vector<RawImage>();
   }
 }
 
 /// Generic all-purpose image saving call.
-int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  std::filesystem::path extension = filename.extension();
-  auto handler = image_save_handlers.find(ToLower(extension.u8string()));
+int image_save(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+  std::string extension = enigma_user::filename_ext(filename);
+  auto handler = image_save_handlers.find(ToLower(extension));
   if (extension.empty() || handler != image_save_handlers.end()) {
     return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
   } else {
-    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
   }
 }
 
-std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
-  if (std::ifstream bmp{filename.u8string(), ios::in | ios::binary}) {
+std::vector<RawImage> image_load_bmp(const std::string &filename) {
+  if (std::ifstream bmp{filename, ios::in | ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
     return image_decode_bmp(buffer.str());
@@ -436,9 +437,9 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
   return imgs;
 }
 
-int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+int image_save_bmp(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  FILE *bmp = fopen(filename.u8string().c_str(), "wb");
+  FILE *bmp = fopen(filename.c_str(), "wb");
   if (!bmp) return -1;
   fwrite("BM", 2, 1, bmp);
 
