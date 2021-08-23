@@ -16,10 +16,11 @@ endif
 
 ifeq ($(UNIX_BASED), true)
 	ARCH := $(shell uname -m)
+	SUFFIX := -$(OS)-$(ARCH)
 else
 	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
+	SUFFIX := -Windows-$(ARCH)
 endif
-SUFFIX := -$(OS)-$(ARCH)
 
 # Determine current platform
 ifeq ($(OS), Darwin)
