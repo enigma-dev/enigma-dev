@@ -29,11 +29,11 @@ using std::string;
 
 namespace enigma {
 
-std::vector<RawImage> image_load_png(const std::filesystem::path& filename) {
+std::vector<RawImage> image_load_png(const std::string& filename) {
   unsigned error;
   std::vector<RawImage> imgs(1);
   
-  error = libpng_decode32_file(&imgs[0].pxdata, &imgs[0].w, &imgs[0].h, filename.u8string().c_str(), true);
+  error = libpng_decode32_file(&imgs[0].pxdata, &imgs[0].w, &imgs[0].h, filename.c_str(), true);
   if (error) {
     DEBUG_MESSAGE("libpng-util error " + std::to_string(error), MESSAGE_TYPE::M_ERROR);
     return std::vector<RawImage>();
@@ -42,7 +42,7 @@ std::vector<RawImage> image_load_png(const std::filesystem::path& filename) {
   return imgs;
 }
 
-int image_save_png(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
+int image_save_png(const std::string& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
   // FIXME: the save functions should take const RawImages too instead of unsigned char*
   RawImage in(const_cast<unsigned char*>(data), fullwidth, fullheight);
@@ -55,7 +55,7 @@ int image_save_png(const std::filesystem::path& filename, const unsigned char* d
     image_flip(img);
   }
   
-  unsigned error = libpng_encode32_file(img.pxdata, width, height, filename.u8string().c_str(), false);
+  unsigned error = libpng_encode32_file(img.pxdata, width, height, filename.c_str(), false);
   
   
   if (error) return -1; else return 1;
