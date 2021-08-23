@@ -33,7 +33,7 @@ ifeq ($(OS), Darwin)
 else ifeq ($(UNIX_BASED), true)
 	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -s`-`uname -m`.so ../libcompileEGMf.so")
 else
-	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-`uname -s`-`gcc -dumpmachine | sed 's/-w.*//'`.dll ../compileEGMf.dll")
+	CPYCOMPEGM := $(shell /bin/sh -c "cp -f ../libcompileEGMf-Windows-`gcc -dumpmachine | sed 's/-w.*//'`.dll ../compileEGMf.dll")
 endif
 
 include ../Default.mk
