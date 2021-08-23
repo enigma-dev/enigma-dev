@@ -6,5 +6,6 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 - **Robert B. Colton**, major ENIGMA contributor
 - **Greg Williamson**, major ENIGMA contributor
 - **Harijs Grinbergs**, major ENIGMA contributor
+- **Hugh Patrick Greene** major Wiki contributor
 - **Samuel Venable**, major ENIGMA contributor
 - **polygoned**, major ENIGMA contributor  
