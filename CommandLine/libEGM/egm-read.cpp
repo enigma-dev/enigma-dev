@@ -168,7 +168,7 @@ namespace egm_internal {
 
 buffers::resources::Script LoadScript(const fs::path& fPath) {
   buffers::resources::Script scr;
-  scr.set_code(FileToString(fPath));
+  scr.set_code(FileToString(fPath.u8string()));
   return scr;
 }
 
