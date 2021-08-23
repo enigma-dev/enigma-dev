@@ -210,7 +210,7 @@ buffers::resources::Timeline LoadTimeLine(const fs::path& fPath) {
     // If we made it this far we can add event to timeline
     buffers::resources::Timeline_Moment* m = tln.add_moments();
     m->set_step(step);
-    m->set_code(FileToString(f.path()));
+    m->set_code(FileToString(f.path().u8string()));
 
   }
 
@@ -334,7 +334,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
       const std::string edlFile = f.path().stem().u8string();
 
       if (edlFile == "roomcreate") {
-        rm->set_creation_code(FileToString(f.path()));
+        rm->set_creation_code(FileToString(f.path().u8string()));
         continue;
       }
 
