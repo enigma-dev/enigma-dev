@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
-declare -A deps
-deps["lateralgm.jar"]="IsmAvatar/LateralGM"
-deps["plugins/enigma.jar"]="enigma-dev/lgmplugin"
+key0="enigma-dev/lgmplugin"
+key1="IsmAvatar/LateralGM"
+dep0="plugins/enigma.jar"
+dep1="lateralgm.jar"
 
 get_latest () {
   local release=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
@@ -27,31 +28,11 @@ else
   curl -L -o "plugins/shared/jna.jar" "$jnaJar"
 fi
 
-if [ ! -f ".deps" ]; then
-  touch ".deps"
-fi
-  
-lineCount=$(wc -l < ".deps")
-lineNum=1;
+download_latest() {
+  latest0=$(get_latest "$key0")
+  grab_latest "$key0" "$latest0" "$dep0"
+  latest1=$(get_latest "$key1")
+  grab_latest "$key1" "$latest1" "$dep1"
+}
 
-for key in ${!deps[@]}; 
-do
-  
-  latest=$(get_latest ${deps[$key]})
-
-  if [ "$lineCount" -lt "$lineNum" ]; then
-    echo "$key $latest" >> ".deps"
-    grab_latest "${deps[$key]}" "$latest" "$key"
-  else
-    line=$(sed -n ${lineNum}p < ".deps")
-     if [ "$line" != "$latest" ]; then
-       grab_latest "${deps[$key]}" "$latest" "$key"
-       sed -i "${lineNum}s/.*/${latest}/" ".deps"
-     else
-       echo -e "$key \e[32mAlready up to date, skipping...\e[0m"
-     fi
-  fi
-  
-  lineNum=$(($lineNum+1))
-  
-done
+download_latest
