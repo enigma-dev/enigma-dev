@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 key0="enigma-dev/lgmplugin"
 key1="IsmAvatar/LateralGM"
 dep0="plugins/enigma.jar"
