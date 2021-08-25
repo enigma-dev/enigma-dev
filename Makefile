@@ -1,39 +1,66 @@
-include ../../Config.mk
+include Config.mk
 
-SHARED_SRC_DIR := ../../shared
+PATH := $(eTCpath)$(PATH)
+SHELL=/bin/bash
 
-PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
+.PHONY: ENIGMA all clean Game clean-game clean-protos emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
 
-ifeq ($(OS), Darwin)
-	OS_LIBS := -lboost_program_options -lpthread -ldl
-else ifeq ($(UNIX_BASED), true)
-	OS_LIBS := -lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
-else
-	OS_LIBS := -lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
-endif
+$(LIB_PFX)compileEGMf$(LIB_EXT): ENIGMA
+ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
+	$(MAKE) -C CompilerSource
 
-ifeq ($(UNIX_BASED), true)
-	ifeq ($(OS), Darwin)
-		OS_LIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
-	else ifeq ($(OS), Linux)
-		OS_LIBS += -lprocps
-	else ifeq ($(OS), FreeBSD)
-		OS_LIBS += -lprocstat -lutil -lc
-	else ifeq ($(OS), DragonFly)
-		OS_LIBS += -lkvm -lutil -lc
-	endif
-endif
+clean: .FORCE
+	$(MAKE) -C CompilerSource/ clean
+	$(MAKE) -C CommandLine/emake/ clean
+	$(MAKE) -C CommandLine/libEGM/ clean
+	$(MAKE) -C CommandLine/testing/ clean
+	$(MAKE) -C shared/ clean
+	$(MAKE) -C shared/protos/ clean
+	$(MAKE) -C CommandLine/gm2egm/ clean
 
-CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
+all: libENIGMAShared libProtocols libEGM ENIGMA gm2egm emake emake-tests test-runner .FORCE
 
-ifeq ($(TESTS), TRUE)
-	TARGET=../../emake-tests$(SUFFIX)
-	SOURCES := $(call rwildcard, ../emake-tests,*.cpp)
-	LDFLAGS += -lpthread -lgtest_main -lgtest
-else
-	TARGET = ../../emake$(SUFFIX)
-	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
-endif
+Game: .FORCE
+	@$(RM) -f logs/enigma_compile.log
+	@$(MAKE) -C ENIGMAsystem/SHELL > >(tee -a /tmp/enigma_compile.log) 2> >(tee -a /tmp/enigma_compile.log >&2)
 
-include ../../Default.mk
+clean-game: .FORCE
+	$(MAKE) -C ENIGMAsystem/SHELL clean
+
+clean-protos: .FORCE
+	$(MAKE) -C shared/protos/ clean
+
+libpng-util: .FORCE
+	$(MAKE) -C shared/libpng-util/
+
+libENIGMAShared$(LIB_EXT): libENIGMAShared
+libENIGMAShared: .FORCE libProtocols$(LIB_EXT)
+	$(MAKE) -C shared/
+
+libProtocols$(LIB_EXT): libProtocols
+libProtocols: .FORCE
+	$(MAKE) -C shared/protos/
+
+libEGM$(LIB_EXT): libEGM
+libEGM: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
+	$(MAKE) -C CommandLine/libEGM/
+
+EMAKE_TARGETS = .FORCE ENIGMA libProtocols$(LIB_EXT) libEGM$(LIB_EXT)
+
+emake: $(EMAKE_TARGETS) $(LIB_PFX)compileEGMf$(LIB_EXT)
+	$(MAKE) -C CommandLine/emake/
+
+emake-tests: .FORCE libEGM$(LIB_EXT) $(LIB_PFX)compileEGMf$(LIB_EXT)
+	TESTS=TRUE $(MAKE) -C CommandLine/emake/
+
+gm2egm: libEGM$(LIB_EXT) .FORCE
+	$(MAKE) -C CommandLine/gm2egm/
+
+test-runner: emake .FORCE
+	$(MAKE) -C CommandLine/testing/
+
+required-directories: .FORCE
+	@mkdir -p "$(WORKDIR)"
+	@mkdir -p "$(CODEGEN)/Preprocessor_Environment_Editable/"
+
+.FORCE:
