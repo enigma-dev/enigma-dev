@@ -37,6 +37,7 @@
 #include "frontend.h"
 
 #if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY
+    #include <sys/types.h>
     #include <sys/user.h>
     #include <libutil.h>
     #if CURRENT_PLATFORM_ID == OS_DRAGONFLY
