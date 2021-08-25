@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 declare -A deps
 deps["lateralgm.jar"]="IsmAvatar/LateralGM"
