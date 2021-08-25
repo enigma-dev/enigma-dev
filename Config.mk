@@ -52,6 +52,7 @@ ifeq ($(OS), Darwin)
 	CXXFLAGS += -I/opt/local/include
 	CFLAGS   += -I/opt/local/include
 	LDFLAGS  += -L/opt/local/lib
+	LDFLIBS  += -L/opt/local/lib
 endif
 
 # FreeBSD include and lib folders
@@ -59,6 +60,7 @@ ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
+	LDFLIBS  += -L/usr/local/lib
 endif
 
 # DragonFlyBSD include and lib folders
@@ -66,6 +68,7 @@ ifeq ($(OS), DragonFly)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
+	LDFLIBS  += -L/usr/local/lib
 endif
 
 # These will be relative to the file that includes this Makefile
