@@ -20,7 +20,7 @@ DEPENDS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
 endif
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS) -L/usr/local/lib
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
 	rm -rf $(TARGET) $(OBJ_DIR)
