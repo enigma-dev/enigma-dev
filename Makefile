@@ -22,7 +22,7 @@ all: libENIGMAShared libProtocols libEGM ENIGMA gm2egm emake emake-tests test-ru
 
 Game: .FORCE
 	@$(RM) -f logs/enigma_compile.log
-	@$(MAKE) -C ENIGMAsystem/SHELL > >(tee -a /tmp/enigma_compile.log) 2> >(tee -a /tmp/enigma_compile.log >&2)
+	@$(MAKE) -C ENIGMAsystem/SHELL 2>&1 | tee /tmp/enigma_compile.log
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
