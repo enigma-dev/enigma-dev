@@ -169,7 +169,7 @@ jobs:
         displayName: 'Publish GitHub Release'
         inputs:
           gitHubConnection: github.com_EnigmaBot
-          repositoryName: enigma-dev/RadialGM
+          repositoryName: enigma-dev/enigma-dev
           action: create
           tagSource: manual
           tag: '$(releasetag)'
