@@ -11,6 +11,8 @@
 /coverage_*.info
 /libEGM.*
 /libProtocols.*
+/app
+/runtime
 
 /shared/protos/build/
 /shared/protos/codegen
@@ -34,6 +36,10 @@
 
 .DS_Store
 
+enigma-launch.bat
+enigma-update.bat
+msys-shell.bat
+LGM.ico
 ValgrindOut.xml
 output_log.txt
 hs_err_pid*.log

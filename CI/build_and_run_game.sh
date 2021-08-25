@@ -6,7 +6,7 @@ export LIBGL_ALWAYS_SOFTWARE=1
 
 if [ "$TEST_HARNESS" == true ]; then
   export ASAN_OPTIONS=detect_leaks=0;
-  ./ci-regression.sh "/tmp/enigma-master" 4
+  ./CI/ephemeral-x.sh -w openbox-session ./ci-regression.sh "/tmp/enigma-master" 4
 else
   for mode in "Debug" "Run"; 
   do
