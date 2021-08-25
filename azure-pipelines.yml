@@ -172,7 +172,7 @@ jobs:
           repositoryName: enigma-dev/enigma-dev
           action: create
           tagSource: manual
-          tag: '$(releasetag)'
+          tag: 'ENIGMA-$(Build.SourceVersion)'
           isDraft: false
           isPreRelease: false
           assetUploadMode: replace
