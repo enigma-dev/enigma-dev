@@ -1,7 +1,7 @@
 include Config.mk
 
 PATH := $(eTCpath)$(PATH)
-SHELL=/bin/bash
+SHELL=/bin/sh
 
 .PHONY: ENIGMA all clean Game clean-game clean-protos emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
 
