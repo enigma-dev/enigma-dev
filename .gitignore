@@ -13,18 +13,15 @@
 /libProtocols.*
 /app
 /runtime
-
 /shared/protos/build/
 /shared/protos/codegen
 /CommandLine/libEGM/build/
-
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 /ENIGMAsystem/SHELL/ENIGMAengine
 /ENIGMAsystem/SHELL/.objs
 /ENIGMAsystem/additional/
 /ENIGMAsystem/Additional/
-
 .deps
 .eobjs/
 /plugins/
@@ -33,7 +30,8 @@
 /CompilerSource/JDI/test/defines_linux.txt
 /CompilerSource/JDI/test/defines_mingw.txt
 /CompilerSource/stupidity-buffer/obj
-
+/ENIGMAsystem/SHELL/.vs/*
+/ENIGMAsystem/SHELL/.vscode/*
 .DS_Store
 
 enigma-launch.bat
@@ -44,7 +42,6 @@ ValgrindOut.xml
 output_log.txt
 hs_err_pid*.log
 *.stackdump
-
 *.a
 *.class
 *.o

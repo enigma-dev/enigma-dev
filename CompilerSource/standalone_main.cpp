@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
   obj.mainEventCount = 1;
   obj.mainEvents = &mev;
   obj.name = "obj_boobs";
-  obj.spriteId = obj.parentId = obj.maskId = -1;
+  obj.spriteId = obj.parentId = obj.maskId = obj.polygonId = -1;
 
   es.gmObjects = &obj;
   es.gmObjectCount = 1;

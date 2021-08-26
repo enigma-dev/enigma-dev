@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: Polygon
+Identifier: Polygon
+Represents: All
+Description: Collisions register using polygons to approximate sprites.
+Author: Nabeel Danish
+
+Represents:
+	Build-platforms: All

@@ -1,4 +1,4 @@
-# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/)[![Build Status](https://dev.azure.com/enigma-dev/ENIGMA/_apis/build/status/enigma-dev.enigma-dev?branchName=master)](https://dev.azure.com/enigma-dev/ENIGMA/_build/latest?definitionId=6&branchName=master) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
+# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![Build Status](https://dev.azure.com/enigma-dev/ENIGMA/_apis/build/status/enigma-dev.enigma-dev?branchName=master)](https://dev.azure.com/enigma-dev/ENIGMA/_build/latest?definitionId=6&branchName=master) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
 
 If you find our tools useful, then please consider supporting ENIGMA on Patreon!
 
