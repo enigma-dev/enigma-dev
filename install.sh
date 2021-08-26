@@ -30,10 +30,6 @@ fi
 lineCount=$(wc -l < ".deps")
 lineNum=1;
 
-
-  latest=$(get_latest "$1")
-  grab_latest "$1" "$latest" "$2"
-
 download_latest() {
 
   if [ "$lineCount" -lt "$lineNum" ]; then
