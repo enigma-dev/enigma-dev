@@ -1,10 +1,5 @@
 #!/bin/sh
 
-key0="enigma-dev/lgmplugin"
-key1="IsmAvatar/LateralGM"
-dep0="plugins/enigma.jar"
-dep1="lateralgm.jar"
-
 get_latest () {
   local release=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
   echo "$release"
@@ -28,11 +23,35 @@ else
   curl -L -o "plugins/shared/jna.jar" "$jnaJar"
 fi
 
+if [ ! -f ".deps" ]; then
+  touch ".deps"
+fi
+
+lineCount=$(wc -l < ".deps")
+lineNum=1;
+
+
+  latest=$(get_latest "$1")
+  grab_latest "$1" "$latest" "$2"
+
 download_latest() {
-  latest0=$(get_latest "$key0")
-  grab_latest "$key0" "$latest0" "$dep0"
-  latest1=$(get_latest "$key1")
-  grab_latest "$key1" "$latest1" "$dep1"
+
+  if [ "$lineCount" -lt "$lineNum" ]; then
+    echo "$2 $latest" >> ".deps"
+    grab_latest "$1" "$latest" "$2"
+  else
+    line=$(sed -n ${lineNum}p < ".deps")
+     if [ "$line" != "$latest" ]; then
+       grab_latest "$1" "$latest" "$2"
+       sed -i "${lineNum}s/.*/${latest}/" ".deps"
+     else
+       echo -e "$2 \e[32mAlready up to date, skipping...\e[0m"
+     fi
+  fi
+
+  lineNum=$(($lineNum+1))
+
 }
 
-download_latest
+download_latest "enigma-dev/lgmplugin" "plugins/enigma.jar"
+download_latest "IsmAvatar/LateralGM" "lateralgm.jar"
