@@ -23,34 +23,9 @@ else
   curl -L -o "plugins/shared/jna.jar" "$jnaJar"
 fi
 
-if [ ! -f ".deps" ]; then
-  touch ".deps"
-fi
-
-lineCount=$(wc -l < ".deps")
-lineNum=1;
-
-
+download_latest() {
   latest=$(get_latest "$1")
   grab_latest "$1" "$latest" "$2"
-
-download_latest() {
-
-  if [ "$lineCount" -lt "$lineNum" ]; then
-    echo "$2 $latest" >> ".deps"
-    grab_latest "$1" "$latest" "$2"
-  else
-    line=$(sed -n ${lineNum}p < ".deps")
-     if [ "$line" != "$latest" ]; then
-       grab_latest "$1" "$latest" "$2"
-       sed -i "${lineNum}s/.*/${latest}/" ".deps"
-     else
-       echo -e "$2 \e[32mAlready up to date, skipping...\e[0m"
-     fi
-  fi
-
-  lineNum=$(($lineNum+1))
-
 }
 
 download_latest "enigma-dev/lgmplugin" "plugins/enigma.jar"
