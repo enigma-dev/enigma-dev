@@ -30,7 +30,6 @@
 #include <stdlib.h>  //getenv and system
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <time.h>  //clock
 #include <unistd.h>
 #include <cstdlib>
 #include <map>

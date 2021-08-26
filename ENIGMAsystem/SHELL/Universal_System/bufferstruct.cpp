@@ -21,6 +21,7 @@
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -234,6 +235,17 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
     }
   }
 }
+  
+void *buffer_get_address(int buffer) {
+  #ifdef DEBUG_MODE
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
+    return nullptr;
+  }
+  #endif
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
+  return reinterpret_cast<void *>(binbuff->data.data());
+}
 
 unsigned buffer_get_size(int buffer) {
   get_bufferr(binbuff, buffer, -1);
@@ -250,10 +262,21 @@ int buffer_get_type(int buffer) {
   return binbuff->type;
 }
 
-//NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
+}
+
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  int tex = surface_get_texture(surface);
+  int wid = surface_get_width(surface);
+  int hgt = surface_get_height(surface);
+  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
+    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
+  } else { // execution can not continue safely with wrong buffer size
+    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
+  }
 }
 
 void buffer_resize(int buffer, unsigned size) {

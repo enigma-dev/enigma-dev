@@ -69,15 +69,6 @@ static string add_escaping(string str, bool is_caption, string new_caption) {
   return result;
 }
 
-static string remove_trailing_zeros(double numb) {
-  string strnumb = std::to_string(numb);
-
-  while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
-    strnumb.pop_back();
-
-  return strnumb;
-}
-
 static string kdialog_filter(string input) {
   std::vector<string> stringVec = split_string(input, '|');
   string string_output = " '";
