@@ -1,10 +1,5 @@
 #!/bin/sh
 
-key0="enigma-dev/lgmplugin"
-key1="IsmAvatar/LateralGM"
-dep0="plugins/enigma.jar"
-dep1="lateralgm.jar"
-
 get_latest () {
   local release=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
   echo "$release"
@@ -29,10 +24,9 @@ else
 fi
 
 download_latest() {
-  latest0=$(get_latest "$key0")
-  grab_latest "$key0" "$latest0" "$dep0"
-  latest1=$(get_latest "$key1")
-  grab_latest "$key1" "$latest1" "$dep1"
+  latest0=$(get_latest "$1")
+  grab_latest "$1" "$latest0" "$2"
 }
 
-download_latest
+download_latest "enigma-dev/lgmplugin" "plugins/enigma.jar"
+download_latest "IsmAvatar/LateralGM" "lateralgm.jar"
