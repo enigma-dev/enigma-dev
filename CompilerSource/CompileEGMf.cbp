@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="compileEGMf" />
+		<Option makefile="makefile" />
+		<Option pch_mode="2" />
+		<Option default_target="StandAlone" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Test/;" />
+		<Build>
+			<Target title="WinRelease">
+				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/WinRelease" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="-jar lgm16b4.jar" />
+				<Option host_application="java" />
+				<Option run_host_application_in_terminal="0" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-DBUILD_DLL" />
+					<Add directory="C:/Users/Owner/Documents/GitHub/enigma-dev/CompilerSource/" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="WinDebug">
+				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/WinDebug" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="-jar lgm16b4.jar" />
+				<Option host_application="java" />
+				<Option run_host_application_in_terminal="0" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DBUILD_DLL" />
+				</Compiler>
+			</Target>
+			<Target title="Release-Linux">
+				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/LinRelease" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
+				<Option host_application="xterm" />
+				<Option run_host_application_in_terminal="0" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Debug-Linux">
+				<Option output="../compileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/LinDebug" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
+				<Option host_application="xterm" />
+				<Option run_host_application_in_terminal="0" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+				</Compiler>
+			</Target>
+			<Target title="StandAlone">
+				<Option output="bin/exec/CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/StandAlone" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-std=c++1z" />
+					<Add option="-g" />
+					<Add option="-DENIGMA_PARSERS_DEBUG" />
+					<Add option="-DNOT_A_DLL" />
+				</Compiler>
+			</Target>
+			<Target title="StandAloneND">
+				<Option output="bin/exec/CompileEGMf" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../" />
+				<Option object_output=".objs/StandAloneND" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-DNOT_A_DLL" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Winit-self" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wcast-align" />
+			<Add option="-Wundef" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wmissing-declarations" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wswitch-enum" />
+			<Add option="-Wswitch-default" />
+			<Add option="-Wmain" />
+			<Add option="-pedantic" />
+			<Add option="-Wextra" />
+			<Add option="-Wall" />
+			<Add directory="." />
+			<Add directory="./JDI/src" />
+			<Add directory="../shared/" />
+			<Add directory="../shared/protos/.eobjs" />
+		</Compiler>
+		<Unit filename="../shared/ProtoYaml/proto-yaml.cpp" />
+		<Unit filename="../shared/ProtoYaml/proto-yaml.h" />
+		<Unit filename="../shared/event_reader/event_parser.cpp" />
+		<Unit filename="../shared/event_reader/event_parser.h" />
+		<Unit filename="../shared/event_reader/events.res" />
+		<Unit filename="../shared/eyaml/Makefile" />
+		<Unit filename="../shared/eyaml/eyaml.cpp" />
+		<Unit filename="../shared/eyaml/eyaml.h" />
+		<Unit filename="../shared/libpng-util/libpng-util.cpp" />
+		<Unit filename="../shared/libpng-util/libpng-util.h" />
+		<Unit filename="../shared/proto_util.h" />
+		<Unit filename="../shared/protos/Action.proto" />
+		<Unit filename="../shared/protos/Background.proto" />
+		<Unit filename="../shared/protos/Configuration/EventDescriptor.proto" />
+		<Unit filename="../shared/protos/Font.proto" />
+		<Unit filename="../shared/protos/GameInformation.proto" />
+		<Unit filename="../shared/protos/Include.proto" />
+		<Unit filename="../shared/protos/Object.proto" />
+		<Unit filename="../shared/protos/Path.proto" />
+		<Unit filename="../shared/protos/Room.proto" />
+		<Unit filename="../shared/protos/Script.proto" />
+		<Unit filename="../shared/protos/Settings.proto" />
+		<Unit filename="../shared/protos/Shader.proto" />
+		<Unit filename="../shared/protos/Sound.proto" />
+		<Unit filename="../shared/protos/Sprite.proto" />
+		<Unit filename="../shared/protos/Polygon.proto"/>
+		<Unit filename="../shared/protos/Timeline.proto" />
+		<Unit filename="../shared/protos/compiler.proto" />
+		<Unit filename="../shared/protos/game.proto" />
+		<Unit filename="../shared/protos/options.proto" />
+		<Unit filename="../shared/protos/project.proto" />
+		<Unit filename="../shared/protos/server.proto" />
+		<Unit filename="../shared/protos/treenode.proto" />
+		<Unit filename="../shared/rectpacker/rectpack.cpp" />
+		<Unit filename="../shared/rectpacker/rectpack.h" />
+		<Unit filename="../shared/strings_util.h" />
+		<Unit filename="JDI/src/API/AST.cpp" />
+		<Unit filename="JDI/src/API/AST.h" />
+		<Unit filename="JDI/src/API/AST_Export.cpp" />
+		<Unit filename="JDI/src/API/compile_settings.h" />
+		<Unit filename="JDI/src/API/context.cpp" />
+		<Unit filename="JDI/src/API/context.h" />
+		<Unit filename="JDI/src/API/error_reporting.cpp" />
+		<Unit filename="JDI/src/API/error_reporting.h" />
+		<Unit filename="JDI/src/API/jdi.cpp" />
+		<Unit filename="JDI/src/API/jdi.h" />
+		<Unit filename="JDI/src/API/lexer_interface.cpp" />
+		<Unit filename="JDI/src/API/lexer_interface.h" />
+		<Unit filename="JDI/src/API/parse_config.h" />
+		<Unit filename="JDI/src/API/user_tokens.cpp" />
+		<Unit filename="JDI/src/API/user_tokens.h" />
+		<Unit filename="JDI/src/General/debug_macros.cpp" />
+		<Unit filename="JDI/src/General/debug_macros.h" />
+		<Unit filename="JDI/src/General/llreader.cpp" />
+		<Unit filename="JDI/src/General/llreader.h" />
+		<Unit filename="JDI/src/General/parse_basics.cpp" />
+		<Unit filename="JDI/src/General/parse_basics.h" />
+		<Unit filename="JDI/src/General/quickreference.h" />
+		<Unit filename="JDI/src/General/quickstack.h" />
+		<Unit filename="JDI/src/General/quickvector.h" />
+		<Unit filename="JDI/src/General/svg_simple.cpp" />
+		<Unit filename="JDI/src/General/svg_simple.h" />
+		<Unit filename="JDI/src/Parser/base.cpp" />
+		<Unit filename="JDI/src/Parser/bodies.h" />
+		<Unit filename="JDI/src/Parser/handlers/handle_class.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_declarators.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_enum.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_function_impl.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_function_impl.h" />
+		<Unit filename="JDI/src/Parser/handlers/handle_hypothetical.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_namespace.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_scope.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_templates.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_union.cpp" />
+		<Unit filename="JDI/src/Parser/parse_context.cpp" />
+		<Unit filename="JDI/src/Parser/parse_context.h" />
+		<Unit filename="JDI/src/Parser/readers/read_expression.cpp" />
+		<Unit filename="JDI/src/Parser/readers/read_next_token.cpp" />
+		<Unit filename="JDI/src/Parser/readers/read_operatorkw_name.cpp" />
+		<Unit filename="JDI/src/Parser/readers/read_qualified_definition.cpp" />
+		<Unit filename="JDI/src/Parser/readers/read_template_parameters.cpp" />
+		<Unit filename="JDI/src/Parser/readers/read_type.cpp" />
+		<Unit filename="JDI/src/Storage/definition.cpp" />
+		<Unit filename="JDI/src/Storage/definition.h" />
+		<Unit filename="JDI/src/Storage/full_type.cpp" />
+		<Unit filename="JDI/src/Storage/full_type.h" />
+		<Unit filename="JDI/src/Storage/references.cpp" />
+		<Unit filename="JDI/src/Storage/references.h" />
+		<Unit filename="JDI/src/Storage/value.cpp" />
+		<Unit filename="JDI/src/Storage/value.h" />
+		<Unit filename="JDI/src/Storage/value_funcs.cpp" />
+		<Unit filename="JDI/src/Storage/value_funcs.h" />
+		<Unit filename="JDI/src/System/builtins.cpp" />
+		<Unit filename="JDI/src/System/builtins.h" />
+		<Unit filename="JDI/src/System/lex_buffer.cpp" />
+		<Unit filename="JDI/src/System/lex_buffer.h" />
+		<Unit filename="JDI/src/System/lex_cpp.cpp" />
+		<Unit filename="JDI/src/System/lex_cpp.h" />
+		<Unit filename="JDI/src/System/macros.cpp" />
+		<Unit filename="JDI/src/System/macros.h" />
+		<Unit filename="JDI/src/System/symbols.cpp" />
+		<Unit filename="JDI/src/System/symbols.h" />
+		<Unit filename="JDI/src/System/token.cpp" />
+		<Unit filename="JDI/src/System/token.h" />
+		<Unit filename="JDI/src/System/type_usage_flags.h" />
+		<Unit filename="JDI/src/User/token_cases.h" />
+		<Unit filename="JDI/src/User/token_types.h" />
+		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="backend/EnigmaCallbacks.h" />
+		<Unit filename="backend/EnigmaStruct.h" />
+		<Unit filename="backend/JavaCallbacks.cpp" />
+		<Unit filename="backend/JavaCallbacks.h" />
+		<Unit filename="backend/JavaStruct.h" />
+		<Unit filename="backend/ideprint.cpp" />
+		<Unit filename="backend/ideprint.h" />
+		<Unit filename="backend/other/Constant.h" />
+		<Unit filename="backend/other/Extension.h" />
+		<Unit filename="backend/other/Include.h" />
+		<Unit filename="backend/other/Trigger.h" />
+		<Unit filename="backend/resources/Background.h" />
+		<Unit filename="backend/resources/EnigmaSettings.h" />
+		<Unit filename="backend/resources/Font.h" />
+		<Unit filename="backend/resources/GameInformation.h" />
+		<Unit filename="backend/resources/GameSettings.h" />
+		<Unit filename="backend/resources/GmObject.h" />
+		<Unit filename="backend/resources/Path.h" />
+		<Unit filename="backend/resources/Room.h" />
+		<Unit filename="backend/resources/Script.h" />
+		<Unit filename="backend/resources/Shader.h" />
+		<Unit filename="backend/resources/Sound.h" />
+		<Unit filename="backend/resources/Sprite.h" />
+		<Unit filename="backend/resources/Polygon.h"/>
+		<Unit filename="backend/resources/Timeline.h" />
+		<Unit filename="backend/resources/Whitespace.h" />
+		<Unit filename="backend/sub/Action.h" />
+		<Unit filename="backend/sub/BackgroundDef.h" />
+		<Unit filename="backend/sub/Event.h" />
+		<Unit filename="backend/sub/Glyph.h" />
+		<Unit filename="backend/sub/GlyphRange.h" />
+		<Unit filename="backend/sub/Instance.h" />
+		<Unit filename="backend/sub/MainEvent.h" />
+		<Unit filename="backend/sub/Moment.h" />
+		<Unit filename="backend/sub/PathPoint.h" />
+		<Unit filename="backend/sub/SubImage.h" />
+		<Unit filename="backend/sub/Tile.h" />
+		<Unit filename="backend/sub/View.h" />
+		<Unit filename="backend/util/Image.h" />
+		<Unit filename="backend/util/Point.h" />
+		<Unit filename="backend/util/Polygon.h" />
+		<Unit filename="compiler/compile.cpp" />
+		<Unit filename="compiler/compile_common.cpp" />
+		<Unit filename="compiler/compile_common.h" />
+		<Unit filename="compiler/compile_includes.h" />
+		<Unit filename="compiler/compile_organization.h" />
+		<Unit filename="compiler/components/components.h" />
+		<Unit filename="compiler/components/handle_templates.cpp" />
+		<Unit filename="compiler/components/module_write_backgrounds.cpp" />
+		<Unit filename="compiler/components/module_write_fonts.cpp" />
+		<Unit filename="compiler/components/module_write_paths.cpp" />
+		<Unit filename="compiler/components/module_write_sounds.cpp" />
+		<Unit filename="compiler/components/module_write_sprites.cpp" />
+		<Unit filename="compiler/components/parse_and_link.cpp" />
+		<Unit filename="compiler/components/parse_secondary.cpp" />
+		<Unit filename="compiler/components/write_defragged_events.cpp" />
+		<Unit filename="compiler/components/write_event_code.cpp" />
+		<Unit filename="compiler/components/write_font_info.cpp" />
+		<Unit filename="compiler/components/write_globals.cpp" />
+		<Unit filename="compiler/components/write_object_access.cpp" />
+		<Unit filename="compiler/components/write_object_data.cpp" />
+		<Unit filename="compiler/components/write_room_data.cpp" />
+		<Unit filename="compiler/components/write_shader_data.cpp" />
+		<Unit filename="compiler/event_ids.h" />
+		<Unit filename="compiler/event_reader/event_parser.cpp" />
+		<Unit filename="compiler/event_reader/event_parser.h" />
+		<Unit filename="compiler/jdi_utility.cpp" />
+		<Unit filename="compiler/jdi_utility.h" />
+		<Unit filename="compiler/license_string.h" />
+		<Unit filename="compiler/output_locals.cpp" />
+		<Unit filename="compiler/output_locals.h" />
+		<Unit filename="compiler/pcs/pcs.cpp" />
+		<Unit filename="compiler/pcs/pcs.h" />
+		<Unit filename="compiler/reshandlers/rectpack.cpp" />
+		<Unit filename="compiler/reshandlers/rectpack.h" />
+		<Unit filename="compiler/reshandlers/refont.cpp" />
+		<Unit filename="compiler/reshandlers/refont.h" />
+		<Unit filename="config.h" />
+		<Unit filename="filesystem/file_find.cpp" />
+		<Unit filename="filesystem/file_find.h" />
+		<Unit filename="frontend.cpp" />
+		<Unit filename="frontend.h" />
+		<Unit filename="gcc_interface/gcc_backend.cpp" />
+		<Unit filename="gcc_interface/gcc_backend.h" />
+		<Unit filename="general/bettersystem.cpp" />
+		<Unit filename="general/bettersystem.h" />
+		<Unit filename="general/darray.cpp" />
+		<Unit filename="darray.h" />
+		<Unit filename="general/estring.h" />
+		<Unit filename="general/implicit_stack.h" />
+		<Unit filename="general/macro_integration.cpp" />
+		<Unit filename="general/macro_integration.h" />
+		<Unit filename="general/parse_basics_old.h" />
+		<Unit filename="general/string.cpp" />
+		<Unit filename="general/textfile.h" />
+		<Unit filename="languages/lang_CPP.cpp" />
+		<Unit filename="languages/lang_CPP.h" />
+		<Unit filename="languages/language_adapter.cpp" />
+		<Unit filename="languages/language_adapter.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="main.h" />
+		<Unit filename="makedir.cpp" />
+		<Unit filename="makedir.h" />
+		<Unit filename="parser/collect_variables.cpp" />
+		<Unit filename="parser/collect_variables.h" />
+		<Unit filename="parser/object_storage.cpp" />
+		<Unit filename="parser/object_storage.h" />
+		<Unit filename="parser/parser.cpp" />
+		<Unit filename="parser/parser.h" />
+		<Unit filename="parser/parser_components.cpp" />
+		<Unit filename="parser/parser_components.h" />
+		<Unit filename="settings-parse/crawler.cpp" />
+		<Unit filename="settings-parse/crawler.h" />
+		<Unit filename="settings-parse/eyaml.cpp" />
+		<Unit filename="settings-parse/eyaml.h" />
+		<Unit filename="settings-parse/parse_ide_settings.cpp" />
+		<Unit filename="settings-parse/parse_ide_settings.h" />
+		<Unit filename="settings.cpp" />
+		<Unit filename="settings.h" />
+		<Unit filename="standalone_main.cpp">
+			<Option target="StandAlone" />
+			<Option target="StandAloneND" />
+		</Unit>
+		<Unit filename="syntax/syncheck.h" />
+		<Unit filename="syntax/syntax.cpp" />
+		<Unit filename="syntax/syntaxtools.h" />
+		<Unit filename="test_gml.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<debugger>
+				<remote_debugging target="WinDebug">
+					<options conn_type="0" serial_baud="115200" additional_cmds_before="-s syntax.txt" />
+				</remote_debugging>
+			</debugger>
+			<envvars />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
