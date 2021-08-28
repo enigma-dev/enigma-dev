@@ -304,6 +304,7 @@ jobs:
     OUTPUT: /tmp/test-android-game.apk
     ANDROID_API_LEVEL: 29 
     ANDROID_BUILD_TOOLS_VERSION: 29.0.3
+    ANDROID_NDK_VERSION: 23.0.7599858
   pool:
     vmImage: 'ubuntu-20.04'
 
@@ -312,7 +313,7 @@ jobs:
       persistCredentials: true
       path: enigma-dev
       
-    - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;22.0.6917172"
+    - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;23.0.7599858"
       displayName: 'Install Android Dependencies'
       
     - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
