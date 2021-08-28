@@ -295,7 +295,7 @@ jobs:
     COMPILER: Android 
     GRAPHICS: OpenGLES2 
     PLATFORM: SDL
-    MODE: Debug
+    MODE: Compile
     AUDIO: SDL
     COLLISION: None 
     NETWORK: None 
