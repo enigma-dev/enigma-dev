@@ -24,6 +24,7 @@
 #include "language_frontend.h"
 #include "settings.h"
 
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <string>
