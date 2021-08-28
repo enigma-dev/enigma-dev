@@ -220,7 +220,7 @@ void d3d_stencil_clear() {
 }
 
 void d3d_enable_scissor_test(bool enable) {
-  enigma_user::DEBUG_MESSAGE("d3d_enable_scissor_test is not implemented yet",MESSAGE_TYPE::M_WARNING);
+  DEBUG_MESSAGE("d3d_enable_scissor_test is not implemented yet",MESSAGE_TYPE::M_WARNING);
 }   
 
 } // namespace enigma_user
