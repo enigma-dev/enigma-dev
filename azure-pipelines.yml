@@ -74,6 +74,9 @@ jobs:
     - checkout: self
       persistCredentials: true
       path: enigma-dev
+     
+    - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+      displayName: 'Clone Android Repo'
 
     - script: |
         (robocopy $(Build.SourcesDirectory) C:\enigma-dev /COPYALL /E) ^& IF %ERRORLEVEL% LEQ 1 exit 0
