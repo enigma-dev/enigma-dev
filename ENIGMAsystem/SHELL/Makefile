@@ -12,6 +12,7 @@ ENIGMA_ROOT := ../../
 
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
+	CXXFLAGS += -fPIC
 	MAKE_TARGETS += android_game
 	BASENAME := $(shell basename $(OUTPUTNAME))
 	ifeq ($(GMODE), Compile)
