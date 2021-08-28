@@ -74,9 +74,15 @@ ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	override LDFLAGS += -flto -s -O3
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -s -O3
+	
+	ifneq ($(TARGET-PLATFORM), Android)
+		override CXXFLAGS += -flto
+		override CFLAGS += -flto
+		override LDFLAGS += -flto
+	endif
 
 	# Disable PIE when possible
 	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
