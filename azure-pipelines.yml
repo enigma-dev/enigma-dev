@@ -60,125 +60,7 @@ jobs:
         _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
         _CODECOV_UPLOAD_TOKEN: $(codecov_upload_token)
       displayName: Run Test Harness
-
-- job: Windows
-  displayName: 'Windows'
-  pool:
-    vmImage: 'windows-latest'
-  timeoutInMinutes: 360
-  variables:
-    COMPILER: gcc
-    OUTPUT: /tmp/test.exe
-
-  steps:
-    - checkout: self
-      persistCredentials: true
-      path: enigma-dev
-
-    - script: |
-        (robocopy $(Build.SourcesDirectory) C:\enigma-dev /COPYALL /E) ^& IF %ERRORLEVEL% LEQ 1 exit 0
-      displayName: 'Stage ENIGMA'
-    
-    - script: |
-        C:\enigma-dev\enigma_bootstrap.bat
-      displayName: 'Bootstrap ENIGMA Install'
-
-    - script: |
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
-      displayName: 'Run Mode'
-      workingDirectory: C:\enigma-dev
-      env:
-        MODE: Run
-        PLATFORM: Win32
-        GRAPHICS: Direct3D9
-        AUDIO: None
-        COLLISION: None
-        NETWORK: None
-        WIDGETS: None
-        EXTENSIONS: "None"
-
-    - script: |
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
-      displayName: 'Compile Mode'
-      workingDirectory: C:\enigma-dev
-      env:
-        MODE: Compile
-        PLATFORM: Win32
-        GRAPHICS: Direct3D9
-        AUDIO: None
-        COLLISION: None
-        NETWORK: None
-        WIDGETS: None
-        EXTENSIONS: "None"
-
-    - script: |
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
-      displayName: 'Windows APIs & Extensions'
-      workingDirectory: C:\enigma-dev
-      env:
-        GRAPHICS: Direct3D11 
-        AUDIO: DirectSound
-        WIDGETS: Win32 
-        EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,ExternalFuncs"
-        PLATFORM: Win32
-        MODE: Debug
-        COLLISION: None
-        NETWORK: None
-
-    - script: |
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
-      displayName: 'OpenGL1 & OpenAL'
-      workingDirectory: C:\enigma-dev
-      env:
-        GRAPHICS: OpenGL1 
-        AUDIO: OpenAL
-        PLATFORM: Win32
-        MODE: Debug
-        COLLISION: None
-        NETWORK: None
-        WIDGETS: None
-        EXTENSIONS: "None"
-
-    - script: |
-        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=SDL; ./ci-build.sh && ./share_logs.sh"
-      displayName: 'OpenGLES & SDL'
-      workingDirectory: C:\enigma-dev
-      env:
-        GRAPHICS: OpenGLES3
-        PLATFORM: Win32
-        MODE: Debug
-        AUDIO: None
-        COLLISION: None
-        NETWORK: None
-        WIDGETS: None
-        EXTENSIONS: "None"
-
-    - script: |
-        cmd /c C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "rm -rf /tmp/*"
-        "%TMP%\nsis-binary-7208-3\Bin\makensis" /V4 "C:/enigma-dev/enigma.nsi"
-      displayName: 'Build Installer'
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Push Build Artifacts'
-      inputs:
-        pathtoPublish: 'C:\Windows\Temp\ENIGMA-installer.exe'
-        artifactName: ENIGMA-installer
-
-    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-      - task: GithubRelease@0 
-        displayName: 'Publish GitHub Release'
-        inputs:
-          gitHubConnection: github.com_EnigmaBot
-          repositoryName: enigma-dev/enigma-dev
-          action: create
-          tagSource: manual
-          tag: 'ENIGMA-$(Build.SourceVersion)'
-          isDraft: false
-          isPreRelease: false
-          assetUploadMode: replace
-          assets: |
-            C:\Windows\Temp\ENIGMA-installer.exe
-
+      
 - job: CrossCompile
   displayName: 'Cross Compile'
   pool:
@@ -230,19 +112,16 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
+        cp enigma-dev/CI/mirrorlist* /etc/pacman.d/
         cp enigma-dev/CI/asound.conf /etc/asound.conf
         echo "[multilib]
               Include = /etc/pacman.d/mirrorlist
               [mingw32]
-              Server = http://mirrors.enigma-dev.org/mingw/mingw32/
+              Include = /etc/pacman.d/mirrorlist.mingw32
               [mingw64]
-              Server = http://mirrors.enigma-dev.org/mingw/mingw64/
-              [ucrt64]
-              Server = http://mirrors.enigma-dev.org/mingw/ucrt64/
-              [clang64]
-              Server = http://mirrors.enigma-dev.org/mingw/clang64/
+              Include = /etc/pacman.d/mirrorlist.mingw64
               [msys]
-              Server = http://mirrors.enigma-dev.org/msys/x86_64/"  >> /etc/pacman.conf
+              Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
         curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
         curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
         pacman-key --populate msys2

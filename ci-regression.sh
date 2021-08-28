@@ -2,6 +2,14 @@
 
 set -e  # exit if any command fails
 
+if [[ "$TRAVIS" -eq "true" ]]; then
+  export DISPLAY=:99.0
+  Xvfb :99 -s "-screen 0 1024x768x24" &
+  openbox-session &
+  sleep 5
+  # We need a wm for these tests
+fi
+
 if [ -z "$1" ]; then
   echo "No directory specified to check out master for regression tests."
   echo "Aborting!"

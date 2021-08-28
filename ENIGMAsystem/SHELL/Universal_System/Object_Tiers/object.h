@@ -2,7 +2,6 @@
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
-**  Copyright (C) 2021 Nabeel Danish                                            **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -85,7 +84,6 @@ namespace enigma
     struct objectstruct
     {
         int sprite;
-        int polygon;
         bool solid, visible;
         double depth;
         bool persistent;
@@ -98,26 +96,21 @@ namespace enigma
 }
 
 namespace enigma_user {
-    bool object_exists(int objid);
-    
-    void object_set_depth(int objid, int val);
-    void object_set_mask(int objid, int val);
-    void object_set_persistent(int objid, bool val);
-    void object_set_solid(int objid, bool val);
-    void object_set_sprite(int objid, int val);
-    void object_set_polygon(int objid, int val);
-    void object_set_visible(int objid, bool val);
-    
-    int object_get_depth(int objid);
-    int object_get_mask(int objid);
-    int object_get_parent(int objid);
-    bool object_get_persistent(int objid);
-    bool object_get_solid(int objid);
-    int object_get_sprite(int objid);
-    int object_get_polygon(int objid);
-    bool object_get_visible(int objid);
-    
-    bool object_is_ancestor(int objid, int acid);
+bool object_exists(int objid);
+void object_set_depth(int objid, int val);
+void object_set_mask(int objid, int val);
+void object_set_persistent(int objid, bool val);
+void object_set_solid(int objid, bool val);
+void object_set_sprite(int objid, int val);
+void object_set_visible(int objid, bool val);
+int object_get_depth(int objid);
+int object_get_mask(int objid);
+int object_get_parent(int objid);
+bool object_get_persistent(int objid);
+bool object_get_solid(int objid);
+int object_get_sprite(int objid);
+bool object_get_visible(int objid);
+bool object_is_ancestor(int objid, int acid);
 }
 
 #endif // ENIGMA_OBJECT_H

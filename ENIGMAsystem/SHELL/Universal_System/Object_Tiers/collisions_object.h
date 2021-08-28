@@ -1,7 +1,6 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2021 Nabeel Danish                                            **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -41,14 +40,9 @@ namespace enigma
 {
   struct object_collisions: object_transform
   {
-    // Bit Mask
-      int mask_index;
+    //Bit Mask
+      int  mask_index;
       bool solid;
-
-    // Polygon related attributes
-    int polygon_index;
-    gs_scalar polygon_xscale, polygon_yscale;
-    gs_scalar polygon_angle;
 
     //Bounding box
       #ifdef JUST_DEFINE_IT_RUN
@@ -65,7 +59,7 @@ namespace enigma
         #define bbox_top    $bbox_top()
         #define bbox_bottom $bbox_bottom()
       #endif
-      
+
     //Constructors
       object_collisions();
       object_collisions(unsigned, int);
