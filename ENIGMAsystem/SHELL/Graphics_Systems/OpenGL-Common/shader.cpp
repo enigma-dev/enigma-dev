@@ -179,6 +179,7 @@ uniform bool en_LightingEnabled;
 uniform bool en_VS_FogEnabled;
 uniform float en_FogStart;
 uniform float en_RcpFogRange;
+uniform vec4 en_FogColor;
 
 uniform vec4 en_BoundColor;
 
@@ -237,6 +238,12 @@ vec4 phongModel( in vec3 norm, in vec4 position )
   return total_light;
 }
 
+float linearstep(float A, float B, float X) {
+  float t = (X - A) / (B - A);
+
+  return t;
+}
+
 void main()
 {
   vec4 iColor = en_BoundColor;
@@ -251,30 +258,55 @@ void main()
   }else{
     v_Color = iColor;
   }
+
+  if (en_VS_FogEnabled == true) {
+    vec4 eyePosition = (modelViewMatrix * vec4(in_Position.xyz, 1.0));
+    float fogAmount = linearstep(en_FogStart, en_RcpFogRange, abs(eyePosition.z));
+    v_Color = mix(v_Color, en_FogColor, fogAmount);
+  }
+
   gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);
 
   v_TextureCoord = in_TextureCoord;
 }
             )CODE";
   }
+
   string getDefaultFragmentShader() {
     std::string returnstring = R"CODE(
     in vec2 v_TextureCoord;
     in vec4 v_Color;
     out vec4 out_FragColor;
+    
+    uniform bool en_PS_FogEnabled;
+    uniform float en_FogStart;
+    uniform float en_RcpFogRange;
+    uniform vec4 en_FogColor;
+
+    float linearstep(float A, float B, float X) {
+      float t = (X - A) / (B - A);
+
+      return t;
+    }
+    
     void main() {
       vec4 TexColor;
       if (en_TexturingEnabled == true) {
         )CODE";
-        returnstring += enigma::texColorString;
-        returnstring += R"CODE(
-        } else {
-          TexColor = v_Color;
-        }
-        if (en_AlphaTestEnabled == true) {
-          if (TexColor.a<=en_AlphaTestValue) discard;
-        }
-        out_FragColor = TexColor;
+    returnstring += enigma::texColorString;
+    returnstring += R"CODE(
+      } else {
+        TexColor = v_Color;
+      }
+      if (en_AlphaTestEnabled == true) {
+        if (TexColor.a<=en_AlphaTestValue) discard;
+      }
+      if (en_PS_FogEnabled == true) {
+        float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
+        float fogAmount = linearstep(en_FogStart, en_RcpFogRange, fogDistance);
+        TexColor = mix(TexColor, en_FogColor, fogAmount);
+      }
+      out_FragColor = TexColor;
     }
     )CODE";
     return returnstring;
@@ -374,6 +406,11 @@ void main()
     shaderprograms[prog_id]->uni_textureEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
     shaderprograms[prog_id]->uni_colorEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_ColorEnabled");
     shaderprograms[prog_id]->uni_lightEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_LightingEnabled");
+    shaderprograms[prog_id]->uni_fogVSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_VS_FogEnabled");
+    shaderprograms[prog_id]->uni_fogPSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_PS_FogEnabled");
+    shaderprograms[prog_id]->uni_fogColor = enigma_user::glsl_get_uniform_location(prog_id, "en_FogColor");
+    shaderprograms[prog_id]->uni_fogStart = enigma_user::glsl_get_uniform_location(prog_id, "en_FogStart");
+    shaderprograms[prog_id]->uni_fogRange = enigma_user::glsl_get_uniform_location(prog_id, "en_RcpFogRange");
     shaderprograms[prog_id]->uni_alphaTestEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestEnabled");
 
     shaderprograms[prog_id]->uni_alphaTest = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestValue");

@@ -23,6 +23,9 @@ endif
 ifeq ($(OS), FreeBSD)
 	LDFLAGS += -lc -lutil
 endif
+ifeq ($(OS), DragonFly)
+	LDFLAGS += -lc -lutil -lkvm
+endif
 SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,.,*.cpp))
 
 include ../Default.mk
