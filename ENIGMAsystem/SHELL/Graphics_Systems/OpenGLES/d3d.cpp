@@ -6,7 +6,6 @@
 #include <string>
 
 namespace enigma {
-  std::string texColorString = "TexColor.bgra = texture( en_TexSampler, v_TextureCoord.st ).rgba * v_Color;";
 void graphics_state_flush_samplers() {
   for (int i = 0; i < 8; ++i) {
     const Sampler& sampler = samplers[i];
