@@ -22,4 +22,3 @@
 #include "GSstdraw.h"
 #include "actions.h"
 #include "texture_atlas.h"
-#include "GSpolygon.h"

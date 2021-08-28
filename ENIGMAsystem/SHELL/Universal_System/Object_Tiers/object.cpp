@@ -32,13 +32,12 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include "Universal_System/Resources/AssetArray.h"
 
 namespace enigma
 {
     extern int maxid;
-    AssetArray<objectstruct*> objectdata;
-    int id_current = 0;
+    objectstruct** objectdata;
+    int id_current =0;
 
     #ifdef DEBUG_MODE
       using enigma_user::show_error;
@@ -83,7 +82,7 @@ namespace enigma
 
     void objectdata_load()
     {
-        objectdata.resize(object_idmax);
+        objectdata = new objectstruct*[object_idmax];
         for (int i = 0; i < objectcount; i++)
             objectdata[objs[i].id] = &objs[i];
     }
@@ -139,12 +138,6 @@ void object_set_sprite(int objid, int val)
   enigma::objectdata[objid]->sprite = val;
 }
 
-void object_set_polygon(int objid, int val) 
-{ 
-    errcheck_v(objid, "Object doesn't exist");
-    enigma::objectdata[objid]->polygon = val;
-}
-
 void object_set_visible(int objid, bool val)
 {
   errcheck_v(objid,"Object doesn't exist");
@@ -185,12 +178,6 @@ int object_get_sprite(int objid)
 {
   errcheck(objid,"Object doesn't exist");
   return enigma::objectdata[objid]->sprite;
-}
-
-int object_get_polygon(int objid) 
-{ 
-    errcheck(objid, "Object doesn't exist");
-    return enigma::objectdata[objid]->polygon;
 }
 
 bool object_get_visible(int objid)

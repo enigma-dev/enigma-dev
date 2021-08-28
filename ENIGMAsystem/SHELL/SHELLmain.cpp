@@ -40,7 +40,6 @@
 #include "Universal_System/Resources/backgrounds.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
-#include "Universal_System/Resources/polygon.h"
 
 #include "Universal_System/Instances/callbacks_events.h"
 

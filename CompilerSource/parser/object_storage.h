@@ -257,7 +257,7 @@ struct parsed_object : ParsedScope {
 
   string name;
   int id;
-  string sprite_name, mask_name, parent_name, polygon_name;
+  string sprite_name, mask_name, parent_name;
   bool visible, solid, persistent;
   double depth;
 
