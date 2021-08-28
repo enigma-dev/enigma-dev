@@ -689,6 +689,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (resfile != "$exe")
   {
     auto resname = resfile.u8string();
+    auto respath = resfile.parent_path().u8string();
+   
+    e_execs("mkdir -p " + respath);
+   
     for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
       resname.replace(p,4,gameFname.u8string());
     gameModule = fopen(resname.c_str(),"wb");
