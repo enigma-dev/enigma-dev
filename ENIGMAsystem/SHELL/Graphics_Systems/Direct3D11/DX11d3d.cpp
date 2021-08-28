@@ -26,8 +26,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
