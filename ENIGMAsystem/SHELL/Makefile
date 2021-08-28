@@ -1,5 +1,3 @@
-
-
 #################
 # configuration #
 #################
@@ -74,24 +72,17 @@ ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -s -O3
 	ifneq ($(TARGET-PLATFORM), Android)
-		override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections
-		override CFLAGS += -Wall -s -O3 -fno-exceptions -fdata-sections -ffunction-sections
-		override LDFLAGS += -s -O3
-	endif
-
-	# Disable PIE when possible
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -no-pie
-		override LDFLAGS += -no-pie
-	endif
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -nopie
-		override LDFLAGS += -nopie
+		# Disable PIE when possible
+		ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+			override CXXFLAGS += -fno-pie
+			override CFLAGS += -fno-pie
+			override LDLIBS += -no-pie
+			override LDFLAGS += -no-pie
+		endif
 	endif
 else
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
