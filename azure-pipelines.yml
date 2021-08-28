@@ -296,11 +296,11 @@ jobs:
     GRAPHICS: OpenGLES2 
     PLATFORM: SDL
     MODE: Compile
-    AUDIO: None
+    AUDIO: SDL
     COLLISION: None 
     NETWORK: None 
     WIDGETS: None 
-    EXTENSIONS: "None"
+    EXTENSIONS: "Alarms,Paths"
     OUTPUT: /tmp/test-android-game.apk
     ANDROID_API_LEVEL: 29 
     ANDROID_BUILD_TOOLS_VERSION: 29.0.3
