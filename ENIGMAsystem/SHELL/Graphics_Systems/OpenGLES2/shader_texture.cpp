@@ -2,5 +2,5 @@
 #include <string>
 
 namespace enigma {
-  std::string texColorString = "TexColor.bgra = texture2D( en_TexSampler, v_TextureCoord.st ).rgba * v_Color;";
+  std::string texColorString = "TexColor.bgra = texture( en_TexSampler, v_TextureCoord.st ).rgba * v_Color;";
 }
