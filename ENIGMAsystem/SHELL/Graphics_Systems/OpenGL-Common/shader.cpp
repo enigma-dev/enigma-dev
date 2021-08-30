@@ -16,6 +16,9 @@
 **/
 
 #include "version.h"
+#if __has_include("shader_wrappers.h") 
+  #include "shader_wrappers.h"
+#endif
 #include "shader.h"
 #include "GLSLshader.h"
 #include "OpenGLHeaders.h"
@@ -29,7 +32,7 @@
 
 #include <cstring>      /* memcpy */
 #include <math.h>
-
+#include <string>
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>     /* malloc, free, rand */
 
@@ -268,44 +271,45 @@ void main()
 }
             )CODE";
   }
-  string getDefaultFragmentShader(){
-    return  R"CODE(
 
-in vec2 v_TextureCoord;
-in vec4 v_Color;
-out vec4 out_FragColor;
+  string getDefaultFragmentShader() {
+    std::string returnstring = R"CODE(
+    in vec2 v_TextureCoord;
+    in vec4 v_Color;
+    out vec4 out_FragColor;
+    
+    uniform bool en_PS_FogEnabled;
+    uniform float en_FogStart;
+    uniform float en_RcpFogRange;
+    uniform vec4 en_FogColor;
 
-uniform bool en_PS_FogEnabled;
-uniform float en_FogStart;
-uniform float en_RcpFogRange;
-uniform vec4 en_FogColor;
+    float linearstep(float A, float B, float X) {
+      float t = (X - A) / (B - A);
 
-float linearstep(float A, float B, float X) {
-  float t = (X - A) / (B - A);
-
-  return t;
-}
-
-void main()
-{
-  vec4 TexColor;
-  if (en_TexturingEnabled == true){
-    TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;
-  }else{
-    TexColor = v_Color;
-  }
-  if (en_AlphaTestEnabled == true){
-    if (TexColor.a<=en_AlphaTestValue) discard;
-  }
-  if (en_PS_FogEnabled == true) {
-    float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
-    float fogAmount = linearstep(en_FogStart, en_RcpFogRange, fogDistance);
-    TexColor = mix(TexColor, en_FogColor, fogAmount);
-  }
-
-  out_FragColor = TexColor;
-}
-            )CODE";
+      return t;
+    }
+    
+    void main() {
+      vec4 TexColor;
+      if (en_TexturingEnabled == true) {
+        )CODE";
+    returnstring += enigma::texColorString;
+    returnstring += R"CODE(
+      } else {
+        TexColor = v_Color;
+      }
+      if (en_AlphaTestEnabled == true) {
+        if (TexColor.a<=en_AlphaTestValue) discard;
+      }
+      if (en_PS_FogEnabled == true) {
+        float fogDistance = gl_FragCoord.z / gl_FragCoord.w;
+        float fogAmount = linearstep(en_FogStart, en_RcpFogRange, fogDistance);
+        TexColor = mix(TexColor, en_FogColor, fogAmount);
+      }
+      out_FragColor = TexColor;
+    }
+    )CODE";
+    return returnstring;
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;
@@ -749,6 +753,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
   }
 }
 
+//---
 void glsl_uniformui(int location, unsigned v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].ui != v0){
@@ -880,7 +885,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform1uiv(location, size, value);
+    glUniform1uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -902,7 +907,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform3uiv(location, size, value);
+    glUniform3uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }
@@ -913,7 +918,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-    glUniform4uiv(location, size, value);
+    glUniform4uiv(location, size,value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
     }

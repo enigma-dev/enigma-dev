@@ -57,7 +57,7 @@ using namespace std;
 #include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-
+#include "System/builtins.h"
 
 #include "settings-parse/crawler.h"
 
@@ -143,7 +143,42 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
   wto.close();
 }
 
-#include "System/builtins.h"
+#define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
+
+static int write_res_helper(FILE* gameModule, int& resourceblock_start, const GameData &game) {
+  // Start by setting off our location with a DWord of NULLs
+  fwrite("\0\0\0",1,4,gameModule);
+
+  idpr("Adding Sprites",90);
+
+  int res = current_language->module_write_sprites(game, gameModule);
+  if (res) { 
+    idpr("Error occurred; see scrollback for details.",-1); 
+    return res;
+  }
+
+  edbg << "Finalized sprites." << flushl;
+  idpr("Adding Sounds",93);
+
+  current_language->module_write_sounds(game, gameModule);
+
+  current_language->module_write_backgrounds(game, gameModule);
+
+  current_language->module_write_fonts(game, gameModule);
+
+  current_language->module_write_paths(game, gameModule);
+
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+
+  // Close the game module; we're done adding resources
+  idpr("Closing game module and running if requested.",99);
+  edbg << "Closing game module and running if requested." << flushl;
+  fclose(gameModule);
+
+  return res;
+}
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es, &current_language->event_data()),
@@ -436,15 +471,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   used_funcs::zero();
 
-  int res;
-  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
-
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
   for (size_t i = 0; i < game.scripts.size(); i++)
     script_names.insert(game.scripts[i].name);
 
-  res = current_language->compile_parseAndLink(game, state);
+  int res = current_language->compile_parseAndLink(game, state);
   irrr();
 
 
@@ -648,6 +680,29 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     return 0;
   }
 
+  FILE *gameModule;
+  int resourceblock_start = 0;
+  std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
+  cout << "`" << resfile.u8string() << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
+
+  // need to write res file before compile for android
+  if (resfile != "$exe")
+  {
+    auto resname = resfile.u8string();
+    auto respath = resfile.parent_path().u8string();
+   
+    e_execs("mkdir -p " + respath);
+   
+    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
+      resname.replace(p,4,gameFname.u8string());
+    gameModule = fopen(resname.c_str(),"wb");
+    if (!gameModule) {
+      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+      idpr("Failed to write resources.",-1); return 12;
+    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
+  }
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
@@ -730,14 +785,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
-  #ifdef OS_ANDROID
-    "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
-  #endif
-
-  FILE *gameModule;
-  int resourceblock_start = 0;
-  std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
-  cout << "`" << resfile.u8string() << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
   if (resfile == "$exe")
   {
     gameModule = fopen(gameFname.u8string().c_str(),"ab");
@@ -753,46 +800,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "Compiled game is clearly not a working module; cannot continue" << flushl;
       idpr("Failed to add resources.",-1); return 13;
     }
-  }
-  else
-  {
-    auto resname = resfile.u8string();
-    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname.u8string());
-    gameModule = fopen(resname.c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-      idpr("Failed to write resources.",-1); return 12;
-    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
   }
 
-  // Start by setting off our location with a DWord of NULLs
-  fwrite("\0\0\0",1,4,gameModule);
-
-  idpr("Adding Sprites",90);
-
-  res = current_language->module_write_sprites(game, gameModule);
-  irrr();
-
-  edbg << "Finalized sprites." << flushl;
-  idpr("Adding Sounds",93);
-
-  current_language->module_write_sounds(game, gameModule);
-
-  current_language->module_write_backgrounds(game, gameModule);
-
-  current_language->module_write_fonts(game, gameModule);
-
-  current_language->module_write_paths(game, gameModule);
-
-  // Tell where the resources start
-  fwrite("\0\0\0\0res0",8,1,gameModule);
-  fwrite(&resourceblock_start,4,1,gameModule);
-
-  // Close the game module; we're done adding resources
-  idpr("Closing game module and running if requested.",99);
-  edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))

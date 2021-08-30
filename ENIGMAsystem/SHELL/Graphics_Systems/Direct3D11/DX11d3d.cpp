@@ -26,8 +26,8 @@
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-
 #include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
@@ -218,5 +218,9 @@ void d3d_stencil_clear() {
   draw_batch_flush(batch_flush_deferred);
   m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_STENCIL, 0, 0);
 }
+
+void d3d_enable_scissor_test(bool enable) {
+  DEBUG_MESSAGE("d3d_enable_scissor_test is not implemented yet",MESSAGE_TYPE::M_WARNING);
+}   
 
 } // namespace enigma_user

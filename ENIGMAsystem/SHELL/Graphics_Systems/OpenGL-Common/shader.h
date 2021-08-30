@@ -29,6 +29,7 @@
 
 namespace enigma
 {
+  extern std::string texColorString;
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;
@@ -59,6 +60,7 @@ namespace enigma
 
 namespace enigma_user
 {
+  
 
 enum {
   sh_vertex = 0,
@@ -129,6 +131,7 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
 void glsl_attribute_enable_all(bool enable);
 void glsl_attribute_enable(int location, bool enable);
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, unsigned offset);
+
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set

@@ -1,3 +1,5 @@
+include Platforms/General/Makefile
+
 ifeq ($(OS), Linux)
 	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
 else ifeq ($(OS), FreeBSD)
