@@ -29,7 +29,7 @@ jobs:
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 360
 
   steps:
@@ -40,7 +40,7 @@ jobs:
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
         ./CI/split_jobs.sh install
-        ./CI/build_sdl.sh
+        sudo cp ./CI/asound.conf /etc/asound.conf
       displayName: Install Dependencies
     - script: |
         make -j4
@@ -60,11 +60,132 @@ jobs:
         _BOT_PUSH_ON_GREEN_TOKEN: $(bot_push_on_green_token)
         _CODECOV_UPLOAD_TOKEN: $(codecov_upload_token)
       displayName: Run Test Harness
-      
+
+- job: Windows
+  displayName: 'Windows'
+  pool:
+    vmImage: 'windows-latest'
+  timeoutInMinutes: 360
+  variables:
+    COMPILER: gcc
+    OUTPUT: /tmp/test.exe
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      path: enigma-dev
+     
+    - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+      displayName: 'Clone Android Repo'
+
+    - script: |
+        (robocopy $(Build.SourcesDirectory) C:\enigma-dev /COPYALL /E) ^& IF %ERRORLEVEL% LEQ 1 exit 0
+      displayName: 'Stage ENIGMA'
+    
+    - script: |
+        C:\enigma-dev\enigma_bootstrap.bat
+      displayName: 'Bootstrap ENIGMA Install'
+
+    - script: |
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
+      displayName: 'Run Mode'
+      workingDirectory: C:\enigma-dev
+      env:
+        MODE: Run
+        PLATFORM: Win32
+        GRAPHICS: Direct3D9
+        AUDIO: None
+        COLLISION: None
+        NETWORK: None
+        WIDGETS: None
+        EXTENSIONS: "None"
+
+    - script: |
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
+      displayName: 'Compile Mode'
+      workingDirectory: C:\enigma-dev
+      env:
+        MODE: Compile
+        PLATFORM: Win32
+        GRAPHICS: Direct3D9
+        AUDIO: None
+        COLLISION: None
+        NETWORK: None
+        WIDGETS: None
+        EXTENSIONS: "None"
+
+    - script: |
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
+      displayName: 'Windows APIs & Extensions'
+      workingDirectory: C:\enigma-dev
+      env:
+        GRAPHICS: Direct3D11 
+        AUDIO: DirectSound
+        WIDGETS: Win32 
+        EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,ExternalFuncs"
+        PLATFORM: Win32
+        MODE: Debug
+        COLLISION: None
+        NETWORK: None
+
+    - script: |
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"
+      displayName: 'OpenGL1 & OpenAL'
+      workingDirectory: C:\enigma-dev
+      env:
+        GRAPHICS: OpenGL1 
+        AUDIO: OpenAL
+        PLATFORM: Win32
+        MODE: Debug
+        COLLISION: None
+        NETWORK: None
+        WIDGETS: None
+        EXTENSIONS: "None"
+
+    - script: |
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=SDL; ./ci-build.sh && ./share_logs.sh"
+      displayName: 'OpenGLES & SDL'
+      workingDirectory: C:\enigma-dev
+      env:
+        GRAPHICS: OpenGLES3
+        PLATFORM: Win32
+        MODE: Debug
+        AUDIO: None
+        COLLISION: None
+        NETWORK: None
+        WIDGETS: None
+        EXTENSIONS: "None"
+
+    - script: |
+        cmd /c C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "rm -rf /tmp/*"
+        "%TMP%\nsis-binary-7208-3\Bin\makensis" /V4 "C:/enigma-dev/enigma.nsi"
+      displayName: 'Build Installer'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Push Build Artifacts'
+      inputs:
+        pathtoPublish: 'C:\Windows\Temp\ENIGMA-installer.exe'
+        artifactName: ENIGMA-installer
+
+    - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+      - task: GithubRelease@0 
+        displayName: 'Publish GitHub Release'
+        inputs:
+          gitHubConnection: github.com_EnigmaBot
+          repositoryName: enigma-dev/enigma-dev
+          action: create
+          tagSource: manual
+          tag: 'ENIGMA-$(Build.SourceVersion)'
+          isDraft: false
+          isPreRelease: false
+          assetUploadMode: replace
+          assets: |
+            C:\Windows\Temp\ENIGMA-installer.exe
+
 - job: CrossCompile
   displayName: 'Cross Compile'
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: 'ubuntu-20.04'
 
   steps:
     - checkout: self
@@ -85,7 +206,7 @@ jobs:
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
         pacman-key --init 
         pacman-key --populate archlinux
-        pacman -Syu --noconfirm base base-devel sudo go git protobuf yaml-cpp pugixml rapidjson boost xorg-server-xvfb
+        pacman -Syu --noconfirm base base-devel sudo go git protobuf grpc yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         mkdir -p /home/aur/packages/
         useradd -G wheel aur
@@ -112,16 +233,19 @@ jobs:
         cd $(Build.BinariesDirectory)
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
-        cp enigma-dev/CI/mirrorlist* /etc/pacman.d/
         cp enigma-dev/CI/asound.conf /etc/asound.conf
         echo "[multilib]
               Include = /etc/pacman.d/mirrorlist
               [mingw32]
-              Include = /etc/pacman.d/mirrorlist.mingw32
+              Server = http://mirrors.enigma-dev.org/mingw/mingw32/
               [mingw64]
-              Include = /etc/pacman.d/mirrorlist.mingw64
+              Server = http://mirrors.enigma-dev.org/mingw/mingw64/
+              [ucrt64]
+              Server = http://mirrors.enigma-dev.org/mingw/ucrt64/
+              [clang64]
+              Server = http://mirrors.enigma-dev.org/mingw/clang64/
               [msys]
-              Include = /etc/pacman.d/mirrorlist.msys"  >> /etc/pacman.conf
+              Server = http://mirrors.enigma-dev.org/msys/x86_64/"  >> /etc/pacman.conf
         curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2.gpg -o /usr/share/pacman/keyrings/msys2.gpg
         curl https://raw.githubusercontent.com/msys2/MSYS2-keyring/master/msys2-trusted -o /usr/share/pacman/keyrings/msys2-trusted
         pacman-key --populate msys2
@@ -147,6 +271,7 @@ jobs:
         set -e
         cd enigma-dev
         ./emake -x MinGW32 -p Win32 -w Win32 -a DirectSound -e DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,ExternalFuncs -o /tmp/test32.exe CommandLine/testing/SimpleTests/clean_exit.sog/
+        pulseaudio --start --verbose
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
         EOF
       displayName: 'Engine MinGW32'
@@ -161,3 +286,47 @@ jobs:
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
         EOF
       displayName: 'Engine MinGW64'
+      
+- job: Android
+  displayName: 'Android'
+  variables:
+    TEST_HARNESS: "true"
+    TRAVIS_OS_NAME: "linux"
+    TRAVIS: "true"
+    TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
+    TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    COMPILER: Android 
+    GRAPHICS: OpenGLES2 
+    PLATFORM: SDL
+    MODE: Compile
+    AUDIO: SDL
+    COLLISION: None 
+    NETWORK: None 
+    WIDGETS: None 
+    EXTENSIONS: "Alarms,Paths"
+    OUTPUT: /tmp/test-android-game.apk
+    ANDROID_API_LEVEL: 29 
+    ANDROID_BUILD_TOOLS_VERSION: 29.0.3
+    ANDROID_NDK_VERSION: 23.0.7599858
+  pool:
+    vmImage: 'ubuntu-20.04'
+
+  steps:
+    - checkout: self
+      persistCredentials: true
+      path: enigma-dev
+      
+    - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;23.0.7599858"
+      displayName: 'Install Android Dependencies'
+      
+    - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
+      displayName: 'Clone Android Repo'
+      
+    - script: ./CI/install_emake_deps.sh
+      displayName: 'Install Emake Dependencies'
+      
+    - script: make -j4 emake
+      displayName: 'Build Emake'
+
+    - script: ./ci-build.sh
+      displayName: 'Build Game'

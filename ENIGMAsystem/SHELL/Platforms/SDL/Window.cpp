@@ -51,7 +51,6 @@ bool initGameWindow() {
   if (notnull) window_init();
   return notnull;
 }
-
 namespace keyboard {
   using namespace enigma_user;
   std::unordered_map<int,SDL_Keycode> keymap = {
@@ -269,18 +268,18 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  int w;
-  SDL_GetWindowSize(windowHandle, &w, nullptr);
-  return w;
+  int viewportWidth, viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportWidth;
+
 }
 
 int window_get_height() {
-  int h;
-  SDL_GetWindowSize(windowHandle, nullptr, &h);
-  return h;
-}
+  int viewportWidth, viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportHeight;
 
-void window_set_size(unsigned w, unsigned h) { SDL_SetWindowSize(windowHandle, w, h); }
+}
 
 bool window_get_fullscreen() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);

@@ -18,6 +18,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "strings_util.h"
 #include <stdlib.h>
 #include <cstdio>
 #include <string>

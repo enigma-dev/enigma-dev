@@ -28,9 +28,9 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/General/fileio.h"
 
 #include <ctime>
-#include <cstdio>
 
 namespace enigma_user
 {
@@ -71,36 +71,36 @@ namespace enigma
 
     // Open the exe for resource load
     do { // Allows break
-      FILE* resfile;
+      FILE_t* resfile;
       if (resource_file_path != std::string("$exe")) {
-        if (!(resfile = fopen(resource_file_path,"rb"))) {
+        if (!(resfile = fopen_wrapper(resource_file_path,"rb"))) {
           DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
           break;
         }
       } else {
         char exename[4097];
         windowsystem_write_exename(exename);
-        if (!(resfile = fopen(exename,"rb"))) {
+        if (!(resfile = fopen_wrapper(exename,"rb"))) {
           DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
           break;
         }
       }
       int nullhere;
       // Read the magic number so we know we're looking at our own data
-      fseek(resfile,-8,SEEK_END);
+      fseek_wrapper(resfile,-8,SEEK_END);
       char str_quad[4];
-      if (!fread(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
+      if (!fread_wrapper(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
         DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
         break;
       }
 
       // Get where our resources are located in the module
       int pos;
-      if (!fread(&pos,4,1,resfile)) break;
+      if (!fread_wrapper(&pos,4,1,resfile)) break;
 
       // Go to the start of the resource data
-      fseek(resfile,pos,SEEK_SET);
-      if (!fread(&nullhere,4,1,resfile)) break;
+      fseek_wrapper(resfile,pos,SEEK_SET);
+      if (!fread_wrapper(&nullhere,4,1,resfile)) break;
       if(nullhere) break;
 
       enigma::exe_loadsprs(resfile);
@@ -111,7 +111,7 @@ namespace enigma
       enigma::exe_loadpaths(resfile);
       #endif
 
-      fclose(resfile);
+      fclose_wrapper(resfile);
     } while (false);
 
     //Load object struct

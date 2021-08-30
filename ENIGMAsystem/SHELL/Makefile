@@ -1,32 +1,18 @@
-
-
 #################
 # configuration #
 #################
 # TODO: better config process based on features rather than OS
 
 # PLATFORM { Platforms/* }
-OS := $(shell uname -s)
-ifeq ($(OS), Linux)
-	PLATFORM := xlib
-	MKDIR := mkdir
-else ifeq ($(OS), Darwin)
-	PLATFORM := Cocoa
-	MKDIR := mkdir
-else
-	PLATFORM := Win32
-	MKDIR := mkdir.exe
-endif
+include ../../Config.mk
 
-ifeq ($(TRAVIS_OS_NAME), linux)
-  override CXXFLAGS += -DOLD_UBUNTU
-endif
+ENIGMA_ROOT := ../../
 
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
+	CXXFLAGS += -fPIC
 	MAKE_TARGETS += android_game
 	BASENAME := $(shell basename $(OUTPUTNAME))
-	SDL_CSTDIO := TRUE
 	ifeq ($(GMODE), Compile)
 		GRADLE_TARGET := build
 		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/release
@@ -86,22 +72,17 @@ ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	override LDFLAGS += -flto -s -O3
-
-	# Disable PIE when possible
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -no-pie
-		override LDFLAGS += -no-pie
-	endif
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -nopie
-		override LDFLAGS += -nopie
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -s -O3
+	ifneq ($(TARGET-PLATFORM), Android)
+		# Disable PIE when possible
+		ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+			override CXXFLAGS += -fno-pie
+			override CFLAGS += -fno-pie
+			override LDLIBS += -no-pie
+			override LDFLAGS += -no-pie
+		endif
 	endif
 else
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
@@ -156,16 +137,24 @@ else
 	RESOURCEBINARY := $(OBJDIR)/resources.res
 endif
 
+
 ############
 # building #
 ############
 
 write_src_files:
-	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.in
+	@echo "$(CXXFLAGS) $(CPPFLAGS)" > $(WORKDIR)/cxxflags.in
+	@echo "$(CFLAGS)" > $(WORKDIR)/cflags.in
+	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/libs.in
+	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/ldlibs.in
+	@echo "$(ANDROID_MAKEFILES)" > $(WORKDIR)/makefiles.in
+	@cat ../../android/enigma/build.gradle.template | sed -e 's/%ANDROID_API_LEVEL%/$(ANDROID_API_LEVEL)/g' | sed -e 's/%ANDROID_NDK_VERSION%/$(ANDROID_NDK_VERSION)/g' > ../../android/enigma/build.gradle
 
 android_game: write_src_files
-	@cd ../../android && BASENAME=$(BASENAME) ./gradlew $(GRADLE_TARGET)
+	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
 	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
+	@rm -rf ../../android/enigma/src/main/assets/*
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"

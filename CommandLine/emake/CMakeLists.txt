@@ -12,12 +12,6 @@ set(Boost_NO_BOOST_CMAKE ON)
 project(emake)
 
 file(GLOB EMAKE_SOURCES *.cpp)
-if (RGM_ENABLE_GRPC_SERVER)
-  set(CLI_ENABLE_SERVER ON)
-  add_definitions(-DCLI_ENABLE_SERVER)
-else()
-  list(REMOVE_ITEM EMAKE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Server.cpp")
-endif()
 
 SET(CMAKE_SKIP_BUILD_RPATH ON)
 set(CMAKE_INSTALL_RPATH $ORIGIN)
@@ -51,18 +45,16 @@ include_directories(${CLI_TARGET} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp)
 
-if (CLI_ENABLE_SERVER)
-  #Find gRPC
-  if (MSVC) # Windows actually does something right for once
-    find_package(gRPC CONFIG REQUIRED)
-    target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-  else() # https://tinyurl.com/arch-grpc-bug
-    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-    find_library(LIB_GPR NAMES gpr)
-    find_library(LIB_CARES NAMES cares)
-    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-    target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-  endif()
+#Find gRPC
+if (MSVC) # Windows actually does something right for once
+  find_package(gRPC CONFIG REQUIRED)
+  target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+else() # https://tinyurl.com/arch-grpc-bug
+  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+  find_library(LIB_GPR NAMES gpr)
+  find_library(LIB_CARES NAMES cares)
+  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+  target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
 endif()
 
 # Find Protobuf

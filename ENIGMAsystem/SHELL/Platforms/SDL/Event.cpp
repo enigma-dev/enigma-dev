@@ -5,8 +5,11 @@
 #include "Platforms/General/PFmain.h"    //game_end
 #include "Platforms/General/PFwindow.h"  // mouse / keyboard
 
-#include "Graphics_Systems/General/GScolors.h"  // draw_clear
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSd3d.h"
 
+#include <unordered_map>
 #include <iostream>
 
 namespace enigma {
@@ -141,6 +144,12 @@ int SDL_map_button_enum(const char button) {
   }
 }
 
+static void graphics_remove_garbage(float x, float y, float width, float height) {
+  graphics_set_viewport(x,y,width,height);
+  enigma_user::d3d_enable_scissor_test(false);
+  enigma_user::draw_clear(enigma_user::window_get_color());
+}
+
 void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
   switch (event->window.event) {
     case SDL_WINDOWEVENT_SHOWN:
@@ -207,19 +216,34 @@ void SDL_Event_Handler::windowFocusLost(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::windowResized(const SDL_Event *event) {
-  enigma_user::draw_clear(enigma_user::window_get_color());
+  graphics_remove_garbage(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
+  enigma::windowWidth = enigma_user::window_get_width();
+  enigma::windowHeight = enigma_user::window_get_height();
+  enigma::compute_window_scaling();
 }
 
-void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) { addGamepad(event->cdevice.which); }
+// map of joystick instance ids to device indexes
+std::unordered_map<SDL_JoystickID,int> joystickDevices;
 
-void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) { removeGamepad(event->cdevice.which); }
+void SDL_Event_Handler::joyDeviceAdded(const SDL_Event *event) {
+  addGamepad(event->cdevice.which);
+  if (event->cdevice.which >= gamepads.size()) return;
+  auto joystick = SDL_GameControllerGetJoystick(gamepads[event->cdevice.which].controller);
+  auto joyId = SDL_JoystickInstanceID(joystick);
+  joystickDevices[joyId] = event->cdevice.which;
+}
+
+void SDL_Event_Handler::joyDeviceRemoved(const SDL_Event *event) {
+  removeGamepad(joystickDevices[event->cdevice.which]);
+  joystickDevices.erase(event->cdevice.which);
+}
 
 void SDL_Event_Handler::controllerButtonDown(const SDL_Event *event) {
-  setGamepadButton(event->cdevice.which, event->cbutton.button, true);
+  setGamepadButton(joystickDevices[event->cdevice.which], event->cbutton.button, true);
 }
 
 void SDL_Event_Handler::controllerButtonUp(const SDL_Event *event) {
-  setGamepadButton(event->cdevice.which, event->cbutton.button, false);
+  setGamepadButton(joystickDevices[event->cdevice.which], event->cbutton.button, false);
 }
 
 void SDL_Event_Handler::keyboardDown(const SDL_Event *event) {
@@ -260,4 +284,5 @@ void SDL_Event_Handler::mouseWheel(const SDL_Event *event) {
 }
 
 void SDL_Event_Handler::quit(const SDL_Event *event) { enigma_user::game_end(); }
+
 }  // namespace enigma

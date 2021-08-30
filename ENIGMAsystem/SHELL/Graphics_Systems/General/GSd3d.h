@@ -101,6 +101,7 @@ namespace enigma_user {
     rs_front_back
   };
 
+  void d3d_enable_scissor_test(bool enable);
   void d3d_clear_depth(double value=1.0L);
   void d3d_start();
   void d3d_end();

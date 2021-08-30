@@ -23,6 +23,7 @@
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
+#include "Platforms/General/fileio.h"
 
 #include <map>
 #include <fstream>      // std::ofstream
@@ -31,30 +32,12 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <cstdio>
 #include <iostream>
-
-using namespace std;
+#include <cstdio>
 
 #include "nlpo2.h"
 
-// FIXME: as of 05-09-2020 some filesystem stuff like extension() isn't implemented on android
-// https://github.com/android/ndk/issues/609
-#ifdef __ANDROID__
-std::string_view std::__ndk1::__fs::filesystem::path::__extension() const {
-  std::string filename = u8string();
-  size_t fp = filename.find_last_of(".");
-  if (fp == string::npos){
-    return "";
-  }
-  return filename.substr(fp);
-}
-
-int std::__ndk1::__fs::filesystem::path::__compare(std::__ndk1::basic_string_view<char, std::__ndk1::char_traits<char> > other) const {
-  if (u8string() == other) return 0; 
-  if (u8string() > other) return 1; else return -1; 
-}
-#endif
+using namespace std;
 
 namespace enigma
 {
@@ -456,17 +439,17 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
 
 int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  FILE *bmp = fopen(filename.u8string().c_str(), "wb");
+  FILE_t *bmp = fopen_wrapper(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
-  fwrite("BM", 2, 1, bmp);
+  fwrite_wrapper("BM", 2, 1, bmp);
 
   sz <<= 2;
-  fwrite(&sz,4,1,bmp);
-  fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-  fwrite(&width,4,1,bmp);
-  fwrite(&height,4,1,bmp);
+  fwrite_wrapper(&sz,4,1,bmp);
+  fwrite_wrapper("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+  fwrite_wrapper(&width,4,1,bmp);
+  fwrite_wrapper(&height,4,1,bmp);
   //NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-  fwrite("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+  fwrite_wrapper("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
 
   unsigned bytes = 4;
 
@@ -480,14 +463,14 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
       tmp = lastbyte - fullwidth - i;
     }
     for (unsigned ii = 0; ii < width; ii += bytes) {
-      fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 3],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 0],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 1],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 2],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 3],sizeof(char),1,bmp);
     }
   }
 
-  fclose(bmp);
+  fclose_wrapper(bmp);
   return 0;
 }
 

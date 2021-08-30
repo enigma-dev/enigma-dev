@@ -32,24 +32,23 @@ file(GLOB PROTO_FILES *.proto Configuration/*.proto)
 include(FindProtobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
 
-if (RGM_ENABLE_GRPC_SERVER)
-  set(GRPC_SRCS "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc")
-  
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc
-    COMMAND  protobuf::protoc
-    ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
-       --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
-       -I=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
-       --plugin=protoc-gen-grpc=${GRPC_EXE}
-       --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
-       server.proto
-    DEPENDS protobuf::protoc
-    COMMENT "Generating grpc protocol buffer compiler on ${GRPC_SRCS}"
-    VERBATIM )
-   
-  add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
-endif()
+
+set(GRPC_SRCS "${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc")
+
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/server.grpc.pb.cc
+  COMMAND  protobuf::protoc
+  ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
+     --grpc_out=${CMAKE_CURRENT_BINARY_DIR}
+     -I=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
+     --plugin=protoc-gen-grpc=${GRPC_EXE}
+     --proto_path=${CMAKE_CURRENT_SOURCE_DIR}
+     server.proto
+  DEPENDS protobuf::protoc
+  COMMENT "Generating grpc protocol buffer compiler on ${GRPC_SRCS}"
+  VERBATIM )
+
+add_custom_target(generate_grpc DEPENDS ${PROTO_FILES})
 
 add_library(${LIB_PROTO} ${LIB_TYPE} ${PROTO_SRCS} ${GRPC_SRCS})
 
@@ -59,18 +58,16 @@ if(MSVC)
   target_compile_options(${LIB_PROTO} PRIVATE /W1)
 endif()
 
-if (RGM_ENABLE_GRPC_SERVER)
-  #Find gRPC
-  if (MSVC) # Windows actually does something right for once
-    find_package(gRPC CONFIG REQUIRED)
-    target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-  else() # https://tinyurl.com/arch-grpc-bug
-    find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-    find_library(LIB_GPR NAMES gpr)
-    find_library(LIB_CARES NAMES cares)
-    find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-    target_link_libraries(${LIB_PROTO} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-  endif()
+#Find gRPC
+if (MSVC) # Windows actually does something right for once
+  find_package(gRPC CONFIG REQUIRED)
+  target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
+else() # https://tinyurl.com/arch-grpc-bug
+  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
+  find_library(LIB_GPR NAMES gpr)
+  find_library(LIB_CARES NAMES cares)
+  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
+  target_link_libraries(${LIB_PROTO} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
 endif()
 
 # Find Protobuf

@@ -53,6 +53,7 @@ private:
 
   int compiler(const std::string &str);
 
+  buffers::resources::Settings _loadedSettings; 
   bool _readArgsFail;
   std::string _extensions;
   std::string _enigmaRoot;

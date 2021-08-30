@@ -761,21 +761,25 @@
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/LINUXjoystick.cpp">
+		<Unit filename="Platforms/xlib/Linux/LINUXjoystick.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/LINUXjoystick.h">
-			<Option target="win-build" />
+		<Unit filename="Platforms/xlib/XLIBjoystick.h">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
+		</Unit>
+		<Unit filename="Platforms/General/POSIX/Linux/LINUXprogdir.cpp">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+		</Unit>
+		<Unit filename="Platforms/General/POSIX/POSIXprogdir.h">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBfilemanip.cpp">
 			<Option target="lin-debug" />
@@ -966,7 +970,7 @@
 		<Unit filename="Universal_System/estring.cpp" />
 		<Unit filename="Universal_System/estring.h" />
 		<Unit filename="Universal_System/fileio.cpp" />
-		<Unit filename="Universal_System/fileio.h" />
+		<Unit filename="Universal_System/Platforms/General/fileio.h" />
 		<Unit filename="Universal_System/Resources/fontinit.cpp" />
 		<Unit filename="Universal_System/Resources/fontstruct.cpp" />
 		<Unit filename="Universal_System/fontstruct.h" />

@@ -25,7 +25,7 @@
 
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures_impl.h"
-
+#include "Universal_System/image_formats.h"
 namespace enigma {
 
 struct GLTexture : Texture {
@@ -34,6 +34,8 @@ struct GLTexture : Texture {
 };
 
 GLuint get_texture_peer(int texid);
+
+int graphics_create_texture_custom(const RawImage& img, bool mipmap, unsigned* fullwidth, unsigned* fullheight, GLint internalFormat, GLenum format, GLenum type);
 
 } // namespace enigma
 

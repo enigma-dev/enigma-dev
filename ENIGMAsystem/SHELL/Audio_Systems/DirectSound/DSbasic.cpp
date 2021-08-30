@@ -145,8 +145,6 @@ void sound_seek_all(float position) {
     sndi.second.soundBuffer->SetCurrentPosition(position);
 }
 
-void action_sound(int snd, bool loop) { (loop ? sound_loop : sound_play)(snd); }
-
 const char* sound_get_audio_error() { return ""; }
 
 }  // namespace enigma_user

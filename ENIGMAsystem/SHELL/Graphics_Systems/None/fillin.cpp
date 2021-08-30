@@ -38,7 +38,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/fileio.h"
+#include "Platforms/General/fileio.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
@@ -130,6 +130,7 @@ namespace enigma_user
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
+	void d3d_enable_scissor_test(bool enable) {}
 	void d3d_clear_depth(double value){}
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}

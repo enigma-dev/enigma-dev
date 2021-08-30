@@ -17,6 +17,7 @@
 
 #include "egm.h"
 #include "egm-rooms.h"
+#include "egm-events.h"
 #include "filesystem.h"
 #include "svg-d.h"
 #include "proto_util.h"
@@ -218,28 +219,6 @@ buffers::resources::Timeline LoadTimeLine(const fs::path& fPath) {
 
 } // namespace internal
 
-// Load all edl files in our object dir
-void EGMFileFormat::LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m,
-                           const google::protobuf::FieldDescriptor *field) const {
-  for(auto& f : fs::directory_iterator(fPath)) {
-    if (f.path().extension() == ".edl") {
-      const std::string eventIdString = f.path().stem().string();
-      auto event = _event_data->DecodeEventString(eventIdString);
-
-      buffers::resources::Object::EgmEvent event_proto;
-      event_proto.set_id(event.bare_id());
-      event_proto.set_code(FileToString(f));
-      for (const auto &arg : event.arguments)
-        event_proto.add_arguments(arg.name);
-
-      const google::protobuf::Reflection *refl = m->GetReflection();
-
-      google::protobuf::Message* msg = refl->AddMessage(m, field);
-      msg->CopyFrom(event_proto);
-    }
-  }
-}
-
 void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
                               YAML::Node& yaml, const fs::path& fPath,
                               int depth) const {
@@ -265,7 +244,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
     if (ext == ".obj" && depth == 0) {
        // code is loaded from edl files
       if (key == "egm_events") {
-        LoadObjectEvents(fPath, m, field);
+        LoadObjectEvents(fPath, m, field, _event_data);
         continue;
       }
     }

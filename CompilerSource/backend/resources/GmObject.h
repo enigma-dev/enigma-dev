@@ -27,6 +27,7 @@ struct GmObject
   boolean persistent;
   int parentId;
   int maskId;
+  int polygonId;
 
   MainEvent *mainEvents;
   int mainEventCount;

@@ -17,6 +17,7 @@
 
 #include "egm.h"
 #include "egm-rooms.h"
+#include "egm-events.h"
 #include "filesystem.h"
 
 #include <yaml-cpp/yaml.h>
@@ -307,12 +308,7 @@ bool EGMFileFormat::WriteObject(const fs::path &egm_root, const fs::path &dir,
   if (!egm_internal::WriteYaml(egm_root, dir, &cleaned))
     return false;
 
-  for (auto &e : events) {
-    auto event = _event_data->get_event(e.id(), {e.arguments().begin(), e.arguments().end()});
-    auto edlFile = dir/(event.IdString() + ".edl");
-    std::ofstream fout{edlFile};
-    fout << e.code();
-  }
+  WriteObjectEvents(dir, events, _event_data);
 
   return true;
 }
