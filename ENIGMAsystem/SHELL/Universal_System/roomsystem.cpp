@@ -65,7 +65,8 @@ var background_visible, background_foreground, background_index, background_x, b
 
 int view_current = 0;
 int view_enabled = 0;
-rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+room_view_array_type
+    view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
     view_yport, view_yview, view_angle;
 
