@@ -3,7 +3,7 @@
 
 #include "yuv_rgb.h"
 
-#ifndef BUILD_ES
+#if !defined(__arm__) && !defined(__aarch64__)
 #include <x86intrin.h>
 #endif
 
