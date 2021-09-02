@@ -3,7 +3,7 @@
 
 #ifdef _WIN32
 #include <clocale>
-#include "strings_util.h"
+#include "Universal_System/estring.h"
 #endif
 
 #include <algorithm>
@@ -34,7 +34,7 @@ namespace uvpx
 
 #ifdef _WIN32
         setlocale(LC_ALL, "");
-        std::wstring wstrFileName = strings_util::widen(fileName);
+        std::wstring wstrFileName = widen(fileName);
         const errno_t e = _wfopen_s(&m_file, wstrFileName.c_str(), L"rb");
 
         if (e)
