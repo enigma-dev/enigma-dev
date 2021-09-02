@@ -159,7 +159,7 @@ bool video_grab_frame_image(int ind, std::string fname) {
         free(rgb);
         videos[ind]->unlockRead();
         if (rgba) {
-          image_save(fname, rgba, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
+          enigma::image_save(fname, rgba, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
           free(rgba);
           return true;
         }
