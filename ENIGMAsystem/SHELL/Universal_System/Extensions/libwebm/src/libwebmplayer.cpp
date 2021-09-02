@@ -4,7 +4,7 @@
 
 #include "player.hpp"
 #include "webm_player.hpp"
-#include "libpng-util/libpng-util.h"
+#include "Universal_System/image_formats.h"
 #include "libwebmplayer.h"
 #include "yuv_rgb.h"
 
@@ -45,17 +45,7 @@ int video_add(std::string fname) {
   uvpx::Player::LoadResult res = video->load(fname.c_str(), 1, true);
   wp::WebmPlayer *audio = new wp::WebmPlayer; audio->load(fname.c_str());
   id++; videos.insert(std::make_pair(id, video));
-  audios.insert(std::make_pair(id, audio));
-  switch (res) {
-   case uvpx::Player::LoadResult::FileNotExists:
-    printf("Failed to open video file '%s'\n", fname.c_str());
-   case uvpx::Player::LoadResult::UnsupportedVideoCodec:
-    printf("Unsupported video codec\n");
-   case uvpx::Player::LoadResult::NotInitialized:
-    printf("Video player not initialized\n");
-   case uvpx::Player::LoadResult::Success:
-    printf("Video loaded successfully\n");
-  }
+  audios.insert(std::make_pair(id, audio)); 
   return id;
 }
 
@@ -169,7 +159,7 @@ bool video_grab_frame_image(int ind, std::string fname) {
         free(rgb);
         videos[ind]->unlockRead();
         if (rgba) {
-          libpng_encode32_file(rgba, yuv->displayWidth(), yuv->displayHeight(), fname.c_str());
+          image_save(fname, rgba, yuv->displayWidth(), yuv->displayHeight(), yuv->displayWidth(), yuv->displayHeight(), false);
           free(rgba);
           return true;
         }
