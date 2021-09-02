@@ -1,0 +1,3 @@
+[submodule "shared/libwebm"]
+	path = shared/libwebm
+	url = https://github.com/webmproject/libwebm/

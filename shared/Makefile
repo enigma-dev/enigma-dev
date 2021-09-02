@@ -8,4 +8,10 @@ PROTO_DIR := ./protos/.eobjs
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR)
 LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols -lprotobuf
 
+override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
+override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
+ifeq ($(UNIX_BASED), true)
+	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
+endif
+
 include ../Default.mk
