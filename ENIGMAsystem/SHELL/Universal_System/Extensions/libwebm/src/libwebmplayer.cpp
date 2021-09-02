@@ -42,8 +42,8 @@ bool video_exists(int ind) {
 
 int video_add(std::string fname) {
   uvpx::Player *video = new uvpx::Player(uvpx::Player::defaultConfig());
-  uvpx::Player::LoadResult res = video->load(fname.c_str(), 1, true);
-  wp::WebmPlayer *audio = new wp::WebmPlayer; audio->load(fname.c_str());
+  video->load(fname.c_str(), 1, true); wp::WebmPlayer *audio = 
+  new wp::WebmPlayer; audio->load(fname.c_str());
   id++; videos.insert(std::make_pair(id, video));
   audios.insert(std::make_pair(id, audio)); 
   return id;
