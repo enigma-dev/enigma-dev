@@ -8,34 +8,6 @@
 #include <algorithm>
 #include <filesystem>
 
-#include "../CompilerSource/OS_Switchboard.h"
-
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-
-#define byte __windows_byte_workaround
-#include <windows.h>
-#undef byte
-
-namespace strings_util {
-
-inline std::wstring widen(const std::string &str) {
-  // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchar_count = str.size() + 1;
-  std::vector<WCHAR> buf(wchar_count);
-  return std::wstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
-}
-
-inline std::string shorten(std::wstring str) {
-  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
-  std::vector<char> buf((size_t)nbytes);
-  return std::string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, nullptr, nullptr)};
-}
-
-} // namespace strings_util
-
-#endif
-
-
 inline std::string ToLower(std::string str) {
   for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
   return str;
