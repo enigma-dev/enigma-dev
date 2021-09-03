@@ -2,8 +2,8 @@ SHARED_SRC_DIR := ../../shared
 WEBMPATH := Universal_System/Extensions/libwebm/src
 
 ifeq ($(UNIX_BASED), true)
-	override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
-	override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+	override CXXFLAGS +=  -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+	override CFLAGS += -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 	override LDFLAGS += -lpthread -lvorbis -logg -lvpx -lz `pkg-config --libs sdl2 --static` -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
 	override LDLIBS += -lpthread -lvorbis -logg -lvpx -lz `pkg-config --libs sdl2 --static` -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
 	ifeq ($(OS), Linux)
@@ -18,8 +18,8 @@ ifeq ($(UNIX_BASED), true)
 	endif
 	SOURCES += $(WEBMPATH)/yuv_rgb.cpp
 else
-	override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
-	override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
+	override CXXFLAGS += -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
+	override CFLAGS += -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
 	override LDFLAGS += -lpthread -lvorbis -logg -lvpx -lz `pkg-config --libs sdl2 --static` -lwebm -Wno-narrowing -fexceptions
 	override LDLIBS += -lpthread -lvorbis -logg -lvpx -lz `pkg-config --libs sdl2 --static` -lwebm -Wno-narrowing -fexceptions
 endif
