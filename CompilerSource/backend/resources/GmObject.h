@@ -27,7 +27,7 @@ struct GmObject
   boolean persistent;
   int parentId;
   int maskId;
-  int polygonId;
+  // int polygonId;  // TODO: Uncomment if/when LGM supports polygons.
 
   MainEvent *mainEvents;
   int mainEventCount;
