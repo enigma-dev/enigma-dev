@@ -513,7 +513,7 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
     default: cout << "- Not transferring unknown " << root.name() << endl; break;
   }
 
-  for (auto child : root.child()) {
+  for (auto child : root.folder().children()) {
     int res = FlattenTree(child, gameData);
     if (res) return res;
   }
