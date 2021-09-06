@@ -4,7 +4,7 @@ If you find our tools useful, then please consider supporting ENIGMA on Patreon!
 
 [![Patreon](https://enigma-dev.org/site/images/v4/patreon.png)](https://www.patreon.com/m/enigma_dev) 
 
-Official Website: http://enigma-dev.org
+Official Website: https://enigma-dev.org
 
 ENIGMA, the Extensible Non-Interpreted Game Maker Augmentation, is an open-source, cross-platform game development environment based on the popular software, Game Maker. Its intent is to provide users with a quality game creation tool and a bridge between high- and low-level programming languages. It can be used either through an IDE, such as its sister project, [LateralGM](https://github.com/IsmAvatar/LateralGM), or its up-and-coming custom frontend, [RadialGM](https://github.com/enigma-dev/RadialGM), or also through its command line interface, [emake](CommandLine/emake).
 
@@ -13,9 +13,9 @@ Like Game Maker, ENIGMA comprises an easy to use Drag & Drop system as well as i
 Although EDL adopts GML's very lax syntax in its scripting, the inputted code is actually parsed and translated into valid C++. This compilation improves size and performance of the language by incredible amounts, while almost magically maintaining its simplicity of use.
 
 ## Install
-Please see http://enigma-dev.org/download.htm for installation instructions.
+Please see https://enigma-dev.org/download.htm for installation instructions.
 
 ## Documentation
 We have a community-led Wiki project hosted on our site where users contribute function and other API documentation. All you need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.
-* http://enigma-dev.org/forums/
-* http://enigma-dev.org/docs/Wiki/Main_Page
+* https://enigma-dev.org/forums/
+* https://enigma-dev.org/docs/Wiki/Main_Page
