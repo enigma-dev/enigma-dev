@@ -226,9 +226,8 @@ void wite_asset_enum(const std::filesystem::path& fName) {
   
   wto << "namespace enigma_user {\n\nenum AssetType : int {\n";
   
-  // "unknown" / "any" need to added manually
+  // ""any" needs to be added manually
   wto << "  asset_any = -2,\n";
-  wto << "  asset_unknown = -1,\n";
   
   buffers::TreeNode tn;
   google::protobuf::Message *m = &tn;
