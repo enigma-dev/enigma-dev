@@ -228,13 +228,7 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
       view_angle[i] = 0;
     }
-    
-    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
-    // The window is no longer moved, centered, or resized when switching rooms.
-    // This is always true, even if the room sizes are different.
-    enigma_user::window_default(false);
-    // window sized by first room, can make visible now
-    enigma_user::window_set_visible(true);
+
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition

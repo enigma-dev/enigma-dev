@@ -42,20 +42,9 @@ bool video_exists(int ind) {
 
 int video_add(std::string fname) {
   uvpx::Player *video = new uvpx::Player(uvpx::Player::defaultConfig());
-  uvpx::Player::LoadResult res = video->load(fname.c_str(), 1, true);
-  wp::WebmPlayer *audio = new wp::WebmPlayer; audio->load(fname.c_str());
-  id++; videos.insert(std::make_pair(id, video));
+  video->load(fname.c_str(), 1, true); wp::WebmPlayer *audio = new wp::WebmPlayer; 
+  audio->load(fname.c_str()); id++; videos.insert(std::make_pair(id, video));
   audios.insert(std::make_pair(id, audio));
-  switch (res) {
-   case uvpx::Player::LoadResult::FileNotExists:
-    printf("Failed to open video file '%s'\n", fname.c_str());
-   case uvpx::Player::LoadResult::UnsupportedVideoCodec:
-    printf("Unsupported video codec\n");
-   case uvpx::Player::LoadResult::NotInitialized:
-    printf("Video player not initialized\n");
-   case uvpx::Player::LoadResult::Success:
-    printf("Video loaded successfully\n");
-  }
   return id;
 }
 
