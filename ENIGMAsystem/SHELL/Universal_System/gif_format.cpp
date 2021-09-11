@@ -202,10 +202,10 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
   if (fp) {
     fseek(fp, 0, SEEK_END);
     size = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+    fseek(fp, 0, SEEK_SET);
     unsigned char* bytes = new unsigned char[size];
     fread(bytes, size, 1, fp);
-	fclose(fp);
+    fclose(fp);
     return bytes;
   }
   #else
