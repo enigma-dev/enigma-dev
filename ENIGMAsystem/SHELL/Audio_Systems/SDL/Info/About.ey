@@ -8,5 +8,3 @@ Author: Abhishek Kumar Jha
 
 Depends:
 	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD
-Represents:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD
