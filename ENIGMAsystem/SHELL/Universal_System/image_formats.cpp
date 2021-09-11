@@ -24,9 +24,10 @@
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
+#include "strings_util.h"
 
 #include <map>
-#include <fstream>      // std::ofstream
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <string>
@@ -259,7 +260,7 @@ int image_save(const std::string &filename, const unsigned char* data, unsigned 
 }
 
 std::vector<RawImage> image_load_bmp(const std::string &filename) {
-  if (std::ifstream bmp{filename, ios::in | ios::binary}) {
+  if (std::ifstream bmp{filename.c_str(), std::ios::in | std::ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
     return image_decode_bmp(buffer.str());
@@ -439,7 +440,12 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
 
 int image_save_bmp(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
+  #if !defined(_WIN32)
   FILE *bmp = fopen(filename.c_str(), "wb");
+  #else
+  std::wstring wfname = strings_util::widen(filename);
+  FILE *bmp = _wfopen(wfname.c_str(), L"wb");
+  #endif
   if (!bmp) return -1;
   fwrite("BM", 2, 1, bmp);
 
