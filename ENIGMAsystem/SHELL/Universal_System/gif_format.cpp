@@ -18,6 +18,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "image_formats.h"
+#include "strings_util.h"
 #include "nlpo2.h"
 
 #include <cstring>
@@ -195,6 +196,19 @@ unsigned int readBits2(unsigned char* bytes, size_t& pos, const size_t size, uns
 
 unsigned char* read_entire_file(const char* filename, size_t& size) 
 {
+  #if defined(_WIN32)
+  std::wstring wfname = strings_util::widen(filename);
+  FILE *fp = _wfopen(wfname.c_str(), L"rb");
+  if (fp) {
+    fseek(fp, 0, SEEK_END);
+    size = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+    unsigned char* bytes = new unsigned char[size];
+    fread(bytes, size, 1, fp);
+	fclose(fp);
+    return bytes;
+  }
+  #else
   std::ifstream input(filename, std::ios::binary|std::ios::ate);
   if (input.good()) {
     size = input.tellg();
@@ -203,6 +217,7 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
     input.read(reinterpret_cast<char*>(bytes), size);
     if (input) { return bytes; }
   }
+  #endif
   return 0;
 }
 
@@ -220,6 +235,7 @@ std::vector<RawImage> image_load_gif(const std::string& filename)
   std::vector<RawImage> res;
 
   //File input
+
   std::unique_ptr<unsigned char[]> bytes_c(read_entire_file(filename.c_str(), size));
   unsigned char *bytes = bytes_c.get();
   if (!bytes) { errno = ERR_FILE_CANT_OPEN; return res; }

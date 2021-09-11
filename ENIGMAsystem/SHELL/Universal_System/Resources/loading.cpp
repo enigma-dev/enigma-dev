@@ -140,10 +140,9 @@ namespace enigma
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
-    else {
-      enigma_user::window_default(false);
-      enigma_user::window_set_visible(true);
-    }
+
+    enigma_user::window_default(true);
+    enigma_user::window_set_visible(true);
 
     // resize and center window
     enigma_user::window_set_size(windowWidth, windowHeight);
