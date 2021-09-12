@@ -500,7 +500,7 @@ std::string glsl_program_get_infolog(int id)
 
 int glsl_shader_create(int type)
 {
-  return enigma::shaders.add(std::move(enigma::Shader(type)));
+  return enigma::shaders.add(enigma::Shader(type));
 }
 
 bool glsl_shader_load(int id, string fname)
@@ -561,7 +561,7 @@ void glsl_shader_free(int id)
 
 int glsl_program_create()
 {
-  return enigma::shaderprograms.add(std::move(enigma::ShaderProgram()));
+  return enigma::shaderprograms.add(enigma::ShaderProgram());
 }
 
 bool glsl_program_link(int id)

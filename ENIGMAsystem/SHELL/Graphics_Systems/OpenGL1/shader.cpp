@@ -68,7 +68,7 @@ using enigma::Shader;
 
 int glsl_shader_create(int type)
 {
-  return shaders.add(std::move(Shader(type)));
+  return shaders.add(Shader(type));
 }
 
 int glsl_shader_load(int id, string fname)
@@ -153,7 +153,7 @@ void glsl_shader_free(int id)
 
 int glsl_program_create()
 {
-  return shaderprograms.add(std::move(ShaderProgram()));
+  return shaderprograms.add(ShaderProgram());
 }
 
 bool glsl_program_link(int id)

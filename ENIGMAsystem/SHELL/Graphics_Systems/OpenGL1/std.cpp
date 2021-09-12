@@ -56,13 +56,13 @@ namespace enigma {
 
       //if (string(shaderstruct.type) != string("GLSL")) { continue; }
 
-      auto& vshader = shaders[shaders.add(std::move(Shader(enigma_user::sh_vertex)))];
+      auto& vshader = shaders[shaders.add(Shader(enigma_user::sh_vertex))];
       glShaderSource(vshader.shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
 
-      auto& fshader = shaders[shaders.add(std::move(Shader(enigma_user::sh_fragment)))];
+      auto& fshader = shaders[shaders.add(Shader(enigma_user::sh_fragment))];
       glShaderSource(fshader.shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
 
-      auto& program = shaderprograms[shaderprograms.add(std::move(ShaderProgram()))];
+      auto& program = shaderprograms[shaderprograms.add(ShaderProgram())];
 
       if (shaderstruct->precompile) {
         glCompileShader(vshader.shader);
