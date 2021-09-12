@@ -89,8 +89,8 @@
 
 namespace enigma
 {
-  AssetArray<enigma::Shader> shaders;
-  AssetArray<enigma::ShaderProgram> shaderprograms;
+  AssetArray<Shader> shaders;
+  AssetArray<ShaderProgram> shaderprograms;
  // std::vector<enigma::AttributeObject*> attributeobjects(0);
 
   extern unsigned default_shader;

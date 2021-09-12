@@ -43,9 +43,9 @@ namespace enigma {
         void destroy()
         {
             glDeleteShader(shader);
-            shader = -1;
+            shader = UINT_MAX;
         }
-        bool isDestroyed() const { return (shader == -1); }
+        bool isDestroyed() const { return (shader == UINT_MAX); }
     };
 
     union UAType{
@@ -151,9 +151,9 @@ namespace enigma {
         void destroy()
         {
             glDeleteProgram(shaderprogram);
-            shaderprogram = -1;
+            shaderprogram = UINT_MAX;
         }
-        bool isDestroyed() const { return (shaderprogram == -1); }
+        bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
     };
 }
 

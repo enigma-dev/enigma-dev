@@ -18,14 +18,15 @@
 #ifndef ENIGMA_GLSLSHADER_H
 #define ENIGMA_GLSLSHADER_H
 
+#include "OpenGLHeaders.h"
+#include "Universal_System/Resources/AssetArray.h"
+
 #include <vector>
 #include <string>
 #include <memory>
 
 using std::string;
 using std::vector;
-
-#include "OpenGLHeaders.h"
 
 namespace enigma {
 
@@ -39,10 +40,12 @@ struct Shader{
     shader = glCreateShader(shadertypes[type]);
   }
 
-  ~Shader()
+  void destroy()
   {
     glDeleteShader(shader);
+    shader = UINT_MAX;
   }
+  bool isDestroyed() const { return (shader == UINT_MAX); }
 };
 
 struct ShaderProgram{
@@ -53,14 +56,16 @@ struct ShaderProgram{
     shaderprogram = glCreateProgram();
   }
 
-  ~ShaderProgram()
+  void destroy()
   {
     glDeleteProgram(shaderprogram);
+    shaderprogram = UINT_MAX;
   }
+  bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
 };
 
-extern vector<std::unique_ptr<Shader>> shaders;
-extern vector<std::unique_ptr<ShaderProgram>> shaderprograms;
+extern AssetArray<Shader> shaders;
+extern AssetArray<ShaderProgram> shaderprograms;
 
 }
 

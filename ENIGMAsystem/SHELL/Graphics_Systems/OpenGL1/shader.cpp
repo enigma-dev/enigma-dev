@@ -37,12 +37,12 @@ GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
 };
 
-vector<std::unique_ptr<Shader>> shaders(0);
-vector<std::unique_ptr<ShaderProgram>> shaderprograms(0);
+AssetArray<Shader> shaders;
+AssetArray<ShaderProgram> shaderprograms;
 
 void cleanup_shaders() {
-  for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms[i] = nullptr;
-  for(size_t i = 0; i < shaders.size(); ++i) shaders[i] = nullptr;
+  for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms.destroy(i);
+  for(size_t i = 0; i < shaders.size(); ++i) shaders.destroy(i);
 }
 
 unsigned long getFileLength(ifstream& file)
@@ -68,9 +68,7 @@ using enigma::Shader;
 
 int glsl_shader_create(int type)
 {
-  unsigned int id = shaders.size();
-  shaders.push_back(std::make_unique<Shader>(type));
-  return id;
+  return shaders.add(std::move(Shader(type)));
 }
 
 int glsl_shader_load(int id, string fname)
@@ -150,23 +148,21 @@ string glsl_shader_get_infolog(int id)
 
 void glsl_shader_free(int id)
 {
-  shaders[id] = nullptr;
+  shaders.destroy(id);
 }
 
 int glsl_program_create()
 {
-  unsigned int id = shaderprograms.size();
-  shaderprograms.push_back(std::make_unique<ShaderProgram>());
-  return id;
+  return shaderprograms.add(std::move(ShaderProgram()));
 }
 
 bool glsl_program_link(int id)
 {
-//glBindFragDataLocation(shaderprograms[id]->shaderprogram, 0, "fragColor");
+//glBindFragDataLocation(shaderprograms[id].shaderprogram, 0, "fragColor");
 
-  glLinkProgram(shaderprograms[id]->shaderprogram);
+  glLinkProgram(shaderprograms[id].shaderprogram);
   GLint linked;
-  glGetProgramiv(shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
+  glGetProgramiv(shaderprograms[id].shaderprogram, GL_LINK_STATUS, &linked);
   if (linked)
   {
     return true;
@@ -177,9 +173,9 @@ bool glsl_program_link(int id)
 
 bool glsl_program_validate(int id)
 {
-  glValidateProgram(shaderprograms[id]->shaderprogram);
+  glValidateProgram(shaderprograms[id].shaderprogram);
   GLint validated;
-  glGetProgramiv(shaderprograms[id]->shaderprogram, GL_VALIDATE_STATUS, &validated);
+  glGetProgramiv(shaderprograms[id].shaderprogram, GL_VALIDATE_STATUS, &validated);
   if (validated)
   {
     return true;
@@ -190,18 +186,18 @@ bool glsl_program_validate(int id)
 
 void glsl_program_attach(int id, int sid)
 {
-  glAttachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
+  glAttachShader(shaderprograms[id].shaderprogram, shaders[sid].shader);
 }
 
 void glsl_program_detach(int id, int sid)
 {
-  glDetachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
+  glDetachShader(shaderprograms[id].shaderprogram, shaders[sid].shader);
 }
 
 void glsl_program_set(int id)
 {
   draw_batch_flush(batch_flush_deferred);
-  glUseProgram(shaderprograms[id]->shaderprogram);
+  glUseProgram(shaderprograms[id].shaderprogram);
 }
 
 void glsl_program_reset()
@@ -212,11 +208,11 @@ void glsl_program_reset()
 
 void glsl_program_free(int id)
 {
-  shaderprograms[id] = nullptr;
+  shaderprograms.destroy(id);
 }
 
 int glsl_get_uniform_location(int program, string name) {
-	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
+	return glGetUniformLocation(shaderprograms[program].shaderprogram, name.c_str());
 }
 
 void glsl_uniformf(int location, float v0) {
