@@ -35,7 +35,7 @@ namespace enigma {
         string log;
         GLuint shader;
         int type;
-        Shader(int type) : type(type)
+        Shader(int type) : log(""), shader(0), type(type), destroyed(false)
         {
             shader = glCreateShader(shadertypes[type]);
         }
@@ -43,11 +43,14 @@ namespace enigma {
         void destroy()
         {
             glDeleteShader(shader);
-            shader = UINT_MAX;
+            destroyed = true;
         }
-        bool isDestroyed() const { return (shader == UINT_MAX); }
+        bool isDestroyed() const { return destroyed; }
 
         static const char* getAssetTypeName() { return "shader"; }
+
+    private:
+        bool destroyed;
     };
 
     union UAType{
@@ -148,16 +151,20 @@ namespace enigma {
         {
             shaderprogram = glCreateProgram();
             name = "";
+            destroyed = false;
         }
 
         void destroy()
         {
             glDeleteProgram(shaderprogram);
-            shaderprogram = UINT_MAX;
+            destroyed = true;
         }
-        bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
+        bool isDestroyed() const { return destroyed; }
 
         static const char* getAssetTypeName() { return "shader program"; }
+
+    private:
+        bool destroyed;
     };
 }
 

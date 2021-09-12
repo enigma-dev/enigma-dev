@@ -32,7 +32,7 @@ extern GLenum shadertypes[];
 struct Shader{
   string log;
   GLuint shader;
-  Shader(int type)
+  Shader(int type): log(""), shader(0), destroyed(false)
   {
     shader = glCreateShader(shadertypes[type]);
   }
@@ -40,17 +40,20 @@ struct Shader{
   void destroy()
   {
     glDeleteShader(shader);
-    shader = UINT_MAX;
+    destroyed = true;
   }
-  bool isDestroyed() const { return (shader == UINT_MAX); }
+  bool isDestroyed() const { return destroyed; }
 
   static const char* getAssetTypeName() { return "shader"; }
+
+private:
+  bool destroyed;
 };
 
 struct ShaderProgram{
   GLuint shaderprogram;
 
-  ShaderProgram()
+  ShaderProgram(): shaderprogram(0), destroyed(false)
   {
     shaderprogram = glCreateProgram();
   }
@@ -58,11 +61,14 @@ struct ShaderProgram{
   void destroy()
   {
     glDeleteProgram(shaderprogram);
-    shaderprogram = UINT_MAX;
+    destroyed = true;
   }
-  bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
+  bool isDestroyed() const { return destroyed; }
 
   static const char* getAssetTypeName() { return "shader program"; }
+
+private:
+  bool destroyed;
 };
 
 extern AssetArray<Shader> shaders;
