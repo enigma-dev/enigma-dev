@@ -1224,7 +1224,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
-      node->mutable_unknown();
+      node->mutable_unknown_resource();
       errStream << "No map of ids to protocol buffers for GMK kind '" << kind
           << "' so tree node with name '" << name << "' will not have "
           << "its protocol buffer set" << std::endl;
