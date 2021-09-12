@@ -124,7 +124,7 @@ void graphics_apply_vertex_format(int format, size_t offset) {
   const auto& vertexFormat = vertexFormats[format];
 
   //Bind texture
-  glsl_uniformi_internal(shaderprograms[bound_shader]->uni_texSampler, 0);
+  glsl_uniformi_internal(shaderprograms[bound_shader].uni_texSampler, 0);
 
   glsl_attribute_enable_all_internal(false); //Disable all attributes
 
@@ -177,7 +177,7 @@ void graphics_apply_vertex_format(int format, size_t offset) {
     offset += size * sizeof(enigma::VertexElement);
   }
 
-  glsl_uniformf_internal(shaderprograms[bound_shader]->uni_color,
+  glsl_uniformf_internal(shaderprograms[bound_shader].uni_color,
                          (float)currentcolor[0]/255.0f,
                          (float)currentcolor[1]/255.0f,
                          (float)currentcolor[2]/255.0f,
@@ -187,11 +187,11 @@ void graphics_apply_vertex_format(int format, size_t offset) {
     GLint boundTex;
     glActiveTexture(GL_TEXTURE0);
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &boundTex);
-    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, boundTex != 0);
+    glsl_uniformi_internal(shaderprograms[bound_shader].uni_textureEnable, boundTex != 0);
   } else {
-    glsl_uniformi_internal(shaderprograms[bound_shader]->uni_textureEnable, 0);
+    glsl_uniformi_internal(shaderprograms[bound_shader].uni_textureEnable, 0);
   }
-  glsl_uniformi_internal(shaderprograms[bound_shader]->uni_colorEnable, useColors);
+  glsl_uniformi_internal(shaderprograms[bound_shader].uni_colorEnable, useColors);
 }
 
 } // namespace enigma

@@ -40,10 +40,12 @@ namespace enigma {
             shader = glCreateShader(shadertypes[type]);
         }
 
-        ~Shader()
+        void destroy()
         {
             glDeleteShader(shader);
+            shader = -1;
         }
+        bool isDestroyed() const { return (shader == -1); }
     };
 
     union UAType{
@@ -146,10 +148,12 @@ namespace enigma {
             name = "";
         }
 
-        ~ShaderProgram()
+        void destroy()
         {
             glDeleteProgram(shaderprogram);
+            shaderprogram = -1;
         }
+        bool isDestroyed() const { return (shaderprogram == -1); }
     };
 }
 

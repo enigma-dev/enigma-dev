@@ -97,7 +97,7 @@ int glsl_shader_load(int id, string fname)
 
   ShaderSource[i] = 0;  // 0-terminate it at the correct position
 
-  glShaderSource(shaders[id]->shader, 1, (const GLchar**)&ShaderSource, NULL);
+  glShaderSource(shaders[id].shader, 1, (const GLchar**)&ShaderSource, NULL);
 
   file.close();
   return 3; // No Error
@@ -105,25 +105,25 @@ int glsl_shader_load(int id, string fname)
 
 bool glsl_shader_compile(int id)
 {
-  glCompileShader(shaders[id]->shader);
+  glCompileShader(shaders[id].shader);
 
   GLint blen = 0;
   GLsizei slen = 0;
 
-  glGetShaderiv(shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);
+  glGetShaderiv(shaders[id].shader, GL_INFO_LOG_LENGTH , &blen);
 
   if (blen > 1)
   {
     GLchar* compiler_log = (GLchar*)malloc(blen);
 
-    glGetInfoLogARB(shaders[id]->shader, blen, &slen, compiler_log);
-    shaders[id]->log = (string)compiler_log;
+    glGetInfoLogARB(shaders[id].shader, blen, &slen, compiler_log);
+    shaders[id].log = (string)compiler_log;
   } else {
-    shaders[id]->log = "Shader compile log empty";
+    shaders[id].log = "Shader compile log empty";
   }
 
   GLint compiled;
-  glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+  glGetProgramiv(shaders[id].shader, GL_COMPILE_STATUS, &compiled);
   if (compiled)
   {
     return true;
@@ -134,7 +134,7 @@ bool glsl_shader_compile(int id)
 
 bool glsl_shader_get_compiled(int id) {
   GLint compiled;
-  glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+  glGetProgramiv(shaders[id].shader, GL_COMPILE_STATUS, &compiled);
   if (compiled)
   {
     return true;
@@ -145,7 +145,7 @@ bool glsl_shader_get_compiled(int id) {
 
 string glsl_shader_get_infolog(int id)
 {
-  return shaders[id]->log;
+  return shaders[id].log;
 }
 
 void glsl_shader_free(int id)
