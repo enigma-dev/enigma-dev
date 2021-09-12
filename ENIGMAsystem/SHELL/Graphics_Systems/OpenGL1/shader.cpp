@@ -16,9 +16,9 @@
 **/
 
 #include "shader.h"
-#include "GLSLshader.h"
 #include "OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSprimitives.h"
+#include "Universal_System/Resources/AssetArray.h"
 
 #include <iostream>
 #include <fstream>

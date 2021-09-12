@@ -17,7 +17,6 @@
 
 #include "std.h"
 #include "shader.h"
-#include "GLSLshader.h"
 
 #include "Graphics_Systems/OpenGL-Common/version.h"
 #include "Graphics_Systems/OpenGL-Common/screen.h"
