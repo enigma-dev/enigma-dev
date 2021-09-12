@@ -943,10 +943,10 @@ int glsl_get_attribute_location(int program, string name) {
   std::unordered_map<string,GLint>::const_iterator it = prog.attribute_names.find(name);
   if (it == prog.attribute_names.end()){
     #ifdef DEBUG_MODE
-      if (prog->name == ""){
+      if (prog.name.empty()){
         DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
+        DEBUG_MESSAGE("Program[" + prog.name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;

@@ -18,15 +18,15 @@
 #ifndef ENIGMA_GLSLSHADER_H
 #define ENIGMA_GLSLSHADER_H
 
+#include "OpenGLHeaders.h"
+
 //#include <functional> //For std::hash
-#include <vector>
 #include <string>
+#include <vector>
 #include <unordered_map>
 using std::string;
 using std::vector;
 using std::unordered_map;
-
-#include "OpenGLHeaders.h"
 
 namespace enigma {
   extern GLenum shadertypes[];
@@ -46,6 +46,8 @@ namespace enigma {
             shader = UINT_MAX;
         }
         bool isDestroyed() const { return (shader == UINT_MAX); }
+
+        static const char* getAssetTypeName() { return "shader"; }
     };
 
     union UAType{
@@ -154,6 +156,8 @@ namespace enigma {
             shaderprogram = UINT_MAX;
         }
         bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
+
+        static const char* getAssetTypeName() { return "shader program"; }
     };
 }
 
@@ -174,8 +178,5 @@ namespace enigma {
         }
     };
 }*/
-
-//extern vector<enigma::Shader*> shaders;
-//extern vector<enigma::ShaderProgram*> shaderprograms;
 
 #endif

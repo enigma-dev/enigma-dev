@@ -21,12 +21,9 @@
 #include "OpenGLHeaders.h"
 #include "Universal_System/Resources/AssetArray.h"
 
-#include <vector>
 #include <string>
-#include <memory>
 
 using std::string;
-using std::vector;
 
 namespace enigma {
 
@@ -46,6 +43,8 @@ struct Shader{
     shader = UINT_MAX;
   }
   bool isDestroyed() const { return (shader == UINT_MAX); }
+
+  static const char* getAssetTypeName() { return "shader"; }
 };
 
 struct ShaderProgram{
@@ -62,6 +61,8 @@ struct ShaderProgram{
     shaderprogram = UINT_MAX;
   }
   bool isDestroyed() const { return (shaderprogram == UINT_MAX); }
+
+  static const char* getAssetTypeName() { return "shader program"; }
 };
 
 extern AssetArray<Shader> shaders;
