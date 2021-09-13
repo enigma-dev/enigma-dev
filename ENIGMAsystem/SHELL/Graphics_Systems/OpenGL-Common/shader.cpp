@@ -41,7 +41,7 @@
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_uniform(uniter,location,usize)\
-    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    string name = enigma::shaderprograms[enigma::bound_shader].name;\
     char str[128];\
     if (name == ""){\
         sprintf(str, "Program[%i]", enigma::bound_shader);\
@@ -49,8 +49,8 @@
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
     if (location < 0) { DEBUG_MESSAGE(std::string(str) + " - Uniform location < 0 given (" + std::to_string(location) + ")!", MESSAGE_TYPE::M_ERROR); return; }\
-    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
-    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader].uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader].uniforms.end()){\
         DEBUG_MESSAGE(std::string(str) + " - Uniform at location " + std::to_string(location) + "  not found!", MESSAGE_TYPE::M_ERROR);\
         return;\
     }else if ( uniter->second.size != usize ){\
@@ -58,7 +58,7 @@
     }
 
   #define get_attribute(atiter,location)\
-    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    string name = enigma::shaderprograms[enigma::bound_shader].name;\
     char str[128];\
     if (name == ""){\
         sprintf(str, "Program[%i]", enigma::bound_shader);\
@@ -66,43 +66,31 @@
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
     if (location < 0) { DEBUG_MESSAGE(std::string(str) + " - Attribute location < 0 given (" + std::to_string(location) + ")!", MESSAGE_TYPE::M_ERROR); return; }\
-    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
-    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader].attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader].attributes.end()){\
         DEBUG_MESSAGE(std::string(str) + " - Attribute at location " + std::to_string(location) + " not found!", MESSAGE_TYPE::M_ERROR);\
         return;\
     }
-
-    #define get_program(ptiter,program,err)\
-    if (program < 0) { DEBUG_MESSAGE("Program id [" + std::to_string(program) + "] < 0 given!", MESSAGE_TYPE::M_ERROR); return err; }\
-    if (size_t(program) >= enigma::shaderprograms.size()) { DEBUG_MESSAGE("Program id [" + std::to_string(program) +"] > size() [" + std::to_string(enigma::shaderprograms.size()) +"] given!", MESSAGE_TYPE::M_ERROR); return err; }\
-    if (enigma::shaderprograms[program] == nullptr) { DEBUG_MESSAGE("Program with id [" + std::to_string(program) + "] is deleted!", MESSAGE_TYPE::M_ERROR); return err; }\
-    auto& ptiter = enigma::shaderprograms[program];
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
-    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
-    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader].uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader].uniforms.end()){\
         return;\
     }
 
     #define get_attribute(atiter,location)\
     if (location < 0) return; \
-    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
-    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader].attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader].attributes.end()){\
         return;\
     }
-
-    #define get_program(ptiter,program,err)\
-    if (program < 0) { return err; }\
-    if (size_t(program) >= enigma::shaderprograms.size()) { return err; }\
-    if (enigma::shaderprograms[program] == nullptr) { return err; }\
-    auto& ptiter = enigma::shaderprograms[program];
 #endif
 
 namespace enigma
 {
-  std::vector<std::unique_ptr<enigma::Shader>> shaders(0);
-  std::vector<std::unique_ptr<enigma::ShaderProgram>> shaderprograms(0);
+  AssetArray<Shader> shaders;
+  AssetArray<ShaderProgram> shaderprograms;
  // std::vector<enigma::AttributeObject*> attributeobjects(0);
 
   extern unsigned default_shader;
@@ -313,21 +301,21 @@ void main()
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;
-    glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORMS, &uniform_count);
-    glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
+    glGetProgramiv(enigma::shaderprograms[prog_id].shaderprogram, GL_ACTIVE_UNIFORMS, &uniform_count);
+    glGetProgramiv(enigma::shaderprograms[prog_id].shaderprogram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
     for (int i = 0; i < uniform_count; ++i)
     {
       Uniform uniform;
       char uniformName[max_length];
 
-      glGetActiveUniform(enigma::shaderprograms[prog_id]->shaderprogram, GLuint(i), max_length, NULL, &uniform.arraySize, &uniform.type, uniformName);
+      glGetActiveUniform(enigma::shaderprograms[prog_id].shaderprogram, GLuint(i), max_length, NULL, &uniform.arraySize, &uniform.type, uniformName);
 
       uniform.name = uniformName;
       uniform.size = getGLTypeSize(uniform.type);
       uniform.data.resize(uniform.size);
-      uniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id]->shaderprogram, uniformName);
-      enigma::shaderprograms[prog_id]->uniform_names[uniform.name] = uniform.location;
-      enigma::shaderprograms[prog_id]->uniforms[uniform.location] = uniform;
+      uniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id].shaderprogram, uniformName);
+      enigma::shaderprograms[prog_id].uniform_names[uniform.name] = uniform.location;
+      enigma::shaderprograms[prog_id].uniforms[uniform.location] = uniform;
       //printf("Program - %i - found uniform - %s - with size - %i\n", prog_id, uniform.name.c_str(), uniform.size);
 
       if (uniform.arraySize>1){ //It's an array
@@ -342,35 +330,35 @@ void main()
           std::ostringstream oss;
           oss << basename << "[" << c << "]";
           suniform.name = oss.str();
-          suniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id]->shaderprogram, suniform.name.c_str());
-          enigma::shaderprograms[prog_id]->uniform_names[suniform.name] = suniform.location;
-          enigma::shaderprograms[prog_id]->uniforms[suniform.location] = suniform;
+          suniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id].shaderprogram, suniform.name.c_str());
+          enigma::shaderprograms[prog_id].uniform_names[suniform.name] = suniform.location;
+          enigma::shaderprograms[prog_id].uniforms[suniform.location] = suniform;
           //printf("Program - %i - found uniform - %s - with size - %i\n", prog_id, suniform.name.c_str(), suniform.size);
         }
         uniform_count_arr += uniform.arraySize;
       }
     }
-    shaderprograms[prog_id]->uniform_count = uniform_count+uniform_count_arr;
+    shaderprograms[prog_id].uniform_count = uniform_count+uniform_count_arr;
   }
   void getAttributes(int prog_id){
     int attribute_count, max_length, attribute_count_arr = 0;
-    glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTES, &attribute_count);
-    glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_length);
+    glGetProgramiv(enigma::shaderprograms[prog_id].shaderprogram, GL_ACTIVE_ATTRIBUTES, &attribute_count);
+    glGetProgramiv(enigma::shaderprograms[prog_id].shaderprogram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_length);
     for (int i = 0; i < attribute_count; ++i)
     {
       Attribute attribute;
       char attributeName[max_length];
 
-      glGetActiveAttrib(enigma::shaderprograms[prog_id]->shaderprogram, GLuint(i), max_length, NULL, &attribute.arraySize, &attribute.type, attributeName);
+      glGetActiveAttrib(enigma::shaderprograms[prog_id].shaderprogram, GLuint(i), max_length, NULL, &attribute.arraySize, &attribute.type, attributeName);
 
       attribute.name = attributeName;
       attribute.size = getGLTypeSize(attribute.type);
-      attribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, attributeName);
+      attribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id].shaderprogram, attributeName);
       attribute.enabled = false;
       attribute.vao = -1;
       glDisableVertexAttribArray(attribute.location);
-      enigma::shaderprograms[prog_id]->attribute_names[attribute.name] = attribute.location;
-      enigma::shaderprograms[prog_id]->attributes[attribute.location] = attribute;
+      enigma::shaderprograms[prog_id].attribute_names[attribute.name] = attribute.location;
+      enigma::shaderprograms[prog_id].attributes[attribute.location] = attribute;
       //printf("Program - %i - found attribute - %s - with size - %i\n", prog_id, attribute.name.c_str(), attribute.size);
 
       if (attribute.arraySize>1){ //It's an array
@@ -384,67 +372,67 @@ void main()
           std::ostringstream oss;
           oss << basename << "[" << c << "]";
           sattribute.name = oss.str();
-          sattribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, sattribute.name.c_str());
-          enigma::shaderprograms[prog_id]->attribute_names[sattribute.name] = sattribute.location;
-          enigma::shaderprograms[prog_id]->attributes[sattribute.location] = sattribute;
+          sattribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id].shaderprogram, sattribute.name.c_str());
+          enigma::shaderprograms[prog_id].attribute_names[sattribute.name] = sattribute.location;
+          enigma::shaderprograms[prog_id].attributes[sattribute.location] = sattribute;
           //printf("Array: Program - %i - found attribute - %s - with size - %i\n", prog_id, sattribute.name.c_str(), sattribute.size);
         }
         attribute_count_arr += attribute.arraySize;
       }
     }
-    shaderprograms[prog_id]->attribute_count = attribute_count+attribute_count_arr;
+    shaderprograms[prog_id].attribute_count = attribute_count+attribute_count_arr;
   }
   void getDefaultUniforms(int prog_id){
-    shaderprograms[prog_id]->uni_viewMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[0]");
-    shaderprograms[prog_id]->uni_projectionMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[1]");
-    shaderprograms[prog_id]->uni_modelMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[2]");
-    shaderprograms[prog_id]->uni_mvMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[3]");
-    shaderprograms[prog_id]->uni_mvpMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[4]");
-    shaderprograms[prog_id]->uni_normalMatrix = enigma_user::glsl_get_uniform_location(prog_id, "normalMatrix");
-    shaderprograms[prog_id]->uni_texSampler = enigma_user::glsl_get_uniform_location(prog_id, "en_TexSampler");
+    shaderprograms[prog_id].uni_viewMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[0]");
+    shaderprograms[prog_id].uni_projectionMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[1]");
+    shaderprograms[prog_id].uni_modelMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[2]");
+    shaderprograms[prog_id].uni_mvMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[3]");
+    shaderprograms[prog_id].uni_mvpMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[4]");
+    shaderprograms[prog_id].uni_normalMatrix = enigma_user::glsl_get_uniform_location(prog_id, "normalMatrix");
+    shaderprograms[prog_id].uni_texSampler = enigma_user::glsl_get_uniform_location(prog_id, "en_TexSampler");
 
-    shaderprograms[prog_id]->uni_textureEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
-    shaderprograms[prog_id]->uni_colorEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_ColorEnabled");
-    shaderprograms[prog_id]->uni_lightEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_LightingEnabled");
-    shaderprograms[prog_id]->uni_fogVSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_VS_FogEnabled");
-    shaderprograms[prog_id]->uni_fogPSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_PS_FogEnabled");
-    shaderprograms[prog_id]->uni_fogColor = enigma_user::glsl_get_uniform_location(prog_id, "en_FogColor");
-    shaderprograms[prog_id]->uni_fogStart = enigma_user::glsl_get_uniform_location(prog_id, "en_FogStart");
-    shaderprograms[prog_id]->uni_fogRange = enigma_user::glsl_get_uniform_location(prog_id, "en_RcpFogRange");
-    shaderprograms[prog_id]->uni_alphaTestEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestEnabled");
+    shaderprograms[prog_id].uni_textureEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
+    shaderprograms[prog_id].uni_colorEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_ColorEnabled");
+    shaderprograms[prog_id].uni_lightEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_LightingEnabled");
+    shaderprograms[prog_id].uni_fogVSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_VS_FogEnabled");
+    shaderprograms[prog_id].uni_fogPSEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_PS_FogEnabled");
+    shaderprograms[prog_id].uni_fogColor = enigma_user::glsl_get_uniform_location(prog_id, "en_FogColor");
+    shaderprograms[prog_id].uni_fogStart = enigma_user::glsl_get_uniform_location(prog_id, "en_FogStart");
+    shaderprograms[prog_id].uni_fogRange = enigma_user::glsl_get_uniform_location(prog_id, "en_RcpFogRange");
+    shaderprograms[prog_id].uni_alphaTestEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestEnabled");
 
-    shaderprograms[prog_id]->uni_alphaTest = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestValue");
-    shaderprograms[prog_id]->uni_color = enigma_user::glsl_get_uniform_location(prog_id, "en_BoundColor");
-    shaderprograms[prog_id]->uni_ambient_color = enigma_user::glsl_get_uniform_location(prog_id, "en_AmbientColor");
-    shaderprograms[prog_id]->uni_lights_active = enigma_user::glsl_get_uniform_location(prog_id, "en_ActiveLights");
+    shaderprograms[prog_id].uni_alphaTest = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestValue");
+    shaderprograms[prog_id].uni_color = enigma_user::glsl_get_uniform_location(prog_id, "en_BoundColor");
+    shaderprograms[prog_id].uni_ambient_color = enigma_user::glsl_get_uniform_location(prog_id, "en_AmbientColor");
+    shaderprograms[prog_id].uni_lights_active = enigma_user::glsl_get_uniform_location(prog_id, "en_ActiveLights");
 
     char tchars[64];
     for (unsigned int i=0; i<8; ++i){
       sprintf(tchars, "Light[%d].Position", i);
-      shaderprograms[prog_id]->uni_light_position[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_position[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].La", i);
-      shaderprograms[prog_id]->uni_light_ambient[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_ambient[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].Ld", i);
-      shaderprograms[prog_id]->uni_light_diffuse[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_diffuse[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].Ls", i);
-      shaderprograms[prog_id]->uni_light_specular[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_specular[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].cA", i);
-      shaderprograms[prog_id]->uni_light_cAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_cAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].lA", i);
-      shaderprograms[prog_id]->uni_light_lAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_lAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
       sprintf(tchars, "Light[%d].qA", i);
-      shaderprograms[prog_id]->uni_light_qAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+      shaderprograms[prog_id].uni_light_qAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
     }
-    shaderprograms[prog_id]->uni_material_ambient = enigma_user::glsl_get_uniform_location(prog_id, "Material.Ka");
-    shaderprograms[prog_id]->uni_material_diffuse = enigma_user::glsl_get_uniform_location(prog_id, "Material.Kd");
-    shaderprograms[prog_id]->uni_material_specular = enigma_user::glsl_get_uniform_location(prog_id, "Material.Ks");
-    shaderprograms[prog_id]->uni_material_shininess = enigma_user::glsl_get_uniform_location(prog_id, "Material.Shininess");
+    shaderprograms[prog_id].uni_material_ambient = enigma_user::glsl_get_uniform_location(prog_id, "Material.Ka");
+    shaderprograms[prog_id].uni_material_diffuse = enigma_user::glsl_get_uniform_location(prog_id, "Material.Kd");
+    shaderprograms[prog_id].uni_material_specular = enigma_user::glsl_get_uniform_location(prog_id, "Material.Ks");
+    shaderprograms[prog_id].uni_material_shininess = enigma_user::glsl_get_uniform_location(prog_id, "Material.Shininess");
   }
   void getDefaultAttributes(int prog_id){
-    shaderprograms[prog_id]->att_vertex = enigma_user::glsl_get_attribute_location(prog_id, "in_Position");
-    shaderprograms[prog_id]->att_color = enigma_user::glsl_get_attribute_location(prog_id, "in_Color");
-    shaderprograms[prog_id]->att_texture = enigma_user::glsl_get_attribute_location(prog_id, "in_TextureCoord");
-    shaderprograms[prog_id]->att_normal = enigma_user::glsl_get_attribute_location(prog_id, "in_Normal");
+    shaderprograms[prog_id].att_vertex = enigma_user::glsl_get_attribute_location(prog_id, "in_Position");
+    shaderprograms[prog_id].att_color = enigma_user::glsl_get_attribute_location(prog_id, "in_Color");
+    shaderprograms[prog_id].att_texture = enigma_user::glsl_get_attribute_location(prog_id, "in_TextureCoord");
+    shaderprograms[prog_id].att_normal = enigma_user::glsl_get_attribute_location(prog_id, "in_Normal");
   }
 
   //This seems very stupid for me, but I don't know any more "elegant" way - Harijs G.
@@ -478,43 +466,41 @@ std::string glsl_shader_get_infolog(int id)
 {
   GLint blen = 0;
   GLsizei slen = 0;
-  glGetShaderiv(enigma::shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);
+  glGetShaderiv(enigma::shaders[id].shader, GL_INFO_LOG_LENGTH , &blen);
   if (blen > 1)
   {
     GLchar* compiler_log = (GLchar*)malloc(blen);
-    glGetShaderInfoLog(enigma::shaders[id]->shader, blen, &slen, compiler_log);
-    enigma::shaders[id]->log = (string)compiler_log;
+    glGetShaderInfoLog(enigma::shaders[id].shader, blen, &slen, compiler_log);
+    enigma::shaders[id].log = (string)compiler_log;
     free(compiler_log);
   } else {
-    enigma::shaders[id]->log = "Shader log empty";
+    enigma::shaders[id].log = "Shader log empty";
   }
-  return enigma::shaders[id]->log;
+  return enigma::shaders[id].log;
 }
 
 std::string glsl_program_get_infolog(int id)
 {
   GLint blen = 0;
   GLsizei slen = 0;
-  glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_INFO_LOG_LENGTH , &blen);
+  glGetProgramiv(enigma::shaderprograms[id].shaderprogram, GL_INFO_LOG_LENGTH , &blen);
 
   if (blen > 1)
   {
     GLchar* compiler_log = (GLchar*)malloc(blen);
-    glGetProgramInfoLog(enigma::shaderprograms[id]->shaderprogram, blen, &slen, compiler_log);
-    enigma::shaderprograms[id]->log = (string)compiler_log;
+    glGetProgramInfoLog(enigma::shaderprograms[id].shaderprogram, blen, &slen, compiler_log);
+    enigma::shaderprograms[id].log = (string)compiler_log;
     free(compiler_log);
   } else {
-    enigma::shaderprograms[id]->log = "Shader program log empty";
+    enigma::shaderprograms[id].log = "Shader program log empty";
   }
   
-  return enigma::shaderprograms[id]->log;
+  return enigma::shaderprograms[id].log;
 }
 
 int glsl_shader_create(int type)
 {
-  unsigned int id = enigma::shaders.size();
-  enigma::shaders.push_back(std::make_unique<enigma::Shader>(type));
-  return id;
+  return enigma::shaders.add(enigma::Shader(type));
 }
 
 bool glsl_shader_load(int id, string fname)
@@ -523,36 +509,36 @@ bool glsl_shader_load(int id, string fname)
   std::string shaderSource((std::istreambuf_iterator<char>(ifs) ),
                      (std::istreambuf_iterator<char>()    ));
   string source;
-  if (enigma::shaders[id]->type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
-  if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
+  if (enigma::shaders[id].type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
+  if (enigma::shaders[id].type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
   const char *ShaderSource = source.c_str();
-  glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
+  glShaderSource(enigma::shaders[id].shader, 1, &ShaderSource, NULL);
   return true; // No Error
 }
 
 bool glsl_shader_load_string(int id, string shaderSource)
 {
   string source;
-  if (enigma::shaders[id]->type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
-  if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
+  if (enigma::shaders[id].type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
+  if (enigma::shaders[id].type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
   const char *ShaderSource = source.c_str();
-  glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
+  glShaderSource(enigma::shaders[id].shader, 1, &ShaderSource, NULL);
   return true; // No Error
 }
 
 bool glsl_shader_compile(int id)
 {
-  glCompileShader(enigma::shaders[id]->shader);
+  glCompileShader(enigma::shaders[id].shader);
 
   GLint compiled;
-  glGetShaderiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+  glGetShaderiv(enigma::shaders[id].shader, GL_COMPILE_STATUS, &compiled);
   if (compiled){
     return true;
   } else {
     DEBUG_MESSAGE("Shader[" + std::to_string(id) + "] " + 
-      (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") + " - Compilation failed - Info log: " + 
+      (enigma::shaders[id].type == sh_vertex?"Vertex shader":"Pixel shader") + " - Compilation failed - Info log: " + 
       glsl_shader_get_infolog(id), MESSAGE_TYPE::M_ERROR);
     return false;
   }
@@ -560,7 +546,7 @@ bool glsl_shader_compile(int id)
 
 bool glsl_shader_get_compiled(int id) {
   GLint compiled;
-  glGetShaderiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+  glGetShaderiv(enigma::shaders[id].shader, GL_COMPILE_STATUS, &compiled);
   if (compiled){
     return true;
   } else {
@@ -570,21 +556,19 @@ bool glsl_shader_get_compiled(int id) {
 
 void glsl_shader_free(int id)
 {
-  enigma::shaders[id] = nullptr;
+  enigma::shaders.destroy(id);
 }
 
 int glsl_program_create()
 {
-  unsigned int id = enigma::shaderprograms.size();
-  enigma::shaderprograms.push_back(std::make_unique<enigma::ShaderProgram>());
-  return id;
+  return enigma::shaderprograms.add(enigma::ShaderProgram());
 }
 
 bool glsl_program_link(int id)
 {
-  glLinkProgram(enigma::shaderprograms[id]->shaderprogram);
+  glLinkProgram(enigma::shaderprograms[id].shaderprogram);
   GLint linked;
-  glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
+  glGetProgramiv(enigma::shaderprograms[id].shaderprogram, GL_LINK_STATUS, &linked);
 
 	if (linked){
     enigma::getUniforms(id);
@@ -601,9 +585,9 @@ bool glsl_program_link(int id)
 
 bool glsl_program_validate(int id)
 {
-  glValidateProgram(enigma::shaderprograms[id]->shaderprogram);
+  glValidateProgram(enigma::shaderprograms[id].shaderprogram);
   GLint validated;
-  glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_VALIDATE_STATUS, &validated);
+  glGetProgramiv(enigma::shaderprograms[id].shaderprogram, GL_VALIDATE_STATUS, &validated);
 
   if (validated){
     return true;
@@ -616,12 +600,12 @@ bool glsl_program_validate(int id)
 
 void glsl_program_attach(int id, int sid)
 {
-  glAttachShader(enigma::shaderprograms[id]->shaderprogram, enigma::shaders[sid]->shader);
+  glAttachShader(enigma::shaderprograms[id].shaderprogram, enigma::shaders[sid].shader);
 }
 
 void glsl_program_detach(int id, int sid)
 {
-  glDetachShader(enigma::shaderprograms[id]->shaderprogram, enigma::shaders[sid]->shader);
+  glDetachShader(enigma::shaderprograms[id].shaderprogram, enigma::shaders[sid].shader);
 }
 
 void glsl_program_set(int id)
@@ -629,7 +613,7 @@ void glsl_program_set(int id)
   if (enigma::bound_shader != unsigned(id)) {
     enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
     enigma::bound_shader = id;
-    glUseProgram(enigma::shaderprograms[id]->shaderprogram);
+    glUseProgram(enigma::shaderprograms[id].shaderprogram);
   }
 }
 
@@ -643,7 +627,7 @@ void glsl_program_reset()
     //if (enigma::bound_shader != enigma::main_shader){ //This doesn't work because enigma::bound_shader is the same as enigma::main_shader at start
         enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
         enigma::bound_shader = enigma::main_shader;
-        glUseProgram(enigma::shaderprograms[enigma::main_shader]->shaderprogram);
+        glUseProgram(enigma::shaderprograms[enigma::main_shader].shaderprogram);
     //}
 }
 
@@ -657,22 +641,22 @@ void glsl_program_default_reset(){
 
 void glsl_program_free(int id)
 {
-  enigma::shaderprograms[id] = nullptr;
+  enigma::shaderprograms.destroy(id);
 }
 
 void glsl_program_set_name(int id, string name){
-  enigma::shaderprograms[id]->name = name;
+  enigma::shaderprograms[id].name = name;
 }
 
 int glsl_get_uniform_location(int program, string name) {
-	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-	std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
-  if (it == enigma::shaderprograms[program]->uniform_names.end()){
+	//int uni = glGetUniformLocation(enigma::shaderprograms[program].shaderprogram, name.c_str());
+	std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program].uniform_names.find(name);
+  if (it == enigma::shaderprograms[program].uniform_names.end()){
     #ifdef DEBUG_MODE
-      if (enigma::shaderprograms[program]->name == ""){
+      if (enigma::shaderprograms[program].name == ""){
         DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-       DEBUG_MESSAGE("Program[" + enigma::shaderprograms[program]->name + " = " + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
+       DEBUG_MESSAGE("Program[" + enigma::shaderprograms[program].name + " = " + std::to_string(program) + "] - Uniform " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;
@@ -955,14 +939,14 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
 
 //Attributes
 int glsl_get_attribute_location(int program, string name) {
-  get_program(prog, program, -1);
-  std::unordered_map<string,GLint>::iterator it = prog->attribute_names.find(name);
-  if (it == prog->attribute_names.end()){
+  const auto& prog = enigma::shaderprograms.get(program);
+  std::unordered_map<string,GLint>::const_iterator it = prog.attribute_names.find(name);
+  if (it == prog.attribute_names.end()){
     #ifdef DEBUG_MODE
-      if (prog->name == ""){
+      if (prog.name.empty()){
         DEBUG_MESSAGE("Program[" + std::to_string(program) + "] - Attribute " + name + "not found!", MESSAGE_TYPE::M_ERROR);
       }else{
-        DEBUG_MESSAGE("Program[" + prog->name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
+        DEBUG_MESSAGE("Program[" + prog.name + " =  " + std::to_string(program) + "] - Attribute " + name + " not found!", MESSAGE_TYPE::M_ERROR);
       }
     #endif
     return -1;
@@ -972,7 +956,7 @@ int glsl_get_attribute_location(int program, string name) {
 }
 
 void glsl_attribute_enable_all(bool enable){
-  for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+  for ( auto &it : enigma::shaderprograms[enigma::bound_shader].attributes ){
     if (enable != it.second.enabled){
       enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
       if (enable == true){
@@ -1050,7 +1034,7 @@ namespace enigma
   }
 
   void glsl_attribute_enable_all_internal(bool enable){
-    for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+    for ( auto &it : enigma::shaderprograms[enigma::bound_shader].attributes ){
       if (enable != it.second.enabled){
         if (enable == true){
           glEnableVertexAttribArray( it.second.location );
@@ -1088,7 +1072,7 @@ namespace enigma
   }
 
   void cleanup_shaders() {
-    for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms[i] = nullptr;
-    for(size_t i = 0; i < shaders.size(); ++i) shaders[i] = nullptr;
+    for(size_t i = 0; i < shaderprograms.size(); ++i) shaderprograms.destroy(i);
+    for(size_t i = 0; i < shaders.size(); ++i) shaders.destroy(i);
   }
 }

@@ -23,6 +23,7 @@
 #include "OpenGLHeaders.h"
 
 #include "Universal_System/var4.h"
+#include "Universal_System/Resources/AssetArray.h"
 
 #include <string>
 #include <memory>
@@ -33,8 +34,8 @@ namespace enigma
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern unsigned bound_shader;
-  extern vector<std::unique_ptr<ShaderProgram>> shaderprograms;
-  extern vector<std::unique_ptr<Shader>> shaders;
+  extern AssetArray<ShaderProgram> shaderprograms;
+  extern AssetArray<Shader> shaders;
 
   std::string getVertexShaderPrefix();
   std::string getFragmentShaderPrefix();
