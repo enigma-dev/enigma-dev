@@ -22,6 +22,8 @@ namespace fs = std::filesystem;
 using namespace grpc;
 using namespace buffers;
 
+std::promise<void> exit_requested;
+
 class CompilerServiceImpl final : public Compiler::Service {
   public:
   explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options, CallBack &ecb):
@@ -168,6 +170,11 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status Teardown(ServerContext*, const ::buffers::Empty*, ::buffers::Empty*) override {
+    exit_requested.set_value();
+    return Status::OK;
+  }
+
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
@@ -182,6 +189,16 @@ int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &o
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << address << std::endl;
-  server->Wait();
+
+  auto serveFn = [&]() {
+    server->Wait();
+  };
+
+  std::thread serving_thread(serveFn);
+  auto f = exit_requested.get_future();
+  f.wait();
+  server->Shutdown();
+  serving_thread.join();
+
   return 0;
 }
