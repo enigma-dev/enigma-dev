@@ -127,6 +127,28 @@ class CompilerServiceImpl final : public Compiler::Service {
         if (author.empty())
           author = about.get("maintainer");
 
+        eyit represents = about.values.find("represents");
+        if (represents != about.values.end()) {
+          std::string repsStr = (represents->second)->data().get("build-platforms");
+          std::stringstream ss(repsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_represents(token);
+          }
+        }
+
+        eyit depends = about.values.find("depends");
+        if (depends != about.values.end()) {
+          std::string depsStr = (depends->second)->data().get("build-platforms");
+          std::stringstream ss(depsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_depends(token);
+          }
+        }
+
         subInfo->set_name(name);
         subInfo->set_id(id);
         subInfo->set_description(desc);
