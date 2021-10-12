@@ -88,11 +88,11 @@ namespace datetime {
 
   int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
     int result = -1; // returns -1 on failure
-	#if defined(_WIN32)
+    #if defined(_WIN32)
     std::wstring wfname = widen(fname);
     struct _stat info = { 0 }; 
     result = _wstat(wfname.c_str(), &info);
-	#else
+    #else
     struct stat info = { 0 }; 
     result = stat(fname, &info);
     #endif
