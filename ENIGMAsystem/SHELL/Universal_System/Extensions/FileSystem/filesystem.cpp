@@ -99,12 +99,12 @@ namespace datetime {
     time_t time = modified ? info.st_mtime : info.st_atime;
     if (result == -1) return result; // failure: stat errored
     struct tm *timeinfo = std::localtime(&time);
-    if      (type == dt_year)   return timeinfo->tm_year + 1900;
-    else if (type == dt_month)  return timeinfo->tm_mon  + 1;
-    else if (type == dt_day)    return timeinfo->tm_mday;
-    else if (type == dt_hour)   return timeinfo->tm_hour;
-    else if (type == dt_minute) return timeinfo->tm_min;
-    else if (type == dt_second) return timeinfo->tm_sec;
+    if      (type == 0) return timeinfo->tm_year + 1900;
+    else if (type == 1) return timeinfo->tm_mon  + 1;
+    else if (type == 2) return timeinfo->tm_mday;
+    else if (type == 3) return timeinfo->tm_hour;
+    else if (type == 4) return timeinfo->tm_min;
+    else if (type == 5) return timeinfo->tm_sec;
     else return result; // failure: enum value not found
   }
 
@@ -526,62 +526,62 @@ namespace filesystem {
 
   int file_get_date_accessed_year(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_year);
+    return file_get_date_accessed_modified(fname.c_str(), false, 0);
   }
 
   int file_get_date_accessed_month(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_month);
+    return file_get_date_accessed_modified(fname.c_str(), false, 1);
   }
 
   int file_get_date_accessed_day(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_day);
+    return file_get_date_accessed_modified(fname.c_str(), false, 2);
   }
 
   int file_get_date_accessed_hour(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_hour);
+    return file_get_date_accessed_modified(fname.c_str(), false, 3);
   }
 
   int file_get_date_accessed_minute(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_minute);
+    return file_get_date_accessed_modified(fname.c_str(), false, 4);
   }
 
   int file_get_date_accessed_second(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), false, dt_second);
+    return file_get_date_accessed_modified(fname.c_str(), false, 5);
   }
 
   int file_get_date_modified_year(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_year);
+    return file_get_date_accessed_modified(fname.c_str(), true, 0);
   }
 
   int file_get_date_modified_month(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_month);
+    return file_get_date_accessed_modified(fname.c_str(), true, 1);
   }
 
   int file_get_date_modified_day(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_day);
+    return file_get_date_accessed_modified(fname.c_str(), true, 2);
   }
 
   int file_get_date_modified_hour(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_hour);
+    return file_get_date_accessed_modified(fname.c_str(), true, 3);
   }
 
   int file_get_date_modified_minute(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_minute);
+    return file_get_date_accessed_modified(fname.c_str(), true, 4);
   }
 
   int file_get_date_modified_second(string fname) {
     fname = environment_expand_variables(fname);
-    return file_get_date_accessed_modified(fname.c_str(), true, dt_second);
+    return file_get_date_accessed_modified(fname.c_str(), true, 5);
   }
 
 } // namespace filesystem
