@@ -72,12 +72,12 @@ namespace enigma_fs {
 namespace enigma_user {
 
   using namespace enigma_fs;
-  #define get_working_directory fs_get_working_directory()
+  #define working_directory fs_get_working_directory()
   #define set_working_directory(x) fs_set_working_directory(x)
-  #define get_temp_directory fs_get_temp_directory()
-  #define get_program_directory fs_get_program_directory()
-  #define get_program_filename fs_get_program_filename()
-  #define get_program_pathname fs_get_program_pathname()
+  #define temp_directory fs_get_temp_directory()
+  #define program_directory fs_get_program_directory()
+  #define program_filename fs_get_program_filename()
+  #define program_pathname fs_get_program_pathname()
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
   #define file_exists(x) fs_file_exists(x)
