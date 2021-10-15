@@ -30,8 +30,6 @@
 #include <ctime>
 #include <cstddef>
 
-#include "Universal_System/var4.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
