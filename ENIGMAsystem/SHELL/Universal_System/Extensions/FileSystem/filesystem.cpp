@@ -606,12 +606,12 @@ namespace filesystem {
       fclose(fp);
       return fd;
 	}
-	#else
+    #else
     std::ofstream stream(fname.c_str());
     stream.close(); FILE *fp = nullptr;
-	if (mode == 0) {
-	  fp = fopen(fname.c_str(), L"rb");
-	} else if (mode == 1) {
+    if (mode == 0) {
+      fp = fopen(fname.c_str(), L"rb");
+    } else if (mode == 1) {
       fp = fopen(fname.c_str(), L"wb");
     } else if (mode == 2) {
       fp = fopen(fname.c_str(), L"w+b");
@@ -624,7 +624,7 @@ namespace filesystem {
       int fd = dup(fileno(fp));
       fclose(fp);
       return fd;
-	}
+    }
     #endif
     return -1;
   }
@@ -654,7 +654,7 @@ namespace filesystem {
   long file_bin_position(int fd) {
     #if defined(_WIN32)
     return _lseek(fd, 0, SEEK_CUR);
-	#else
+    #else
     return lseek(fd, 0, SEEK_CUR);
     #endif
   }
@@ -662,7 +662,7 @@ namespace filesystem {
   long file_bin_seek(int fd, long pos) {
     #if defined(_WIN32)
     return _lseek(fd, pos, SEEK_CUR);
-	#else
+    #else
     return lseek(fd, pos, SEEK_CUR);
     #endif
   }
