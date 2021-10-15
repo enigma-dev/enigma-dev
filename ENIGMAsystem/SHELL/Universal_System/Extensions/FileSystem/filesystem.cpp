@@ -594,15 +594,15 @@ namespace filesystem {
     std::wofstream wstream(wfname.c_str());
     wstream.close(); FILE *fp = nullptr;
 	if (mode == 0) {
-	  fp = _wfopen(wfname.c_str(), L"rb");
+	  fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8");
 	} else if (mode == 1) {
-      fp = _wfopen(wfname.c_str(), L"wb");
+      fp = _wfopen(wfname.c_str(), L"wb, ccs=UTF-8");
     } else if (mode == 2) {
-      fp = _wfopen(wfname.c_str(), L"w+b");
+      fp = _wfopen(wfname.c_str(), L"w+b, ccs=UTF-8");
     } else if (mode == 3) {
-      fp = _wfopen(wfname.c_str(), L"ab");
+      fp = _wfopen(wfname.c_str(), L"ab, ccs=UTF-8");
     } else if (mode == 4) {
-      fp = _wfopen(wfname.c_str(), L"a+b");
+      fp = _wfopen(wfname.c_str(), L"a+b, ccs=UTF-8");
     }
     if (fp) {
       int fd = _dup(_fileno(fp));
@@ -613,15 +613,15 @@ namespace filesystem {
     std::ofstream stream(fname.c_str());
     stream.close(); FILE *fp = nullptr;
     if (mode == 0) {
-      fp = fopen(fname.c_str(), L"rb");
+      fp = fopen(fname.c_str(), "rb");
     } else if (mode == 1) {
-      fp = fopen(fname.c_str(), L"wb");
+      fp = fopen(fname.c_str(), "wb");
     } else if (mode == 2) {
-      fp = fopen(fname.c_str(), L"w+b");
+      fp = fopen(fname.c_str(), "w+b");
     } else if (mode == 3) {
-      fp = fopen(fname.c_str(), L"ab");
+      fp = fopen(fname.c_str(), "ab");
     } else if (mode == 4) {
-      fp = fopen(fname.c_str(), L"a+b");
+      fp = fopen(fname.c_str(), "a+b");
     }
     if (fp) {
       int fd = dup(fileno(fp));
