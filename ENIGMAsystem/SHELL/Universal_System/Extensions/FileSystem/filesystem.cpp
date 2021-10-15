@@ -593,9 +593,9 @@ namespace filesystem {
     wstring wfname = widen(fname);
     std::wofstream wstream(wfname.c_str());
     wstream.close(); FILE *fp = nullptr;
-	if (mode == 0) {
-	  fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8");
-	} else if (mode == 1) {
+    if (mode == 0) {
+      fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8");
+    } else if (mode == 1) {
       fp = _wfopen(wfname.c_str(), L"wb, ccs=UTF-8");
     } else if (mode == 2) {
       fp = _wfopen(wfname.c_str(), L"w+b, ccs=UTF-8");
@@ -608,7 +608,7 @@ namespace filesystem {
       int fd = _dup(_fileno(fp));
       fclose(fp);
       return fd;
-	}
+    }
     #else
     std::ofstream stream(fname.c_str());
     stream.close(); FILE *fp = nullptr;
