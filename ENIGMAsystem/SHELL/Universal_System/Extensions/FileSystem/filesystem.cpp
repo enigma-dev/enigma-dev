@@ -584,6 +584,107 @@ namespace filesystem {
     return file_get_date_accessed_modified(fname.c_str(), true, 5);
   }
 
+  int file_bin_open(string fname, int mode) {
+    fname = environment_expand_variables(fname);
+    #if defined(_WIN32)
+    wstring wfname = widen(fname);
+    std::wofstream wstream(wfname.c_str());
+    wstream.close(); FILE *fp = nullptr;
+	if (mode == 0) {
+	  fp = _wfopen(wfname.c_str(), L"rb");
+	} else if (mode == 1) {
+      fp = _wfopen(wfname.c_str(), L"wb");
+    } else if (mode == 2) {
+      fp = _wfopen(wfname.c_str(), L"w+b");
+    } else if (mode == 3) {
+      fp = _wfopen(wfname.c_str(), L"ab");
+    } else if (mode == 4) {
+      fp = _wfopen(wfname.c_str(), L"a+b");
+    }
+    if (fp) {
+      int fd = _dup(_fileno(fp));
+      fclose(fp);
+      return fd;
+	}
+	#else
+    std::ofstream stream(fname.c_str());
+    stream.close(); FILE *fp = nullptr;
+	if (mode == 0) {
+	  fp = fopen(fname.c_str(), L"rb");
+	} else if (mode == 1) {
+      fp = fopen(fname.c_str(), L"wb");
+    } else if (mode == 2) {
+      fp = fopen(fname.c_str(), L"w+b");
+    } else if (mode == 3) {
+      fp = fopen(fname.c_str(), L"ab");
+    } else if (mode == 4) {
+      fp = fopen(fname.c_str(), L"a+b");
+    }
+    if (fp) {
+      int fd = dup(fileno(fp));
+      fclose(fp);
+      return fd;
+	}
+    #endif
+    return -1;
+  }
+  
+  int file_bin_rewrite(int fd) {
+    return _chsize(fd, 0);
+  }
+  
+  int file_bin_close(int fd) {
+    return close(fd);
+  }
+  
+  long file_bin_size(int fd) {
+    #if defined(_WIN32)
+    struct _stat info = { 0 }; 
+    int result = _fstat(fd, &info);
+    #else
+    struct stat info = { 0 }; 
+    int result = fstat(fd, &info);
+    #endif
+    if (result != -1) {
+      return info.st_size;
+    }
+    return 0;
+  }
+
+  long file_bin_position(int fd) {
+    #if defined(_WIN32)
+    return _lseek(fd, 0, SEEK_CUR);
+	#else
+    return lseek(fd, 0, SEEK_CUR);
+    #endif
+  }
+  
+  long file_bin_seek(int fd, long pos) {
+    #if defined(_WIN32)
+    return _lseek(fd, pos, SEEK_CUR);
+	#else
+    return lseek(fd, pos, SEEK_CUR);
+    #endif
+  }
+
+  int file_bin_read_byte(int fd) {
+    int byte;
+    #if defined(_WIN32)
+    return _read(fd, &byte, 1);
+    #else
+    return read(fd, &byte, 1);
+    #endif
+  }
+
+  int file_bin_write_byte(int fd, int byte) {
+    #if defined(_WIN32)
+    _write(fd, &byte, 1);
+    #else
+    write(fd, &byte, 1);
+    #endif
+    return byte;
+  }
+
 } // namespace filesystem
 
 namespace strings {

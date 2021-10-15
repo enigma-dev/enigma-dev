@@ -26,6 +26,7 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include <ctime>
 #include <cstddef>
@@ -90,5 +91,13 @@ namespace filesystem {
   int file_get_date_modified_hour(std::string fname);
   int file_get_date_modified_minute(std::string fname);
   int file_get_date_modified_second(std::string fname);
+  int file_bin_open(std::string fname, int mode);
+  int file_bin_rewrite(int fd);
+  int file_bin_close(int fd);
+  long file_bin_size(int fd);
+  long file_bin_position(int fd);
+  long file_bin_seek(int fd, long pos);
+  int file_bin_read_byte(int fd);
+  int file_bin_write_byte(int fd, int byte); 
 
 } // namespace filesystem

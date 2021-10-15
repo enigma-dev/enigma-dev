@@ -66,6 +66,14 @@ namespace enigma_fs {
   int fs_file_get_date_modified_hour(std::string fname);
   int fs_file_get_date_modified_minute(std::string fname);
   int fs_file_get_date_modified_second(std::string fname);
+  int fs_file_bin_open(std::string fname, int mode);
+  int fs_file_bin_rewrite(int fd);
+  int fs_file_bin_close(int fd);
+  long fs_file_bin_size(int fd);
+  long fs_file_bin_position(int fd);
+  long fs_file_bin_seek(int fd, long pos);
+  int fs_file_bin_read_byte(int fd);
+  int fs_file_bin_write_byte(int fd, int byte); 
 
 } // namespace enigma_fs
 
@@ -111,5 +119,13 @@ namespace enigma_user {
   #define file_get_date_modified_hour(x) fs_file_get_date_modified_hour(x)
   #define file_get_date_modified_minute(x) fs_file_get_date_modified_minute(x)
   #define file_get_date_modified_second(x) fs_file_get_date_modified_second(x)
+  #define file_bin_open(x, y) fs_file_bin_open(x, y)
+  #define file_bin_rewrite(x) fs_file_bin_rewrite(x)
+  #define file_bin_close(x) fs_file_bin_close(x)
+  #define file_bin_size(x) fs_file_bin_size(x)
+  #define file_bin_position(x) fs_file_bin_position(x)
+  #define file_bin_seek(x, y) fs_file_bin_seek(x, y)
+  #define file_bin_read_byte(x) fs_file_bin_read_byte(x)
+  #define file_bin_write_byte(x, y) fs_file_bin_write_byte(x, y)
 
 } // namespace enigma_user
