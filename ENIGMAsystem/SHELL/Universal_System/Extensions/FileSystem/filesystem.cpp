@@ -37,11 +37,14 @@
 
 #if defined(_WIN32) 
 #include <windows.h>
-#elif defined(__APPLE__) && defined(__MACH__)
+#include <io.h>
+#else
+#if defined(__APPLE__) && defined(__MACH__)
 #include <libproc.h>
-#include <unistd.h>
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 #include <sys/sysctl.h>
+#endif
+#include <unistd.h>
 #endif
 
 namespace fs = std::filesystem;
