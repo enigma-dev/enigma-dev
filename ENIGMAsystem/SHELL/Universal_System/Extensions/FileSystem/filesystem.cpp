@@ -264,7 +264,7 @@ namespace filesystem {
 
   bool file_exists(string fname) {
     std::error_code ec;
-    fname = filesystem::environment_expand_variables(fname);
+    fname = environment_expand_variables(fname);
     const fs::path path = fs::u8path(fname);
     return (fs::exists(path, ec) && ec.value() == 0 && 
       (!fs::is_directory(path, ec)) && ec.value() == 0);
@@ -281,7 +281,7 @@ namespace filesystem {
 
   string filename_canonical(string fname) {
     std::error_code ec;
-    fname = filesystem::environment_expand_variables(fname);
+    fname = environment_expand_variables(fname);
     const fs::path path = fs::u8path(fname);
     string result = fs::weakly_canonical(path, ec).u8string();
     if (ec.value() == 0 && directory_exists(result)) {
@@ -303,7 +303,7 @@ namespace filesystem {
   std::uintmax_t file_size(string fname) {
     std::error_code ec;
     if (!file_exists(fname)) return 0;
-    fname = filesystem::environment_expand_variables(fname);
+    fname = environment_expand_variables(fname);
     const fs::path path = fs::u8path(fname);
     std::uintmax_t result = fs::file_size(path, ec);
     return (ec.value() == 0) ? result : 0;
@@ -312,7 +312,7 @@ namespace filesystem {
   bool file_delete(string fname) {
     std::error_code ec;
     if (!file_exists(fname)) return false;
-    fname = filesystem::environment_expand_variables(fname);
+    fname = environment_expand_variables(fname);
     const fs::path path = fs::u8path(fname);
     return (fs::remove(path, ec) && ec.value() == 0);
   }
@@ -327,8 +327,8 @@ namespace filesystem {
   bool file_rename(string oldname, string newname) {
     std::error_code ec;
     if (!file_exists(oldname)) return false;
-    oldname = filesystem::environment_expand_variables(oldname);
-    newname = filesystem::environment_expand_variables(newname);
+    oldname = environment_expand_variables(oldname);
+    newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const fs::path path1 = fs::u8path(oldname);
@@ -340,8 +340,8 @@ namespace filesystem {
   bool file_copy(string fname, string newname) {
     std::error_code ec;
     if (!file_exists(fname)) return false;
-    fname = filesystem::environment_expand_variables(fname);
-    newname = filesystem::environment_expand_variables(newname);
+    fname = environment_expand_variables(fname);
+    newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const fs::path path1 = fs::u8path(fname);
