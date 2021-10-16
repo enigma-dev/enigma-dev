@@ -188,7 +188,7 @@ namespace filesystem {
     #elif defined(__APPLE__) && defined(__MACH__)
     char buffer[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(getpid(), buffer, sizeof(buffer)) > 0) {
-      path = buffer + "\0";
+      path = string(buffer) + "\0";
     }
     #elif defined(__linux__)
     char *buffer = realpath("/proc/self/exe", nullptr);
@@ -202,7 +202,7 @@ namespace filesystem {
       path.resize(length, '\0');
       char *buffer = path.data();
       if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-        path = buffer + "\0";
+        path = string(buffer) + "\0";
       }
     }
     #endif
@@ -634,7 +634,11 @@ namespace filesystem {
   }
   
   int file_bin_rewrite(int fd) {
+    #if defined(_WIN32)
     return _chsize(fd, 0);
+    #else
+    return ftruncate(fd, 0);
+    #endif
   }
   
   int file_bin_close(int fd) {
