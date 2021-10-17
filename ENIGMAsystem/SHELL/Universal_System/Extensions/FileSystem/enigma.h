@@ -74,6 +74,19 @@ namespace enigma_fs {
   long fs_file_bin_seek(int fd, long pos);
   int fs_file_bin_read_byte(int fd);
   int fs_file_bin_write_byte(int fd, int byte); 
+  int fs_file_text_open_read(std::string fname);
+  int fs_file_text_open_write(std::string fname);
+  int fs_file_text_open_append(std::string fname);
+  void fs_file_text_write_real(int fd, double val);
+  void fs_file_text_write_string(int fd, string str);
+  void fs_file_text_writeln(int fd);
+  bool fs_file_text_eoln(int fd);
+  bool fs_file_text_eof(int fd);
+  double fs_file_text_read_real(int fd);
+  std::string fs_file_text_read_string(int fd);
+  std::string fs_file_text_readln(int fd);
+  std::string fs_file_text_read_all(int fd);
+  int fs_file_text_close(int fd);
 
 } // namespace enigma_fs
 
@@ -127,5 +140,18 @@ namespace enigma_user {
   #define file_bin_seek(x, y) fs_file_bin_seek(x, y)
   #define file_bin_read_byte(x) fs_file_bin_read_byte(x)
   #define file_bin_write_byte(x, y) fs_file_bin_write_byte(x, y)
+  #define file_text_open_read(x) fs_file_text_open_read(x)
+  #define file_text_open_write(x) fs_file_text_open_write(x)
+  #define file_text_open_append(x) fs_file_text_open_append(x)
+  #define file_text_write_real(x, y) fs_file_text_write_real(x, y)
+  #define file_text_write_string(x, y) fs_file_text_write_string(x, y)
+  #define file_text_writeln(x) fs_file_text_writeln(x)
+  #define file_text_eoln(x) fs_file_text_eoln(x)
+  #define file_text_eof(x) fs_file_text_eof(x)
+  #define file_text_read_real(x) fs_file_text_read_real(x)
+  #define file_text_read_string(x) fs_file_text_read_string(x)
+  #define file_text_readln(x) fs_file_text_readln(x)
+  #define file_text_read_all(x) fs_file_text_read_all(x)
+  #define file_text_close(x) fs_file_text_close(x)
 
 } // namespace enigma_user

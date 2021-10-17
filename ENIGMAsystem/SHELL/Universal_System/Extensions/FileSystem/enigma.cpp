@@ -213,4 +213,56 @@ namespace enigma_fs {
     return filesystem::file_bin_write_byte(fd, byte);
   }
 
+  int fs_file_text_open_read(std::string fname) {
+    return filesystem::file_text_open_read(fname);
+  }
+
+  int fs_file_text_open_write(std::string fname) {
+    return filesystem::file_text_open_write(fname);
+  }
+  
+  int fs_file_text_open_append(std::string fname) {
+    return filesystem::file_text_open_append(fname);
+  }
+  
+  void fs_file_text_write_real(int fd, double val) {
+    filesystem::file_text_write_real(fd, val);
+  }
+  
+  void fs_file_text_write_string(int fd, std::string str) {
+    filesystem::file_text_write_string(fd, str);
+  }
+  
+  void fs_file_text_writeln(int fd) {
+    filesystem::file_text_writeln(fd);
+  }
+  
+  bool fs_file_text_eoln(int fd) {
+    return filesystem::file_text_eoln(fd);
+  }
+  
+  bool fs_file_text_eof(int fd) {
+    return filesystem::file_text_eof(fd);
+  }
+
+  double fs_file_text_read_real(int fd) {
+    return filesystem::file_text_read_real(fd);
+  }
+  
+  std::string fs_file_text_read_string(int fd) {
+    return filesystem::file_text_read_string(fd);
+  }
+  
+  std::string fs_file_text_readln(int fd) {
+    return filesystem::file_text_readln(fd);
+  }
+  
+  std::string fs_file_text_read_all(int fd) {
+    return filesystem::file_text_read_all(fd);
+  }
+  
+  int fs_file_text_close(int fd) {
+    return filesystem::file_text_close(fd);
+  }
+
 } // namespace enigma_fs

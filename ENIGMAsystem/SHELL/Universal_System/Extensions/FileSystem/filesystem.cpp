@@ -86,6 +86,11 @@ namespace {
   }
   #endif
 
+  bool is_digit(char byte) {
+    return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
+	  byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
+  }
+
 } // anonymous namespace
 
 namespace datetime {
@@ -592,8 +597,7 @@ namespace filesystem {
     fname = environment_expand_variables(fname);
     #if defined(_WIN32)
     wstring wfname = widen(fname);
-    std::wofstream wstream(wfname.c_str());
-    wstream.close(); FILE *fp = nullptr;
+    FILE *fp = nullptr;
     if (mode == 0) {
       fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8");
     } else if (mode == 1) {
@@ -611,8 +615,7 @@ namespace filesystem {
       return fd;
     }
     #else
-    std::ofstream stream(fname.c_str());
-    stream.close(); FILE *fp = nullptr;
+    FILE *fp = nullptr;
     if (mode == 0) {
       fp = fopen(fname.c_str(), "rb");
     } else if (mode == 1) {
@@ -678,19 +681,132 @@ namespace filesystem {
   int file_bin_read_byte(int fd) {
     int byte;
     #if defined(_WIN32)
-    return _read(fd, &byte, 1);
+    _read(fd, &byte, 1);
     #else
-    return read(fd, &byte, 1);
+    read(fd, &byte, 1);
     #endif
+    return byte;
   }
 
   int file_bin_write_byte(int fd, int byte) {
     #if defined(_WIN32)
-    _write(fd, &byte, 1);
+    return (int)_write(fd, &byte, 1);
     #else
-    write(fd, &byte, 1);
+    return (int)write(fd, &byte, 1);
     #endif
-    return byte;
+  }
+
+  int file_text_open_read(string fname) {
+    return file_bin_open(fname, 0);
+  }
+
+  int file_text_open_write(string fname) {
+    return file_bin_open(fname, 1);
+  }
+
+  int file_text_open_append(string fname) {
+    return file_bin_open(fname, 3);
+  }
+
+  void file_text_write_real(int fd, double val) {
+    string str = std::to_string(val);
+    for (int i = 0; i < str.length(); i++) {
+      file_bin_write_byte(fd, str[i]);
+    }
+  }
+
+  void file_text_write_string(int fd, string str) {
+	for (int i = 0; i < str.length(); i++) {
+      file_bin_write_byte(fd, str[i]);
+    }
+  }
+
+  void file_text_writeln(int fd) {
+    file_bin_write_byte(fd, '\n');
+  }
+
+  bool file_text_eoln(int fd) {
+	return (file_bin_read_byte(fd) == '\n');
+  }
+
+  bool file_text_eof(int fd) {
+    return (file_bin_position(fd) == file_bin_size(fd));
+  }
+  
+  double file_text_read_real(int fd) {
+    string str;
+	bool dot = false; int byte = file_bin_read_byte(fd); 
+    if (byte == '.' && !dot) {
+        dot = true;
+    } else if (!is_digit((char)byte) && (char)byte != '+' && 
+      (char)byte != '-' && (char)byte != '.') {
+      file_bin_seek(fd, -1);
+      return 0;
+	}
+	str.resize(str.length() + 1, ' ');
+    str[str.length() - 1] = byte;
+    byte = file_bin_read_byte(fd);
+    if (byte == '.' && !dot) {
+        dot = true;
+    } else if (!is_digit((char)byte) && (char)byte != '.') {
+      file_bin_seek(fd, -2);
+      return 0;
+	}
+	str.resize(str.length() + 1, ' ');
+    str[str.length() - 1] = byte;
+	while ((char)byte != '\n' && !file_text_eof(fd)) {
+      byte = file_bin_read_byte(fd);
+	  if (byte == '.' && !dot) {
+        dot = true;
+	  } else if (byte == '.' && dot) {
+        break;
+      } else if ((char)byte != '.' && !is_digit((char)byte)) {
+        break;
+      }
+	  str.resize(str.length() + 1, ' ');
+      str[str.length() - 1] = byte;
+	}
+	return strtod(str.c_str(), nullptr);
+  }
+
+  string file_text_read_string(int fd) {
+    int byte = -1; string str;
+    while ((char)byte != '\n' && !file_text_eof(fd)) {
+      byte = file_bin_read_byte(fd);
+	  str.resize(str.length() + 1, ' ');
+      str[str.length() - 1] = byte;
+    }
+	if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
+      file_bin_seek(fd, -1);
+	}
+	if (str[str.length() - 2] == '\r' && str[str.length() - 1] == '\n') {
+      file_bin_seek(fd, -2);
+	}
+	return str;
+  }
+
+  string file_text_readln(int fd) {
+    int byte = -1; string str;
+    while ((char)byte != '\n' && !file_text_eof(fd)) {
+      byte = file_bin_read_byte(fd);
+	  str.resize(str.length() + 1, ' ');
+      str[str.length() - 1] = byte;
+    }
+	return str;
+  }
+  
+  string file_text_read_all(int fd) {
+    string str;
+    while (!file_text_eof(fd)) {
+      int byte = file_bin_read_byte(fd);
+	  str.resize(str.length() + 1, ' ');
+      str[str.length() - 1] = byte;
+	}
+    return str;
+  }
+  
+  int file_text_close(int fd) {
+    return file_bin_close(fd);
   }
 
 } // namespace filesystem

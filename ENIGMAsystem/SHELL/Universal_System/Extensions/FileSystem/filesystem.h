@@ -97,6 +97,19 @@ namespace filesystem {
   long file_bin_position(int fd);
   long file_bin_seek(int fd, long pos);
   int file_bin_read_byte(int fd);
-  int file_bin_write_byte(int fd, int byte); 
+  int file_bin_write_byte(int fd, int byte);
+  int file_text_open_read(std::string fname);
+  int file_text_open_write(std::string fname);
+  int file_text_open_append(std::string fname);
+  void file_text_write_real(int fd, double val);
+  void file_text_write_string(int fd, std::string str);
+  void file_text_writeln(int fd);
+  bool file_text_eoln(int fd);
+  bool file_text_eof(int fd);
+  double file_text_read_real(int fd);
+  std::string file_text_read_string(int fd);
+  std::string file_text_readln(int fd);
+  std::string file_text_read_all(int fd);
+  int file_text_close(int fd);
 
 } // namespace filesystem
