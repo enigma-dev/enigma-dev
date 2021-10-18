@@ -725,12 +725,16 @@ namespace filesystem {
     file_bin_write_byte(fd, '\n');
   }
 
-  bool file_text_eoln(int fd) {
-    return (file_bin_read_byte(fd) == '\n');
-  }
-
   bool file_text_eof(int fd) {
     return (file_bin_position(fd) == file_bin_size(fd));
+  }
+
+  bool file_text_eoln(int fd) {
+    if (file_text_eof(fd)) {
+      return true;
+    }
+    file_bin_seek(fd, -1);
+    return ((char)file_bin_read_byte(fd) == '\n');
   }
   
   double file_text_read_real(int fd) {
@@ -794,7 +798,7 @@ namespace filesystem {
     }
     return str;
   }
-  
+
   string file_text_read_all(int fd) {
     string str;
     while (!file_text_eof(fd)) {
