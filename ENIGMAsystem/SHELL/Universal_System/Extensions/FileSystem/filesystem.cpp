@@ -133,7 +133,7 @@ namespace ngs::fs {
 
     string filename_path(string fname) {
       size_t fp = fname.find_last_of("/\\");
-      return fname.substr(0,fp + 1);
+      return fname.substr(0, fp + 1);
     }
 
     string filename_name(string fname) {
