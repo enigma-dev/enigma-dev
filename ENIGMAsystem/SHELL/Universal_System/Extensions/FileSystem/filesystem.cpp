@@ -61,7 +61,7 @@ namespace ngs::fs {
 
   namespace {
 
-    void MessagePump() {
+    void message_pump() {
       #if defined(_WIN32) 
       MSG msg; while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -72,14 +72,12 @@ namespace ngs::fs {
 
     #if defined(_WIN32) 
     wstring widen(string str) {
-      size_t wchar_count = str.size() + 1;
-      vector<wchar_t> buf(wchar_count);
+      size_t wchar_count = str.size() + 1; vector<wchar_t> buf(wchar_count);
       return wstring{ buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
     }
 
     string narrow(wstring wstr) {
-      int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
-      vector<char> buf(nbytes);
+      int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); vector<char> buf(nbytes);
       return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
     }
     #endif
@@ -114,7 +112,7 @@ namespace ngs::fs {
     string string_replace_all(string str, string substr, string nstr) {
       size_t pos = 0;
       while ((pos = str.find(substr, pos)) != string::npos) {
-        MessagePump();
+        message_pump();
         str.replace(pos, substr.length(), nstr);
         pos += nstr.length();
       }
@@ -126,7 +124,7 @@ namespace ngs::fs {
       std::stringstream sstr(str);
       string tmp;
       while (std::getline(sstr, tmp, delimiter)) {
-        MessagePump();
+        message_pump();
         vec.push_back(tmp);
       }
       return vec;
@@ -154,11 +152,11 @@ namespace ngs::fs {
       if (canonical) dname = ngs::fs::filename_canonical(dname);
       #if defined(_WIN32)
       while (dname.back() == '\\' || dname.back() == '/') {
-        MessagePump(); dname.pop_back();
+        message_pump(); dname.pop_back();
       }
       #else
       while (dname.back() == '/') {
-        MessagePump(); dname.pop_back();
+        message_pump(); dname.pop_back();
       }
       #endif
       return dname;
@@ -374,7 +372,7 @@ namespace ngs::fs {
     if (std::filesystem::exists(path)) {
       std::filesystem::directory_iterator end_itr;
       for (std::filesystem::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
-        MessagePump();
+        message_pump();
         std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
         if (!std::filesystem::is_directory(dir_ite->status())) {
           result += file_size(file_path.u8string());
@@ -423,7 +421,7 @@ namespace ngs::fs {
     if (directory_exists(dname)) {
       std::filesystem::directory_iterator end_itr;
       for (std::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
-        MessagePump();
+        message_pump();
         if (ec.value() != 0) { break; }
         std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
         if (!std::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
@@ -439,9 +437,9 @@ namespace ngs::fs {
     vector<string> extVec = string_split(pattern, ';');
     std::set<string> filteredItems;
     for (const string &item : result_unfiltered) {
-      MessagePump();
+      message_pump();
       for (const string &ext : extVec) {
-        MessagePump();
+        message_pump();
         if (ext == "." || ext == filename_ext(item) || directory_exists(item)) {
           filteredItems.insert(item);
           break;
@@ -451,7 +449,7 @@ namespace ngs::fs {
     vector<string> result_filtered;
     if (filteredItems.empty()) return result_filtered;
     for (const string &filteredName : filteredItems) {
-      MessagePump();
+      message_pump();
       result_filtered.push_back(filteredName);
     }
     return result_filtered;
@@ -460,7 +458,7 @@ namespace ngs::fs {
   static inline vector<string> directory_contents_recursive_helper(string dname, string pattern) {
     vector<string> result = directory_contents(dname, pattern, true);
     for (unsigned i = 0; i < result.size(); i++) {
-      MessagePump();
+      message_pump();
       if (directory_exists(result[i])) {
         vector<string> recursive_result = directory_contents_recursive_helper(result[i], pattern);
         if (recursive_result.size() > 0) {
@@ -475,7 +473,7 @@ namespace ngs::fs {
     vector<string> result_unfiltered = directory_contents_recursive_helper(dname, pattern);
     vector<string> result_filtered;
     for (unsigned i = 0; i < result_unfiltered.size(); i++) {
-      MessagePump();
+      message_pump();
       if (!directory_exists(result_unfiltered[i])) {
         result_filtered.push_back(result_unfiltered[i]);
       } else if (includedirs) {
@@ -489,7 +487,7 @@ namespace ngs::fs {
 
   static string retained_string = "";
   static size_t retained_length = 0;
-  static std::uintmax_t szSrc   = 0;
+  static std::uintmax_t szsrc   = 0;
   // this function was written to prevent infinitely copying inside itself
   static inline bool directory_copy_retained(string dname, string newname) {
     std::error_code ec;
@@ -512,7 +510,7 @@ namespace ngs::fs {
         if (!directory_exists(newname)) {
           directory_create(newname);
           for (const string &item : itemVec) {
-            MessagePump();
+            message_pump();
             if (directory_exists(filename_remove_slash(item)) && 
               filename_remove_slash(item).substr(retained_length) != retained_string) {
               directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
@@ -526,7 +524,7 @@ namespace ngs::fs {
           }
           // check size to determine success instead of error code.
           // comment the line below out if you want break on error.
-          result = (directory_exists(newname) && szSrc == directory_size(newname));
+          result = (directory_exists(newname) && szsrc == directory_size(newname));
         }
       }
     }
@@ -541,7 +539,7 @@ namespace ngs::fs {
     retained_length = 0;
     // check size to determine success instead of error code.
     // comment the line below out if you want break on error.
-    szSrc = directory_size(dname);
+    szsrc = directory_size(dname);
     return directory_copy_retained(dname, newname);
   }
 
@@ -723,14 +721,14 @@ namespace ngs::fs {
   void file_text_write_real(int fd, double val) {
     string str = std::to_string(val);
     for (unsigned i = 0; i < str.length(); i++) {
-      MessagePump();
+      message_pump();
       file_bin_write_byte(fd, str[i]);
     }
   }
 
   void file_text_write_string(int fd, string str) {
     for (unsigned i = 0; i < str.length(); i++) {
-      MessagePump();
+      message_pump();
       file_bin_write_byte(fd, str[i]);
     }
   }
@@ -774,7 +772,7 @@ namespace ngs::fs {
       str[str.length() - 1] = byte;
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
-      MessagePump();
+      message_pump();
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
@@ -794,7 +792,7 @@ namespace ngs::fs {
   string file_text_read_string(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
-      MessagePump();
+      message_pump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
@@ -811,7 +809,7 @@ namespace ngs::fs {
   string file_text_readln(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
-      MessagePump();
+      message_pump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
@@ -822,7 +820,7 @@ namespace ngs::fs {
   string file_text_read_all(int fd) {
     string str;
     while (!file_text_eof(fd)) {
-      MessagePump();
+      message_pump();
       char byte = (char)file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
