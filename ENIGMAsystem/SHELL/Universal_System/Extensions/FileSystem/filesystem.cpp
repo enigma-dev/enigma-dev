@@ -48,11 +48,6 @@
 #include <unistd.h>
 #endif
 
-namespace fs = std::filesystem;
-
-using namespace strings;
-using namespace datetime;
-
 #if defined(_WIN32)
 using std::wstring;
 #endif
@@ -61,125 +56,137 @@ using std::string;
 using std::vector;
 using std::size_t;
 
-namespace {
+namespace ngs::fs {
 
-  void MessagePump() {
+  namespace {
+
+    void MessagePump() {
+      #if defined(_WIN32) 
+      MSG msg; while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+      #endif
+    }
+
     #if defined(_WIN32) 
-    MSG msg; while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
+    wstring widen(string str) {
+      size_t wchar_count = str.size() + 1;
+      vector<wchar_t> buf(wchar_count);
+      return wstring{ buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
+    }
+
+    string narrow(wstring wstr) {
+      int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
+      vector<char> buf(nbytes);
+      return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
     }
     #endif
-  }
 
-  #if defined(_WIN32) 
-  wstring widen(string str) {
-    size_t wchar_count = str.size() + 1;
-    vector<wchar_t> buf(wchar_count);
-    return wstring{ buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
-  }
-
-  string narrow(wstring wstr) {
-    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
-    vector<char> buf(nbytes);
-    return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
-  }
-  #endif
-
-  bool is_digit(char byte) {
-    return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
-      byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
-  }
-
-} // anonymous namespace
-
-namespace datetime {
-
-  int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
-    int result = -1; // returns -1 on failure
-    #if defined(_WIN32)
-    std::wstring wfname = widen(fname);
-    struct _stat info = { 0 }; 
-    result = _wstat(wfname.c_str(), &info);
-    #else
-    struct stat info = { 0 }; 
-    result = stat(fname, &info);
-    #endif
-    time_t time = modified ? info.st_mtime : info.st_atime;
-    if (result == -1) return result; // failure: stat errored
-    struct tm *timeinfo = std::localtime(&time);
-    if      (type == 0) return timeinfo->tm_year + 1900;
-    else if (type == 1) return timeinfo->tm_mon  + 1;
-    else if (type == 2) return timeinfo->tm_mday;
-    else if (type == 3) return timeinfo->tm_hour;
-    else if (type == 4) return timeinfo->tm_min;
-    else if (type == 5) return timeinfo->tm_sec;
-    else return result; // failure: enum value not found
-  }
-
-} // namespace datetime
-
-namespace strings {
-
-  string string_replace_all(string str, string substr, string nstr) {
-    size_t pos = 0;
-    while ((pos = str.find(substr, pos)) != string::npos) {
-      MessagePump();
-      str.replace(pos, substr.length(), nstr);
-      pos += nstr.length();
+    bool is_digit(char byte) {
+      return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
+        byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
     }
-    return str;
-  }
 
-  vector<string> string_split(string str, char delimiter) {
-    vector<string> vec;
-    std::stringstream sstr(str);
-    string tmp;
-    while (std::getline(sstr, tmp, delimiter)) {
-      MessagePump();
-      vec.push_back(tmp);
+    int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
+      int result = -1; // returns -1 on failure
+      #if defined(_WIN32)
+      std::wstring wfname = widen(fname);
+      struct _stat info = { 0 }; 
+      result = _wstat(wfname.c_str(), &info);
+      #else
+      struct stat info = { 0 }; 
+      result = stat(fname, &info);
+      #endif
+      time_t time = modified ? info.st_mtime : info.st_atime;
+      if (result == -1) return result; // failure: stat errored
+      struct tm *timeinfo = std::localtime(&time);
+      if      (type == 0) return timeinfo->tm_year + 1900;
+      else if (type == 1) return timeinfo->tm_mon  + 1;
+      else if (type == 2) return timeinfo->tm_mday;
+      else if (type == 3) return timeinfo->tm_hour;
+      else if (type == 4) return timeinfo->tm_min;
+      else if (type == 5) return timeinfo->tm_sec;
+      else return result; // failure: enum value not found
     }
-    return vec;
-  }
 
-  string filename_path(string fname) {
-    size_t fp = fname.find_last_of("/\\");
-    return fname.substr(0,fp + 1);
-  }
+    string string_replace_all(string str, string substr, string nstr) {
+      size_t pos = 0;
+      while ((pos = str.find(substr, pos)) != string::npos) {
+        MessagePump();
+        str.replace(pos, substr.length(), nstr);
+        pos += nstr.length();
+      }
+      return str;
+    }
 
-  string filename_name(string fname) {
-    size_t fp = fname.find_last_of("/\\");
-    return fname.substr(fp + 1);
-  }
+    vector<string> string_split(string str, char delimiter) {
+      vector<string> vec;
+      std::stringstream sstr(str);
+      string tmp;
+      while (std::getline(sstr, tmp, delimiter)) {
+        MessagePump();
+        vec.push_back(tmp);
+      }
+      return vec;
+    }
 
-  string filename_ext(string fname) {
-    fname = filename_name(fname);
-    size_t fp = fname.find_last_of(".");
-    if (fp == string::npos)
-      return "";
-    return fname.substr(fp);
-  }
+    string filename_path(string fname) {
+      size_t fp = fname.find_last_of("/\\");
+      return fname.substr(0,fp + 1);
+    }
 
-} // namespace strings
+    string filename_name(string fname) {
+      size_t fp = fname.find_last_of("/\\");
+      return fname.substr(fp + 1);
+    }
 
-namespace filesystem {
+    string filename_ext(string fname) {
+      fname = filename_name(fname);
+      size_t fp = fname.find_last_of(".");
+      if (fp == string::npos)
+        return "";
+      return fname.substr(fp);
+    }
+
+    string filename_remove_slash(string dname, bool canonical = false) {
+      if (canonical) dname = ngs::fs::filename_canonical(dname);
+      #if defined(_WIN32)
+      while (dname.back() == '\\' || dname.back() == '/') dname.pop_back();
+      #else
+      while (dname.back() == '/') dname.pop_back();
+      #endif
+      return dname;
+    }
+
+    string filename_add_slash(string dname, bool canonical = false) {
+      dname = filename_remove_slash(dname, canonical);
+      #if defined(_WIN32)
+      if (dname.back() != '\\') dname += "\\";
+      #else
+      if (dname.back() != '/') dname += "/";
+      #endif
+      return dname;
+    }
+
+  } // anonymous namespace
 
   string get_working_directory() {
     std::error_code ec;
-    string result = filename_add_slash(fs::current_path(ec).u8string());
+    string result = filename_add_slash(std::filesystem::current_path(ec).u8string());
     return (ec.value() == 0) ? result : "";
   }
 
   bool set_working_directory(string dname) {
     std::error_code ec;
-    const fs::path path = fs::u8path(dname);
-    fs::current_path(path, ec);
+    const std::filesystem::path path = std::filesystem::u8path(dname);
+    std::filesystem::current_path(path, ec);
     return (ec.value() == 0);
   }
 
   string get_temp_directory() {
     std::error_code ec;
-    string result = filename_add_slash(fs::temp_directory_path(ec).u8string());
+    string result = filename_add_slash(std::filesystem::temp_directory_path(ec).u8string());
     return (ec.value() == 0) ? result : "";
   }
 
@@ -270,25 +277,25 @@ namespace filesystem {
   bool file_exists(string fname) {
     std::error_code ec;
     fname = environment_expand_variables(fname);
-    const fs::path path = fs::u8path(fname);
-    return (fs::exists(path, ec) && ec.value() == 0 && 
-      (!fs::is_directory(path, ec)) && ec.value() == 0);
+    const std::filesystem::path path = std::filesystem::u8path(fname);
+    return (std::filesystem::exists(path, ec) && ec.value() == 0 && 
+      (!std::filesystem::is_directory(path, ec)) && ec.value() == 0);
   }
 
   bool directory_exists(string dname) {
     std::error_code ec;
     dname = filename_remove_slash(dname, false);
     dname = environment_expand_variables(dname);
-    const fs::path path = fs::u8path(dname);
-    return (fs::exists(path, ec) && ec.value() == 0 && 
-      fs::is_directory(path, ec) && ec.value() == 0);
+    const std::filesystem::path path = std::filesystem::u8path(dname);
+    return (std::filesystem::exists(path, ec) && ec.value() == 0 && 
+      std::filesystem::is_directory(path, ec) && ec.value() == 0);
   }
 
   string filename_canonical(string fname) {
     std::error_code ec;
     fname = environment_expand_variables(fname);
-    const fs::path path = fs::u8path(fname);
-    string result = fs::weakly_canonical(path, ec).u8string();
+    const std::filesystem::path path = std::filesystem::u8path(fname);
+    string result = std::filesystem::weakly_canonical(path, ec).u8string();
     if (ec.value() == 0 && directory_exists(result)) {
       return filename_add_slash(result);
     }
@@ -309,8 +316,8 @@ namespace filesystem {
     std::error_code ec;
     if (!file_exists(fname)) return 0;
     fname = environment_expand_variables(fname);
-    const fs::path path = fs::u8path(fname);
-    std::uintmax_t result = fs::file_size(path, ec);
+    const std::filesystem::path path = std::filesystem::u8path(fname);
+    std::uintmax_t result = std::filesystem::file_size(path, ec);
     return (ec.value() == 0) ? result : 0;
   }
 
@@ -318,15 +325,15 @@ namespace filesystem {
     std::error_code ec;
     if (!file_exists(fname)) return false;
     fname = environment_expand_variables(fname);
-    const fs::path path = fs::u8path(fname);
-    return (fs::remove(path, ec) && ec.value() == 0);
+    const std::filesystem::path path = std::filesystem::u8path(fname);
+    return (std::filesystem::remove(path, ec) && ec.value() == 0);
   }
 
   bool directory_create(string dname) {
     std::error_code ec;
     dname = filename_remove_slash(dname, true);
-    const fs::path path = fs::u8path(dname);
-    return (fs::create_directories(path, ec) && ec.value() == 0);
+    const std::filesystem::path path = std::filesystem::u8path(dname);
+    return (std::filesystem::create_directories(path, ec) && ec.value() == 0);
   }
 
   bool file_rename(string oldname, string newname) {
@@ -336,9 +343,9 @@ namespace filesystem {
     newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
-    const fs::path path1 = fs::u8path(oldname);
-    const fs::path path2 = fs::u8path(newname);
-    fs::rename(path1, path2, ec);
+    const std::filesystem::path path1 = std::filesystem::u8path(oldname);
+    const std::filesystem::path path2 = std::filesystem::u8path(newname);
+    std::filesystem::rename(path1, path2, ec);
     return (ec.value() == 0);
   }
 
@@ -349,22 +356,22 @@ namespace filesystem {
     newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
-    const fs::path path1 = fs::u8path(fname);
-    const fs::path path2 = fs::u8path(newname);
-    fs::copy(path1, path2, ec);
+    const std::filesystem::path path1 = std::filesystem::u8path(fname);
+    const std::filesystem::path path2 = std::filesystem::u8path(newname);
+    std::filesystem::copy(path1, path2, ec);
     return (ec.value() == 0);
   }
 
   std::uintmax_t directory_size(string dname) {
     std::uintmax_t result = 0;
     if (!directory_exists(dname)) return 0;
-    const fs::path path = fs::u8path(filename_remove_slash(dname, true));
-    if (fs::exists(path)) {
-      fs::directory_iterator end_itr;
-      for (fs::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
+    const std::filesystem::path path = std::filesystem::u8path(filename_remove_slash(dname, true));
+    if (std::filesystem::exists(path)) {
+      std::filesystem::directory_iterator end_itr;
+      for (std::filesystem::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
         MessagePump();
-        fs::path file_path = fs::u8path(filename_absolute(dir_ite->path().u8string()));
-        if (!fs::is_directory(dir_ite->status())) {
+        std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
+        if (!std::filesystem::is_directory(dir_ite->status())) {
           result += file_size(file_path.u8string());
         } else {
           result += directory_size(file_path.u8string());
@@ -378,8 +385,8 @@ namespace filesystem {
     std::error_code ec;
     if (!directory_exists(dname)) return false;
     dname = filename_remove_slash(dname, true);
-    const fs::path path = fs::u8path(dname);
-    return (fs::remove_all(path, ec) && ec.value() == 0);
+    const std::filesystem::path path = std::filesystem::u8path(dname);
+    return (std::filesystem::remove_all(path, ec) && ec.value() == 0);
   }
 
   bool directory_rename(string oldname, string newname) {
@@ -389,14 +396,14 @@ namespace filesystem {
     oldname = filename_remove_slash(oldname, true);
     newname = filename_remove_slash(newname, true);
     bool result = false;
-    const fs::path path1 = fs::u8path(oldname);
-    const fs::path path2 = fs::u8path(newname);
-    const fs::path path3 = fs::u8path(path2.u8string().substr(0, path1.u8string().length()));
+    const std::filesystem::path path1 = std::filesystem::u8path(oldname);
+    const std::filesystem::path path2 = std::filesystem::u8path(newname);
+    const std::filesystem::path path3 = std::filesystem::u8path(path2.u8string().substr(0, path1.u8string().length()));
     if (directory_exists(oldname)) {
       if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
         filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
         path1.u8string() != path3.u8string()) {
-        fs::rename(path1, path2, ec);
+        std::filesystem::rename(path1, path2, ec);
         result = (ec.value() == 0);
       }
     }
@@ -407,14 +414,14 @@ namespace filesystem {
     std::error_code ec; vector<string> result_unfiltered;
     if (!directory_exists(dname)) return result_unfiltered;
     dname = filename_remove_slash(dname, true);
-    const fs::path path = fs::u8path(dname);
+    const std::filesystem::path path = std::filesystem::u8path(dname);
     if (directory_exists(dname)) {
-      fs::directory_iterator end_itr;
-      for (fs::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
+      std::filesystem::directory_iterator end_itr;
+      for (std::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
         MessagePump();
         if (ec.value() != 0) { break; }
-        fs::path file_path = fs::u8path(filename_absolute(dir_ite->path().u8string()));
-        if (!fs::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
+        std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
+        if (!std::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
           result_unfiltered.push_back(file_path.u8string());
         } else if (ec.value() == 0 && includedirs) {
           result_unfiltered.push_back(filename_add_slash(file_path.u8string()));
@@ -482,9 +489,9 @@ namespace filesystem {
   static inline bool directory_copy_retained(string dname, string newname) {
     std::error_code ec;
     bool result = false;
-    const fs::path path1 = fs::u8path(dname);
-    const fs::path path2 = fs::u8path(newname);
-    const fs::path path3 = fs::u8path(path2.u8string().substr(0, path1.u8string().length()));
+    const std::filesystem::path path1 = std::filesystem::u8path(dname);
+    const std::filesystem::path path2 = std::filesystem::u8path(newname);
+    const std::filesystem::path path3 = std::filesystem::u8path(path2.u8string().substr(0, path1.u8string().length()));
     if (retained_string.empty() && retained_length == 0) {
       retained_length = path1.u8string().length();
       retained_string = path2.u8string().substr(retained_length);
@@ -493,7 +500,7 @@ namespace filesystem {
       if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
         filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
         path1.u8string() != path3.u8string()) {
-        fs::copy(path1, path2, fs::copy_options::recursive, ec);
+        std::filesystem::copy(path1, path2, std::filesystem::copy_options::recursive, ec);
         result = (ec.value() == 0);
       } else if (path1.u8string() == path3.u8string()) {
         vector<string> itemVec = directory_contents(dname, "*.*", true);
@@ -506,7 +513,7 @@ namespace filesystem {
               directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
               filename_name(filename_remove_slash(item)));
             } else if (file_exists(item)) {
-              fs::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
+              std::filesystem::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
               // ignore and skip errored copies and copy what is left.
               // uncomment the line below to break if one copy failed.
               // if (ec.value() == 0) { result = true; } else { return false; }
@@ -710,13 +717,13 @@ namespace filesystem {
 
   void file_text_write_real(int fd, double val) {
     string str = std::to_string(val);
-    for (int i = 0; i < str.length(); i++) {
+    for (unsigned i = 0; i < str.length(); i++) {
       file_bin_write_byte(fd, str[i]);
     }
   }
 
   void file_text_write_string(int fd, string str) {
-    for (int i = 0; i < str.length(); i++) {
+    for (unsigned i = 0; i < str.length(); i++) {
       file_bin_write_byte(fd, str[i]);
     }
   }
@@ -816,28 +823,4 @@ namespace filesystem {
     return file_bin_close(fd);
   }
 
-} // namespace filesystem
-
-namespace strings {
-
-  string filename_remove_slash(string dname, bool canonical) {
-    if (canonical) dname = filesystem::filename_canonical(dname);
-    #if defined(_WIN32)
-    while (dname.back() == '\\' || dname.back() == '/') dname.pop_back();
-    #else
-    while (dname.back() == '/') dname.pop_back();
-    #endif
-    return dname;
-  }
-
-  string filename_add_slash(string dname, bool canonical) {
-    dname = filename_remove_slash(dname, canonical);
-    #if defined(_WIN32)
-    if (dname.back() != '\\') dname += "\\";
-    #else
-    if (dname.back() != '/') dname += "/";
-    #endif
-    return dname;
-  }
-
-} // namespace strings
+} // namespace ngs::fs

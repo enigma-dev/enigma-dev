@@ -27,6 +27,8 @@
 #include "filesystem.h"
 #include "Universal_System/var4.h"
 
+namespace filesystem = ngs::fs;
+
 namespace enigma_fs {
 
   std::string fs_get_working_directory() {

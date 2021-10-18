@@ -33,25 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-namespace datetime {
-
-  int file_get_date_accessed_modified(const char *fname, bool modified, int type);
-
-}
-
-namespace strings {
-
-  std::string string_replace_all(std::string str, std::string substr, std::string nstr);
-  std::vector<std::string> string_split(std::string str, char delimiter);
-  std::string filename_path(std::string fname);
-  std::string filename_name(std::string fname);
-  std::string filename_ext(std::string fname);
-  std::string filename_remove_slash(std::string dname, bool canonical = false);
-  std::string filename_add_slash(std::string dname, bool canonical = false);
-
-} // namespace slashes
-
-namespace filesystem {
+namespace ngs::fs {
 
   std::string get_working_directory();
   bool set_working_directory(std::string dname);
@@ -112,4 +94,4 @@ namespace filesystem {
   std::string file_text_read_all(int fd);
   int file_text_close(int fd);
 
-} // namespace filesystem
+ } // namespace ngs::fs
