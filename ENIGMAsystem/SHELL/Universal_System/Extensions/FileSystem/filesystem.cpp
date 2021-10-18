@@ -732,11 +732,11 @@ namespace filesystem {
   bool file_text_eoln(int fd) {
     file_bin_seek(fd, -1);
     bool res = ((char)file_bin_read_byte(fd) == '\n');
-	if (res) file_bin_seek(fd, 2);
-	res = (file_text_eof(fd) || res);
+    if (res) file_bin_seek(fd, 2);
+    res = (file_text_eof(fd) || res);
     return res;
   }
-  
+
   double file_text_read_real(int fd) {
     string str;
     bool dot = false; int byte = file_bin_read_byte(fd); 
