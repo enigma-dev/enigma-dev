@@ -207,11 +207,11 @@ namespace enigma_fs {
     return filesystem::file_bin_seek(fd, pos);
   }
   
-  int fs_file_bin_read_byte(int fd) {
+  char fs_file_bin_read_byte(int fd) {
     return filesystem::file_bin_read_byte(fd);
   }
   
-  int fs_file_bin_write_byte(int fd, int byte) {
+  int fs_file_bin_write_byte(int fd, char byte) {
     return filesystem::file_bin_write_byte(fd, byte);
   }
 
@@ -261,6 +261,10 @@ namespace enigma_fs {
   
   std::string fs_file_text_read_all(int fd) {
     return filesystem::file_text_read_all(fd);
+  }
+  
+  int file_text_open_from_string(std::string str) {
+    return filesystem::file_text_open_from_string(str);
   }
   
   int fs_file_text_close(int fd) {

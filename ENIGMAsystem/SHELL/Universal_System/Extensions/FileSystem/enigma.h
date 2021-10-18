@@ -72,8 +72,8 @@ namespace enigma_fs {
   long fs_file_bin_size(int fd);
   long fs_file_bin_position(int fd);
   long fs_file_bin_seek(int fd, long pos);
-  int fs_file_bin_read_byte(int fd);
-  int fs_file_bin_write_byte(int fd, int byte); 
+  char fs_file_bin_read_byte(int fd);
+  int fs_file_bin_write_byte(int fd, char byte); 
   int fs_file_text_open_read(std::string fname);
   int fs_file_text_open_write(std::string fname);
   int fs_file_text_open_append(std::string fname);
@@ -86,6 +86,7 @@ namespace enigma_fs {
   std::string fs_file_text_read_string(int fd);
   std::string fs_file_text_readln(int fd);
   std::string fs_file_text_read_all(int fd);
+  int fs_file_text_open_from_string(std::string str);
   int fs_file_text_close(int fd);
 
 } // namespace enigma_fs
@@ -152,6 +153,7 @@ namespace enigma_user {
   #define file_text_read_string(x) fs_file_text_read_string(x)
   #define file_text_readln(x) fs_file_text_readln(x)
   #define file_text_read_all(x) fs_file_text_read_all(x)
+  #define file_text_open_from_string(x) fs_file_text_open_from_string(x)
   #define file_text_close(x) fs_file_text_close(x)
 
 } // namespace enigma_user

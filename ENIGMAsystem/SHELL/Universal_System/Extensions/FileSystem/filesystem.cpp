@@ -38,6 +38,7 @@
 
 #if defined(_WIN32) 
 #include <windows.h>
+#include <fcntl.h>
 #include <io.h>
 #else
 #if defined(__APPLE__) && defined(__MACH__)
@@ -827,6 +828,17 @@ namespace ngs::fs {
       str[str.length() - 1] = byte;
     }
     return str;
+  }
+
+  int file_text_open_from_string(string str) {
+    int fd[2];
+    #if defined(_WIN32)
+    if (_pipe(fd, str.length(), O_BINARY) < 0) return -1;
+    #else
+    if (pipe(fd) < 0) return -1;
+    #endif
+    file_text_write_string(fd[1], str);
+    return fd[0];
   }
   
   int file_text_close(int fd) {

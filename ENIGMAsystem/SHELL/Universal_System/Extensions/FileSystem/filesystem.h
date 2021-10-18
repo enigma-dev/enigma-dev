@@ -92,6 +92,7 @@ namespace ngs::fs {
   std::string file_text_read_string(int fd);
   std::string file_text_readln(int fd);
   std::string file_text_read_all(int fd);
+  int file_text_open_from_string(std::string str);
   int file_text_close(int fd);
 
  } // namespace ngs::fs
