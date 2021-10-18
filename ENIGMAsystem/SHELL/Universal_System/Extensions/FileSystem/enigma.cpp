@@ -207,11 +207,11 @@ namespace enigma_fs {
     return filesystem::file_bin_seek(fd, pos);
   }
   
-  char fs_file_bin_read_byte(int fd) {
+  int fs_file_bin_read_byte(int fd) {
     return filesystem::file_bin_read_byte(fd);
   }
   
-  int fs_file_bin_write_byte(int fd, char byte) {
+  int fs_file_bin_write_byte(int fd, int byte) {
     return filesystem::file_bin_write_byte(fd, byte);
   }
 
