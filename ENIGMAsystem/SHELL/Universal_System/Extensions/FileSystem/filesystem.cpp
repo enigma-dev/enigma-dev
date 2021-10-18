@@ -152,9 +152,13 @@ namespace ngs::fs {
     string filename_remove_slash(string dname, bool canonical = false) {
       if (canonical) dname = ngs::fs::filename_canonical(dname);
       #if defined(_WIN32)
-      while (dname.back() == '\\' || dname.back() == '/') dname.pop_back();
+      while (dname.back() == '\\' || dname.back() == '/') {
+        MessagePump(); dname.pop_back();
+      }
       #else
-      while (dname.back() == '/') dname.pop_back();
+      while (dname.back() == '/') {
+        MessagePump(); dname.pop_back();
+      }
       #endif
       return dname;
     }
@@ -718,12 +722,14 @@ namespace ngs::fs {
   void file_text_write_real(int fd, double val) {
     string str = std::to_string(val);
     for (unsigned i = 0; i < str.length(); i++) {
+      MessagePump();
       file_bin_write_byte(fd, str[i]);
     }
   }
 
   void file_text_write_string(int fd, string str) {
     for (unsigned i = 0; i < str.length(); i++) {
+      MessagePump();
       file_bin_write_byte(fd, str[i]);
     }
   }
@@ -767,6 +773,7 @@ namespace ngs::fs {
       str[str.length() - 1] = byte;
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
+      MessagePump();
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
@@ -786,6 +793,7 @@ namespace ngs::fs {
   string file_text_read_string(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
+      MessagePump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
@@ -802,6 +810,7 @@ namespace ngs::fs {
   string file_text_readln(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
+      MessagePump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
@@ -812,6 +821,7 @@ namespace ngs::fs {
   string file_text_read_all(int fd) {
     string str;
     while (!file_text_eof(fd)) {
+      MessagePump();
       char byte = (char)file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
