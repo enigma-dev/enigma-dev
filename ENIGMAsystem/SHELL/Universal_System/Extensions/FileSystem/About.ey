@@ -4,7 +4,7 @@
 Name: File System
 Identifier: FileSystem
 Author: Samuel Venable
-Description: Allows creating, copying, moving, renaming, and deleting files and directories.
+Description: Allows creating, reading, writing, copying, moving, renaming, and deleting both files and directories.
 Default: true
 Icon: filesystem.png
 

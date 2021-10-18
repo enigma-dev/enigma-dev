@@ -732,45 +732,47 @@ namespace filesystem {
   bool file_text_eoln(int fd) {
     file_bin_seek(fd, -1);
     bool res = ((char)file_bin_read_byte(fd) == '\n');
-    if (res) file_bin_seek(fd, 2);
-    res = (file_text_eof(fd) || res);
-    return res;
+    return (file_text_eof(fd) || res);
   }
 
   double file_text_read_real(int fd) {
-    string str;
-    bool dot = false; int byte = file_bin_read_byte(fd); 
+    bool dot = false, sign = false;
+    string str; char byte = (char)file_bin_read_byte(fd);
+    if (byte == '\n') byte = (char)file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
       dot = true;
-    } else if (!is_digit((char)byte) && (char)byte != '+' && 
-      (char)byte != '-' && (char)byte != '.') {
-      file_text_readln(fd);
+    } else if (!is_digit(byte) && byte != '+' && 
+      byte != '-' && byte != '.') {
       return 0;
+    } else if (byte == '+' || byte == '-') {
+      sign = true;
     }
     str.resize(str.length() + 1, ' ');
-    str[str.length() - 1] = (char)byte;
-    byte = file_bin_read_byte(fd);
-    if (byte == '.' && !dot) {
-      dot = true;
-    } else if ((!is_digit((char)byte) && (char)byte != '.') || file_text_eof(fd)) {
-      file_text_readln(fd);
-      return strtod(str.c_str(), nullptr);
-    }
-    str.resize(str.length() + 1, ' ');
-    str[str.length() - 1] = (char)byte;
-    do {
-      byte = file_bin_read_byte(fd);
+    str[str.length() - 1] = byte;
+	if (sign) {
+      byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
-      } else if ((char)byte == '.' && dot) {
+      } else if (!is_digit(byte) && byte != '.') {
+        return strtod(str.c_str(), nullptr);
+      }
+      str.resize(str.length() + 1, ' ');
+      str[str.length() - 1] = byte;
+    }
+    while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
+      byte = (char)file_bin_read_byte(fd);
+      if (byte == '.' && !dot) {
+        dot = true;
+      } else if (byte == '.' && dot) {
         break;
-      } else if (!is_digit((char)byte) && (char)byte != '.') {
+      } else if (!is_digit(byte) && byte != '.') {
+        break;
+      } else if (byte == '\n' || file_bin_position(fd) > file_bin_size(fd)) {
         break;
       }
       str.resize(str.length() + 1, ' ');
-      str[str.length() - 1] = (char)byte;
-    } while ((char)byte != '\n' && !file_text_eof(fd));
-    file_text_readln(fd);
+      str[str.length() - 1] = byte;
+    }
     return strtod(str.c_str(), nullptr);
   }
 
@@ -803,7 +805,7 @@ namespace filesystem {
   string file_text_read_all(int fd) {
     string str;
     while (!file_text_eof(fd)) {
-      int byte = file_bin_read_byte(fd);
+      char byte = (char)file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
     }
