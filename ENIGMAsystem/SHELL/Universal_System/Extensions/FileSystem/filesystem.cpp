@@ -71,7 +71,7 @@ namespace {
     }
     #endif
   }
-  
+
   #if defined(_WIN32) 
   wstring widen(string str) {
     size_t wchar_count = str.size() + 1;
@@ -88,7 +88,7 @@ namespace {
 
   bool is_digit(char byte) {
     return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
-	  byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
+      byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
   }
 
 } // anonymous namespace
@@ -716,7 +716,7 @@ namespace filesystem {
   }
 
   void file_text_write_string(int fd, string str) {
-	for (int i = 0; i < str.length(); i++) {
+    for (int i = 0; i < str.length(); i++) {
       file_bin_write_byte(fd, str[i]);
     }
   }
@@ -726,7 +726,7 @@ namespace filesystem {
   }
 
   bool file_text_eoln(int fd) {
-	return (file_bin_read_byte(fd) == '\n');
+    return (file_bin_read_byte(fd) == '\n');
   }
 
   bool file_text_eof(int fd) {
@@ -735,15 +735,15 @@ namespace filesystem {
   
   double file_text_read_real(int fd) {
     string str;
-	bool dot = false; int byte = file_bin_read_byte(fd); 
+    bool dot = false; int byte = file_bin_read_byte(fd); 
     if (byte == '.' && !dot) {
         dot = true;
     } else if (!is_digit((char)byte) && (char)byte != '+' && 
       (char)byte != '-' && (char)byte != '.') {
       file_bin_seek(fd, -1);
       return 0;
-	}
-	str.resize(str.length() + 1, ' ');
+    }
+    str.resize(str.length() + 1, ' ');
     str[str.length() - 1] = byte;
     byte = file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
@@ -751,57 +751,57 @@ namespace filesystem {
     } else if (!is_digit((char)byte) && (char)byte != '.') {
       file_bin_seek(fd, -2);
       return 0;
-	}
-	str.resize(str.length() + 1, ' ');
+    }
+    str.resize(str.length() + 1, ' ');
     str[str.length() - 1] = byte;
-	while ((char)byte != '\n' && !file_text_eof(fd)) {
+    while ((char)byte != '\n' && !file_text_eof(fd)) {
       byte = file_bin_read_byte(fd);
-	  if (byte == '.' && !dot) {
+      if (byte == '.' && !dot) {
         dot = true;
-	  } else if (byte == '.' && dot) {
+      } else if (byte == '.' && dot) {
         break;
       } else if ((char)byte != '.' && !is_digit((char)byte)) {
         break;
       }
-	  str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
-	}
-	return strtod(str.c_str(), nullptr);
+    }
+    return strtod(str.c_str(), nullptr);
   }
 
   string file_text_read_string(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       byte = file_bin_read_byte(fd);
-	  str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
     }
-	if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
+    if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
       file_bin_seek(fd, -1);
-	}
-	if (str[str.length() - 2] == '\r' && str[str.length() - 1] == '\n') {
+    }
+    if (str[str.length() - 2] == '\r' && str[str.length() - 1] == '\n') {
       file_bin_seek(fd, -2);
-	}
-	return str;
+    }
+    return str;
   }
 
   string file_text_readln(int fd) {
     int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       byte = file_bin_read_byte(fd);
-	  str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
     }
-	return str;
+    return str;
   }
   
   string file_text_read_all(int fd) {
     string str;
     while (!file_text_eof(fd)) {
       int byte = file_bin_read_byte(fd);
-	  str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
-	}
+    }
     return str;
   }
   
