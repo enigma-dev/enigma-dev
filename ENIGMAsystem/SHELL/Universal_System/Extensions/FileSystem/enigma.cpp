@@ -114,7 +114,7 @@ namespace enigma_fs {
   var fs_directory_contents_recursive(std::string dname, std::string pattern = "*.*", bool includedirs = true) {
     var resVar; std::vector<std::string> resVec = filesystem::directory_contents_recursive(dname, pattern, includedirs);
     for (unsigned i = 0; i < resVec.size(); i++) resVar[i] = resVec[i];
-	return resVar;
+    return resVar;
   }
 
   std::string fs_environment_get_variable(std::string name) {
