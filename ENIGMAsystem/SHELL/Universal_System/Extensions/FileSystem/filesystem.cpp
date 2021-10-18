@@ -749,7 +749,7 @@ namespace filesystem {
     }
     str.resize(str.length() + 1, ' ');
     str[str.length() - 1] = byte;
-	if (sign) {
+    if (sign) {
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
