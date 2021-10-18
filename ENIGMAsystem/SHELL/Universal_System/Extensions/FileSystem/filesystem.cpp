@@ -726,50 +726,51 @@ namespace filesystem {
   }
 
   bool file_text_eof(int fd) {
-    return (file_bin_position(fd) == file_bin_size(fd));
+    return (file_bin_position(fd) >= file_bin_size(fd));
   }
 
   bool file_text_eoln(int fd) {
-    if (file_text_eof(fd)) {
-      return true;
-    }
     file_bin_seek(fd, -1);
-    return ((char)file_bin_read_byte(fd) == '\n');
+    bool res = ((char)file_bin_read_byte(fd) == '\n');
+	if (res) file_bin_seek(fd, 2);
+	res = (file_text_eof(fd) || res);
+    return res;
   }
   
   double file_text_read_real(int fd) {
     string str;
     bool dot = false; int byte = file_bin_read_byte(fd); 
     if (byte == '.' && !dot) {
-        dot = true;
+      dot = true;
     } else if (!is_digit((char)byte) && (char)byte != '+' && 
       (char)byte != '-' && (char)byte != '.') {
-      file_bin_seek(fd, -1);
+      file_text_readln(fd);
       return 0;
     }
     str.resize(str.length() + 1, ' ');
-    str[str.length() - 1] = byte;
+    str[str.length() - 1] = (char)byte;
     byte = file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
-        dot = true;
-    } else if (!is_digit((char)byte) && (char)byte != '.') {
-      file_bin_seek(fd, -2);
-      return 0;
+      dot = true;
+    } else if ((!is_digit((char)byte) && (char)byte != '.') || file_text_eof(fd)) {
+      file_text_readln(fd);
+      return strtod(str.c_str(), nullptr);
     }
     str.resize(str.length() + 1, ' ');
-    str[str.length() - 1] = byte;
-    while ((char)byte != '\n' && !file_text_eof(fd)) {
+    str[str.length() - 1] = (char)byte;
+    do {
       byte = file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
-      } else if (byte == '.' && dot) {
+      } else if ((char)byte == '.' && dot) {
         break;
-      } else if ((char)byte != '.' && !is_digit((char)byte)) {
+      } else if (!is_digit((char)byte) && (char)byte != '.') {
         break;
       }
       str.resize(str.length() + 1, ' ');
-      str[str.length() - 1] = byte;
-    }
+      str[str.length() - 1] = (char)byte;
+    } while ((char)byte != '\n' && !file_text_eof(fd));
+    file_text_readln(fd);
     return strtod(str.c_str(), nullptr);
   }
 
