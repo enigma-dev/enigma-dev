@@ -639,6 +639,7 @@ namespace ngs::fs {
     }
     if (fp) {
       int fd = dup(fileno(fp));
+      
       fclose(fp);
       return fd;
     }
@@ -689,12 +690,13 @@ namespace ngs::fs {
   }
 
   int file_bin_read_byte(int fd) {
-    int byte;
+    int byte = -1;
     #if defined(_WIN32)
-    _read(fd, &byte, 1);
+    int num = (int)_read(fd, &byte, 1);
     #else
-    read(fd, &byte, 1);
+    int num = (int)read(fd, &byte, 1);
     #endif
+    if (num == -1) return -1;
     return byte;
   }
 
@@ -759,6 +761,7 @@ namespace ngs::fs {
     } else if (byte == '+' || byte == '-') {
       sign = true;
     }
+    if (byte == -1) goto finish;
     str.resize(str.length() + 1, ' ');
     str[str.length() - 1] = byte;
     if (sign) {
@@ -768,6 +771,7 @@ namespace ngs::fs {
       } else if (!is_digit(byte) && byte != '.') {
         return strtod(str.c_str(), nullptr);
       }
+      if (byte == -1) goto finish;
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
     }
@@ -783,9 +787,11 @@ namespace ngs::fs {
       } else if (byte == '\n' || file_bin_position(fd) > file_bin_size(fd)) {
         break;
       }
+      if (byte == -1) goto finish;
       str.resize(str.length() + 1, ' ');
       str[str.length() - 1] = byte;
     }
+    finish:
     return strtod(str.c_str(), nullptr);
   }
 
@@ -812,7 +818,8 @@ namespace ngs::fs {
       message_pump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
-      str[str.length() - 1] = byte;
+      str[str.length() - 1] = ((byte == -1) ? 0 : byte);
+      if (byte == -1) break;
     }
     return str;
   }
@@ -823,7 +830,8 @@ namespace ngs::fs {
       message_pump();
       char byte = (char)file_bin_read_byte(fd);
       str.resize(str.length() + 1, ' ');
-      str[str.length() - 1] = byte;
+      str[str.length() - 1] = ((byte == -1) ? 0 : byte);
+      if (byte == -1) break;
     }
     return str;
   }
@@ -836,6 +844,7 @@ namespace ngs::fs {
     if (pipe(fd) < 0) return -1;
     #endif
     file_text_write_string(fd[1], str);
+    file_bin_close(fd[1]);
     return fd[0];
   }
   
