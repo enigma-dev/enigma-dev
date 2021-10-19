@@ -639,7 +639,6 @@ namespace ngs::fs {
     }
     if (fp) {
       int fd = dup(fileno(fp));
-      
       fclose(fp);
       return fd;
     }
