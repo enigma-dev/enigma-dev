@@ -608,40 +608,28 @@ namespace ngs::fs {
     #if defined(_WIN32)
     wstring wfname = widen(fname);
     FILE *fp = nullptr;
-    if (mode == 0) {
-      fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8");
-    } else if (mode == 1) {
-      fp = _wfopen(wfname.c_str(), L"wb, ccs=UTF-8");
-    } else if (mode == 2) {
-      fp = _wfopen(wfname.c_str(), L"w+b, ccs=UTF-8");
-    } else if (mode == 3) {
-      fp = _wfopen(wfname.c_str(), L"ab, ccs=UTF-8");
-    } else if (mode == 4) {
-      fp = _wfopen(wfname.c_str(), L"a+b, ccs=UTF-8");
+    switch (mode) {
+      case  0: { fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8" ); break; }
+      case  1: { fp = _wfopen(wfname.c_str(), L"wb, ccs=UTF-8" ); break; }
+      case  2: { fp = _wfopen(wfname.c_str(), L"w+b, ccs=UTF-8"); break; }
+      case  3: { fp = _wfopen(wfname.c_str(), L"ab, ccs=UTF-8" ); break; }
+      case  4: { fp = _wfopen(wfname.c_str(), L"a+b, ccs=UTF-8"); break; }
+      default: return -1;
     }
-    if (fp) {
-      int fd = _dup(_fileno(fp));
-      fclose(fp);
-      return fd;
-    }
+    if (fp) { int fd = _dup(_fileno(fp));
+    fclose(fp); return fd; }
     #else
     FILE *fp = nullptr;
-    if (mode == 0) {
-      fp = fopen(fname.c_str(), "rb");
-    } else if (mode == 1) {
-      fp = fopen(fname.c_str(), "wb");
-    } else if (mode == 2) {
-      fp = fopen(fname.c_str(), "w+b");
-    } else if (mode == 3) {
-      fp = fopen(fname.c_str(), "ab");
-    } else if (mode == 4) {
-      fp = fopen(fname.c_str(), "a+b");
+    switch (mode) {
+      case  0: { fp = fopen(fname.c_str(), "rb" ); break; }
+      case  1: { fp = fopen(fname.c_str(), "wb" ); break; }
+      case  2: { fp = fopen(fname.c_str(), "w+b"); break; }
+      case  3: { fp = fopen(fname.c_str(), "ab" ); break; }
+      case  4: { fp = fopen(fname.c_str(), "a+b"); break; }
+      default: return -1;
     }
-    if (fp) {
-      int fd = dup(fileno(fp));
-      fclose(fp);
-      return fd;
-    }
+    if (fp) { int fd = dup(fileno(fp));
+    fclose(fp); return fd; }
     #endif
     return -1;
   }
@@ -719,23 +707,29 @@ namespace ngs::fs {
     return file_bin_open(fname, 3);
   }
 
-  void file_text_write_real(int fd, double val) {
+  long file_text_write_real(int fd, double val) {
     string str = std::to_string(val);
     for (unsigned i = 0; i < str.length(); i++) {
       message_pump();
-      file_bin_write_byte(fd, str[i]);
+      if (file_bin_write_byte(fd, str[i]) == -1) {
+        return -1;
+      }
     }
+    return (long)str.length();
   }
 
-  void file_text_write_string(int fd, string str) {
+  long file_text_write_string(int fd, string str) {
     for (unsigned i = 0; i < str.length(); i++) {
       message_pump();
-      file_bin_write_byte(fd, str[i]);
+      if (file_bin_write_byte(fd, str[i]) == -1) {
+        return -1;
+      }
     }
+    return (long)str.length();
   }
 
-  void file_text_writeln(int fd) {
-    file_bin_write_byte(fd, '\n');
+  int file_text_writeln(int fd) {
+    return file_bin_write_byte(fd, '\n');
   }
 
   bool file_text_eof(int fd) {

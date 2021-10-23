@@ -77,9 +77,9 @@ namespace enigma_fs {
   int fs_file_text_open_read(std::string fname);
   int fs_file_text_open_write(std::string fname);
   int fs_file_text_open_append(std::string fname);
-  void fs_file_text_write_real(int fd, double val);
-  void fs_file_text_write_string(int fd, string str);
-  void fs_file_text_writeln(int fd);
+  long fs_file_text_write_real(int fd, double val);
+  long fs_file_text_write_string(int fd, string str);
+  int fs_file_text_writeln(int fd);
   bool fs_file_text_eoln(int fd);
   bool fs_file_text_eof(int fd);
   double fs_file_text_read_real(int fd);

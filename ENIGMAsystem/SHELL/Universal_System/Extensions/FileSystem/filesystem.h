@@ -83,9 +83,9 @@ namespace ngs::fs {
   int file_text_open_read(std::string fname);
   int file_text_open_write(std::string fname);
   int file_text_open_append(std::string fname);
-  void file_text_write_real(int fd, double val);
-  void file_text_write_string(int fd, std::string str);
-  void file_text_writeln(int fd);
+  long file_text_write_real(int fd, double val);
+  long file_text_write_string(int fd, std::string str);
+  int file_text_writeln(int fd);
   bool file_text_eoln(int fd);
   bool file_text_eof(int fd);
   double file_text_read_real(int fd);

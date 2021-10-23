@@ -227,16 +227,16 @@ namespace enigma_fs {
     return filesystem::file_text_open_append(fname);
   }
   
-  void fs_file_text_write_real(int fd, double val) {
-    filesystem::file_text_write_real(fd, val);
+  long fs_file_text_write_real(int fd, double val) {
+    return filesystem::file_text_write_real(fd, val);
   }
   
-  void fs_file_text_write_string(int fd, std::string str) {
-    filesystem::file_text_write_string(fd, str);
+  long fs_file_text_write_string(int fd, std::string str) {
+    return filesystem::file_text_write_string(fd, str);
   }
   
-  void fs_file_text_writeln(int fd) {
-    filesystem::file_text_writeln(fd);
+  int fs_file_text_writeln(int fd) {
+    return filesystem::file_text_writeln(fd);
   }
   
   bool fs_file_text_eoln(int fd) {
