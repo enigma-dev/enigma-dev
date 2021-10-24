@@ -100,13 +100,16 @@ namespace ngs::fs {
       time_t time = modified ? info.st_mtime : info.st_atime;
       if (result == -1) return result; // failure: stat errored
       struct tm *timeinfo = std::localtime(&time);
-      if      (type == 0) return timeinfo->tm_year + 1900;
-      else if (type == 1) return timeinfo->tm_mon  + 1;
-      else if (type == 2) return timeinfo->tm_mday;
-      else if (type == 3) return timeinfo->tm_hour;
-      else if (type == 4) return timeinfo->tm_min;
-      else if (type == 5) return timeinfo->tm_sec;
-      else return result; // failure: enum value not found
+      switch (type) {
+        case  0: return timeinfo->tm_year + 1900;
+        case  1: return timeinfo->tm_mon  + 1;
+        case  2: return timeinfo->tm_mday;
+        case  3: return timeinfo->tm_hour;
+        case  4: return timeinfo->tm_min;
+        case  5: return timeinfo->tm_sec;
+        default: return result;
+      }
+      return result;
     }
 
     string string_replace_all(string str, string substr, string nstr) {
@@ -131,20 +134,29 @@ namespace ngs::fs {
     }
 
     string filename_path(string fname) {
-      size_t fp = fname.find_last_of("/\\");
+      #if defined(_WIN32)
+      size_t fp = fname.find_last_of("\\/");
+      #else
+      size_t fp = fname.find_last_of("/");
+      #endif
+      if (fp == string::npos) return fname;
       return fname.substr(0, fp + 1);
     }
 
     string filename_name(string fname) {
-      size_t fp = fname.find_last_of("/\\");
+      #if defined(_WIN32)
+      size_t fp = fname.find_last_of("\\/");
+      #else
+      size_t fp = fname.find_last_of("/");
+      #endif
+      if (fp == string::npos) return fname;
       return fname.substr(fp + 1);
     }
 
     string filename_ext(string fname) {
       fname = filename_name(fname);
       size_t fp = fname.find_last_of(".");
-      if (fp == string::npos)
-        return "";
+      if (fp == string::npos) return "";
       return fname.substr(fp);
     }
 
@@ -707,8 +719,7 @@ namespace ngs::fs {
     return file_bin_open(fname, 3);
   }
 
-  long file_text_write_real(int fd, double val) {
-    string str = std::to_string(val);
+  long file_text_write_string(int fd, string str) {
     for (unsigned i = 0; i < str.length(); i++) {
       message_pump();
       if (file_bin_write_byte(fd, str[i]) == -1) {
@@ -718,14 +729,9 @@ namespace ngs::fs {
     return (long)str.length();
   }
 
-  long file_text_write_string(int fd, string str) {
-    for (unsigned i = 0; i < str.length(); i++) {
-      message_pump();
-      if (file_bin_write_byte(fd, str[i]) == -1) {
-        return -1;
-      }
-    }
-    return (long)str.length();
+  long file_text_write_real(int fd, double val) {
+    string str = std::to_string(val);
+    return file_text_write_string(fd, str);
   }
 
   int file_text_writeln(int fd) {
