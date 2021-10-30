@@ -407,13 +407,15 @@ namespace ngs::fs {
   bool directory_rename(string oldname, string newname) {
     std::error_code ec;
     if (!directory_exists(oldname)) return false;
-    if (!directory_exists(newname)) directory_create(newname);
     oldname = filename_remove_slash(oldname, true);
     newname = filename_remove_slash(newname, true);
+    if (!directory_exists(newname)) directory_create(filename_path(newname));
     bool result = false;
     const std::filesystem::path path1 = std::filesystem::u8path(oldname);
     const std::filesystem::path path2 = std::filesystem::u8path(newname);
-    const std::filesystem::path path3 = std::filesystem::u8path(path2.u8string().substr(0, path1.u8string().length()));
+    const std::filesystem::path path3 = std::filesystem::u8path(
+    filename_add_slash(path2.u8string(), true).substr(0, 
+    filename_add_slash(path1.u8string(), true).length()));
     if (directory_exists(oldname)) {
       if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
         filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
@@ -645,11 +647,13 @@ namespace ngs::fs {
     #endif
     return -1;
   }
-  
+
   int file_bin_rewrite(int fd) {
     #if defined(_WIN32)
+    _lseek(fd, 0, SEEK_SET);
     return _chsize(fd, 0);
     #else
+    lseek(fd, 0, SEEK_SET);
     return ftruncate(fd, 0);
     #endif
   }
