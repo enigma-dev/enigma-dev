@@ -203,7 +203,7 @@ void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglei
   const Sound& snd = sounds.get(sound);
 
   // query for the 3d buffer interface
-  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  ComPtr<IDirectSound3DBuffer8> sound3DBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**)&sound3DBuffer8);
 
   sound3DBuffer8->SetConeOrientation(x, y, z, DS3D_IMMEDIATE);
@@ -215,7 +215,7 @@ void sound_3d_set_sound_distance(int sound, float mindist, float maxdist) {
   const Sound& snd = sounds.get(sound);
 
   // query for the 3d buffer interface
-  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  ComPtr<IDirectSound3DBuffer8> sound3DBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**)&sound3DBuffer8);
 
   sound3DBuffer8->SetMinDistance(mindist, DS3D_IMMEDIATE);
@@ -226,7 +226,7 @@ void sound_3d_set_sound_position(int sound, float x, float y, float z) {
   const Sound& snd = sounds.get(sound);
 
   // query for the 3d buffer interface
-  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  ComPtr<IDirectSound3DBuffer8> sound3DBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**)&sound3DBuffer8);
 
   sound3DBuffer8->SetPosition(x, y, z, DS3D_IMMEDIATE);
@@ -236,7 +236,7 @@ void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
   const Sound& snd = sounds.get(sound);
 
   // query for the 3d buffer interface
-  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  ComPtr<IDirectSound3DBuffer8> sound3DBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**)&sound3DBuffer8);
 
   sound3DBuffer8->SetVelocity(x, y, z, DS3D_IMMEDIATE);
