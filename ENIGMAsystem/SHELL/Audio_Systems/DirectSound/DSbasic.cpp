@@ -26,6 +26,22 @@ using std::string;
 
 #include "Universal_System/estring.h"
 
+namespace enigma {
+
+template <typename EffectInterface, typename EffectParams>
+void set_sound_effect_parameters(int sound, REFGUID rguidObject, DWORD dwIndex, REFGUID rguidInterface, EffectParams* effectParams) {
+  const Sound& snd = sounds.get(sound);
+
+  ComPtr<IDirectSoundBuffer8> soundBuffer8 = 0;
+  snd.soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&soundBuffer8);
+
+  ComPtr<EffectInterface> sndFX8 = 0;
+  soundBuffer8->GetObjectInPath(rguidObject, dwIndex, rguidInterface, (void**)&sndFX8);
+  if (sndFX8) sndFX8->SetAllParameters(effectParams);
+}
+
+} // namespace enigma
+
 namespace enigma_user {
 
 bool sound_exists(int sound) { return sounds.exists(sound); }
@@ -228,32 +244,33 @@ void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
 
 void sound_effect_chorus(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay,
                          long phase) {
-  /*
 	DSFXChorus effectParams = { };
   effectParams.fWetDryMix = wetdry;
   effectParams.fDepth = depth;
-  effectParams.fFeedback = Feedback;
+  effectParams.fFeedback = feedback;
   effectParams.fFrequency = frequency;
   effectParams.lWaveform = wave;
   effectParams.fDelay = delay;
   effectParams.lPhase = phase;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXChorus8, DSFXChorus>(
+    sound, GUID_DSFX_STANDARD_CHORUS, 0, IID_IDirectSoundFXChorus8, &effectParams);
 }
 
 void sound_effect_echo(int sound, float wetdry, float feedback, float leftdelay, float rightdelay, long pandelay) {
-  /*
   DSFXEcho effectParams = { };
   effectParams.fWetDryMix = wetdry;
   effectParams.fFeedback = feedback;
   effectParams.fLeftDelay = leftdelay;
   effectParams.fRightDelay = rightdelay;
   effectParams.lPanDelay = pandelay;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXEcho8, DSFXEcho>(
+    sound, GUID_DSFX_STANDARD_ECHO, 0, IID_IDirectSoundFXEcho8, &effectParams);
 }
 
 void sound_effect_flanger(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay,
                           long phase) {
-  /*
   DSFXFlanger effectParams = { };
   effectParams.fWetDryMix = wetdry;
   effectParams.fDepth = depth;
@@ -262,30 +279,33 @@ void sound_effect_flanger(int sound, float wetdry, float depth, float feedback, 
   effectParams.lWaveform = wave;
   effectParams.fDelay = delay;
   effectParams.lPhase = phase;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXFlanger8, DSFXFlanger>(
+    sound, GUID_DSFX_STANDARD_FLANGER, 0, IID_IDirectSoundFXFlanger8, &effectParams);
 }
 
 void sound_effect_gargle(int sound, unsigned rate, unsigned wave) {
-  /*
   DSFXGargle effectParams = { };
   effectParams.dwRateHz = rate;
   effectParams.dwWaveShape = wave;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXGargle8, DSFXGargle>(
+    sound, GUID_DSFX_STANDARD_GARGLE, 0, IID_IDirectSoundFXGargle8, &effectParams);
 }
 
 void sound_effect_reverb(int sound, float gain, float mix, float time, float ratio) {
-  /*
   DSFXWavesReverb effectParams = { };
   effectParams.fInGain = gain;
   effectParams.fReverbMix = mix;
   effectParams.fReverbTime = time;
   effectParams.fHighFreqRTRatio = ratio;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXWavesReverb8, DSFXWavesReverb>(
+    sound, GUID_DSFX_WAVES_REVERB, 0, IID_IDirectSoundFXWavesReverb8, &effectParams);
 }
 
 void sound_effect_compressor(int sound, float gain, float attack, float release, float threshold, float ratio,
                              float delay) {
-  /*
   DSFXCompressor effectParams = { };
   effectParams.fGain = gain;
   effectParams.fAttack = attack;
@@ -293,16 +313,19 @@ void sound_effect_compressor(int sound, float gain, float attack, float release,
   effectParams.fThreshold = threshold;
   effectParams.fRatio = ratio;
   effectParams.fPredelay = delay;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXCompressor8, DSFXCompressor>(
+    sound, GUID_DSFX_STANDARD_COMPRESSOR, 0, IID_IDirectSoundFXCompressor8, &effectParams);
 }
 
 void sound_effect_equalizer(int sound, float center, float bandwidth, float gain) {
-  /*
   DSFXParamEq effectParams = { };
   effectParams.fCenter = center;
   effectParams.fBandwidth = bandwidth;
   effectParams.fGain = gain;
-  */
+
+  enigma::set_sound_effect_parameters<IDirectSoundFXParamEq8, DSFXParamEq>(
+    sound, GUID_DSFX_STANDARD_PARAMEQ, 0, IID_IDirectSoundFXParamEq8, &effectParams);
 }
 
 static const GUID sound_effect_guids[7] = {
@@ -355,9 +378,11 @@ void sound_effect_set(int sound, int effect) {
   if (wasPlaying) snd.soundBuffer->Stop();  // pause
 
   // query for the effect interface and set the effects on the sound buffer
-  IDirectSoundBuffer8* soundBuffer8 = 0;
+  ComPtr<IDirectSoundBuffer8> soundBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&soundBuffer8);
-  soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
+  if (soundBuffer8) soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
+  delete[] dsEffects;
+  delete[] dwResults;
 
   if (wasPlaying) snd.soundBuffer->Play(0, 0, wasLooping ? DSBPLAY_LOOPING : 0);  // resume
 }
