@@ -15,16 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "DSsystem.h"
+#include "Audio_Systems/General/ASbasic.h"
+#include "Audio_Systems/audio_mandatory.h"
+#include "Universal_System/estring.h"
+
+#include <string>
+#include <vector>
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <string>
-using std::string;
-#include "../General/ASbasic.h"
-#include "Audio_Systems/audio_mandatory.h"
-#include "DSsystem.h"
 
-#include "Universal_System/estring.h"
+using std::string;
 
 namespace enigma {
 
@@ -335,8 +337,8 @@ static const GUID sound_effect_guids[7] = {
 void sound_effect_set(int sound, int effect) {
   size_t numOfEffects = 0;
 
-  DWORD* dwResults = 0;
-  DSEFFECTDESC* dsEffects = 0;
+  std::vector<DWORD> dwResults;
+  std::vector<DSEFFECTDESC> dsEffects;
 
   if (effect != 0) {
     // count the number of effect flags that were set
@@ -347,8 +349,8 @@ void sound_effect_set(int sound, int effect) {
     }
 
     // allocate an array of effect descriptions and results
-    dwResults = new DWORD[numOfEffects];
-    dsEffects = new DSEFFECTDESC[numOfEffects];
+    dwResults.resize(numOfEffects);
+    dsEffects.resize(numOfEffects);
 
     size_t eff = 0;
     // loop all the bits of the effect parameter to see which of the flags were set
@@ -380,9 +382,7 @@ void sound_effect_set(int sound, int effect) {
   // query for the effect interface and set the effects on the sound buffer
   ComPtr<IDirectSoundBuffer8> soundBuffer8 = 0;
   snd.soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**)&soundBuffer8);
-  if (soundBuffer8) soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
-  delete[] dsEffects;
-  delete[] dwResults;
+  if (soundBuffer8) soundBuffer8->SetFX(numOfEffects, dsEffects.data(), dwResults.data());
 
   if (wasPlaying) snd.soundBuffer->Play(0, 0, wasLooping ? DSBPLAY_LOOPING : 0);  // resume
 }
