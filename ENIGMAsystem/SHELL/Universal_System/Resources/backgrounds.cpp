@@ -54,10 +54,7 @@ Background background_add_helper(std::string filename, bool transparent, bool sm
 
   // If background is transparent, set the alpha to zero for pixels that should be
   // transparent from lower left pixel color
-  if (transparent) {
-    Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
-    enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
-  }
+  if (transparent) enigma::image_swap_color(imgs[0]);
 
   nb.textureID = graphics_create_texture(imgs[0], mipmap, &fullwidth, &fullheight);
   nb.textureBounds = TexRect(0, 0, static_cast<gs_scalar>(imgs[0].w) / fullwidth, static_cast<gs_scalar>(imgs[0].h) / fullheight);

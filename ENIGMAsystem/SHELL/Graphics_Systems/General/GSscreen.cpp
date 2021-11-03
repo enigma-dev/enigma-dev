@@ -73,10 +73,7 @@ RawImage create_from_screen_helper(int x, int y, int w, int h, bool removeback, 
   if (flipped)
     enigma::image_flip(i);
     
-  if (removeback) {
-    Color c = enigma::image_get_pixel_color(i, 0, h - 1);
-    enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
-  }
+  if (removeback) enigma::image_swap_color(i);
   
   return i;
 }

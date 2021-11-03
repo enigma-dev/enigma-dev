@@ -87,6 +87,17 @@ void image_swap_color(RawImage& in, Color oldColor, Color newColor) {
   }
 }
 
+void image_swap_color(RawImage& in, Color oldColor) {
+  Color newColor = oldColor;
+  newColor.a = 0;
+  image_swap_color(in, oldColor, newColor);
+}
+
+void image_swap_color(RawImage& in) {
+  const Color bottom_left = enigma::image_get_pixel_color(in, 0, in.h - 1);
+  image_swap_color(in, bottom_left);
+}
+
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
   std::vector<RawImage> imgs(imgcount);
   unsigned splitWidth = in.w / imgcount;
