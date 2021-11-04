@@ -1,4 +1,4 @@
-﻿/*
+/*
 
  MIT License
  
@@ -99,6 +99,19 @@ namespace ngs::fs {
       #endif
       time_t time = modified ? info.st_mtime : info.st_atime;
       if (result == -1) return result; // failure: stat errored
+      #if defined(_WIN32)
+      struct tm timeinfo = { 0 };
+      if (localtime_s(&timeinfo, &time)) return -1;
+      switch (type) {
+        case  0: return timeinfo.tm_year + 1900;
+        case  1: return timeinfo.tm_mon  + 1;
+        case  2: return timeinfo.tm_mday;
+        case  3: return timeinfo.tm_hour;
+        case  4: return timeinfo.tm_min;
+        case  5: return timeinfo.tm_sec;
+        default: return result;
+      }
+      #else
       struct tm *timeinfo = std::localtime(&time);
       switch (type) {
         case  0: return timeinfo->tm_year + 1900;
@@ -109,9 +122,10 @@ namespace ngs::fs {
         case  5: return timeinfo->tm_sec;
         default: return result;
       }
+      #endif
       return result;
     }
-
+    
     string string_replace_all(string str, string substr, string nstr) {
       size_t pos = 0;
       while ((pos = str.find(substr, pos)) != string::npos) {
@@ -623,11 +637,11 @@ namespace ngs::fs {
     wstring wfname = widen(fname);
     FILE *fp = nullptr;
     switch (mode) {
-      case  0: { fp = _wfopen(wfname.c_str(), L"rb, ccs=UTF-8" ); break; }
-      case  1: { fp = _wfopen(wfname.c_str(), L"wb, ccs=UTF-8" ); break; }
-      case  2: { fp = _wfopen(wfname.c_str(), L"w+b, ccs=UTF-8"); break; }
-      case  3: { fp = _wfopen(wfname.c_str(), L"ab, ccs=UTF-8" ); break; }
-      case  4: { fp = _wfopen(wfname.c_str(), L"a+b, ccs=UTF-8"); break; }
+      case  0: { if (!_wfopen_s(&fp, wfname.c_str(), L"rb, ccs=UTF-8" )) break; return -1; }
+      case  1: { if (!_wfopen_s(&fp, wfname.c_str(), L"wb, ccs=UTF-8" )) break; return -1; }
+      case  2: { if (!_wfopen_s(&fp, wfname.c_str(), L"w+b, ccs=UTF-8")) break; return -1; }
+      case  3: { if (!_wfopen_s(&fp, wfname.c_str(), L"ab, ccs=UTF-8" )) break; return -1; }
+      case  4: { if (!_wfopen_s(&fp, wfname.c_str(), L"a+b, ccs=UTF-8")) break; return -1; }
       default: return -1;
     }
     if (fp) { int fd = _dup(_fileno(fp));
@@ -659,7 +673,11 @@ namespace ngs::fs {
   }
   
   int file_bin_close(int fd) {
+    #if defined(_WIN32)
+    return _close(fd);
+    #else
     return close(fd);
+    #endif
   }
   
   long file_bin_size(int fd) {
