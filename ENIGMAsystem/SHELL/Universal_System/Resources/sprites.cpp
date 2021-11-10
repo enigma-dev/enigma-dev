@@ -51,9 +51,7 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
   
   if (imgs.size() == 1 && imgnumb > 1) {
-    if (transparent) {      
-      enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
-    }
+    if (transparent) enigma::image_remove_color(imgs[0]);
   
     std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0], imgnumb);
     for (const RawImage& i : rawSubimages) {
@@ -61,9 +59,7 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
     }
   } else {
     for (RawImage& i : imgs) {
-      if (transparent) {
-        enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
-      }
+      if (transparent) enigma::image_remove_color(i);
       ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }
   }

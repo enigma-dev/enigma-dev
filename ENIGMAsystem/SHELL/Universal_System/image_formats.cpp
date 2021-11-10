@@ -87,6 +87,56 @@ void image_swap_color(RawImage& in, Color oldColor, Color newColor) {
   }
 }
 
+void image_remove_color(RawImage& in, Color oldColor) {
+  #ifdef DEBUG_MODE
+  if (in.pxdata == nullptr) {
+    in.pxdata = new unsigned char[in.w * in.h * 4];
+    std::fill(in.pxdata, in.pxdata + (in.w * in.h * 4), 255);
+    DEBUG_MESSAGE("Attempt to access a null pointer" , MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  #endif
+
+  unsigned int ih, iw;
+  for (ih = 0; ih < in.h; ih++) {
+    int index = ih * in.w * 4;
+    
+    for (iw = 0; iw < in.w; iw++) {
+      if (
+           in.pxdata[index]     == oldColor.b
+        && in.pxdata[index + 1] == oldColor.g
+        && in.pxdata[index + 2] == oldColor.r
+        ) {
+          in.pxdata[index + 3] = 0;
+      } else {
+        unsigned int nw, nh;
+        float neighbors = 0, counted = 0;
+        for (nh = ih - 1; nh <= ih + 1; ++nh) {
+          for (nw = iw - 1; nw <= iw + 1; ++nw) {
+            if (nw < 0 || nh < 0 || (nw == iw && nh == ih)) continue;
+            ++counted;
+            int ni = (nh * in.w + nw) * 4;
+            if (
+                 in.pxdata[ni]     != oldColor.b
+              || in.pxdata[ni + 1] != oldColor.g
+              || in.pxdata[ni + 2] != oldColor.r
+              )
+              ++neighbors;
+          }
+        }
+        in.pxdata[index + 3] = static_cast<unsigned char>((neighbors/counted) * 255.0f);
+      }
+
+      index += 4;
+    }
+  }
+}
+
+void image_remove_color(RawImage& in) {
+  Color c = image_get_pixel_color(in, 0, in.h - 1);
+  image_remove_color(in, c);
+}
+
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
   std::vector<RawImage> imgs(imgcount);
   unsigned splitWidth = in.w / imgcount;
