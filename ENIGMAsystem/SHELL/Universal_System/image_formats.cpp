@@ -133,8 +133,8 @@ void image_remove_color(RawImage& in, Color oldColor) {
 }
 
 void image_remove_color(RawImage& in) {
-  Color c = image_get_pixel_color(in, 0, in.h - 1);
-  image_remove_color(in, c);
+  Color bottom_left = image_get_pixel_color(in, 0, in.h - 1);
+  image_remove_color(in, bottom_left);
 }
 
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
