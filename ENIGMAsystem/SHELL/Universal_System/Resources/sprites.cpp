@@ -45,10 +45,6 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   unsigned cellwidth = ((imgs.size() > 1) ? imgs[0].w : imgs[0].w / imgnumb);
   Sprite ns(cellwidth, imgs[0].h, x_offset, y_offset);
   ns.SetBBox(0, 0, cellwidth, imgs[0].h);
-
-  // If sprite transparent, set the alpha to zero for pixels that should be
-  // transparent from lower left pixel color
-  Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
   
   if (imgs.size() == 1 && imgnumb > 1) {
     if (transparent) enigma::image_remove_color(imgs[0]);
