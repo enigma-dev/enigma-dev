@@ -114,7 +114,6 @@ void image_remove_color(RawImage& in, Color oldColor) {
         float neighbors = 0, counted = 0;
         for (; nh <= ih + 1 && nh < in.h; ++nh) {
           for (; nw <= iw + 1 && nw < in.w; ++nw) {
-            if (nw == iw && nh == ih) continue;
             ++counted;
             int ni = (nh * in.w + nw) * 4;
             if (
