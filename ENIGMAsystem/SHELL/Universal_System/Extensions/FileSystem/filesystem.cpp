@@ -743,12 +743,12 @@ namespace ngs::fs {
   }
 
   long file_text_write_string(int fd, string str) {
-    char *buffer = new char[str.length() + 1];
+    char *buffer = new char[str.length()];
     strcpy(buffer, str.c_str());
     #if defined(_WIN32)
-    long result =  _write(fd, buffer, str.length() + 1);
+    long result =  _write(fd, buffer, str.length());
     #else
-    long result = write(fd, buffer, str.length() + 1);
+    long result = write(fd, buffer, str.length());
     #endif
     delete[] buffer;
     return result;
@@ -825,7 +825,8 @@ namespace ngs::fs {
       message_pump();
       byte = file_bin_read_byte(fd);
       str.resize(str.length() + 1, '\0');
-      str[str.length() - 1] = byte;
+      str[str.length() - 1] = ((byte == -1) ? 0 : byte);
+      if (byte == -1) break;
     }
     if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
       file_bin_seek(fd, -1);
