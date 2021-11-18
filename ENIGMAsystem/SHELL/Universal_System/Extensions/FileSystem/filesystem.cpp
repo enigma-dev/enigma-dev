@@ -749,7 +749,8 @@ namespace ngs::fs {
     wstring wstr = widen(str);
     wchar_t *buffer = new wchar_t[wstr.length()];
     wcscpy_s(buffer, wstr.length(), wstr.c_str());
-    long result =  _write(fd, buffer, wstr.length());
+    str = narrow(buffer);
+    long result = _write(fd, str.data(), str.length());
     #else
     char *buffer = new char[str.length()];
     strcpy(buffer, str.c_str());
