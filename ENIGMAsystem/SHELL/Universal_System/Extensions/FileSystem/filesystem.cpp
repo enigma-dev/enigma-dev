@@ -31,7 +31,9 @@
 #include <filesystem>
 
 #include <cstring>
-#if defined(__linux__)
+#if defined(_WIN32)
+#include <cwchar>
+#elif defined(__linux__)
 #include <cstdlib>
 #endif
 
@@ -743,11 +745,14 @@ namespace ngs::fs {
   }
 
   long file_text_write_string(int fd, string str) {
+    #if defined(_WIN32)
+    wstring wstr = widen(str);
+    wchar_t *buffer = new wchar_t[wstr.length()];
+    wcscpy_s(buffer, wstr.length(), wstr.c_str());
+    long result =  _write(fd, buffer, wstr.length());
+    #else
     char *buffer = new char[str.length()];
     strcpy(buffer, str.c_str());
-    #if defined(_WIN32)
-    long result =  _write(fd, buffer, str.length());
-    #else
     long result = write(fd, buffer, str.length());
     #endif
     delete[] buffer;
