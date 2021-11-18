@@ -742,13 +742,15 @@ namespace ngs::fs {
   }
 
   long file_text_write_string(int fd, string str) {
-    for (unsigned i = 0; i < str.length(); i++) {
-      message_pump();
-      if (file_bin_write_byte(fd, str[i]) == -1) {
-        return -1;
-      }
-    }
-    return (long)str.length();
+    char *buffer = new char[str.length() + 1];
+    strcpy(buffer, str.c_str());
+    #if defined(_WIN32)
+    long result =  _write(fd, buffer, str.length() + 1);
+    #else
+    long result = write(fd, buffer, str.length() + 1);
+    #endif
+    delete[] buffer;
+    return result;
   }
 
   long file_text_write_real(int fd, double val) {
@@ -783,7 +785,7 @@ namespace ngs::fs {
       sign = true;
     }
     if (byte == -1) goto finish;
-    str.resize(str.length() + 1, ' ');
+    str.resize(str.length() + 1, '\0');
     str[str.length() - 1] = byte;
     if (sign) {
       byte = (char)file_bin_read_byte(fd);
@@ -793,7 +795,7 @@ namespace ngs::fs {
         return strtod(str.c_str(), nullptr);
       }
       if (byte == -1) goto finish;
-      str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, '\0');
       str[str.length() - 1] = byte;
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
@@ -809,7 +811,7 @@ namespace ngs::fs {
         break;
       }
       if (byte == -1) goto finish;
-      str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, '\0');
       str[str.length() - 1] = byte;
     }
     finish:
@@ -821,7 +823,7 @@ namespace ngs::fs {
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
-      str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, '\0');
       str[str.length() - 1] = byte;
     }
     if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
@@ -838,7 +840,7 @@ namespace ngs::fs {
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
-      str.resize(str.length() + 1, ' ');
+      str.resize(str.length() + 1, '\0');
       str[str.length() - 1] = ((byte == -1) ? 0 : byte);
       if (byte == -1) break;
     }
@@ -847,24 +849,34 @@ namespace ngs::fs {
 
   string file_text_read_all(int fd) {
     string str;
-    while (!file_text_eof(fd)) {
-      message_pump();
-      char byte = (char)file_bin_read_byte(fd);
-      str.resize(str.length() + 1, ' ');
-      str[str.length() - 1] = ((byte == -1) ? 0 : byte);
-      if (byte == -1) break;
+    long sz = file_bin_size(fd);
+    char *buffer = new char[sz];
+    #if defined(_WIN32)
+    long result =  _read(fd, buffer, sz);
+    #else
+    long result = read(fd, buffer, sz);
+    #endif
+    if (result == -1) {
+      delete[] buffer;
+      return "";
     }
+    str = buffer ? buffer : "";
+    delete[] buffer;
     return str;
   }
 
   int file_text_open_from_string(string str) {
     int fd[2];
     #if defined(_WIN32)
-    if (_pipe(fd, str.length(), O_BINARY) < 0) return -1;
+    if (_pipe(fd, str.length() + 1, O_BINARY) == -1) return -1;
     #else
     if (pipe(fd) < 0) return -1;
     #endif
-    file_text_write_string(fd[1], str);
+    if (file_text_write_string(fd[1], str) == -1) {
+      file_bin_close(fd[1]);
+      file_bin_close(fd[2]);
+      return -1;
+    }
     file_bin_close(fd[1]);
     return fd[0];
   }
