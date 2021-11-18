@@ -873,8 +873,8 @@ namespace ngs::fs {
     if (pipe(fd) < 0) return -1;
     #endif
     if (file_text_write_string(fd[1], str) == -1) {
+      file_bin_close(fd[0]);
       file_bin_close(fd[1]);
-      file_bin_close(fd[2]);
       return -1;
     }
     file_bin_close(fd[1]);
