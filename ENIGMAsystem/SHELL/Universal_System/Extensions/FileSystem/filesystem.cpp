@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <filesystem>
 
+#include <cstring>
 #if defined(__linux__)
 #include <cstdlib>
 #endif
