@@ -4,32 +4,35 @@
 namespace enigma_user {
 
 using CrossProcess::PROCID;
-using CrossProcess::PROCESS;
+using CrossProcess::PROCID_LOCAL;
 using CrossProcess::PROCINFO;
 using CrossProcess::PROCLIST;
 using CrossProcess::WINDOWID;
 using CrossProcess::WINDOW;
 
 // execute process from the shell, return process id
-PROCESS ProcessExecute(std::string command);
+PROCID_LOCAL ProcessExecute(std::string command);
 
 // execute process from the shell async, return process id
-PROCESS ProcessExecuteAsync(std::string command);
+PROCID_LOCAL ProcessExecuteAsync(std::string command);
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(PROCESS procIndex);
+bool CompletionStatusFromExecutedProcess(PROCID_LOCAL procIndex);
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(PROCESS procIndex, std::string input);
+void ExecutedProcessWriteToStandardInput(PROCID_LOCAL procIndex, std::string input);
+
+// read from current process standard input
+std::string CurrentProcessReadFromStandardInput();
 
 // read from executed process standard output file descriptor based on process id
-std::string ExecutedProcessReadFromStandardOutput(PROCESS procIndex);
+std::string ExecutedProcessReadFromStandardOutput(PROCID_LOCAL procIndex);
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(PROCESS procIndex);
+void FreeExecutedProcessStandardInput(PROCID_LOCAL procIndex);
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(PROCESS procIndex);
+void FreeExecutedProcessStandardOutput(PROCID_LOCAL procIndex);
 
 // get process id from self
 PROCID ProcIdFromSelf();
@@ -111,20 +114,5 @@ bool EnvironmentSetVariable(std::string name, std::string value);
 
 // unset the environment variable with the given name
 bool EnvironmentUnsetVariable(std::string name);
-
-// get owned window id string from process info at index
-wid_t OwnedWindowId(PROCINFO procInfo, int i);
-
-// get amount of owned window id's from process info at index
-int OwnedWindowIdLength(PROCINFO procInfo);
-
-// get whether a process exists based on one of its window id's
-bool WindowIdExists(wid_t winId);
-
-// kill a process based on one of its window id's, return whether succeeded
-bool WindowIdKill(wid_t winId);
-
-// return a window id from native window handle
-wid_t WindowIdFromNativeWindow(window_t window); 
 
 } // namespace enigma_user
