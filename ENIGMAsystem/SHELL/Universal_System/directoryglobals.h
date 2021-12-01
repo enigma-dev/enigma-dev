@@ -2,7 +2,7 @@
 
 #include "estring.h"
 
-#include "../../../shared/crossprocess/crossprocess.h"
+#include "../../../shared/apiprocess/process.h"
 #include "../../../shared/tempdir/tempdir.h"
 
 namespace enigma_user {
