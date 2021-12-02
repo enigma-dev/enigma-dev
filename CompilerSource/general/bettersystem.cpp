@@ -159,8 +159,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           parameters += " " + pcur;
         }
       }
-    myReplace(redirout, "\"", "");
-    myReplace(redirerr, "\"", "");
+      myReplace(redirout, "\"", "");
+      myReplace(redirerr, "\"", "");
 
 
       STARTUPINFO StartupInfo;
