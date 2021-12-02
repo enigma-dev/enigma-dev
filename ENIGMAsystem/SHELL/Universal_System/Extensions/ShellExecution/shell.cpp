@@ -10,22 +10,22 @@ using std::string;
 namespace enigma_user {
 
 // execute process from the shell, return process id
-LOCALPROCID ProcessExecute(string command) {
+ngs::proc::LOCALPROCID ProcessExecute(string command) {
   return ngs::proc::process_execute(command.c_str());
 }
 
 // execute process from the shell async, return process id
-LOCALPROCID ProcessExecuteAsync(string command) {
+ngs::proc::LOCALPROCID ProcessExecuteAsync(string command) {
   return ngs::proc::process_execute_async(command.c_str());
 }
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex) {
+bool CompletionStatusFromExecutedProcess(ngs::proc::LOCALPROCID procIndex) {
   return ngs::proc::completion_status_from_executed_process(procIndex);
 }
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, string input) {
+void ExecutedProcessWriteToStandardInput(ngs::proc::LOCALPROCID procIndex, string input) {
   ngs::proc::executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
@@ -35,37 +35,37 @@ std::string CurrentProcessReadFromStandardInput() {
 }
 
 // read from executed process standard output file descriptor based on process id
-string ExecutedProcessReadFromStandardOutput(LOCALPROCID procIndex) {
+string ExecutedProcessReadFromStandardOutput(ngs::proc::LOCALPROCID procIndex) {
   return ngs::proc::executed_process_read_from_standard_output(procIndex);
 }
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(LOCALPROCID procIndex) {
+void FreeExecutedProcessStandardInput(ngs::proc::LOCALPROCID procIndex) {
   ngs::proc::free_executed_process_standard_input(procIndex);
 }
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(LOCALPROCID procIndex) {
+void FreeExecutedProcessStandardOutput(ngs::proc::LOCALPROCID procIndex) {
   ngs::proc::free_executed_process_standard_output(procIndex);
 }
 
 // get process id from self
-PROCID ProcIdFromSelf() {
+ngs::proc::PROCID ProcIdFromSelf() {
   return ngs::proc::proc_id_from_self();
 }
 
 // get parent process id from self
-PROCID ParentProcIdFromSelf() {
+ngs::proc::PROCID ParentProcIdFromSelf() {
   return ngs::proc::parent_proc_id_from_self();
 }
 
 // get whether process exists based on process id
-bool ProcIdExists(PROCID procId) {
+bool ProcIdExists(ngs::proc::PROCID procId) {
   return ngs::proc::proc_id_exists(procId);
 }
 
 // kill process based on process id, return whether succeeded
-bool ProcIdKill(PROCID procId) {
+bool ProcIdKill(ngs::proc::PROCID procId) {
   return ngs::proc::proc_id_kill(procId);
 }
 
@@ -75,87 +75,87 @@ string ExecutableFromSelf() {
 }
 
 // get executable image file path from process id
-string ExeFromProcId(PROCID procId) {
+string ExeFromProcId(ngs::proc::PROCID procId) {
   return ngs::proc::exe_from_proc_id(procId);
 }
 
 // get current working directory from process id
-string CwdFromProcId(PROCID procId) {
+string CwdFromProcId(ngs::proc::PROCID procId) {
   return ngs::proc::cwd_from_proc_id(procId);
 }
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId, PROCINFO_SPECIFIC specifics) {
+ngs::proc::PROCINFO ProcInfoFromProcId(ngs::proc::PROCID procId, ngs::proc::PROCINFO_SPECIFIC specifics) {
   return ngs::proc::proc_info_from_proc_id(procId, specifics);
 }
 
 // free process info data from memory
-void FreeProcInfo(PROCINFO procInfo) {
+void FreeProcInfo(ngs::proc::PROCINFO procInfo) {
   ngs::proc::free_proc_info(procInfo);
 }
 
 // create a list of all process id's
-PROCLIST ProcListCreate() {
+ngs::proc::PROCLIST ProcListCreate() {
   return ngs::proc::proc_list_create();
 }
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, int i) {
+ngs::proc::PROCID ProcessId(ngs::proc::PROCLIST procList, int i) {
   return ngs::proc::process_id(procList, i);
 }
 
 // get amount of process id's in process list
-int ProcessIdLength(PROCLIST procList) {
+int ProcessIdLength(ngs::proc::PROCLIST procList) {
   return ngs::proc::process_id_length(procList);
 }
 
 // free list of process id's from memory
-void FreeProcList(PROCLIST procList) {
+void FreeProcList(ngs::proc::PROCLIST procList) {
   ngs::proc::free_proc_list(procList);
 }
 
 // get executable image file path from process info data
-string ExecutableImageFilePath(PROCINFO procInfo) {
+string ExecutableImageFilePath(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::executable_image_file_path(procInfo);
 }
 
 // get current working directory ffrom process info data
-string CurrentWorkingDirectory(PROCINFO procInfo) {
+string CurrentWorkingDirectory(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::current_working_directory(procInfo);
 }
 
 // get parent processs id from process info data
-PROCID ParentProcessId(PROCINFO procInfo) {
+ngs::proc::PROCID ParentProcessId(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::parent_process_id(procInfo);
 }
 
 // get child process id from process info data at index
-PROCID ChildProcessId(PROCINFO procInfo, int i) {
+ngs::proc::PROCID ChildProcessId(ngs::proc::PROCINFO procInfo, int i) {
   return ngs::proc::child_process_id(procInfo, i);
 }
 
 // get amount of child processes from process info data
-int ChildProcessIdLength(PROCINFO procInfo) {
+int ChildProcessIdLength(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::child_process_id_length(procInfo);
 }
 
 // get command line argument from process info data at index
-string CommandLine(PROCINFO procInfo, int i) {
+string CommandLine(ngs::proc::PROCINFO procInfo, int i) {
   return ngs::proc::commandline(procInfo, i);
 }
 
 // get amount of command line arguments from process info data
-int CommandLineLength(PROCINFO procInfo) {
+int CommandLineLength(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::commandline_length(procInfo);
 }
 
 // get environment variable (NAME=VALUE) from process info at index
-string Environment(PROCINFO procInfo, int i) {
+string Environment(ngs::proc::PROCINFO procInfo, int i) {
   return ngs::proc::environment(procInfo, i);
 }
 
 // get amount of anvironment variables from process info at index
-int EnvironmentLength(PROCINFO procInfo) {
+int EnvironmentLength(ngs::proc::PROCINFO procInfo) {
   return ngs::proc::environment_length(procInfo);
 }
 
@@ -190,7 +190,7 @@ string DirectoryGetTemporaryPath() {
 }
 
 void execute_program(string fname, string args, bool wait) {
-  PROCID pid = 0;
+  ngs::proc::PROCID pid = 0;
   string cmd = string_replace_all(fname, "\"", "\\\"");
   cmd = string_replace_all(cmd, "\\", "\\\\");
   cmd = "\"" + cmd + "\" " + args;
@@ -210,7 +210,7 @@ void execute_shell(string fname, string args) {
 }
   
 string execute_shell_for_output(const string &command) {
-  PROCID pid = ProcessExecute(command.c_str());
+  ngs::proc::PROCID pid = ProcessExecute(command.c_str());
   string output;
   if (pid > 0) {
     while (!CompletionStatusFromExecutedProcess(pid)) {
