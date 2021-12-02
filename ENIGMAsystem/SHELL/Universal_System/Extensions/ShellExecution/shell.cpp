@@ -44,7 +44,6 @@ string execute_shell_for_output(const string &command) {
 }
 
 void url_open(string url) {
-  #if defined(_WIN32)
   string escapedfolder = url;
   escapedfolder = strings_util::string_replace_all(escapedfolder, "\"", "\\\"");
   #if defined(_WIN32)
