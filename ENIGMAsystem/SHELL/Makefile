@@ -134,7 +134,7 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
-		override LDLIBS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+		override LDLIBS += -framework CoreFoundation -framework CoreGraphics
 		override CXXFLAGS += -ObjC++
 		override CFLAGS += -ObjC++
 	else ifeq ($(OS), Linux)
@@ -145,11 +145,11 @@ ifeq ($(UNIX_BASED), true)
 		override LDLIBS += -lkvm -lutil -lc
 	endif
 else
-	override CXXFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
-	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif
 
-SOURCES += $(wildcard ../../shared/crossprocess/*.cpp)
+SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
 SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
 
 #This does not work, use a for loop and prepend it to each one not the whole string
