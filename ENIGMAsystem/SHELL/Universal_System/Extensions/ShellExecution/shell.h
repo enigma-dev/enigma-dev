@@ -4,33 +4,33 @@
 namespace enigma_user {
 
 using ngs::proc::PROCID;
-using ngs::proc::PROCID_LOCAL;
+using ngs::proc::LOCALPROCID;
 using ngs::proc::PROCINFO;
 using ngs::proc::PROCLIST;
 
 // execute process from the shell, return process id
-PROCID_LOCAL ProcessExecute(std::string command);
+LOCALPROCID ProcessExecute(std::string command);
 
 // execute process from the shell async, return process id
-PROCID_LOCAL ProcessExecuteAsync(std::string command);
+LOCALPROCID ProcessExecuteAsync(std::string command);
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(PROCID_LOCAL procIndex);
+bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex);
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(PROCID_LOCAL procIndex, std::string input);
+void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, std::string input);
 
 // read from current process standard input
 std::string CurrentProcessReadFromStandardInput();
 
 // read from executed process standard output file descriptor based on process id
-std::string ExecutedProcessReadFromStandardOutput(PROCID_LOCAL procIndex);
+std::string ExecutedProcessReadFromStandardOutput(LOCALPROCID procIndex);
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(PROCID_LOCAL procIndex);
+void FreeExecutedProcessStandardInput(LOCALPROCID procIndex);
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(PROCID_LOCAL procIndex);
+void FreeExecutedProcessStandardOutput(LOCALPROCID procIndex);
 
 // get process id from self
 PROCID ProcIdFromSelf();

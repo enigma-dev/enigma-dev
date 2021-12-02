@@ -61,22 +61,22 @@ void action_webpage(const string& url) {
 }
 
 // execute process from the shell, return process id
-PROCID_LOCAL ProcessExecute(string command) {
+LOCALPROCID ProcessExecute(string command) {
   return ngs::proc::process_execute(command.c_str());
 }
 
 // execute process from the shell async, return process id
-PROCID_LOCAL ProcessExecuteAsync(string command) {
+LOCALPROCID ProcessExecuteAsync(string command) {
   return ngs::proc::process_execute_async(command.c_str());
 }
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(PROCID_LOCAL procIndex) {
+bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex) {
   return ngs::proc::completion_status_from_executed_process(procIndex);
 }
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(PROCID_LOCAL procIndex, string input) {
+void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, string input) {
   ngs::proc::executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
@@ -86,17 +86,17 @@ std::string CurrentProcessReadFromStandardInput() {
 }
 
 // read from executed process standard output file descriptor based on process id
-string ExecutedProcessReadFromStandardOutput(PROCID_LOCAL procIndex) {
+string ExecutedProcessReadFromStandardOutput(LOCALPROCID procIndex) {
   return ngs::proc::executed_process_read_from_standard_output(procIndex);
 }
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(PROCID_LOCAL procIndex) {
+void FreeExecutedProcessStandardInput(LOCALPROCID procIndex) {
   ngs::proc::free_executed_process_standard_input(procIndex);
 }
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(PROCID_LOCAL procIndex) {
+void FreeExecutedProcessStandardOutput(LOCALPROCID procIndex) {
   ngs::proc::free_executed_process_standard_output(procIndex);
 }
 
