@@ -9,56 +9,6 @@ using std::string;
 
 namespace enigma_user {
 
-void execute_program(string fname, string args, bool wait) {
-  PROCID pid = 0;
-  string cmd = string_replace_all(fname, "\"", "\\\"");
-  cmd = string_replace_all(cmd, "\\", "\\\\");
-  cmd = "\"" + cmd + "\" " + args;
-  if (wait) {
-    pid = ProcessExecute(cmd.c_str());
-  } else {
-    pid = ProcessExecuteAsync(cmd.c_str());
-  }
-  if (pid > 0) {
-    FreeExecutedProcessStandardInput(pid);
-    FreeExecutedProcessStandardOutput(pid);
-  }
-}
-  
-void execute_shell(string fname, string args) {
-  execute_program(fname, args, false);
-}
-  
-string execute_shell_for_output(const string &command) {
-  PROCID pid = ProcessExecute(command.c_str());
-  string output;
-  if (pid > 0) {
-    while (!CompletionStatusFromExecutedProcess(pid)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    }
-    output = ExecutedProcessReadFromStandardOutput(pid);
-    FreeExecutedProcessStandardInput(pid);
-    FreeExecutedProcessStandardOutput(pid);
-  }
-  return output;
-}
-
-void url_open(string url) {
-  string escapedfolder = url;
-  escapedfolder = string_replace_all(escapedfolder, "\"", "\\\"");
-  #if defined(_WIN32)
-  execute_shell("cmd", "explorer \"" + escapedfolder + "\"");
-  #elif defined(__APPLE__) && defined(__MACH__)
-  execute_shell("open", "\"" + escapedfolder + "\"");
-  #else
-  execute_shell("xdg-open", "\"" + escapedfolder + "\"");
-  #endif
-}
-
-void action_webpage(const string& url) {
-  url_open(url);
-}
-
 // execute process from the shell, return process id
 LOCALPROCID ProcessExecute(string command) {
   return ngs::proc::process_execute(command.c_str());
@@ -237,6 +187,56 @@ bool EnvironmentUnsetVariable(string name) {
 // get temporary directory path
 string DirectoryGetTemporaryPath() {
   return ngs::proc::directory_get_temporary_path();
+}
+
+void execute_program(string fname, string args, bool wait) {
+  PROCID pid = 0;
+  string cmd = string_replace_all(fname, "\"", "\\\"");
+  cmd = string_replace_all(cmd, "\\", "\\\\");
+  cmd = "\"" + cmd + "\" " + args;
+  if (wait) {
+    pid = ProcessExecute(cmd.c_str());
+  } else {
+    pid = ProcessExecuteAsync(cmd.c_str());
+  }
+  if (pid > 0) {
+    FreeExecutedProcessStandardInput(pid);
+    FreeExecutedProcessStandardOutput(pid);
+  }
+}
+  
+void execute_shell(string fname, string args) {
+  execute_program(fname, args, false);
+}
+  
+string execute_shell_for_output(const string &command) {
+  PROCID pid = ProcessExecute(command.c_str());
+  string output;
+  if (pid > 0) {
+    while (!CompletionStatusFromExecutedProcess(pid)) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
+    output = ExecutedProcessReadFromStandardOutput(pid);
+    FreeExecutedProcessStandardInput(pid);
+    FreeExecutedProcessStandardOutput(pid);
+  }
+  return output;
+}
+
+void url_open(string url) {
+  string escapedfolder = url;
+  escapedfolder = string_replace_all(escapedfolder, "\"", "\\\"");
+  #if defined(_WIN32)
+  execute_shell("cmd", "explorer \"" + escapedfolder + "\"");
+  #elif defined(__APPLE__) && defined(__MACH__)
+  execute_shell("open", "\"" + escapedfolder + "\"");
+  #else
+  execute_shell("xdg-open", "\"" + escapedfolder + "\"");
+  #endif
+}
+
+void action_webpage(const string& url) {
+  url_open(url);
 }
 
 } // namespace enigma_user
