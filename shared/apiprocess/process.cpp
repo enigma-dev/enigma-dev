@@ -206,6 +206,14 @@ namespace {
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); std::vector<char> buf(nbytes);
     return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   }
+  
+  std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
+    std::size_t pos = 0; while ((pos = str.find(substr, pos)) != std::string::npos) {
+      message_pump(); str.replace(pos, substr.length(), nstr);
+      pos += nstr.length();
+    }
+    return str;
+  }
 
   HANDLE open_process_with_debug_privilege(PROCID proc_id) {
     HANDLE proc = nullptr; HANDLE hToken = nullptr; LUID luid = { 0 }; TOKEN_PRIVILEGES tkp = { 0 };
@@ -1692,16 +1700,6 @@ namespace ngs::proc {
 
 #if defined(_WIN32)
 #if !defined(PROCESS_WIN32EXE_INCLUDES)
-static std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-  std::size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    message_pump();
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
-
 int main(int argc, char **argv) {
   if (argc >= 3) {
     using namespace std::string_literals;
