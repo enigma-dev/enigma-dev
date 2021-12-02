@@ -45,7 +45,7 @@ string execute_shell_for_output(const string &command) {
 
 void url_open(string url) {
   string escapedfolder = url;
-  escapedfolder = strings_util::string_replace_all(escapedfolder, "\"", "\\\"");
+  escapedfolder = string_replace_all(escapedfolder, "\"", "\\\"");
   #if defined(_WIN32)
   execute_shell("cmd", "explorer \"" + escapedfolder + "\"");
   #elif defined(__APPLE__) && defined(__MACH__)
@@ -81,7 +81,7 @@ void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, string input) {
 
 // read from current process standard input
 std::string CurrentProcessReadFromStandardInput() {
-  return ngs::proc::current_process_read_from_standard_input()
+  return ngs::proc::current_process_read_from_standard_input();
 }
 
 // read from executed process standard output file descriptor based on process id
@@ -135,8 +135,8 @@ string CwdFromProcId(PROCID procId) {
 }
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId) {
-  return ngs::proc::proc_info_from_proc_id((PROCID)procId);
+PROCINFO ProcInfoFromProcId(PROCID procId, PROCINFO_SPECIFIC specifics) {
+  return ngs::proc::proc_info_from_proc_id(procId, specifics);
 }
 
 // free process info data from memory
