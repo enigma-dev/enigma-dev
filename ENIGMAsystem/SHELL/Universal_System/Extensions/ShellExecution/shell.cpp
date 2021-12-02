@@ -235,4 +235,9 @@ bool EnvironmentUnsetVariable(string name) {
   return ngs::proc::environment_unset_variable(name.c_str());
 }
 
+// get temporary directory path
+string DirectoryGetTemporaryPath() {
+  return ngs::proc::directory_get_temporary_path();
+}
+
 } // namespace enigma_user

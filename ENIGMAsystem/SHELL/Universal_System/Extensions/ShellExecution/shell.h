@@ -3,12 +3,10 @@
 
 namespace enigma_user {
 
-using CrossProcess::PROCID;
-using CrossProcess::PROCID_LOCAL;
-using CrossProcess::PROCINFO;
-using CrossProcess::PROCLIST;
-using CrossProcess::WINDOWID;
-using CrossProcess::WINDOW;
+using ngs::proc::PROCID;
+using ngs::proc::PROCID_LOCAL;
+using ngs::proc::PROCINFO;
+using ngs::proc::PROCLIST;
 
 // execute process from the shell, return process id
 PROCID_LOCAL ProcessExecute(std::string command);
@@ -114,5 +112,8 @@ bool EnvironmentSetVariable(std::string name, std::string value);
 
 // unset the environment variable with the given name
 bool EnvironmentUnsetVariable(std::string name);
+
+// get temporary directory path
+std::string DirectoryGetTemporaryPath();
 
 } // namespace enigma_user
