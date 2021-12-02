@@ -2,8 +2,8 @@
 
 #include "estring.h"
 
-#include "../../../shared/apiprocess/process.h"
-#include "../../../shared/tempdir/tempdir.h"
+#include "apiprocess/process.h"
+#include "tempdir/tempdir.h"
 
 namespace enigma_user {
 
