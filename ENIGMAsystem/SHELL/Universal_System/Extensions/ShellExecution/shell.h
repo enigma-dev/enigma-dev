@@ -3,10 +3,60 @@
 
 namespace enigma_user {
 
-using ngs::proc::PROCID;
-using ngs::proc::LOCALPROCID;
-using ngs::proc::PROCINFO;
-using ngs::proc::PROCLIST;
+#if !defined(_WIN32)
+typedef int PROCID;
+#else
+typedef unsigned long PROCID;
+#endif
+typedef PROCID LOCALPROCID;
+#if defined(PROCESS_GUIWINDOW_IMPL)
+#if defined(_WIN32)
+typedef HWND WINDOW;
+#elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
+typedef CGWindowID WINDOW;
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(PROCESS_XQUARTZ_IMPL)
+typedef Window WINDOW;
+#endif
+typedef char *WINDOWID;
+#endif
+typedef int PROCLIST;
+typedef int PROCINFO;
+typedef const unsigned char PROCINFO_SPECIFIC;
+PROCINFO_SPECIFIC PROCINFO_ALLINFO = 1 << 0;
+PROCINFO_SPECIFIC PROCINFO_EXEFILE = 1 << 1;
+PROCINFO_SPECIFIC PROCINFO_CWDPATH = 1 << 2;
+PROCINFO_SPECIFIC PROCINFO_PPROCID = 1 << 3;
+PROCINFO_SPECIFIC PROCINFO_CPROCID = 1 << 4;
+PROCINFO_SPECIFIC PROCINFO_CMDLINE = 1 << 5;
+PROCINFO_SPECIFIC PROCINFO_ENVIRON = 1 << 6;
+#if defined(PROCESS_GUIWINDOW_IMPL)
+PROCINFO_SPECIFIC PROCINFO_WINDOWS = 1 << 7;
+#endif
+#if !defined(_MSC_VER)
+#pragma pack(push, 8)
+#else
+#include <pshpack8.h>
+#endif
+typedef struct {
+  char *executable_image_file_path;
+  char *current_working_directory;
+  PROCID parent_process_id;
+  PROCID *child_process_id;
+  int child_process_id_length;
+  char **commandline;
+  int commandline_length;
+  char **environment;
+  int environment_length;
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  WINDOWID *owned_window_id;
+  int owned_window_id_length;
+  #endif
+} PROCINFO_STRUCT;
+#if !defined(_MSC_VER)
+#pragma pack(pop)
+#else
+#include <poppack.h>
+#endif
 
 // execute process from the shell, return process id
 LOCALPROCID ProcessExecute(std::string command);
