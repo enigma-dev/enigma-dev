@@ -10,7 +10,7 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf
 
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
-		override LDFLAGS += -framework CoreFoundation -framework CoreGraphics -framework Cocoa
+		override LDFLAGS += -framework CoreFoundation -framework CoreGraphics
 		override CXXFLAGS += -ObjC++
 		override CFLAGS += -ObjC++
 	else ifeq ($(OS), Linux)
@@ -29,20 +29,20 @@ ifeq ($(UNIX_BASED), true)
 endif
 
 ifeq ($(UNIX_BASED), false)
-	CROSSPROCESS := $(shell CROSSPROCESS=crossprocess32.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ crossprocess/crossprocess.cpp -o crossprocess/crossprocess32.exe -DXPROCESS_GUIWINDOW_IMPL -std=c++17 -static-libgcc -static-libstdc++ -static -m32";fi)
-	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess64.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ crossprocess/crossprocess.cpp -o crossprocess/crossprocess64.exe -DXPROCESS_GUIWINDOW_IMPL -std=c++17 -static-libgcc -static-libstdc++ -static -m64";fi)
-	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess32.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else cd crossprocess;xxd -i crossprocess32 > crossprocess32.h;fi)
-	CROSSPROCESS += $(shell CROSSPROCESS=crossprocess64.h;if test -f "$CROSSPROCESS"; then echo $CROSSPROCESS exists;else cd crossprocess;xxd -i crossprocess64 > crossprocess64.h;fi)
-	CROSSPROCESS += $(shell rm -f "crossprocess/crossprocess32.exe" "crossprocess/crossprocess64.exe")
+	APIPROCESS := $(shell APIPROCESS=process32.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ apiprocess/process.cpp -o apiprocess/process32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";fi)
+	APIPROCESS += $(shell APIPROCESS=process64.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ apiprocess/process.cpp -o apiprocess/process64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";fi)
+	APIPROCESS += $(shell APIPROCESS=process32.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else cd apiprocess;xxd -i process32 > process32.h;fi)
+	APIPROCESS += $(shell APIPROCESS=process64.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else cd apiprocess;xxd -i process64 > process64.h;fi)
+	APIPROCESS += $(shell rm -f "apiprocess/process32.exe" "apiprocess/process64.exe")
 	override CXXFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
 	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif
 
-override CXXFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
-override CFLAGS += -DXPROCESS_GUIWINDOW_IMPL -std=c++17
+override CXXFLAGS += -std=c++17
+override CFLAGS += -std=c++17
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
 endif
-SHARED_SOURCES += $(call rwildcard,crossprocess,*.cpp) $(call rwildcard,tempdir,*.cpp)
+SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
