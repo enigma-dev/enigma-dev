@@ -58,41 +58,17 @@ namespace ngs::proc {
   #endif
   typedef int PROCLIST;
   typedef int PROCINFO;
-  typedef unsigned long PROCINFO_SPECIFIC;
-  #define PROCINFO_ALLINFO (1L << 0)
-  #define PROCINFO_EXEFILE (1L << 1)
-  #define PROCINFO_CWDPATH (1L << 2)
-  #define PROCINFO_PPROCID (1L << 3)
-  #define PROCINFO_CPROCID (1L << 4)
-  #define PROCINFO_CMDLINE (1L << 5)
-  #define PROCINFO_ENVIRON (1L << 6)
+  typedef unsigned PROCINFO_SPECIFIC;
+  #define PROCINFO_RESERVE 0
+  #define PROCINFO_ALLINFO 1
+  #define PROCINFO_EXEFILE 2
+  #define PROCINFO_CWDPATH 3
+  #define PROCINFO_PPROCID 4
+  #define PROCINFO_CPROCID 5
+  #define PROCINFO_CMDLINE 6
+  #define PROCINFO_ENVIRON 7
   #if defined(PROCESS_GUIWINDOW_IMPL)
-  #define PROCINFO_WINDOWS (1L << 7)
-  #endif
-  #if !defined(_MSC_VER)
-  #pragma pack(push, 8)
-  #else
-  #include <pshpack8.h>
-  #endif
-  #define PROCINFO_STRUCT struct {\
-    char *executable_image_file_path;\
-    char *current_working_directory;\
-    PROCID parent_process_id;\
-    PROCID *child_process_id;\
-    int child_process_id_length;\
-    char **commandline;\
-    int commandline_length;\
-    char **environment;\
-    int environment_length;\
-    #if defined(PROCESS_GUIWINDOW_IMPL)\
-    WINDOWID *owned_window_id;\
-    int owned_window_id_length;\
-    #endif\
-  }
-  #if !defined(_MSC_VER)
-  #pragma pack(pop)
-  #else
-  #include <poppack.h>
+  #define PROCINFO_WINDOWS 8
   #endif
 
   void proc_id_enumerate(PROCID **proc_id, int *size);

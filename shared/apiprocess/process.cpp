@@ -95,6 +95,32 @@ using ngs::proc::WINDOWID;
 
 namespace {
 
+  #if !defined(_MSC_VER)
+  #pragma pack(push, 8)
+  #else
+  #include <pshpack8.h>
+  #endif
+  typedef struct {
+    char *executable_image_file_path;
+    char *current_working_directory;
+    PROCID parent_process_id;
+    PROCID *child_process_id;
+    int child_process_id_length;
+    char **commandline;
+    int commandline_length;
+    char **environment;
+    int environment_length;
+    #if defined(PROCESS_GUIWINDOW_IMPL)
+    WINDOWID *owned_window_id;
+    int owned_window_id_length;
+    #endif
+  } PROCINFO_STRUCT;
+  #if !defined(_MSC_VER)
+  #pragma pack(pop)
+  #else
+  #include <poppack.h>
+  #endif
+
   void message_pump() {
     #if defined(_WIN32) 
     MSG msg; while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -1374,37 +1400,30 @@ namespace ngs::proc {
 
   PROCINFO proc_info_from_proc_id(PROCID proc_id, PROCINFO_SPECIFIC specifics) {
     char *exe = nullptr; 
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_EXEFILE) == PROCINFO_EXEFILE)) 
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_EXEFILE) 
       exe_from_proc_id(proc_id, &exe);
     char *cwd = nullptr; 
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_CWDPATH) == PROCINFO_CWDPATH)) 
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CWDPATH)
       cwd_from_proc_id(proc_id, &cwd);
     PROCID ppid = 0; 
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_PPROCID) == PROCINFO_PPROCID)) 
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_PPROCID)
       parent_proc_id_from_proc_id(proc_id, &ppid);
     PROCID *pid = nullptr; 
     int pidsize = 0;
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_CPROCID) == PROCINFO_CPROCID))
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CPROCID)
       proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
     char **cmd = nullptr; 
     int cmdsize = 0;
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_CMDLINE) == PROCINFO_CMDLINE))
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CMDLINE)
       cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
     char **env = nullptr; 
     int envsize = 0;
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_ENVIRON) == PROCINFO_ENVIRON))
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_ENVIRON)
       environ_from_proc_id(proc_id, &env, &envsize);
     #if defined(PROCESS_GUIWINDOW_IMPL)
     WINDOWID *wid = nullptr; 
     int widsize = 0;
-    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
-      ((specifics & PROCINFO_WINDOWS) == PROCINFO_WINDOWS)) 
+    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_WINDOWS)
       window_id_from_proc_id(proc_id, &wid, &widsize);
     #endif
     PROCINFO_STRUCT *proc_info = new PROCINFO_STRUCT();
