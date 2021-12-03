@@ -1677,17 +1677,11 @@ namespace ngs::proc {
     if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
     std::string str = input;
     #if !defined(_WIN32)
-    char *buffer = new char[str.length() + 1]();
-    strcpy(buffer, str.c_str());
-    write((int)stdipt_map[proc_index], buffer, str.length() + 1);
+    write((int)stdipt_map[proc_index], str.data(), str.length() + 1);
     #else
-    std::wstring wstr = widen(str);
-    wchar_t *buffer = new wchar_t[wstr.length() + 1]();
-    wcsncpy_s(buffer, wstr.length() + 1, wstr.c_str(), wstr.length() + 1);
-    DWORD dwWritten; WriteFile((HANDLE)(void *)stdipt_map[proc_index], buffer,
-    str.length() + 1, &dwWritten, nullptr);
+    DWORD dwwritten; WriteFile((HANDLE)(void *)stdipt_map[proc_index], str.data(),
+    str.length() + 1, &dwwritten, nullptr);
     #endif
-    delete[] buffer;
   }
 
   const char *executed_process_read_from_standard_output(LOCALPROCID proc_index) {
