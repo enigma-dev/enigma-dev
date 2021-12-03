@@ -74,21 +74,21 @@ namespace ngs::proc {
   #else
   #include <pshpack8.h>
   #endif
-  typedef struct {
-    char *executable_image_file_path;
-    char *current_working_directory;
-    PROCID parent_process_id;
-    PROCID *child_process_id;
-    int child_process_id_length;
-    char **commandline;
-    int commandline_length;
-    char **environment;
-    int environment_length;
-    #if defined(PROCESS_GUIWINDOW_IMPL)
-    WINDOWID *owned_window_id;
-    int owned_window_id_length;
-    #endif
-  } PROCINFO_STRUCT;
+  #define PROCINFO_STRUCT struct {\
+    char *executable_image_file_path;\
+    char *current_working_directory;\
+    PROCID parent_process_id;\
+    PROCID *child_process_id;\
+    int child_process_id_length;\
+    char **commandline;\
+    int commandline_length;\
+    char **environment;\
+    int environment_length;\
+    #if defined(PROCESS_GUIWINDOW_IMPL)\
+    WINDOWID *owned_window_id;\
+    int owned_window_id_length;\
+    #endif\
+  }
   #if !defined(_MSC_VER)
   #pragma pack(pop)
   #else
