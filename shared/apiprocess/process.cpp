@@ -1373,21 +1373,38 @@ namespace ngs::proc {
   static std::vector<std::vector<PROCID>> proc_list_vec;
 
   PROCINFO proc_info_from_proc_id(PROCID proc_id, PROCINFO_SPECIFIC specifics) {
-    char *exe = nullptr; if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_EXEFILE)) exe_from_proc_id(proc_id, &exe);
-    char *cwd = nullptr; if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_CWDPATH)) cwd_from_proc_id(proc_id, &cwd);
-    PROCID ppid = 0; if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_PPROCID)) parent_proc_id_from_proc_id(proc_id, &ppid);
-    PROCID *pid = nullptr; int pidsize = 0;
-    if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_CPROCID))
+    char *exe = nullptr; 
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_EXEFILE) == PROCINFO_EXEFILE)) 
+      exe_from_proc_id(proc_id, &exe);
+    char *cwd = nullptr; 
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_CWDPATH) == PROCINFO_CWDPATH)) 
+      cwd_from_proc_id(proc_id, &cwd);
+    PROCID ppid = 0; 
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_PPROCID) == PROCINFO_PPROCID)) 
+      parent_proc_id_from_proc_id(proc_id, &ppid);
+    PROCID *pid = nullptr; 
+    int pidsize = 0;
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_CPROCID) == PROCINFO_CPROCID))
       proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
-    char **cmd = nullptr; int cmdsize = 0;
-    if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_CMDLINE))
+    char **cmd = nullptr; 
+    int cmdsize = 0;
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_CMDLINE) == PROCINFO_CMDLINE))
       cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
-    char **env = nullptr; int envsize = 0;
-    if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_ENVIRON))
+    char **env = nullptr; 
+    int envsize = 0;
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_ENVIRON) == PROCINFO_ENVIRON))
       environ_from_proc_id(proc_id, &env, &envsize);
     #if defined(PROCESS_GUIWINDOW_IMPL)
-    WINDOWID *wid = nullptr; int widsize = 0;
-    if ((specifics & PROCINFO_ALLINFO) || (specifics & PROCINFO_WINDOWS)) 
+    WINDOWID *wid = nullptr; 
+    int widsize = 0;
+    if (((specifics & PROCINFO_ALLINFO) == PROCINFO_ALLINFO) || 
+      ((specifics & PROCINFO_WINDOWS) == PROCINFO_WINDOWS)) 
       window_id_from_proc_id(proc_id, &wid, &widsize);
     #endif
     PROCINFO_STRUCT *proc_info = new PROCINFO_STRUCT();
@@ -1639,12 +1656,15 @@ namespace ngs::proc {
 
   void executed_process_write_to_standard_input(LOCALPROCID proc_index, const char *input) {
     if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
-    std::string str = input; char *buffer = new char[str.length() + 1]();
+    std::string str = input;
     #if !defined(_WIN32)
+    char *buffer = new char[str.length() + 1]();
     strcpy(buffer, str.c_str());
     write((int)stdipt_map[proc_index], buffer, str.length() + 1);
     #else
-    strncpy_s(buffer, str.length() + 1, str.c_str(), str.length() + 1);
+    std::wstring wstr = widen(str);
+    wchar_t *buffer = new wchar_t[wstr.length() + 1]();
+    wcsncpy_s(buffer, wstr.length() + 1, wstr.c_str(), wstr.length() + 1);
     DWORD dwWritten; WriteFile((HANDLE)(void *)stdipt_map[proc_index], buffer,
     str.length() + 1, &dwWritten, nullptr);
     #endif
