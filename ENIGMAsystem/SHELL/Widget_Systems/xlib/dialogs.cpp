@@ -252,11 +252,15 @@ static void *modify_shell_dialog(void *pid) {
       break;
     }
   }
-  XSynchronize(display, true); 
-  unsigned long empty[] = { 1, 1, 0x0 };
-  Atom property = XInternAtom(display, "_NET_WM_ICON", false);
-  XChangeProperty(display, wid, property, XA_CARDINAL, 32, 
-  PropModeReplace, (unsigned char *)empty, 3); XFlush(display);
+  if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
+    XSynchronize(display, true);
+    unsigned long empty[] = { 1, 1, 0x0 };
+    Atom property = XInternAtom(display, "_NET_WM_ICON", false);
+    XChangeProperty(display, wid, property, XA_CARDINAL, 32, 
+    PropModeReplace, (unsigned char *)empty, 3); XFlush(display);
+  } else {
+    XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
+  }
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
   int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
   strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
