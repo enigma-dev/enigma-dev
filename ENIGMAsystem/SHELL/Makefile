@@ -96,8 +96,8 @@ else ifeq ($(GMODE), Compile)
 		override LDFLAGS += -nopie
 	endif
 else
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	override CFLAGS += -Wall -s -O3 -fno-exceptions
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fPIE
+	override CFLAGS += -Wall -s -O3 -fno-exceptions -fPIE
 endif
 
 ifeq ($(PLATFORM), Win32)
