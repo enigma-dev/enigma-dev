@@ -5,12 +5,13 @@
 #define PROCID unsigned long
 #define LOCALPROCID unsigned long
 #else
+#define PROCID int
 #define LOCALPROCID int
 #endif
 
 #define PROCLIST int
 #define PROCINFO int
-#define PROCINFO_SPECIFIC unsigned char
+#define PROCINFO_SPECIFIC unsigned
 
 using namespace ::ngs::proc;
 
