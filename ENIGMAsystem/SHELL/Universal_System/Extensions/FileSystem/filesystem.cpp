@@ -838,7 +838,7 @@ namespace ngs::fs {
   }
 
   int file_text_open_from_string(string str) {
-    int fd; srand((unsigned)time(0));
+    int fd; srand((unsigned)time(nullptr));
     string tmpfname = get_temp_directory() + 
     "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     while (file_exists(tmpfname)) {
