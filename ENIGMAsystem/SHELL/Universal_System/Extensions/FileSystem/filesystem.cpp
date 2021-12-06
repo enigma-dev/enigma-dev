@@ -779,7 +779,7 @@ namespace ngs::fs {
   double file_text_read_real(int fd) {
     bool dot = false, sign = false;
     string str; char byte = (char)file_bin_read_byte(fd);
-    while (byte == '\r' || byte == '\n') byte = (char)file_bin_read_byte(fd);
+    if (byte == '\n') byte = (char)file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
       dot = true;
     } else if (!is_digit(byte) && byte != '+' && 
@@ -834,13 +834,16 @@ namespace ngs::fs {
     if (str.length() >= 2) {
       if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
         file_bin_seek(fd, -1);
+        str = str.substr(0, str.length() - 1);
       }
       if (str[str.length() - 2] == '\r' && str[str.length() - 1] == '\n') {
         file_bin_seek(fd, -2);
+        str = str.substr(0, str.length() - 2);
       }
-    } else if (str.length() >= 1) {
+    } else if (str.length() == 1) {
       if (str[str.length() - 1] == '\n') {
         file_bin_seek(fd, -1);
+        str = str.substr(0, str.length() - 1);
       }
     }
     return str;
