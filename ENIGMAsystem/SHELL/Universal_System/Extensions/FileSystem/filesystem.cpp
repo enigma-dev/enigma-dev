@@ -762,11 +762,13 @@ namespace ngs::fs {
     return file_bin_write_byte(fd, '\n');
   }
 
+  static unsigned cnt = 0;
   bool file_text_eof(int fd) {
     bool res1 = ((char)file_bin_read_byte(fd) == '\0');
-    bool res2 = (file_bin_position(fd) >= file_bin_size(fd));
-    file_bin_seek(fd, -1);
-    return (res1 || res2);
+    bool res2 = (file_bin_position(fd) > file_bin_size(fd));
+    while (res2 && cnt < 2) { file_bin_seek(fd, -1); cnt++; }
+    if (!res2) file_bin_seek(fd, -1);
+    cnt = 0; return (res1 || res2);
   }
 
   bool file_text_eoln(int fd) {
@@ -789,8 +791,7 @@ namespace ngs::fs {
       sign = true;
     }
     if (byte == 0) goto finish;
-    str.resize(str.length() + 1, '\0');
-    str[str.length() - 1] = byte;
+    str.push_back(byte);
     if (sign) {
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
@@ -799,8 +800,7 @@ namespace ngs::fs {
         return strtod(str.c_str(), nullptr);
       }
       if (byte == 0) goto finish;
-      str.resize(str.length() + 1, '\0');
-      str[str.length() - 1] = byte;
+      str.push_back(byte);
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
       message_pump();
@@ -815,20 +815,19 @@ namespace ngs::fs {
         break;
       }
       if (byte == 0) goto finish;
-      str.resize(str.length() + 1, '\0');
-      str[str.length() - 1] = byte;
+      str.push_back(byte);
     }
     finish:
     return strtod(str.c_str(), nullptr);
   }
 
   string file_text_read_string(int fd) {
-    int byte = 0; string str;
-    while ((char)byte != '\n' && !file_text_eof(fd)) {
+    int byte = file_bin_read_byte(fd); string str;
+    str.push_back((char)byte);
+    while ((char)byte != '\n') {
       message_pump();
       byte = file_bin_read_byte(fd);
-      str.resize(str.length() + 1, '\0');
-      str[str.length() - 1] = byte;
+      str.push_back((char)byte);
       if (byte == 0) break;
     }
     if (str.length() >= 2) {
@@ -850,12 +849,12 @@ namespace ngs::fs {
   }
 
   string file_text_readln(int fd) {
-    int byte = 0; string str;
-    while ((char)byte != '\n' && !file_text_eof(fd)) {
+    int byte = file_bin_read_byte(fd); string str;
+    str.push_back((char)byte);
+    while ((char)byte != '\n') {
       message_pump();
       byte = file_bin_read_byte(fd);
-      str.resize(str.length() + 1, '\0');
-      str[str.length() - 1] = byte;
+      str.push_back((char)byte);
       if (byte == 0) break;
     }
     return str;
