@@ -39,9 +39,9 @@
 
 #include "filesystem.h"
 
+#include <fcntl.h>
 #if defined(_WIN32) 
 #include <windows.h>
-#include <fcntl.h>
 #include <io.h>
 #else
 #if defined(__APPLE__) && defined(__MACH__)
@@ -838,23 +838,27 @@ namespace ngs::fs {
   }
 
   int file_text_open_from_string(string str) {
-    int fd; srand((unsigned)time(nullptr));
-    string tmpfname = get_temp_directory() + 
+    srand((unsigned)time(nullptr));
+    string fname = get_temp_directory() + 
     "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
-    while (file_exists(tmpfname)) {
+    while (file_exists(fname)) {
       message_pump();
-      tmpfname = get_temp_directory() + 
+      fname = get_temp_directory() + 
       "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     }
-    fd = file_text_open_write(tmpfname);
+    #if defined(_WIN32)
+    wstring wfname = widen(fname);
+    int fd = _wopen(wfname.c_str(), _O_CREAT | O_RDWR | _O_TEMPORARY, _S_IREAD | _S_IWRITE);
+    #else
+    int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TMPFILE, S_IRUSR | S_IWUSR);
+    #endif
     if (fd == -1) return -1;
-    if (file_text_write_string(fd, str) == -1) {
-      file_bin_close(fd);
-      return -1;
-    }
-    file_bin_close(fd);
-    fd = file_text_open_read(tmpfname);
-    if (fd == -1) return -1;
+    file_text_write_string(fd, str);
+    #if defined(_WIN32)
+    _lseek(fd, 0, SEEK_SET);
+    #else
+    lseek(fd, 0, SEEK_SET);
+    #endif
     return fd;
   }
   
