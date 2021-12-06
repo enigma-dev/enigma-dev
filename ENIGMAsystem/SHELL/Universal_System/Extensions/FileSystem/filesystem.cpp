@@ -779,7 +779,7 @@ namespace ngs::fs {
   double file_text_read_real(int fd) {
     bool dot = false, sign = false;
     string str; char byte = (char)file_bin_read_byte(fd);
-    if (byte == '\n') byte = (char)file_bin_read_byte(fd);
+    while (byte == '\r' || byte == '\n') byte = (char)file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
       dot = true;
     } else if (!is_digit(byte) && byte != '+' && 
