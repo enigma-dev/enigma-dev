@@ -837,10 +837,9 @@ namespace ngs::fs {
     return str;
   }
 
-  static string tmpfname;
   int file_text_open_from_string(string str) {
     int fd; srand((unsigned)time(0));
-    tmpfname = get_temp_directory() + 
+    string tmpfname = get_temp_directory() + 
     "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     while (file_exists(tmpfname)) {
       message_pump();
