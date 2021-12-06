@@ -714,7 +714,7 @@ namespace ngs::fs {
   }
 
   int file_bin_read_byte(int fd) {
-    int byte = -1;
+    int byte = 0;
     #if defined(_WIN32)
     int num = (int)_read(fd, &byte, 1);
     #else
@@ -783,7 +783,7 @@ namespace ngs::fs {
       sign = true;
     }
     if (byte == 0) goto finish;
-    str.push_back((char)byte);
+    str.push_back(byte);
     if (sign) {
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
@@ -792,7 +792,7 @@ namespace ngs::fs {
         return strtod(str.c_str(), nullptr);
       }
       if (byte == 0) goto finish;
-      str.push_back((char)byte);
+      str.push_back(byte);
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
       message_pump();
@@ -807,14 +807,14 @@ namespace ngs::fs {
         break;
       }
       if (byte == 0) goto finish;
-      str.push_back((char)byte);
+      str.push_back(byte);
     }
     finish:
     return strtod(str.c_str(), nullptr);
   }
 
   string file_text_read_string(int fd) {
-    int byte = -1; string str;
+    int byte = 0; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
@@ -831,7 +831,7 @@ namespace ngs::fs {
   }
 
   string file_text_readln(int fd) {
-    int byte = -1; string str;
+    int byte = 0; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
