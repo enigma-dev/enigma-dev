@@ -840,10 +840,12 @@ namespace ngs::fs {
   static string tmpfname;
   int file_text_open_from_string(string str) {
     int fd; srand((unsigned)time(0));
-    tmpfname = get_temp_directory() + std::to_string(rand()) + ".tmp";
+    tmpfname = get_temp_directory() + 
+    "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     while (file_exists(tmpfname)) {
       message_pump();
-      tmpfname = get_temp_directory() + std::to_string(rand()) + ".tmp";
+      tmpfname = get_temp_directory() + 
+      "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     }
     fd = file_text_open_write(tmpfname);
     if (fd == -1) return -1;
