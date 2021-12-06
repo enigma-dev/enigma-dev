@@ -30,11 +30,11 @@
 #include <algorithm>
 #include <filesystem>
 
+#include <ctime>
+#include <cstdlib>
 #include <cstring>
 #if defined(_WIN32)
 #include <cwchar>
-#elif defined(__linux__)
-#include <cstdlib>
 #endif
 
 #include "filesystem.h"
@@ -84,11 +84,6 @@ namespace ngs::fs {
       return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
     }
     #endif
-
-    bool is_digit(char byte) {
-      return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
-        byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
-    }
 
     int file_get_date_accessed_modified(const char *fname, bool modified, int type) {
       int result = -1;
@@ -766,7 +761,8 @@ namespace ngs::fs {
   bool file_text_eof(int fd) {
     bool res1 = ((char)file_bin_read_byte(fd) == '\0');
     bool res2 = (file_bin_position(fd) > file_bin_size(fd));
-    while (res2 && cnt < 2) { file_bin_seek(fd, -1); cnt++; }
+    while (res2 && cnt < 2) { message_pump(); 
+    file_bin_seek(fd, -1); cnt++; }
     if (!res2) file_bin_seek(fd, -1);
     cnt = 0; return (res1 || res2);
   }
@@ -774,51 +770,10 @@ namespace ngs::fs {
   bool file_text_eoln(int fd) {
     bool res1 = ((char)file_bin_read_byte(fd) == '\n');
     bool res2 = file_text_eof(fd);
-    file_bin_seek(fd, -1);
-    return (res1 || res2);
-  }
-
-  double file_text_read_real(int fd) {
-    bool dot = false, sign = false;
-    string str; char byte = (char)file_bin_read_byte(fd);
-    while (byte == '\r' || byte == '\n') byte = (char)file_bin_read_byte(fd);
-    if (byte == '.' && !dot) {
-      dot = true;
-    } else if (!is_digit(byte) && byte != '+' && 
-      byte != '-' && byte != '.') {
-      return 0;
-    } else if (byte == '+' || byte == '-') {
-      sign = true;
-    }
-    if (byte == 0) goto finish;
-    str.push_back(byte);
-    if (sign) {
-      byte = (char)file_bin_read_byte(fd);
-      if (byte == '.' && !dot) {
-        dot = true;
-      } else if (!is_digit(byte) && byte != '.') {
-        return strtod(str.c_str(), nullptr);
-      }
-      if (byte == 0) goto finish;
-      str.push_back(byte);
-    }
-    while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
-      message_pump();
-      byte = (char)file_bin_read_byte(fd);
-      if (byte == '.' && !dot) {
-        dot = true;
-      } else if (byte == '.' && dot) {
-        break;
-      } else if (!is_digit(byte) && byte != '.') {
-        break;
-      } else if (byte == '\n' || file_bin_position(fd) > file_bin_size(fd)) {
-        break;
-      }
-      if (byte == 0) goto finish;
-      str.push_back(byte);
-    }
-    finish:
-    return strtod(str.c_str(), nullptr);
+    while (res2 && cnt < 2) { message_pump(); 
+    file_bin_seek(fd, -1); cnt++; }
+    if (!res2) file_bin_seek(fd, -1);
+    cnt = 0; return (res1 || res2);
   }
 
   string file_text_read_string(int fd) {
@@ -846,6 +801,10 @@ namespace ngs::fs {
       }
     }
     return str;
+  }
+
+  double file_text_read_real(int fd) {
+    return strtod(file_text_read_string(fd).c_str(), nullptr);
   }
 
   string file_text_readln(int fd) {
@@ -878,20 +837,24 @@ namespace ngs::fs {
     return str;
   }
 
+  static string tmpfname;
   int file_text_open_from_string(string str) {
-    int fd[2];
-    #if defined(_WIN32)
-    if (_pipe(fd, str.length() + 1, O_BINARY) == -1) return -1;
-    #else
-    if (pipe(fd) == -1) return -1;
-    #endif
-    if (file_text_write_string(fd[1], str) == -1) {
-      file_bin_close(fd[0]);
-      file_bin_close(fd[1]);
+    int fd; srand((unsigned)time(0));
+    tmpfname = get_temp_directory() + std::to_string(rand()) + ".tmp";
+    while (file_exists(tmpfname)) {
+      message_pump();
+      tmpfname = get_temp_directory() + std::to_string(rand()) + ".tmp";
+    }
+    fd = file_text_open_write(tmpfname);
+    if (fd == -1) return -1;
+    if (file_text_write_string(fd, str) == -1) {
+      file_bin_close(fd);
       return -1;
     }
-    file_bin_close(fd[1]);
-    return fd[0];
+    file_bin_close(fd);
+    fd = file_text_open_read(tmpfname);
+    if (fd == -1) return -1;
+    return fd;
   }
   
   int file_text_close(int fd) {
