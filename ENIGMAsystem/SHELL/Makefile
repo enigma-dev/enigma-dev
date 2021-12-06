@@ -147,6 +147,7 @@ ifeq ($(UNIX_BASED), true)
 else
 	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override LDLIBS += -lshlwapi
 endif
 
 SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
