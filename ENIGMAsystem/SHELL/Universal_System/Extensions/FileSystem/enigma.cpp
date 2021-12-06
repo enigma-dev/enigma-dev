@@ -263,7 +263,7 @@ namespace enigma_fs {
     return filesystem::file_text_read_all(fd);
   }
   
-  int file_text_open_from_string(std::string str) {
+  int fs_file_text_open_from_string(std::string str) {
     return filesystem::file_text_open_from_string(str);
   }
   
