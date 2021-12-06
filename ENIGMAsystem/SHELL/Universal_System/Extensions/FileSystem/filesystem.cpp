@@ -848,7 +848,7 @@ namespace ngs::fs {
     }
     #if defined(_WIN32)
     wstring wfname = widen(fname);
-    int fd = _wopen(wfname.c_str(), _O_CREAT | O_RDWR | _O_TEMPORARY, _S_IREAD | _S_IWRITE);
+    int fd = _wopen(wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY, _S_IREAD | _S_IWRITE);
     #else
     int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TMPFILE, S_IRUSR | S_IWUSR);
     #endif
