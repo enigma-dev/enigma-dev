@@ -772,7 +772,7 @@ namespace ngs::fs {
 
   double file_text_read_real(int fd) {
     bool dot = false, sign = false;
-    vector<char> vec; char byte = (char)file_bin_read_byte(fd);
+    string str; char byte = (char)file_bin_read_byte(fd);
     while (byte == '\r' || byte == '\n') byte = (char)file_bin_read_byte(fd);
     if (byte == '.' && !dot) {
       dot = true;
@@ -783,16 +783,16 @@ namespace ngs::fs {
       sign = true;
     }
     if (byte == 0) goto finish;
-    vec.push_back(byte);
+    str.push_back((char)byte);
     if (sign) {
       byte = (char)file_bin_read_byte(fd);
       if (byte == '.' && !dot) {
         dot = true;
       } else if (!is_digit(byte) && byte != '.') {
-        return strtod(vec.data(), nullptr);
+        return strtod(str.c_str(), nullptr);
       }
       if (byte == 0) goto finish;
-      vec.push_back(byte);
+      str.push_back((char)byte);
     }
     while (byte != '\n' && !(file_bin_position(fd) > file_bin_size(fd))) {
       message_pump();
@@ -807,38 +807,38 @@ namespace ngs::fs {
         break;
       }
       if (byte == 0) goto finish;
-      vec.push_back(byte);
+      str.push_back((char)byte);
     }
     finish:
-    return strtod(vec.data(), nullptr);
+    return strtod(str.c_str(), nullptr);
   }
 
   string file_text_read_string(int fd) {
-    int byte = -1; vector<char> vec;
+    int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
-      vec.push_back(byte);
+      str.push_back((char)byte);
       if (byte == 0) break;
     }
-    if (vec[vec.size() - 2] != '\r' && vec[vec.size() - 1] == '\n') {
+    if (str[str.length() - 2] != '\r' && str[str.length() - 1] == '\n') {
       file_bin_seek(fd, -1);
     }
-    if (vec[vec.size() - 2] == '\r' && vec[vec.size() - 1] == '\n') {
+    if (str[str.length() - 2] == '\r' && str[str.length() - 1] == '\n') {
       file_bin_seek(fd, -2);
     }
-    return vec.data();
+    return str;
   }
 
   string file_text_readln(int fd) {
-    int byte = -1; vector<char> vec;
+    int byte = -1; string str;
     while ((char)byte != '\n' && !file_text_eof(fd)) {
       message_pump();
       byte = file_bin_read_byte(fd);
-      vec.push_back(byte);
+      str.push_back((char)byte);
       if (byte == 0) break;
     }
-    return vec.data();
+    return str;
   }
 
   string file_text_read_all(int fd) {
