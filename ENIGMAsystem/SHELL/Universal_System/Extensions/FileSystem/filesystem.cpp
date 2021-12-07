@@ -850,7 +850,7 @@ namespace ngs::fs {
     }
     #if defined(_WIN32)
     int fd = -1; wstring wfname = widen(fname);
-    if (_wsopen_s(&fd, wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY, _SH_DENYRW, _S_IREAD | _S_IWRITE)) {
+    if (_wsopen_s(&fd, wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY | _O_U8TEXT, _SH_DENYNO, _S_IREAD | _S_IWRITE)) {
       return -1;
     }
     #else
