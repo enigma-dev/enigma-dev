@@ -742,10 +742,11 @@ namespace ngs::fs {
   }
 
   long file_text_write_string(int fd, string str) {
+    char *buffer = str.data();
     #if defined(_WIN32)
-    long result = _write(fd, str.data(), (unsigned)str.length());
+    long result = _write(fd, buffer, (unsigned)str.length());
     #else
-    long result = write(fd, str.data(), (unsigned)str.length());
+    long result = write(fd, buffer, (unsigned)str.length());
     #endif
     return result;
   }
@@ -840,21 +841,16 @@ namespace ngs::fs {
   }
 
   int file_text_open_from_string(string str) {
-    srand((unsigned)time(nullptr));
-    string fname = get_temp_directory() + 
-    "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
-    while (file_exists(fname)) {
-      message_pump();
-      fname = get_temp_directory() + 
-      "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
-    }
+    string fname = get_temp_directory() + "temp.XXXXXX";
     #if defined(_WIN32)
-    int fd = -1; wstring wfname = widen(fname);
+    int fd = -1; wstring wfname = widen(fname); 
+    wchar_t *buffer = wfname.data(); if (_wmktemp_s(buffer, wfname.length() + 1)) return -1;
     if (_wsopen_s(&fd, wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY | _O_WTEXT, _SH_DENYNO, _S_IREAD | _S_IWRITE)) {
       return -1;
     }
     #else
-    int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TMPFILE, S_IRUSR | S_IWUSR);
+    char *buffer = fname.data();
+    int fd = mkstemp(buffer);
     #endif
     if (fd == -1) return -1;
     file_text_write_string(fd, str);
