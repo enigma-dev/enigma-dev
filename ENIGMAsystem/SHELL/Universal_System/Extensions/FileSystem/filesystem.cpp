@@ -40,7 +40,9 @@
 #include "filesystem.h"
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #if defined(_WIN32) 
+#include <share.h>
 #include <windows.h>
 #include <io.h>
 #else
@@ -847,8 +849,10 @@ namespace ngs::fs {
       "file_text_open_from_string_" + std::to_string(rand()) + ".tmp";
     }
     #if defined(_WIN32)
-    wstring wfname = widen(fname);
-    int fd = _wopen(wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY, _S_IREAD | _S_IWRITE);
+    int fd = -1; wstring wfname = widen(fname);
+    if (_wsopen_s(&fd, wfname.c_str(), _O_CREAT | _O_RDWR | _O_TEMPORARY, _SH_DENYRW, _S_IREAD | _S_IWRITE)) {
+      return -1;
+    }
     #else
     int fd = open(fname.c_str(), O_CREAT | O_RDWR | O_TMPFILE, S_IRUSR | S_IWUSR);
     #endif
