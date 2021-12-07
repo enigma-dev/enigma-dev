@@ -743,9 +743,9 @@ namespace ngs::fs {
 
   long file_text_write_string(int fd, string str) {
     #if defined(_WIN32)
-    long result = _write(fd, str.data(), str.length());
+    long result = _write(fd, str.data(), (unsigned)str.length());
     #else
-    long result = write(fd, str.data(), str.length());
+    long result = write(fd, str.data(), (unsigned)str.length());
     #endif
     return result;
   }
