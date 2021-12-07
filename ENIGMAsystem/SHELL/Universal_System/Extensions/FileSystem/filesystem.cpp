@@ -30,7 +30,6 @@
 #include <algorithm>
 #include <filesystem>
 
-#include <ctime>
 #include <cstdlib>
 #include <cstring>
 #if defined(_WIN32)
