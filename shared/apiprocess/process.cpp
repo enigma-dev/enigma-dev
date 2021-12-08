@@ -1611,9 +1611,9 @@ namespace ngs::proc {
     std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
     opt_thread.join();
     #else
-    wchar_t cwstr_command[32768];
+    wchar_t cwstr_command[32767];
     std::wstring wstr_command = widen(command); bool proceed = true;
-    wcsncpy_s(cwstr_command, 32768, wstr_command.c_str(), 32768);
+    wcsncpy_s(cwstr_command, 32767, wstr_command.c_str(), 32767);
     HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
     HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
     SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
