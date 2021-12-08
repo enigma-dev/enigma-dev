@@ -237,7 +237,7 @@ namespace ngs::fs {
     }
     #elif defined(__linux__)
     char *buffer = realpath("/proc/self/exe", nullptr);
-    path = buffer ? : "";
+    path = buffer ? buffer : "";
     free(buffer);
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
     size_t length;
