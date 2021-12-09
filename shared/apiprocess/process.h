@@ -58,18 +58,6 @@ namespace ngs::proc {
   #endif
   typedef int PROCLIST;
   typedef int PROCINFO;
-  typedef unsigned PROCINFO_SPECIFIC;
-  #define PROCINFO_RESERVE 0
-  #define PROCINFO_ALLINFO 1
-  #define PROCINFO_EXEFILE 2
-  #define PROCINFO_CWDPATH 3
-  #define PROCINFO_PPROCID 4
-  #define PROCINFO_CPROCID 5
-  #define PROCINFO_CMDLINE 6
-  #define PROCINFO_ENVIRON 7
-  #if defined(PROCESS_GUIWINDOW_IMPL)
-  #define PROCINFO_WINDOWS 8
-  #endif
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
   void free_proc_id(PROCID *proc_id);
@@ -98,7 +86,7 @@ namespace ngs::proc {
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value);
   const char *environ_from_proc_id_ex(PROCID proc_id, const char *name);
   const char *directory_get_temporary_path();
-  PROCINFO proc_info_from_proc_id(PROCID proc_id, PROCINFO_SPECIFIC specifics);
+  PROCINFO proc_info_from_proc_id(PROCID proc_id);
   void free_proc_info(PROCINFO proc_info);
   PROCLIST proc_list_create();
   PROCID process_id(PROCLIST proc_list, int i);

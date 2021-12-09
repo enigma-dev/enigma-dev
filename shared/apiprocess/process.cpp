@@ -1398,33 +1398,19 @@ namespace ngs::proc {
   static std::unordered_map<PROCINFO, PROCINFO_STRUCT *> proc_info_map;
   static std::vector<std::vector<PROCID>> proc_list_vec;
 
-  PROCINFO proc_info_from_proc_id(PROCID proc_id, PROCINFO_SPECIFIC specifics) {
-    char *exe = nullptr; 
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_EXEFILE) 
-      exe_from_proc_id(proc_id, &exe);
-    char *cwd = nullptr; 
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CWDPATH)
-      cwd_from_proc_id(proc_id, &cwd);
-    PROCID ppid = 0; 
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_PPROCID)
-      parent_proc_id_from_proc_id(proc_id, &ppid);
-    PROCID *pid = nullptr; 
-    int pidsize = 0;
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CPROCID)
-      proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
-    char **cmd = nullptr; 
-    int cmdsize = 0;
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_CMDLINE)
-      cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
-    char **env = nullptr; 
-    int envsize = 0;
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_ENVIRON)
-      environ_from_proc_id(proc_id, &env, &envsize);
+  PROCINFO proc_info_from_proc_id(PROCID proc_id) {
+    char *exe = nullptr; exe_from_proc_id(proc_id, &exe);
+    char *cwd = nullptr; cwd_from_proc_id(proc_id, &cwd);
+    PROCID ppid = 0; parent_proc_id_from_proc_id(proc_id, &ppid);
+    PROCID *pid = nullptr; int pidsize = 0;
+    proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
+    char **cmd = nullptr; int cmdsize = 0;
+    cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
+    char **env = nullptr; int envsize = 0;
+    environ_from_proc_id(proc_id, &env, &envsize);
     #if defined(PROCESS_GUIWINDOW_IMPL)
-    WINDOWID *wid = nullptr; 
-    int widsize = 0;
-    if (specifics == PROCINFO_ALLINFO || specifics == PROCINFO_WINDOWS)
-      window_id_from_proc_id(proc_id, &wid, &widsize);
+    WINDOWID *wid = nullptr; int widsize = 0;
+    window_id_from_proc_id(proc_id, &wid, &widsize);
     #endif
     PROCINFO_STRUCT *proc_info = new PROCINFO_STRUCT();
     proc_info->executable_image_file_path = exe;
@@ -1466,15 +1452,11 @@ namespace ngs::proc {
 
   void free_proc_info(PROCINFO proc_info) {
     if (proc_info_map.find(proc_info) == proc_info_map.end()) return;
-    if (proc_info_map[proc_info]->child_process_id) 
-       free_proc_id(proc_info_map[proc_info]->child_process_id);
-    if (proc_info_map[proc_info]->commandline)
-      free_cmdline(proc_info_map[proc_info]->commandline);
-    if (proc_info_map[proc_info]->environment)
-      free_environ(proc_info_map[proc_info]->environment);
+    free_proc_id(proc_info_map[proc_info]->child_process_id);
+    free_cmdline(proc_info_map[proc_info]->commandline);
+    free_environ(proc_info_map[proc_info]->environment);
     #if defined(PROCESS_GUIWINDOW_IMPL)
-    if (proc_info_map[proc_info]->owned_window_id)
-      free_window_id(proc_info_map[proc_info]->owned_window_id);
+    free_window_id(proc_info_map[proc_info]->owned_window_id);
     #endif
     delete proc_info_map[proc_info];
     proc_info_map.erase(proc_info);
