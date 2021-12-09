@@ -87,8 +87,8 @@ string CwdFromProcId(PROCID procId) {
 }
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId, PROCINFO_SPECIFIC specifics) {
-  return proc_info_from_proc_id(procId, specifics);
+PROCINFO ProcInfoFromProcId(PROCID procId) {
+  return proc_info_from_proc_id(procId);
 }
 
 // free process info data from memory
