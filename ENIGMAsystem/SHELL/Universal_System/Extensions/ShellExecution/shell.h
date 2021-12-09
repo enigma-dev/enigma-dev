@@ -11,7 +11,6 @@
 
 #define PROCLIST int
 #define PROCINFO int
-#define PROCINFO_SPECIFIC unsigned
 
 using namespace ::ngs::proc;
 
@@ -63,7 +62,7 @@ std::string ExeFromProcId(PROCID procId);
 std::string CwdFromProcId(PROCID procId);
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId, PROCINFO_SPECIFIC specifics);
+PROCINFO ProcInfoFromProcId(PROCID procId);
 
 // free process info data from memory
 void FreeProcInfo(PROCINFO procInfo);
