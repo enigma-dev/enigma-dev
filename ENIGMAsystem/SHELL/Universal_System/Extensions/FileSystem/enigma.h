@@ -35,6 +35,7 @@ namespace enigma_fs {
   std::string fs_get_program_directory();
   std::string fs_get_program_filename();
   std::string fs_get_program_pathname();
+  std::string fs_get_filedescriptor_pathname(int fd);
   std::string fs_filename_absolute(std::string fname);
   std::string fs_filename_canonical(std::string fname);
   bool fs_file_exists(std::string fname);
@@ -100,6 +101,7 @@ namespace enigma_user {
   #define program_directory fs_get_program_directory()
   #define program_filename fs_get_program_filename()
   #define program_pathname fs_get_program_pathname()
+  #define get_filedescriptor_pathname(x) fs_get_filedescriptor_pathname(x)
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
   #define file_exists(x) fs_file_exists(x)

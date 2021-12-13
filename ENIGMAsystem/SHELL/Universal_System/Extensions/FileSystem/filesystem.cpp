@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <filesystem>
 
+#include <climits>
 #include <cstdlib>
 #include <cstring>
 #if defined(_WIN32)
@@ -49,6 +50,7 @@
 #include <libproc.h>
 #elif defined(__FreeBSD__) || defined(__DragonFly__)
 #include <sys/sysctl.h>
+#include <sys/user.h>
 #endif
 #include <unistd.h>
 #endif
@@ -248,6 +250,47 @@ namespace ngs::fs {
       char *buffer = path.data();
       if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
         path = string(buffer) + "\0";
+      }
+    }
+    #endif
+    return path;
+  }
+
+  string get_filedescriptor_pathname(int fd) {
+    string path;
+    #if defined(_WIN32) 
+    size_t size = sizeof(FILE_NAME_INFO) + sizeof(wchar_t) * MAX_PATH;
+    FILE_NAME_INFO *info = reinterpret_cast<FILE_NAME_INFO *>(malloc(size));
+    info->FileNameLength = MAX_PATH;
+    if (GetFileInformationByHandleEx((HANDLE)_get_osfhandle(fd), FileNameInfo, info, size)) {
+      path = info->FileName;
+      free(info);
+    }
+    #elif defined(__APPLE__) && defined(__MACH__)
+    char buffer[PATH_MAX];
+    if (fcntl(fd, F_GETPATH, buffer) != -1) {
+      path = buffer;
+    }
+    #elif defined(__linux__)
+    char *buffer = realpath(("/proc/self/fd/" + std::to_string(fd)).c_str(), nullptr);
+    path = buffer ? buffer : "";
+    free(buffer);
+    #elif defined(__FreeBSD__) || defined(__DragonFly__)
+    size_t length;
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
+    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
+      path.resize(length * 2, '\0');
+      char *buffer = path.data();
+      if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
+        path.resize(length * 2, '\0');
+        char *buffer = path.data();
+        for (char *p = buffer; p < buffer + length;) {
+          struct kinfo_file *kif=(struct kinfo_file *) p;
+          if (kif->kf_fd == fd) {
+            path = kif->kf_path;
+          }
+          p += kif->kf_structsize;
+        }
       }
     }
     #endif

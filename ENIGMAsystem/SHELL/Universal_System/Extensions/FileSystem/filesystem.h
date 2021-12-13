@@ -41,6 +41,7 @@ namespace ngs::fs {
   std::string get_program_directory();
   std::string get_program_filename();
   std::string get_program_pathname();
+  std::string get_filedescriptor_pathname(int fd);
   std::string filename_absolute(std::string fname);
   std::string filename_canonical(std::string fname);
   bool file_exists(std::string fname);

@@ -54,6 +54,10 @@ namespace enigma_fs {
   std::string fs_get_program_pathname() {
     return filesystem::get_program_pathname();
   }
+
+  std::string fs_get_filedescriptor_pathname(int fd) {
+    return filesystem::get_filedescriptor_pathname(fd);
+  }
   
   std::string fs_filename_absolute(std::string fname) {
     return filesystem::filename_absolute(fname);
