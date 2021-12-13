@@ -263,7 +263,7 @@ namespace ngs::fs {
     FILE_NAME_INFO *info = reinterpret_cast<FILE_NAME_INFO *>(malloc(size));
     info->FileNameLength = MAX_PATH;
     if (GetFileInformationByHandleEx((HANDLE)_get_osfhandle(fd), FileNameInfo, info, size)) {
-      path = info->FileName;
+      path = narrow(info->FileName);
       free(info);
     }
     #elif defined(__APPLE__) && defined(__MACH__)
