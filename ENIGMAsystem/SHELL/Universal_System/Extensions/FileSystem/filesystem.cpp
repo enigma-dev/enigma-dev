@@ -937,7 +937,7 @@ namespace ngs::fs {
     #if defined(_WIN32)
     int fd = -1; wstring wfname = widen(fname); 
     wchar_t *buffer = wfname.data(); if (_wmktemp_s(buffer, wfname.length() + 1)) return -1;
-    if (_wsopen_s(&fd, buffer, _O_CREAT | _O_RDWR | _O_TEMPORARY | _O_WTEXT, _SH_DENYNO, _S_IREAD | _S_IWRITE)) {
+    if (_wsopen_s(&fd, buffer, _O_CREAT | _O_RDWR | _O_WTEXT, _SH_DENYNO, _S_IREAD | _S_IWRITE)) {
       return -1;
     }
     #else
