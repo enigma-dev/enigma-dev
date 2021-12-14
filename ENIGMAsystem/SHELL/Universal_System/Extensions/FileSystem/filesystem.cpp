@@ -259,12 +259,15 @@ namespace ngs::fs {
   string get_filedescriptor_pathname(int fd) {
     string path;
     #if defined(_WIN32) 
-    size_t size = sizeof(FILE_NAME_INFO) + sizeof(wchar_t) * MAX_PATH;
-    FILE_NAME_INFO *info = reinterpret_cast<FILE_NAME_INFO *>(malloc(size));
-    info->FileNameLength = MAX_PATH;
-    if (GetFileInformationByHandleEx((HANDLE)_get_osfhandle(fd), FileNameInfo, info, size)) {
-      path = narrow(info->FileName);
-      free(info);
+    DWORD length; HANDLE file = (HANDLE)_get_osfhandle(fd);
+    if ((length = GetFinalPathNameByHandleW(file, nullptr, 0, VOLUME_NAME_DOS))) {
+      wstring wpath; wpath.resize(length, '\0'); wchar_t *buffer = wpath.data();
+      if ((length = GetFinalPathNameByHandleW(file, buffer, length, VOLUME_NAME_DOS))) {
+        path = narrow(wpath); size_t pos = 0; string substr = "\\\\?\\";
+        if ((pos = path.find(substr, pos)) != string::npos) {
+          path.replace(pos, substr.length(), "");
+        }
+      }
     }
     #elif defined(__APPLE__) && defined(__MACH__)
     char buffer[PATH_MAX];
