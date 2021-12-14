@@ -269,7 +269,7 @@ namespace ngs::fs {
         }
       }
     }
-    #elif defined(__APPLE__) && defined(__MACH__)
+    #elif (defined(__APPLE__) && defined(__MACH__)) || defined(__DragonFly__)
     char buffer[PATH_MAX];
     if (fcntl(fd, F_GETPATH, buffer) != -1) {
       path = buffer;
@@ -278,7 +278,7 @@ namespace ngs::fs {
     char *buffer = realpath(("/proc/self/fd/" + std::to_string(fd)).c_str(), nullptr);
     path = buffer ? buffer : "";
     free(buffer);
-    #elif defined(__FreeBSD__) || defined(__DragonFly__)
+    #elif defined(__FreeBSD__)
     size_t length;
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
