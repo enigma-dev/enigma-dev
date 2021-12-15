@@ -258,7 +258,7 @@ namespace ngs::fs {
 
   string get_filedescriptor_pathname(int fd) {
     string path;
-    #if defined(_WIN32) 
+    #if defined(_WIN32)
     DWORD length; HANDLE file = (HANDLE)_get_osfhandle(fd);
     if ((length = GetFinalPathNameByHandleW(file, nullptr, 0, VOLUME_NAME_DOS))) {
       wstring wpath; wpath.resize(length, '\0'); wchar_t *buffer = wpath.data();
@@ -282,11 +282,8 @@ namespace ngs::fs {
     size_t length;
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      path.resize(length * 2, '\0');
-      char *buffer = path.data();
+      path.resize(length * 2, '\0'); char *buffer = path.data();
       if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-        path.resize(length * 2, '\0');
-        char *buffer = path.data();
         for (char *p = buffer; p < buffer + length;) {
           struct kinfo_file *kif = (struct kinfo_file *)p;
           if (kif->kf_fd == fd) {
