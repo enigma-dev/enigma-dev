@@ -288,7 +288,7 @@ namespace ngs::fs {
         path.resize(length * 2, '\0');
         char *buffer = path.data();
         for (char *p = buffer; p < buffer + length;) {
-          struct kinfo_file *kif=(struct kinfo_file *) p;
+          struct kinfo_file *kif = (struct kinfo_file *)p;
           if (kif->kf_fd == fd) {
             path = kif->kf_path;
           }
@@ -919,7 +919,7 @@ namespace ngs::fs {
     long sz = file_bin_size(fd);
     char *buffer = new char[sz];
     #if defined(_WIN32)
-    long result =  _read(fd, buffer, sz);
+    long result = _read(fd, buffer, sz);
     #else
     long result = read(fd, buffer, sz);
     #endif
