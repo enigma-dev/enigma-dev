@@ -77,6 +77,19 @@ override LDFLAGS += $(shell pkg-config --libs --static sdl2)
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
+	# Disable PIE when possible
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -no-pie
+		override LDFLAGS += -no-pie
+	endif
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -nopie
+		override LDFLAGS += -nopie
+	endif
 else ifeq ($(GMODE), Compile)
 	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
 	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
@@ -96,8 +109,21 @@ else ifeq ($(GMODE), Compile)
 		override LDFLAGS += -nopie
 	endif
 else
-	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fPIE
-	override CFLAGS += -Wall -s -O3 -fno-exceptions -fPIE
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
+	override CFLAGS += -Wall -s -O3 -fno-exceptions
+	# Disable PIE when possible
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -no-pie
+		override LDFLAGS += -no-pie
+	endif
+	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
+		override CXXFLAGS += -fno-pie
+		override CFLAGS += -fno-pie
+		override LDLIBS += -nopie
+		override LDFLAGS += -nopie
+	endif
 endif
 
 ifeq ($(PLATFORM), Win32)
