@@ -29,7 +29,7 @@
 #include "settings.h"
 #include "utility.h"
 
-#include "eyaml/eyaml.h"
+#include <yaml-cpp/yaml.h>
 
 #include <fstream>
 #include <iostream>
@@ -56,83 +56,79 @@ namespace setting
 
 CompilerInfo compilerInfo;
 
-void map_ey(ey_data& key, std::map<std::string, std::string>& map) {
-  for (const auto& v : key) {
-    map[toUpper(v.first)] = v.second->data().scalar().toString();
-    std::cout << toUpper(v.first) << "=\""; // The makefiles expect caps
-    std::cout << v.second->data().scalar().toString() << "\"" << std::endl;
+void map_ey(const YAML::Node& node, std::map<std::string, std::string>& map) {
+  //std::cout << node << std::endl;
+  for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+    std::string val = (it->second.IsNull()) ? "" : it->second.as<std::string>();
+    map[toUpper(it->first.as<std::string>())] = val;
   }
 }
 
-inline bool get_ey_field(ey_base* keyPtr, std::string field, std::string& str) {
-  ey_data& key = keyPtr->data();
-  str = key.get(field);
+inline bool get_ey_field(const YAML::Node& node, const std::string& field, std::string& str) {
+  str = node[field].as<std::string>();
   if (str.empty()) {
-    std::cerr << "Error: misssing required field: \"" << field << "\"" << std::endl; 
-  } else if (str.length() > 2 && (str.front() == '"') && (str.back() == '"')) { // Josh's shitty yaml parser is copying quotes from quoted fields
-    str = str.substr(1, str.length()-2);
+    std::cerr << "Failed to lookup yaml field: " << field << std::endl;
+    return false;
   }
-  return !str.empty();
+  return true;
 }
 
-bool load_compiler_ey(std::string fPath) {
+bool load_compiler_ey(const std::filesystem::path& fPath) {
 
-  bool success = true; // ugly hacks cause josh can't program 
+  bool success = true; // ugly hacks cause josh can't program
 
   std::cout << std::endl << "Loading compiler ey file: " << fPath << std::endl;
 
-  // Clear old info
-  compilerInfo = CompilerInfo(); 
-
-  std::ifstream compiler_ifstream(fPath.c_str());
+  // Parse our compiler data file
+  const YAML::Node compiler_yaml = YAML::LoadFile(fPath);
 
   // Bail if error
-  if (!compiler_ifstream.is_open())
+  if (!compiler_yaml.IsDefined())
     return false;
 
-  // Parse our compiler data file
-  ey_data compiler_yaml = parse_eyaml(compiler_ifstream, fPath.c_str());
+  // Clear old info
+  compilerInfo = CompilerInfo();
 
   // Write down our top level ey fields (Note yaml toLowers all field names)
-  success &= get_ey_field(&compiler_yaml, "name", compilerInfo.name);
-  success &= get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer);
-  success &= get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform);
+  success &= get_ey_field(compiler_yaml, "name", compilerInfo.name);
+  success &= get_ey_field(compiler_yaml, "maintainer", compilerInfo.maintainer);
+  success &= get_ey_field(compiler_yaml, "target-platform", compilerInfo.target_platform);
 
   std::string native;
-  success &= get_ey_field(&compiler_yaml, "native", native);
+  success &= get_ey_field(compiler_yaml, "native", native);
   compilerInfo.native = toUpper(native) == "YES";
 
   // Write down required parser things
-  ey_base* parserKeyPtr = compiler_yaml.values["parser-vars"];
-  if (parserKeyPtr == nullptr || parserKeyPtr->is_scalar) {
+  const YAML::Node& parser_node = compiler_yaml["parser-vars"];
+  if (!parser_node.IsDefined() || !parser_node.IsMap()) {
     std::cerr << "Error: missing Parser-Vars group" << std::endl;
     return false;
-  } 
+  }
 
-  success &= get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd);
-  success &= get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd);
-  success &= get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start);
-  success &= get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end);
+  success &= get_ey_field(parser_node, "defines", compilerInfo.defines_cmd);
+  success &= get_ey_field(parser_node, "searchdirs", compilerInfo.searchdirs_cmd);
+  success &= get_ey_field(parser_node, "searchdirs-start", compilerInfo.searchdirs_start);
+  success &= get_ey_field(parser_node, "searchdirs-end", compilerInfo.searchdirs_end);
 
   // Write down make vars which can be literally anything to maps
-  ey_base* makeKeyPtr = compiler_yaml.values["make-vars"];
-  if (makeKeyPtr == nullptr || makeKeyPtr->is_scalar) {
+  const YAML::Node& make_node = compiler_yaml["make-vars"];
+  if (!make_node.IsDefined() || !make_node.IsMap()) {
     std::cerr << "Warning: missing Make-Vars group" << std::endl;
   } else {
-    map_ey(makeKeyPtr->data(), compilerInfo.make_vars);
+    map_ey(make_node, compilerInfo.make_vars);
   }
 
   // Write down exe and runtime args which can be literally anything to map
-  ey_base* exeKeyPtr = compiler_yaml.values["exe-vars"];
-  if (exeKeyPtr == nullptr || exeKeyPtr->is_scalar) {
+  const YAML::Node& exe_node = compiler_yaml["exe-vars"];
+  if (!exe_node.IsDefined() || !exe_node.IsMap()) {
     std::cerr << "Error: missing EXE-Vars group" << std::endl;
   } else {
-    map_ey(exeKeyPtr->data(), compilerInfo.exe_vars);
+    map_ey(exe_node, compilerInfo.exe_vars);
   }
 
   // TODO: everything in exe-vars should be optional but for now the compiler will break if some things aren't set
   if (compilerInfo.exe_vars.find("RESOURCES") == compilerInfo.exe_vars.end()) {
-    std::cerr << "Error: misssing required field: Resources" << std::endl; 
+    std::cerr << "Error: misssing required field: Resources" << std::endl;
     success = false;
   }
 

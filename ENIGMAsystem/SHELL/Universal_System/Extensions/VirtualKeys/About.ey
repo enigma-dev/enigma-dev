@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: Virtual Keys
-Identifier: VirtualKeys
-Author: Robert Colton
-Description: Graphical virtualization of keyboard events.
-Default: false
-Icon: virtualkeyslogo.png
+name: Virtual Keys
+identifier: VirtualKeys
+author: Robert Colton
+description: Graphical virtualization of keyboard events.
+default: false
+icon: virtualkeyslogo.png
 
-Depends: None
-Dependencies: None
-Init: extension_virtualkeys_init
+depends: None
+dependencies: None
+init: extension_virtualkeys_init

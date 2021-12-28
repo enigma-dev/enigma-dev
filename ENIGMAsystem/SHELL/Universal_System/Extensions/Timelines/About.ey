@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Timelines
-Identifier: Timelines
-Author: To be decided
-Description: Adds timeline local variables and functions.
-Icon: timeline.png
+name: Timelines
+identifier: Timelines
+author: To be decided
+description: Adds timeline local variables and functions.
+icon: timeline.png
 
-Depends: None
-Dependencies: None
-Implements: extension_timelines
+depends: None
+dependencies: None
+implements: extension_timelines

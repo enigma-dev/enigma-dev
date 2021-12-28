@@ -520,7 +520,7 @@ namespace syncheck
                 lex.push_back(token(TT_BEGINTRIANGLE, "<", superPos, 1, false, false, false, mymacroind)), pos++;
                 open_parenths.push_back(open_parenth_info(lexlast, mymacroind, '<'));
                 continue;
-              } else;
+              } else {}
             else if (open_parenths.size() && open_parenths[open_parenths.size()-1].type == '<') {
               lex.push_back(token(TT_ENDTRIANGLE, ">", superPos, 1, false, false, false, mymacroind)), pos++;
               open_error = pop_open_parenthesis(open_parenths, lex, superPos, lexlast, '<', "closing triangle bracket");

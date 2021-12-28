@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: Direct3D 9.0
-Identifier: Direct3D9
-Description: Native, hardware-accelerated rendering on Windows platforms. Requires the DirectX 9.0 End User Runtime or later. A Direct3D 9Ex device is used on supported platforms (Windows Vista or later), and a standard Direct3D 9 device is used otherwise. When a Direct3D 9Ex device is not supported (Windows XP), resources will be placed in a managed memory pool backed by system RAM, which may increase the game's memory consumption.
-Author: Robert Colton
+name: Direct3D 9.0
+identifier: Direct3D9
+description: Native, hardware-accelerated rendering on Windows platforms. Requires the DirectX 9.0 End User Runtime or later. A Direct3D 9Ex device is used on supported platforms (Windows Vista or later), and a standard Direct3D 9 device is used otherwise. When a Direct3D 9Ex device is not supported (Windows XP), resources will be placed in a managed memory pool backed by system RAM, which may increase the game's memory consumption.
+author: Robert Colton
 
-Depends:
-	Build-platforms: Windows, SDL
+depends:
+  build-platforms: Windows, SDL
 
-Represents:
-	Build-platforms: None
+represents:
+  build-platforms: None

@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: None
-Identifier: None
-Description: No networking system.
-Author: Robert B. Colton
+name: None
+identifier: None
+description: No networking system.
+author: Robert B. Colton
 
-Depends:
+depends:
 
-Represents:
-	Build-platforms: All
+represents:
+  build-platforms: All

@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: X11
-Identifier: xlib
-Represents:
-	Build-Platforms: Linux, FreeBSD
-Description: Run on any Mac, Linux, FreeBSD, or DragonFlyBSD environment with the X Window System.
-Author: IsmAvatar, Josh Ventura
+name: X11
+identifier: xlib
+represents:
+  build-platforms: Linux, FreeBSD
+description: Run on any Mac, Linux, FreeBSD, or DragonFlyBSD environment with the X Window System.
+author: IsmAvatar, Josh Ventura
 
-Depends:
-	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD
+depends:
+  build-platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD

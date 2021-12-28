@@ -1,15 +1,15 @@
 %e-yaml
 ---
 
-Name: Asynchronous
-Identifier: Asynchronous
-Author: Robert
-Description: Asynchronous dialog support for GameMaker: Studio. Requires a set Widget System and the Data Structure extension enabled. Do not try this on Mac OS X. Mac OS X windows are not thread safe and will crash your game.
-Default: false
-Icon: asynclogo.png
+name: Asynchronous
+identifier: Asynchronous
+author: Robert
+description: Asynchronous dialog support for GameMaker Studio. Requires a set Widget System and the Data Structure extension enabled. Do not try this on Mac OS X. Mac OS X windows are not thread safe and will crash your game.
+default: false
+icon: asynclogo.png
 
-Depends:
-	Extensions: DataStructures
-Dependencies: None
-Implement: extension_async
-Init: extension_async_init
+depends:
+  extensions: DataStructures
+dependencies: None
+implement: extension_async
+init: extension_async_init

@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: SDL
-Identifier: SDL
-Description: Audio playback support using SDL. A light compatibility layer is provided for GameMaker's classic sound API. Emphasis is placed on positional audio playback and audio processing features of more recent GameMaker versions.
-Author: Abhishek Kumar Jha
-Depends:
-    Windowing: SDL
+name: SDL
+identifier: SDL
+description: Audio playback support using SDL. A light compatibility layer is provided for GameMaker's classic sound API. Emphasis is placed on positional audio playback and audio processing features of more recent GameMaker versions.
+author: Abhishek Kumar Jha
+depends:
+    windowing: SDL
 
-Represents:
-    Build-platforms: SDL
+represents:
+    build-platforms: SDL

@@ -1,14 +1,13 @@
 %e-yaml
 ---
 
-Name: OpenGL 1.1
-Identifier: OpenGL1
-Description: Native, hardware-accelerated rendering on most graphics hardware using legacy OpenGL. Fallbacks are provided where necessary to lower the minimum required OpenGL to version 1.1 and maximize compatibility. Where fallbacks can not be provided (e.g, shaders), the minimum OpenGL version required is that of the features used.
-Author: Josh Ventura, serprex
+name: OpenGL 1.1
+identifier: OpenGL1
+description: Native, hardware-accelerated rendering on most graphics hardware using legacy OpenGL. Fallbacks are provided where necessary to lower the minimum required OpenGL to version 1.1 and maximize compatibility. Where fallbacks can not be provided (e.g, shaders), the minimum OpenGL version required is that of the features used.
+author: Josh Ventura, serprex
 
-Depends:
-	Windowing: xlib, Win32, Cocoa, SDL
+depends:
+  windowing: xlib, Win32, Cocoa, SDL
 
-Represents:
-	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
-  
+represents:
+  build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL

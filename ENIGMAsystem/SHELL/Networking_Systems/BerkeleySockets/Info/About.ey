@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Berkeley Sockets
-Identifier: BerkeleySockets
-Description: Utilization of the Berkeley Sockets library for networking with HTTP, FTP, TCP-IP and UDP.
-Author: IsmAvatar and Robert B. Colton
+name: Berkeley Sockets
+identifier: BerkeleySockets
+description: Utilization of the Berkeley Sockets library for networking with HTTP, FTP, TCP-IP and UDP.
+author: IsmAvatar and Robert B. Colton
 
-Depends: None
+depends: None
 
-Represents:
-	Build-platforms: None
+represents:
+  build-platforms: None

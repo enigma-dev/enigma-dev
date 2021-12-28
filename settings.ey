@@ -1,103 +1,101 @@
 %e-yaml
 ---
 
--Compatibility/Progress:
-    Layout: Grid
-    Columns: 3
+-compatibility/progress:
+    layout: Grid
+    columns: 3
     -inherit-strings-from:
-        Type: Radio-1
-        Label: Inherit strings from: 
-        Options: "GML ('A'=\"A\"), C++ ('A'=65)"
+        type: Radio-1
+        label: "Inherit strings from:"
+        options: "GML ('A'=\"A\"), C++ ('A'=65)"
     -inherit-escapes-from:
-        Type: Radio-1
-        Label: Inherit escape sequences: 
-        Options: "GML (#), C++ (\\n)"
+        type: Radio-1
+        label: "Inherit escape sequences:"
+        options: "GML (#), C++ (\\n)"
     -inherit-increment-from:
-        Type: Radio-1
-        Label: Inherit ++/-- from: 
-        Options: "GML (+), C++ (+=1/-=1)"
-        Default: 1
-    -inherit-equivalence-from:
-        Type: Radio-1
-        Label: Inherit a=b=c from: 
-        Options: "GML (a=b==c), C++ (b=c;a=c)"
+        type: Radio-1
+        label: "Inherit ++/-- from:"
+        options: "GML (+), C++ (+=1/-=1)"
+        default: 1
+    -inherit-equivalence-from\:
+        type: Radio-1
+        label: "Inherit a=b=c from:"
+        options: "GML (a=b==c), C++ (b=c;a=c)"
     -treat-literals-as:
-        Type: Radio-1
-        Label: Treat literals as: 
-        Options: "EDL (variant), C++ (scalar)"
+        type: Radio-1
+        label: "Treat literals as:"
+        options: "EDL (variant), C++ (scalar)"
     -inherit-negatives-as:
-        Type: Radio-1
-        Label: Treat negatives as: 
-        Options: "GML (true > 0), C++ (true != 0)"
+        type: Radio-1
+        label: "Treat negatives as:"
+        options: "GML (true > 0), C++ (true != 0)"
     -compliance-mode:
-        Type: Combobox
-        Label: Compliance Mode: 
-        Options: "Standard, GM5, GM6, GM7, GM8"
+        type: Combobox
+        label: "Compliance Mode:"
+        options: "Standard, GM5, GM6, GM7, GM8"
     -keyword-blacklist:
-        Type: Textfield
-        Label: Keyword Blacklist: 
-        Default: ""
+        type: Textfield
+        label: "Keyword Blacklist:"
+        default: ""
 
-		
-
--Build Options:
-    Layout: Grid
-    Columns: 2
+-build options:
+    layout: Grid
+    columns: 2
     -eobjs-directory:
-        Type: Textfield
-        Label: EOBJS Directory
-        Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
-        Default-Linux: "%HOME%/.enigma/"
-        Default-MacOSX: "%HOME%/.enigma/"
-        Default: "%HOME%/.enigma/"
+        type: Textfield
+        label: EOBJS Directory
+        default-windows: "%LOCALAPPDATA%/ENIGMA/"
+        default-linux: "%HOME%/.enigma/"
+        default-macosx: "%HOME%/.enigma/"
+        default: "%HOME%/.enigma/"
     -codegen-directory:
-        Type: Textfield
-        Label: Codegen Directory
-        Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
-        Default-Linux: "%HOME%/.enigma/"
-        Default-MacOSX: "%HOME%/.enigma/"
-        Default: "%HOME%/.enigma/"
+        type: Textfield
+        label: Codegen Directory
+        default-windows: "%LOCALAPPDATA%/ENIGMA/"
+        default-linux: "%HOME%/.enigma/"
+        default-macosx: "%HOME%/.enigma/"
+        default: "%HOME%/.enigma/"
     -inherit-objects:
-        Type: Checkbox
-        Label: Object Inheritance
-        Default: true
+        type: Checkbox
+        label: Object Inheritance
+        default: true
     -automatic-semicolons:
-        Type: Checkbox
-        Label: Automatic Semicolons
-        Default: true
-		
--Graphics:
-    Layout: Grid
-    Columns: 3
+        type: Checkbox
+        label: Automatic Semicolons
+        default: true
+
+-graphics:
+    layout: Grid
+    columns: 3
     -angular-unit:
-        Type: Radio-1
-        Label: Angular unit: 
-        Options: "degrees, radians"
+        type: Radio-1
+        label: "Angular unit:"
+        options: "degrees, radians"
     -scalar-precision:
-        Type: Radio-1
-        Label: Scalar precision: 
-        Options: "float, double"
-		
--Collision:
-    Layout: Grid
-    Columns: 3
+        type: Radio-1
+        label: "Scalar precision:"
+        options: "float, double"
+
+-collision:
+    layout: Grid
+    columns: 3
     -angular-unit:
-        Type: Radio-1
-        Label: Angular unit: 
-        Options: "degrees, radians"
+        type: Radio-1
+        label: "Angular unit:"
+        options: "degrees, radians"
     -scalar-precision:
-        Type: Radio-1
-        Label: Scalar precision: 
-        Options: "float, double"
-		
--Audio:
-    Layout: Grid
-    Columns: 3
+        type: Radio-1
+        label: "Scalar precision:"
+        options: "float, double"
+
+-audio:
+    layout: Grid
+    columns: 3
     -angular-unit:
-        Type: Radio-1
-        Label: Angular unit: 
-        Options: "degrees, radians"
+        type: Radio-1
+        label: "Angular unit:"
+        options: "degrees, radians"
     -scalar-precision:
-        Type: Radio-1
-        Label: Scalar precision: 
-        Options: "float, double"
+        type: Radio-1
+        label: "Scalar precision:"
+        options: "float, double"

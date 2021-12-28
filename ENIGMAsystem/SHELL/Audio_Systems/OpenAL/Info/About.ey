@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: OpenAL
-Identifier: OpenAL
-Description: Audio playback support using OpenAL. A light compatibility layer is provided for GameMaker's classic sound API. Emphasis is placed on positional audio playback and audio processing features of more recent GameMaker versions.
-Author: Josh Ventura
+name: OpenAL
+identifier: OpenAL
+description: Audio playback support using OpenAL. A light compatibility layer is provided for GameMaker's classic sound API. Emphasis is placed on positional audio playback and audio processing features of more recent GameMaker versions.
+author: Josh Ventura
 
-Depends:
-	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
-Represents:
-	Build-platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
+depends:
+  build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
+represents:
+  build-platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL

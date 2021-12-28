@@ -34,14 +34,14 @@
 namespace settings
 {
   struct system_descriptor {
-    string name;
+    std::string name;
   };
-  extern list<string> systems;
+  extern std::list<std::string> systems;
   int scour_settings();
 }
 
 namespace extensions {
-  void parse_extensions(vector<string> exts);
+  void parse_extensions(std::vector<std::string> exts);
   void crawl_for_locals();
   void determine_target();
 }

@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: GameMaker 5 Compatibility
-Identifier: GM5Compat
-Author: Seth N. Hetu
-Description: Compatibility function calls for Game Maker 5.
-Default: false
-Icon: gm5compat_logo.png
+name: GameMaker 5 Compatibility
+identifier: GM5Compat
+author: Seth N. Hetu
+description: Compatibility function calls for Game Maker 5.
+default: false
+icon: gm5compat_logo.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

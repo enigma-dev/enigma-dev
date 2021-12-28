@@ -1,14 +1,14 @@
 %e-yaml
 ---
 
-Name: Windows
-Identifier: Win32
-Represents:
-	Build-Platforms: Windows
-Description: Run on Microsoft Windows.
-Author: Josh Ventura
+name: Windows
+identifier: Win32
+represents:
+  build-platforms: Windows
+description: Run on Microsoft Windows.
+author: Josh Ventura
 
-Depends:
-	Build-Platforms: Windows
+depends:
+  build-platforms: Windows
 
-Templates: game_info.rc.template
+templates: game_info.rc.template

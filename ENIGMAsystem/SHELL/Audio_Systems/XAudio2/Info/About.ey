@@ -1,13 +1,12 @@
 %e-yaml
 ---
 
-Name: XAudio 2.0
-Identifier: XAudio2
-Description: Advanced audio using XAudio 2 compatible with Windows XP to Windows 8 and even Xbox 360.
-Author: Robert B. Colton
+name: XAudio 2.0
+identifier: XAudio2
+description: Advanced audio using XAudio 2 compatible with Windows XP to Windows 8 and even Xbox 360.
+author: Robert B. Colton
 
-Depends:
-	Build-platforms: None
-Represents:
-	Build-platforms: None
-
+depends:
+  build-platforms: None
+represents:
+  build-platforms: None

@@ -38,15 +38,13 @@
 namespace extensions
 {
   struct sdk_descriptor {
-    std::string name, identifier, represents, description, author, build_platforms;
+    std::string name, identifier, represents, description, author, depends;
   };
-  
+
   struct api_descriptor
   {
     std::string
       windowSys,   graphicsSys,   audioSys,   collisionSys,   widgetSys,   networkSys;
-    std::string
-      windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
   };
 
   extern sdk_descriptor targetSDK;
@@ -98,7 +96,7 @@ struct CompilerInfo {
 };
 
 extern CompilerInfo compilerInfo;
-bool load_compiler_ey(std::string fPath);
+bool load_compiler_ey(const std::filesystem::path& fPath);
 
 extern bool codegen_only;
 extern std::filesystem::path enigma_root;
@@ -118,7 +116,7 @@ inline std::string escapeEnv(std::string str) {
     str.replace(i, j - i + 1, repl);
     i = str.find_first_of('%');
   }
-  
+
   return str;
 }
 

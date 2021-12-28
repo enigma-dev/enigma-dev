@@ -38,20 +38,6 @@
 #include <fstream> // std::ifstream
 #include <iostream> // std::cerr
 
-// TODO: delete me once this has a permenant home in shared
-inline std::string fc(const char* fn) {
-  std::ifstream t(fn);
-  
-  if (!t.is_open()) {
-    std::cerr << "Failed to open " << fn << std::endl;
-    return "";
-  }
-  
-  std::stringstream buffer;
-  buffer << t.rdbuf();
-  return buffer.str();
-}
-
 inline int rdir_system(std::string x, std::string y) { return system((x + " " + y).c_str()); }
 
 static inline std::vector<std::string> explode(std::string n) {

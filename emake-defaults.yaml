@@ -1,3 +1,5 @@
+%e-yaml
+---
 # See Settings.proto for more info.
 
 API:
@@ -20,20 +22,20 @@ API:
   target_collision: BBox
 
   # Enabled Extensions
-  extensions: 
-   - Alarms
-   - Paths
-   - libpng
-   - DataStructures
-   - Timelines
-   - MotionPlanning
-   - DateTime
-   - GTest
+  extensions:
+    - Alarms
+    - Paths
+    - libpng
+    - DataStructures
+    - Timelines
+    - MotionPlanning
+    - DateTime
+    - GTest
 
   # Platform default is OS specific and handled internally but can be overriden here
   # target_platform: xlib
 
-Compiler:  
+Compiler:
   inherit_strings: 0
   inherit_escapes: 0
   inherit_increment: 0

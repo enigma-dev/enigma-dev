@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Google Test
-Identifier: GTest
-Author: Josh
-Description: Exposes Google Test checks through an ENIGMA API. (Including Google Test directly would break everything.)
-Default: false
-Icon: beaker.png
+name: Google Test
+identifier: GTest
+author: Josh
+description: Exposes Google Test checks through an ENIGMA API. (Including Google Test directly would break everything.)
+default: false
+icon: beaker.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

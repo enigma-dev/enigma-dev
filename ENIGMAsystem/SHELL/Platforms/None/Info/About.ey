@@ -1,8 +1,9 @@
 %e-yaml
 ---
 
-Name: None
-Identifier: None
-Represents: None
-Description: Run without using a windowing system (headless), intended primarily for servers.
-Author: Faissaloo
+name: None
+identifier: None
+represents:
+  build-platforms: None
+description: Run without using a windowing system (headless), intended primarily for servers.
+author: Faissaloo
