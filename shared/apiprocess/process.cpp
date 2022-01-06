@@ -737,9 +737,8 @@ namespace ngs::proc {
       std::string exe = directory_get_temporary_path();
       if (is_x86_process(proc)) exe = exe + "\\process32.exe";
       else exe = exe + "\\process64.exe";
-      std::wstring wexe = widen(exe);
       if (!file_exists(exe.c_str())) {
-        FILE *file = nullptr;
+        FILE *file = nullptr; std::wstring wexe = widen(exe);
         if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
           if (is_x86_process(proc)) {
             #if defined(_WIN64)
@@ -858,9 +857,8 @@ namespace ngs::proc {
       std::string exe = directory_get_temporary_path();
       if (is_x86_process(proc)) exe = exe + "\\process32.exe";
       else exe = exe + "\\process64.exe";
-      std::wstring wexe = widen(exe);
       if (!file_exists(exe.c_str())) {
-        FILE *file = nullptr;
+        FILE *file = nullptr; std::wstring wexe = widen(exe);
         if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
           if (is_x86_process(proc)) {
             #if defined(_WIN64)
@@ -982,9 +980,8 @@ namespace ngs::proc {
       std::string exe = directory_get_temporary_path();
       if (is_x86_process(proc)) exe = exe + "\\process32.exe";
       else exe = exe + "\\process64.exe";
-      std::wstring wexe = widen(exe);
       if (!file_exists(exe.c_str())) {
-        FILE *file = nullptr;
+        FILE *file = nullptr; std::wstring wexe = widen(exe);
         if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
           if (is_x86_process(proc)) {
             #if defined(_WIN64)
