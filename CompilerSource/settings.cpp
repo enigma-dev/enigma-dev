@@ -80,7 +80,7 @@ bool load_compiler_ey(const std::filesystem::path& fPath) {
   std::cout << std::endl << "Loading compiler ey file: " << fPath << std::endl;
 
   // Parse our compiler data file
-  const YAML::Node compiler_yaml = YAML::LoadFile(fPath);
+  const YAML::Node compiler_yaml = YAML::LoadFile(fPath.u8string());
 
   // Bail if error
   if (!compiler_yaml.IsDefined())

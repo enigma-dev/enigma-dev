@@ -67,7 +67,7 @@ static void reset_ide_editables()
     const string incg = "#include \"", impl = "/implement.h\"\n";
     f2write += "\n// Extensions selected by user\n";
     for (const auto &ext : parsed_extensions) {
-      YAML::Node about = YAML::LoadFile(enigma_root/"ENIGMAsystem/SHELL"/(ext.path + ext.name)/"About.ey");
+      YAML::Node about = YAML::LoadFile((enigma_root/"ENIGMAsystem/SHELL"/(ext.path + ext.name)/"About.ey").u8string());
       f2write += incg + ext.pathname + inc;
       if (ext.implements != "")
         f2write += incg + ext.pathname + impl;

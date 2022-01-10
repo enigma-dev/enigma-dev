@@ -59,16 +59,8 @@ if(MSVC)
 endif()
 
 #Find gRPC
-if (MSVC) # Windows actually does something right for once
-  find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-else() # https://tinyurl.com/arch-grpc-bug
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GPR NAMES gpr)
-  find_library(LIB_CARES NAMES cares)
-  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-  target_link_libraries(${LIB_PROTO} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-endif()
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
 include_directories(${Protobuf_INCLUDE_DIRS})

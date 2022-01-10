@@ -63,7 +63,7 @@ namespace extensions
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
 
-      YAML::Node iey = YAML::LoadFile(enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey");
+      YAML::Node iey = YAML::LoadFile((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").u8string());
       if (!iey.IsDefined())
         cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
 
@@ -86,7 +86,7 @@ namespace extensions
     {
       if (!ef.is_directory() || ef.path().stem() == "General") continue;
       const std::filesystem::path ef_path = ef.path()/"Info/About.ey";
-      const YAML::Node ext = YAML::LoadFile(ef_path);
+      const YAML::Node ext = YAML::LoadFile(ef_path.u8string());
       if (!ext.IsDefined()) continue;
 
       cout << " - " << ef_path << ": Opened.\n";

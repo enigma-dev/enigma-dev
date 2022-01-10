@@ -13,7 +13,7 @@ else
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lProtocols -lENIGMAShared -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lProtocols -lENIGMAShared $(shell pkg-config --libs pkg-config --libs grpc++ protobuf) -lyaml-cpp -lpng
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
