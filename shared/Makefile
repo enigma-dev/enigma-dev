@@ -10,7 +10,7 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf
 
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
-		override LDFLAGS += -framework CoreFoundation -framework CoreGraphics
+		override LDFLAGS += -framework Cocoa -framework CoreFoundation -framework CoreGraphics
 		override CXXFLAGS += -ObjC++
 		override CFLAGS += -ObjC++
 	else ifeq ($(OS), Linux)
