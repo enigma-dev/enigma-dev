@@ -1197,12 +1197,20 @@ namespace ngs::proc {
 
   WINDOWID window_id_from_native_window(WINDOW window) {
     static std::string res;
+    #if (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
+    res = std::to_string((unsigned long long)[(NSWindow *)window windowNumber]);
+    #else
     res = std::to_string((unsigned long long)window);
+    #endif
     return (WINDOWID)res.c_str();
   }
 
   WINDOW native_window_from_window_id(WINDOWID win_id) {
+    #if (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
+    return (WINDOW)[NSApp windowWithWindowNumber:(CGWindowID)strtoul(win_id, nullptr, 10)];
+    #else
     return (WINDOW)strtoull(win_id, nullptr, 10);
+    #endif
   }
 
   static std::vector<std::string> wid_vec_1;
@@ -1237,9 +1245,8 @@ namespace ngs::proc {
         if (proc_id == pid) {
           CFNumberRef windowID = (CFNumberRef)CFDictionaryGetValue(
           windowInfoDictionary, kCGWindowNumber);
-          CGWindowID wid; CFNumberGetValue(windowID,
-          kCGWindowIDCFNumberType, &wid);
-          wid_vec_1.push_back(window_id_from_native_window(wid)); i++;
+          CGWindowID wid; CFNumberGetValue(windowID, kCGWindowIDCFNumberType, &wid);
+          wid_vec_1.push_back(std::to_string((unsigned int)wid)); i++;
         }
       }
     }
@@ -1316,7 +1323,7 @@ namespace ngs::proc {
     *proc_id = (PROCID)pid;
     #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
     CFArrayRef window_array = CGWindowListCopyWindowInfo(
-    kCGWindowListOptionIncludingWindow, native_window_from_window_id(win_id));
+    kCGWindowListOptionIncludingWindow, (CGWindowID)strtol(win_id, nullptr, 10));
     CFIndex windowCount = 0;
     if ((windowCount = CFArrayGetCount(window_array))) {
       for (CFIndex i = 0; i < windowCount; i++) {

@@ -32,6 +32,7 @@
 #if (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <Cocoa/Cocoa.h>
 #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(PROCESS_XQUARTZ_IMPL)
 #include <X11/Xlib.h>
 #endif
@@ -50,7 +51,7 @@ namespace ngs::proc {
   #if defined(_WIN32)
   typedef HWND WINDOW;
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
-  typedef CGWindowID WINDOW;
+  typedef NSWindow *WINDOW;
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(PROCESS_XQUARTZ_IMPL)
   typedef Window WINDOW;
   #endif
