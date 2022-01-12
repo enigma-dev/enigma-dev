@@ -22,7 +22,7 @@ ifeq ($(UNIX_BASED), true)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
 		override CFLAGS += $(shell pkg-config --cflags x11)
 	else ifeq ($(OS), DragonFly)
-		override LDFLAGS += -lkvm -lutil -lc $(shell pkg-config --libs x11)
+		override LDFLAGS += -lkvm -lc $(shell pkg-config --libs x11)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
 		override CFLAGS += $(shell pkg-config --cflags x11)
 	endif
