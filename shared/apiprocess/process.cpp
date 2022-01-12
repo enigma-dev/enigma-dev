@@ -188,8 +188,8 @@ namespace {
     CURDIR CurrentDirectory;\
     UNICODE_STRING DllPath;\
     UNICODE_STRING ImagePathName;\
-    UNICODE_STRING commandline;\
-    PVOID environment;\
+    UNICODE_STRING CommandLine;\
+    PVOID Environment;\
     ULONG StartingX;\
     ULONG StartingY;\
     ULONG CountX;\
@@ -287,11 +287,11 @@ namespace {
       buf = upp.CurrentDirectory.DosPath.Buffer;
       len = upp.CurrentDirectory.DosPath.Length;
     } else if (type == MEMENV) {
-      buf = upp.environment;
+      buf = upp.Environment;
       len = upp.EnvironmentSize;
     } else if (type == MEMCMD) {
-      buf = upp.commandline.Buffer;
-      len = upp.commandline.Length;
+      buf = upp.CommandLine.Buffer;
+      len = upp.CommandLine.Length;
     }
     wchar_t *res = new wchar_t[len / 2 + 1];
     ReadProcessMemory(proc, buf, res, len, &nRead);
