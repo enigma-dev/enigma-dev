@@ -48,7 +48,7 @@
 #else
 #if defined(__APPLE__) && defined(__MACH__)
 #include <libproc.h>
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
 #include <sys/user.h>
 #endif
@@ -250,6 +250,17 @@ namespace ngs::fs {
       char *buffer = path.data();
       if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
         path = string(buffer) + "\0";
+      }
+    }
+    #elif defined(__OpenBSD__)
+    char **argv = nullptr; size_t length; 
+    int mib[4] { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
+      if ((argv = (char **)malloc(length))) {
+        if (sysctl(mib, 4, argv, &length, nullptr, 0) == 0) {
+          path = argv[0];
+        }
+        free(argv);
       }
     }
     #endif
