@@ -7,5 +7,7 @@ ifeq ($(OS), Linux)
 else ifeq ($(OS), FreeBSD)
 	override LDLIBS += -lutil -lc
 else ifeq ($(OS), DragonFly)
-	override LDLIBS += -lkvm -lutil -lc
+	override LDLIBS += -lkvm -lc
+else ifeq ($(OS), OpenBSD)
+	override LDLIBS += -lkvm -lc
 endif

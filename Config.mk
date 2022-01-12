@@ -10,6 +10,8 @@ else ifeq ($(OS), FreeBSD)
 	UNIX_BASED := true
 else ifeq ($(OS), DragonFly)
 	UNIX_BASED := true
+else ifeq ($(OS), OpenBSD)
+	UNIX_BASED := true
 else 
 	UNIX_BASED := false
 endif
@@ -65,6 +67,14 @@ endif
 
 # DragonFlyBSD include and lib folders
 ifeq ($(OS), DragonFly)
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
+	LDFLIBS  += -L/usr/local/lib
+endif
+
+# OpenBSD include and lib folders
+ifeq ($(OS), OpenBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib

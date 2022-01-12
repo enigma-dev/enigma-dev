@@ -36,11 +36,13 @@
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
-#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
     #include <sys/types.h>
     #include <sys/user.h>
+    #if CURRENT_PLATFORM_ID == OS_FREEBSD
     #include <libutil.h>
-    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+    #endif
+    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
         #include <sys/param.h>
         #include <sys/sysctl.h>
         #include <kvm.h>
@@ -49,7 +51,7 @@
 
 using std::string;
 
-#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+#if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
 kvm_t *kd = nullptr;
 #endif
 
@@ -321,6 +323,22 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       }
       return vec;
     }
+#elif CURRENT_PLATFORM_ID == OS_OPENBSD
+    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
+      char errbuf[_POSIX2_LINE_MAX];
+      vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
+      kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
+      if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
+        for (int i = cntp - 1; i >= 0; i--) {
+          if (proc_info[i].p_pid >= 0 && proc_info[i].p_ppid >= 0 && 
+            proc_info[i].p_ppid == parentProcId) {
+            vec.push_back(proc_info[i].p_pid);
+          }
+        }
+        free(proc_info);
+      }
+      return vec;
+    }
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
     pid_t ParentProcIdFromProcId(pid_t procId) {
       proc_bsdinfo proc_info;
@@ -345,7 +363,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return vec;
     }
 #endif
-#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD || CURRENT_PLATFORM_ID == OS_MACOSX
     void WaitForAllChildrenToDie(pid_t pid, int *status) {
       vector<pid_t> procId = ProcIdFromParentProcId(pid);
       if (procId.size()) {

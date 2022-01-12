@@ -9,6 +9,8 @@ else ifeq ($(TARGET-PLATFORM), FreeBSD)
 	override LDLIBS += -lGL -lGLEW
 else ifeq ($(TARGET-PLATFORM), DragonFlyBSD)
 	override LDLIBS += -lGL -lGLEW
+else ifeq ($(TARGET-PLATFORM), OpenBSD)
+	override LDLIBS += -lGL -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL -lGLEW
 endif

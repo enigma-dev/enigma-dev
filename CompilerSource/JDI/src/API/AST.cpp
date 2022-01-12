@@ -30,7 +30,7 @@
 #include <API/compile_settings.h>
 #include <iostream>
 
-#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__DragonFly__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__) && !defined(__DragonFly__) && !defined(__OpenBSD__)
 #include <malloc.h>
 #endif
 

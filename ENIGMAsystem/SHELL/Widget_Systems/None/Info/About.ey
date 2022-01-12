@@ -3,7 +3,7 @@
 
 Name: None
 Identifier: None
-Build-Platforms: Windows, Linux, FreeBSD, DragonFlyBSD
+Build-Platforms: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Represents: None
 Description: Console based output and filler functions.
 Author: Josh Ventura

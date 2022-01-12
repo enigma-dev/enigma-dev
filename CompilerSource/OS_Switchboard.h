@@ -5,6 +5,7 @@
 #define OS_MACOSX    2
 #define OS_FREEBSD   3
 #define OS_DRAGONFLY 4
+#define OS_OPENBSD  5
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
   #define CURRENT_PLATFORM_NAME "Windows"
@@ -23,6 +24,9 @@
 #elif defined(__DragonFly__)
   #define CURRENT_PLATFORM_NAME "DragonFlyBSD"
   #define CURRENT_PLATFORM_ID   OS_DRAGONFLY
+#elif defined(__OpenBSD__)
+  #define CURRENT_PLATFORM_NAME "OpenBSD"
+  #define CURRENT_PLATFORM_ID   OS_OPENBSD
 #elif defined(unix) || defined(__unix) || defined(__unix__)
   #define CURRENT_PLATFORM_NAME "Linux"
   #define CURRENT_PLATFORM_ID   OS_LINUX
