@@ -33,7 +33,7 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <Cocoa/Cocoa.h>
-#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(PROCESS_XQUARTZ_IMPL)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
 #include <X11/Xlib.h>
 #endif
 #endif
@@ -52,7 +52,7 @@ namespace ngs::proc {
   typedef HWND WINDOW;
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
   typedef NSWindow *WINDOW;
-  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(PROCESS_XQUARTZ_IMPL)
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
   typedef Window WINDOW;
   #endif
   typedef char *WINDOWID;
