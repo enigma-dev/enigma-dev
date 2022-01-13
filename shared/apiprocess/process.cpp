@@ -716,7 +716,7 @@ namespace ngs::proc {
     if (cmdsize) {
       static std::string cmd;
       cmd = cmdbuf[0]; 
-      *buffer = cmd.data();
+      *buffer = (char *)cmd.c_str();
       free_cmdline(cmdbuf);
     }
     #endif
