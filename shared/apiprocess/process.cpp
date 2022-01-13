@@ -342,7 +342,6 @@ namespace {
     }
     sp = cp; int j = 0;
     while (*sp != '\0' && sp < &procargs[s]) {
-      message_pump();
       if (type && j >= nargs) { 
         cmd_env_vec_1.push_back(sp); i++;
       } else if (!type && j < nargs) {
@@ -396,7 +395,6 @@ namespace ngs::proc {
     if (proc_id_exists(0)) { vec.push_back(0); i++; }
     PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
     while (proc_t *proc_info = readproc(proc, nullptr)) {
-      message_pump();
       vec.push_back(proc_info->tgid); i++;
       freeproc(proc_info);
     }
@@ -421,6 +419,7 @@ namespace ngs::proc {
         }
       }
     #elif defined(__OpenBSD__)
+    if (proc_id_exists(0)) { vec.push_back(0); i++; }
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int j = cntp - 1; j >= 0; j--) {
@@ -601,7 +600,6 @@ namespace ngs::proc {
     #elif (defined(__linux__) && !defined(__ANDROID__))
     PROCTAB *proc = openproc(PROC_FILLSTAT);
     while (proc_t *proc_info = readproc(proc, nullptr)) {
-      message_pump();
       if (proc_info->ppid == parent_proc_id) {
         vec.push_back(proc_info->tgid); i++;
       }
@@ -1582,7 +1580,6 @@ namespace ngs::proc {
     #if !defined(_WIN32)
     ssize_t nRead = 0; char buffer[BUFSIZ];
     while ((nRead = read((int)file, buffer, BUFSIZ)) > 0) {
-      message_pump();
       buffer[nRead] = '\0';
     #else
     DWORD nRead = 0; char buffer[BUFSIZ];
@@ -1621,7 +1618,6 @@ namespace ngs::proc {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     if (fork_proc_id != -1) {
       while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
-        message_pump();
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
         char **cmd = nullptr; int cmdsize; cmdline_from_proc_id(fork_proc_id, &cmd, &cmdsize);
@@ -1745,7 +1741,6 @@ namespace ngs::proc {
     char buffer[BUFSIZ]; ssize_t nread = 0;
     int flags = fcntl(STDIN_FILENO, F_GETFL, 0); if (-1 == flags) return "";
     while ((nread = read(fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK), buffer, BUFSIZ)) > 0) {
-      message_pump();
       buffer[nread] = '\0';
       standard_input.append(buffer, nread);
     }
