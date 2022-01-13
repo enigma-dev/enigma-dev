@@ -253,14 +253,14 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char **argv = nullptr; size_t length; 
+    char **buffer = nullptr; size_t length; 
     int mib[4] { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      if ((argv = (char **)malloc(length))) {
-        if (sysctl(mib, 4, argv, &length, nullptr, 0) == 0) {
-          path = argv[0];
+      if ((buffer = (char **)malloc(length))) {
+        if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
+          path = string(buffer[0]) + "\0";
         }
-        free(argv);
+        free(buffer);
       }
     }
     #endif
