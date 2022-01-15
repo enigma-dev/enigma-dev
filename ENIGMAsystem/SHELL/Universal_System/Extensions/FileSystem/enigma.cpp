@@ -292,35 +292,35 @@ namespace enigma_fs {
   }
  
   int fs_file_bin_open(std::string fname, int mode) {
-
+    return filesystem::file_bin_open(fname, mode);
   }
  
   int fs_file_bin_rewrite(int fd) {
-
+    return filesystem::file_bin_rewrite(fd);
   }
  
   int fs_file_bin_close(int fd) {
-
+    return filesystem::file_bin_close(fd);
   }
  
   long fs_file_bin_size(int fd) {
-
+    return filesystem::file_bin_size(fd);
   }
  
   long fs_file_bin_position(int fd) {
-
+    return filesystem::file_bin_position(fd);
   }
  
   long fs_file_bin_seek(int fd, long pos) {
-
+    return filesystem::file_bin_seek(fd, pos);
   }
  
   int fs_file_bin_read_byte(int fd) {
-
+    return filesystem::file_bin_read_byte(fd);
   }
  
   int fs_file_bin_write_byte(int fd, int byte) {
-
+    return filesystem::file_bin_write_byte(fd, byte);
   }
  
   int fs_file_text_open_read(std::string fname) {
