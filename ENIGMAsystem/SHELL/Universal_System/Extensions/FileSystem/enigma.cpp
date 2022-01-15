@@ -88,27 +88,27 @@ namespace enigma_fs {
   }
  
   bool fs_directory_exists(std::string dname) {
-
+    return filesystem::directory_exists(dname);
   }
  
   bool fs_directory_create(std::string dname) {
-
+    return filesystem::directory_create(dname);
   }
  
   bool fs_directory_destroy(std::string dname) {
-
+    return filesystem::directory_destroy(dname);
   }
  
   bool fs_directory_rename(std::string oldname, std::string newname) {
-
+    return filesystem::directory_rename(oldname, newname);
   }
  
   bool fs_directory_copy(std::string dname, std::string newname) {
-
+    return filesystem::directory_copy(dname, newname);
   }
  
   std::uintmax_t fs_directory_size(std::string dname) {
-
+    return filesystem::directory_size(dname);
   }
  
   var fs_directory_contents(std::string dname, std::string pattern = "*.*", bool includedirs = true) {
@@ -124,43 +124,43 @@ namespace enigma_fs {
   }
  
   std::string fs_environment_get_variable(std::string name) {
-
+    return filesystem::environment_get_variable(name);
   }
  
   bool fs_environment_set_variable(std::string name, std::string value) {
-
+    return filesystem::environment_set_variable(name, value);
   }
  
   bool fs_environment_unset_variable(std::string name) {
-
+    return filesystem::environment_unset_variable(name);
   }
  
   std::string environment_expand_variables(std::string str) {
-
+    return filesystem::environment_expand_variables(str);
   }
  
   int fs_file_datetime_accessed_year(std::string fname) {
-
+    return filesystem::file_datetime_accessed_year(fname);
   }
  
   int fs_file_datetime_accessed_month(std::string fname) {
-
+    return filesystem::file_datetime_accessed_month(fname);
   }
  
   int fs_file_datetime_accessed_day(std::string fname) {
-
+    return filesystem::file_datetime_accessed_day(fname);
   }
  
   int fs_file_datetime_accessed_hour(std::string fname) {
-
+    return filesystem::file_datetime_accessed_hour(fname);
   }
  
   int fs_file_datetime_accessed_minute(std::string fname) {
-
+    return filesystem::file_datetime_accessed_minute(fname);
   }
  
   int fs_file_datetime_accessed_second(std::string fname) {
-
+    return filesystem::file_datetime_accessed_second(fname);
   }
  
   int fs_file_datetime_modified_year(std::string fname) {
