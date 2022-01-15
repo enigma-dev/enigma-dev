@@ -32,59 +32,59 @@ namespace filesystem = ngs::fs;
 namespace enigma_fs {
 
   std::string fs_directory_get_current_working() {
-    filesystem::directory_get_current_working();
+    return filesystem::directory_get_current_working();
   }
  
   bool fs_directory_set_current_working(std::string dname) {
-    filesystem::directory_set_current_working(dname);
+    return filesystem::directory_set_current_working(dname);
   }
  
   std::string fs_directory_get_temporary_path() {
-    filesystem::directory_get_temporary_path();
+    return filesystem::directory_get_temporary_path();
   }
  
   std::string fs_executable_get_directory() {
-    filesystem::executable_get_directory();
+    return filesystem::executable_get_directory();
   }
  
   std::string fs_executable_get_filename() {
-    filesystem::executable_get_filename();
+    return filesystem::executable_get_filename();
   }
  
   std::string fs_executable_get_pathname() {
-    filesystem::executable_get_pathname();
+    return filesystem::executable_get_pathname();
   }
  
   std::string fs_file_bin_pathname(int fd) {
-    filesystem::file_bin_pathname(fd);
+    return filesystem::file_bin_pathname(fd);
   }
  
   std::string fs_filename_absolute(std::string fname) {
-    filesystem::filename_absolute(fname);
+    return filesystem::filename_absolute(fname);
   }
  
   std::string fs_filename_canonical(std::string fname) {
-    filesystem::filename_canonical(fname);
+    return filesystem::filename_canonical(fname);
   }
  
   bool fs_file_exists(std::string fname) {
-
+    return filesystem::file_exists(fname);
   }
  
   bool fs_file_delete(std::string fname) {
-
+    return filesystem::file_delete(fname);
   }
  
   bool fs_file_rename(std::string oldname, std::string newname) {
-
+    return filesystem::file_rename(oldname, newname);
   }
  
   bool fs_file_copy(std::string fname, std::string newname) {
-
+    return filesystem::file_copy(fname, newname);
   }
  
   std::uintmax_t fs_file_size(std::string fname) {
-
+    return filesystem::file_size(fname);
   }
  
   bool fs_directory_exists(std::string dname) {
