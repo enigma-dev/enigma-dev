@@ -164,123 +164,131 @@ namespace enigma_fs {
   }
  
   int fs_file_datetime_modified_year(std::string fname) {
-
+    return filesystem::file_datetime_modified_year(fname);
   }
  
   int fs_file_datetime_modified_month(std::string fname) {
-
+    return filesystem::file_datetime_modified_month(fname);
   }
  
   int fs_file_datetime_modified_day(std::string fname) {
-
+    return filesystem::file_datetime_modified_day(fname);
   }
  
   int fs_file_datetime_modified_hour(std::string fname) {
-
+    return filesystem::file_datetime_modified_hour(fname);
   }
  
   int fs_file_datetime_modified_minute(std::string fname) {
-
+    return filesystem::file_datetime_modified_minute(fname);
   }
  
   int fs_file_datetime_modified_second(std::string fname) {
-
+    return filesystem::file_datetime_modified_second(fname);
   }
  
   int fs_file_datetime_created_year(std::string fname) {
 
   }
  
+  int fs_file_datetime_created_year(std::string fname) {
+    return filesystem::file_datetime_created_year(fname);
+  }
+ 
   int fs_file_datetime_created_month(std::string fname) {
-
+    return filesystem::file_datetime_created_month(fname);
   }
  
   int fs_file_datetime_created_day(std::string fname) {
-
+    return filesystem::file_datetime_created_day(fname);
   }
  
   int fs_file_datetime_created_hour(std::string fname) {
-
+    return filesystem::file_datetime_created_hour(fname);
   }
  
   int fs_file_datetime_created_minute(std::string fname) {
-
+    return filesystem::file_datetime_created_minute(fname);
   }
  
   int fs_file_datetime_created_second(std::string fname) {
-
+    return filesystem::file_datetime_created_second(fname);
   }
  
   int fs_file_bin_datetime_accessed_year(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_year(fd);
   }
  
   int fs_file_bin_datetime_accessed_month(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_month(fd);
   }
  
   int fs_file_bin_datetime_accessed_day(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_day(fd);
   }
  
   int fs_file_bin_datetime_accessed_hour(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_hour(fd);
   }
  
   int fs_file_bin_datetime_accessed_minute(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_minute(fd);
   }
  
   int fs_file_bin_datetime_accessed_second(int fd) {
-
+    return filesystem::file_bin_datetime_accessed_second(fd);
   }
  
   int fs_file_bin_datetime_modified_year(int fd) {
-
+    return filesystem::file_bin_datetime_modified_year(fd);
   }
  
   int fs_file_bin_datetime_modified_month(int fd) {
-
+    return filesystem::file_bin_datetime_modified_month(fd);
   }
  
   int fs_file_bin_datetime_modified_day(int fd) {
-
+    return filesystem::file_bin_datetime_modified_day(fd);
   }
  
   int fs_file_bin_datetime_modified_hour(int fd) {
-
+    return filesystem::file_bin_datetime_modified_hour(fd);
   }
  
   int fs_file_bin_datetime_modified_minute(int fd) {
-
+    return filesystem::file_bin_datetime_modified_minute(fd);
   }
  
   int fs_file_bin_datetime_modified_second(int fd) {
-
+    return filesystem::file_bin_datetime_modified_second(fd);
   }
  
   int fs_file_bin_datetime_created_year(int fd) {
 
   }
  
+  int fs_file_bin_datetime_created_year(int fd) {
+    return filesystem::file_bin_datetime_created_year(fd);
+  }
+ 
   int fs_file_bin_datetime_created_month(int fd) {
-
+    return filesystem::file_bin_datetime_created_month(fd);
   }
  
   int fs_file_bin_datetime_created_day(int fd) {
-
+    return filesystem::file_bin_datetime_created_day(fd);
   }
  
   int fs_file_bin_datetime_created_hour(int fd) {
-
+    return filesystem::file_bin_datetime_created_hour(fd);
   }
  
   int fs_file_bin_datetime_created_minute(int fd) {
-
+    return filesystem::file_bin_datetime_created_minute(fd);
   }
  
   int fs_file_bin_datetime_created_second(int fd) {
-
+    return filesystem::file_bin_datetime_created_second(fd);
   }
  
   int fs_file_bin_open(std::string fname, int mode) {
