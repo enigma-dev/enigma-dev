@@ -32,39 +32,39 @@ namespace filesystem = ngs::fs;
 namespace enigma_fs {
 
   std::string fs_directory_get_current_working() {
-
+    filesystem::directory_get_current_working();
   }
  
   bool fs_directory_set_current_working(std::string dname) {
-
+    filesystem::directory_set_current_working(dname);
   }
  
   std::string fs_directory_get_temporary_path() {
-
+    filesystem::directory_get_temporary_path();
   }
  
   std::string fs_executable_get_directory() {
-
+    filesystem::executable_get_directory();
   }
  
   std::string fs_executable_get_filename() {
-
+    filesystem::executable_get_filename();
   }
  
   std::string fs_executable_get_pathname() {
-
+    filesystem::executable_get_pathname();
   }
  
   std::string fs_file_bin_pathname(int fd) {
-
+    filesystem::file_bin_pathname(fd);
   }
  
   std::string fs_filename_absolute(std::string fname) {
-
+    filesystem::filename_absolute(fname);
   }
  
   std::string fs_filename_canonical(std::string fname) {
-
+    filesystem::filename_canonical(fname);
   }
  
   bool fs_file_exists(std::string fname) {
