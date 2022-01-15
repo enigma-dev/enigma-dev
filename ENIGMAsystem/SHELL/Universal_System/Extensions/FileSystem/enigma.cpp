@@ -188,10 +188,6 @@ namespace enigma_fs {
   }
  
   int fs_file_datetime_created_year(std::string fname) {
-
-  }
- 
-  int fs_file_datetime_created_year(std::string fname) {
     return filesystem::file_datetime_created_year(fname);
   }
  
