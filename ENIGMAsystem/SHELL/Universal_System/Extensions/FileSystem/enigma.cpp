@@ -260,10 +260,6 @@ namespace enigma_fs {
   }
  
   int fs_file_bin_datetime_created_year(int fd) {
-
-  }
- 
-  int fs_file_bin_datetime_created_year(int fd) {
     return filesystem::file_bin_datetime_created_year(fd);
   }
  
