@@ -29,13 +29,13 @@
 
 namespace enigma_fs {
 
-  std::string fs_get_working_directory();
-  bool fs_set_working_directory(std::string dname);
-  std::string fs_get_temp_directory();
-  std::string fs_get_program_directory();
-  std::string fs_get_program_filename();
-  std::string fs_get_program_pathname();
-  std::string fs_get_filedescriptor_pathname(int fd);
+  std::string fs_directory_get_current_working();
+  bool fs_directory_set_current_working(std::string dname);
+  std::string fs_directory_get_temporary_path();
+  std::string fs_executable_get_directory();
+  std::string fs_executable_get_filename();
+  std::string fs_executable_get_pathname();
+  std::string fs_file_bin_pathname(int fd);
   std::string fs_filename_absolute(std::string fname);
   std::string fs_filename_canonical(std::string fname);
   bool fs_file_exists(std::string fname);
@@ -54,19 +54,43 @@ namespace enigma_fs {
   std::string fs_environment_get_variable(std::string name);
   bool fs_environment_set_variable(std::string name, std::string value);
   bool fs_environment_unset_variable(std::string name);
-  std::string fs_environment_expand_variables(std::string str);
-  int fs_file_get_date_accessed_year(std::string fname);
-  int fs_file_get_date_accessed_month(std::string fname);
-  int fs_file_get_date_accessed_day(std::string fname);
-  int fs_file_get_date_accessed_hour(std::string fname);
-  int fs_file_get_date_accessed_minute(std::string fname);
-  int fs_file_get_date_accessed_second(std::string fname);
-  int fs_file_get_date_modified_year(std::string fname);
-  int fs_file_get_date_modified_month(std::string fname);
-  int fs_file_get_date_modified_day(std::string fname);
-  int fs_file_get_date_modified_hour(std::string fname);
-  int fs_file_get_date_modified_minute(std::string fname);
-  int fs_file_get_date_modified_second(std::string fname);
+  std::string environment_expand_variables(std::string str);
+  int fs_file_datetime_accessed_year(std::string fname);
+  int fs_file_datetime_accessed_month(std::string fname);
+  int fs_file_datetime_accessed_day(std::string fname);
+  int fs_file_datetime_accessed_hour(std::string fname);
+  int fs_file_datetime_accessed_minute(std::string fname);
+  int fs_file_datetime_accessed_second(std::string fname);
+  int fs_file_datetime_modified_year(std::string fname);
+  int fs_file_datetime_modified_month(std::string fname);
+  int fs_file_datetime_modified_day(std::string fname);
+  int fs_file_datetime_modified_hour(std::string fname);
+  int fs_file_datetime_modified_minute(std::string fname);
+  int fs_file_datetime_modified_second(std::string fname);
+  int fs_file_datetime_created_year(std::string fname);
+  int fs_file_datetime_created_month(std::string fname);
+  int fs_file_datetime_created_day(std::string fname);
+  int fs_file_datetime_created_hour(std::string fname);
+  int fs_file_datetime_created_minute(std::string fname);
+  int fs_file_datetime_created_second(std::string fname);
+  int fs_file_bin_datetime_accessed_year(int fd);
+  int fs_file_bin_datetime_accessed_month(int fd);
+  int fs_file_bin_datetime_accessed_day(int fd);
+  int fs_file_bin_datetime_accessed_hour(int fd);
+  int fs_file_bin_datetime_accessed_minute(int fd);
+  int fs_file_bin_datetime_accessed_second(int fd);
+  int fs_file_bin_datetime_modified_year(int fd);
+  int fs_file_bin_datetime_modified_month(int fd);
+  int fs_file_bin_datetime_modified_day(int fd);
+  int fs_file_bin_datetime_modified_hour(int fd);
+  int fs_file_bin_datetime_modified_minute(int fd);
+  int fs_file_bin_datetime_modified_second(int fd);
+  int fs_file_bin_datetime_created_year(int fd);
+  int fs_file_bin_datetime_created_month(int fd);
+  int fs_file_bin_datetime_created_day(int fd);
+  int fs_file_bin_datetime_created_hour(int fd);
+  int fs_file_bin_datetime_created_minute(int fd);
+  int fs_file_bin_datetime_created_second(int fd);
   int fs_file_bin_open(std::string fname, int mode);
   int fs_file_bin_rewrite(int fd);
   int fs_file_bin_close(int fd);
@@ -74,12 +98,12 @@ namespace enigma_fs {
   long fs_file_bin_position(int fd);
   long fs_file_bin_seek(int fd, long pos);
   int fs_file_bin_read_byte(int fd);
-  int fs_file_bin_write_byte(int fd, int byte); 
+  int fs_file_bin_write_byte(int fd, int byte);
   int fs_file_text_open_read(std::string fname);
   int fs_file_text_open_write(std::string fname);
   int fs_file_text_open_append(std::string fname);
   long fs_file_text_write_real(int fd, double val);
-  long fs_file_text_write_string(int fd, string str);
+  long fs_file_text_write_string(int fd, std::string str);
   int fs_file_text_writeln(int fd);
   bool fs_file_text_eoln(int fd);
   bool fs_file_text_eof(int fd);
@@ -95,13 +119,13 @@ namespace enigma_fs {
 namespace enigma_user {
 
   using namespace enigma_fs;
-  #define working_directory fs_get_working_directory()
-  #define set_working_directory(x) fs_set_working_directory(x)
-  #define temp_directory fs_get_temp_directory()
-  #define program_directory fs_get_program_directory()
-  #define program_filename fs_get_program_filename()
-  #define program_pathname fs_get_program_pathname()
-  #define get_filedescriptor_pathname(x) fs_get_filedescriptor_pathname(x)
+  #define working_directory fs_directory_get_current_working()
+  #define set_working_directory(x) fs_directory_set_current_working(x)
+  #define temp_directory fs_directory_get_temporary()
+  #define program_directory fs_program_get_directory()
+  #define program_filename fs_program_get_filename()
+  #define program_pathname fs_program_get_pathname()
+  #define file_bin_pathname(x) fs_file_bin_pathname(x)
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
   #define file_exists(x) fs_file_exists(x)
@@ -123,18 +147,24 @@ namespace enigma_user {
   #define environment_set_variable(x, y) fs_environment_set_variable(x, y)
   #define environment_unset_variable(x) fs_environment_unset_variable(x)
   #define environment_expand_variables(str) fs_environment_expand_variables(str)
-  #define file_get_date_accessed_year(x) fs_file_get_date_accessed_year(x)
-  #define file_get_date_accessed_month(x) fs_file_get_date_accessed_month(x)
-  #define file_get_date_accessed_day(x) fs_file_get_date_accessed_day(x)
-  #define file_get_date_accessed_hour(x) fs_file_get_date_accessed_hour(x)
-  #define file_get_date_accessed_minute(x) fs_file_get_date_accessed_minute(x)
-  #define file_get_date_accessed_second(x) fs_file_get_date_accessed_second(x)
-  #define file_get_date_modified_year(x) fs_file_get_date_modified_year(x)
-  #define file_get_date_modified_month(x) fs_file_get_date_modified_month(x)
-  #define file_get_date_modified_day(x) fs_file_get_date_modified_day(x)
-  #define file_get_date_modified_hour(x) fs_file_get_date_modified_hour(x)
-  #define file_get_date_modified_minute(x) fs_file_get_date_modified_minute(x)
-  #define file_get_date_modified_second(x) fs_file_get_date_modified_second(x)
+  #define file_bin_datetime_accessed_year(x) fs_file_bin_datetime_accessed_year(x)
+  #define file_bin_datetime_accessed_month(x) fs_file_bin_datetime_accessed_month(x)
+  #define file_bin_datetime_accessed_day(x) fs_file_bin_datetime_accessed_day(x)
+  #define file_bin_datetime_accessed_hour(x) fs_file_bin_datetime_accessed_hour(x)
+  #define file_bin_datetime_accessed_minute(x) fs_file_bin_datetime_accessed_minute(x)
+  #define file_bin_datetime_accessed_second(x) fs_file_bin_datetime_accessed_second(x)
+  #define file_bin_datetime_modified_year(x) fs_file_bin_datetime_modified_year(x)
+  #define file_bin_datetime_modified_month(x) fs_file_bin_datetime_modified_month(x)
+  #define file_bin_datetime_modified_day(x) fs_file_bin_datetime_modified_day(x)
+  #define file_bin_datetime_modified_hour(x) fs_file_bin_datetime_modified_hour(x)
+  #define file_bin_datetime_modified_minute(x) fs_file_bin_datetime_modified_minute(x)
+  #define file_bin_datetime_modified_second(x) fs_file_bin_datetime_modified_second(x)
+  #define file_bin_datetime_created_year(x) fs_file_bin_datetime_created_year(x)
+  #define file_bin_datetime_created_month(x) fs_file_bin_datetime_created_month(x)
+  #define file_bin_datetime_created_day(x) fs_file_bin_datetime_created_day(x)
+  #define file_bin_datetime_created_hour(x) fs_file_bin_datetime_created_hour(x)
+  #define file_bin_datetime_created_minute(x) fs_file_bin_datetime_created_minute(x)
+  #define file_bin_datetime_created_second(x) fs_file_bin_datetime_created_second(x)
   #define file_bin_open(x, y) fs_file_bin_open(x, y)
   #define file_bin_rewrite(x) fs_file_bin_rewrite(x)
   #define file_bin_close(x) fs_file_bin_close(x)
