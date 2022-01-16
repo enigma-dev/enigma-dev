@@ -319,7 +319,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
             vec.push_back(proc_info[i].kp_pid);
           }
         }
-        free(proc_info);
+        kvm_close(kd);
       }
       return vec;
     }
@@ -335,7 +335,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
             vec.push_back(proc_info[i].p_pid);
           }
         }
-        free(proc_info);
+        kvm_close(kd);
       }
       return vec;
     }
