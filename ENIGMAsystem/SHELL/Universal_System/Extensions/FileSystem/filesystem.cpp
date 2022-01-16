@@ -87,7 +87,7 @@ struct filearg {
   TAILQ_HEAD(fuserhead, fuser) fusers;
 };
 
-static SLIST_HEAD(fileargs, filearg);
+SLIST_HEAD(fileargs, filearg);
 static struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
 static int fsflg = 0, cflg = 0, fuser = 0;
 
@@ -488,7 +488,8 @@ namespace ngs::fs {
           break;
         }
       }
-      kvm_close(kif);   
+      free(kif);
+      kvm_close(kd);
     }
     #endif
     return path;
