@@ -87,9 +87,9 @@ struct filearg {
   TAILQ_HEAD(fuserhead, fuser) fusers;
 };
 
-int fsflg = 0, cflg = 0, fuser = 0;
-SLIST_HEAD(fileargs, filearg);
-struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
+static SLIST_HEAD(fileargs, filearg);
+static struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
+static int fsflg = 0, cflg = 0, fuser = 0;
 
 static bool match(struct filearg *fa, struct kinfo_file *kf) {
   if (fa->dev == kf->va_fsid) {
