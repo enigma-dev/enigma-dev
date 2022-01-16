@@ -217,7 +217,7 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; int cntp = 0;
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
   if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
     for (int i = 0; i < cntp; i++) {
       if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 &&
@@ -230,7 +230,7 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   #elif CURRENT_PLATFORM_ID == OS_OPENBSD
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; int cntp = 0;
-  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
   if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
     for (int i = cntp - 1; i >= 0; i--) {
       if (proc_info[i].p_pid >= 0 && proc_info[i].p_ppid >= 0 &&
