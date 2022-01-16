@@ -188,11 +188,11 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   std::vector<pid_t> proc_info(cntp);
   std::fill(proc_info.begin(), proc_info.end(), 0);
   proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(pid_t) * cntp);
-  for (int j = cntp; j > 0; j--) {
-    if (proc_info[j] == 0) { continue; }
-    pid_t ppid; PpidFromPid(proc_info[j], &ppid);
+  for (int i = cntp; i > 0; i--) {
+    if (proc_info[i] == 0) { continue; }
+    pid_t ppid; PpidFromPid(proc_info[i], &ppid);
     if (ppid == parentProcId) {
-      vec.push_back(proc_info[j]);
+      vec.push_back(proc_info[i]);
     }
   }
   #elif CURRENT_PLATFORM_ID == OS_LINUX
@@ -206,27 +206,40 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   closeproc(proc);
   #elif CURRENT_PLATFORM_ID == OS_FREEBSD
   int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
-    for (int j = 0; j < cntp; j++) {
-      if (proc_info[j].ki_ppid == parentProcId) {
-        vec.push_back(proc_info[j].ki_pid);
+    for (int i = 0; i < cntp; i++) {
+      if (proc_info[i].ki_ppid == parentProcId) {
+        vec.push_back(proc_info[i].ki_pid);
       }
     }
     free(proc_info);
   }
   #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
   char errbuf[_POSIX2_LINE_MAX];
-  kinfo_proc *proc_info = nullptr; 
-  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
-  if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
-    for (int j = cntp - 1; j >= 0; j--) {
-      if (proc_info[j].p_pid >= 0 && proc_info[j].p_ppid >= 0 && 
-        proc_info[j].p_ppid == parentProcId) {
-        vec.push_back(proc_info[j].p_pid);
+  kinfo_proc *proc_info = nullptr; int cntp = 0;
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
+  if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+    for (int i = 0; i < cntp; i++) {
+      if (proc_info[i].kp_pid >= 0 && proc_info[i].kp_ppid >= 0 &&
+        proc_info[i].kp_ppid == parent_proc_id) {
+        vec.push_back(proc_info[i].kp_pid);
       }
     }
-    free(proc_info);
+    kvm_close(kd);
   }
   #elif CURRENT_PLATFORM_ID == OS_OPENBSD
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; int cntp = 0;
+  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
+  if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
+    for (int i = cntp - 1; i >= 0; i--) {
+      if (proc_info[i].p_pid >= 0 && proc_info[i].p_ppid >= 0 &&
+        proc_info[i].p_ppid == parent_proc_id) {
+        vec.push_back(proc_info[i].p_pid);
+      }
+    }
+    kvm_close(kd);
+  }
   #endif
   return vec;
 }
