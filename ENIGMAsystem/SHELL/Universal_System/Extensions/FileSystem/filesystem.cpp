@@ -141,7 +141,7 @@ static int getfname(char *filename) {
   return false;
 }
 
-static int compare(const FTSENT** one, const FTSENT** two) {
+static int compare(const FTSENT **one, const FTSENT **two) {
   return (strcmp((*one)->fts_name, (*two)->fts_name));
 }
 
