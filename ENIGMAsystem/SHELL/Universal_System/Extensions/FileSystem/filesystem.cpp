@@ -88,7 +88,7 @@ struct filearg {
 };
 
 int fsflg = 0, cflg = 0, fuser = 0;
-static kvm_t *kd = nullptr; SLIST_HEAD(fileargs, filearg);
+SLIST_HEAD(fileargs, filearg);
 struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
 
 static bool match(struct filearg *fa, struct kinfo_file *kf) {
@@ -471,6 +471,7 @@ namespace ngs::fs {
           struct kinfo_file *kif = (struct kinfo_file *)p;
           if (kif->kf_fd == fd) {
             path = kif->kf_path;
+            break;
           }
           p += kif->kf_structsize;
         }
@@ -478,16 +479,16 @@ namespace ngs::fs {
     }
     #elif defined(__OpenBSD__)
     char errbuf[_POSIX2_LINE_MAX];
-    kinfo_file *kif = nullptr; int cntp = 0;
+    static kvm_t *kd = nullptr; kinfo_file *kif = nullptr; int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return "";
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, -1, sizeof(struct kinfo_file), &cntp))) {
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
       for (int i = 0; i < cntp; i++) {
         if (kif[i].fd_fd == fd) {
           path = find(&kif[i]);
           break;
         }
       }
-      free(kif);   
+      kvm_close(kif);   
     }
     #endif
     return path;
