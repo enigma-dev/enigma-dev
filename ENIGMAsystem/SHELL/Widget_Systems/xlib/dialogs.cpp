@@ -177,7 +177,7 @@ static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
 }
 #endif
 
-#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+#if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
 static kvm_t *kd = nullptr;
 #endif
 
