@@ -488,7 +488,6 @@ namespace ngs::fs {
           break;
         }
       }
-      free(kif);
       kvm_close(kd);
     }
     #endif
