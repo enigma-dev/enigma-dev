@@ -51,10 +51,6 @@
 
 using std::string;
 
-#if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
-kvm_t *kd = nullptr;
-#endif
-
 inline char* scopy(string& str)
 {
   char *np = (char*)malloc(str.length()+1);
@@ -308,7 +304,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     }
 #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
-      char errbuf[_POSIX2_LINE_MAX];
+      char errbuf[_POSIX2_LINE_MAX]; static kvm_t *kd = nullptr; 
       vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
       const char *nlistf, *memf; nlistf = memf = "/dev/null";
       kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
@@ -319,14 +315,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
             vec.push_back(proc_info[i].kp_pid);
           }
         }
-        kvm_close(kd);
       }
+      kvm_close(kd);
       return vec;
     }
 #elif CURRENT_PLATFORM_ID == OS_OPENBSD
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
       char errbuf[_POSIX2_LINE_MAX];
-      vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
+      static kvm_t *kd = nullptr; vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
       kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
       if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
         for (int i = cntp - 1; i >= 0; i--) {
@@ -335,8 +331,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
             vec.push_back(proc_info[i].p_pid);
           }
         }
-        kvm_close(kd);
       }
+      kvm_close(kd);
       return vec;
     }
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
@@ -476,7 +472,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         int infd = open("/dev/null", O_RDONLY);
         dup2(infd, STDIN_FILENO);
 
-        // Redirect STDOUT
+        // Redirect STDOUTkvm_t *kd = nullptr;
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
             if (flags != -1)
