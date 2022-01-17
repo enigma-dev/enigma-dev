@@ -177,10 +177,6 @@ static void PpidFromPid(pid_t procId, pid_t *parentProcId) {
 }
 #endif
 
-#if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
-static kvm_t *kd = nullptr;
-#endif
-
 static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   std::vector<pid_t> vec;
   #if CURRENT_PLATFORM_ID == OS_MACOSX
@@ -216,7 +212,7 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
   #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; int cntp = 0;
-  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  static kvm_t *kd = nullptr; const char *nlistf, *memf; nlistf = memf = "/dev/null";
   kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
   if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
     for (int i = 0; i < cntp; i++) {
@@ -225,11 +221,11 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
         vec.push_back(proc_info[i].kp_pid);
       }
     }
-    kvm_close(kd);
   }
+  kvm_close(kd);
   #elif CURRENT_PLATFORM_ID == OS_OPENBSD
   char errbuf[_POSIX2_LINE_MAX];
-  kinfo_proc *proc_info = nullptr; int cntp = 0;
+  static kvm_t *kd = nullptr; kinfo_proc *proc_info = nullptr; int cntp = 0;
   kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
   if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
     for (int i = cntp - 1; i >= 0; i--) {
@@ -238,8 +234,8 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
         vec.push_back(proc_info[i].p_pid);
       }
     }
-    kvm_close(kd);
   }
+  kvm_close(kd);
   #endif
   return vec;
 }
