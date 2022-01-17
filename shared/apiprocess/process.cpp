@@ -428,8 +428,8 @@ namespace ngs::proc {
         }
       }
     #endif
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
     *proc_id = (PROCID *)malloc(sizeof(PROCID) * vec.size());
     if (proc_id) {
@@ -564,8 +564,8 @@ namespace ngs::proc {
         *parent_proc_id = proc_info->p_ppid;
       }
     #endif
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
   }
 
@@ -638,8 +638,8 @@ namespace ngs::proc {
         }
       }
     #endif
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
     *proc_id = (PROCID *)malloc(sizeof(PROCID) * vec.size());
     if (proc_id) {
@@ -990,8 +990,8 @@ namespace ngs::proc {
           cmdline_vec_1.push_back(cmdline[j]); i++;
         }
       }
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
     std::vector<char *> cmdline_vec_2;
     for (int i = 0; i < cmdline_vec_1.size(); i++)
@@ -1115,8 +1115,8 @@ namespace ngs::proc {
           environ_vec_1.push_back(environ[j]); i++;
         }
       }
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
     std::vector<char *> environ_vec_2;
     for (int i = 0; i < environ_vec_1.size(); i++)
