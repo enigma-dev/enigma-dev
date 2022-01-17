@@ -488,8 +488,8 @@ namespace ngs::fs {
           break;
         }
       }
-      kvm_close(kd);
     }
+    kvm_close(kd);
     #endif
     return path;
   }
