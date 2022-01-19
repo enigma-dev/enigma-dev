@@ -95,9 +95,9 @@ namespace ngs::fs {
     struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
     int fsflg = 0, cflg = 0, fuser = 0;
 
-    bool match(struct filearg *fa, struct kinfo_file *kf) {
-      if (fa->dev == kf->va_fsid) {
-        if (fa->ino == kf->va_fileid) {
+    bool match(struct filearg *fa, struct kinfo_file *kif) {
+      if (fa->dev == kif->va_fsid) {
+        if (fa->ino == kif->va_fileid) {
           return true;
         }
       }
