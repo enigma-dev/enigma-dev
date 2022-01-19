@@ -155,7 +155,7 @@ namespace ngs::fs {
       FTSENT *parent = nullptr;
       string result, path; glob_t glob_result;
       memset(&glob_result, 0, sizeof(glob_result)); string pattern = "/*";
-      int return_value = glob(pattern.c_str(), GLOB_TILDE, NULL, &glob_result);
+      int return_value = glob(pattern.c_str(), GLOB_TILDE, nullptr, &glob_result);
       if (return_value) {
         globfree(&glob_result);
       }
@@ -181,11 +181,12 @@ namespace ngs::fs {
                 SLIST_FOREACH(fa, &fileargs, next) {
                   if (match(fa, kif)) {
                     path = fa->name;
-                    break;
+                    goto finish;
                   }
                 }
               }
-            }
+            } 
+            finish:
             fts_close(file_system); 
           }
           delete[] arr;
