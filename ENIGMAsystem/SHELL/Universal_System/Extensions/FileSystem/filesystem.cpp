@@ -53,12 +53,8 @@
 #include <sys/user.h>
 #endif
 #if defined(__OpenBSD__)
-#include <sys/types.h>
-#include <sys/queue.h>
-#include <sys/mount.h>
 #include <glob.h>
 #include <kvm.h>
-#include <fts.h>
 #endif
 #include <unistd.h>
 #endif
@@ -76,122 +72,37 @@ namespace ngs::fs {
   namespace {
 
     #if defined(__OpenBSD__)
-    struct fuser {
-      TAILQ_ENTRY(fuser) tq;
-      uid_t uid;
-      pid_t pid;
-      int flags;
-    };
-
-    struct filearg {
-      SLIST_ENTRY(filearg) next;
-      dev_t dev;
-      ino_t ino;
-      char *name;
-      TAILQ_HEAD(fuserhead, fuser) fusers;
-    };
-
-    SLIST_HEAD(fileargs, filearg);
-    struct fileargs fileargs = SLIST_HEAD_INITIALIZER(fileargs);
-    int fsflg = 0, cflg = 0, fuser = 0;
-
-    bool match(struct filearg *fa, struct kinfo_file *kif) {
-      if (fa->dev == kif->va_fsid) {
-        if (fa->ino == kif->va_fileid) {
+    bool match(string fname, struct kinfo_file *kif) {
+      struct stat info = { 0 }; stat(fname.c_str(), &info);
+      if (info.st_dev == kif->va_fsid) {
+        if ((info.st_ino & 0xffff) == kif->va_fileid) {
           return true;
         }
       }
       return false;
     }
 
-    int getfname(char *filename) {
-      static struct statfs *mntbuf = nullptr;
-      static int nmounts; int i = 0;
-      struct stat sb = { 0 };
-      struct filearg *cur = nullptr;
-      if (stat(filename, &sb)) {
-        return false;
-      }
-      if (fuser && !fsflg && S_ISBLK(sb.st_mode)) {
-        if (mntbuf == nullptr) {
-          nmounts = getmntinfo(&mntbuf, MNT_NOWAIT);
-          if (nmounts != -1) {
-            for (i = 0; i < nmounts; i++) {
-              if (!strcmp(mntbuf[i].f_mntfromname, filename)) {
-                if (stat(mntbuf[i].f_mntonname, &sb) == -1) {
-                  return false;
-                }
-                cflg = 1;
-                break;
-              }
-            }
-          }
-        }
-      }
-      if (!fuser && S_ISSOCK(sb.st_mode)) {
-        char *newname = realpath(filename, nullptr);
-        if (newname != nullptr) filename = newname;
-      }
-      if ((cur = (struct filearg *)calloc(1, sizeof(*cur)))) {
-        if (!S_ISSOCK(sb.st_mode)) {
-          cur->ino = sb.st_ino;
-          cur->dev = sb.st_dev & 0xffff;
-        }
-        cur->name = filename;
-        TAILQ_INIT(&cur->fusers);
-        SLIST_INSERT_HEAD(&fileargs, cur, next);
-        return true;
-      }
-      return false;
-    }
-
-    int compare(const FTSENT **one, const FTSENT **two) {
-      return (strcmp((*one)->fts_name, (*two)->fts_name));
-    }
-
     string find(struct kinfo_file *kif) {
-      FTS *file_system = nullptr;
-      FTSENT *child = nullptr;
-      FTSENT *parent = nullptr;
-      string result, path; glob_t glob_result;
-      memset(&glob_result, 0, sizeof(glob_result)); string pattern = "/*";
-      int return_value = glob(pattern.c_str(), GLOB_TILDE, nullptr, &glob_result);
-      if (return_value) {
-        globfree(&glob_result);
-      }
-      vector<char *> vec; char **arr = nullptr;
-      for (size_t i = 0; i < glob_result.gl_pathc; i++) {
-        if (ngs::fs::directory_exists(glob_result.gl_pathv[i])) {
-          vec.push_back(glob_result.gl_pathv[i]);
+      string path; glob_t globres = { 0 }; int globerr = 0;
+      memset(&globres, 0, sizeof(globres)); string pattern = "/*";
+      for (size_t i = 2; i < PATH_MAX; i += 2) {
+        globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
+        if (globerr) {
+          globfree(&globres);
         }
-      }
-      if (vec.size()) {
-        arr = new char *[vec.size()]();
-        std::copy(vec.begin(), vec.end(), arr);
-        if (arr) {
-          file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, &compare);
-          if (file_system) {
-            while ((parent = fts_read(file_system)) && path.empty()) {
-              child = fts_children(file_system, 0);
-              while (child && child->fts_link) {
-                child = child->fts_link;
-                result = child->fts_path + string(child->fts_name);
-                struct filearg *fa = nullptr; 
-                getfname((char *)result.c_str());
-                SLIST_FOREACH(fa, &fileargs, next) {
-                  if (match(fa, kif)) {
-                    path = fa->name;
-                    goto finish;
-                  }
-                }
-              }
-            } 
-            finish:
-            fts_close(file_system); 
+        for (size_t j = 0; j < globres.gl_pathc; j++) {
+          if (match(globres.gl_pathv[j], kif)) {
+            path = globres.gl_pathv[j];
+            globfree(&globres);
+            goto finish;
           }
-          delete[] arr;
         }
+        if (!globerr) {
+          globfree(&globres);
+        }
+        pattern += "/*";
       }
+      finish:
       return path;
     }
     #endif
