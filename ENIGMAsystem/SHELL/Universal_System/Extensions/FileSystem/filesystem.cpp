@@ -74,10 +74,12 @@ namespace ngs::fs {
 
     #if defined(__OpenBSD__)
     bool match(string fname, struct kinfo_file *kif) {
-      struct stat info = { 0 }; stat(fname.c_str(), &info);
-      if (info.st_dev == kif->va_fsid) {
-        if (info.st_ino == kif->va_fileid) {
-          return true;
+      struct stat info = { 0 }; 
+      if (!stat(fname.c_str(), &info) && !S_ISSOCK(info.st_mode)) {
+        if (info.st_dev == kif->va_fsid) {
+          if (info.st_ino == kif->va_fileid) {
+             return true;
+          }
         }
       }
       return false;
@@ -89,10 +91,11 @@ namespace ngs::fs {
       FTSENT *parent = nullptr;
       string result, path; glob_t globres = { 0 };
       memset(&globres, 0, sizeof(globres)); string pattern = "/*";
-      int globerr = glob(pattern.c_str(), GLOB_TILDE, nullptr, &globres);
+      int globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
       vector<char *> vec; char **arr = nullptr;
       for (size_t i = 0; i < globres.gl_pathc; i++) {
-        if (ngs::fs::directory_exists(globres.gl_pathv[i])) {
+        struct stat info = { 0 }; // GLOB_ONLYDIR is undefined in OpenBSD
+        if (!stat(globres.gl_pathv[i], &info) && S_ISDIR(info.st_mode)) {
           vec.push_back(globres.gl_pathv[i]);
         }
       }
@@ -102,7 +105,7 @@ namespace ngs::fs {
         if (arr) {
           file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
           if (file_system) {
-            while ((parent = fts_read(file_system)) && path.empty()) {
+            while ((parent = fts_read(file_system))) {
               child = fts_children(file_system, 0);
               while (child && child->fts_link) {
                 child = child->fts_link;
