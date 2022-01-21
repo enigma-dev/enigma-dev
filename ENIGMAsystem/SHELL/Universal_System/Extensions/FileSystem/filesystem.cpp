@@ -54,7 +54,6 @@
 #endif
 #if defined(__OpenBSD__)
 #include <glob.h>
-#include <kvm.h>
 #include <fts.h>
 #endif
 #include <unistd.h>
@@ -71,64 +70,6 @@ using std::size_t;
 namespace ngs::fs {
 
   namespace {
-
-    #if defined(__OpenBSD__)
-    bool match(string fname, struct kinfo_file *kif) {
-      struct stat info = { 0 }; 
-      if (!stat(fname.c_str(), &info) && !S_ISSOCK(info.st_mode)) {
-        if (info.st_dev == kif->va_fsid) {
-          if (info.st_ino == kif->va_fileid) {
-             return true;
-          }
-        }
-      }
-      return false;
-    }
-
-    string find(struct kinfo_file *kif) {
-      FTS *file_system = nullptr;
-      FTSENT *child = nullptr;
-      FTSENT *parent = nullptr;
-      string result, path; glob_t globres = { 0 };
-      memset(&globres, 0, sizeof(globres)); string pattern = "/*";
-      int globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
-      vector<char *> vec; char **arr = nullptr;
-      for (size_t i = 0; i < globres.gl_pathc; i++) {
-        struct stat info = { 0 }; // GLOB_ONLYDIR is undefined in OpenBSD
-        if (!stat(globres.gl_pathv[i], &info) && S_ISDIR(info.st_mode)) {
-          vec.push_back(globres.gl_pathv[i]);
-        }
-      }
-      if (vec.size()) {
-        arr = new char *[vec.size()]();
-        std::copy(vec.begin(), vec.end(), arr);
-        if (arr) {
-          file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
-          if (file_system) {
-            while ((parent = fts_read(file_system))) {
-              child = fts_children(file_system, 0);
-              while (child && child->fts_link) {
-                child = child->fts_link;
-                result = child->fts_path + string(child->fts_name);
-                if (match(result, kif)) {
-                  path = result;
-                  fts_close(file_system);
-                  delete[] arr;
-                  globfree(&globres);
-                  goto finish;
-                }
-              }
-            } 
-            fts_close(file_system); 
-          }
-          delete[] arr;
-        }
-      }
-      globfree(&globres);
-      finish:
-      return path;
-    }
-    #endif
 
     void message_pump() {
       #if defined(_WIN32) 
@@ -413,18 +354,52 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char errbuf[_POSIX2_LINE_MAX];
-    static kvm_t *kd = nullptr; kinfo_file *kif = nullptr; int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return "";
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-      for (int i = 0; i < cntp; i++) {
-        if (kif[i].fd_fd == fd) {
-          path = find(&kif[i]);
-          break;
-        }
+    FTS *file_system = nullptr;
+    FTSENT *child = nullptr;
+    FTSENT *parent = nullptr;
+    string result; glob_t globres = { 0 };
+    memset(&globres, 0, sizeof(globres)); string pattern = "/*";
+    int globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
+    vector<char *> vec; char **arr = nullptr;
+    for (size_t i = 0; i < globres.gl_pathc; i++) {
+      struct stat info = { 0 }; // GLOB_ONLYDIR is undefined in OpenBSD
+      if (!stat(globres.gl_pathv[i], &info) && S_ISDIR(info.st_mode)) {
+        vec.push_back(globres.gl_pathv[i]);
       }
     }
-    kvm_close(kd);
+    if (vec.size()) {
+      arr = new char *[vec.size()]();
+      std::copy(vec.begin(), vec.end(), arr);
+      if (arr) {
+        file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
+        if (file_system) {
+          while ((parent = fts_read(file_system))) {
+            child = fts_children(file_system, 0);
+            while (child && child->fts_link) {
+              child = child->fts_link;
+              result = child->fts_path + string(child->fts_name);
+              struct stat info = { 0 }; if (!S_ISSOCK(child->fts_statp->st_mode)) {
+                if (!fstat(fd, &info) && !S_ISSOCK(info.st_mode)) {
+                  if (child->fts_statp->st_dev == info.st_dev) {
+                    if (child->fts_statp->st_ino == info.st_ino) {
+                      path = result;
+                      fts_close(file_system);
+                      delete[] arr;
+                      globfree(&globres);
+                      goto finish;
+                    }
+                  }
+                }
+              }
+            }
+          } 
+          fts_close(file_system); 
+        }
+        delete[] arr;
+      }
+    }
+    globfree(&globres);
+    finish:
     #endif
     return path;
   }
