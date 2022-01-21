@@ -120,8 +120,8 @@ namespace ngs::fs {
           }
           delete[] arr;
         }
-        globfree(&globres);
       }
+      globfree(&globres);
       finish:
       return path;
     }
