@@ -55,6 +55,7 @@
 #if defined(__OpenBSD__)
 #include <glob.h>
 #include <kvm.h>
+#include <fts.h>
 #endif
 #include <unistd.h>
 #endif
@@ -75,7 +76,7 @@ namespace ngs::fs {
     bool match(string fname, struct kinfo_file *kif) {
       struct stat info = { 0 }; stat(fname.c_str(), &info);
       if (info.st_dev == kif->va_fsid) {
-        if ((info.st_ino & 0xffff) == kif->va_fileid) {
+        if (info.st_ino == kif->va_fileid) {
           return true;
         }
       }
@@ -83,24 +84,43 @@ namespace ngs::fs {
     }
 
     string find(struct kinfo_file *kif) {
-      string path; glob_t globres = { 0 }; int globerr = 0;
+      FTS *file_system = nullptr;
+      FTSENT *child = nullptr;
+      FTSENT *parent = nullptr;
+      string result, path; glob_t globres = { 0 };
       memset(&globres, 0, sizeof(globres)); string pattern = "/*";
-      for (size_t i = 2; i < PATH_MAX; i += 2) {
-        globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
-        if (globerr) {
-          globfree(&globres);
+      int globerr = glob(pattern.c_str(), GLOB_TILDE, nullptr, &globres);
+      vector<char *> vec; char **arr = nullptr;
+      for (size_t i = 0; i < globres.gl_pathc; i++) {
+        if (ngs::fs::directory_exists(globres.gl_pathv[i])) {
+          vec.push_back(globres.gl_pathv[i]);
         }
-        for (size_t j = 0; j < globres.gl_pathc; j++) {
-          if (match(globres.gl_pathv[j], kif)) {
-            path = globres.gl_pathv[j];
-            globfree(&globres);
-            goto finish;
+      }
+      if (vec.size()) {
+        arr = new char *[vec.size()]();
+        std::copy(vec.begin(), vec.end(), arr);
+        if (arr) {
+          file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
+          if (file_system) {
+            while ((parent = fts_read(file_system)) && path.empty()) {
+              child = fts_children(file_system, 0);
+              while (child && child->fts_link) {
+                child = child->fts_link;
+                result = child->fts_path + string(child->fts_name);
+                if (match(result, kif)) {
+                  path = result;
+                  fts_close(file_system);
+                  delete[] arr;
+                  globfree(&globres);
+                  goto finish;
+                }
+              }
+            } 
+            fts_close(file_system); 
           }
+          delete[] arr;
         }
-        if (!globerr) {
-          globfree(&globres);
-        }
-        pattern += "/*";
+        globfree(&globres);
       }
       finish:
       return path;
