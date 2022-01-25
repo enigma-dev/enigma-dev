@@ -290,7 +290,7 @@ namespace ngs::fs {
     path = buffer ? buffer : "";
     free(buffer);
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
-    size_t length;
+    size_t length = 0;
     // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(-1)
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
@@ -301,8 +301,8 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char **buffer = nullptr; size_t length; 
-    int mib[4] { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    char **buffer = nullptr; size_t length = 0; 
+    int mib[4] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
       if ((buffer = (char **)malloc(length))) {
         if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
