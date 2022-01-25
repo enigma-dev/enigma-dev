@@ -338,7 +338,7 @@ namespace ngs::fs {
     path = buffer ? buffer : "";
     free(buffer);
     #elif defined(__FreeBSD__)
-    size_t length;
+    size_t length = 0;
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
       path.resize(length * 2, '\0'); char *buffer = path.data();
