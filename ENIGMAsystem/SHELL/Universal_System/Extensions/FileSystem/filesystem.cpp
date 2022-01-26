@@ -53,7 +53,6 @@
 #include <sys/user.h>
 #endif
 #if defined(__OpenBSD__)
-#include <glob.h>
 #include <fts.h>
 #endif
 #include <unistd.h>
@@ -354,52 +353,29 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    FTS *file_system = nullptr;
-    FTSENT *child = nullptr;
-    FTSENT *parent = nullptr;
-    string result; glob_t globres = { 0 };
-    memset(&globres, 0, sizeof(globres)); string pattern = "/*";
-    int globerr = glob(pattern.c_str(), GLOB_TILDE | GLOB_NOSORT, nullptr, &globres);
-    vector<char *> vec; char **arr = nullptr;
-    for (size_t i = 0; i < globres.gl_pathc; i++) {
-      struct stat info = { 0 }; // GLOB_ONLYDIR is undefined in OpenBSD
-      if (!stat(globres.gl_pathv[i], &info) && S_ISDIR(info.st_mode)) {
-        vec.push_back(globres.gl_pathv[i]);
-      }
-    }
-    if (vec.size()) {
-      arr = new char *[vec.size()]();
-      std::copy(vec.begin(), vec.end(), arr);
-      if (arr) {
-        file_system = fts_open(arr, FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
-        if (file_system) {
-          while ((parent = fts_read(file_system))) {
-            child = fts_children(file_system, 0);
-            while (child && child->fts_link) {
-              child = child->fts_link;
-              result = child->fts_path + string(child->fts_name);
-              struct stat info = { 0 }; if (!S_ISSOCK(child->fts_statp->st_mode)) {
-                if (!fstat(fd, &info) && !S_ISSOCK(info.st_mode)) {
-                  if (child->fts_statp->st_dev == info.st_dev) {
-                    if (child->fts_statp->st_ino == info.st_ino) {
-                      path = result;
-                      fts_close(file_system);
-                      delete[] arr;
-                      globfree(&globres);
-                      goto finish;
-                    }
-                  }
+    FTS *file_system = nullptr; FTSENT *child = nullptr; FTSENT *parent = nullptr;
+    vector<char *> root; char buffer[2]; strcpy(buffer, "/"); root.push_back(buffer);
+    file_system = fts_open(&root[0], FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
+    if (file_system) {
+      while ((parent = fts_read(file_system))) {
+        child = fts_children(file_system, 0);
+        while (child && child->fts_link) {
+          child = child->fts_link; struct stat info = { 0 }; 
+          if (!S_ISSOCK(child->fts_statp->st_mode)) {
+            if (!fstat(fd, &info) && !S_ISSOCK(info.st_mode)) {
+              if (child->fts_statp->st_dev == info.st_dev) {
+                if (child->fts_statp->st_ino == info.st_ino) {
+                  path = child->fts_path + string(child->fts_name);
+                  goto finish;
                 }
               }
             }
-          } 
-          fts_close(file_system); 
+          }
         }
-        delete[] arr;
       }
+      finish: 
+      fts_close(file_system); 
     }
-    globfree(&globres);
-    finish:
     #endif
     return path;
   }
