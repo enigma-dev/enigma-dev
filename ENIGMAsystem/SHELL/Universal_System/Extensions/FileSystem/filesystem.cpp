@@ -285,8 +285,11 @@ namespace ngs::fs {
       path = string(buffer) + "\0";
     }
     #elif defined(__linux__)
-    char *buffer = realpath("/proc/self/exe", nullptr);
-    path = buffer ? buffer : "";
+    char *buffer = nullptr;
+    if ((buffer = realpath("/proc/self/exe", nullptr))) {
+      path = buffer;
+      free(buffer);
+    }
     free(buffer);
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
     size_t length = 0;
@@ -317,7 +320,7 @@ namespace ngs::fs {
   string file_bin_pathname(int fd) {
     string path;
     #if defined(_WIN32)
-    DWORD length; HANDLE file = (HANDLE)_get_osfhandle(fd);
+    DWORD length = 0; HANDLE file = (HANDLE)_get_osfhandle(fd);
     if ((length = GetFinalPathNameByHandleW(file, nullptr, 0, VOLUME_NAME_DOS))) {
       wstring wpath; wpath.resize(length, '\0'); wchar_t *buffer = wpath.data();
       if ((length = GetFinalPathNameByHandleW(file, buffer, length, VOLUME_NAME_DOS))) {
@@ -333,23 +336,27 @@ namespace ngs::fs {
       path = buffer;
     }
     #elif defined(__linux__)
-    char *buffer = realpath(("/proc/self/fd/" + std::to_string(fd)).c_str(), nullptr);
-    path = buffer ? buffer : "";
-    free(buffer);
+    char *buffer = nullptr;
+    if ((buffer = realpath(("/proc/self/fd/" + std::to_string(fd)).c_str(), nullptr))) {
+      path = buffer;
+      free(buffer);
+    }
     #elif defined(__FreeBSD__)
-    size_t length = 0;
+    char *buffer = nullptr; size_t length = 0;
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      path.resize(length * 2, '\0'); char *buffer = path.data();
-      if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-        for (char *p = buffer; p < buffer + length;) {
-          struct kinfo_file *kif = (struct kinfo_file *)p;
-          if (kif->kf_fd == fd) {
-            path = kif->kf_path;
-            break;
+      if ((buffer = (char *)malloc(length * 2))) {
+        if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
+          for (char *p = buffer; p < buffer + length;) {
+            struct kinfo_file *kif = (struct kinfo_file *)p;
+            if (kif->kf_fd == fd) {
+              path = kif->kf_path;
+              break;
+            }
+            p += kif->kf_structsize;
           }
-          p += kif->kf_structsize;
         }
+        free(buffer);
       }
     }
     #elif defined(__OpenBSD__)
