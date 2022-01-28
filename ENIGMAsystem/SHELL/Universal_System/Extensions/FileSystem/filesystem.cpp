@@ -255,20 +255,20 @@ namespace ngs::fs {
 
   string directory_get_current_working() {
     std::error_code ec;
-    string result = filename_add_slash(std::filesystem::current_path(ec).u8string());
+    string result = filename_add_slash(ghc::filesystem::current_path(ec).string());
     return (ec.value() == 0) ? result : "";
   }
 
   bool directory_set_current_working(string dname) {
     std::error_code ec;
-    const std::filesystem::path path = std::filesystem::u8path(dname);
-    std::filesystem::current_path(path, ec);
+    const ghc::filesystem::path path = ghc::filesystem::path(dname);
+    ghc::filesystem::current_path(path, ec);
     return (ec.value() == 0);
   }
 
   string directory_get_temporary_path() {
     std::error_code ec;
-    string result = filename_add_slash(std::filesystem::temp_directory_path(ec).u8string());
+    string result = filename_add_slash(ghc::filesystem::temp_directory_path(ec).string());
     return (ec.value() == 0) ? result : "";
   }
 
@@ -443,25 +443,25 @@ namespace ngs::fs {
   bool file_exists(string fname) {
     std::error_code ec;
     fname = environment_expand_variables(fname);
-    const std::filesystem::path path = std::filesystem::u8path(fname);
-    return (std::filesystem::exists(path, ec) && ec.value() == 0 && 
-      (!std::filesystem::is_directory(path, ec)) && ec.value() == 0);
+    const ghc::filesystem::path path = ghc::filesystem::path(fname);
+    return (ghc::filesystem::exists(path, ec) && ec.value() == 0 && 
+      (!ghc::filesystem::is_directory(path, ec)) && ec.value() == 0);
   }
 
   bool directory_exists(string dname) {
     std::error_code ec;
     dname = filename_remove_slash(dname, false);
     dname = environment_expand_variables(dname);
-    const std::filesystem::path path = std::filesystem::u8path(dname);
-    return (std::filesystem::exists(path, ec) && ec.value() == 0 && 
-      std::filesystem::is_directory(path, ec) && ec.value() == 0);
+    const ghc::filesystem::path path = ghc::filesystem::path(dname);
+    return (ghc::filesystem::exists(path, ec) && ec.value() == 0 && 
+      ghc::filesystem::is_directory(path, ec) && ec.value() == 0);
   }
 
   string filename_canonical(string fname) {
     std::error_code ec;
     fname = environment_expand_variables(fname);
-    const std::filesystem::path path = std::filesystem::u8path(fname);
-    string result = std::filesystem::weakly_canonical(path, ec).u8string();
+    const ghc::filesystem::path path = ghc::filesystem::path(fname);
+    string result = ghc::filesystem::weakly_canonical(path, ec).string();
     if (ec.value() == 0 && directory_exists(result)) {
       return filename_add_slash(result);
     }
@@ -482,8 +482,8 @@ namespace ngs::fs {
     std::error_code ec;
     if (!file_exists(fname)) return 0;
     fname = environment_expand_variables(fname);
-    const std::filesystem::path path = std::filesystem::u8path(fname);
-    std::uintmax_t result = std::filesystem::file_size(path, ec);
+    const ghc::filesystem::path path = ghc::filesystem::path(fname);
+    std::uintmax_t result = ghc::filesystem::file_size(path, ec);
     return (ec.value() == 0) ? result : 0;
   }
 
@@ -491,15 +491,15 @@ namespace ngs::fs {
     std::error_code ec;
     if (!file_exists(fname)) return false;
     fname = environment_expand_variables(fname);
-    const std::filesystem::path path = std::filesystem::u8path(fname);
-    return (std::filesystem::remove(path, ec) && ec.value() == 0);
+    const ghc::filesystem::path path = ghc::filesystem::path(fname);
+    return (ghc::filesystem::remove(path, ec) && ec.value() == 0);
   }
 
   bool directory_create(string dname) {
     std::error_code ec;
     dname = filename_remove_slash(dname, true);
-    const std::filesystem::path path = std::filesystem::u8path(dname);
-    return (std::filesystem::create_directories(path, ec) && ec.value() == 0);
+    const ghc::filesystem::path path = ghc::filesystem::path(dname);
+    return (ghc::filesystem::create_directories(path, ec) && ec.value() == 0);
   }
 
   bool file_rename(string oldname, string newname) {
@@ -509,9 +509,9 @@ namespace ngs::fs {
     newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
-    const std::filesystem::path path1 = std::filesystem::u8path(oldname);
-    const std::filesystem::path path2 = std::filesystem::u8path(newname);
-    std::filesystem::rename(path1, path2, ec);
+    const ghc::filesystem::path path1 = ghc::filesystem::path(oldname);
+    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    ghc::filesystem::rename(path1, path2, ec);
     return (ec.value() == 0);
   }
 
@@ -522,25 +522,25 @@ namespace ngs::fs {
     newname = environment_expand_variables(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
-    const std::filesystem::path path1 = std::filesystem::u8path(fname);
-    const std::filesystem::path path2 = std::filesystem::u8path(newname);
-    std::filesystem::copy(path1, path2, ec);
+    const ghc::filesystem::path path1 = ghc::filesystem::path(fname);
+    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    ghc::filesystem::copy(path1, path2, ec);
     return (ec.value() == 0);
   }
 
   std::uintmax_t directory_size(string dname) {
     std::uintmax_t result = 0;
     if (!directory_exists(dname)) return 0;
-    const std::filesystem::path path = std::filesystem::u8path(filename_remove_slash(dname, true));
-    if (std::filesystem::exists(path)) {
-      std::filesystem::directory_iterator end_itr;
-      for (std::filesystem::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
+    const ghc::filesystem::path path = ghc::filesystem::path(filename_remove_slash(dname, true));
+    if (ghc::filesystem::exists(path)) {
+      ghc::filesystem::directory_iterator end_itr;
+      for (ghc::filesystem::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
         message_pump();
-        std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
-        if (!std::filesystem::is_directory(dir_ite->status())) {
-          result += file_size(file_path.u8string());
+        ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
+        if (!ghc::filesystem::is_directory(dir_ite->status())) {
+          result += file_size(file_path.string());
         } else {
-          result += directory_size(file_path.u8string());
+          result += directory_size(file_path.string());
         }
       }
     }
@@ -551,8 +551,8 @@ namespace ngs::fs {
     std::error_code ec;
     if (!directory_exists(dname)) return false;
     dname = filename_remove_slash(dname, true);
-    const std::filesystem::path path = std::filesystem::u8path(dname);
-    return (std::filesystem::remove_all(path, ec) && ec.value() == 0);
+    const ghc::filesystem::path path = ghc::filesystem::path(dname);
+    return (ghc::filesystem::remove_all(path, ec) && ec.value() == 0);
   }
 
   bool directory_rename(string oldname, string newname) {
@@ -562,16 +562,16 @@ namespace ngs::fs {
     newname = filename_remove_slash(newname, true);
     if (!directory_exists(newname)) directory_create(filename_path(newname));
     bool result = false;
-    const std::filesystem::path path1 = std::filesystem::u8path(oldname);
-    const std::filesystem::path path2 = std::filesystem::u8path(newname);
-    const std::filesystem::path path3 = std::filesystem::u8path(
-    filename_add_slash(path2.u8string(), true).substr(0, 
-    filename_add_slash(path1.u8string(), true).length()));
+    const ghc::filesystem::path path1 = ghc::filesystem::path(oldname);
+    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    const ghc::filesystem::path path3 = ghc::filesystem::path(
+    filename_add_slash(path2.string(), true).substr(0, 
+    filename_add_slash(path1.string(), true).length()));
     if (directory_exists(oldname)) {
-      if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
-        filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
-        path1.u8string() != path3.u8string()) {
-        std::filesystem::rename(path1, path2, ec);
+      if ((filename_name(path1.string()) != filename_name(path2.string()) &&
+        filename_path(path1.string()) == filename_path(path2.string())) ||
+        path1.string() != path3.string()) {
+        ghc::filesystem::rename(path1, path2, ec);
         result = (ec.value() == 0);
       }
     }
@@ -582,17 +582,17 @@ namespace ngs::fs {
     std::error_code ec; vector<string> result_unfiltered;
     if (!directory_exists(dname)) return result_unfiltered;
     dname = filename_remove_slash(dname, true);
-    const std::filesystem::path path = std::filesystem::u8path(dname);
+    const ghc::filesystem::path path = ghc::filesystem::path(dname);
     if (directory_exists(dname)) {
-      std::filesystem::directory_iterator end_itr;
-      for (std::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
+      ghc::filesystem::directory_iterator end_itr;
+      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
         message_pump();
         if (ec.value() != 0) { break; }
-        std::filesystem::path file_path = std::filesystem::u8path(filename_absolute(dir_ite->path().u8string()));
-        if (!std::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
-          result_unfiltered.push_back(file_path.u8string());
+        ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
+        if (!ghc::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
+          result_unfiltered.push_back(file_path.string());
         } else if (ec.value() == 0 && includedirs) {
-          result_unfiltered.push_back(filename_add_slash(file_path.u8string()));
+          result_unfiltered.push_back(filename_add_slash(file_path.string()));
         }
       }
     }
@@ -657,20 +657,20 @@ namespace ngs::fs {
   static inline bool directory_copy_retained(string dname, string newname) {
     std::error_code ec;
     bool result = false;
-    const std::filesystem::path path1 = std::filesystem::u8path(dname);
-    const std::filesystem::path path2 = std::filesystem::u8path(newname);
-    const std::filesystem::path path3 = std::filesystem::u8path(path2.u8string().substr(0, path1.u8string().length()));
+    const ghc::filesystem::path path1 = ghc::filesystem::path(dname);
+    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    const ghc::filesystem::path path3 = ghc::filesystem::path(path2.string().substr(0, path1.string().length()));
     if (retained_string.empty() && retained_length == 0) {
-      retained_length = path1.u8string().length();
-      retained_string = path2.u8string().substr(retained_length);
+      retained_length = path1.string().length();
+      retained_string = path2.string().substr(retained_length);
     }
     if (directory_exists(dname)) {
-      if ((filename_name(path1.u8string()) != filename_name(path2.u8string()) &&
-        filename_path(path1.u8string()) == filename_path(path2.u8string())) ||
-        path1.u8string() != path3.u8string()) {
-        std::filesystem::copy(path1, path2, std::filesystem::copy_options::recursive, ec);
+      if ((filename_name(path1.string()) != filename_name(path2.string()) &&
+        filename_path(path1.string()) == filename_path(path2.string())) ||
+        path1.string() != path3.string()) {
+        ghc::filesystem::copy(path1, path2, ghc::filesystem::copy_options::recursive, ec);
         result = (ec.value() == 0);
-      } else if (path1.u8string() == path3.u8string()) {
+      } else if (path1.string() == path3.string()) {
         vector<string> itemVec = directory_contents(dname, "*.*", true);
         if (!directory_exists(newname)) {
           directory_create(newname);
@@ -678,10 +678,10 @@ namespace ngs::fs {
             message_pump();
             if (directory_exists(filename_remove_slash(item)) && 
               filename_remove_slash(item).substr(retained_length) != retained_string) {
-              directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.u8string()) + 
+              directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.string()) + 
               filename_name(filename_remove_slash(item)));
             } else if (file_exists(item)) {
-              std::filesystem::copy(item, filename_add_slash(path2.u8string()) + filename_name(item), ec);
+              ghc::filesystem::copy(item, filename_add_slash(path2.string()) + filename_name(item), ec);
               // ignore and skip errored copies and copy what is left.
               // uncomment the line below to break if one copy failed.
               // if (ec.value() == 0) { result = true; } else { return false; }
