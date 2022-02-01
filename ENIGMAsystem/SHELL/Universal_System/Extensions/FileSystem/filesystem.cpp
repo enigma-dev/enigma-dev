@@ -2,7 +2,7 @@
 
  MIT License
  
- Copyright © 2020-2021 Samuel Venable
+ Copyright © 2020-2022 Samuel Venable
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+#include <vector>
+#include <random>
 
 #include <climits>
 #include <cstdlib>
@@ -42,8 +44,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #if defined(_WIN32) 
-#include <share.h>
 #include <windows.h>
+#include <share.h>
 #include <io.h>
 #else
 #if defined(__APPLE__) && defined(__MACH__)
@@ -96,21 +98,33 @@ namespace ngs::fs {
         byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
     }
 
-    int file_datetime(std::string fname, int timestamp, int measurement) {
+    vector<string> directory_contents;
+    unsigned directory_contents_index = 0;
+    unsigned directory_contents_order = DC_ATOZ;
+    unsigned directory_contents_cntfiles = 1;
+    unsigned directory_contents_maxfiles = 0;
+
+    time_t file_datetime_helper(string fname, int timestamp) {
       int result = -1;
       #if defined(_WIN32)
-      std::wstring wfname = widen(fname);
+      wstring wfname = widen(fname);
       struct _stat info = { 0 }; 
       result = _wstat(wfname.c_str(), &info);
       #else
       struct stat info = { 0 }; 
       result = stat(fname.c_str(), &info);
       #endif
-      time_t time = 0; 
+      if (result == -1) return 0;
+      time_t time = 0;
       if (timestamp == 0) time = info.st_atime;
       if (timestamp == 1) time = info.st_mtime;
       if (timestamp == 2) time = info.st_ctime;
-      if (result == -1) return result;
+      return time;
+    }
+
+    int file_datetime(string fname, int timestamp, int measurement) {
+      int result = -1;
+      time_t time = file_datetime_helper(fname, timestamp);
       #if defined(_WIN32)
       struct tm timeinfo = { 0 };
       if (localtime_s(&timeinfo, &time)) return -1;
@@ -578,22 +592,35 @@ namespace ngs::fs {
     return result;
   }
 
-  vector<string> directory_contents(string dname, string pattern, bool includedirs) {
-    std::error_code ec; vector<string> result_unfiltered;
-    if (!directory_exists(dname)) return result_unfiltered;
+  unsigned directory_contents_get_cntfiles() {
+    return directory_contents_cntfiles;
+  }
+
+  unsigned directory_contents_get_maxfiles() {
+    return directory_contents_maxfiles;
+  }
+
+  void directory_contents_set_maxfiles(unsigned maxfiles) {
+    directory_contents_maxfiles = maxfiles;
+  }
+
+  static inline vector<string> directory_contents_helper(string dname, string pattern, bool includedirs) {
+    std::error_code ec; vector<string> result;
+    if (!directory_exists(dname)) return result;
     dname = filename_remove_slash(dname, true);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     if (directory_exists(dname)) {
       ghc::filesystem::directory_iterator end_itr;
-      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite++) {
-        message_pump();
-        if (ec.value() != 0) { break; }
+      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr && 
+        (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite++) {
+        message_pump(); if (ec.value() != 0) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
         if (!ghc::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
-          result_unfiltered.push_back(file_path.string());
+          result.push_back(file_path.string());
         } else if (ec.value() == 0 && includedirs) {
-          result_unfiltered.push_back(filename_add_slash(file_path.string()));
+          result.push_back(filename_add_slash(file_path.string()));
         }
+        directory_contents_cntfiles++;
       }
     }
     if (pattern.empty()) pattern = "*.*";
@@ -601,7 +628,7 @@ namespace ngs::fs {
     pattern = string_replace_all(pattern, "*", "");
     vector<string> extVec = string_split(pattern, ';');
     std::set<string> filteredItems;
-    for (const string &item : result_unfiltered) {
+    for (const string &item : result) {
       message_pump();
       for (const string &ext : extVec) {
         message_pump();
@@ -620,34 +647,97 @@ namespace ngs::fs {
     return result_filtered;
   }
 
-  static inline vector<string> directory_contents_recursive_helper(string dname, string pattern) {
-    vector<string> result = directory_contents(dname, pattern, true);
+  static inline vector<string> directory_contents_recursive_helper(string dname, string pattern, bool includedirs) {
+    vector<string> result = directory_contents_helper(dname, pattern, true);
     for (unsigned i = 0; i < result.size(); i++) {
       message_pump();
       if (directory_exists(result[i])) {
-        vector<string> recursive_result = directory_contents_recursive_helper(result[i], pattern);
-        if (recursive_result.size() > 0) {
-          result.insert(result.end(), recursive_result.begin(), recursive_result.end());
+        vector<string> recursive_result = directory_contents_recursive_helper(result[i], pattern, includedirs);
+        for (unsigned j = 0; j < recursive_result.size(); j++) {
+          message_pump();
+          result.insert(result.end(), recursive_result[j]);
         }
       }
     }
-    return result;
-  }
-
-  vector<string> directory_contents_recursive(string dname, string pattern, bool includedirs) {
-    vector<string> result_unfiltered = directory_contents_recursive_helper(dname, pattern);
     vector<string> result_filtered;
-    for (unsigned i = 0; i < result_unfiltered.size(); i++) {
+    for (unsigned i = 0; i < result.size(); i++) {
       message_pump();
-      if (!directory_exists(result_unfiltered[i])) {
-        result_filtered.push_back(result_unfiltered[i]);
+      if (!directory_exists(result[i])) {
+        result_filtered.push_back(result[i]);
       } else if (includedirs) {
-        result_filtered.push_back(result_unfiltered[i]);
+        result_filtered.push_back(result[i]);
       }
     }
     std::set<string> removed_duplicates(result_filtered.begin(), result_filtered.end());
     result_filtered.clear(); result_filtered.assign(removed_duplicates.begin(), removed_duplicates.end());
     return result_filtered;
+  }
+
+  void directory_contents_close() {
+    directory_contents.clear(); 
+    directory_contents_index = 0;
+    directory_contents_cntfiles = 1;
+  }
+
+  unsigned directory_contents_get_order() {
+    return directory_contents_order;
+  }
+
+  void directory_contents_set_order(unsigned order) {
+    directory_contents_order = order;
+  }
+
+  string directory_contents_first(string dname, string pattern, bool includedirs, bool recursive) {
+    directory_contents_close();
+    if (!recursive) directory_contents = directory_contents_helper(dname, pattern, includedirs);
+    else directory_contents = directory_contents_recursive_helper(dname, pattern, includedirs);
+    if (directory_contents_index < directory_contents.size()) {
+      if (directory_contents_order == DC_ZTOA) {
+        std::reverse(directory_contents.begin(), directory_contents.end());
+      } else if (directory_contents_order == DC_AOTON) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 0) < file_datetime_helper(r, 0));
+        });
+      } else if (directory_contents_order == DC_ANTOO) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 0) > file_datetime_helper(r, 0));
+        });
+      } else if (directory_contents_order == DC_MOTON) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 1) < file_datetime_helper(r, 1));
+        });
+      } else if (directory_contents_order == DC_MNTOO) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 1) > file_datetime_helper(r, 1));
+        });
+      } else if (directory_contents_order == DC_COTON) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 2) < file_datetime_helper(r, 2));
+        });
+      } else if (directory_contents_order == DC_CNTOO) {
+        std::sort(directory_contents.begin(), directory_contents.end(),
+        [](const std::string &l, const std::string &r) {
+        return (file_datetime_helper(l, 2) > file_datetime_helper(r, 2));
+        });
+      } else if (directory_contents_order == DC_RAND) {
+        std::random_device rd; std::mt19937 g(rd());
+        std::shuffle(directory_contents.begin(), directory_contents.end(), g);
+      }
+      return directory_contents[directory_contents_index];
+    } 
+    return "";
+  }
+
+  string directory_contents_next() {
+    directory_contents_index++;
+    if (directory_contents_index < directory_contents.size())
+      return directory_contents[directory_contents_index];
+    return "";
   }
 
   static string retained_string = "";
@@ -671,7 +761,10 @@ namespace ngs::fs {
         ghc::filesystem::copy(path1, path2, ghc::filesystem::copy_options::recursive, ec);
         result = (ec.value() == 0);
       } else if (path1.string() == path3.string()) {
-        vector<string> itemVec = directory_contents(dname, "*.*", true);
+        unsigned directory_contents_maxprev = directory_contents_get_maxfiles();
+        directory_contents_set_maxfiles(0);
+        vector<string> itemVec = directory_contents_helper(dname, "*.*", true);
+        directory_contents_set_maxfiles(directory_contents_maxprev);
         if (!directory_exists(newname)) {
           directory_create(newname);
           for (const string &item : itemVec) {

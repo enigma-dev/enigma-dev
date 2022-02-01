@@ -2,7 +2,7 @@
 
  MIT License
  
- Copyright © 2020-2021 Samuel Venable
+ Copyright © 2020-2022 Samuel Venable
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -25,15 +25,26 @@
 */
 
 #include <string>
-#include <vector>
-
-#include <ctime>
-#include <cstddef>
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 namespace ngs::fs {
+
+  // Directory Contents
+  #define DC_ATOZ   0 // Alphabetical Order
+  #define DC_ZTOA   1 // Reverse Alphabetical Order
+  #define DC_AOTON  2 // Date Accessed Ordered Old to New
+  #define DC_ANTOO  3 // Date Accessed Ordered New to Old
+  #define DC_MOTON  4 // Date Modified Ordered Old to New
+  #define DC_MNTOO  5 // Date Modified Ordered New to Old
+  #define DC_COTON  6 // Date Created Ordered Old to New
+  #define DC_CNTOO  7 // Date Created Ordered New to Old
+  #define DC_RAND   8 // Random Order
+
+  // File Descriptors
+  #define FD_RDONLY 0 // Opened as Read-Only
+  #define FD_WRONLY 1 // Opened as Write-Only
+  #define FD_RDWR   2 // Reading and Writing
+  #define FD_APPEND 3 // Opened for Appending
+  #define FD_RDAP   4 // Reading and Appending
 
   std::string directory_get_current_working();
   bool directory_set_current_working(std::string dname);
@@ -55,8 +66,14 @@ namespace ngs::fs {
   bool directory_rename(std::string oldname, std::string newname);
   bool directory_copy(std::string dname, std::string newname);
   std::uintmax_t directory_size(std::string dname);
-  std::vector<std::string> directory_contents(std::string dname, std::string pattern = "*.*", bool includedirs = true);
-  std::vector<std::string> directory_contents_recursive(std::string dname, std::string pattern = "*.*", bool includedirs = true);
+  unsigned directory_contents_get_order();
+  unsigned directory_contents_get_cntfiles();
+  void directory_contents_set_order(unsigned order);
+  unsigned directory_contents_get_maxfiles();
+  void directory_contents_set_maxfiles(unsigned maxfiles);
+  std::string directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive);
+  std::string directory_contents_next();
+  void directory_contents_close();
   std::string environment_get_variable(std::string name);
   bool environment_set_variable(std::string name, std::string value);
   bool environment_unset_variable(std::string name);
@@ -120,5 +137,4 @@ namespace ngs::fs {
   int file_text_open_from_string(std::string str);
   int file_text_close(int fd);
 
- } // namespace ngs::fs
- 
+} // namespace ngs::fs
