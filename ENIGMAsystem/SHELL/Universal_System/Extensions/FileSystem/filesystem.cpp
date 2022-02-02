@@ -304,7 +304,6 @@ namespace ngs::fs {
       path = buffer;
       free(buffer);
     }
-    free(buffer);
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
     size_t length = 0;
     // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(-1)
