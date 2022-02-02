@@ -25,7 +25,6 @@
 */
 
 #include "filesystem.h"
-#include "Universal_System/var4.h"
 
 namespace enigma_fs {
 
@@ -145,14 +144,14 @@ namespace enigma_user {
   #define directory_rename(x, y) fs_directory_rename(x, y)
   #define directory_copy(x, y) fs_directory_copy(x, y)
   #define directory_size(x) fs_directory_size(x)
-  #define directory_contents_get_order fs_directory_contents_get_order();
-  #define directory_contents_set_order(x) fs_directory_contents_set_order(x);
-  #define directory_contents_get_cntfiles fs_directory_contents_get_cntfiles();
-  #define directory_contents_get_maxfiles fs_directory_contents_get_maxfiles();
-  #define directory_contents_set_maxfiles(x) fs_directory_contents_set_maxfiles(x);
-  #define directory_contents_first(w, x, y, z) fs_directory_contents_first(w, x, y, z);
-  #define directory_contents_next fs_directory_contents_next();
-  #define directory_contents_close fs_directory_contents_close(); 
+  #define directory_contents_get_order fs_directory_contents_get_order()
+  #define directory_contents_set_order(x) fs_directory_contents_set_order(x)
+  #define directory_contents_get_cntfiles fs_directory_contents_get_cntfiles()
+  #define directory_contents_get_maxfiles fs_directory_contents_get_maxfiles()
+  #define directory_contents_set_maxfiles(x) fs_directory_contents_set_maxfiles(x)
+  #define directory_contents_first(w, x, y, z) fs_directory_contents_first(w, x, y, z)
+  #define directory_contents_next fs_directory_contents_next()
+  #define directory_contents_close fs_directory_contents_close() 
   #define environment_get_variable(x) fs_environment_get_variable(x)
   #define environment_set_variable(x, y) fs_environment_set_variable(x, y)
   #define environment_unset_variable(x) fs_environment_unset_variable(x)

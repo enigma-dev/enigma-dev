@@ -543,15 +543,16 @@ namespace ngs::fs {
   }
 
   std::uintmax_t directory_size(string dname) {
+    std::error_code ec;
     std::uintmax_t result = 0;
     if (!directory_exists(dname)) return 0;
     const ghc::filesystem::path path = ghc::filesystem::path(filename_remove_slash(dname, true));
-    if (ghc::filesystem::exists(path)) {
+    if (ghc::filesystem::exists(path, ec)) {
       ghc::filesystem::directory_iterator end_itr;
-      for (ghc::filesystem::directory_iterator dir_ite(path); dir_ite != end_itr; dir_ite++) {
-        message_pump();
+      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
+        message_pump(); if (ec.value() != 0) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
-        if (!ghc::filesystem::is_directory(dir_ite->status())) {
+        if (!directory_exists(file_path.string())) {
           result += file_size(file_path.string());
         } else {
           result += directory_size(file_path.string());
@@ -612,7 +613,7 @@ namespace ngs::fs {
     if (directory_exists(dname)) {
       ghc::filesystem::directory_iterator end_itr;
       for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr && 
-        (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite++) {
+        (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite.increment(ec)) {
         message_pump(); if (ec.value() != 0) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
         if (!ghc::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
