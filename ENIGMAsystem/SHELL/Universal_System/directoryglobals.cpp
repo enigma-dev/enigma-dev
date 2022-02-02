@@ -6,9 +6,9 @@ namespace enigma_user {
 
 std::string get_working_directory() { 
   #if defined(_WIN32)
-  return ::ngs::proc::directory_get_current_working() + std::string("\\");
+  return ::ngs::proc::directory_get_current_working();
   #else
-  return ::ngs::proc::directory_get_current_working() + std::string("/");
+  return ::ngs::proc::directory_get_current_working();
   #endif
 }
 
