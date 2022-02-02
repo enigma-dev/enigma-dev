@@ -111,16 +111,36 @@ namespace enigma_fs {
     return filesystem::directory_size(dname);
   }
  
-  var fs_directory_contents(std::string dname, std::string pattern = "*.*", bool includedirs = true) {
-    var resVar; std::vector<std::string> resVec = filesystem::directory_contents(dname, pattern, includedirs);
-    for (unsigned i = 0; i < resVec.size(); i++) resVar[i] = resVec[i];
-    return resVar;
+  unsigned fs_directory_contents_get_order() {
+    return filesystem::directory_contents_get_order();
   }
 
-  var fs_directory_contents_recursive(std::string dname, std::string pattern = "*.*", bool includedirs = true) {
-    var resVar; std::vector<std::string> resVec = filesystem::directory_contents_recursive(dname, pattern, includedirs);
-    for (unsigned i = 0; i < resVec.size(); i++) resVar[i] = resVec[i];
-    return resVar;
+  void fs_directory_contents_set_order(unsigned order) {
+    filesystem::directory_contents_set_order(order);
+  }
+
+  unsigned fs_directory_contents_get_cntfiles() {
+    return filesystem::directory_contents_get_cntfiles();
+  }
+
+  unsigned fs_directory_contents_get_maxfiles() {
+    return filesystem::directory_contents_get_maxfiles();
+  }
+
+  void fs_directory_contents_set_maxfiles(unsigned maxfiles) {
+    filesystem::directory_contents_set_maxfiles(maxfiles);
+  }
+
+  std::string fs_directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive) {
+    return filesystem::directory_contents_first(dname, pattern, includedirs, recursive);
+  }
+
+  std::string fs_directory_contents_next() {
+    return filesystem::directory_contents_next();
+  }
+ 
+  void fs_directory_contents_close() {
+    return filesystem::directory_contents_close();
   }
  
   std::string fs_environment_get_variable(std::string name) {
