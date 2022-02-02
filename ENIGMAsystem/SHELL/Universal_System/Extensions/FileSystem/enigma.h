@@ -125,12 +125,12 @@ namespace enigma_fs {
 namespace enigma_user {
 
   using namespace enigma_fs;
-  #define working_directory fs_directory_get_current_working()
-  #define set_working_directory(x) fs_directory_set_current_working(x)
-  #define temp_directory fs_directory_get_temporary()
-  #define program_directory fs_executable_get_directory()
-  #define program_filename fs_executable_get_filename()
-  #define program_pathname fs_executable_get_pathname()
+  #define directory_get_current_working fs_directory_get_current_working()
+  #define directory_set_current_working(x) fs_directory_set_current_working(x)
+  #define directory_get_temporary_path fs_directory_get_temporary_path()
+  #define executable_get_directory fs_executable_get_directory()
+  #define executable_get_filename fs_executable_get_filename()
+  #define executable_get_pathname fs_executable_get_pathname()
   #define file_bin_pathname(x) fs_file_bin_pathname(x)
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
