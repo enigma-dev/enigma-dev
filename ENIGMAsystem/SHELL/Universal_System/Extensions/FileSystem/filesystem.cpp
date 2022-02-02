@@ -248,7 +248,7 @@ namespace ngs::fs {
         message_pump(); dname.pop_back();
       }
       #else
-      while (dname.back() == '/') {
+      while (dname.back() == '/' && (!dname.empty() && dname[0] != '/' && dname.length() != 1)) {
         dname.pop_back();
       }
       #endif
