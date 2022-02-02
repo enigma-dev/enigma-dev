@@ -49,8 +49,14 @@ namespace enigma_fs {
   bool fs_directory_rename(std::string oldname, std::string newname);
   bool fs_directory_copy(std::string dname, std::string newname);
   std::uintmax_t fs_directory_size(std::string dname);
-  var fs_directory_contents(std::string dname, std::string pattern = "*.*", bool includedirs = true);
-  var fs_directory_contents_recursive(std::string dname, std::string pattern = "*.*", bool includedirs = true);
+  unsigned fs_directory_contents_get_order();
+  unsigned fs_directory_contents_get_cntfiles();
+  void fs_directory_contents_set_order(unsigned order);
+  unsigned fs_directory_contents_get_maxfiles();
+  void fs_directory_contents_set_maxfiles(unsigned maxfiles);
+  std::string fs_directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive);
+  std::string fs_directory_contents_next();
+  void fs_directory_contents_close();
   std::string fs_environment_get_variable(std::string name);
   bool fs_environment_set_variable(std::string name, std::string value);
   bool fs_environment_unset_variable(std::string name);
@@ -139,10 +145,14 @@ namespace enigma_user {
   #define directory_rename(x, y) fs_directory_rename(x, y)
   #define directory_copy(x, y) fs_directory_copy(x, y)
   #define directory_size(x) fs_directory_size(x)
-  #define directory_contents(x) fs_directory_contents(x)
-  #define directory_contents_ext(x, y, z) fs_directory_contents_ext(x, y, z)
-  #define directory_contents_recursive(x) fs_directory_contents_recursive(x)
-  #define directory_contents_recursive_ext(x, y, z) fs_directory_contents_recursive_ext(x, y, z)
+  #define directory_contents_get_order fs_directory_contents_get_order();
+  #define directory_contents_get_cntfiles fs_directory_contents_get_cntfiles();
+  #define directory_contents_set_order(x) fs_directory_contents_set_order(x);
+  #define directory_contents_get_maxfiles fs_directory_contents_get_maxfiles();
+  #define directory_contents_set_maxfiles(x) fs_directory_contents_set_maxfiles(x);
+  #define directory_contents_first(w, x, y, z) fs_directory_contents_first(w, x, y, z);
+  #define directory_contents_next fs_directory_contents_next();
+  #define directory_contents_close fs_directory_contents_close(); 
   #define environment_get_variable(x) fs_environment_get_variable(x)
   #define environment_set_variable(x, y) fs_environment_set_variable(x, y)
   #define environment_unset_variable(x) fs_environment_unset_variable(x)
