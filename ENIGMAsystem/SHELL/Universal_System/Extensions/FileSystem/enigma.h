@@ -50,8 +50,8 @@ namespace enigma_fs {
   bool fs_directory_copy(std::string dname, std::string newname);
   std::uintmax_t fs_directory_size(std::string dname);
   unsigned fs_directory_contents_get_order();
-  unsigned fs_directory_contents_get_cntfiles();
   void fs_directory_contents_set_order(unsigned order);
+  unsigned fs_directory_contents_get_cntfiles();
   unsigned fs_directory_contents_get_maxfiles();
   void fs_directory_contents_set_maxfiles(unsigned maxfiles);
   std::string fs_directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive);
@@ -146,8 +146,8 @@ namespace enigma_user {
   #define directory_copy(x, y) fs_directory_copy(x, y)
   #define directory_size(x) fs_directory_size(x)
   #define directory_contents_get_order fs_directory_contents_get_order();
-  #define directory_contents_get_cntfiles fs_directory_contents_get_cntfiles();
   #define directory_contents_set_order(x) fs_directory_contents_set_order(x);
+  #define directory_contents_get_cntfiles fs_directory_contents_get_cntfiles();
   #define directory_contents_get_maxfiles fs_directory_contents_get_maxfiles();
   #define directory_contents_set_maxfiles(x) fs_directory_contents_set_maxfiles(x);
   #define directory_contents_first(w, x, y, z) fs_directory_contents_first(w, x, y, z);
