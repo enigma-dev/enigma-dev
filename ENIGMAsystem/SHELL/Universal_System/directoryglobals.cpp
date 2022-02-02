@@ -5,10 +5,11 @@
 namespace enigma_user {
 
 std::string get_working_directory() { 
+  std::string result = ::ngs::proc::directory_get_current_working();
   #if defined(_WIN32)
-  return ::ngs::proc::directory_get_current_working();
+  return (!result.empty() && result.back() != '\\') ? result + "\\" : result;
   #else
-  return ::ngs::proc::directory_get_current_working();
+  return (!result.empty() && result.back() != '/') ? result + "/" : result;
   #endif
 }
 
