@@ -430,6 +430,7 @@ namespace ngs::fs {
         }
       }
     }
+    kvm_close(kd);
     #endif
     return path;
   }
