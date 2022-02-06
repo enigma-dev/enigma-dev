@@ -55,7 +55,8 @@
 #include <sys/user.h>
 #endif
 #if defined(__OpenBSD__)
-#include <fts.h>
+#include <pthread.h>
+#include <kvm.h>
 #endif
 #include <unistd.h>
 #endif
@@ -265,6 +266,44 @@ namespace ngs::fs {
       return dname;
     }
 
+    #if defined(__OpenBSD__)
+    struct dir_ite_struct {
+      vector<string> vec;
+      unsigned index;
+      ino_t ino;
+      dev_t dev;
+    };
+
+    string thread_result;
+    void *directory_iterator_thread(void *p) {
+      if (!thread_result.empty()) return nullptr; std::error_code ec;
+      struct dir_ite_struct *s = (struct dir_ite_struct *)p; pthread_t thr;
+      if (!directory_exists(s->vec[s->index])) return nullptr;
+      s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
+      const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
+      if (directory_exists(s->vec[s->index])) {
+        ghc::filesystem::directory_iterator end_itr;
+        for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
+          if (ec.value() != 0) { break; } struct stat info = { 0 }; 
+          ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
+          if (ghc::filesystem::exists(file_path, ec) && ec.value() == 0 && !stat(file_path.string().c_str(), &info)) {
+            if (info.st_ino == s->ino && info.st_dev == s->dev) {
+              s->vec.clear(); thread_result = file_path.string();
+              return nullptr;
+            }
+            if (directory_exists(file_path.string())) {
+              s->vec.push_back(file_path.string());sort(s->vec.begin(), s->vec.end() );
+              s->vec.erase(unique(s->vec.begin(), s->vec.end() ), s->vec.end());
+              s->index++; pthread_create(&thr, nullptr, directory_iterator_thread, (void *)s);
+              pthread_join(thr, nullptr);
+            }
+          }
+        }
+      }
+      return nullptr;
+    }
+    #endif
+
   } // anonymous namespace
 
   string directory_get_current_working() {
@@ -373,28 +412,23 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    FTS *file_system = nullptr; FTSENT *child = nullptr; FTSENT *parent = nullptr;
-    vector<char *> root; char buffer[2]; strcpy(buffer, "/"); root.push_back(buffer);
-    file_system = fts_open(&root[0], FTS_COMFOLLOW | FTS_NOCHDIR, nullptr);
-    if (file_system) {
-      while ((parent = fts_read(file_system))) {
-        child = fts_children(file_system, 0);
-        while (child && child->fts_link) {
-          child = child->fts_link; struct stat info = { 0 }; 
-          if (!S_ISSOCK(child->fts_statp->st_mode)) {
-            if (!fstat(fd, &info) && !S_ISSOCK(info.st_mode)) {
-              if (child->fts_statp->st_dev == info.st_dev) {
-                if (child->fts_statp->st_ino == info.st_ino) {
-                  path = child->fts_path + string(child->fts_name);
-                  goto finish;
-                }
-              }
-            }
-          }
+    char errbuf[_POSIX2_LINE_MAX];
+    static kvm_t *kd = nullptr; kinfo_file *kif = nullptr; int cntp = 0;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return "";
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+      for (int i = 0; i < cntp; i++) {
+        if (kif[i].fd_fd == fd) {
+          pthread_t t; vector<string> in; in.push_back("/");
+          in.push_back(environment_get_variable("HOME"));
+          in.push_back(directory_get_temporary_path());
+          vector<string> epath = string_split(environment_get_variable("PATH"), ':');
+          in.insert(in.end(), epath.begin(), epath.end()); thread_result.clear();
+          struct dir_ite_struct new_struct; new_struct.vec = in; new_struct.index = 0;
+          new_struct.ino = kif[i].va_fileid; new_struct.dev = kif[i].va_fsid;
+          pthread_create(&t, nullptr, directory_iterator_thread, (void *)&new_struct);
+          pthread_join(t, nullptr); path = thread_result; break;
         }
       }
-      finish: 
-      fts_close(file_system); 
     }
     #endif
     return path;
@@ -615,7 +649,7 @@ namespace ngs::fs {
         (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite.increment(ec)) {
         message_pump(); if (ec.value() != 0) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
-        if (!ghc::filesystem::is_directory(dir_ite->status(ec)) && ec.value() == 0) {
+        if (!directory_exists(file_path.string())) {
           result.push_back(file_path.string());
         } else if (ec.value() == 0 && includedirs) {
           result.push_back(filename_add_slash(file_path.string()));
