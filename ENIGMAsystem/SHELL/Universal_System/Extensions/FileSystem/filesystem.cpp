@@ -292,7 +292,7 @@ namespace ngs::fs {
               return nullptr;
             }
             if (directory_exists(file_path.string())) {
-              s->vec.push_back(file_path.string());sort(s->vec.begin(), s->vec.end() );
+              s->vec.push_back(file_path.string()); sort(s->vec.begin(), s->vec.end() );
               s->vec.erase(unique(s->vec.begin(), s->vec.end() ), s->vec.end());
               s->index++; pthread_create(&thr, nullptr, directory_iterator_thread, (void *)s);
               pthread_join(thr, nullptr);
