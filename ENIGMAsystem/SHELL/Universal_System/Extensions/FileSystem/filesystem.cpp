@@ -42,7 +42,9 @@
 #include "filesystem.hpp"
 
 #include <fcntl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <pthread.h>
 #if defined(_WIN32) 
 #include <windows.h>
 #include <share.h>
@@ -53,10 +55,6 @@
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
 #include <sys/user.h>
-#endif
-#if defined(__OpenBSD__)
-#include <pthread.h>
-#include <kvm.h>
 #endif
 #include <unistd.h>
 #endif
@@ -266,30 +264,44 @@ namespace ngs::fs {
       return dname;
     }
 
-    #if defined(__OpenBSD__)
     struct dir_ite_struct {
       vector<string> vec;
       unsigned index;
+      unsigned nlink;
+      #if defined(_WIN32)
+      _ino_t ino;
+      _dev_t dev;
+      #else
       ino_t ino;
       dev_t dev;
+      #endif
     };
 
-    string thread_result;
+    vector<string> thread_result;
     void *directory_iterator_thread(void *p) {
-      if (!thread_result.empty()) return nullptr; std::error_code ec;
       struct dir_ite_struct *s = (struct dir_ite_struct *)p; pthread_t thr;
+      if (thread_result.size() >= s->nlink) return nullptr; std::error_code ec;
       if (!directory_exists(s->vec[s->index])) return nullptr;
       s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
       const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
       if (directory_exists(s->vec[s->index])) {
         ghc::filesystem::directory_iterator end_itr;
         for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
-          if (ec.value() != 0) { break; } struct stat info = { 0 }; 
+          if (ec.value() != 0) { break; }
           ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
+          #if defined(_WIN32)
+          struct _stat info = { 0 }; 
+          if (ghc::filesystem::exists(file_path, ec) && ec.value() == 0 && !_stat(file_path.string().c_str(), &info)) {
+          #else
+          struct stat info = { 0 }; 
           if (ghc::filesystem::exists(file_path, ec) && ec.value() == 0 && !stat(file_path.string().c_str(), &info)) {
+          #endif
             if (info.st_ino == s->ino && info.st_dev == s->dev) {
-              s->vec.clear(); thread_result = file_path.string();
-              return nullptr;
+              thread_result.push_back(file_path.string());
+              if (thread_result.size() >= info.st_nlink) {
+                s->nlink = info.st_nlink; s->vec.clear();
+                return nullptr;
+              }
             }
             if (directory_exists(file_path.string())) {
               s->vec.push_back(file_path.string()); sort(s->vec.begin(), s->vec.end() );
@@ -302,7 +314,6 @@ namespace ngs::fs {
       }
       return nullptr;
     }
-    #endif
 
   } // anonymous namespace
 
@@ -372,66 +383,38 @@ namespace ngs::fs {
   string file_bin_pathname(int fd) {
     string path;
     #if defined(_WIN32)
-    DWORD length = 0; HANDLE file = (HANDLE)_get_osfhandle(fd);
-    if ((length = GetFinalPathNameByHandleW(file, nullptr, 0, VOLUME_NAME_DOS))) {
-      wstring wpath; wpath.resize(length, '\0'); wchar_t *buffer = wpath.data();
-      if ((length = GetFinalPathNameByHandleW(file, buffer, length, VOLUME_NAME_DOS))) {
-        path = narrow(wpath); size_t pos = 0; string substr = "\\\\?\\";
-        if ((pos = path.find(substr, pos)) != string::npos) {
-          path.replace(pos, substr.length(), "");
-        }
-      }
-    }
-    #elif (defined(__APPLE__) && defined(__MACH__)) || defined(__DragonFly__)
-    char buffer[PATH_MAX];
-    if (fcntl(fd, F_GETPATH, buffer) != -1) {
-      path = buffer;
-    }
-    #elif defined(__linux__)
-    char *buffer = nullptr;
-    if ((buffer = realpath(("/proc/self/fd/" + std::to_string(fd)).c_str(), nullptr))) {
-      path = buffer;
-      free(buffer);
-    }
-    #elif defined(__FreeBSD__)
-    char *buffer = nullptr; size_t length = 0;
-    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_FILEDESC, getpid() };
-    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      if ((buffer = (char *)malloc(length * 2))) {
-        if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-          for (char *p = buffer; p < buffer + length;) {
-            struct kinfo_file *kif = (struct kinfo_file *)p;
-            if (kif->kf_fd == fd) {
-              path = kif->kf_path;
-              break;
-            }
-            p += kif->kf_structsize;
-          }
-        }
-        free(buffer);
-      }
-    }
-    #elif defined(__OpenBSD__)
-    char errbuf[_POSIX2_LINE_MAX];
-    static kvm_t *kd = nullptr; kinfo_file *kif = nullptr; int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return "";
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-      for (int i = 0; i < cntp; i++) {
-        if (kif[i].fd_fd == fd) {
-          pthread_t t; vector<string> in; in.push_back("/");
-          in.push_back(environment_get_variable("HOME"));
-          in.push_back(directory_get_temporary_path());
-          vector<string> epath = string_split(environment_get_variable("PATH"), ':');
-          in.insert(in.end(), epath.begin(), epath.end()); thread_result.clear();
-          struct dir_ite_struct new_struct; new_struct.vec = in; new_struct.index = 0;
-          new_struct.ino = kif[i].va_fileid; new_struct.dev = kif[i].va_fsid;
-          pthread_create(&t, nullptr, directory_iterator_thread, (void *)&new_struct);
-          pthread_join(t, nullptr); path = thread_result; break;
-        }
-      }
-    }
-    kvm_close(kd);
+    struct _stat info = { 0 };
+    if (!_fstat(fd, &info) && 0 < info.st_nlink) {
+    #else
+    struct stat info = { 0 };
+    if (!fstat(fd, &info) && 0 < info.st_nlink) {
     #endif
+      pthread_t t; 
+      vector<string> in; 
+      in.push_back("/");
+      in.push_back(directory_get_temporary_path());
+      #if defined(_WIN32)
+      in.push_back(environment_expand_variables("${HOMEDRIVE}${HOMEPATH}"));
+      vector<string> epath = string_split(environment_get_variable("PATH"), ';');
+      #else
+      in.push_back(environment_get_variable("HOME"));
+      vector<string> epath = string_split(environment_get_variable("PATH"), ':');
+      #endif
+      in.insert(in.end(), epath.begin(), epath.end()); thread_result.clear();
+      struct dir_ite_struct new_struct; 
+      new_struct.vec = in; 
+      new_struct.index = 0;
+      new_struct.ino = info.st_ino; 
+      new_struct.dev = info.st_dev;
+      pthread_create(&t, nullptr, directory_iterator_thread, (void *)&new_struct);
+      pthread_join(t, nullptr); 
+      for (unsigned i = 0; i < thread_result.size(); i++) {
+        path += thread_result[i] + "\n";
+      }
+      if (!path.empty()) {
+        path.pop_back();
+      }
+    }
     return path;
   }
 
