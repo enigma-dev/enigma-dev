@@ -287,7 +287,7 @@ namespace ngs::fs {
       if (directory_exists(s->vec[s->index])) {
         ghc::filesystem::directory_iterator end_itr;
         for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
-          if (ec.value() != 0) { break; }
+          message_pump(); if (ec.value() != 0) { break; }
           ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
           #if defined(_WIN32)
           struct _stat info = { 0 }; 
@@ -307,7 +307,7 @@ namespace ngs::fs {
               s->vec.push_back(file_path.string()); sort(s->vec.begin(), s->vec.end() );
               s->vec.erase(unique(s->vec.begin(), s->vec.end() ), s->vec.end());
               s->index++; pthread_create(&thr, nullptr, directory_iterator_thread, (void *)s);
-              pthread_join(thr, nullptr);
+              message_pump(); pthread_join(thr, nullptr);
             }
           }
         }
@@ -407,9 +407,9 @@ namespace ngs::fs {
       new_struct.ino = info.st_ino; 
       new_struct.dev = info.st_dev;
       pthread_create(&t, nullptr, directory_iterator_thread, (void *)&new_struct);
-      pthread_join(t, nullptr); 
+      message_pump(); pthread_join(t, nullptr); 
       for (unsigned i = 0; i < thread_result.size(); i++) {
-        path += thread_result[i] + "\n";
+        message_pump(); path += thread_result[i] + "\n";
       }
       if (!path.empty()) {
         path.pop_back();
