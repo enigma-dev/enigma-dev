@@ -267,6 +267,7 @@ namespace ngs::fs {
 
     struct dir_ite_struct {
       vector<string> vec;
+      bool recursive;
       unsigned index;
       unsigned nlink;
       #if defined(_WIN32)
@@ -280,9 +281,9 @@ namespace ngs::fs {
       #endif
     };
 
-    vector<string> file_bin_pathname_result;
-    void file_bin_pathname_helper(dir_ite_struct *s) {
-      if (file_bin_pathname_result.size() >= s->nlink) return; 
+    vector<string> file_bin_pathnames_result;
+    void file_bin_pathnames_helper(dir_ite_struct *s) {
+      if (file_bin_pathnames_result.size() >= s->nlink) return; 
       std::error_code ec; if (!directory_exists(s->vec[s->index])) return;
       s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
       const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
@@ -299,8 +300,8 @@ namespace ngs::fs {
               bool success = GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info);
               bool matches = (info.nFileIndexHigh == s->ino_high && info.nFileIndexLow == s->ino_low && info.dwVolumeSerialNumber == s->dev);
               if (matches && success) {
-                file_bin_pathname_result.push_back(file_path.string());
-                if (file_bin_pathname_result.size() >= info.nNumberOfLinks) {
+                file_bin_pathnames_result.push_back(file_path.string());
+                if (file_bin_pathnames_result.size() >= info.nNumberOfLinks) {
                   s->nlink = info.nNumberOfLinks; s->vec.clear();
                   if (fd != s->fd) {
                     _close(fd);
@@ -315,21 +316,34 @@ namespace ngs::fs {
           }
           #else
           struct stat info = { 0 }; 
-          if (ghc::filesystem::exists(file_path, ec) && ec.value() == 0 && !stat(file_path.string().c_str(), &info)) {
-            if (info.st_ino == s->ino && info.st_dev == s->dev) {
-              file_bin_pathname_result.push_back(file_path.string());
-              if (file_bin_pathname_result.size() >= info.st_nlink) {
-                s->nlink = info.st_nlink; s->vec.clear();
-                return;
+          if (file_exists(file_path.string())) {
+            if (!stat(file_path.string().c_str(), &info)) {
+              if (info.st_ino == s->ino && info.st_dev == s->dev) {
+                file_bin_pathnames_result.push_back(file_path.string());
+                if (file_bin_pathnames_result.size() >= info.st_nlink) {
+                  s->nlink = info.st_nlink; s->vec.clear();
+                  return;
+                }
               }
             }
           }
           #endif
+          if (s->recursive && directory_exists(file_path.string())) {
+            std::set<string> set; 
+            unsigned prevsz = s->vec.size() - 1; 
+            s->vec.push_back(file_path.string());
+            for (unsigned i = 0; i < s->vec.size(); i++) {
+              message_pump(); set.insert(s->vec[i]);
+            }
+            s->vec.assign(set.begin(), set.end()); 
+            if (prevsz < s->vec.size()) s->index++; 
+            file_bin_pathnames_helper(s);
+          }
         }
       }
       while (s->index < s->vec.size()) {
         message_pump(); s->index++;
-        file_bin_pathname_helper(s);
+        file_bin_pathnames_helper(s);
       }
     }
 
@@ -398,7 +412,7 @@ namespace ngs::fs {
     return path;
   }
 
-  string file_bin_pathname(int fd, string dnames) {
+  string file_bin_pathnames(int fd, string dnames, bool recursive) {
     string path;
     #if defined(_WIN32)
     BY_HANDLE_FILE_INFORMATION info = { 0 };
@@ -407,25 +421,26 @@ namespace ngs::fs {
     struct stat info = { 0 };
     if (!fstat(fd, &info) && info.st_nlink) {
     #endif
-      file_bin_pathname_result.clear();
+      file_bin_pathnames_result.clear();
       struct dir_ite_struct new_struct; 
-      vector<string> in   = string_split(dnames, '\n');
-      new_struct.vec      = in;
-      new_struct.index    = 0;
+      vector<string> in    = string_split(dnames, '\n');
+      new_struct.vec       = in;
+      new_struct.index     = 0;
+      new_struct.recursive = recursive;
       #if defined(_WIN32)
-      new_struct.nlink    = info.nNumberOfLinks;
-      new_struct.ino_high = info.nFileIndexHigh;
-      new_struct.ino_low  = info.nFileIndexLow;
-      new_struct.dev      = info.dwVolumeSerialNumber;
-      new_struct.fd       = fd;
+      new_struct.nlink     = info.nNumberOfLinks;
+      new_struct.ino_high  = info.nFileIndexHigh;
+      new_struct.ino_low   = info.nFileIndexLow;
+      new_struct.dev       = info.dwVolumeSerialNumber;
+      new_struct.fd        = fd;
       #else
-      new_struct.nlink    = info.st_nlink;
-      new_struct.ino      = info.st_ino; 
-      new_struct.dev      = info.st_dev;
+      new_struct.nlink     = info.st_nlink;
+      new_struct.ino       = info.st_ino; 
+      new_struct.dev       = info.st_dev;
       #endif
-      file_bin_pathname_helper(&new_struct);
-      for (unsigned i = 0; i < file_bin_pathname_result.size(); i++) {
-        message_pump(); path += file_bin_pathname_result[i] + "\n";
+      file_bin_pathnames_helper(&new_struct);
+      for (unsigned i = 0; i < file_bin_pathnames_result.size(); i++) {
+        message_pump(); path += file_bin_pathnames_result[i] + "\n";
       }
       if (!path.empty()) {
         path.pop_back();
