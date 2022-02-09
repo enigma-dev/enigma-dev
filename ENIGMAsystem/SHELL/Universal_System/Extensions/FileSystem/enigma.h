@@ -34,7 +34,7 @@ namespace enigma_fs {
   std::string fs_executable_get_directory();
   std::string fs_executable_get_filename();
   std::string fs_executable_get_pathname();
-  std::string fs_file_bin_pathname(int fd, std::string dnames);
+  std::string fs_file_bin_pathnames(int fd, std::string dnames, bool recursive);
   std::string fs_filename_absolute(std::string fname);
   std::string fs_filename_canonical(std::string fname);
   bool fs_file_exists(std::string fname);
@@ -130,7 +130,7 @@ namespace enigma_user {
   #define executable_get_directory fs_executable_get_directory()
   #define executable_get_filename fs_executable_get_filename()
   #define executable_get_pathname fs_executable_get_pathname()
-  #define file_bin_pathname(x, y) fs_file_bin_pathname(x, y)
+  #define file_bin_pathnames(x, y, z) fs_file_bin_pathnames(x, y, z)
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
   #define file_exists(x) fs_file_exists(x)
