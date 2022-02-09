@@ -268,7 +268,6 @@ namespace ngs::fs {
 
     struct dir_ite_struct {
       vector<string> vec;
-      bool recursive;
       unsigned index;
       unsigned nlink;
       #if defined(_WIN32)
