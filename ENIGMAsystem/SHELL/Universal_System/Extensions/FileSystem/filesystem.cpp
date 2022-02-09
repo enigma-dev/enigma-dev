@@ -292,9 +292,10 @@ namespace ngs::fs {
           message_pump(); if (ec.value() != 0) { break; }
           ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
           #if defined(_WIN32)
-          BY_HANDLE_FILE_INFORMATION info = { 0 }; int fd = -1;
+          int fd = -1;
+          BY_HANDLE_FILE_INFORMATION info = { 0 };
           if (file_exists(file_path.string())) {
-            if ((fd = _wopen(file_path.wstring().c_str(), _O_RDONLY, _S_IREAD)) != -1) {
+            if (!_wsopen_s(&fd, file_path.wstring().c_str(), _O_RDONLY, _SH_DENYNO, _S_IREAD)) {
               bool success = GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info);
               bool matches = (info.nFileIndexHigh == s->ino_high && info.nFileIndexLow == s->ino_low && info.dwVolumeSerialNumber == s->dev);
               if (matches && success) {
