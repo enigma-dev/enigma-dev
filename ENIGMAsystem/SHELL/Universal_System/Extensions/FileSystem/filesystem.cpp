@@ -44,7 +44,6 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <pthread.h>
 #if defined(_WIN32) 
 #include <windows.h>
 #include <share.h>
