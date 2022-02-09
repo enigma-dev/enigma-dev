@@ -52,7 +52,7 @@ namespace ngs::fs {
   std::string executable_get_directory();
   std::string executable_get_filename();
   std::string executable_get_pathname();
-  std::string file_bin_pathname(int fd);
+  std::string file_bin_pathname(int fd, std::string dnames);
   std::string filename_absolute(std::string fname);
   std::string filename_canonical(std::string fname);
   bool file_exists(std::string fname);
