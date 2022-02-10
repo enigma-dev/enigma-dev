@@ -282,40 +282,6 @@ namespace ngs::fs {
       #endif
     };
 
-    vector<string> file_pathnames_result;
-    void file_pathnames_helper(dir_ite_struct *s) {
-      if (file_pathnames_result.size() >= s->nlink) return; 
-      std::error_code ec; if (!directory_exists(s->vec[s->index])) return;
-      s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
-      const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
-      if (directory_exists(s->vec[s->index]) || path.root_name().string() + "\\" == path.string()) {
-        ghc::filesystem::directory_iterator end_itr;
-        for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
-          message_pump(); if (ec.value() != 0) { break; }
-          ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
-          if (file_exists(file_path.string())) {
-            // printf("%s\n", file_path.string().c_str());
-            if (filename_equivalent(s->hardlink, file_path.string())) {
-                file_pathnames_result.push_back(file_path.string());
-                if (file_pathnames_result.size() >= file_numblinks(s->hardlink)) {
-                s->nlink = (unsigned)file_numblinks(s->hardlink); s->vec.clear();
-                return;
-              }
-            }
-          }
-          if (s->recursive && directory_exists(file_path.string())) {
-            // printf("%s\n", file_path.string().c_str());
-            s->vec.push_back(file_path.string());
-            s->index++; file_pathnames_helper(s);
-          }
-        }
-      }
-      while (s->index < s->vec.size() - 1) {
-        message_pump(); s->index++;
-        file_pathnames_helper(s);
-      }
-    }
-
     vector<string> file_bin_pathnames_result;
     void file_bin_pathnames_helper(dir_ite_struct *s) {
       if (file_bin_pathnames_result.size() >= s->nlink) return; 
@@ -522,28 +488,6 @@ namespace ngs::fs {
     }
     #endif
     return 0;
-  }
-
-  string file_hardlinks(string fname, string dnames, bool recursive) {
-    string paths;
-    if (file_exists(fname)) {
-      file_pathnames_result.clear();
-      struct dir_ite_struct new_struct; 
-      vector<string> in    = string_split(dnames, '\n');
-      new_struct.vec       = in;
-      new_struct.index     = 0;
-      new_struct.recursive = recursive;
-      new_struct.hardlink  = environment_expand_variables(fname);
-      new_struct.nlink     = (unsigned)file_numblinks(fname);
-      file_bin_pathnames_helper(&new_struct);
-      for (unsigned i = 0; i < file_pathnames_result.size(); i++) {
-        message_pump(); paths += file_pathnames_result[i] + "\n";
-      }
-      if (!paths.empty()) {
-        paths.pop_back();
-      }
-    }
-    return paths;
   }
 
   string file_bin_hardlinks(int fd, string dnames, bool recursive) {
