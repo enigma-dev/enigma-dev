@@ -25,7 +25,6 @@
 */
 
 #include "filesystem.h"
-#include "Universal_System/var4.h"
 
 namespace filesystem = ngs::fs;
 
@@ -55,8 +54,8 @@ namespace enigma_fs {
     return filesystem::executable_get_pathname();
   }
  
-  std::string fs_file_bin_pathname(int fd, std::string dnames) {
-    return filesystem::file_bin_pathname(fd, dnames);
+  std::string fs_file_bin_pathnames(int fd, std::string dnames, bool recursive) {
+    return filesystem::file_bin_pathnames(fd, dnames, recursive);
   }
  
   std::string fs_filename_absolute(std::string fname) {
