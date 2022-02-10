@@ -52,9 +52,17 @@ namespace ngs::fs {
   std::string executable_get_directory();
   std::string executable_get_filename();
   std::string executable_get_pathname();
-  std::string file_bin_pathnames(int fd, std::string dnames, bool recursive);
+  bool symlink_create(std::string fname, std::string newname);
+  bool symlink_copy(std::string fname, std::string newname);
+  bool symlink_exists(std::string fname);
+  bool hardlink_create(std::string fname, std::string newname);
+  std::uintmax_t file_numblinks(std::string fname);
+  std::uintmax_t file_bin_numblinks(int fd);
+  std::string file_hardlinks(std::string, std::string dnames, bool recursive);
+  std::string file_bin_hardlinks(int fd, std::string dnames, bool recursive);
   std::string filename_absolute(std::string fname);
   std::string filename_canonical(std::string fname);
+  bool filename_equivalent(std::string fname1, std::string fname2);
   bool file_exists(std::string fname);
   bool file_delete(std::string fname);
   bool file_rename(std::string oldname, std::string newname);

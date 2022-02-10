@@ -267,6 +267,7 @@ namespace ngs::fs {
 
     struct dir_ite_struct {
       vector<string> vec;
+      string hardlink;
       bool recursive;
       unsigned index;
       unsigned nlink;
@@ -280,6 +281,40 @@ namespace ngs::fs {
       dev_t dev;
       #endif
     };
+
+    vector<string> file_pathnames_result;
+    void file_pathnames_helper(dir_ite_struct *s) {
+      if (file_pathnames_result.size() >= s->nlink) return; 
+      std::error_code ec; if (!directory_exists(s->vec[s->index])) return;
+      s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
+      const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
+      if (directory_exists(s->vec[s->index]) || path.root_name().string() + "\\" == path.string()) {
+        ghc::filesystem::directory_iterator end_itr;
+        for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
+          message_pump(); if (ec.value() != 0) { break; }
+          ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
+          if (file_exists(file_path.string())) {
+            // printf("%s\n", file_path.string().c_str());
+            if (filename_equivalent(s->hardlink, file_path.string())) {
+                file_pathnames_result.push_back(file_path.string());
+                if (file_pathnames_result.size() >= file_numblinks(s->hardlink)) {
+                s->nlink = (unsigned)file_numblinks(s->hardlink); s->vec.clear();
+                return;
+              }
+            }
+          }
+          if (s->recursive && directory_exists(file_path.string())) {
+            // printf("%s\n", file_path.string().c_str());
+            s->vec.push_back(file_path.string());
+            s->index++; file_pathnames_helper(s);
+          }
+        }
+      }
+      while (s->index < s->vec.size() - 1) {
+        message_pump(); s->index++;
+        file_pathnames_helper(s);
+      }
+    }
 
     vector<string> file_bin_pathnames_result;
     void file_bin_pathnames_helper(dir_ite_struct *s) {
@@ -318,6 +353,7 @@ namespace ngs::fs {
           #else
           struct stat info = { 0 }; 
           if (file_exists(file_path.string())) {
+            // printf("%s\n", file_path.string().c_str());
             if (!stat(file_path.string().c_str(), &info)) {
               if (info.st_ino == s->ino && info.st_dev == s->dev) {
                 file_bin_pathnames_result.push_back(file_path.string());
@@ -407,8 +443,111 @@ namespace ngs::fs {
     return path;
   }
 
-  string file_bin_pathnames(int fd, string dnames, bool recursive) {
-    string path;
+  bool symlink_create(string fname, string newname) {
+    std::error_code ec;
+    fname = filename_remove_slash(fname);
+    newname = filename_remove_slash(newname);
+    fname = environment_expand_variables(fname);
+    newname = environment_expand_variables(newname);
+    ghc::filesystem::path path1 = ghc::filesystem::path(fname);
+    ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    if (file_exists(fname)) {
+      ghc::filesystem::create_symlink(path1, path2, ec);
+      return (ec.value() == 0);
+    } else if (directory_exists(fname)) {
+      ghc::filesystem::create_directory_symlink(path1, path2, ec);
+      return (ec.value() == 0);
+    }
+    return false;
+  }
+
+  bool symlink_copy(string fname, string newname) {
+    std::error_code ec;
+    fname = filename_remove_slash(fname);
+    newname = filename_remove_slash(newname);
+    fname = environment_expand_variables(fname);
+    newname = environment_expand_variables(newname);
+    ghc::filesystem::path path1 = ghc::filesystem::path(fname);
+    ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    if (symlink_exists(fname)) {
+      ghc::filesystem::copy_symlink(path1, path2, ec);
+      return (ec.value() == 0);
+    }
+    return false;
+  }
+
+  bool symlink_exists(string fname) {
+    std::error_code ec;
+    fname = filename_remove_slash(fname);
+    fname = environment_expand_variables(fname);
+    ghc::filesystem::path path = ghc::filesystem::path(fname);
+    return (ghc::filesystem::exists(path, ec) && ec.value() == 0 &&
+      ghc::filesystem::is_symlink(path, ec) && ec.value() == 0);
+  }
+
+  bool hardlink_create(string fname, string newname) {
+    std::error_code ec;
+    fname = environment_expand_variables(fname);
+    newname = environment_expand_variables(newname);
+    ghc::filesystem::path path1 = ghc::filesystem::path(fname);
+    ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+    if (file_exists(fname)) {
+      ghc::filesystem::create_hard_link(path1, path2, ec);
+      return (ec.value() == 0);
+    }
+    return false;
+  }
+
+  std::uintmax_t file_numblinks(string fname) {
+    std::error_code ec;
+    fname = environment_expand_variables(fname);
+    if (file_exists(fname)) {
+      ghc::filesystem::path path = ghc::filesystem::path(fname);
+      std::uintmax_t cnt = ghc::filesystem::hard_link_count(path, ec);
+      return ((ec.value() == 0) ? cnt : 0);
+    }
+    return 0;
+  }
+
+  std::uintmax_t file_bin_numblinks(int fd) {
+    #if defined(_WIN32)
+    BY_HANDLE_FILE_INFORMATION info = { 0 };
+    if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info)) {
+      return info.nNumberOfLinks;
+    }
+    #else
+    struct stat info = { 0 };
+    if (!fstat(fd, &info)) {
+      return info.st_nlink;
+    }
+    #endif
+    return 0;
+  }
+
+  string file_hardlinks(string fname, string dnames, bool recursive) {
+    string paths;
+    if (file_exists(fname)) {
+      file_pathnames_result.clear();
+      struct dir_ite_struct new_struct; 
+      vector<string> in    = string_split(dnames, '\n');
+      new_struct.vec       = in;
+      new_struct.index     = 0;
+      new_struct.recursive = recursive;
+      new_struct.hardlink  = environment_expand_variables(fname);
+      new_struct.nlink     = (unsigned)file_numblinks(fname);
+      file_bin_pathnames_helper(&new_struct);
+      for (unsigned i = 0; i < file_pathnames_result.size(); i++) {
+        message_pump(); paths += file_pathnames_result[i] + "\n";
+      }
+      if (!paths.empty()) {
+        paths.pop_back();
+      }
+    }
+    return paths;
+  }
+
+  string file_bin_hardlinks(int fd, string dnames, bool recursive) {
+    string paths;
     #if defined(_WIN32)
     BY_HANDLE_FILE_INFORMATION info = { 0 };
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info) && info.nNumberOfLinks) {
@@ -435,13 +574,13 @@ namespace ngs::fs {
       #endif
       file_bin_pathnames_helper(&new_struct);
       for (unsigned i = 0; i < file_bin_pathnames_result.size(); i++) {
-        message_pump(); path += file_bin_pathnames_result[i] + "\n";
+        message_pump(); paths += file_bin_pathnames_result[i] + "\n";
       }
-      if (!path.empty()) {
-        path.pop_back();
+      if (!paths.empty()) {
+        paths.pop_back();
       }
     }
-    return path;
+    return paths;
   }
 
   string executable_get_directory() {
@@ -509,7 +648,7 @@ namespace ngs::fs {
 
   bool directory_exists(string dname) {
     std::error_code ec;
-    dname = filename_remove_slash(dname, false);
+    dname = filename_remove_slash(dname);
     dname = environment_expand_variables(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     return (ghc::filesystem::exists(path, ec) && ec.value() == 0 && 
@@ -528,13 +667,26 @@ namespace ngs::fs {
   }
 
   string filename_absolute(string fname) {
-    string result = "";
+    string result;
     if (directory_exists(fname)) {
       result = filename_add_slash(fname, true);
     } else if (file_exists(fname)) {
       result = filename_canonical(fname);
     }
     return result;
+  }
+
+  bool filename_equivalent(std::string fname1, std::string fname2) {
+    std::error_code ec;
+    fname1 = environment_expand_variables(fname1);
+    fname2 = environment_expand_variables(fname2);
+    ghc::filesystem::path path1 = ghc::filesystem::path(fname1);
+    ghc::filesystem::path path2 = ghc::filesystem::path(fname2);
+    if (ghc::filesystem::exists(path1, ec) && ec.value() == 0 &&
+      ghc::filesystem::exists(path2, ec) && ec.value() == 0) {
+      return (ghc::filesystem::equivalent(path1, path2, ec) && ec.value() == 0);
+    }
+    return false;
   }
 
   std::uintmax_t file_size(string fname) {
