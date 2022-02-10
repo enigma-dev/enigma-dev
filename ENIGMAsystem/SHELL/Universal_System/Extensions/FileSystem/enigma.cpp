@@ -54,8 +54,8 @@ namespace enigma_fs {
     return filesystem::executable_get_pathname();
   }
  
-  std::string fs_file_bin_pathnames(int fd, std::string dnames, bool recursive) {
-    return filesystem::file_bin_pathnames(fd, dnames, recursive);
+  std::string fs_file_bin_hardlinks(int fd, std::string dnames, bool recursive) {
+    return filesystem::file_bin_hardlinks(fd, dnames, recursive);
   }
  
   std::string fs_filename_absolute(std::string fname) {
