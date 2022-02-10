@@ -242,10 +242,10 @@ namespace ngs::fs {
     string filename_remove_slash(string dname, bool canonical = false) {
       if (canonical) dname = ngs::fs::filename_canonical(dname);
       #if defined(_WIN32)
-      ghc::filesystem::path p = dname;
+      ghc::filesystem::path p = ghc::filesystem::path(dname);
       while ((dname.back() == '\\' || dname.back() == '/') && 
         (p.root_name().string() + "\\" != dname && p.root_name().string() + "/" != dname)) {
-        message_pump(); p = dname; dname.pop_back();
+        message_pump(); p = ghc::filesystem::path(dname); dname.pop_back();
       }
       #else
       while (dname.back() == '/' && (!dname.empty() && dname[0] != '/' && dname.length() != 1)) {
