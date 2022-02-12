@@ -1071,7 +1071,6 @@ namespace ngs::fs {
   }
 
   int file_bin_datetime_modified_day(int fd) {
-
     return file_bin_datetime(fd, 1, 2);
   }
 
