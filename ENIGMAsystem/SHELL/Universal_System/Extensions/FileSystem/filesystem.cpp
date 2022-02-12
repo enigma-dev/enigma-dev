@@ -1043,7 +1043,6 @@ namespace ngs::fs {
   }
 
   int file_bin_datetime_accessed_month(int fd) {
-
     return file_bin_datetime(fd, 0, 1);
   }
 
