@@ -82,6 +82,7 @@ namespace ngs::fs {
   std::string directory_contents_next();
   void directory_contents_close();
   std::string environment_get_variable(std::string name);
+  bool environment_get_variable_exists(std::string name);
   bool environment_set_variable(std::string name, std::string value);
   bool environment_unset_variable(std::string name);
   std::string environment_expand_variables(std::string str);

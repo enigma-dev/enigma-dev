@@ -239,10 +239,14 @@ namespace ngs::fs {
       return fname.substr(fp);
     }
 
-    string filename_remove_slash(string dname, bool canonical = false) {
-      if (canonical) dname = ngs::fs::filename_canonical(dname);
-      #if defined(_WIN32)
+    string expand_without_trailing_slash(string dname) {
+      std::error_code ec;
+      dname = environment_expand_variables(dname);
       ghc::filesystem::path p = ghc::filesystem::path(dname);
+      p = ghc::filesystem::weakly_canonical(p, ec);
+      dname = p.string();
+      if (ec.value() != 0) return "";
+      #if defined(_WIN32)
       while ((dname.back() == '\\' || dname.back() == '/') && 
         (p.root_name().string() + "\\" != dname && p.root_name().string() + "/" != dname)) {
         message_pump(); p = ghc::filesystem::path(dname); dname.pop_back();
@@ -255,8 +259,8 @@ namespace ngs::fs {
       return dname;
     }
 
-    string filename_add_slash(string dname, bool canonical = false) {
-      dname = filename_remove_slash(dname, canonical);
+    string expand_with_trailing_slash(string dname) {
+      dname = expand_without_trailing_slash(dname);
       #if defined(_WIN32)
       if (dname.back() != '\\') dname += "\\";
       #else
@@ -275,18 +279,19 @@ namespace ngs::fs {
       unsigned long ino_high;
       unsigned long ino_low;
       unsigned long dev;
-      int fd;
       #else
       ino_t ino;
       dev_t dev;
       #endif
     };
 
+    /* ghc::filesystem::equivalent would be useful here but sadly it does 
+    not support passing a file descriptor and only accepts a file path */
     vector<string> file_bin_pathnames_result;
     void file_bin_pathnames_helper(dir_ite_struct *s) {
       if (file_bin_pathnames_result.size() >= s->nlink) return; 
       std::error_code ec; if (!directory_exists(s->vec[s->index])) return;
-      s->vec[s->index] = filename_remove_slash(s->vec[s->index], true);
+      s->vec[s->index] = expand_without_trailing_slash(s->vec[s->index]);
       const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
       if (directory_exists(s->vec[s->index]) || path.root_name().string() + "\\" == path.string()) {
         ghc::filesystem::directory_iterator end_itr;
@@ -304,16 +309,13 @@ namespace ngs::fs {
               if (matches && success) {
                 file_bin_pathnames_result.push_back(file_path.string());
                 if (file_bin_pathnames_result.size() >= info.nNumberOfLinks) {
-                  s->nlink = info.nNumberOfLinks; s->vec.clear();
-                  if (fd != s->fd) {
-                    _close(fd);
-                  }
+                  s->nlink = info.nNumberOfLinks; 
+                  s->vec.clear();
+                  _close(fd);
                   return;
                 }
               }
-              if (fd != s->fd) {
-                _close(fd);
-              }
+              _close(fd);
             }
           }
           #else
@@ -348,12 +350,13 @@ namespace ngs::fs {
 
   string directory_get_current_working() {
     std::error_code ec;
-    string result = filename_add_slash(ghc::filesystem::current_path(ec).string());
+    string result = expand_with_trailing_slash(ghc::filesystem::current_path(ec).string());
     return (ec.value() == 0) ? result : "";
   }
 
   bool directory_set_current_working(string dname) {
     std::error_code ec;
+    dname = expand_without_trailing_slash(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     ghc::filesystem::current_path(path, ec);
     return (ec.value() == 0);
@@ -361,7 +364,7 @@ namespace ngs::fs {
 
   string directory_get_temporary_path() {
     std::error_code ec;
-    string result = filename_add_slash(ghc::filesystem::temp_directory_path(ec).string());
+    string result = expand_with_trailing_slash(ghc::filesystem::temp_directory_path(ec).string());
     return (ec.value() == 0) ? result : "";
   }
 
@@ -411,16 +414,18 @@ namespace ngs::fs {
 
   bool symlink_create(string fname, string newname) {
     std::error_code ec;
-    fname = filename_remove_slash(fname);
-    newname = filename_remove_slash(newname);
-    fname = environment_expand_variables(fname);
-    newname = environment_expand_variables(newname);
+    fname = expand_without_trailing_slash(fname);
+    newname = expand_without_trailing_slash(newname);
     ghc::filesystem::path path1 = ghc::filesystem::path(fname);
     ghc::filesystem::path path2 = ghc::filesystem::path(newname);
     if (file_exists(fname)) {
+      if (!directory_exists(filename_path(newname)))
+        directory_create(filename_path(newname));
       ghc::filesystem::create_symlink(path1, path2, ec);
       return (ec.value() == 0);
     } else if (directory_exists(fname)) {
+      if (!directory_exists(filename_path(newname)))
+        directory_create(filename_path(newname));
       ghc::filesystem::create_directory_symlink(path1, path2, ec);
       return (ec.value() == 0);
     }
@@ -429,13 +434,13 @@ namespace ngs::fs {
 
   bool symlink_copy(string fname, string newname) {
     std::error_code ec;
-    fname = filename_remove_slash(fname);
-    newname = filename_remove_slash(newname);
-    fname = environment_expand_variables(fname);
-    newname = environment_expand_variables(newname);
+    fname = expand_without_trailing_slash(fname);
+    newname = expand_without_trailing_slash(newname);
     ghc::filesystem::path path1 = ghc::filesystem::path(fname);
     ghc::filesystem::path path2 = ghc::filesystem::path(newname);
     if (symlink_exists(fname)) {
+      if (!directory_exists(filename_path(newname)))
+        directory_create(filename_path(newname));
       ghc::filesystem::copy_symlink(path1, path2, ec);
       return (ec.value() == 0);
     }
@@ -444,8 +449,7 @@ namespace ngs::fs {
 
   bool symlink_exists(string fname) {
     std::error_code ec;
-    fname = filename_remove_slash(fname);
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     ghc::filesystem::path path = ghc::filesystem::path(fname);
     return (ghc::filesystem::exists(path, ec) && ec.value() == 0 &&
       ghc::filesystem::is_symlink(path, ec) && ec.value() == 0);
@@ -453,11 +457,13 @@ namespace ngs::fs {
 
   bool hardlink_create(string fname, string newname) {
     std::error_code ec;
-    fname = environment_expand_variables(fname);
-    newname = environment_expand_variables(newname);
+    fname = expand_without_trailing_slash(fname);
+    newname = expand_without_trailing_slash(newname);
     ghc::filesystem::path path1 = ghc::filesystem::path(fname);
     ghc::filesystem::path path2 = ghc::filesystem::path(newname);
     if (file_exists(fname)) {
+      if (!directory_exists(filename_path(newname)))
+        directory_create(filename_path(newname));
       ghc::filesystem::create_hard_link(path1, path2, ec);
       return (ec.value() == 0);
     }
@@ -466,11 +472,11 @@ namespace ngs::fs {
 
   std::uintmax_t file_numblinks(string fname) {
     std::error_code ec;
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     if (file_exists(fname)) {
       ghc::filesystem::path path = ghc::filesystem::path(fname);
-      std::uintmax_t cnt = ghc::filesystem::hard_link_count(path, ec);
-      return ((ec.value() == 0) ? cnt : 0);
+      std::uintmax_t numb = ghc::filesystem::hard_link_count(path, ec);
+      return ((ec.value() == 0) ? numb : 0);
     }
     return 0;
   }
@@ -510,7 +516,6 @@ namespace ngs::fs {
       new_struct.ino_high  = info.nFileIndexHigh;
       new_struct.ino_low   = info.nFileIndexLow;
       new_struct.dev       = info.dwVolumeSerialNumber;
-      new_struct.fd        = fd;
       #else
       new_struct.nlink     = info.st_nlink;
       new_struct.ino       = info.st_ino; 
@@ -550,9 +555,21 @@ namespace ngs::fs {
     #endif
   }
 
+  bool environment_get_variable_exists(string name) {
+    #if defined(_WIN32)
+    string value;
+    wchar_t buffer[32767];
+    wstring u8name = widen(name);
+    GetEnvironmentVariableW(u8name.c_str(), buffer, 32767);
+    return (GetLastError() != ERROR_ENVVAR_NOT_FOUND);
+    #else
+    return (getenv(name.c_str()) != nullptr);
+    #endif
+  }
+
   bool environment_set_variable(string name, string value) {
     #if defined(_WIN32)
-    wstring u8name = widen(name);
+    wstring u8name = widen(name); 
     wstring u8value = widen(value);
     return (SetEnvironmentVariableW(u8name.c_str(), u8value.c_str()) != 0);
     #else
@@ -577,14 +594,14 @@ namespace ngs::fs {
     string variable = post.substr(0, post.find('}'));
     size_t pos = post.find('}') + 1; post = post.substr(pos);
     string value = environment_get_variable(variable);
-    if (value.empty()) return str.substr(0, pos) + 
-    environment_expand_variables(str.substr(pos));
+    if (!environment_get_variable_exists(variable))
+      return str.substr(0, pos) + environment_expand_variables(str.substr(pos));
     return environment_expand_variables(pre + value + post);
   }
 
   bool file_exists(string fname) {
     std::error_code ec;
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     const ghc::filesystem::path path = ghc::filesystem::path(fname);
     return (ghc::filesystem::exists(path, ec) && ec.value() == 0 && 
       (!ghc::filesystem::is_directory(path, ec)) && ec.value() == 0);
@@ -592,8 +609,8 @@ namespace ngs::fs {
 
   bool directory_exists(string dname) {
     std::error_code ec;
-    dname = filename_remove_slash(dname);
-    dname = environment_expand_variables(dname);
+    dname = expand_without_trailing_slash(dname);
+    dname = expand_without_trailing_slash(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     return (ghc::filesystem::exists(path, ec) && ec.value() == 0 && 
       ghc::filesystem::is_directory(path, ec) && ec.value() == 0);
@@ -601,11 +618,11 @@ namespace ngs::fs {
 
   string filename_canonical(string fname) {
     std::error_code ec;
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     const ghc::filesystem::path path = ghc::filesystem::path(fname);
     string result = ghc::filesystem::weakly_canonical(path, ec).string();
     if (ec.value() == 0 && directory_exists(result)) {
-      return filename_add_slash(result);
+      return expand_with_trailing_slash(result);
     }
     return (ec.value() == 0) ? result : "";
   }
@@ -613,7 +630,7 @@ namespace ngs::fs {
   string filename_absolute(string fname) {
     string result;
     if (directory_exists(fname)) {
-      result = filename_add_slash(fname, true);
+      result = expand_with_trailing_slash(fname);
     } else if (file_exists(fname)) {
       result = filename_canonical(fname);
     }
@@ -622,8 +639,8 @@ namespace ngs::fs {
 
   bool filename_equivalent(std::string fname1, std::string fname2) {
     std::error_code ec;
-    fname1 = environment_expand_variables(fname1);
-    fname2 = environment_expand_variables(fname2);
+    fname1 = expand_without_trailing_slash(fname1);
+    fname2 = expand_without_trailing_slash(fname2);
     ghc::filesystem::path path1 = ghc::filesystem::path(fname1);
     ghc::filesystem::path path2 = ghc::filesystem::path(fname2);
     if (ghc::filesystem::exists(path1, ec) && ec.value() == 0 &&
@@ -636,7 +653,7 @@ namespace ngs::fs {
   std::uintmax_t file_size(string fname) {
     std::error_code ec;
     if (!file_exists(fname)) return 0;
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     const ghc::filesystem::path path = ghc::filesystem::path(fname);
     std::uintmax_t result = ghc::filesystem::file_size(path, ec);
     return (ec.value() == 0) ? result : 0;
@@ -645,14 +662,14 @@ namespace ngs::fs {
   bool file_delete(string fname) {
     std::error_code ec;
     if (!file_exists(fname)) return false;
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     const ghc::filesystem::path path = ghc::filesystem::path(fname);
     return (ghc::filesystem::remove(path, ec) && ec.value() == 0);
   }
 
   bool directory_create(string dname) {
     std::error_code ec;
-    dname = filename_remove_slash(dname, true);
+    dname = expand_without_trailing_slash(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     return (ghc::filesystem::create_directories(path, ec) && ec.value() == 0);
   }
@@ -660,8 +677,8 @@ namespace ngs::fs {
   bool file_rename(string oldname, string newname) {
     std::error_code ec;
     if (!file_exists(oldname)) return false;
-    oldname = environment_expand_variables(oldname);
-    newname = environment_expand_variables(newname);
+    oldname = expand_without_trailing_slash(oldname);
+    newname = expand_without_trailing_slash(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const ghc::filesystem::path path1 = ghc::filesystem::path(oldname);
@@ -673,8 +690,8 @@ namespace ngs::fs {
   bool file_copy(string fname, string newname) {
     std::error_code ec;
     if (!file_exists(fname)) return false;
-    fname = environment_expand_variables(fname);
-    newname = environment_expand_variables(newname);
+    fname = expand_without_trailing_slash(fname);
+    newname = expand_without_trailing_slash(newname);
     if (!directory_exists(filename_path(newname)))
       directory_create(filename_path(newname));
     const ghc::filesystem::path path1 = ghc::filesystem::path(fname);
@@ -687,7 +704,7 @@ namespace ngs::fs {
     std::error_code ec;
     std::uintmax_t result = 0;
     if (!directory_exists(dname)) return 0;
-    const ghc::filesystem::path path = ghc::filesystem::path(filename_remove_slash(dname, true));
+    const ghc::filesystem::path path = ghc::filesystem::path(expand_without_trailing_slash(dname));
     if (ghc::filesystem::exists(path, ec)) {
       ghc::filesystem::directory_iterator end_itr;
       for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr; dir_ite.increment(ec)) {
@@ -706,32 +723,9 @@ namespace ngs::fs {
   bool directory_destroy(string dname) {
     std::error_code ec;
     if (!directory_exists(dname)) return false;
-    dname = filename_remove_slash(dname, true);
+    dname = expand_without_trailing_slash(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     return (ghc::filesystem::remove_all(path, ec) && ec.value() == 0);
-  }
-
-  bool directory_rename(string oldname, string newname) {
-    std::error_code ec;
-    if (!directory_exists(oldname)) return false;
-    oldname = filename_remove_slash(oldname, true);
-    newname = filename_remove_slash(newname, true);
-    if (!directory_exists(newname)) directory_create(filename_path(newname));
-    bool result = false;
-    const ghc::filesystem::path path1 = ghc::filesystem::path(oldname);
-    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
-    const ghc::filesystem::path path3 = ghc::filesystem::path(
-    filename_add_slash(path2.string(), true).substr(0, 
-    filename_add_slash(path1.string(), true).length()));
-    if (directory_exists(oldname)) {
-      if ((filename_name(path1.string()) != filename_name(path2.string()) &&
-        filename_path(path1.string()) == filename_path(path2.string())) ||
-        path1.string() != path3.string()) {
-        ghc::filesystem::rename(path1, path2, ec);
-        result = (ec.value() == 0);
-      }
-    }
-    return result;
   }
 
   unsigned directory_contents_get_cntfiles() {
@@ -749,7 +743,7 @@ namespace ngs::fs {
   static inline vector<string> directory_contents_helper(string dname, string pattern, bool includedirs) {
     std::error_code ec; vector<string> result;
     if (!directory_exists(dname)) return result;
-    dname = filename_remove_slash(dname, true);
+    dname = expand_without_trailing_slash(dname);
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     if (directory_exists(dname)) {
       ghc::filesystem::directory_iterator end_itr;
@@ -760,7 +754,7 @@ namespace ngs::fs {
         if (!directory_exists(file_path.string())) {
           result.push_back(file_path.string());
         } else if (ec.value() == 0 && includedirs) {
-          result.push_back(filename_add_slash(file_path.string()));
+          result.push_back(expand_with_trailing_slash(file_path.string()));
         }
         directory_contents_cntfiles++;
       }
@@ -882,154 +876,165 @@ namespace ngs::fs {
     return "";
   }
 
-  static string retained_string = "";
-  static size_t retained_length = 0;
-  static std::uintmax_t szsrc   = 0;
-  // this function was written to prevent infinitely copying inside itself
-  static inline bool directory_copy_retained(string dname, string newname) {
-    std::error_code ec;
-    bool result = false;
-    const ghc::filesystem::path path1 = ghc::filesystem::path(dname);
-    const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
-    const ghc::filesystem::path path3 = ghc::filesystem::path(path2.string().substr(0, path1.string().length()));
-    if (retained_string.empty() && retained_length == 0) {
-      retained_length = path1.string().length();
-      retained_string = path2.string().substr(retained_length);
-    }
-    if (directory_exists(dname)) {
-      if ((filename_name(path1.string()) != filename_name(path2.string()) &&
-        filename_path(path1.string()) == filename_path(path2.string())) ||
-        path1.string() != path3.string()) {
-        ghc::filesystem::copy(path1, path2, ghc::filesystem::copy_options::recursive, ec);
-        result = (ec.value() == 0);
-      } else if (path1.string() == path3.string()) {
-        unsigned directory_contents_maxprev = directory_contents_get_maxfiles();
-        directory_contents_set_maxfiles(0);
-        vector<string> itemVec = directory_contents_helper(dname, "*.*", true);
-        directory_contents_set_maxfiles(directory_contents_maxprev);
-        if (!directory_exists(newname)) {
-          directory_create(newname);
-          for (const string &item : itemVec) {
-            message_pump();
-            if (directory_exists(filename_remove_slash(item)) && 
-              filename_remove_slash(item).substr(retained_length) != retained_string) {
-              directory_copy_retained(filename_remove_slash(item), filename_add_slash(path2.string()) + 
-              filename_name(filename_remove_slash(item)));
-            } else if (file_exists(item)) {
-              ghc::filesystem::copy(item, filename_add_slash(path2.string()) + filename_name(item), ec);
-              // ignore and skip errored copies and copy what is left.
-              // uncomment the line below to break if one copy failed.
-              // if (ec.value() == 0) { result = true; } else { return false; }
-            }
-          }
-          // check size to determine success instead of error code.
-          // comment the line below out if you want break on error.
-          result = (directory_exists(newname) && szsrc == directory_size(newname));
-        }
+  static inline bool file_is_inside_directory(string outer, string inner) {
+    if (!directory_exists(outer)) return false;
+    outer = expand_without_trailing_slash(outer);
+    inner = expand_without_trailing_slash(inner);
+    const ghc::filesystem::path path1 = ghc::filesystem::path(outer);
+    ghc::filesystem::path path2 = ghc::filesystem::path(inner);
+    while (expand_without_trailing_slash(path2.string()) !=
+      expand_without_trailing_slash(path2.root_name().string())) {
+      message_pump();
+      if (!filename_equivalent(path1.string(), path2.string())) {
+        path2 = path2.parent_path();
+      } else {
+        return true;
       }
     }
-    return result;
+    return false;
   }
 
   bool directory_copy(string dname, string newname) {
+    std::error_code ec;
     if (!directory_exists(dname)) return false;
-    dname = filename_remove_slash(dname, true);
-    newname = filename_remove_slash(newname, true);
-    retained_string = "";
-    retained_length = 0;
-    // check size to determine success instead of error code.
-    // comment the line below out if you want break on error.
-    szsrc = directory_size(dname);
-    return directory_copy_retained(dname, newname);
+    dname = expand_without_trailing_slash(dname);
+    newname = expand_without_trailing_slash(newname);
+    vector<string> vec = directory_contents_helper(dname, "*.*", true);
+    if (!file_is_inside_directory(dname, newname)) {
+      for (unsigned i = 0; i < vec.size(); i++) {
+        message_pump();
+        if (!directory_exists(newname)) {
+          if (!directory_create(newname)) return false;
+        }
+        if (file_exists(vec[i]) || symlink_exists(vec[i])) {
+          const ghc::filesystem::path path1 = ghc::filesystem::path(vec[i]);
+          const ghc::filesystem::path path2 = 
+            ghc::filesystem::path(expand_with_trailing_slash(newname) + filename_name(vec[i]));
+          ghc::filesystem::copy(path1, path2, ghc::filesystem::copy_options::copy_symlinks, ec);
+          if (ec.value() != 0) return false;
+        } else if (directory_exists(vec[i])) {
+          if (!directory_create(expand_with_trailing_slash(newname) +
+            filename_name(expand_without_trailing_slash(vec[i]))) || 
+            !directory_copy(vec[i], expand_with_trailing_slash(newname) + 
+            filename_name(expand_without_trailing_slash(vec[i])))) {
+            return false;
+          }
+        }
+      }
+    } else {
+      return false;
+    }
+    return true;
+  }
+
+  bool directory_rename(string oldname, string newname) {
+    std::error_code ec;
+    if (!directory_exists(oldname)) return false;
+    oldname = expand_without_trailing_slash(oldname);
+    newname = expand_without_trailing_slash(newname);
+    if (!file_is_inside_directory(oldname, newname)) {
+      const ghc::filesystem::path path1 = ghc::filesystem::path(oldname);
+      const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+      if (!directory_exists(path2.parent_path().string())) {
+        if (!directory_create(path2.parent_path().string())) {
+          return false;
+        }
+      }
+      ghc::filesystem::rename(path1, path2, ec);
+      return (ec.value() == 0);
+    } else {
+      return false;
+    }
+    return true;
   }
 
   int file_datetime_accessed_year(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 0);
   }
 
   int file_datetime_accessed_month(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 1);
   }
 
   int file_datetime_accessed_day(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 2);
   }
 
   int file_datetime_accessed_hour(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 3);
   }
 
   int file_datetime_accessed_minute(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 4);
   }
 
   int file_datetime_accessed_second(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 0, 5);
   }
 
   int file_datetime_modified_year(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 0);
   }
 
   int file_datetime_modified_month(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 1);
   }
 
   int file_datetime_modified_day(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 2);
   }
 
   int file_datetime_modified_hour(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 3);
   }
 
   int file_datetime_modified_minute(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 4);
   }
 
   int file_datetime_modified_second(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 1, 5);
   }
 
   int file_datetime_created_year(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 0);
   }
 
   int file_datetime_created_month(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 1);
   }
 
   int file_datetime_created_day(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 2);
   }
 
   int file_datetime_created_hour(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 3);
   }
 
   int file_datetime_created_minute(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 4);
   }
 
   int file_datetime_created_second(string fname) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     return file_datetime(fname.c_str(), 2, 5);
   }
 
@@ -1108,7 +1113,7 @@ namespace ngs::fs {
   }
 
   int file_bin_open(string fname, int mode) {
-    fname = environment_expand_variables(fname);
+    fname = expand_without_trailing_slash(fname);
     #if defined(_WIN32)
     wstring wfname = widen(fname);
     FILE *fp = nullptr;
