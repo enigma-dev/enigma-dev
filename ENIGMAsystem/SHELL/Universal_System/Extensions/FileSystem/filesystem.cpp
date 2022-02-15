@@ -899,7 +899,13 @@ namespace ngs::fs {
     if (!directory_exists(dname)) return false;
     dname = expand_without_trailing_slash(dname);
     newname = expand_without_trailing_slash(newname);
+    unsigned maxprev = directory_contents_get_maxfiles();
+    unsigned orderprev = directory_contents_get_order();
+    directory_contents_set_maxfiles(0);
+    directory_contents_set_order(DC_ATOZ);
     vector<string> vec = directory_contents_helper(dname, "*.*", true);
+    directory_contents_set_order(orderprev);
+    directory_contents_set_maxfiles(maxprev);
     if (!file_is_inside_directory(dname, newname)) {
       for (unsigned i = 0; i < vec.size(); i++) {
         message_pump();
