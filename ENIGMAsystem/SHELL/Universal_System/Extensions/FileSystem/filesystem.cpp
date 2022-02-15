@@ -31,6 +31,7 @@
 #include <vector>
 #include <random>
 
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <cstring>
@@ -243,9 +244,9 @@ namespace ngs::fs {
       std::error_code ec;
       dname = environment_expand_variables(dname);
       ghc::filesystem::path p = ghc::filesystem::path(dname);
-      p = ghc::filesystem::weakly_canonical(p, ec);
-      dname = p.string();
+      p = ghc::filesystem::absolute(p, ec);
       if (ec.value() != 0) return "";
+      dname = p.string();
       #if defined(_WIN32)
       while ((dname.back() == '\\' || dname.back() == '/') && 
         (p.root_name().string() + "\\" != dname && p.root_name().string() + "/" != dname)) {
@@ -287,9 +288,9 @@ namespace ngs::fs {
 
     /* ghc::filesystem::equivalent would be useful here but sadly it does 
     not support passing a file descriptor and only accepts a file path */
-    vector<string> file_bin_pathnames_result;
-    void file_bin_pathnames_helper(dir_ite_struct *s) {
-      if (file_bin_pathnames_result.size() >= s->nlink) return; 
+    vector<string> file_bin_hardlinks_result;
+    void file_bin_hardlinks_helper(dir_ite_struct *s) {
+      if (file_bin_hardlinks_result.size() >= s->nlink) return; 
       std::error_code ec; if (!directory_exists(s->vec[s->index])) return;
       s->vec[s->index] = expand_without_trailing_slash(s->vec[s->index]);
       const ghc::filesystem::path path = ghc::filesystem::path(s->vec[s->index]);
@@ -307,8 +308,8 @@ namespace ngs::fs {
               bool success = GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info);
               bool matches = (info.nFileIndexHigh == s->ino_high && info.nFileIndexLow == s->ino_low && info.dwVolumeSerialNumber == s->dev);
               if (matches && success) {
-                file_bin_pathnames_result.push_back(file_path.string());
-                if (file_bin_pathnames_result.size() >= info.nNumberOfLinks) {
+                file_bin_hardlinks_result.push_back(file_path.string());
+                if (file_bin_hardlinks_result.size() >= info.nNumberOfLinks) {
                   s->nlink = info.nNumberOfLinks; 
                   s->vec.clear();
                   _close(fd);
@@ -324,8 +325,8 @@ namespace ngs::fs {
             // printf("%s\n", file_path.string().c_str());
             if (!stat(file_path.string().c_str(), &info)) {
               if (info.st_ino == s->ino && info.st_dev == s->dev) {
-                file_bin_pathnames_result.push_back(file_path.string());
-                if (file_bin_pathnames_result.size() >= info.st_nlink) {
+                file_bin_hardlinks_result.push_back(file_path.string());
+                if (file_bin_hardlinks_result.size() >= info.st_nlink) {
                   s->nlink = info.st_nlink; s->vec.clear();
                   return;
                 }
@@ -336,13 +337,13 @@ namespace ngs::fs {
           if (s->recursive && directory_exists(file_path.string())) {
             // printf("%s\n", file_path.string().c_str());
             s->vec.push_back(file_path.string());
-            s->index++; file_bin_pathnames_helper(s);
+            s->index++; file_bin_hardlinks_helper(s);
           }
         }
       }
       while (s->index < s->vec.size() - 1) {
         message_pump(); s->index++;
-        file_bin_pathnames_helper(s);
+        file_bin_hardlinks_helper(s);
       }
     }
 
@@ -505,7 +506,7 @@ namespace ngs::fs {
     struct stat info = { 0 };
     if (!fstat(fd, &info) && info.st_nlink) {
     #endif
-      file_bin_pathnames_result.clear();
+      file_bin_hardlinks_result.clear();
       struct dir_ite_struct new_struct; 
       vector<string> in    = string_split(dnames, '\n');
       new_struct.vec       = in;
@@ -521,9 +522,9 @@ namespace ngs::fs {
       new_struct.ino       = info.st_ino; 
       new_struct.dev       = info.st_dev;
       #endif
-      file_bin_pathnames_helper(&new_struct);
-      for (unsigned i = 0; i < file_bin_pathnames_result.size(); i++) {
-        message_pump(); paths += file_bin_pathnames_result[i] + "\n";
+      file_bin_hardlinks_helper(&new_struct);
+      for (unsigned i = 0; i < file_bin_hardlinks_result.size(); i++) {
+        message_pump(); paths += file_bin_hardlinks_result[i] + "\n";
       }
       if (!paths.empty()) {
         paths.pop_back();
@@ -632,7 +633,7 @@ namespace ngs::fs {
     if (directory_exists(fname)) {
       result = expand_with_trailing_slash(fname);
     } else if (file_exists(fname)) {
-      result = filename_canonical(fname);
+      result = expand_without_trailing_slash(fname);
     }
     return result;
   }
