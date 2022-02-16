@@ -34,6 +34,7 @@
 #include "Universal_System/random.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/buffers.h"
+#include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
 #include "Universal_System/Resources/backgrounds.h"
