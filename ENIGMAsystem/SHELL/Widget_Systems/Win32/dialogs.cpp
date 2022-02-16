@@ -62,11 +62,11 @@ void widget_set_system(string sys) {
   enigma_user::external_call(enigma_user::external_define(enigma_user::temp_directory + "libdlgmod.dll", "widget_set_system", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), sys);
 }
 
-string message_get_caption() {
+string widget_get_caption() {
   return enigma_user::external_call(enigma_user::external_define(enigma_user::temp_directory + "libdlgmod.dll", "widget_get_caption", enigma_user::dll_cdecl, enigma_user::ty_string, 0));
 }
 
-void message_set_caption(string title) {
+void widget_set_caption(string title) {
   enigma_user::external_call(enigma_user::external_define(enigma_user::temp_directory + "libdlgmod.dll", "widget_set_caption", enigma_user::dll_cdecl, enigma_user::ty_real, 1, enigma_user::ty_string), title);
 }
 

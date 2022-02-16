@@ -1,51 +1,130 @@
-/** Copyright (C) 2008 Josh Ventura
-*** Copyright (C) 2014 Robert B. Colton
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+/*
 
-/* Simple, intuitive, integer based file I/O */
-#ifndef ENIGMA_FILEIO_H
-#define ENIGMA_FILEIO_H
+ MIT License
+ 
+ Copyright © 2020-2021 Samuel Venable
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ 
+*/
 
-#include <string>
+#include "apifilesystem/filesystem.h"
 
 namespace enigma_user {
-int file_text_open_read(const std::string& fname);
-int file_text_open_write(const std::string& fname);
-int file_text_open_append(const std::string& fname);
-void file_text_close(int fileid);
-void file_text_write_string(int fileid, const std::string& str);
-void file_text_write_real(int fileid, double x);
-void file_text_writeln(int fileid);
-void file_text_writeln(int fileid, const std::string& str);
-std::string file_text_read_string(int fileid);
-std::string file_text_read_all(int fileid);
-double file_text_read_real(int fileid);
-std::string file_text_readln(int fileid);
-bool file_text_eof(int fileid);
-bool file_text_eoln(int fileid);
-void load_info(const std::string& fname); // game information function
-int file_bin_open(const std::string& fname, int mode);
-bool file_bin_rewrite(int fileid);
-void file_bin_close(int fileid);
-size_t file_bin_size(int fileid);
-size_t file_bin_position(int fileid);
-void file_bin_seek(int fileid, size_t pos);
-void file_bin_write_byte(int fileid, unsigned char byte);
-int file_bin_read_byte(int fileid);
 
-} //namespace enigma_user
+  using ngs::fs::directory_get_current_working;
+  using ngs::fs::directory_set_current_working;
+  using ngs::fs::directory_get_temporary_path;
+  using ngs::fs::executable_get_directory;
+  using ngs::fs::executable_get_filename;
+  using ngs::fs::executable_get_pathname;
+  using ngs::fs::symlink_create;
+  using ngs::fs::symlink_copy;
+  using ngs::fs::symlink_exists;
+  using ngs::fs::hardlink_create;
+  using ngs::fs::file_numblinks;
+  using ngs::fs::file_bin_numblinks;
+  using ngs::fs::file_bin_hardlinks;
+  using ngs::fs::filename_absolute;
+  using ngs::fs::filename_canonical;
+  using ngs::fs::filename_equivalent;
+  using ngs::fs::file_exists;
+  using ngs::fs::file_delete;
+  using ngs::fs::file_rename;
+  using ngs::fs::file_copy;
+  using ngs::fs::file_size;
+  using ngs::fs::directory_exists;
+  using ngs::fs::directory_create;
+  using ngs::fs::directory_destroy;
+  using ngs::fs::directory_rename;
+  using ngs::fs::directory_copy;
+  using ngs::fs::directory_size;
+  using ngs::fs::directory_contents_get_order;
+  using ngs::fs::directory_contents_set_order;
+  using ngs::fs::directory_contents_get_cntfiles;
+  using ngs::fs::directory_contents_get_maxfiles;
+  using ngs::fs::directory_contents_set_maxfiles;
+  using ngs::fs::directory_contents_first;
+  using ngs::fs::directory_contents_next;
+  using ngs::fs::directory_contents_close;
+  using ngs::fs::environment_get_variable;
+  using ngs::fs::environment_get_variable_exists;
+  using ngs::fs::environment_set_variable;
+  using ngs::fs::environment_unset_variable;
+  using ngs::fs::environment_expand_variables;
+  using ngs::fs::file_datetime_accessed_year;
+  using ngs::fs::file_datetime_accessed_month;
+  using ngs::fs::file_datetime_accessed_day;
+  using ngs::fs::file_datetime_accessed_hour;
+  using ngs::fs::file_datetime_accessed_minute;
+  using ngs::fs::file_datetime_accessed_second;
+  using ngs::fs::file_datetime_modified_year;
+  using ngs::fs::file_datetime_modified_month;
+  using ngs::fs::file_datetime_modified_day;
+  using ngs::fs::file_datetime_modified_hour;
+  using ngs::fs::file_datetime_modified_minute;
+  using ngs::fs::file_datetime_modified_second;
+  using ngs::fs::file_datetime_created_year;
+  using ngs::fs::file_datetime_created_month;
+  using ngs::fs::file_datetime_created_day;
+  using ngs::fs::file_datetime_created_hour;
+  using ngs::fs::file_datetime_created_minute;
+  using ngs::fs::file_datetime_created_second;
+  using ngs::fs::file_bin_datetime_accessed_year;
+  using ngs::fs::file_bin_datetime_accessed_month;
+  using ngs::fs::file_bin_datetime_accessed_day;
+  using ngs::fs::file_bin_datetime_accessed_hour;
+  using ngs::fs::file_bin_datetime_accessed_minute;
+  using ngs::fs::file_bin_datetime_accessed_second;
+  using ngs::fs::file_bin_datetime_modified_year;
+  using ngs::fs::file_bin_datetime_modified_month;
+  using ngs::fs::file_bin_datetime_modified_day;
+  using ngs::fs::file_bin_datetime_modified_hour;
+  using ngs::fs::file_bin_datetime_modified_minute;
+  using ngs::fs::file_bin_datetime_modified_second;
+  using ngs::fs::file_bin_datetime_created_year;
+  using ngs::fs::file_bin_datetime_created_month;
+  using ngs::fs::file_bin_datetime_created_day;
+  using ngs::fs::file_bin_datetime_created_hour;
+  using ngs::fs::file_bin_datetime_created_minute;
+  using ngs::fs::file_bin_datetime_created_second;
+  using ngs::fs::file_bin_open;
+  using ngs::fs::file_bin_rewrite;
+  using ngs::fs::file_bin_close;
+  using ngs::fs::file_bin_size;
+  using ngs::fs::file_bin_position;
+  using ngs::fs::file_bin_seek;
+  using ngs::fs::file_bin_read_byte;
+  using ngs::fs::file_bin_write_byte;
+  using ngs::fs::file_text_open_read;
+  using ngs::fs::file_text_open_write;
+  using ngs::fs::file_text_open_append;
+  using ngs::fs::file_text_write_real;
+  using ngs::fs::file_text_write_string;
+  using ngs::fs::file_text_writeln;
+  using ngs::fs::file_text_eoln;
+  using ngs::fs::file_text_eof;
+  using ngs::fs::file_text_read_real;
+  using ngs::fs::file_text_read_string;
+  using ngs::fs::file_text_readln;
+  using ngs::fs::file_text_read_all;
+  using ngs::fs::file_text_open_from_string;
+  using ngs::fs::file_text_close;
 
-#endif //ENIGMA_FILEIO_H
+} // namespace enigma_fs

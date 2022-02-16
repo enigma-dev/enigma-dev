@@ -168,15 +168,17 @@ ifeq ($(UNIX_BASED), true)
 	else ifeq ($(OS), FreeBSD)
 		override LDLIBS += -lprocstat -lutil -lc
 	else ifeq ($(OS), DragonFly)
-		override LDLIBS += -lkvm -lutil -lc
+		override LDLIBS += -lkvm -lc
+	else ifeq ($(OS), OpenBSD)
+		override LDLIBS += -lkvm -lc
 	endif
 else
 	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
-	override LDLIBS += -lshlwapi
 endif
 
 SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
+SOURCES += $(wildcard ../../shared/apifilesystem/*.cpp)
 SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
 
 #This does not work, use a for loop and prepend it to each one not the whole string

@@ -270,8 +270,8 @@ static void *modify_shell_dialog(void *pid) {
     XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
   }
   XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
-  int len = enigma_user::message_get_caption().length() + 1; char *buffer = new char[len]();
-  strcpy(buffer, enigma_user::message_get_caption().c_str()); XChangeProperty(display, wid,
+  int len = enigma_user::widget_get_caption().length() + 1; char *buffer = new char[len]();
+  strcpy(buffer, enigma_user::widget_get_caption().c_str()); XChangeProperty(display, wid,
   XInternAtom(display, "_NET_WM_NAME", false),
   XInternAtom(display, "UTF8_STRING", false),
   8, PropModeReplace, (unsigned char *)buffer, len);
@@ -402,12 +402,12 @@ int get_color_ext(int defcol, string title) {
   return enigma::current_widget_engine->get_color_ext(defcol, title);
 }
 
-string message_get_caption() {
-  return enigma::current_widget_engine->message_get_caption();
+string widget_get_caption() {
+  return enigma::current_widget_engine->widget_get_caption();
 }
 
-void message_set_caption(string title) {
-  enigma::current_widget_engine->message_set_caption(title);
+void widget_set_caption(string title) {
+  enigma::current_widget_engine->widget_set_caption(title);
 }
 
 } // namespace enigma_user

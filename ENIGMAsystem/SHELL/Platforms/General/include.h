@@ -7,7 +7,6 @@
 #include "PFmain.h"
 #include "PFwindow.h"
 #include "PFthreads.h"
-#include "PFfilemanip.h"
 #include "PFexternals.h"
 #include "PFsystem.h"
 #include "PFjoystick.h"

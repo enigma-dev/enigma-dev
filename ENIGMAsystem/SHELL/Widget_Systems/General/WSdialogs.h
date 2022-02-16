@@ -81,8 +81,11 @@ enum {
 	string get_directory_alt(string capt, string root);
 	int get_color(int defcol);
 	int get_color_ext(int defcol, string title);
-	string message_get_caption();
-	void message_set_caption(string title);
+	string widget_get_caption();
+	void widget_set_caption(string title);
+
+	inline string message_get_caption() { return widget_get_caption(); }
+	inline void message_set_caption(string title) { widget_set_caption(title); }
 	
 	inline bool action_if_question(string message)
 	{

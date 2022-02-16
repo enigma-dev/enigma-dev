@@ -49,8 +49,8 @@ class CommandLineWidgetEngine {
   virtual std::string get_directory_alt(std::string capt, std::string root) = 0;
   virtual int get_color(int defcol) = 0;
   virtual int get_color_ext(int defcol, std::string title) = 0;
-  virtual std::string message_get_caption() = 0;
-  virtual void message_set_caption(std::string title) = 0;
+  virtual std::string widget_get_caption() = 0;
+  virtual void widget_set_caption(std::string title) = 0;
 
 }; // class CommandLineWidgetEngine
 

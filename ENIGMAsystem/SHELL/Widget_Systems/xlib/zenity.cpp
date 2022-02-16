@@ -39,9 +39,6 @@ using enigma_user::filename_path;
 #include "Platforms/General/PFwindow.h"
 using enigma_user::window_get_caption;
 
-#include "Platforms/General/PFfilemanip.h"
-using enigma_user::file_exists;
-
 #include "Graphics_Systems/General/GScolors.h"
 using enigma_user::color_get_red;
 using enigma_user::color_get_green;
@@ -62,6 +59,10 @@ static bool message_cancel  = false;
 static bool question_cancel = false;
 
 using enigma::create_shell_dialog;
+
+static bool file_exists(string fname) {
+  return (!access(fname.c_str(), F_OK));
+}
 
 static string add_escaping(string str, bool is_caption, string new_caption) {
   string result = str; if (is_caption && str.empty()) result = new_caption;
@@ -456,14 +457,14 @@ int get_color_ext(int defcol, string title) override {
   return make_color_rgb(red, green, blue);
 }
 
-string message_get_caption() override {
+string widget_get_caption() override {
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
   if (dialog_caption == window_get_caption() && error_caption == "Error")
     return ""; else return dialog_caption;
 }
 
-void message_set_caption(string title) override {
+void widget_set_caption(string title) override {
   dialog_caption = title; error_caption = title;
   if (dialog_caption.empty()) dialog_caption = window_get_caption();
   if (error_caption.empty()) error_caption = "Error";
