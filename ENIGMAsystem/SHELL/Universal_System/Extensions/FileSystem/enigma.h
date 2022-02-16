@@ -34,9 +34,16 @@ namespace enigma_fs {
   std::string fs_executable_get_directory();
   std::string fs_executable_get_filename();
   std::string fs_executable_get_pathname();
+  bool fs_symlink_create(std::string fname, std::string newname);
+  bool fs_symlink_copy(std::string fname, std::string newname);
+  bool fs_symlink_exists(std::string fname);
+  bool fs_hardlink_create(std::string fname, std::string newname);
+  std::uintmax_t fs_file_numblinks(std::string fname);
+  std::uintmax_t fs_file_bin_numblinks(int fd);
   std::string fs_file_bin_hardlinks(int fd, std::string dnames, bool recursive);
   std::string fs_filename_absolute(std::string fname);
   std::string fs_filename_canonical(std::string fname);
+  bool fs_filename_equivalent(std::string fname1, std::string fname2);
   bool fs_file_exists(std::string fname);
   bool fs_file_delete(std::string fname);
   bool fs_file_rename(std::string oldname, std::string newname);
@@ -57,6 +64,7 @@ namespace enigma_fs {
   std::string fs_directory_contents_next();
   void fs_directory_contents_close();
   std::string fs_environment_get_variable(std::string name);
+  bool fs_environment_get_variable_exists(std::string name);
   bool fs_environment_set_variable(std::string name, std::string value);
   bool fs_environment_unset_variable(std::string name);
   std::string environment_expand_variables(std::string str);
@@ -130,9 +138,16 @@ namespace enigma_user {
   #define executable_get_directory fs_executable_get_directory()
   #define executable_get_filename fs_executable_get_filename()
   #define executable_get_pathname fs_executable_get_pathname()
+  #define symlink_create(x, y) fs_symlink_create(x, y)
+  #define symlink_copy(x, y) fs_symlink_copy(x, y)
+  #define symlink_exists(x) fs_symlink_exists(x)
+  #define hardlink_create(x, y) fs_hardlink_create(x, y)
+  #define file_numblinks(x) fs_file_numblinks(x)
+  #define file_bin_numblinks(x) fs_file_bin_numblinks(x)
   #define file_bin_hardlinks(x, y, z) fs_file_bin_hardlinks(x, y, z)
   #define filename_absolute(x) fs_filename_absolute(x)
   #define filename_canonical(x) fs_filename_canonical(x)
+  #define filename_equivalent(x, y) fs_filename_equivalent(x, y)
   #define file_exists(x) fs_file_exists(x)
   #define file_delete(x) fs_file_delete(x)
   #define file_rename(x, y) fs_file_rename(x, y)
@@ -153,6 +168,7 @@ namespace enigma_user {
   #define directory_contents_next fs_directory_contents_next()
   #define directory_contents_close fs_directory_contents_close() 
   #define environment_get_variable(x) fs_environment_get_variable(x)
+  #define environment_get_variable_exists(x) fs_environment_get_variable_exists(x)
   #define environment_set_variable(x, y) fs_environment_set_variable(x, y)
   #define environment_unset_variable(x) fs_environment_unset_variable(x)
   #define environment_expand_variables(str) fs_environment_expand_variables(str)
