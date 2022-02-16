@@ -53,6 +53,30 @@ namespace enigma_user {
   std::string executable_get_pathname() {
     return filesystem::executable_get_pathname();
   }
+
+  bool symlink_create(std::string fname, std::string newname) {
+    return filesystem::symlink_create(fname, newname);
+  }
+
+  bool symlink_copy(std::string fname, std::string newname) {
+    return filesystem::symlink_copy(fname, newname);
+  }
+
+  bool symlink_exists(std::string fname) {
+    return filesystem::symlink_exists(fname);
+  }
+
+  bool hardlink_create(std::string fname, std::string newname) {
+    return filesystem::hardlink_create(fname, newname);
+  }
+
+  std::uintmax_t file_numblinks(std::string fname) {
+    return filesystem::file_numblinks(fname);
+  }
+
+  std::uintmax_t file_bin_numblinks(int fd) {
+    return filesystem::file_bin_numblinks(fd);
+  }
  
   std::string file_bin_hardlinks(int fd, std::string dnames, bool recursive) {
     return filesystem::file_bin_hardlinks(fd, dnames, recursive);
@@ -64,6 +88,10 @@ namespace enigma_user {
  
   std::string filename_canonical(std::string fname) {
     return filesystem::filename_canonical(fname);
+  }
+
+  bool filename_equivalent(std::string fname1, std::string fname2) {
+    return filesystem::filename_equivalent(fname1, fname2);
   }
  
   bool file_exists(std::string fname) {
@@ -144,6 +172,10 @@ namespace enigma_user {
  
   std::string environment_get_variable(std::string name) {
     return filesystem::environment_get_variable(name);
+  }
+
+  bool environment_get_variable_exists(std::string name) {
+    return filesystem::environment_get_variable_exists(name);
   }
  
   bool environment_set_variable(std::string name, std::string value) {
