@@ -55,11 +55,11 @@ namespace enigma_fs {
   }
 
   bool fs_symlink_create(std::string fname, std::string newname) {
-    return filesystem::symlink_create(fname. newname);
+    return filesystem::symlink_create(fname, newname);
   }
 
   bool fs_symlink_copy(std::string fname, std::string newname) {
-    return filesystem::symlink_copy(fname. newname);
+    return filesystem::symlink_copy(fname, newname);
   }
 
   bool fs_symlink_exists(std::string fname) {
@@ -67,7 +67,7 @@ namespace enigma_fs {
   }
 
   bool fs_hardlink_create(std::string fname, std::string newname) {
-    return filesystem::hardlink_create(fname. newname);
+    return filesystem::hardlink_create(fname, newname);
   }
 
   std::uintmax_t fs_file_numblinks(std::string fname) {
