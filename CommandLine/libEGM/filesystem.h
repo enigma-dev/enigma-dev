@@ -1,8 +1,8 @@
 #ifndef EGM_FILESYS_H
 #define EGM_FILESYS_H
 
-#include "apifilesystem/filesystem.hpp"
-namespace fs = ghc::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 using errc = std::error_code;
 
 using std::string;
