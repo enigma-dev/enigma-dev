@@ -25,6 +25,7 @@
  
 */
 
+#pragma once
 #if defined(PROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
 #include <windows.h>
