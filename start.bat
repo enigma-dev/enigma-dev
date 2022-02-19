@@ -1,1 +1,0 @@
-C:\STIGMA\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -c "cd /c/STIGMA/stigma-dev/ && bash -c \"/c/STIGMA/stigma-dev/LGM.exe\""

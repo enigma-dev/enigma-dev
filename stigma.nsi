@@ -4,7 +4,7 @@ SetCompressor /FINAL lzma
 Unicode True
 !define PRODUCT "STIGMA"
 Name "STIGMA"
-Outfile "C:\Windows\Temp\${PRODUCT}-installer.exe"
+Outfile "C:\Windows\Temp\${PRODUCT}-Installer.exe"
 InstallDir "C:\${PRODUCT}"
 RequestExecutionLevel admin
 ShowInstDetails "show"
@@ -97,14 +97,14 @@ Section "STIGMA Sources"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "NoRepair" 1
 
-  ;Create optional start menu shortcut for uninstaller and Main component
+  ;Create optional start menu shortcut for Uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA.lnk" "$INSTDIR\stigma-dev\stigma-launch.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA-update.lnk" "$INSTDIR\stigma-dev\stigma-update.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\msys2-shell.lnk" "$INSTDIR\stigma-dev\msys2-shell.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}_uninstaller.exe" "" "$INSTDIR\${PRODUCT}_uninstaller.exe" 0
 
-  ;Create uninstaller
+  ;Create Uninstaller
   WriteUninstaller "${PRODUCT}_uninstaller.exe"
 
 SectionEnd
