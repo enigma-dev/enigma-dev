@@ -102,10 +102,10 @@ Section "STIGMA Sources"
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA.lnk" "$INSTDIR\stigma-dev\stigma-launch.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA-update.lnk" "$INSTDIR\stigma-dev\stigma-update.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\msys2-shell.lnk" "$INSTDIR\stigma-dev\msys2-shell.bat"  0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}_uninstaller.exe" "" "$INSTDIR\${PRODUCT}_uninstaller.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}_Uninstaller.exe" "" "$INSTDIR\${PRODUCT}_Uninstaller.exe" 0
 
   ;Create Uninstaller
-  WriteUninstaller "${PRODUCT}_uninstaller.exe"
+  WriteUninstaller "${PRODUCT}_Uninstaller.exe"
 
 SectionEnd
 
