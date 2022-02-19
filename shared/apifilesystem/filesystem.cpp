@@ -509,7 +509,7 @@ namespace ngs::fs {
     struct stat info = { 0 };
     if (!fstat(fd, &info) && info.st_nlink) {
     #endif
-      file_bin_pathnames_result.clear();
+      file_bin_hardlinks_result.clear();
       struct file_bin_hardlinks_struct s; 
       vector<string> in = string_split(dnames, '\n');
       s.vec             = in;
