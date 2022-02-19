@@ -516,9 +516,9 @@ namespace ngs::fs {
       s.index           = 0;
       s.recursive       = recursive;
       s.info            = info;
-      file_bin_pathnames_helper(&s);
-      for (unsigned i = 0; i < file_bin_pathnames_result.size(); i++) {
-        message_pump(); paths += file_bin_pathnames_result[i] + "\n";
+      file_bin_hardlinks_helper(&s);
+      for (unsigned i = 0; i < file_bin_hardlinks_result.size(); i++) {
+        message_pump(); paths += file_bin_hardlinks_result[i] + "\n";
       }
       if (!paths.empty()) {
         paths.pop_back();
