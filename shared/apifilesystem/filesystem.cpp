@@ -877,8 +877,12 @@ namespace ngs::fs {
     inner = expand_without_trailing_slash(inner);
     const ghc::filesystem::path path1 = ghc::filesystem::path(outer);
     ghc::filesystem::path path2 = ghc::filesystem::path(inner);
+    #if defined(_WIN32) 
     while (expand_without_trailing_slash(path2.string()) !=
       expand_without_trailing_slash(path2.root_name().string())) {
+    #else
+    while (expand_without_trailing_slash(path2.string()) != "/") {
+    #endif
       message_pump();
       if (!filename_equivalent(path1.string(), path2.string())) {
         path2 = path2.parent_path();
@@ -894,34 +898,18 @@ namespace ngs::fs {
     if (!directory_exists(dname)) return false;
     dname = expand_without_trailing_slash(dname);
     newname = expand_without_trailing_slash(newname);
-    unsigned maxprev = directory_contents_get_maxfiles();
-    unsigned orderprev = directory_contents_get_order();
-    directory_contents_set_maxfiles(0);
-    directory_contents_set_order(DC_ATOZ);
-    vector<string> vec = directory_contents_helper(dname, "*.*", true);
-    directory_contents_set_order(orderprev);
-    directory_contents_set_maxfiles(maxprev);
     if (!file_is_inside_directory(dname, newname)) {
-      for (unsigned i = 0; i < vec.size(); i++) {
-        message_pump();
-        if (!directory_exists(newname)) {
-          if (!directory_create(newname)) return false;
-        }
-        if (file_exists(vec[i]) || symlink_exists(vec[i])) {
-          const ghc::filesystem::path path1 = ghc::filesystem::path(vec[i]);
-          const ghc::filesystem::path path2 = 
-            ghc::filesystem::path(expand_with_trailing_slash(newname) + filename_name(vec[i]));
-          ghc::filesystem::copy(path1, path2, ghc::filesystem::copy_options::copy_symlinks, ec);
-          if (ec.value() != 0) return false;
-        } else if (directory_exists(vec[i])) {
-          if (!directory_create(expand_with_trailing_slash(newname) +
-            filename_name(expand_without_trailing_slash(vec[i]))) || 
-            !directory_copy(vec[i], expand_with_trailing_slash(newname) + 
-            filename_name(expand_without_trailing_slash(vec[i])))) {
-            return false;
-          }
+      const ghc::filesystem::path path1 = ghc::filesystem::path(dname);
+      const ghc::filesystem::path path2 = ghc::filesystem::path(newname);
+      if (!directory_exists(path2.parent_path().string())) {
+        if (!directory_create(path2.parent_path().string())) {
+          return false;
         }
       }
+      ghc::filesystem::copy(path1, path2, 
+        ghc::filesystem::copy_options::recursive |
+        ghc::filesystem::copy_options::copy_symlinks, ec);
+      return (ec.value() == 0);
     } else {
       return false;
     }
