@@ -162,6 +162,22 @@ namespace enigma_user {
     return filesystem::directory_contents_first(dname, pattern, includedirs, recursive);
   }
 
+  void directory_contents_first_async(std::string dname, std::string pattern, bool includedirs, bool recursive) {
+    filesystem::directory_contents_first_async(dname, pattern, includedirs, recursive);
+  }
+   
+  unsigned directory_contents_get_length() {
+    return filesystem::directory_contents_get_length();
+  }
+ 
+  bool directory_contents_get_completion_status() {
+    return filesystem::directory_contents_get_completion_status();
+  }
+ 
+  void directory_contents_set_completion_status(bool complete) {
+    filesystem::directory_contents_set_completion_status(complete);
+  }
+ 
   std::string directory_contents_next() {
     return filesystem::directory_contents_next();
   }
