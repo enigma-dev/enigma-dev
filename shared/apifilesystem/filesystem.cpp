@@ -748,9 +748,9 @@ namespace ngs::fs {
     const ghc::filesystem::path path = ghc::filesystem::path(dname);
     if (directory_exists(dname)) {
       ghc::filesystem::directory_iterator end_itr;
-      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr && 
+      for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr && !directory_contents_completion_status &&
         (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite.increment(ec)) {
-        message_pump(); if (ec.value() != 0 || directory_contents_completion_status) { break; }
+        message_pump(); if (ec.value() != 0) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
         if (!directory_exists(file_path.string())) {
           result.push_back(file_path.string());
@@ -825,11 +825,11 @@ namespace ngs::fs {
     directory_contents_order = order;
   }
 
-  string directory_contents_first(string dname, string pattern, bool includedirs, bool recursive) {
+  string directory_contents_first(string dname, string pattern, bool includedirs, bool recursive, bool async = false) {
     if (directory_contents_completion_status) directory_contents_close();
     if (!recursive) directory_contents = directory_contents_helper(dname, pattern, includedirs);
     else directory_contents = directory_contents_recursive_helper(dname, pattern, includedirs);
-    if (!directory_contents_completion_status) directory_contents.insert(directory_contents.begin(), "");
+    if (async) directory_contents.insert(directory_contents.begin(), "");
     if (directory_contents_index < directory_contents.size()) {
       if (directory_contents_order == DC_ZTOA) {
         std::reverse(directory_contents.begin(), directory_contents.end());
@@ -882,9 +882,8 @@ namespace ngs::fs {
   }
 
   void directory_contents_first_async(string dname, string pattern, bool includedirs, bool recursive) {
-    directory_contents_close();
     directory_contents_completion_status = false;
-    std::thread(directory_contents_first, dname, pattern, includedirs, recursive).detach();
+    std::thread(directory_contents_first, dname, pattern, includedirs, recursive, true).detach();
   }
 
   bool directory_contents_get_completion_status() {
