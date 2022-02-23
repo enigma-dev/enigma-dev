@@ -80,6 +80,10 @@ namespace ngs::fs {
   unsigned directory_contents_get_maxfiles();
   void directory_contents_set_maxfiles(unsigned maxfiles);
   std::string directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive);
+  void directory_contents_first_async(std::string dname, std::string pattern, bool includedirs, bool recursive);
+  unsigned directory_contents_get_length();
+  bool directory_contents_get_completion_status();
+  void directory_contents_set_completion_status(bool complete);
   std::string directory_contents_next();
   void directory_contents_close();
   std::string environment_get_variable(std::string name);

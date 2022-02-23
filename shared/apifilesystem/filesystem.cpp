@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <vector>
 #include <random>
+#include <thread>
 
 #include <climits>
 #include <cstdlib>
@@ -101,6 +102,7 @@ namespace ngs::fs {
     unsigned directory_contents_order = DC_ATOZ;
     unsigned directory_contents_cntfiles = 1;
     unsigned directory_contents_maxfiles = 0;
+    bool directory_contents_completion_status = false;
 
     time_t file_datetime_helper(string fname, int timestamp) {
       int result = -1;
@@ -723,6 +725,10 @@ namespace ngs::fs {
     return (ghc::filesystem::remove_all(path, ec) && ec.value() == 0);
   }
 
+  unsigned directory_contents_get_length() {
+    return directory_contents.size();
+  }
+
   unsigned directory_contents_get_cntfiles() {
     return directory_contents_cntfiles;
   }
@@ -744,7 +750,7 @@ namespace ngs::fs {
       ghc::filesystem::directory_iterator end_itr;
       for (ghc::filesystem::directory_iterator dir_ite(path, ec); dir_ite != end_itr && 
         (directory_contents_maxfiles == 0 || directory_contents_cntfiles < directory_contents_maxfiles); dir_ite.increment(ec)) {
-        message_pump(); if (ec.value() != 0) { break; }
+        message_pump(); if (ec.value() != 0 || directory_contents_completion_status) { break; }
         ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
         if (!directory_exists(file_path.string())) {
           result.push_back(file_path.string());
@@ -808,6 +814,7 @@ namespace ngs::fs {
     directory_contents.clear(); 
     directory_contents_index = 0;
     directory_contents_cntfiles = 1;
+    directory_contents_completion_status = false;
   }
 
   unsigned directory_contents_get_order() {
@@ -819,9 +826,10 @@ namespace ngs::fs {
   }
 
   string directory_contents_first(string dname, string pattern, bool includedirs, bool recursive) {
-    directory_contents_close();
+    if (directory_contents_completion_status) directory_contents_close();
     if (!recursive) directory_contents = directory_contents_helper(dname, pattern, includedirs);
     else directory_contents = directory_contents_recursive_helper(dname, pattern, includedirs);
+    if (!directory_contents_completion_status) directory_contents.insert(directory_contents.begin(), "");
     if (directory_contents_index < directory_contents.size()) {
       if (directory_contents_order == DC_ZTOA) {
         std::reverse(directory_contents.begin(), directory_contents.end());
@@ -859,8 +867,10 @@ namespace ngs::fs {
         std::random_device rd; std::mt19937 g(rd());
         std::shuffle(directory_contents.begin(), directory_contents.end(), g);
       }
+      directory_contents_completion_status = true;
       return directory_contents[directory_contents_index];
     } 
+    directory_contents_completion_status = true;
     return "";
   }
 
@@ -869,6 +879,20 @@ namespace ngs::fs {
     if (directory_contents_index < directory_contents.size())
       return directory_contents[directory_contents_index];
     return "";
+  }
+
+  void directory_contents_first_async(string dname, string pattern, bool includedirs, bool recursive) {
+    directory_contents_close();
+    directory_contents_completion_status = false;
+    std::thread(directory_contents_first, dname, pattern, includedirs, recursive).detach();
+  }
+
+  bool directory_contents_get_completion_status() {
+    return directory_contents_completion_status;
+  }
+
+  void directory_contents_set_completion_status(bool complete) {
+    directory_contents_completion_status = complete;
   }
 
   static inline bool file_is_inside_directory(string outer, string inner) {
