@@ -727,7 +727,7 @@ namespace ngs::fs {
   }
 
   unsigned directory_contents_get_length() {
-    return directory_contents.size();
+    return (unsigned)directory_contents.size();
   }
 
   unsigned directory_contents_get_cntfiles() {
