@@ -830,7 +830,6 @@ namespace ngs::fs {
     if (directory_contents_completion_status) directory_contents_close();
     if (!recursive) directory_contents = directory_contents_helper(dname, pattern, includedirs);
     else directory_contents = directory_contents_recursive_helper(dname, pattern, includedirs);
-    if (directory_contents_completion_async) directory_contents.insert(directory_contents.begin(), "");
     if (directory_contents_index < directory_contents.size()) {
       if (directory_contents_order == DC_ZTOA) {
         std::reverse(directory_contents.begin(), directory_contents.end());
@@ -867,6 +866,9 @@ namespace ngs::fs {
       } else if (directory_contents_order == DC_RAND) {
         std::random_device rd; std::mt19937 g(rd());
         std::shuffle(directory_contents.begin(), directory_contents.end(), g);
+      }
+      if (directory_contents_completion_async) {
+        directory_contents.insert(directory_contents.begin(), "");
       }
       directory_contents_completion_async = false;
       directory_contents_completion_status = true;
