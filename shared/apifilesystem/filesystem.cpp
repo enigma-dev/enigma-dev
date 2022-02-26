@@ -867,10 +867,6 @@ namespace ngs::fs {
         std::random_device rd; std::mt19937 g(rd());
         std::shuffle(directory_contents.begin(), directory_contents.end(), g);
       }
-      if (directory_contents_completion_async) {
-        directory_contents.insert(directory_contents.begin(), "");
-      }
-      directory_contents_completion_async = false;
       directory_contents_completion_status = true;
       return directory_contents[directory_contents_index];
     } 
@@ -880,7 +876,9 @@ namespace ngs::fs {
   }
 
   string directory_contents_next() {
-    directory_contents_index++;
+    if (!directory_contents_completion_async)
+      directory_contents_index++;
+    directory_contents_completion_async = false;
     if (directory_contents_index < directory_contents.size())
       return directory_contents[directory_contents_index];
     return "";
