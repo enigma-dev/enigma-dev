@@ -470,9 +470,9 @@ namespace ngs::fs {
       if (!directory_exists(filename_path(newname)))
         directory_create(filename_path(newname));
       #if defined(_WIN32)
-      wstring wfname = widen(wfname);
-      wstring wnewname = widen(newname);	  
-      return (CreateHardLinkW(wfname.c_str(), wnewname.c_str(), nullptr));
+      wstring u8fname = widen(fname);
+      wstring u8newname = widen(newname);	  
+      return (CreateHardLinkW(u8fname.c_str(), u8newname.c_str(), nullptr));
       #else
       return (!link(fname.c_str(), newname.c_str()));
       #endif
