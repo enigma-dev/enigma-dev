@@ -466,13 +466,16 @@ namespace ngs::fs {
     std::error_code ec;
     fname = expand_without_trailing_slash(fname);
     newname = expand_without_trailing_slash(newname);
-    ghc::filesystem::path path1 = ghc::filesystem::path(fname);
-    ghc::filesystem::path path2 = ghc::filesystem::path(newname);
     if (file_exists(fname)) {
       if (!directory_exists(filename_path(newname)))
         directory_create(filename_path(newname));
-      ghc::filesystem::create_hard_link(path1, path2, ec);
-      return (ec.value() == 0);
+      #if defined(_WIN32)
+      wstring wfname = widen(wfname);
+      wstring wnewname = widen(newname);	  
+      return (CreateHardLinkW(wfname.c_str(), wnewname.c_str(), nullptr));
+      #else
+      return (!link(fname.c_str(), newname.c_str()));
+      #endif
     }
     return false;
   }
@@ -481,9 +484,12 @@ namespace ngs::fs {
     std::error_code ec;
     fname = expand_without_trailing_slash(fname);
     if (file_exists(fname)) {
-      ghc::filesystem::path path = ghc::filesystem::path(fname);
-      std::uintmax_t numb = ghc::filesystem::hard_link_count(path, ec);
-      return ((ec.value() == 0) ? numb : 0);
+      int fd = file_bin_open(fname, FD_RDONLY);
+      if (fd != -1) {
+        std::uintmax_t result = file_bin_numblinks(fd);
+        file_bin_close(fd);
+        return result;
+      }
     }
     return 0;
   }
