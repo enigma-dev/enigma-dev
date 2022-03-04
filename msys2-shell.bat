@@ -1,1 +1,0 @@
-C:\STIGMA\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -c "EDIR=$(echo \"C:\STIGMA\stigma-dev\" | tr '\\' '/') && cd $EDIR && bash"
