@@ -523,6 +523,7 @@ namespace ngs::fs {
       file_bin_hardlinks_result.clear();
       struct file_bin_hardlinks_struct s; 
       vector<string> in = string_split(dnames, '\n');
+      if (in.empty()) return paths;
       vector<string> first;
       first.push_back(in[0]);
       in.erase(in.begin());
