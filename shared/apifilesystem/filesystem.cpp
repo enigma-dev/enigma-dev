@@ -346,7 +346,11 @@ namespace ngs::fs {
           }
         }
       }
-      while (s->index < s->vec.size() - 1) {
+      #if defined(_WIN32)
+      while (findhardlinks_result.size() < s->info.nNumberOfLinks) {
+      #else
+      while (findhardlinks_result.size() < s->info.st_nlink) {
+      #endif
         message_pump(); s->index++;
         file_bin_hardlinks_helper(s);
       }
