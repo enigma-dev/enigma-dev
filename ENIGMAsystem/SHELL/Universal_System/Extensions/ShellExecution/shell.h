@@ -9,8 +9,9 @@
 #define LOCALPROCID int
 #endif
 
-#define PROCLIST int
-#define PROCINFO int
+#define PROCLIST   int
+#define PROCINFO   int
+#define KINFOFLAGS long
 
 using namespace ::ngs::proc;
 
@@ -64,6 +65,9 @@ std::string CwdFromProcId(PROCID procId);
 // get process info from process id
 PROCINFO ProcInfoFromProcId(PROCID procId);
 
+// get specific process info from process id
+PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags);
+
 // free process info data from memory
 void FreeProcInfo(PROCINFO procInfo);
 
@@ -114,6 +118,9 @@ bool DirectorySetCurrentWorking(std::string dname);
 
 // get the environment variable of the given name
 std::string EnvironmentGetVariable(std::string name);
+
+// get whether the environment variable of the given name exists
+bool EnvironmentGetVariableExists(std::string name);
 
 // set the environment variable with the given name and value
 bool EnvironmentSetVariable(std::string name, std::string value);

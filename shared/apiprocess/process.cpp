@@ -1155,6 +1155,26 @@ namespace ngs::proc {
     return str.c_str();
   }
 
+  bool environ_from_proc_id_ex_exists(PROCID proc_id, const char *name) {
+    char **buffer = nullptr; int size = 0; bool result = false;
+    environ_from_proc_id(proc_id, &buffer, &size);
+    if (buffer) {
+      for (int i = 0; i < size; i++) {
+        std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
+        if (!equalssplit.empty()) {
+          std::string str = name;
+          std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
+          std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+          if (equalssplit[0] == str) {
+            result = true;
+          }
+        }
+      }
+      free_environ(buffer);
+    }
+    return result;
+  }
+
   const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
@@ -1166,6 +1186,15 @@ namespace ngs::proc {
     str = value ? value : "\0";
     #endif
     return str.c_str();
+  }
+
+  bool environment_get_variable_exists(const char *name) {
+    #if defined(_WIN32)
+    return environ_from_proc_id_ex_exists(proc_id_from_self(), name);
+    #else
+    char *value = getenv(name);
+    return (value != nullptr);
+    #endif		
   }
 
   bool environment_set_variable(const char *name, const char *value) {
@@ -1439,18 +1468,26 @@ namespace ngs::proc {
   static std::vector<std::vector<PROCID>> proc_list_vec;
 
   PROCINFO proc_info_from_proc_id(PROCID proc_id) {
-    char *exe = nullptr; exe_from_proc_id(proc_id, &exe);
-    char *cwd = nullptr; cwd_from_proc_id(proc_id, &cwd);
-    PROCID ppid = 0; parent_proc_id_from_proc_id(proc_id, &ppid);
+    KINFOFLAGS kinfo_flags = KINFO_EXEP | KINFO_CWDP | KINFO_PPID | KINFO_CPID | KINFO_ARGV | KINFO_ENVV;
+    #if defined(PROCESS_GUIWINDOW_IMPL)
+    kinfo_flags |= KINFO_OWID;
+    #endif
+    return proc_info_from_proc_id_ex(proc_id, kinfo_flags);
+  }
+
+  PROCINFO proc_info_from_proc_id_ex(PROCID proc_id, KINFOFLAGS kinfo_flags) {
+    char *exe = nullptr; if (kinfo_flags & KINFO_EXEP) exe_from_proc_id(proc_id, &exe);
+    char *cwd = nullptr; if (kinfo_flags & KINFO_CWDP) cwd_from_proc_id(proc_id, &cwd);
+    PROCID ppid = 0;     if (kinfo_flags & KINFO_PPID) parent_proc_id_from_proc_id(proc_id, &ppid);
     PROCID *pid = nullptr; int pidsize = 0;
-    proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
+    if (kinfo_flags & KINFO_CPID) proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
     char **cmd = nullptr; int cmdsize = 0;
-    cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
+    if (kinfo_flags & KINFO_ARGV) cmdline_from_proc_id(proc_id, &cmd, &cmdsize);
     char **env = nullptr; int envsize = 0;
-    environ_from_proc_id(proc_id, &env, &envsize);
+    if (kinfo_flags & KINFO_ENVV) environ_from_proc_id(proc_id, &env, &envsize);
     #if defined(PROCESS_GUIWINDOW_IMPL)
     WINDOWID *wid = nullptr; int widsize = 0;
-    window_id_from_proc_id(proc_id, &wid, &widsize);
+    if (kinfo_flags & KINFO_OWID) window_id_from_proc_id(proc_id, &wid, &widsize);
     #endif
     PROCINFO_STRUCT *proc_info = new PROCINFO_STRUCT();
     proc_info->executable_image_file_path = exe;

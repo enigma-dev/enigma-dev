@@ -58,8 +58,20 @@ namespace ngs::proc {
   #endif
   typedef char *WINDOWID;
   #endif
-  typedef int PROCLIST;
-  typedef int PROCINFO;
+  typedef int  PROCLIST;
+  typedef int  PROCINFO;
+  typedef long KINFOFLAGS;
+
+  // Specific Process Info
+  #define KINFO_EXEP 0x00800000
+  #define KINFO_CWDP 0x00C00000
+  #define KINFO_PPID 0x40000000
+  #define KINFO_CPID 0x02000000
+  #define KINFO_ARGV 0x04000000
+  #define KINFO_ENVV 0x08000000
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  #define KINFO_OWID 0x00400000
+  #endif
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
   void free_proc_id(PROCID *proc_id);
@@ -81,14 +93,17 @@ namespace ngs::proc {
   void free_cmdline(char **buffer);
   void cmdline_from_proc_id(PROCID proc_id, char ***buffer, int *size);
   const char *environment_get_variable(const char *name);
+  bool environment_get_variable_exists(const char *name);
   bool environment_set_variable(const char *name, const char *value);
   bool environment_unset_variable(const char *name);
   void free_environ(char **buffer);
   void environ_from_proc_id(PROCID proc_id, char ***buffer, int *size);
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value);
   const char *environ_from_proc_id_ex(PROCID proc_id, const char *name);
+  bool environ_from_proc_id_ex_exists(PROCID proc_id, const char *name);
   const char *directory_get_temporary_path();
   PROCINFO proc_info_from_proc_id(PROCID proc_id);
+  PROCINFO proc_info_from_proc_id_ex(PROCID proc_id, KINFOFLAGS kinfo_flags);
   void free_proc_info(PROCINFO proc_info);
   PROCLIST proc_list_create();
   PROCID process_id(PROCLIST proc_list, int i);

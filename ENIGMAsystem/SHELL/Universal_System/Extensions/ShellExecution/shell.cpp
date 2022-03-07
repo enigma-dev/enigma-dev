@@ -91,6 +91,11 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   return proc_info_from_proc_id(procId);
 }
 
+// get specific process info from process id
+PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags) {
+  return proc_info_from_proc_id_ex(procId, kInfoFlags);
+}
+
 // free process info data from memory
 void FreeProcInfo(PROCINFO procInfo) {
   free_proc_info(procInfo);
@@ -174,6 +179,11 @@ bool DirectorySetCurrentWorking(string dname) {
 // get the environment variable of the given name
 string EnvironmentGetVariable(string name) {
   return environment_get_variable(name.c_str());
+}
+
+// get whether the environment variable of the given name exists
+bool EnvironmentGetVariableExists(string name) {
+  return environment_get_variable_exists(name.c_str());
 }
 
 // set the environment variable with the given name and value
