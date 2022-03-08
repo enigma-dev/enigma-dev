@@ -11,7 +11,7 @@
 
 #define PROCLIST   int
 #define PROCINFO   int
-#define KINFOFLAGS long
+#define KINFOFLAGS int
 
 using namespace ::ngs::proc;
 
