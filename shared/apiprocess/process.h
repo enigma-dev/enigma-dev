@@ -64,7 +64,7 @@ namespace ngs::proc {
 
   // Specific Process Info
   #define KINFO_EXEP 0x00800000
-  #define KINFO_CWDP 0x00C00000
+  #define KINFO_CWDP 0x00200000
   #define KINFO_PPID 0x40000000
   #define KINFO_CPID 0x02000000
   #define KINFO_ARGV 0x04000000
