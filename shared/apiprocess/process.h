@@ -62,15 +62,14 @@ namespace ngs::proc {
   typedef int  PROCINFO;
   typedef long KINFOFLAGS;
 
-  // Specific Process Info
-  #define KINFO_EXEP 0x00800000
-  #define KINFO_CWDP 0x00200000
-  #define KINFO_PPID 0x40000000
+  #define KINFO_EXEP 0x10000000
+  #define KINFO_CWDP 0x20000000
+  #define KINFO_PPID 0x01000000
   #define KINFO_CPID 0x02000000
-  #define KINFO_ARGV 0x04000000
-  #define KINFO_ENVV 0x08000000
+  #define KINFO_ARGV 0x00100000
+  #define KINFO_ENVV 0x00200000
   #if defined(PROCESS_GUIWINDOW_IMPL)
-  #define KINFO_OWID 0x00400000
+  #define KINFO_OWID 0x00010000
   #endif
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
