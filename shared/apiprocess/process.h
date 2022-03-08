@@ -58,18 +58,18 @@ namespace ngs::proc {
   #endif
   typedef char *WINDOWID;
   #endif
-  typedef int  PROCLIST;
-  typedef int  PROCINFO;
-  typedef long KINFOFLAGS;
+  typedef int PROCLIST;
+  typedef int PROCINFO;
+  typedef int KINFOFLAGS;
 
-  #define KINFO_EXEP 0x10000000
-  #define KINFO_CWDP 0x20000000
-  #define KINFO_PPID 0x01000000
-  #define KINFO_CPID 0x02000000
-  #define KINFO_ARGV 0x00100000
-  #define KINFO_ENVV 0x00200000
+  #define KINFO_EXEP 0x1000
+  #define KINFO_CWDP 0x2000
+  #define KINFO_PPID 0x0100
+  #define KINFO_CPID 0x0200
+  #define KINFO_ARGV 0x0010
+  #define KINFO_ENVV 0x0020
   #if defined(PROCESS_GUIWINDOW_IMPL)
-  #define KINFO_OWID 0x00010000
+  #define KINFO_OWID 0x0001
   #endif
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
