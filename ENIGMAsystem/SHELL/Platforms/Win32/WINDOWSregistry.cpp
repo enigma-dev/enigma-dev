@@ -65,9 +65,9 @@ namespace enigma_user {
 
   bool registry_write_string_ext(string subpath, string name, string str) {
     wchar_t buff[32767];
-	HKEY subkey = nullptr;
-	wstring u8subpath = widen(subpath);
-	wstring u8name    = widen(name);
+    HKEY subkey = nullptr;
+    wstring u8subpath = widen(subpath);
+    wstring u8name    = widen(name);
     wstring u8str     = widen(str);
     wcsncpy_s(buff, sizeof(buff), u8str.c_str(), sizeof(buff));
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
@@ -81,9 +81,9 @@ namespace enigma_user {
   }
 
   bool registry_write_real_ext(string subpath, string name, unsigned long val) {
-	HKEY subkey = nullptr;
-	wstring u8subpath = widen(subpath);
-	wstring u8name    = widen(name);
+    HKEY subkey = nullptr;
+    wstring u8subpath = widen(subpath);
+    wstring u8name    = widen(name);
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
     } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, &val, sizeof(unsigned long)) != ERROR_SUCCESS) {
@@ -97,8 +97,8 @@ namespace enigma_user {
   string registry_read_string_ext(string subpath, string name) {
     string res; wchar_t buff[32767]; 
     unsigned long sz  = sizeof(buff);
-	wstring u8subpath = widen(subpath);
-	wstring u8name    = widen(name);
+    wstring u8subpath = widen(subpath);
+    wstring u8name    = widen(name);
     if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_SZ, nullptr, &buff, &sz) == ERROR_SUCCESS) {
       res = shorten(buff);
     }
@@ -108,8 +108,8 @@ namespace enigma_user {
   unsigned long registry_read_real_ext(string subpath, string name) {
     unsigned long val = 0; 
     unsigned long sz  = sizeof(val);
-	wstring u8subpath = widen(subpath);
-	wstring u8name    = widen(name);
+    wstring u8subpath = widen(subpath);
+    wstring u8name    = widen(name);
     if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
       return val;
     }
@@ -118,8 +118,8 @@ namespace enigma_user {
 
   bool registry_exists_ext(string subpath, string name) {
     HKEY subkey = nullptr;
-	wstring u8subpath = widen(subpath);
-	wstring u8name    = widen(name);
+    wstring u8subpath = widen(subpath);
+    wstring u8name    = widen(name);
     if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) != ERROR_SUCCESS) {
       return false;
     } else if (RegQueryValueExW(subkey, u8name.c_str(), 0, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND) {
@@ -136,7 +136,7 @@ namespace enigma_user {
  
   bool registry_set_path(string subpath) {
     HKEY subkey = nullptr;
-	wstring u8subpath = widen(subpath);
+    wstring u8subpath = widen(subpath);
     if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) == ERROR_SUCCESS) {
       path = subpath;
       RegCloseKey(subkey);
