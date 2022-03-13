@@ -33,9 +33,10 @@
 
 #include "Platforms/General/PFregistry.h"
 #include "Platforms/platforms_mandatory.h"
-#include "strings_utii.h"
+#include "Universal_System/estring.h"
 
 using std::string;
+using std::wstring;
 
 static HKEY   key       = HKEY_CURRENT_USER;
 static string keystring = "HKEY_CURRENT_USER"; 
@@ -48,7 +49,7 @@ namespace enigma_user {
   }
 
   bool registry_write_real(string name, unsigned long val) {
-    return registry_write_string_ext(path, name, val);
+    return registry_write_real_ext(path, name, val);
   }
 
   string registry_read_string(string name) {
@@ -64,15 +65,14 @@ namespace enigma_user {
   }
 
   bool registry_write_string_ext(string subpath, string name, string str) {
-    wchar_t buff[32767];
+    char buff[32767];
     HKEY subkey = nullptr;
     wstring u8subpath = widen(subpath);
     wstring u8name    = widen(name);
-    wstring u8str     = widen(str);
-    wcsncpy_s(buff, sizeof(buff), u8str.c_str(), sizeof(buff));
+    strncpy_s(buff, sizeof(buff), str.c_str(), sizeof(buff));
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
-    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, &buff, sizeof(buff)) != ERROR_SUCCESS) {
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, (unsigned char *)&buff, sizeof(buff)) != ERROR_SUCCESS) {
       RegCloseKey(subkey);
       return false;
     }
@@ -86,7 +86,7 @@ namespace enigma_user {
     wstring u8name    = widen(name);
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
-    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, &val, sizeof(unsigned long)) != ERROR_SUCCESS) {
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, (unsigned char *)&val, sizeof(unsigned long)) != ERROR_SUCCESS) {
       RegCloseKey(subkey);
       return false;
     }
@@ -95,12 +95,12 @@ namespace enigma_user {
   }
 
   string registry_read_string_ext(string subpath, string name) {
-    string res; wchar_t buff[32767]; 
+    string res; char buff[32767]; 
     unsigned long sz  = sizeof(buff);
     wstring u8subpath = widen(subpath);
     wstring u8name    = widen(name);
-    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_SZ, nullptr, &buff, &sz) == ERROR_SUCCESS) {
-      res = shorten(buff);
+    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_SZ, nullptr, (unsigned char *)&buff, &sz) == ERROR_SUCCESS) {
+      res = buff;
     }
     return res;
   }
@@ -110,7 +110,7 @@ namespace enigma_user {
     unsigned long sz  = sizeof(val);
     wstring u8subpath = widen(subpath);
     wstring u8name    = widen(name);
-    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, (unsigned char *)&val, &sz) == ERROR_SUCCESS) {
       return val;
     }
     return 0;
@@ -151,7 +151,7 @@ namespace enigma_user {
 
   bool registry_set_key(string keystr) {
     bool success = true;
-    std::transform(keystr.begin(), keystr.end(), keystr.begin(), std::toupper);
+    std::transform(keystr.begin(), keystr.end(), keystr.begin(), ::toupper);
     if      (keystr == "HKEY_CLASSES_ROOT")        key = HKEY_CLASSES_ROOT;
     else if (keystr == "HKEY_CURRENT_CONFIG")      key = HKEY_CURRENT_CONFIG;
     else if (keystr == "HKEY_CURRENT_USER")        key = HKEY_CURRENT_USER;

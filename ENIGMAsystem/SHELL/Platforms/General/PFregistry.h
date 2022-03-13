@@ -19,22 +19,24 @@
 #ifndef ENIGMA_PLATFORM_REGISTRY
 #define ENIGMA_PLATFORM_REGISTRY
 
+#include <string>
+
 namespace enigma_user {
 
-  bool registry_write_string(string name, string str);
-  bool registry_write_real(string name, unsigned long val);
-  string registry_read_string(string name);
-  unsigned long registry_read_real(string name);
-  bool registry_exists(string name);
-  bool registry_write_string_ext(string subpath, string name, string str);
-  bool registry_write_real_ext(string subpath, string name, unsigned long val);
-  string registry_read_string_ext(string subpath, string name);
-  unsigned long registry_read_real_ext(string subpath, string name);
-  bool registry_exists_ext(string subpath, string name);
-  string registry_get_path();
-  bool registry_set_path(string subpath);
-  string registry_get_key();
-  bool registry_set_key(string keystr);
+  bool registry_write_string(std::string name, std::string str);
+  bool registry_write_real(std::string name, unsigned long val);
+  std::string registry_read_string(std::string name);
+  unsigned long registry_read_real(std::string name);
+  bool registry_exists(std::string name);
+  bool registry_write_string_ext(std::string subpath, std::string name, std::string str);
+  bool registry_write_real_ext(std::string subpath, std::string name, unsigned long val);
+  std::string registry_read_string_ext(std::string subpath, std::string name);
+  unsigned long registry_read_real_ext(std::string subpath, std::string name);
+  bool registry_exists_ext(std::string subpath, std::string name);
+  std::string registry_get_path();
+  bool registry_set_path(std::string subpath);
+  std::string registry_get_key();
+  bool registry_set_key(std::string keystr);
 
 }
 
