@@ -1,171 +1,168 @@
-/** Copyright (C) 2008-2011 Josh Ventura
-*** Copyright (C) 2013-2014 Robert B. Colton
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+/*
+
+ MIT License
+ 
+ Copyright © 2022 Samuel Venable
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ 
+*/
 
 #include <string>
-#include <sstream>
-using std::string;
+#include <algorithm>
 
 #define byte __windows_byte_workaround
 #include <windows.h>
 #undef byte
 
-
-#include "../General/PFregistry.h"
-
+#include "Platforms/General/PFregistry.h"
 #include "Platforms/platforms_mandatory.h"
+#include "strings_utii.h"
+
+using std::string;
+
+static HKEY   key       = HKEY_CURRENT_USER;
+static string keystring = "HKEY_CURRENT_USER"; 
+static string path      = "SOFTWARE\\STIGMA\\";
 
 namespace enigma_user {
 
-extern unsigned int game_id;
+  bool registry_write_string(string name, string str) {
+    return registry_write_string_ext(path, name, str);
+  }
 
-}
+  bool registry_write_real(string name, unsigned long val) {
+    return registry_write_string_ext(path, name, val);
+  }
 
-static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
+  string registry_read_string(string name) {
+    return registry_read_string_ext(path, name);
+  }
 
-namespace enigma_user
-{
+  unsigned long registry_read_real(string name) {
+    return registry_read_real_ext(path, name);
+  }
 
-void registry_write_string(std::string name, std::string str)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+  bool registry_exists(string name) {
+    return registry_exists_ext(path, name);
+  }
 
-	// Write to registry
-	registry_write_string_ext(ss.str(), name, str);
-}
+  bool registry_write_string_ext(string subpath, string name, string str) {
+    wchar_t buff[32767];
+	HKEY subkey = nullptr;
+	wstring u8subpath = widen(subpath);
+	wstring u8name    = widen(name);
+    wstring u8str     = widen(str);
+    wcsncpy_s(buff, sizeof(buff), u8str.c_str(), sizeof(buff));
+    if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
+      return false;
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, &buff, sizeof(buff)) != ERROR_SUCCESS) {
+      RegCloseKey(subkey);
+      return false;
+    }
+    RegCloseKey(subkey);
+    return true;
+  }
 
-void registry_write_real(std::string name, int x)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+  bool registry_write_real_ext(string subpath, string name, unsigned long val) {
+	HKEY subkey = nullptr;
+	wstring u8subpath = widen(subpath);
+	wstring u8name    = widen(name);
+    if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
+      return false;
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, &val, sizeof(unsigned long)) != ERROR_SUCCESS) {
+      RegCloseKey(subkey);
+      return false;
+    }
+    RegCloseKey(subkey);
+    return true;
+  }
 
-	// Write to registry
-	registry_write_real_ext(ss.str(), name, x);
-}
+  string registry_read_string_ext(string subpath, string name) {
+    string res; wchar_t buff[32767]; 
+    unsigned long sz  = sizeof(buff);
+	wstring u8subpath = widen(subpath);
+	wstring u8name    = widen(name);
+    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_SZ, nullptr, &buff, &sz) == ERROR_SUCCESS) {
+      res = shorten(buff);
+    }
+    return res;
+  }
 
-std::string registry_read_string(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+  unsigned long registry_read_real_ext(string subpath, string name) {
+    unsigned long val = 0; 
+    unsigned long sz  = sizeof(val);
+	wstring u8subpath = widen(subpath);
+	wstring u8name    = widen(name);
+    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      return val;
+    }
+    return 0;
+  }
 
-	// Read from registry
-	return registry_read_string_ext(ss.str(), name);
-}
+  bool registry_exists_ext(string subpath, string name) {
+    HKEY subkey = nullptr;
+	wstring u8subpath = widen(subpath);
+	wstring u8name    = widen(name);
+    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) != ERROR_SUCCESS) {
+      return false;
+    } else if (RegQueryValueExW(subkey, u8name.c_str(), 0, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND) {
+      RegCloseKey(subkey);
+      return false;
+    }
+    RegCloseKey(subkey);
+    return true;
+  }
+  
+  string registry_get_path() {
+    return path;
+  }
+ 
+  bool registry_set_path(string subpath) {
+    HKEY subkey = nullptr;
+	wstring u8subpath = widen(subpath);
+    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) == ERROR_SUCCESS) {
+      path = subpath;
+      RegCloseKey(subkey);
+      return true;
+    }
+    return false;
+  }
+  
+  string registry_get_key() {
+    return keystring;
+  }
 
-int registry_read_real(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+  bool registry_set_key(string keystr) {
+    bool success = true;
+    std::transform(keystr.begin(), keystr.end(), keystr.begin(), std::toupper);
+    if      (keystr == "HKEY_CLASSES_ROOT")        key = HKEY_CLASSES_ROOT;
+    else if (keystr == "HKEY_CURRENT_CONFIG")      key = HKEY_CURRENT_CONFIG;
+    else if (keystr == "HKEY_CURRENT_USER")        key = HKEY_CURRENT_USER;
+    else if (keystr == "HKEY_LOCAL_MACHINE")       key = HKEY_LOCAL_MACHINE;
+    else if (keystr == "HKEY_PERFORMANCE_DATA")    key = HKEY_PERFORMANCE_DATA;
+    else if (keystr == "HKEY_PERFORMANCE_NLSTEXT") key = HKEY_PERFORMANCE_NLSTEXT;
+    else if (keystr == "HKEY_PERFORMANCE_TEXT")    key = HKEY_PERFORMANCE_TEXT; 
+    else if (keystr == "HKEY_USERS")               key = HKEY_USERS;
+    else success = false;
+    if (success) keystring = keystr;
+    return success;
+  }
 
-	// Read from registry
-	return registry_read_real_ext(ss.str(), name);
-}
-
-bool registry_exists(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
-
-	return registry_exists_ext(ss.str(), name);
-}
-
-void registry_write_string_ext(std::string key, std::string name, std::string str)
-{
-	HKEY hKey;
-
-	// Open registry key
-	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
-		return;
-
-	// Write file and close key
-	RegSetValueEx(hKey, name.c_str(), 0, REG_SZ, (LPBYTE)str.c_str(), str.length() + 1);
-	RegCloseKey(hKey);
-}
-
-void registry_write_real_ext(std::string key, std::string name, int x)
-{
-	HKEY hKey;
-
-	// Open registry key
-	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
-		return;
-
-	// Write value and close key
-	RegSetValueEx(hKey, name.c_str(), 0, REG_DWORD, (LPBYTE)&x, sizeof(int));
-	RegCloseKey(hKey);
-}
-
-std::string registry_read_string_ext(std::string key, std::string name)
-{
-	char buffer[1024];
-	DWORD type = REG_SZ, len = 1024;
-	HKEY hKey;
-
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return "";
-
-	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)buffer, &len);
-	RegCloseKey(hKey);
-
-	return buffer;
-}
-
-int registry_read_real_ext(std::string key, std::string name)
-{
-	DWORD type = REG_DWORD, len = sizeof(int);
-	HKEY hKey;
-	int value;
-
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return 0;
-
-	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)&value, &len);
-	RegCloseKey(hKey);
-
-	return value;
-}
-
-bool registry_exists_ext(std::string key, std::string name)
-{
-	HKEY hKey;
-	bool value;
-
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return false;
-
-	// Read value and close key
-	value = RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, NULL, NULL, NULL) != ERROR_FILE_NOT_FOUND;
-	RegCloseKey(hKey);
-
-	return value;
-}
-
-void registry_set_root(int root)
-{
-	const HKEY keyLookup[4] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_CLASSES_ROOT, HKEY_USERS };
-	if (root >= 0 && root < 4)
-		registryCurrentRoot = keyLookup[root];
-}
-
-}
-
+} // namespace enigma_user
