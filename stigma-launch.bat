@@ -1,0 +1,1 @@
+C:\Users\windows\STIGMA\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -c "EDIR=$(echo \"C:\Users\windows\STIGMA\stigma-dev\" | tr '\\' '/') && cd $EDIR && ./LGM.exe"

@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Windows Registry
+Identifier: WindowsRegistry
+Author: Samuel Venable
+Description: Provides windows registry reading and writing functions.
+Default: false
+Icon: registry.png
+
+Depends: None
+Dependencies: None
