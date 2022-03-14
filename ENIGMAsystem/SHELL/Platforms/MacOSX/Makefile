@@ -5,5 +5,7 @@ endif
 SOURCES += $(wildcard Platforms/MacOSX/*.cpp) Platforms/General/POSIX/Utility.cpp
 SOURCES += Platforms/MacOSX/Cocoa/Window.cpp
 SOURCES += Platforms/MacOSX/Desktop/Window.cpp
-override CXXFLAGS += -DENIGMA_PLATFORM_SDL
-override LDLIBS += -lpthread -lobjc -framework Cocoa
+override CFLAGS += -DENIGMA_PLATFORM_SDL -arch arm64 -arch x86_64
+override CXXFLAGS += -DENIGMA_PLATFORM_SDL -arch arm64 -arch x86_64
+override LDFLAGS += -arch arm64 -arch x86_64 /opt/local/lib/libiconv.a /opt/local/lib/libSDL2.a -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+override LDLIBS += -arch arm64 -arch x86_64 /opt/local/lib/libiconv.a /opt/local/lib/libSDL2.a -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal

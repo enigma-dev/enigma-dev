@@ -1,7 +1,8 @@
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
 ifeq ($(TARGET-PLATFORM), MacOSX)
-	override LDLIBS += -framework OpenAL -lalure
+	override LDFLAGS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a
+	override LDLIBS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a
 else ifeq ($(UNIX_BASED), true)
 	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
 else ifeq ($(TARGET-PLATFORM), Windows)
