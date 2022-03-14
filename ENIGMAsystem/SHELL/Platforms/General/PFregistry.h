@@ -29,6 +29,8 @@
 
 #include <string>
 
+#include "Universal_System/var4.h"
+
 namespace enigma_user {
 
   bool registry_write_string(std::string name, std::string str);
@@ -43,8 +45,8 @@ namespace enigma_user {
   bool registry_exists_ext(std::string subpath, std::string name);
   std::string registry_get_path();
   bool registry_set_path(std::string subpath);
-  std::string registry_get_key();
-  bool registry_set_key(std::string keystr);
+  std::string registry_get_root();
+  bool registry_set_root(var root);
 
 }
 

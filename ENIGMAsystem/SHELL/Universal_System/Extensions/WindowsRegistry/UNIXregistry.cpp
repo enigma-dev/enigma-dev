@@ -81,11 +81,11 @@ namespace enigma_user {
     return false;
   }
   
-  string registry_get_key() {
+  string registry_get_root() {
     return "";
   }
 
-  bool registry_set_key(string keystr) {
+  bool registry_set_root(var root) {
     return false;
   }
   
