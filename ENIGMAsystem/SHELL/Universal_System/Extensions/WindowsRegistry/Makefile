@@ -1,5 +1,5 @@
 ifeq ($(UNIX_BASED), true)
-	SOURCES += Universal_System/Extensions/IniFilesystem/UNIXregistry.cpp
+	SOURCES += Universal_System/Extensions/WindowsRegistry/UNIXregistry.cpp
 else
-	SOURCES += Universal_System/Extensions/IniFilesystem/WINDOWSregistry.cpp
+	SOURCES += Universal_System/Extensions/WindowsRegistry/WINDOWSregistry.cpp
 endif

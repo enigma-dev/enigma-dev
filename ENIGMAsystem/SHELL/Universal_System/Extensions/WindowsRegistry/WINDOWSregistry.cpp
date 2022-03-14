@@ -65,14 +65,12 @@ namespace enigma_user {
   }
 
   bool registry_write_string_ext(string subpath, string name, string str) {
-    char buff[32767];
-    HKEY subkey = nullptr;
-    wstring u8subpath = widen(subpath);
-    wstring u8name    = widen(name);
-    strncpy_s(buff, sizeof(buff), str.c_str(), sizeof(buff));
+    static wchar_t buff[32767]; DWORD sz = sizeof(buff); HKEY subkey = nullptr;
+    wstring u8subpath = widen(subpath); wstring u8name = widen(name); 
+	wstring wstr = widen(str); wcsncpy_s(buff, sizeof(buff), wstr.c_str(), sizeof(buff));
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
-    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, (unsigned char *)&buff, sizeof(buff)) != ERROR_SUCCESS) {
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, (unsigned char *)&buff, sz) != ERROR_SUCCESS) {
       RegCloseKey(subkey);
       return false;
     }
@@ -81,12 +79,10 @@ namespace enigma_user {
   }
 
   bool registry_write_real_ext(string subpath, string name, unsigned long val) {
-    HKEY subkey = nullptr;
-    wstring u8subpath = widen(subpath);
-    wstring u8name    = widen(name);
+    HKEY subkey = nullptr; wstring u8subpath = widen(subpath); wstring u8name = widen(name); DWORD sz = sizeof(DWORD);
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
-    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, (unsigned char *)&val, sizeof(unsigned long)) != ERROR_SUCCESS) {
+    } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_DWORD, (BYTE *)&val, sz) != ERROR_SUCCESS) {
       RegCloseKey(subkey);
       return false;
     }
@@ -95,39 +91,31 @@ namespace enigma_user {
   }
 
   string registry_read_string_ext(string subpath, string name) {
-    string res; char buff[32767]; 
-    unsigned long sz  = sizeof(buff);
-    wstring u8subpath = widen(subpath);
-    wstring u8name    = widen(name);
+    static wchar_t buff[32767]; DWORD sz = sizeof(buff); wstring u8subpath = widen(subpath); wstring u8name = widen(name);
     if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_SZ, nullptr, (unsigned char *)&buff, &sz) == ERROR_SUCCESS) {
-      res = buff;
+      return shorten((wchar_t *)buff);
     }
-    return res;
+    return "";
   }
 
   unsigned long registry_read_real_ext(string subpath, string name) {
-    unsigned long val = 0; 
-    unsigned long sz  = sizeof(val);
-    wstring u8subpath = widen(subpath);
-    wstring u8name    = widen(name);
-    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, (unsigned char *)&val, &sz) == ERROR_SUCCESS) {
+    unsigned long val = 0; DWORD sz = sizeof(DWORD); wstring u8subpath = widen(subpath); wstring u8name = widen(name);
+    if (RegGetValueW(key, u8subpath.c_str(), u8name.c_str(), RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
       return val;
     }
     return 0;
   }
 
   bool registry_exists_ext(string subpath, string name) {
-    HKEY subkey = nullptr;
-    wstring u8subpath = widen(subpath);
-    wstring u8name    = widen(name);
-    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) != ERROR_SUCCESS) {
-      return false;
-    } else if (RegQueryValueExW(subkey, u8name.c_str(), 0, nullptr, nullptr, nullptr) == ERROR_FILE_NOT_FOUND) {
+    HKEY subkey = nullptr; wstring u8subpath = widen(subpath); wstring u8name = widen(name);
+    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_READ, &subkey) == ERROR_SUCCESS) {
+      if (RegQueryValueExW(subkey, u8name.c_str(), nullptr, nullptr, nullptr, nullptr) != ERROR_FILE_NOT_FOUND) {
+        RegCloseKey(subkey);
+        return true;
+      }
       RegCloseKey(subkey);
-      return false;
     }
-    RegCloseKey(subkey);
-    return true;
+    return false;
   }
   
   string registry_get_path() {
@@ -135,9 +123,8 @@ namespace enigma_user {
   }
  
   bool registry_set_path(string subpath) {
-    HKEY subkey = nullptr;
-    wstring u8subpath = widen(subpath);
-    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_ALL_ACCESS, &subkey) == ERROR_SUCCESS) {
+    HKEY subkey = nullptr; wstring u8subpath = widen(subpath);
+    if (RegOpenKeyExW(key, u8subpath.c_str(), 0, KEY_READ, &subkey) == ERROR_SUCCESS) {
       path = subpath;
       RegCloseKey(subkey);
       return true;
