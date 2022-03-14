@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: MacOSX Widgets
+Identifier: MacOSX
+Build-Platforms: MacOSX
+Represents: MacOSX
+Description: Create widgets on MacOSX.
+Author: Samuel Venable
