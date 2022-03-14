@@ -4,7 +4,7 @@
 Name: Windows Registry
 Identifier: WindowsRegistry
 Author: Samuel Venable
-Description: Provides windows registry reading and writing functions.
+Description: Provides Windows Registry reading and writing functions.
 Default: false
 Icon: registry.png
 
