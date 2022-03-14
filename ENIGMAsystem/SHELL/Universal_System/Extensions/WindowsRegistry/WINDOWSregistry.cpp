@@ -67,7 +67,7 @@ namespace enigma_user {
   bool registry_write_string_ext(string subpath, string name, string str) {
     static wchar_t buff[32767]; DWORD sz = sizeof(buff); HKEY subkey = nullptr;
     wstring u8subpath = widen(subpath); wstring u8name = widen(name); 
-	wstring wstr = widen(str); wcsncpy_s(buff, sizeof(buff), wstr.c_str(), sizeof(buff));
+    wstring wstr = widen(str); wcsncpy_s(buff, sizeof(buff), wstr.c_str(), sizeof(buff));
     if (RegCreateKeyExW(key, u8subpath.c_str(), 0, nullptr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, nullptr, &subkey, nullptr) != ERROR_SUCCESS) {
       return false;
     } else if (RegSetValueExW(subkey, u8name.c_str(), 0, REG_SZ, (unsigned char *)&buff, sz) != ERROR_SUCCESS) {
@@ -138,20 +138,20 @@ namespace enigma_user {
 
   bool registry_set_root(var root) {
     bool success = true; 
-	string str = root.c_str(); 
-	char first = str[0];
-	if (strcmp(root.c_str(), "HKEY_CURRENT_USER") == 0 || (first == '0' && str.length() == 1)) { 
+    string str = root.c_str(); 
+    char first = str[0];
+    if (strcmp(root.c_str(), "HKEY_CURRENT_USER") == 0 || (first == '0' && str.length() == 1)) { 
       key = HKEY_CURRENT_USER; 
-	  keystring = "HKEY_CURRENT_USER"; 
+      keystring = "HKEY_CURRENT_USER"; 
     } else if (strcmp(root.c_str(), "HKEY_LOCAL_MACHINE") == 0 || (first == '1' && str.length() == 1)) {
       key = HKEY_LOCAL_MACHINE; 
-	  keystring = "HKEY_LOCAL_MACHINE";
+      keystring = "HKEY_LOCAL_MACHINE";
     } else if (strcmp(root.c_str(), "HKEY_CLASSES_ROOT") == 0 || (first == '2' && str.length() == 1)) {
       key = HKEY_CLASSES_ROOT; 
-	  keystring = "HKEY_CLASSES_ROOT";
+      keystring = "HKEY_CLASSES_ROOT";
     } else if (strcmp(root.c_str(), "HKEY_USERS") == 0 || (first == '3' && str.length() == 1)) { 
-	  key = HKEY_USERS; 
-	  keystring = "HKEY_USERS";
+      key = HKEY_USERS; 
+      keystring = "HKEY_USERS";
     } else {
       success = false;
     }
