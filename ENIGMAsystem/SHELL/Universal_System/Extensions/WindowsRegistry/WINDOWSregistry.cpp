@@ -25,7 +25,7 @@
 */
 
 #include <string>
-#include <algorithm>
+#include <cstring>
 
 #define byte __windows_byte_workaround
 #include <windows.h>
@@ -132,23 +132,29 @@ namespace enigma_user {
     return false;
   }
   
-  string registry_get_key() {
+  string registry_get_root() { 
     return keystring;
   }
 
-  bool registry_set_key(string keystr) {
-    bool success = true;
-    std::transform(keystr.begin(), keystr.end(), keystr.begin(), ::toupper);
-    if      (keystr == "HKEY_CLASSES_ROOT")        key = HKEY_CLASSES_ROOT;
-    else if (keystr == "HKEY_CURRENT_CONFIG")      key = HKEY_CURRENT_CONFIG;
-    else if (keystr == "HKEY_CURRENT_USER")        key = HKEY_CURRENT_USER;
-    else if (keystr == "HKEY_LOCAL_MACHINE")       key = HKEY_LOCAL_MACHINE;
-    else if (keystr == "HKEY_PERFORMANCE_DATA")    key = HKEY_PERFORMANCE_DATA;
-    else if (keystr == "HKEY_PERFORMANCE_NLSTEXT") key = HKEY_PERFORMANCE_NLSTEXT;
-    else if (keystr == "HKEY_PERFORMANCE_TEXT")    key = HKEY_PERFORMANCE_TEXT; 
-    else if (keystr == "HKEY_USERS")               key = HKEY_USERS;
-    else success = false;
-    if (success) keystring = keystr;
+  bool registry_set_root(var root) {
+    bool success = true; 
+	string str = root.c_str(); 
+	char first = str[0];
+	if (strcmp(root.c_str(), "HKEY_CURRENT_USER") == 0 || (first == '0' && str.length() == 1)) { 
+      key = HKEY_CURRENT_USER; 
+	  keystring = "HKEY_CURRENT_USER"; 
+    } else if (strcmp(root.c_str(), "HKEY_LOCAL_MACHINE") == 0 || (first == '1' && str.length() == 1)) {
+      key = HKEY_LOCAL_MACHINE; 
+	  keystring = "HKEY_LOCAL_MACHINE";
+    } else if (strcmp(root.c_str(), "HKEY_CLASSES_ROOT") == 0 || (first == '2' && str.length() == 1)) {
+      key = HKEY_CLASSES_ROOT; 
+	  keystring = "HKEY_CLASSES_ROOT";
+    } else if (strcmp(root.c_str(), "HKEY_USERS") == 0 || (first == '3' && str.length() == 1)) { 
+	  key = HKEY_USERS; 
+	  keystring = "HKEY_USERS";
+    } else {
+      success = false;
+    }
     return success;
   }
 
