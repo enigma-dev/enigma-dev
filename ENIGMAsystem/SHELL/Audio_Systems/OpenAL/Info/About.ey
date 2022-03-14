@@ -7,6 +7,6 @@ Description: Audio playback support using OpenAL. A light compatibility layer is
 Author: Josh Ventura
 
 Depends:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Represents:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD

@@ -34,6 +34,9 @@
 
 #if defined(_WIN32)
 #include <windows.h>
+#elif defined(__MACH__) && defined(__APPLE__)
+#include <libproc.h>
+#include <unistd.h>
 #elif defined(__linux__)
 #include <climits>
 #endif
@@ -83,7 +86,10 @@ namespace enigma
     do { // Allows break
       FILE* resfile = nullptr; 
       #if !defined(_WIN32)
-      #if defined(__linux__)
+      #if defined(__MACH__) && defined(__APPLE__)
+      char exename[PROC_PIDPATHINFO_MAXSIZE];
+      proc_pidpath(getpid(), exename, sizeof(exename));
+      #elif defined(__linux__)
       char exename[PATH_MAX];
       realpath("/proc/self/exe", exename);
       #else

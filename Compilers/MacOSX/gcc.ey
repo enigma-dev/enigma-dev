@@ -1,0 +1,30 @@
+%e-yaml
+---
+Name: GNU GCC G++
+Native: No
+Maintainer: fundies
+Target-platform: MacOSX
+
+Make-Vars:
+  make: make
+  makeflags:
+  cc: gcc
+  cxx: g++
+  cppflags:
+  cxxflags:
+  cflags:
+  ldflags:
+  links:
+
+Parser-Vars:
+  defines: cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc -E -x c++ --std=c++03 -v $blank 
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+
+EXE-Vars:
+  resources: $exe
+  Build-Extension: .app
+  Run-output: $exe
+  Run-Program: open $game
+  Run-Params:

@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: MacOSX
+Identifier: MacOSX
+Represents:
+	Build-Platforms: MacOSX
+Description: Run on MacOSX.
+Author: fundies

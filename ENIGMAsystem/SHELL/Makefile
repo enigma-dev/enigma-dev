@@ -177,6 +177,7 @@ else
 	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif
 
+override CXXFLAGS += -fexceptions
 SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
 SOURCES += $(wildcard ../../shared/apifilesystem/*.cpp)
 SOURCES += $(wildcard ../../shared/tempdir/*.cpp)

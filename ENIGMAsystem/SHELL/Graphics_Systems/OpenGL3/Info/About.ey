@@ -7,4 +7,4 @@ Description: High quality optimized rendering using OpenGL3.3 making full use of
 Author: Harijs Grinbergs, Robert B. Colton et al.
 
 Depends:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD

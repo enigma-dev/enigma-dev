@@ -30,8 +30,8 @@
 #include <list>
 #include <string>
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
+#if defined(__MACH__) && defined(__APPLE__)
+#include <OpenAL/alure.h>
 #else
 #include <AL/alure.h>
 #endif
