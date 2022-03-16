@@ -10,4 +10,4 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 - **Robert B. Colton**, Win32, RadialGM, emake, LGM, major contributor.
 - **Greg Williamson**, Linux, RadialGM, emake, SDL2, major contributor.
 - **Hugh Patrick Greene**, Wiki, games, tutorials, content contributor.
-- **Samuel Venable**, FreeBSD, xlib widgets, SDL2 joystick contributor.
+- **Samuel Venable**, FreeBSD, GUI widgets, SDL2 joystick contributor.
