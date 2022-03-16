@@ -69,10 +69,6 @@ DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
 
 ifeq ($(OS), Darwin)
-	override CXXFLAGS += -arch arm64 -arch x86_64
-	override CFLAGS += -arch arm64 -arch x86_64
-	override LDLIBS += -arch arm64 -arch x86_64
-	override LDFLAGS += -arch arm64 -arch x86_64
 else
 	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
