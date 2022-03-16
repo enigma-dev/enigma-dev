@@ -12,5 +12,4 @@ cd /usr/local/bin/STIGMA/STIGMA/stigma-dev
 /usr/bin/sudo chmod +x ./install.sh
 /usr/bin/sudo ./install.sh
 /usr/bin/sudo chmod +x ./start.sh
-ln -s /usr/local/bin/STIGMA/STIGMA/stigma-dev/start.sh $HOME/STIGMA-launch.sh
-chmod +x $HOME/STIGMA-launch.sh
+ln -s /usr/local/bin/STIGMA/STIGMA/stigma-dev Applications/STIGMA
