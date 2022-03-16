@@ -10,9 +10,9 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexce
 
 ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
-		override LDFLAGS += -arch arm64 -arch x86_64 -framework Cocoa -framework CoreFoundation -framework CoreGraphics
-		override CXXFLAGS += -arch arm64 -arch x86_64 -ObjC++
-		override CFLAGS += -arch arm64 -arch x86_64 -ObjC++
+		override LDFLAGS += -framework Cocoa -framework CoreFoundation -framework CoreGraphics
+		override CXXFLAGS += -ObjC++
+		override CFLAGS += -ObjC++
 	else ifeq ($(OS), Linux)
 		override LDFLAGS += -lprocps -lpthread $(shell pkg-config --libs x11)
 		override CXXFLAGS += $(shell pkg-config --cflags x11)
