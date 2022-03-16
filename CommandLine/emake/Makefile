@@ -5,7 +5,7 @@ SHARED_SRC_DIR := ../../shared
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Darwin)
-	OS_LIBS := -lboost_program_options -lpthread -ldl
+	OS_LIBS := -lboost_program_options-mt -lpthread -ldl
 else ifeq ($(UNIX_BASED), true)
 	OS_LIBS := -lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
 else
