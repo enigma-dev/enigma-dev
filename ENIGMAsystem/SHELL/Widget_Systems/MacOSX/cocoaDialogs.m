@@ -39,7 +39,7 @@ int cocoa_show_message(const char *message, bool has_cancel, const char *title) 
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"OK"];
   if (has_cancel) [alert addButtonWithTitle:@"Cancel"];
-  [alert setAlertStyle:1];
+  [alert setAlertStyle:(NSAlertStyle)1];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
@@ -62,7 +62,7 @@ int cocoa_show_question(const char *message, bool has_cancel, const char *title)
   [alert addButtonWithTitle:@"Yes"];
   [alert addButtonWithTitle:@"No"];
   if (has_cancel) [alert addButtonWithTitle:@"Cancel"];
-  [alert setAlertStyle:1];
+  [alert setAlertStyle:(NSAlertStyle)1];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
@@ -86,7 +86,7 @@ int cocoa_show_attempt(const char *errortext, const char *title) {
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Retry"];
   [alert addButtonWithTitle:@"Cancel"];
-  [alert setAlertStyle:2];
+  [alert setAlertStyle:(NSAlertStyle)2];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
@@ -107,7 +107,7 @@ int cocoa_show_error(const char *errortext, bool fatal, const char *title) {
   [alert setInformativeText:myStr];
   [alert addButtonWithTitle:@"Abort"];
   if (!fatal) [alert addButtonWithTitle:@"Ignore"];
-  [alert setAlertStyle:2];
+  [alert setAlertStyle:(NSAlertStyle)2];
   NSModalResponse responseTag = [alert runModal];
   [alert release];
 
@@ -193,19 +193,19 @@ const char *cocoa_password_box(const char *message, const char *def, const char 
 
 const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect) {
   static const char *res;
-  res = ngs::imgui::get_open_filename_ext(filter, fname, dir, title);
+  res = ngs::imgui::get_open_filename_ext(filter, fname, dir, title).c_str();
   return res;
 }
 
 const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title) {
   static const char *res;
-  res = ngs::imgui::get_save_filename_ext(filter, fname, dir, title);
+  res = ngs::imgui::get_save_filename_ext(filter, fname, dir, title).c_str();
   return res;
 }
 
 const char *cocoa_get_directory(const char *capt, const char *root) {
   static const char *res;
-  res = ngs::imgui::directory_alt(capt, root).c_str();
+  res = ngs::imgui::get_directory_alt(capt, root).c_str();
   return res;
 }
 
@@ -229,10 +229,10 @@ int cocoa_get_color(int defcol, const char *title) {
 
   [myOKButton setTitle:@"OK"];
   [myOKButton setAlternateTitle:@"OK"];
-  [myOKButton setBezelStyle:1];
+  [myOKButton setBezelStyle:(NSBezelStyle)1];
   [myCancelButton setTitle:@"Cancel"];
   [myCancelButton setAlternateTitle:@"Cancel"];
-  [myCancelButton setBezelStyle:1];
+  [myCancelButton setBezelStyle:(NSBezelStyle)1];
   [myButtonView addSubview:myOKButton];
   [myButtonView addSubview:myCancelButton];
   [myOKButton setKeyEquivalent:@"\r"];

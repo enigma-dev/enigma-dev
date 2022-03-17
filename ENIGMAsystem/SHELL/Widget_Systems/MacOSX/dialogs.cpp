@@ -173,7 +173,7 @@ int get_color_ext(int defcol, string title) {
   return cocoa_get_color(defcol, title.c_str());
 }
 
-string message_get_caption() {
+string widget_get_caption() {
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   if (error_caption == "") error_caption = "Error";
 
@@ -183,7 +183,7 @@ string message_get_caption() {
   return dialog_caption;
 }
 
-void message_set_caption(string title) {
+void widget_set_caption(string title) {
   dialog_caption = title; error_caption = title;
   if (dialog_caption == "") dialog_caption = cocoa_dialog_caption();
   if (error_caption == "") error_caption = "Error";

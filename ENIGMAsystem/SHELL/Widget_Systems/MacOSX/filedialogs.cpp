@@ -49,7 +49,7 @@
 #endif
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
-#include <lib/ImGuiFileDialog/ImGuiFileDialog.h>
+#include "lib/ImGuiFileDialog/ImGuiFileDialog.h"
 #include "filesystem.hpp"
 #include "filesystem.h"
 #include <unistd.h>
