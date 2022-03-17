@@ -1,5 +1,5 @@
 #!/bin/sh
-# Requires MacPorts to be installed! (Don't use Homebrew!)
+# Requires MacPorts to be installed!
 sudo xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install alure
