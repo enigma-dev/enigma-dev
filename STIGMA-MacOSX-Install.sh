@@ -1,5 +1,5 @@
 #!/bin/sh
-# Requires MacPorts to be installed. (Don't use Homebrew!)
+# Requires MacPorts to be installed! (Don't use Homebrew!)
 # You also need to have Xcode installed from the AppStore!
 # Xcode select is NOT enough if you want to use any audio!
 /usr/bin/sudo xcode-select --install 
