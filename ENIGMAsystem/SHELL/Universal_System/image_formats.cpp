@@ -491,16 +491,38 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
   unsigned sz = width * height;
   FILE_t *bmp = fopen_wrapper(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
-  fwrite_wrapper("BM", 2, 1, bmp);
 
+  // Write BITMAP_FILE_HEADER
+  fwrite_wrapper("BM", 2, 1, bmp);
   sz <<= 2;
   fwrite_wrapper(&sz,4,1,bmp);
-  fwrite_wrapper("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+  fwrite_wrapper("\0\0", 2, 1, bmp);
+  fwrite_wrapper("\0\0", 2, 1, bmp);
+  // 14 + 108 = 122 byte offset for bmp with transparency
+  fwrite_wrapper("\x7A\0\0\0", 4, 1, bmp);
+
+  // Write BITMAP_INFO_HEADER
+  // x6C = 108 byte info_header indicates use of BITMAPV4HEADER to support transparency
+  fwrite_wrapper("\x6C\0\0\0",4,1,bmp);
   fwrite_wrapper(&width,4,1,bmp);
   fwrite_wrapper(&height,4,1,bmp);
+  fwrite_wrapper("\1\0", 2, 1, bmp);
   //NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-  fwrite_wrapper("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+  fwrite_wrapper("\x20\0", 2, 1, bmp);
+  // x03 indicates compression method as BI_BITFIELDS
+  fwrite_wrapper("\x03\0\0\0", 4, 1, bmp);
+  fwrite_wrapper("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20, 1, bmp);
 
+  // bit masks per channel in RGBA format (in big-endian)
+  fwrite_wrapper("\0\0\xff\0", 4, 1, bmp);
+  fwrite_wrapper("\0\xff\0\0", 4, 1, bmp);
+  fwrite_wrapper("\xff\0\0\0", 4, 1, bmp);
+  fwrite_wrapper("\0\0\0\xff", 4, 1, bmp);
+
+  // little-endian "Win"
+  fwrite_wrapper("\x20\x6E\x69\x57", 4, 1, bmp);
+  fwrite_wrapper("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 48, 1, bmp);
+  
   unsigned bytes = 4;
 
   width *= bytes;
