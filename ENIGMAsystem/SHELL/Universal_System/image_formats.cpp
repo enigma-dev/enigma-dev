@@ -511,7 +511,8 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
   fwrite_wrapper("\x20\0", 2, 1, bmp);
   // x03 indicates compression method as BI_BITFIELDS
   fwrite_wrapper("\x03\0\0\0", 4, 1, bmp);
-  fwrite_wrapper("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 20, 1, bmp);
+  constexpr char k20Zeroes[20] = {};
+  fwrite_wrapper(k20Zeroes, 20, 1, bmp);
 
   // bit masks per channel in RGBA format (in big-endian)
   fwrite_wrapper("\0\0\xff\0", 4, 1, bmp);
@@ -521,7 +522,8 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
 
   // little-endian "Win"
   fwrite_wrapper("\x20\x6E\x69\x57", 4, 1, bmp);
-  fwrite_wrapper("\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", 48, 1, bmp);
+  constexpr char k48Zeroes[48] = {};
+  fwrite_wrapper(k48Zeroes, 48, 1, bmp);
   
   unsigned bytes = 4;
 
