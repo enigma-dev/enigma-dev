@@ -3,7 +3,7 @@
 sudo xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 brew install alure
-sudo port -N install gcc11 openjdk17 gmake cmake pkgconfig grpc protobuf-c glew glm libpng openal-soft libsndfile libogg libvorbis vorbis-tools box2D libdumb libsdl2 freetype libffi rapidjson libyaml libvpx pugixml yaml-cpp boost
+sudo port -N install openjdk17 gmake cmake pkgconfig grpc protobuf-c glew glm libpng openal-soft libsndfile libogg libvorbis vorbis-tools box2D libdumb libsdl2 freetype libffi rapidjson libyaml libvpx pugixml yaml-cpp boost
 sudo mkdir -p /usr/local/bin/STIGMA/STIGMA
 sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /usr/local/bin/STIGMA/STIGMA/stigma-dev
 cd /usr/local/bin/STIGMA/STIGMA/stigma-dev
