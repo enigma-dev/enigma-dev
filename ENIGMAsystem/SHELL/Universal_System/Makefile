@@ -3,6 +3,8 @@ SOURCES += $(wildcard Universal_System/*.cpp)\
            $(wildcard Universal_System/Instances/*.cpp)\
            $(wildcard Universal_System/Resources/*.cpp)
 ifeq ($(OS), Darwin)
+	override CXXFLAGS += -std=c++17
+	override CFLAGS += -std=c++17
 	override LDFLAGS += /opt/local/lib/libz.a
 	override LDLIBS += /opt/local/lib/libz.a
 else
