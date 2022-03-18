@@ -74,6 +74,8 @@ void audio_channel_num(int num);
 int audio_system();
 int audio_add(string fname);
 void audio_delete(int index);
+inline int  audio_create_stream(string fname) { audio_add(fname);    }
+inline void audio_destroy_stream(int index)   { audio_delete(fname); }
 void audio_falloff_set_model(int model);
 
 int audio_emitter_create();
