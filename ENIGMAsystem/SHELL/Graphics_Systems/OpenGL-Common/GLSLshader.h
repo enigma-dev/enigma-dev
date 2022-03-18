@@ -18,15 +18,15 @@
 #ifndef ENIGMA_GLSLSHADER_H
 #define ENIGMA_GLSLSHADER_H
 
+#include "OpenGLHeaders.h"
+
 //#include <functional> //For std::hash
-#include <vector>
 #include <string>
+#include <vector>
 #include <unordered_map>
 using std::string;
 using std::vector;
 using std::unordered_map;
-
-#include "OpenGLHeaders.h"
 
 namespace enigma {
   extern GLenum shadertypes[];
@@ -35,15 +35,22 @@ namespace enigma {
         string log;
         GLuint shader;
         int type;
-        Shader(int type) : type(type)
+        Shader(int type) : log(""), shader(0), type(type), destroyed(false)
         {
             shader = glCreateShader(shadertypes[type]);
         }
 
-        ~Shader()
+        void destroy()
         {
             glDeleteShader(shader);
+            destroyed = true;
         }
+        bool isDestroyed() const { return destroyed; }
+
+        static const char* getAssetTypeName() { return "shader"; }
+
+    private:
+        bool destroyed;
     };
 
     union UAType{
@@ -108,6 +115,11 @@ namespace enigma {
         GLint uni_textureEnable;
         GLint uni_colorEnable;
         GLint uni_lightEnable;
+        GLint uni_fogVSEnable;
+        GLint uni_fogPSEnable;
+        GLint uni_fogColor;
+        GLint uni_fogStart;
+        GLint uni_fogRange;
         GLint uni_alphaTestEnable;
 
         GLint uni_color;
@@ -139,12 +151,20 @@ namespace enigma {
         {
             shaderprogram = glCreateProgram();
             name = "";
+            destroyed = false;
         }
 
-        ~ShaderProgram()
+        void destroy()
         {
             glDeleteProgram(shaderprogram);
+            destroyed = true;
         }
+        bool isDestroyed() const { return destroyed; }
+
+        static const char* getAssetTypeName() { return "shader program"; }
+
+    private:
+        bool destroyed;
     };
 }
 
@@ -165,8 +185,5 @@ namespace enigma {
         }
     };
 }*/
-
-//extern vector<enigma::Shader*> shaders;
-//extern vector<enigma::ShaderProgram*> shaderprograms;
 
 #endif

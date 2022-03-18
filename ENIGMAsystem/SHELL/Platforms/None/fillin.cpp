@@ -25,17 +25,8 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
 
-#include <stdio.h>
-#include <stdlib.h>  //malloc
 #include <stdlib.h>  //getenv and system
-#include <sys/resource.h>
-#include <sys/stat.h>
-#include <time.h>  //clock
-#include <unistd.h>
-#include <cstdlib>
-#include <map>
 #include <string>
-#include <time.h>
 
 namespace enigma {
   bool initGameWindow() { return true; }

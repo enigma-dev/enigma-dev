@@ -33,10 +33,10 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   // Add tree root
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
-  game_root->set_folder(true);
+  game_root->mutable_folder();
 
   // Add our object
-  buffers::TreeNode* obj_node = game_root->add_child();
+  buffers::TreeNode* obj_node = game_root->mutable_folder()->add_children();
   obj_node->set_name("test_object");
   buffers::resources::Object* obj = obj_node->mutable_object();
   obj->set_sprite_name("");
@@ -53,7 +53,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   LoadObjectEvents(fName, obj, desc->FindFieldByName("egm_events"), _event_data);
   
   // Add our room
-  buffers::TreeNode* rm_node = game_root->add_child();
+  buffers::TreeNode* rm_node = game_root->mutable_folder()->add_children();
   rm_node->set_name("test_room");
   buffers::resources::Room* rm = rm_node->mutable_room();
   rm->set_caption ("");
@@ -87,8 +87,8 @@ bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const 
     if (game.has_root()) {
       const auto& root = game.root();
       // Opening sog will add a room but we dont want saving to add one
-      if (root.child_size() != 0 && root.child_size() <= 2) {
-        for (const auto& child : root.child()) {
+      if (root.folder().children_size() != 0 && root.folder().children_size() <= 2) {
+        for (const auto& child : root.folder().children()) {
           if (child.has_object()) {
             const auto& obj = child.object();
             WriteObjectEvents(fName, obj.egm_events(), _event_data);
@@ -97,7 +97,7 @@ bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const 
           } else continue;
         }
       } else {
-        errStream << "Error: Wrong number of resources: \"" << root.child_size() << "\" for a *single* object game" << std::endl;
+        errStream << "Error: Wrong number of resources: \"" << root.folder().children_size() << "\" for a *single* object game" << std::endl;
         return false;
       }
     } else {

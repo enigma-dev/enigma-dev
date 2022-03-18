@@ -58,8 +58,10 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
 
 void ListObjects(buffers::TreeNode *node, std::map<int, NamedObject> *out) {
   if (node->has_object()) (*out)[node->object().id()] = NamedObject(node->name(), node->mutable_object());
-  for (buffers::TreeNode &c : *node->mutable_child())
-    ListObjects(&c, out);
+  if (node->has_folder()) {
+    for (buffers::TreeNode &c : *node->mutable_folder()->mutable_children())
+      ListObjects(&c, out);
+  }
 }
 
 void LegacyEventsToEGM(buffers::Project *project, const EventData* evdata) {

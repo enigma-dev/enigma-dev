@@ -45,15 +45,9 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   unsigned cellwidth = ((imgs.size() > 1) ? imgs[0].w : imgs[0].w / imgnumb);
   Sprite ns(cellwidth, imgs[0].h, x_offset, y_offset);
   ns.SetBBox(0, 0, cellwidth, imgs[0].h);
-
-  // If sprite transparent, set the alpha to zero for pixels that should be
-  // transparent from lower left pixel color
-  Color c = enigma::image_get_pixel_color(imgs[0], 0, imgs[0].h - 1);
   
   if (imgs.size() == 1 && imgnumb > 1) {
-    if (transparent) {      
-      enigma::image_swap_color(imgs[0], c, Color {0, 0, 0, 0});
-    }
+    if (transparent) enigma::image_remove_color(imgs[0]);
   
     std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0], imgnumb);
     for (const RawImage& i : rawSubimages) {
@@ -61,9 +55,7 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
     }
   } else {
     for (RawImage& i : imgs) {
-      if (transparent) {
-        enigma::image_swap_color(i, c, Color {0, 0, 0, 0});
-      }
+      if (transparent) enigma::image_remove_color(i);
       ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
     }
   }
@@ -75,7 +67,7 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
 
 namespace enigma_user {
 
-int sprite_get_width(int sprid) {
+int sprite_get_width(int sprid) { 
   return sprites.get(sprid).width;
 }
 
@@ -294,5 +286,4 @@ uint32_t sprite_get_pixel(int id, int subimg, unsigned x, unsigned y) {
   // Note: this will need to be amended when atlas support is implemented
   return texture_get_pixel(sprite_get_texture(id, subimg), x, y);
 }
-
 }

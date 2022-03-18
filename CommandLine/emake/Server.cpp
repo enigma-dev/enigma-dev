@@ -22,6 +22,8 @@ namespace fs = std::filesystem;
 using namespace grpc;
 using namespace buffers;
 
+std::promise<void> exit_requested;
+
 class CompilerServiceImpl final : public Compiler::Service {
   public:
   explicit CompilerServiceImpl(EnigmaPlugin& plugin, OptionsParser& options, CallBack &ecb):
@@ -125,6 +127,28 @@ class CompilerServiceImpl final : public Compiler::Service {
         if (author.empty())
           author = about.get("maintainer");
 
+        eyit represents = about.values.find("represents");
+        if (represents != about.values.end()) {
+          std::string repsStr = (represents->second)->data().get("build-platforms");
+          std::stringstream ss(repsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_represents(token);
+          }
+        }
+
+        eyit depends = about.values.find("depends");
+        if (depends != about.values.end()) {
+          std::string depsStr = (depends->second)->data().get("build-platforms");
+          std::stringstream ss(depsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_depends(token);
+          }
+        }
+
         subInfo->set_name(name);
         subInfo->set_id(id);
         subInfo->set_description(desc);
@@ -168,6 +192,11 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status Teardown(ServerContext*, const ::buffers::Empty*, ::buffers::Empty*) override {
+    exit_requested.set_value();
+    return Status::OK;
+  }
+
   private:
   EnigmaPlugin& plugin;
   OptionsParser& options;
@@ -182,6 +211,16 @@ int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &o
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << address << std::endl;
-  server->Wait();
+
+  auto serveFn = [&]() {
+    server->Wait();
+  };
+
+  std::thread serving_thread(serveFn);
+  auto f = exit_requested.get_future();
+  f.wait();
+  server->Shutdown();
+  serving_thread.join();
+
   return 0;
 }

@@ -25,6 +25,22 @@ void msaa_fbo_blit() {
   // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 }
 
+unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, bool* flipped) {
+  if (flipped) *flipped = true;
+
+  const int bpp = 4; // bytes per pixel
+  const int topY = enigma_user::window_get_region_height_scaled()-height-y;
+  unsigned char* pxdata = new unsigned char[width*height*bpp];
+
+  GLint prevFbo;
+  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevFbo);
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glReadPixels(x,topY,width,height,GL_BGRA,GL_UNSIGNED_BYTE,pxdata);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
+  return pxdata;
+}
+
 } // namespace enigma
 
 namespace enigma_user {

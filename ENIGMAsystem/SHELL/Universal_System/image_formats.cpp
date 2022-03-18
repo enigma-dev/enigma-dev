@@ -23,6 +23,7 @@
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
+#include "Platforms/General/fileio.h"
 
 #include <map>
 #include <fstream>      // std::ofstream
@@ -31,8 +32,8 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <cstdio>
 #include <iostream>
+#include <cstdio>
 
 #include "nlpo2.h"
 
@@ -84,6 +85,56 @@ void image_swap_color(RawImage& in, Color oldColor, Color newColor) {
       index += 4;
     }
   }
+}
+
+void image_remove_color(RawImage& in, Color oldColor) {
+  #ifdef DEBUG_MODE
+  if (in.pxdata == nullptr) {
+    in.pxdata = new unsigned char[in.w * in.h * 4];
+    std::fill(in.pxdata, in.pxdata + (in.w * in.h * 4), 255);
+    DEBUG_MESSAGE("Attempt to access a null pointer" , MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  #endif
+
+  unsigned int ih, iw;
+  for (ih = 0; ih < in.h; ih++) {
+    int index = ih * in.w * 4;
+    
+    for (iw = 0; iw < in.w; iw++) {
+      if (
+           in.pxdata[index]     == oldColor.b
+        && in.pxdata[index + 1] == oldColor.g
+        && in.pxdata[index + 2] == oldColor.r
+        ) {
+          in.pxdata[index + 3] = 0;
+      } else {
+        unsigned int nw = (iw <= 0 ? iw : iw - 1),
+                     nh = (ih <= 0 ? ih : ih - 1);
+        float neighbors = 0, counted = 0;
+        for (; nh <= ih + 1 && nh < in.h; ++nh) {
+          for (; nw <= iw + 1 && nw < in.w; ++nw) {
+            ++counted;
+            int ni = (nh * in.w + nw) * 4;
+            if (
+                 in.pxdata[ni]     != oldColor.b
+              || in.pxdata[ni + 1] != oldColor.g
+              || in.pxdata[ni + 2] != oldColor.r
+              )
+              ++neighbors;
+          }
+        }
+        in.pxdata[index + 3] = static_cast<unsigned char>((neighbors/counted) * 255.0f);
+      }
+
+      index += 4;
+    }
+  }
+}
+
+void image_remove_color(RawImage& in) {
+  Color bottom_left = image_get_pixel_color(in, 0, in.h - 1);
+  image_remove_color(in, bottom_left);
 }
 
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
@@ -438,17 +489,17 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
 
 int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  FILE *bmp = fopen(filename.u8string().c_str(), "wb");
+  FILE_t *bmp = fopen_wrapper(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
-  fwrite("BM", 2, 1, bmp);
+  fwrite_wrapper("BM", 2, 1, bmp);
 
   sz <<= 2;
-  fwrite(&sz,4,1,bmp);
-  fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-  fwrite(&width,4,1,bmp);
-  fwrite(&height,4,1,bmp);
+  fwrite_wrapper(&sz,4,1,bmp);
+  fwrite_wrapper("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+  fwrite_wrapper(&width,4,1,bmp);
+  fwrite_wrapper(&height,4,1,bmp);
   //NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-  fwrite("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+  fwrite_wrapper("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
 
   unsigned bytes = 4;
 
@@ -462,14 +513,14 @@ int image_save_bmp(const std::filesystem::path& filename, const unsigned char* d
       tmp = lastbyte - fullwidth - i;
     }
     for (unsigned ii = 0; ii < width; ii += bytes) {
-      fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 3],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 0],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 1],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 2],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 3],sizeof(char),1,bmp);
     }
   }
 
-  fclose(bmp);
+  fclose_wrapper(bmp);
   return 0;
 }
 

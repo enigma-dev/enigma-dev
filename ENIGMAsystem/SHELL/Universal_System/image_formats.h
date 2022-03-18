@@ -60,6 +60,8 @@ enum {
 
 Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y);
 void image_swap_color(RawImage& in, Color oldColor, Color newColor);
+void image_remove_color(RawImage& in, Color oldColor);
+void image_remove_color(RawImage& in);
 /// Note splits horizontally
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount);
 RawImage image_pad(const RawImage& in, unsigned newWidth, unsigned newHeight);

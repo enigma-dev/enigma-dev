@@ -124,6 +124,7 @@ class gmx_root_walker {
         }
         return;
     }
+    node->mutable_unknown();
     errStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
   }
 
@@ -154,12 +155,12 @@ class gmx_root_walker {
       if (!name.empty() && treeParsed) {
         if (node.name() == std::string("constant")) return true;  //TODO: add constants here
 
-        buffers::TreeNode *n = nodes.back()->add_child();  // adding a folder
-        if (depth == 1)                                  // fix root folder names
+        buffers::TreeNode *n = nodes.back()->mutable_folder()->add_children();
+        if (depth == 1) // fix root folder names
           name = fix_folder_name(name);
 
         n->set_name(name);
-        n->set_folder(true);
+        n->mutable_folder();
         nodes.push_back(n);
       }
     } else {
@@ -194,7 +195,7 @@ class gmx_root_walker {
         idLookup[resType][count] = resName;
       } else {
         // Can't parse resource until lookup map is done
-        buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
+        buffers::TreeNode *n = nodes.back()->mutable_folder()->add_children();  // adding res here
         n->set_name(resName);
         AddResource(n, resType, node);
       }

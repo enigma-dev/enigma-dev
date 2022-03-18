@@ -145,7 +145,6 @@ void window_set_sizeable(bool sizeable);
 void window_set_showborder(bool show);
 void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
-unsigned long get_timer(); // number of microseconds since the game started
 
 }  // namespace enigma_user
 

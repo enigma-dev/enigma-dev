@@ -108,11 +108,13 @@ extern int view_enabled;
 
 }
 
-typedef var rvt;
+typedef var room_view_array_type;
 
 namespace enigma_user {
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+extern room_view_array_type
+    view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
+    view_yport, view_yview, view_angle;
 }
 
 
