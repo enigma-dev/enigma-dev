@@ -14,3 +14,4 @@ sudo chmod +x ./install.sh
 sudo ./install.sh
 sudo chmod +x ./start.sh
 ln -s /usr/local/bin/STIGMA/STIGMA/stigma-dev /Applications/STIGMA
+sudo port -f deactivate libiconv
