@@ -30,7 +30,7 @@ using std::string;
 namespace enigma {
 
 inline char* read_all_bytes(std::string fname, size_t &flen) {
-  int fd = enigma_user::file_bin_open(fname.c_str(), FD_RDONLY);
+  int fd = ngs::fs::file_bin_open(fname.c_str(), FD_RDONLY);
   FILE *afile = fdopen(fd, "rb");
   if (!afile)
     return NULL;
