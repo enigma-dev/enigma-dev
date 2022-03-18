@@ -70,10 +70,10 @@ bool mp_potential_step_object(const double x, const double y, const double steps
 
     double dir, xstep, ystep, goaldir;
     goaldir = atan2(inst->y - y, x - inst->x)*(180/M_PI);
-    dir = (goaldir + 360) %(variant) 360;
+    dir = (goaldir + 360) %(evariant) 360;
 
     //direct goal direction
-    if (abs((dir - inst->direction + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+    if (abs((dir - inst->direction + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
     {
         if (hypot(x - inst->x, y - inst->y) <= stepsize)
         {
@@ -86,7 +86,7 @@ bool mp_potential_step_object(const double x, const double y, const double steps
             }
             if (mp_potential::onspot)
             {
-                inst->direction += min(mp_potential::maxrot, max(-mp_potential::maxrot, (goaldir - inst->direction + 540) %(variant) 360 - 180));
+                inst->direction += min(mp_potential::maxrot, max(-mp_potential::maxrot, (goaldir - inst->direction + 540) %(evariant) 360 - 180));
             }
             return false;
         }
@@ -105,8 +105,8 @@ bool mp_potential_step_object(const double x, const double y, const double steps
     //alternate either side of the goal direction full circle
     for (int i = mp_potential::rotstep; i < 180; i += mp_potential::rotstep)
     {
-        dir = (goaldir - i + 360) %(variant) 360;
-        if (abs((dir - inst->direction + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+        dir = (goaldir - i + 360) %(evariant) 360;
+        if (abs((dir - inst->direction + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
         {
             xstep = cos(dir*M_PI/180)*stepsize;
             ystep = -sin(dir*M_PI/180)*stepsize;
@@ -119,8 +119,8 @@ bool mp_potential_step_object(const double x, const double y, const double steps
                 return true;
             }
         }
-        dir = (goaldir + i + 360) %(variant) 360;
-        if (abs((dir - inst->direction + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+        dir = (goaldir + i + 360) %(evariant) 360;
+        if (abs((dir - inst->direction + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
         {
             xstep = cos(dir*M_PI/180)*stepsize;
             ystep = -sin(dir*M_PI/180)*stepsize;
@@ -136,7 +136,7 @@ bool mp_potential_step_object(const double x, const double y, const double steps
     }
     if (mp_potential::onspot)
     {
-        inst->direction += min(mp_potential::maxrot, max(-mp_potential::maxrot, (goaldir - inst->direction + 540) %(variant) 360 - 180));
+        inst->direction += min(mp_potential::maxrot, max(-mp_potential::maxrot, (goaldir - inst->direction + 540) %(evariant) 360 - 180));
     }
     return false;
 }
@@ -162,8 +162,8 @@ bool mp_potential_path_object(int path, const double x, const double y, const do
         pathfound = false;
 
         //direct goal direction
-        dir = (goaldir + 360) %(variant) 360;
-        if (abs((dir - pathpdir + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+        dir = (goaldir + 360) %(evariant) 360;
+        if (abs((dir - pathpdir + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
         {
             if (hypot(x - pathpx, y - pathpy) <= stepsize)
             {
@@ -192,8 +192,8 @@ bool mp_potential_path_object(int path, const double x, const double y, const do
             //alternate either side of the goal direction full circle
             for (int i = mp_potential::rotstep; i < 180; i += mp_potential::rotstep)
             {
-                dir = (goaldir - i + 360) %(variant) 360;
-                if (abs((dir - pathpdir + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+                dir = (goaldir - i + 360) %(evariant) 360;
+                if (abs((dir - pathpdir + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
                 {
                     xstep = cos(dir*M_PI/180)*stepsize;
                     ystep = -sin(dir*M_PI/180)*stepsize;
@@ -208,8 +208,8 @@ bool mp_potential_path_object(int path, const double x, const double y, const do
                         break;
                     }
                 }
-                dir = (goaldir + i + 360) %(variant) 360;
-                if (abs((dir - pathpdir + 540) %(variant) 360 - 180) <= mp_potential::maxrot)
+                dir = (goaldir + i + 360) %(evariant) 360;
+                if (abs((dir - pathpdir + 540) %(evariant) 360 - 180) <= mp_potential::maxrot)
                 {
                     xstep = cos(dir*M_PI/180)*stepsize;
                     ystep = -sin(dir*M_PI/180)*stepsize;

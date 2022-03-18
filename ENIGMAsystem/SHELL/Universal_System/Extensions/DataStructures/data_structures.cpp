@@ -82,7 +82,7 @@ class grid
     }
     void resize(unsigned w, unsigned h)
     {
-        grid<variant> temp(w, h);
+        grid<evariant> temp(w, h);
         const unsigned int wm = minv(xgrid, w), hm = minv(ygrid, h);
         for (unsigned i = 0; i < hm; i++)
             for (unsigned ii = 0; ii < wm; ii++)
@@ -248,7 +248,7 @@ class grid
        if (xd > 0 && yd > 0)
        {
            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
-           variant sum = 0;
+           evariant sum = 0;
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    sum += grid_array[i * xgrid + ii];
@@ -477,7 +477,7 @@ class grid
 
 /* ds_grids */
 
-static map<unsigned int, grid<variant> > ds_grids;
+static map<unsigned int, grid<evariant> > ds_grids;
 static unsigned int ds_grids_maxid = 0;
 
 namespace enigma_user
@@ -486,7 +486,7 @@ namespace enigma_user
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h)
 {
   //Creates a new grid. The function returns an integer as an id that must be used in all other functions to access the particular grid.
-  pair<map<unsigned int, grid<variant> >::iterator, bool> ins = ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(w, h)));
+  pair<map<unsigned int, grid<evariant> >::iterator, bool> ins = ds_grids.insert(pair<unsigned int, grid<evariant> >(ds_grids_maxid++, grid<evariant>(w, h)));
   ins.first->second.clear(0);
   return ds_grids_maxid-1;
 }
@@ -498,7 +498,7 @@ void ds_grid_destroy(const unsigned int id)
   ds_grids.erase(ds_grids.find(id));
 }
 
-void ds_grid_clear(const unsigned int id, const variant val)
+void ds_grid_clear(const unsigned int id, const evariant val)
 {
   //Clears the grid with the given id, to the indicated value
   ds_grids[id].clear(val);
@@ -527,13 +527,13 @@ unsigned int ds_grid_height(const unsigned int id)
   return ds_grids[id].height();
 }
 
-void ds_grid_set(const unsigned int id, const unsigned int x, const unsigned int y, const variant val)
+void ds_grid_set(const unsigned int id, const unsigned int x, const unsigned int y, const evariant val)
 {
   //Sets the indicated cell in the grid with the given id, to the indicated value
   ds_grids[id].insert(x, y, val);
 }
 
-void ds_grid_add(const unsigned int id, const unsigned int x, const unsigned int y, const variant val)
+void ds_grid_add(const unsigned int id, const unsigned int x, const unsigned int y, const evariant val)
 {
   //Add the value to the cell in the region in the grid with the given id. For strings this corresponds to concatenation
   ds_grids[id].add(x, y, val);
@@ -545,13 +545,13 @@ void ds_grid_multiply(const unsigned int id, const unsigned int x, const unsigne
   ds_grids[id].multiply(x, y, val);
 }
 
-void ds_grid_set_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val)
+void ds_grid_set_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const evariant val)
 {
   //Sets the all cells in the region in the grid with the given id, to the indicated value
   ds_grids[id].insert_region(x1, y1, x2, y2, val);
 }
 
-void ds_grid_add_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val)
+void ds_grid_add_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const evariant val)
 {
   //Add the value to the cell in the region in the grid with the given id.
   ds_grids[id].add_region(x1, y1, x2, y2, val);
@@ -563,13 +563,13 @@ void ds_grid_multiply_region(const unsigned int id, const unsigned int x1, const
   ds_grids[id].multiply_region(x1, y1, x2, y2, val);
 }
 
-void ds_grid_set_disk(const unsigned int id, const double x, const double y, const double r, const variant val)
+void ds_grid_set_disk(const unsigned int id, const double x, const double y, const double r, const evariant val)
 {
   //Sets all cells in the disk with center (xm,ym) and radius r
   ds_grids[id].insert_disk(x, y, r, val);
 }
 
-void ds_grid_add_disk(const unsigned int id, const double x, const double y, const double r, const variant val)
+void ds_grid_add_disk(const unsigned int id, const double x, const double y, const double r, const evariant val)
 {
   //Add the value to all cells in the disk with center (xm,ym) and radius r
   ds_grids[id].add_disk(x, y, r, val);
@@ -599,91 +599,91 @@ void ds_grid_multiply_grid_region(const unsigned int id, const unsigned int sour
   ds_grids[id].multiply_grid_region(ds_grids[source], x1, y1, x2, y2, xpos, ypos);
 }
 
-variant ds_grid_get(const unsigned int id, const unsigned int x, const unsigned int y)
+evariant ds_grid_get(const unsigned int id, const unsigned int x, const unsigned int y)
 {
   //Returns the value of the indicated cell in the grid with the given id
-  return ((x < ds_grids[id].width() && y < ds_grids[id].height()) ? ds_grids[id].find(x, y) : variant());
+  return ((x < ds_grids[id].width() && y < ds_grids[id].height()) ? ds_grids[id].find(x, y) : evariant());
 }
 
-variant ds_grid_get_sum(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
+evariant ds_grid_get_sum(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
   //Returns the sum of the values of the cells in the region in the grid with the given id
-  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_sum(x1, y1, x2, y2) : variant());
+  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_sum(x1, y1, x2, y2) : evariant());
 }
 
-variant ds_grid_get_max(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
+evariant ds_grid_get_max(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
   //Returns the max of the values of the cells in the region in the grid with the given id
-  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_max(x1, y1, x2, y2) : variant());
+  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_max(x1, y1, x2, y2) : evariant());
 }
 
-variant ds_grid_get_min(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
+evariant ds_grid_get_min(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
   //Returns the min of the values of the cells in the region in the grid with the given id
-  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_min(x1, y1, x2, y2) : variant());
+  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_min(x1, y1, x2, y2) : evariant());
 }
 
-variant ds_grid_get_mean(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
+evariant ds_grid_get_mean(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
   //Returns the mean of the values of the cells in the region in the grid with the given id
-  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_mean(x1, y1, x2, y2) : variant());
+  return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_mean(x1, y1, x2, y2) : evariant());
 }
 
-variant ds_grid_get_disk_sum(const unsigned int id, const double x, const double y, const double r)
+evariant ds_grid_get_disk_sum(const unsigned int id, const double x, const double y, const double r)
 {
   //Returns the sum of the values of the cells in the disk
   return (ds_grids[id].find_disk_sum(x, y, r));
 }
 
-variant ds_grid_get_disk_max(const unsigned int id, const double x, const double y, const double r)
+evariant ds_grid_get_disk_max(const unsigned int id, const double x, const double y, const double r)
 {
   //Returns the max of the values of the cells in the disk.
   return (ds_grids[id].find_disk_max(x, y, r));
 }
 
-variant ds_grid_get_disk_min(const unsigned int id, const double x, const double y, const double r)
+evariant ds_grid_get_disk_min(const unsigned int id, const double x, const double y, const double r)
 {
   //Returns the min of the values of the cells in the disk.
   return (ds_grids[id].find_disk_min(x, y, r));
 }
 
-variant ds_grid_get_disk_mean(const unsigned int id, const double x, const double y, const double r)
+evariant ds_grid_get_disk_mean(const unsigned int id, const double x, const double y, const double r)
 {
   //Returns the mean of the values of the cells in the disk
   return (ds_grids[id].find_disk_mean(x, y, r));
 }
 
-bool ds_grid_value_exists(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val)
+bool ds_grid_value_exists(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const evariant val)
 {
   //Returns whether the value appears somewhere in the region
   return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].value_region_exists(x1, y1, x2, y2, val) : false);
 }
 
-int ds_grid_value_x(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val)
+int ds_grid_value_x(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const evariant val)
 {
   //Returns the x-coordinate of the cell in which the value appears in the region
   return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].value_region_x(x1, y1, x2, y2, val) : 0);
 }
 
-int ds_grid_value_y(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val)
+int ds_grid_value_y(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const evariant val)
 {
   //Returns the y-coordinate of the cell in which the value appears in the region
   return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].value_region_y(x1, y1, x2, y2, val) : 0);
 }
 
-bool ds_grid_value_disk_exists(const unsigned int id, const double x, const double y, const double r, const variant val)
+bool ds_grid_value_disk_exists(const unsigned int id, const double x, const double y, const double r, const evariant val)
 {
   //Returns whether the value appears somewhere in the disk
   return (ds_grids[id].value_disk_exists(x, y, r, val));
 }
 
-bool ds_grid_value_disk_x(const unsigned int id, const double x, const double y, const double r, const variant val)
+bool ds_grid_value_disk_x(const unsigned int id, const double x, const double y, const double r, const evariant val)
 {
   //Returns the x-coordinate of the cell in which the value appears in the disk
   return (ds_grids[id].value_disk_x(x, y, r, val));
 }
 
-bool ds_grid_value_disk_y(const unsigned int id, const double x, const double y, const double r, const variant val)
+bool ds_grid_value_disk_y(const unsigned int id, const double x, const double y, const double r, const evariant val)
 {
   //Returns the y-coordinate of the cell in which the value appears in the disk
   return (ds_grids[id].value_disk_y(x, y, r, val));
@@ -704,7 +704,7 @@ bool ds_grid_exists(const unsigned int id)
 unsigned int ds_grid_duplicate(const unsigned int source)
 {
   //creates and returns a new grid containing a copy of the source grid
-  ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(0, 0)));
+  ds_grids.insert(pair<unsigned int, grid<evariant> >(ds_grids_maxid++, grid<evariant>(0, 0)));
   ds_grids[ds_grids_maxid-1].copy(ds_grids[source]);
   return ds_grids_maxid-1;
 }
@@ -716,7 +716,7 @@ std::string ds_grid_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  grid<variant> dsGrid = ds_grids[id];
+  grid<evariant> dsGrid = ds_grids[id];
 
   // Write size
   ss << std::hex << dsGrid.width();
@@ -732,7 +732,7 @@ std::string ds_grid_write(const unsigned int id)
       ss.width(4); ss << x;
       ss.width(4); ss << y;
 
-      variant vari = dsGrid.find(x, y);
+      evariant vari = dsGrid.find(x, y);
 
       // Write type
       ss.width(2);
@@ -797,7 +797,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 
       if (type == 0)
       {
-        variant vari;
+        evariant vari;
         vari.type = ty_real;
 
         string b;
@@ -813,7 +813,7 @@ void ds_grid_read(const unsigned int id, std::string value)
       }
       else
       {
-        variant vari;
+        evariant vari;
         vari.type = ty_string;
         int len;
 
@@ -836,7 +836,7 @@ void ds_grid_read(const unsigned int id, std::string value)
 
 /* ds_maps */
 
-static map<unsigned int, multimap<variant, variant> > ds_maps;
+static map<unsigned int, multimap<evariant, evariant> > ds_maps;
 static unsigned int ds_maps_maxid = 0;
 
 namespace enigma_user
@@ -845,7 +845,7 @@ namespace enigma_user
 unsigned int ds_map_create()
 {
   //Creates a new map. The function returns an integer as an id that must be used in all other functions to access the particular map.
-  ds_maps.insert(pair<unsigned int, multimap<variant, variant> >(ds_maps_maxid++, multimap<variant, variant>()));
+  ds_maps.insert(pair<unsigned int, multimap<evariant, evariant> >(ds_maps_maxid++, multimap<evariant, evariant>()));
   return ds_maps_maxid-1;
 }
 
@@ -879,13 +879,13 @@ bool ds_map_empty(const unsigned int id)
   return ds_maps[id].empty();
 }
 
-void ds_map_add(const unsigned int id, const variant key, const variant val)
+void ds_map_add(const unsigned int id, const evariant key, const evariant val)
 {
   //Adds the value and corresponding key to the map.
-  ds_maps[id].insert(pair<variant, variant>(key, val));
+  ds_maps[id].insert(pair<evariant, evariant>(key, val));
 }
 
-void ds_map_replace(const unsigned int id, const variant key, const variant val)
+void ds_map_replace(const unsigned int id, const evariant key, const evariant val)
 {
   //TODO: Studio made it so this function will add the value if it is not in the map.
   //GM 8.1 does not have this behaviour. This has also been tested.
@@ -896,64 +896,64 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
   //not exist in the global async_load map.
 
   //Replaces the value corresponding with the key with a new value
-  multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+  multimap<evariant, evariant>::iterator it = ds_maps[id].find(key);
   if (it != ds_maps[id].end())
   {
     ds_maps[id].erase(it);
-    ds_maps[id].insert(pair<variant, variant>(key, val));
+    ds_maps[id].insert(pair<evariant, evariant>(key, val));
   }
 }
 
 //NOTE: Special function, see todo comment above.
-void ds_map_overwrite(const unsigned int id, const variant key, const variant val)
+void ds_map_overwrite(const unsigned int id, const evariant key, const evariant val)
 {
   //Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
-  multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+  multimap<evariant, evariant>::iterator it = ds_maps[id].find(key);
   if (it != ds_maps[id].end())
   {
     ds_maps[id].erase(it);
   }
-  ds_maps[id].insert(pair<variant, variant>(key, val));
+  ds_maps[id].insert(pair<evariant, evariant>(key, val));
 }
 
-void ds_map_delete(const unsigned int id, const variant key)
+void ds_map_delete(const unsigned int id, const evariant key)
 {
   //Deletes the key and the corresponding value from the map
-  multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+  multimap<evariant, evariant>::iterator it = ds_maps[id].find(key);
   if (it != ds_maps[id].end())
   {
     ds_maps[id].erase(it);
   }
 }
 
-void ds_map_delete(const unsigned int id, const variant first, const variant last)
+void ds_map_delete(const unsigned int id, const evariant first, const evariant last)
 {
   //Deletes the keys and corresponding values in the range between first and last
-  multimap<variant, variant>::iterator itf = ds_maps[id].find(first), itl = ds_maps[id].find(last);
+  multimap<evariant, evariant>::iterator itf = ds_maps[id].find(first), itl = ds_maps[id].find(last);
   if (itf != ds_maps[id].end() && itl != ds_maps[id].end())
   {
     ds_maps[id].erase(itf, itl);
   }
 }
 
-bool ds_map_exists(const unsigned int id, const variant key)
+bool ds_map_exists(const unsigned int id, const evariant key)
 {
   //returns whether the key exists in the map
   return (ds_maps[id].find(key) != ds_maps[id].end());
 }
 
-variant ds_map_find_value(const unsigned int id, const variant key)
+evariant ds_map_find_value(const unsigned int id, const evariant key)
 {
   //Returns the value corresponding to the key in the map
-  multimap<variant, variant>::iterator it = ds_maps[id].find(key);
-  return ((it == ds_maps[id].end()) ? variant() : (*it).second);
+  multimap<evariant, evariant>::iterator it = ds_maps[id].find(key);
+  return ((it == ds_maps[id].end()) ? evariant() : (*it).second);
 }
 
-variant ds_map_find_previous(const unsigned int id, const variant key)
+evariant ds_map_find_previous(const unsigned int id, const evariant key)
 {
   //Returns the largest key in the map smaller than the indicated key
-  multimap<variant, variant>::reverse_iterator rit;
-  variant key_check;
+  multimap<evariant, evariant>::reverse_iterator rit;
+  evariant key_check;
   for (rit = ds_maps[id].rbegin(); rit != ds_maps[id].rend(); rit++)
   {
     if ((key_check = (*rit).first) < key)
@@ -961,14 +961,14 @@ variant ds_map_find_previous(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return variant();
+  return evariant();
 }
 
-variant ds_map_find_next(const unsigned int id, const variant key)
+evariant ds_map_find_next(const unsigned int id, const evariant key)
 {
   //Returns the smallest key in the map larger than the indicated key
-  multimap<variant, variant>::iterator it;
-  variant key_check;
+  multimap<evariant, evariant>::iterator it;
+  evariant key_check;
   for (it = ds_maps[id].begin(); it != ds_maps[id].end(); it++)
   {
     if ((key_check = (*it).first) > key)
@@ -976,21 +976,21 @@ variant ds_map_find_next(const unsigned int id, const variant key)
       return key_check;
     }
   }
-  return variant();
+  return evariant();
 }
 
-variant ds_map_find_first(const unsigned int id)
+evariant ds_map_find_first(const unsigned int id)
 {
   //Returns the smallest key in the map
-  multimap<variant, variant>::iterator it = ds_maps[id].begin();
-  return (it == ds_maps[id].end()) ? variant() : (*it).first;
+  multimap<evariant, evariant>::iterator it = ds_maps[id].begin();
+  return (it == ds_maps[id].end()) ? evariant() : (*it).first;
 }
 
-variant ds_map_find_last(const unsigned int id)
+evariant ds_map_find_last(const unsigned int id)
 {
   //Returns the largest key in the map
-  multimap<variant, variant>::reverse_iterator rit = ds_maps[id].rbegin();
-  return ((rit == ds_maps[id].rend()) ? variant() : (*rit).first);
+  multimap<evariant, evariant>::reverse_iterator rit = ds_maps[id].rbegin();
+  return ((rit == ds_maps[id].rend()) ? evariant() : (*rit).first);
 }
 
 bool ds_map_exists(const unsigned int id)
@@ -1002,7 +1002,7 @@ bool ds_map_exists(const unsigned int id)
 unsigned int ds_map_duplicate(const unsigned int source)
 {
   //creates and returns a new map containing a copy of the source map
-  ds_maps.insert(pair<unsigned int, multimap<variant, variant> >(++ds_maps_maxid, multimap<variant, variant>()));
+  ds_maps.insert(pair<unsigned int, multimap<evariant, evariant> >(++ds_maps_maxid, multimap<evariant, evariant>()));
   ds_maps[ds_maps_maxid-1] = ds_maps[source];
   return ds_maps_maxid-1;
 }
@@ -1014,12 +1014,12 @@ std::string ds_map_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  std::multimap<variant, variant> dsMap = ds_maps[id];
+  std::multimap<evariant, evariant> dsMap = ds_maps[id];
 
   // Write size
   ss << std::hex << dsMap.size();
 
-  std::multimap<variant, variant>::iterator it = dsMap.begin();
+  std::multimap<evariant, evariant>::iterator it = dsMap.begin();
   while (it != dsMap.end())
   {
     // Write type
@@ -1080,7 +1080,7 @@ void ds_map_read(const unsigned int id, std::string value)
 
   for (int j = 0; j < count; ++j)
   {
-    variant variKey, variValue;
+    evariant variKey, variValue;
     int type;
 
     // Read type
@@ -1150,7 +1150,7 @@ void ds_map_read(const unsigned int id, std::string value)
     }
 
     // Push value
-    ds_maps[id].insert(std::pair<variant, variant>(variKey, variValue));
+    ds_maps[id].insert(std::pair<evariant, evariant>(variKey, variValue));
   }
 }
 
@@ -1158,7 +1158,7 @@ void ds_map_read(const unsigned int id, std::string value)
 
 /* ds_lists */
 
-static map<unsigned int, vector<variant> > ds_lists;
+static map<unsigned int, vector<evariant> > ds_lists;
 static unsigned int ds_lists_maxid = 0;
 
 namespace enigma_user
@@ -1167,7 +1167,7 @@ namespace enigma_user
 unsigned int ds_list_create()
 {
   //Creates a new list. The function returns an integer as an id that must be used in all other functions to access the particular list.
-  ds_lists.insert(pair<unsigned int, vector<variant> >(ds_lists_maxid++, vector<variant>()));
+  ds_lists.insert(pair<unsigned int, vector<evariant> >(ds_lists_maxid++, vector<evariant>()));
   return ds_lists_maxid-1;
 }
 
@@ -1208,7 +1208,7 @@ void ds_list_add(const unsigned int id, const enigma::varargs &values)
     ds_lists[id].push_back(values.get(i));
 }
 
-void ds_list_insert(const unsigned int id, const unsigned int pos, const variant val)
+void ds_list_insert(const unsigned int id, const unsigned int pos, const evariant val)
 {
   //Inserts val and the given pos in the list
 
@@ -1218,7 +1218,7 @@ void ds_list_insert(const unsigned int id, const unsigned int pos, const variant
   }
 }
 
-void ds_list_replace(const unsigned int id, const unsigned int pos, const variant val)
+void ds_list_replace(const unsigned int id, const unsigned int pos, const evariant val)
 {
   //replaces the value at pos with the val in the list
   if (pos < ds_lists[id].size())
@@ -1245,7 +1245,7 @@ void ds_list_delete(const unsigned int id, const unsigned int first, const unsig
   }
 }
 
-int ds_list_find_index(const unsigned int id, const variant val)
+int ds_list_find_index(const unsigned int id, const evariant val)
 {
   for (size_t i = 0; i < ds_lists[id].size(); i++)
   {
@@ -1257,11 +1257,11 @@ int ds_list_find_index(const unsigned int id, const variant val)
   return -1;
 }
 
-variant ds_list_find_value(const unsigned int id, const unsigned int pos)
+evariant ds_list_find_value(const unsigned int id, const unsigned int pos)
 {
   //Returns the value stored at the indicated position in the list
-  vector<variant>::iterator it = ds_lists[id].begin() + pos;
-  return ((it == ds_lists[id].end()) ? variant() : (*it));
+  vector<evariant>::iterator it = ds_lists[id].begin() + pos;
+  return ((it == ds_lists[id].end()) ? evariant() : (*it));
 }
 
 void ds_list_sort(const unsigned int id, const bool ascend)
@@ -1292,7 +1292,7 @@ bool ds_list_exists(const unsigned int id)
 unsigned int ds_list_duplicate(const unsigned int source)
 {
   //creates and returns a new list containing a copy of the source list
-  ds_lists.insert(pair<unsigned int, vector<variant> >(++ds_lists_maxid, vector<variant>()));
+  ds_lists.insert(pair<unsigned int, vector<evariant> >(++ds_lists_maxid, vector<evariant>()));
   ds_lists[ds_lists_maxid-1] = ds_lists[source];
   return ds_lists_maxid-1;
 }
@@ -1304,7 +1304,7 @@ std::string ds_list_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  std::vector<variant> dsList = ds_lists[id];
+  std::vector<evariant> dsList = ds_lists[id];
 
   // Write count
   ss << dsList.size();
@@ -1357,7 +1357,7 @@ void ds_list_read(const unsigned int id, std::string value)
 
     if (type == 0)
     {
-      variant vari;
+      evariant vari;
       vari.type = ty_real;
 
       string b;
@@ -1373,7 +1373,7 @@ void ds_list_read(const unsigned int id, std::string value)
     }
     else
     {
-      variant vari;
+      evariant vari;
       int len;
 
       // Read length
@@ -1394,7 +1394,7 @@ void ds_list_read(const unsigned int id, std::string value)
 
 /* ds_prioritys */
 
-static map<unsigned int, multimap<variant, variant> > ds_prioritys;
+static map<unsigned int, multimap<evariant, evariant> > ds_prioritys;
 static unsigned int ds_prioritys_maxid = 0;
 
 namespace enigma_user
@@ -1403,7 +1403,7 @@ namespace enigma_user
 unsigned int ds_priority_create()
 {
   //Creates a new priority queue. The function returns an integer as an id that must be used in all other functions to access the particular priority queue.
-  ds_prioritys.insert(pair<unsigned int, multimap<variant, variant> >(ds_prioritys_maxid++, multimap<variant, variant>()));
+  ds_prioritys.insert(pair<unsigned int, multimap<evariant, evariant> >(ds_prioritys_maxid++, multimap<evariant, evariant>()));
   return ds_prioritys_maxid-1;
 }
 
@@ -1437,50 +1437,50 @@ bool ds_priority_empty(const unsigned int id)
   return ds_prioritys[id].empty();
 }
 
-void ds_priority_add(const unsigned int id, const variant val, const variant prio)
+void ds_priority_add(const unsigned int id, const evariant val, const evariant prio)
 {
   //Adds the value with the given priority to the priority queue
-  ds_prioritys[id].insert(pair<variant, variant>(val, prio));
+  ds_prioritys[id].insert(pair<evariant, evariant>(val, prio));
 }
 
-void ds_priority_change_priority(const unsigned int id, const variant val, const variant prio)
+void ds_priority_change_priority(const unsigned int id, const evariant val, const evariant prio)
 {
   //Changes the priority of the given value in the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].find(val);
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].find(val);
   if (it != ds_prioritys[id].end())
   {
     ds_prioritys[id].erase(it);
-    ds_prioritys[id].insert(pair<variant, variant>(val, prio));
+    ds_prioritys[id].insert(pair<evariant, evariant>(val, prio));
   }
 }
 
-variant ds_priority_find_priority(const unsigned int id, const variant val)
+evariant ds_priority_find_priority(const unsigned int id, const evariant val)
 {
   //Returns the priority of the given value in the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].find(val);
-  return ((it == ds_prioritys[id].end()) ? variant() : (*it).second);
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].find(val);
+  return ((it == ds_prioritys[id].end()) ? evariant() : (*it).second);
 }
 
-void ds_priority_delete_value(const unsigned int id, const variant val)
+void ds_priority_delete_value(const unsigned int id, const evariant val)
 {
   //Deletes the given value (with its priority) from the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].find(val);
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].find(val);
   if (it != ds_prioritys[id].end())
   {
     ds_prioritys[id].erase(it);
   }
 }
 
-bool ds_priority_value_exists(const unsigned int id, const variant val)
+bool ds_priority_value_exists(const unsigned int id, const evariant val)
 {
   //returns whether the value exists in the priority queue
   return (ds_prioritys[id].find(val) != ds_prioritys[id].end());
 }
 
-variant ds_priority_delete_min(const unsigned int id)
+evariant ds_priority_delete_min(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].begin(), it_check;
   if (it == ds_prioritys[id].end()) {return 0;}
   it_check = it++;
   while (it != ds_prioritys[id].end())
@@ -1488,16 +1488,16 @@ variant ds_priority_delete_min(const unsigned int id)
     if ((*it).second < (*it_check).second) {it_check = it;}
     it++;
   }
-  const variant val = (*it_check).first;
+  const evariant val = (*it_check).first;
   ds_prioritys[id].erase(it_check);
   return val;
 }
 
-variant ds_priority_find_min(const unsigned int id)
+evariant ds_priority_find_min(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return variant();}
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].begin(), it_check;
+  if (it == ds_prioritys[id].end()) {return evariant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1507,27 +1507,27 @@ variant ds_priority_find_min(const unsigned int id)
   return ((*it_check).first);
 }
 
-variant ds_priority_delete_max(const unsigned int id)
+evariant ds_priority_delete_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return variant();}
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].begin(), it_check;
+  if (it == ds_prioritys[id].end()) {return evariant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
     if ((*it).second > (*it_check).second) {it_check = it;}
     it++;
   }
-  const variant val = (*it_check).first;
+  const evariant val = (*it_check).first;
   ds_prioritys[id].erase(it_check);
   return val;
 }
 
-variant ds_priority_find_max(const unsigned int id)
+evariant ds_priority_find_max(const unsigned int id)
 {
   //Returns the value with the smallest priority but does not delete it from the priority queue
-  multimap<variant, variant>::iterator it = ds_prioritys[id].begin(), it_check;
-  if (it == ds_prioritys[id].end()) {return variant();}
+  multimap<evariant, evariant>::iterator it = ds_prioritys[id].begin(), it_check;
+  if (it == ds_prioritys[id].end()) {return evariant();}
   it_check = it++;
   while (it != ds_prioritys[id].end())
   {
@@ -1546,7 +1546,7 @@ bool ds_priority_exists(const unsigned int id)
 unsigned int ds_priority_duplicate(const unsigned int source)
 {
   //creates and returns a new priority queue containing a copy of the source priority queue
-  ds_prioritys.insert(pair<unsigned int, multimap<variant, variant> >(++ds_prioritys_maxid, multimap<variant, variant>()));
+  ds_prioritys.insert(pair<unsigned int, multimap<evariant, evariant> >(++ds_prioritys_maxid, multimap<evariant, evariant>()));
   ds_prioritys[ds_prioritys_maxid-1] = ds_prioritys[source];
   return ds_prioritys_maxid-1;
 }
@@ -1558,12 +1558,12 @@ std::string ds_priority_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  std::multimap<variant, variant> dsPriority = ds_prioritys[id];
+  std::multimap<evariant, evariant> dsPriority = ds_prioritys[id];
 
   // Write size
   ss << std::hex << dsPriority.size();
 
-  std::multimap<variant, variant>::iterator it = dsPriority.begin();
+  std::multimap<evariant, evariant>::iterator it = dsPriority.begin();
   while (it != dsPriority.end())
   {
     // Write type
@@ -1609,7 +1609,7 @@ void ds_priority_read(const unsigned int id, std::string value)
 
   for (int j = 0; j < count; ++j)
   {
-    variant vari, prio;
+    evariant vari, prio;
     int type;
 
     prio.type = ty_real;
@@ -1658,7 +1658,7 @@ void ds_priority_read(const unsigned int id, std::string value)
     }
 
     // Push value
-    ds_prioritys[id].insert(std::pair<variant, variant>(vari, prio));
+    ds_prioritys[id].insert(std::pair<evariant, evariant>(vari, prio));
   }
 }
 
@@ -1666,7 +1666,7 @@ void ds_priority_read(const unsigned int id, std::string value)
 
 /* ds_queues */
 
-static map<unsigned int, deque<variant> > ds_queues;
+static map<unsigned int, deque<evariant> > ds_queues;
 static unsigned int ds_queues_maxid = 0;
 
 namespace enigma_user
@@ -1675,7 +1675,7 @@ namespace enigma_user
 unsigned int ds_queue_create()
 {
   //Creates a new queue. The function returns an integer as an id that must be used in all other functions to access the particular queue.
-  ds_queues.insert(pair<unsigned int, deque<variant> >(ds_queues_maxid++, deque<variant>()));
+  ds_queues.insert(pair<unsigned int, deque<evariant> >(ds_queues_maxid++, deque<evariant>()));
   return ds_queues_maxid-1;
 }
 
@@ -1716,28 +1716,28 @@ void ds_queue_enqueue(const unsigned int id, const enigma::varargs &values)
     ds_queues[id].push_back(values.get(i));
 }
 
-variant ds_queue_dequeue(const unsigned int id)
+evariant ds_queue_dequeue(const unsigned int id)
 {
   //Returns the value at the front of the queue and removes it from the queue
-  deque<variant>::iterator it = ds_queues[id].begin();
+  deque<evariant>::iterator it = ds_queues[id].begin();
   if (it == ds_queues[id].end()) {return 0;}
-  const variant val = *it;
+  const evariant val = *it;
   ds_queues[id].pop_front();
   return val;
 }
 
-variant ds_queue_head(const unsigned int id)
+evariant ds_queue_head(const unsigned int id)
 {
   //Returns the value at the front of the queue
-  deque<variant>::iterator it = ds_queues[id].begin();
-  return ((it == ds_queues[id].end()) ? variant() : (*it));
+  deque<evariant>::iterator it = ds_queues[id].begin();
+  return ((it == ds_queues[id].end()) ? evariant() : (*it));
 }
 
-variant ds_queue_tail(const unsigned int id)
+evariant ds_queue_tail(const unsigned int id)
 {
   //Returns the value on the back of the queue
-  deque<variant>::reverse_iterator rit = ds_queues[id].rbegin();
-  return ((rit == ds_queues[id].rend()) ? variant() : (*rit));
+  deque<evariant>::reverse_iterator rit = ds_queues[id].rbegin();
+  return ((rit == ds_queues[id].rend()) ? evariant() : (*rit));
 }
 
 bool ds_queue_exists(const unsigned int id)
@@ -1749,7 +1749,7 @@ bool ds_queue_exists(const unsigned int id)
 unsigned int ds_queue_duplicate(const unsigned int source)
 {
   //creates and returns a new queue containing a copy of the source queue
-  ds_queues.insert(pair<unsigned int, deque<variant> >(++ds_queues_maxid, deque<variant>()));
+  ds_queues.insert(pair<unsigned int, deque<evariant> >(++ds_queues_maxid, deque<evariant>()));
   ds_queues[ds_queues_maxid-1] = ds_queues[source];
   return ds_queues_maxid-1;
 }
@@ -1761,7 +1761,7 @@ std::string ds_queue_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  std::deque<variant> dsQueue = ds_queues[id];
+  std::deque<evariant> dsQueue = ds_queues[id];
 
   // Write size
   ss << std::hex << dsQueue.size();
@@ -1805,7 +1805,7 @@ void ds_queue_read(const unsigned int id, std::string value)
 
   for (int j = 0; j < count; ++j)
   {
-    variant vari;
+    evariant vari;
     int type;
 
     // Read type
@@ -1850,7 +1850,7 @@ void ds_queue_read(const unsigned int id, std::string value)
 
 /* ds_stacks */
 
-static map<unsigned int, deque<variant> > ds_stacks;
+static map<unsigned int, deque<evariant> > ds_stacks;
 static unsigned int ds_stacks_maxid = 0;
 
 namespace enigma_user
@@ -1859,7 +1859,7 @@ namespace enigma_user
 unsigned int ds_stack_create()
 {
   //Creates a new stack. The function returns an integer as an id that must be used in all other functions to access the particular stack.
-  ds_stacks.insert(pair<unsigned int, deque<variant> >(ds_stacks_maxid++, deque<variant>()));
+  ds_stacks.insert(pair<unsigned int, deque<evariant> >(ds_stacks_maxid++, deque<evariant>()));
   return ds_stacks_maxid-1;
 }
 
@@ -1900,21 +1900,21 @@ void ds_stack_push(const unsigned int id, const enigma::varargs &values)
     ds_stacks[id].push_front(values.get(i));
 }
 
-variant ds_stack_pop(const unsigned int id)
+evariant ds_stack_pop(const unsigned int id)
 {
   //Returns the value on the top of the stack and removes it from the stack
-  deque<variant>::iterator it = ds_stacks[id].begin();
+  deque<evariant>::iterator it = ds_stacks[id].begin();
   if (it == ds_stacks[id].end()) {return 0;}
-  const variant val = *it;
+  const evariant val = *it;
   ds_stacks[id].pop_front();
   return val;
 }
 
-variant ds_stack_top(const unsigned int id)
+evariant ds_stack_top(const unsigned int id)
 {
   //Returns the value on the top of the stack
-  deque<variant>::iterator it = ds_stacks[id].begin();
-  return ((it == ds_stacks[id].end()) ? variant() : (*it));
+  deque<evariant>::iterator it = ds_stacks[id].begin();
+  return ((it == ds_stacks[id].end()) ? evariant() : (*it));
 }
 
 bool ds_stack_exists(const unsigned int id)
@@ -1926,7 +1926,7 @@ bool ds_stack_exists(const unsigned int id)
 unsigned int ds_stack_duplicate(const unsigned int source)
 {
   //creates and returns a new stack containing a copy of the source stack
-  ds_stacks.insert(pair<unsigned int, deque<variant> >(++ds_stacks_maxid, deque<variant>()));
+  ds_stacks.insert(pair<unsigned int, deque<evariant> >(++ds_stacks_maxid, deque<evariant>()));
   ds_stacks[ds_stacks_maxid-1] = ds_stacks[source];
   return ds_stacks_maxid-1;
 }
@@ -1938,7 +1938,7 @@ std::string ds_stack_write(const unsigned int id)
   ss.width(4);
   ss.fill('0');
 
-  std::deque<variant> dsStack = ds_stacks[id];
+  std::deque<evariant> dsStack = ds_stacks[id];
 
   // Write size
   ss << std::hex << dsStack.size();
@@ -1982,7 +1982,7 @@ void ds_stack_read(const unsigned int id, std::string value)
 
   for (int j = 0; j < count; ++j)
   {
-    variant vari;
+    evariant vari;
     int type;
 
     // Read type

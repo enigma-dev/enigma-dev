@@ -60,7 +60,7 @@ void SVG::draw_rectangle(std::string id, int x1, int y1, int x2, int y2, unsigne
 }
 void SVG::draw_text(std::string id, int cx, int bly, string t, int sz, unsigned color) {
   fprintf(f,
-  "  <text xml:space=\"preserve\" style=\"font-size:%dpx;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;"
+  "  <text xml:space=\"preserve\" style=\"font-size:%dpx;font-style:normal;font-evariant:normal;font-weight:normal;font-stretch:normal;"
   "line-height:125%%;letter-spacing:0px;word-spacing:0px;fill:#%06X;fill-opacity:%f;stroke:none;font-family:Monospace;\" x=\"%d\" y=\"%d\" id=\"%s\" "
   "sodipodi:linespacing=\"125%%\"><tspan\n    sodipodi:role=\"line\" id=\"%s_span\" x=\"%d\" y=\"%d\" style=\"text-align:center;text-anchor:middle;\">%s</tspan></text>\n",
   sz, color & 0x00FFFFFF, (color & 0xFF000000) / (double)0xFF000000, cx, bly, id.c_str(), id.c_str(), cx, bly, escape(t).c_str());

@@ -33,7 +33,7 @@ struct lang_CPP: language_adapter {
 
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
-  jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
+  jdi::definition *enigma_type__var, *enigma_type__evariant, *enigma_type__varargs;
 
   // Utility
   string get_name() final;

@@ -55,7 +55,7 @@
 #endif
 #define STL_ARITHMETIC(func)                                                  \
   using ::func;                                                               \
-  static inline double func(const variant &v) { return ::func((double) v); }  \
+  static inline double func(const evariant &v) { return ::func((double) v); }  \
   static inline double func(const var &v)     { return ::func((double) v); }
 
 namespace enigma_user
@@ -82,7 +82,7 @@ namespace enigma_user
   template<typename T> enigma::SIntType<T>  abs(T x) { return ::abs(x); }
   template<typename T> enigma::UIntType<T>  abs(T x) { return x; }
   template<typename T> enigma::FloatType<T> abs(T x) { return ::fabs(x); }
-  static inline double abs(const variant& x) { return ::fabs(double(x)); }
+  static inline double abs(const evariant& x) { return ::fabs(double(x)); }
   static inline double abs(const var& x)     { return ::fabs(double(x)); }
 
   // Aliases to STL functions.
@@ -97,7 +97,7 @@ namespace enigma_user
   inline int64(T x) { return (int64_t) x; }
   inline int64_t int64(const char *x) { return (int64_t) atol(x); }
   inline int64_t int64(std::string x) { return (int64_t) atol(x.c_str()); }
-  inline int64_t int64(const variant& x) {
+  inline int64_t int64(const evariant& x) {
     return x.type == ty_string ? int64((std::string) x) : int64((double) x);
   }
   inline int64_t int64(const var& x) { return int64(*x); }
@@ -199,7 +199,7 @@ namespace enigma_user
   ma_scalar max(ma_scalar x, ma_scalar y);
   ma_scalar median(enigma::varargs t);
   ma_scalar mean(const enigma::varargs &t);
-  variant choose(const enigma::varargs& args);
+  evariant choose(const enigma::varargs& args);
 }
 
 #undef WITH_ARITHMETIC_TYPES

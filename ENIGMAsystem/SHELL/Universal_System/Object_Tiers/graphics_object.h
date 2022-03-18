@@ -39,7 +39,7 @@ namespace enigma
   struct depthv: multifunction_variant<depthv> {
     INHERIT_OPERATORS(depthv)
     struct inst_iter *myiter;
-    void function(const variant &oldval);
+    void function(const evariant &oldval);
     void init(gs_scalar depth, object_basic* who);
     void remove();
     depthv();
@@ -48,7 +48,7 @@ namespace enigma
   struct image_singlev: multifunction_variant<image_singlev> {
     INHERIT_OPERATORS(image_singlev)
     gs_scalar *image_index, *image_speed;
-    void function(const variant &oldval);
+    void function(const evariant &oldval);
     image_singlev(): multifunction_variant<image_singlev>(-1) {}
   };
   struct object_graphics: object_timelines
@@ -68,11 +68,11 @@ namespace enigma
       gs_scalar image_yscale;
       gs_scalar image_angle;
 
-      virtual variant myevent_draw();
+      virtual evariant myevent_draw();
       virtual bool myevent_draw_subcheck();
-      virtual variant myevent_drawgui();
+      virtual evariant myevent_drawgui();
       virtual bool myevent_drawgui_subcheck();
-      virtual variant myevent_drawresize();
+      virtual evariant myevent_drawresize();
 
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN

@@ -49,7 +49,7 @@ std::string toString(const char* s);
 std::string toString(size_t n, char c);
 
 std::string toString(const struct var&);
-std::string toString(const struct variant&);
+std::string toString(const struct evariant&);
 
 }  // namespace enigma_user
 

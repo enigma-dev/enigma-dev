@@ -33,7 +33,7 @@
 
 namespace enigma {
   struct callable_script {
-    variant (*base)();
+    evariant (*base)();
     int argnum;
   };
   struct nameid_pair {
@@ -48,7 +48,7 @@ namespace enigma_user
 {
 
 int resource_get_id(std::string name);
-variant script_execute(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0, variant arg8 = 0, variant arg9 = 0, variant arg10 = 0, variant arg11 = 0, variant arg12 = 0, variant arg13 = 0, variant arg14 = 14, variant arg15 = 0);
+evariant script_execute(int scr, evariant arg0 = 0, evariant arg1 = 0, evariant arg2 = 0, evariant arg3 = 0, evariant arg4 = 0, evariant arg5 = 0, evariant arg6 = 0, evariant arg7 = 0, evariant arg8 = 0, evariant arg9 = 0, evariant arg10 = 0, evariant arg11 = 0, evariant arg12 = 0, evariant arg13 = 0, evariant arg14 = 14, evariant arg15 = 0);
 bool script_exists(int script);
 
 std::string object_get_name(int i);

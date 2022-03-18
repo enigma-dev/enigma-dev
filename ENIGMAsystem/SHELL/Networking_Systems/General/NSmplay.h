@@ -40,19 +40,19 @@ namespace enigma_user {
 	string mplay_session_name(unsigned numb); 
 	int mplay_session_status(); 
 	void mplay_data_mode(bool guar); 
-	variant mplay_data_read(unsigned ind); 
-	void mplay_data_write(unsigned ind, variant val); 
+	evariant mplay_data_read(unsigned ind); 
+	void mplay_data_write(unsigned ind, evariant val); 
 	void mplay_message_clear(); 
 	unsigned mplay_message_count(string player);
 	unsigned mplay_message_count(unsigned player);
 	unsigned mplay_message_id();
 	string mplay_message_name(); 
-	variant mplay_message_value(); 
+	evariant mplay_message_value(); 
 	unsigned mplay_message_player(); 
 	bool mplay_message_receive(string player); 
 	bool mplay_message_receive(unsigned player); 
-	bool mplay_message_send(string player, unsigned id, variant val);
-	bool mplay_message_send(unsigned player, unsigned id, variant val); 
-	bool mplay_message_send_guaranteed(string player, unsigned id, variant val); 
-	bool mplay_message_send_guaranteed(unsigned player, unsigned id, variant val); 
+	bool mplay_message_send(string player, unsigned id, evariant val);
+	bool mplay_message_send(unsigned player, unsigned id, evariant val); 
+	bool mplay_message_send_guaranteed(string player, unsigned id, evariant val); 
+	bool mplay_message_send_guaranteed(unsigned player, unsigned id, evariant val); 
 }

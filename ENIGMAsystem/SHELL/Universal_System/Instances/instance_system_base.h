@@ -24,7 +24,7 @@
 
 namespace enigma
 {
-  typedef variant instance_t;
+  typedef evariant instance_t;
 
   struct inst_iter
   {

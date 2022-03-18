@@ -6,7 +6,7 @@
   bool t6 = 1;
   const char *s1;
   std_string s2;
-  variant v1;
+  evariant v1;
   var v2;
 
   s1 = "one";
@@ -128,14 +128,14 @@
 
   v1 += s1 + v1;
   v1 += v1 + s1;
-  // v1 -= s1 - v1; [string - variant undefined]
-  // v1 -= v1 - s1; [variant - string undefined]
-  // v1 *= s1 * v1; [string * variant undefined]
-  // v1 *= v1 * s1; [variant * string undefined]
-  // v1 /= s1 / v1; [string / variant undefined]
-  // v1 /= v1 / s1; [variant / string undefined]
-  // v1 %= s1 % v1; [string % variant undefined]
-  // v1 %= v1 % s1; [variant % string undefined]
+  // v1 -= s1 - v1; [string - evariant undefined]
+  // v1 -= v1 - s1; [evariant - string undefined]
+  // v1 *= s1 * v1; [string * evariant undefined]
+  // v1 *= v1 * s1; [evariant * string undefined]
+  // v1 /= s1 / v1; [string / evariant undefined]
+  // v1 /= v1 / s1; [evariant / string undefined]
+  // v1 %= s1 % v1; [string % evariant undefined]
+  // v1 %= v1 % s1; [evariant % string undefined]
   v1 += s1 == v1;
   v1 -= s1 != v1;
   v1 *= s1 <= v1;
@@ -147,14 +147,14 @@
 
   v1 += s2 + v1;
   v1 += v1 + s2;
-  // v1 -= s2 - v1; [string - variant undefined]
-  // v1 -= v1 - s2; [variant - string undefined]
-  // v1 *= s2 * v1; [string * variant undefined]
-  // v1 *= v1 * s2; [variant * string undefined]
-  // v1 /= s2 / v1; [string / variant undefined]
-  // v1 /= v1 / s2; [variant / string undefined]
-  // v1 %= s2 % v1; [string % variant undefined]
-  // v1 %= v1 % s2; [variant % string undefined]
+  // v1 -= s2 - v1; [string - evariant undefined]
+  // v1 -= v1 - s2; [evariant - string undefined]
+  // v1 *= s2 * v1; [string * evariant undefined]
+  // v1 *= v1 * s2; [evariant * string undefined]
+  // v1 /= s2 / v1; [string / evariant undefined]
+  // v1 /= v1 / s2; [evariant / string undefined]
+  // v1 %= s2 % v1; [string % evariant undefined]
+  // v1 %= v1 % s2; [evariant % string undefined]
   v1 += s2 == v1;
   v1 -= s2 != v1;
   v1 *= s2 <= v1;
@@ -550,13 +550,13 @@
 
   speed += s1 + v1;
   speed += v1 + s1;
-  // speed -= s1 - v1; [string - variant undefined]
+  // speed -= s1 - v1; [string - evariant undefined]
   // speed -= v1 - s1;
-  // speed *= s1 * v1; [string * variant undefined]
+  // speed *= s1 * v1; [string * evariant undefined]
   // speed *= v1 * s1;
-  // speed /= s1 / v1; [string / variant undefined]
+  // speed /= s1 / v1; [string / evariant undefined]
   // speed /= v1 / s1;
-  // speed %= s1 % v1; [string % variant undefined]
+  // speed %= s1 % v1; [string % evariant undefined]
   // speed %= v1 % s1;
   speed += s1 == v1;
   speed -= s1 != v1;
@@ -569,13 +569,13 @@
 
   speed += s2 + v1;
   speed += v1 + s2;
-  // speed -= s2 - v1; [string - variant undefined]
+  // speed -= s2 - v1; [string - evariant undefined]
   // speed -= v1 - s2;
-  // speed *= s2 * v1; [string * variant undefined]
+  // speed *= s2 * v1; [string * evariant undefined]
   // speed *= v1 * s2;
-  // speed /= s2 / v1; [string / variant undefined]
+  // speed /= s2 / v1; [string / evariant undefined]
   // speed /= v1 / s2;
-  // speed %= s2 % v1; [string % variant undefined]
+  // speed %= s2 % v1; [string % evariant undefined]
   // speed %= v1 % s2;
   speed += s2 == v1;
   speed -= s2 != v1;

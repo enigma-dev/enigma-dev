@@ -45,7 +45,7 @@ std::string ansi_char(char byte);
 std::string chr(char val);
 int ord(std::string str);
 
-double real(variant str);
+double real(evariant str);
 
 size_t string_length(std::string str);
 size_t string_length(const char* str);

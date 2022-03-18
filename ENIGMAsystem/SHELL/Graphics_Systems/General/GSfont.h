@@ -37,37 +37,37 @@ namespace enigma_user
   unsigned draw_get_valign();
   void draw_set_font(int fnt);
   int draw_get_font();
-  void draw_text(gs_scalar x, gs_scalar y, variant str);
-  void draw_text_skewed(gs_scalar x, gs_scalar y, variant str, gs_scalar top, gs_scalar bottom);
-  void draw_text_color(gs_scalar x, gs_scalar y, variant str, int c1, int c2, int c3, int c4, gs_scalar a);
+  void draw_text(gs_scalar x, gs_scalar y, evariant str);
+  void draw_text_skewed(gs_scalar x, gs_scalar y, evariant str, gs_scalar top, gs_scalar bottom);
+  void draw_text_color(gs_scalar x, gs_scalar y, evariant str, int c1, int c2, int c3, int c4, gs_scalar a);
 
-  void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineWidth, int sprite, int firstChar, int scale);
+  void draw_text_sprite(gs_scalar x, gs_scalar y, evariant vstr, int sep, int lineWidth, int sprite, int firstChar, int scale);
 
-  void draw_text_ext(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid);
-  void draw_text_ext_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, int c1, int c2, int c3, int c4, gs_scalar a);
+  void draw_text_ext(gs_scalar x, gs_scalar y, evariant str, gs_scalar sep, gs_scalar wid);
+  void draw_text_ext_color(gs_scalar x, gs_scalar y, evariant str, gs_scalar sep, gs_scalar wid, int c1, int c2, int c3, int c4, gs_scalar a);
 
-  void draw_text_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot);
-  void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
+  void draw_text_transformed(gs_scalar x, gs_scalar y, evariant str, gs_scalar xscale, gs_scalar yscale, double rot);
+  void draw_text_transformed_color(gs_scalar x, gs_scalar y, evariant str, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
 
-  void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot);
-  void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
+  void draw_text_ext_transformed(gs_scalar x, gs_scalar y, evariant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot);
+  void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, evariant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
 
   unsigned int font_get_texture(int fnt);
   unsigned int font_get_texture_width(int fnt);
   unsigned int font_get_texture_height(int fnt);
   unsigned int font_height(int fnt);
 
-  double string_char_width(variant vstr);
+  double string_char_width(evariant vstr);
 
-  unsigned int string_width(variant str);
-  unsigned int string_height(variant str);
+  unsigned int string_width(evariant str);
+  unsigned int string_height(evariant str);
 
-  unsigned int string_width_ext(variant str, gs_scalar sep, gs_scalar wid);
-  unsigned int string_height_ext(variant str, gs_scalar sep, gs_scalar wid);
+  unsigned int string_width_ext(evariant str, gs_scalar sep, gs_scalar wid);
+  unsigned int string_height_ext(evariant str, gs_scalar sep, gs_scalar wid);
 
-  unsigned int string_width_line(variant str, int line);
-  unsigned int string_width_ext_line(variant str, gs_scalar wid, int line);
-  unsigned int string_width_ext_line_count(variant str, gs_scalar wid);
+  unsigned int string_width_line(evariant str, int line);
+  unsigned int string_width_ext_line(evariant str, gs_scalar wid, int line);
+  unsigned int string_width_ext_line_count(evariant str, gs_scalar wid);
 }
 
 #endif // ENIGMA_GSFONT_H

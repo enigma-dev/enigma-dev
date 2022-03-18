@@ -68,10 +68,10 @@ static inline void declare_scripts(std::ostream &wto, const GameData &game, cons
   for (size_t i = 0; i < game.scripts.size(); i++) {
     ParsedScript* scr = state.parsed_scripts[i];
     const char* comma = "";
-    wto << "variant _SCR_" << game.scripts[i].name << "(";
+    wto << "evariant _SCR_" << game.scripts[i].name << "(";
     scr->globargs = 16; //Fixes too many arguments error (scripts can be called dynamically with any number of arguments)
     for (int argn = 0; argn < scr->globargs; argn++) {
-      wto << comma << "variant argument" << argn << "=0";
+      wto << comma << "evariant argument" << argn << "=0";
       comma = ", ";
     }
     wto << ");\n";
@@ -258,10 +258,10 @@ static inline void write_object_scripts(std::ostream &wto, parsed_object *object
     if (subscr != state.script_lookup.end() // If we've got ourselves a script
     and subscr->second->global_code) { // And it has distinct code for use at the global scope (meaning it's more efficient locally)
       const char* comma = "";
-      wto << "\n    variant _SCR_" << it->first << "(";
+      wto << "\n    evariant _SCR_" << it->first << "(";
       for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
       {
-        wto << comma << "variant argument" << argn << " = 0";
+        wto << comma << "evariant argument" << argn << " = 0";
         comma = ", ";
       }
       wto << ");";
@@ -347,7 +347,7 @@ static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
     string evname = pev.ev_id.TrueFunctionName();
     if (!pev.code.empty() || pev.ev_id.HasDefaultCode()) {
-      wto << "    variant myevent_" << evname << "();\n";
+      wto << "    evariant myevent_" << evname << "();\n";
       if (pev.ev_id.HasSubCheck()) {
         wto << "    inline bool myevent_" << evname << "_subcheck();\n";
       }
@@ -414,7 +414,7 @@ static inline void write_event_perform(
     std::ostream &wto, const EventData &events, parsed_object *object) {
   /* Event Perform Code */
   wto << "\n    // Event Perform Code\n";
-  wto << "    variant myevents_perf(int type, int numb) override {\n";
+  wto << "    evariant myevents_perf(int type, int numb) override {\n";
 
   for (const auto &event : object->all_events) {
     string evname = event.ev_id.TrueFunctionName();
@@ -732,9 +732,9 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
   for (size_t i = 0; i < game.scripts.size(); i++) {
     ParsedScript* scr = state.script_lookup.at(game.scripts[i].name);
     const char* comma = "";
-    wto << "variant _SCR_" << game.scripts[i].name << "(";
+    wto << "evariant _SCR_" << game.scripts[i].name << "(";
     for (int argn = 0; argn < scr->globargs; argn++) { //it->second gives max argument count used
-      wto << comma << "variant argument" << argn;
+      wto << comma << "evariant argument" << argn;
       comma = ", ";
     }
     wto << ")\n{\n";
@@ -856,7 +856,7 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 
 static void write_event_func(ofstream& wto, const ParsedEvent &event, string objname, string evname, int mode) {
   std::string evfuncname = "myevent_" + evname;
-  wto << "variant enigma::OBJ_" << objname << "::" << evfuncname << "()\n{\n";
+  wto << "evariant enigma::OBJ_" << objname << "::" << evfuncname << "()\n{\n";
   if (mode == emode_debug) {
     wto << "  enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
   }
@@ -876,10 +876,10 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
     if (subscr != script_lookup.end() // If we've got ourselves a script
         and subscr->second->global_code) { // And it has distinct code for use at the global scope (meaning it's more efficient locally)
       const char* comma = "";
-      wto << "variant enigma::OBJ_" << t->name << "::_SCR_" << it->first << "(";
+      wto << "evariant enigma::OBJ_" << t->name << "::_SCR_" << it->first << "(";
 
       for (int argn = 0; argn < it->second; ++argn) { // it->second gives max argument count used
-        wto << comma << "variant argument" << argn;
+        wto << comma << "evariant argument" << argn;
         comma = ", ";
       }
 
@@ -967,7 +967,7 @@ static inline void write_global_script_array(ofstream &wto, const GameData &game
         scr_count++;
     }
     scr_count++;
-    wto << "    { (variant(*)())_SCR_" << game.scripts[i].name << ", "
+    wto << "    { (evariant(*)())_SCR_" << game.scripts[i].name << ", "
         << state.script_lookup.at(game.scripts[i].name)->globargs << " },\n";
   }
   wto << "  };\n  \n";

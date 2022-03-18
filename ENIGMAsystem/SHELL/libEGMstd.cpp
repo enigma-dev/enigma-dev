@@ -61,7 +61,7 @@ string toString(const char *s, size_t n)                 { return string (s, n);
 string toString(const char *s)                           { return string (s);    }
 string toString(size_t n, char c)                        { return string (n, c); }
 
-string toString(const variant &a) {
+string toString(const evariant &a) {
   if (a.type == enigma_user::ty_real) {
     //Ensure that integral types don't pick up any baggage from being stored
     //  as a double in a var-type.

@@ -103,13 +103,13 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   }
   
   jdi::definition *d;
-  if ((d = main_context->get_global()->look_up("variant"))) {
-    enigma_type__variant = d;   
+  if ((d = main_context->get_global()->look_up("evariant"))) {
+    enigma_type__evariant = d;   
     if (!(d->flags & jdi::DEF_TYPENAME))
-      cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
+      cerr << "ERROR! ENIGMA's evariant is not a type!" << endl;
     else
-      cout << "Successfully loaded builtin variant type" << endl;
-  } else cerr << "ERROR! No variant type found!" << endl;
+      cout << "Successfully loaded builtin evariant type" << endl;
+  } else cerr << "ERROR! No evariant type found!" << endl;
   if ((d = main_context->get_global()->look_up("var"))) {
     enigma_type__var = d;
     if (!(d->flags & jdi::DEF_TYPENAME))

@@ -62,7 +62,7 @@
 2012-09-30  Toni Ronkko
 
 	* Version 1.12: define PATH_MAX and NAME_MAX.  Added wide-character
-	variants _wDIR, _wdirent, _wopendir(), _wreaddir(), _wclosedir() and
+	evariants _wDIR, _wdirent, _wopendir(), _wreaddir(), _wclosedir() and
 	_wrewinddir().  Thanks to Edgar Buerkle and Jan Nijtmans for ideas
 	and code.
 

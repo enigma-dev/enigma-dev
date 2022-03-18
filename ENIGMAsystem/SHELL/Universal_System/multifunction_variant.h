@@ -32,19 +32,19 @@
 
 namespace enigma
 {
-  template<class Kernel> struct multifunction_variant: variant {
+  template<class Kernel> struct multifunction_variant: evariant {
     //These are assignment operators and require a reference to be passed
     template<class T> multifunction_variant& operator=(const T &nv) {
-      variant old = std::move(*this);
-      *(variant*) this = nv;
+      evariant old = std::move(*this);
+      *(evariant*) this = nv;
       static_cast<Kernel*>(this)->function(old);
       return *this;
     }
     
     #define declare_relative_assign(op) template<class T>                      \
     multifunction_variant<Kernel> &operator op##=(const T &value) {            \
-      variant old = std::move(*(variant*) this);                               \
-      *(variant*) this = old op value;                                         \
+      evariant old = std::move(*(evariant*) this);                               \
+      *(evariant*) this = old op value;                                         \
       static_cast<Kernel*>(this)->function(old);                               \
       return *this;                                                            \
     }
@@ -63,7 +63,7 @@ namespace enigma
     #undef declare_relative_assign
 
     multifunction_variant() = default;
-    template<typename T> explicit multifunction_variant(T t): variant(t) {}
+    template<typename T> explicit multifunction_variant(T t): evariant(t) {}
   };
 
 } //namespace enigma
@@ -71,7 +71,7 @@ namespace enigma
 #define INHERIT_OPERATORS(T)\
   using multifunction_variant<T>::operator=; \
   T &operator=(const T &x) {                 \
-    *this = (const variant&) x;              \
+    *this = (const evariant&) x;              \
     return *this;                            \
   }
 

@@ -432,7 +432,7 @@ CODE
                         - ImGuiMouseCursor_Count_             -> use ImGuiMouseCursor_COUNT
                       - removed redirecting functions names that were marked obsolete in 1.61 (May 2018):
                         - InputFloat (... int decimal_precision ...) -> use InputFloat (... const char* format ...) with format = "%.Xf" where X is your value for decimal_precision.
-                        - same for InputFloat2()/InputFloat3()/InputFloat4() variants taking a `int decimal_precision` parameter.
+                        - same for InputFloat2()/InputFloat3()/InputFloat4() evariants taking a `int decimal_precision` parameter.
  - 2020/10/05 (1.79) - removed ImGuiListClipper: Renamed constructor parameters which created an ambiguous alternative to using the ImGuiListClipper::Begin() function, with misleading edge cases (note: imgui_memory_editor <0.40 from imgui_club/ used this old clipper API. Update your copy if needed).
  - 2020/09/25 (1.79) - renamed ImGuiSliderFlags_ClampOnInput to ImGuiSliderFlags_AlwaysClamp. Kept redirection enum (will obsolete sooner because previous name was added recently).
  - 2020/09/25 (1.79) - renamed style.TabMinWidthForUnselectedCloseButton to style.TabMinWidthForCloseButton.
@@ -519,7 +519,7 @@ CODE
                        old backends will still work as is, however prefer using the separated backends as they will be updated to support multi-viewports.
                        when adopting new backends follow the main.cpp code of your preferred examples/ folder to know which functions to call.
                        in particular, note that old backends called ImGui::NewFrame() at the end of their ImGui_ImplXXXX_NewFrame() function.
- - 2018/06/06 (1.62) - renamed GetGlyphRangesChinese() to GetGlyphRangesChineseFull() to distinguish other variants and discourage using the full set.
+ - 2018/06/06 (1.62) - renamed GetGlyphRangesChinese() to GetGlyphRangesChineseFull() to distinguish other evariants and discourage using the full set.
  - 2018/06/06 (1.62) - TreeNodeEx()/TreeNodeBehavior(): the ImGuiTreeNodeFlags_CollapsingHeader helper now include the ImGuiTreeNodeFlags_NoTreePushOnOpen flag. See Changelog for details.
  - 2018/05/03 (1.61) - DragInt(): the default compile-time format string has been changed from "%.0f" to "%d", as we are not using integers internally any more.
                        If you used DragInt() with custom format strings, make sure you change them to use %d or an integer-compatible format.
@@ -2681,7 +2681,7 @@ void ImGui::PushStyleVar(ImGuiStyleVar idx, float val)
         *pvar = val;
         return;
     }
-    IM_ASSERT(0 && "Called PushStyleVar() float variant but variable is not a float!");
+    IM_ASSERT(0 && "Called PushStyleVar() float evariant but variable is not a float!");
 }
 
 void ImGui::PushStyleVar(ImGuiStyleVar idx, const ImVec2& val)
@@ -2695,7 +2695,7 @@ void ImGui::PushStyleVar(ImGuiStyleVar idx, const ImVec2& val)
         *pvar = val;
         return;
     }
-    IM_ASSERT(0 && "Called PushStyleVar() ImVec2 variant but variable is not a ImVec2!");
+    IM_ASSERT(0 && "Called PushStyleVar() ImVec2 evariant but variable is not a ImVec2!");
 }
 
 void ImGui::PopStyleVar(int count)

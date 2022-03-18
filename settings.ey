@@ -24,7 +24,7 @@
     -treat-literals-as:
         Type: Radio-1
         Label: Treat literals as: 
-        Options: "EDL (variant), C++ (scalar)"
+        Options: "EDL (evariant), C++ (scalar)"
     -inherit-negatives-as:
         Type: Radio-1
         Label: Treat negatives as: 

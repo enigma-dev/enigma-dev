@@ -160,8 +160,8 @@ namespace enigma
 
     int backcolor;
     bool drawbackcolor;
-    variant(*createcode)();
-    variant(*precreatecode)();
+    evariant(*createcode)();
+    evariant(*precreatecode)();
     int width, height, spd, persistent;
     int views_enabled;
     viewstruct views[10];
@@ -185,7 +185,7 @@ namespace enigma
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant<roomv> {
   INHERIT_OPERATORS(roomv)
-  void function(const variant &oldval);
+  void function(const evariant &oldval);
   roomv(): multifunction_variant<roomv>(0) {}
 }; }
 namespace enigma_user {

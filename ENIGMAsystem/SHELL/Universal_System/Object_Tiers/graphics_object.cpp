@@ -39,13 +39,13 @@ namespace enigma
   }
   object_graphics::~object_graphics() {}
 
-  variant object_graphics::myevent_draw()      { return 0; }
+  evariant object_graphics::myevent_draw()      { return 0; }
   bool object_graphics::myevent_draw_subcheck() { return 0; }
-  variant object_graphics::myevent_drawgui()   { return 0; }
+  evariant object_graphics::myevent_drawgui()   { return 0; }
   bool object_graphics::myevent_drawgui_subcheck() { return 0; }
-  variant object_graphics::myevent_drawresize()   { return 0; }
+  evariant object_graphics::myevent_drawresize()   { return 0; }
 
-  void depthv::function(const variant &oldval) {
+  void depthv::function(const evariant &oldval) {
     if (!myiter) { return; }
 
     rval.d = floor(rval.d);
@@ -76,7 +76,7 @@ namespace enigma
   depthv::depthv() : multifunction_variant<depthv>(0), myiter(0) {}
   depthv::~depthv() {}
 
-  void image_singlev::function(const variant&) {
+  void image_singlev::function(const evariant&) {
     if (rval.d == -1) {
       *image_speed = 1;
     } else {

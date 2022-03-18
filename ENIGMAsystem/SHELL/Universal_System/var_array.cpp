@@ -30,8 +30,8 @@
 
 namespace enigma_user {
 
-var array_create(size_t size, variant value) { return var(value, size); }
-var array_create_2d(size_t length, size_t height, variant value) { return var(value, length, height); }
+var array_create(size_t size, evariant value) { return var(value, size); }
+var array_create_2d(size_t length, size_t height, evariant value) { return var(value, length, height); }
 bool array_equals(const var& arr1, const var& arr2) {
   if (arr1.array_len() != arr2.array_len()) return false;
   for (int i = 0; i < arr1.array_len(); i++) {
@@ -47,7 +47,7 @@ void array_copy(var& dest, size_t dest_index, const var& src, size_t src_index, 
 int array_length_1d(const var& v) { return v.array_len(); }
 int array_length_2d(const var& v, int n) { return v.array_len(n); }
 int array_height_2d(const var& v) { return v.array_height(); }
-void array_set(var& v, int pos, variant value) { v[pos] = value; }
+void array_set(var& v, int pos, evariant value) { v[pos] = value; }
 bool is_array(const var& v) {
   //There is no way (currently) to downsize an array from >1 element, so this might not be accurate.
   return (v.array_height() > 1) || (v.array_len() > 1);

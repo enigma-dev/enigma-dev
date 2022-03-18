@@ -58,7 +58,7 @@ RECENT REVISION HISTORY:
       2.19  (2018-02-11) fix warning
       2.18  (2018-01-30) fix warnings
       2.17  (2018-01-29) bugfix, 1-bit BMP, 16-bitness query, fix warnings
-      2.16  (2017-07-23) all functions have 16-bit variants; optimizations; bugfixes
+      2.16  (2017-07-23) all functions have 16-bit evariants; optimizations; bugfixes
       2.15  (2017-03-18) fix png-1,2,4; all Imagenet JPGs; no runtime SSE detection on GCC
       2.14  (2017-03-03) remove deprecated STBI_JPEG_OLD; fixes for Imagenet JPGs
       2.13  (2016-12-04) experimental 16-bit API, only for PNG so far; fixes
@@ -677,7 +677,7 @@ typedef unsigned char validate_uint32[sizeof(stbi__uint32)==4 ? 1 : -1];
 // Note that __MINGW32__ doesn't actually mean 32-bit, so we have to avoid STBI__X64_TARGET
 //
 // 32-bit MinGW wants ESP to be 16-byte aligned, but this is not in the
-// Windows ABI and VC++ as well as Windows DLLs don't maintain that invariant.
+// Windows ABI and VC++ as well as Windows DLLs don't maintain that inevariant.
 // As a result, enabling SSE2 on 32-bit MinGW is dangerous when not
 // simultaneously enabling "-mstackrealign".
 //
@@ -7544,7 +7544,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
                          1-bit BMP
                          *_is_16_bit api
                          avoid warnings
-      2.16  (2017-07-23) all functions have 16-bit variants;
+      2.16  (2017-07-23) all functions have 16-bit evariants;
                          STBI_NO_STDIO works again;
                          compilation fixes;
                          fix rounding in unpremultiply;
@@ -7713,7 +7713,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const *c, void *user
       0.53    fix bug in png 3->4; speedup png decoding
       0.52    png handles req_comp=3,4 directly; minor cleanup; jpeg comments
       0.51    obey req_comp requests, 1-component jpegs return as 1-component,
-              on 'test' only check type, not whether we support this variant
+              on 'test' only check type, not whether we support this evariant
       0.50  (2006-11-19)
               first released version
 */

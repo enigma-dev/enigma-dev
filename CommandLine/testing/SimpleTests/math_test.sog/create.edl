@@ -5,7 +5,7 @@ int i = -30;
 unsigned u = 30;
 long l = -60;
 unsigned lu = 60;
-variant v = -120;
+evariant v = -120;
 var a = -150;
 
 var five = 5; // These just save us a var cast, below

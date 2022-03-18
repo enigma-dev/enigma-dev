@@ -137,8 +137,8 @@ namespace enigma_user
 	void screen_redraw() {}
 	void screen_refresh() {}
 	void screen_init() {}
-	unsigned int string_width(variant str) { return 0; }
-	void draw_text(float, float, variant) {}
+	unsigned int string_width(evariant str) { return 0; }
+	void draw_text(float, float, evariant) {}
 	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
 	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
   

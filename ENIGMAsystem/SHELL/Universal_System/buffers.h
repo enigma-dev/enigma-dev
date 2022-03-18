@@ -86,11 +86,11 @@ void buffer_seek(int buffer, int base, unsigned offset);
 unsigned buffer_sizeof(int type);
 int buffer_tell(int buffer);
 
-variant buffer_peek(int buffer, unsigned offset, int type);
-variant buffer_read(int buffer, int type);
-void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size);
-void buffer_poke(int buffer, unsigned offset, int type, variant value);
-void buffer_write(int buffer, int type, variant value);
+evariant buffer_peek(int buffer, unsigned offset, int type);
+evariant buffer_read(int buffer, int type);
+void buffer_fill(int buffer, unsigned offset, int type, evariant value, unsigned size);
+void buffer_poke(int buffer, unsigned offset, int type, evariant value);
+void buffer_write(int buffer, int type, evariant value);
 
 void game_save_buffer(int buffer);
 void game_load_buffer(int buffer);

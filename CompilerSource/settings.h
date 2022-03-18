@@ -70,7 +70,7 @@ namespace setting
   extern bool use_cpp_escapes;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
   extern bool use_gml_equals;   // Defines what language operator= is inherited from.   0 = GML,               1 = C++
   extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
-  extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
+  extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::evariant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
   extern bool automatic_semicolons; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.

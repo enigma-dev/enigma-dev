@@ -138,7 +138,7 @@ void lang_CPP::quickmember_script(jdi::definition_scope* scope, string name) {
   jdi::ref_stack::parameter_ct params;
   for (int i = 0; i < 16; ++i) {
     jdi::ref_stack::parameter p;
-    p.def = enigma_type__variant;
+    p.def = enigma_type__evariant;
     p.default_value = new jdi::AST();
     params.throw_on(p);
   }

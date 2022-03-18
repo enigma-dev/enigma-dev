@@ -42,16 +42,16 @@ struct ethread;
 
 struct scrtdata {
   int scr;
-  variant args[8];
+  evariant args[8];
   ethread* mt;
-  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
+  scrtdata(int s, evariant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
 };
 
 struct ethread {
   pltfrm_thread_t handle;
   scrtdata *sd;
   bool active;
-  variant ret;
+  evariant ret;
   ethread(): handle(0), sd(NULL), active(false), ret(0) {};
   ~ethread() {
     if (sd != NULL) {

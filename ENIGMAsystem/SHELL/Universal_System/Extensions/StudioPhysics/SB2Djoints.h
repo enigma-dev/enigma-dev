@@ -59,8 +59,8 @@ void physics_joint_gear_create(int inst1, int inst2, int joint_1, int joint_2, d
 void physics_joint_delete(int id);
 
 void physics_joint_enable_motor(int id);
-variant physics_joint_get_value(int id, int field);
-void physics_joint_set_value(int id, int field, variant value);
+evariant physics_joint_get_value(int id, int field);
+void physics_joint_set_value(int id, int field, evariant value);
 
 }
 

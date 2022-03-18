@@ -22,7 +22,7 @@ void* thread_script_func(void* data) {
 
 namespace enigma_user {
 
-int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7) {
+int script_thread(int scr,evariant arg0, evariant arg1, evariant arg2, evariant arg3, evariant arg4, evariant arg5, evariant arg6, evariant arg7) {
   int thread = thread_create_script(scr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
   int res = thread_start(thread);
   if (res != 0) {
@@ -32,9 +32,9 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   return thread;
 }
 
-int thread_create_script(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7) {
+int thread_create_script(int scr,evariant arg0, evariant arg1, evariant arg2, evariant arg3, evariant arg4, evariant arg5, evariant arg6, evariant arg7) {
   ethread* newthread = new ethread();
-  variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
+  evariant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
   newthread->sd = new scrtdata(scr, args, newthread);
   threads.push_back(newthread);
   return threads.size() - 1;
@@ -53,7 +53,7 @@ bool thread_get_finished(int thread) {
   return !threads[thread]->active;
 }
 
-variant thread_get_return(int thread) {
+evariant thread_get_return(int thread) {
   return threads[thread]->ret;
 }
 

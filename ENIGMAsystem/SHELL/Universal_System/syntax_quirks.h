@@ -9,7 +9,7 @@
 **/
 
 #define repeat(x) for (int ENIGMA_REPEAT_VAR = (x); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
-#define mod %(variant)
+#define mod %(evariant)
 
 struct INTEGER_DIVISION
 {

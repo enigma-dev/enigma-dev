@@ -21,14 +21,14 @@
 #include "Universal_System/var4.h"
 
 namespace enigma_user {
-  int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
-  int thread_create_script(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
+  int script_thread(int scr, evariant arg0 = 0, evariant arg1 = 0, evariant arg2 = 0, evariant arg3 = 0, evariant arg4 = 0, evariant arg5 = 0, evariant arg6 = 0, evariant arg7 = 0);
+  int thread_create_script(int scr, evariant arg0 = 0, evariant arg1 = 0, evariant arg2 = 0, evariant arg3 = 0, evariant arg4 = 0, evariant arg5 = 0, evariant arg6 = 0, evariant arg7 = 0);
   int thread_start(int thread);
   void thread_join(int thread);
   void thread_delete(int thread);
   bool thread_exists(int thread);
   bool thread_get_finished(int thread);
-  variant thread_get_return(int thread);
+  evariant thread_get_return(int thread);
 } //namespace enigma_user
 
 #endif //ENIGMA_PLATFORM_THREADS_H

@@ -317,7 +317,7 @@ void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
         }else{ //draw coords
             for (unsigned int i=0; i<grid->hcells; i++){
                 for (unsigned int c=0; c<grid->vcells; c++){
-                    draw_text(x+(i+0.5)*grid->cellwidth,y+(c+0.5)*grid->cellheight,toString(variant(grid->nodearray[i*grid->vcells+c].x)) + ":" + toString(variant(grid->nodearray[i*grid->vcells+c].y)));
+                    draw_text(x+(i+0.5)*grid->cellwidth,y+(c+0.5)*grid->cellheight,toString(evariant(grid->nodearray[i*grid->vcells+c].x)) + ":" + toString(evariant(grid->nodearray[i*grid->vcells+c].y)));
                 }
             }
         }

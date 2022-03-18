@@ -1023,7 +1023,7 @@ void ImGui::Image(ImTextureID user_texture_id, const ImVec2& size, const ImVec2&
 }
 
 // ImageButton() is flawed as 'id' is always derived from 'texture_id' (see #2464 #1390)
-// We provide this internal helper to write your own variant while we figure out how to redesign the public ImageButton() API.
+// We provide this internal helper to write your own evariant while we figure out how to redesign the public ImageButton() API.
 bool ImGui::ImageButtonEx(ImGuiID id, ImTextureID texture_id, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1, const ImVec2& padding, const ImVec4& bg_col, const ImVec4& tint_col)
 {
     ImGuiContext& g = *GImGui;
@@ -1394,7 +1394,7 @@ void ImGui::SeparatorEx(ImGuiSeparatorFlags flags)
             x1 += window->DC.Indent.x;
 
         // FIXME-WORKRECT: In theory we should simply be using WorkRect.Min.x/Max.x everywhere but it isn't aesthetically what we want,
-        // need to introduce a variant of WorkRect for that purpose. (#4787)
+        // need to introduce a evariant of WorkRect for that purpose. (#4787)
         if (ImGuiTable* table = g.CurrentTable)
         {
             x1 = table->Columns[table->CurrentColumn].MinX;
@@ -4202,7 +4202,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
             if ((multiclick_count % 2) == 0)
             {
                 // Double-click: Select word
-                // We always use the "Mac" word advance for double-click select vs CTRL+Right which use the platform dependent variant:
+                // We always use the "Mac" word advance for double-click select vs CTRL+Right which use the platform dependent evariant:
                 // FIXME: There are likely many ways to improve this behavior, but there's no "right" behavior (depends on use-case, software, OS)
                 const bool is_bol = (state->Stb.cursor == 0) || ImStb::STB_TEXTEDIT_GETCHAR(state, state->Stb.cursor - 1) == '\n';
                 if (STB_TEXT_HAS_SELECTION(&state->Stb) || !is_bol)

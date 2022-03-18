@@ -69,6 +69,8 @@ DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
 
 ifeq ($(OS), Darwin)
+	override LDFLAGS += -I/opt/local/include -I/opt/local/include/SDL2 -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal /opt/local/lib/libiconv.a /opt/local/lib/libSDL2.a
+	override LDLIBS += -I/opt/local/include -I/opt/local/include/SDL2 -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal /opt/local/lib/libiconv.a /opt/local/lib/libSDL2.a
 else
 	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)

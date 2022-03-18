@@ -250,7 +250,7 @@ namespace enigma_user
     return ret/t.argc;
   }
 
-  variant choose(const enigma::varargs& args) {
+  evariant choose(const enigma::varargs& args) {
      return args.get(rand() % args.argc);
   }
 }

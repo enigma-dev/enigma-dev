@@ -35,7 +35,7 @@
 namespace enigma {
 
     int initialize_everything();
-    variant ev_perf(int type, int numb);
+    evariant ev_perf(int type, int numb);
 
 } // namespace enigma
 
@@ -81,7 +81,7 @@ inline void action_timeline_stop()
   ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_position=0;
 }
 
-inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
+inline bool action_if_variable(const evariant& variable, const evariant& value, int operation) {
     switch (operation)
     {
         case 0: return (variable==value); break;
@@ -531,11 +531,11 @@ enum
     ev_step_end     = 2
 };
 
-inline variant event_perform(int type, int numb) {
+inline evariant event_perform(int type, int numb) {
     return enigma::ev_perf(type, numb);
 }
 
-inline variant event_user(int numb) {
+inline evariant event_user(int numb) {
     return event_perform(enigma_user::ev_other, numb + enigma_user::ev_user0);
 }
 

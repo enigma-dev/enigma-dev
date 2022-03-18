@@ -83,7 +83,7 @@ int get_free_buffer() {
   return buffers.size();
 }
 
-std::vector<unsigned char> valToBytes(variant value, unsigned count) {
+std::vector<unsigned char> valToBytes(evariant value, unsigned count) {
   std::vector<unsigned char> result(0);
   for (unsigned i = 0; i < count; i++) {
     result.push_back(value >> ((i)*8));
@@ -218,7 +218,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
   myfile.close();
 }
 
-void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size) {
+void buffer_fill(int buffer, unsigned offset, int type, evariant value, unsigned size) {
   get_buffer(binbuff, buffer);
   unsigned nsize = offset + size;
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
@@ -340,7 +340,7 @@ int buffer_tell(int buffer) {
   return binbuff->position;
 }
 
-variant buffer_peek(int buffer, unsigned offset, int type) {
+evariant buffer_peek(int buffer, unsigned offset, int type) {
   get_bufferr(binbuff, buffer, -1);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -359,16 +359,16 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
       byte = binbuff->ReadByte();
       data.push_back(byte);
     }
-    return variant(&data[0]);
+    return evariant(&data[0]);
   }
 }
 
-variant buffer_read(int buffer, int type) {
+evariant buffer_read(int buffer, int type) {
   get_bufferr(binbuff, buffer, -1);
   return buffer_peek(buffer, binbuff->position, type);
 }
 
-void buffer_poke(int buffer, unsigned offset, int type, variant value) {
+void buffer_poke(int buffer, unsigned offset, int type, evariant value) {
   get_buffer(binbuff, buffer);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -394,7 +394,7 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
   }
 }
 
-void buffer_write(int buffer, int type, variant value) {
+void buffer_write(int buffer, int type, evariant value) {
   get_buffer(binbuff, buffer);
   buffer_poke(buffer, binbuff->position, type, value);
 }

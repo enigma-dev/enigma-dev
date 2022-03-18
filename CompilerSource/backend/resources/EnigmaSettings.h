@@ -12,7 +12,7 @@ struct ENIGMAsettings
   //Compatibility / Progess options
   int cppStrings; // Defines what language strings are inherited from.                0 = GML,               1 = C++
   int cppOperators; // Defines what language operators ++ and -- are inherited from.  0 = GML,               1 = C++
-  int literalHandling; // Determines how literals are treated.                        0 = enigma::variant,   1 = C++-scalar
+  int literalHandling; // Determines how literals are treated.                        0 = enigma::evariant,   1 = C++-scalar
   int structHandling;  // Defines behavior of the closing brace of struct {}.         0 = Implied semicolon, 1 = ISO C
   
   //Advanced options

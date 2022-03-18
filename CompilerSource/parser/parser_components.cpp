@@ -954,7 +954,7 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
     a2i = tmc - a2i;
     string iseg;
     for (int i = 0; i < a2i;)
-      iseg += (++i < a2i) ? "variant," : "variant";
+      iseg += (++i < a2i) ? "evariant," : "evariant";
     if (code[pos-1] == '>')
     {
       if (code[pos-2] == ',' or code[pos-2] == '<')

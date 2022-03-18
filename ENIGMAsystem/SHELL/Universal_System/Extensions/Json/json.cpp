@@ -200,7 +200,7 @@ namespace enigma_user
 		return jsonObject;
 	}
 	
-	variant json_decode(string data)
+	evariant json_decode(string data)
 	{
 		Json::Value root;
 		Json::Reader reader;
@@ -213,7 +213,7 @@ namespace enigma_user
 		return RecursiveDSMap(root);
 	}
 
-	string json_encode(variant ds_map)
+	string json_encode(evariant ds_map)
 	{
 		Json::Value root;
 		return string("{  }");

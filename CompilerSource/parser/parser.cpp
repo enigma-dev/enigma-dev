@@ -237,7 +237,7 @@ pt end_of_brackets(const string& synt, pt pos) // Given a string and the index O
   return pos;
 }
 
-extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
+extern jdi::definition *enigma_type__var, *enigma_type__evariant, *enigma_type__varargs;
 
 // A little structure to hold detatched cases.
 // Code and synt have their own, identical lengths; they are the expression following the `case` token.
@@ -852,7 +852,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
         string valuevar = cname;
 
         string icode = "{", isynt = "{";
-        icode += "const variant" + valuevar + "=" + svalue + ";";
+        icode += "const evariant" + valuevar + "=" + svalue + ";";
         isynt += "ttttttttttttt" + string(valuevar.length(),'n') + "=" + svaluelex + ";";
         icode += "switch(enigma::switch_hash(" + valuevar + ")){";
         isynt += "ssssss(nnnnnnnnnnnnnnnnnnn(" + string(valuevar.length(), 'n') + ")){";

@@ -211,7 +211,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     const auto &room = game.rooms[room_index];
     parsed_room *pr = parsed_rooms[room_index];
     for (const auto &int_ev_pair : pr->instance_create_codes) {
-      wto << "variant room_" << room.id()
+      wto << "evariant room_" << room.id()
           << "_instancecreate_" << int_ev_pair.first << "()\n{\n  ";
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << int_ev_pair.first << "'\");\n  ";
@@ -236,7 +236,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
     {
-      wto << "variant room_"<< room.id() <<"_instanceprecreate_" << it->first << "()\n{\n  ";
+      wto << "evariant room_"<< room.id() <<"_instanceprecreate_" << it->first << "()\n{\n  ";
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n  ";
       }
@@ -258,7 +258,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
       wto << "  return 0;\n}\n\n";
     }
 
-    wto << "variant roomprecreate" << room.id() << "()\n{\n";
+    wto << "evariant roomprecreate" << room.id() << "()\n{\n";
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room preCreation' for room '" << room.name << "'\");\n";
     }
@@ -273,7 +273,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
     wto << "\n  return 0;\n}\n\n";
 
-    wto << "variant roomcreate" << room.id() << "()\n{\n";
+    wto << "evariant roomcreate" << room.id() << "()\n{\n";
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << room.name << "'\");\n";
     }

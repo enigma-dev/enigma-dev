@@ -69,7 +69,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   global_script_argument_count=16; //write all 16 arguments
   if (global_script_argument_count) {
     wto << "// Script arguments\n";
-    wto << "variant argument0 = 0";
+    wto << "evariant argument0 = 0";
     for (int i = 1; i < global_script_argument_count; i++)
       wto << ", argument" << i << " = 0";
     wto << ";\n\n";
@@ -94,7 +94,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   const auto &gameInfo = game.gameInfo;
 
   wto << "//Default variable type: \"undefined\" or \"real\"" << endl;
-  wto << "const int variant::default_type = "
+  wto << "const int evariant::default_type = "
       << (csets.treat_uninitialized_vars_as_zero()
               ? "ty_real" : "ty_undefined") << ";"
       << endl << endl;

@@ -129,7 +129,7 @@ ACCEPT_TYPE(ArithmeticTypeEnabler, double);
 ACCEPT_TYPE(ArithmeticTypeEnabler, long double);
 
 // More lax than NumericType, but does not permit any type that can also be cast
-// to a string. Allows booleans and enum constants, but not vars or variants.
+// to a string. Allows booleans and enum constants, but not vars or evariants.
 template<typename T> struct NonStringNumberTypeEnabler
     : MaybeEnabled<T, CanCast<T, double>::V && !CanCast<T, std::string>::V> {};
 
@@ -200,8 +200,8 @@ template<typename T> struct StringType  {};
 
 #define REQUIRE_NON_STRING_NUMBER(T) bool non_string_number = true
 #define REQUIRE_STRING_TYPE(T)       bool is_string_type = true
-#define REQUIRE_NON_VARIANT_TYPE(T)  bool is_not_variant_type = true
-#define REQUIRE_VARIANT_TYPE(T)      bool is_variant_type = true
+#define REQUIRE_NON_VARIANT_TYPE(T)  bool is_not_evariant_type = true
+#define REQUIRE_VARIANT_TYPE(T)      bool is_evariant_type = true
 
 template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
 struct EnumAndNumericBinaryFuncEnabler {};
@@ -220,17 +220,17 @@ union rvt {
   rvt(const void *x): p(x) {}
 };
 
-struct variant_real_union {
+struct evariant_real_union {
   enigma::rvt rval;
-  variant_real_union(double x): rval(x) {}
-  variant_real_union(const void *x): rval(x) {}
+  evariant_real_union(double x): rval(x) {}
+  evariant_real_union(const void *x): rval(x) {}
 };
-struct variant_string_wrapper : std::string {
+struct evariant_string_wrapper : std::string {
   std::string &sval() { return *this; }
   const std::string &sval() const { return *this; }
-  variant_string_wrapper() {}
-  variant_string_wrapper(std::string const      &x): std::string(x) {}
-  variant_string_wrapper(std::string rvalue_ref  x): std::string(x) {}
+  evariant_string_wrapper() {}
+  evariant_string_wrapper(std::string const      &x): std::string(x) {}
+  evariant_string_wrapper(std::string rvalue_ref  x): std::string(x) {}
   std::string rvalue_ref release_sval() {
     return std::move(*(std::string*) this);
   }
@@ -239,13 +239,13 @@ struct variant_string_wrapper : std::string {
 }  // namespace enigma
 
 struct var;
-struct variant;
+struct evariant;
 
 namespace enigma {
 
 template<typename T> struct VariantTypeEnabler
-    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
-template<> struct VariantTypeEnabler<variant> : EnabledType<variant> {};
+    : MaybeEnabled<T, std::is_base_of<evariant, T>::value> {};
+template<> struct VariantTypeEnabler<evariant> : EnabledType<evariant> {};
 template<> struct VariantTypeEnabler<var> : EnabledType<var> {};
 
 }
@@ -272,11 +272,11 @@ using std::string;
 
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
 //██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜██████████████████████████████
-//██▌ variant: a smart pair of string and double ▐██████████████████████████████
+//██▌ evariant: a smart pair of string and double ▐██████████████████████████████
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟██████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
+struct evariant : enigma::evariant_real_union, enigma::evariant_string_wrapper {
   int type;  ///< Union tag.
 
   // Default type (-1 or real), changes based on "assume_uninitialized_is_zero."
@@ -316,41 +316,41 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     return (char) rval.d;
   }
 
-  // How to construct a variant: the basics
-  variant():
-      enigma::variant_real_union(0.0), type(default_type) {}
-  variant(const void *p):
-      enigma::variant_real_union(p), type(enigma_user::ty_pointer) {}
-  variant(const variant &x):
-      enigma::variant_real_union(x.rval.d),
-      enigma::variant_string_wrapper(x.sval()),
+  // How to construct a evariant: the basics
+  evariant():
+      enigma::evariant_real_union(0.0), type(default_type) {}
+  evariant(const void *p):
+      enigma::evariant_real_union(p), type(enigma_user::ty_pointer) {}
+  evariant(const evariant &x):
+      enigma::evariant_real_union(x.rval.d),
+      enigma::evariant_string_wrapper(x.sval()),
       type(x.type) {}
-  variant(variant rvalue_ref x):
-      enigma::variant_real_union(x.rval.d),
-      enigma::variant_string_wrapper(x.release_sval()),
+  evariant(evariant rvalue_ref x):
+      enigma::evariant_real_union(x.rval.d),
+      enigma::evariant_string_wrapper(x.release_sval()),
       type(x.type) {}
 
-  // Construct a variant from numeric types
+  // Construct a evariant from numeric types
   template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-  variant(T number): enigma::variant_real_union((double) number), type(ty_real) {}
+  evariant(T number): enigma::evariant_real_union((double) number), type(ty_real) {}
 
-  variant(const char *str):
-      enigma::variant_real_union(0.),
-      enigma::variant_string_wrapper(str),
+  evariant(const char *str):
+      enigma::evariant_real_union(0.),
+      enigma::evariant_string_wrapper(str),
       type(ty_string) {}
-  variant(const std::string &str):
-      enigma::variant_real_union(0.),
-      enigma::variant_string_wrapper(str),
+  evariant(const std::string &str):
+      enigma::evariant_real_union(0.),
+      enigma::evariant_string_wrapper(str),
       type(ty_string) {}
-  variant(std::string rvalue_ref str):
-      enigma::variant_real_union(0.),
-      enigma::variant_string_wrapper(str),
+  evariant(std::string rvalue_ref str):
+      enigma::evariant_real_union(0.),
+      enigma::evariant_string_wrapper(str),
       type(ty_string) {}
 
   // Assignment operators
   // ===========================================================================
 
-  variant& operator=(const variant &v) {
+  evariant& operator=(const evariant &v) {
     rval = v.rval;
     if ((type = v.type) == ty_string) sval() = v.sval();
     return *this;
@@ -358,25 +358,25 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 
   // Assignment to a numeric type
   template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-  variant& operator=(T number) {
+  evariant& operator=(T number) {
     rval.d = (double) number;
     type = ty_real;
     return *this;
   }
 
   // Assignment to a string type
-  variant& operator=(const std::string &str) {
+  evariant& operator=(const std::string &str) {
     sval() = str;
     type = ty_string;
     return *this;
   }
-  variant& operator=(std::string rvalue_ref str) {
+  evariant& operator=(std::string rvalue_ref str) {
     sval() = std::move(str);
     type = ty_string;
     return *this;
   }
 
-  variant& operator=(const char *str) {
+  evariant& operator=(const char *str) {
     sval() = str;
     type = ty_string;
     return *this;
@@ -386,24 +386,24 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 
   // The plus operator is actually really special.
   template<typename T, REQUIRE_NON_STRING_NUMBER(T)>
-  variant& operator+=(T number) {
+  evariant& operator+=(T number) {
     rval.d += number;
     return *this;
   }
   template<typename T, REQUIRE_STRING_TYPE(T)>
-  variant& operator+=(T str) {
+  evariant& operator+=(T str) {
     sval() += str;
     return *this;
   }
   template<class T, REQUIRE_VARIANT_TYPE(T)>
-  RLY_INLINE variant& operator+=(const T &other) {
+  RLY_INLINE evariant& operator+=(const T &other) {
     if (type == ty_string) sval() += other.sval();
     else rval.d += other.rval.d;
     return *this;
   }
 
   template<typename T, REQUIRE_VARIANT_TYPE(T)>
-  RLY_INLINE variant operator+(const T &other) const {
+  RLY_INLINE evariant operator+(const T &other) const {
     if (type == ty_string) return sval() + other.sval();
     return rval.d + other.rval.d;
   }
@@ -427,23 +427,23 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
     return fmod(rval.d, x);
   }
 
-  // Same as the above, but for another variant.
+  // Same as the above, but for another evariant.
   VAROP double operator-(const T &x) const { return rval.d - x.rval.d; }
   VAROP double operator*(const T &x) const { return rval.d * x.rval.d; }
   VAROP double operator/(const T &x) const { return rval.d / x.rval.d; }
   VAROP double operator%(const T &x) const { return fmod(rval.d, x.rval.d); }
 
   // This is just fucking stupid.
-  ANYOP variant &operator-=(const T &v)  { return *this = *this - v;  }
-  ANYOP variant &operator*=(const T &v)  { return *this = *this * v;  }
-  ANYOP variant &operator/=(const T &v)  { return *this = *this / v;  }
-  ANYOP variant &operator%=(const T &v)  { return *this = *this % v;  }
+  ANYOP evariant &operator-=(const T &v)  { return *this = *this - v;  }
+  ANYOP evariant &operator*=(const T &v)  { return *this = *this * v;  }
+  ANYOP evariant &operator/=(const T &v)  { return *this = *this / v;  }
+  ANYOP evariant &operator%=(const T &v)  { return *this = *this % v;  }
 
-  ANYOP variant &operator&=( const T &v) { return *this = *this & v;  }
-  ANYOP variant &operator|=( const T &v) { return *this = *this | v;  }
-  ANYOP variant &operator^=( const T &v) { return *this = *this ^ v;  }
-  ANYOP variant &operator<<=(const T &v) { return *this = *this << v; }
-  ANYOP variant &operator>>=(const T &v) { return *this = *this >> v; }
+  ANYOP evariant &operator&=( const T &v) { return *this = *this & v;  }
+  ANYOP evariant &operator|=( const T &v) { return *this = *this | v;  }
+  ANYOP evariant &operator^=( const T &v) { return *this = *this ^ v;  }
+  ANYOP evariant &operator<<=(const T &v) { return *this = *this << v; }
+  ANYOP evariant &operator>>=(const T &v) { return *this = *this >> v; }
 
 # undef NONVAROP
 # undef VAROP
@@ -474,7 +474,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   // Comparison operators:  <  >  <=  >=  !=  ==
   // ===========================================================================
 
-  // Block one: Type-aware comparison with other variant.
+  // Block one: Type-aware comparison with other evariant.
 # define VAROP template<typename T, REQUIRE_VARIANT_TYPE(T)> bool RLY_INLINE
   VAROP operator==(const T &x) const {
     if (type != x.type) return false;
@@ -590,11 +590,11 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   char  operator[](int ind) const { return sval()[ind]; }
 
   // Increment operators.
-  variant&  operator++()    { return ++rval.d, *this; }
+  evariant&  operator++()    { return ++rval.d, *this; }
   double    operator++(int) { return rval.d++; }
-  variant&  operator--()    { return --rval.d, *this; }
+  evariant&  operator--()    { return --rval.d, *this; }
   double    operator--(int) { return rval.d--; }
-  variant&  operator*()     { return *this; }
+  evariant&  operator*()     { return *this; }
 
   // Other unary operators.
   bool   operator!() const { return !bool(*this); }
@@ -602,53 +602,53 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   double operator-() const { return -rval.d; }
   double operator+() const { return  rval.d; }
 
-  ~variant() {}
+  ~evariant() {}
 };
 
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
 //██▛▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▜█████████████████████████████████████████
-//██▌ var: a sparse matrix of variant ▐█████████████████████████████████████████
+//██▌ var: a sparse matrix of evariant ▐█████████████████████████████████████████
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟█████████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-struct var : variant {
-  lua_table<variant> array1d;
-  lua_table<lua_table<variant>> array2d;
+struct var : evariant {
+  lua_table<evariant> array1d;
+  lua_table<lua_table<evariant>> array2d;
 
   var() {}
   var(const var&) = default;
-  var(variant value, size_t length, size_t height = 1):
-      variant(value), array1d(value, length) {
+  var(evariant value, size_t length, size_t height = 1):
+      evariant(value), array1d(value, length) {
     for (size_t i = 1; i < height; ++i) array2d[i].fill(value, length);
   }
-  template<typename T> var(const T &v): variant(v) {}
+  template<typename T> var(const T &v): evariant(v) {}
 
-  // Non-variant operators (matrix-related)
+  // Non-evariant operators (matrix-related)
   // ===========================================================================
 
-  variant& operator*  () { return *this; }
-  variant& operator() () { return *this; }
-  variant& operator() (int ind) { return (*this)[ind]; }
+  evariant& operator*  () { return *this; }
+  evariant& operator() () { return *this; }
+  evariant& operator() (int ind) { return (*this)[ind]; }
 
-  variant& operator[] (int ind) {
+  evariant& operator[] (int ind) {
     if (!ind) return *this;
     return array1d[ind];
   }
-  variant& operator() (int ind_2d,int ind_1d) {
+  evariant& operator() (int ind_2d,int ind_1d) {
     if (ind_2d) return array2d[ind_2d][ind_1d];
     if (ind_1d) return array1d[ind_1d];
     return *this;
   }
 
-  const variant& operator*  () const { return *this; }
-  const variant& operator() () const { return *this; }
-  const variant& operator() (int ind) const { return (*this)[ind]; }
+  const evariant& operator*  () const { return *this; }
+  const evariant& operator() () const { return *this; }
+  const evariant& operator() (int ind) const { return (*this)[ind]; }
 
-  const variant& operator[] (int ind) const {
+  const evariant& operator[] (int ind) const {
     if (!ind) return *this;
     return array1d[ind];
   }
-  const variant& operator() (int ind_2d,int ind_1d) const {
+  const evariant& operator() (int ind_2d,int ind_1d) const {
     if (ind_2d) return array2d[ind_2d][ind_1d];
     if (ind_1d) return array1d[ind_1d];
     return *this;
@@ -669,7 +669,7 @@ struct var : variant {
     return array1d.dense_length();
   }
 
-  const std::vector<variant> &dense_array_1d() {
+  const std::vector<evariant> &dense_array_1d() {
     *array1d = *this;
     return array1d.dense_part();
   }
@@ -680,34 +680,34 @@ struct var : variant {
             array1d.dense_part().end()};
   }
 
-  // Annoying overhead and var extensions of variant operators
+  // Annoying overhead and var extensions of evariant operators
   // ===========================================================================
 
-  // Inherit 75 operators from variant like it's 1982
-  using variant::operator=;   using variant::operator==;
-  using variant::operator+;   using variant::operator+=;
-  using variant::operator-;   using variant::operator-=;
-  using variant::operator*;   using variant::operator*=;
-  using variant::operator/;   using variant::operator/=;
-  using variant::operator%;   using variant::operator%=;
-  using variant::operator<;   using variant::operator<=;
-  using variant::operator>;   using variant::operator>=;
-  using variant::operator<<;  using variant::operator<<=;
-  using variant::operator>>;  using variant::operator>>=;
-  using variant::operator|;   using variant::operator|=;
-  using variant::operator^;   using variant::operator^=;
-  using variant::operator!;   using variant::operator!=;
-  using variant::operator~;
+  // Inherit 75 operators from evariant like it's 1982
+  using evariant::operator=;   using evariant::operator==;
+  using evariant::operator+;   using evariant::operator+=;
+  using evariant::operator-;   using evariant::operator-=;
+  using evariant::operator*;   using evariant::operator*=;
+  using evariant::operator/;   using evariant::operator/=;
+  using evariant::operator%;   using evariant::operator%=;
+  using evariant::operator<;   using evariant::operator<=;
+  using evariant::operator>;   using evariant::operator>=;
+  using evariant::operator<<;  using evariant::operator<<=;
+  using evariant::operator>>;  using evariant::operator>>=;
+  using evariant::operator|;   using evariant::operator|=;
+  using evariant::operator^;   using evariant::operator^=;
+  using evariant::operator!;   using evariant::operator!=;
+  using evariant::operator~;
 
   #ifndef JUST_DEFINE_IT_RUN // These confuse JDI for some reason
   var &operator=(const var &v) {
-    *(variant*) this = v;
+    *(evariant*) this = v;
     return *this;
   }
 
   template<typename T, REQUIRE_VARIANT_TYPE(T)>
-  variant operator+(const T &v) {
-    return *(variant*) this + v;
+  evariant operator+(const T &v) {
+    return *(evariant*) this + v;
   }
   #endif
 
@@ -759,9 +759,9 @@ VARBINOP long long operator^(T a, const U &b) {
 
 #undef VARBINOP
 
-// We need to disallow these operators for variants or Clang will decide
+// We need to disallow these operators for evariants or Clang will decide
 // that the global version is equally preferable with the FULLY-SPECIFIED
-// match in the actual variant class.
+// match in the actual evariant class.
 #ifndef JUST_DEFINE_IT_RUN
 #define PRIMITIVE_OP                                                           \
     template<class T, typename U,                                              \
@@ -791,7 +791,7 @@ PRIMITIVE_OP T &operator>>=(T &a, const U &b) { return a >>= (T) b; }
 
 #undef PRIMITIVE_OP
 
-// String + variant operator we missed above
+// String + evariant operator we missed above
 template<typename T, typename U, REQUIRE_STRING_TYPE(T), REQUIRE_VARIANT_TYPE(U)>
 static inline std::string operator+(T str, const U &v) {
   return str + v.to_string();
@@ -800,19 +800,19 @@ static inline std::string operator+(T str, const U &v) {
 namespace enigma_user {
 
 using ::var;
-using ::variant;
+using ::evariant;
 typedef std::string std_string;
 
-static inline bool is_undefined(const variant &val) {
+static inline bool is_undefined(const evariant &val) {
   return val.type == enigma_user::ty_undefined;
 }
-static inline bool is_real     (const variant &val) {
+static inline bool is_real     (const evariant &val) {
   return val.type == enigma_user::ty_real;
 }
-static inline bool is_string   (const variant &val) {
+static inline bool is_string   (const evariant &val) {
   return val.type == enigma_user::ty_string;
 }
-static inline bool is_ptr      (const variant &val) {
+static inline bool is_ptr      (const evariant &val) {
   return val.type == enigma_user::ty_pointer;
 }
 
@@ -823,22 +823,22 @@ static inline bool is_ptr      (const variant &val) {
 namespace std {
 
 template<> class numeric_limits<var>: numeric_limits<double> {};
-template<> class numeric_limits<variant>: numeric_limits<double> {};
+template<> class numeric_limits<evariant>: numeric_limits<double> {};
 template<> class numeric_limits<const var&>: numeric_limits<double> {};
-template<> class numeric_limits<const variant&>: numeric_limits<double> {};
+template<> class numeric_limits<const evariant&>: numeric_limits<double> {};
 
 }  // namespace std
 
 
 namespace enigma {
 
-// Define var and variant as arithmetic types.
+// Define var and evariant as arithmetic types.
 // Note: This isn't some profound or magical truth; it's just the distinction
 //       between ArithmeticType and NumericType, as we've defined them.
 template<> struct ArithmeticTypeEnabler<const var&>
     : EnabledType<const var&>     {};
-template<> struct ArithmeticTypeEnabler<const variant&>
-    : EnabledType<const variant&> {};
+template<> struct ArithmeticTypeEnabler<const evariant&>
+    : EnabledType<const evariant&> {};
 
 }  // namespace enigma
 

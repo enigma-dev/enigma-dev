@@ -79,7 +79,7 @@ int lang_CPP::compile_writeDefraggedEvents(
       }
     }
     const bool e_is_void = e_is_inst || e_has_dispatch;
-    wto << "    virtual " << (e_is_void ? "void" : "variant")
+    wto << "    virtual " << (e_is_void ? "void" : "evariant")
         << " myevent_" << fname << (e_has_dispatch ? "_dispatcher()" : "()");
     if (event.HasDefaultCode()) {
       wto << " {" << endl << "  " << event.DefaultCode() << endl
@@ -111,7 +111,7 @@ int lang_CPP::compile_writeDefraggedEvents(
   wto << "    }\n";
 
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
-  wto << "    virtual variant myevents_perf(int type, int numb) {return 0;}" << endl;
+  wto << "    virtual evariant myevents_perf(int type, int numb) {return 0;}" << endl;
   wto << "    event_parent() {}" << endl;
   wto << "    event_parent(unsigned _x, int _y): " << system_get_uppermost_tier() << "(_x,_y) {}" << endl;
   wto << "  };" << endl;
@@ -162,7 +162,7 @@ int lang_CPP::compile_writeDefraggedEvents(
   wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
-  wto << "  variant ev_perf(int type, int numb) {\n"
+  wto << "  evariant ev_perf(int type, int numb) {\n"
          "    return ((enigma::event_parent*) instance_event_iterator->inst)->myevents_perf(type, numb);\n"
          "  }\n";
 

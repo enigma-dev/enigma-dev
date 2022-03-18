@@ -36,7 +36,7 @@ gtest_assert_eq(real("3.125"), 3.125);
 // assert that they're covered.
 //gtest_assert_gt(real("1234567890123"), 1234567890000.);
 
-variant my_str = "hello, world";
+evariant my_str = "hello, world";
 gtest_assert_eq(string(my_str), "hello, world");
 gtest_assert_eq(string_length("hello, world"), 12);
 gtest_assert_eq(string_length(my_str), 12);

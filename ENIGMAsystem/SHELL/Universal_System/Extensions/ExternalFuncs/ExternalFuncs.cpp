@@ -154,8 +154,8 @@ union ambiguous { double d; const char* s; const void* p; };
 namespace enigma_user
 {
 
-variant external_call(int id,variant a1,variant a2, variant a3, variant a4, variant a5, variant a6, variant a7, variant a8,
-                             variant a9,variant a10,variant a11,variant a12,variant a13,variant a14,variant a15,variant a16)
+evariant external_call(int id,evariant a1,evariant a2, evariant a3, evariant a4, evariant a5, evariant a6, evariant a7, evariant a8,
+                             evariant a9,evariant a10,evariant a11,evariant a12,evariant a13,evariant a14,evariant a15,evariant a16)
 {
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
@@ -168,7 +168,7 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   std::vector<ambiguous> array(a->argc);
   std::vector<void *> arg_values(a->argc);
 
-  variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
+  evariant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
   for (int i = 0; i < a->argc; ++i)
   {
     if (a->arg_type[i] == &ffi_type_double)

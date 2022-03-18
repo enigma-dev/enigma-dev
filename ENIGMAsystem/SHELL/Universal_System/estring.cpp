@@ -164,7 +164,7 @@ string base64_decode(string const& str) {
   return ret;
 }
 
-double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
+double real(evariant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
 string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }

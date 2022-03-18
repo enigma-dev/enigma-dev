@@ -36,7 +36,7 @@ namespace enigma {
   }
 }
 
-void enigma::livesv::function(const variant &oldval) {
+void enigma::livesv::function(const evariant &oldval) {
   rval.d = round(rval.d);
   if (rval.d <= 0.0 && oldval.rval.d >= 1.0) {
     has_been_zeroless = true;

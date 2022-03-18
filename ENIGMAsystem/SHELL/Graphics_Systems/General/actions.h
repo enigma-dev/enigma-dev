@@ -232,7 +232,7 @@ inline void action_draw_text_transformed(const string text, const gs_scalar x, c
         draw_text_transformed(x, y, text, horScale, verScale, angle);
 }
 
-inline void action_draw_variable(variant variable, const gs_scalar x, const gs_scalar y)
+inline void action_draw_variable(evariant variable, const gs_scalar x, const gs_scalar y)
 {
     if (argument_relative)
     {
