@@ -85,12 +85,7 @@ void audio_sound_gain(int index, float volume, double time) {
 
 void audio_master_gain(float volume) { sound_global_volume(volume); }
 
-void audio_channel_num(int num) { channel_num = num; }
-
-int audio_system() { return audio_new_system; }
-
 int audio_add(string fname) {
-  // Decode sound
   return sound_add(fname);
 }
 
