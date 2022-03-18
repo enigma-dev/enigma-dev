@@ -79,7 +79,7 @@ static TokenTrie token_lookup {
   { "*=",  TT_ASSOP        },
   { "/",   TT_SLASH        },
   { "/=",  TT_ASSOP        },
-  { ".",   TT_DECIMAL      },
+  { ".",   TT_DOT          },
   { ":",   TT_COLON,       },
   { "::",  TT_SCOPEACCESS  },
   { ":=",  TT_ASSIGN,      },
@@ -299,7 +299,7 @@ Token Lexer::ReadRawToken() {
     case '_': {
       while (is_letterd(code[++pos]));
       const auto name = std::string_view{code}.substr(spos, pos - spos);
-      return Token(TT_VARNAME, Mark(spos, name.length()));
+      return Token(TT_IDENTIFIER, Mark(spos, name.length()));
     }
 
     case '$': {
@@ -448,7 +448,7 @@ Token &Lexer::TranslateNameToken(Token &token) {
   }
 
   if (!context->language_fe->is_shared_local(name)) {
-    // TODO: REMOVEME
+    // TODO: remove slow_ass_conversion with new JDI
     std::string slow_ass_conversion{name};
     jdi::definition *d = context->language_fe->look_up(slow_ass_conversion);
     if (d) {
@@ -457,16 +457,8 @@ Token &Lexer::TranslateNameToken(Token &token) {
         token.type = TT_TYPE_NAME;
         return token;
       }
-      if (d->flags & jdi::DEF_NAMESPACE) {
-        token.type = TT_NAMESPACE;
-        return token;
-      }
-      if (context->language_fe->definition_is_function(d)) {
-        token.type = TT_FUNCTION;
-        return token;
-      }
       // Global variables
-      token.type = TT_VARNAME;
+      token.type = TT_IDENTIFIER;
       return token;
     }
   }
@@ -483,7 +475,7 @@ Token Lexer::ReadToken() {
     return macro.tokens[macro.index++];
   }
   Token res = ReadRawToken();
-  if (res.type == TT_VARNAME) {
+  if (res.type == TT_IDENTIFIER) {
     if (HandleMacro(res.content)) return ReadToken();
     return TranslateNameToken(res);
   }

@@ -109,7 +109,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
     // -------------------------------------------------------------------------
     // -- Handle argument names, VA_LIST, VA_OPT. ------------------------------
     // -------------------------------------------------------------------------
-    if (tokens[i].type == TT_VARNAME) {
+    if (tokens[i].type == TT_IDENTIFIER) {
       auto found = params_by_name.find(tokens[i].content);
       size_t arg_num = 0;
       if (found == params_by_name.end()) {
@@ -143,7 +143,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
     } else if (tokens[i].type == TTM_STRINGIFY) {
       size_t j = i;
       while (++j < tokens.size() && tokens[j].PreprocessesAway());
-      if (j >= tokens.size() || tokens[j].type != TT_VARNAME) {
+      if (j >= tokens.size() || tokens[j].type != TT_IDENTIFIER) {
         herr->Error(tokens[i]) << "# must be followed by a parameter name";
         continue;
       }

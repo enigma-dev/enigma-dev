@@ -36,10 +36,10 @@ struct LexerTester {
 
 TEST(LexerTest, NumericLiterals) {
   LexerTester lex("cool+++beans");
-  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_INCREMENT);
   EXPECT_EQ(lex->ReadToken().type, TT_PLUS);
-  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
@@ -52,8 +52,8 @@ TEST(LexerTest, Comments) {
 
 TEST(LexerTest, AnnoyingCommentsA) {
   LexerTester lex("test/*'*/endtest");
-  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
-  EXPECT_EQ(lex->ReadToken().type, TT_VARNAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
