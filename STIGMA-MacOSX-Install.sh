@@ -14,5 +14,3 @@ sudo chmod +x ./install.sh
 sudo ./install.sh
 sudo chmod +x ./start.sh
 ln -s /usr/local/bin/STIGMA/STIGMA/stigma-dev /Applications/STIGMA
-echo "export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk8-temurin/Contents/Home" >> ~/.zshrc
-echo "export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk8-temurin/Contents/Home" >> ~/.bashrc
