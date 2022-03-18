@@ -86,7 +86,7 @@ void audio_sound_gain(int index, float volume, double time) {
 void audio_master_gain(float volume) { sound_global_volume(volume); }
 
 int audio_add(string fname) {
-  return sound_add(fname);
+  return sound_add(fname, 0, true);
 }
 
 void audio_delete(int sound) {
