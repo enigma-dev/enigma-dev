@@ -20,6 +20,7 @@
 #define ENIGMA_AS_UTIL_H
 
 #include "Widget_Systems/widgets_mandatory.h"
+#include "apifilesystem/filesystem.h"
 
 #include <cstdio>
 #include <string>
@@ -29,7 +30,8 @@ using std::string;
 namespace enigma {
 
 inline char* read_all_bytes(std::string fname, size_t &flen) {
-  FILE *afile = fopen(fname.c_str(),"rb");
+  int fd = enigma_user::file_bin_open(fname.c_str(), FD_RDONLY);
+  FILE *afile = fdopen(fd, "rb");
   if (!afile)
     return NULL;
 
