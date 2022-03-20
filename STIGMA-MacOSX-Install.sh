@@ -12,4 +12,4 @@ chmod +x ./install.sh
 ./install.sh
 chmod +x ./start.sh
 sudo port -f deactivate libiconv
-echo "Installation Complete! You may now run the \"/Applications/start.sh\" script from the terminal app!"
+echo "Installation Complete! You may now run the \"/Applications/stigma-dev/start.sh\" script from the terminal app!"
