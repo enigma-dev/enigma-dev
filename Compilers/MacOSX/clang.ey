@@ -25,6 +25,6 @@ Parser-Vars:
 EXE-Vars:
   resources: $exe
   Build-Extension: .app
-  Run-output: $exe
+  Run-output: $tempfile
   Run-Program: open $game
   Run-Params:

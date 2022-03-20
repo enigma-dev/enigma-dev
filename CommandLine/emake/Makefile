@@ -24,7 +24,7 @@ ifeq ($(UNIX_BASED), true)
 	endif
 endif
 
-CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM
+CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../$(LIB_PFX)EGM -I../$(LIB_PFX)EGM
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
 
 ifeq ($(TESTS), TRUE)
@@ -35,5 +35,20 @@ else
 	TARGET = ../../emake$(SUFFIX)
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 endif
+
+ifeq ($(OS), Darwin)
+	LINKING_TARGETS += make AppleFixLinks
+	CPYCOMPEGM := $(shell cp -f ../../libcompileEGMf-`uname -s`-`uname -m`.dylib ../libcompileEGMf.dylib)
+endif
+
+AppleFixLinks:
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(LIB_EXT)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(LIB_EXT)
+	install_name_tool -change ../../$(LIB_PFX)EGM$(LIB_EXT) @loader_path/./$(LIB_PFX)EGM$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)compileEGMf$(LIB_EXT) @loader_path/./$(LIB_PFX)compileEGMf$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) $(TARGET)
 
 include ../../Default.mk
