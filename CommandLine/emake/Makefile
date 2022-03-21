@@ -38,16 +38,16 @@ endif
 
 ifeq ($(OS), Darwin)
 	LINKING_TARGETS += make AppleFixLinks
-	CPYCOMPEGM := $(shell cp -f ../../libcompileEGMf-`uname -s`-`uname -m`.dylib ../libcompileEGMf.dylib)
 endif
 
 AppleFixLinks:
 	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
 	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
-	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(LIB_EXT)
-	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(LIB_EXT)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(SUFFIX)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)compileEGMf$(SUFFIX)
 	install_name_tool -change ../../$(LIB_PFX)EGM$(LIB_EXT) @loader_path/./$(LIB_PFX)EGM$(LIB_EXT) $(TARGET)
-	install_name_tool -change ../$(LIB_PFX)compileEGMf$(LIB_EXT) @loader_path/./$(LIB_PFX)compileEGMf$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)compileEGMf$(LIB_EXT) @loader_path/./$(LIB_PFX)compileEGMf$(SUFFIX) $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)compileEGMf$(SUFFIX) @loader_path/./$(LIB_PFX)compileEGMf$(SUFFIX) $(TARGET)
 	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) $(TARGET)
 	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) $(TARGET)
 
