@@ -2,20 +2,20 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>C:\STIGMA\stigma-dev-Windows-i686\lateralgm.jar</jar>
-  <outfile>C:\STIGMA\stigma-dev-Windows-i686\LateralGM-Windows-i686.exe</outfile>
+  <jar>C:\stigma-dev-Windows-i686\lateralgm.jar</jar>
+  <outfile>C:\stigma-dev-Windows-i686\LateralGM-Windows-i686.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>http://java.com/download</downloadUrl>
+  <downloadUrl></downloadUrl>
   <supportUrl></supportUrl>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>C:\STIGMA\stigma-dev-Windows-i686\lateralgm.ico</icon>
+  <icon>C:\stigma-dev-Windows-i686\lateralgm.ico</icon>
   <jre>
-    <path>oracle-jdk</path>
+    <path>openjdk</path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.8.0</minVersion>
