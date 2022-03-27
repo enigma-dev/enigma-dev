@@ -1,0 +1,32 @@
+%e-yaml
+---
+Name: emscripten
+Native: No
+Maintainer: fundies
+Target-platform: Web
+
+Make-Vars:
+  path:
+  make: make
+  makeflags:
+  cc: emcc
+  cxx: em++
+  cppflags:
+  cxxflags: -fdiagnostics-color=always
+  cflags:
+  ldflags: -lstdc++fs
+  links:
+
+Parser-Vars:
+  defines: cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc -E -x c++ --std=c++03 -v $blank
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+
+EXE-Vars:
+  resources: /tmp/resources.res
+  resources_in: resources.res
+  Build-Extension:
+  Run-output: firefox $tempfile
+  Run-Program: firefox $game
+  Run-Params:

@@ -1,7 +1,7 @@
 #ifndef E_SDL_EVENT_HANDLER_H
 #define E_SDL_EVENT_HANDLER_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 namespace enigma {
 
@@ -12,7 +12,7 @@ class SDL_Event_Handler {
 
  protected:
   void windowEvent(const SDL_Event *event);
-  
+
   void windowResized(const SDL_Event *event);
   void windowFocusGain(const SDL_Event *event);
   void windowFocusLost(const SDL_Event *event);
@@ -29,9 +29,9 @@ class SDL_Event_Handler {
   void windowClose(const SDL_Event *event) {}
   void windowTakeFocus(const SDL_Event *event) {}
   void windowHitTest(const SDL_Event *event) {}
-  
+
   void mouseMotion(const SDL_Event *event) {}
-  
+
   void joystickAxisMotion(const SDL_Event *event) {}
   void joyBallAxisMotion(const SDL_Event *event) {}
   void joyHatMotion(const SDL_Event *event) {}
@@ -39,7 +39,7 @@ class SDL_Event_Handler {
   void joyButtonUp(const SDL_Event *event) {}*/
   void joyDeviceAdded(const SDL_Event *event);
   void joyDeviceRemoved(const SDL_Event *event);
-  
+
   void controllerButtonDown(const SDL_Event *event);
   void controllerButtonUp(const SDL_Event *event);
   /*void controllerAxisMotion(const SDL_Event *event) {}
@@ -48,17 +48,17 @@ class SDL_Event_Handler {
   void controllerDeviceAdded(const SDL_Event *event) {}
   void controllerDeviceRemoved(const SDL_Event *event) {}
   void controllerDeviceRemmaped(const SDL_Event *event) {}
-  
+
   void audioDeviceAdded(const SDL_Event *event) {}
   void audioDeviceRemoved(const SDL_Event *event) {}
-  
+
   void fingerMotion(const SDL_Event *event) {}
   void fingerDown(const SDL_Event *event) {}
   void fingerUp(const SDL_Event *event) {}
   void multigesture(const SDL_Event *event) {}
   void dollarGesture(const SDL_Event *event) {}
   void dollarRecord(const SDL_Event *event) {}
-  
+
   void dropFile(const SDL_Event *event) {}
   void dropText(const SDL_Event *event) {}
   void dropBegin(const SDL_Event *event) {}

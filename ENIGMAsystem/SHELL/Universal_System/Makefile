@@ -1,3 +1,7 @@
+ifeq ($(TARGET-PLATFORM), Web)
+	override CXXFLAGS += -s USE_ZLIB=1
+endif
+
 SOURCES += $(wildcard Universal_System/*.cpp)\
            $(wildcard Universal_System/Object_Tiers/*.cpp)\
            $(wildcard Universal_System/Instances/*.cpp)\

@@ -244,8 +244,8 @@ struct variant;
 namespace enigma {
 
 template<typename T> struct VariantTypeEnabler
-    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
-template<> struct VariantTypeEnabler<variant> : EnabledType<variant> {};
+    : MaybeEnabled<T, std::is_base_of<::variant, T>::value> {};
+template<> struct VariantTypeEnabler<::variant> : EnabledType<::variant> {};
 template<> struct VariantTypeEnabler<var> : EnabledType<var> {};
 
 }
@@ -611,7 +611,7 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟█████████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-struct var : variant {
+struct var : ::variant {
   lua_table<variant> array1d;
   lua_table<lua_table<variant>> array2d;
 
@@ -820,15 +820,10 @@ static inline bool is_ptr      (const variant &val) {
 
 // End of reverse-order operations.
 
-namespace std {
-
-template<> class numeric_limits<var>: numeric_limits<double> {};
-template<> class numeric_limits<variant>: numeric_limits<double> {};
-template<> class numeric_limits<const var&>: numeric_limits<double> {};
-template<> class numeric_limits<const variant&>: numeric_limits<double> {};
-
-}  // namespace std
-
+template<> class std::numeric_limits<var>: numeric_limits<double> {};
+template<> class std::numeric_limits<::variant>: numeric_limits<double> {};
+template<> class std::numeric_limits<const var&>: numeric_limits<double> {};
+template<> class std::numeric_limits<const ::variant&>: numeric_limits<double> {};
 
 namespace enigma {
 
@@ -837,8 +832,8 @@ namespace enigma {
 //       between ArithmeticType and NumericType, as we've defined them.
 template<> struct ArithmeticTypeEnabler<const var&>
     : EnabledType<const var&>     {};
-template<> struct ArithmeticTypeEnabler<const variant&>
-    : EnabledType<const variant&> {};
+template<> struct ArithmeticTypeEnabler<const ::variant&>
+    : EnabledType<const ::variant&> {};
 
 }  // namespace enigma
 

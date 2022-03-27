@@ -29,6 +29,7 @@
 // user's package manager happens to be old
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_LEFT_HANDED
+#define GLM_FORCE_PURE
 #include <glm/glm.hpp>
 // FreeBSD won't compile otheriwse
 #ifndef GLM_LEFT_HANDED

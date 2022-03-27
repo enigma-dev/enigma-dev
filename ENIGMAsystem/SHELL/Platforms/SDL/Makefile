@@ -8,6 +8,10 @@ SOURCES += $(wildcard Platforms/SDL/*.cpp) Platforms/General/POSIX/Utility.cpp
 
 override CXXFLAGS += -DENIGMA_PLATFORM_SDL
 
+ifeq ($(TARGET-PLATFORM), Web)
+	override CXXFLAGS += -sUSE_SDL=2 -I$(ENIGMA_ROOT)/android/external/glm/
+endif
+
 ifneq ($(TARGET-PLATFORM), Android)
 	override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2)
 	override LDLIBS += $(shell $(PKG-CONFIG) --libs --static sdl2)
@@ -43,5 +47,7 @@ else
 		SOURCES += Platforms/SDL/xlib/Window.cpp
 	else ifeq ($(TARGET-PLATFORM), FreeBSD)
 		SOURCES += Platforms/SDL/xlib/Window.cpp
+	else ifeq ($(TARGET-PLATFORM), Web)
+		SOURCES += Platforms/SDL/Web/Window.cpp
 	endif
 endif

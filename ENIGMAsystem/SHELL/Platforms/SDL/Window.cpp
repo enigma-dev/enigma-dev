@@ -146,7 +146,7 @@ unsigned window_get_icon_subimg() {
 }
 
 void window_set_icon(int ind, unsigned subimg) {
-  // the line below prevents glitchy minimizing when 
+  // the line below prevents glitchy minimizing when
   // icons are changed rapidly (i.e. for animation).
   if (window_get_minimized()) return;
 

@@ -10,6 +10,10 @@
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#include <stdio.h>
+
 namespace enigma {
 
 std::vector<std::function<void()> > extension_update_hooks;
@@ -166,10 +170,30 @@ int updateTimer() {
   return 0;
 }
 
+EM_BOOL GameLoop(double time, void* userData) {
+    if (!((std::string)enigma_user::room_caption).empty())
+      enigma_user::window_set_caption(enigma_user::room_caption);
+    update_mouse_variables();
+
+    if (updateTimer() != 0) return EM_FALSE;
+    if (handleEvents() != 0) return EM_FALSE;
+    if (gameWait() != 0) return EM_FALSE;
+
+    // if any extensions need updated, update them now
+    // just before we fire off user events like step
+    for (auto update_hook : extension_update_hooks)
+      update_hook();
+
+    ENIGMA_events();
+    handleInput();
+
+    return EM_TRUE;
+}
+
 int enigma_main(int argc, char** argv) {
   // Initialize directory globals
   initialize_directory_globals();
-  
+
   // Copy our parameters
   set_program_args(argc, argv);
 
@@ -186,24 +210,14 @@ int enigma_main(int argc, char** argv) {
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
 
+  #ifdef __EMSCRIPTEN__
+    // Receives a function to call and some user data to provide it.
+    emscripten_request_animation_frame_loop(GameLoop, 0);
+  #else
   while (!game_isending) {
-
-    if (!((std::string)enigma_user::room_caption).empty())
-      enigma_user::window_set_caption(enigma_user::room_caption);
-    update_mouse_variables();
-
-    if (updateTimer() != 0) continue;
-    if (handleEvents() != 0) break;
-    if (gameWait() != 0) continue;
-
-    // if any extensions need updated, update them now
-    // just before we fire off user events like step
-    for (auto update_hook : extension_update_hooks)
-      update_hook();
-
-    ENIGMA_events();
-    handleInput();
+    GameLoop();
   }
+  #endif
 
   game_ending();
   DisableDrawing(nullptr);

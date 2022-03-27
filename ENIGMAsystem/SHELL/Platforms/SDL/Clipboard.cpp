@@ -1,6 +1,6 @@
 #include "Platforms/General/PFwindow.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 namespace enigma_user {
   std::string clipboard_get_text()

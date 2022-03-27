@@ -3,7 +3,7 @@
 
 #include "Platforms/General/PFgamepad.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <vector>
 
