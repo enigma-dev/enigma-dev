@@ -220,13 +220,14 @@ const char *cocoa_password_box(const char *message, const char *def, const char 
 
 const char *cocoa_get_open_filename(const char *filter, const char *fname, const char *dir, const char *title, const bool mselect) {
   static const char *res;
-  res = ngs::imgui::get_open_filename_ext(filter, fname, dir, title).c_str();
+  if (mselect) res = ngs::imgui::get_open_filenames_ext(filter, dir, title).c_str();
+  else res = ngs::imgui::get_open_filename_ext(filter, dir, title).c_str();
   return res;
 }
 
 const char *cocoa_get_save_filename(const char *filter, const char *fname, const char *dir, const char *title) {
   static const char *res;
-  res = ngs::imgui::get_save_filename_ext(filter, fname, dir, title).c_str();
+  res = ngs::imgui::get_save_filename_ext(filter, dir, title).c_str();
   return res;
 }
 
