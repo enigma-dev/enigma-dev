@@ -711,7 +711,7 @@ namespace ifd {
 			}
 			else if (filter[i] == '{') {
 				std::string filterName = filter.substr(lastSplit, i - lastSplit);
-				if (filterName == ".*") {
+				if (filterName == "*.*" || filterName == ".*" || filterName == "*") {
 					m_filter += std::string(std::string("All Files (*.*)\0").c_str(), 16);
 					m_filterExtensions.push_back(std::vector<std::string>());
 				}

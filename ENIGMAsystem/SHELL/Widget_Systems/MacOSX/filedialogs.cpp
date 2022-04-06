@@ -118,7 +118,7 @@ namespace {
     return vec;
   }
 
-  string imgui_filter(string input) {
+  string imgui_filter(string input, bool is_folder) {
     input = string_replace_all(input, "\r", "");
     input = string_replace_all(input, "\n", "");
     input = string_replace_all(input, "{", "");
@@ -137,9 +137,8 @@ namespace {
       }
       index += 1;
     }
-    if (!string_output.empty() && string_output.back() == ',') {
-      string_output.push_back('.');
-      string_output.push_back('*');
+    if (!is_folder) {
+      string_output += ".*";
     }
     return string_output;
   }
@@ -358,7 +357,8 @@ namespace {
       #endif
     };
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    string filterNew = imgui_filter(filter); bool quit = false; SDL_Event e;
+    string filterNew = imgui_filter(filter, (type == selectFolder)); 
+    bool quit = false; SDL_Event e;
     string result; while (!quit) {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
@@ -397,6 +397,7 @@ namespace {
       if (ifd::FileDialog::Instance().IsDone("GetDirectory")) {
         if (ifd::FileDialog::Instance().HasResult()) {
           result = ifd::FileDialog::Instance().GetResult().string();
+          if (!result.empty() && result.back() != CHR_SLASH) result.push_back(CHR_SLASH);
         }
         ifd::FileDialog::Instance().Close();
         goto finish;
