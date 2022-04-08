@@ -173,9 +173,9 @@ ifeq ($(UNIX_BASED), true)
 	else ifeq ($(OS), Linux)
 		override LDLIBS += -lprocps
 	else ifeq ($(OS), FreeBSD)
-		override LDLIBS += -lprocstat -lutil -lc
+		override LDLIBS += -lprocstat -lutil -lc /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a /usr/lib/libc.a /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
 	else ifeq ($(OS), DragonFly)
-		override LDLIBS += -lkvm -lc
+		override LDLIBS += -lkvm -lc /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a /usr/lib/libc.a /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
 	else ifeq ($(OS), OpenBSD)
 		override LDLIBS += -lkvm -lc
 	endif
