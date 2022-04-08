@@ -7,6 +7,21 @@ ifeq ($(UNIX_BASED), true)
 		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override LDFLAGS += -lpthread -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /opt/local/lib/libvpx.a /opt/local/lib/libz.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
 		override LDLIBS += -lpthread  -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /opt/local/lib/libvpx.a /opt/local/lib/libz.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
+	else ifeq ($(OS), FreeBSD)
+		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override LDFLAGS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+		override LDLIBS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+	else ifeq ($(OS), DragonFly)
+		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override LDFLAGS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+		override LDLIBS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+	else ifeq ($(OS), OpenBSD)
+		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
+		override LDFLAGS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+		override LDLIBS += -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
 	else
 		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
@@ -16,12 +31,6 @@ ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Linux)
 		override LDFLAGS += -latomic
 		override LDLIBS += -latomic
-	else ifeq ($(OS), FreeBSD)
-		override LDFLAGS += -lc
-		override LDLIBS += -lc
-	else ifeq ($(OS), DragonFly)
-		override LDFLAGS += -lc
-		override LDLIBS += -lc
 	endif
 	SOURCES += $(WEBMPATH)/yuv_rgb.cpp
 else

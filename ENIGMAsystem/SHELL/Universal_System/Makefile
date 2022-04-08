@@ -7,6 +7,9 @@ ifeq ($(OS), Darwin)
 	override CFLAGS += -std=c++17
 	override LDFLAGS += /opt/local/lib/libz.a
 	override LDLIBS += /opt/local/lib/libz.a
+else ifeq ($(OS), FreeBSD)
+else ifeq ($(OS), DragonFly)
+else ifeq ($(OS), OpenBSD)
 else
 	override LDFLAGS += -lz
 	override LDLIBS += -lz

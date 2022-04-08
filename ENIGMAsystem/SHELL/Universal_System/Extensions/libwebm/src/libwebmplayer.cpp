@@ -150,7 +150,7 @@ bool video_grab_frame_image(int ind, std::string fname) {
     yuv = videos[ind]->lockRead();
     if (yuv) {
       unsigned char *rgb = (unsigned char *)malloc(3 * yuv->width() * yuv->height());
-      yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
+      _yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
       yuv->yPitch(), yuv->uvPitch(), rgb, yuv->width() * 3, YCBCR_JPEG);
       if (rgb) {
         unsigned char *rgba = nullptr;
@@ -175,7 +175,7 @@ bool video_grab_frame_buffer(int ind, void *buffer) {
     yuv = videos[ind]->lockRead();
     if (yuv) {
       unsigned char *rgb = (unsigned char *)malloc(3 * yuv->width() * yuv->height());
-      yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
+      _yuv420_rgb24_std(yuv->width(), yuv->height(), yuv->y(), yuv->u(), yuv->v(), 
       yuv->yPitch(), yuv->uvPitch(), rgb, yuv->width() * 3, YCBCR_JPEG);
       if (rgb) {
         unsigned char *rgba = (unsigned char *)buffer;

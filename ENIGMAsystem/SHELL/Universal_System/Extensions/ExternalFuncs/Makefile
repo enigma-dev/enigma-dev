@@ -6,6 +6,15 @@ else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
 		override LDFLAGS += /opt/local/lib/libffi.a
 		override LDLIBS += /opt/local/lib/libffi.a
+	else ifeq ($(OS), FreeBSD)
+		override LDFLAGS += /usr/local/lib/libffi.a
+		override LDLIBS += /usr/local/lib/libffi.a
+	else ifeq ($(OS), DragonFly)
+		override LDFLAGS += /usr/local/lib/libffi.a
+		override LDLIBS += /usr/local/lib/libffi.a
+	else ifeq ($(OS), OpenBSD)
+		override LDFLAGS += /usr/local/lib/libffi.a
+		override LDLIBS += /usr/local/lib/libffi.a
 	else
 		override LDFLAGS += -lffi -ldl
 		override LDLIBS += -lffi -ldl

@@ -9,7 +9,6 @@
 
 #include <stdio.h>
 
-
 uint8_t clamp(int16_t value)
 {
 	return value<0 ? 0 : (value>255 ? 255 : value);
@@ -134,7 +133,7 @@ static const YUV2RGBParam YUV2RGB[3] = {
 };
 
 
-void rgb24_yuv420_std(
+void _rgb24_yuv420_std(
 	uint32_t width, uint32_t height, 
 	const uint8_t *RGB, uint32_t RGB_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
@@ -192,7 +191,7 @@ void rgb24_yuv420_std(
 	}
 }
 
-void rgb32_yuv420_std(
+void _rgb32_yuv420_std(
 	uint32_t width, uint32_t height, 
 	const uint8_t *RGBA, uint32_t RGBA_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
@@ -251,7 +250,7 @@ void rgb32_yuv420_std(
 }
 
 
-void yuv420_rgb24_std(
+void _yuv420_rgb24_std(
 	uint32_t width, uint32_t height, 
 	const uint8_t *Y, const uint8_t *U, const uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	uint8_t *RGB, uint32_t RGB_stride, 
@@ -604,7 +603,7 @@ Y = _mm_add_epi16(_mm_srli_epi16(_mm_mullo_epi16(Y, _mm_set1_epi16(param->y_fact
 	SAVE_SI128((__m128i*)(v_ptr), cr);
 
 
-void rgb24_yuv420_sse(uint32_t width, uint32_t height, 
+void _rgb24_yuv420_sse(uint32_t width, uint32_t height, 
 	const uint8_t *RGB, uint32_t RGB_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	YCbCrType yuv_type)
@@ -640,7 +639,7 @@ void rgb24_yuv420_sse(uint32_t width, uint32_t height,
 	#undef SAVE_SI128
 }
 
-void rgb24_yuv420_sseu(uint32_t width, uint32_t height, 
+void _rgb24_yuv420_sseu(uint32_t width, uint32_t height, 
 	const uint8_t *RGB, uint32_t RGB_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	YCbCrType yuv_type)
@@ -843,7 +842,7 @@ RD8 = _mm_unpackhi_epi8(RS4, RS8);
 	SAVE_SI128((__m128i*)(u_ptr), cb); \
 	SAVE_SI128((__m128i*)(v_ptr), cr);
 
-void rgb32_yuv420_sse(uint32_t width, uint32_t height, 
+void _rgb32_yuv420_sse(uint32_t width, uint32_t height, 
 	const uint8_t *RGBA, uint32_t RGBA_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	YCbCrType yuv_type)
@@ -879,7 +878,7 @@ void rgb32_yuv420_sse(uint32_t width, uint32_t height,
 	#undef SAVE_SI128
 }
 
-void rgb32_yuv420_sseu(uint32_t width, uint32_t height, 
+void _rgb32_yuv420_sseu(uint32_t width, uint32_t height, 
 	const uint8_t *RGBA, uint32_t RGBA_stride, 
 	uint8_t *Y, uint8_t *U, uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	YCbCrType yuv_type)
@@ -1086,7 +1085,7 @@ PACK_RGB24_32_STEP(R1, R2, G1, G2, B1, B2, RGB1, RGB2, RGB3, RGB4, RGB5, RGB6) \
 	YUV2RGB_32
 
 
-void yuv420_rgb24_sse(
+void _yuv420_rgb24_sse(
 	uint32_t width, uint32_t height, 
 	const uint8_t *Y, const uint8_t *U, const uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	uint8_t *RGB, uint32_t RGB_stride, 
@@ -1123,7 +1122,7 @@ void yuv420_rgb24_sse(
 	#undef SAVE_SI128
 }
 
-void yuv420_rgb24_sseu(
+void _yuv420_rgb24_sseu(
 	uint32_t width, uint32_t height, 
 	const uint8_t *Y, const uint8_t *U, const uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
 	uint8_t *RGB, uint32_t RGB_stride, 
@@ -1299,7 +1298,5 @@ void nv21_rgb24_sseu(
 	#undef LOAD_SI128
 	#undef SAVE_SI128
 }
-
-
 
 #endif //__SSE2__

@@ -73,6 +73,24 @@ ifeq ($(OS), Darwin)
 	override CFLAGS += -I/opt/local/include -I/opt/local/include/SDL2
 	override LDFLAGS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
 	override LDLIBS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+else ifeq ($(OS), FreeBSD)
+	# needed for joysticks functions and audio playback in webm extension
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override LDLIBS += -L/usr/local/lib
+	override LDFLAGS += -L/usr/local/lib
+else ifeq ($(OS), DragonFly)
+	# needed for joysticks functions and audio playback in webm extension
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override LDLIBS += -L/usr/local/lib
+	override LDFLAGS += -L/usr/local/lib
+else ifeq ($(OS), OpenBSD)
+	# needed for joysticks functions and audio playback in webm extension
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override LDLIBS += -L/usr/local/lib
+	override LDFLAGS += -L/usr/local/lib
 else
 	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
@@ -173,11 +191,11 @@ ifeq ($(UNIX_BASED), true)
 	else ifeq ($(OS), Linux)
 		override LDLIBS += -lprocps
 	else ifeq ($(OS), FreeBSD)
-		override LDLIBS += -lprocstat -lutil -lc /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a /usr/lib/libc.a /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
+		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
 	else ifeq ($(OS), DragonFly)
-		override LDLIBS += -lkvm -lc /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a /usr/lib/libc.a /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
+		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
 	else ifeq ($(OS), OpenBSD)
-		override LDLIBS += -lkvm -lc
+		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
 	endif
 else
 	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
