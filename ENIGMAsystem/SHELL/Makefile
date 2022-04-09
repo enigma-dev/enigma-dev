@@ -98,7 +98,7 @@ else
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
 	override LDLIBS += $(shell pkg-config --libs --static sdl2)
-	override LDLDFLAGS += $(shell pkg-config --libs --static sdl2)
+	override LDFLAGS += $(shell pkg-config --libs --static sdl2)
 endif
  
 ifeq ($(GMODE), Debug)
