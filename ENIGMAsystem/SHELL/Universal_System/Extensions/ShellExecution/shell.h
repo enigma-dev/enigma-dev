@@ -13,8 +13,6 @@
 #define PROCINFO   int
 #define KINFOFLAGS int
 
-using namespace ::ngs::proc;
-
 namespace enigma_user {
 
 // execute process from the shell, return process id

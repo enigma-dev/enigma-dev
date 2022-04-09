@@ -8,28 +8,14 @@ PROTO_DIR := ./protos/.eobjs
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
 LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
-ifeq ($(UNIX_BASED), true)
-	ifeq ($(OS), Darwin)
-		override LDFLAGS += -framework Cocoa -framework CoreFoundation -framework CoreGraphics
-		override CXXFLAGS += -ObjC++
-		override CFLAGS += -ObjC++
-	else ifeq ($(OS), Linux)
-		override LDFLAGS += -lprocps -lpthread $(shell pkg-config --libs x11)
-		override CXXFLAGS += $(shell pkg-config --cflags x11)
-		override CFLAGS += $(shell pkg-config --cflags x11)
-	else ifeq ($(OS), FreeBSD)
-		override LDFLAGS += -lprocstat -lutil -lc -lpthread $(shell pkg-config --libs x11)
-		override CXXFLAGS += $(shell pkg-config --cflags x11)
-		override CFLAGS += $(shell pkg-config --cflags x11)
-	else ifeq ($(OS), DragonFly)
-		override LDFLAGS += -lkvm -lc -lpthread $(shell pkg-config --libs x11)
-		override CXXFLAGS += $(shell pkg-config --cflags x11)
-		override CFLAGS += $(shell pkg-config --cflags x11)
-	else ifeq ($(OS), OpenBSD)
-		override LDFLAGS += -lkvm -lc -lpthread $(shell pkg-config --libs x11)
-		override CXXFLAGS += $(shell pkg-config --cflags x11)
-		override CFLAGS += $(shell pkg-config --cflags x11)
-	endif
+ifeq ($(OS), Linux)
+	override LDFLAGS += -lpthread -lprocps
+else ifeq ($(OS), FreeBSD)
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/local/lib/libz.a /usr/local/lib/libpng.a
+else ifeq ($(OS), DragonFly)
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/local/lib/libz.a /usr/local/lib/libpng.a
+else ifeq ($(OS), OpenBSD)
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/local/lib/libz.a /usr/local/lib/libpng.a
 endif
 
 ifeq ($(UNIX_BASED), false)

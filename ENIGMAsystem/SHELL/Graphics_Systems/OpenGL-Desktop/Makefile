@@ -6,11 +6,17 @@ ifeq ($(TARGET-PLATFORM), Windows)
 else ifeq ($(TARGET-PLATFORM), Linux)
 	override LDLIBS += -lGL -lGLEW
 else ifeq ($(TARGET-PLATFORM), FreeBSD)
-	override LDLIBS += -lGL -lGLEW
+	override CFLAGS += -DGLEW_STATIC
+	override CXXFLAGS += -DGLEW_STATIC
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), DragonFlyBSD)
-	override LDLIBS += -lGL -lGLEW
+	override CFLAGS += -DGLEW_STATIC
+	override CXXFLAGS += -DGLEW_STATIC
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), OpenBSD)
-	override LDLIBS += -lGL -lGLEW
+	override CFLAGS += -DGLEW_STATIC
+	override CXXFLAGS += -DGLEW_STATIC
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL /opt/local/lib/libGLEW.a
 endif

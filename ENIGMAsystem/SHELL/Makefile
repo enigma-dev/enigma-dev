@@ -71,32 +71,34 @@ override CXXFLAGS += -std=c++17
 ifeq ($(OS), Darwin)
 	override CXXFLAGS += -I/opt/local/include -I/opt/local/include/SDL2
 	override CFLAGS += -I/opt/local/include -I/opt/local/include/SDL2
-	override LDFLAGS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
-	override LDLIBS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal
+	override LDFLAGS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
+	override LDLIBS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
+		override CXXFLAGS += -ObjC++
+		override CFLAGS += -ObjC++
 else ifeq ($(OS), FreeBSD)
-	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -L/usr/local/lib
-	override LDFLAGS += -L/usr/local/lib
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a
 else ifeq ($(OS), DragonFly)
-	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -L/usr/local/lib
-	override LDFLAGS += -L/usr/local/lib
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
 else ifeq ($(OS), OpenBSD)
-	# needed for joysticks functions and audio playback in webm extension
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -L/usr/local/lib
-	override LDFLAGS += -L/usr/local/lib
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
 else
-	# needed for joysticks functions and audio playback in webm extension
+	ifeq ($(OS), Linux)
+	override LDLIBS += -lpthread -lprocps
+	override LDLDFLAGS += -lpthread -lprocps
+	endif
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
 	override LDLIBS += $(shell pkg-config --libs --static sdl2)
-	override LDFLAGS += $(shell pkg-config --libs --static sdl2)
+	override LDLDFLAGS += $(shell pkg-config --libs --static sdl2)
 endif
  
 ifeq ($(GMODE), Debug)
@@ -183,21 +185,7 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
-ifeq ($(UNIX_BASED), true)
-	ifeq ($(OS), Darwin)
-		override LDLIBS += -framework CoreFoundation -framework CoreGraphics
-		override CXXFLAGS += -ObjC++
-		override CFLAGS += -ObjC++
-	else ifeq ($(OS), Linux)
-		override LDLIBS += -lprocps
-	else ifeq ($(OS), FreeBSD)
-		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
-	else ifeq ($(OS), DragonFly)
-		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
-	else ifeq ($(OS), OpenBSD)
-		override LDLIBS += /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvpx.a /usr/lib/libz.a -lc -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libGLEW.a /usr/local/lib/libvorbisfile.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a /usr/local/lib/libFLAC.a /usr/local/lib/libvorbisenc.a /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libkvm.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libopus.a
-	endif
-else
+ifeq ($(UNIX_BASED), false)
 	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif

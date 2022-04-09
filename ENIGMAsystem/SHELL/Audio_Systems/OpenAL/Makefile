@@ -4,10 +4,10 @@ ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDFLAGS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a
 	override LDLIBS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a
 else ifeq ($(UNIX_BASED), true)
-	ifeq ($(OS), Linux)
+	ifeq ($(TARGET-PLATFORM), Linux)
 		override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
 	else
-		override LDLIBS += -lopenal -lalure
+		override LDLIBS += -lopenal -lalure  /usr/local/lib/libvorbis.a /usr/local/lib/libogg.a /usr/local/lib/libvorbisfile.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libFLAC.a /usr/local/lib/libopus.a /usr/local/lib/libopusfile.a -lmodplug -lmpg123 -lfluidsynth
 	endif
 else ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
