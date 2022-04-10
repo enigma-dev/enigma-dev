@@ -11,11 +11,11 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexce
 ifeq ($(OS), Linux)
 	override LDFLAGS += -lpthread -lprocps -lz -lpng
 else ifeq ($(OS), FreeBSD)
-	override LDFLAGS +=  -lc -lkvm -lutil -lprocstat -lz -lpng
+	override LDFLAGS += -lc -lkvm -lutil -lprocstat -lz -lpng
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS +=  -lc -lkvm -lz -lpng
+	override LDFLAGS += -lc -lkvm -lz -lpng
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS +=  -lc -lkvm -lz -lpng
+	override LDFLAGS += -lc -lkvm -lz -lpng
 endif
 
 ifeq ($(UNIX_BASED), false)
