@@ -11,11 +11,11 @@ LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexce
 ifeq ($(OS), Linux)
 	override LDFLAGS += -lpthread -lprocps
 else ifeq ($(OS), FreeBSD)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a /usr/local/lib/libpng.a
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a /usr/local/lib/libpng.a -Wl,-z,notext
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a -Wl,-z,notext
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a
+	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a -Wl,-z,notext
 endif
 
 ifeq ($(UNIX_BASED), false)
