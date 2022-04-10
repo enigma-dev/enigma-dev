@@ -313,7 +313,7 @@ namespace {
     ngs::fs::environment_set_variable("IMGUI_FONT_PATH", ngs::fs::executable_get_directory() + "fonts");
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
     ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(18));
-    ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; 
+    ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
     config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 }; 
     vector<string> fonts; fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
     unsigned i = 0; while (!fonts[fonts.size() - 1].empty()) { fonts.push_back(ngs::fs::directory_contents_next()); message_pump(); } 
@@ -476,4 +476,3 @@ namespace ngs::imgui {
   }
 
 } // namespace ngs::imgui
-
