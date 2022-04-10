@@ -9,13 +9,13 @@ CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
 LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
 ifeq ($(OS), Linux)
-	override LDFLAGS += -lpthread -lprocps
+	override LDFLAGS += -lpthread -lprocps -lz -lpng
 else ifeq ($(OS), FreeBSD)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a /usr/local/lib/libpng.a -fPIC
+	override LDFLAGS +=  -lc -lkvm -lutil -lprocstat -lz -lpng
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a -fPIC
+	override LDFLAGS +=  -lc -lkvm -lz -lpng
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS +=  -lc /usr/lib/libelf.a  /usr/lib/libkvm.a /usr/lib/libz.a /usr/local/lib/libpng.a -fPIC
+	override LDFLAGS +=  -lc -lkvm -lz -lpng
 endif
 
 ifeq ($(UNIX_BASED), false)
