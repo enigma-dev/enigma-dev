@@ -12,6 +12,8 @@
 /coverage_*.info
 /libEGM*
 /libProtocols*
+/shared/protos/google
+/CommandLine/emake/google
 
 /shared/protos/build/
 /shared/protos/codegen
