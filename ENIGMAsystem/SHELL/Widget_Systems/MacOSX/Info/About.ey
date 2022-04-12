@@ -7,3 +7,9 @@ Build-Platforms: MacOSX
 Represents: MacOSX
 Description: Create widgets on MacOSX.
 Author: Samuel Venable
+
+Depends:
+  Build-Platforms: MacOSX
+
+Represents:
+  Build-Platforms: MacOSX

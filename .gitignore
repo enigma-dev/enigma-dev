@@ -1,5 +1,6 @@
 /ENIGMA/
-/emake
+/openjdk/
+/emake*
 /test-runner
 /emake-tests
 /gm2egm
@@ -9,8 +10,8 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
-/libEGM.*
-/libProtocols.*
+/libEGM*
+/libProtocols*
 
 /shared/protos/build/
 /shared/protos/codegen

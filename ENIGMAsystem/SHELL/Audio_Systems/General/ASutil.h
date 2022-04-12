@@ -31,7 +31,7 @@ namespace enigma {
 
 inline char* read_all_bytes(std::string fname, size_t &flen) {
   #if defined(_WIN32)
-  std::wstring wfname = widen(fname);
+  std::wstring wfname = strings_util::widen(fname);
   FILE *afile = _wfopen(wfname.c_str(), L"rb");
   #else
   FILE *afile = fopen(fname.c_str(), "rb");
