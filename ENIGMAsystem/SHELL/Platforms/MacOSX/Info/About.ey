@@ -7,3 +7,6 @@ Represents:
 	Build-Platforms: MacOSX
 Description: Run on MacOSX.
 Author: fundies
+
+Depends:
+	Build-Platforms: MacOSX
