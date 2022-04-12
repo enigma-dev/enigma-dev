@@ -1,9 +1,7 @@
 #!/bin/sh
 # Requires MacPorts to be installed!
 sudo xcode-select --install
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew install alure
-sudo port -N install openjdk8 gmake cmake pkgconfig grpc protobuf-c glew glm libpng openal-soft libsndfile libogg libvorbis vorbis-tools box2D libdumb libsdl2 freetype libffi rapidjson libyaml libvpx pugixml yaml-cpp boost flac mpg123 libmodplug libopus opusfile
+sudo port -N install openjdk8 +universal gmake +universal cmake +universal pkgconfig +universal grpc +universal protobuf-c +universal glew +universal glm +universal libpng +universal libsndfile +universal libogg +universal libvorbis +universal vorbis-tools +universal box2D +universal libdumb +universal libsdl2 +universal libsdl2_mixer +universal freetype +universal libffi +universal rapidjson +universal libyaml +universal libvpx +universal pugixml +universal yaml-cpp +universal boost +universal flac +universal mpg123 +universal libmodplug +universal libopus +universal opusfile +universal
 sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
 cd /Applications/stigma-dev
 sudo port -f activate libiconv
