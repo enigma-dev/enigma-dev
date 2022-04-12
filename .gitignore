@@ -10,8 +10,8 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
-/libEGM*
-/libProtocols*
+/libEGM.*
+/libProtocols.*
 /shared/protos/google
 /CommandLine/emake/google
 
