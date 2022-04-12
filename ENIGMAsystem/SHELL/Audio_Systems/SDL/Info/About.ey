@@ -7,4 +7,7 @@ Description: Audio playback support using SDL. A light compatibility layer is pr
 Author: Abhishek Kumar Jha
 
 Depends:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	
+Represents:
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD

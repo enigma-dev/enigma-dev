@@ -1,16 +1,10 @@
 ifndef PKG-CONFIG
 	PKG-CONFIG := pkg-config
 endif
-
-ifeq ($(TARGET-PLATFORM), Windows)
-	override LDLIBS += -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lssp -lole32 -lwinmm -lshlwapi -fstack-protector
-endif
-
 SOURCES += $(wildcard Audio_Systems/SDL/*.cpp)
-
 override CXXFLAGS += $(shell pkg-config --cflags SDL2_mixer)
 ifeq  ($(TARGET-PLATFORM), Windows)
-	override LDLIBS += $(shell pkg-config --libs --static SDL2_mixer)
+	override LDLIBS += $(shell pkg-config --libs --static SDL2_mixer) -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lssp -lole32 -lwinmm -lshlwapi -fstack-protector
 else ifeq  ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += /opt/local/lib/libSDL2_mixer.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a /opt/local/lib/libFLAC.a /opt/local/lib/libopus.a /opt/local/lib/libopusfile.a /opt/local/lib/libdumb.a /opt/local/lib/libmodplug.a /opt/local/lib/libmpg123.a /opt/local/lib/libfluidsynth.a /opt/local/lib/libsndfile.a
 else ifeq  ($(TARGET-PLATFORM), Linux)
