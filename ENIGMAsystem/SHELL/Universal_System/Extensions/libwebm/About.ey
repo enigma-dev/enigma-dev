@@ -4,7 +4,7 @@
 Name: libwebm
 Identifier: libwebm
 Author: Samuel Venable
-Description: Play *.webm video files with libwebm.
+Description: Play *.webm video files with vorbis audio using libwebm, (requires libpng extension enabled for an image frame grabbing function).
 Default: false
 Icon: libwebm.png
 
