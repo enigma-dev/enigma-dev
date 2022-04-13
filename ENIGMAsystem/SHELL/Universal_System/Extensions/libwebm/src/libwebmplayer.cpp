@@ -10,7 +10,7 @@
 
 namespace {
 
-int id = -1;
+int video_id = -1;
 std::unordered_map<int,   uvpx::Player *> videos;
 std::unordered_map<int, wp::WebmPlayer *> audios;
 
@@ -43,9 +43,9 @@ bool video_exists(int ind) {
 int video_add(std::string fname) {
   uvpx::Player *video = new uvpx::Player(uvpx::Player::defaultConfig());
   video->load(fname.c_str(), 1, true); wp::WebmPlayer *audio = new wp::WebmPlayer; 
-  audio->load(fname.c_str()); id++; videos.insert(std::make_pair(id, video));
-  audios.insert(std::make_pair(id, audio));
-  return id;
+  audio->load(fname.c_str()); video_id++; videos.insert(std::make_pair(video_id, video));
+  audios.insert(std::make_pair(video_id, audio));
+  return video_id;
 }
 
 bool video_delete(int ind) {
