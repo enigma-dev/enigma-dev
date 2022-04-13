@@ -69,10 +69,10 @@ DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
 
 ifeq ($(OS), Darwin)
-	override CXXFLAGS += -I/opt/local/include -I/opt/local/include/SDL2
-	override CFLAGS += -I/opt/local/include -I/opt/local/include/SDL2
-	override LDFLAGS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
-	override LDLIBS += "/opt/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
+	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2
+	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2
+	override LDFLAGS += "/usr/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
+	override LDLIBS += "/usr/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
 		override CXXFLAGS += -ObjC++
 		override CFLAGS += -ObjC++
 else ifeq ($(OS), FreeBSD)

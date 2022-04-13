@@ -18,5 +18,5 @@ else ifeq ($(TARGET-PLATFORM), OpenBSD)
 	override CXXFLAGS += -DGLEW_STATIC
 	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
-	override LDLIBS += -framework OpenGL /opt/local/lib/libGLEW.a
+	override LDLIBS += -framework OpenGL /usr/local/lib/libGLEW.a
 endif

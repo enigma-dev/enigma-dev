@@ -5,8 +5,8 @@ ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
 		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
-		override LDFLAGS += -lpthread -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /usr/local/lib/libvpx.a /opt/local/lib/libvpx.a /opt/local/lib/libz.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
-		override LDLIBS += -lpthread  -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /usr/local/lib/libvpx.a /opt/local/lib/libvpx.a /opt/local/lib/libz.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
+		override LDFLAGS += -lpthread -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /usr/local/lib/libvpx.a /usr/local/lib/libvpx.a /usr/local/lib/libz.a /usr/local/lib/libogg.a /usr/local/lib/libvorbis.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
+		override LDLIBS += -lpthread  -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a /usr/local/lib/libvpx.a /usr/local/lib/libvpx.a /usr/local/lib/libz.a /usr/local/lib/libogg.a /usr/local/lib/libvorbis.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbisfile.a -Wno-narrowing -fexceptions
 	else ifeq ($(OS), FreeBSD)
 		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions

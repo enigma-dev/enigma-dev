@@ -5,8 +5,8 @@ SOURCES += $(wildcard Universal_System/*.cpp)\
 ifeq ($(OS), Darwin)
 	override CXXFLAGS += -std=c++17
 	override CFLAGS += -std=c++17
-	override LDFLAGS += /opt/local/lib/libz.a
-	override LDLIBS += /opt/local/lib/libz.a
+	override LDFLAGS += /usr/local/lib/libz.a
+	override LDLIBS += /usr/local/lib/libz.a
 else ifeq ($(OS), FreeBSD)
 else ifeq ($(OS), DragonFly)
 else ifeq ($(OS), OpenBSD)

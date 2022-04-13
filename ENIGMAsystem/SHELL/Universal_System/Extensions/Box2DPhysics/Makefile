@@ -1,7 +1,7 @@
 SOURCES += $(wildcard Universal_System/Extensions/Box2D/*.cpp) 
 ifeq ($(OS), Darwin)
-	override LDFLAGS += /opt/local/lib/libbox2d.a
-	override LDLIBS += /opt/local/lib/libbox2d.a
+	override LDFLAGS += /usr/local/lib/libbox2d.a
+	override LDLIBS += /usr/local/lib/libbox2d.a
 else
 	override LDFLAGS += -lBox2D
 	override LDLIBS += -lBox2D
