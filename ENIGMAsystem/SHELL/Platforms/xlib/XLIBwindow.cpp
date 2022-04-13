@@ -292,6 +292,7 @@ int window_mouse_get_x() { return getMouse(2); }
 int window_mouse_get_y() { return getMouse(3); }
 
 void window_set_stayontop(bool stay) {
+  XSynchronize(disp, true);
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp, "_NET_WM_STATE_ABOVE", False);
   XEvent xev;
@@ -305,6 +306,8 @@ void window_set_stayontop(bool stay) {
   xev.xclient.data.l[1] = aStay;
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureRedirectMask | SubstructureNotifyMask, &xev);
+  XResizeWindow(disp, win, window_get_width(), window_get_height());
+  XFlush(disp);
 }
 
 bool window_get_stayontop() {
@@ -315,6 +318,7 @@ bool window_get_stayontop() {
 void window_set_sizeable(bool sizeable) {
   if (window_get_maximized()) return;
   if (window_get_fullscreen()) return;
+  XSynchronize(disp, true);
   enigma::isSizeable = sizeable;
   XSizeHints *sh = XAllocSizeHints();
   sh->flags = PMinSize | PMaxSize;
@@ -339,6 +343,8 @@ void window_set_sizeable(bool sizeable) {
   }
   XSetWMNormalHints(disp, win, sh);
   XFree(sh);
+  XResizeWindow(disp, win, window_get_width(), window_get_height());
+  XFlush(disp);
 }
 
 void window_set_min_width(int width) {
@@ -367,15 +373,19 @@ void window_set_showborder(bool show) {
   if (window_get_maximized()) return;
   if (window_get_fullscreen()) return;
   if (window_get_showborder() == show) return;
+  XSynchronize(disp, true);
   enigma::showBorder = show;
   Hints hints;
   Atom property = XInternAtom(disp, "_MOTIF_WM_HINTS", False);
   hints.flags = 2;
   hints.decorations = show;
   XChangeProperty(disp, win, property, property, 32, PropModeReplace, (unsigned char *)&hints, 5);
+  XResizeWindow(disp, win, window_get_width(), window_get_height());
+  XFlush(disp);
 }
 
 bool window_get_showborder() {
+  XSynchronize(disp, true);
   Atom type;
   int format;
   unsigned long bytes;
@@ -388,6 +398,8 @@ bool window_get_showborder() {
     ret = hints->decorations;
     XFree(data);
   }
+  XResizeWindow(disp, win, window_get_width(), window_get_height());
+  XFlush(disp);
   return ret;
 }
 
