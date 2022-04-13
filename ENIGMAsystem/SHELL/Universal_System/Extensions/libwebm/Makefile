@@ -32,7 +32,6 @@ ifeq ($(UNIX_BASED), true)
 		override LDFLAGS += -latomic
 		override LDLIBS += -latomic
 	endif
-	SOURCES += $(WEBMPATH)/yuv_rgb.cpp
 else
 	override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
 	override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -Wno-narrowing -fexceptions
@@ -40,4 +39,4 @@ else
 	override LDLIBS += -lpthread -lvorbis -logg -lvpx -lz `pkg-config --libs sdl2 --static` -lwebm -Wno-narrowing -fexceptions
 endif
 
-SOURCES += $(WEBMPATH)/audio_decoder.cpp $(WEBMPATH)/frame_buffer.cpp $(WEBMPATH)/timer.cpp $(WEBMPATH)/file_reader.cpp $(WEBMPATH)/libwebmplayer.cpp $(WEBMPATH)/packet.cpp $(WEBMPATH)/utils.cpp $(WEBMPATH)/frame.cpp $(WEBMPATH)/player.cpp $(WEBMPATH)/video_player.cpp $(WEBMPATH)/webm_player.cpp
+SOURCES += $(WEBMPATH)/audio_decoder.cpp $(WEBMPATH)/frame_buffer.cpp $(WEBMPATH)/timer.cpp $(WEBMPATH)/file_reader.cpp $(WEBMPATH)/libwebmplayer.cpp $(WEBMPATH)/packet.cpp $(WEBMPATH)/utils.cpp $(WEBMPATH)/frame.cpp $(WEBMPATH)/player.cpp $(WEBMPATH)/video_player.cpp $(WEBMPATH)/webm_player.cpp $(WEBMPATH)/yuv_rgb.cpp
