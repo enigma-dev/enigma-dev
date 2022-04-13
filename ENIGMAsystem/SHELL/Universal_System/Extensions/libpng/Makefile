@@ -1,8 +1,8 @@
 SHARED_SRC_DIR := ../../shared
 override CXXFLAGS += -I$(SHARED_SRC_DIR)/libpng-util
 ifeq ($(OS), Darwin)
-	override LDFLAGS += /usr/local/lib/libpng.a
-	override LDLIBS += /usr/local/lib/libpng.a
+	override LDFLAGS += /usr/local/lib/libpng.a -lz
+	override LDLIBS += /usr/local/lib/libpng.a -lz
 else ifeq ($(OS), FreeBSD)
 	override LDFLAGS +=  /usr/local/lib/libpng.a /usr/lib/libz.a
 	override LDLIBS +=  /usr/local/lib/libpng.a /usr/lib/libz.a
