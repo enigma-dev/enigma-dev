@@ -391,7 +391,8 @@ namespace {
       #else
       ImGui_ImplSDLRenderer_NewFrame();
       #endif 
-      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); dir = expand_without_trailing_slash(dir);
+      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0));
+      if (dir.empty()) dir = directory_get_current_working(); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, dir.c_str());
       if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, dir.c_str());
       if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, dir.c_str());
@@ -462,7 +463,7 @@ namespace {
 namespace ngs::imgui {
 
   string get_open_filename(string filter) {
-    return file_dialog_helper(filter, ngs::fs::executable_get_directory(), "Open", openFile);
+    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Open", openFile);
   }
 
   string get_open_filename_ext(string filter, string dir, string title) {
@@ -470,7 +471,7 @@ namespace ngs::imgui {
   }
 
   string get_open_filenames(string filter) {
-    return file_dialog_helper(filter, ngs::fs::executable_get_directory(), "Open", openFiles);
+    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Open", openFiles);
   }
  
   string get_open_filenames_ext(string filter, string dir, string title) {
@@ -478,7 +479,7 @@ namespace ngs::imgui {
   }
 
   string get_save_filename(string filter) {
-    return file_dialog_helper(filter, ngs::fs::executable_get_directory(), "Save As", saveFile);
+    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Save As", saveFile);
   }
 
   string get_save_filename_ext(string filter, string dir, string title) {
