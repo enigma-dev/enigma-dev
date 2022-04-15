@@ -375,33 +375,19 @@ namespace ifd {
 		m_treeCache.push_back(quickAccess);
 
 #ifdef _WIN32
-		wchar_t username[UNLEN + 1] = { 0 };
-		DWORD username_len = UNLEN + 1;
-		GetUserNameW(username, &username_len);
+		std::error_code ec;
 
-		std::wstring userPath = L"C:\\Users\\" + std::wstring(username) + L"\\";
-
-		// Quick Access / Bookmarks
-		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Desktop"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Documents"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Downloads"));
-		quickAccess->Children.push_back(new FileTreeNode(userPath + L"Pictures"));
-
-		// OneDrive
-		FileTreeNode* oneDrive = new FileTreeNode(userPath + L"OneDrive");
-		m_treeCache.push_back(oneDrive);
+		// Quick Access
+		wchar_t userProfile[32767];
+		const ghc::filesystem::path homePath;
+		if (GetEnvironmentVariableW("USERPROFILE", userProfile, 32767)) 
+			homePath = userProfile;
+		if (ghc::filesystem::exists(homePath, ec))
+			quickAccess->Children.push_back(new FileTreeNode(homePath));
 
 		// This PC
 		FileTreeNode* thisPC = new FileTreeNode("This PC");
 		thisPC->Read = true;
-		if (ghc::filesystem::exists(userPath + L"3D Objects"))
-			thisPC->Children.push_back(new FileTreeNode(userPath + L"3D Objects"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Desktop"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Documents"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Downloads"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Music"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Pictures"));
-		thisPC->Children.push_back(new FileTreeNode(userPath + L"Videos"));
 		DWORD d = GetLogicalDrives();
 		for (int i = 0; i < 26; i++)
 			if (d & (1 << i))
@@ -411,59 +397,9 @@ namespace ifd {
 		std::error_code ec;
 
 		// Quick Access
-		struct passwd *pw;
-		uid_t uid;
-		uid = geteuid();
-		pw = getpwuid(uid);
-		if (pw) {
-			#if defined(__MACH__) && defined(__APPLE__)
-			
-			std::string homePath = "/Users/" + std::string(pw->pw_name);
-			
-			if (ghc::filesystem::exists(homePath, ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath));
-			if (ghc::filesystem::exists("/Applications", ec))
-				quickAccess->Children.push_back(new FileTreeNode("/Applications"));
-			if (ghc::filesystem::exists(homePath + "/Desktop", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Desktop"));
-			if (ghc::filesystem::exists(homePath + "/Documents", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Documents"));
-			if (ghc::filesystem::exists(homePath + "/Downloads", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Downloads"));
-			if (ghc::filesystem::exists(homePath + "/Movies", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Movies"));
-			if (ghc::filesystem::exists(homePath + "/Music", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Music"));
-			if (ghc::filesystem::exists(homePath + "/Pictures", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Pictures"));
-			if (ghc::filesystem::exists(homePath + "/Public", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Public"));
-			
-			#else
-				
-			std::string homePath = "/home/" + std::string(pw->pw_name);
-			
-			if (ghc::filesystem::exists(homePath, ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath));
-			if (ghc::filesystem::exists(homePath + "/Desktop", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Desktop"));
-			if (ghc::filesystem::exists(homePath + "/Documents", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Documents"));
-			if (ghc::filesystem::exists(homePath + "/Downloads", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Downloads"));
-			if (ghc::filesystem::exists(homePath + "/Music", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Music"));
-			if (ghc::filesystem::exists(homePath + "/Pictures", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Pictures"));
-			if (ghc::filesystem::exists(homePath + "/Public", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Public"));
-			if (ghc::filesystem::exists(homePath + "/Templates", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Templates"));
-			if (ghc::filesystem::exists(homePath + "/Videos", ec))
-				quickAccess->Children.push_back(new FileTreeNode(homePath + "/Videos"));
-			
-			#endif
-		}
+		const ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
+		if (ghc::filesystem::exists(homePath, ec))
+			quickAccess->Children.push_back(new FileTreeNode(homePath));
 
 		// This PC
 		FileTreeNode* thisPC = new FileTreeNode("This PC");
@@ -598,6 +534,18 @@ namespace ifd {
 		if (!ghc::filesystem::exists(ghc::filesystem::path(path)))
 			return;
 
+		#ifdef _WIN32
+		wchar_t userProfile[32767];
+		const ghc::filesystem::path homePath;
+		if (GetEnvironmentVariableW("USERPROFILE", userProfile, 32767)) 
+			homePath = userProfile;
+		#else
+		const ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
+		#endif
+
+		if (path == homePath.string())
+			return; 
+
 		m_favorites.push_back(path);
 		
 		// add to sidebar
@@ -711,7 +659,7 @@ namespace ifd {
 			}
 			else if (filter[i] == '{') {
 				std::string filterName = filter.substr(lastSplit, i - lastSplit);
-				if (filterName == "*.*" || filterName == ".*" || filterName == "*" || filterName == "") {
+				if (filterName == "*.*" || filterName == ".*" || filterName == "*") {
 					m_filter += std::string(std::string("All Files (*.*)\0").c_str(), 16);
 					m_filterExtensions.push_back(std::vector<std::string>());
 				}
@@ -730,7 +678,7 @@ namespace ifd {
 		}
 		if (lastSplit != 0) {
 			std::string filterName = filter.substr(lastSplit);
-			if (filterName == "*.*" || filterName == ".*" || filterName == "*" || filterName == "") {
+			if (filterName == "*.*" || filterName == ".*" || filterName == "*") {
 				m_filter += std::string(std::string("All Files (*.*)\0").c_str(), 16);
 				m_filterExtensions.push_back(std::vector<std::string>());
 			}
@@ -959,9 +907,15 @@ namespace ifd {
 
 		m_currentDirectory = p;
 #ifdef _WIN32
+		while (!m_currentDirectory.string().empty() && m_currentDirectory.string().length() > 3 && m_currentDirectory.string().back() == '\\')
+			m_currentDirectory = m_currentDirectory.string().substr(0, m_currentDirectory.string().length() - 1);
+
 		// drives don't work well without the backslash symbol
 		if (p.string().size() == 2 && p.string()[1] == ':')
 			m_currentDirectory = ghc::filesystem::path(p.string() + "\\");
+#else
+		while (!m_currentDirectory.string().empty() && m_currentDirectory.string().length() > 1 && m_currentDirectory.string().back() == '/')
+			m_currentDirectory = m_currentDirectory.string().substr(0, m_currentDirectory.string().length() - 1);
 #endif
 
 		m_clearIconPreview();

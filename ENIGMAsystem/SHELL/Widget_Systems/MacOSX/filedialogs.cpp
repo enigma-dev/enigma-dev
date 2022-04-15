@@ -391,8 +391,7 @@ namespace {
       #else
       ImGui_ImplSDLRenderer_NewFrame();
       #endif 
-      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0));
-      if (dir.empty()) dir = ngs::fs::directory_get_current_working(); dir = expand_without_trailing_slash(dir);
+      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, dir.c_str());
       if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, dir.c_str());
       if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, dir.c_str());
