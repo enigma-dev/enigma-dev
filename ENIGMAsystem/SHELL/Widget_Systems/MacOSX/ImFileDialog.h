@@ -12,7 +12,7 @@
 #include "filesystem.hpp"
 
 #define IFD_DIALOG_FILE			0
-#define IFD_DIALOG_DIRECTORY	1
+#define IFD_DIALOG_DIRECTORY		1
 #define IFD_DIALOG_SAVE			2
 
 namespace ifd {
@@ -27,9 +27,9 @@ namespace ifd {
 		FileDialog();
 		~FileDialog();
 
-		bool Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir = "");
+		bool Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingFile = "", const std::string& startingDir = "");
 
-		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingDir = "");
+		bool Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect = false, const std::string& startingFile = "", const std::string& startingDir = "");
 
 		bool IsDone(const std::string& key);
 
@@ -133,7 +133,7 @@ namespace ifd {
 		unsigned int m_sortColumn;
 		unsigned int m_sortDirection;
 		std::vector<FileData> m_content;
-		void m_setDirectory(const ghc::filesystem::path& p, bool addHistory = true);
+		void m_setDirectory(const ghc::filesystem::path& p, bool addHistory = true, bool clearFileName = true);
 		void m_sortContent(unsigned int column, unsigned int sortDirection);
 		void m_renderContent();
 

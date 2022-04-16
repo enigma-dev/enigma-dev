@@ -268,7 +268,7 @@ namespace {
   SDL_Surface *surf = nullptr;
   #endif
 
-  string file_dialog_helper(string filter, string dir, string title, int type) {
+  string file_dialog_helper(string filter, string fname, string dir, string title, int type) {
     SDL_Window *window;
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
       return "";
@@ -392,10 +392,10 @@ namespace {
       ImGui_ImplSDLRenderer_NewFrame();
       #endif 
       ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); dir = expand_without_trailing_slash(dir);
-      if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, dir.c_str());
-      if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, dir.c_str());
-      if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, dir.c_str());
-      if (type == saveFile) ifd::FileDialog::Instance().Save("GetSaveFileName", "Save As", filterNew.c_str(), dir.c_str());
+      if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
+      if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, fname.c_str(), dir.c_str());
+      if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, fname.c_str(), dir.c_str());
+      if (type == saveFile) ifd::FileDialog::Instance().Save("GetSaveFileName", "Save As", filterNew.c_str(), fname.c_str(), dir.c_str());
       if (ifd::FileDialog::Instance().IsDone("GetOpenFileName")) {
         if (ifd::FileDialog::Instance().HasResult()) {
           result = ifd::FileDialog::Instance().GetResult().string();
@@ -461,36 +461,36 @@ namespace {
 
 namespace ngs::imgui {
 
-  string get_open_filename(string filter) {
-    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Open", openFile);
+  string get_open_filename(string filter, string fname) {
+    return file_dialog_helper(filter, fname, ngs::fs::directory_get_current_working(), "Open", openFile);
   }
 
-  string get_open_filename_ext(string filter, string dir, string title) {
-    return file_dialog_helper(filter, dir, title, openFile);
+  string get_open_filename_ext(string filter, string fname, string dir, string title) {
+    return file_dialog_helper(filter, fname, dir, title, openFile);
   }
 
-  string get_open_filenames(string filter) {
-    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Open", openFiles);
+  string get_open_filenames(string filter, string fname) {
+    return file_dialog_helper(filter, fname, ngs::fs::directory_get_current_working(), "Open", openFiles);
   }
  
-  string get_open_filenames_ext(string filter, string dir, string title) {
-    return file_dialog_helper(filter, dir, title, openFiles);
+  string get_open_filenames_ext(string filter, string fname, string dir, string title) {
+    return file_dialog_helper(filter, fname, dir, title, openFiles);
   }
 
-  string get_save_filename(string filter) {
-    return file_dialog_helper(filter, ngs::fs::directory_get_current_working(), "Save As", saveFile);
+  string get_save_filename(string filter, string fname) {
+    return file_dialog_helper(filter, fname, ngs::fs::directory_get_current_working(), "Save As", saveFile);
   }
 
-  string get_save_filename_ext(string filter, string dir, string title) {
-    return file_dialog_helper(filter, dir, title, saveFile);
+  string get_save_filename_ext(string filter, string fname, string dir, string title) {
+    return file_dialog_helper(filter, fname, dir, title, saveFile);
   }
 
   string get_directory(string dname) {
-    return file_dialog_helper("", dname, "Select Directory", selectFolder);
+    return file_dialog_helper("", "", dname, "Select Directory", selectFolder);
   }
 
   string get_directory_alt(string capt, string root) {
-    return file_dialog_helper("", root, capt, selectFolder);
+    return file_dialog_helper("", "", root, capt, selectFolder);
   }
 
 } // namespace ngs::imgui

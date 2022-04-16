@@ -22,8 +22,10 @@
 #pragma comment(lib, "Shell32.lib")
 #endif
 #else
+#if (defined(__MACH__) && defined(__APPLE__))
+#include <AppKit/AppKit.h>
+#endif
 #include <unistd.h>
-#include <pwd.h>
 #endif
 
 #define ICON_SIZE ImGui::GetFont()->FontSize + 3
@@ -419,7 +421,7 @@ namespace ifd {
 			m_clearTree(fn);
 		m_treeCache.clear();
 	}
-	bool FileDialog::Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingDir)
+	bool FileDialog::Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingFile, const std::string& startingDir)
 	{
 		if (!m_currentKey.empty())
 			return false;
@@ -435,15 +437,17 @@ namespace ifd {
 		m_isMultiselect = false;
 		m_type = IFD_DIALOG_SAVE;
 
+		strcpy(m_inputTextbox, startingFile.substr(0, 1023).c_str());
+
 		m_parseFilter(filter);
 		if (!startingDir.empty())
-			m_setDirectory(ghc::filesystem::path(startingDir), false);
+			m_setDirectory(ghc::filesystem::path(startingDir), false, false);
 		else
-			m_setDirectory(m_currentDirectory, false); // refresh contents
+			m_setDirectory(m_currentDirectory, false, false); // refresh contents
 
 		return true;
 	}
-	bool FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingDir)
+	bool FileDialog::Open(const std::string& key, const std::string& title, const std::string& filter, bool isMultiselect, const std::string& startingFile, const std::string& startingDir)
 	{
 		if (!m_currentKey.empty())
 			return false;
@@ -459,11 +463,13 @@ namespace ifd {
 		m_isMultiselect = isMultiselect;
 		m_type = filter.empty() ? IFD_DIALOG_DIRECTORY : IFD_DIALOG_FILE;
 
+		strcpy(m_inputTextbox, startingFile.substr(0, 1023).c_str());
+
 		m_parseFilter(filter);
 		if (!startingDir.empty())
-			m_setDirectory(ghc::filesystem::path(startingDir), false);
+			m_setDirectory(ghc::filesystem::path(startingDir), false, false);
 		else
-			m_setDirectory(m_currentDirectory, false); // refresh contents
+			m_setDirectory(m_currentDirectory, false, false); // refresh contents
 
 		return true;
 	}
@@ -631,9 +637,25 @@ namespace ifd {
 			}
 		}
 
-		m_isOpen = false;
+		std::error_code ec;
+		if (!m_result.empty() && m_type == IFD_DIALOG_SAVE && 
+			!ghc::filesystem::exists(m_result.back(), ec) && !ghc::filesystem::is_directory(m_currentDirectory / filename, ec)) {
+			m_isOpen = false;
+			return true;
+		} else if (!m_result.size() && m_type == IFD_DIALOG_SAVE && filename.empty()) {
+			m_isOpen = false;
+			return true;
+		} else if (m_result.size() && m_type == IFD_DIALOG_FILE && 
+			ghc::filesystem::exists(m_result.back(), ec) && !ghc::filesystem::is_directory(m_currentDirectory / filename, ec)) {
+			m_isOpen = false;
+			return true;
+		} else if (m_result.size() && m_type == IFD_DIALOG_DIRECTORY && 
+			ghc::filesystem::exists(m_result.back(), ec) && ghc::filesystem::is_directory(m_currentDirectory / filename, ec)) {
+			m_isOpen = false;
+			return true;
+		}
 
-		return true;
+		return false;
 	}
 	void FileDialog::m_parseFilter(const std::string& filter)
 	{
@@ -898,7 +920,7 @@ namespace ifd {
 		delete node;
 		node = nullptr;
 	}
-	void FileDialog::m_setDirectory(const ghc::filesystem::path& p, bool addHistory)
+	void FileDialog::m_setDirectory(const ghc::filesystem::path& p, bool addHistory, bool clearFileName)
 	{
 		bool isSameDir = m_currentDirectory == p;
 
@@ -922,7 +944,7 @@ namespace ifd {
 		m_content.clear(); // p == "" after this line, due to reference
 		m_selectedFileItem = -1;
 		
-		if (m_type == IFD_DIALOG_DIRECTORY || m_type == IFD_DIALOG_FILE)
+		if ((m_type == IFD_DIALOG_DIRECTORY || m_type == IFD_DIALOG_FILE) && clearFileName)
 			m_inputTextbox[0] = 0;
 		m_selections.clear();
 
@@ -1193,7 +1215,7 @@ namespace ifd {
 	}
 	void FileDialog::m_renderPopups()
 	{
-		bool openAreYouSureDlg = false, openNewFileDlg = false, openNewDirectoryDlg = false;
+		bool openAreYouSureDlg = false, openNewFileDlg = false, openNewDirectoryDlg = false, openOverwriteDlg = false;
 		if (ImGui::BeginPopupContextItem("##dir_context")) {
 			if (ImGui::Selectable("New file"))
 				openNewFileDlg = true;
@@ -1203,8 +1225,20 @@ namespace ifd {
 				openAreYouSureDlg = true;
 			ImGui::EndPopup();
 		}
+		std::error_code ec;
+		if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type == IFD_DIALOG_SAVE && 
+			ghc::filesystem::exists(m_currentDirectory / m_inputTextbox, ec) && !ghc::filesystem::is_directory(m_currentDirectory / m_inputTextbox, ec))
+			openOverwriteDlg = true;
+		if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type != IFD_DIALOG_DIRECTORY && 
+			ghc::filesystem::exists(m_currentDirectory / m_inputTextbox, ec) && ghc::filesystem::is_directory(m_currentDirectory / m_inputTextbox, ec)) {
+			m_setDirectory(m_currentDirectory / m_inputTextbox, false);
+			m_inputTextbox[0] = 0;
+			m_result.clear();
+		}
 		if (openAreYouSureDlg)
 			ImGui::OpenPopup("Are you sure?##delete");
+		if (openOverwriteDlg)
+			ImGui::OpenPopup("Overwrite file?##overwrite");
 		if (openNewFileDlg)
 			ImGui::OpenPopup("Enter file name##newfile");
 		if (openNewDirectoryDlg)
@@ -1225,6 +1259,25 @@ namespace ifd {
 				ImGui::SameLine();
 				if (ImGui::Button("No"))
 					ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::SetNextWindowSize(ImVec2(315, 105), ImGuiCond_FirstUseEver);
+		if (ImGui::BeginPopupModal("Overwrite file?##overwrite")) {
+			if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
+				ImGui::CloseCurrentPopup();
+			else {
+				const FileData& data = m_content[m_selectedFileItem];
+				ImGui::TextWrapped("Are you sure you want to overwrite %s?", m_inputTextbox);
+				if (ImGui::Button("Yes")) {
+					m_isOpen = false;
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button("No")) {
+					m_result.clear();
+					ImGui::CloseCurrentPopup();
+				}
 			}
 			ImGui::EndPopup();
 		}
@@ -1362,6 +1415,9 @@ namespace ifd {
 #ifdef _WIN32
 			if (!success)
 				MessageBeep(MB_ICONERROR);
+#elif (defined(__MACH__) && defined(__APPLE__))
+			if (!success)
+				NSBeep();
 #else
 			(void)success;
 #endif
@@ -1382,11 +1438,19 @@ namespace ifd {
 		if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? "Save" : "Open", ImVec2(ok_cancel_width / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f))) {
 			std::string filename(m_inputTextbox);
 			bool success = false;
-			if (!filename.empty() || m_type == IFD_DIALOG_DIRECTORY)
+
+			std::error_code ec;
+			if (!filename.empty() && m_type == IFD_DIALOG_SAVE && 
+				!ghc::filesystem::exists(m_currentDirectory / filename, ec) && !ghc::filesystem::is_directory(m_currentDirectory / filename, ec))
+				success = m_finalize(filename);
+			else if (!filename.empty() || m_type == IFD_DIALOG_DIRECTORY)
 				success = m_finalize(filename);
 #ifdef _WIN32
 			if (!success)
 				MessageBeep(MB_ICONERROR);
+#elif (defined(__MACH__) && defined(__APPLE__))
+			if (!success)
+				NSBeep();
 #else
 			(void)success;
 #endif
@@ -1395,8 +1459,10 @@ namespace ifd {
 		if (ImGui::Button("Cancel", ImVec2(-FLT_MIN, 0.0f))) {
 			if (m_type == IFD_DIALOG_DIRECTORY)
 				m_isOpen = false;
-			else
+			else {
 				m_finalize();
+				m_isOpen = false;
+			}
 		}
 
 		int escapeKey = ImGui::GetIO().KeyMap[ImGuiKey_Escape];
