@@ -230,6 +230,26 @@ namespace {
     style.TabRounding                      = 4;
   }
 
+  string expand_without_trailing_slash(string dname) {
+    std::error_code ec;
+    dname = ngs::fs::environment_expand_variables(dname);
+    ghc::filesystem::path p = ghc::filesystem::path(dname);
+    p = ghc::filesystem::absolute(p, ec);
+    if (ec.value() != 0) return "";
+    dname = p.string();
+    #if defined(_WIN32)
+    while ((dname.back() == '\\' || dname.back() == '/') && 
+      (p.root_name().string() + "\\" != dname && p.root_name().string() + "/" != dname)) {
+      message_pump(); p = ghc::filesystem::path(dname); dname.pop_back();
+    }
+    #else
+    while (dname.back() == '/' && (!dname.empty() && dname[0] != '/' && dname.length() != 1)) {
+      dname.pop_back();
+    }
+    #endif
+    return dname;
+  }
+
   #if defined(_WIN32)
   BOOL is_light_theme() {
     auto buffer = std::vector<char>(4);
@@ -371,9 +391,7 @@ namespace {
       #else
       ImGui_ImplSDLRenderer_NewFrame();
       #endif 
-      ImGui_ImplSDL2_NewFrame();
-      ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0));
-      if (!dir.empty() && dir.back() != CHR_SLASH) dir.push_back(CHR_SLASH);
+      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, dir.c_str());
       if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, dir.c_str());
       if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, dir.c_str());
