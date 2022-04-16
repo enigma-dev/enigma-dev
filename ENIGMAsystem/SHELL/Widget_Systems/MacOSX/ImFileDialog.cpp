@@ -379,8 +379,8 @@ namespace ifd {
 
 		// Quick Access
 		wchar_t userProfile[32767];
-		const ghc::filesystem::path homePath;
-		if (GetEnvironmentVariableW("USERPROFILE", userProfile, 32767)) 
+		ghc::filesystem::path homePath;
+		if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, 32767)) 
 			homePath = userProfile;
 		if (ghc::filesystem::exists(homePath, ec))
 			quickAccess->Children.push_back(new FileTreeNode(homePath));
@@ -391,13 +391,13 @@ namespace ifd {
 		DWORD d = GetLogicalDrives();
 		for (int i = 0; i < 26; i++)
 			if (d & (1 << i))
-				thisPC->Children.push_back(new FileTreeNode(std::string(1, 'A' + i) + ":"));
+				thisPC->Children.push_back(new FileTreeNode(std::string(1, 'A' + i) + ":\\"));
 		m_treeCache.push_back(thisPC);
 #else
 		std::error_code ec;
 
 		// Quick Access
-		const ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
+		ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
 		if (ghc::filesystem::exists(homePath, ec))
 			quickAccess->Children.push_back(new FileTreeNode(homePath));
 
@@ -536,11 +536,11 @@ namespace ifd {
 
 		#ifdef _WIN32
 		wchar_t userProfile[32767];
-		const ghc::filesystem::path homePath;
-		if (GetEnvironmentVariableW("USERPROFILE", userProfile, 32767)) 
+		ghc::filesystem::path homePath;
+		if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, 32767)) 
 			homePath = userProfile;
 		#else
-		const ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
+		ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
 		#endif
 
 		if (path == homePath.string())
