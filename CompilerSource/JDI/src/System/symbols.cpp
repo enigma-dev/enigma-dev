@@ -11,9 +11,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -23,19 +23,19 @@
 #include "symbols.h"
 #include <Storage/value_funcs.h>
 
-namespace jdip {
+namespace jdi {
   symbol_table symbols;
 
   symbol::symbol() {}
   symbol::symbol(unsigned char t, unsigned char p):
     type(t), prec_binary(t&(ST_BINARY|ST_TERNARY)? p:0), prec_unary_pre(t&ST_UNARY_PRE? p:0), prec_unary_post(t&ST_UNARY_POST? p:0),
-    operate(NULL), operate_unary_pre(NULL), operate_unary_post(NULL) {}
+    operate(nullptr), operate_unary_pre(nullptr), operate_unary_post(nullptr) {}
   symbol::symbol(unsigned char t, unsigned char p, value(*o)(const value&, const value&)):
     type(t), prec_binary(p), prec_unary_pre(0), prec_unary_post(0),
-    operate(o), operate_unary_pre(NULL), operate_unary_post(NULL) {}
+    operate(o), operate_unary_pre(nullptr), operate_unary_post(nullptr) {}
   symbol::symbol(unsigned char t, unsigned char p, value(*ou)(const value&)):
     type(t), prec_binary(0), prec_unary_pre(t&ST_UNARY_PRE? p:0), prec_unary_post(t&ST_UNARY_POST? p:0),
-    operate(NULL), operate_unary_pre(t&ST_UNARY_PRE? ou:NULL), operate_unary_post(t&ST_UNARY_POST? ou:NULL) {}
+    operate(nullptr), operate_unary_pre(t&ST_UNARY_PRE? ou:nullptr), operate_unary_post(t&ST_UNARY_POST? ou:nullptr) {}
   symbol& symbol::operator|=(const symbol& other) {
     type |= other.type;
     prec_binary |= other.prec_binary;
@@ -48,7 +48,7 @@ namespace jdip {
   }
 }
 
-using namespace jdip;
+using namespace jdi;
 
 /// Constructor designed to circumvent C++'s lack of static initializer blocks; will be run at program start to populate symbols.
 /// Simply maps all the symbols with their AST generation and evaluation information.

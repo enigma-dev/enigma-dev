@@ -73,6 +73,6 @@ extern language_adapter *current_language;
 extern string current_language_name;
 
 #include <API/context.h>
-extern jdi::context *main_context;
+extern jdi::Context *main_context;
 
 #endif

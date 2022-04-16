@@ -1,20 +1,20 @@
 /**
  * @file svg_simple.cpp
  * @brief Source implementing SVG functions.
- * 
+ *
  * @section License
- * 
+ *
  * Copyright (C) 2011 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -22,8 +22,7 @@
 #include "svg_simple.h"
 
 using std::string;
-std::string SVG::escape(std::string e) {
-  string r = e;
+std::string SVG::escape(std::string r) {
   for (size_t i = 0; i < r.length(); i++)
     if (r[i] == '<')
       r.replace(i,1,"&lt;");
@@ -33,16 +32,21 @@ std::string SVG::escape(std::string e) {
       r.replace(i,1,"&amp;");
   return r;
 }
-std::string SVG::tostring(int id) { char buf[16]; sprintf(buf,"%d",id); return buf; }
 
 void SVG::write_header(int w, int h) {
   fputs("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>", f);
   fprintf(f,
-    "<svg xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:cc=\"http://creativecommons.org/ns#\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
-    "xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\" width=\"%d\" "
-    "height=\"%d\" id=\"JDI_AST_Render\" version=\"1.1\" sodipodi:docname=\"JDI AST Render\">\n",w,h);
+    "<svg xmlns:dc=\"http://purl.org/dc/elements/1.1/\" "
+         "xmlns:cc=\"http://creativecommons.org/ns#\" "
+         "xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" "
+         "xmlns:svg=\"http://www.w3.org/2000/svg\" "
+         "xmlns=\"http://www.w3.org/2000/svg\" "
+         "xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\" "
+         "width=\"%d\" height=\"%d\" id=\"JDI_AST_Render\" "
+         "version=\"1.1\" sodipodi:docname=\"JDI AST Render\">\n",w,h);
   fputs("<g id=\"Drawing\">\n", f);
 }
+// TODO: SVG supports both <circle> and proper arc types, now.
 void SVG::draw_circle(std::string id, int x,int y,int r,unsigned fill,unsigned stroke, double stroke_width) {
   const int d = r * 2;
   fprintf(f, "  <path sodipodi:type=\"arc\" sodipodi:cx=\"%d\" sodipodi:cy=\"%d\" sodipodi:rx=\"%d\" sodipodi:ry=\"%d\" "
@@ -69,13 +73,13 @@ bool SVG::is_open() {
   return f;
 }
 void SVG::close() {
-  fputs("</g>\n",f);
-  fputs("</svg>\n",f);
+  fputs("</g>\n", f);
+  fputs("</svg>\n", f);
   fclose(f);
-  f = NULL;
+  f = nullptr;
 }
-SVG::SVG(const char* fn) {
-  f = fopen(fn, "wb");
+SVG::SVG(std::filesystem::path fn) {
+  f = fopen(fn.u8string().c_str(), "wb");
 }
 SVG::~SVG() {
   if (f) close();

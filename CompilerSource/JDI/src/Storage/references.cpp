@@ -15,9 +15,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -39,8 +39,8 @@
 using namespace std;
 
 namespace jdi {
-  ref_stack::ref_stack(): name(), ndef(NULL), ntop(NULL), nbottom(NULL), sz(0) {}
-  ref_stack::ref_stack(ref_stack& rf): name(), ndef(NULL), ntop(NULL), nbottom(NULL), sz(0) { swap(rf); }
+  ref_stack::ref_stack(): name(), ndef(nullptr), ntop(nullptr), nbottom(nullptr), sz(0) {}
+  ref_stack::ref_stack(ref_stack& rf): name(), ndef(nullptr), ntop(nullptr), nbottom(nullptr), sz(0) { swap(rf); }
   ref_stack::ref_stack(const ref_stack& rf) { /* cerr << "IMPLICITLY DUPLICATED REF STACK (CTOR)" << endl; */ copy(rf); }
   ref_stack::~ref_stack() { clear(); }
   
@@ -58,9 +58,9 @@ namespace jdi {
   ref_stack::node_memptr::~node_memptr() {}
   
   ref_stack::node* ref_stack::node::duplicate() {
-    if (type == RT_ARRAYBOUND) return new node_array(NULL,((node_array*)this)->bound);
-    if (type == RT_FUNCTION) return new node_func(NULL,((node_func*)this)->params);
-    return new node(NULL,type);
+    if (type == RT_ARRAYBOUND) return new node_array(nullptr,((node_array*)this)->bound);
+    if (type == RT_FUNCTION) return new node_func(nullptr,((node_func*)this)->params);
+    return new node(nullptr,type);
   }
   
   size_t ref_stack::node::arraysize() const {
@@ -80,7 +80,7 @@ namespace jdi {
   ref_stack::iterator::iterator(ref_stack::node *nconstruct): n(nconstruct) { }
   
   ref_stack::iterator ref_stack::begin() const { return ref_stack::iterator(ntop); }
-  ref_stack::iterator ref_stack::end() const { return ref_stack::iterator(NULL); }
+  ref_stack::iterator ref_stack::end() const { return ref_stack::iterator(nullptr); }
   
   bool ref_stack::ends_with(const ref_stack &rf) const {
     for (const node *n1 = ntop, *n2 = rf.ntop; n2; n1 = n1->previous, n2 = n2->previous) {
@@ -97,21 +97,21 @@ namespace jdi {
   }
   void ref_stack::push_array(size_t array_size) {
     node* bo = nbottom;
-    nbottom = new node_array(NULL, array_size);
+    nbottom = new node_array(nullptr, array_size);
     if (bo) bo->previous = nbottom;
     else ntop = nbottom;
     ++sz;
   }
   void ref_stack::push_func(parameter_ct &parameters) {
     node* bo = nbottom;
-    nbottom = new node_func(NULL, parameters);
+    nbottom = new node_func(nullptr, parameters);
     if (bo) bo->previous = nbottom;
     else ntop = nbottom;
     ++sz;
   }
   void ref_stack::push_memptr(definition_class *memof) {
     node* bo = nbottom;
-    nbottom = new node_memptr(NULL, memof);
+    nbottom = new node_memptr(nullptr, memof);
     if (bo) bo->previous = nbottom;
     else ntop = nbottom;
     ++sz;
@@ -122,7 +122,7 @@ namespace jdi {
     if (dme) {
       ntop = dme->previous;
       if (!ntop)
-        nbottom = NULL;
+        nbottom = nullptr;
       free(dme);
     }
   }
@@ -141,7 +141,7 @@ namespace jdi {
     ndef = rf.ndef;
     sz = rf.sz;
     if (!rf.nbottom) {
-      ntop = nbottom = NULL;
+      ntop = nbottom = nullptr;
       return;
     }
     nbottom = ntop = rf.ntop->duplicate();
@@ -166,20 +166,20 @@ namespace jdi {
     if (!nbottom) nbottom = rf.nbottom; // If we didn't have anything on our stack, our nbottom is now its nbottom.
     rf.nbottom->previous = ntop; // If we had anything on our stack, then our ntop item comes before its nbottom item.
     ntop = rf.ntop; // Since we threw that stack on ntop of ours, its ntop is now our ntop.
-    rf.ntop = rf.nbottom = NULL; // Make sure it doesn't free what we just stole
+    rf.ntop = rf.nbottom = nullptr; // Make sure it doesn't free what we just stole
     sz += rf.sz; rf.sz = 0; // Steal its size, too.
   }
   
   void ref_stack::append_nest_c(ref_stack &rf) {
     if (!rf.nbottom) {
       if (!rf.name.empty()) name = rf.name; // Grab the name, if it's meaningful
-      if (rf.ndef) ndef = rf.ndef; // This way, we don't overwrite with NULL/""
+      if (rf.ndef) ndef = rf.ndef; // This way, we don't overwrite with nullptr/""
       return; // Appending an empty stack is meaningless
     }
     if (!nbottom) nbottom = rf.nbottom; // If we didn't have anything on our stack, our nbottom is now its nbottom.
     rf.nbottom->previous = ntop; // If we had anything on our stack, then our ntop item comes before its nbottom item.
     ntop = rf.ntop; // Since we threw that stack on ntop of ours, its ntop is now our ntop.
-    rf.ntop = rf.nbottom = NULL; // Make sure it doesn't free what we just stole
+    rf.ntop = rf.nbottom = nullptr; // Make sure it doesn't free what we just stole
     sz += rf.sz; rf.sz = 0; // Steal its size, too.
     name = rf.name; // Steal the name from the nested expression.
     ndef = rf.ndef;
@@ -190,7 +190,7 @@ namespace jdi {
     if (!ntop) ntop = rf.ntop; // If we didn't have anything on our stack, our ntop is now its ntop.
     else nbottom->previous = rf.ntop;
     nbottom = rf.nbottom; // Since we threw that stack on ntop of ours, its ntop is now our ntop.
-    rf.ntop = rf.nbottom = NULL; // Make sure it doesn't free what we just stole
+    rf.ntop = rf.nbottom = nullptr; // Make sure it doesn't free what we just stole
     sz += rf.sz; rf.sz = 0; // Steal its size, too.
   }
   
@@ -219,7 +219,7 @@ namespace jdi {
     enswap(ft);
   }
   
-  ref_stack::parameter::parameter(): variadic(false), default_value(NULL) {}
+  ref_stack::parameter::parameter(): variadic(false), default_value(nullptr) {}
   ref_stack::parameter::parameter(const full_type& ft, AST* dv): full_type(ft), variadic(false), default_value(dv) {}
   ref_stack::parameter::~parameter() { delete default_value; }
     

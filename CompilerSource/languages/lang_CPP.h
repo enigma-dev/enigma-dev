@@ -29,7 +29,7 @@
 
 struct lang_CPP: language_adapter {
   /// The context of all parsed definitions.
-  jdi::context definitions;
+  jdi::Context definitions;
 
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma, *namespace_enigma_user;

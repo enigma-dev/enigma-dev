@@ -1,26 +1,26 @@
 /**
  * @file lex_cpp.h
  * @brief Header extending the \c lexer base class for parsing C++.
- * 
+ *
  * This file defines two subclasses of \c jdi::lexer. The first is meant to lex
  * C++ definitions, and so returns a wide range of token types. It will also do
  * any needed preprocessing, handing the second lexer to \c jdi::AST to handle
  * `#if` expression evaluation. The second lexer is much simpler, and treats all
  * identifiers the same.
- * 
+ *
  * @section License
- * 
- * Copyright (C) 2011-2012 Josh Ventura
+ *
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -28,163 +28,351 @@
 #ifndef _LEX_CPP__H
 #define _LEX_CPP__H
 
-namespace jdip {
-  struct lexer_cpp;
+namespace jdi {
+  struct lexer;
   struct lexer_macro;
 }
 
+#include <optional>
+#include <map>
 #include <set>
 #include <string>
-#include <API/lexer_interface.h>
+#include <vector>
 #include <General/quickstack.h>
 #include <General/llreader.h>
+#include <System/token.h>
+#include <System/macros.h>
 #include <API/context.h>
 
-namespace jdip {
-  using namespace jdi;
-  /**
-    @brief An extension of \c llreader which also stores information about the
-           current line number and the position of the last line break.
-  **/
-  struct openfile {
-    const char* filename; ///< The name of the open file.
-    string searchdir; ///< The search directory from which this file was included, or the empty string.
-    size_t line; ///< The index of the current line.
-    size_t lpos; ///< The position of the most recent line break.
-    llreader file; ///< The llreader of this file.
-    openfile(); ///< Default constructor.
-    openfile(const char* fname); ///< Construct a new openfile at position 0 with the given filename.
-    /// Construct a new openfile with the works.
-    /// @param fname     The name of the file in use
-    /// @param sdir      The search directory from which this file was included, or the empty string
-    /// @param line_num  The number of the line, to store
-    /// @param line_pos  The position of the last newline, to store
-    /// @param consume   The llreader to consume for storage
-    openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume);
-    void swap(openfile&); ///< Swap with another openfile.
+namespace jdi {
+  using std::string;
+  typedef std::vector<token_t> token_vector;
+
+  /// Details a macro we entered during preprocessing. Used in error reporting,
+  /// and to avoid infinite recursion from unrolling the same macro.
+  struct EnteredMacro {
+    /// The name of the macro we have entered.
+    string name;
+    /// The token used in reporting location information.
+    token_t origin;
+    /// Construct with name and origin token.
+    EnteredMacro(string name_, token_t origin_): name(name_), origin(origin_) {}
   };
-  
+
+  /// References or holds a buffer of tokens to emit before processing more.
+  /// Brings three principle benefits:
+  /// 1. Macros can be entered without re-lexing a buffer.
+  /// 2. Our Lexer can be constructed to supply a fixed collection of tokens.
+  /// 3. Rewinding is trivial, as previously-read tokens can just be re-stacked.
+  struct OpenBuffer {
+    /// Tokens in the macro or other buffer (may be owned by someone else!)
+    const token_vector &tokens;
+    /// If this buffer belongs to a macro, this describes it.
+    std::optional<EnteredMacro> macro_info;
+    /// Allows us to own the above vector.
+    token_vector assembled_token_data;
+    /// Scratch space: how far the lexer advanced in this buffer before pushing
+    /// a new one and switching to it.
+    size_t buf_pos = 0;
+    /// Denotes that this buffer was already preprocessed fully.
+    bool is_rewind = false;
+    /// When true, do not allow popping this buffer during normal parsing.
+    /// This is used to do nested lexing/preprocessing operations within the
+    /// preprocessing logic. More buffers can be pushed on and subsequently
+    /// popped off, but this buffer can only be popped manually.
+    bool is_frozen = false;
+
+    OpenBuffer(string macro, token_t origin, const std::vector<token_t> *tokens_):
+        tokens(*tokens_), macro_info({macro, origin}) {}
+    OpenBuffer(string macro, token_t origin, std::vector<token_t> &&tokens_):
+        tokens(assembled_token_data), macro_info({macro, origin}),
+        assembled_token_data(std::move(tokens_)) {}
+    OpenBuffer(token_vector &&tokens_):
+        tokens(assembled_token_data), macro_info(),
+        assembled_token_data(tokens_) {}
+    OpenBuffer(const token_vector *tokens_):
+        tokens(*tokens_), macro_info(), assembled_token_data() {}
+
+    OpenBuffer(const OpenBuffer&) = delete;
+    OpenBuffer(OpenBuffer &&other):
+        tokens(&other.tokens == &other.assembled_token_data
+               ? assembled_token_data : other.tokens),
+        macro_info(std::move(other.macro_info)),
+        assembled_token_data(std::move(other.assembled_token_data)),
+        buf_pos(other.buf_pos),
+        is_rewind(other.is_rewind),
+        is_frozen(other.is_frozen) {}
+  };
+
   /**
-    @brief An implementation of \c jdi::lexer for lexing C++. Handles preprocessing
-           seamlessly, returning only relevant tokens.
-  **/
-  struct lexer_cpp: lexer, llreader {
-    virtual token_t get_token(error_handler *herr = def_error_handler);
-    quick::stack<openfile> files; ///< The files we have open, in the order we included them.
+  The basic C++ lexer. Extracts a single preprocessor token from the given reader.
+  Uses @p cfile to include source metadata in the token.
+
+  ISO C++ calls for nine phases of translation. The llreader passed to this call
+  handles the first (file character mapping), and this routine handles the second
+  and third. The data is not physically modified for any of these phases.
+  */
+  token_t read_token(llreader &cfile, ErrorHandler *herr);
+
+  /// Tokenizes a string with no preprocessing. All words are identifiers.
+  /// Will return preprocessing tokens, except for whitespace tokens.
+  token_vector tokenize(string fname, string_view str, ErrorHandler *herr);
+
+  /**
+  Basic lexing/preprocessing unit; polled by all systems for tokens.
+
+  This lexer calls out to `read_token` to handle phases 1-3 of translation.
+  It then handles phases four (execution of preprocessing directives), five
+  (expansion of string literals), and six (concatenation of adjacent string
+  literals). This work needs to be handled when parsing C++11 or greater, as
+  string literal contents can be used at compile time to have meaningful
+  effect on output (this was also possible in previous versions, but through
+  less conventional means that would not normally arise).
+
+  Because of that nuance, and the general lookahead-heavy nature of parsing C++,
+  token rewinding is a first-class feature of this lexer. When a string literal
+  is encountered, another token is read immediately, and is either queued for
+  return or concatenated to the current literal (depending on whether it is also
+  a string literal). There is also a RAII helper, `look_ahead`, designed to
+  facilitate handling of cases such as MVP. This way, a try-like branch of code
+  can attempt to evaluate the tree one way, then seamlessly give up and allow
+  a later branch to attempt the same.
+
+  Thus, this lexer implementation has four layers of token source data:
+    1. The open file stack. Files or string buffers (managed by an llreader) are
+       lexed for raw tokens.
+    2. Macros used within a file are expanded into tokens, and these buffers of
+       tokens are stacked. Per ISO, a macro may not appear twice in this stack.
+    3. Rewind operations produce queues of tokens. Each queue is stacked.
+    4. During normal lexing operations, minor lookahead may be required.
+       Tokens read during lookahead are queued at the top of this stack.d
+
+  The above stacks are treated in stack order. They are generally populated in
+  order from 1-4, but tokens are retrieved in order of 4-1.
+  */
+  class lexer {
+    struct condition;
+
+    llreader cfile;  ///< The current file being read.
+    std::vector<llreader> files; ///< The files we have open, in the order we entered them.
+    std::vector<OpenBuffer> open_buffers; ///< Buffers of tokens to consume.
+    ErrorHandler *herr;  ///< Error handler for problems during lex.
+
+    /// Our conditional levels (one for each nested `\#if*`)
+    vector<condition> conditionals;
+
+    /// Tokens to return before lexing continues. Generally, these are tokens
+    /// that have been expanded from a macro or fetched as lookahead.
+    const token_vector *buffered_tokens = nullptr;
+    /// The position in the current token buffer.
+    size_t buffer_pos;
+
+    /// Buffer to which tokens will be recorded for later re-parse, as needed.
+    token_vector *lookahead_buffer = nullptr;
+
     macro_map &macros; ///< Reference to the \c jdi::macro_map which will be used to store and retrieve macros.
-    
-    const char* filename; ///< The name of the open file.
-    string sdir; ///< The last loaded search directory.
-    size_t line; ///< The current line number in the file
-    size_t lpos; ///< The index in the file of the most recent line break.
-    
-    unsigned open_macro_count;
-    
-    /// Map of string to token type; a map-of-keywords type.
-    typedef map<string,TOKEN_TYPE> keyword_map;
-    /// List of C++ keywords, mapped to the type of their token.
-    /// This list is assumed to contain tokens whose contents are unambiguous; one string maps to one token, and vice-versa.
-    static keyword_map keywords;
-    /// This is a map of macros to add bare-minimal support for a number of compiler-specific builtins.
-    static macro_map kludge_map;
-    
-    /// Static cleanup function; safe to call without a matching init.
-    static void cleanup();
-    
-    /** Sole constructor; consumes an llreader and attaches a new \c lex_macro.
-        @param input    The file from which to read definitions. This file will be manipulated by the system.
-        @param pmacros  A \c jdi::macro_map which will receive and be probed for macros.
-        @param fname    The name of the file that was first opened.
-    **/
-    lexer_cpp(llreader& input, macro_map &pmacros, const char *fname = "stdcall/file.cpp");
-    /** Destructor; free the attached macro lexer. **/
-    ~lexer_cpp();
-    
+
+    // std::set<string> visited_macros; ///< Cache over macro names in open_buffers.
+    /// For record and reporting purposes. String views are created into this
+    /// collection. Do NOT blindly replace this with a flat hash map.
+    std::set<string> visited_files;
+
+    /// Pointer to the context we're parsing definitions into.
+    Context *const builtin;
+
+    /// Indicates whether Cpp.Cond expressions (eg, defined, __has_include) are
+    /// to be evaluated. Otherwise, the tokens will be treated as normal
+    /// identifiers.
+    bool evaluate_cpp_cond_ = false;
+
+    /// Private base constructor.
+    lexer(macro_map &pmacros, ErrorHandler *herr);
+
     /**
       Utility function designed to handle the preprocessor directive
       pointed to by \c pos upon invoking the function. Note that it should
       be the character directly after the pound pointed to upon invoking
       the function, not the pound itself.
-      @param herr  The error handler to use if the preprocessor doesn't
-                   exist or is malformed.
     **/
-    void handle_preprocessor(error_handler *herr);
-    
-    /// Utility function to skip a single-line comment; invoke with pos indicating one of the slashes.
-    void skip_comment();
-    /// Utility function to skip a multi-line comment; invoke with pos indicating the starting slash.
-    void skip_multiline_comment();
-    /// Utility function to skip a string; invoke with pos indicating the quotation mark. Terminates indicating match.
-    void skip_string(error_handler *herr);
-    /// Skip anything that cannot be interpreted as code in any way.
-    inline void skip_whitespace();
+    void handle_preprocessor();
+
+    /// Tests the given identifier token against currently-defined macros, and
+    /// handles expanding it if it is defined and usable in this context.
+    bool handle_macro(token_t &identifier);
+
+    /// Converts an identifier token into an appropriate keyword token.
+    bool translate_identifier(token_t &identifier);
+
     /// Function used by the preprocessor to read in macro parameters in compliance with ISO.
-    string read_preprocessor_args(error_handler *herr);
-    /** Second-order utility function to skip lines until a preprocessor
-        directive is encountered, then invoke the handler on the directive it found. **/
-    void skip_to_macro(error_handler *herr);
-    
+    string read_preprocessor_args();
+    /// Second-order utility function to skip lines until a preprocessor
+    /// directive is encountered, then invoke the handler on the directive it found.
+    void skip_to_macro();
+
     /// Enter a scalar macro, if it has any content.
+    /// @param otk  The originating token (naming this macro).
     /// @param ms   The macro scalar to enter.
-    void enter_macro(macro_scalar *ms);
+    void enter_macro(const token_t &otk, const macro_type &ms);
     /// Parse for parameters to a given macro function, if there are any, then evaluate
     /// the macro function and set the open file to reflect the change.
     /// This call should be made while the position is just after the macro name.
+    /// @param otk  The originating token (naming this macro function).
     /// @param mf   The macro function to parse
-    /// @param herr An error handler in case of parameter mismatch or non-terminated literals
     /// @return Returns whether parameters were encountered and parsed.
-    bool parse_macro_function(const macro_function* mf, error_handler *herr);
-    /// Parse for parameters to a given macro function, if there are any.
-    /// This call should be made while the position is just after the macro name.
-    /// @param mf    The macro function to parse.
-    /// @param dest  The vector to receive the individual parameters [out].
-    /// @param herr  An error handler in case of parameter mismatch or non-terminated literals.
-    /// @return Returns whether parameters were encountered and parsed.
-    bool parse_macro_params(const macro_function* mf, vector<string>& dest, error_handler *herr);
-    /// Parse for parameters to a given macro function, if there are any.
-    /// This call should be made while the position is just after the macro name.
-    /// @param mf    The macro function to parse.
-    /// @param cfile The buffer to read from.
-    /// @param pos   The position in the buffer to read; modified as used [in-out].
-    /// @param len   The length of the given buffer.
-    /// @param dest  The vector to receive the individual parameters [out].
-    /// @param errep A token to use to report errors [in].
-    /// @param herr  An error handler in case of parameter mismatch or non-terminated literals.
-    /// @return Returns whether parameters were encountered and parsed.
-    static bool parse_macro_params(const macro_function* mf, const macro_map &macros, const char* cfile, size_t &pos, size_t length, vector<string>& dest, const token_t &errep, error_handler *herr);
-    
-    /// Pop the currently open file or active macro.
-    /// @return Returns whether the end of all input has been reached.
+    bool parse_macro_function(const token_t &otk, const macro_type &mf);
+    /// Check if we're currently inside a macro by the given name.
+    bool inside_macro(string_view macro_name) const;
+
+    /// Pop the currently open file to return to the file that included it.
+    /// @return Returns true if the buffer was successfully popped, and input remains.
     bool pop_file();
-    
-    set<string> visited_files; ///< For record and reporting purposes only.
-  protected:
-    /// Storage mechanism for conditionals, such as <code>\#if</code>, <code>\#ifdef</code>, and <code>\#ifndef</code>.
+
+    /// Storage mechanism for conditionals, such as `\#if`, `\#ifdef`, and `\#ifndef`.
     struct condition {
-      bool is_true; ///< True if code in this layer is to be parsed; ie, the condition given is true.
-      bool can_be_true; ///< True if an `else` statement or the like can set is_true to true.
-      condition(bool,bool); ///< Convenience constructor.
-      condition(); ///< Default constructor.
+      /// True if code in this region is to be parsed
+      /// (the condition that was given is true).
+      bool is_true;
+      /// Indicates that we've seen an else statement already.
+      /// If true, this branch must be terminated with an #endif.
+      /// This will not be set to true when `elif` or similar are encountered.
+      /// In that case, the current condition will be popped, and a new one will
+      /// be pushed. In this new condition, `seen_else` will still be false.
+      bool seen_else;
+      /// Indicates whether the enclosing conditionals were all true.
+      /// This prevents if 1 X else if 0 Y else Z from being X and Z,
+      /// without having to iterate the entire hierarchy each time.
+      bool parents_true;
+      /// Convenience constructor.
+      condition(bool, bool);
     };
-    /// FLatten a macro parameter, evaluating nested macro functions.
-    static string _flatten(string param, const macro_map& macros, const token_t &errep, error_handler *herr);
-    quick::stack<condition> conditionals; ///< Our conditional levels (one for each nested `\#if*`)
-    lexer_macro *mlex; ///< The macro lexer that will be passed to the AST builder for #if directives.
-    context_parser *mctex; ///< A context used for constructing ASTs from preprocessor expressions.
-  };
-  
-  /**
-    An implementation of \c jdi::lexer for handling macro expressions.
-    Unrolls macros automatically. Treats non-macro identifiers as zero.
-    Replaces `defined x` with 0 or 1, depending on whether x is defined.
-  **/
-  struct lexer_macro: lexer {
-    const char* cfile;
-    size_t &pos, length;
-    lexer_cpp *lcpp;
-    token_t get_token(error_handler *herr = def_error_handler);
-    lexer_macro(lexer_cpp*);
-    void update();
+
+    /// Retrieves the next token from the underlying file or current buffer.
+    /// No *additional* preprocessing will be performed, but this token may come
+    /// from inside a replacement list expansion or rewind buffer.
+    token_t read_raw();
+
+    /// Similar to read_raw, but will not return tokens that preprocess to
+    /// nothing (eg, TTM_NEWLINE, TTM_WHITESPACE, TTM_COMMENT).
+    token_t read_raw_non_empty();
+
+    /// Internal logic to handle preprocessing and fetching a token, as well
+    /// as reading tokens off the current buffer, if needed.
+    token_t preprocess_and_read_token();
+
+   public:
+    /** Consumes an llreader and attaches a new \c lex_macro.
+        @param input    The file from which to read definitions.
+                        This file will be manipulated by the system.
+        @param pmacros  A \c jdi::macro_map which will receive
+                        (and be probed for) macros.
+        @param herr     An error handler that will receive lexing and
+                        preprocessing errors.
+    **/
+    lexer(llreader& input, macro_map &pmacros, ErrorHandler *herr);  // TODO: Have Lexer own pmacros.
+    /**
+      Consumes a token_vector, processing only the tokens in the vector before
+      returning END_OF_CODE. Does macro expansion using the macros in the given
+      lexer.
+      @param input    The file from which to read definitions.
+                      This file will be manipulated by the system.
+      @param basis    A reference lexer to pilfer context and macro information
+                      from, as well as an error handler.
+    **/
+    lexer(token_vector &&tokens, const lexer &basis);
+    /**
+      Aliases a token_vector, processing only the tokens in the vector before
+      returning END_OF_CODE. Does macro expansion using the macros in the given
+      lexer.
+      @param input    The file from which to read definitions.
+                      This file will be manipulated by the system.
+      @param basis    A reference lexer to pilfer context and macro information
+                      from, as well as an error handler.
+    **/
+    lexer(const token_vector *tokens, const lexer &basis);
+    /**
+      Aliases a token_vector, processing only the tokens in the vector before
+      returning END_OF_CODE. Treats these tokens as gospel, returning them as-is
+      (except for whitespace and comment tokens).
+      @param input    The file from which to read definitions.
+                      This file will be manipulated by the system.
+      @param herr     An error handler that will receive any errors that might
+                      occur during replay. In general, this should go unused.
+    **/
+    lexer(const token_vector *tokens, ErrorHandler *herr);
+    /** Destructor; free the attached macro lexer. **/
+    ~lexer();
+
+    /// Read a C++ token, with no scope information.
+    token_t get_token();
+    /// Read a C++ token, searching the given scope for names.
+    token_t get_token_in_scope(definition_scope *scope);
+
+    /// RAII type for initiating unbounded lookahead.
+    class look_ahead {
+      token_vector buffer;
+      token_vector *prev_buffer;
+      lexer *lex;
+
+     public:
+      token_t &push(token_t token) {
+        buffer.push_back(token);
+        return buffer.back();
+      }
+
+      look_ahead(lexer *lex_): prev_buffer(lex_->lookahead_buffer), lex(lex_) {
+        lex->lookahead_buffer = &buffer;
+      }
+      ~look_ahead() {
+        if (lex->lookahead_buffer != &buffer) {
+          SourceLocation sloc("jdi::look_ahead::~look_ahead",
+                              SourceLocation::npos, SourceLocation::npos);
+          lex->herr->error(sloc, "LOGIC ERROR: lookahead buffer is not owned");
+          abort();
+        }
+        lex->lookahead_buffer = prev_buffer;
+        if (prev_buffer) {
+          if (prev_buffer->empty()) {
+            prev_buffer->swap(buffer);
+          } else {
+            prev_buffer->insert(prev_buffer->end(), buffer.begin(), buffer.end());
+          }
+        }
+      }
+      void rewind() {
+        if (buffer.empty()) return;
+        token_vector buf;
+        buf.swap(buffer);
+        lex->push_rewind_buffer(std::move(buf));
+      }
+    };
+
+    /// Push a buffer of tokens onto this lexer.
+    void push_buffer(OpenBuffer &&buf);
+
+    /// Push a buffer of tokens onto this lexer, and mark them preprocessed.
+    void push_rewind_buffer(OpenBuffer &&buf);
+
+    /// Push a buffer onto this lexer, and freeze it. (See notes above.)
+    void push_frozen_buffer(OpenBuffer &&buf);
+
+    /// Pop the current top buffer.
+    bool pop_buffer();
+
+    /// Pop the frozen buffer you just pushed.
+    /// Will report an error if a buffer was pushed onto it and not popped.
+    /// There is no pop_rewind_buffer because rewind buffers are normal buffers
+    /// except they are not rescanned. A rewind buffer can technically be frozen.
+    void pop_frozen_buffer();
+
+    /// Build a traceback of open files and macros.
+    std::vector<SourceLocation> detailed_position() const;
+
+    // =========================================================================
+    // == Configuration Storage ================================================
+    // =========================================================================
+
+    /// Retrieve this lexer's error handler
+    ErrorHandler *get_error_handler() { return herr; }
   };
 }
 

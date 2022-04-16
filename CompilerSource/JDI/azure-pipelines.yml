@@ -1,0 +1,53 @@
+jobs:
+- job: MINGW
+  pool:
+    vmImage: windows-latest
+  strategy:
+    matrix:
+      i686:
+        MINGW_UPPER: MINGW32
+        MINGW_LOWER: mingw32
+        MINGW_ARCH: i686
+      x86_64:
+        MINGW_UPPER: MINGW64
+        MINGW_LOWER: mingw64
+        MINGW_ARCH: x86_64
+  
+  steps:
+    - checkout: self
+
+    - powershell: |
+        choco install msys2
+      displayName: Install MSYS2
+    
+    - script: |
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\pacman --noconfirm --needed -S git base-devel mingw-w64-$(MINGW_ARCH)-toolchain mingw-w64-$(MINGW_ARCH)-cmake mingw-w64-$(MINGW_ARCH)-gtest
+      displayName: Install Toolchain
+    
+    - script: |
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\bash -lc "cmake -G \"Unix Makefiles\" CMakeLists.txt"
+      displayName: 'CMake Generate Makefiles'
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
+        
+    - script: |
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\bash -lc "make"
+      displayName: 'Build'
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
+        
+    - script: |
+        set PATH=C:\tools\msys64\usr\bin
+        C:\tools\msys64\usr\bin\bash -lc "bin/Test/JustDefineIt"
+      displayName: 'Test'
+      env:
+        MSYSTEM: $(MINGW_UPPER)
+        CHERE_INVOKING: yes
+        MINGW_INSTALLS: $(MINGW_LOWER)
