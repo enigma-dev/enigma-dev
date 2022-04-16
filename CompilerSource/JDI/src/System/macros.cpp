@@ -13,270 +13,272 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include <cstring>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
-#include <cstring>
 using namespace std;
 
 #include "macros.h"
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
+#include <System/lex_cpp.h>
+using namespace jdi;
 
-using namespace jdip;
-using namespace parse_bacics::visible;
-
-macro_type::macro_type(string n, int ac): argc(ac), refc(1), name(n) {}
-macro_type::~macro_type() {}
-
-macro_scalar::macro_scalar(string n, string val): macro_type(n,-1), value(val) {}
-macro_scalar::~macro_scalar() {}
-
-macro_function::macro_function(string n, string val): macro_type(n,0), value(), args() {
-  const size_t bs = val.length();
-  if (bs) {
-    char *buf = new char[bs]; memcpy(buf, val.c_str(), bs);
-    value.push_back(mv_chunk(buf, bs));
+string macro_type::NameAndPrototype() const {
+  string res = name;
+  if (is_function) {
+    res += "(";
+    for (size_t i = 0; i < params.size(); i++)
+      res += params[i]
+          + (i + 1 < params.size() ? ", " : is_variadic ? "..." : "");
+    res += ")";
   }
-}
-macro_function::macro_function(string n, const vector<string> &arglist, string val, bool variadic, error_handler *herr): macro_type(n,arglist.size()+variadic), value(), args(arglist) {
-  preparse(val, herr);
-}
-macro_function::~macro_function() {
-  for (size_t i = 0; i < value.size(); ++i)
-    if (!value[i].is_arg) delete []value[i].data;
-}
-
-void macro_type::free(const macro_type* whom) {
-  if (!-- whom->refc){
-    if (whom->argc >= 0) delete (macro_function*)whom;
-    else delete (macro_scalar*)whom;
-  }
-}
-
-bool macro_type::is_variadic() const {
-  return argc > 0 && argc > ((macro_function*) this)->args.size();
-}
-
-
-//======================================================================================================
-//=====: Macro function data chunk constructors :=======================================================
-//======================================================================================================
-
-macro_function::mv_chunk::mv_chunk(const char* str, size_t start, size_t len): metric(len), is_arg(false) {
-  data = new char[len];
-  memcpy(data, str+start, len);
-}
-macro_function::mv_chunk::mv_chunk(char* ndata, size_t len): data(ndata), metric(len), is_arg(false) {}
-macro_function::mv_chunk::mv_chunk(size_t argnum): data(NULL), metric(argnum), is_arg(true) {}
-
-string macro_function::mv_chunk::toString(macro_function *mf) {
-  if (is_arg) return "{{" + mf->args[metric] + "}}";
-  return string(data,metric);
-}
-
-//======================================================================================================
-//=====: Macro function parsing methods :===============================================================
-//======================================================================================================
-
-/**
-  @section Implementation
-  This function actually hauls quite a bit of ass. Its purpose is to make sure that
-  when the parse is done, evaluating a macro function down the road is as simple as
-  imploding the vector with a lookup on each element before concatenation.
-  
-  Since the function value parameter is read in raw, the function must handle both
-  comments and strings, as well as, according to the expanded-value specification
-  in \c jdip::macro_function::value, handle the # and ## operators.
-**/
-inline void jdip::macro_function::preparse(string val, error_handler *herr)
-{
-  unsigned push_from = 0;
-  map<string,int> parameters;
-  
-  value.clear(); // Wipe anything in the output array
-  
-  for (pt i = 0; i < args.size(); i++) // Load parameters into map for searching and fetching index
-    parameters[args[i]] = i;
-  
-  for (pt i = 0; i < val.length(); ) // Iterate the string
-  {
-    if (val[i] == '\"' or val[i] == '\'') { // Skip strings
-      char nc = val[i];
-      while (++i < val.length() and val[i] != nc) // We're ultimately searching for the matching quote.
-        if (val[i] == '\\') ++i; // No need to handle escape sequences; only '\\' and '\"' are of concern.
-      continue;
-    }
-    
-    if (val[i] == '/') { // Unfortunately, we must also do comment checking.
-      if (val[i+1] == '*') { i += 3; // This is a hack to save lines on this trivialty
-        while (i < val.length() and (val[i] != '/' or val[i-1] != '*')) ++i;
-      } else if (val[i+1] == '/')
-        while (++i < val.length() and val[i] != '\n');        
-    }
-    
-    if (is_digit(val[i])) { // We must also be sure to skip numbers,
-      while (is_digit(val[++i])); // As they could have postfixes matching a parameter
-      continue;
-    }
-    
-    if (is_letter(val[i])) // If we do encounter a letter, the fun begins.
-    {
-      const unsigned sp = i; // We record where we're leaving off
-      while (is_letterd(val[++i])); // And navigate to the end of the identifier.
-      map<string,int>::iterator pi = parameters.find(val.substr(sp,i-sp));
-      if (pi != parameters.end()) // Then check if it's a parameter.
-      {
-        if (sp > push_from) // If we've covered any ground since our last value push,
-          value.push_back(mv_chunk(val.c_str(), push_from, sp-push_from)); // Push it onto our value
-        value.push_back(mv_chunk(pi->second)); // Push this identifier as a distinct item onto value
-        push_from = i; // Indicate the new starting position of data to be pushed
-      }
-      continue;
-    }
-    
-    if (val[i] == '#')
-    {
-      if (val[++i] == '#') {
-        if (i <= 1) continue;
-        pt ie = i - 2;
-        while (ie > 0 and is_useless(val[ie])) --ie; // eliminate any leading whitespace
-        if (ie > push_from) // If there's anything non-white to push since last time,
-          value.push_back(mv_chunk(val.c_str(), push_from, ie-push_from+1)); // Then push it
-        while (is_useless(val[++i])); // Skip any trailing whitespace
-        push_from = i;
-        continue;
-      }
-      if (--i > push_from) // If we've covered any ground since our last value push,
-        value.push_back(mv_chunk(val.c_str(), push_from, i-push_from)); // Push it onto our value
-      while (is_useless_macros(val[++i]));
-      push_from = i; // Store current position just in case something stupid happens
-      if (!is_letter(val[i])) { herr->error("Expected parameter name following '#' token; `" + val + "'[" + ::toString(i) + "] is not a valid identifier character"); continue; }
-      const size_t asi = i;
-      while (is_letterd(val[++i]));
-      map<string,int>::iterator pi = parameters.find(val.substr(asi,i-asi));
-      if (pi == parameters.end()) { herr->error("Expected parameter name following '#' token: `" + val.substr(asi,i-asi) + "' does not name a parameter"); continue; }
-      
-      // Push our string junk
-      value.push_back(mv_chunk("#", 0, 1));
-      value.push_back(mv_chunk(pi->second));
-      
-      push_from = i; // Indicate the new starting position of data to be pushed
-    }
-    
-    i++;
-  }
-  if (val.length() > push_from)
-    value.push_back(mv_chunk(val.c_str(), push_from, val.length() - push_from));
+  return res;
 }
 
 string macro_type::toString() const {
-  if (argc >= 0)
-  {
-    macro_function *mf = (macro_function*)this;
-    string res = "#define " + name + "(";
-    for (size_t i = 0; i < mf->args.size(); i++)
-      res += mf->args[i] + (i+1 < mf->args.size() ? ", " : ((size_t)argc > mf->args.size()? "...": ""));
-    res += ") \\\n";
-    for (size_t i = 0; i < mf->value.size(); i++)
-      res += "  " + mf->value[i].toString(mf) + (i+1 < mf->value.size()? "\\\n" : "");
-    return res;
-  }
-  else {
-    return "#define " + name + "\n  " + ((macro_scalar*)this)->value;
-  }
+  string res = "#define " + NameAndPrototype() + " \\\n";
+  for (size_t i = 0; i < raw_value.size(); ++i)
+    res += "  " + raw_value[i].to_string()
+        + (i + 1 < raw_value.size()? "\\\n" : "");
+  return res;
 }
 
-string macro_type::valueString() const {
-  if (argc >= 0) {
-    macro_function *mf = (macro_function*)this;
-    string res;
-    for (size_t i = 0; i < mf->value.size(); i++)
-      res += mf->value[i].toString(mf) + (i+1 < mf->value.size()? " " : "");
-    return res;
-  } else {
-    return ((macro_scalar*)this)->value;
+constexpr char kConcatenationError[] =
+    "Concatenation marker cannot appear at either end of a replacement list.";
+
+inline bool meaningful_span(const token_vector &tokens, size_t b, size_t e) {
+  for (auto i = b; i < e; ++i) {
+    if (!tokens[i].preprocesses_away()) return true;
   }
+  return false;
 }
 
-#include <iostream>
-#include <System/token.h>
-bool macro_function::parse(vector<string> &arg_list, char* &dest, char* &destend, token_t errtok, error_handler *herr) const
-{
-  if (arg_list.size() < args.size()) {
-    if (arg_list.size() + 1 < args.size())
-      return errtok.report_error(herr, "Too few arguments to macro function `" + name + "': provided " + ::toString(arg_list.size()) + ", requested " + ::toString(args.size())), false;
-    arg_list.push_back("");
-  }
-  else if ((arg_list.size() > args.size() and args.size() == (unsigned)argc))
-    return errtok.report_error(herr, "Too many arguments to macro function `" + name + "'"), false;
-  size_t alloc = 1;
-  
-  if (value.empty())
-    return false;
-  
-  for (size_t i = 0; i < value.size(); i++) {
-    if (value[i].is_arg)
-      alloc += arg_list[value[i].metric].length();
-    else {
-      dbg_assert(value[i].metric > 0);
-      if (*value[i].data == '#') {
-        dbg_assert(value[i].metric == 1);
-        alloc += (1 + arg_list[value[++i].metric].length()) << 1; // Make sure we have enough room for a string of nothing but newlines and backslashes
+vector<macro_type::FuncComponent> macro_type::componentize(
+    const token_vector &tokens, const vector<string> &params,
+    ErrorHandler *herr) {
+  vector<macro_type::FuncComponent> res;
+  std::unordered_map<std::string_view, size_t> params_by_name;
+  for (size_t i = 0; i < params.size(); ++i) params_by_name[params[i]] = i;
+  size_t e = 0;
+  for (size_t i = 0; i < tokens.size(); ++i) {
+    // -------------------------------------------------------------------------
+    // -- Handle concatenation markers. ----------------------------------------
+    // -------------------------------------------------------------------------
+    if (tokens[i].type == TTM_CONCAT) {
+      if (!i) {
+        herr->error(tokens[i]) << "Concatenation marker (`##`) "
+            "cannot appear at either end of a replacement list.";
         continue;
       }
-      alloc += value[i].metric;
+      // Don't push spans CONCAT would always discard.
+      if (meaningful_span(tokens, e, i))
+        res.push_back(FuncComponent::TokenSpan{e, i});
+      res.push_back(FuncComponent::Paste{});
+      while (++i < tokens.size() && tokens[i].preprocesses_away());
+      e = i--;
+      continue;
     }
-  }
-  
-  bool last_was_arg = false; // True if the previous chunk was an argument.
-  char* buf = new char[alloc], *bufat = buf;
-  for (size_t i = 0; i < value.size(); i++)
-    if (value[i].is_arg)
-    {
-      if (last_was_arg) {
-        while (bufat > buf and is_useless(*--bufat)); ++bufat;
-        const string &ts = arg_list[value[i].metric];
-        const char* argname = ts.c_str();
-        size_t sz = ts.length();
-        while (is_useless(*argname)) ++argname, --sz;
-        memcpy(bufat, argname, sz);
-        bufat += sz;
-      }
-      else {
-        const string& argname = arg_list[value[i].metric];
-        memcpy(bufat, argname.c_str(), argname.length());
-        bufat += argname.length();
-      }
-      last_was_arg = true;
-    }
-    else {
-      last_was_arg = false;
-      dbg_assert(value[i].metric > 0);
-      if (value[i].metric == 1 and *value[i].data == '#') {
-        *bufat++ = '"';
-        dbg_assert(value[i+1].is_arg /* This should be guaranteed by the preparser. */);
-        for (const char* bi = arg_list[value[++i].metric].c_str(); *bi; bi++) {
-          if (*bi == '\n') { *bufat++ = '\\', *bufat++ = 'n'; continue; }
-          if (*bi == '\\') { *bufat++ = '\\', *bufat++ = '\\'; continue; }
-          if (*bi == '\r') { *bufat++ = '\\', *bufat++ = 'r'; continue; }
-          *bufat++ = *bi;
+    // -------------------------------------------------------------------------
+    // -- Handle argument names, VA_LIST, VA_OPT. ------------------------------
+    // -------------------------------------------------------------------------
+    if (tokens[i].type == TT_IDENTIFIER) {
+      auto found = params_by_name.find(tokens[i].content.view());
+      size_t arg_num = 0;
+      if (found == params_by_name.end()) {
+        if (tokens[i].content.view() == "__VA_OPT__") {
+          if (e != i) res.push_back(FuncComponent::TokenSpan{e, i});
+          res.push_back(FuncComponent::VAOpt{});
+          e = i + 1;
+        } else if (tokens[i].content.view() == "__VA_ARGS__") {
+          arg_num = params.size() - 1;
+        } else {
+          continue;
         }
-        *bufat++ = '"';
+      } else {
+        arg_num = found->second;
+      }
+      if (e != i) res.push_back(FuncComponent::TokenSpan{e, i});
+      // Check if either neighboring token is CONCAT.
+      // We already know if the previous was CONCAT, because we'll have
+      // a PASTE at the end of our result vector. We must still look ahead.
+      size_t j = i;  // First, find next non-whitespace token.
+      while (++j < tokens.size() && tokens[j].preprocesses_away());
+      // If the next meaningful token is CONCAT, or our last operation is
+      // PASTE, we use the raw argument token vector.
+      if ((j < tokens.size() && tokens[j].type == TTM_CONCAT) ||
+          (!res.empty() && res.back().tag == FuncComponent::PASTE)) {
+        res.push_back(FuncComponent::RawArgument{arg_num});
+      } else {
+        res.push_back(FuncComponent::ExpandedArgument{arg_num});
+      }
+      e = i + 1;
+    } else if (tokens[i].type == TTM_TOSTRING) {
+      size_t j = i;
+      while (++j < tokens.size() && tokens[j].preprocesses_away());
+      if (j >= tokens.size() || tokens[j].type != TT_IDENTIFIER) {
+        herr->error(tokens[i], "# must be followed by a parameter name");
         continue;
       }
-      memcpy(bufat, value[i].data, value[i].metric);
-      bufat += value[i].metric;
+      if (e != i) res.push_back(FuncComponent::TokenSpan{e, i});
+      i = j;
+      auto found = params_by_name.find(tokens[i].content.view());
+      if (found == params_by_name.end()) {
+        herr->error(tokens[i])
+            << "# must be followed by a parameter name; "
+            << tokens[i].content.toString() << " is not a parameter";
+        continue;
+      }
+      res.push_back(FuncComponent::Stringify{found->second});
+      e = i + 1;
     }
-  *bufat = 0;
-  dest = buf, destend = bufat;
-  return true;
+  }
+  if (e < tokens.size())
+    res.push_back(FuncComponent::TokenSpan{e, tokens.size()});
+  return res;
+}
+
+static token_t paste_tokens(
+    const token_t &left, const token_t &right, ErrorHandler *herr) {
+  string buf = left.content.toString() + right.content.toString();
+  llreader read("token concatenation", buf, false);
+  token_t res = read_token(read, herr);
+  if (res.type == TT_INVALID || res.type == TT_ENDOFCODE || !read.eof()) {
+    herr->error(left) << "Concatenation of " << left << " and " << right
+                      << " does not yield a coherent token (got "
+                      << res << ")";
+  }
+  return res;
+}
+
+token_vector macro_type::evaluate_concats(const token_vector &replacement_list,
+                                          ErrorHandler *herr) {
+  token_vector res;
+  res.reserve(replacement_list.size());
+  for (size_t i = 0; i < replacement_list.size(); ++i) {
+    if (replacement_list[i].type == TTM_CONCAT) {
+      const size_t cat_at = i;
+      while (++i < replacement_list.size() &&
+             replacement_list[i].preprocesses_away());
+      while (!res.empty() && res.back().preprocesses_away()) res.pop_back();
+      if (i >= replacement_list.size() || res.empty()) {
+        herr->error(replacement_list[cat_at], kConcatenationError);
+        break;
+      }
+      res.back() = paste_tokens(res.back(), replacement_list[i], herr);
+    } else {
+      res.push_back(replacement_list[i]);
+    }
+  }
+  return res;
+}
+
+static void append_or_paste(token_vector &dest,
+                            token_vector::const_iterator begin,
+                            token_vector::const_iterator end,
+                            bool paste, ErrorHandler *herr) {
+  if (begin == end) return;
+  if (paste) {
+    while (!dest.empty() && dest.back().preprocesses_away()) dest.pop_back();
+    while (begin != end && begin->preprocesses_away()) ++begin;
+    if (!dest.empty() && begin != end) {
+      token_t &left = dest.back();
+      left = paste_tokens(left, *begin++, herr);
+    }
+  }
+  dest.insert(dest.end(), begin, end);
+}
+
+token_vector macro_type::substitute_and_unroll(
+    const vector<token_vector> &args, const vector<token_vector> &args_evald,
+    ErrorContext errc) const {
+  token_vector res;
+  bool paste_next = false;
+  if (args.size() < params.size()) {
+    if (!is_variadic || args.size() + 1 < params.size()) {
+      errc.error() << "Too few arguments to macro " << NameAndPrototype()
+                   << ": wanted " << params.size() << ", got " << args.size();
+    }
+  }
+  if (args.size() > params.size()) {
+    if (!is_variadic) {
+      errc.error() << "Too many arguments to macro " << NameAndPrototype()
+                   << ": wanted " << params.size() << ", got " << args.size();
+    } else {
+      errc.error("Internal error: variadic macro passed too many arguments");
+    }
+  }
+  // Errors from here on out will concern tokens.
+  ErrorHandler *herr = errc.get_herr();
+  for (const FuncComponent &part : parts) {
+    switch (part.tag) {
+      case FuncComponent::TOKEN_SPAN:
+        append_or_paste(res, raw_value.begin() + part.token_span.begin,
+                             raw_value.begin() + part.token_span.end,
+                        paste_next, herr);
+        paste_next = false;
+        break;
+      case FuncComponent::RAW_ARGUMENT:
+      case FuncComponent::EXPANDED_ARGUMENT:
+      case FuncComponent::STRINGIFY: {
+        size_t ind = part.raw_expanded_or_stringify_argument.index;
+        if (ind >= args.size()) {
+          if (ind >= params.size()) {
+            errc.error() << "Internal error: "
+                << "Macro function built with bad argument references. Index "
+                << ind << " out of bounds (only " << params.size()
+                << " params defined).";
+            paste_next = false;
+            continue;
+          } else {
+            paste_next = false;
+            continue;
+          }
+        }
+        if (part.tag == FuncComponent::STRINGIFY) {
+          string str;
+          for (const token_t &tok : args[ind])
+            str += tok.content.toString();
+          str = quote(str);
+          const string &name_str = params[ind];
+          token_vector vec{token_t(TT_STRINGLITERAL, name_str, 0, 0, std::move(str))};
+          append_or_paste(res, vec.begin(), vec.end(), paste_next, herr);
+          paste_next = false;
+          break;
+        }
+        const token_vector &vec =
+            part.tag == FuncComponent::EXPANDED_ARGUMENT
+                ? args_evald[ind] : args[ind];
+        append_or_paste(res, vec.begin(), vec.end(), paste_next, herr);
+        paste_next = false;
+        break;
+      }
+      case FuncComponent::PASTE:
+        paste_next = true;
+        break;
+      case FuncComponent::VA_OPT: {
+        token_vector opt;
+        if (args.size() == params.size() + 1 && !args[params.size()].empty()) {
+          opt.push_back(token_t(TT_COMMA, "__VA_OPT__", 0, 0, ",", 1));
+        } else {
+          token_vector empty;
+          append_or_paste(res, empty.begin(), empty.end(), paste_next, herr);
+        }
+        break;
+      }
+      default:
+        errc.error("Internal error: Macro function component unknown...");
+    }
+  }
+  return res;
 }

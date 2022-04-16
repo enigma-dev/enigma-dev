@@ -11,9 +11,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -24,7 +24,6 @@
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
 #include <cstdio>
-using namespace jdip;
 using namespace jdi;
 
 #define  c_file // Makes the code look prettier without making doxygen bitch
@@ -36,8 +35,8 @@ using namespace jdi;
   variety of memory constructs an llreader may actually represent, that
   isn't an option here.
 **/
-token_t jdip::context_parser::read_next_token(definition_scope *scope)
+token_t jdi::context_parser::read_next_token(definition_scope *scope)
 {
-  return lex->get_token_in_scope(scope, herr);
+  return lex->get_token_in_scope(scope);
 }
 

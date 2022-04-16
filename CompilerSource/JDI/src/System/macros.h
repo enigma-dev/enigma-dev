@@ -18,9 +18,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -29,151 +29,150 @@
 #ifndef _MACROS__H
 #define _MACROS__H
 
-namespace jdip {
+namespace jdi {
   struct macro_type;
-  struct macro_scalar;
-  struct macro_function;
 }
 
+#include <map>
+#include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <General/llreader.h>
 #include <API/error_reporting.h>
 #include <System/token.h>
 
-namespace jdip {
+namespace jdi {
   using std::string;
+  using std::string_view;
   using std::vector;
-  using namespace jdi;
   
   /**
     @struct macro_type
     @brief  A generic structure representing a macro in memory.
     
-    This is the base class beneath \c macro_scalar and \c macro_function. It should not
-    be instantiated purely, as it does not contain any accessible value; its only purpose
-    is for storing different types of macros together. \
+    This is the base class beneath \c macro_scalar and \c macro_function.
+    It should not be instantiated purely, as it does not contain any accessible
+    value; its only purpose is for storing different types of macros together.
   **/
   struct macro_type {
     /** 
       Argument count, or -1 if not a function.
       Hence, a value of -1 implies that this is an instance of macro_scalar.
       Otherwise, this is an instance of macro_function.
-      If this value is greater than the size of the argument vector in the macro_function, then the function is variadic.
+      If this value is greater than the size of the argument vector in the
+      macro_function, then the function is variadic.
     **/
-    const int argc;
-    /// Macros should not be edited, only replaced, and therefore are easy to copy by reference; this tells how many references are made to this macro.
-    mutable unsigned refc;
-    /// A copy of the name of this macro; std::string will take care of the aliasing.
+    const bool is_function, is_variadic;
+    /// A copy of the name of this macro.
     string name;
-    
-    /// Release a macro
-    static void free(const macro_type* whom);
-    
+    /// A copy of the parameter list of this macro.
+    vector<string> params;
+
+    /// The definiens of this macro, as a series of preprocessor tokens.
+    token_vector raw_value;
+    /// For object-like macros, a copy of raw_value with any CONCATs evaluated.
+    token_vector optimized_value;
+
+    /// Caches meaning for chunks of the replacement list of macro functions.
+    struct FuncComponent {
+      enum TAG {
+        TOKEN_SPAN = 1,
+        RAW_ARGUMENT,
+        EXPANDED_ARGUMENT,
+        PASTE,
+        STRINGIFY,
+        VA_OPT
+      };
+      struct TokenSpan {
+        size_t begin, end;
+      };
+      struct Argument {
+        size_t index;
+      };
+      struct RawArgument : Argument {};
+      struct ExpandedArgument : Argument {};
+      struct Stringify : Argument {};
+      struct Paste {};
+      struct VAOpt {};
+
+      TAG tag;
+      union {
+        TokenSpan token_span;
+        Argument raw_expanded_or_stringify_argument;
+        RawArgument raw_argument;
+        ExpandedArgument expanded_argument;
+        Stringify stringify;
+      };
+
+      FuncComponent(TokenSpan span):
+          tag(TOKEN_SPAN), token_span(span) {}
+      FuncComponent(RawArgument arg_index):
+          tag(RAW_ARGUMENT), raw_argument(arg_index) {}
+      FuncComponent(ExpandedArgument arg_index):
+          tag(EXPANDED_ARGUMENT), expanded_argument(arg_index) {}
+      FuncComponent(Stringify arg_index):
+          tag(STRINGIFY), stringify(arg_index) {}
+      FuncComponent(Paste):  tag(PASTE)   {}
+      FuncComponent(VAOpt):  tag(VA_OPT)  {}
+    };
+
+    /// Semantic cache of the replacement list of our function-like macro.
+    vector<FuncComponent> parts;
+
+    /// Build the components vector from the given value vector.
+    static vector<FuncComponent>
+        componentize(const token_vector &tokens, const vector<string> &params,
+                     ErrorHandler *herr);
+
+    /// Expand this macro function, given arguments.
+    token_vector substitute_and_unroll(const vector<token_vector> &args,
+                                       const vector<token_vector> &args_evald,
+                                       ErrorContext errc) const;
+
+    /// Handle concatenations (##) in replacement lists for object-like macros.
+    static token_vector evaluate_concats(const token_vector &replacement_list,
+                                         ErrorHandler *herr);
+
     /// Convert this macro to a string
     string toString() const;
+    /// Returns the name of this macro, including the parameter list for
+    /// function-like macros.
+    string NameAndPrototype() const;
+    
+    /// Default constructor; defines an object-like macro with the given value.
+    macro_type(const string &n, vector<token_t> &&definiens, ErrorHandler *h):
+        is_function(false), is_variadic(false), name(n), params(),
+        raw_value(std::move(definiens)),
+        optimized_value(evaluate_concats(raw_value, h)) {}
 
-    // Generate a string with the unexpanded value of this macro.
-    string valueString() const;
-    
-    bool is_function() const { return argc >= 0; }
-    bool is_variadic() const;
-    
-    protected:
-      /**
-        The macro_type constructor is used to set the argument count or flag it inactive.
-        As macro_type should never be instantiated purely, its constructor is protected. Modifying
-        the parameter count could cause failure to recognize the type of the current macro.
-        @see argc
-      **/
-      macro_type(string n, int argc);
-      /// The base destructor of macro_type does not do anything to free memebers: DO NOT INVOKE IT!
-      /// Use macro_type::free instead.
-      ~macro_type();
-  };
-  
-  /**
-    @struct macro_scalar
-    @brief  A structure representing a macro substitution in memory.
-  **/
-  struct macro_scalar: macro_type {
-    string value; ///< The definiens of this macro.
-    macro_scalar(string n, string val=""); ///< The default constructor, taking an optional value parameter.
-    ~macro_scalar(); ///< The macro_scalar destructor is only for debugging purposes.
-  };
-  
-  /**
-    @struct macro_function
-    @brief  A structure representing a macro function in memory.
-  **/
-  struct macro_function: macro_type {
-    /// A structure, short for "macro value chunk," which contains either a string or an argument number.
-    struct mv_chunk {
-      char* data; ///< A pointer to the string value of this chunk, if it has one.
-      size_t metric; ///< The argument number if we are an argument, or the length of data otherwise.
-      bool is_arg; ///< True if we are an argument number.
-      mv_chunk(const char* str, size_t start, size_t lenth); ///< Construct a new macro value chunk from a substring
-      mv_chunk(char* data_buf, size_t length); ///< Construct a new macro value chunk as data, with a length, consuming data.
-      mv_chunk(size_t argnum); ///< Construct a new macro value chunk as a reference to the value of a parameter with the given index
-      mv_chunk(); ///< Default constructor; do not use. Created to appease the STL.
-      string toString(macro_function *mf); ///< For debugging purposes, convert to a string.
-    };
-    
-    /** The expanded value of this macro.
-        
-        @section Convention
-        
-        The definiens of this macro must be stored expanded such that each used parameter is given its own element.
-        For example, given #define vertex_x(a,b,c) ((-(b))/(2*(a))), the value member will be expanded as follows:
-        
-          {   "((-(",   "b",   "))/(2*(",   "a",   ")))"   }.
-        
-        Use of the concatenation operator, "##", will be automatically accounted for, such that the definiens "a##b=c"
-        will be expanded as such:
-        
-          {   "a",    "b",    "=",   "c"   }
-        
-        The string operator, #, will be handled by appending the singleton string "#" to the vector, followed by
-        the name of the parameter. This is the only special case which the imploding function must implement.
-        
-        By this convention, evaluating a macro function is as simple as unloading the argument-value pairs into a
-        map and iterating the value vector, substituting value[i] with map[value[i]] where defined.
-    **/
-    vector<mv_chunk> value;
-    vector<string> args; //!< The names of each argument.
-    
-    /// Default constructor; construct a zero-parameter macro function with the given value, or an empty value if none is specified.
-    macro_function(string n, string val="");
     /** Construct a macro function taking the arguments in arg_list.
         This function parses the given value based on the argument list.
+        @param name_     The name of this macro.
         @param arg_list  Contains the arguments to be copied in.
-        @param value     The value that will be assigned to this macro function. 
-                         The constructor will automatically parse and expand this value according to convention.
-        @param variadic  Determines if an additional parameter should be created to store all excess arguments.
+        @param variadic  Determines if an additional parameter should be created
+                         to store all excess arguments.
+        @param definiens The value that will be assigned to this macro function. 
+                         The constructor will automatically parse and expand
+                         this value according to convention.
         @param herr      The error handler to receive any errors.
         @note
-          If \p arg_list is empty, and \p variadic is false, the behavior is the same as the default constructor. 
+          If \p arg_list is empty, and \p variadic is false, the behavior is the
+          same as the default constructor. 
     **/
-    macro_function(string n, const vector<string> &arg_list, string value="", bool variadic=0, error_handler *herr = def_error_handler);
+    macro_type(string_view name_, vector<string> &&arg_list, bool variadic,
+               vector<token_t> &&definiens, ErrorHandler *herr):
+        is_function(true), is_variadic(variadic), name(name_),
+        params(std::move(arg_list)), raw_value(std::move(definiens)),
+        parts(componentize(raw_value, params, herr)) {}
     
-    /** An internal function used to parse the definiens of a macro into a vector for collapse at eval-time.
-        Saves big on CPU when evaluating a function many times.
-        @see jdi::macro_function::value
-    **/
-    void preparse(string definiens, error_handler *herr);
-    
-    /** Parse an argument vector into a string. 
-        @param arg_list  Contains the arguments to be copied in.
-        @param dest      The char* to direct at the buffer. You are responsible for freeing this buffer. [out]
-        @param destend   The char* to direct at the end of the buffer. [out]
-        @param errtok    Dummy token for error reporting coordination.
-        @param herr      The error handler to receive any errors.
-    **/
-    bool parse(vector<string> &arg_list, char* &dest, char* &destend, token_t errtok, error_handler *herr = def_error_handler) const;
-    
-    /// Big surprise: The macro_function destructor also does nothing.
-    ~macro_function();
+    ~macro_type() {}
   };
   
+  /** Map type used for storing macros. Sharing reduces copy times when cloning
+      the base context. It also makes destruction automatic. */
+  typedef std::map<string, std::shared_ptr<const jdi::macro_type>> macro_map;
+  typedef macro_map::iterator macro_iter; ///< Iterator type for macro maps.
+  typedef macro_map::const_iterator macro_iter_c; ///< Const iterator type for macro maps.
 }
 #endif

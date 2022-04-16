@@ -7,7 +7,7 @@
 
 #include <string>
 
-typedef set<string, std::less<>> NameSet;
+typedef std::set<string, std::less<>> NameSet;
 
 // The main idea here is that ENIGMA's EDL can be pretty language-agnostic,
 // despite inheriting some of C++'s traits. A language frontend tells ENIGMA
