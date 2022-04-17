@@ -294,6 +294,9 @@ struct definition_scope: definition {
   /// Shortcut to an iterator type for \c defmap.
   /// This iterator is **NOT INVALIDATED** by map resizes!
   typedef defmap::iterator defiter;
+  /// Shortcut to an iterator type for \c defrefmap.
+  /// This iterator is **NOT INVALIDATED** by map resizes!
+  typedef defrefmap::iterator defrefiter;
   /// Shortcut to a constant iterator type for \c defmap.
   /// This iterator is **NOT INVALIDATED** by map resizes!
   typedef defmap::const_iterator defiter_c;
