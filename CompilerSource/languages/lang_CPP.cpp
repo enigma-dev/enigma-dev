@@ -83,93 +83,93 @@ namespace {
  * as big string blobs, though (and pre-segmented string blobs).
 
 // taking content here is a hack; old JDI uses gloss token types instead of one symbol per token
-enigma::parsing::TokenType TranslateTokenType(jdip::token_t token,
+enigma::parsing::TokenType TranslateTokenType(jdi::token_t token,
                                               std::string_view content) {
   using enigma::parsing::TokenType;
   switch (token.type) {
-    case jdip::TT_DECFLAG:       return TokenType::TT_TYPE_NAME;
-    case jdip::TT_DECLARATOR:    return TokenType::TT_TYPE_NAME;
-    case jdip::TT_CLASS:         return TokenType::TT_CLASS;
-    case jdip::TT_STRUCT:        return TokenType::TT_STRUCT;
+    case jdi::TT_DECFLAG:       return TokenType::TT_TYPE_NAME;
+    case jdi::TT_DECLARATOR:    return TokenType::TT_TYPE_NAME;
+    case jdi::TT_CLASS:         return TokenType::TT_CLASS;
+    case jdi::TT_STRUCT:        return TokenType::TT_STRUCT;
 
-    case jdip::TT_IDENTIFIER:    return TokenType::TT_VARNAME;
-    case jdip::TT_DEFINITION:    return TokenType::TT_VARNAME;
-    case jdip::TT_TEMPLATE:      return TokenType::TT_ERROR;
-    case jdip::TT_TYPENAME:      return TokenType::TT_ERROR;
-    case jdip::TT_TYPEDEF:       return TokenType::TT_ERROR;
-    case jdip::TT_USING:         return TokenType::TT_ERROR;
-    case jdip::TT_PUBLIC:        return TokenType::TT_ERROR;
-    case jdip::TT_PRIVATE:       return TokenType::TT_ERROR;
-    case jdip::TT_PROTECTED:     return TokenType::TT_ERROR;
-    case jdip::TT_FRIEND:        return TokenType::TT_ERROR;
-    case jdip::TT_COLON:         return TokenType::TT_COLON;
-    case jdip::TT_SCOPE:         return TokenType::TT_SCOPEACCESS;
+    case jdi::TT_IDENTIFIER:    return TokenType::TT_VARNAME;
+    case jdi::TT_DEFINITION:    return TokenType::TT_VARNAME;
+    case jdi::TT_TEMPLATE:      return TokenType::TT_ERROR;
+    case jdi::TT_TYPENAME:      return TokenType::TT_ERROR;
+    case jdi::TT_TYPEDEF:       return TokenType::TT_ERROR;
+    case jdi::TT_USING:         return TokenType::TT_ERROR;
+    case jdi::TT_PUBLIC:        return TokenType::TT_ERROR;
+    case jdi::TT_PRIVATE:       return TokenType::TT_ERROR;
+    case jdi::TT_PROTECTED:     return TokenType::TT_ERROR;
+    case jdi::TT_FRIEND:        return TokenType::TT_ERROR;
+    case jdi::TT_COLON:         return TokenType::TT_COLON;
+    case jdi::TT_SCOPE:         return TokenType::TT_SCOPEACCESS;
 
-    case jdip::TT_LEFTPARENTH:   return TokenType::TT_BEGINPARENTH;
-    case jdip::TT_RIGHTPARENTH:  return TokenType::TT_ENDPARENTH;
-    case jdip::TT_LEFTBRACKET:   return TokenType::TT_BEGINBRACKET;
-    case jdip::TT_RIGHTBRACKET:  return TokenType::TT_ENDBRACKET;
-    case jdip::TT_LEFTBRACE:     return TokenType::TT_BEGINBRACE;
-    case jdip::TT_RIGHTBRACE:    return TokenType::TT_ENDBRACE;
-    case jdip::TT_LESSTHAN:      return TokenType::TT_LESS;
-    case jdip::TT_GREATERTHAN:   return TokenType::TT_GREATER;
-    case jdip::TT_TILDE:         return TokenType::TT_TILDE;
-    case jdip::TT_OPERATOR:      return enigma::parsing::Lexer::LookUpOperator(content);
-    case jdip::TT_COMMA:         return TokenType::TT_COMMA;
-    case jdip::TT_SEMICOLON:     return TokenType::TT_SEMICOLON;
-    case jdip::TT_STRINGLITERAL: return TokenType::TT_STRINGLIT;
-    case jdip::TT_CHARLITERAL:   return TokenType::TT_CHARLIT;
-    case jdip::TT_DECLITERAL:    return TokenType::TT_DECLITERAL;
-    case jdip::TT_HEXLITERAL:    return TokenType::TT_HEXLITERAL;
-    case jdip::TT_OCTLITERAL:    return TokenType::TT_OCTLITERAL;
-    case jdip::TTM_CONCAT:       return TokenType::TTM_CONCAT;
-    case jdip::TTM_TOSTRING:     return TokenType::TTM_STRINGIFY;
-    case jdip::TT_NEW:           return TokenType::TT_S_NEW;
-    case jdip::TT_DELETE:        return TokenType::TT_S_DELETE;
-    case jdip::TT_ENDOFCODE:     return TokenType::TT_ENDOFCODE;
+    case jdi::TT_LEFTPARENTH:   return TokenType::TT_BEGINPARENTH;
+    case jdi::TT_RIGHTPARENTH:  return TokenType::TT_ENDPARENTH;
+    case jdi::TT_LEFTBRACKET:   return TokenType::TT_BEGINBRACKET;
+    case jdi::TT_RIGHTBRACKET:  return TokenType::TT_ENDBRACKET;
+    case jdi::TT_LEFTBRACE:     return TokenType::TT_BEGINBRACE;
+    case jdi::TT_RIGHTBRACE:    return TokenType::TT_ENDBRACE;
+    case jdi::TT_LESSTHAN:      return TokenType::TT_LESS;
+    case jdi::TT_GREATERTHAN:   return TokenType::TT_GREATER;
+    case jdi::TT_TILDE:         return TokenType::TT_TILDE;
+    case jdi::TT_OPERATOR:      return enigma::parsing::Lexer::LookUpOperator(content);
+    case jdi::TT_COMMA:         return TokenType::TT_COMMA;
+    case jdi::TT_SEMICOLON:     return TokenType::TT_SEMICOLON;
+    case jdi::TT_STRINGLITERAL: return TokenType::TT_STRINGLIT;
+    case jdi::TT_CHARLITERAL:   return TokenType::TT_CHARLIT;
+    case jdi::TT_DECLITERAL:    return TokenType::TT_DECLITERAL;
+    case jdi::TT_HEXLITERAL:    return TokenType::TT_HEXLITERAL;
+    case jdi::TT_OCTLITERAL:    return TokenType::TT_OCTLITERAL;
+    case jdi::TTM_CONCAT:       return TokenType::TTM_CONCAT;
+    case jdi::TTM_TOSTRING:     return TokenType::TTM_STRINGIFY;
+    case jdi::TT_NEW:           return TokenType::TT_S_NEW;
+    case jdi::TT_DELETE:        return TokenType::TT_S_DELETE;
+    case jdi::TT_ENDOFCODE:     return TokenType::TT_ENDOFCODE;
 
     // ...JDI doesn't actually do these, right now.
-    case jdip::TT_IF:         return TokenType::TT_S_IF;
-    case jdip::TT_THEN:       return TokenType::TT_S_THEN;
-    case jdip::TT_ELSE:       return TokenType::TT_S_ELSE;
-    case jdip::TT_REPEAT:     return TokenType::TT_S_REPEAT;
-    case jdip::TT_DO:         return TokenType::TT_S_DO;
-    case jdip::TT_WHILE:      return TokenType::TT_S_WHILE;
-    case jdip::TT_UNTIL:      return TokenType::TT_S_UNTIL;
-    case jdip::TT_FOR:        return TokenType::TT_S_FOR;
-    case jdip::TT_SWITCH:     return TokenType::TT_S_SWITCH;
-    case jdip::TT_CASE:       return TokenType::TT_S_CASE;
-    case jdip::TT_DEFAULT:    return TokenType::TT_S_DEFAULT;
-    case jdip::TT_BREAK:      return TokenType::TT_BREAK;
-    case jdip::TT_CONTINUE:   return TokenType::TT_CONTINUE;
-    case jdip::TT_RETURN:     return TokenType::TT_RETURN;
-    case jdip::TT_WITH:       return TokenType::TT_S_WITH;
-    case jdip::TT_GLOBAL:     return TokenType::TT_GLOBAL;
-    case jdip::TT_LOCAL:      return TokenType::TT_LOCAL;
+    case jdi::TT_IF:         return TokenType::TT_S_IF;
+    case jdi::TT_THEN:       return TokenType::TT_S_THEN;
+    case jdi::TT_ELSE:       return TokenType::TT_S_ELSE;
+    case jdi::TT_REPEAT:     return TokenType::TT_S_REPEAT;
+    case jdi::TT_DO:         return TokenType::TT_S_DO;
+    case jdi::TT_WHILE:      return TokenType::TT_S_WHILE;
+    case jdi::TT_UNTIL:      return TokenType::TT_S_UNTIL;
+    case jdi::TT_FOR:        return TokenType::TT_S_FOR;
+    case jdi::TT_SWITCH:     return TokenType::TT_S_SWITCH;
+    case jdi::TT_CASE:       return TokenType::TT_S_CASE;
+    case jdi::TT_DEFAULT:    return TokenType::TT_S_DEFAULT;
+    case jdi::TT_BREAK:      return TokenType::TT_BREAK;
+    case jdi::TT_CONTINUE:   return TokenType::TT_CONTINUE;
+    case jdi::TT_RETURN:     return TokenType::TT_RETURN;
+    case jdi::TT_WITH:       return TokenType::TT_S_WITH;
+    case jdi::TT_GLOBAL:     return TokenType::TT_GLOBAL;
+    case jdi::TT_LOCAL:      return TokenType::TT_LOCAL;
 
-    case jdip::TT_ENUM:       case jdip::TT_UNION:       case jdip::TT_NAMESPACE:
-    case jdip::TT_EXTERN:     case jdip::TT_ASM:         case jdip::TT_OPERATORKW:
-    case jdip::TT_CONST_CAST: case jdip::TT_STATIC_CAST: case jdip::TT_DYNAMIC_CAST: case jdip::TT_REINTERPRET_CAST:
-    case jdip::TT_ELLIPSIS:   case jdip::TT_MEMBEROF:
-    case jdip::TT_SIZEOF:     case jdip::TT_ISEMPTY:
-    case jdip::TT_ALIGNAS:    case jdip::TT_ALIGNOF:
-    case jdip::TT_DECLTYPE:   case jdip::TT_TYPEID:
-    case jdip::TT_AUTO:       case jdip::TT_CONSTEXPR:
-    case jdip::TT_TRY:        case jdip::TT_CATCH:     case jdip::TT_NOEXCEPT:
-    case jdip::TT_STATIC_ASSERT:
-    case jdip::TT_INVALID:
+    case jdi::TT_ENUM:       case jdi::TT_UNION:       case jdi::TT_NAMESPACE:
+    case jdi::TT_EXTERN:     case jdi::TT_ASM:         case jdi::TT_OPERATORKW:
+    case jdi::TT_CONST_CAST: case jdi::TT_STATIC_CAST: case jdi::TT_DYNAMIC_CAST: case jdi::TT_REINTERPRET_CAST:
+    case jdi::TT_ELLIPSIS:   case jdi::TT_MEMBEROF:
+    case jdi::TT_SIZEOF:     case jdi::TT_ISEMPTY:
+    case jdi::TT_ALIGNAS:    case jdi::TT_ALIGNOF:
+    case jdi::TT_DECLTYPE:   case jdi::TT_TYPEID:
+    case jdi::TT_AUTO:       case jdi::TT_CONSTEXPR:
+    case jdi::TT_TRY:        case jdi::TT_CATCH:     case jdi::TT_NOEXCEPT:
+    case jdi::TT_STATIC_ASSERT:
+    case jdi::TT_INVALID:
     default:
         return TokenType::TT_ERROR;
   }
 }
 */
 
-enigma::parsing::Macro TranslateMacro(const jdip::macro_type &macro,
+enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
                                       enigma::parsing::ErrorHandler *herr) {
   using namespace enigma::parsing;
-  if (macro.is_function()) {
+  if (macro.is_function) {
     std::vector<std::string> arg_list =
-        ((const jdip::macro_function*) &macro)->args;
+        ((const jdi::macro_function*) &macro)->args;
     return enigma::parsing::Macro(macro.name, std::move(arg_list),
           macro.is_variadic(), macro.valueString(), herr);
   }
@@ -251,7 +251,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   }
 
   cout << "Creating dummy primitives for old ENIGMA" << endl;
-  for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
+  for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
     main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
 
@@ -320,8 +320,8 @@ int lang_CPP::load_shared_locals() {
 }
 
 jdi::definition* lang_CPP::look_up(const string &name) const {
-  auto builtin = jdip::builtin_declarators.find(name);
-  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
+  auto builtin = jdi::builtin_declarators.find(name);
+  if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);
 }
 

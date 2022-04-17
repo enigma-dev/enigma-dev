@@ -24,7 +24,7 @@
 #include <Storage/definition.h>
 #include <languages/lang_CPP.h>
 
-using namespace jdip;
+using namespace jdi;
 
 /*
  * Visit a function overload and change minimum argument count and maximum
@@ -51,13 +51,12 @@ static void visit_overload(
  */
 static void iterate_overloads(
     definition_function* d, unsigned &min, unsigned &max, definition *varargs_t) {
-  for (map<arg_key, definition_overload*>::iterator iter = d->overloads.begin();
-       iter != d->overloads.end(); iter++) {
-    visit_overload(iter->second, min, max, varargs_t);
+  for (auto iter = d->overloads.begin(); iter != d->overloads.end(); iter++) {
+    visit_overload(iter->second.get(), min, max, varargs_t);
   }
 
-  for (definition_template* templateOverload : d->template_overloads) {
-    definition* def = templateOverload->def;
+  for (const auto &templateOverload : d->template_overloads) {
+    definition* def = templateOverload->def.get();
     if (def->flags & DEF_OVERLOAD) {
      visit_overload(static_cast<definition_overload*>(def), min, max, varargs_t);
     }
@@ -81,7 +80,7 @@ bool lang_CPP::is_variadic_function(jdi::definition *d) const {
 
 int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
   for (const auto &overload_pair : func->overloads) {
-    jdi::definition_overload *ov = overload_pair.second;
+    jdi::definition_overload *ov = overload_pair.second.get();
     const int rva = referencers_varargs_at(ov->referencers, enigma_type__varargs);
     if (rva != -1) return rva;
   }
@@ -131,7 +130,7 @@ bool lang_CPP::global_exists(string n) const {
 
 
 void lang_CPP::quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
-  scope->members[name] = new jdi::definition_typed(name,scope,type);
+  scope->members[name] = std::make_unique<jdi::definition_typed>(name,scope,type);
 }
 void lang_CPP::quickmember_script(jdi::definition_scope* scope, string name) {
   jdi::ref_stack rfs;
@@ -143,5 +142,5 @@ void lang_CPP::quickmember_script(jdi::definition_scope* scope, string name) {
     params.throw_on(p);
   }
   rfs.push_func(params);
-  scope->members[name] = new jdi::definition_function(name,enigma_type__var,scope,rfs,0,0);
+  scope->members[name] = std::make_unique<jdi::definition_function>(name,enigma_type__var,scope,rfs,0,0);
 }
