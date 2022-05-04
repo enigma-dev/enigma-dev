@@ -297,7 +297,7 @@ string create_shell_dialog(string command) {
     output.append(buffer, nRead);
   }
   pthread_cancel(thread);
-  while (output.back() == '\r' || output.back() == '\n')
+  while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
     output.pop_back();
   return output;
 }

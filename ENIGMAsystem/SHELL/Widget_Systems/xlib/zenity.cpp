@@ -110,7 +110,7 @@ static int show_message_helperfunc(string message) {
   add_escaping(message, false, "") + str_icon + str_echo;
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 static int show_question_helperfunc(string message) {
@@ -131,7 +131,7 @@ static int show_question_helperfunc(string message) {
   string("\" --icon-name=dialog-question);if [ $? = 0 ] ;then echo 1;elif [ $ans = \"Cancel\" ] ;then echo -1;else echo 0;fi");
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
@@ -161,7 +161,7 @@ static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   }
 
   string str_result = create_shell_dialog(str_command);
-  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+  if (strtod(str_result.c_str(), nullptr) == 1) exit(0);
 }
 
 class ZenityWidgets : public enigma::CommandLineWidgetEngine {
@@ -207,7 +207,7 @@ int show_attempt(string errortext) override {
   string("\" --icon-name=dialog-error);if [ $? = 0 ] ;then echo -1;else echo 0;fi");
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 string get_string(string message, string def) override {
@@ -245,181 +245,88 @@ string get_password(string message, string def) override {
 double get_integer(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(message, str_def);
-  return strtod(str_result.c_str(), NULL);
+  return strtod(str_result.c_str(), nullptr);
 }
 
 double get_passcode(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(message, str_def);
-  return strtod(str_result.c_str(), NULL);
+  return strtod(str_result.c_str(), nullptr);
 }
 
 string get_open_filename(string filter, string fname) override {
-  string str_command;
-  string str_title = "Open";
-  string str_fname = filename_name(fname);
-
-  str_command = string("ans=$(zenity ") +
-  string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
-  string result = create_shell_dialog(str_command);
-  return file_exists(result) ? result : "";
+  return get_open_filename_ext(filter, fname, "", "Open");
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) override {
-  string str_command;
+  string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
+  string str_fname = filename_name(filename_absolute(fname));
+  string str_dir = filename_absolute(dir);
+  string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
   str_command = string("ans=$(zenity ") +
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
+  add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter) + string(");echo $ans");
   string result = create_shell_dialog(str_command);
   return file_exists(result) ? result : "";
 }
 
 string get_open_filenames(string filter, string fname) override {
-  string str_command;
-  string str_title = "Open";
-  string str_fname = filename_name(fname);
-
-  str_command = string("zenity ") +
-  string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
-
-  string result = create_shell_dialog(str_command);
-  std::vector<string> stringVec = split_string(result, '\n');
-
-  bool success = true;
-  for (const string &str : stringVec) {
-    if (!file_exists(str))
-      success = false;
-  }
-
-  return success ? result : "";
+  return get_open_filenames_ext(filter, fname, "", "Open");
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) override {
-  string str_command;
+  string str_command; string pwd;
   string str_title = add_escaping(title, true, "Open");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
+  string str_fname = filename_name(filename_absolute(fname));
+  string str_dir = filename_absolute(dir);
+  string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
   str_command = string("zenity ") +
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "");
-
+  add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter);
   string result = create_shell_dialog(str_command);
   std::vector<string> stringVec = split_string(result, '\n');
-
   bool success = true;
   for (const string &str : stringVec) {
     if (!file_exists(str))
       success = false;
   }
-
   return success ? result : "";
 }
 
 string get_save_filename(string filter, string fname) override {
-  string str_command;
-  string str_title = "Save As";
-  string str_fname = filename_name(fname);
-
-  str_command = string("ans=$(zenity ") +
-  string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
-  return create_shell_dialog(str_command);
+  return get_save_filename_ext(filter, fname, "", "Save As");
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) override {
-  string str_command;
+  string str_command; string pwd;
   string str_title = add_escaping(title, true, "Save As");
-  string str_fname = filename_name(fname);
-  string str_dir = filename_path(dir);
-
-  string str_path = fname;
-  if (str_dir[0] != '\0') str_path = str_dir + str_fname;
-  str_fname = (char *)str_path.c_str();
-
+  string str_fname = filename_name(filename_absolute(fname));
+  string str_dir = filename_absolute(dir);
+  string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
   str_command = string("ans=$(zenity ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_fname, false, "") + string("\"") + add_escaping(zenity_filter(filter), false, "") + string(");echo $ans");
-
+  add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter) + string(");echo $ans");
   return create_shell_dialog(str_command);
 }
 
 string get_directory(string dname) override {
-  string str_command;
-  string str_title = "Select Directory";
-  string str_dname = dname;
-  string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
-
-  str_command = string("ans=$(zenity ") +
-  string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_dname, false, "") + str_end;
-
-  return create_shell_dialog(str_command);
+  return get_directory_alt("Select Directory", dname);
 }
 
 string get_directory_alt(string capt, string root) override {
-  string str_command;
+  string str_command; string pwd;
   string str_title = add_escaping(capt, true, "Select Directory");
   string str_dname = root;
-  string str_end = "\");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
-
+  string str_end = ");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
   str_command = string("ans=$(zenity ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
-  add_escaping(str_dname, false, "") + str_end;
-
+  add_escaping(str_dname, false, "") + string("\"") + str_end;
   return create_shell_dialog(str_command);
 }
 
 int get_color(int defcol) override {
-  string str_command;
-  string str_title = "Color";
-  string str_defcol;
-  string str_result;
-
-  int red; int green; int blue;
-  red = color_get_red(defcol);
-  green = color_get_green(defcol);
-  blue = color_get_blue(defcol);
-
-  str_defcol = string("rgb(") + std::to_string(red) + string(",") +
-  std::to_string(green) + string(",") + std::to_string(blue) + string(")");
-  str_command = string("ans=$(zenity ") +
-  string("--color-selection --show-palette --title=\"") + str_title + string("\"  --color='") +
-  str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
-
-  str_result = create_shell_dialog(str_command);
-  if (str_result == "-1") return strtod(str_result.c_str(), NULL);
-  str_result = string_replace_all(str_result, "rgba(", "");
-  str_result = string_replace_all(str_result, "rgb(", "");
-  str_result = string_replace_all(str_result, ")", "");
-  std::vector<string> stringVec = split_string(str_result, ',');
-
-  unsigned int index = 0;
-  for (const string &str : stringVec) {
-    if (index == 0) red = strtod(str.c_str(), NULL);
-    if (index == 1) green = strtod(str.c_str(), NULL);
-    if (index == 2) blue = strtod(str.c_str(), NULL);
-    index += 1;
-  }
-
-  return make_color_rgb(red, green, blue);
+  return get_color_ext(defcol, "Color");
 }
 
 int get_color_ext(int defcol, string title) override {
@@ -440,7 +347,7 @@ int get_color_ext(int defcol, string title) override {
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
   str_result = create_shell_dialog(str_command);
-  if (str_result == "-1") return strtod(str_result.c_str(), NULL);
+  if (str_result == "-1") return strtod(str_result.c_str(), nullptr);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
   str_result = string_replace_all(str_result, ")", "");
@@ -448,9 +355,9 @@ int get_color_ext(int defcol, string title) override {
 
   unsigned int index = 0;
   for (const string &str : stringVec) {
-    if (index == 0) red = strtod(str.c_str(), NULL);
-    if (index == 1) green = strtod(str.c_str(), NULL);
-    if (index == 2) blue = strtod(str.c_str(), NULL);
+    if (index == 0) red = strtod(str.c_str(), nullptr);
+    if (index == 1) green = strtod(str.c_str(), nullptr);
+    if (index == 2) blue = strtod(str.c_str(), nullptr);
     index += 1;
   }
 

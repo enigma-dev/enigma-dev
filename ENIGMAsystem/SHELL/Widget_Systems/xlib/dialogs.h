@@ -21,6 +21,10 @@
 
 #include "Platforms/xlib/XLIBwindow.h"
 
+#include "Universal_System/fileio.h"
+
+using enigma_user::filename_absolute;
+
 namespace enigma {
 
 std::string create_shell_dialog(std::string command);
