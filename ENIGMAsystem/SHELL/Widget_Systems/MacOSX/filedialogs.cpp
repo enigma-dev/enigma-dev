@@ -30,9 +30,9 @@
 #include <vector>
 #include <map>
 
-#include "sys/stat.h"
 #include "SDL.h"
 #include "SDL_syswm.h"
+#include "filedialogs.h"
 #if defined(__APPLE__) && defined(__MACH__)
 #include "imgui_impl_sdlrenderer.h"
 #else
@@ -49,6 +49,7 @@
 #include "filesystem.hpp"
 #include "filesystem.h"
 
+#include <sys/stat.h>
 #if defined(_WIN32) 
 #include <windows.h>
 #include <dwmapi.h>
@@ -265,10 +266,29 @@ namespace {
   }
   #endif
 
+  vector<string> fonts;
   #if (defined(__MACH__) && defined(__APPLE__))
   SDL_Renderer *renderer = nullptr;
   SDL_Surface *surf = nullptr;
   #endif
+
+  void ifd_load_fonts() {
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty()) {
+      if (!fonts.empty()) fonts.clear();
+      ngs::fs::environment_set_variable("IMGUI_FONT_PATH", ngs::fs::executable_get_directory() + "fonts");
+      fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
+      while (!fonts[fonts.size() - 1].empty()) {
+        message_pump();
+        fonts.push_back(ngs::fs::directory_contents_next());
+      }
+      if (!fonts.empty()) fonts.pop_back();
+      ngs::fs::directory_contents_close();
+    } else {
+      #if !defined(IFD_SHARED_LIBRARY)
+      ngs::imgui::ifd_load_fonts();
+      #endif
+    }
+  }
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type) {
     SDL_Window *window;
@@ -289,12 +309,12 @@ namespace {
     SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #endif
     window = SDL_CreateWindow(title.c_str(), 
-    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, windowFlags);
+    SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
     #if (defined(__MACH__) && defined(__APPLE__))
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return "";
-    #endif
+    #else
     if (type == selectFolder) {
       SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::folder_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
       SDL_SetWindowIcon(window, surface);
@@ -304,6 +324,7 @@ namespace {
       SDL_SetWindowIcon(window, surface);
       SDL_FreeSurface(surface);
     }
+    #endif
     #if defined(_WIN32)
     SDL_SysWMinfo system_info;
     SDL_VERSION(&system_info.version);
@@ -331,17 +352,12 @@ namespace {
     SDL_GL_SetSwapInterval(1);
     #endif
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext(); if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty())
-    ngs::fs::environment_set_variable("IMGUI_FONT_PATH", ngs::fs::executable_get_directory() + "fonts");
+    ImGui::CreateContext(); ifd_load_fonts();
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
     ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(18));
     ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
     config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 }; 
-    vector<string> fonts; fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
-    unsigned i = 0; while (!fonts[fonts.size() - 1].empty()) { fonts.push_back(ngs::fs::directory_contents_next()); message_pump(); } 
-    while (!fonts[fonts.size() - 1].empty()) { fonts.pop_back(); message_pump(); }
-    ngs::fs::directory_contents_close(); float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
-    // for (unsigned i = 0; i < fonts.size(); i++) { if (ngs::fs::file_exists(fonts[i])) { printf("%s\n", fonts[i].c_str()); } message_pump(); }
+    float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
     for (unsigned i = 0; i < fonts.size(); i++) if (ngs::fs::file_exists(fonts[i])) io.Fonts->AddFontFromFileTTF(fonts[i].c_str(), fontSize, (!i) ? nullptr : &config, ranges);
     io.Fonts->Build(); ApplyDefaultStyle();
     #if (!defined(__MACH__) && !defined(__APPLE__))
@@ -466,6 +482,19 @@ namespace {
 
 namespace ngs::imgui {
 
+  void ifd_load_fonts() {
+    if (!fonts.empty()) fonts.clear();
+    if (!ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty()) {
+      fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
+      while (!fonts[fonts.size() - 1].empty()) {
+        message_pump();
+        fonts.push_back(ngs::fs::directory_contents_next());
+      }
+      if (!fonts.empty()) fonts.pop_back();
+      ngs::fs::directory_contents_close();
+    }
+  }
+
   string get_open_filename(string filter, string fname) {
     return file_dialog_helper(((filter.empty()) ? "*.*" : filter), fname, ngs::fs::environment_get_variable(HOME_PATH), "Open", openFile);
   }
@@ -499,3 +528,57 @@ namespace ngs::imgui {
   }
 
 } // namespace ngs::imgui
+
+#if defined(IFD_SHARED_LIBRARY)
+void ifd_load_fonts() {
+  ngs::imgui::ifd_load_fonts();
+}
+
+const char *get_open_filename(const char *filter, const char *fname) {
+  static string result;
+  result = ngs::imgui::get_open_filename(filter, fname);
+  return result.c_str();
+}
+
+const char *get_open_filename_ext(const char *filter, const char *fname, const char *dir, const char *title) {
+  static string result;
+  result = ngs::imgui::get_open_filename_ext(filter, fname, dir, title);
+  return result.c_str();
+}
+
+const char *get_open_filenames(const char *filter, const char *fname) {
+  static string result;
+  result = ngs::imgui::get_open_filenames(filter, fname);
+  return result.c_str();
+}
+
+const char *get_open_filenames_ext(const char *filter, const char *fname, const char *dir, const char *title) {
+  static string result;
+  result = ngs::imgui::get_open_filenames_ext(filter, fname, dir, title);
+  return result.c_str();
+}
+
+const char *get_save_filename(const char *filter, const char *fname) {
+  static string result;
+  result = ngs::imgui::get_save_filename(filter, fname);
+  return result.c_str();
+}
+
+const char *get_save_filename_ext(const char *filter, const char *fname, const char *dir, const char *title) {
+  static string result;
+  result = ngs::imgui::get_save_filename_ext(filter, fname, dir, title);
+  return result.c_str();
+}
+
+const char *get_directory(const char *dname) {
+  static string result;
+  result = ngs::imgui::get_directory(dname);
+  return result.c_str();
+}
+
+const char *get_directory_alt(const char *capt, const char *root) {
+  static string result;
+  result = ngs::imgui::get_directory_alt(capt, root);
+  return result.c_str();
+}
+#endif
