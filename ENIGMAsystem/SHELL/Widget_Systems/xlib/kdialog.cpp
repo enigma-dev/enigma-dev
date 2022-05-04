@@ -121,7 +121,7 @@ static int show_message_helperfunc(string message) {
   string("--title \"") + str_title + string("\";") + str_echo;
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 static int show_question_helperfunc(string message) {
@@ -142,7 +142,7 @@ static int show_question_helperfunc(string message) {
   string("x=$? ;if [ $x = 0 ] ;then echo 1;elif [ $x = 1 ] ;then echo 0;elif [ $x = 2 ] ;then echo -1;fi");
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
@@ -172,7 +172,7 @@ static void show_debug_message_helperfunc(string errortext, MESSAGE_TYPE type) {
   }
 
   string str_result = create_shell_dialog(str_command);
-  if (strtod(str_result.c_str(), NULL) == 1) exit(0);
+  if (strtod(str_result.c_str(), nullptr) == 1) exit(0);
 }
 
 class KDialogWidgets : public enigma::CommandLineWidgetEngine {
@@ -218,7 +218,7 @@ int show_attempt(string errortext) override {
   string("x=$? ;if [ $x = 0 ] ;then echo 0;else echo -1;fi");
 
   string str_result = create_shell_dialog(str_command);
-  return (int)strtod(str_result.c_str(), NULL);
+  return (int)strtod(str_result.c_str(), nullptr);
 }
 
 string get_string(string message, string def) override {
@@ -256,13 +256,13 @@ string get_password(string message, string def) override {
 double get_integer(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_string(message, str_def);
-  return strtod(str_result.c_str(), NULL);
+  return strtod(str_result.c_str(), nullptr);
 }
 
 double get_passcode(string message, double def) override {
   string str_def = remove_trailing_zeros(def);
   string str_result = get_password(message, str_def);
-  return strtod(str_result.c_str(), NULL);
+  return strtod(str_result.c_str(), nullptr);
 }
 
 string get_open_filename(string filter, string fname) override {
@@ -368,7 +368,7 @@ int get_color_ext(int defcol, string title) override {
   string("\");if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
   str_result = create_shell_dialog(str_command);
-  if (str_result == "-1") return strtod(str_result.c_str(), NULL);
+  if (str_result == "-1") return strtod(str_result.c_str(), nullptr);
   str_result = str_result.substr(1, str_result.length() - 1);
 
   unsigned int color;
