@@ -1,5 +1,7 @@
 # STIGMA Development Environment
 
+**Join our Discord:** https://discord.gg/pMwuVtyC​
+
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
 ...that actually spells "**SINGMA**", because we are not very good at coming up with acronyms...
