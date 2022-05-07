@@ -52,7 +52,7 @@
 #else
 #if defined(__APPLE__) && defined(__MACH__)
 #include <libproc.h>
-#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
 #include <sys/user.h>
 #endif
@@ -394,7 +394,7 @@ namespace ngs::fs {
       path = buffer;
       free(buffer);
     }
-    #elif defined(__FreeBSD__) || defined(__DragonFly__)
+    #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__)
     size_t length = 0;
     // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(-1)
     int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
