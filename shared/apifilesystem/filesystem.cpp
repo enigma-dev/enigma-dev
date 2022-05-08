@@ -395,9 +395,18 @@ namespace ngs::fs {
       free(buffer);
     }
     #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__)
-    size_t length = 0;
-    // CTL_KERN::KERN_PROC::KERN_PROC_PATHNAME(-1)
-    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    int mib[4]; 
+    std::size_t length = 0;
+    mib[0] = CTL_KERN;
+    #if defined(__NetBSD__)
+    mib[1] = KERN_PROC_ARGS;
+    mib[2] = getpid();
+    mib[3] = KERN_PROC_PATHNAME;
+    #else
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PATHNAME;
+    mib[3] = -1;
+    #endif
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
       path.resize(length, '\0');
       char *buffer = path.data();
@@ -406,8 +415,13 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char **buffer = nullptr; size_t length = 0; 
-    int mib[4] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    int mib[4];
+    size_t length = 0;
+    char **buffer = nullptr;  
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC_ARGS;
+    mib[2] = getpid();
+    mib[3] = KERN_PROC_ARGV; 
     if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
       if ((buffer = (char **)malloc(length))) {
         if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
