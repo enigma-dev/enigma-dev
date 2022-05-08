@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: DirectPlay
-Identifier: DirectPlay
-Description: Support for the use of obsolete mplay functions. This system is Windows only like the original functions were.
-Author: Robert B. Colton
+name: DirectPlay
+identifier: DirectPlay
+description: Support for the use of obsolete mplay functions. This system is Windows only like the original functions were.
+author: Robert B. Colton
 
-Depends: None
+depends: None
 
-Represents:
-	Build-platforms: None
+represents:
+  build-platforms: None

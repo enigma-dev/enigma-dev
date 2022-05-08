@@ -1,9 +1,9 @@
 %e-yaml
 ---
 
-Name: Cocoa Widgets
-Identifier: Cocoa
-Build-Platforms: MacOSX,  SDL
-Represents: MacOSX
-Description: Create widgets with the native Cocoa API for Mac OS X. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Cocoa_Widgets
-Author: Samuel Venable
+name: Cocoa Widgets
+identifier: Cocoa
+build-platforms: MacOSX,  SDL
+represents: MacOSX
+description: "Create widgets with the native Cocoa API for Mac OS X. License, documentation, and install instructions: https://enigma-dev.org/docs/Wiki/Dialogs#Cocoa_Widgets"
+author: Samuel Venable

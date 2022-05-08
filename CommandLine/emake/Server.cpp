@@ -3,7 +3,6 @@
 #endif
 
 #include "Server.hpp"
-#include "eyaml/eyaml.h"
 
 #include "server.grpc.pb.h"
 
@@ -11,6 +10,7 @@
 #include <grpc++/server.h>
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
+#include <yaml-cpp/yaml.h>
 
 #include <filesystem>
 #include <memory>
@@ -104,19 +104,20 @@ class CompilerServiceImpl final : public Compiler::Service {
       for (auto&& subsystem : systems.second) {
         SystemInfo* subInfo = system.add_subsystems();
 
-        std::ifstream ifabout(subsystem, std::ios_base::in);
-        if (!ifabout.is_open()) continue;
+        const YAML::Node yaml = YAML::LoadFile(subsystem);
+        if (!yaml.IsDefined()) {
+          std::cout << "Failed to load yaml: " << subsystem << std::endl;
+          continue;
+        }
 
-        ey_data about = parse_eyaml(ifabout, subsystem);
-
-        std::string name = about.get("name");
-        std::string id = about.get("identifier");
-        std::string desc = about.get("description");
-        std::string author = about.get("author");
-        std::string target = about.get("target-platform");
+        std::string name = yaml["name"].as<std::string>();
+        std::string id = yaml["identifier"].as<std::string>("");
+        std::string desc = yaml["description"].as<std::string>("");
+        std::string author = yaml["author"].as<std::string>("");
+        std::string target = yaml["target-platform"].as<std::string>("");
 
         if (id.empty())
-          id = about.get("id"); // allow alias
+          id = yaml["id"].as<std::string>(""); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
           fs::path ey(subsystem);
@@ -125,11 +126,11 @@ class CompilerServiceImpl final : public Compiler::Service {
 
         // allow author alias used by compiler descriptors
         if (author.empty())
-          author = about.get("maintainer");
+          author = yaml["maintainer"].as<std::string>("");
 
-        eyit represents = about.values.find("represents");
-        if (represents != about.values.end()) {
-          std::string repsStr = (represents->second)->data().get("build-platforms");
+        const YAML::Node represents = yaml["represents"];
+        if (represents.IsDefined()) {
+          std::string repsStr = represents["build-platforms"].as<std::string>("");
           std::stringstream ss(repsStr);
           std::string token;
           while (ss >> token) {
@@ -138,9 +139,9 @@ class CompilerServiceImpl final : public Compiler::Service {
           }
         }
 
-        eyit depends = about.values.find("depends");
-        if (depends != about.values.end()) {
-          std::string depsStr = (depends->second)->data().get("build-platforms");
+        const YAML::Node depends = yaml["depends"];
+        if (depends.IsDefined()) {
+          std::string depsStr = depends["build-platforms"].as<std::string>("");
           std::stringstream ss(depsStr);
           std::string token;
           while (ss >> token) {

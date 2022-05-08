@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: FreeType2 Font Rendering
-Identifier: ttf
-Author: fundies
-Description: Adds support for font_add using freetype
-Default: false
-Icon: ttf.png
+name: FreeType2 Font Rendering
+identifier: ttf
+author: fundies
+description: Adds support for font_add using freetype
+default: false
+icon: ttf.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

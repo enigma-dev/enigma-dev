@@ -1,7 +1,7 @@
 /**
   @file  lang_CPP.cpp
   @brief Implements much of the C++ languages adapter class.
-  
+
   @section License
     Copyright (C) 2008-2012 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
@@ -10,7 +10,7 @@
     terms of the GNU General Public License as published by the Free Software
     Foundation, version 3 of the license or any later version.
 
-    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY;
     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
     PURPOSE. See the GNU General Public License for more details.
 
@@ -19,9 +19,12 @@
 **/
 
 #include "settings.h"
+#include "languages/lang_CPP.h"
+
+#include <yaml-cpp/yaml.h>
+
 #include <ctime>
 #include <cstdio>
-#include "languages/lang_CPP.h"
 
 string lang_CPP::get_name() { return "C++"; }
 
@@ -33,9 +36,9 @@ void lang_CPP::load_extension_locals() {
   {
     if (parsed_extensions[i].implements == "")
       continue;
-    
+
     jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
-    
+
     if (!implements or !(implements->flags & jdi::DEF_SCOPE)) {
       cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
       continue;
@@ -79,20 +82,21 @@ void parser_init();
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
 {
   cout << "Parsing settings..." << endl;
-    parse_ide_settings(targetYaml);
-  
-  cout << targetYaml << endl;
-  
+
+  cout << targetYaml << std::endl;
+
+  parse_ide_settings(YAML::Load(targetYaml));
+
   cout << "Creating swap." << endl;
   delete main_context;
   main_context = new jdi::context();
-  
+
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
-  
+
   cout << "Opening ENIGMA for parse..." << endl;
-  
+
   llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
@@ -101,10 +105,10 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     res = main_context->parse_C_stream(f, "SHELLmain.cpp");
     CURRENT_TIME(te);
   }
-  
+
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
-    enigma_type__variant = d;   
+    enigma_type__variant = d;
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
     else
@@ -135,38 +139,38 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
       namespace_enigma_user = (jdi::definition_scope*) d;
     } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
-  
+
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
-    
+
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
-  } else {    
+  } else {
     cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME(ts,te) << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   }
-  
+
   cout << "Creating dummy primitives for old ENIGMA" << endl;
   for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
     main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
-  
+
   cout << "Initializing EDL Parser...\n";
-  
+
   parser_init();
-  
+
   cout << "Grabbing locals...\n";
-  
+
   load_shared_locals();  // Extensions were separated above
-  
+
   cout << "Determining build target...\n";
-  
+
   extensions::determine_target();
-  
+
   cout << " Done.\n";
-  
+
   return &ide_passback_error;
 }
 
@@ -219,4 +223,3 @@ jdi::definition* lang_CPP::look_up(const string &name) {
 
 // TODO: This could use better plumbing.
 lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
-

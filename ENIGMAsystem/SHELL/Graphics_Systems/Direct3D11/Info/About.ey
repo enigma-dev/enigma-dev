@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: Direct3D 11.0
-Identifier: Direct3D11
-Description: Native hardware accelerated rendering on Windows platforms. Requires the DirectX 11.0 End User Runtime or later in the Windows Portable ZIP, DirectX which is included with our MinGW, being Microsoft technology is also exceptionally proprietary.
-Author: Robert B. Colton
+name: Direct3D 11.0
+identifier: Direct3D11
+description: Native hardware accelerated rendering on Windows platforms. Requires the DirectX 11.0 End User Runtime or later in the Windows Portable ZIP, DirectX which is included with our MinGW, being Microsoft technology is also exceptionally proprietary.
+author: Robert B. Colton
 
-Depends:
-	Build-platforms: Windows, SDL
+depends:
+  build-platforms: Windows, SDL
   
-Represents:
-	Build-platforms: None
+represents:
+  build-platforms: None

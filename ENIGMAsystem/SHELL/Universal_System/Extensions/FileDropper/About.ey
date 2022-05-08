@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: File Dropper
-Identifier: FileDropper
-Author: Samuel Venable
-Description: Allows the developer to drag and drop files and directories onto the game window and return their full paths.
-Default: false
-Icon: FileDropper.png
+name: File Dropper
+identifier: FileDropper
+author: Samuel Venable
+description: Allows the developer to drag and drop files and directories onto the game window and return their full paths.
+default: false
+icon: FileDropper.png
 
-Depends:
-  Build-Platforms: Windows
-Dependencies: None
+depends:
+  build-platforms: Windows
+dependencies: None

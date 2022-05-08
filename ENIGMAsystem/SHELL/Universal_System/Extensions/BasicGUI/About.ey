@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Basic GUI
-Identifier: BasicGUI
-Author: Harri
-Description: Adds basic GUI functions: buttons, labels, scrollbars etc.
-Default: false
-Icon: BasicGUI.png
+name: Basic GUI
+identifier: BasicGUI
+author: Harri
+description: Adds basic GUI functions (buttons, labels, scrollbars etc.)
+default: false
+icon: BasicGUI.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

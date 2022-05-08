@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Mac OS X
-Identifier: Cocoa
-Represents:
-	Build-Platforms: MacOSX
-Description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
-Author: TGMG
+name: Mac OS X
+identifier: Cocoa
+represents:
+  build-platforms: MacOSX
+description: Run on Apple Mac OS X, or other Cocoa-enabled Apple systems.
+author: TGMG
 
-Depends:
-	Build-Platforms: MacOSX
+depends:
+  build-platforms: MacOSX

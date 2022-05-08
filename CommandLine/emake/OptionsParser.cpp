@@ -1,16 +1,16 @@
 #include "OptionsParser.hpp"
 #include "Main.hpp"
 
-#include "eyaml/eyaml.h"
 #include "strings_util.h"
 #include "ProtoYaml/proto-yaml.h"
 #include "OS_Switchboard.h"
 
-#include <filesystem>
-namespace fs = std::filesystem;
+#include <yaml-cpp/yaml.h>
 
 #include <iostream>
 #include <cctype> // std::ispace
+#include <filesystem>
+namespace fs = std::filesystem;
 
 using namespace buffers::resources;
 
@@ -78,7 +78,7 @@ inline std::string repeatedStringToDelimit(const google::protobuf::RepeatedPtrFi
   for (auto s : f) {
     ret += s + ",";
   }
-  
+
   if (!ret.empty()) ret.pop_back();
   return ret;
 }
@@ -100,12 +100,12 @@ OptionsParser::OptionsParser() : _desc("Options")
     def_workdir = "/tmp/ENIGMA/";
     def_compiler = "gcc";
   #endif
-  
+
   fs::path defaultConfig = fs::current_path()/"emake-defaults.yaml";
   if (fs::exists(defaultConfig)) _loadedSettings = egm::ReadYamlFileAs<Settings>(defaultConfig.u8string());
   const API& defAPI = _loadedSettings.api();
   const Compiler& defComp = _loadedSettings.compiler();
-  
+
   _desc.add_options()
     ("help,h", "Print help messages")
     ("list,l", "List available types, globals & functions")
@@ -166,14 +166,14 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
     opt::store(opt::command_line_parser(argc, argv)
                    .options(_desc).positional(_positional).run(),
                _rawArgs);
-               
+
     _enigmaRoot = fs::absolute(_rawArgs["enigma-root"].as<std::string>()).string();
-    
+
     if (!_enigmaRoot.empty() && _enigmaRoot.back() != '/') _enigmaRoot += "/";
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
-      
+
     if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("server") && !_rawArgs.count("output")) {
       throw std::logic_error("Option 'help', 'list', 'info', 'server', or option 'output' is required.");
     }
@@ -187,11 +187,11 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     return OPTIONS_ERROR;
   }
-  
+
   std::string config = _rawArgs["config"].as<std::string>();
   if (!config.empty()) {
     if (fs::exists(config)) _loadedSettings = egm::ReadYamlFileAs<Settings>(config);
-    else { 
+    else {
       std::cerr << "Error: Configuration file: \"" << config << "\" does not exists" << std::endl;
       return OPTIONS_ERROR;
     }
@@ -245,10 +245,10 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   std::string widgets = _rawArgs["widgets"].as<std::string>();
   std::string collision = _rawArgs["collision"].as<std::string>();
   std::string network = _rawArgs["network"].as<std::string>();
-  
+
   std::string eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string();
-  std::string codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string(); 
-  
+  std::string codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string();
+
   // Only override passed arguments if passed a configuration
   if (currentConfig != nullptr) {
     const auto &api = currentConfig->api();
@@ -259,7 +259,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
     if (api.has_target_widgets()) widgets = api.target_widgets();
     if (api.has_target_collision()) collision = api.target_collision();
     if (api.has_target_network()) network = api.target_network();
-    
+
     const auto &compilerSettings = currentConfig->compiler();
     if (compilerSettings.has_eobjs_directory()) eobjs_directory = compilerSettings.eobjs_directory();
     if (compilerSettings.has_codegen_directory()) codegen_directory = compilerSettings.codegen_directory();
@@ -267,7 +267,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
 
   // No emake flags to worry about for these
   if (currentConfig == nullptr) currentConfig = &_loadedSettings;
-  
+
   const auto &compilerSettings = currentConfig->compiler();
   int inherit_strings = compilerSettings.has_inherit_strings() ? compilerSettings.inherit_strings() : 0;
   int inherit_escapes = compilerSettings.inherit_escapes() ? compilerSettings.inherit_escapes() : 0;
@@ -295,6 +295,8 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "inherit-increment-from: " + std::to_string(inherit_increment) + "\n";
   yaml += "inherit-objects: " + std::string(inherit_objects ? "true" : "false") + "\n";
   yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
+  yaml += "compliance-mode: 65535\n";
+  yaml += "keyword-blacklist: \"\"\n";
   yaml += " \n";
   yaml += "target-audio: " + audio + "\n";
   yaml += "target-windowing: " + platform + "\n";
@@ -362,19 +364,17 @@ int OptionsParser::printInfo(const std::string &api)
 
     for (auto&& p : _api[api])
     {
-      std::ifstream ifabout(p, std::ios_base::in);
+      const YAML::Node yaml = YAML::LoadFile(p);
 
-      if (ifabout.is_open())
+      if (yaml.IsDefined())
       {
-        ey_data about = parse_eyaml(ifabout, p);
-
-        std::string name = about.get("name");
-        std::string desc = about.get("description");
-        std::string id = about.get("identifier");
-        std::string target = about.get("target-platform");
+        std::string name = yaml["name"].as<std::string>();
+        std::string desc = yaml["description"].as<std::string>("");
+        std::string id = yaml["identifier"].as<std::string>();
+        std::string target = yaml["target-platform"].as<std::string>("");
 
         if (id.empty())
-          id = about.get("id"); // allow alias
+          id = yaml["id"].as<std::string>(); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
           fs::path ey(p);
@@ -501,11 +501,10 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
 {
   auto it = std::find_if(std::begin(_api[api]), std::end(_api[api]), [target](std::string &a)
   {
-    std::ifstream ifabout(a, std::ios_base::in);
-    ey_data about = parse_eyaml(ifabout, a);
-    std::string id = about.get("identifier");
+    const YAML::Node yaml = YAML::LoadFile(a);
+    std::string id = yaml["identifier"].as<std::string>("");
     if (id.empty())
-      id = about.get("id"); // allow alias
+      id = yaml["id"].as<std::string>(""); // allow alias
     return (id == target);
   });
 

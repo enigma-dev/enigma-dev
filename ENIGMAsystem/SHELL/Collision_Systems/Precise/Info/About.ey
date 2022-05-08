@@ -1,12 +1,10 @@
 %e-yaml
 ---
 
-Name: Precise
-Identifier: Precise
-Represents: All
-Description: Collisions register using sprite image sources.
-Author: forthevin
+name: Precise
+identifier: Precise
+description: Collisions register using sprite image sources.
+author: forthevin
 
-Represents:
-	Build-platforms: All
-	
+represents:
+  build-platforms: All

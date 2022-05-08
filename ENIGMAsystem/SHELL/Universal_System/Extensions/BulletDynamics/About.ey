@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Bullet Dynamics
-Identifier: BulletDynamics
-Author: Robert
-Description: 3D physics simulation, collision detection, and real time destruction.
-Default: false
-Icon: bulletlogo.png
+name: Bullet Dynamics
+identifier: BulletDynamics
+author: Robert
+description: 3D physics simulation, collision detection, and real time destruction.
+default: false
+icon: bulletlogo.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

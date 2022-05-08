@@ -25,15 +25,8 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <list>
 
-using namespace std;
 
-#include "eyaml/eyaml.h"
 #include "general/parse_basics_old.h"
 #include "OS_Switchboard.h"
 #include "parser/object_storage.h"
@@ -43,12 +36,25 @@ using namespace std;
 #include "parse_ide_settings.h"
 #include "compiler/compile_common.h"
 #include "settings.h"
+#include "strings_util.h"
 
-inline string fc(const char* fn);
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <list>
+
+using namespace std;
+
 static void reset_ide_editables()
 {
+  string f2comp;
+  std::filesystem::path API_Switchboard = codegen_directory/"API_Switchboard.h";
+  if (std::filesystem::exists(API_Switchboard))
+    f2comp = FileToString(API_Switchboard);
+
   ofstream wto;
-  string f2comp = fc((codegen_directory/"API_Switchboard.h").u8string().c_str());
+
   string f2write = license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
@@ -61,8 +67,7 @@ static void reset_ide_editables()
     const string incg = "#include \"", impl = "/implement.h\"\n";
     f2write += "\n// Extensions selected by user\n";
     for (const auto &ext : parsed_extensions) {
-      ifstream ifabout((ext.pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout, ext.path + ext.name + "/About.ey");
+      YAML::Node about = YAML::LoadFile((enigma_root/"ENIGMAsystem/SHELL"/(ext.path + ext.name)/"About.ey").u8string());
       f2write += incg + ext.pathname + inc;
       if (ext.implements != "")
         f2write += incg + ext.pathname + impl;
@@ -70,7 +75,7 @@ static void reset_ide_editables()
 
   if (f2comp != f2write + "\n")
   {
-    wto.open((codegen_directory/"API_Switchboard.h").u8string().c_str(),ios_base::out);
+    wto.open(API_Switchboard.u8string().c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
@@ -108,19 +113,24 @@ std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
 
-void parse_ide_settings(const char* eyaml)
+void ey_cp(const YAML::Node& node, const std::string& key, std::string& sys) {
+  if (!node[key].IsDefined()) {
+    user << "ERROR! IDE has not specified a target " << key << "!" << flushl; \
+    sys = "None";
+  } else sys = node[key].as<std::string>();
+}
+
+void parse_ide_settings(const YAML::Node& yaml)
 {
-  ey_data settree = parse_eyaml_str(eyaml);
-  eyit it;
-  
   // Read settings info
-  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
-  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
-  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
-  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
-  setting::inherit_objects   = settree.get("inherit-objects").toBool();
-  switch (settree.get("compliance-mode").toInt()) {
+  setting::use_cpp_strings   = yaml["inherit-strings-from"].as<int>();
+  setting::use_cpp_escapes   = yaml["inherit-escapes-from"].as<int>();
+  setting::use_incrementals  = yaml["inherit-increment-from"].as<int>();
+  setting::use_gml_equals    = !yaml["inherit-equivalence-from"].as<int>(0); //FIXME: LGM aint passing this.
+  setting::literal_autocast  = yaml["treat-literals-as"].as<int>();
+  setting::inherit_objects   = yaml["inherit-objects"].as<bool>();
+
+  switch (yaml["compliance-mode"].as<int>()) {
     case 4:
       setting::compliance_mode = setting::COMPL_GM8;
       break;
@@ -136,18 +146,15 @@ void parse_ide_settings(const char* eyaml)
     default:
       setting::compliance_mode = setting::COMPL_STANDARD;
   }
-  setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
-  setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
+  setting::automatic_semicolons   = yaml["automatic-semicolons"].as<bool>();
+  setting::keyword_blacklist = yaml["keyword-blacklist"].as<std::string>();
 
   // Path to enigma sources
-  enigma_root = settree.get("enigma-root").toString();
-  if (enigma_root.empty()) {
-    enigma_root = ".";
-  }
+  enigma_root = yaml["enigma-root"].as<std::string>(".");
 
   // Use a platform-specific make directory.
-  eobjs_directory = settree.get("eobjs-directory").toString();
-  
+  eobjs_directory = yaml["eobjs-directory"].as<std::string>();
+
   if (eobjs_directory.empty())
   {
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
@@ -156,74 +163,33 @@ void parse_ide_settings(const char* eyaml)
     eobjs_directory = "%HOME%/.enigma/";
   #endif
   }
-  
-  codegen_directory = settree.get("codegen-directory").toString();
-  
+
+  codegen_directory = yaml["codegen-directory"].as<std::string>();
+
   if (codegen_directory.empty())
     codegen_directory = eobjs_directory;
-    
+
   eobjs_directory = escapeEnv(eobjs_directory.u8string());
   codegen_directory = escapeEnv(codegen_directory.u8string());
   enigma_root = escapeEnv(enigma_root.u8string());
-  
-  if (settree.exists("codegen-only"))
-    codegen_only = settree.get("codegen-only").toBool();
 
-  #define ey_cp(v,x,y) \
-  it = settree.find("target-" #x); \
-  if (it == settree.end()) { \
-     user << "ERROR! IDE has not specified a target " #x " " #y "!" << flushl; \
-     extensions::targetAPI.v ## Sys = "None"; \
-  } else  extensions::targetAPI.v ## Sys = eyscalar(it);
+  if (yaml["codegen-only"])
+    codegen_only = yaml["codegen-only"].as<bool>();
 
   // Get target's windowing api
-  ey_cp(window,    windowing,api)
+  ey_cp(yaml, "target-windowing", extensions::targetAPI.windowSys);
   // Get requested graphics system
-  ey_cp(graphics,  graphics,system)
+  ey_cp(yaml, "target-graphics", extensions::targetAPI.graphicsSys);
   // Get requested audio system
-  ey_cp(audio,     audio,system)
+  ey_cp(yaml, "target-audio", extensions::targetAPI.audioSys);
   // Get requested collision system
-  ey_cp(collision, collision,system)
+  ey_cp(yaml, "target-collision", extensions::targetAPI.collisionSys);
   // Get requested widget system
-  ey_cp(widget,    widget,system)
+  ey_cp(yaml, "target-widget", extensions::targetAPI.widgetSys);
   // Get requested networking system
-  ey_cp(network,   networking,system)
+  ey_cp(yaml, "target-networking", extensions::targetAPI.networkSys);
 
-  ifstream ifs; 
-  std::filesystem::path eyname = enigma_root/"ENIGMAsystem/SHELL/Platforms"/extensions::targetAPI.windowSys/"Info/About.ey";
-  ifs.open(eyname.u8string().c_str());
-  if (ifs.is_open())
-  {
-    ey_data l = parse_eyaml(ifs, eyname.u8string().c_str());
-    it = l.find("links");
-    if (it != l.end())
-      extensions::targetAPI.windowLinks = eyscalar(it);
-    ifs.close();
-  }
-  string platn = ToLower(extensions::targetAPI.windowSys);
-
-  #define eygl(fn,v) {};
-  /*{\
-    ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
-    if (ifs.is_open()) \
-    { \
-      ey_data l = parse_eyaml(ifs, eyname.c_str()); \
-      user << "Opened " << eyname << flushl; \
-      if ((it = l.find("links")) != l.end()) \
-        extensions::targetAPI.v ## Links = eyscalar(it); \
-      else \
-        user << "Links not named in " << eyname << flushl; \
-      ifs.close(); \
-    } \
-    else user << "Could not open " << eyname << ".\n"; \
-  }*/
-
-  eygl(Graphics_Systems, graphics);
-  eygl(Widget_Systems, widget);
-  eygl(Audio_Systems, audio);
-  eygl(Networking_Systems, network);
-
-  string target_compiler = settree.get("target-compiler");
+  string target_compiler = yaml["target-compiler"].as<std::string>();
   std::filesystem::path cinffile = enigma_root/"Compilers"/CURRENT_PLATFORM_NAME/(target_compiler + ".ey");
 
   const char *a = establish_bearings(cinffile.u8string().c_str());
@@ -231,8 +197,8 @@ void parse_ide_settings(const char* eyaml)
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions_last_parse.clear();
-  requested_extensions_last_parse = explode((string)settree.get("extensions"));
-  
+  requested_extensions_last_parse = explode(yaml["extensions"].as<std::string>());
+
   string sep = ": ";
   cout << "Loading extensions" << flush;
   for (const string &e : requested_extensions_last_parse) {
@@ -240,7 +206,7 @@ void parse_ide_settings(const char* eyaml)
     sep = ", ";
   }
   cout << endl;
-  
+
   extensions::parse_extensions(requested_extensions_last_parse);
   reset_ide_editables();
 }

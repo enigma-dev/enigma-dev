@@ -59,7 +59,7 @@ static std::filesystem::path lastcodegen_directory;
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{ 
+{
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -118,10 +118,10 @@ const char* establish_bearings(const char *compiler)
 
   if (!load_compiler_ey(compiler))
     return (sprintf(errbuf, "Could not open compiler descriptor `%s`.", compiler), errbuf);
-  
+
   lastbearings = compiler;
   lastcodegen_directory = codegen_directory;
-  
+
   string GCC_location;
 
   bool got_success = false;
@@ -131,7 +131,7 @@ const char* establish_bearings(const char *compiler)
   bool redir; // Whether or not to redirect the output manually
 
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
-  
+
   std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
   dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
   e_execs("make", dirs, "required-directories");
@@ -158,7 +158,7 @@ const char* establish_bearings(const char *compiler)
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc((codegen_directory/"enigma_searchdirs.txt").u8string().c_str());
+    string idirs = FileToString(codegen_directory/"enigma_searchdirs.txt");
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -173,7 +173,7 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-  
+
     jdi::builtin->add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
     jdi::builtin->add_search_directory((enigma_root/"shared").u8string().c_str());
     jdi::builtin->add_search_directory(codegen_directory.u8string().c_str());

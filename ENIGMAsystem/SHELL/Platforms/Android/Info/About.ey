@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Android
-Identifier: Android
-Represents:
-	Build-Platforms: None
-Description: Build for Android.
-Author: TGMG
+name: Android
+identifier: Android
+represents:
+  build-platforms: None
+description: Build for Android.
+author: TGMG
 
-Depends:
-	Build-Platforms: Android
+depends:
+  build-platforms: Android

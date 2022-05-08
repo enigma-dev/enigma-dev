@@ -15,82 +15,85 @@
 # YOU'RE DOING. Modifying this file CAN screw up ENIGMA's behavior.
 #
 
-Events:
-  - ID: GameStart
-    Name: "Game Start"
-    Description: "Start of the game."
-    Type: TriggerAll
+%e-yaml
+---
 
-  - ID: WindowClose
-    Name: "Window Close"
-    Description: "Window was closed."
-    Type: TriggerAll
+events:
+  - id: GameStart
+    name: "Game Start"
+    description: "Start of the game."
+    type: TriggerAll
 
-  - ID: ImageLoaded
-    Name: "Image Loaded"
-    Description: "Image finished loading."
-    Type: TriggerAll
+  - id: WindowClose
+    name: "Window Close"
+    description: "Window was closed."
+    type: TriggerAll
 
-  - ID: SoundLoaded
-    Name: "Sound Loaded"
-    Description: "Sound finished loading."
-    Type: TriggerAll
+  - id: ImageLoaded
+    name: "Image Loaded"
+    description: "Image finished loading."
+    type: TriggerAll
 
-  - ID: HTTP
-    Name: "HTTP"
-    Description: "Callback from one of the http_ functions, such as `http_post_string`."
-    Type: TriggerAll
+  - id: SoundLoaded
+    name: "Sound Loaded"
+    description: "Sound finished loading."
+    type: TriggerAll
 
-  - ID: Dialog
-    Name: "Dialog"
-    Description: "Dialog resolved"
-    Type: TriggerAll
+  - id: HTTP
+    name: "HTTP"
+    description: "Callback from one of the http_ functions, such as `http_post_string`."
+    type: TriggerAll
 
-  - ID: IAP
-    Name: "In App Purchase"
-    Description: "In-App purchase"
-    Type: TriggerAll
+  - id: Dialog
+    name: "Dialog"
+    description: "Dialog resolved"
+    type: TriggerAll
 
-  - ID: Cloud
-    Name: "Cloud"
-    Description: "Callback from one of the cloud_ functions, such as `cloud_synchronise`."
-    Type: TriggerAll
+  - id: IAP
+    name: "In App Purchase"
+    description: "In-App purchase"
+    type: TriggerAll
 
-  - ID: Networking
-    Name: "Networking"
-    Description: "Network traffic detected."
-    Type: TriggerAll
+  - id: Cloud
+    name: "Cloud"
+    description: "Callback from one of the cloud_ functions, such as `cloud_synchronise`."
+    type: TriggerAll
 
-  - ID: Steam
-    Name: "Steam"
-    Description: "Callback from one of the Steam API functions."
-    Type: TriggerAll
+  - id: Networking
+    name: "Networking"
+    description: "Network traffic detected."
+    type: TriggerAll
 
-  - ID: Social
-    Name: "Social"
-    Description: "Callback from one of the Social API functions."
-    Type: TriggerAll
+  - id: Steam
+    name: "Steam"
+    description: "Callback from one of the Steam API functions."
+    type: TriggerAll
 
-  - ID: RoomStart
-    Name: "Room Start"
-    Description: "New room loaded."
-    Type: TriggerAll
+  - id: Social
+    name: "Social"
+    description: "Callback from one of the Social API functions."
+    type: TriggerAll
 
-  - ID: Create
-    Name: "Create"
-    Description: "Instance constructor (called when the instance is first created)."
-    Type: TriggerOnce
+  - id: RoomStart
+    name: "Room Start"
+    description: "New room loaded."
+    type: TriggerAll
 
-  - ID: Destroy
-    Name: "Destroy"
-    Description: "Instance destructor (called as the instance is destroyed)."
-    Type: TriggerOnce
+  - id: Create
+    name: "Create"
+    description: "Instance constructor (called when the instance is first created)."
+    type: TriggerOnce
 
-  - ID: BeginStep
-    Name: "Begin Step"
-    Description: "The first step event executed each frame."
-    Group: "Step"
-    Constant: |
+  - id: Destroy
+    name: "Destroy"
+    description: "Instance destructor (called as the instance is destroyed)."
+    type: TriggerOnce
+
+  - id: BeginStep
+    name: "Begin Step"
+    description: "The first step event executed each frame."
+    group: "Step"
+    constant: |
       {
         xprevious = x;
         yprevious = y;
@@ -100,189 +103,189 @@ Events:
         }
       }
 
-  - ID: Alarm
-    Name: "Alarm %1"
-    Type: Stacked
-    Parameters:
+  - id: Alarm
+    name: "Alarm %1"
+    type: Stacked
+    parameters:
       - integer
-    Group: Alarm
-    SubCheck: |
+    group: Alarm
+    subcheck: |
       {
         alarm[%1] = (int) alarm[%1];
         return alarm[%1] < 0 ? false : !((int)--alarm[%1]);
       }
 
-  - ID: Keyboard
-    Name: "Keyboard %1"
-    Description: "A key was pressed or is being held."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each key.
-    Parameters:
+  - id: Keyboard
+    name: "Keyboard %1"
+    description: "A key was pressed or is being held."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each key.
+    parameters:
       - Key
-    SuperCheck: |
+    supercheck: |
       keyboard_check(%1)
 
-  - ID: KeyPressed
-    Name: "Key Pressed %1"
-    Description: "A key was pressed."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each key.
-    Parameters:
+  - id: KeyPressed
+    name: "Key Pressed %1"
+    description: "A key was pressed."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each key.
+    parameters:
       - Key
-    SuperCheck: |
+    supercheck: |
       keyboard_check_pressed(%1)
 
-  - ID: KeyReleased
-    Name: "Key Released %1"
-    Description: "A key was pressed."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each key.
-    Parameters:
+  - id: KeyReleased
+    name: "Key Released %1"
+    description: "A key was pressed."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each key.
+    parameters:
       - Key
-    SuperCheck: |
+    supercheck: |
       keyboard_check_pressed(%1)
 
-  - ID: MouseButton
-    Name: "Mouse Button %1"
-    Description: "A mouse button is pressed or held and the mouse is hovering this instance."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: MouseButton
+    name: "Mouse Button %1"
+    description: "A mouse button is pressed or held and the mouse is hovering this instance."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button(%1)
-    SubCheck: |
+    subcheck: |
       position_meeting(mouse_x, mouse_y, id)
 
-  - ID: MousePressed
-    Name: "Mouse Button Pressed %1"
-    Description: "A mouse button was pressed while hovering this instance."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: MousePressed
+    name: "Mouse Button Pressed %1"
+    description: "A mouse button was pressed while hovering this instance."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button_pressed(%1)
-    SubCheck: |
+    subcheck: |
       position_meeting(mouse_x, mouse_y, id)
 
-  - ID: MouseReleased
-    Name: "Mouse Button Released %1"
-    Description: "A mouse button was released while hovering this instance."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: MouseReleased
+    name: "Mouse Button Released %1"
+    description: "A mouse button was released while hovering this instance."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button_pressed(%1)
-    SubCheck: |
+    subcheck: |
       position_meeting(mouse_x, mouse_y, id)
 
-  - ID: GlobalMouseButton
-    Name: "Global Mouse Button %1"
-    Description: "A mouse button was pressed or is being held."
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: GlobalMouseButton
+    name: "Global Mouse Button %1"
+    description: "A mouse button was pressed or is being held."
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button(%1)
 
-  - ID: GlobalMousePressed
-    Name: "Global Mouse Button Pressed %1"
-    Description: "A mouse button was pressed."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: GlobalMousePressed
+    name: "Global Mouse Button Pressed %1"
+    description: "A mouse button was pressed."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button_pressed(%1)
 
-  - ID: GlobalMouseReleased
-    Name: "Global Mouse Button Released %1"
-    Description: "A mouse button was released."
-    Group: "Input"
-    Type: Specialized  # We want the event loop to handle checking each button.
-    Parameters:
+  - id: GlobalMouseReleased
+    name: "Global Mouse Button Released %1"
+    description: "A mouse button was released."
+    group: "Input"
+    type: Specialized  # We want the event loop to handle checking each button.
+    parameters:
       - MouseButton
-    SuperCheck: |
+    supercheck: |
       mouse_check_button_pressed(%1)
 
-  - ID: MouseWheelUp
-    Name: "Mouse Wheel Up"
-    Description: "Mouse scroll wheel was rotated upwards. See `mouse_vscrolls`."
-    SuperCheck: |
+  - id: MouseWheelUp
+    name: "Mouse Wheel Up"
+    description: "Mouse scroll wheel was rotated upwards. See `mouse_vscrolls`."
+    supercheck: |
       mouse_vscrolls > 0
 
-  - ID: MouseWheelDown
-    Name: "Mouse Wheel Down"
-    Description: "Mouse scroll wheel was rotated downwards. See `mouse_vscrolls`."
-    SuperCheck: |
+  - id: MouseWheelDown
+    name: "Mouse Wheel Down"
+    description: "Mouse scroll wheel was rotated downwards. See `mouse_vscrolls`."
+    supercheck: |
       mouse_vscrolls < 0
 
-  - ID: MouseEnterWindow
-    Name: "Mouse Enter Window"
-    Description:  "Mouse has entered the window."
-    Locals: bool $innowEnter = false;
-    SubCheck: |
+  - id: MouseEnterWindow
+    name: "Mouse Enter Window"
+    description:  "Mouse has entered the window."
+    locals: bool $innowEnter = false;
+    subcheck: |
       {
         const bool wasin = $innowEnter;
         $innowEnter = position_meeting(mouse_x, mouse_y, id);
         return !(!$innowEnter or wasin);
       }
 
-  - ID: MouseLeaveWindow
-    Name: "Mouse Leave Window"
-    Description: "Mouse has left the window."
-    Locals: |
+  - id: MouseLeaveWindow
+    name: "Mouse Leave Window"
+    description: "Mouse has left the window."
+    locals: |
       bool $innowLeave = false;
-    SubCheck: |
+    subcheck: |
       {
         const bool wasin = $innowLeave;
         $innowLeave = position_meeting(mouse_x, mouse_y, id);
         return !($innowLeave or !wasin);
       }
 
-  - ID: Step
-    Name: "Step"
-    Group: "Step"
-    Description: "Standard step event executed after begin step and input handling."
-    Constant: |
+  - id: Step
+    name: "Step"
+    group: "Step"
+    description: "Standard step event executed after begin step and input handling."
+    constant: |
       if (timeline_running && timeline_speed != 0) {
         advance_curr_timeline();
       }
 
-  - ID: LocalSweep
-    Name: "Locals sweep"
-    Description: "Internal event to update local variables."
-    Constant: |
+  - id: LocalSweep
+    name: "Locals sweep"
+    description: "Internal event to update local variables."
+    constant: |
       enigma::propagate_locals(this);
 
-  - ID: PathEnd
-    Name: "Path End"
-    Description: "Instance has reached the endpoint of a path."
-    SuperCheck: "false" # TODO: Paths are not yet implemented.
+  - id: PathEnd
+    name: "Path End"
+    description: "Instance has reached the endpoint of a path."
+    supercheck: "false" # TODO: Paths are not yet implemented.
 
-  - ID: OutsideRoom
-    Name: "Outside Room"
-    Description: "Instance has move outside the room's bounds."
-    SubCheck: |
+  - id: OutsideRoom
+    name: "Outside Room"
+    description: "Instance has move outside the room's bounds."
+    subcheck: |
       (bbox_right < 0)  || (bbox_left > room_width) ||
       (bbox_bottom < 0) || (bbox_top > room_height)
 
-  - ID: InsideRoom
-    Name: "Inside Room"
-    Description: "Instance has moved inside the room's bounds."
-    SubCheck: |
+  - id: InsideRoom
+    name: "Inside Room"
+    description: "Instance has moved inside the room's bounds."
+    subcheck: |
       (bbox_left < 0) || (bbox_right > room_width) ||
       (bbox_top < 0)  || (bbox_bottom > room_height)
 
-  - ID: OutsideView
-    Name: "Outside View %1"
-    Description: "Instance has moved outside of the view's bounds."
-    Type: Stacked
-    Parameters:
+  - id: OutsideView
+    name: "Outside View %1"
+    description: "Instance has moved outside of the view's bounds."
+    type: Stacked
+    parameters:
       - integer
-    SubCheck: |
+    subcheck: |
       view_enabled && !view_visible[%1] && (
         (bbox_right  < view_xview[%1])                  ||
         (bbox_left   > view_xview[%1] + view_wview[%1]) ||
@@ -290,13 +293,13 @@ Events:
         (bbox_top    > view_yview[%1] + view_hview[%1])
       )
 
-  - ID: InsideView
-    Name: "Inside View %1"
-    Description: "Instance has moved inside of the view's bounds."
-    Type: Stacked
-    Parameters:
+  - id: InsideView
+    name: "Inside View %1"
+    description: "Instance has moved inside of the view's bounds."
+    type: Stacked
+    parameters:
       - integer
-    SubCheck: |
+    subcheck: |
       view_enabled && view_visible[%1] && (
         (bbox_right  < view_xview[%1])                  ||
         (bbox_left   > view_xview[%1] + view_wview[%1]) ||
@@ -304,43 +307,43 @@ Events:
         (bbox_top    > view_yview[%1] + view_hview[%1])
       )
 
-  - ID: NoMoreLives
-    Name: "No More Lives"
-    Description: "Lives variable has dropped to 0."
-    SuperCheck: |
+  - id: NoMoreLives
+    name: "No More Lives"
+    description: "Lives variable has dropped to 0."
+    supercheck: |
       enigma::update_lives_status_and_return_zeroless()
 
-  - ID: NoMoreHealth
-    Name: "No More Health"
-    Description: "Health variable has dropped to 0."
-    Type: Specialized
-    Locals: "bool $out_of_health = 0;"
-    SubCheck: |
+  - id: NoMoreHealth
+    name: "No More Health"
+    description: "Health variable has dropped to 0."
+    type: Specialized
+    locals: "bool $out_of_health = 0;"
+    subcheck: |
       {
         bool OoH = $out_of_health;
         $out_of_health = (health <= 0);
         return $out_of_health && !OoH;
       }
 
-  - ID: BeforeCollisionAutomaticCollisionHandling
-    Name: "Pre-collision automatic collision handling."
-    Description: "Internal event to update collision stuff"
-    Type: Inline
-    Instead: |
+  - id: BeforeCollisionAutomaticCollisionHandling
+    name: "Pre-collision automatic collision handling."
+    description: "Internal event to update collision stuff"
+    type: Inline
+    instead: |
       enigma::perform_callbacks_before_collision_event();
 
-  - ID: Collision
-    Name: "Collision %1"
-    Description: "Instance is colliding (overlapping) with another object."
-    Group: "Collisions"
-    Type: Stacked
-    Parameters:
+  - id: Collision
+    name: "Collision %1"
+    description: "Instance is colliding (overlapping) with another object."
+    group: "Collisions"
+    type: Stacked
+    parameters:
       - object
-    # SuperCheck: |
+    # supercheck: |
     #   instance_number(%1)
-    SubCheck: |
+    subcheck: |
       enigma::place_meeting_inst(x, y, %1)
-    Dispatcher: |
+    dispatcher: |
       for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {
         int $$$internal$$$ = %1;
         instance_other = *it;
@@ -362,235 +365,235 @@ Events:
         }
       }
 
-  - ID: EndStep
-    Name: "End Step"
-    Description: "The last of the step events."
-    Group: "Step"
-    Constant: |
+  - id: EndStep
+    name: "End Step"
+    description: "The last of the step events."
+    group: "Step"
+    constant: |
       {
         if (timeline_running && timeline_loop && timeline_speed != 0)
           loop_curr_timeline();
       }
 
-  - ID: ParticleSystemsUpdate
-    Name: "Particle systems update."
-    Description: "Internal event to update particles"
-    Type: Inline
-    Instead: |
+  - id: ParticleSystemsUpdate
+    name: "Particle systems update."
+    description: "Internal event to update particles"
+    type: Inline
+    instead: |
       enigma::perform_callbacks_particle_updating();
 
-  - ID: Draw
-    Name: "Draw"
-    Description: "Draw inside the current viewport."
-    Group: "Draw"
-    SubCheck: "visible"
-    IteratorDeclare: "/* Draw is handled by depth */"
-    IteratorInitialize: "/* Draw is initialized in the constructor */"
-    IteratorRemove: "depth.remove();"
-    IteratorDelete: "/* Draw event will destruct with this */"
-    Default: |
+  - id: Draw
+    name: "Draw"
+    description: "Draw inside the current viewport."
+    group: "Draw"
+    subcheck: "visible"
+    iteratordeclare: "/* Draw is handled by depth */"
+    iteratorinitialize: "/* Draw is initialized in the constructor */"
+    iteratorremove: "depth.remove();"
+    iteratordelete: "/* Draw event will destruct with this */"
+    default: |
       if (visible && sprite_index != -1) {
         draw_sprite_ext(sprite_index, image_index, x, y,
                         image_xscale, image_yscale, image_angle,
                         image_blend, image_alpha);
       }
-    Instead: |
+    instead: |
       // We never want to iterate draw; we let screen_redraw() handle it.
       if (automatic_redraw) screen_redraw();
 
-  - ID: DrawGUI
-    Name: "Draw GUI"
-    Description: "Draw directly on top the window, ignoring any viewports."
-    Group: "Draw"
-    IteratorDeclare: "/* DrawGUI is handled by depth */"
-    IteratorInitialize: "++enigma::gui_used;"
-    IteratorRemove: "--enigma::gui_used;"
-    IteratorDelete: "/* Nothing to do for DrawGUI */"
-    SubCheck: "visible"
+  - id: DrawGUI
+    name: "Draw GUI"
+    description: "Draw directly on top the window, ignoring any viewports."
+    group: "Draw"
+    iteratordeclare: "/* DrawGUI is handled by depth */"
+    iteratorinitialize: "++enigma::gui_used;"
+    iteratorremove: "--enigma::gui_used;"
+    iteratordelete: "/* Nothing to do for DrawGUI */"
+    subcheck: "visible"
 
-  - ID: WindowResize
-    Name: "Window Resize"
-    Description: "Window size has changed."
-    Type: TriggerAll
+  - id: WindowResize
+    name: "Window Resize"
+    description: "Window size has changed."
+    type: TriggerAll
 
-  - ID: AnimationEnd
-    Name: "Animation End"
-    Description: "Instance sprite has reached the last subimage."
-    SubCheck: |
+  - id: AnimationEnd
+    name: "Animation End"
+    description: "Instance sprite has reached the last subimage."
+    subcheck: |
       !(image_index + image_speed < sprite_get_number(sprite_index))
 
-  - ID: RoomEnd
-    Name: "Room End"
-    Description: "The current room has changed."
-    Type: TriggerAll
+  - id: RoomEnd
+    name: "Room End"
+    description: "The current room has changed."
+    type: TriggerAll
 
-  - ID: GameEnd
-    Name: "Game End"
-    Description: "Game is ending."
-    Type: TriggerAll
+  - id: GameEnd
+    name: "Game End"
+    description: "Game is ending."
+    type: TriggerAll
 
-  - ID: User
-    Name: "User %1"
-    Description: "Custom user event. Invoked manually."
-    Type: TriggerOnce
-    Parameters:
+  - id: User
+    name: "User %1"
+    description: "Custom user event. Invoked manually."
+    type: TriggerOnce
+    parameters:
       - string
 
-  - ID: Joystick.Axis
-    Name: "Joystick %1 Axis %2"
-    Description: "A joystick button is pressed or held"
-    Group: "Input"
-    Type: Specialized
-    Parameters:
+  - id: Joystick.Axis
+    name: "Joystick %1 Axis %2"
+    description: "A joystick button is pressed or held"
+    group: "Input"
+    type: Specialized
+    parameters:
       - integer
       - JoystickButton
-    SuperCheck: "false" # TODO: not implemented yet
+    supercheck: "false" # TODO: not implemented yet
 
-  - ID: Joystick.Button
-    Name: "Joystick %1 Button %2"
-    Description: "A joystick button is pressed or held"
-    Group: "Input"
-    Type: Specialized
-    Parameters:
+  - id: Joystick.Button
+    name: "Joystick %1 Button %2"
+    description: "A joystick button is pressed or held"
+    group: "Input"
+    type: Specialized
+    parameters:
       - integer
       - JoystickButton
-    SuperCheck: "false" # TODO: not implemented yet
+    supercheck: "false" # TODO: not implemented yet
 
 # These are definitions of constants used in the above.
-Aliases:
+aliases:
   # Keyboard Aliases
-  Key:
-    AnyKey:      {value: 1,   spelling: "vk_anykey"}
-    NoKey:       {value: 0,   spelling: "vk_nokey"}
-    Left:        {value: 37,  spelling: "vk_left"}
-    Right:       {value: 39,  spelling: "vk_right"}
-    Up:          {value: 38,  spelling: "vk_up"}
-    Down:        {value: 40,  spelling: "vk_down"}
-    Tab:         {value: 9,   spelling: "vk_tab"}
-    Enter:       {value: 13,  spelling: "vk_enter"}
-    Shift:       {value: 16,  spelling: "vk_shift"}
-    Control:     {value: 17,  spelling: "vk_control"}
-    Alt:         {value: 18,  spelling: "vk_alt"}
-    Space:       {value: 32,  spelling: "vk_space"}
-    Numpad0:     {value: 96,  spelling: "vk_numpad0"}
-    Numpad1:     {value: 97,  spelling: "vk_numpad1"}
-    Numpad2:     {value: 98,  spelling: "vk_numpad2"}
-    Numpad3:     {value: 99,  spelling: "vk_numpad3"}
-    Numpad4:     {value: 100, spelling: "vk_numpad4"}
-    Numpad5:     {value: 101, spelling: "vk_numpad5"}
-    Numpad6:     {value: 102, spelling: "vk_numpad6"}
-    Numpad7:     {value: 103, spelling: "vk_numpad7"}
-    Numpad8:     {value: 104, spelling: "vk_numpad8"}
-    Numpad9:     {value: 105, spelling: "vk_numpad9"}
-    Multiply:    {value: 106, spelling: "vk_multiply"}
-    Add:         {value: 107, spelling: "vk_add"}
-    Subtract:    {value: 109, spelling: "vk_subtract"}
-    Decimal:     {value: 110, spelling: "vk_decimal"}
-    Divide:      {value: 111, spelling: "vk_divide"}
-    F1:          {value: 112, spelling: "vk_f1"}
-    F2:          {value: 113, spelling: "vk_f2"}
-    F3:          {value: 114, spelling: "vk_f3"}
-    F4:          {value: 115, spelling: "vk_f4"}
-    F5:          {value: 116, spelling: "vk_f5"}
-    F6:          {value: 117, spelling: "vk_f6"}
-    F7:          {value: 118, spelling: "vk_f7"}
-    F8:          {value: 119, spelling: "vk_f8"}
-    F9:          {value: 120, spelling: "vk_f9"}
-    F10:         {value: 121, spelling: "vk_f10"}
-    F11:         {value: 122, spelling: "vk_f11"}
-    F12:         {value: 123, spelling: "vk_f12"}
-    Backspace:   {value: 8,   spelling: "vk_backspace"}
-    Escape:      {value: 27,  spelling: "vk_escape"}
-    PageUp:      {value: 33,  spelling: "vk_pageup"}
-    PageDown:    {value: 34,  spelling: "vk_pagedown"}
-    End:         {value: 35,  spelling: "vk_end"}
-    Home:        {value: 36,  spelling: "vk_home"}
-    Insert:      {value: 45,  spelling: "vk_insert"}
-    Delete:      {value: 46,  spelling: "vk_delete"}
+  key:
+    anykey:      {value: 1,   spelling: "vk_anykey"}
+    nokey:       {value: 0,   spelling: "vk_nokey"}
+    left:        {value: 37,  spelling: "vk_left"}
+    right:       {value: 39,  spelling: "vk_right"}
+    up:          {value: 38,  spelling: "vk_up"}
+    down:        {value: 40,  spelling: "vk_down"}
+    tab:         {value: 9,   spelling: "vk_tab"}
+    enter:       {value: 13,  spelling: "vk_enter"}
+    shift:       {value: 16,  spelling: "vk_shift"}
+    control:     {value: 17,  spelling: "vk_control"}
+    alt:         {value: 18,  spelling: "vk_alt"}
+    space:       {value: 32,  spelling: "vk_space"}
+    numpad0:     {value: 96,  spelling: "vk_numpad0"}
+    numpad1:     {value: 97,  spelling: "vk_numpad1"}
+    numpad2:     {value: 98,  spelling: "vk_numpad2"}
+    numpad3:     {value: 99,  spelling: "vk_numpad3"}
+    numpad4:     {value: 100, spelling: "vk_numpad4"}
+    numpad5:     {value: 101, spelling: "vk_numpad5"}
+    numpad6:     {value: 102, spelling: "vk_numpad6"}
+    numpad7:     {value: 103, spelling: "vk_numpad7"}
+    numpad8:     {value: 104, spelling: "vk_numpad8"}
+    numpad9:     {value: 105, spelling: "vk_numpad9"}
+    multiply:    {value: 106, spelling: "vk_multiply"}
+    add:         {value: 107, spelling: "vk_add"}
+    subtract:    {value: 109, spelling: "vk_subtract"}
+    decimal:     {value: 110, spelling: "vk_decimal"}
+    divide:      {value: 111, spelling: "vk_divide"}
+    f1:          {value: 112, spelling: "vk_f1"}
+    f2:          {value: 113, spelling: "vk_f2"}
+    f3:          {value: 114, spelling: "vk_f3"}
+    f4:          {value: 115, spelling: "vk_f4"}
+    f5:          {value: 116, spelling: "vk_f5"}
+    f6:          {value: 117, spelling: "vk_f6"}
+    f7:          {value: 118, spelling: "vk_f7"}
+    f8:          {value: 119, spelling: "vk_f8"}
+    f9:          {value: 120, spelling: "vk_f9"}
+    f10:         {value: 121, spelling: "vk_f10"}
+    f11:         {value: 122, spelling: "vk_f11"}
+    f12:         {value: 123, spelling: "vk_f12"}
+    backspace:   {value: 8,   spelling: "vk_backspace"}
+    escape:      {value: 27,  spelling: "vk_escape"}
+    pageup:      {value: 33,  spelling: "vk_pageup"}
+    pagedown:    {value: 34,  spelling: "vk_pagedown"}
+    end:         {value: 35,  spelling: "vk_end"}
+    home:        {value: 36,  spelling: "vk_home"}
+    insert:      {value: 45,  spelling: "vk_insert"}
+    delete:      {value: 46,  spelling: "vk_delete"}
   # These are for check_direct only
-    LShift:      {value: 160, spelling: "vk_lshift"}
-    RShift:      {value: 161, spelling: "vk_rshift"}
-    LControl:    {value: 162, spelling: "vk_lcontrol"}
-    RControl:    {value: 163, spelling: "vk_rcontrol"}
-    LAlt:        {value: 164, spelling: "vk_lalt"}
-    RAlt:        {value: 165, spelling: "vk_ralt"}
+    lshift:      {value: 160, spelling: "vk_lshift"}
+    rshift:      {value: 161, spelling: "vk_rshift"}
+    lcontrol:    {value: 162, spelling: "vk_lcontrol"}
+    rcontrol:    {value: 163, spelling: "vk_rcontrol"}
+    lalt:        {value: 164, spelling: "vk_lalt"}
+    ralt:        {value: 165, spelling: "vk_ralt"}
   # This one's Windows only
-    PrintScreen: {value: 42,  spelling: "vk_printscreen"}
+    printscreen: {value: 42,  spelling: "vk_printscreen"}
   # These are ENIGMA-only
-    Caps:        {value: 20,  spelling: "vk_caps"}
-    Scroll:      {value: 145, spelling: "vk_scroll"}
-    Pause:       {value: 19,  spelling: "vk_pause"}
-    LSuper:      {value: 91,  spelling: "vk_lsuper"}
-    RSuper:      {value: 92,  spelling: "vk_rsuper"}
+    caps:        {value: 20,  spelling: "vk_caps"}
+    scroll:      {value: 145, spelling: "vk_scroll"}
+    pause:       {value: 19,  spelling: "vk_pause"}
+    lsuper:      {value: 91,  spelling: "vk_lsuper"}
+    rsuper:      {value: 92,  spelling: "vk_rsuper"}
   # These are a little annoying, but make codegen easier.
-    A:  {value: 65, spelling: "'A'"}
-    B:  {value: 66, spelling: "'B'"}
-    C:  {value: 67, spelling: "'C'"}
-    D:  {value: 68, spelling: "'D'"}
-    E:  {value: 69, spelling: "'E'"}
-    F:  {value: 70, spelling: "'F'"}
-    G:  {value: 71, spelling: "'G'"}
-    H:  {value: 72, spelling: "'H'"}
-    I:  {value: 73, spelling: "'I'"}
-    J:  {value: 74, spelling: "'J'"}
-    K:  {value: 75, spelling: "'K'"}
-    L:  {value: 76, spelling: "'L'"}
-    M:  {value: 77, spelling: "'M'"}
-    N:  {value: 78, spelling: "'N'"}
-    O:  {value: 79, spelling: "'O'"}
-    P:  {value: 80, spelling: "'P'"}
-    Q:  {value: 81, spelling: "'Q'"}
-    R:  {value: 82, spelling: "'R'"}
-    S:  {value: 83, spelling: "'S'"}
-    T:  {value: 84, spelling: "'T'"}
-    U:  {value: 85, spelling: "'U'"}
-    V:  {value: 86, spelling: "'V'"}
-    W:  {value: 87, spelling: "'W'"}
-    X:  {value: 88, spelling: "'X'"}
-    Y:  {value: 89, spelling: "'Y'"}
-    Z:  {value: 90, spelling: "'Z'"}
+    a:  {value: 65, spelling: "'A'"}
+    b:  {value: 66, spelling: "'B'"}
+    c:  {value: 67, spelling: "'C'"}
+    d:  {value: 68, spelling: "'D'"}
+    e:  {value: 69, spelling: "'E'"}
+    f:  {value: 70, spelling: "'F'"}
+    g:  {value: 71, spelling: "'G'"}
+    h:  {value: 72, spelling: "'H'"}
+    i:  {value: 73, spelling: "'I'"}
+    j:  {value: 74, spelling: "'J'"}
+    k:  {value: 75, spelling: "'K'"}
+    l:  {value: 76, spelling: "'L'"}
+    m:  {value: 77, spelling: "'M'"}
+    n:  {value: 78, spelling: "'N'"}
+    o:  {value: 79, spelling: "'O'"}
+    p:  {value: 80, spelling: "'P'"}
+    q:  {value: 81, spelling: "'Q'"}
+    r:  {value: 82, spelling: "'R'"}
+    s:  {value: 83, spelling: "'S'"}
+    t:  {value: 84, spelling: "'T'"}
+    u:  {value: 85, spelling: "'U'"}
+    v:  {value: 86, spelling: "'V'"}
+    w:  {value: 87, spelling: "'W'"}
+    x:  {value: 88, spelling: "'X'"}
+    y:  {value: 89, spelling: "'Y'"}
+    z:  {value: 90, spelling: "'Z'"}
 
   # Mouse Button Aliases
-  MouseButton:
-    Any:    {value: -1, spelling: "mb_any"}
-    None:   {value:  0, spelling: "mb_none"}
-    Left:   {value:  1, spelling: "mb_left"}
-    Right:  {value:  2, spelling: "mb_right"}
-    Middle: {value:  3, spelling: "mb_middle"}
+  mousebutton:
+    any:    {value: -1, spelling: "mb_any"}
+    none:   {value:  0, spelling: "mb_none"}
+    left:   {value:  1, spelling: "mb_left"}
+    right:  {value:  2, spelling: "mb_right"}
+    middle: {value:  3, spelling: "mb_middle"}
 
-  JoystickButton:
-    Left:   {value: 0, spelling: "js_left"}
-    Right:  {value: 1, spelling: "js_right"}
-    Up:     {value: 2, spelling: "js_up"}
-    Down:   {value: 3, spelling: "js_down"}
+  joystickbutton:
+    left:   {value: 0, spelling: "js_left"}
+    right:  {value: 1, spelling: "js_right"}
+    up:     {value: 2, spelling: "js_up"}
+    down:   {value: 3, spelling: "js_down"}
 
 # Mapping of GM's integer event ids to our event names
-GameMakerEventMappings:
+gamemakereventmappings:
   0:  # Instance construct event.
-    Single: Create
+    single: Create
 
   1:  # Instance destruct event.
-    Single: Destroy
+    single: Destroy
 
   2:  # Alarms. GM only supports ten.
-    Parameterized: Alarm[%1]  # Number <1-10>
+    parameterized: Alarm[%1]  # Number <1-10>
 
   3:  # Step events.
-    Specialized:
-      Cases:
+    specialized:
+      cases:
         0: Step
         1: BeginStep
         2: EndStep
 
   4:  # Collision events.
-    Parameterized: Collision[%1]  # <Object>
+    parameterized: Collision[%1]  # <Object>
 
   5:  # Keyboard events.
-    Parameterized: Keyboard[%1]   # <Key>
+    parameterized: Keyboard[%1]   # <Key>
 
   6:  # The "Mouse" group, which somehow inherited joysticks.
-    Specialized:
-      Cases:
+    specialized:
+      cases:
         0: MouseButton[Left]
         1: MouseButton[Right]
         2: MouseButton[Middle]
@@ -644,8 +647,8 @@ GameMakerEventMappings:
         61: MouseWheelDown
 
   7:  # The "Other" group, which became a dumping ground.
-    Specialized:
-      Cases:
+    specialized:
+      cases:
         0: OutsideRoom
         1: InsideRoom
         2: GameStart
@@ -705,14 +708,14 @@ GameMakerEventMappings:
         70: Social
 
   8:  # The "Draw" group.
-    Specialized:
-      Cases:
+    specialized:
+      cases:
         0: Draw
         64: DrawGUI
         65: WindowResize
 
   9:  # The "Key Pressed" group.
-    Parameterized: KeyPressed[%1]  # <KeyCode>
+    parameterized: KeyPressed[%1]  # <KeyCode>
 
   10: # The "Key Released" group.
-    Parameterized: KeyReleased[%1] # <KeyCode>
+    parameterized: KeyReleased[%1] # <KeyCode>

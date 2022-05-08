@@ -1,11 +1,11 @@
 %e-yaml
 ---
-Name: iPhoneSimulator
-Native: No
-Maintainer: TGMG
-Target-platform: iPhone
+name: iPhoneSimulator
+native: No
+maintainer: TGMG
+target-platform: iPhone
 
-Make-Vars:
+make-vars:
   path:
   make: make
   makeflags:
@@ -17,15 +17,15 @@ Make-Vars:
   links: -lz -framework Cocoa
 
   
-Parser-Vars:
+parser-vars:
   defines: gcc -dM -x c++ -E $blank
   searchdirs: gcc -E -x c++ -v $blank -I./ENIGMAsystem/SHELL/
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
   
-EXE-Vars:
+exe-vars:
   resources: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaXcode.res
-  Build-Extension: .app
-  Run-output: ./MacOS/EnigmaIPhone
-  Run-Program: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaIPhone
-  Run-Params:
+  build-extension: .app
+  run-output: ./MacOS/EnigmaIPhone
+  run-program: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaIPhone
+  run-params:

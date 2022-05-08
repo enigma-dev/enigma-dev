@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: OpenGLES3
-Identifier: OpenGLES3
-Description: Hardware-accelerated rendering on mobile and embedded systems using OpenGLES.
-Author: Harijs Grinbergs, Robert B. Colton et al.
+name: OpenGLES3
+identifier: OpenGLES3
+description: Hardware-accelerated rendering on mobile and embedded systems using OpenGLES.
+author: Harijs Grinbergs, Robert B. Colton et al.
 
-Depends:
-	Windowing: SDL
+depends:
+  windowing: SDL
 
-Represents:
-	Build-platforms: None
+represents:
+  build-platforms: None

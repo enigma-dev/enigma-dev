@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: Media Control Interface
-Identifier: MediaControlInterface
-Author: Robert
-Description: CD playback on Windows using the MCI.
-Default: false
-Icon: mcilogo.png
+name: Media Control Interface
+identifier: MediaControlInterface
+author: Robert
+description: CD playback on Windows using the MCI.
+default: false
+icon: mcilogo.png
 
-Depends: None
-Dependencies: None
+depends: None
+dependencies: None

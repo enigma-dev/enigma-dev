@@ -1,11 +1,11 @@
 %e-yaml
 ---
-Name: Android compile
-Native: No
-Maintainer: fundies
-Target-platform: Android
+name: Android compile
+native: No
+maintainer: fundies
+target-platform: Android
 
-Make-Vars:
+make-vars:
   path:
   make: make
   makeflags:
@@ -17,16 +17,16 @@ Make-Vars:
   ldflags:
   links:
 
-Parser-Vars:
+parser-vars:
   defines: cpp -dM -x c++ --std=c++03 -E $blank
   searchdirs: gcc -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
-EXE-Vars:
+exe-vars:
   resources: android/enigma/src/main/assets/resources.res
   resources_in: resources.res
-  Build-Extension: .apk
-  Run-output:
-  Run-Program: adb shell am start -n enigma.game/.ENIGMAActivity
-  Run-Params:
+  build-extension: .apk
+  run-output:
+  run-program: adb shell am start -n enigma.game/.ENIGMAActivity
+  run-params:

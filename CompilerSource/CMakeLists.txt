@@ -31,6 +31,10 @@ target_link_libraries(${COMPILER_LIB} PRIVATE "Protocols" "ENIGMAShared")
 include(FindProtobuf)
 target_link_libraries(${COMPILER_LIB} PRIVATE ${Protobuf_LIBRARIES})
 
+# Find yaml-cpp
+find_package(yaml-cpp CONFIG REQUIRED)
+target_link_libraries(${COMPILER_LIB} PRIVATE yaml-cpp)
+
 # Find libpng
 find_package(PNG REQUIRED)
 target_link_libraries(${COMPILER_LIB} PRIVATE ${PNG_LIBRARY})

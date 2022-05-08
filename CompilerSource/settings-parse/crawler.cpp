@@ -24,6 +24,14 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#include "crawler.h"
+#include "utility.h"
+
+#include "parser/object_storage.h"
+#include "OS_Switchboard.h"
+#include "languages/language_adapter.h"
+
+#include <yaml-cpp/yaml.h>
 
 #include <iostream>
 #include <string>
@@ -31,18 +39,9 @@
 
 using namespace std;
 
-#include "crawler.h"
-#include "utility.h"
-
-#include "eyaml/eyaml.h"
-
-#include "parser/object_storage.h"
-#include "OS_Switchboard.h"
-#include "languages/language_adapter.h"
-
 namespace extensions
 {
-  static inline string unmangled_type_pre(string str) { 
+  static inline string unmangled_type_pre(string str) {
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
   }
@@ -52,7 +51,7 @@ namespace extensions
   }
   void parse_extensions(vector<string> exts) {
     parsed_extensions.clear();
-    
+
     for (unsigned i = 0; i < exts.size(); i++)
     {
       parsed_extension pe;
@@ -63,51 +62,49 @@ namespace extensions
       for (pos = 0; pos < pe.path.length(); pos++)
         if (pe.path[pos] == '\\')
           pe.path[i] = '/';
-      
-      ifstream iey((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").u8string().c_str());
-      if (!iey.is_open())
-        cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
-      ey_data about = parse_eyaml(iey,exts[i]);
-      pe.implements = about.get("implement");
-      pe.init = about.get("init");
 
+      YAML::Node iey = YAML::LoadFile((enigma_root/"ENIGMAsystem/SHELL"/exts[i]/"About.ey").u8string());
+      if (!iey.IsDefined())
+        cout << "ERROR! Failed to open extension descriptor for " << exts[i] << endl;
+
+      pe.implements = iey["implement"].as<std::string>("");
+      pe.init = iey["init"].as<std::string>("");
       parsed_extensions.push_back(pe);
     }
   }
-  
+
   map<string, sdk_descriptor> all_platforms;
   typedef map<string, sdk_descriptor>::iterator platIter;
-  
+
   string uname_s = CURRENT_PLATFORM_NAME;
-  
+
   void determine_target()
   {
     all_platforms.clear();
     cout << "\n\n\n\nStarting platform inspection\n";
     for (auto& ef : std::filesystem::directory_iterator(enigma_root/"ENIGMAsystem/SHELL/Platforms/"))
     {
-      if (!ef.is_directory()) continue;
-      const std::filesystem::path ef_path = enigma_root/"ENIGMAsystem/SHELL/Platforms"/ef/"Info/About.ey";
-      ifstream ext(ef_path.c_str(), ios_base::in);
-      if (!ext.is_open()) continue;
+      if (!ef.is_directory() || ef.path().stem() == "General") continue;
+      const std::filesystem::path ef_path = ef.path()/"Info/About.ey";
+      const YAML::Node ext = YAML::LoadFile(ef_path.u8string());
+      if (!ext.IsDefined()) continue;
 
       cout << " - " << ef_path << ": Opened.\n";
-      ey_data dat = parse_eyaml(ext,ef.path().u8string());
-      eyit hasname = dat.values.find("represents");
-      if (hasname == dat.values.end()) {
+      if (!ext["represents"].IsDefined()) {
         cout << "Skipping invalid platform API under `" << ef.path().u8string() << "': File does not specify an OS it represents.";
         continue;
       }
-      
+
       sdk_descriptor& sdk = all_platforms[toUpper(ef.path().u8string())];
-      sdk.name   = dat.get("name");
-      sdk.author = dat.get("author");
-      sdk.build_platforms = dat.get("build-platforms");
-      sdk.description = dat.get("description");
-      sdk.identifier  = dat.get("identifier");
-      sdk.represents  = dat.get("represents");
+      sdk.name = ext["name"].as<std::string>();
+      sdk.author = ext["author"].as<std::string>();
+      if (ext["depends"].IsDefined())
+        sdk.depends = ext["depends"]["build-platforms"].as<std::string>("");
+      sdk.represents = ext["represents"]["build-platforms"].as<std::string>();
+      sdk.description = ext["description"].as<std::string>();
+      sdk.identifier  = ext["identifier"].as<std::string>();
     }
-    
+
     if (targetAPI.windowSys != "")
       targetSDK = all_platforms[toUpper(targetAPI.windowSys)];
     else

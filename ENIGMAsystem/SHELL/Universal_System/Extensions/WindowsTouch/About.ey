@@ -1,13 +1,12 @@
 %e-yaml
 ---
 
-Name: Windows Touch
-Identifier: WindowsTouch
-Author: Robert
-Description: Touch support for Windows based environments.
-Default: false
-Icon: touchlogo.png
+name: Windows Touch
+identifier: WindowsTouch
+author: Robert
+description: Touch support for Windows based environments.
+default: false
+icon: touchlogo.png
 
-Depends: None
-Dependencies: None
-
+depends: None
+dependencies: None

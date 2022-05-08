@@ -1,13 +1,13 @@
 %e-yaml
 ---
 
-Name: XInput
-Identifier: XInput
-Author: Robert
-Description: Input support including gamepads on Windows and Xbox 360.
-Default: false
-Icon: xinputlogo.png
+name: XInput
+identifier: XInput
+author: Robert
+description: Input support including gamepads on Windows and Xbox 360.
+default: false
+icon: xinputlogo.png
 
-Depends: None
-Dependencies: None
-Init: extension_xinput_init
+depends: None
+dependencies: None
+init: extension_xinput_init

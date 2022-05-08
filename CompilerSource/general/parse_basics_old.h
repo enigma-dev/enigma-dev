@@ -27,7 +27,9 @@
 #ifndef PARSE_BASICS_OLD_H
 #define PARSE_BASICS_OLD_H
 
-typedef size_t pt;
+#include <cstddef>
+
+typedef std::size_t pt;
 
 inline bool is_letter(char x)
 {
@@ -53,16 +55,16 @@ inline bool is_letterdd(char x)
   return  (x>='a' and x<='z') or (x>='A' and x<='Z') or (x=='_' or x=='$') or (x>='0' and x<='9');
 }
 
-inline bool is_useless(char x) 
+inline bool is_useless(char x)
 {
   return x==' ' || x=='\r' || x=='\n' || x=='\t';
 }
-inline bool is_useless_macros(char x) 
+inline bool is_useless_macros(char x)
 {
   return x==' ' || x=='\t';
 }
 
-inline bool is_unary(char x) 
+inline bool is_unary(char x)
 {
   return x=='!' || x=='~' || x=='+' || x=='-' || x=='&' || x=='*';
 }

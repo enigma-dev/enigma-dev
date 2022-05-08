@@ -5,7 +5,7 @@ resources:
       name: enigma-dev/RadialGM
       endpoint: github.com_EnigmaBot
       # ref: refs/pull/138/merge # Use this for testing a co-dependent rgm pr but comment this before merging
-      
+
 pr:  # Trigger a build on every PR.
   branches:
     include:
@@ -35,7 +35,7 @@ jobs:
   steps:
     - checkout: self
       persistCredentials: true
-      
+
     - script: |
         sudo dpkg --add-architecture i386
         ./CI/install_emake_deps.sh
@@ -46,12 +46,12 @@ jobs:
         make -j4
         make -j4 emake
       displayName: Build emake
-      
+
     - script: |
         make emake-tests
         ./emake-tests
       displayName: Test emake
-   
+
     - script: |
         ./CI/build_and_run_game.sh
       env:
@@ -74,14 +74,14 @@ jobs:
     - checkout: self
       persistCredentials: true
       path: enigma-dev
-     
+
     - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
       displayName: 'Clone Android Repo'
 
     - script: |
         (robocopy $(Build.SourcesDirectory) C:\enigma-dev /COPYALL /E) ^& IF %ERRORLEVEL% LEQ 1 exit 0
       displayName: 'Stage ENIGMA'
-    
+
     - script: |
         C:\enigma-dev\enigma_bootstrap.bat
       displayName: 'Bootstrap ENIGMA Install'
@@ -119,9 +119,9 @@ jobs:
       displayName: 'Windows APIs & Extensions'
       workingDirectory: C:\enigma-dev
       env:
-        GRAPHICS: Direct3D11 
+        GRAPHICS: Direct3D11
         AUDIO: DirectSound
-        WIDGETS: Win32 
+        WIDGETS: Win32
         EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,ExternalFuncs"
         PLATFORM: Win32
         MODE: Debug
@@ -133,7 +133,7 @@ jobs:
       displayName: 'OpenGL1 & OpenAL'
       workingDirectory: C:\enigma-dev
       env:
-        GRAPHICS: OpenGL1 
+        GRAPHICS: OpenGL1
         AUDIO: OpenAL
         PLATFORM: Win32
         MODE: Debug
@@ -168,7 +168,7 @@ jobs:
         artifactName: ENIGMA-installer
 
     - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-      - task: GithubRelease@0 
+      - task: GithubRelease@0
         displayName: 'Publish GitHub Release'
         inputs:
           gitHubConnection: github.com_EnigmaBot
@@ -191,7 +191,7 @@ jobs:
     - checkout: self
       persistCredentials: true
       path: enigma-dev
-    
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -204,7 +204,7 @@ jobs:
         cat << EOF | sudo ./root.x86_64/bin/arch-chroot ./root.x86_64/
         set -e
         echo 'Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch' >> /etc/pacman.d/mirrorlist
-        pacman-key --init 
+        pacman-key --init
         pacman-key --populate archlinux
         pacman -Syu --noconfirm base base-devel sudo go git protobuf grpc yaml-cpp pugixml rapidjson boost xorg-server-xvfb
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
@@ -213,7 +213,7 @@ jobs:
         chown -R aur:aur /home/aur
         EOF
       displayName: 'Bootstrap Archlinux'
-    
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -227,7 +227,7 @@ jobs:
         sudo -u aur yay -S --noconfirm --builddir /home/aur/packages lcov mingw-w64-gcc mingw-w64-binutils mingw-w64-crt mingw-w64-headers mingw-w64-winpthreads
         EOF
       displayName: 'Build & Install AUR Packages'
-    
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -253,7 +253,7 @@ jobs:
         pacman -S --noconfirm mingw-w64-i686-openal mingw-w64-i686-dumb mingw-w64-i686-libvorbis mingw-w64-i686-libogg mingw-w64-i686-flac mingw-w64-i686-mpg123 mingw-w64-i686-libsndfile mingw-w64-i686-zlib mingw-w64-i686-libffi mingw-w64-i686-box2d mingw-w64-i686-glew mingw-w64-i686-glm mingw-w64-i686-alure mingw-w64-i686-SDL2 mingw-w64-i686-pkg-config
         EOF
       displayName: 'Install MinGW Engine Dependencies'
-      
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -263,7 +263,7 @@ jobs:
         make emake
         EOF
       displayName: 'Build emake'
-      
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -275,7 +275,7 @@ jobs:
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine32 WINEARCH=win32 xvfb-run wine /tmp/test32.exe
         EOF
       displayName: 'Engine MinGW32'
-      
+
     - bash: |
         set -e
         cd $(Build.BinariesDirectory)
@@ -286,7 +286,7 @@ jobs:
         LIBGL_ALWAYS_SOFTWARE=1 WINEDLLOVERRIDES="mscoree,mshtml=" WINEPREFIX=/tmp/.wine64 WINEARCH=win64 xvfb-run wine /tmp/test64.exe
         EOF
       displayName: 'Engine MinGW64'
-      
+
 - job: Android
   displayName: 'Android'
   variables:
@@ -295,17 +295,17 @@ jobs:
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
-    COMPILER: Android 
-    GRAPHICS: OpenGLES2 
+    COMPILER: Android
+    GRAPHICS: OpenGLES2
     PLATFORM: SDL
     MODE: Compile
     AUDIO: SDL
-    COLLISION: None 
-    NETWORK: None 
-    WIDGETS: None 
+    COLLISION: None
+    NETWORK: None
+    WIDGETS: None
     EXTENSIONS: "Alarms,Paths"
     OUTPUT: /tmp/test-android-game.apk
-    ANDROID_API_LEVEL: 29 
+    ANDROID_API_LEVEL: 29
     ANDROID_BUILD_TOOLS_VERSION: 29.0.3
     ANDROID_NDK_VERSION: 23.0.7599858
   pool:
@@ -315,16 +315,16 @@ jobs:
     - checkout: self
       persistCredentials: true
       path: enigma-dev
-      
+
     - script: echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --channel=1 --install "tools" "platform-tools" "extras;google;google_play_services" "extras;google;m2repository" "extras;android;m2repository" "build-tools;29.0.3" "platforms;android-29" "ndk;23.0.7599858"
       displayName: 'Install Android Dependencies'
-      
+
     - script: git clone --depth 1 https://github.com/enigma-dev/enigma-android.git android
       displayName: 'Clone Android Repo'
-      
+
     - script: ./CI/install_emake_deps.sh
       displayName: 'Install Emake Dependencies'
-      
+
     - script: make -j4 emake
       displayName: 'Build Emake'
 

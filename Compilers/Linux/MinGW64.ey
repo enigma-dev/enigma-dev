@@ -1,11 +1,11 @@
 %e-yaml
 ---
-Name: MinGW 64
-Native: No
-Maintainer: fundies
-Target-platform: Windows
+name: MinGW 64
+native: No
+maintainer: fundies
+target-platform: Windows
 
-Make-Vars:
+make-vars:
   path:
   make: make
   makeflags:
@@ -20,15 +20,15 @@ Make-Vars:
   pkg-config: x86_64-w64-mingw32-pkg-config
 
 
-Parser-Vars:
+parser-vars:
   defines: x86_64-w64-mingw32-cpp -dM -x c++ --std=c++03 -E $blank
   searchdirs: x86_64-w64-mingw32-gcc -E -x c++ --std=c++03 -v $blank
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
-EXE-Vars:
+exe-vars:
   resources: $exe
-  Build-Extension:
-  Run-output: $tempfile
-  Run-Program: wine $game
-  Run-Params:
+  build-extension:
+  run-output: $tempfile
+  run-program: wine $game
+  run-params:

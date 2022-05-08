@@ -1,13 +1,12 @@
 %e-yaml
 ---
 
-Name: Box2D Physics
-Identifier: Box2DPhysics
-Author: Robert
-Description: Physics simulation of 2D rigid bodies, joints, and forces.
-Default: false
-Icon: b2dlogo.png
+name: Box2D Physics
+identifier: Box2DPhysics
+author: Robert
+description: Physics simulation of 2D rigid bodies, joints, and forces.
+default: false
+icon: b2dlogo.png
 
-Depends: None
-Dependencies: None
-
+depends: None
+dependencies: None

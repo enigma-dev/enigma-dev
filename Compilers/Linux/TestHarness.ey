@@ -1,12 +1,12 @@
 %e-yaml
 ---
 # GCC Coverage for use in travis-ci
-Name: TestHarness
-Maintainer: fundies
-Target-platform: Linux
-Native: No
+name: TestHarness
+maintainer: fundies
+target-platform: Linux
+native: No
 
-Make-Vars:
+make-vars:
   path:
   make: make
   makeflags:
@@ -18,15 +18,15 @@ Make-Vars:
   ldflags:
   ldlibs: -lgcov -lubsan
 
-Parser-Vars:
+parser-vars:
   defines: cpp -dM -x c++ --std=c++03 -E $blank
   searchdirs: gcc -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
-EXE-Vars:
+exe-vars:
   resources: $exe
-  Build-Extension:
-  Run-output: $tempfile
-  Run-Program: $game
-  Run-Params:
+  build-extension:
+  run-output: $tempfile
+  run-program: $game
+  run-params:

@@ -1,12 +1,12 @@
 %e-yaml
 ---
 
-Name: iPhone
-Identifier: iPhone
-Represents:
-	Build-Platforms: None
-Description: Build for Apple iPhone.
-Author: TGMG
+name: iPhone
+identifier: iPhone
+represents:
+  build-platforms: None
+description: Build for Apple iPhone.
+author: TGMG
 
-Depends:
-	Build-Platforms: iPhone
+depends:
+  build-platforms: iPhone
