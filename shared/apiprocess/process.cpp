@@ -658,15 +658,6 @@ namespace ngs::proc {
           vec.push_back(proc_info[j].p_pid); i++;
         }
       }
-    #elif defined(__NetBSD__)
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
-    if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
-      for (int j = cntp - 1; j >= 0; j--) {
-        if (proc_info[j].p_pid >= 0 && proc_info[j].p_ppid >= 0 &&
-          proc_info[j].p_ppid == parent_proc_id) {
-          vec.push_back(proc_info[j].p_pid); i++;
-        }
-      }
     #elif defined(__OpenBSD__)
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
