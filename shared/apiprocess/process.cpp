@@ -34,7 +34,7 @@
 #include <vector>
 #include <mutex>
 
-#if (defined(__APPLE__) && defined(__MACH__)) || (defined(__linux__) && !defined(__ANDROID__)) || defined(__OpenBSD__)
+#if (defined(__APPLE__) && defined(__MACH__)) || (defined(__linux__) && !defined(__ANDROID__)) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <set>
 #endif
 
@@ -433,18 +433,14 @@ namespace ngs::proc {
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
       for (int j = cntp - 1; j >= 0; j--) {
-        if (proc_info[j].p_pid >= 0) {
-          vec.push_back(proc_info[j].p_pid); i++;
-        }
+        vec.push_back(proc_info[j].p_pid); i++;
       }
     #elif defined(__OpenBSD__)
     if (proc_id_exists(0)) { vec.push_back(0); i++; }
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
       for (int j = cntp - 1; j >= 0; j--) {
-        if (proc_info[j].p_pid >= 0) {
-          vec.push_back(proc_info[j].p_pid); i++;
-        }
+        vec.push_back(proc_info[j].p_pid); i++;
       }
     #endif
     }
@@ -579,15 +575,11 @@ namespace ngs::proc {
     #elif defined(__NetBSD__)
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct KINFO_PROC), &cntp))) {
-      if (proc_info->p_ppid >= 0) {
-        *parent_proc_id = proc_info->p_ppid;
-      }
+      *parent_proc_id = proc_info->p_ppid;
     #elif defined(__OpenBSD__)
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct KINFO_PROC), &cntp))) {
-      if (proc_info->p_ppid >= 0) {
-        *parent_proc_id = proc_info->p_ppid;
-      }
+      *parent_proc_id = proc_info->p_ppid;
     #endif
     }
     kvm_close(kd);
@@ -660,7 +652,10 @@ namespace ngs::proc {
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int j = 0; j < cntp; j++) {
-        if (proc_info[j].kp_ppid == parent_proc_id) {
+        if (proc_info[j].kp_ppid == 0) {
+          vec.push_back(0); i++;
+        }
+        if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && proc_info[j].kp_ppid == parent_proc_id) {
           vec.push_back(proc_info[j].kp_pid); i++;
         }
       }
@@ -686,7 +681,7 @@ namespace ngs::proc {
     #endif
     }
     kvm_close(kd);
-    #if defined(__OpenBSD__)
+    #if defined(__DragonFly__) || defined(__OpenBSD__)
     std::set<PROCID> s;
     unsigned sz = vec.size();
     for (unsigned j = 0; j < sz; j++) s.insert(vec[j]);
