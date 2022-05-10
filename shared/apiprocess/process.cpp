@@ -604,7 +604,7 @@ namespace ngs::proc {
     std::fill(proc_info.begin(), proc_info.end(), 0);
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
     for (int j = cntp - 1; j >= 0; j--) {
-      if (proc_info[0] == 0) { continue; }
+      if (proc_info[j] == 0) { continue; }
       PROCID ppid; parent_proc_id_from_proc_id(proc_info[j], &ppid);
       if (proc_info[j] == 1 && ppid == 0 && parent_proc_id == 0) {
         vec.push_back(0); i++;
