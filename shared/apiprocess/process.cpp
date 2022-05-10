@@ -637,12 +637,12 @@ namespace ngs::proc {
       }
       freeproc(proc_info);
     }
+    closeproc(proc);
     std::set<PROCID> s;
     unsigned sz = vec.size();
     for (unsigned j = 0; j < sz; j++) s.insert(vec[j]);
     vec.assign(s.begin(), s.end());
     i = vec.size();
-    closeproc(proc);
     #elif defined(__FreeBSD__)
     int cntp = 0; if (KINFO_PROC *proc_info = kinfo_getallproc(&cntp)) {
       for (int j = 0; j < cntp; j++) {
