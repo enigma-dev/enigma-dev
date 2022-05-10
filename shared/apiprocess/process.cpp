@@ -629,7 +629,7 @@ namespace ngs::proc {
       }
       freeproc(proc_info);
     }
-    i = vec.size();
+    closeproc(proc);
     #elif defined(__FreeBSD__)
     int cntp = 0; if (KINFO_PROC *proc_info = kinfo_getallproc(&cntp)) {
       for (int j = 0; j < cntp; j++) {
