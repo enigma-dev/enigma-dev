@@ -34,7 +34,7 @@
 #include <vector>
 #include <mutex>
 
-#if (defined(__APPLE__) && defined(__MACH__))
+#if (defined(__APPLE__) && defined(__MACH__)) || (defined(__linux__) && !defined(__ANDROID__))
 #include <set>
 #endif
 
@@ -629,11 +629,19 @@ namespace ngs::proc {
     #elif (defined(__linux__) && !defined(__ANDROID__))
     PROCTAB *proc = openproc(PROC_FILLSTAT);
     while (proc_t *proc_info = readproc(proc, nullptr)) {
+      if (proc_info->ppid == 0) {
+        vec.push_back(0); i++;
+      }
       if (proc_info->ppid == parent_proc_id) {
         vec.push_back(proc_info->tgid); i++;
       }
       freeproc(proc_info);
     }
+    std::set<PROCID> s;
+    unsigned sz = vec.size();
+    for (unsigned j = 0; j < sz; j++) s.insert(vec[j]);
+    vec.assign(s.begin(), s.end());
+    i = vec.size();
     closeproc(proc);
     #elif defined(__FreeBSD__)
     int cntp = 0; if (KINFO_PROC *proc_info = kinfo_getallproc(&cntp)) {
