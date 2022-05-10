@@ -617,7 +617,7 @@ namespace ngs::proc {
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
     for (int j = cntp - 1; j >= 0; j--) {
       PROCID ppid; parent_proc_id_from_proc_id(proc_info[j], &ppid);
-      if (proc_info[j] >= 0 && ppid >= 0 && ppid == parent_proc_id) {
+      if (ppid == parent_proc_id) {
         vec.push_back(proc_info[j]); i++;
       }
     }
@@ -652,8 +652,7 @@ namespace ngs::proc {
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int j = 0; j < cntp; j++) {
-        if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 &&
-          proc_info[j].kp_ppid == parent_proc_id) {
+        if (proc_info[j].kp_ppid == parent_proc_id) {
           vec.push_back(proc_info[j].kp_pid); i++;
         }
       }
@@ -661,8 +660,7 @@ namespace ngs::proc {
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
       for (int j = cntp - 1; j >= 0; j--) {
-        if (proc_info[j].p_pid >= 0 && proc_info[j].p_ppid >= 0 &&
-          proc_info[j].p_ppid == parent_proc_id) {
+        if (proc_info[j].p_ppid == parent_proc_id) {
           vec.push_back(proc_info[j].p_pid); i++;
         }
       }
@@ -670,8 +668,7 @@ namespace ngs::proc {
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct KINFO_PROC), &cntp))) {
       for (int j = cntp - 1; j >= 0; j--) {
-        if (proc_info[j].p_pid >= 0 && proc_info[j].p_ppid >= 0 &&
-          proc_info[j].p_ppid == parent_proc_id) {
+        if (proc_info[j].p_ppid == parent_proc_id) {
           vec.push_back(proc_info[j].p_pid); i++;
         }
       }
