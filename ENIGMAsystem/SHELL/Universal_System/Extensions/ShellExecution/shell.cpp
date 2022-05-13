@@ -40,7 +40,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
   SetParent(child, parent); RECT rect; GetClientRect(parent, &rect); ShowWindow(child, SW_MAXIMIZE);
   MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
-  FillRect((HDC)GetDC(parent), &rect, CreateSolidBrush(0));
+  SendMessage(parent, WM_SIZE, 0, 0);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
@@ -71,6 +71,7 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_BORDER | WS_SIZEBOX));
   SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW); 
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+  SendMessage(parent, WM_SIZE, 0, 0);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
