@@ -35,11 +35,12 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #if defined(_WIN32)
   HWND child  = (HWND)(void *)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX));
+  SetWindowLongPtr(child, GWL_STYLE, GetWindowLongPtr(child, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX) | WS_CHILD);
   SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-  SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
-  SetParent(child, parent); ShowWindow(child, SW_MAXIMIZE); SendMessage(child, WM_SETREDRAW, TRUE, 0);
+  SetParent(child, parent); if (!IsZoomed(child)) ShowWindow(child, SW_MAXIMIZE);
+  SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+  SendMessage(child, WM_SETREDRAW, TRUE, 0);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
