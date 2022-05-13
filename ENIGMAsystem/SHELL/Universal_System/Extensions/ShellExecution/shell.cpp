@@ -63,7 +63,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
 
 // update embed area of window identifier to fill parent window identifier client area
 void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
-  if (strtoull(parentWindowId, nullptr, 10) == 0) return;
+  if (strtoull(parentWindowId.c_str(), nullptr, 10) == 0) return;
   #if defined(_WIN32)
   HWND child  = native_window_from_window_id(windowId.c_str());
   HWND parent = native_window_from_window_id(parentWindowId.c_str());
