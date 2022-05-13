@@ -77,7 +77,7 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   Window r = 0; int x = 0, y = 0;
   unsigned w = 0, h = 0, b = 0, d = 0;
   XGetGeometry(display, parent, &r, &x, &y, &w, &h, &b, &d);
-  XResizeWindow(display, child, w, h);
+  XMoveResizeWindow(display, child, 0, 0, w, h);
   XCloseDisplay(display);
   #else
   DEBUG_MESSAGE("Unsupported platform for function!", MESSAGE_TYPE::M_INFO);
