@@ -45,7 +45,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  rootparent = parent; Display *display = XOpenDisplay(nullptr);
+  Display *display = XOpenDisplay(nullptr);
   Window root = 0, rparent = 0, *children = nullptr; unsigned int nchildren = 0;
   XQueryTree(display, child, &root, &rparent, &children, &nchildren);
   XReparentWindow(display, child, parent, 0, 0); if (nchildren > 0) { XFree(children); }
@@ -53,7 +53,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   while (parent != rparent) {
     XSynchronize(display, true);
     XQueryTree(display, child, &root, &rparent, &children, &nchildren);
-    XReparentWindow(display, child, rootparent, 0, 0); if (nchildren > 0) { XFree(children); }
+    XReparentWindow(display, child, parent, 0, 0); if (nchildren > 0) { XFree(children); }
     XFlush(display); std::this_thread::sleep_for(std::chrono::milliseconds(5));
   }
   XCloseDisplay(display);
