@@ -21,6 +21,12 @@ LOCALPROCID ProcessExecute(std::string command);
 // execute process from the shell async, return process id
 LOCALPROCID ProcessExecuteAsync(std::string command);
 
+// embed window identifier into parent window identifier
+void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId);
+
+// update embed area of window identifier to fill parent window identifier client area
+void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId);
+
 //  get whether executed process has quit based on process id
 bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex);
 
