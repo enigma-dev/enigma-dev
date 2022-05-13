@@ -42,6 +42,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
   SendMessage(child, WM_SETREDRAW, TRUE, 0); RECT rect; GetClientRect(parent, &rect);
   MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
+  GetWindowRect(parent, &rect); MoveWindow(parent, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
