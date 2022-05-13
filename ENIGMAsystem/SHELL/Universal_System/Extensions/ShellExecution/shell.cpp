@@ -40,9 +40,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
   SetParent(child, parent); SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
   RECT rect; GetClientRect(parent, &rect); MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
-  ShowWindow(child, SW_MAXIMIZE); if (IsZoomed(parent) || IsIconic(parent)) ShowWindow(parent, SW_RESTORE);
-  GetWindowRect(parent, &rect); MoveWindow(parent, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top - 1, true);
-  GetWindowRect(parent, &rect); MoveWindow(parent, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top + 1, true);
+  ShowWindow(child, SW_MAXIMIZE);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
@@ -71,7 +69,7 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
   RECT rect; GetClientRect(parent, &rect); MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
   SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_BORDER | WS_SIZEBOX));
-  SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
+  SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW); ShowWindow(child, SW_MAXIMIZE);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
