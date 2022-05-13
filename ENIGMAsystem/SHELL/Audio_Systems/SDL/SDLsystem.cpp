@@ -12,9 +12,6 @@ int audiosystem_initialize() {
   SDL_Init(SDL_INIT_AUDIO);
   int flags = MIX_INIT_OGG|MIX_INIT_MOD|MIX_INIT_FLAC|MIX_INIT_MP3;
   int initted = Mix_Init(flags);
-  if ((initted&flags) != flags) {
-    DEBUG_MESSAGE("Failed to initialize audio system", MESSAGE_TYPE::M_ERROR);
-  }
   if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096) == -1) { return 0; }
   return 1;
 }
