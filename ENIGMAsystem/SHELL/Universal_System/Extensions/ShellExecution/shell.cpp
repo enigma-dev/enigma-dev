@@ -8,6 +8,7 @@
 #include "shell.h"
 #include "strings_util.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #if defined(_WIN32) 
@@ -40,7 +41,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
   SetParent(child, parent); RECT rect; GetClientRect(parent, &rect); ShowWindow(child, SW_MAXIMIZE);
   MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
-  SendMessage(parent, WM_SIZE, 0, 0);
+  if (parent == enigma::hWnd) ProcessResizeEvent();
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
