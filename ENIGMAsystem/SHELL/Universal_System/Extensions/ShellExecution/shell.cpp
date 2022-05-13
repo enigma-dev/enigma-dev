@@ -8,7 +8,7 @@
 #include "strings_util.h"
 
 #include "Platforms/platforms_mandatory.h"
-#inlcude "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #if defined(_WIN32) 
 #include <windows.h>
