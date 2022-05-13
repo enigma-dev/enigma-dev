@@ -7,7 +7,6 @@
 #include "shell.h"
 #include "strings_util.h"
 
-#include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #if defined(_WIN32) 
@@ -30,6 +29,7 @@ LOCALPROCID ProcessExecuteAsync(string command) {
   return ngs::proc::process_execute_async(command.c_str());
 }
 
+// embed window identifier into parent window identifier
 void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #if defined(_WIN32)
   HWND child  = native_window_from_window_id(windowId.c_str());
@@ -61,6 +61,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #endif
 }
 
+// update embed area of window identifier to fill parent window identifier client area
 void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   if (strtoull(parentWindowId, nullptr, 10) == 0) return;
   #if defined(_WIN32)
