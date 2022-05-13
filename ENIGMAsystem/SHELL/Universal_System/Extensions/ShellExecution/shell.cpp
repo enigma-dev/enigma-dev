@@ -38,8 +38,7 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX));
   SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-  SetParent(child, parent); if (!IsZoomed(child)) ShowWindow(child, SW_MAXIMIZE);
-  SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+  SetParent(child, parent); SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
   RECT rect; GetClientRect(parent, &rect); MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
   RedrawWindow(child, nullptr, nullptr, RDW_ERASE | RDW_INTERNALPAINT);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
