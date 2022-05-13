@@ -53,6 +53,7 @@ namespace enigma {
   int updateTimer();
   int gameWait();
   void set_room_speed(int rs);
+  void ProcessResizeEvent();
 
   // This method should write the name of the running module to exenamehere.
   inline void windowsystem_write_exename(char **exenamehere) { 
