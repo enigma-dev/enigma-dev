@@ -59,6 +59,19 @@ namespace enigma
 
   LRESULT (CALLBACK *touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
+  
+  void ProcessResizeEvent() {
+    if (WindowResizedCallback != nullptr) {
+      WindowResizedCallback();
+      windowWidth = enigma_user::window_get_width();
+      windowHeight = enigma_user::window_get_height();
+      enigma::compute_window_scaling();
+    }
+    instance_event_iterator = &dummy_event_iterator;
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+      ((object_graphics*)*it)->myevent_drawresize();
+    }
+  }
 
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
   {
@@ -89,17 +102,7 @@ namespace enigma
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
         if (hWndParameter == hWnd) {
-          if (WindowResizedCallback != NULL) {
-            WindowResizedCallback();
-            windowWidth = enigma_user::window_get_width();
-            windowHeight = enigma_user::window_get_height();
-            enigma::compute_window_scaling();
-          }
-          instance_event_iterator = &dummy_event_iterator;
-          for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-          {
-            ((object_graphics*)*it)->myevent_drawresize();
-          }
+          ProcessResizeEvent();
         } else {
           DefWindowProc(hWndParameter, message, wParam, lParam);
         }
