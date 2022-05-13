@@ -2,8 +2,19 @@
 #include <thread>
 #include <chrono>
 
+#include <cstdlib>
+
 #include "shell.h"
 #include "strings_util.h"
+
+#include "Platforms/platforms_mandatory.h"
+#inlcude "Widget_Systems/widgets_mandatory.h"
+
+#if defined(_WIN32) 
+#include <windows.h>
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+#include <X11/Xlib.h>
+#endif
 
 using std::string;
 
@@ -17,6 +28,58 @@ LOCALPROCID ProcessExecute(string command) {
 // execute process from the shell async, return ngs::proc::process id
 LOCALPROCID ProcessExecuteAsync(string command) {
   return ngs::proc::process_execute_async(command.c_str());
+}
+
+void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
+  #if defined(_WIN32)
+  HWND child  = native_window_from_window_id(windowId.c_str());
+  HWND parent = native_window_from_window_id(parentWindowId.c_str());
+  SetWindowLongPtr(child, GWL_STYLE, GetWindowLongPtr(child, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX) | WS_CHILD);
+  SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
+  SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+  SetParent(child, parent); if (!IsZoomed(child)) ShowWindow(child, SW_MAXIMIZE);
+  SetWindowPos(child, HWND_TOP, 0, 0, 0, 0, SWP_NOOWNERZORDER | SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+  SendMessage(child, WM_SETREDRAW, TRUE, 0);
+  return result;
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  Window child  = native_window_from_window_id(windowId.c_str());
+  Window parent = native_window_from_window_id(parentWindowId.c_str());
+  rootparent = parent; Display *display = XOpenDisplay(nullptr);
+  Window root = 0, rparent = 0, *children = nullptr; unsigned int nchildren = 0;
+  XQueryTree(display, child, &root, &rparent, &children, &nchildren);
+  XReparentWindow(display, child, parent, 0, 0); if (nchildren > 0) { XFree(children); }
+  XFlush(display); std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while (parent != rparent) {
+    XSynchronize(display, true);
+    XQueryTree(display, child, &root, &rparent, &children, &nchildren);
+    XReparentWindow(display, child, rootparent, 0, 0); if (nchildren > 0) { XFree(children); }
+    XFlush(display); std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+  XCloseDisplay(display);
+  #else
+  DEBUG_MESSAGE("Unsupported platform for function!", MESSAGE_TYPE::M_INFO);
+  #endif
+}
+
+void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
+  if (strtoull(parentWindowId, nullptr, 10) == 0) return;
+  #if defined(_WIN32)
+  HWND child  = native_window_from_window_id(windowId.c_str());
+  HWND parent = native_window_from_window_id(parentWindowId.c_str());
+  RECT rect; GetClientRect(parent, &rect);
+  MoveWindow(child, 0, 0, rect.right, rect.bottom, true);
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  Window child  = native_window_from_window_id(windowId.c_str());
+  Window parent = native_window_from_window_id(parentWindowId.c_str());
+  Display *display = XOpenDisplay(nullptr);
+  Window r = 0; int x = 0, y = 0;
+  unsigned w = 0, h = 0, b = 0, d = 0;
+  XGetGeometry(display, parent, &r, &x, &y, &w, &h, &b, &d);
+  XResizeWindow(display, child, w, h);
+  XCloseDisplay(display);
+  #else
+  DEBUG_MESSAGE("Unsupported platform for function!", MESSAGE_TYPE::M_INFO);
+  #endif
 }
 
 //  get whether executed process has quit based on process id
