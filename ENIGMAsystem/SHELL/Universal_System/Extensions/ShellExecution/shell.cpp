@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 
+#include <cstdint>
 #include <cstdlib>
 
 #include "shell.h"
@@ -32,8 +33,8 @@ LOCALPROCID ProcessExecuteAsync(string command) {
 // embed window identifier into parent window identifier
 void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #if defined(_WIN32)
-  HWND child  = native_window_from_window_id(windowId.c_str());
-  HWND parent = native_window_from_window_id(parentWindowId.c_str());
+  HWND child  = (HWND)(void *)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
+  HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
   SetWindowLongPtr(child, GWL_STYLE, GetWindowLongPtr(child, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX) | WS_CHILD);
   SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
@@ -42,8 +43,8 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   SendMessage(child, WM_SETREDRAW, TRUE, 0);
   return result;
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
-  Window child  = native_window_from_window_id(windowId.c_str());
-  Window parent = native_window_from_window_id(parentWindowId.c_str());
+  Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
+  Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
   rootparent = parent; Display *display = XOpenDisplay(nullptr);
   Window root = 0, rparent = 0, *children = nullptr; unsigned int nchildren = 0;
   XQueryTree(display, child, &root, &rparent, &children, &nchildren);
@@ -65,13 +66,13 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
 void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   if (strtoull(parentWindowId.c_str(), nullptr, 10) == 0) return;
   #if defined(_WIN32)
-  HWND child  = native_window_from_window_id(windowId.c_str());
-  HWND parent = native_window_from_window_id(parentWindowId.c_str());
+  HWND child  = (HWND)(void *)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
+  HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
   RECT rect; GetClientRect(parent, &rect);
   MoveWindow(child, 0, 0, rect.right, rect.bottom, true);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
-  Window child  = native_window_from_window_id(windowId.c_str());
-  Window parent = native_window_from_window_id(parentWindowId.c_str());
+  Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
+  Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
   Display *display = XOpenDisplay(nullptr);
   Window r = 0; int x = 0, y = 0;
   unsigned w = 0, h = 0, b = 0, d = 0;
