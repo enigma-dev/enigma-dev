@@ -376,7 +376,11 @@ namespace {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      #if defined(IMGUI_IMPL_OPENGL_ES2)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      #else
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+      #endif
       glBindTexture(GL_TEXTURE_2D, 0);
       return (void *)(uintptr_t)tex;
       #else
@@ -474,7 +478,7 @@ namespace {
     SDL_GL_DeleteContext(gl_context);
     #endif
     SDL_DestroyWindow(window);
-    //SDL_Quit();
+    SDL_Quit();
     return result;
   }
 
