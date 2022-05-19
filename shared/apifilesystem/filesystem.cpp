@@ -54,7 +54,9 @@
 #include <libproc.h>
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
+#if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/user.h>
+#endif
 #endif
 #include <unistd.h>
 #endif
