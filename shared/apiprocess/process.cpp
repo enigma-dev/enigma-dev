@@ -40,7 +40,6 @@
 #include <cstring>
 #include <climits>
 #include <cstdio>
-
 #include "process.h"
 #if defined(PROCESS_WIN32EXE_INCLUDES)
 #if defined(_WIN64)
@@ -524,7 +523,6 @@ namespace ngs::proc {
     #if defined(_WIN32)
     DebugSetProcessKillOnExit(FALSE);
     return (!DebugActiveProcessStop(proc_id));
-    return result;
     #else
     return (kill(proc_id, SIGCONT) != -1);
     #endif
