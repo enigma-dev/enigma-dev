@@ -130,12 +130,12 @@ bool ProcIdExists(PROCID procId) {
   return ngs::proc::proc_id_exists(procId);
 }
 
-// suspend process based process id, return whether succeeded
+// suspend process based on process id, return whether succeeded
 bool ProcIdSuspend(PROCID procId) {
   return ngs::proc::proc_id_suspend(procId);
 }
 
-// resume process based process id, return whether succeeded
+// resume process based on process id, return whether succeeded
 bool ProcIdResume(PROCID procId) {
   return ngs::proc::proc_id_resume(procId);
 }
