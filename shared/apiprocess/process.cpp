@@ -515,6 +515,7 @@ namespace ngs::proc {
     #if defined(_WIN32)
     typedef NTSTATUS (__stdcall *NtSuspendProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
+    if (proc == nullptr) return false;
     NtSuspendProcess pfnNtSuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
     NTSTATUS status = pfnNtSuspendProcess(proc);
     CloseHandle(proc);
@@ -528,6 +529,7 @@ namespace ngs::proc {
     #if defined(_WIN32)
     typedef NTSTATUS (__stdcall *NtResumeProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
+    if (proc == nullptr) return false;
     NtResumeProcess pfnNtResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
     NTSTATUS status = pfnNtResumeProcess(proc);
     CloseHandle(proc);
