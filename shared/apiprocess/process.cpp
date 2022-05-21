@@ -1516,7 +1516,7 @@ namespace ngs::proc {
     return false;
   }
 
-  bool win_id_suspend(WINDOWID win_id) {
+  bool window_id_suspend(WINDOWID win_id) {
     PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
@@ -1525,7 +1525,7 @@ namespace ngs::proc {
     return false;
   }
 
-  bool win_id_resume(WINDOWID win_id) {
+  bool window_id_resume(WINDOWID win_id) {
     PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
