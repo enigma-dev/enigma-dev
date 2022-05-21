@@ -529,7 +529,7 @@ namespace ngs::proc {
 
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
-    DebugSetProcessKillOnExit(FALSE);
+    DebugSetProcessKillOnExit(TRUE);
     bool result = (!DebugActiveProcessStop(proc_id));
     if (debug_procs.find(proc_id) != debug_procs.end()) {
       CloseHandle(debug_procs[proc_id]);
