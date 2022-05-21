@@ -54,10 +54,10 @@ PROCID ParentProcIdFromSelf();
 // get whether process exists based on process id
 bool ProcIdExists(PROCID procId);
 
-// suspend process based process id, return whether succeeded
+// suspend process based on process id, return whether succeeded
 bool ProcIdSuspend(PROCID procId);
 
-// resume process based process id, return whether succeeded
+// resume process based on process id, return whether succeeded
 bool ProcIdResume(PROCID procId);
 
 // kill process based on process id, return whether succeeded
