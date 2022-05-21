@@ -459,7 +459,7 @@ namespace ngs::proc {
     *proc_id = 0;
     #if !defined(_WIN32)
     *proc_id = getpid();
-    #elif defined(_WIN32)
+    #else
     *proc_id = GetCurrentProcessId();
     #endif
   }
@@ -467,7 +467,7 @@ namespace ngs::proc {
   PROCID proc_id_from_self() {
     #if !defined(_WIN32)
     return getpid();
-    #elif defined(_WIN32)
+    #else
     return GetCurrentProcessId();
     #endif
   }
@@ -476,17 +476,17 @@ namespace ngs::proc {
     *parent_proc_id = 0;
     #if !defined(_WIN32)
     *parent_proc_id = getppid();
-    #elif defined(_WIN32)
-    parent_proc_id_from_proc_id(GetCurrentProcessId(), parent_proc_id);
+    #else
+    parent_proc_id_from_proc_id(proc_id_from_self(), parent_proc_id);
     #endif
   }
 
   PROCID parent_proc_id_from_self() {
     #if !defined(_WIN32)
     return getppid();
-    #elif defined(_WIN32)
+    #else
     PROCID parent_proc_id = 0;
-    parent_proc_id_from_proc_id(GetCurrentProcessId(), &parent_proc_id);
+    parent_proc_id_from_proc_id(proc_id_from_self(), &parent_proc_id);
     return parent_proc_id;
     #endif
   }
@@ -494,16 +494,17 @@ namespace ngs::proc {
   bool proc_id_exists(PROCID proc_id) {
     #if !defined(_WIN32)
     return (kill(proc_id, 0) != -1);
-    #elif defined(_WIN32)
+    #else
     PROCID *buffer = nullptr; int size = 0;
     proc_id_enumerate(&buffer, &size);
     if (buffer) {
       for (int i = 0; i < size; i++) {
+        message_pump();
         if (proc_id == buffer[i]) {
           return true;
         }
       }
-      free(buffer);
+      free_proc_id(buffer);
     }
     return false;
     #else
@@ -512,7 +513,9 @@ namespace ngs::proc {
   }
 
   bool proc_id_suspend(PROCID proc_id) {
-    #if defined(_WIN32)
+    #if !defined(_WIN32)
+    return (kill(proc_id, SIGSTOP) != -1);
+    #else
     typedef NTSTATUS (__stdcall *NtSuspendProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return false;
@@ -520,13 +523,13 @@ namespace ngs::proc {
     NTSTATUS status = pfnNtSuspendProcess(proc);
     CloseHandle(proc);
     return (!status);
-    #else
-    return (kill(proc_id, SIGSTOP) != -1);
     #endif
   }
 
   bool proc_id_resume(PROCID proc_id) {
-    #if defined(_WIN32)
+    #if !defined(_WIN32)
+    return (kill(proc_id, SIGCONT) != -1);
+    #else
     typedef NTSTATUS (__stdcall *NtResumeProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return false;
@@ -534,15 +537,13 @@ namespace ngs::proc {
     NTSTATUS status = pfnNtResumeProcess(proc);
     CloseHandle(proc);
     return (!status);
-    #else
-    return (kill(proc_id, SIGCONT) != -1);
     #endif
   }
 
   bool proc_id_kill(PROCID proc_id) {
     #if !defined(_WIN32)
-    return (kill(proc_id, SIGKILL) == 0);
-    #elif defined(_WIN32)
+    return (kill(proc_id, SIGKILL) != -1);
+    #else
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return false;
     bool result = TerminateProcess(proc, 0);
@@ -1058,8 +1059,10 @@ namespace ngs::proc {
     kvm_close(kd);
     #endif
     std::vector<char *> cmdline_vec_2;
-    for (int i = 0; i < cmdline_vec_1.size(); i++)
+    for (int i = 0; i < cmdline_vec_1.size(); i++) {
+      message_pump();
       cmdline_vec_2.push_back((char *)cmdline_vec_1[i].c_str());
+    }
     char **arr = new char *[cmdline_vec_2.size()]();
     std::copy(cmdline_vec_2.begin(), cmdline_vec_2.end(), arr);
     *buffer = arr; *size = i;
@@ -1188,8 +1191,10 @@ namespace ngs::proc {
     kvm_close(kd);
     #endif
     std::vector<char *> environ_vec_2;
-    for (int i = 0; i < environ_vec_1.size(); i++)
+    for (int i = 0; i < environ_vec_1.size(); i++) {
+      message_pump();
       environ_vec_2.push_back((char *)environ_vec_1[i].c_str());
+    }
     char **arr = new char *[environ_vec_2.size()]();
     std::copy(environ_vec_2.begin(), environ_vec_2.end(), arr);
     *buffer = arr; *size = i;
@@ -1229,6 +1234,7 @@ namespace ngs::proc {
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
       for (int i = 0; i < size; i++) {
+        message_pump();
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
         if (!equalssplit.empty()) {
           std::string str = name;
@@ -1420,8 +1426,10 @@ namespace ngs::proc {
     XCloseDisplay(display);
     #endif
     std::vector<WINDOWID> wid_vec_2;
-    for (int i = 0; i < wid_vec_1.size(); i++)
+    for (int i = 0; i < wid_vec_1.size(); i++) {
+      message_pump();
       wid_vec_2.push_back((WINDOWID)wid_vec_1[i].c_str());
+    }
     WINDOWID *arr = new WINDOWID[wid_vec_2.size()]();
     std::copy(wid_vec_2.begin(), wid_vec_2.end(), arr);
     *win_id = arr; *size = i;
@@ -1441,6 +1449,7 @@ namespace ngs::proc {
     proc_id_enumerate(&pid, &pidsize);
     if (pid) {
       for (int j = 0; j < pidsize; j++) {
+        message_pump();
         WINDOWID *wid = nullptr; int widsize = 0;
         window_id_from_proc_id(pid[j], &wid, &widsize);
         if (wid) {
@@ -1452,8 +1461,10 @@ namespace ngs::proc {
       }
     }
     std::vector<WINDOWID> widVec4;
-    for (int i = 0; i < wid_vec_3.size(); i++)
+    for (int i = 0; i < wid_vec_3.size(); i++) {
+      message_pump();
       widVec4.push_back((WINDOWID)wid_vec_3[i].c_str());
+    }
     WINDOWID *arr = new WINDOWID[widVec4.size()]();
     std::copy(widVec4.begin(), widVec4.end(), arr);
     *win_id = arr; *size = i;
@@ -1631,8 +1642,10 @@ namespace ngs::proc {
     proc_id_enumerate(&proc_id, &size);
     if (proc_id) {
       std::vector<PROCID> res;
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < size; i++) {
+        message_pump();
         res.push_back(proc_id[i]);
+      }
       proc_list_vec.push_back(res);
       free_proc_id(proc_id);
     }
@@ -1889,8 +1902,10 @@ int main(int argc, char **argv) {
       char **buffer = nullptr; int size = 0;
       ngs::proc::cmdline_from_proc_id(strtoul(argv[2], nullptr, 10), &buffer, &size);
       if (buffer) {
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
+          message_pump();
           std::cout << buffer[i] << "\0"s;
+        }
         std::cout << "\0"s;
         ngs::proc::free_cmdline(buffer);
       }
@@ -1898,8 +1913,10 @@ int main(int argc, char **argv) {
       char **buffer = nullptr; int size = 0;
       ngs::proc::environ_from_proc_id(strtoul(argv[2], nullptr, 10), &buffer, &size);
       if (buffer) {
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < size; i++) {
+          message_pump();
           std::cout << buffer[i] << "\0"s;
+        }
         std::cout << "\0"s;
         ngs::proc::free_environ(buffer);
       }
