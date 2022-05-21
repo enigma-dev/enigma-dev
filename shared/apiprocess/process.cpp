@@ -547,8 +547,6 @@ namespace ngs::proc {
     bool result = TerminateProcess(proc, 0);
     CloseHandle(proc);
     return result;
-    #else
-    return false;
     #endif
   }
 
