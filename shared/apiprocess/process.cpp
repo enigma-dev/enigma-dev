@@ -514,10 +514,13 @@ namespace ngs::proc {
  
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
-    open_process_with_debug_privilege(proc_id);
-    open_process_with_debug_privilege(proc_id_from_self());
+    HANDLE other = open_process_with_debug_privilege(proc_id);
+    HANDLE self  = open_process_with_debug_privilege(proc_id_from_self());
     DebugSetProcessKillOnExit(FALSE);
-    return (!DebugActiveProcess(proc_id));
+    bool result = (!DebugActiveProcess(proc_id));
+    CloseHandle(other);
+    CloseHandle(self);
+    return result;
     #else
     return (kill(proc_id, SIGSTOP) != -1);
     #endif
@@ -525,10 +528,13 @@ namespace ngs::proc {
 
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
-    open_process_with_debug_privilege(proc_id);
-    open_process_with_debug_privilege(proc_id_from_self());
+    HANDLE other = open_process_with_debug_privilege(proc_id);
+    HANDLE self  = open_process_with_debug_privilege(proc_id_from_self());
     DebugSetProcessKillOnExit(FALSE);
-    return (!DebugActiveProcessStop(proc_id));
+    bool result = (!DebugActiveProcessStop(proc_id));
+    CloseHandle(other);
+    CloseHandle(self);
+    return result;
     #else
     return (kill(proc_id, SIGCONT) != -1);
     #endif
