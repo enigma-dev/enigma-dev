@@ -512,7 +512,7 @@ namespace ngs::proc {
 
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
-    typedef LONG (NTAPI *NtSuspendProcess)(IN HANDLE ProcessHandle);
+    typedef NTSTATUS (__stdcall *NtSuspendProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     NtSuspendProcess pfnNtSuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
     pfnNtSuspendProcess(proc);
@@ -524,7 +524,7 @@ namespace ngs::proc {
 
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
-    typedef LONG (NTAPI *NtResumeProcess)(IN HANDLE ProcessHandle);
+    typedef NTSTATUS (__stdcall *NtResumeProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     NtResumeProcess pfnNtResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
     pfnNtResumeProcess(proc);
