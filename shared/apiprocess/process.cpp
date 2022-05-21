@@ -518,7 +518,6 @@ namespace ngs::proc {
     NTSTATUS status = pfnNtSuspendProcess(proc);
     CloseHandle(proc);
     return (!status);
-    return 
     #else
     return (kill(proc_id, SIGSTOP) != -1);
     #endif
