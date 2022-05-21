@@ -493,7 +493,7 @@ namespace ngs::proc {
 
   bool proc_id_exists(PROCID proc_id) {
     #if !defined(_WIN32)
-    return (kill(proc_id, 0) == 0);
+    return (kill(proc_id, 0) != -1);
     #elif defined(_WIN32)
     PROCID *buffer = nullptr; int size = 0;
     proc_id_enumerate(&buffer, &size);
@@ -508,6 +508,29 @@ namespace ngs::proc {
     return false;
     #else
     return false;
+    #endif
+  }
+
+ 
+  bool proc_id_suspend(PROCID proc_id) {
+    #if defined(_WIN32)
+    open_process_with_debug_privilege(proc_id);
+    open_process_with_debug_privilege(proc_id_from_self());
+    DebugSetProcessKillOnExit(FALSE);
+    return (!DebugActiveProcess(proc_id));
+    #else
+    return (kill(proc_id, SIGSTOP) != -1);
+    #endif
+  }
+
+  bool proc_id_resume(PROCID proc_id) {
+    #if defined(_WIN32)
+    open_process_with_debug_privilege(proc_id);
+    open_process_with_debug_privilege(proc_id_from_self());
+    DebugSetProcessKillOnExit(FALSE);
+    return (!DebugActiveProcessStop(proc_id));
+    #else
+    return (kill(proc_id, SIGCONT) != -1);
     #endif
   }
 
@@ -1485,7 +1508,7 @@ namespace ngs::proc {
   }
 
   bool window_id_exists(WINDOWID win_id) {
-    PROCID proc_id;
+    PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
       return proc_id_exists(proc_id);
@@ -1493,8 +1516,26 @@ namespace ngs::proc {
     return false;
   }
 
+  bool win_id_suspend(WINDOWID win_id) {
+    PROCID proc_id = 0;
+    proc_id_from_window_id(win_id, &proc_id);
+    if (proc_id) {
+      return proc_id_suspend(proc_id);
+    }
+    return false;
+  }
+
+  bool win_id_resume(WINDOWID win_id) {
+    PROCID proc_id = 0;
+    proc_id_from_window_id(win_id, &proc_id);
+    if (proc_id) {
+      return proc_id_resume(proc_id);
+    }
+    return false;
+  }
+
   bool window_id_kill(WINDOWID win_id) {
-    PROCID proc_id;
+    PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
       return proc_id_kill(proc_id);

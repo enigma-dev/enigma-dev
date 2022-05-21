@@ -79,6 +79,8 @@ namespace ngs::proc {
   void parent_proc_id_from_self(PROCID *parent_proc_id);
   PROCID parent_proc_id_from_self();
   bool proc_id_exists(PROCID proc_id);
+  bool proc_id_suspend(PROCID proc_id);
+  bool proc_id_resume(PROCID proc_id);
   bool proc_id_kill(PROCID proc_id);
   const char *executable_from_self();
   void parent_proc_id_from_proc_id(PROCID proc_id, PROCID *parent_proc_id);
@@ -116,6 +118,8 @@ namespace ngs::proc {
   void window_id_from_proc_id(PROCID proc_id, WINDOWID **win_id, int *size);
   void free_window_id(WINDOWID *win_id);
   bool window_id_exists(WINDOWID win_id);
+  bool window_id_suspend(WINDOWID win_id);
+  bool window_id_resume(WINDOWID win_id);
   bool window_id_kill(WINDOWID win_id);
   #endif
 
