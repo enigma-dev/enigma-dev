@@ -2,7 +2,7 @@
 
  MIT License
  
- Copyright © 2021 Samuel Venable
+ Copyright © 2021-2022 Samuel Venable
  Copyright © 2021 Lars Nilsson
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -34,7 +34,7 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <Cocoa/Cocoa.h>
-#elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__NetBSD__) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
 #include <X11/Xlib.h>
 #endif
 #endif
