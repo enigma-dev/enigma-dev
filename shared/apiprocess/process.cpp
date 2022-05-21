@@ -510,21 +510,13 @@ namespace ngs::proc {
     #endif
   }
 
-  #if defined(_WIN32)
-  static std::unordered_map<PROCID, HANDLE> debug_procs;
-  #endif     
-
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
-    if (debug_procs.find(proc_id_from_self()) == debug_procs.end()) {
-      open_process_with_debug_privilege(proc_id_from_self());
-    } 
-    if (debug_procs.find(proc_id) == debug_procs.end()) {
-      debug_procs.insert(std::make_pair(proc_id, open_process_with_debug_privilege(proc_id)));
-    } else {
-      debug_procs[proc_id] = open_process_with_debug_privilege(proc_id);
-    }
-    return (!DebugActiveProcess(proc_id));
+    typedef LONG (NTAPI *NtSuspendProcess)(IN HANDLE ProcessHandle);
+    HANDLE proc = open_process_with_debug_privilege(proc_id);
+    NtSuspendProcess pfnNtSuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
+    pfnNtSuspendProcess(proc);
+    CloseHandle(proc);
     #else
     return (kill(proc_id, SIGSTOP) != -1);
     #endif
@@ -532,13 +524,11 @@ namespace ngs::proc {
 
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
-    DebugSetProcessKillOnExit(FALSE);
-    bool result = (!DebugActiveProcessStop(proc_id));
-    if (debug_procs.find(proc_id) != debug_procs.end()) {
-      CloseHandle(debug_procs[proc_id]);
-      debug_procs.erase(proc_id);
-    }
-    return result;
+    typedef LONG (NTAPI *NtResumeProcess)(IN HANDLE ProcessHandle);
+    HANDLE proc = open_process_with_debug_privilege(proc_id);
+    NtResumeProcess pfnNtResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
+    pfnNtResumeProcess(proc);
+    CloseHandle(proc);
     #else
     return (kill(proc_id, SIGCONT) != -1);
     #endif
