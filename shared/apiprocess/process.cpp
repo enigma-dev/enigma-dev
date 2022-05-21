@@ -510,9 +510,13 @@ namespace ngs::proc {
     #endif
   }
 
- 
+  #if defined(_WIN32)
+  static std::unordered_map<PROCID, HANDLE> debug_procs;
+  #endif     
+
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
+    debug_proc[proc_id] = open_process_with_debug_privilege(proc_id);
     return (!DebugActiveProcess(proc_id));
     #else
     return (kill(proc_id, SIGSTOP) != -1);
@@ -522,7 +526,10 @@ namespace ngs::proc {
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
     DebugSetProcessKillOnExit(FALSE);
-    return (!DebugActiveProcessStop(proc_id));
+    bool result = (!DebugActiveProcessStop(proc_id));
+    CloseHandle(debug_proc[proc_id]);
+    debug_proc.erase(proc_id);
+    return result;
     #else
     return (kill(proc_id, SIGCONT) != -1);
     #endif
