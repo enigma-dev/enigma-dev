@@ -516,7 +516,11 @@ namespace ngs::proc {
 
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
-    debug_procs[proc_id] = open_process_with_debug_privilege(proc_id);
+    if (debug_procs.find(proc_id) == debug_procs.end()) {
+      debug_procs.insert(std::make_pair(proc_id, open_process_with_debug_privilege(proc_id)));
+    } else {
+      debug_procs[proc_id] = open_process_with_debug_privilege(proc_id);
+    }
     return (!DebugActiveProcess(proc_id));
     #else
     return (kill(proc_id, SIGSTOP) != -1);
@@ -527,8 +531,10 @@ namespace ngs::proc {
     #if defined(_WIN32)
     DebugSetProcessKillOnExit(FALSE);
     bool result = (!DebugActiveProcessStop(proc_id));
-    CloseHandle(debug_procs[proc_id]);
-    debug_procs.erase(proc_id);
+    if (debug_procs.find(proc_id) != debug_procs.end()) {
+      CloseHandle(debug_procs[proc_id]);
+      debug_procs.erase(proc_id);
+    }
     return result;
     #else
     return (kill(proc_id, SIGCONT) != -1);
