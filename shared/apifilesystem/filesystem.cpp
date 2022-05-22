@@ -318,7 +318,7 @@ namespace ngs::fs {
                 if (matches && success) {
                   file_bin_hardlinks_result.push_back(file_path.string());
                   if (file_bin_hardlinks_result.size() >= info.nNumberOfLinks) {
-                   s->info.nNumberOfLinks = info.nNumberOfLinks; s->x.clear();
+                    s->info.nNumberOfLinks = info.nNumberOfLinks; s->x.clear();
                     _close(fd);
                     return;
                   }
@@ -335,7 +335,7 @@ namespace ngs::fs {
                   info.st_size == s->info.st_size && info.st_mtime == s->info.st_mtime) {
                  file_bin_hardlinks_result.push_back(file_path.string());
                   if (file_bin_hardlinks_result.size() >= info.st_nlink) {
-                  s->info.st_nlink = info.st_nlink; s->x.clear();
+                    s->info.st_nlink = info.st_nlink; s->x.clear();
                     return;
                   }
                 }
