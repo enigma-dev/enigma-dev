@@ -838,13 +838,12 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(proc_id)).c_str());
-      if (!ind) { CloseHandle(proc); return; }
-      static std::string cwd; cwd = executed_process_read_from_standard_output(ind);
-      if (!cwd.empty() && std::count(cwd.begin(), cwd.end(), '\\') > 1 && cwd.back() == '\\') {
-        static std::string substr; substr = cwd.substr(0, cwd.length() - 1);
+      static std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
+      if (!str.empty() && std::count(str.begin(), str.end(), '\\') > 1 && str.back() == '\\') {
+        static std::string substr; substr = str.substr(0, str.length() - 1);
         *buffer = (char *)substr.c_str();
       } else {
-        *buffer = (char *)cwd.c_str();
+        *buffer = (char *)str.c_str();
       }
       free_executed_process_standard_output(ind);
     } else {
@@ -965,13 +964,13 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(proc_id)).c_str());
-      if (!ind) { CloseHandle(proc); return; } 
-      static std::string cmd; cmd = executed_process_read_from_standard_output(ind);
-      int j = 0; if (!cmd.empty()) {
+      std::string str;  if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
+      char *cmd = str.data();
+      int j = 0; if (!str.empty()) {
         while (cmd[j] != '\0') {
           message_pump();
           cmdline_vec_1.push_back(&cmd[j]); i++;
-          j += (int)(strlen(&cmd[j]) + 1);
+          j += (int)(strlen(cmd + j) + 1);
         }
       }
       free_executed_process_standard_output(ind);
@@ -1100,13 +1099,13 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --env-from-pid " + std::to_string(proc_id)).c_str());
-      if (!ind) { CloseHandle(proc); return; } 
-      static std::string env; env = executed_process_read_from_standard_output(ind);
-      int j = 0; if (!env.empty()) {
+      std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
+      char *env = str.data();
+      int j = 0; if (!str.empty()) {
         while (env[j] != '\0') {
           message_pump();
           environ_vec_1.push_back(&env[j]); i++;
-          j += (int)(strlen(&env[j]) + 1);
+          j += (int)(strlen(env + j) + 1);
         }
       }
       free_executed_process_standard_output(ind);
