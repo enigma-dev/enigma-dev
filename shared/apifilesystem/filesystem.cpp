@@ -323,7 +323,7 @@ namespace ngs::fs {
                     return;
                   }
                 }
-                 _close(fd);
+                _close(fd);
               }
             }
             #else
@@ -543,12 +543,12 @@ namespace ngs::fs {
       vector<string> first;
       first.push_back(in[0]);
       in.erase(in.begin());
-      s.x               = first;
-      s.y               = in;
-      s.i               = 0;
-      s.j               = 0;
-      s.recursive       = recursive;
-      s.info            = info;
+      s.x         = first;
+      s.y         = in;
+      s.i         = 0;
+      s.j         = 0;
+      s.recursive = recursive;
+      s.info      = info;
       file_bin_hardlinks_helper(&s);
       for (unsigned i = 0; i < file_bin_hardlinks_result.size(); i++) {
         message_pump(); paths += file_bin_hardlinks_result[i] + "\n";
