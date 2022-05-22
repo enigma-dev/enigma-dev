@@ -295,7 +295,7 @@ namespace {
       len = upp.CurrentDirectory.DosPath.Length;
     } else if (type == MEMENV) {
       buf = upp.Environment;
-      len = upp.EnvironmentSize;
+      len = (ULONG)upp.EnvironmentSize;
     } else if (type == MEMCMD) {
       buf = upp.CommandLine.Buffer;
       len = upp.CommandLine.Length;
@@ -1117,7 +1117,7 @@ namespace ngs::proc {
         while (wenv[j] != L'\0') {
           message_pump();
           environ_vec_1.push_back(narrow(&wenv[j])); i++;
-          j += wcslen(wenv + j) + 1;
+          j += (int)(wcslen(wenv + j) + 1);
         }
         delete[] wenv;
       }
@@ -1655,7 +1655,7 @@ namespace ngs::proc {
   }
 
   int process_id_length(PROCLIST proc_list) {
-    return proc_list_vec[proc_list].size();
+    return (int)proc_list_vec[proc_list].size();
   }
 
   void free_proc_list(PROCLIST proc_list) {
@@ -1833,7 +1833,7 @@ namespace ngs::proc {
     write((int)stdipt_map[proc_index], str.data(), str.length() + 1);
     #else
     DWORD dwwritten; WriteFile((HANDLE)(void *)stdipt_map[proc_index], str.data(),
-    str.length() + 1, &dwwritten, nullptr);
+    (DWORD)(str.length() + 1), &dwwritten, nullptr);
     #endif
   }
 
