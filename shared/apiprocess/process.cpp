@@ -838,12 +838,13 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(proc_id)).c_str());
-      static std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
-      if (!str.empty() && std::count(str.begin(), str.end(), '\\') > 1 && str.back() == '\\') {
-        static std::string substr; substr = str.substr(0, str.length() - 1);
+      if (!ind) { CloseHandle(proc); return; }
+      static std::string cwd; cwd = executed_process_read_from_standard_output(ind);
+      if (!cwd.empty() && std::count(cwd.begin(), cwd.end(), '\\') > 1 && cwd.back() == '\\') {
+        static std::string substr; substr = cwd.substr(0, cwd.length() - 1);
         *buffer = (char *)substr.c_str();
       } else {
-        *buffer = (char *)str.c_str();
+        *buffer = (char *)cwd.c_str();
       }
       free_executed_process_standard_output(ind);
     } else {
@@ -964,13 +965,13 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(proc_id)).c_str());
-      std::string str;  if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
-      char *cmd = str.data();
-      int j = 0; if (!str.empty()) {
+      if (!ind) { CloseHandle(proc); return; } 
+      static std::string cmd; cmd = executed_process_read_from_standard_output(ind);
+      int j = 0; if (!cmd.empty()) {
         while (cmd[j] != '\0') {
           message_pump();
           cmdline_vec_1.push_back(&cmd[j]); i++;
-          j += strlen(cmd + j) + 1;
+          j += (int)(strlen(&cmd[j]) + 1);
         }
       }
       free_executed_process_standard_output(ind);
@@ -1099,13 +1100,13 @@ namespace ngs::proc {
         }
       }
       LOCALPROCID ind = process_execute(("\"" + exe + "\" --env-from-pid " + std::to_string(proc_id)).c_str());
-      std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
-      char *env = str.data();
-      int j = 0; if (!str.empty()) {
+      if (!ind) { CloseHandle(proc); return; } 
+      static std::string env; env = executed_process_read_from_standard_output(ind);
+      int j = 0; if (!env.empty()) {
         while (env[j] != '\0') {
           message_pump();
           environ_vec_1.push_back(&env[j]); i++;
-          j += strlen(env + j) + 1;
+          j += (int)(strlen(&env[j]) + 1);
         }
       }
       free_executed_process_standard_output(ind);
@@ -1422,7 +1423,7 @@ namespace ngs::proc {
     XCloseDisplay(display);
     #endif
     std::vector<WINDOWID> wid_vec_2;
-    for (int i = 0; i < wid_vec_1.size(); i++) {
+    for (int i = 0; i < (int)wid_vec_1.size(); i++) {
       message_pump();
       wid_vec_2.push_back((WINDOWID)wid_vec_1[i].c_str());
     }
@@ -1457,7 +1458,7 @@ namespace ngs::proc {
       }
     }
     std::vector<WINDOWID> widVec4;
-    for (int i = 0; i < wid_vec_3.size(); i++) {
+    for (int i = 0; i < (int)wid_vec_3.size(); i++) {
       message_pump();
       widVec4.push_back((WINDOWID)wid_vec_3[i].c_str());
     }
