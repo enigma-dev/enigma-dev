@@ -1055,7 +1055,7 @@ namespace ngs::proc {
     kvm_close(kd);
     #endif
     std::vector<char *> cmdline_vec_2;
-    for (int i = 0; i < cmdline_vec_1.size(); i++) {
+    for (int i = 0; i < (int)cmdline_vec_1.size(); i++) {
       message_pump();
       cmdline_vec_2.push_back((char *)cmdline_vec_1[i].c_str());
     }
@@ -1187,7 +1187,7 @@ namespace ngs::proc {
     kvm_close(kd);
     #endif
     std::vector<char *> environ_vec_2;
-    for (int i = 0; i < environ_vec_1.size(); i++) {
+    for (int i = 0; i < (int)environ_vec_1.size(); i++) {
       message_pump();
       environ_vec_2.push_back((char *)environ_vec_1[i].c_str());
     }
@@ -1202,7 +1202,7 @@ namespace ngs::proc {
     if (buffer) {
       for (int i = 0; i < size; i++) {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
-        for (int j = 0; j < equalssplit.size(); j++) {
+        for (int j = 0; j < (int)equalssplit.size(); j++) {
           std::string str1 = name;
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
           std::transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
