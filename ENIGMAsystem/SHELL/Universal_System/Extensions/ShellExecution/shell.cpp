@@ -76,11 +76,10 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  Display *display = XOpenDisplay(nullptr);
-  Window r = 0; int x = 0, y = 0;
-  unsigned w = 0, h = 0, b = 0, d = 0;
-  XGetGeometry(display, rootparent, &r, &x, &y, &w, &h, &b, &d);
-  XResizeWindow(display, child, w, h);
+  Display *display = XOpenDisplay(nullptr); XMapWindow(display, child);
+  Window r = 0; int x = 0, y = 0; unsigned w = 0, h = 0, b = 0, d = 0;
+  XGetGeometry(display, parent, &r, &x, &y, &w, &h, &b, &d);
+  XMoveResizeWindow(display, child, 0, 0, w, h);
   XCloseDisplay(display);
   #else
   DEBUG_MESSAGE("Unsupported platform for function!", MESSAGE_TYPE::M_INFO);
