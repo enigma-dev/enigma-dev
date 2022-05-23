@@ -36,11 +36,14 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #if defined(_WIN32)
   HWND child  = (HWND)(void *)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_BORDER | WS_SIZEBOX));
+  RECT wrect; GetWindowRect(parent, &wrect); RECT crect; GetClientRect(parent, &crect); 
+  POINT lefttop     = { crect.left,  crect.top    }; ClientToScreen(parent, &lefttop);
+  POINT bottomright = { crect.right, crect.bottom }; ClientToScreen(parent, &bottomright);
+  MoveWindow(child, -(lefttop.x - wrect.left), -(lefttop.y - wrect.top), crect.right + bottomright.x, crect.bottom + bottomright.y, true);
+  SetWindowLongPtr(child, GWL_STYLE, GetWindowLongPtr(child, GWL_STYLE) & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZE | WS_MAXIMIZE | WS_SYSMENU | WS_POPUP | WS_SIZEBOX) | WS_CHILD);
   SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW);
-  SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
-  SetParent(child, parent); RECT rect; GetClientRect(parent, &rect); ShowWindow(child, SW_MAXIMIZE);
-  MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
+  SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS); 
+  SetParent(child, parent); ShowWindow(child, SW_MAXIMIZE);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
@@ -67,18 +70,17 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
   #if defined(_WIN32)
   HWND child  = (HWND)(void *)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   HWND parent = (HWND)(void *)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  RECT rect; GetClientRect(parent, &rect); MoveWindow(child, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, true);
-  SetWindowLongPtr(child, GWL_STYLE, (GetWindowLongPtr(child, GWL_STYLE) | WS_CHILD) & ~(WS_CAPTION | WS_BORDER | WS_SIZEBOX));
-  SetWindowLongPtr(child, GWL_EXSTYLE, GetWindowLongPtr(child, GWL_EXSTYLE) | WS_EX_TOOLWINDOW); 
+  RECT crect; GetClientRect(parent, &crect); 
+  MoveWindow(child, 0, 0, crect.right, crect.bottom, true);
   SetWindowLongPtr(parent, GWL_STYLE, GetWindowLongPtr(parent, GWL_STYLE) | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   Window child  = (Window)(uintptr_t)strtoull(windowId.c_str(), nullptr, 10);
   Window parent = (Window)(uintptr_t)strtoull(parentWindowId.c_str(), nullptr, 10);
-  Display *display = XOpenDisplay(nullptr); XMapWindow(display, child);
+  Display *display = XOpenDisplay(nullptr);
   Window r = 0; int x = 0, y = 0;
   unsigned w = 0, h = 0, b = 0, d = 0;
-  XGetGeometry(display, parent, &r, &x, &y, &w, &h, &b, &d);
-  XMoveResizeWindow(display, child, 0, 0, w, h);
+  XGetGeometry(display, rootparent, &r, &x, &y, &w, &h, &b, &d);
+  XResizeWindow(display, child, w, h);
   XCloseDisplay(display);
   #else
   DEBUG_MESSAGE("Unsupported platform for function!", MESSAGE_TYPE::M_INFO);
