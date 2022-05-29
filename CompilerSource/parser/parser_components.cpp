@@ -59,19 +59,20 @@ int dropscope()
 int quickscope()
 {
   jdi::definition_scope* ns = new jdi::definition_scope("{}",current_scope,jdi::DEF_NAMESPACE);
-  current_scope->members["{}"+tostring(scope_braceid++)] = ns;
+  current_scope->members["{}"+tostring(scope_braceid++)].reset(ns);
   current_scope = ns;
   return 0;
 }
 int initscope(string name)
 {
   scope_braceid = 0;
-  main_context->get_global()->members[name] = current_scope = new jdi::definition_scope(name,main_context->get_global(),jdi::DEF_NAMESPACE);
+  main_context->get_global()->members[name] = std::make_unique<jdi::definition_scope>(name,main_context->get_global(),jdi::DEF_NAMESPACE);
+  current_scope = reinterpret_cast<jdi::definition_scope*>(main_context->get_global()->members[name].get());
   return 0;
 }
 int quicktype(unsigned flags, string name)
 {
-  current_scope->members[name] = new jdi::definition(name,current_scope,flags | jdi::DEF_TYPENAME);
+  current_scope->members[name] = std::make_unique<jdi::definition>(name,current_scope,flags | jdi::DEF_TYPENAME);
   return 0;
 }
 

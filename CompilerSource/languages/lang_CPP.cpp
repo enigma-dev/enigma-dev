@@ -169,11 +169,11 @@ enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
   using namespace enigma::parsing;
   if (macro.is_function) {
     std::vector<std::string> arg_list =
-        ((const jdi::macro_function*) &macro)->args;
+        macro.params;
     return enigma::parsing::Macro(macro.name, std::move(arg_list),
-          macro.is_variadic(), macro.valueString(), herr);
+          macro.is_variadic, macro.toString(), herr);
   }
-  return enigma::parsing::Macro(macro.name, macro.valueString(), herr);
+  return enigma::parsing::Macro(macro.name, macro.toString(), herr);
 }
 
 }  // namespace
@@ -187,7 +187,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
 
   cout << "Creating swap." << endl;
   delete main_context;
-  main_context = new jdi::context();
+  main_context = new jdi::Context();
 
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
@@ -200,7 +200,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
     CURRENT_TIME(ts);
-    res = main_context->parse_C_stream(f, "SHELLmain.cpp");
+    res = main_context->parse_stream(f);
     CURRENT_TIME(te);
   }
 
@@ -252,7 +252,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
 
   cout << "Creating dummy primitives for old ENIGMA" << endl;
   for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
-    main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+    main_context->get_global()->members[it->first] = std::make_unique<jdi::definition>(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
 
   enigma::parsing::StdErrorHandler hack;  // TODO: FIXME: This should be using a central error handler...

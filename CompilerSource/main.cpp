@@ -109,7 +109,7 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   current_language = languages[current_language_name] = new lang_CPP();
 
   cout << "Creating parse context" << endl;
-  main_context = new jdi::context;
+  main_context = new jdi::Context;
 
   return 0;
 }
