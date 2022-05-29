@@ -132,6 +132,8 @@ bool lang_CPP::global_exists(string n) const {
 void lang_CPP::quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
   scope->members[name] = std::make_unique<jdi::definition_typed>(name,scope,type);
 }
+
+enigma::parsing::StdErrorHandler hackybaby;  // TODO: FIXME: This should be using a central error handler...
 void lang_CPP::quickmember_script(jdi::definition_scope* scope, string name) {
   jdi::ref_stack rfs;
   jdi::ref_stack::parameter_ct params;
@@ -142,5 +144,5 @@ void lang_CPP::quickmember_script(jdi::definition_scope* scope, string name) {
     params.throw_on(p);
   }
   rfs.push_func(params);
-  scope->members[name] = std::make_unique<jdi::definition_function>(name,enigma_type__var,scope,rfs,0,0);
+  scope->members[name] = std::make_unique<jdi::definition_function>(name,enigma_type__var,scope,rfs,0,0, SourceLocation{name, 0, 0}, (ErrorHandler*)&hackybaby);
 }

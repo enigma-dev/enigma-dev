@@ -204,7 +204,7 @@ const char* establish_bearings(const char *compiler)
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = builtin.parse_stream(macro_reader, (codegen_directory/"enigma_defines.txt").u8string().c_str());
+    int res = builtin.parse_stream(macro_reader);
     builtin.add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
