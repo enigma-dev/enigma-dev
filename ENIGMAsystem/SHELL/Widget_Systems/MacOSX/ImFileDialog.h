@@ -16,7 +16,7 @@
 #include "filesystem.hpp"
 
 #define IFD_DIALOG_FILE      0
-#define IFD_DIALOG_DIRECTORY    1
+#define IFD_DIALOG_DIRECTORY 1
 #define IFD_DIALOG_SAVE      2
 
 #define IFD_DIALOG_WIDTH    (int)((!ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH" ).empty()) ? strtoul(ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH" ).c_str(), nullptr, 10) : 600)
