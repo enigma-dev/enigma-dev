@@ -78,18 +78,18 @@ ifeq ($(OS), Darwin)
 else ifeq ($(OS), FreeBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
 else ifeq ($(OS), DragonFly)
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 else ifeq ($(OS), OpenBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a
+	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
+	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 else
 	ifeq ($(OS), Linux)
 	override LDLIBS += -lpthread -lprocps
