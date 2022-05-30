@@ -478,7 +478,7 @@ namespace {
     SDL_GL_DeleteContext(gl_context);
     #endif
     SDL_DestroyWindow(window);
-    //SDL_Quit();
+    SDL_Quit();
     return result;
   }
 
