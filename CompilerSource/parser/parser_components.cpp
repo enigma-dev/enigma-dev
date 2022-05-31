@@ -151,9 +151,11 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
           c = 't';
         else if (current_language->is_variadic_function(d))
           c = 'V', cprime = 'n';
+        else std::cerr << name << " is not a type";
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
+      else std::cerr << name << " is not a known name";
       
       if (last_token == c || last_token == cprime)
       {

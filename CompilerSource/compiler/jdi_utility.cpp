@@ -116,8 +116,8 @@ size_t lang_CPP::definition_overload_count(jdi::definition *d) const {
 
 
 #include "languages/lang_CPP.h"
-definition* lang_CPP::find_typename(string n) const {
-  definition* d = look_up(n);
+definition* lang_CPP::find_typename(std::string_view name) const {
+  definition* d = look_up(name);
   if (!d) return NULL;
   if (d->flags & DEF_TYPENAME) return d;
   return NULL;

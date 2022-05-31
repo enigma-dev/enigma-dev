@@ -106,10 +106,14 @@ full_type jdi::context_parser::read_type(token_t &token, definition_scope *scope
         return full_type();
     }
     else {
-      if (token.type == TT_IDENTIFIER)
+      if (token.type == TT_IDENTIFIER) {
         token.report_error(herr,"Type name expected here; `" + token.content.toString() + "' is not declared");
-      else
-        token.report_errorf(herr,"Type name expected here before %s");
+      } else if (token.type == TT_ATTRIBUTE) {
+        read_attribute_clause(token, scope);
+        return read_type(token, scope);
+      } else {
+        token.report_errorf(herr, "Type name expected here before %s");
+      }
       return full_type();
     }
   } else {

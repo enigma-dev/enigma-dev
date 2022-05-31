@@ -43,11 +43,11 @@ std::string format(std::string_view text, Args... args) {
   std::string strs[] = { jdi::to_string(args)... };
 
   int cap = text.length();
-  for (const std::string str : strs) { cap += str.length() - 2; }
+  for (const std::string &str : strs) { cap += str.length() - 2; }
   if (cap > 0) res.reserve(cap);  // Should always be true if format str is correct.
 
   size_t p = 0;
-  for (const std::string str : strs) {
+  for (const std::string &str : strs) {
     const size_t pn = text.find("%s", p);
     if (pn == std::string::npos) break;
     res += text.substr(p, pn - p);

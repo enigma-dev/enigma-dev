@@ -76,7 +76,7 @@ struct lang_CPP: language_adapter {
   // ===============================================================================================
 
   /// Look up a type by its name.
-  jdi::definition* find_typename(string name) const final;
+  jdi::definition* find_typename(std::string_view name) const final;
 
   // Returns whether the given definition is a function accepting `enigma::varargs`.
   bool is_variadic_function(jdi::definition *d) const final;
@@ -98,7 +98,7 @@ struct lang_CPP: language_adapter {
     return quickmember_variable(scope, jdi::builtin_type__int, name);
   }
   /// Look up an enigma_user definition by its name.
-  jdi::definition* look_up(const string &name) const final;
+  jdi::definition* look_up(std::string_view name) const final;
 
   // Reads in event data automatically. This isn't great, but is better than
   // accessing everything statically (for future refactors).

@@ -59,7 +59,7 @@ class LanguageFrontend {
   virtual int function_variadic_after(jdi::definition_function *refs) const = 0;
 
   /// Look up a type by its name.
-  virtual jdi::definition* find_typename(std::string name) const = 0;
+  virtual jdi::definition* find_typename(std::string_view name) const = 0;
   /// Check whether the given definition is callable as a function.
   virtual bool definition_is_function(jdi::definition *d) const = 0;
   /// Assuming this definition is a function, retrieve the number of overloads it has.
@@ -78,7 +78,7 @@ class LanguageFrontend {
   virtual void quickmember_integer(jdi::definition_scope* scope,
                                    std::string name) = 0;
   /// Look up an enigma_user definition by its name.
-  virtual jdi::definition* look_up(const std::string &name) const = 0;
+  virtual jdi::definition* look_up(std::string_view name) const = 0;
 
   virtual ~LanguageFrontend() = default;
 };

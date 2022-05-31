@@ -142,10 +142,16 @@ definition* jdi::context_parser::read_qualified_definition(token_t &token, defin
     }
 
     if (token.type == TT_SCOPE) {
-      #ifdef DEBUG_MODE
-        if (!res) { token.report_error(herr, "Accessing nullptr scope..."); return nullptr; }
-        if (!(res->flags & DEF_SCOPE)) { token.report_error(herr, "Accessing non-scope object " + res->name + "..."); return nullptr; }
-      #endif
+      if (!res) {
+        token.report_error(herr, "Could not parse entity on left hand of scope access...");
+        return nullptr;
+      }
+      if (!(res->flags & DEF_SCOPE)) {
+        token.report_error(
+            herr, "Entity `" + res->name + "` on left hand of scope access is not a scope...");
+        return nullptr;
+      }
+
       token = lex->get_token();
       if (token.type != TT_IDENTIFIER) {
         if (token.type == TT_OPERATORKW) {

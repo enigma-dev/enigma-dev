@@ -78,102 +78,26 @@ void parser_init();
 
 namespace {
 
-/* TODO: it would be better to use this in the future to translate JDI's
- * tokenization to ENIGMA's own token space.  Legacy JDI just treats macros
- * as big string blobs, though (and pre-segmented string blobs).
-
-// taking content here is a hack; old JDI uses gloss token types instead of one symbol per token
-enigma::parsing::TokenType TranslateTokenType(jdi::token_t token,
-                                              std::string_view content) {
-  using enigma::parsing::TokenType;
-  switch (token.type) {
-    case jdi::TT_DECFLAG:       return TokenType::TT_TYPE_NAME;
-    case jdi::TT_DECLARATOR:    return TokenType::TT_TYPE_NAME;
-    case jdi::TT_CLASS:         return TokenType::TT_CLASS;
-    case jdi::TT_STRUCT:        return TokenType::TT_STRUCT;
-
-    case jdi::TT_IDENTIFIER:    return TokenType::TT_VARNAME;
-    case jdi::TT_DEFINITION:    return TokenType::TT_VARNAME;
-    case jdi::TT_TEMPLATE:      return TokenType::TT_ERROR;
-    case jdi::TT_TYPENAME:      return TokenType::TT_ERROR;
-    case jdi::TT_TYPEDEF:       return TokenType::TT_ERROR;
-    case jdi::TT_USING:         return TokenType::TT_ERROR;
-    case jdi::TT_PUBLIC:        return TokenType::TT_ERROR;
-    case jdi::TT_PRIVATE:       return TokenType::TT_ERROR;
-    case jdi::TT_PROTECTED:     return TokenType::TT_ERROR;
-    case jdi::TT_FRIEND:        return TokenType::TT_ERROR;
-    case jdi::TT_COLON:         return TokenType::TT_COLON;
-    case jdi::TT_SCOPE:         return TokenType::TT_SCOPEACCESS;
-
-    case jdi::TT_LEFTPARENTH:   return TokenType::TT_BEGINPARENTH;
-    case jdi::TT_RIGHTPARENTH:  return TokenType::TT_ENDPARENTH;
-    case jdi::TT_LEFTBRACKET:   return TokenType::TT_BEGINBRACKET;
-    case jdi::TT_RIGHTBRACKET:  return TokenType::TT_ENDBRACKET;
-    case jdi::TT_LEFTBRACE:     return TokenType::TT_BEGINBRACE;
-    case jdi::TT_RIGHTBRACE:    return TokenType::TT_ENDBRACE;
-    case jdi::TT_LESSTHAN:      return TokenType::TT_LESS;
-    case jdi::TT_GREATERTHAN:   return TokenType::TT_GREATER;
-    case jdi::TT_TILDE:         return TokenType::TT_TILDE;
-    case jdi::TT_OPERATOR:      return enigma::parsing::Lexer::LookUpOperator(content);
-    case jdi::TT_COMMA:         return TokenType::TT_COMMA;
-    case jdi::TT_SEMICOLON:     return TokenType::TT_SEMICOLON;
-    case jdi::TT_STRINGLITERAL: return TokenType::TT_STRINGLIT;
-    case jdi::TT_CHARLITERAL:   return TokenType::TT_CHARLIT;
-    case jdi::TT_DECLITERAL:    return TokenType::TT_DECLITERAL;
-    case jdi::TT_HEXLITERAL:    return TokenType::TT_HEXLITERAL;
-    case jdi::TT_OCTLITERAL:    return TokenType::TT_OCTLITERAL;
-    case jdi::TTM_CONCAT:       return TokenType::TTM_CONCAT;
-    case jdi::TTM_TOSTRING:     return TokenType::TTM_STRINGIFY;
-    case jdi::TT_NEW:           return TokenType::TT_S_NEW;
-    case jdi::TT_DELETE:        return TokenType::TT_S_DELETE;
-    case jdi::TT_ENDOFCODE:     return TokenType::TT_ENDOFCODE;
-
-    // ...JDI doesn't actually do these, right now.
-    case jdi::TT_IF:         return TokenType::TT_S_IF;
-    case jdi::TT_THEN:       return TokenType::TT_S_THEN;
-    case jdi::TT_ELSE:       return TokenType::TT_S_ELSE;
-    case jdi::TT_REPEAT:     return TokenType::TT_S_REPEAT;
-    case jdi::TT_DO:         return TokenType::TT_S_DO;
-    case jdi::TT_WHILE:      return TokenType::TT_S_WHILE;
-    case jdi::TT_UNTIL:      return TokenType::TT_S_UNTIL;
-    case jdi::TT_FOR:        return TokenType::TT_S_FOR;
-    case jdi::TT_SWITCH:     return TokenType::TT_S_SWITCH;
-    case jdi::TT_CASE:       return TokenType::TT_S_CASE;
-    case jdi::TT_DEFAULT:    return TokenType::TT_S_DEFAULT;
-    case jdi::TT_BREAK:      return TokenType::TT_BREAK;
-    case jdi::TT_CONTINUE:   return TokenType::TT_CONTINUE;
-    case jdi::TT_RETURN:     return TokenType::TT_RETURN;
-    case jdi::TT_WITH:       return TokenType::TT_S_WITH;
-    case jdi::TT_GLOBAL:     return TokenType::TT_GLOBAL;
-    case jdi::TT_LOCAL:      return TokenType::TT_LOCAL;
-
-    case jdi::TT_ENUM:       case jdi::TT_UNION:       case jdi::TT_NAMESPACE:
-    case jdi::TT_EXTERN:     case jdi::TT_ASM:         case jdi::TT_OPERATORKW:
-    case jdi::TT_CONST_CAST: case jdi::TT_STATIC_CAST: case jdi::TT_DYNAMIC_CAST: case jdi::TT_REINTERPRET_CAST:
-    case jdi::TT_ELLIPSIS:   case jdi::TT_MEMBEROF:
-    case jdi::TT_SIZEOF:     case jdi::TT_ISEMPTY:
-    case jdi::TT_ALIGNAS:    case jdi::TT_ALIGNOF:
-    case jdi::TT_DECLTYPE:   case jdi::TT_TYPEID:
-    case jdi::TT_AUTO:       case jdi::TT_CONSTEXPR:
-    case jdi::TT_TRY:        case jdi::TT_CATCH:     case jdi::TT_NOEXCEPT:
-    case jdi::TT_STATIC_ASSERT:
-    case jdi::TT_INVALID:
-    default:
-        return TokenType::TT_ERROR;
+std::string TranscribeTokens(const jdi::token_vector &tokens) {
+  std::string result;
+  for (const jdi::token_t &token : tokens) {
+    if (result.length()) result.push_back(' ');
+    result += token.content.toString();
   }
+  return result;
 }
-*/
 
 enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
                                       enigma::parsing::ErrorHandler *herr) {
   using namespace enigma::parsing;
   if (macro.is_function) {
-    std::vector<std::string> arg_list =
-        macro.params;
-    return enigma::parsing::Macro(macro.name, std::move(arg_list),
-          macro.is_variadic, macro.toString(), herr);
+    auto copy = macro.params;
+    return enigma::parsing::Macro(
+        macro.name, std::move(copy), macro.is_variadic,
+        TranscribeTokens(macro.raw_value), herr);
   }
-  return enigma::parsing::Macro(macro.name, macro.toString(), herr);
+  return enigma::parsing::Macro(
+      macro.name, TranscribeTokens(macro.raw_value), herr);
 }
 
 }  // namespace
@@ -237,6 +161,17 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
       namespace_enigma_user = (jdi::definition_scope*) d;
     } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
+  if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
+    if (dstd->flags & jdi::DEF_NAMESPACE) {
+      jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
+      jdi::definition *j_string = j_std->look_up("string");
+      if (!j_string) cerr << "Error! std::string was not detected! The parse output probably sucks.";
+      else if (!(j_string->flags & jdi::DEF_TYPENAME))
+        cerr << "Error! std::string is not a type! The parse output probably sucks.";
+      else
+        cout << "Successfully parsed std::string, so data is probably good.";
+    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace std not found!" << endl;
 
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
@@ -319,7 +254,9 @@ int lang_CPP::load_shared_locals() {
   return 0;
 }
 
-jdi::definition* lang_CPP::look_up(const string &name) const {
+jdi::definition* lang_CPP::look_up(std::string_view n) const {
+  // TODO: FIXME: slow-ass conversion still exists...
+  std::string name(n);
   auto builtin = jdi::builtin_declarators.find(name);
   if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);

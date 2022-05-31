@@ -344,6 +344,7 @@ namespace jdi {
         buf.swap(buffer);
         lex->push_rewind_buffer(std::move(buf));
       }
+      size_t size() const { return buffer.size(); }
     };
 
     /// Push a buffer of tokens onto this lexer.

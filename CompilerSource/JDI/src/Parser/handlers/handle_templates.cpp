@@ -527,7 +527,7 @@ int context_parser::handle_template(definition_scope *scope, token_t& token,
       }
       if (token.type != TT_SEMICOLON) {
         herr->error(token)
-            << "Expected semicolon to close friend statement before " << token;
+            << "Expected semicolon to close `friend` statement before " << token;
       }
       return 0; // TODO: store this friend somewhere
     }
@@ -535,11 +535,43 @@ int context_parser::handle_template(definition_scope *scope, token_t& token,
       herr->error(token) << "Unexpected `friend' statement: not in a class";
       return 1;
     }
-  }
-  else {
-    herr->error(token) <<
-      "Expected class or function declaration following template clause before "
-      << token;
+  } else if (token.type == TT_USING) {
+    return !handle_using_directive(temp.get(), token);
+  } else if (token.type == TT_IDENTIFIER || token.type == TT_DEFINITION) {
+    herr->error(token)
+        << "Expected type name, but found unrecognized identifier `"
+        << token.content.toString() << "`; declaration will be skipped";
+    int level = 0;
+    while (token.type != TT_ENDOFCODE) {
+      token = read_next_token(scope);
+      if (token.type == TT_LEFTPARENTH || token.type == TT_LEFTBRACKET) {
+        ++level;
+        continue;
+      }
+      if (token.type == TT_RIGHTPARENTH || token.type == TT_RIGHTBRACKET
+          || token.type == TT_RIGHTBRACE) {
+        if (!level) {
+          herr->error(token) << "Unexpected " << token
+              << "; expected semicolon or function body for skipped declaration.";
+          break;
+        }
+        --level;
+        continue;
+      }
+      if (level > 0) {
+        if (token.type == TT_LEFTBRACE) ++level;
+        continue;
+      }
+      if (token.type == TT_LEFTBRACE) {
+        handle_function_implementation(lex, token, scope, herr);
+        break;
+      }
+      if (token.type == TT_SEMICOLON) break;
+    }
+  } else {
+    herr->error(token)
+        << "Expected class or function declaration following `template` clause before "
+        << token;
     return ERROR_CODE;
   }
   return 0;
