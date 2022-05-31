@@ -1192,9 +1192,11 @@ enum class LexerKeyword {
   // below it. Used to quickly check if we're evaluating these.
   CPP_COND_BEGIN,
   DEFINED,
+  HAS_BUILTIN,
   HAS_INCLUDE,
   HAS_INCLUDE_NEXT,
-  HAS_CPP_ATTRIBUTES
+  HAS_CPP_ATTRIBUTES,
+  IS_IDENTIFIER,
 };
 static const unordered_map<string, LexerKeyword> kLexerKeywords {
   { "__FILE__", LexerKeyword::FILENAME },
@@ -1208,6 +1210,9 @@ static const unordered_map<string, LexerKeyword> kLexerKeywords {
   {"__has_include_next", LexerKeyword::HAS_INCLUDE_NEXT},
   {"__has_include_next__", LexerKeyword::HAS_INCLUDE_NEXT},  // GNU spelling
   {"__has_cpp_attribute", LexerKeyword::HAS_CPP_ATTRIBUTES},
+  { "__has_builtin", LexerKeyword::HAS_BUILTIN },
+  { "__has_builtin__", LexerKeyword::HAS_BUILTIN },  // hedging...
+  { "__is_identifier", LexerKeyword::IS_IDENTIFIER },
 };
 
 const map<string, long> kAttributeSupportDate {
@@ -1332,6 +1337,40 @@ bool lexer::handle_macro(token_t &identifier) {
       identifier.content =
           try_find_and_open(cfile, builtin, fnfind, chklocal, incnext).is_open()
               ? "1" : "0";
+      identifier.type = TT_DECLITERAL;
+      return false;
+    }
+    case LexerKeyword::HAS_BUILTIN: {
+      token_t tok = read_raw_non_empty();
+      if (tok.type != TT_LEFTPARENTH) {
+        herr->error(tok, "Expected parentheses after `__has_builtin`");
+        return false;
+      }
+      int parenths = 1;
+      while (parenths > 0 && tok.type != TT_ENDOFCODE) {
+        tok = read_raw_non_empty();
+        if (tok.type == TT_LEFTPARENTH) ++parenths;
+        else if (tok.type == TT_RIGHTPARENTH) --parenths;
+      }
+      herr->warning(tok) << "Final parenth count: " << parenths;
+      identifier.content = "0";  // Just tell GNU we don't support shit
+      identifier.type = TT_DECLITERAL;
+      return false;
+    }
+    case LexerKeyword::IS_IDENTIFIER: {
+      // This might not be implemented correctly per GNU.
+      token_t tok = read_raw_non_empty();
+      if (tok.type != TT_LEFTPARENTH) {
+        herr->error(tok, "Expected parentheses after `__is_identifier`");
+        return false;
+      }
+      bool result = (tok = read_raw_non_empty()).type == TT_IDENTIFIER;
+      if (tok.type != TT_RIGHTPARENTH) tok = read_raw_non_empty();
+      if (tok.type != TT_RIGHTPARENTH) {
+        herr->error(tok, "Expected closing parenthesis to `__is_identifier`");
+        return false;
+      }
+      identifier.content = result ? "1" : "0";
       identifier.type = TT_DECLITERAL;
       return false;
     }
@@ -1463,7 +1502,8 @@ token_t lexer::get_token() {
 }
 
 token_t lexer::get_token_in_scope(jdi::definition_scope *scope) {
-  token_t res = get_token();
+  token_t res = preprocess_and_read_token();
+  while (res.preprocesses_away()) res = preprocess_and_read_token();
 
   if (res.type == TT_IDENTIFIER) {
     definition *def = res.def = scope->look_up(res.content.toString());
@@ -1472,13 +1512,14 @@ token_t lexer::get_token_in_scope(jdi::definition_scope *scope) {
     }
   }
 
+  if (lookahead_buffer) lookahead_buffer->push_back(res);
   return res;
 }
 
 void lexer::push_buffer(OpenBuffer &&buf) {
   assert(open_buffers.empty() == !buffered_tokens);
   if (buffered_tokens) {
-    assert(open_buffers.empty() == !buffered_tokens);
+    assert(!open_buffers.empty());
     open_buffers.back().buf_pos = buffer_pos;
   }
   open_buffers.emplace_back(std::move(buf));

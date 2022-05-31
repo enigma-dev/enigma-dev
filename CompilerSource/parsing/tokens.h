@@ -31,14 +31,14 @@ namespace enigma {
 namespace parsing {
 
 enum TokenType {
-  TT_VARNAME,         // somevar
+  TT_IDENTIFIER,      // Variable names, including function, class, and template names.
   TT_SEMICOLON,       // A semicolon.
   TT_COLON,           // A colon.
   TT_COMMA,           // A comma.
   TT_ASSIGN,          // The strict := assignment operator. Not to be confused with EQUALS.
   TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>=
   TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
-  TT_DECIMAL,         // A dot. '.'. Whether for number or for access is determined in the second pass.
+  TT_DOT,             // A dot ('.'). Is neither preceeded nor followed by a numeral.
   TT_PLUS,            // The + operator.
   TT_MINUS,           // The - operator.
   TT_STAR,            // The * operator.
@@ -81,9 +81,7 @@ enum TokenType {
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::
-  TT_FUNCTION,        // game_end
-  TT_TYPE_NAME,       // int, double, whatever
-  TT_NAMESPACE,       // std, enigma, sf
+  TT_TYPE_NAME,       // int, double, var; any baked-in primitive type (includes C++ types in namespace enigma_user).
   TT_LOCAL,           // `local` storage specifier
   TT_GLOBAL,          // `global` storage specifier
   TT_RETURN,          // The `return` keyword

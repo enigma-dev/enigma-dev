@@ -146,7 +146,8 @@ struct Macro {
       name(definiendum), value(std::move(definiens)),
       parameters(std::move(arg_list)), is_variadic(variadic),
       parts(Componentize(value, *parameters, herr)) {}
-  // Like the function-like constructor, but parses tokens from a given string.
+  /// Like the function-like constructor, but parses tokens from the
+  /// given string.  NOTE: The string is lexed using C++ semantics.
   Macro(std::string_view definiendum, std::vector<std::string> &&arg_list,
         bool variadic, std::string definiens, ErrorHandler *herr):
       name(definiendum),

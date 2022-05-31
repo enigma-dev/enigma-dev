@@ -64,8 +64,10 @@ int jdi::context_parser::handle_scope(definition_scope *scope, token_t& token, u
                 token.report_error(herr, "Expected closing symbol to function");
                 continue;
               }
-            }
-            else {
+            } else if (token.type == TT_ATTRIBUTE) {
+              read_attribute_clause(token, scope);
+              goto handled_declarator_block;
+            } else {
               token.report_errorf(herr, "Expected semicolon before %s following declaration");
               #if FATAL_ERRORS
                 return 1;
@@ -116,7 +118,9 @@ int jdi::context_parser::handle_scope(definition_scope *scope, token_t& token, u
         return 1;
 
       case TT_SEMICOLON:
-          /* Printing a warning here is advisable but unnecessary. */
+          // TODO: Fix all the logic not consuming the final semicolon,
+          // then uncommenet this warning line:
+          // token.report_warning(herr, "Unnecessary semicolon.");
         break;
 
       case TT_NAMESPACE: if (!handle_namespace(scope,token)) return 1; break;
@@ -157,7 +161,8 @@ int jdi::context_parser::handle_scope(definition_scope *scope, token_t& token, u
 
       case TT_TYPEDEF:
         token = read_next_token(scope);
-        if (handle_declarators(scope,token,inherited_flags | DEF_TYPENAME)) FATAL_RETURN(1); break;
+        if (handle_declarators(scope,token,inherited_flags | DEF_TYPENAME)) FATAL_RETURN(1);
+        break;
 
       case TT_PUBLIC:
         if (scope->flags & DEF_CLASS) { inherited_flags &= ~(DEF_PRIVATE | DEF_PROTECTED); }
@@ -197,46 +202,7 @@ int jdi::context_parser::handle_scope(definition_scope *scope, token_t& token, u
         continue;
 
       case TT_USING:
-          token = read_next_token(scope);
-          if (token.type == TT_NAMESPACE) {
-            token = lex->get_token_in_scope(scope);
-            if (token.type == TT_DEFINITION) {
-              definition *d = read_qualified_definition(token, scope);
-              if (!d) {
-                token.report_errorf(herr, "Expected namespace-name following `namespace' token");
-                FATAL_RETURN(1);
-              }
-              else {
-                if (d->flags & DEF_NAMESPACE)
-                  scope->use_namespace((definition_scope*)d);
-                else
-                  token.report_error(herr, "Expected namespace-name following `namespace' token");
-              }
-              if (token.type == TT_SEMICOLON)
-                token = read_next_token(scope);
-              else {
-                token.report_errorf(herr, "Expected semicolon before %s");
-                FATAL_RETURN(1);
-              }
-            }
-            else {
-              token.report_errorf(herr, "Expected namespace to use before %s");
-              FATAL_RETURN(1);
-            }
-          }
-          else {
-            definition *usedef = read_qualified_definition(token, scope);
-            if (usedef)
-              scope->use_general(usedef->name, usedef);
-            else {
-              token.report_errorf(herr, "Using directive does not specify an object");
-              FATAL_RETURN(1);
-            }
-            if (token.type != TT_SEMICOLON) {
-              token.report_errorf(herr, "Expected semicolon before %s to terminate using directive");
-              FATAL_RETURN(1);
-            }
-          }
+          if (!handle_using_directive(scope, token)) FATAL_RETURN(1);
         continue;
 
       case TT_SCOPE:

@@ -28,14 +28,14 @@ jdi::definition_scope *jdi::context_parser::handle_namespace(definition_scope *s
   definition_scope *nscope;
   token = read_next_token( scope);
   if (token.type != TT_IDENTIFIER) {
-    if (token.type == TT_DEFINITION and (token.def->flags & DEF_NAMESPACE))
-      nscope = (definition_scope*)token.def;
-    else {
+    if (token.type == TT_DEFINITION and (token.def->flags & DEF_NAMESPACE)) {
+      nscope = (definition_scope*) token.def;
+      token = read_next_token(scope);
+    } else {
       token.report_error(herr, "Expected namespace name here.");
       return nullptr;
     }
-  }
-  else {
+  } else {
     // Copy the name and ensure it's a member of this scope.
     string nsname(token.content.toString());
     decpair dins = scope->declare(nsname);
@@ -51,9 +51,11 @@ jdi::definition_scope *jdi::context_parser::handle_namespace(definition_scope *s
         return nullptr;
       }
     }
+    token = read_next_token(scope);
   }
   
-  token = read_next_token(scope);
+  if (token.type == TT_ATTRIBUTE) read_attribute_clause(token, scope);
+  
   if (token.type != TT_LEFTBRACE) {
     token.report_errorf(herr, "Expected opening brace for namespace definition before %s");
     return nullptr;

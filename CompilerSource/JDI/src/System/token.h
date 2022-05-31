@@ -350,6 +350,12 @@ namespace jdi {
             validate();
     }
 
+    bool operator==(const token_t &tok) const {
+      return type == tok.type && file == tok.file
+            && linenum == tok.linenum && pos == tok.pos
+            && content.toString() == tok.content.toString();
+    }
+
     /**
       Pass error information to an error handler.
       If no information is available, then zeros are copied in its place.

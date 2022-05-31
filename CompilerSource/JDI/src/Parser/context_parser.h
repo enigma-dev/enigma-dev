@@ -253,6 +253,13 @@ class context_parser {
                                      token_t &token);
 
   /**
+    Read an __attribute__(()) clause. JDI has nothing to do with the
+    result right mow, so the attribute names are discarded. The return
+    value is true if parsing succeeded, false if an error occurred.
+  **/
+  bool read_attribute_clause(token_t &token, definition_scope *scope);
+
+  /**
     Handle accessing dependent types and members. Shoves the definitions into the
     template for fix later.
 
@@ -399,6 +406,24 @@ class context_parser {
     @return The namespace that was populated, or nullptr upon failure.
   **/
   definition_scope *handle_namespace(definition_scope *scope, token_t& token);
+
+  /**
+    Parse a using directive.
+
+    This function is a complete handler. All inputs are liable to be
+    modified. See \section Handlers for details.
+
+    @param  scope  The scope in which the new declaration will be 
+                   stored. [in-out]
+    @param  token  The token that was read before this function was
+                   invoked. At the start of this call, the type of this
+                   token must be TT_NAMESPACE. Upon termination, this
+                   will be the first unconsumed token. [in-out]
+
+    @return The new using definition, or nullptr upon failure.
+  **/
+  definition *handle_using_directive(definition_scope *scope,
+                                     token_t &token);
 
   /**
     Parse a class or struct definition.

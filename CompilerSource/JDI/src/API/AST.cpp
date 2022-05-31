@@ -368,9 +368,40 @@ unique_ptr<AST_Node> AST_Builder::parse_expression(AST* ast, token_t &token, int
         track(myroot->content);
       break;
 
-    case TT_DECLTYPE:
-        herr->error(token) << "Unimplemented: `decltype'.";
-      return nullptr;
+    case TT_DECLTYPE: {
+      token_t dt_tok = token;
+      token = get_next_token();
+      if (token.type != TT_LEFTPARENTH) {
+        herr->error(token)
+            << "Expected `(` for `decltype` before " << token;
+        return nullptr;
+      }
+      track(string("("));
+      token = get_next_token();
+      auto coerce_node = parse_expression(ast, token, 0);
+      if (!coerce_node) {
+        herr->error(token) << "Bad expression to `decltype`";
+        return nullptr;
+      }
+      if (token.type != TT_RIGHTPARENTH) {
+        herr->error(token)
+            << "Expected closing parenthesis to `decltype` before "
+            << token;
+      } else {
+        track(string(")"));
+        token = get_next_token();
+      }
+
+      // FIXME: It would be better to store this AST as a sub-AST of
+      // some decltype node, but I'm lazy.
+      ErrorContext errc(herr, dt_tok);
+      full_type ft = coerce_node->coerce(errc);
+      myroot = make_unique<AST_Node_Type>(ft);
+      at = AT_DEFINITION;
+      read_next = true;
+      break;
+    }
+
     case TT_TYPEOF:
         herr->error(token) << "Unimplemented: `typeof'.";
       return nullptr;
@@ -389,19 +420,22 @@ unique_ptr<AST_Node> AST_Builder::parse_expression(AST* ast, token_t &token, int
         } else {
           case TT_SIZEOF: not_result = false; track(string("sizeof"));
         }
-        if (true)
         token = get_next_token();
         if (token.type == TT_LEFTPARENTH) {
-            token = get_next_token(); track(string("("));
-            full_type ft = cparse->read_fulltype(token, search_scope);
-            myroot = make_unique<AST_Node_sizeof>(make_unique<AST_Node_Type>(ft), not_result);
-            if (token.type != TT_RIGHTPARENTH)
-              token.report_errorf(herr, "Expected closing parenthesis to sizeof before %s");
-            else { track(string(")")); }
+          token = get_next_token(); track(string("("));
+          full_type ft = cparse->read_fulltype(token, search_scope);
+          myroot = make_unique<AST_Node_sizeof>(make_unique<AST_Node_Type>(ft), not_result);
+          if (token.type != TT_RIGHTPARENTH) {
+            herr->error(token)
+                << "Expected closing parenthesis to `sizeof` before "
+                << token;
+          } else {
+            track(string(")"));
             token = get_next_token();
-        }
-        else
+          }
+        } else {
           myroot = make_unique<AST_Node_sizeof>(parse_expression(ast, token,precedence::unary_pre), not_result);
+        }
         at = AT_UNARY_PREFIX;
         read_next = true;
     } break;
@@ -683,7 +717,7 @@ unique_ptr<AST_Node> AST_Builder::parse_binary_or_unary_post(
 
             lb.push(token);
             for (int depth = 1;;) {
-              token_t &tk = lb.push(get_next_token());
+              token_t tk = get_next_token();
               if (tk.type == TT_RIGHTPARENTH) {
                   if (!--depth) { token = tk; break; }
               }
@@ -714,21 +748,22 @@ unique_ptr<AST_Node> AST_Builder::parse_binary_or_unary_post(
               }
             }
             else {
-              #if defined(DEBUG_MODE) && DEBUG_MODE
-                if (token.type != TT_LEFTPARENTH) {
-                  herr->error(token)
-                      << "INTERNAL ERROR: " << token
-                      << " is not a left parenthesis. This should not happen.";
-                }
-              #endif
+              if (token.type != TT_LEFTPARENTH) {
+                herr->error(token)
+                    << "INTERNAL ERROR: " << token
+                    << " is not a left parenthesis. This should not happen.";
+              }
               track(string("("));
               token = get_next_token();
               auto nr = make_unique<AST_Node_Cast>(
                   parse_expression(ast, token, 0), ft);
-              if (token.type != TT_RIGHTPARENTH)
-                herr->error(token) << "Expected closing parenthesis before "
-                                   << token;
-              else token = get_next_token();
+              if (token.type == TT_RIGHTPARENTH) {
+                token = get_next_token();
+              } else {
+                herr->error(token)
+                    << "Expected closing parenthesis to cast before "
+                    << token;
+              }
               nr->content = nr->cast_type.toString();
 
               left_node = std::move(nr);
@@ -1123,6 +1158,7 @@ full_type AST_Node::coerce(const ErrorContext &errc) const {
 
 full_type AST_Node_Binary::coerce(const ErrorContext &errc) const {
   //TODO: Implement using operator() functions.
+  if (!left || !right) return {};
   return left->coerce(errc);
 }
 
@@ -1221,6 +1257,7 @@ full_type AST_Node_Type::coerce(const ErrorContext &) const {
 }
 
 full_type AST_Node_Unary::coerce(const ErrorContext &errc) const {
+  if (content.empty() || !operand) return {};
   switch (content[0]) {
     case '+': case '-': case '~': {
       return operand->coerce(errc);
