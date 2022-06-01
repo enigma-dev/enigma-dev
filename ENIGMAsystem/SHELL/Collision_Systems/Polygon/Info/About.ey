@@ -8,4 +8,4 @@ Description: Collisions register using polygons to approximate sprites.
 Author: Nabeel Danish
 
 Represents:
-	Build-platforms: All
+	Build-platforms: None
