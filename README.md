@@ -22,6 +22,7 @@ Supported Platforms:
 - Limited Mac 10.15+ support
 - NetBSD/OpenBSD Coming Soon
 
+
 ![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
 
 ![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
