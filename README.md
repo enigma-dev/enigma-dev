@@ -24,7 +24,7 @@ Supported Platforms:
 
 ![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
 
-![screenshot1](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot1.png)
+![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
 
 ![screenshot2](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png)
 
