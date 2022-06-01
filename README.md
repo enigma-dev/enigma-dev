@@ -2,6 +2,36 @@
 
 **Join our Discord:** https://discord.gg/f3WBpf2qQb
 
+GameMaker clone. Fork of enigma-dev. GameMaker-compatible.
+
+- **Create Games** for many supported Desktop Platforms.
+- **Build AppImages** using GMAppImager (downloaded separately).
+- **WebM Video Playback** support (no patent issues or fees).
+- **Joystick Support** (cheated a little with using SDL2 library).
+- **Improved UTF-8 Support** on Windows (non-Latin support).
+- Expanded upon Shell and Process Execution (process info).
+- Improved upon Dialog Box and Native Widgets Systems.
+
+Supported Platforms:
+
+- Windows i686 7/8/8.1/10/11
+- Windows x86-64 7/8/8.1/10/11
+- Ubuntu/Debian/RPiOS/KDEneon
+- Arch-Linux/Manjaro/SteamOS
+- FreeBSD/DragonFlyBSD-based
+- NetBSD/OpenBSD Coming Soon
+
+Complete Games:
+
+- https://github.com/time-killer-games/Flippy-Bored-Multiplayer
+- https://github.com/time-killer-games/Key-to-Success
+
+Example Projects:
+
+- https://github.com/time-killer-games/ENIGMA-WebMPlayer-Demo
+- https://github.com/time-killer-games/ENIGMA-xProcess-Demo
+- https://github.com/time-killer-games/ENIGMA-Launcher-Demo
+
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
 ...that actually spells "**SINGMA**", because we are not very good at coming up with acronyms...
