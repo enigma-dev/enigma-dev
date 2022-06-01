@@ -10,7 +10,7 @@
 
 - **Create Games** for many supported Desktop Platforms.
 - **GPLv3 crap will be replaced** with permissive code over time.
-- **Build AppImages** with [GMAppImager](https://www.youtube.com/watch?v=5hWqH8Igh_U) (downloaded separately).
+- **Build AppImages** with [GMAppImager](https://www.youtube.com/watch?v=5hWqH8Igh_U) (separate download).
 - **WebM Video Playback** support (no patent issues or fees).
 - **Joystick Support** (cheated a little with using SDL2 library).
 - **Improved UTF-8 Support** on Windows (non-Latin support).
