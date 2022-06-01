@@ -2,7 +2,7 @@
 
 **Join our Discord:** https://discord.gg/f3WBpf2qQb
 
-GameMaker clone. Fork of enigma-dev. GameMaker-compatible.
+**GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
 
 - **Create Games** for many supported Desktop Platforms.
 - **Build AppImages** using GMAppImager (downloaded separately).
