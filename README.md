@@ -20,7 +20,7 @@ Supported Platforms:
 - Windows x86-64 7/8/8.1/10/11
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
-- FreeBSD/DragonFlyBSD-based
+- FreeBSD/GhostBSD/DragonFly
 - Limited Mac 10.15+ Support
 - NetBSD/OpenBSD Coming Soon
 
