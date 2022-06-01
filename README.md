@@ -4,9 +4,12 @@
 
 **Join our Discord:** https://discord.gg/f3WBpf2qQb
 
+**View on itch.io:** https://samuel-venable.itch.io/stigma-development-environment
+
 **GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
 
 - **Create Games** for many supported Desktop Platforms.
+- **GPLv3 crap will be replaced** with permissive code over time.
 - **Build AppImages** using GMAppImager (downloaded separately).
 - **WebM Video Playback** support (no patent issues or fees).
 - **Joystick Support** (cheated a little with using SDL2 library).
