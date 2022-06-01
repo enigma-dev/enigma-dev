@@ -21,7 +21,7 @@ Supported Platforms:
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
 - FreeBSD/DragonFlyBSD-based
-- Limited Mac 10.15+ support
+- Limited Mac 10.15+ Support
 - NetBSD/OpenBSD Coming Soon
 
 Complete Games:
