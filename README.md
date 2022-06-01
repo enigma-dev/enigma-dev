@@ -25,7 +25,7 @@ Supported Platforms:
 - Arch-Linux/Manjaro/SteamOS
 - FreeBSD/GhostBSD/DragonFly
 - Limited Mac 10.15+ Support
-- NetBSD/OpenBSD Coming Soon
+- NetBSD/OpenBSD is a WIP
 
 Complete Games:
 
