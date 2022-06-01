@@ -24,19 +24,11 @@ Supported Platforms:
 
 ![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
 
-![screenshot5](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot5.png)
-
-![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
-
 ![screenshot1](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot1.png)
 
 ![screenshot2](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png)
 
-![screenshot3](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot3.png)
-
 ![screenshot6](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot6.png)
-
-![screenshot7](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot7.png)
 
 Complete Games:
 
