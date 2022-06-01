@@ -4,7 +4,7 @@ SetCompressor /FINAL lzma
 Unicode True
 !define PRODUCT "STIGMA"
 Name "STIGMA"
-Outfile "C:\Windows\Temp\${PRODUCT}-Installer-i686.exe"
+Outfile "C:\Windows\Temp\stigma-dev_1.0.0.0_i686_win32.exe"
 InstallDir "C:\${PRODUCT}"
 RequestExecutionLevel admin
 ShowInstDetails "show"
