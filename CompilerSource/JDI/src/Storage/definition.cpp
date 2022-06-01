@@ -168,29 +168,9 @@ decpair definition_scope::declare_c_struct(string n,
 }
 
 definition *definition_scope::look_up(string sname) {
-  if (defiter it = members.find(sname); it != members.end())
-    return it->second.get();
-  //if (members.size() == 1)
-  //  cout << sname << ": Not my member: " << members.begin()->first << " => " << members.begin()->second->toString() << endl;
-  if (auto it = using_general.find(sname); it != using_general.end())
-    return it->second;
-  // Lookup of class/struct names happens after using lookup but before checking
-  // used scopes.
-  if (auto it = c_structs.find(sname); it != c_structs.end())
-    return it->second.get();
-  /*if (members.size() == 1) {
-    cout << "Not in my using: {" << endl;
-    for (defiter u = using_general.begin(); u != using_general.end(); ++u)
-      cout << u->second->toString() << endl;
-    cout << "}" << endl;
-  }*/
-  definition *res;
-  for (definition_scope *scope : using_scopes)
-    if ((res = scope->find_local(sname)))
-      return res;
-  if (parent == nullptr)
-    return nullptr;
-  return parent->look_up(sname);
+  if (definition *mine = find_local(sname)) return mine;
+  if (parent) return parent->look_up(sname);
+  return nullptr;
 }
 definition *definition_class::look_up(string sname) {
   if (defiter it = members.find(sname); it != members.end())
@@ -209,14 +189,18 @@ definition *definition_class::look_up(string sname) {
   return parent->look_up(sname);
 }
 definition *definition_scope::find_local(string sname) {
-  if (auto it = members.find(sname); it != members.end())
+  if (defiter it = members.find(sname); it != members.end())
     return it->second.get();
   if (auto it = using_general.find(sname); it != using_general.end())
     return it->second;
-  definition *res;
-  for (definition_scope *scope : using_scopes)
-    if ((res = scope->find_local(sname)))
+  // Lookup of class/struct names happens after using lookup but before checking
+  // used scopes.
+  if (auto it = c_structs.find(sname); it != c_structs.end())
+    return it->second.get();
+  for (definition_scope *scope : using_scopes) {
+    if (definition *res = scope->find_local(sname))
       return res;
+  }
   return nullptr;
 }
 definition *definition_class::find_local(string sname) {

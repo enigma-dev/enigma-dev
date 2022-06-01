@@ -27,15 +27,14 @@ using namespace jdi;
 definition* jdi::context_parser::read_qualified_definition(token_t &token, definition_scope* scope)
 {
   definition *res;
-  if (token.type == TT_SCOPE)
-  {
+  if (token.type == TT_SCOPE) {
     res = ctex->get_global();
     token = lex->get_token();
-    if (token.type == TT_IDENTIFIER)
-    {
-      res = ((definition_scope*)res)->get_local(token.content.toString());
+    if (token.type == TT_IDENTIFIER) {
+      string rname = token.content.toString();
+      res = ((definition_scope*)res)->get_local(rname);
       if (!res) {
-        token.report_error(herr, "No `" + token.content.toString() + "' found in global scope");
+        herr->error(token) << "No `" << rname << "' found in global scope";
         return nullptr;
       }
       if (!(res->flags & DEF_SCOPE)) {

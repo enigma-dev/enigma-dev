@@ -68,6 +68,7 @@ int jdi::Context::parse_stream(llreader &cfile) {
             else if (eoc.type == TT_RIGHTBRACE) if (!--depth) break;
           }
         }
+        eoc.report_warning(herr, "Parsing will resume from here");
         cp.handle_scope(global.get(), eoc);
       #endif
     }
