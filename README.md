@@ -27,11 +27,27 @@ Complete Games:
 - https://github.com/time-killer-games/Flippy-Bored-Multiplayer
 - https://github.com/time-killer-games/Key-to-Success
 
+![screenshot4]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png))
+
+![screenshot5]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot5.png))
+
+![screenshot0]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png))
+
+![screenshot1]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot1.png))
+
 Example Projects:
 
 - https://github.com/time-killer-games/ENIGMA-WebMPlayer-Demo
 - https://github.com/time-killer-games/ENIGMA-xProcess-Demo
 - https://github.com/time-killer-games/ENIGMA-Launcher-Demo
+
+![screenshot2]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png))
+
+![screenshot3]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot3.png))
+
+![screenshot6]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot6.png))
+
+![screenshot7]([https://github.com/time-killer-games/filedialogs/blob/main/win32.png?raw=true](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot7.png))
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
