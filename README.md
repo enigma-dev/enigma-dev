@@ -22,6 +22,22 @@ Supported Platforms:
 - Limited Mac 10.15+ support
 - NetBSD/OpenBSD Coming Soon
 
+![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
+
+![screenshot5](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot5.png)
+
+![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
+
+![screenshot1](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot1.png)
+
+![screenshot2](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png)
+
+![screenshot3](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot3.png)
+
+![screenshot6](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot6.png)
+
+![screenshot7](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot7.png)
+
 Complete Games:
 
 - https://github.com/time-killer-games/Flippy-Bored-Multiplayer
@@ -44,19 +60,3 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 - **Greg Williamson**, Linux, RadialGM, emake, SDL2, major contributor.
 - **Hugh Patrick Greene**, Wiki, games, tutorials, content contributor.
 - **Samuel Venable**, FreeBSD, GUI widgets, SDL2 joystick contributor.
-
-![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
-
-![screenshot5](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot5.png)
-
-![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
-
-![screenshot1](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot1.png)
-
-![screenshot2](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png)
-
-![screenshot3](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot3.png)
-
-![screenshot6](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot6.png)
-
-![screenshot7](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot7.png)
