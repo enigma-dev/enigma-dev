@@ -1,5 +1,7 @@
 # STIGMA Development Environment
 
+![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
+
 **Join our Discord:** https://discord.gg/f3WBpf2qQb
 
 **GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
@@ -21,15 +23,6 @@ Supported Platforms:
 - FreeBSD/DragonFlyBSD-based
 - Limited Mac 10.15+ support
 - NetBSD/OpenBSD Coming Soon
-
-
-![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
-
-![screenshot4](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot4.png)
-
-![screenshot2](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot2.png)
-
-![screenshot6](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot6.png)
 
 Complete Games:
 
