@@ -1,12 +1,13 @@
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
-#include "ImFileDialog.h"
-#include "ImFileDialogMacros.h"
 
 #include <fstream>
 #include <algorithm>
-#include <sys/stat.h>
+
+#include "ImFileDialog.h"
+#include "ImFileDialogMacros.h"
+#include "filedialogs.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
@@ -28,6 +29,7 @@
 #endif
 #include <unistd.h>
 #endif
+#include <sys/stat.h>
 
 #define ICON_SIZE ImGui::GetFont()->FontSize + 3
 #define GUI_ELEMENT_SIZE std::max(GImGui->FontSize + 10.f, 24.f)
@@ -393,6 +395,21 @@ namespace ifd {
       homePath = userProfile;
     if (ghc::filesystem::exists(homePath, ec))
       quickAccess->Children.push_back(new FileTreeNode(homePath));
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_PATH", homePath.string() + "\\.config\\filedialogs");
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
+    std::string conf = ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
+    if (ngs::fs::file_exists(conf)) {
+      int fd = ngs::fs::file_text_open_read(conf);
+      if (fd != -1) {
+        while (!ngs::fs::file_text_eof(fd)) {
+          FileDialog::AddFavorite(ngs::fs::file_text_read_string(fd));
+          ngs::fs::file_text_readln(fd);
+        }
+        ngs::fs::file_text_close(fd);
+      }
+    }
 
     // This PC
     FileTreeNode* thisPC = new FileTreeNode(IFD_THIS_PC);
@@ -404,11 +421,26 @@ namespace ifd {
     m_treeCache.push_back(thisPC);
     #else
     std::error_code ec;
-
+    
     // Quick Access
     ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
     if (ghc::filesystem::exists(homePath, ec))
       quickAccess->Children.push_back(new FileTreeNode(homePath));
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_PATH", homePath.string() + "/.config/filedialogs");
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
+    std::string conf = ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
+    if (ngs::fs::file_exists(conf)) {
+      int fd = ngs::fs::file_text_open_read(conf);
+      if (fd != -1) {
+        while (!ngs::fs::file_text_eof(fd)) {
+          FileDialog::AddFavorite(ngs::fs::file_text_read_string(fd));
+          ngs::fs::file_text_readln(fd);
+        }
+        ngs::fs::file_text_close(fd);
+      }
+    }
 
     // This PC
     FileTreeNode* thisPC = new FileTreeNode(IFD_THIS_PC);
@@ -511,6 +543,28 @@ namespace ifd {
   }
 
   void FileDialog::Close() {
+    std::error_code ec;
+    if (!ngs::fs::directory_exists("${IMGUI_CONFIG_PATH}"))
+      ngs::fs::directory_create("${IMGUI_CONFIG_PATH}");
+    #if defined(_WIN32)
+    int fd = ngs::fs::file_text_open_write("${IMGUI_CONFIG_PATH}\\${IMGUI_CONFIG_FILE}");
+    #else
+    int fd = ngs::fs::file_text_open_write("${IMGUI_CONFIG_PATH}/${IMGUI_CONFIG_FILE}");
+    #endif
+    if (fd != -1) {
+      for (auto& p : m_treeCache) {
+        if (p->Path == IFD_QUICK_ACCESS) {
+          for (size_t i = 0; i < p->Children.size(); i++) {
+            if (ghc::filesystem::exists(p->Children[i]->Path.string(), ec)) {
+              ngs::fs::file_text_write_string(fd, p->Children[i]->Path.string());
+              ngs::fs::file_text_writeln(fd);
+            }
+          }
+        }
+      }
+      ngs::fs::file_text_close(fd);
+    }
+  
     m_currentKey.clear();
     m_backHistory = std::stack<ghc::filesystem::path>();
     m_forwardHistory = std::stack<ghc::filesystem::path>();
