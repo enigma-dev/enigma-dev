@@ -70,7 +70,11 @@ std::optional<T> LoadResource(const fs::path& fName) {
   std::string ext = ToLower(fName.extension().u8string()); 
   if (ext == ".gmx") {
     return fileFormats[".gmx"]->LoadResource<T>(fName);
-  } else return fileFormats[".egm"]->LoadResource<T>(fName);
+  }
+  else if (ext == ".tsx") {
+    return fileFormats[".tsx"]->LoadResource<T>(fName);
+  } 
+  else return fileFormats[".egm"]->LoadResource<T>(fName);
 }
 
 // Writers
