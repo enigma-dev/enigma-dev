@@ -76,8 +76,8 @@ std::unique_ptr<buffers::Project> TSXFileFormat::LoadProject(const fs::path& fPa
   buffers::TreeNode* background = root->mutable_folder()->add_children();
   background->set_name("tsxBackgroundTest");
 
-  TSXTilesetLoader backgroud_walker(background->mutable_background(), fPath);
-  doc.traverse(backgroud_walker);
+  TSXTilesetLoader background_walker(background->mutable_background(), fPath);
+  doc.traverse(background_walker);
 
   return proj;
 }
