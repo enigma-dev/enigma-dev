@@ -448,16 +448,12 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
 static const std::string EGM_VERSION = "2.0.0";
 
 bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const {
-  std::string fName = fPath.u8string();
+  std::string fPathWoutExt = fPath.parent_path().string() + "/" + fPath.stem().string() + "/";
 
-  if (fName.back() != '/')
-    fName += '/';
-
-  if (!CreateDirectory(fName))
+  if (!CreateDirectory(fPathWoutExt))
     return false;
 
-  // need to remove the '/' here
-  const fs::path projectFile = fName + "/" + fs::path(fName.substr(0, fName.length()-1)).filename().string();
+  const fs::path projectFile = fPathWoutExt + fPath.filename().string();
 
   if (std::ofstream out{projectFile.string()}) { // egm settings
     YAML::Emitter projYAML;
@@ -473,13 +469,13 @@ bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const 
     return false;
   }
 
-  std::fstream bin(fName + "/protobuf.bin", std::ios::out | std::ios::trunc | std::ios::binary);
+  std::fstream bin(fPathWoutExt + "protobuf.bin", std::ios::out | std::ios::trunc | std::ios::binary);
   project->SerializeToOstream(&bin);
 
   YAML::Emitter tree;
 
-  fs::path abs_root = fs::canonical(fs::absolute(fName));
-  bool success = WriteNode(project->mutable_game()->mutable_root(), fName, abs_root, tree);
+  fs::path abs_root = fs::canonical(fs::absolute(fPathWoutExt));
+  bool success = WriteNode(project->mutable_game()->mutable_root(), fPathWoutExt, abs_root, tree);
 
   if (!success) return false;
 
