@@ -432,7 +432,7 @@ bool Lexer::HandleMacro(std::string_view name) {
         for (size_t i = 0; i < args.size(); ++i)
           args_evald[i] = PreprocessBuffer(args[i]);
         PushMacro(macro.name,
-                  macro.SubstituteAndUnroll(args, args_evald, errc));
+                  macro.SubstituteAndUnroll(args, args_evald, errc, stringified_macros));
       } else {
         errc.Error() << "No closing parenthesis for arguments to `"
                      << name << '`';

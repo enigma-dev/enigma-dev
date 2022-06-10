@@ -127,6 +127,17 @@ class Lexer {
   const ParseContext *context;
   std::deque<OpenMacro> open_macros;
   ErrorHandler *herr;
+
+  /// Store the stringified versions of macros in a set so that they can be safely referred to by `std::string_view`.
+  ///
+  /// As `CodeSnippet`s point inside the source itself, it is not possible to make one that points to the `std::string`
+  /// created on stringifying a macro as that string doesn't exist within the source and can only be referred to within
+  /// the function it is created in and therefore when trying to access this string outside, it can cause a segfault.
+  ///
+  /// Thus, this set "extends" the lifetime of the stringified forms of macros by promoting their lifetimes to the
+  /// lifetime of the lexer itself. The reason a `std::unordered_set` is used is to deduplicate macros which stringify
+  /// to the same string.
+  Macro::StringifiedSet stringified_macros;
   
   struct Options {
     bool use_escapes;  ///< Use C++-like escape sequences.
