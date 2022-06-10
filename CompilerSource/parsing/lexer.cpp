@@ -422,7 +422,7 @@ bool Lexer::HandleMacro(std::string_view name) {
         else if (t.type == TT_ENDPARENTH) --paren;
         if (t.type == TT_COMMA && paren == 1) {
           args.emplace_back();
-        } else {
+        } else if (paren != 0) {
           args.back().push_back(t);
         }
       } while (paren && t.type != TT_ENDOFCODE);
