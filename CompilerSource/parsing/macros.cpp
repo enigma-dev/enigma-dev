@@ -257,9 +257,8 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
             str += tok.content;
           str = QuoteString(str);
 
-          stringified_macros.insert(str);
           CodeSnippet snr;
-          snr.content = *stringified_macros.find(str);
+          snr.content = *stringified_macros.insert(str).first;
 
           TokenVector vec{Token(TT_STRINGLIT, snr)};
           AppendOrPaste(res, vec.begin(), vec.end(), paste_next, errc);
