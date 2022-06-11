@@ -615,12 +615,16 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
 
 
       case ';':
-        if (level and !infor)
+        if (level and !infor) {
+          cout << code << endl;
+          cout << synt << endl;
+          cout << std::string(pos, ' ') << '^' << endl;
           cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! THIS SHOULD NOT HAVE FUCKING HAPPENED! DAMN IT! SOMETHING IS REALLY WRONG WITH THE FOUNDATION OF "
                   "THIS SYSTEM! Or, I mean, maybe I just skipped a small block of text; point is, let me know this happened, please. Level = " << level << endl;
+        }
         if (infor) infor--;
         rhs = indecl = false;
       case ',':
