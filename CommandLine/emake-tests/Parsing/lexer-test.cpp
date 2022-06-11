@@ -151,3 +151,16 @@ TEST(LexerTest, HexThenComment) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(LexerTest, PreProcessorMacroExpansion) {
+  LexerTester lex("MACRO_FUNC(ident);", true);
+
+  const_cast<MacroMap*>(&const_cast<ParseContext*>(lex.context)->macro_map)->insert({"MACRO_FUNC", Macro("MACRO_FUNC", {"arg"}, false, "(arg)", &lex.herr)});
+
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
