@@ -422,7 +422,7 @@ bool Lexer::HandleMacro(std::string_view name) {
         else if (t.type == TT_ENDPARENTH) --paren;
         if (t.type == TT_COMMA && paren == 1) {
           args.emplace_back();
-        } else {
+        } else if (paren != 0) {
           args.back().push_back(t);
         }
       } while (paren && t.type != TT_ENDOFCODE);
@@ -432,7 +432,7 @@ bool Lexer::HandleMacro(std::string_view name) {
         for (size_t i = 0; i < args.size(); ++i)
           args_evald[i] = PreprocessBuffer(args[i]);
         PushMacro(macro.name,
-                  macro.SubstituteAndUnroll(args, args_evald, errc));
+                  macro.SubstituteAndUnroll(args, args_evald, errc, stringified_macros));
       } else {
         errc.Error() << "No closing parenthesis for arguments to `"
                      << name << '`';

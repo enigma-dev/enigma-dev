@@ -25,6 +25,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace enigma {
@@ -105,10 +106,11 @@ struct Macro {
       const TokenVector &tokens, const std::vector<std::string> &params,
       ErrorHandler *herr);
 
+  using StringifiedSet = std::unordered_set<std::string>;
+
   /// Expand this macro function, given arguments.
-  TokenVector SubstituteAndUnroll(const std::vector<TokenVector> &args,
-                                  const std::vector<TokenVector> &args_evald,
-                                  ErrorContext errc) const;
+  TokenVector SubstituteAndUnroll(const std::vector<TokenVector> &args, const std::vector<TokenVector> &args_evald,
+                                  ErrorContext errc, StringifiedSet &stringified_macros) const;
 
   /// Convert this macro to a string
   std::string ToString() const;
