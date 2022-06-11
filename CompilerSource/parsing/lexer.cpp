@@ -418,11 +418,21 @@ bool Lexer::HandleMacro(std::string_view name) {
 
       do {
         t = ReadRawToken();
-        if (t.type == TT_BEGINPARENTH) ++paren;
-        else if (t.type == TT_ENDPARENTH) --paren;
+        if (t.type == TT_BEGINPARENTH) {
+          ++paren;
+        } else if (t.type == TT_ENDPARENTH) {
+          if (!--paren) break;
+        }
         if (t.type == TT_COMMA && paren == 1) {
-          args.emplace_back();
-        } else if (paren != 0) {
+          if (args.size() < macro.parameters->size()) {
+            args.emplace_back();
+          } else if (macro.is_variadic) {
+            args.back().push_back(t);
+          } else {
+            errc.Error() << "Too many arguments to macro function `"
+                         << name << '`';
+          }
+        } else {
           args.back().push_back(t);
         }
       } while (paren && t.type != TT_ENDOFCODE);
