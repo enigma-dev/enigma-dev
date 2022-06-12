@@ -74,12 +74,15 @@ class Lexer {
   // The entire given string must match the operator, or TT_ERROR is returned.
   static TokenType LookUpOperator(std::string_view op);
 
+  void UseCppOptions() { options.SetAsCpp(); }
+
   Lexer(std::string code_, const ParseContext *ctx, ErrorHandler *herr_):
       owned_code(std::make_shared<std::string>(std::move(code_))),
-      code(*owned_code), context(ctx), herr(herr_) {}
+      code(*owned_code), context(ctx), herr(herr_), options(ctx) {}
   Lexer(std::shared_ptr<const std::string> code_, const ParseContext *ctx,
         ErrorHandler *herr_):
-      owned_code(code_), code(*owned_code), context(ctx), herr(herr_) {}
+      owned_code(code_), code(*owned_code), context(ctx), herr(herr_),
+      options(ctx) {}
   Lexer(TokenVector tokens, const ParseContext *ctx, ErrorHandler *herr_);
 
  private:
@@ -124,6 +127,30 @@ class Lexer {
   const ParseContext *context;
   std::deque<OpenMacro> open_macros;
   ErrorHandler *herr;
+
+  /// Store the stringified versions of macros in a set so that they can be safely referred to by `std::string_view`.
+  ///
+  /// As `CodeSnippet`s point inside the source itself, it is not possible to make one that points to the `std::string`
+  /// created on stringifying a macro as that string doesn't exist within the source and can only be referred to within
+  /// the function it is created in and therefore when trying to access this string outside, it can cause a segfault.
+  ///
+  /// Thus, this set "extends" the lifetime of the stringified forms of macros by promoting their lifetimes to the
+  /// lifetime of the lexer itself. The reason a `std::unordered_set` is used is to deduplicate macros which stringify
+  /// to the same string.
+  Macro::StringifiedSet stringified_macros;
+  
+  struct Options {
+    bool use_escapes;  ///< Use C++-like escape sequences.
+    bool use_char_literals;  ///< Treat 'l' as a char literal rather than a string literal.
+    bool use_hex_literals;  ///< Treat 0x1AB as a hexadecimal literal.
+    bool use_oct_literals;  ///< Treat 0755 as an octal literal.
+    bool use_bin_literals;  ///< Treat 0b1AB as a hexadecimal literal.
+    bool use_gml_style_hex;  ///< Treat $ABC123 as hex (otherwise, assume identifier char).
+    bool use_preprocessor_tokens;  ///< Treat # and ## as preprocessing tokens.
+    
+    void SetAsCpp();  ///< Behave more like a C++ lexer.
+    Options(const ParseContext *pc);  ///< Construct from parse context.
+  } options;
 };
 
 }  // namespace parsing

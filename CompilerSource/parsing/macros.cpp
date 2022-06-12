@@ -204,9 +204,8 @@ static void AppendOrPaste(TokenVector &dest,
   dest.insert(dest.end(), begin, end);
 }
 
-TokenVector Macro::SubstituteAndUnroll(
-    const vector<TokenVector> &args, const vector<TokenVector> &args_evald,
-    ErrorContext errc) const {
+TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const vector<TokenVector> &args_evald,
+                                       ErrorContext errc, StringifiedSet &stringified_macros) const {
   TokenVector res;
   bool paste_next = false;
   if (args.size() != parameters->size()) {
@@ -257,7 +256,11 @@ TokenVector Macro::SubstituteAndUnroll(
           for (const Token &tok : args[ind])
             str += tok.content;
           str = QuoteString(str);
-          TokenVector vec{Token(TT_STRINGLIT, errc.snippet)};
+
+          CodeSnippet snr;
+          snr.content = *stringified_macros.insert(str).first;
+
+          TokenVector vec{Token(TT_STRINGLIT, snr)};
           AppendOrPaste(res, vec.begin(), vec.end(), paste_next, errc);
           paste_next = false;
           break;
@@ -298,6 +301,7 @@ TokenVector Macro::ParseTokens(
     std::shared_ptr<const std::string> owned_raw_string, ErrorHandler *herr) {
   TokenVector definiens;
   Lexer lex(owned_raw_string, &ParseContext::ForPreprocessorEvaluation(), herr);
+  lex.UseCppOptions();
   for (auto t = lex.ReadToken(); t.type != TT_ENDOFCODE; t = lex.ReadToken()) {
     definiens.push_back(t);
   }

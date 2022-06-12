@@ -11,9 +11,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -32,8 +32,8 @@ namespace quick {
     /** Private template type for storing a chunk of stack nodes. **/
     struct node {
       tp data; ///< The data stored in the node.
-      node *prev; ///< The node after this one, be it in this chunk or the next. If prev==NULL, the stack is presently "empty."
-      node *next; ///< The node before this node, be it in this chunk or the last. If next==NULL, a push will allocate a new node.
+      node *prev; ///< The node after this one, be it in this chunk or the next. If prev==nullptr, the stack is presently "empty."
+      node *next; ///< The node before this node, be it in this chunk or the last. If next==nullptr, a push will allocate a new node.
     } *ntop;
     
     size_t tnum;
@@ -111,7 +111,7 @@ namespace quick {
           bool operator!=(const iterator& it) const { return n != it.n; }
       };
       iterator begin() { return iterator(ntop); }
-      iterator end() { return iterator(NULL); }
+      iterator end() { return iterator(nullptr); }
   };
 }
 

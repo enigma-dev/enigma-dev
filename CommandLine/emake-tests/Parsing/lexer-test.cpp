@@ -34,12 +34,25 @@ struct LexerTester {
       lexer(std::move(code), context, &herr) {}
 };
 
-TEST(LexerTest, NumericLiterals) {
+TEST(LexerTest, GreedyTokenization) {
   LexerTester lex("cool+++beans");
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_INCREMENT);
   EXPECT_EQ(lex->ReadToken().type, TT_PLUS);
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, OneCharIdentifiers) {
+  LexerTester lex("a b");
+  Token t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_IDENTIFIER);
+  EXPECT_EQ(t.content, "a");
+
+  t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_IDENTIFIER);
+  EXPECT_EQ(t.content, "b");
+
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
@@ -133,8 +146,37 @@ TEST(LexerTest, DoubleThenComment) {
 
 TEST(LexerTest, HexThenComment) {
   LexerTester lex("{0x1234ABC/**/}", true);
+  lex->UseCppOptions();
   EXPECT_EQ(lex->ReadToken().type, TT_BEGINBRACE);
   EXPECT_EQ(lex->ReadToken().type, TT_HEXLITERAL);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDBRACE);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+void AddMacro(LexerTester &lex, Macro macro) {
+  // FIXME: this is a horrible hack
+  const_cast<MacroMap&>(lex.context->macro_map)
+      .insert({macro.name, macro});
+}
+
+TEST(LexerTest, MacroFunctions) {
+  LexerTester lex("MACRO_FUNC(ident);", true);
+  AddMacro(lex, Macro("MACRO_FUNC", {"arg"}, false, "(arg)", &lex.herr));
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, VariadicMacroFunctions) {
+  LexerTester lex("VAR_FUNC(ident, 123);", true);
+  AddMacro(lex, Macro("VAR_FUNC", {"arg"}, true, "(arg)", &lex.herr));
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_COMMA);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }

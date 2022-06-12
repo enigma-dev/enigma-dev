@@ -22,21 +22,20 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "System/lex_buffer.h"
 #include "Parser/context_parser.h"
 #include "General/debug_macros.h"
 #include "API/compile_settings.h"
 #include "Storage/definition.h"
 
-using namespace jdip;
+using namespace jdi;
 
 full_type context_parser::read_operatorkw_cast_type(token_t &token, definition_scope *scope)
 {
@@ -55,7 +54,7 @@ full_type context_parser::read_operatorkw_cast_type(token_t &token, definition_s
   ft.refs.pop();
   ref_stack nfunc;
   ref_stack::parameter_ct funcparams;
-  ref_stack::parameter oneparam(ft, NULL);
+  ref_stack::parameter oneparam(ft, nullptr);
   funcparams.throw_on(oneparam);
   nfunc.push_func(funcparams);
   ft.refs.append_c(nfunc);

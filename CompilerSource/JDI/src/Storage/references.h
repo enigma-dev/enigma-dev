@@ -15,9 +15,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -215,7 +215,7 @@ namespace jdi {
   /// Parameter storage type; contains type info and other important parameter info.
   struct ref_stack::parameter: full_type {
     bool variadic; ///< True if this parameter can be passed several values; in C/C++, this is mandated to be the last parameter.
-    AST *default_value; ///< An AST if a default value was given. NULL otherwise.
+    AST *default_value; ///< An AST if a default value was given. nullptr otherwise.
     
     parameter(); ///< Default constructor.
     parameter(const full_type& ft, AST *default_value); ///< Construct by copying a full_type and accepting an optional default value AST.

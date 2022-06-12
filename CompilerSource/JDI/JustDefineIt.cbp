@@ -5,16 +5,31 @@
 		<Option title="JustDefineIt" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Documentation/;test/;" />
+		<Option virtualFolders="Documentation/;test/;src/Parser/handlers/" />
 		<Build>
+			<Target title="Demo">
+				<Option output="bin/Demo/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++1z" />
+					<Add option="-g" />
+					<Add option="-D_GLIBCXX_DEBUG" />
+					<Add option="-DDEBUG_MODE" />
+				</Compiler>
+			</Target>
 			<Target title="Debug">
 				<Option output="bin/Debug/JustDefineIt" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++1z" />
 					<Add option="-g" />
+					<Add option="-D_GLIBCXX_DEBUG" />
 					<Add option="-DDEBUG_MODE" />
+					<Add option="-Werror" />
 				</Compiler>
 			</Target>
 			<Target title="Debug-Render">
@@ -23,9 +38,12 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++1z" />
 					<Add option="-g" />
+					<Add option="-D_GLIBCXX_DEBUG" />
 					<Add option="-DDEBUG_MODE" />
 					<Add option="-DRENDER_ASTS" />
+					<Add option="-Werror" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -37,6 +55,7 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O3" />
+					<Add option="-std=c++1z" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -48,11 +67,29 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++1z" />
 					<Add option="-pg" />
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
 					<Add option="-pg" />
+				</Linker>
+			</Target>
+			<Target title="Test">
+				<Option output="bin/Test/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++1z" />
+					<Add option="-g" />
+					<Add option="-D_GLIBCXX_DEBUG" />
+					<Add option="-DDEBUG_MODE" />
+					<Add directory="./test" />
+				</Compiler>
+				<Linker>
+					<Add library="gtest" />
+					<Add library="gtest_main" />
 				</Linker>
 			</Target>
 		</Build>
@@ -73,9 +110,11 @@
 			<Add option="-pedantic" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
-			<Add option="-Werror" />
 			<Add directory="./src" />
 		</Compiler>
+		<Unit filename="demo/main.cc">
+			<Option target="Demo" />
+		</Unit>
 		<Unit filename="dox/scope.dox">
 			<Option virtualFolder="Documentation/" />
 		</Unit>
@@ -94,15 +133,13 @@
 		<Unit filename="src/API/error_context.h" />
 		<Unit filename="src/API/error_reporting.cpp" />
 		<Unit filename="src/API/error_reporting.h" />
-		<Unit filename="src/API/jdi.cpp" />
-		<Unit filename="src/API/jdi.h" />
-		<Unit filename="src/API/lexer_interface.cpp" />
-		<Unit filename="src/API/lexer_interface.h" />
 		<Unit filename="src/API/parse_config.h" />
 		<Unit filename="src/API/user_tokens.cpp" />
 		<Unit filename="src/API/user_tokens.h" />
 		<Unit filename="src/General/debug_macros.cpp" />
-		<Unit filename="src/General/debug_macros.h" />
+		<Unit filename="src/General/debug_macros.h">
+			<Option virtualFolder="test/" />
+		</Unit>
 		<Unit filename="src/General/llreader.cpp" />
 		<Unit filename="src/General/llreader.h" />
 		<Unit filename="src/General/parse_basics.cpp" />
@@ -110,8 +147,10 @@
 		<Unit filename="src/General/quickreference.h" />
 		<Unit filename="src/General/quickstack.h" />
 		<Unit filename="src/General/quickvector.h" />
+		<Unit filename="src/General/strings.h" />
 		<Unit filename="src/General/svg_simple.cpp" />
 		<Unit filename="src/General/svg_simple.h" />
+		<Unit filename="src/General/utils.h" />
 		<Unit filename="src/Parser/base.cpp" />
 		<Unit filename="src/Parser/cclass_base.h" />
 		<Unit filename="src/Parser/context_parser.cpp" />
@@ -151,8 +190,6 @@
 		<Unit filename="src/Storage/value_funcs.h" />
 		<Unit filename="src/System/builtins.cpp" />
 		<Unit filename="src/System/builtins.h" />
-		<Unit filename="src/System/lex_buffer.cpp" />
-		<Unit filename="src/System/lex_buffer.h" />
 		<Unit filename="src/System/lex_cpp.cpp" />
 		<Unit filename="src/System/lex_cpp.h" />
 		<Unit filename="src/System/macros.cpp" />
@@ -162,14 +199,27 @@
 		<Unit filename="src/System/token.cpp" />
 		<Unit filename="src/System/token.h" />
 		<Unit filename="src/System/type_usage_flags.h" />
+		<Unit filename="test/General/error_handler_test.cc">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="test/Lexer/lexer_test.cc">
+			<Option target="Test" />
+		</Unit>
 		<Unit filename="test/MAIN.cc">
-			<Option virtualFolder="test/" />
+			<Option virtualFolder="src/Parser/handlers/" />
+			<Option target="Debug" />
+			<Option target="Debug-Render" />
+			<Option target="Release" />
+			<Option target="Profile" />
 		</Unit>
-		<Unit filename="test/debug_lexer.cpp">
-			<Option virtualFolder="test/" />
+		<Unit filename="test/Parsing/parsing_test.cc">
+			<Option target="Test" />
 		</Unit>
-		<Unit filename="test/debug_lexer.h">
-			<Option virtualFolder="test/" />
+		<Unit filename="test/Testing/error_handler.h">
+			<Option target="Test" />
+		</Unit>
+		<Unit filename="test/Testing/matchers.h">
+			<Option target="Test" />
 		</Unit>
 		<Unit filename="test/modifiers.txt">
 			<Option virtualFolder="test/" />
@@ -184,10 +234,6 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>
-			<envvars />
-			<code_completion />
-			<lib_finder disable_auto="1" />
-			<debugger />
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />
 				<doxyfile_project />
@@ -197,6 +243,7 @@
 				<doxyfile_dot />
 				<general />
 			</DoxyBlocks>
+			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

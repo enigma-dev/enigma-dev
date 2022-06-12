@@ -1,7 +1,7 @@
 namespace jdi {
   class AST;
 }
-namespace jdip {
+namespace jdi {
   class AST_Builder;
   struct ASTOperator;
   struct ConstASTOperator;

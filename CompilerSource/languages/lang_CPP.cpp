@@ -78,102 +78,26 @@ void parser_init();
 
 namespace {
 
-/* TODO: it would be better to use this in the future to translate JDI's
- * tokenization to ENIGMA's own token space.  Legacy JDI just treats macros
- * as big string blobs, though (and pre-segmented string blobs).
-
-// taking content here is a hack; old JDI uses gloss token types instead of one symbol per token
-enigma::parsing::TokenType TranslateTokenType(jdip::token_t token,
-                                              std::string_view content) {
-  using enigma::parsing::TokenType;
-  switch (token.type) {
-    case jdip::TT_DECFLAG:       return TokenType::TT_TYPE_NAME;
-    case jdip::TT_DECLARATOR:    return TokenType::TT_TYPE_NAME;
-    case jdip::TT_CLASS:         return TokenType::TT_CLASS;
-    case jdip::TT_STRUCT:        return TokenType::TT_STRUCT;
-
-    case jdip::TT_IDENTIFIER:    return TokenType::TT_VARNAME;
-    case jdip::TT_DEFINITION:    return TokenType::TT_VARNAME;
-    case jdip::TT_TEMPLATE:      return TokenType::TT_ERROR;
-    case jdip::TT_TYPENAME:      return TokenType::TT_ERROR;
-    case jdip::TT_TYPEDEF:       return TokenType::TT_ERROR;
-    case jdip::TT_USING:         return TokenType::TT_ERROR;
-    case jdip::TT_PUBLIC:        return TokenType::TT_ERROR;
-    case jdip::TT_PRIVATE:       return TokenType::TT_ERROR;
-    case jdip::TT_PROTECTED:     return TokenType::TT_ERROR;
-    case jdip::TT_FRIEND:        return TokenType::TT_ERROR;
-    case jdip::TT_COLON:         return TokenType::TT_COLON;
-    case jdip::TT_SCOPE:         return TokenType::TT_SCOPEACCESS;
-
-    case jdip::TT_LEFTPARENTH:   return TokenType::TT_BEGINPARENTH;
-    case jdip::TT_RIGHTPARENTH:  return TokenType::TT_ENDPARENTH;
-    case jdip::TT_LEFTBRACKET:   return TokenType::TT_BEGINBRACKET;
-    case jdip::TT_RIGHTBRACKET:  return TokenType::TT_ENDBRACKET;
-    case jdip::TT_LEFTBRACE:     return TokenType::TT_BEGINBRACE;
-    case jdip::TT_RIGHTBRACE:    return TokenType::TT_ENDBRACE;
-    case jdip::TT_LESSTHAN:      return TokenType::TT_LESS;
-    case jdip::TT_GREATERTHAN:   return TokenType::TT_GREATER;
-    case jdip::TT_TILDE:         return TokenType::TT_TILDE;
-    case jdip::TT_OPERATOR:      return enigma::parsing::Lexer::LookUpOperator(content);
-    case jdip::TT_COMMA:         return TokenType::TT_COMMA;
-    case jdip::TT_SEMICOLON:     return TokenType::TT_SEMICOLON;
-    case jdip::TT_STRINGLITERAL: return TokenType::TT_STRINGLIT;
-    case jdip::TT_CHARLITERAL:   return TokenType::TT_CHARLIT;
-    case jdip::TT_DECLITERAL:    return TokenType::TT_DECLITERAL;
-    case jdip::TT_HEXLITERAL:    return TokenType::TT_HEXLITERAL;
-    case jdip::TT_OCTLITERAL:    return TokenType::TT_OCTLITERAL;
-    case jdip::TTM_CONCAT:       return TokenType::TTM_CONCAT;
-    case jdip::TTM_TOSTRING:     return TokenType::TTM_STRINGIFY;
-    case jdip::TT_NEW:           return TokenType::TT_S_NEW;
-    case jdip::TT_DELETE:        return TokenType::TT_S_DELETE;
-    case jdip::TT_ENDOFCODE:     return TokenType::TT_ENDOFCODE;
-
-    // ...JDI doesn't actually do these, right now.
-    case jdip::TT_IF:         return TokenType::TT_S_IF;
-    case jdip::TT_THEN:       return TokenType::TT_S_THEN;
-    case jdip::TT_ELSE:       return TokenType::TT_S_ELSE;
-    case jdip::TT_REPEAT:     return TokenType::TT_S_REPEAT;
-    case jdip::TT_DO:         return TokenType::TT_S_DO;
-    case jdip::TT_WHILE:      return TokenType::TT_S_WHILE;
-    case jdip::TT_UNTIL:      return TokenType::TT_S_UNTIL;
-    case jdip::TT_FOR:        return TokenType::TT_S_FOR;
-    case jdip::TT_SWITCH:     return TokenType::TT_S_SWITCH;
-    case jdip::TT_CASE:       return TokenType::TT_S_CASE;
-    case jdip::TT_DEFAULT:    return TokenType::TT_S_DEFAULT;
-    case jdip::TT_BREAK:      return TokenType::TT_BREAK;
-    case jdip::TT_CONTINUE:   return TokenType::TT_CONTINUE;
-    case jdip::TT_RETURN:     return TokenType::TT_RETURN;
-    case jdip::TT_WITH:       return TokenType::TT_S_WITH;
-    case jdip::TT_GLOBAL:     return TokenType::TT_GLOBAL;
-    case jdip::TT_LOCAL:      return TokenType::TT_LOCAL;
-
-    case jdip::TT_ENUM:       case jdip::TT_UNION:       case jdip::TT_NAMESPACE:
-    case jdip::TT_EXTERN:     case jdip::TT_ASM:         case jdip::TT_OPERATORKW:
-    case jdip::TT_CONST_CAST: case jdip::TT_STATIC_CAST: case jdip::TT_DYNAMIC_CAST: case jdip::TT_REINTERPRET_CAST:
-    case jdip::TT_ELLIPSIS:   case jdip::TT_MEMBEROF:
-    case jdip::TT_SIZEOF:     case jdip::TT_ISEMPTY:
-    case jdip::TT_ALIGNAS:    case jdip::TT_ALIGNOF:
-    case jdip::TT_DECLTYPE:   case jdip::TT_TYPEID:
-    case jdip::TT_AUTO:       case jdip::TT_CONSTEXPR:
-    case jdip::TT_TRY:        case jdip::TT_CATCH:     case jdip::TT_NOEXCEPT:
-    case jdip::TT_STATIC_ASSERT:
-    case jdip::TT_INVALID:
-    default:
-        return TokenType::TT_ERROR;
+std::string TranscribeTokens(const jdi::token_vector &tokens) {
+  std::string result;
+  for (const jdi::token_t &token : tokens) {
+    if (result.length()) result.push_back(' ');
+    result += token.content.toString();
   }
+  return result;
 }
-*/
 
-enigma::parsing::Macro TranslateMacro(const jdip::macro_type &macro,
+enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
                                       enigma::parsing::ErrorHandler *herr) {
   using namespace enigma::parsing;
-  if (macro.is_function()) {
-    std::vector<std::string> arg_list =
-        ((const jdip::macro_function*) &macro)->args;
-    return enigma::parsing::Macro(macro.name, std::move(arg_list),
-          macro.is_variadic(), macro.valueString(), herr);
+  if (macro.is_function) {
+    auto copy = macro.params;
+    return enigma::parsing::Macro(
+        macro.name, std::move(copy), macro.is_variadic,
+        TranscribeTokens(macro.raw_value), herr);
   }
-  return enigma::parsing::Macro(macro.name, macro.valueString(), herr);
+  return enigma::parsing::Macro(
+      macro.name, TranscribeTokens(macro.raw_value), herr);
 }
 
 }  // namespace
@@ -187,7 +111,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
 
   cout << "Creating swap." << endl;
   delete main_context;
-  main_context = new jdi::context();
+  main_context = new jdi::Context();
 
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
@@ -200,7 +124,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
     CURRENT_TIME(ts);
-    res = main_context->parse_C_stream(f, "SHELLmain.cpp");
+    res = main_context->parse_stream(f);
     CURRENT_TIME(te);
   }
 
@@ -237,6 +161,17 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
       namespace_enigma_user = (jdi::definition_scope*) d;
     } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
+  if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
+    if (dstd->flags & jdi::DEF_NAMESPACE) {
+      jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
+      jdi::definition *j_string = j_std->look_up("string");
+      if (!j_string) cerr << "Error! std::string was not detected! The parse output probably sucks.";
+      else if (!(j_string->flags & jdi::DEF_TYPENAME))
+        cerr << "Error! std::string is not a type! The parse output probably sucks.";
+      else
+        cout << "Successfully parsed std::string, so data is probably good.";
+    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace std not found!" << endl;
 
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
@@ -251,8 +186,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   }
 
   cout << "Creating dummy primitives for old ENIGMA" << endl;
-  for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
-    main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+  for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
+    main_context->get_global()->members[it->first] = std::make_unique<jdi::definition>(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
 
   enigma::parsing::StdErrorHandler hack;  // TODO: FIXME: This should be using a central error handler...
@@ -319,9 +254,11 @@ int lang_CPP::load_shared_locals() {
   return 0;
 }
 
-jdi::definition* lang_CPP::look_up(const string &name) const {
-  auto builtin = jdip::builtin_declarators.find(name);
-  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
+jdi::definition* lang_CPP::look_up(std::string_view n) const {
+  // TODO: FIXME: slow-ass conversion still exists...
+  std::string name(n);
+  auto builtin = jdi::builtin_declarators.find(name);
+  if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);
 }
 

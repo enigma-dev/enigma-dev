@@ -70,7 +70,7 @@ extern const char* establish_bearings(const char *compiler);
 #include "general/bettersystem.h"
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
-#include <API/jdi.h>
+#include <API/context.h>
 
 #include <cstdlib>
 
@@ -98,10 +98,10 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
 
   cout << "Implementing JDI basics" << endl;
-  jdi::initialize();
-  jdi::builtin->output_types();
-  jdi::builtin->add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
-  jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
+  auto &builtin = jdi::builtin_context();
+  builtin.output_types();
+  builtin.add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
+  builtin.add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
 
   cout << "Choosing language: C++" << endl;
@@ -109,7 +109,7 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   current_language = languages[current_language_name] = new lang_CPP();
 
   cout << "Creating parse context" << endl;
-  main_context = new jdi::context;
+  main_context = new jdi::Context;
 
   return 0;
 }
@@ -138,12 +138,6 @@ extern void print_definition(string n);
 DLLEXPORT syntax_error *definitionsModified(const char* wscode, const char* targetYaml)
 {
   current_language->definitionsModified(wscode, targetYaml);
-
-  std::cout << "List of all built-in macros:" << std::endl;
-  for (const auto &m : current_language->builtin_macros()) {
-    std::cout << " - " << m.first << " = " << m.second.ToString() << std::endl;
-  }
-
   return &ide_passback_error;
 }
 

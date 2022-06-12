@@ -169,8 +169,8 @@ class NullLanguageFrontend : public LanguageFrontend {
     return compatibility_opts_;
   }
 
-  jdi::definition* look_up(const string&) const final { return nullptr; }
-  jdi::definition* find_typename(string) const final { return nullptr; }
+  jdi::definition* look_up(std::string_view) const final { return nullptr; }
+  jdi::definition* find_typename(std::string_view) const final { return nullptr; }
 
   bool is_variadic_function(jdi::definition *) const final { return false; }
   int function_variadic_after(jdi::definition_function *) const final { return 0; }
@@ -288,6 +288,17 @@ Token Lexer::ReadRawToken() {
 
   const size_t spos = pos;
   switch (code[pos++]) {
+    case '$': {
+      if (options.use_gml_style_hex) {
+        if (!is_nybble(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "GML-style hex literal is trunucated";
+          return ReadRawToken();
+        }
+        while (!is_nybble(code[++pos]));
+        return Token(TT_HEXLITERAL, Mark(pos, pos - spos));
+      } else [[fallthrough]];
+    }
+
     case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
     case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
     case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
@@ -297,28 +308,18 @@ Token Lexer::ReadRawToken() {
     case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U':
     case 'V': case 'W': case 'X': case 'Y': case 'Z':
     case '_': {
-      while (is_letterd(code[++pos]));
+      while (pos < code.length() && is_letterd(code[pos])) ++pos;
       const auto name = std::string_view{code}.substr(spos, pos - spos);
       return Token(TT_IDENTIFIER, Mark(spos, name.length()));
     }
 
-    case '$': {
-      if (!is_nybble(code[pos])) {
-        herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
-        return ReadRawToken();
-      }
-      while (!is_nybble(code[++pos]));
-      return Token(TT_HEXLITERAL, Mark(pos, pos - spos));
-    }
-
     case '"': {
-      const bool use_escapes = context->compatibility_opts.use_cpp_escapes;
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
           return Token(TT_STRINGLIT, Mark(spos, pos - spos));
         }
-        if (use_escapes && code[pos] == '\\') ++pos;
+        if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '"') {
           return Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
         }
@@ -326,15 +327,14 @@ Token Lexer::ReadRawToken() {
     }
 
     case '\'': {
-      const bool use_escapes = context->compatibility_opts.use_cpp_escapes;
-      const TokenType token_type = context->compatibility_opts.use_cpp_strings
-            ? TT_STRINGLIT : TT_CHARLIT;
+      const TokenType token_type =
+          options.use_char_literals ? TT_STRINGLIT : TT_CHARLIT;
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
           return Token(token_type, Mark(spos, pos - spos));
         }
-        if (use_escapes && code[pos] == '\\') ++pos;
+        if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '\'') {
           return Token(token_type, Mark(spos, ++pos - spos));
         }
@@ -342,21 +342,19 @@ Token Lexer::ReadRawToken() {
     }
 
     case '0': {
-      if (context->compatibility_opts.use_cpp_literals) {
-        if (pos >= code.length())
-          return Token(TT_DECLITERAL, Mark(spos, pos - spos));
-        if (code[pos] == 'x') {
-          while (++pos < code.length() && is_nybble(code[pos]));
-          return Token(TT_HEXLITERAL, Mark(spos, pos - spos));
-        }
-        if (code[pos] == 'b') {
-          while (++pos < code.length() && is_bit(code[pos]));
-          return Token(TT_BINLITERAL, Mark(spos, pos - spos));
-        }
-        if (code[pos] == 'o') {
-          while (++pos < code.length() && is_octal(code[pos]));
-          return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
-        }
+      if (pos >= code.length())
+        return Token(TT_DECLITERAL, Mark(spos, pos - spos));
+      if (code[pos] == 'x' && options.use_hex_literals) {
+        while (++pos < code.length() && is_nybble(code[pos]));
+        return Token(TT_HEXLITERAL, Mark(spos, pos - spos));
+      }
+      if (code[pos] == 'b' && options.use_bin_literals) {
+        while (++pos < code.length() && is_bit(code[pos]));
+        return Token(TT_BINLITERAL, Mark(spos, pos - spos));
+      }
+      if (code[pos] == 'o' && options.use_oct_literals) {
+        while (++pos < code.length() && is_octal(code[pos]));
+        return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
       }
       [[fallthrough]]; case '1': case '2': case '3': case '4': case '5':
                        case '6': case '7': case '8': case '9':
@@ -368,21 +366,31 @@ Token Lexer::ReadRawToken() {
     }
 
     case '/': {
-      if (code[pos] == '/') { // Two-slash comments
-        while (pos < code.length() and code[pos] != '\n' and code[pos] != '\r')
+      if (pos < code.length() && code[pos] == '/') { // Two-slash comments
+        while (pos < code.length() && code[pos] != '\n' && code[pos] != '\r')
           ++pos;
         ++pos;  // Optimization: skip the whitespace
         return ReadRawToken();
       }
       if (code[pos] == '*') {
         ++pos; // GM /**/ Comments
-        while (pos < code.length() and (code[pos] != '/' or code[pos-1] != '*'))
+        while (pos < code.length() && (code[pos] != '/' || code[pos-1] != '*'))
           ++pos;
         ++pos;  // Important: skip the trailing slash
         return ReadRawToken();
       }
       break;
     }
+
+    case '#':
+      if (options.use_preprocessor_tokens) {
+        if (pos < code.length() && code[pos] == '#') {
+          ++pos;
+          return Token(TTM_CONCAT, Mark(spos, 2));
+        }
+        return Token(TTM_STRINGIFY, Mark(spos, 1));
+      }
+      break;
   }
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
@@ -410,10 +418,20 @@ bool Lexer::HandleMacro(std::string_view name) {
 
       do {
         t = ReadRawToken();
-        if (t.type == TT_BEGINPARENTH) ++paren;
-        else if (t.type == TT_ENDPARENTH) --paren;
+        if (t.type == TT_BEGINPARENTH) {
+          ++paren;
+        } else if (t.type == TT_ENDPARENTH) {
+          if (!--paren) break;
+        }
         if (t.type == TT_COMMA && paren == 1) {
-          args.emplace_back();
+          if (args.size() < macro.parameters->size()) {
+            args.emplace_back();
+          } else if (macro.is_variadic) {
+            args.back().push_back(t);
+          } else {
+            errc.Error() << "Too many arguments to macro function `"
+                         << name << '`';
+          }
         } else {
           args.back().push_back(t);
         }
@@ -424,7 +442,7 @@ bool Lexer::HandleMacro(std::string_view name) {
         for (size_t i = 0; i < args.size(); ++i)
           args_evald[i] = PreprocessBuffer(args[i]);
         PushMacro(macro.name,
-                  macro.SubstituteAndUnroll(args, args_evald, errc));
+                  macro.SubstituteAndUnroll(args, args_evald, errc, stringified_macros));
       } else {
         errc.Error() << "No closing parenthesis for arguments to `"
                      << name << '`';
@@ -448,9 +466,7 @@ Token &Lexer::TranslateNameToken(Token &token) {
   }
 
   if (!context->language_fe->is_shared_local(name)) {
-    // TODO: remove slow_ass_conversion with new JDI
-    std::string slow_ass_conversion{name};
-    jdi::definition *d = context->language_fe->look_up(slow_ass_conversion);
+    jdi::definition *d = context->language_fe->look_up(name);
     if (d) {
       token.ext = d;
       if (d->flags & jdi::DEF_TYPENAME) {
@@ -484,8 +500,25 @@ Token Lexer::ReadToken() {
 
 Lexer::Lexer(TokenVector tokens, const ParseContext *ctex, ErrorHandler *herr_):
     owned_code(std::make_unique<std::string>()), code(*owned_code),
-    context(ctex), herr(herr_) {
+    context(ctex), herr(herr_), options(ctex) {
   PushMacro("", std::move(tokens));
+}
+
+Lexer::Options::Options(const ParseContext *ctex):
+    use_escapes(ctex->compatibility_opts.use_cpp_escapes),
+    use_char_literals(ctex->compatibility_opts.use_cpp_strings),
+    use_hex_literals(ctex->compatibility_opts.use_cpp_literals),
+    use_oct_literals(ctex->compatibility_opts.use_cpp_literals),
+    use_bin_literals(ctex->compatibility_opts.use_cpp_literals),
+    use_gml_style_hex(true),
+    use_preprocessor_tokens(false) {}
+
+void Lexer::Options::SetAsCpp() {
+  use_escapes = true;
+  use_char_literals = true;
+  use_hex_literals = use_oct_literals = use_bin_literals = true;
+  use_gml_style_hex = false;
+  use_preprocessor_tokens = true;
 }
 
 }  // namespace parsing

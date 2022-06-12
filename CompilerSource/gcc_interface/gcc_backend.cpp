@@ -173,10 +173,11 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-  
-    jdi::builtin->add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
-    jdi::builtin->add_search_directory((enigma_root/"shared").u8string().c_str());
-    jdi::builtin->add_search_directory(codegen_directory.u8string().c_str());
+
+    auto &builtin = jdi::builtin_context();
+    builtin.add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    builtin.add_search_directory((enigma_root/"shared").u8string().c_str());
+    builtin.add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -189,13 +190,13 @@ const char* establish_bearings(const char *compiler)
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        jdi::builtin->add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
+        builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned " << jdi::builtin->search_dir_count() << " search directories:\n";
+    cout << "Toolchain returned " << builtin.search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
@@ -203,8 +204,8 @@ const char* establish_bearings(const char *compiler)
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory/"enigma_defines.txt").u8string().c_str());
-    jdi::builtin->add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
+    int res = builtin.parse_stream(macro_reader);
+    builtin.add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 
