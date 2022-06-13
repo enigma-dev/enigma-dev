@@ -75,6 +75,39 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
   for (const auto &action : actions) {
     const auto &args = action.arguments();
 
+    std::string applies_to = action.who_name();
+    if (action.use_apply_to() && applies_to != "self") {
+      const auto &ref_as_int = [&action](const std::string &applies_to) -> std::string {
+        if (applies_to == "self") {
+          return "-1";
+        } else if (applies_to == "other") {
+          return "-2";
+        } else if (action.id() == -4) {
+          return "-100";
+        } else {
+          return std::to_string(action.id());
+        }
+      };
+
+      if (action.is_question()) {
+        if (applies_to == "other") {
+          code += "with (other) ";
+        } else if (!applies_to.empty()) {
+          code += std::string{"with ("} + ref_as_int(applies_to) + ") ";
+        } else {
+          code += "/*null with*/";
+        }
+      } else {
+        if (applies_to == "other") {
+          code += "with (other) {";
+        } else if (!applies_to.empty()) {
+          code += std::string{"with ("} + ref_as_int(applies_to) + ") {";
+        } else {
+          code += "/*null with*/{";
+        }
+      }
+    }
+
     switch (action.kind()) {
       case ActionKind::ACT_BEGIN:
         code += '{';
@@ -104,7 +137,7 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
           code += " += ";
         else
           code += " = ";
-        code += args.Get(1).string();
+        code += args.Get(1).string() + "\n";
         break;
       case ActionKind::ACT_CODE:
         code += "{\n" + args.Get(0).string() + "\n/**/\n}";
@@ -112,49 +145,15 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
       case ActionKind::ACT_NORMAL: {
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
-        const std::string &applies_to = action.who_name();
-
-        const auto &ref_as_int = [&action](const std::string &applies_to) -> std::string {
-          if (applies_to == "self") {
-            return "-1";
-          } else if (applies_to == "other") {
-            return "-2";
-          } else if (action.id() == -4) {
-            return "-100";
-          } else {
-            return std::to_string(action.id());
-          }
-        };
-
-        if (action.use_apply_to() && applies_to != "self") {
-          if (action.is_question()) {
-            if (applies_to == "other") {
-              code += "with (other) ";
-            } else if (applies_to != "") {
-              code += std::string{"with ("} + ref_as_int(applies_to) + ") ";
-            } else {
-              code += "/*null with*/";
-            }
-          } else {
-            if (applies_to == "other") {
-              code += "with (other) {";
-            } else if (applies_to != "") {
-              code += std::string{"with ("} + ref_as_int(applies_to) + ") {";
-            } else {
-              code += "/*null with*/{";
-            }
-          }
-        }
-
         if (action.is_question()) {
-          code += "if ";
+          code += "__if__ = ";
           numberOfIfs++;
         }
 
         if (action.is_not())
           code += "!";
 
-        if (action.relative()) {
+        if (action.use_relative()) {
           if (action.is_question())
             code += std::string{"(argument_relative := "} + (action.relative() ? "true" : "false") + ", ";
           else
@@ -176,8 +175,11 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
           code += ')';
         }
 
-        if (action.relative())
-          code += action.is_question() ? ")" : "\n}";
+        if (action.use_relative())
+          code += action.is_question() ? ");" : "\n}";
+        if (action.is_question()) {
+          code += "\nif (__if__)";
+        }
         code += "\n";
 
         if (applies_to != "self" && !action.is_question())
@@ -193,6 +195,9 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
   if (numberOfBraces > 0)
     for (int i = 0; i < numberOfBraces; i++)
       code += "\n}";
+
+  if (numberOfIfs > 0)
+    code = "var __if__ = false;\n" + code;
 
   return code;
 }
