@@ -85,7 +85,7 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
         } else if (action.id() == -4) {
           return "-100";
         } else {
-          return std::to_string(action.id());
+          return action.who_name();
         }
       };
 
