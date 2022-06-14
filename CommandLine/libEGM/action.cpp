@@ -75,37 +75,11 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
   for (const auto &action : actions) {
     const auto &args = action.arguments();
 
-    std::string applies_to = action.who_name();
-    if (action.use_apply_to() && applies_to != "self") {
-      const auto &ref_as_int = [&action](const std::string &applies_to) -> std::string {
-        if (applies_to == "self") {
-          return "-1";
-        } else if (applies_to == "other") {
-          return "-2";
-        } else if (action.id() == -4) {
-          return "-100";
-        } else {
-          return action.who_name();
-        }
-      };
-
-      if (action.is_question()) {
-        if (applies_to == "other") {
-          code += "with (other) ";
-        } else if (!applies_to.empty()) {
-          code += std::string{"with ("} + ref_as_int(applies_to) + ") ";
-        } else {
-          code += "/*null with*/";
-        }
-      } else {
-        if (applies_to == "other") {
-          code += "with (other) {";
-        } else if (!applies_to.empty()) {
-          code += std::string{"with ("} + ref_as_int(applies_to) + ") {";
-        } else {
-          code += "/*null with*/{";
-        }
-      }
+    bool in_with = action.use_apply_to() && action.who_name() != "self";
+    if (in_with) {
+      code += "with (" + action.who_name() + ")\n";
+      if (!action.is_question())
+        code += " {\n";
     }
 
     switch (action.kind()) {
@@ -142,7 +116,7 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
       case ActionKind::ACT_CODE:
         code += "{\n" + args.Get(0).string() + "\n/**/\n}";
         break;
-      case ActionKind::ACT_NORMAL: {
+      case ActionKind::ACT_NORMAL:
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
         if (action.is_question()) {
@@ -182,10 +156,9 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
         }
         code += "\n";
 
-        if (applies_to != "self" && !action.is_question())
+        if (action.who_name() != "self" && !action.is_question())
           code += "\n}";
         break;
-      }
       default:
         break;
     }
