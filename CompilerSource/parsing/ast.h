@@ -27,6 +27,8 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <unordered_map>
+#include <variant>
 #include <vector>
 
 struct ParsedScope;  // object_storage.h
@@ -42,8 +44,8 @@ class AST {
     UNARY_EXPRESSION,
     TERNARY_EXPRESSION,
     PARENTHETICAL, ARRAY,
-    IDENTIFIER, LITERAL, FUNCTION_CALL,
-    IF, FOR, WHILE, DO, WITH, REPEAT,
+    IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
+    IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
     BREAK, CONTINUE, RETURN,
   };
   struct Node {
@@ -56,6 +58,22 @@ class AST {
 
   template<NodeType kType> struct TypedNode : Node {
     TypedNode(): Node(kType) {}
+  };
+
+  struct ConstValue {
+    /// Hardware representation of supported values.
+    typedef std::variant<long double, long long, std::string> HardwareValue;
+    HardwareValue value;
+
+    /// When processed from a C++-compatible token, this is the original
+    /// spelling. Useful for preserving floats like 0.123.
+    /// When the original spelling is not available, this serves as a
+    /// cache of the latest computed spelling.
+    std::optional<std::string> literal_representation;
+
+    ConstValue(const Token &t);
+    std::string ToCppLiteral() const;
+    std::string ToCppLiteral();
   };
 
   // Simple block of code, containing zero or more statements.
@@ -99,6 +117,10 @@ class AST {
   struct Variable : TypedNode<NodeType::IDENTIFIER> {
     std::string name;
   };
+  struct Literal : TypedNode<NodeType::LITERAL> {
+    ConstValue value;
+    Literal(const Token &token);
+  };
   
   struct IfStatement : TypedNode<NodeType::IF> {
     PNode condition;
@@ -121,6 +143,19 @@ class AST {
     bool is_until;
 
     DoLoop(bool until): is_until(until) {}
+  };
+  struct CaseStatement : TypedNode<NodeType::CASE> {
+    PNode value;
+  };
+  struct DefaultStatement : TypedNode<NodeType::DEFAULT> {
+  };
+  struct SwitchStatement : TypedNode<NodeType::SWITCH> {
+    PNode expression;
+    PNode body;
+    // Need to track these because case labels must be unique
+    // and there can only be one default label.
+    std::unordered_map<ConstValue::HardwareValue, CaseStatement*> cases;
+    DefaultStatement *default_branch = nullptr;
   };
   struct ReturnStatement : TypedNode<NodeType::RETURN> {
     // Optional: the return value. Default: T()
