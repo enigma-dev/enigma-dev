@@ -47,10 +47,12 @@
 #include <sys/stat.h>
 #if defined(_WIN32) 
 #include <windows.h>
+#include <Shlobj.h>
 #include <share.h>
 #include <io.h>
 #else
 #if defined(__APPLE__) && defined(__MACH__)
+#include <sysdir.h>
 #include <libproc.h>
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
@@ -356,6 +358,89 @@ namespace ngs::fs {
       }
     }
 
+    string directory_get_special_path(int dtype) {
+      std::string result;
+      #if defined(_WIN32)
+      wchar_t *ptr = nullptr;
+      REFKNOWNFOLDERID fid;
+      switch (dtype) {
+        case  0: { fid = FOLDERID_Desktop;   break; }
+        case  1: { fid = FOLDERID_Documents; break; }
+        case  2: { fid = FOLDERID_Downloads; break; }
+        case  3: { fid = FOLDERID_Music;     break; }
+        case  4: { fid = FOLDERID_Pictures;  break; }
+        case  5: { fid = FOLDERID_Videos;    break; }
+        default: { fid = FOLDERID_Desktop;   break; }
+      }
+      if (SUCCEEDED(SHGetKnownFolderPath(fid, KF_FLAG_CREATE | KF_FLAG_DONT_UNEXPAND, nullptr, &ptr))) {
+        result = narrow(ptr);
+      }
+      CoTaskMemFree(ptr); 
+      #elif defined(__APPLE__) && defined(__MACH__)
+      char buf[PATH_MAX];
+      sysdir_search_path_directory_t fid;
+      sysdir_search_path_enumeration_state state;
+      switch (dtype) {
+        case  0: { fid = SYSDIR_DIRECTORY_DESKTOP;   break; }
+        case  1: { fid = SYSDIR_DIRECTORY_DOCUMENT;  break; }
+        case  2: { fid = SYSDIR_DIRECTORY_DOWNLOADS; break; }
+        case  3: { fid = SYSDIR_DIRECTORY_MUSIC;     break; }
+        case  4: { fid = SYSDIR_DIRECTORY_PICTURES;  break; }
+        case  5: { fid = SYSDIR_DIRECTORY_MOVIES;    break; }
+        default: { fid = SYSDIR_DIRECTORY_DESKTOP;   break; }
+      }
+      state = sysdir_start_search_path_enumeration(fid, SYSDIR_DOMAIN_MASK_USER);
+      while ((state = sysdir_get_next_search_path_enumeration(state, buf))) {
+        if (buf[0] == '~') {
+          result = buf; 
+          result.replace(0, 1, environment_get_variable("HOME"));
+          break;
+        }
+      }
+      #else
+      std::string fid;
+      switch (dtype) {
+        case  0: { fid = "XDG_DESKTOP_DIR=";   break; }
+        case  1: { fid = "XDG_DOCUMENTS_DIR="; break; }
+        case  2: { fid = "XDG_DOWNLOAD_DIR=";  break; }
+        case  3: { fid = "XDG_MUSIC_DIR=";     break; }
+        case  4: { fid = "XDG_PICTURES_DIR=";  break; }
+        case  5: { fid = "XDG_VIDEOS_DIR=";    break; }
+        default: { fid = "XDG_DESKTOP_DIR=";   break; }
+      }
+      std::string conf = environment_get_variable("HOME") + "/.config/user-dirs.dirs";
+      if (file_exists(conf)) {
+        int dirs = file_text_open_read(conf);
+        if (dirs != -1) {
+          while (!file_text_eof(dirs)) {
+            std::string line = file_text_read_string(dirs);
+            file_text_readln(dirs);
+            std::size_t pos = line.find(fid, 0);
+            if (pos != std::string::npos) {
+              FILE *fp = popen(("echo " + line.substr(pos + fid.length())).c_str(), "r");
+              if (fp) {
+                char buf[PATH_MAX];
+                if (fgets(buf, PATH_MAX, fp)) {
+                  std::string str = buf;
+                  std::size_t pos = str.find("\n", strlen(buf) - 1);
+                  if (pos != std::string::npos)
+                    str.replace(pos, 1, "");
+                  if (!directory_exists(str)) {
+                    directory_create(str);
+                  }
+                  result = str;
+                }
+                pclose(fp);
+              }
+            }
+          }
+          file_text_close(dirs);
+        }
+      }
+      #endif
+      return result;
+    }
+
   } // anonymous namespace
 
   string directory_get_current_working() {
@@ -376,6 +461,30 @@ namespace ngs::fs {
     std::error_code ec;
     string result = expand_with_trailing_slash(ghc::filesystem::temp_directory_path(ec).string());
     return (ec.value() == 0) ? result : "";
+  }
+
+  string directory_get_desktop_path() {
+    return directory_get_special_path(0);
+  }
+
+  string directory_get_documents_path() {
+    return directory_get_special_path(1);
+  }
+
+  string directory_get_downloads_path() {
+    return directory_get_special_path(2);
+  }
+
+  string directory_get_music_path() {
+    return directory_get_special_path(3);
+  }
+
+  string directory_get_pictures_path() {
+    return directory_get_special_path(4);
+  }
+
+  string directory_get_videos_path() {
+    return directory_get_special_path(5);
   }
 
   string executable_get_pathname() {

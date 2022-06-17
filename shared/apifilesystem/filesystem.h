@@ -50,6 +50,12 @@ namespace ngs::fs {
   std::string directory_get_current_working();
   bool directory_set_current_working(std::string dname);
   std::string directory_get_temporary_path();
+  std::string directory_get_desktop_path();
+  std::string directory_get_documents_path();
+  std::string directory_get_downloads_path();
+  std::string directory_get_music_path();
+  std::string directory_get_pictures_path();
+  std::string directory_get_videos_path();
   std::string executable_get_directory();
   std::string executable_get_filename();
   std::string executable_get_pathname();
