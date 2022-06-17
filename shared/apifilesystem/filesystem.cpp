@@ -362,7 +362,7 @@ namespace ngs::fs {
       std::string result;
       #if defined(_WIN32)
       wchar_t *ptr = nullptr;
-      REFKNOWNFOLDERID fid;
+      KNOWNFOLDERID fid;
       switch (dtype) {
         case  0: { fid = FOLDERID_Desktop;   break; }
         case  1: { fid = FOLDERID_Documents; break; }
