@@ -117,20 +117,44 @@ ActionVectorSpan GetNextAction(const std::vector<buffers::resources::Action> &ac
   return {begin, begin};
 }
 
-std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs);
+/// Push the given action's target to the @c who_name_stack if required
+///
+/// \return true If a new target was pushed onto the stack
+/// \return false If a new target was not pushed onto the stack
+bool PushIfRequired(std::string &code, std::stack<std::string> &who_name_stack, const buffers::resources::Action &action) {
+  // If we have a relative action nested inside another action, we need to check if the action we are inside doesn't
+  // already apply relative to the object we are applying to
+  //
+  // For applying relative to self, we only need to check if there exists a target before us in the stack which is
+  // already being applied to, which is handled in the else-if branch
+  if (action.use_apply_to() && action.who_name() != "self") {
+    if (who_name_stack.empty() || who_name_stack.top() != action.who_name()) {
+      code += "with (" + action.who_name() + ")\n";
+      who_name_stack.push(action.who_name());
+      return true;
+    }
+  } else if (!who_name_stack.empty() && who_name_stack.top() != "self") {
+    // Otherwise, if we are applying to "self", we need to check if the action we are within doesn't apply to some
+    // object other than "self"
+    code += "with (self)\n";
+    who_name_stack.push("self");
+    return true;
+  }
+  // Otherwise, the stack is empty and we are applying to self, in which case we need to do nothing at all
+  return false;
+}
+
+std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs, std::stack<std::string> &who_name_stack);
 
 /// A question action is one which is used for conditional flow of control, i.e. an "if"-action.
 ///
 /// The problem with these is that they require special scoping of the @c __if__ variable which actually stores the
 /// results of the evaluation of the condition.
-std::pair<std::string, std::size_t> Question2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs) {
+std::pair<std::string, std::size_t> Question2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs, std::stack<std::string> &who_name_stack) {
   using buffers::resources::ActionExecution;
 
   std::string code;
-  bool in_with = span.first->use_apply_to() && span.first->who_name() != "self";
-  if (in_with) {
-    code += "with (" + span.first->who_name() + ")\n";
-  }
+  bool pushed_to_stack = PushIfRequired(code, who_name_stack, *span.first);
   code += "{\n";
 
   const auto &action = *span.first;
@@ -167,7 +191,7 @@ std::pair<std::string, std::size_t> Question2Code(ActionVectorSpan span, int &nu
   code += "\nif (__if__)\n";
 
   // Convert the body of the condition to code.
-  code += Action2Code({span.first + 1, span.second}, numberOfBraces, numberOfIfs);
+  code += Action2Code({span.first + 1, span.second}, numberOfBraces, numberOfIfs, who_name_stack);
 
   code += "}\n";
 
@@ -175,20 +199,21 @@ std::pair<std::string, std::size_t> Question2Code(ActionVectorSpan span, int &nu
   // to skip over the actions we have already emitted code for.
   std::size_t displacement = std::distance(span.first, span.second);
 
+  if (pushed_to_stack) {
+    who_name_stack.pop();
+  }
+
   return {code, displacement};
 }
 
 /// Convert a sequence of actions to a code string.
-std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs) {
+std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs, std::stack<std::string> &who_name_stack) {
   using buffers::resources::ActionKind;
   using buffers::resources::ActionExecution;
 
   std::string code;
 
-  bool in_with = span.first->use_apply_to() && span.first->who_name() != "self";
-  if (in_with) {
-    code += "with (" + span.first->who_name() + ")\n";
-  }
+  bool pushed_to_stack = PushIfRequired(code, who_name_stack, *span.first);
 
   const buffers::resources::Action *iter = span.first;
   while (iter <= span.second) {
@@ -233,7 +258,7 @@ std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberO
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
         if (action.is_question()) {
-          auto question = Question2Code({iter, span.second}, numberOfBraces, numberOfIfs);
+          auto question = Question2Code({iter, span.second}, numberOfBraces, numberOfIfs, who_name_stack);
           code += question.first; // The code generated for the if
           iter += question.second; // The displacement required as a result of processing the if's body
           break;
@@ -266,6 +291,10 @@ std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberO
     iter++;
   }
 
+  if (pushed_to_stack) {
+    who_name_stack.pop();
+  }
+
   return code;
 }
 
@@ -278,10 +307,13 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
   int numberOfIfs = 0; // gm allows multipe else actions after 1 if, so its important to track the number
 
   std::size_t i = 0;
+  // This is used to track which object's scope we are currently in, so that we know when its required to emit "with()".
+  std::stack<std::string> who_stack{};
+
   while (i < actions.size()) {
     ActionVectorSpan action = GetNextAction(actions, i);
     if (action.first != nullptr) {
-      code += Action2Code(action, numberOfBraces, numberOfIfs);
+      code += Action2Code(action, numberOfBraces, numberOfIfs, who_stack);
     }
   }
 
@@ -292,8 +324,6 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
 
   if (numberOfIfs > 0)
     code = "var __if__ = false;\n" + code;
-
-  std::cout << "Code:\n" << code << '\n';
 
   return code;
 }
