@@ -64,23 +64,136 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
   return val;
 }
 
-std::string Actions2Code(const std::vector< buffers::resources::Action >& actions) {
+/// A poor man's <tt> std::span </tt> over <tt> const std::vector< buffers::resources::Action >& actions </tt>
+///
+/// The second pointer being null implies the end of the actions buffer was reached.
+using ActionVectorSpan = std::pair<const buffers::resources::Action*, const buffers::resources::Action*>;
+
+/// Return a span over the vector of actions which consist of the next action (or block of actions) in the sequence.
+///
+/// The pointers are inclusive at both ends, so the first pointer points to the starting action and the second pointer
+/// points to the ending action. It also considers the action (or block of actions) that come after an @c if
+/// (conditional/question) action to be included with the @c if.
+///
+/// A return value of <tt> {nullptr, nullptr} </tt> indicates the end of the sequence.
+ActionVectorSpan GetNextAction(const std::vector<buffers::resources::Action> &actions, std::size_t &index) {
+  using buffers::resources::ActionKind;
+
+  if (index >= actions.size()) {
+    return {nullptr, nullptr};
+  }
+
+  const buffers::resources::Action *begin = &actions[index++];
+
+  // Conditional/Question/If actions and ACT_REPEAT actions have a body
+  if (begin->is_question()) {
+    ActionVectorSpan body = GetNextAction(actions, index);
+
+    // Consider the @c else of an if as part of its body
+    if ((index + 1) <= actions.size() && actions[index + 1].kind() == ActionKind::ACT_ELSE) {
+      // Skip over the ACT_ELSE and set the index pointer to the first action of the else
+      index += 2;
+      body = GetNextAction(actions, index);
+    }
+    // Return the start of the if action and the end of its body as the sequence of actions.
+    return {begin, body.second};
+  } else if (begin->kind() == ActionKind::ACT_REPEAT) {
+    ActionVectorSpan body = GetNextAction(actions, index);
+    // Return the start of the repeat action and the end of its body as the sequence of actions.
+    return {begin, body.second};
+  } else if (begin->kind() == ActionKind::ACT_BEGIN) {
+    while (index < actions.size() && actions[index].kind() != ActionKind::ACT_END) {
+      index++;
+    }
+
+    // If the block was not delineated properly, this ends up consuming all the actions in the sequence.
+    if (index >= actions.size()) {
+      return {begin, &actions.back()};
+    } else {
+      return {begin, &actions[index]};
+    }
+  }
+
+  return {begin, begin};
+}
+
+std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs);
+
+/// A question action is one which is used for conditional flow of control, i.e. an "if"-action.
+///
+/// The problem with these is that they require special scoping of the @c __if__ variable which actually stores the
+/// results of the evaluation of the condition.
+std::pair<std::string, std::size_t> Question2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs) {
+  using buffers::resources::ActionExecution;
+
+  std::string code;
+  bool in_with = span.first->use_apply_to() && span.first->who_name() != "self";
+  if (in_with) {
+    code += "with (" + span.first->who_name() + ")\n";
+  }
+  code += "{\n";
+
+  const auto &action = *span.first;
+  const auto &args = action.arguments();
+
+  code += "__if__ = ";
+  numberOfIfs++;
+
+  if (action.is_not())
+    code += "!";
+
+  if (action.use_relative()) {
+      code += std::string{"(argument_relative := "} + (action.relative() ? "true" : "false") + ", ";
+  }
+
+  if (action.exe_type() == ActionExecution::EXEC_CODE)
+    code += action.code_string();
+  else
+    code += action.function_name();
+
+  if (action.exe_type() == ActionExecution::EXEC_FUNCTION) {
+    code += '(';
+    for (int i = 0; i < args.size(); i++) {
+      if (i != 0)
+        code += ',';
+      code += Argument2Code(args.Get(i));
+    }
+    code += ')';
+  }
+
+  if (action.use_relative())
+    code += ");";
+
+  code += "\nif (__if__)\n";
+
+  // Convert the body of the condition to code.
+  code += Action2Code({span.first + 1, span.second}, numberOfBraces, numberOfIfs);
+
+  code += "}\n";
+
+  // We have already created the code for the body of the @c if, thus we need to tell the @c Action2Code which called us
+  // to skip over the actions we have already emitted code for.
+  std::size_t displacement = std::distance(span.first, span.second);
+
+  return {code, displacement};
+}
+
+/// Convert a sequence of actions to a code string.
+std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberOfIfs) {
   using buffers::resources::ActionKind;
   using buffers::resources::ActionExecution;
-  std::string code = "";
 
-  int numberOfBraces = 0; // gm ignores brace actions which are in the wrong place or missing
-  int numberOfIfs = 0; // gm allows multipe else actions after 1 if, so its important to track the number
+  std::string code;
 
-  for (const auto &action : actions) {
+  bool in_with = span.first->use_apply_to() && span.first->who_name() != "self";
+  if (in_with) {
+    code += "with (" + span.first->who_name() + ")\n";
+  }
+
+  const buffers::resources::Action *iter = span.first;
+  while (iter <= span.second) {
+    const auto &action = *iter;
     const auto &args = action.arguments();
-
-    bool in_with = action.use_apply_to() && action.who_name() != "self";
-    if (in_with) {
-      code += "with (" + action.who_name() + ")\n";
-      if (!action.is_question())
-        code += " {\n";
-    }
 
     switch (action.kind()) {
       case ActionKind::ACT_BEGIN:
@@ -120,24 +233,17 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
         if (action.is_question()) {
-          code += "__if__ = ";
-          numberOfIfs++;
+          auto question = Question2Code({iter, span.second}, numberOfBraces, numberOfIfs);
+          code += question.first; // The code generated for the if
+          iter += question.second; // The displacement required as a result of processing the if's body
+          break;
         }
-
-        if (action.is_not())
-          code += "!";
 
         if (action.use_relative()) {
-          if (action.is_question())
-            code += std::string{"(argument_relative := "} + (action.relative() ? "true" : "false") + ", ";
-          else
-            code += std::string{"{argument_relative := "} + (action.relative() ? "true" : "false") + "; ";
+          code += std::string{"{argument_relative := "} + (action.relative() ? "true" : "false") + "; ";
         }
 
-        if (action.is_question() && action.exe_type() == ActionExecution::EXEC_CODE)
-          code += action.code_string();
-        else
-          code += action.function_name();
+        code += action.function_name();
 
         if (action.exe_type() == ActionExecution::EXEC_FUNCTION) {
           code += '(';
@@ -149,18 +255,33 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
           code += ')';
         }
 
-        if (action.use_relative())
-          code += action.is_question() ? ");" : "\n}";
-        if (action.is_question()) {
-          code += "\nif (__if__)";
-        }
-        code += "\n";
-
-        if (action.who_name() != "self" && !action.is_question())
+        if (action.use_relative()) {
           code += "\n}";
+        }
         break;
       default:
         break;
+    }
+
+    iter++;
+  }
+
+  return code;
+}
+
+std::string Actions2Code(const std::vector< buffers::resources::Action >& actions) {
+  using buffers::resources::ActionKind;
+  using buffers::resources::ActionExecution;
+  std::string code = "";
+
+  int numberOfBraces = 0; // gm ignores brace actions which are in the wrong place or missing
+  int numberOfIfs = 0; // gm allows multipe else actions after 1 if, so its important to track the number
+
+  std::size_t i = 0;
+  while (i < actions.size()) {
+    ActionVectorSpan action = GetNextAction(actions, i);
+    if (action.first != nullptr) {
+      code += Action2Code(action, numberOfBraces, numberOfIfs);
     }
   }
 
@@ -171,6 +292,8 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
 
   if (numberOfIfs > 0)
     code = "var __if__ = false;\n" + code;
+
+  std::cout << "Code:\n" << code << '\n';
 
   return code;
 }
