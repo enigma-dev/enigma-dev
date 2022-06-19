@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Config>
+  <Options>
+    <option_sync_vertex>0</option_sync_vertex>
+    <option_use_new_audio>true</option_use_new_audio>
+    <option_shortcircuit>true</option_shortcircuit>
+    <option_use_fast_collision>false</option_use_fast_collision>
+    <option_fast_collision_compatibility>false</option_fast_collision_compatibility>
+    <option_fullscreen>false</option_fullscreen>
+    <option_sizeable>false</option_sizeable>
+    <option_stayontop>false</option_stayontop>
+    <option_aborterrors>false</option_aborterrors>
+    <option_noscreensaver>true</option_noscreensaver>
+    <option_showcursor>true</option_showcursor>
+    <option_displayerrors>true</option_displayerrors>
+    <option_noborder>false</option_noborder>
+    <option_nobuttons>false</option_nobuttons>
+    <option_argumenterrors>true</option_argumenterrors>
+    <option_freeze>true</option_freeze>
+    <option_colordepth>0</option_colordepth>
+    <option_frequency>0</option_frequency>
+    <option_resolution>0</option_resolution>
+    <option_changeresolution>false</option_changeresolution>
+    <option_priority>0</option_priority>
+    <option_closeesc>true</option_closeesc>
+    <option_interpolate>false</option_interpolate>
+    <option_scale>-1</option_scale>
+    <option_closeesc>true</option_closeesc>
+    <option_lastchanged>44732.07699074074</option_lastchanged>
+    <option_gameid>688953219</option_gameid>
+    <option_gameguid>{85DDA3A5-CDE6-4418-83D7-E76DE5F131F8}</option_gameguid>
+    <option_author/>
+    <option_version_company/>
+    <option_version_copyright/>
+    <option_version_description/>
+    <option_version_product/>
+    <option_information/>
+    <option_version>100</option_version>
+    <option_version_build>0</option_version_build>
+    <option_version_major>1</option_version_major>
+    <option_version_minor>0</option_version_minor>
+    <option_version_release>0</option_version_release>
+    <option_windows_steam_app_id>0</option_windows_steam_app_id>
+    <option_mac_steam_app_id>0</option_mac_steam_app_id>
+    <option_linux_steam_app_id>0</option_linux_steam_app_id>
+    <option_windows_enable_steam>false</option_windows_enable_steam>
+    <option_mac_enable_steam>false</option_mac_enable_steam>
+    <option_linux_enable_steam>false</option_linux_enable_steam>
+    <option_windows_game_icon>Configs\Default\windows\runner_icon.ico</option_windows_game_icon>
+  </Options>
+  <ConfigConstants>
+    <constants number="0"/>
+  </ConfigConstants>
+</Config>
