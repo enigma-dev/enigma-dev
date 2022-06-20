@@ -291,15 +291,13 @@ with (obj_1) {&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>if (my_x == 5) {&#13;
+            <string>if (my_x % 10 == 0) {&#13;
 	gtest_assert_eq(my_x, my_y * 5);&#13;
 }&#13;
 &#13;
 &#13;
 with (obj_1) {&#13;
-	if (test_x == 5) {&#13;
-		gtest_assert_eq(test_x, test_y * 5);&#13;
-	}&#13;
+	gtest_assert_eq(test_x, test_y * 5);&#13;
 }</string>
           </argument>
         </arguments>
@@ -499,6 +497,77 @@ with (obj_1) {&#13;
         <isquestion>0</isquestion>
         <exetype>0</exetype>
         <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments/>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>612</id>
+        <kind>0</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>-1</isquestion>
+        <exetype>1</exetype>
+        <functionname>action_if_variable</functionname>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>0</kind>
+            <string>my_x</string>
+          </argument>
+          <argument>
+            <kind>0</kind>
+            <string>100</string>
+          </argument>
+          <argument>
+            <kind>4</kind>
+            <string>0</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>612</id>
+        <kind>0</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>-1</isquestion>
+        <exetype>1</exetype>
+        <functionname>action_if_variable</functionname>
+        <codestring/>
+        <whoName>obj_1</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>0</kind>
+            <string>test_x</string>
+          </argument>
+          <argument>
+            <kind>0</kind>
+            <string>100</string>
+          </argument>
+          <argument>
+            <kind>4</kind>
+            <string>0</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>332</id>
+        <kind>0</kind>
+        <userelative>0</userelative>
+        <useapplyto>0</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>1</exetype>
+        <functionname>action_end_game</functionname>
         <codestring/>
         <whoName>self</whoName>
         <relative>0</relative>
