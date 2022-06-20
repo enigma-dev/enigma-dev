@@ -36,9 +36,12 @@ enum TokenType {
   TT_COLON,           // A colon.
   TT_COMMA,           // A comma.
   TT_ASSIGN,          // The strict := assignment operator. Not to be confused with EQUALS.
-  TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>=
+  TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>= &= ^= |=
   TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
   TT_DOT,             // A dot ('.'). Is neither preceeded nor followed by a numeral.
+  TT_ARROW,           // The -> operator.
+  TT_DOT_STAR,        // The .* operator (pointer-to-member).
+  TT_ARROW_STAR,      // The ->* operator (pointer-to-pointer-member).
   TT_PLUS,            // The + operator.
   TT_MINUS,           // The - operator.
   TT_STAR,            // The * operator.
@@ -63,6 +66,7 @@ enum TokenType {
   TT_GREATER,         // The > operator (or closing angle bracket).
   TT_LESSEQUAL,       // The <= operator.
   TT_GREATEREQUAL,    // The >= operator.
+  TT_THREEWAY,        // The <=> operator.
   TT_LSH,             // The << operator.
   TT_RSH,             // The >> operator (or double closing angle bracket).
   TT_QMARK,           // ?

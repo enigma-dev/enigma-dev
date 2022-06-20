@@ -4,6 +4,7 @@
 
 #include <string>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -26,7 +27,7 @@ struct Precedence {
       kTypeInit = kUnaryPostfix,      // Functional cast; LTR-parsed.
       kFuncCall = kUnaryPostfix,      // Function call; LTR-parsed.
       kSubscript = kUnaryPostfix,     // Subscript; LTR-parsed.
-      kMemberAccess = kUnaryPostfix,  // Member access; LTR-parsed.
+      kMemberAccess = kUnaryPostfix,  // Member access (a.b, a->b); LTR-parsed.
       kUnaryPrefix = 3,          // Prefix increment and decrement, unary plus and minus, logical and bitwise NOT, C-style cast, Dereference, Address-of; RTL-parsed.
       kSizeOf = kUnaryPrefix,    // sizeof; RTL-parsed.
       kAwait = kUnaryPrefix,     // await-expression; RTL-parsed.
@@ -46,16 +47,59 @@ struct Precedence {
       kBitXOr = 12,              // Bitwise XOR (a^b); LTR-parsed.
       kBitOr = 13,               // Bitwise OR (a|b); LTR-parsed.
       kBoolAnd = 14,             // Logical AND (a&&b); LTR-parsed.
-      kBoolOr = 15,              // Logical OR (a||b); LTR-parsed.
-      kTernary = 16,             // Ternary conditional (a?b:c); RTL-parsed.
-      kThrow = 16,               // throw operator; RTL-parsed.
-      kYield = 16,               // yield-expression (co_yield); RTL-parsed.
-      kAssign = 16,              // Direct assignment (provided by default for C++ classes) (a=b); RTL-parsed.
+      kBoolXOr = 15,              // Logical OR (a||b); LTR-parsed.
+      kBoolOr = 16,              // Logical OR (a||b); LTR-parsed.
+      kTernary = 17,             // Ternary conditional (a?b:c); RTL-parsed.
+      kThrow = 17,               // throw operator; RTL-parsed.
+      kYield = 17,               // yield-expression (co_yield); RTL-parsed.
+      kAssign = 17,              // Direct assignment (provided by default for C++ classes) (a=b); RTL-parsed.
       kCompoundAssign = kAssign, // Compound assignment (a+=b, a-=b, a*=b, a/=b, a%=b, a<<=b, a>>=b, a&=b, a^=b, a|=b); RTL-parsed.
-      kComma = 17,               // Comma (a,b); LTR-parsed.
+      kComma = 18,               // Comma (a,b); LTR-parsed.
       kAll = 100;                // Everything, including comma.
 
   constexpr static int kMin = 0;
+
+  static std::unordered_map<TokenType, OperatorPrecedence> kBinaryPrec;
+  static std::unordered_set<TokenType> kUnaryPrefixOps;
+};
+std::unordered_map<TokenType, OperatorPrecedence> Precedence::kBinaryPrec{
+   {TT_SCOPEACCESS,  {Precedence::kScope,          Associativity::LTR}},
+   {TT_DOT,          {Precedence::kMemberAccess,   Associativity::LTR}},
+   {TT_ARROW,        {Precedence::kMemberAccess,   Associativity::LTR}},
+   {TT_DOT_STAR,     {Precedence::kMemberPointer,  Associativity::LTR}},
+   {TT_ARROW_STAR,   {Precedence::kMemberPointer,  Associativity::LTR}},
+   {TT_STAR,         {Precedence::kMultiply,       Associativity::LTR}},
+   {TT_SLASH,        {Precedence::kDivide,         Associativity::LTR}},
+   {TT_DIV,          {Precedence::kDivide,         Associativity::LTR}},
+   {TT_MOD,          {Precedence::kModulo,         Associativity::LTR}},
+   {TT_PERCENT,      {Precedence::kModulo,         Associativity::LTR}},
+   {TT_PLUS,         {Precedence::kAdd,            Associativity::LTR}},
+   {TT_MINUS,        {Precedence::kSubtract,       Associativity::LTR}},
+   {TT_LSH,          {Precedence::kShift,          Associativity::LTR}},
+   {TT_RSH,          {Precedence::kShift,          Associativity::LTR}},
+   {TT_THREEWAY,     {Precedence::kThreeWayComp,   Associativity::LTR}},
+   {TT_LESS,         {Precedence::kRelational,     Associativity::LTR}},
+   {TT_LESSEQUAL,    {Precedence::kRelational,     Associativity::LTR}},
+   {TT_GREATER,      {Precedence::kRelational,     Associativity::LTR}},
+   {TT_GREATEREQUAL, {Precedence::kRelational,     Associativity::LTR}},
+   {TT_EQUALTO,      {Precedence::kEquality,       Associativity::LTR}},
+   {TT_NOTEQUAL,     {Precedence::kEquality,       Associativity::LTR}},
+   {TT_AMPERSAND,    {Precedence::kBitAnd,         Associativity::LTR}},
+   {TT_CARET,        {Precedence::kBitXOr,         Associativity::LTR}},
+   {TT_PIPE,         {Precedence::kBitOr,          Associativity::LTR}},
+   {TT_AND,          {Precedence::kBoolAnd,        Associativity::LTR}},
+   {TT_XOR,          {Precedence::kBoolXOr,        Associativity::LTR}},
+   {TT_OR,           {Precedence::kBoolOr,         Associativity::LTR}},
+   {TT_QMARK,        {Precedence::kTernary,        Associativity::LTR}},
+   {TT_ASSIGN,       {Precedence::kAssign,         Associativity::RTL}},
+   {TT_ASSOP,        {Precedence::kCompoundAssign, Associativity::RTL}},
+   {TT_COMMA,        {Precedence::kComma,          Associativity::LTR}},
+   // TODO: TT_THROW as kThrow RTL
+   // TODO: TT_ kYield RTL
+};
+std::unordered_set<TokenType> Precedence::kUnaryPrefixOps{
+  TT_PLUS, TT_MINUS, TT_STAR, TT_AMPERSAND, TT_TILDE, TT_NOT, TT_BANG,
+  TT_INCREMENT, TT_DECREMENT
 };
 
 class AstBuilder {
@@ -64,7 +108,9 @@ Lexer *lexer;
 ErrorHandler *herr;
 Token token;
 
-std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
+/// Parse an operand--this includes variables, literals, arrays, and
+/// unary expressions on these.
+std::unique_ptr<AST::Node> TryParseOperand() {
   token = lexer->ReadToken();
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
@@ -87,14 +133,18 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
       herr->ReportError(token, "Expected assignable expression before assignment operator");
       token = lexer->ReadToken();
       return nullptr;
-    case TT_DOT:
-      herr->ReportError(token, "Expected expression before dot");
+    case TT_DOT: case TT_ARROW:
+      herr->ReportError(token, "Expected expression before member access");
+      token = lexer->ReadToken();
+      return nullptr;
+    case TT_DOT_STAR: case TT_ARROW_STAR:
+      herr->ReportError(token, "Expected expression before pointer-to-member");
       token = lexer->ReadToken();
       return nullptr;
     case TT_PERCENT: case TT_PIPE: case TT_CARET:
     case TT_AND: case TT_OR: case TT_XOR: case TT_DIV: case TT_MOD:
     case TT_EQUALS: case TT_SLASH: case TT_EQUALTO: case TT_NOTEQUAL:
-    case TT_LESS: case TT_GREATER: case TT_LESSEQUAL:
+    case TT_LESS: case TT_GREATER: case TT_LESSEQUAL: case TT_THREEWAY:
     case TT_GREATEREQUAL: case TT_LSH: case TT_RSH:
       herr->Error(token) << "Expected expression before binary operator `" << token.content << '`';
       token = lexer->ReadToken();
@@ -168,7 +218,33 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
   }
 }
 
-/// Reads if()/for()/while()/with() statements.
+std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
+  if (auto operand = TryParseOperand()) {
+    // TODO: Handle binary operators, unary postfix operators
+    // (including function calls, array indexing, etc).
+    // XXX: Maybe handle TT_IDENTIFIER here when `operand` names a type
+    // to parse a declaration as an expression. This is a bold move, but
+    // more robust than handling it in TryParseExpression.
+    (void) precedence;
+    return operand;
+  }
+  return nullptr;
+}
+
+/// Reads if()/for()/while()/with()/switch() statements.
+///
+/// Syntax rule: In quirks mode, all binary operators are presumed to
+/// extend a parenthetical expression, EXCLUDING the star operator but
+/// INCLUDING the ampersand operator. The rationale for this is that
+/// `if (expr) *stmt = ...;` is far more likely to appear in code than
+/// `if (expr) &expr...;`, and `if (expr1) & (expr2)` is far more likely
+/// to appear than `if (expr2) * (expr2)`. In quirks mode, use of either
+/// token will result in a warning.
+///
+/// In strict mode, only the first parenthesized expression is taken.
+///
+/// In GML mode, a complete expression is read; unary * and & do not
+/// exist and so are not ambiguous (same for prefix ++ and --).
 template<typename ExpNode>
 std::unique_ptr<ExpNode> ReadConditionalStatement() {
   
@@ -206,11 +282,12 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       token = lexer->ReadToken();
       return std::make_unique<AST::CodeBlock>();
 
-    case TT_COLON: case TT_ASSIGN: case TT_ASSOP: case TT_DOT:
+    case TT_COLON: case TT_ASSIGN: case TT_ASSOP:
+    case TT_DOT: case TT_ARROW: case TT_DOT_STAR: case TT_ARROW_STAR:
     case TT_PERCENT: case TT_PIPE: case TT_CARET:
     case TT_AND: case TT_OR: case TT_XOR:
     case TT_DIV: case TT_MOD: case TT_SLASH:
-    case TT_EQUALS: case TT_EQUALTO: case TT_NOTEQUAL:
+    case TT_EQUALS: case TT_EQUALTO: case TT_NOTEQUAL: case TT_THREEWAY:
     case TT_LESS: case TT_GREATER: case TT_LSH: case TT_RSH:
     case TT_LESSEQUAL: case TT_GREATEREQUAL:
     case TT_QMARK:
@@ -289,6 +366,8 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     ;
   }
 }
+
+// TODO: the following.
 std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
 }
 std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression() {
