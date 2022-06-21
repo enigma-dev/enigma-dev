@@ -59,7 +59,7 @@ namespace enigma_user {
   }
    
   std::string directory_get_pictures_path() {
-    return filesystem::directory_get_picutres_path();
+    return filesystem::directory_get_pictures_path();
   }
    
   std::string directory_get_videos_path() {
