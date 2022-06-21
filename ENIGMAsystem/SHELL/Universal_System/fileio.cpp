@@ -42,6 +42,30 @@ namespace enigma_user {
     return filesystem::directory_get_temporary_path();
   }
  
+  std::string directory_get_desktop_path() {
+    return filesystem::directory_get_desktop_path();
+  }
+  
+  std::string directory_get_documents_path() {
+    return filesystem::directory_get_documents_path();
+  }
+  
+  std::string directory_get_downloads_path() {
+    return filesystem::directory_get_downloads_path();
+  }
+  
+  std::string directory_get_music_path() {
+    return filesystem::directory_get_music_path();
+  }
+   
+  std::string directory_get_pictures_path() {
+    return filesystem::directory_get_picutres_path();
+  }
+   
+  std::string directory_get_videos_path() {
+    return filesystem::directory_get_videos_path();
+  }
+ 
   std::string executable_get_directory() {
     return filesystem::executable_get_directory();
   }
