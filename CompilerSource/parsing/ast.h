@@ -142,24 +142,33 @@ class AST {
   struct IfStatement : TypedNode<NodeType::IF> {
     PNode condition;
     PNode true_branch, false_branch;
+
+    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_): condition{std::move(condition_)},
+        true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)} {}
   };
   struct ForLoop : TypedNode<NodeType::FOR> {
     PNode assignment, condition, increment;
     PNode body;
+
+    ForLoop(PNode assignment_, PNode condition_, PNode increment_, PNode body_): assignment{std::move(assignment_)},
+        condition{std::move(condition_)}, increment{std::move(increment_)}, body{std::move(body_)} {}
   };
   struct WhileLoop : TypedNode<NodeType::WHILE> {
     PNode condition;
     PNode body;
-    bool is_until;
 
-    WhileLoop(bool until): is_until(until) {}
+    enum class Kind { WHILE, UNTIL, REPEAT } kind;
+
+    WhileLoop(PNode condition_, PNode body_, Kind kind_): condition{std::move(condition_)},
+        body{std::move(body_)}, kind{kind_} {}
   };
   struct DoLoop : TypedNode<NodeType::DO> {
     PNode body;
     PNode condition;
     bool is_until;
 
-    DoLoop(bool until): is_until(until) {}
+    DoLoop(PNode body_, PNode condition_, bool until): body{std::move(body_)}, condition{std::move(condition_)},
+        is_until(until) {}
   };
   struct CaseStatement : TypedNode<NodeType::CASE> {
     PNode value;
@@ -177,14 +186,27 @@ class AST {
   struct ReturnStatement : TypedNode<NodeType::RETURN> {
     // Optional: the return value. Default: T()
     PNode expression;
+    bool is_exit;
+
+    ReturnStatement(PNode expression_, bool is_exit_): expression{std::move(expression_)}, is_exit{is_exit_} {}
   };
   struct BreakStatement : TypedNode<NodeType::BREAK> {
     // Optional: the number of nested loops to break out of (default = 1)
     PNode count;
+
+    explicit BreakStatement(PNode count_): count{std::move(count_)} {}
   };
   struct ContinueStatement : TypedNode<NodeType::CONTINUE> {
     // Optional: the number of nested loops to continue past (default = 1)
     PNode count;
+
+    explicit ContinueStatement(PNode count_): count{std::move(count_)} {}
+  };
+  struct WithStatement : TypedNode<NodeType::WITH> {
+    PNode object;
+    PNode body;
+
+    WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
   };
 
   // Used to adapt to current single-error syntax checking interface.
