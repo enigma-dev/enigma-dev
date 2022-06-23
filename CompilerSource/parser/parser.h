@@ -38,6 +38,10 @@ int parser_secondary(CompileState &state, ParsedCode *pev);
 void print_to_file(const enigma::parsing::ParseContext &ctex,string,string,const unsigned int,const varray<string>&,int,ofstream&);
 
 namespace enigma::parsing {
+enum class SyntaxMode {
+  STRICT, QUIRKS, GML
+};
+
 /// @brief Parser class for the EDL language
 ///
 /// Each parser in the class follows the contract that each callee's caller would have updated @c token to point to the
@@ -50,8 +54,10 @@ class AstBuilder {
   ErrorHandler *herr;
   Token token;
 
-  AstBuilder();
-  AstBuilder(Lexer *lexer, ErrorHandler *herr);
+  SyntaxMode mode;
+
+  AstBuilder(SyntaxMode mode = SyntaxMode::STRICT);
+  AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode = SyntaxMode::STRICT);
 
   template <typename T1, typename T2>
   bool map_contains(const std::unordered_map<T1, T2> &map, const T1 &value) {
@@ -76,23 +82,26 @@ class AstBuilder {
   std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedence, std::unique_ptr<AST::Node> operand);
   std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand);
 
+  std::unique_ptr<AST::Node> TryParseControlExpression();
+
   /// <!-- Statement parsers -->
   std::unique_ptr<AST::Node> TryReadStatement();
+  std::unique_ptr<AST::Node> ParseCFStmtBody();
   std::unique_ptr<AST::CodeBlock> ParseCodeBlock();
   std::unique_ptr<AST::IfStatement> ParseIfStatement();
   std::unique_ptr<AST::ForLoop> ParseForLoop();
   std::unique_ptr<AST::WhileLoop> ParseWhileLoop();
   std::unique_ptr<AST::WhileLoop> ParseUntilLoop();
   std::unique_ptr<AST::DoLoop> ParseDoLoop();
-  std::unique_ptr<AST::DoLoop> ParseRepeatStatement();
+  std::unique_ptr<AST::WhileLoop> ParseRepeatStatement();
   std::unique_ptr<AST::ReturnStatement> ParseReturnStatement();
   std::unique_ptr<AST::BreakStatement> ParseBreakStatement();
-  std::unique_ptr<AST::BreakStatement> ParseContinueStatement();
+  std::unique_ptr<AST::ContinueStatement> ParseContinueStatement();
   std::unique_ptr<AST::ReturnStatement> ParseExitStatement();
   std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement();
   std::unique_ptr<AST::CaseStatement> ParseCaseStatement();
   std::unique_ptr<AST::CaseStatement> ParseDefaultStatement();
-  std::unique_ptr<AST::CaseStatement> ParseWithStatement();
+  std::unique_ptr<AST::WithStatement> ParseWithStatement();
 
   /// Reads if()/for()/while()/with()/switch() statements.
   ///
