@@ -931,11 +931,11 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
 }
 
 namespace enigma::parsing {
-  AstBuilder::AstBuilder() {
+  AstBuilder::AstBuilder(SyntaxMode mode): mode{mode} {
     token = lexer->ReadToken();
   }
 
-  AstBuilder::AstBuilder(Lexer *lexer, ErrorHandler *herr): lexer{lexer}, herr{herr} {
+  AstBuilder::AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
     token = lexer->ReadToken();
   }
 
@@ -1188,6 +1188,37 @@ namespace enigma::parsing {
     return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
   }
 
+  std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression() {
+    switch (mode) {
+      case SyntaxMode::STRICT: {
+        if (token.type == TT_BEGINPARENTH) {
+          token = lexer->ReadToken();
+        } else {
+          herr->Error(token) << "Expected '(' before control expression";
+        }
+        auto expr = TryParseExpression(Precedence::kAll);
+        if (token.type == TT_ENDPARENTH) {
+          token = lexer->ReadToken();
+        } else {
+          herr->Error(token) << "Expected ')' after control expression";
+        }
+        return expr;
+      }
+      case SyntaxMode::QUIRKS: {
+        auto operand = TryParseOperand();
+        if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
+          Token oper = token;
+          token = lexer->ReadToken(); // Consume the token
+          auto right = TryParseControlExpression();
+          operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+        }
+        return operand;
+      }
+      case SyntaxMode::GML:
+        return TryParseExpression(Precedence::kAll);
+    }
+  }
+
   std::unique_ptr<AST::Node> AstBuilder::TryReadStatement() {
     switch (token.type) {
       case TTM_WHITESPACE:
@@ -1301,51 +1332,126 @@ namespace enigma::parsing {
     }
   }
 
+  // Parse control flow statement body
+  std::unique_ptr<AST::Node> AstBuilder::ParseCFStmtBody() {
+    return TryReadStatement();
+  }
+
   // TODO: the following.
   std::unique_ptr<AST::CodeBlock> AstBuilder::ParseCodeBlock() {
   }
 
-
   std::unique_ptr<AST::IfStatement> AstBuilder::ParseIfStatement() {
+    token = lexer->ReadToken();
+    auto condition = TryParseControlExpression();
+    if (token.type == TT_S_THEN) {
+      if (mode == SyntaxMode::STRICT) {
+        herr->Warning(token) << "Use of `then` keyword in if statement";
+      }
+      token = lexer->ReadToken();
+    }
 
+    auto true_branch = ParseCFStmtBody();
+
+    if (token.type == TT_S_ELSE) {
+      token = lexer->ReadToken();
+      auto false_branch = ParseCFStmtBody();
+      return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
+    } else {
+      return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), nullptr);
+    }
   }
+
   std::unique_ptr<AST::ForLoop> AstBuilder::ParseForLoop() {
 
   }
+
   std::unique_ptr<AST::WhileLoop> AstBuilder::ParseWhileLoop() {
+    token = lexer->ReadToken();
+    auto condition = TryParseControlExpression();
+    auto body = ParseCFStmtBody();
 
+    return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::WHILE);
   }
+
   std::unique_ptr<AST::WhileLoop> AstBuilder::ParseUntilLoop() {
+    token = lexer->ReadToken();
+    auto condition = TryParseControlExpression();
+    auto body = ParseCFStmtBody();
 
+    return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::UNTIL);
   }
+
   std::unique_ptr<AST::DoLoop> AstBuilder::ParseDoLoop() {
+    token = lexer->ReadToken();
+    auto body = ParseCFStmtBody();
 
-  }
-  std::unique_ptr<AST::DoLoop> AstBuilder::ParseRepeatStatement() {
+    Token kind = token;
+    if (token.type == TT_S_WHILE || token.type == TT_S_UNTIL) {
+      token = lexer->ReadToken();
+    } else {
+      herr->Error(token) << "Expected `while` or `until` after do loop body";
+    }
 
+    auto condition = TryParseControlExpression();
+
+    return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
   }
+
+  std::unique_ptr<AST::WhileLoop> AstBuilder::ParseRepeatStatement() {
+    token = lexer->ReadToken();
+    auto condition = TryParseControlExpression();
+    auto body = ParseCFStmtBody();
+
+    return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
+  }
+
   std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseReturnStatement() {
 
   }
+
   std::unique_ptr<AST::BreakStatement> AstBuilder::ParseBreakStatement() {
-
+    token = lexer->ReadToken(); // Consume the break
+    if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL && token.type != TT_OCTLITERAL &&
+        token.type != TT_HEXLITERAL) {
+      return std::make_unique<AST::BreakStatement>(nullptr);
+    } else {
+      return std::make_unique<AST::BreakStatement>(TryParseOperand());
+    }
   }
-  std::unique_ptr<AST::BreakStatement> AstBuilder::ParseContinueStatement() {
 
+  std::unique_ptr<AST::ContinueStatement> AstBuilder::ParseContinueStatement() {
+    token = lexer->ReadToken(); // Consume the break
+    if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL && token.type != TT_OCTLITERAL &&
+        token.type != TT_HEXLITERAL) {
+      return std::make_unique<AST::ContinueStatement>(nullptr);
+    } else {
+      return std::make_unique<AST::ContinueStatement>(TryParseOperand());
+    }
   }
+
   std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseExitStatement() {
-
+    token = lexer->ReadToken();
+    return std::make_unique<AST::ReturnStatement>(nullptr, true);
   }
+
   std::unique_ptr<AST::SwitchStatement> AstBuilder::ParseSwitchStatement() {
 
   }
+
   std::unique_ptr<AST::CaseStatement> AstBuilder::ParseCaseStatement() {
 
   }
+
   std::unique_ptr<AST::CaseStatement> AstBuilder::ParseDefaultStatement() {
 
   }
-  std::unique_ptr<AST::CaseStatement> AstBuilder::ParseWithStatement() {
 
+  std::unique_ptr<AST::WithStatement> AstBuilder::ParseWithStatement() {
+    token = lexer->ReadToken();
+    auto object = TryParseControlExpression();
+    auto body = ParseCFStmtBody();
+
+    return std::make_unique<AST::WithStatement>(std::move(object), std::move(body));
   }
 } // namespace enigma::parsing
