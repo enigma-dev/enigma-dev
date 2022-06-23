@@ -41,7 +41,8 @@ class AST {
     ERROR = 0,
     BLOCK = 1,
     BINARY_EXPRESSION,
-    UNARY_EXPRESSION,
+    UNARY_PREFIX_EXPRESSION,
+    UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
@@ -71,9 +72,10 @@ class AST {
     /// cache of the latest computed spelling.
     std::optional<std::string> literal_representation;
 
-    ConstValue(const Token &t);
-    std::string ToCppLiteral() const;
-    std::string ToCppLiteral();
+    // TODO: Make this parse the data correctly
+    ConstValue(const Token &t): value{std::string{t.content}} {}
+    std::string ToCppLiteral() const { return ""; }
+    std::string ToCppLiteral() { return "";}
   };
 
   // Simple block of code, containing zero or more statements.
@@ -90,11 +92,24 @@ class AST {
         left(std::move(left_)), right(std::move(right_)),
         operation(operation_) {}
   };
-  // Unary expressions; generally top-level will be "++varname"
-  struct UnaryExpression : TypedNode<NodeType::UNARY_EXPRESSION> {
+  // Function call expression, foo(bar)
+  struct FunctionCallExpression: TypedNode<NodeType::FUNCTION_CALL> {
+    PNode function;
+    std::vector<PNode> arguments;
+    FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_): function{std::move(function_)}, arguments{std::move(arguments_)} {}
+  };
+  // Unary prefix expressions; generally top-level will be "++varname"
+  struct UnaryPrefixExpression : TypedNode<NodeType::UNARY_PREFIX_EXPRESSION> {
     PNode operand;
     TokenType operation;
-    UnaryExpression(PNode operand_, TokenType operation_):
+    UnaryPrefixExpression(PNode operand_, TokenType operation_):
+        operand(std::move(operand_)), operation(operation_) {}
+  };
+  // Unary postfix expression
+  struct UnaryPostfixExpression: TypedNode<NodeType::UNARY_POSTFIX_EXPRESSION> {
+    PNode operand;
+    TokenType operation;
+    UnaryPostfixExpression(PNode operand_, TokenType operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
   // Ternary expression; the only one is ?:
@@ -102,6 +117,8 @@ class AST {
     PNode condition;
     PNode true_expression;
     PNode false_expression;
+    TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
+      condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
   };
   // No-op tree node that allows true-to-original pretty printing and
   // establishes a formal place for empty (null) nodes in a complete tree.
@@ -119,7 +136,7 @@ class AST {
   };
   struct Literal : TypedNode<NodeType::LITERAL> {
     ConstValue value;
-    Literal(const Token &token);
+    Literal(const Token &token): value{token} {}
   };
   
   struct IfStatement : TypedNode<NodeType::IF> {
