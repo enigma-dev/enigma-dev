@@ -93,6 +93,25 @@ class AstBuilder {
   std::unique_ptr<AST::CaseStatement> ParseCaseStatement();
   std::unique_ptr<AST::CaseStatement> ParseDefaultStatement();
   std::unique_ptr<AST::CaseStatement> ParseWithStatement();
+
+  /// Reads if()/for()/while()/with()/switch() statements.
+  ///
+  /// Syntax rule: In quirks mode, all binary operators are presumed to
+  /// extend a parenthetical expression, EXCLUDING the star operator but
+  /// INCLUDING the ampersand operator. The rationale for this is that
+  /// `if (expr) *stmt = ...;` is far more likely to appear in code than
+  /// `if (expr) &expr...;`, and `if (expr1) & (expr2)` is far more likely
+  /// to appear than `if (expr2) * (expr2)`. In quirks mode, use of either
+  /// token will result in a warning.
+  ///
+  /// In strict mode, only the first parenthesized expression is taken.
+  ///
+  /// In GML mode, a complete expression is read; unary * and & do not
+  /// exist and so are not ambiguous (same for prefix ++ and --).
+  template<typename ExpNode>
+  std::unique_ptr<ExpNode> ReadConditionalStatement() {
+
+  }
 };
 
 } // namespace enigma::parsing

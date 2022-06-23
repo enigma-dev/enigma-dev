@@ -1187,4 +1187,165 @@ namespace enigma::parsing {
 
     return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
   }
+
+  std::unique_ptr<AST::Node> AstBuilder::TryReadStatement() {
+    switch (token.type) {
+      case TTM_WHITESPACE:
+      case TTM_CONCAT:
+      case TTM_STRINGIFY:
+        herr->ReportError(token, "Internal error: Unhandled preprocessing token");
+        token = lexer->ReadToken();
+        return nullptr;
+      case TT_ERROR:
+        herr->ReportError(token, "Internal error: Bad token");
+        token = lexer->ReadToken();
+        return nullptr;
+
+      case TT_COMMA:
+        herr->ReportError(token, "Expected expression before comma");
+        token = lexer->ReadToken();
+        return nullptr;
+      case TT_ENDPARENTH:
+        herr->ReportError(token, "Unmatched closing parenthesis");
+        token = lexer->ReadToken();
+        return nullptr;
+      case TT_ENDBRACKET:
+        herr->ReportError(token, "Unmatched closing bracket");
+        token = lexer->ReadToken();
+        return nullptr;
+
+      case TT_SEMICOLON:
+        herr->ReportWarning(token, "Statement doesn't do anything (consider using `{}` instead of `;`)");
+        token = lexer->ReadToken();
+        return std::make_unique<AST::CodeBlock>();
+
+      case TT_COLON: case TT_ASSIGN: case TT_ASSOP:
+      case TT_DOT: case TT_ARROW: case TT_DOT_STAR: case TT_ARROW_STAR:
+      case TT_PERCENT: case TT_PIPE: case TT_CARET:
+      case TT_AND: case TT_OR: case TT_XOR:
+      case TT_DIV: case TT_MOD: case TT_SLASH:
+      case TT_EQUALS: case TT_EQUALTO: case TT_NOTEQUAL: case TT_THREEWAY:
+      case TT_LESS: case TT_GREATER: case TT_LSH: case TT_RSH:
+      case TT_LESSEQUAL: case TT_GREATEREQUAL:
+      case TT_QMARK:
+        // Allow TryParseExpression to handle errors.
+        // (Fall through.)
+      case TT_PLUS: case TT_MINUS: case TT_STAR: case TT_AMPERSAND:
+      case TT_NOT: case TT_BANG: case TT_TILDE:
+      case TT_INCREMENT: case TT_DECREMENT:
+      case TT_BEGINPARENTH: case TT_BEGINBRACKET:
+      case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
+      case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
+      case TT_SCOPEACCESS:
+        return TryParseExpression(Precedence::kAll);
+
+      case TT_ENDBRACE:
+        return nullptr;
+
+      case TT_BEGINBRACE: {
+        auto code = ParseCodeBlock();
+        if (token.type != TT_ENDBRACE) {
+          herr->ReportError(token, "Expected closing brace");
+        }
+        return code;
+      }
+
+      case TT_IDENTIFIER: {
+        // TODO: Verify that template instantiations are covered by kScope
+        auto name = TryParseExpression(Precedence::kScope);
+        // TODO:
+        // if (name.IsTypeIdentifier()) {
+        //   // Handle reading decl-specifier-seq and init-declarator-list
+        //   return ReadDeclaration(name);
+        // } else {
+        //   return TryParseBinaryExpression(name, Precedence::kAll);
+        // }
+        return name;
+      }
+
+      case TT_TYPE_NAME:  // TODO: rename TT_DECLARATOR, exclude var/variant/C++ classes,
+                          // include cv-qualifiers, storage-specifiers, etc
+      case TT_LOCAL:      // XXX: Treat as storage-specifiers?
+      case TT_GLOBAL:
+
+      case TT_RETURN: return ParseReturnStatement();
+      case TT_EXIT: return ParseExitStatement();
+      case TT_BREAK: return ParseBreakStatement();
+      case TT_CONTINUE: return ParseContinueStatement();
+      case TT_S_SWITCH: return ParseSwitchStatement();
+      case TT_S_REPEAT: return ParseRepeatStatement();
+      case TT_S_CASE:   return ParseCaseStatement();
+      case TT_S_DEFAULT: return ParseDefaultStatement();
+      case TT_S_FOR: return ParseForLoop();
+      case TT_S_IF: return ParseIfStatement();
+      case TT_S_DO: return ParseDoLoop();
+      case TT_S_WHILE: return ParseWhileLoop();
+      case TT_S_UNTIL: return ParseUntilLoop();
+      case TT_S_WITH: return ParseWithStatement();
+
+      case TT_S_THEN:
+        herr->ReportError(token, "`then` statement not paired with an `if`");
+        token = lexer->ReadToken();
+        return nullptr;
+      case TT_S_ELSE:
+        herr->ReportError(token, "`else` statement not paired with an `if`");
+        token = lexer->ReadToken();
+        return nullptr;
+
+      case TT_S_TRY: case TT_S_CATCH:
+      case TT_S_NEW: case TT_S_DELETE:
+
+
+      case TT_ENDOFCODE: return nullptr;
+        ;
+    }
+  }
+
+  // TODO: the following.
+  std::unique_ptr<AST::CodeBlock> AstBuilder::ParseCodeBlock() {
+  }
+
+
+  std::unique_ptr<AST::IfStatement> AstBuilder::ParseIfStatement() {
+
+  }
+  std::unique_ptr<AST::ForLoop> AstBuilder::ParseForLoop() {
+
+  }
+  std::unique_ptr<AST::WhileLoop> AstBuilder::ParseWhileLoop() {
+
+  }
+  std::unique_ptr<AST::WhileLoop> AstBuilder::ParseUntilLoop() {
+
+  }
+  std::unique_ptr<AST::DoLoop> AstBuilder::ParseDoLoop() {
+
+  }
+  std::unique_ptr<AST::DoLoop> AstBuilder::ParseRepeatStatement() {
+
+  }
+  std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseReturnStatement() {
+
+  }
+  std::unique_ptr<AST::BreakStatement> AstBuilder::ParseBreakStatement() {
+
+  }
+  std::unique_ptr<AST::BreakStatement> AstBuilder::ParseContinueStatement() {
+
+  }
+  std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseExitStatement() {
+
+  }
+  std::unique_ptr<AST::SwitchStatement> AstBuilder::ParseSwitchStatement() {
+
+  }
+  std::unique_ptr<AST::CaseStatement> AstBuilder::ParseCaseStatement() {
+
+  }
+  std::unique_ptr<AST::CaseStatement> AstBuilder::ParseDefaultStatement() {
+
+  }
+  std::unique_ptr<AST::CaseStatement> AstBuilder::ParseWithStatement() {
+
+  }
 } // namespace enigma::parsing
