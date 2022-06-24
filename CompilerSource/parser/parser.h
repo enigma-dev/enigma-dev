@@ -26,6 +26,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_COMPILER_PARSER_PARSER_h
+#define ENIGMA_COMPILER_PARSER_PARSER_h
+
 #include "precedence.h"
 #include "../parsing/tokens.h"
 #include "object_storage.h"
@@ -124,3 +127,5 @@ class AstBuilder {
 };
 
 } // namespace enigma::parsing
+
+#endif
