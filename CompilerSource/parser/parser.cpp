@@ -1407,7 +1407,10 @@ namespace enigma::parsing {
   }
 
   std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseReturnStatement() {
+    token = lexer->ReadToken();
+    auto value = TryParseExpression(Precedence::kAll);
 
+    return std::make_unique<AST::ReturnStatement>(std::move(value), false);
   }
 
   std::unique_ptr<AST::BreakStatement> AstBuilder::ParseBreakStatement() {
