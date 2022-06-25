@@ -359,7 +359,7 @@ namespace ngs::fs {
     }
 
     string directory_get_special_path(int dtype) {
-      std::string result;
+      string result;
       #if defined(_WIN32)
       wchar_t *ptr = nullptr;
       KNOWNFOLDERID fid;
@@ -374,6 +374,9 @@ namespace ngs::fs {
       }
       if (SUCCEEDED(SHGetKnownFolderPath(fid, KF_FLAG_CREATE | KF_FLAG_DONT_UNEXPAND, nullptr, &ptr))) {
         result = narrow(ptr);
+        if (!result.empty() && result.back() != '\\') {
+          result.push_back('\\');
+        }
       }
       CoTaskMemFree(ptr); 
       #elif defined(__APPLE__) && defined(__MACH__)
@@ -394,11 +397,14 @@ namespace ngs::fs {
         if (buf[0] == '~') {
           result = buf; 
           result.replace(0, 1, environment_get_variable("HOME"));
+          if (!result.empty() && result.back() != '/') {
+            result.push_back('/');
+          }
           break;
         }
       }
       #else
-      std::string fid;
+      string fid;
       switch (dtype) {
         case  0: { fid = "XDG_DESKTOP_DIR=";   break; }
         case  1: { fid = "XDG_DOCUMENTS_DIR="; break; }
@@ -408,27 +414,31 @@ namespace ngs::fs {
         case  5: { fid = "XDG_VIDEOS_DIR=";    break; }
         default: { fid = "XDG_DESKTOP_DIR=";   break; }
       }
-      std::string conf = environment_get_variable("HOME") + "/.config/user-dirs.dirs";
+      string conf = environment_get_variable("HOME") + "/.config/user-dirs.dirs";
       if (file_exists(conf)) {
         int dirs = file_text_open_read(conf);
         if (dirs != -1) {
           while (!file_text_eof(dirs)) {
-            std::string line = file_text_read_string(dirs);
+            string line = file_text_read_string(dirs);
             file_text_readln(dirs);
-            std::size_t pos = line.find(fid, 0);
-            if (pos != std::string::npos) {
+            size_t pos = line.find(fid, 0);
+            if (pos != string::npos) {
               FILE *fp = popen(("echo " + line.substr(pos + fid.length())).c_str(), "r");
               if (fp) {
                 char buf[PATH_MAX];
                 if (fgets(buf, PATH_MAX, fp)) {
-                  std::string str = buf;
-                  std::size_t pos = str.find("\n", strlen(buf) - 1);
-                  if (pos != std::string::npos)
+                  string str = buf;
+                  size_t pos = str.find("\n", strlen(buf) - 1);
+                  if (pos != string::npos) {
                     str.replace(pos, 1, "");
+                  }
                   if (!directory_exists(str)) {
                     directory_create(str);
                   }
                   result = str;
+                  if (!result.empty() && result.back() != '/') {
+                    result.push_back('/');
+                  }
                 }
                 pclose(fp);
               }
