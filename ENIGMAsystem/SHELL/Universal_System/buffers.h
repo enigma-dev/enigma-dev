@@ -80,7 +80,7 @@ int buffer_get_type(int buffer);
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
 void buffer_resize(int buffer, unsigned size);
-void buffer_seek(int buffer, int base, unsigned offset);
+void buffer_seek(int buffer, int base, long long offset);
 unsigned buffer_sizeof(int type);
 int buffer_tell(int buffer);
 

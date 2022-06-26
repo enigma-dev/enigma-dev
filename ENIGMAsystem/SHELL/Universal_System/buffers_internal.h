@@ -28,18 +28,20 @@ namespace enigma
 {
   struct BinaryBuffer
   {
-    std::vector<unsigned char> data;
-    unsigned position;
-    unsigned alignment;
+    std::vector<std::byte> data;
+    std::size_t position;
+    std::size_t alignment;
     int type;
     
-    BinaryBuffer(unsigned size);
+    BinaryBuffer(std::size_t size);
     ~BinaryBuffer() = default;
-    unsigned GetSize();
-    void Resize(unsigned size);
-    void Seek(unsigned offset);  
-    unsigned char ReadByte();
-    void WriteByte(unsigned char byte);
+
+    std::size_t GetSize();
+    void Resize(std::size_t size);
+    void Seek(long long offset);
+
+    std::byte ReadByte();
+    void WriteByte(std::byte byte);
   };
   
   extern std::vector<BinaryBuffer*> buffers;

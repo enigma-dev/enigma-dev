@@ -33,18 +33,18 @@ using std::string;
 namespace enigma {
 std::vector<BinaryBuffer*> buffers(0);
 
-BinaryBuffer::BinaryBuffer(unsigned size) {
-  data.resize(size, 0);
+BinaryBuffer::BinaryBuffer(std::size_t size) {
+  data.resize(size, std::byte{0});
   position = 0;
   alignment = 1;
   type = 0;
 }
 
-unsigned BinaryBuffer::GetSize() { return data.size(); }
+std::size_t BinaryBuffer::GetSize() { return data.size(); }
 
-void BinaryBuffer::Resize(unsigned size) { data.resize(size, 0); }
+void BinaryBuffer::Resize(std::size_t size) { data.resize(size, std::byte{0}); }
 
-void BinaryBuffer::Seek(unsigned offset) {
+void BinaryBuffer::Seek(long long offset) {
   position = offset;
   while (position >= GetSize()) {
     switch (type) {
@@ -61,14 +61,14 @@ void BinaryBuffer::Seek(unsigned offset) {
   }
 }
 
-unsigned char BinaryBuffer::ReadByte() {
+std::byte BinaryBuffer::ReadByte() {
   Seek(position);
-  unsigned char byte = data[position];
+  std::byte byte = data[position];
   Seek(position + 1);
   return byte;
 }
 
-void BinaryBuffer::WriteByte(unsigned char byte) {
+void BinaryBuffer::WriteByte(std::byte byte) {
   Seek(position);
   data[position] = byte;
   Seek(position + 1);
@@ -83,10 +83,10 @@ int get_free_buffer() {
   return buffers.size();
 }
 
-std::vector<unsigned char> valToBytes(variant value, unsigned count) {
-  std::vector<unsigned char> result(0);
+std::vector<std::byte> valToBytes(variant value, unsigned count) {
+  std::vector<std::byte> result(0);
   for (unsigned i = 0; i < count; i++) {
-    result.push_back(value >> ((i)*8));
+    result.push_back(static_cast<std::byte>((value >> (i << 3)) & 0xff));
   }
   return result;
 }
@@ -199,7 +199,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
-  std::vector<char> data;
+  std::vector<std::byte> data;
   myfile.read(reinterpret_cast<char*>(&data[0]), myfile.tellg());
   unsigned over = data.size() - binbuff->GetSize();
   switch (binbuff->type) {
@@ -284,7 +284,7 @@ void buffer_resize(int buffer, unsigned size) {
   binbuff->Resize(size);
 }
 
-void buffer_seek(int buffer, int base, unsigned offset) {
+void buffer_seek(int buffer, int base, long long offset) {
   get_buffer(binbuff, buffer);
   switch (base) {
     case buffer_seek_start:
@@ -336,7 +336,7 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
     char byte = '1';
     std::vector<char> data;
     while (byte != 0x00) {
-      byte = binbuff->ReadByte();
+      byte = static_cast<char>(binbuff->ReadByte());
       data.push_back(byte);
     }
     return variant(&data[0]);
@@ -354,21 +354,21 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
   if (type != buffer_string) {
     //TODO: Implement buffer alignment.
     //unsigned dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
-    std::vector<unsigned char> data = enigma::valToBytes(value, buffer_sizeof(type));
+    std::vector<std::byte> data = enigma::valToBytes(value, buffer_sizeof(type));
     for (unsigned i = 0; i < data.size(); i++) {
       binbuff->WriteByte(data[i]);
     }
   } else {
-    char byte = '1';
+    std::byte byte{'1'};
     unsigned pos = 0;
-    while (byte != 0x00) {
-      byte = value[pos];
+    while (byte != std::byte{0x00}) {
+      byte = static_cast<std::byte>(value[pos]);
       pos += 1;
       binbuff->WriteByte(byte);
     }
     if (binbuff->alignment > pos) {
       for (unsigned i = 0; i < binbuff->alignment - pos; i++) {
-        binbuff->WriteByte(0);
+        binbuff->WriteByte(std::byte{0});
       }
     }
   }
