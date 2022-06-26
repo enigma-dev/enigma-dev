@@ -92,22 +92,41 @@ std::vector<std::byte> valToBytes(variant value, int type) {
 namespace enigma_user {
 std::vector<std::byte> serialize_to_type(variant &value, int type) {
 #define BYTE(x) static_cast<std::byte>(x)
+  // If a positive value is too large for `intXX_t`, it'll be chopped in half because the conversion from double
+  // to signed integer will truncate the highest sign bit and replace it with its own sign bit (which will be 0).
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool: {
       assert("Expected numeric value to be passed in" && value.type == ty_real);
-      std::uint8_t as_int = static_cast<std::int8_t>(value.rval.d);
+      std::uint8_t as_int = 0;
+      if (value.rval.d > std::numeric_limits<std::int8_t>::max()) {
+        as_int = static_cast<std::uint8_t>(value.rval.d);
+      } else {
+        as_int = static_cast<std::int8_t>(value.rval.d);
+      }
       return {BYTE(as_int)};
     }
 
     case buffer_u16: case buffer_s16: {
       assert("Expected numeric value to be passed in" && value.type == ty_real);
-      std::uint16_t as_int = static_cast<std::int16_t>(value.rval.d);
+      std::uint16_t as_int = 0;
+      if (value.rval.d > std::numeric_limits<std::int16_t>::max()) {
+
+        as_int = static_cast<std::uint16_t>(value.rval.d);
+      } else {
+        as_int = static_cast<std::int16_t>(value.rval.d);
+      }
       return {BYTE((as_int >> 8) & 0xff), BYTE((as_int) & 0xff)};
     }
 
     case buffer_u32: case buffer_s32: {
       assert("Expected numeric value to be passed in" && value.type == ty_real);
-      std::uint32_t as_int = static_cast<std::int32_t>(value.rval.d);
+      std::uint32_t as_int = 0;
+      if (value.rval.d > std::numeric_limits<std::int32_t>::max()) {
+        as_int = static_cast<std::uint32_t>(value.rval.d);
+      } else {
+        as_int = static_cast<std::int32_t>(value.rval.d);
+      }
+
       return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
               BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
     }
@@ -159,45 +178,46 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
 }
 
 variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type) {
+#define DOUBLE(x) static_cast<double>(x)
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool: {
       assert("Expected span to be of correct size" && std::distance(first, last) == 1);
-      std::int8_t value = static_cast<std::int8_t>(*first++);
+      std::uint8_t value = static_cast<std::uint8_t>(*first++);
       assert(first == last);
 
-      return {value};
+      return {type == buffer_s8 ? DOUBLE(static_cast<int8_t>(value)) : value};
     }
 
     case buffer_u16: case buffer_s16: {
       assert("Expected span to be of correct size" && std::distance(first, last) == 2);
-      std::int16_t value = static_cast<std::int16_t>(*first++);
-      value = (value << 8) | static_cast<std::int16_t>(*first++);
+      std::uint16_t value = static_cast<std::uint16_t>(*first++);
+      value = (value << 8) | static_cast<std::uint16_t>(*first++);
       assert(first == last);
 
-      return {value};
+      return {type == buffer_s16 ? DOUBLE(static_cast<int16_t>(value)) : DOUBLE(value)};
     }
 
     case buffer_u32: case buffer_s32: {
       assert("Expected span to be of correct size" && std::distance(first, last) == 4);
-      std::int32_t value = static_cast<std::int32_t>(*(first++));
-      value = (value << 8) | static_cast<std::int32_t>(*(first++));
-      value = (value << 8) | static_cast<std::int32_t>(*(first++));
-      value = (value << 8) | static_cast<std::int32_t>(*(first++));
+      std::uint32_t value = static_cast<std::uint32_t>(*(first++));
+      value = (value << 8) | static_cast<std::uint32_t>(*(first++));
+      value = (value << 8) | static_cast<std::uint32_t>(*(first++));
+      value = (value << 8) | static_cast<std::uint32_t>(*(first++));
       assert(first == last);
 
-      return {value};
+      return {type == buffer_s32 ? DOUBLE(static_cast<int32_t>(value)) : value};
     }
 
     case buffer_u64: {
       assert("Expected span to be of correct size" && std::distance(first, last) == 8);
-      std::int64_t value = static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
-      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      std::uint64_t value = static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
+      value = (value << 8) | static_cast<std::uint64_t>(*first++);
       assert(first == last);
 
       return {value};
@@ -244,6 +264,7 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     default:
       return {};
   }
+#undef DOUBLE
 }
 
 
@@ -382,6 +403,7 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
   for (int i = 0; i < times; i++) {
     std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + i * bytes.size());
   }
+  binbuff->Seek(0);
 }
   
 void *buffer_get_address(int buffer) {
@@ -475,11 +497,9 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
     //unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
     //NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
     //TODO: Fix floating point precision.
-    long res = 0;
-    for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-      res += binbuff->ReadByte() << i * 8;
-    }
-    return res;
+    variant value = deserialize_from_type(binbuff->data.begin() + offset, binbuff->data.begin() + offset + buffer_sizeof(type), type);
+    binbuff->Seek(binbuff->position + buffer_sizeof(type));
+    return value;
   } else {
     char byte = '1';
     std::vector<char> data;
