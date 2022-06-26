@@ -104,6 +104,7 @@ extern bool codegen_only;
 extern std::filesystem::path enigma_root;
 extern std::filesystem::path eobjs_directory;
 extern std::filesystem::path codegen_directory;
+extern std::string jobs;
 
 inline std::string escapeEnv(std::string str) {
   size_t i = str.find_first_of('%');
