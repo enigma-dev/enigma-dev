@@ -415,8 +415,7 @@ namespace ifd {
         for (std::size_t i = 0; i < favorites.size(); i++) {
           ngs::fs::file_text_write_string(desc, favorites[i]);
           ngs::fs::file_text_writeln(desc);
-        }
-        // close file descriptor    
+        }   
         ngs::fs::file_text_close(desc);
       }
     }
@@ -468,8 +467,7 @@ namespace ifd {
         for (std::size_t i = 0; i < favorites.size(); i++) {
           ngs::fs::file_text_write_string(desc, favorites[i]);
           ngs::fs::file_text_writeln(desc);
-        }
-        // close file descriptor    
+        }   
         ngs::fs::file_text_close(desc);
       }
     }
@@ -668,18 +666,6 @@ namespace ifd {
 
     if (!ghc::filesystem::exists(ghc::filesystem::path(path)))
       return;
-
-    #ifdef _WIN32
-    wchar_t userProfile[32767];
-    ghc::filesystem::path homePath;
-    if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, 32767)) 
-      homePath = userProfile;
-    #else
-    ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
-    #endif
-
-    if (path == homePath.string())
-      return; 
 
     m_favorites.push_back(path);
     
