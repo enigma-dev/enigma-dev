@@ -107,7 +107,7 @@ bool codegen_only = false;
 std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
-std::string jobs;
+std::string num_make_jobs;
 
 void parse_ide_settings(const char* eyaml)
 {
@@ -141,7 +141,7 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // The number of compile jobs
-  jobs = settree.get("jobs").toString();
+  num_make_jobs = settree.get("jobs").toString();
 
   // Path to enigma sources
   enigma_root = settree.get("enigma-root").toString();
