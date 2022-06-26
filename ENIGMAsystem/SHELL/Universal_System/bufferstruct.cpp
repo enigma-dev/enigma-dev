@@ -24,6 +24,7 @@
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include <cassert>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -83,16 +84,168 @@ int get_free_buffer() {
   return buffers.size();
 }
 
-std::vector<std::byte> valToBytes(variant value, unsigned count) {
-  std::vector<std::byte> result(0);
-  for (unsigned i = 0; i < count; i++) {
-    result.push_back(static_cast<std::byte>((value >> (i << 3)) & 0xff));
-  }
-  return result;
+std::vector<std::byte> valToBytes(variant value, int type) {
+  return enigma_user::serialize_to_type(value, type);
 }
 }  // namespace enigma
 
 namespace enigma_user {
+std::vector<std::byte> serialize_to_type(variant &value, int type) {
+#define BYTE(x) static_cast<std::byte>(x)
+  switch (type) {
+    case buffer_u8: case buffer_s8: case buffer_bool: {
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint8_t as_int = static_cast<std::int8_t>(value.rval.d);
+      return {BYTE(as_int)};
+    }
+
+    case buffer_u16: case buffer_s16: {
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint16_t as_int = static_cast<std::int16_t>(value.rval.d);
+      return {BYTE((as_int >> 8) & 0xff), BYTE((as_int) & 0xff)};
+    }
+
+    case buffer_u32: case buffer_s32: {
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint32_t as_int = static_cast<std::int32_t>(value.rval.d);
+      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+    }
+
+    case buffer_u64: {
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint64_t as_int = static_cast<std::int64_t>(value.rval.d);
+      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
+              BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
+              BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+    }
+
+    case buffer_f16:
+      assert("Unimplemented!" && false);
+
+    case buffer_f32: {
+      static_assert(sizeof(float) == 4, "Expected `float` type to be 4 bytes wide");
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint32_t as_int = bit_cast<std::uint32_t>(static_cast<float>(value.rval.d));
+      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+    }
+
+    case buffer_f64: {
+      static_assert(sizeof(double) == 8, "Expected `double` type to be 8 bytes wide");
+      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      std::uint64_t as_int = bit_cast<std::uint64_t>(static_cast<double>(value.rval.d));
+      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
+              BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
+              BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+    }
+
+    case buffer_string: case buffer_text: {
+      std::string &val = value.sval();
+      std::vector<std::byte> result;
+      result.reserve(val.size() + 1);
+      std::transform(val.begin(), val.end(), std::back_inserter(result),
+                     [](char value) { return std::byte{static_cast<std::uint8_t>(value)}; });
+      result.emplace_back(std::byte{0});
+      return result;
+    }
+
+    default:
+      return {};
+  }
+#undef BYTE
+}
+
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type) {
+  switch (type) {
+    case buffer_u8: case buffer_s8: case buffer_bool: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 1);
+      std::int8_t value = static_cast<std::int8_t>(*first++);
+      assert(first == last);
+
+      return {value};
+    }
+
+    case buffer_u16: case buffer_s16: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 2);
+      std::int16_t value = static_cast<std::int16_t>(*first++);
+      value = (value << 8) | static_cast<std::int16_t>(*first++);
+      assert(first == last);
+
+      return {value};
+    }
+
+    case buffer_u32: case buffer_s32: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 4);
+      std::int32_t value = static_cast<std::int32_t>(*(first++));
+      value = (value << 8) | static_cast<std::int32_t>(*(first++));
+      value = (value << 8) | static_cast<std::int32_t>(*(first++));
+      value = (value << 8) | static_cast<std::int32_t>(*(first++));
+      assert(first == last);
+
+      return {value};
+    }
+
+    case buffer_u64: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 8);
+      std::int64_t value = static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      value = (value << 8) | static_cast<std::int64_t>(*first++);
+      assert(first == last);
+
+      return {value};
+    }
+
+    case buffer_f16:
+      assert("Unimplemented!" && false);
+
+    case buffer_f32: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 4);
+      std::uint32_t as_int = static_cast<std::uint32_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint32_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint32_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint32_t>(*first++);
+      assert(first == last);
+
+      return {bit_cast<float>(as_int)};
+    }
+
+    case buffer_f64: {
+      assert("Expected span to be of correct size" && std::distance(first, last) == 8);
+      std::uint64_t as_int = static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
+      assert(first == last);
+
+      return {bit_cast<double>(as_int)};
+    }
+
+    case buffer_string: case buffer_text: {
+      std::string result;
+      result.reserve(std::distance(first, last));
+      std::transform(first, last, std::back_inserter(result),
+                     [](std::byte b) { return static_cast<char>(b); });
+
+      return {std::move(result)};
+    }
+
+    default:
+      return {};
+  }
+}
+
 
 int buffer_create(unsigned size, int type, unsigned alignment) {
   enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(size);
@@ -224,15 +377,10 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
     binbuff->data.resize(nsize);
   }
-  unsigned pos = offset;
-  for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-    binbuff[pos] = value[i];
-    if (i > binbuff->GetSize()) {
-      if (binbuff->type != buffer_wrap) {
-        break;
-      }
-      pos = 0;
-    }
+  std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
+  std::size_t times = size / bytes.size();
+  for (int i = 0; i < times; i++) {
+    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + i * bytes.size());
   }
 }
   
@@ -354,7 +502,7 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
   if (type != buffer_string) {
     //TODO: Implement buffer alignment.
     //unsigned dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
-    std::vector<std::byte> data = enigma::valToBytes(value, buffer_sizeof(type));
+    std::vector<std::byte> data = enigma::valToBytes(value, type);
     for (unsigned i = 0; i < data.size(); i++) {
       binbuff->WriteByte(data[i]);
     }

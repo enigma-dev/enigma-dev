@@ -58,6 +58,9 @@ enum {
   buffer_text = 13,
 };
 
+std::vector<std::byte> serialize_to_type(variant &value, int type);
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type);
+
 int buffer_create(unsigned size, int type, unsigned alignment);
 bool buffer_exists(int buffer);
 void buffer_delete(int buffer);
