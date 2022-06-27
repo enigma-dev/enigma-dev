@@ -32,7 +32,7 @@
 using std::string;
 
 namespace enigma {
-std::vector<BinaryBuffer*> buffers(0);
+AssetArray<BinaryBufferAsset> buffers{};
 
 BinaryBuffer::BinaryBuffer(std::size_t size) {
   data.resize(size, std::byte{0});
@@ -40,6 +40,9 @@ BinaryBuffer::BinaryBuffer(std::size_t size) {
   alignment = 1;
   type = 0;
 }
+
+BinaryBuffer::BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, int type):
+  data{std::move(data)}, position{position}, alignment{alignment}, type{type} {}
 
 std::size_t BinaryBuffer::GetSize() { return data.size(); }
 
@@ -77,7 +80,7 @@ void BinaryBuffer::WriteByte(std::byte byte) {
 
 int get_free_buffer() {
   for (unsigned i = 0; i < buffers.size(); i++) {
-    if (!buffers[i]) {
+    if (buffers[i].get() == nullptr) {
       return i;
     }
   }
@@ -267,24 +270,22 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
 #undef DOUBLE
 }
 
+int push_buffer(std::size_t size, int type, std::size_t alignment) {
+  return enigma::buffers.add(
+      std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type));
+}
 
 int buffer_create(unsigned size, int type, unsigned alignment) {
-  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(size);
-  buffer->type = type;
-  buffer->alignment = alignment;
-  int id = enigma::get_free_buffer();
-  enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
-  return id;
+  return push_buffer(size, type, alignment);
 }
 
 void buffer_delete(int buffer) {
   GET_BUFFER(binbuff, buffer);
-  delete binbuff;
-  enigma::buffers[buffer] = nullptr;
+  enigma::buffers[buffer].to_ptr().reset(nullptr);
 }
 
 bool buffer_exists(int buffer) {
-  return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer] != nullptr);
+  return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer].get() != nullptr);
 }
 
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
@@ -348,11 +349,8 @@ void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size
 }
 
 int buffer_load(string filename) {
-  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
-  buffer->type = buffer_grow;
-  buffer->alignment = 1;
-  int id = enigma::get_free_buffer();
-  enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
+  int id = push_buffer(0, buffer_grow, 1);
+  enigma::BinaryBuffer *buffer = enigma::buffers.get(id).get();
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
@@ -408,12 +406,12 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
   
 void *buffer_get_address(int buffer) {
   #ifdef DEBUG_MODE
-  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or enigma::buffers[buffer].get() == nullptr) {
     DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
     return nullptr;
   }
   #endif
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer].get();
   return reinterpret_cast<void *>(binbuff->data.data());
 }
 
@@ -560,13 +558,13 @@ string buffer_sha1(int buffer, unsigned offset, unsigned size) {
 }
 
 int buffer_base64_decode(string str) {
-  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
-  buffer->type = buffer_grow;
-  buffer->alignment = 1;
-  int id = enigma::get_free_buffer();
-  enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
+//  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
+//  buffer->type = buffer_grow;
+//  buffer->alignment = 1;
+//  int id = enigma::get_free_buffer();
+//  enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
   //TODO: Write this function
-  return id;
+//  return id;
 }
 
 int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {

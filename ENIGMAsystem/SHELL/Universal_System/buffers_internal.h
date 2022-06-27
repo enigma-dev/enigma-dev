@@ -22,6 +22,8 @@
 #ifndef ENIGMA_BUFFERS_INTERNAL_H
 #define ENIGMA_BUFFERS_INTERNAL_H
 
+#include "Resources/AssetArray.h"
+#include <memory>
 #include <vector>
 
 namespace enigma
@@ -34,6 +36,7 @@ namespace enigma
     int type;
     
     BinaryBuffer(std::size_t size);
+    BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, int type);
     ~BinaryBuffer() = default;
 
     std::size_t GetSize();
@@ -43,27 +46,47 @@ namespace enigma
     std::byte ReadByte();
     void WriteByte(std::byte byte);
   };
+
+  struct BinaryBufferAsset {
+    std::unique_ptr<BinaryBuffer> asset;
+
+    BinaryBufferAsset() = default;
+    BinaryBufferAsset(std::unique_ptr<BinaryBuffer> &&asset_);
+
+    BinaryBuffer *operator->();
+    const BinaryBuffer *operator->() const;
+    BinaryBuffer *get();
+    const BinaryBuffer *get() const;
+
+    std::unique_ptr<BinaryBuffer> &to_ptr();
+    const std::unique_ptr<BinaryBuffer> &to_ptr() const;
+
+    // Necessary for AssetArray interface
+    static const char* getAssetTypeName();
+    bool isDestroyed() const;
+    void destroy();
+  };
   
-  extern std::vector<BinaryBuffer*> buffers;
+  extern AssetArray<BinaryBufferAsset> buffers;
 }
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
 #define GET_BUFFER(binbuff, buff)                                                                            \
-  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {                        \
+  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or enigma::buffers[buff].get() == nullptr) {        \
     DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buff), MESSAGE_TYPE::M_USER_ERROR); \
     return;                                                                                                  \
   }                                                                                                          \
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buff].get();
 #define GET_BUFFER_R(binbuff, buff, r)                                                                       \
-  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {                        \
+  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or enigma::buffers[buff].get() == nullptr) {        \
     DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buff), MESSAGE_TYPE::M_USER_ERROR); \
     return r;                                                                                                \
   }                                                                                                          \
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buff].get();
 #else
-#define GET_BUFFER(binbuff, buff) enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-#define GET_BUFFER_R(binbuff, buff, r) enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+#define GET_BUFFER(binbuff, buff) enigma::BinaryBuffer *binbuff = enigma::buffers[buff].get();
+#define GET_BUFFER_R(binbuff, buff, r) enigma::BinaryBuffer *binbuff = enigma::buffers[buff].get();
 #endif
 
 #endif // ENIGMA_BUFFERS_INTERNAL_H
