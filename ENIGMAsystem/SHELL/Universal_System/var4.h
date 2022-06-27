@@ -269,7 +269,7 @@ std::string toString(double);
 using std::string;
 
 }
-#include <iostream>
+
 namespace {
 template <typename T, typename U>
 T bit_cast(const U &value) {
