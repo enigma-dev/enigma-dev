@@ -278,7 +278,7 @@ int buffer_create(unsigned size, int type, unsigned alignment) {
 }
 
 void buffer_delete(int buffer) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   delete binbuff;
   enigma::buffers[buffer] = nullptr;
 }
@@ -288,8 +288,8 @@ bool buffer_exists(int buffer) {
 }
 
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
-  get_buffer(srcbuff, src_buffer);
-  get_buffer(dstbuff, dest_buffer);
+  GET_BUFFER(srcbuff, src_buffer);
+  GET_BUFFER(dstbuff, dest_buffer);
 
   unsigned over = size - srcbuff->GetSize();
   switch (dstbuff->type) {
@@ -310,7 +310,7 @@ void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_bu
 }
 
 void buffer_save(int buffer, string filename) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
@@ -321,7 +321,7 @@ void buffer_save(int buffer, string filename) {
 }
 
 void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
@@ -366,7 +366,7 @@ int buffer_load(string filename) {
 }
 
 void buffer_load_ext(int buffer, string filename, unsigned offset) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
@@ -393,7 +393,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 }
 
 void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   unsigned nsize = offset + size;
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
     binbuff->data.resize(nsize);
@@ -418,22 +418,22 @@ void *buffer_get_address(int buffer) {
 }
 
 unsigned buffer_get_size(int buffer) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->GetSize();
 }
 
 unsigned buffer_get_alignment(int buffer) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->alignment;
 }
 
 int buffer_get_type(int buffer) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->type;
 }
 
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-  //get_buffer(binbuff, buffer);
+  //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
   DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
 }
@@ -450,12 +450,12 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
 }
 
 void buffer_resize(int buffer, unsigned size) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   binbuff->Resize(size);
 }
 
 void buffer_seek(int buffer, int base, long long offset) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   switch (base) {
     case buffer_seek_start:
       binbuff->Seek(offset);
@@ -486,12 +486,12 @@ unsigned buffer_sizeof(int type) {
 }
 
 int buffer_tell(int buffer) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->position;
 }
 
 variant buffer_peek(int buffer, unsigned offset, int type) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   binbuff->Seek(offset);
   if (type != buffer_string) {
     //unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
@@ -512,12 +512,12 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 }
 
 variant buffer_read(int buffer, int type) {
-  get_bufferr(binbuff, buffer, -1);
+  GET_BUFFER_R(binbuff, buffer, -1);
   return buffer_peek(buffer, binbuff->position, type);
 }
 
 void buffer_poke(int buffer, unsigned offset, int type, variant value) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   binbuff->Seek(offset);
   if (type != buffer_string) {
     //TODO: Implement buffer alignment.
@@ -543,18 +543,18 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 }
 
 void buffer_write(int buffer, int type, variant value) {
-  get_buffer(binbuff, buffer);
+  GET_BUFFER(binbuff, buffer);
   buffer_poke(buffer, binbuff->position, type, value);
 }
 
 string buffer_md5(int buffer, unsigned offset, unsigned size) {
-  //get_bufferr(binbuff, buffer, 0);
+  //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
 
 string buffer_sha1(int buffer, unsigned offset, unsigned size) {
-  //get_bufferr(binbuff, buffer, 0);
+  //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
@@ -570,24 +570,24 @@ int buffer_base64_decode(string str) {
 }
 
 int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {
-  //get_bufferr(binbuff, buffer, -1);
+  //GET_BUFFER_R(binbuff, buffer, -1);
   //TODO: Write this function
   return 0;
 }
 
 string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
-  //get_bufferr(binbuff, buffer, 0);
+  //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
 
 void game_save_buffer(int buffer) {
-  //get_buffer(binbuff, buffer);
+  //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
 }
 
 void game_load_buffer(int buffer) {
-  //get_buffer(binbuff, buffer);
+  //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
 }
 
