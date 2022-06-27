@@ -4,7 +4,7 @@ package buffers.resources;
 import "options.proto";
 
 message Background {
-  optional int32 id = 1 [(gmx) = "GMX_DEPRECATED", (tmx) = "firstgid"];
+  optional int32 id = 1 [(gmx) = "GMX_DEPRECATED", (tmx) = "id"];
 
   optional bool preload = 2 [(gmx) = "GMX_DEPRECATED"];
   optional bool smooth_edges = 3 [(gmx) = "GMX_DEPRECATED"];

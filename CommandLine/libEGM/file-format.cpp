@@ -5,6 +5,7 @@
 #include "yyp.h"
 #include "sog.h"
 #include "tsx.h"
+#include "tmx.h"
 #include "strings_util.h"
 
 namespace egm {
@@ -20,6 +21,7 @@ void LibEGMInit(const EventData* event_data) {
   fileFormats[".yyp"] = std::make_unique<YYPFileFormat>(event_data);
   fileFormats[".sog"] = std::make_unique<SOGFileFormat>(event_data);
   fileFormats[".tsx"] = std::make_unique<TSXFileFormat>(event_data);
+  fileFormats[".tmx"] = std::make_unique<TMXFileFormat>(event_data);
 }
 
 std::unique_ptr<Project> LoadProject(const fs::path& fName) {
