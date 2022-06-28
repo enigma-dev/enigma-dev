@@ -33,7 +33,7 @@ using std::string;
 namespace enigma {
 AssetArray<BinaryBufferAsset> buffers{};
 
-int get_free_buffer() {
+std::size_t get_free_buffer() {
   for (std::size_t i = 0; i < buffers.size(); i++) {
     if (buffers[i].get() == nullptr) {
       return i;
@@ -261,13 +261,18 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
 #undef DOUBLE
 }
 
-buffer_t push_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
-  return enigma::buffers.add(
-      std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type));
+buffer_t make_new_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
+  auto buffer = std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type);
+  if (std::size_t id = enigma::get_free_buffer(); id == enigma::buffers.size()) {
+    return enigma::buffers.add(std::move(buffer));
+  } else {
+    enigma::buffers.get(id).to_ptr() = std::move(buffer);
+    return id;
+  }
 }
 
 buffer_t buffer_create(std::size_t size, buffer_type_t type, std::size_t alignment) {
-  return push_buffer(size, type, alignment);
+  return make_new_buffer(size, type, alignment);
 }
 
 void buffer_delete(buffer_t buffer) {
@@ -339,7 +344,7 @@ void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::
 }
 
 buffer_t buffer_load(string filename) {
-  int id = push_buffer(0, buffer_grow, 1);
+  buffer_t id = make_new_buffer(0, buffer_grow, 1);
   enigma::BinaryBuffer *buffer = enigma::buffers.get(id).get();
 
   std::ifstream myfile(filename.c_str());

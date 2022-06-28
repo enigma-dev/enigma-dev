@@ -18,6 +18,8 @@
 #ifndef ENIGMA_BUFFERS_ENUMS_H
 #define ENIGMA_BUFFERS_ENUMS_H
 
+#include <cstdint>
+
 namespace enigma_user {
 // Other buffer constants
 enum {
@@ -54,7 +56,11 @@ enum buffer_data_t {
   buffer_text = 13,
 };
 
-using buffer_t = int;
+/// @brief Handle to a buffer
+///
+/// This value is a signed 64-bit integer to allow -1 being the error case, and 9,223,372,036,854,775,807 buffers is
+/// probably more than anyone will ever need to deal with.
+using buffer_t = std::int64_t;
 } // namespace enigma_user
 
 #endif
