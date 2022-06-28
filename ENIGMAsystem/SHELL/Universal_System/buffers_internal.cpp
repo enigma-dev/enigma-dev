@@ -27,10 +27,10 @@ BinaryBuffer::BinaryBuffer(std::size_t size) {
   data.resize(size, std::byte{0});
   position = 0;
   alignment = 1;
-  type = 0;
+  type = enigma_user::buffer_fixed;
 }
 
-BinaryBuffer::BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, int type):
+BinaryBuffer::BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, enigma_user::buffer_type_t type):
     data{std::move(data)}, position{position}, alignment{alignment}, type{type} {}
 
 std::size_t BinaryBuffer::GetSize() { return data.size(); }

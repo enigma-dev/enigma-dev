@@ -42,13 +42,13 @@ int get_free_buffer() {
   return buffers.size();
 }
 
-std::vector<std::byte> valToBytes(variant value, int type) {
+std::vector<std::byte> valToBytes(variant value, enigma_user::buffer_data_t type) {
   return enigma_user::serialize_to_type(value, type);
 }
 }  // namespace enigma
 
 namespace enigma_user {
-std::vector<std::byte> serialize_to_type(variant &value, int type) {
+std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
 #define BYTE(x) static_cast<std::byte>(x)
   // If a positive value is too large for `intXX_t`, it'll be chopped in half because the conversion from double
   // to signed integer will truncate the highest sign bit and replace it with its own sign bit (which will be 0).
@@ -153,7 +153,7 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
 #undef BYTE
 }
 
-variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type) {
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, buffer_data_t type) {
 #define DOUBLE(x) static_cast<double>(x)
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool: {
@@ -261,20 +261,20 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
 #undef DOUBLE
 }
 
-int push_buffer(std::size_t size, int type, std::size_t alignment) {
+buffer_t push_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
   return enigma::buffers.add(
       std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type));
 }
 
-int buffer_create(std::size_t size, int type, std::size_t alignment) {
+buffer_t buffer_create(std::size_t size, buffer_type_t type, std::size_t alignment) {
   return push_buffer(size, type, alignment);
 }
 
-void buffer_delete(int buffer) {
+void buffer_delete(buffer_t buffer) {
   enigma::buffers[buffer].to_ptr().reset(nullptr);
 }
 
-bool buffer_exists(int buffer) {
+bool buffer_exists(buffer_t buffer) {
   return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer].get() != nullptr);
 }
 
@@ -300,7 +300,7 @@ void buffer_copy(int src_buffer, std::size_t src_offset, std::size_t size, int d
   }
 }
 
-void buffer_save(int buffer, string filename) {
+void buffer_save(buffer_t buffer, string filename) {
   GET_BUFFER(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
@@ -311,7 +311,7 @@ void buffer_save(int buffer, string filename) {
   myfile.close();
 }
 
-void buffer_save_ext(int buffer, string filename, std::size_t offset, std::size_t size) {
+void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
@@ -338,7 +338,7 @@ void buffer_save_ext(int buffer, string filename, std::size_t offset, std::size_
   myfile.close();
 }
 
-int buffer_load(string filename) {
+buffer_t buffer_load(string filename) {
   int id = push_buffer(0, buffer_grow, 1);
   enigma::BinaryBuffer *buffer = enigma::buffers.get(id).get();
 
@@ -353,7 +353,7 @@ int buffer_load(string filename) {
   return id;
 }
 
-void buffer_load_ext(int buffer, string filename, std::size_t offset) {
+void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
   GET_BUFFER(binbuff, buffer);
 
   std::ifstream myfile(filename.c_str());
@@ -380,7 +380,7 @@ void buffer_load_ext(int buffer, string filename, std::size_t offset) {
   myfile.close();
 }
 
-void buffer_fill(int buffer, std::size_t offset, int type, variant value, std::size_t size) {
+void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
   std::size_t nsize = offset + size;
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
@@ -394,7 +394,7 @@ void buffer_fill(int buffer, std::size_t offset, int type, variant value, std::s
   binbuff->Seek(0);
 }
   
-void *buffer_get_address(int buffer) {
+void *buffer_get_address(buffer_t buffer) {
   #ifdef DEBUG_MODE
   if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or enigma::buffers[buffer].get() == nullptr) {
     DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
@@ -405,28 +405,28 @@ void *buffer_get_address(int buffer) {
   return reinterpret_cast<void *>(binbuff->data.data());
 }
 
-std::size_t buffer_get_size(int buffer) {
+std::size_t buffer_get_size(buffer_t buffer) {
   GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->GetSize();
 }
 
-std::size_t buffer_get_alignment(int buffer) {
+std::size_t buffer_get_alignment(buffer_t buffer) {
   GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->alignment;
 }
 
-int buffer_get_type(int buffer) {
-  GET_BUFFER_R(binbuff, buffer, -1);
+buffer_type_t buffer_get_type(buffer_t buffer) {
+  GET_BUFFER_R(binbuff, buffer, static_cast<buffer_type_t>(-1));
   return binbuff->type;
 }
 
-void buffer_get_surface(int buffer, int surface, int mode, std::size_t offset, int modulo) {
+void buffer_get_surface(buffer_t buffer, int surface, int mode, std::size_t offset, int modulo) {
   //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
   DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
 }
 
-void buffer_set_surface(int buffer, int surface, int mode, std::size_t offset, int modulo) {
+void buffer_set_surface(buffer_t buffer, int surface, int mode, std::size_t offset, int modulo) {
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
@@ -437,12 +437,12 @@ void buffer_set_surface(int buffer, int surface, int mode, std::size_t offset, i
   }
 }
 
-void buffer_resize(int buffer, std::size_t size) {
+void buffer_resize(buffer_t buffer, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
   binbuff->Resize(size);
 }
 
-void buffer_seek(int buffer, int base, long long offset) {
+void buffer_seek(buffer_t buffer, int base, long long offset) {
   GET_BUFFER(binbuff, buffer);
   switch (base) {
     case buffer_seek_start:
@@ -457,7 +457,7 @@ void buffer_seek(int buffer, int base, long long offset) {
   }
 }
 
-std::size_t buffer_sizeof(int type) {
+std::size_t buffer_sizeof(buffer_data_t type) {
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool:
       return 1;
@@ -473,12 +473,12 @@ std::size_t buffer_sizeof(int type) {
   return 0;
 }
 
-int buffer_tell(int buffer) {
+std::size_t buffer_tell(buffer_t buffer) {
   GET_BUFFER_R(binbuff, buffer, -1);
   return binbuff->position;
 }
 
-variant buffer_peek(int buffer, std::size_t offset, int type) {
+variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -499,12 +499,12 @@ variant buffer_peek(int buffer, std::size_t offset, int type) {
   }
 }
 
-variant buffer_read(int buffer, int type) {
+variant buffer_read(buffer_t buffer, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
   return buffer_peek(buffer, binbuff->position, type);
 }
 
-void buffer_poke(int buffer, std::size_t offset, int type, variant value) {
+void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value) {
   GET_BUFFER(binbuff, buffer);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -530,24 +530,24 @@ void buffer_poke(int buffer, std::size_t offset, int type, variant value) {
   }
 }
 
-void buffer_write(int buffer, int type, variant value) {
+void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
   GET_BUFFER(binbuff, buffer);
   buffer_poke(buffer, binbuff->position, type, value);
 }
 
-string buffer_md5(int buffer, std::size_t offset, std::size_t size) {
+string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size) {
   //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
 
-string buffer_sha1(int buffer, std::size_t offset, std::size_t size) {
+string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size) {
   //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
 
-int buffer_base64_decode(string str) {
+buffer_t buffer_base64_decode(string str) {
 //  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
 //  buffer->type = buffer_grow;
 //  buffer->alignment = 1;
@@ -557,24 +557,23 @@ int buffer_base64_decode(string str) {
 //  return id;
 }
 
-int buffer_base64_decode_ext(int buffer, string str, std::size_t offset) {
+void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
   //GET_BUFFER_R(binbuff, buffer, -1);
   //TODO: Write this function
-  return 0;
 }
 
-string buffer_base64_encode(int buffer, std::size_t offset, std::size_t size) {
+string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size) {
   //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
 }
 
-void game_save_buffer(int buffer) {
+void game_save_buffer(buffer_t buffer) {
   //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
 }
 
-void game_load_buffer(int buffer) {
+void game_load_buffer(buffer_t buffer) {
   //GET_BUFFER(binbuff, buffer);
   //TODO: Write this function
 }

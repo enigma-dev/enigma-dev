@@ -22,6 +22,7 @@
 #ifndef ENIGMA_BUFFERS_INTERNAL_H
 #define ENIGMA_BUFFERS_INTERNAL_H
 
+#include "buffers_data.h"
 #include "Resources/AssetArray.h"
 #include <memory>
 #include <vector>
@@ -33,10 +34,10 @@ namespace enigma
     std::vector<std::byte> data;
     std::size_t position;
     std::size_t alignment;
-    int type;
+    enigma_user::buffer_type_t type;
     
     BinaryBuffer(std::size_t size);
-    BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, int type);
+    BinaryBuffer(std::vector<std::byte> &&data, std::size_t position, std::size_t alignment, enigma_user::buffer_type_t type);
     ~BinaryBuffer() = default;
 
     std::size_t GetSize();

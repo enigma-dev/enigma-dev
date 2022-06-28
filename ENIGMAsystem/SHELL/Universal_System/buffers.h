@@ -18,83 +18,49 @@
 #ifndef ENIGMA_BUFFERS_H
 #define ENIGMA_BUFFERS_H
 
+#include "buffers_data.h"
 #include "var4.h"
 
 #include <string>
 
 namespace enigma_user {
-// Other buffer constants
-enum {
-  buffer_generalerror,
-  buffer_invalidtype,
-  buffer_outofbounds,
-  buffer_outofspace,
-  buffer_vbuffer,
-};
+std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type);
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, buffer_data_t type);
 
-// Buffer surface constants
-enum { buffer_surface_copy, buffer_surface_grayscale, buffer_surface_mask };
+buffer_t buffer_create(std::size_t size, buffer_type_t type, std::size_t alignment);
+bool buffer_exists(buffer_t buffer);
+void buffer_delete(buffer_t buffer);
+void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer, std::size_t dest_offset);
+void buffer_save(buffer_t buffer, std::string filename);
+void buffer_save_ext(buffer_t buffer, std::string filename, std::size_t offset, std::size_t size);
+buffer_t buffer_load(std::string filename);
+void buffer_load_ext(buffer_t buffer, std::string filename, std::size_t offset);
 
-// Buffer seek base
-enum { buffer_seek_start = 0, buffer_seek_relative = 1, buffer_seek_end = 2 };
+buffer_t buffer_base64_decode(std::string str);
+void buffer_base64_decode_ext(buffer_t buffer, std::string str, std::size_t offset);
+std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size);
+std::string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size);
+std::string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size);
 
-// Buffer types
-enum { buffer_fixed = 0, buffer_grow = 1, buffer_wrap = 2, buffer_fast = 3 };
+void *buffer_get_address(buffer_t buffer);
+std::size_t buffer_get_size(buffer_t buffer);
+std::size_t buffer_get_alignment(buffer_t buffer);
+buffer_type_t buffer_get_type(buffer_t buffer);
+void buffer_get_surface(buffer_t buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
+void buffer_set_surface(buffer_t buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
+void buffer_resize(buffer_t buffer, std::size_t size);
+void buffer_seek(buffer_t buffer, int base, long long offset);
+std::size_t buffer_sizeof(buffer_data_t type);
+std::size_t buffer_tell(buffer_t buffer);
 
-// Buffer data types
-enum {
-  buffer_u8 = 1,
-  buffer_s8 = 2,
-  buffer_u16 = 3,
-  buffer_s16 = 4,
-  buffer_u32 = 5,
-  buffer_s32 = 6,
-  buffer_f16 = 7,
-  buffer_f32 = 8,
-  buffer_f64 = 9,
-  buffer_bool = 10,
-  buffer_string = 11,
-  buffer_u64 = 12,
-  buffer_text = 13,
-};
+variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type);
+variant buffer_read(buffer_t buffer, buffer_data_t type);
+void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size);
+void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value);
+void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
 
-std::vector<std::byte> serialize_to_type(variant &value, int type);
-variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type);
-
-int buffer_create(std::size_t size, int type, std::size_t alignment);
-bool buffer_exists(int buffer);
-void buffer_delete(int buffer);
-void buffer_copy(int src_buffer, std::size_t src_offset, std::size_t size, int dest_buffer, std::size_t dest_offset);
-void buffer_save(int buffer, std::string filename);
-void buffer_save_ext(int buffer, std::string filename, std::size_t offset, std::size_t size);
-int buffer_load(std::string filename);
-void buffer_load_ext(int buffer, std::string filename, std::size_t offset);
-
-int buffer_base64_decode(std::string str);
-int buffer_base64_decode_ext(int buffer, std::string str, std::size_t offset);
-std::string buffer_base64_encode(int buffer, std::size_t offset, std::size_t size);
-std::string buffer_md5(int buffer, std::size_t offset, std::size_t size);
-std::string buffer_sha1(int buffer, std::size_t offset, std::size_t size);
-
-void *buffer_get_address(int buffer);
-std::size_t buffer_get_size(int buffer);
-std::size_t buffer_get_alignment(int buffer);
-int buffer_get_type(int buffer);
-void buffer_get_surface(int buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
-void buffer_set_surface(int buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
-void buffer_resize(int buffer, std::size_t size);
-void buffer_seek(int buffer, int base, long long offset);
-std::size_t buffer_sizeof(int type);
-int buffer_tell(int buffer);
-
-variant buffer_peek(int buffer, std::size_t offset, int type);
-variant buffer_read(int buffer, int type);
-void buffer_fill(int buffer, std::size_t offset, int type, variant value, std::size_t size);
-void buffer_poke(int buffer, std::size_t offset, int type, variant value);
-void buffer_write(int buffer, int type, variant value);
-
-void game_save_buffer(int buffer);
-void game_load_buffer(int buffer);
+void game_save_buffer(buffer_t buffer);
+void game_load_buffer(buffer_t buffer);
 
 }  //namespace enigma_user
 
