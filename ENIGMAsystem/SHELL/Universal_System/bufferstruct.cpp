@@ -54,7 +54,10 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
   // to signed integer will truncate the highest sign bit and replace it with its own sign bit (which will be 0).
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool: {
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint8_t as_int = 0;
       if (value.rval.d > std::numeric_limits<std::int8_t>::max()) {
         as_int = static_cast<std::uint8_t>(value.rval.d);
@@ -65,7 +68,10 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
     }
 
     case buffer_u16: case buffer_s16: {
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint16_t as_int = 0;
       if (value.rval.d > std::numeric_limits<std::int16_t>::max()) {
         as_int = static_cast<std::uint16_t>(value.rval.d);
@@ -76,7 +82,10 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
     }
 
     case buffer_u32: case buffer_s32: {
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint32_t as_int = 0;
       if (value.rval.d > std::numeric_limits<std::int32_t>::max()) {
         as_int = static_cast<std::uint32_t>(value.rval.d);
@@ -89,7 +98,10 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
     }
 
     case buffer_u64: {
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint64_t as_int = static_cast<std::int64_t>(value.rval.d);
       return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
               BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
@@ -98,11 +110,15 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
     }
 
     case buffer_f16:
-      assert("Unimplemented!" && false);
+      DEBUG_MESSAGE("serialize_to_type: buffer_f16 is unimplemented!", MESSAGE_TYPE::M_FATAL_ERROR);
+      return {};
 
     case buffer_f32: {
       static_assert(sizeof(float) == 4, "Expected `float` type to be 4 bytes wide");
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint32_t as_int = bit_cast<std::uint32_t>(static_cast<float>(value.rval.d));
       return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
               BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
@@ -110,7 +126,10 @@ std::vector<std::byte> serialize_to_type(variant &value, int type) {
 
     case buffer_f64: {
       static_assert(sizeof(double) == 8, "Expected `double` type to be 8 bytes wide");
-      assert("Expected numeric value to be passed in" && value.type == ty_real);
+      if (value.type != ty_real) {
+        DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint64_t as_int = bit_cast<std::uint64_t>(static_cast<double>(value.rval.d));
       return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
               BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
@@ -138,7 +157,10 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
 #define DOUBLE(x) static_cast<double>(x)
   switch (type) {
     case buffer_u8: case buffer_s8: case buffer_bool: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 1);
+      if (std::distance(first, last) != 1) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint8_t value = static_cast<std::uint8_t>(*first++);
       assert(first == last);
 
@@ -146,7 +168,10 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     }
 
     case buffer_u16: case buffer_s16: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 2);
+      if (std::distance(first, last) != 2) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint16_t value = static_cast<std::uint16_t>(*first++);
       value = (value << 8) | static_cast<std::uint16_t>(*first++);
       assert(first == last);
@@ -155,7 +180,10 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     }
 
     case buffer_u32: case buffer_s32: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 4);
+      if (std::distance(first, last) != 4) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint32_t value = static_cast<std::uint32_t>(*(first++));
       value = (value << 8) | static_cast<std::uint32_t>(*(first++));
       value = (value << 8) | static_cast<std::uint32_t>(*(first++));
@@ -166,7 +194,10 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     }
 
     case buffer_u64: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 8);
+      if (std::distance(first, last) != 8) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint64_t value = static_cast<std::uint64_t>(*first++);
       value = (value << 8) | static_cast<std::uint64_t>(*first++);
       value = (value << 8) | static_cast<std::uint64_t>(*first++);
@@ -181,10 +212,13 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     }
 
     case buffer_f16:
-      assert("Unimplemented!" && false);
+      assert("deserialize_from_type: buffer_f16 is unimplemented!" && false);
 
     case buffer_f32: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 4);
+      if (std::distance(first, last) != 4) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint32_t as_int = static_cast<std::uint32_t>(*first++);
       as_int = (as_int << 8) | static_cast<std::uint32_t>(*first++);
       as_int = (as_int << 8) | static_cast<std::uint32_t>(*first++);
@@ -195,7 +229,10 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
     }
 
     case buffer_f64: {
-      assert("Expected span to be of correct size" && std::distance(first, last) == 8);
+      if (std::distance(first, last) != 8) {
+        DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
       std::uint64_t as_int = static_cast<std::uint64_t>(*first++);
       as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
       as_int = (as_int << 8) | static_cast<std::uint64_t>(*first++);
