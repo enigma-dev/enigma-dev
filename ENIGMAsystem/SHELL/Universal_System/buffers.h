@@ -61,36 +61,36 @@ enum {
 std::vector<std::byte> serialize_to_type(variant &value, int type);
 variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, int type);
 
-int buffer_create(unsigned size, int type, unsigned alignment);
+int buffer_create(std::size_t size, int type, std::size_t alignment);
 bool buffer_exists(int buffer);
 void buffer_delete(int buffer);
-void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset);
+void buffer_copy(int src_buffer, std::size_t src_offset, std::size_t size, int dest_buffer, std::size_t dest_offset);
 void buffer_save(int buffer, std::string filename);
-void buffer_save_ext(int buffer, std::string filename, unsigned offset, unsigned size);
+void buffer_save_ext(int buffer, std::string filename, std::size_t offset, std::size_t size);
 int buffer_load(std::string filename);
-void buffer_load_ext(int buffer, std::string filename, unsigned offset);
+void buffer_load_ext(int buffer, std::string filename, std::size_t offset);
 
 int buffer_base64_decode(std::string str);
-int buffer_base64_decode_ext(int buffer, std::string str, unsigned offset);
-std::string buffer_base64_encode(int buffer, unsigned offset, unsigned size);
-std::string buffer_md5(int buffer, unsigned offset, unsigned size);
-std::string buffer_sha1(int buffer, unsigned offset, unsigned size);
+int buffer_base64_decode_ext(int buffer, std::string str, std::size_t offset);
+std::string buffer_base64_encode(int buffer, std::size_t offset, std::size_t size);
+std::string buffer_md5(int buffer, std::size_t offset, std::size_t size);
+std::string buffer_sha1(int buffer, std::size_t offset, std::size_t size);
 
 void *buffer_get_address(int buffer);
-unsigned buffer_get_size(int buffer);
-unsigned buffer_get_alignment(int buffer);
+std::size_t buffer_get_size(int buffer);
+std::size_t buffer_get_alignment(int buffer);
 int buffer_get_type(int buffer);
-void buffer_get_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
-void buffer_set_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
-void buffer_resize(int buffer, unsigned size);
+void buffer_get_surface(int buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
+void buffer_set_surface(int buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
+void buffer_resize(int buffer, std::size_t size);
 void buffer_seek(int buffer, int base, long long offset);
-unsigned buffer_sizeof(int type);
+std::size_t buffer_sizeof(int type);
 int buffer_tell(int buffer);
 
-variant buffer_peek(int buffer, unsigned offset, int type);
+variant buffer_peek(int buffer, std::size_t offset, int type);
 variant buffer_read(int buffer, int type);
-void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size);
-void buffer_poke(int buffer, unsigned offset, int type, variant value);
+void buffer_fill(int buffer, std::size_t offset, int type, variant value, std::size_t size);
+void buffer_poke(int buffer, std::size_t offset, int type, variant value);
 void buffer_write(int buffer, int type, variant value);
 
 void game_save_buffer(int buffer);
