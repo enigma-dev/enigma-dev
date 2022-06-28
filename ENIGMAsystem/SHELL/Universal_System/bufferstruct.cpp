@@ -176,7 +176,7 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
       value = (value << 8) | static_cast<std::uint16_t>(*first++);
       assert(first == last);
 
-      return {type == buffer_s16 ? DOUBLE(static_cast<int16_t>(value)) : DOUBLE(value)};
+      return {type == buffer_s16 ? DOUBLE(static_cast<int16_t>(value)) : value};
     }
 
     case buffer_u32: case buffer_s32: {
@@ -271,7 +271,6 @@ int buffer_create(std::size_t size, int type, std::size_t alignment) {
 }
 
 void buffer_delete(int buffer) {
-  GET_BUFFER(binbuff, buffer);
   enigma::buffers[buffer].to_ptr().reset(nullptr);
 }
 
