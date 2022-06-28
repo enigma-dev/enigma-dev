@@ -280,7 +280,8 @@ void buffer_delete(buffer_t buffer) {
 }
 
 bool buffer_exists(buffer_t buffer) {
-  return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer].get() != nullptr);
+  return (buffer >= 0 && static_cast<std::size_t>(buffer) < enigma::buffers.size() &&
+          enigma::buffers[buffer].get() != nullptr);
 }
 
 void buffer_copy(int src_buffer, std::size_t src_offset, std::size_t size, int dest_buffer, std::size_t dest_offset) {
