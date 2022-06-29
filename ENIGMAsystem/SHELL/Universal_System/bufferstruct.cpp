@@ -413,9 +413,9 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
   std::size_t times = size / bytes.size();
   for (std::size_t i = 0; i < times; i++) {
-    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + i * bytes.size());
+    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + offset + i * bytes.size());
   }
-  binbuff->Seek(0);
+  binbuff->Seek(offset);
 }
   
 void *buffer_get_address(buffer_t buffer) {
