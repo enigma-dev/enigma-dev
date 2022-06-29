@@ -1550,9 +1550,9 @@ namespace ifd {
     ghc::filesystem::path pathToCheckExistenceFor = m_currentDirectory / m_inputTextbox;
     if (ImGui::InputTextEx("##file_input", IFD_FILE_NAME_WITHOUT_COLON, m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue) && 
       #if defined(_WIN32)
-      (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)) {
+      ((m_type == IFD_DIALOG_SAVE) || (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND))) {
       #else
-      ghc::filesystem::exists(pathToCheckExistenceFor)) {
+      ((m_type == IFD_DIALOG_SAVE) || ghc::filesystem::exists(pathToCheckExistenceFor))) {
       #endif
       std::string filename(m_inputTextbox);
       bool success = false;
@@ -1588,9 +1588,9 @@ namespace ifd {
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ok_cancel_width);
     if (ImGui::Button(m_type == IFD_DIALOG_SAVE ? IFD_SAVE : IFD_OPEN, ImVec2(ok_cancel_width / 2 - ImGui::GetStyle().ItemSpacing.x, 0.0f)) &&
       #if defined(_WIN32)
-      (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)) {
+      ((m_type == IFD_DIALOG_SAVE) || (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND))) {
       #else
-      ghc::filesystem::exists(pathToCheckExistenceFor)) {
+      ((m_type == IFD_DIALOG_SAVE) || ghc::filesystem::exists(pathToCheckExistenceFor))) {
       #endif
       std::string filename(m_inputTextbox);
       bool success = false;
