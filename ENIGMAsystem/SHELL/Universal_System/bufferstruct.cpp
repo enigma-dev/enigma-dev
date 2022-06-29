@@ -266,7 +266,7 @@ buffer_t make_new_buffer(std::size_t size, buffer_type_t type, std::size_t align
   if (std::size_t id = enigma::get_free_buffer(); id == enigma::buffers.size()) {
     return enigma::buffers.add(std::move(buffer));
   } else {
-    enigma::buffers.get(id).to_ptr() = std::move(buffer);
+    enigma::buffers.assign(id, std::move(buffer));
     return id;
   }
 }
@@ -276,7 +276,7 @@ buffer_t buffer_create(std::size_t size, buffer_type_t type, std::size_t alignme
 }
 
 void buffer_delete(buffer_t buffer) {
-  enigma::buffers[buffer].to_ptr().reset(nullptr);
+  enigma::buffers.destroy(buffer);
 }
 
 bool buffer_exists(buffer_t buffer) {
@@ -372,18 +372,33 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
   std::vector<std::byte> data;
   std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
                  std::back_inserter(data), [](char x) { return static_cast<std::byte>(x); });
-  std::size_t over = data.size() - binbuff->GetSize();
+
   switch (binbuff->type) {
     case buffer_wrap:
-      binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);
-      binbuff->data.insert(binbuff->data.begin(), data.begin(), data.begin() + over);
+      if (data.size() + offset > binbuff->data.size()) {
+        std::size_t extra = (data.size() + offset) - binbuff->data.size();
+        std::copy(data.begin(), data.end() - extra, binbuff->data.begin() + offset);
+        std::copy(data.end() - extra, data.end(), binbuff->data.begin());
+      } else {
+        std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
+      }
       break;
     case buffer_grow:
-      binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end());
+      if (data.size() + offset > binbuff->data.size()) {
+        binbuff->Resize(data.size() + offset);
+      }
+      std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
       break;
-    default:
-      binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);
+    case buffer_fixed:
+    case buffer_fast: {
+      std::size_t over = 0;
+      if (data.size() + offset > binbuff->data.size()) {
+        DEBUG_MESSAGE("Data being read cannot fit into fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
+        over = (data.size() + offset) - binbuff->data.size();
+      }
+      std::copy(data.begin(), data.end() - over, binbuff->data.begin() + offset);
       break;
+    }
   }
 
   myfile.close();
