@@ -72,4 +72,29 @@ for var offset = 0; offset < 8; ++offset {
     buffer_delete(buf);
 }
 
+for var offset = 0; offset < 10; ++offset {
+    var buf = buffer_create(20, buffer_grow, buffer_sizeof(buffer_u8));
+    const char *str = "this is a string";
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_string, str);
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_string), str);
+    var len = strlen(str);
+    gtest_assert_eq(buffer_tell(buf), offset + len + 1);
+    buffer_delete(buf);
+}
+
+for var offset = 0; offset < 10; ++offset {
+    var buf = buffer_create(20, buffer_wrap, buffer_sizeof(buffer_u8));
+    const char *str = "this is a string";
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_string, str);
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_string), str);
+    var len = strlen(str);
+    int off = offset + len + 1;
+    gtest_assert_eq(buffer_tell(buf), off % 20);
+    buffer_delete(buf);
+}
+
 game_end();
