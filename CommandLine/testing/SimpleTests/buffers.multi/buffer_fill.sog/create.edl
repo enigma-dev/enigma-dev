@@ -1,0 +1,52 @@
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_f32));
+
+buffer_fill(buf, 0, buffer_u8, 255, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_u8)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_u8), 255);
+}
+
+buffer_fill(buf, 0, buffer_s8, -127, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_s8)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_s8), -127);
+}
+
+buffer_fill(buf, 0, buffer_u16, 65535, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_u16)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 2);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_u16), 65535);
+}
+
+buffer_fill(buf, 0, buffer_s16, -32768, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_s16)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 2);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_s16), -32768);
+}
+
+buffer_fill(buf, 0, buffer_u32, 4294967295, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_u32)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 4);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_u32), 4294967295);
+}
+
+buffer_fill(buf, 0, buffer_s32, -2147483648, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_s32)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 4);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_s32), -2147483648);
+}
+
+buffer_fill(buf, 0, buffer_f32, 1.25, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_f32)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 4);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_f32), 1.25);
+}
+
+buffer_fill(buf, 0, buffer_f64, 200.651, buffer_get_size(buf));
+for var i = 0; i < (buffer_get_size(buf) / buffer_sizeof(buffer_f64)); i++ {
+    gtest_assert_eq(buffer_tell(buf), i * 8);
+    gtest_assert_eq(buffer_peek(buf, buffer_tell(buf), buffer_f64), 200.651);
+}
+
+buffer_delete(buf);
+game_end();

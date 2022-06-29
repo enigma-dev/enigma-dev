@@ -1,0 +1,10 @@
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_f32));
+var buf2 = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_f32));
+
+buffer_fill(buf, 0, buffer_u8, 170, buffer_get_size(buf));
+buffer_copy(buf, 0, buffer_get_size(buf), buf2, 0);
+gtest_assert_eq(buffer_get_size(buf2), 8);
+for var i = 0; i < buffer_get_size(buf2); ++i {
+    gtest_assert_eq(buffer_tell(buf2), i);
+    gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+}
