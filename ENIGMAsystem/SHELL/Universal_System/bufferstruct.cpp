@@ -353,7 +353,9 @@ buffer_t buffer_load(string filename) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
-  myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
+
+  std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
+                 std::back_inserter(buffer->data), [](char x) { return static_cast<std::byte>(x); });
   myfile.close();
 
   return id;
@@ -368,7 +370,8 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
     return;
   }
   std::vector<std::byte> data;
-  myfile.read(reinterpret_cast<char*>(&data[0]), myfile.tellg());
+  std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
+                 std::back_inserter(data), [](char x) { return static_cast<std::byte>(x); });
   std::size_t over = data.size() - binbuff->GetSize();
   switch (binbuff->type) {
     case buffer_wrap:
