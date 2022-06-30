@@ -549,13 +549,28 @@ namespace ngs::fs {
       std::vector<char> str; str.resize(s, '\0');
       char *cwd = str.data();
       if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
-        if (info.dli_fname[0] != '/') {
+        if (*info.dli_fname == '.') {
           char buffer[PATH_MAX];
           if (realpath((std::string(cwd) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
             path = buffer;
           }
+        } else if (*info.dli_fname != '/') {
+          vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
+          struct stat st = { 0 };
+          for (std::size_t i = 0; i < env.size(); i++) {
+            char buffer[PATH_MAX];
+            if (realpath((std::string(env[i]) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
+              if (!stat(buffer, &st) && (st.st_mode & S_IXUSR)) {
+                path = buffer;
+                break;
+              }
+            }
+          }
         } else {
-          path = info.dli_fname;
+          char buffer[PATH_MAX];
+          if (realpath(info.dli_fname, buffer)) {
+            path = buffer;
+          }
         }
       }
     }
