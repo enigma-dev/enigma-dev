@@ -473,7 +473,7 @@ void buffer_seek(buffer_t buffer, buffer_seek_t base, long long offset) {
       binbuff->Seek(offset);
       break;
     case buffer_seek_end:
-      binbuff->Seek(binbuff->GetSize() + offset);
+      binbuff->Seek(binbuff->GetSize() - 1 + offset);
       break;
     case buffer_seek_relative:
       binbuff->Seek(binbuff->position + offset);

@@ -39,9 +39,11 @@ void BinaryBuffer::Resize(std::size_t size) { data.resize(size, std::byte{0}); }
 
 void BinaryBuffer::Seek(long long offset) {
   if (offset < 0) {
-    DEBUG_MESSAGE("'offset' needs to be a non-zero integer", MESSAGE_TYPE::M_USER_ERROR);
+    DEBUG_MESSAGE("'offset' needs to be a non-negative integer; setting position to 0", MESSAGE_TYPE::M_WARNING);
+    position = 0;
     return;
   }
+
   switch (type) {
     case enigma_user::buffer_grow: {
       position = offset;
@@ -56,16 +58,16 @@ void BinaryBuffer::Seek(long long offset) {
     }
     case enigma_user::buffer_fixed: {
       if (static_cast<std::size_t>(offset) > GetSize()) {
-        DEBUG_MESSAGE("buffer_fixed: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("buffer_fixed: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_WARNING);
       }
-      position = std::min(static_cast<std::size_t>(offset), GetSize());
+      position = std::min(static_cast<std::size_t>(offset), GetSize() - 1);
       break;
     }
     case enigma_user::buffer_fast: {
       if (static_cast<std::size_t>(offset) > GetSize()) {
-        DEBUG_MESSAGE("buffer_fast: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("buffer_fast: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_WARNING);
       }
-      position = std::min(static_cast<std::size_t>(offset), GetSize());
+      position = std::min(static_cast<std::size_t>(offset), GetSize() - 1);
       break;
     }
   }
