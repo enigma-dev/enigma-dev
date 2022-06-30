@@ -411,9 +411,20 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
     binbuff->data.resize(nsize);
   }
   std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
-  std::size_t times = size / bytes.size();
+
+  std::size_t padding = 0;
+  if (bytes.size() % binbuff->alignment != 0) {
+    padding = binbuff->alignment - (bytes.size() % binbuff->alignment);
+  }
+  std::vector<std::byte> padding_bytes{};
+  padding_bytes.resize(padding, std::byte{0});
+
+  std::size_t times = size / (bytes.size() + padding);
   for (std::size_t i = 0; i < times; i++) {
-    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + offset + i * bytes.size());
+    std::copy(bytes.begin(), bytes.end(),
+              binbuff->data.begin() + offset + i * (bytes.size() + padding));
+    std::copy(padding_bytes.begin(), padding_bytes.end(),
+              binbuff->data.begin() + offset + i * (bytes.size() + padding) + bytes.size());
   }
   binbuff->Seek(offset);
 }
