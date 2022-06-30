@@ -81,6 +81,9 @@ for var offset = 0; offset < 10; ++offset {
     gtest_assert_eq(buffer_read(buf, buffer_string), str);
     var len = strlen(str);
     gtest_assert_eq(buffer_tell(buf), offset + len + 1);
+    if ((offset + len) > 20) {
+        gtest_assert_eq(buffer_get_size(buf), 20 + offset - 1);
+    }
     buffer_delete(buf);
 }
 
@@ -94,6 +97,7 @@ for var offset = 0; offset < 10; ++offset {
     var len = strlen(str);
     int off = offset + len + 1;
     gtest_assert_eq(buffer_tell(buf), off % 20);
+    gtest_assert_eq(buffer_get_size(buf), 20);
     buffer_delete(buf);
 }
 

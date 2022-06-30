@@ -49,7 +49,7 @@ buffer_type_t buffer_get_type(buffer_t buffer);
 void buffer_get_surface(buffer_t buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
 void buffer_set_surface(buffer_t buffer, int surface, int mode, std::size_t offset = 0, int modulo = 0);
 void buffer_resize(buffer_t buffer, std::size_t size);
-void buffer_seek(buffer_t buffer, int base, long long offset);
+void buffer_seek(buffer_t buffer, buffer_seek_t base, long long offset);
 std::size_t buffer_sizeof(buffer_data_t type);
 std::size_t buffer_tell(buffer_t buffer);
 

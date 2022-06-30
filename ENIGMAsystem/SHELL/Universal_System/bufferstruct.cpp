@@ -466,7 +466,7 @@ void buffer_resize(buffer_t buffer, std::size_t size) {
   binbuff->Resize(size);
 }
 
-void buffer_seek(buffer_t buffer, int base, long long offset) {
+void buffer_seek(buffer_t buffer, buffer_seek_t base, long long offset) {
   GET_BUFFER(binbuff, buffer);
   switch (base) {
     case buffer_seek_start:
@@ -539,11 +539,9 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
       binbuff->WriteByte(data[i]);
     }
   } else {
-    std::byte byte{'1'};
+    std::vector<std::byte> bytes = serialize_to_type(value, buffer_string);
     std::size_t pos = 0;
-    while (byte != std::byte{0x00}) {
-      byte = static_cast<std::byte>(value[pos]);
-      pos += 1;
+    for (auto &byte : bytes) {
       binbuff->WriteByte(byte);
     }
     if (binbuff->alignment > pos) {

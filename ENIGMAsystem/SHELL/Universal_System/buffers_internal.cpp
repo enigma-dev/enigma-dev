@@ -17,7 +17,7 @@
 #include "buffers.h"
 #include "buffers_internal.h"
 #include "../libEGMstd.h"
-
+#include "../Widget_Systems/widgets_mandatory.h"
 
 namespace enigma {
 ////////////////////////////////////////////////////////////////////////////////
@@ -38,18 +38,35 @@ std::size_t BinaryBuffer::GetSize() { return data.size(); }
 void BinaryBuffer::Resize(std::size_t size) { data.resize(size, std::byte{0}); }
 
 void BinaryBuffer::Seek(long long offset) {
-  position = offset;
-  while (position >= GetSize()) {
-    switch (type) {
-      case enigma_user::buffer_grow:
-        Resize(position + 1);
-        return;
-      case enigma_user::buffer_wrap:
-        position -= GetSize();
-        return;
-      default:
-        position = GetSize() - (position - GetSize());
-        return;
+  if (offset < 0) {
+    DEBUG_MESSAGE("'offset' needs to be a non-zero integer", MESSAGE_TYPE::M_USER_ERROR);
+    return;
+  }
+  switch (type) {
+    case enigma_user::buffer_grow: {
+      position = offset;
+      if (static_cast<std::size_t>(offset) >= GetSize()) {
+        Resize(offset + 1);
+      }
+      break;
+    }
+    case enigma_user::buffer_wrap: {
+      position = offset % GetSize();
+      break;
+    }
+    case enigma_user::buffer_fixed: {
+      if (static_cast<std::size_t>(offset) > GetSize()) {
+        DEBUG_MESSAGE("buffer_fixed: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_USER_ERROR);
+      }
+      position = std::min(static_cast<std::size_t>(offset), GetSize());
+      break;
+    }
+    case enigma_user::buffer_fast: {
+      if (static_cast<std::size_t>(offset) > GetSize()) {
+        DEBUG_MESSAGE("buffer_fast: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_USER_ERROR);
+      }
+      position = std::min(static_cast<std::size_t>(offset), GetSize());
+      break;
     }
   }
 }
