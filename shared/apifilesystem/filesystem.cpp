@@ -536,7 +536,8 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    std::string arg; char **buffer;
+    std::string arg; 
+    char **buffer = nullptr;
     int mib1[4]; std::size_t s = 0;
     mib1[0] = CTL_KERN;
     mib1[1] = KERN_PROC_ARGS;
