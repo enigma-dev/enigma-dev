@@ -532,7 +532,10 @@ namespace ngs::fs {
       path.resize(length, '\0');
       char *buffer = path.data();
       if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-        path = string(buffer) + "\0";
+        char exe[PATH_MAX];
+        if (realpath(buffer, exe)) {
+          path = exe;
+        }
       }
     }
     #elif defined(__OpenBSD__)
