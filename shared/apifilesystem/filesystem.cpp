@@ -43,7 +43,6 @@
 #include "filesystem.hpp"
 
 #include <fcntl.h>
-#include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #if defined(_WIN32) 
@@ -59,6 +58,9 @@
 #include <sys/sysctl.h>
 #if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/user.h>
+#if defined(__OpenBSD__)
+#include <dlfcn.h>
+#endif
 #endif
 #endif
 #include <unistd.h>
