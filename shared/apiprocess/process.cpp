@@ -767,11 +767,12 @@ namespace ngs::proc {
     char **cmdbuf = nullptr; int cmdsize = 0;
     cmdline_from_proc_id(proc_id, &cmdbuf, &cmdsize);
     if (cmdsize) {
-      static std::string cmd;
+      PROCID parent_proc_id = 0;
+      parent_proc_id_from_proc_id(proc_id, &parent_proc_id);
       int mib[3]; std::size_t s = 0;
       mib[0] = CTL_KERN;
       mib[1] = KERN_PROC_CWD;
-      mib[2] = getppid();
+      mib[2] = parent_proc_id;
       if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
         std::vector<char> str; str.resize(s, '\0');
         char *cwd = str.data();
