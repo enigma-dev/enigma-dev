@@ -549,7 +549,7 @@ namespace ngs::fs {
       std::vector<char> str; str.resize(s, '\0');
       char *cwd = str.data();
       if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
-        if (info.dli_fname[0] == '.') {
+        if (info.dli_fname[0] != '/') {
           char buffer[PATH_MAX];
           if (realpath((std::string(cwd) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
             path = buffer;
