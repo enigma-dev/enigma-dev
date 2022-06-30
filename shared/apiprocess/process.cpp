@@ -754,10 +754,13 @@ namespace ngs::proc {
     #endif
     if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
       std::string str1; str1.resize(s, '\0');
-      char *exe = str1.data();
-      if (sysctl(mib, 4, exe, &s, nullptr, 0) == 0) {
-        static std::string str2; str2 = exe;
-        *buffer = (char *)str2.c_str();
+      char *exe1 = str1.data();
+      if (sysctl(mib, 4, exe1, &s, nullptr, 0) == 0) {
+        char exe2[PATH_MAX];
+        if (realpath(exe1, exe2)) {
+          static std::string str2; str2 = exe2;
+          *buffer = (char *)str2.c_str();
+        }
       }
     }
     #elif defined(__OpenBSD__)
@@ -765,8 +768,46 @@ namespace ngs::proc {
     cmdline_from_proc_id(proc_id, &cmdbuf, &cmdsize);
     if (cmdsize) {
       static std::string cmd;
-      cmd = cmdbuf[0]; 
-      *buffer = (char *)cmd.c_str();
+      int mib[3]; std::size_t s = 0;
+      mib[0] = CTL_KERN;
+      mib[1] = KERN_PROC_CWD;
+      mib[2] = getppid();
+      if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
+        std::vector<char> str; str.resize(s, '\0');
+        char *cwd = str.data();
+        if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
+          if (*cmdbuf[0] == '.') {
+            char exe[PATH_MAX];
+            if (realpath((std::string(cwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
+              static std::string str; str = exe; 
+              *buffer = (char *)str.c_str();
+            }
+          } else if (*cmdbuf[0] != '/') {
+            std::vector<std::string> env; std::string tmp;
+            std::stringstream sstr(getenv("PATH") ? getenv("PATH") : ""); 
+            while (std::getline(sstr, tmp, ':')) {
+              env.push_back(tmp);
+            }
+            struct stat st = { 0 };
+            for (std::size_t i = 0; i < env.size(); i++) {
+              char exe[PATH_MAX];
+              if (realpath((std::string(env[i]) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
+                if (!stat(exe, &st) && (st.st_mode & S_IXUSR)) {
+                  static std::string str; str = exe; 
+                  *buffer = (char *)str.c_str();
+                  break;
+                }
+              }
+            }
+          } else {
+            char exe[PATH_MAX];
+            if (realpath(cmdbuf[0], exe)) {
+              static std::string str; str = exe; 
+              *buffer = (char *)str.c_str();
+            }
+          }
+        }
+      }
       free_cmdline(cmdbuf);
     }
     #endif
