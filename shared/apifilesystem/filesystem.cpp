@@ -58,9 +58,6 @@
 #include <sys/sysctl.h>
 #if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/user.h>
-#if defined(__OpenBSD__)
-#include <dlfcn.h>
-#endif
 #endif
 #endif
 #include <unistd.h>
@@ -539,37 +536,50 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    Dl_info info = { 0 };
-    dladdr(__FUNCTION__, &info);
-    int mib[3]; std::size_t s = 0;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC_CWD;
-    mib[2] = getppid();
-    if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
-      std::vector<char> str; str.resize(s, '\0');
-      char *cwd = str.data();
-      if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
-        if (*info.dli_fname == '.') {
-          char buffer[PATH_MAX];
-          if (realpath((std::string(cwd) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
-            path = buffer;
-          }
-        } else if (*info.dli_fname != '/') {
-          vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
-          struct stat st = { 0 };
-          for (std::size_t i = 0; i < env.size(); i++) {
+    std::string arg; char **buffer;
+    int mib1[4]; std::size_t s = 0;
+    mib1[0] = CTL_KERN;
+    mib1[1] = KERN_PROC_ARGS;
+    mib1[2] = getpid();
+    mib1[3] = KERN_PROC_ARGV; 
+    if (sysctl(mib1, 4, nullptr, &s, nullptr, 0) == 0) {
+      if ((buffer = (char **)malloc(s))) {
+        if (sysctl(mib1, 4, buffer, &s, nullptr, 0) == 0) {
+          arg = string(buffer[0]) + "\0";
+        }
+        free(buffer);
+      }
+    }
+    if (!arg.empty()) {
+      std::vector<char> str; 
+      int mib2[3]; std::size_t s = 0;
+      char *cwd = nullptr;
+      mib2[0] = CTL_KERN;
+      mib2[1] = KERN_PROC_CWD;
+      mib2[2] = getppid();
+      if (sysctl(mib2, 3, nullptr, &s, nullptr, 0) == 0) {
+        str.resize(s, '\0'); cwd = str.data();
+        if (sysctl(mib2, 3, cwd, &s, nullptr, 0) == 0) {
+          if (arg[0] == '.') {
             char buffer[PATH_MAX];
-            if (realpath((std::string(env[i]) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
-              if (!stat(buffer, &st) && (st.st_mode & S_IXUSR)) {
+            if (realpath((std::string(cwd) + "/" + std::string(arg).data()).c_str(), buffer)) {
+              path = buffer;
+            }
+          }
+          if (arg[0] != '/') {
+            vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
+            struct stat st = { 0 }; for (std::size_t i = 0; i < env.size(); i++) {
+              char buffer[PATH_MAX];
+              if (realpath((std::string(env[i]) + "/" + std::string(arg).data()).c_str(), buffer)) {
                 path = buffer;
                 break;
               }
             }
-          }
-        } else {
-          char buffer[PATH_MAX];
-          if (realpath(info.dli_fname, buffer)) {
-            path = buffer;
+          } else {
+            char buffer[PATH_MAX];
+            if (realpath(arg.c_str(), buffer)) {
+              path = buffer;
+            }
           }
         }
       }
