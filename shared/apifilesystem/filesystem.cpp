@@ -43,6 +43,7 @@
 #include "filesystem.hpp"
 
 #include <fcntl.h>
+#include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #if defined(_WIN32) 
@@ -536,19 +537,24 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    int mib[4];
-    size_t length = 0;
-    char **buffer = nullptr;  
+    Dl_info info = { 0 };
+    dladdr(__FUNCTION__, &info);
+    int mib[3]; std::size_t s = 0;
     mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC_ARGS;
-    mib[2] = getpid();
-    mib[3] = KERN_PROC_ARGV; 
-    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      if ((buffer = (char **)malloc(length))) {
-        if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-          path = string(buffer[0]) + "\0";
+    mib[1] = KERN_PROC_CWD;
+    mib[2] = getppid();
+    if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
+      std::vector<char> str; str.resize(s, '\0');
+      char *cwd = str.data();
+      if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
+        if (info.dli_fname[0] == '.') {
+          char buffer[PATH_MAX];
+          if (realpath((std::string(cwd) + "/" + std::string(info.dli_fname).data()).c_str(), buffer)) {
+            path = buffer;
+          }
+        } else {
+          path = info.dli_fname;
         }
-        free(buffer);
       }
     }
     #endif
