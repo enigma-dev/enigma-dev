@@ -11,11 +11,11 @@ for var offset = 0; offset < 8; ++offset {
     var len = buffer_get_size(buf2);
     for var i = 0; i < offset; ++i {
         gtest_assert_eq(buffer_tell(buf2), i);
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 0);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
     }
     for var i = 0; i < len - offset; ++i {
         gtest_assert_eq(buffer_tell(buf2), i + offset);
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
     }
     buffer_delete(buf2);
 }
@@ -30,12 +30,12 @@ for var offset = 0; offset < 8; ++offset {
     for var i = 0; i < (len - 8); ++i {
         int off = (i + len - (4 - offset));
         gtest_assert_eq(buffer_tell(buf2), off % buffer_get_size(buf2));
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 0);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
     }
     for var i = 0; i < 8; ++i {
         int off = i + offset;
         gtest_assert_eq(buffer_tell(buf2), off % 12);
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
     }
     buffer_delete(buf2);
 }
@@ -48,11 +48,11 @@ for var offset = 0; offset < 8; ++offset {
     var len = buffer_get_size(buf2);
     for var i = 0; i < offset; ++i {
         gtest_assert_eq(buffer_tell(buf2), i);
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 0);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
     }
     for var i = 0; i < len - offset; ++i {
         gtest_assert_eq(buffer_tell(buf2), i + offset);
-        gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
     }
     buffer_delete(buf2);
 }

@@ -9,7 +9,7 @@ gtest_assert_eq(buffer_get_size(buf2), 8);
 var len = buffer_get_size(buf2);
 for var i = 0; i < len; ++i {
     gtest_assert_eq(buffer_tell(buf2), i);
-    gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+    gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
 }
 
 buffer_delete(buf2);
