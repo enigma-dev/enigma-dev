@@ -409,6 +409,9 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   std::size_t nsize = offset + size;
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
     binbuff->data.resize(nsize);
+  } else if (binbuff->GetSize() < nsize) {
+    DEBUG_MESSAGE("buffer_fill: size too large; clamping to buffer end", MESSAGE_TYPE::M_WARNING);
+    size = binbuff->GetSize() - offset;
   }
   std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
 
