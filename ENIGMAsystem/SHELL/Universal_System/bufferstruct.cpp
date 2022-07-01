@@ -406,11 +406,15 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
 
 void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
-  std::size_t nsize = offset + size;
-  if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
-    binbuff->data.resize(nsize);
-  } else if (binbuff->GetSize() < nsize) {
-    DEBUG_MESSAGE("buffer_fill: size too large; clamping to buffer end", MESSAGE_TYPE::M_WARNING);
+
+  std::size_t orig_off = offset;
+  while (offset % binbuff->alignment != 0 && offset < binbuff->GetSize()) {
+    binbuff->WriteByte(std::byte{0});
+    offset++;
+  }
+
+  if (offset + size > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_fill: size too large; clamping to buffer end (max: " + std::to_string(binbuff->GetSize()) + ", got offset: " + std::to_string(orig_off) + " size: " + std::to_string(size) + ")", MESSAGE_TYPE::M_WARNING);
     size = binbuff->GetSize() - offset;
   }
   std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
@@ -422,14 +426,25 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   std::vector<std::byte> padding_bytes{};
   padding_bytes.resize(padding, std::byte{0});
 
-  std::size_t times = size / (bytes.size() + padding);
+  std::size_t element_size = bytes.size() + padding;
+  std::size_t times = size / element_size;
+  std::size_t remainder = size % element_size;
+
   for (std::size_t i = 0; i < times; i++) {
     std::copy(bytes.begin(), bytes.end(),
-              binbuff->data.begin() + offset + i * (bytes.size() + padding));
+              binbuff->data.begin() + offset + i * element_size);
     std::copy(padding_bytes.begin(), padding_bytes.end(),
-              binbuff->data.begin() + offset + i * (bytes.size() + padding) + bytes.size());
+              binbuff->data.begin() + offset + i * element_size + bytes.size());
   }
-  binbuff->Seek(offset);
+  if (remainder != 0 && remainder >= bytes.size()) {
+    std::copy(bytes.begin(), bytes.end(),
+              binbuff->data.begin() + offset + times * element_size);
+    if (remainder - bytes.size() >= padding_bytes.size()) {
+      std::copy(bytes.begin(), bytes.end(),
+                binbuff->data.begin() + offset + times * element_size + bytes.size());
+    }
+  }
+  binbuff->Seek(0);
 }
   
 void *buffer_get_address(buffer_t buffer) {
@@ -518,13 +533,11 @@ std::size_t buffer_tell(buffer_t buffer) {
 
 variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
-  binbuff->Seek(offset);
   if (type != buffer_string) {
     //std::size_t dsize = buffer_sizeof(type) + binbuff->alignment - 1;
     //NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
     //TODO: Fix floating point precision.
     variant value = deserialize_from_type(binbuff->data.begin() + offset, binbuff->data.begin() + offset + buffer_sizeof(type), type);
-    binbuff->Seek(binbuff->position + buffer_sizeof(type));
     return value;
   } else {
     char byte = '1';
@@ -539,7 +552,15 @@ variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type) {
 
 variant buffer_read(buffer_t buffer, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
-  return buffer_peek(buffer, binbuff->position, type);
+  while (binbuff->position % binbuff->alignment != 0) {
+    if (binbuff->ReadByte() != std::byte{0}) {
+      DEBUG_MESSAGE("buffer_peek: internal error: buffer not padded with zeroes, probably read something incorrect", MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+  }
+
+  auto result = buffer_peek(buffer, binbuff->position, type);
+  binbuff->Seek(binbuff->position + buffer_sizeof(type));
+  return result;
 }
 
 void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value) {
