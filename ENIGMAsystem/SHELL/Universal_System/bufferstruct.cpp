@@ -533,20 +533,24 @@ std::size_t buffer_tell(buffer_t buffer) {
 
 variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
-  if (type != buffer_string) {
+  if (type != buffer_string && type != buffer_text) {
     //std::size_t dsize = buffer_sizeof(type) + binbuff->alignment - 1;
     //NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
     //TODO: Fix floating point precision.
     variant value = deserialize_from_type(binbuff->data.begin() + offset, binbuff->data.begin() + offset + buffer_sizeof(type), type);
     return value;
   } else {
-    char byte = '1';
-    std::vector<char> data;
-    while (byte != 0x00) {
-      byte = static_cast<char>(binbuff->ReadByte());
-      data.push_back(byte);
+    std::string data;
+    for (std::size_t pos = offset; pos < binbuff->GetSize() && binbuff->data[pos] != std::byte{0};) {
+      data.push_back(static_cast<char>(binbuff->data[pos]));
+      if (binbuff->type == buffer_wrap) {
+        pos = (pos + 1) % binbuff->GetSize();
+      } else {
+        pos++;
+      }
     }
-    return variant(&data[0]);
+
+    return {data};
   }
 }
 
@@ -559,7 +563,15 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
   }
 
   auto result = buffer_peek(buffer, binbuff->position, type);
-  binbuff->Seek(binbuff->position + buffer_sizeof(type));
+
+  if (type != buffer_string && type != buffer_string) {
+    binbuff->Seek(binbuff->position + buffer_sizeof(type));
+  } else {
+    while (binbuff->position < binbuff->GetSize() && binbuff->data[binbuff->position] != std::byte{0}) {
+      binbuff->ReadByte(); // read the string, because we do not know its length
+    }
+    binbuff->ReadByte(); // skip the null terminator
+  }
   return result;
 }
 
@@ -579,11 +591,11 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
     for (auto &byte : bytes) {
       binbuff->WriteByte(byte);
     }
-    if (binbuff->alignment > pos) {
-      for (std::size_t i = 0; i < binbuff->alignment - pos; i++) {
-        binbuff->WriteByte(std::byte{0});
-      }
-    }
+    // if (binbuff->alignment > pos) {
+    //   for (std::size_t i = 0; i < binbuff->alignment - pos; i++) {
+    //     binbuff->WriteByte(std::byte{0});
+    //   }
+    // }
   }
 }
 

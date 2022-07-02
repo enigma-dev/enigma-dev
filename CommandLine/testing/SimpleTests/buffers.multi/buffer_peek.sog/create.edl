@@ -1,0 +1,26 @@
+var buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_u8));
+
+show_debug_message("Testing buffer_grow");
+for var offset = 0; offset < 8; offset++ {
+    buffer_seek(buf, buffer_seek_start, offset);
+    var str = "this is a";
+    buffer_write(buf, buffer_string, str);
+    gtest_assert_eq(buffer_peek(buf, offset, buffer_string), str);
+}
+
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, buffer_sizeof(buffer_u8));
+var str = "this is";
+
+show_debug_message("Testing buffer_wrap");
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_peek(buf, 0, buffer_string), str);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_poke(buf, 5, buffer_string, str);
+gtest_assert_eq(buffer_peek(buf, 5, buffer_string), str);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_delete(buf);
+game_end();
