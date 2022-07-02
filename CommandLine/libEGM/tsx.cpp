@@ -22,12 +22,10 @@ TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPat
 // constructor which fills up the background folder of a pre-existing project
 TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
                                    std::vector<buffers::TreeNode *> &existingTreeNode,
-                                   buffers::TreeNode *existingBgFolderRef,
-                                   std::unordered_map<std::string, buffers::resources::Background *>& backgroundNameMsgPtrMap) : tsxPath(fPath) {
+                                   buffers::TreeNode *existingBgFolderRef) : tsxPath(fPath) {
   nodes = existingTreeNode;
   backgroundFolderRef = existingBgFolderRef;
   tiledEnigmaResourceNameMap["tileset"] = "background";
-  bgNameMsgPtrMap = backgroundNameMsgPtrMap;
 }
 
 bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
@@ -38,8 +36,6 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
     std::cout << "Unsupported resource type: " << xmlNode.name() << std::endl;
     return true;
   }
-
-  // TODO: Add folder structure to separate different types of resources
 
   std::string resType = tiledEnigmaResourceNameMap[xmlNode.name()];
 
@@ -68,8 +64,6 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
       // use_as_tileset should be false for stanalone tile converted to background
       protoNode->mutable_background()->set_use_as_tileset(false);
-
-      bgNameMsgPtrMap[protoNodeName] = protoNode->mutable_background();
     }
   }
   else {
@@ -79,8 +73,6 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
     // if single image is holding all the tiles then set use_as_tileset as true
     protoNode->mutable_background()->set_use_as_tileset(true);
-
-    bgNameMsgPtrMap[resName] = protoNode->mutable_background();
   }
 
 
