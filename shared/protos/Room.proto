@@ -4,17 +4,17 @@ package buffers.resources;
 import "options.proto";
 
 message Room {
-  optional int32 id = 29 [(gmx) = "GMX_DEPRECATED", (tmx) = "N/A"];
+  optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
 
-  optional string caption = 1 [(tmx) = "N/A"];
-  optional uint32 width = 2 [(yyp) = "roomSettings/Width", (tmx) = "width"];
-  optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"];
-  optional uint32 hsnap = 4 [(tmx) = "tilewidth"];
-  optional uint32 vsnap = 5 [(tmx) = "tileheight"];
-  optional bool isometric = 6 [(tmx) = "orientation"]; // TODO: Add support to staggered and hexagonal orientations of tmx
-  optional uint32 speed = 27 [(tmx) = "N/A"];
-  optional bool persistent = 7 [(yyp) = "roomSettings/persistent", (tmx) = "N/A"];
-  optional int32 color = 8 [(gmx) = "colour"];
+  optional string caption = 1;
+  optional uint32 width = 2 [(yyp) = "roomSettings/Width", (tmx) = "width"]; // tmx width unit is no. of tiles
+  optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"]; // tmx height unit is no. of tiles
+  optional uint32 hsnap = 4 [(tmx) = "tilewidth"]; // tmx tilewidth unit is probably in pixels
+  optional uint32 vsnap = 5 [(tmx) = "tileheight"]; // tmx tileheight unit is probably in pixels
+  optional bool isometric = 6 [(tmx) = "orientation"]; // TODO: Handle type conversion exclusively. Add support to staggered and hexagonal orientations of tmx
+  optional uint32 speed = 27;
+  optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
+  optional int32 color = 8 [(gmx) = "colour", (tmx) = "backgroundcolor"]; // TODO: Handle type conversion exclusively
   optional bool show_color = 9 [(gmx) = "showcolour"];
   optional string creation_code = 10;
   optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
@@ -86,12 +86,12 @@ message Room {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000001];
     optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
-    optional double x = 4;
-    optional double y = 5;
+    optional double x = 4 [(tmx) = "x"];
+    optional double y = 5 [(tmx) = "y"];
     optional int32 xoffset = 6 [(gmx) = "xo"];
     optional int32 yoffset = 7 [(gmx) = "yo"];
-    optional uint32 width = 8 [(gmx) = "w"];
-    optional uint32 height = 9 [(gmx) = "h"];
+    optional uint32 width = 8 [(gmx) = "w", (tmx) = "width"];
+    optional uint32 height = 9 [(gmx) = "h", (tmx) = "height"];
     optional int32 depth = 10;
     optional double xscale = 11 [default = 1.0, (gmx) = "scaleX"];
     optional double yscale = 12 [default = 1.0, (gmx) = "scaleY"];
