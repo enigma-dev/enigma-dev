@@ -9,7 +9,7 @@ message Background {
   optional bool preload = 2 [(gmx) = "GMX_DEPRECATED"];
   optional bool smooth_edges = 3 [(gmx) = "GMX_DEPRECATED"];
 
-  optional bool use_as_tileset = 4 [(gmx) = "istileset", (tmx) = "_SET_TRUE_"];
+  optional bool use_as_tileset = 4 [(gmx) = "istileset"];
 
   optional int32 tile_width         = 5 [(gmx) = "tilewidth", (tmx) = "tilewidth"];
   optional int32 tile_height        = 6 [(gmx) = "tileheight", (tmx) = "tileheight"];
@@ -30,6 +30,7 @@ message Background {
   // additional fields for tmx compatibility
   optional string tsx_source_path = 18 [(tmx) = "source"];
   optional string name = 19 [(tmx) = "name"];
+  optional uint32 columns = 20 [(tmx) = "columns"];
 
   // TODO 1: add tilecount, columns and objectalignment properties of tilesets
   // TODO 2: add support to tile(repeated), tileoffset, grid, properties, terraintypes, wangsets, transformations

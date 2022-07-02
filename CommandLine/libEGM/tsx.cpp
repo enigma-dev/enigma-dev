@@ -21,11 +21,13 @@ TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPat
 
 // constructor which fills up the background folder of a pre-existing project
 TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
-                 std::vector<buffers::TreeNode *> &existingTreeNode,
-                 buffers::TreeNode *existingBgFolderRef) : tsxPath(fPath) {
+                                   std::vector<buffers::TreeNode *> &existingTreeNode,
+                                   buffers::TreeNode *existingBgFolderRef,
+                                   std::unordered_map<std::string, buffers::resources::Background *>& backgroundNameMsgPtrMap) : tsxPath(fPath) {
   nodes = existingTreeNode;
   backgroundFolderRef = existingBgFolderRef;
   tiledEnigmaResourceNameMap["tileset"] = "background";
+  bgNameMsgPtrMap = backgroundNameMsgPtrMap;
 }
 
 bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
@@ -42,7 +44,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   std::string resType = tiledEnigmaResourceNameMap[xmlNode.name()];
 
   // add new resource according to resType
-  if(backgroundFolderRef == NULL){
+  if(backgroundFolderRef == NULL) {
     backgroundFolderRef = nodes.back()->mutable_folder()->add_children();
     std::string fixName = resType + 's'; // add an 's' at the end
     fixName[0] -= 32; // make first character capital
@@ -50,22 +52,35 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   }
 
   pugi::xml_node imgNode = xmlNode.child("image");
-  if(imgNode.empty()){
+  if(imgNode.empty()) {
     pugi::xml_object_range<pugi::xml_named_node_iterator> tileChildrenItr = xmlNode.children("tile");
 
     std::cout<<"Adding tile as background"<<std::endl;
 
-    for(pugi::xml_node tileChild : tileChildrenItr){
+    for(pugi::xml_node tileChild : tileChildrenItr) {
+      // TODO: Needs improvement: All compatible* individual tiles can be combined into a single tileset, just like in Tiled
+
       buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
       std::string tileId = tileChild.attribute("id").value();
-      protoNode->set_name(resName+tileId);
+      std::string protoNodeName = resName+"_"+tileId;
+      protoNode->set_name(protoNodeName);
       AddResource(protoNode, resType, tileChild);
+
+      // use_as_tileset should be false for stanalone tile converted to background
+      protoNode->mutable_background()->set_use_as_tileset(false);
+
+      bgNameMsgPtrMap[protoNodeName] = protoNode->mutable_background();
     }
   }
-  else{
+  else {
     buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
     protoNode->set_name(resName);
     AddResource(protoNode, resType, xmlNode);
+
+    // if single image is holding all the tiles then set use_as_tileset as true
+    protoNode->mutable_background()->set_use_as_tileset(true);
+
+    bgNameMsgPtrMap[resName] = protoNode->mutable_background();
   }
 
 
@@ -108,7 +123,7 @@ void TSXTilesetLoader::PackRes(pugi::xml_node &xmlNode, google::protobuf::Messag
   const google::protobuf::Reflection *refl = m->GetReflection();
 
   // for tsx tilesets use_as_tileset will always be true
-  if(resType == "background"){
+  if(resType == "background") {
     const google::protobuf::FieldDescriptor *useAsTilesetField = desc->FindFieldByName("use_as_tileset");
     if(useAsTilesetField){
       refl->SetBool(m, useAsTilesetField, true);
@@ -133,13 +148,12 @@ void TSXTilesetLoader::PackRes(pugi::xml_node &xmlNode, google::protobuf::Messag
     // for example in Background.proto fields with options [(tmx) = "image/source"] has a forward
     // slash in it and it indicates that in .tsx file, source should be fectched from child image node
     std::size_t splitPos = tsxPropertyName.find("/");
-    if(splitPos != std::string::npos){
+    if(splitPos != std::string::npos) {
       const std::string childNodeName = tsxPropertyName.substr(0, splitPos);
       const std::string childNodeAttrName = tsxPropertyName.substr(splitPos + 1);
       pugi::xml_node child = xmlNode.child(childNodeName.c_str());
-      if(!child.empty()){
+      if(!child.empty())
         attr = child.attribute(childNodeAttrName.c_str());
-      }
     }
     // otherwise get the attribute directly
     else {
@@ -195,7 +209,7 @@ void TSXTilesetLoader::PackRes(pugi::xml_node &xmlNode, google::protobuf::Messag
           std::string parentDirPath = tsxPath.parent_path().string()+"/";
           value = parentDirPath + attr.as_string();
         }
-        else{
+        else {
           value = attr.as_string();
         }
 

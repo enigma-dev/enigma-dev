@@ -17,13 +17,15 @@ public:
   TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPath);
   TSXTilesetLoader(const fs::path &fPath,
                    std::vector<buffers::TreeNode *> &existingTreeNode,
-                   buffers::TreeNode * existingBgFolderRef);
+                   buffers::TreeNode * existingBgFolderRef,
+                   std::unordered_map<std::string, buffers::resources::Background *>& backgroundNameMsgPtrMap);
 
 private:
   std::vector<buffers::TreeNode *> nodes;
   fs::path tsxPath;
   std::unordered_map<std::string, std::string> tiledEnigmaResourceNameMap;
   buffers::TreeNode *backgroundFolderRef;
+  std::unordered_map<std::string, buffers::resources::Background *> bgNameMsgPtrMap;
 
   virtual bool for_each(pugi::xml_node& xmlNode) override;
   void AddResource(buffers::TreeNode *protoNode, std::string resType, pugi::xml_node &xmlNode);
