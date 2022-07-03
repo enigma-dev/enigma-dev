@@ -568,7 +568,7 @@ namespace ngs::fs {
           char buffer[PATH_MAX];
           if (realpath((std::string(env[i]) + "/" + arg).c_str(), buffer)) {
             struct stat st = { 0 };
-            if (!stat(buffer, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {) {
+            if (!stat(buffer, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
               path = buffer;
               goto finish;
             }
