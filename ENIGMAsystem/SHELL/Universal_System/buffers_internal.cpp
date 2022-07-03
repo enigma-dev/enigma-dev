@@ -57,14 +57,14 @@ void BinaryBuffer::Seek(long long offset) {
       break;
     }
     case enigma_user::buffer_fixed: {
-      if (static_cast<std::size_t>(offset) > GetSize()) {
+      if (static_cast<std::size_t>(offset) >= GetSize()) {
         DEBUG_MESSAGE("buffer_fixed: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_WARNING);
       }
       position = std::min(static_cast<std::size_t>(offset), GetSize() - 1);
       break;
     }
     case enigma_user::buffer_fast: {
-      if (static_cast<std::size_t>(offset) > GetSize()) {
+      if (static_cast<std::size_t>(offset) >= GetSize()) {
         DEBUG_MESSAGE("buffer_fast: 'offset' greater than buffer size, clamped at end", MESSAGE_TYPE::M_WARNING);
       }
       position = std::min(static_cast<std::size_t>(offset), GetSize() - 1);

@@ -588,7 +588,7 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
   return result;
 }
 
-void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value) {
+void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, bool resize) {
   GET_BUFFER(binbuff, buffer);
 
   // NOTE: there is a GMS incompatibility here; in GMS if the data cannot fit within the current size of the buffer, the
@@ -597,6 +597,12 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   // - buffer_fixed/buffer_fast: Truncate the data being written
 
   std::vector<std::byte> data = serialize_to_type(value, type);
+
+  if (!resize && (data.size() + offset) >= binbuff->GetSize() && binbuff->type == buffer_grow) {
+    DEBUG_MESSAGE("buffer_poke: Write would go off end of buffer, aborting", MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+
   write_to_buffer(binbuff, data, offset);
 }
 
@@ -606,7 +612,8 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
     binbuff->WriteByte(std::byte{0});
   }
 
-  buffer_poke(buffer, binbuff->position, type, value);
+  std::vector<std::byte> data = serialize_to_type(value, type);
+  write_to_buffer(binbuff, data, binbuff->position);
 
   if (type != buffer_string && type != buffer_string) {
     binbuff->Seek(binbuff->position + buffer_sizeof(type));
@@ -616,7 +623,6 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
     }
     binbuff->ReadByte();  // skip the null terminator
   }
-
 }
 
 string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size) {

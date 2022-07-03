@@ -56,7 +56,7 @@ std::size_t buffer_tell(buffer_t buffer);
 variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type);
 variant buffer_read(buffer_t buffer, buffer_data_t type);
 void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size);
-void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value);
+void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, bool resize = false);
 void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
 
 void game_save_buffer(buffer_t buffer);
