@@ -766,8 +766,6 @@ namespace ngs::proc {
     #elif defined(__OpenBSD__)
     char **cmdbuf = nullptr; int cmdsize = 0;
     cmdline_from_proc_id(proc_id, &cmdbuf, &cmdsize);
-    PROCID parent_proc_id = 0; char *cwd = nullptr;
-    parent_proc_id_from_proc_id(proc_id, &parent_proc_id);
     const char *pwd = nullptr;
     if (cmdsize) {
       if (*cmdbuf[0] == '/') {
