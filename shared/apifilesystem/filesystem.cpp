@@ -564,11 +564,14 @@ namespace ngs::fs {
         }
       } else if (arg.find('/') == string::npos) {
         vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
-        struct stat st = { 0 }; for (std::size_t i = 0; i < env.size(); i++) {
+        for (std::size_t i = 0; i < env.size(); i++) {
           char buffer[PATH_MAX];
           if (realpath((std::string(env[i]) + "/" + arg).c_str(), buffer)) {
-            path = buffer;
-            goto finish;
+            struct stat st = { 0 };
+            if (!stat(buffer, &st) && (st.st_mode & S_IXUSR)) {
+              path = buffer;
+              goto finish;
+            }
           }
         }
       }
