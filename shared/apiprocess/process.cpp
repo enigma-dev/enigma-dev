@@ -785,7 +785,7 @@ namespace ngs::proc {
           char exe[PATH_MAX];
           if (realpath((std::string(env[i]) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
             struct stat st = { 0 };
-            if (!stat(exe, &st) && (st.st_mode & S_IXUSR)) {
+            if (!stat(exe, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
               static std::string str; str = exe; 
               *buffer = (char *)str.c_str();
               goto finish;
