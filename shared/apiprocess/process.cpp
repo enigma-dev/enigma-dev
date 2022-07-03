@@ -770,23 +770,13 @@ namespace ngs::proc {
     parent_proc_id_from_proc_id(proc_id, &parent_proc_id);
     int mib[3]; std::size_t s = 0; std::vector<char> str;
     if (cmdsize) {
-      mib[0] = CTL_KERN;
-      mib[1] = KERN_PROC_CWD;
-      mib[2] = parent_proc_id;
-      if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
-        str.resize(s, '\0');
-        cwd = str.data();
-        if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
-          if (*cmdbuf[0] == '.') {
-            char exe[PATH_MAX];
-            if (realpath((std::string(cwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
-              static std::string str; str = exe; 
-              *buffer = (char *)str.c_str();
-            }
-          }
+      if (*cmdbuf[0] == '/') {
+        char exe[PATH_MAX];
+        if (realpath(cmdbuf[0], exe)) {
+          static std::string str; str = exe; 
+          *buffer = (char *)str.c_str();
         }
-      }
-      if (*cmdbuf[0] != '/') {
+      } else {
         std::vector<std::string> env; std::string tmp;
         std::stringstream sstr(environ_from_proc_id_ex(proc_id, "PATH")); 
         while (std::getline(sstr, tmp, ':')) {
@@ -801,11 +791,21 @@ namespace ngs::proc {
             break;
           }
         }
-      } else {
-        char exe[PATH_MAX];
-        if (realpath(cmdbuf[0], exe)) {
-          static std::string str; str = exe; 
-          *buffer = (char *)str.c_str();
+      }
+      mib[0] = CTL_KERN;
+      mib[1] = KERN_PROC_CWD;
+      mib[2] = parent_proc_id;
+      if (sysctl(mib, 3, nullptr, &s, nullptr, 0) == 0) {
+        str.resize(s, '\0');
+        cwd = str.data();
+        if (sysctl(mib, 3, cwd, &s, nullptr, 0) == 0) {
+          if (*cmdbuf[0] == '.' && std::string(cmdbuf[0]).find('/') != std::string::npos) {
+            char exe[PATH_MAX];
+            if (realpath((std::string(cwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
+              static std::string str; str = exe; 
+              *buffer = (char *)str.c_str();
+            }
+          }
         }
       }
       free_cmdline(cmdbuf);
