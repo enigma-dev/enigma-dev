@@ -156,7 +156,6 @@ buffer_delete(buf);
 
 buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
 buffer_fill(buf, 3, buffer_u8, 1, 1);
-buffer_save(buf, "buf.bin");
 gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
 gtest_assert_eq(buffer_tell(buf), 1);
 gtest_assert_eq(buffer_read(buf, buffer_u8), 1);
@@ -173,7 +172,10 @@ for var offset = 0; offset < 10; ++offset {
     var len = strlen(str);
     gtest_assert_eq(buffer_tell(buf), offset + len + 1);
     if ((offset + len) > 20) {
-        gtest_assert_eq(buffer_get_size(buf), 20 + offset - 1);
+        // The reason it needs +2 is: +1 for the null terminator of the string,
+        // and +1 for the extra byte automatically allocated to store the next
+        // byte of (possibly) incoming data.
+        gtest_assert_eq(buffer_get_size(buf), len + offset + 2);
     }
     buffer_delete(buf);
 }
