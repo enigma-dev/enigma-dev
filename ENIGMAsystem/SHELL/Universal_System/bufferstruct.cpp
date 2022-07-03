@@ -261,6 +261,45 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
 #undef DOUBLE
 }
 
+void write_to_buffer(enigma::BinaryBuffer *binbuff, const std::vector<std::byte> &data, std::size_t offset) {
+  switch (binbuff->type) {
+    case buffer_wrap:
+      if (offset >= binbuff->GetSize()) {
+        offset = offset % binbuff->GetSize();
+      }
+
+      if (data.size() + offset > binbuff->data.size()) {
+        std::size_t extra = (data.size() + offset) - binbuff->data.size();
+        std::copy(data.begin(), data.end() - extra, binbuff->data.begin() + offset);
+        std::copy(data.end() - extra, data.end(), binbuff->data.begin());
+      } else {
+        std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
+      }
+      break;
+
+    case buffer_grow:
+      if (data.size() + offset > binbuff->data.size()) {
+        binbuff->Resize(data.size() + offset);
+      }
+      std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
+      break;
+
+    case buffer_fixed:
+    case buffer_fast: {
+      std::size_t over = 0;
+      if (offset >= binbuff->data.size()) {
+        DEBUG_MESSAGE("write_to_buffer: Offset beyond end of fixed/fast buffer, aborting write", MESSAGE_TYPE::M_USER_ERROR);
+        return;
+      } else if (data.size() + offset > binbuff->data.size()) {
+        DEBUG_MESSAGE("write_to_buffer: Data being read cannot fit into fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
+        over = (data.size() + offset) - binbuff->data.size();
+      }
+      std::copy(data.begin(), data.end() - over, binbuff->data.begin() + offset);
+      break;
+    }
+  }
+}
+
 buffer_t make_new_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
   auto buffer = std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type);
   if (std::size_t id = enigma::get_free_buffer(); id == enigma::buffers.size()) {
@@ -373,33 +412,7 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
   std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
                  std::back_inserter(data), [](char x) { return static_cast<std::byte>(x); });
 
-  switch (binbuff->type) {
-    case buffer_wrap:
-      if (data.size() + offset > binbuff->data.size()) {
-        std::size_t extra = (data.size() + offset) - binbuff->data.size();
-        std::copy(data.begin(), data.end() - extra, binbuff->data.begin() + offset);
-        std::copy(data.end() - extra, data.end(), binbuff->data.begin());
-      } else {
-        std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
-      }
-      break;
-    case buffer_grow:
-      if (data.size() + offset > binbuff->data.size()) {
-        binbuff->Resize(data.size() + offset);
-      }
-      std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
-      break;
-    case buffer_fixed:
-    case buffer_fast: {
-      std::size_t over = 0;
-      if (data.size() + offset > binbuff->data.size()) {
-        DEBUG_MESSAGE("Data being read cannot fit into fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
-        over = (data.size() + offset) - binbuff->data.size();
-      }
-      std::copy(data.begin(), data.end() - over, binbuff->data.begin() + offset);
-      break;
-    }
-  }
+  write_to_buffer(binbuff, data, offset);
 
   myfile.close();
 }
@@ -577,31 +590,33 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
 
 void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value) {
   GET_BUFFER(binbuff, buffer);
-  binbuff->Seek(offset);
-  if (type != buffer_string) {
-    //TODO: Implement buffer alignment.
-    //std::size_t dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
-    std::vector<std::byte> data = enigma::valToBytes(value, type);
-    for (std::size_t i = 0; i < data.size(); i++) {
-      binbuff->WriteByte(data[i]);
-    }
-  } else {
-    std::vector<std::byte> bytes = serialize_to_type(value, buffer_string);
-    std::size_t pos = 0;
-    for (auto &byte : bytes) {
-      binbuff->WriteByte(byte);
-    }
-    // if (binbuff->alignment > pos) {
-    //   for (std::size_t i = 0; i < binbuff->alignment - pos; i++) {
-    //     binbuff->WriteByte(std::byte{0});
-    //   }
-    // }
-  }
+
+  // NOTE: there is a GMS incompatibility here; in GMS if the data cannot fit within the current size of the buffer, the
+  // write is simply aborted. Here, if the buffer is not large enough, there are 2 cases handled:
+  // - buffer_grow: Expand the buffer
+  // - buffer_fixed/buffer_fast: Truncate the data being written
+
+  std::vector<std::byte> data = serialize_to_type(value, type);
+  write_to_buffer(binbuff, data, offset);
 }
 
 void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
   GET_BUFFER(binbuff, buffer);
+  while (binbuff->position % binbuff->alignment != 0) {
+    binbuff->WriteByte(std::byte{0});
+  }
+
   buffer_poke(buffer, binbuff->position, type, value);
+
+  if (type != buffer_string && type != buffer_string) {
+    binbuff->Seek(binbuff->position + buffer_sizeof(type));
+  } else {
+    while (binbuff->position < binbuff->GetSize() && binbuff->data[binbuff->position] != std::byte{0}) {
+      binbuff->ReadByte();  // read the string, because we do not know its length
+    }
+    binbuff->ReadByte();  // skip the null terminator
+  }
+
 }
 
 string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size) {

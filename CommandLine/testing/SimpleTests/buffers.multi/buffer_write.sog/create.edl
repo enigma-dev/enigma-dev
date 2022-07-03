@@ -1,0 +1,70 @@
+for var offset = 0; offset < 10; offset++ {
+    show_debug_message("offset: " + string(offset));
+    show_debug_message("Testing buffer_grow");
+    var buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_u8));
+    
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_u8, 255);
+    gtest_assert_eq(buffer_tell(buf), offset + 1);
+    if ((offset + buffer_sizeof(buffer_u8)) < 8) {
+        gtest_assert_eq(buffer_get_size(buf), 8);
+    } else {
+        // The u8 is written at `offset`, one extra byte is reserved for the next byte
+        gtest_assert_eq(buffer_get_size(buf), offset + 1);
+    }
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_wrap");
+    buf = buffer_create(8, buffer_wrap, buffer_sizeof(buffer_u8));
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_u8, 255);
+    gtest_assert_eq(buffer_tell(buf), offset + 1);
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+    gtest_assert_eq(buffer_tell(buf), int(offset + 1) % 8); // +1 because we are at the next byte
+
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_fixed");
+    buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_u8, 255);
+    gtest_assert_eq(buffer_tell(buf), offset + 1);
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    if (offset < 8) {
+        buffer_seek(buf, buffer_seek_start, offset);
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+    } else {
+        gtest_assert_eq(buffer_read(buf, buffer_u64), 0);
+    }
+
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_fast");
+    buf = buffer_create(8, buffer_fast, buffer_sizeof(buffer_u8));
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_u8, 255);
+    gtest_assert_eq(buffer_tell(buf), offset + 1);
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    if (offset < 8) {
+        buffer_seek(buf, buffer_seek_start, offset);
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+    } else {
+        gtest_assert_eq(buffer_read(buf, buffer_u64), 0);
+    }
+
+    buffer_delete(buf);
+}
+
+var buf2 = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+buffer_poke(buf, 1, buffer_u32, 4294967295);
+gtest_assert_eq(buffer_tell(buf), 8);
+gtest_assert_eq(buffer_peek(buf, 4, buffer_u32), 4294967295); // buffer_write writes are aligned
+gtest_assert_eq(buffer_get_size(buf), 9); // 8 bytes total, one reserved
+buffer_delete(buf2);
+
+game_end();
