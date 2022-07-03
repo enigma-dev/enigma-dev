@@ -55,16 +55,9 @@
 #include <sysdir.h>
 #include <libproc.h>
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#if defined(__OpenBSD__)
-#include <signal.h>
-#include <sys/param.h>
-#endif
 #include <sys/sysctl.h>
 #if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
 #include <sys/user.h>
-#if defined(__OpenBSD__)
-#include <kvm.h>
-#endif
 #endif
 #endif
 #include <unistd.h>
@@ -457,84 +450,6 @@ namespace ngs::fs {
       #endif
       return result;
     }
-   
-    #if defined(__OpenBSD__)
-    bool proc_id_exists(pid_t proc_id) {
-      return (kill(proc_id, 0) != -1);
-    }
-
-    void free_environ(char **buffer) {
-      if (buffer) {
-        delete[] buffer;
-      }
-    }
-
-    vector<string> environ_vec_1;
-    void environ_from_proc_id(pid_t proc_id, char ***buffer, int *size) {
-      static kvm_t *kd = nullptr;
-      *buffer = nullptr; *size = 0;
-      environ_vec_1.clear(); int i = 0;
-      if (!proc_id_exists(proc_id)) return;
-      char errbuf[_POSIX2_LINE_MAX];
-      kinfo_proc *proc_info = nullptr; int cntp = 0;
-      kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return;
-      if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
-        char **environ = kvm_getenvv(kd, proc_info, 0);
-        if (environ) {
-          for (int j = 0; environ[j]; j++) {
-            environ_vec_1.push_back(environ[j]); i++;
-          }
-        }
-      }
-      kvm_close(kd);
-      vector<char *> environ_vec_2;
-      for (int i = 0; i < (int)environ_vec_1.size(); i++) {
-        environ_vec_2.push_back((char *)environ_vec_1[i].c_str());
-      }
-      char **arr = new char *[environ_vec_2.size()]();
-      std::copy(environ_vec_2.begin(), environ_vec_2.end(), arr);
-      *buffer = arr; *size = i;
-    }
-
-    vector<string> string_split_by_first_equals_sign(std::string str) {
-      std::size_t pos = 0;
-      vector<string> vec;
-      if ((pos = str.find_first_of("=")) != string::npos) {
-        vec.push_back(str.substr(0, pos));
-        vec.push_back(str.substr(pos + 1));
-      }
-      return vec;
-    }
-
-    void environ_from_proc_id_ex(pid_t proc_id, const char *name, char **value) {
-      char **buffer = nullptr; int size = 0; *value = (char *)"\0";
-      environ_from_proc_id(proc_id, &buffer, &size);
-      if (buffer) {
-        for (int i = 0; i < size; i++) {
-          vector<string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
-          for (int j = 0; j < (int)equalssplit.size(); j++) {
-            string str1 = name;
-            transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
-            transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
-            if (j == equalssplit.size() - 1 && equalssplit[0] == str1) {
-              if (str1.empty()) { *value = (char *)"\0"; } else {
-                static string str2; str2 = equalssplit[j];
-                *value = (char *)str2.c_str();
-              }
-            }
-          }
-        }
-        free_environ(buffer);
-      }
-    }
-
-    const char *environ_from_proc_id_ex(pid_t proc_id, const char *name) {
-      char *value = (char *)"\0";
-      environ_from_proc_id_ex(proc_id, name, &value);
-      static string str; str = value;
-      return str.c_str();
-    }
-    #endif
 
   } // anonymous namespace
 
@@ -625,15 +540,16 @@ namespace ngs::fs {
     }
     #elif defined(__OpenBSD__)
     std::string arg; 
+    char *pwd = nullptr;
     char **buffer = nullptr;
-    int mib1[4]; std::size_t s = 0;
-    mib1[0] = CTL_KERN;
-    mib1[1] = KERN_PROC_ARGS;
-    mib1[2] = getpid();
-    mib1[3] = KERN_PROC_ARGV; 
-    if (sysctl(mib1, 4, nullptr, &s, nullptr, 0) == 0) {
+    int mib[4]; std::size_t s = 0;
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC_ARGS;
+    mib[2] = getpid();
+    mib[3] = KERN_PROC_ARGV; 
+    if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
       if ((buffer = (char **)malloc(s))) {
-        if (sysctl(mib1, 4, buffer, &s, nullptr, 0) == 0) {
+        if (sysctl(mib, 4, buffer, &s, nullptr, 0) == 0) {
           arg = string(buffer[0]) + "\0";
         }
         free(buffer);
@@ -644,35 +560,27 @@ namespace ngs::fs {
         char buffer[PATH_MAX];
         if (realpath(arg.c_str(), buffer)) {
           path = buffer;
+          goto finish;
         }
-      } else {
-        vector<string> env = string_split(environ_from_proc_id_ex(getppid(), "PATH"), ':');
+      } else if (arg.find('/') == string::npos) {
+        vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
         struct stat st = { 0 }; for (std::size_t i = 0; i < env.size(); i++) {
           char buffer[PATH_MAX];
-          if (realpath((std::string(env[i]) + "/" + std::string(arg).data()).c_str(), buffer)) {
+          if (realpath((std::string(env[i]) + "/" + arg).c_str(), buffer)) {
             path = buffer;
-            break;
+            goto finish;
           }
         }
       }
-      std::vector<char> str; 
-      int mib2[3]; std::size_t s = 0;
-      char *cwd = nullptr;
-      mib2[0] = CTL_KERN;
-      mib2[1] = KERN_PROC_CWD;
-      mib2[2] = getppid();
-      if (sysctl(mib2, 3, nullptr, &s, nullptr, 0) == 0) {
-        str.resize(s, '\0'); cwd = str.data();
-        if (sysctl(mib2, 3, cwd, &s, nullptr, 0) == 0) {
-          if (arg[0] == '.' && arg.find('/') != string::npos) {
-            char buffer[PATH_MAX];
-            if (realpath((std::string(cwd) + "/" + std::string(arg).data()).c_str(), buffer)) {
-              path = buffer;
-            }
-          }
+      pwd = getenv("PWD");
+      if (pwd) {
+        char buffer[PATH_MAX];
+        if (realpath((std::string(pwd) + "/" + arg).c_str(), buffer)) {
+          path = buffer; 
         }
       }
     }
+    finish:
     #endif
     return path;
   }
