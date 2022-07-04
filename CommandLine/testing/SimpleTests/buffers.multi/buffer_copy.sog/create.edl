@@ -1,10 +1,100 @@
-var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_f32));
-var buf2 = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_f32));
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+var buf2 = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
 
 buffer_fill(buf, 0, buffer_u8, 170, buffer_get_size(buf));
 buffer_copy(buf, 0, buffer_get_size(buf), buf2, 0);
 gtest_assert_eq(buffer_get_size(buf2), 8);
 for var i = 0; i < buffer_get_size(buf2); ++i {
     gtest_assert_eq(buffer_tell(buf2), i);
-    gtest_assert_eq(buffer_peek(buf2, buffer_tell(buf2), buffer_u8), 170);
+    gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
 }
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, 1);
+for var i = 0; i < 8; ++i {
+    buffer_write(buf, buffer_u8, i + 1);
+}
+buf2 = buffer_create(8, buffer_grow, 1);
+buffer_copy(buf, 2, 8, buf2, 5);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 6);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 7);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 8);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 1);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 2);
+gtest_assert_eq(buffer_get_size(buf2), 14);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, 1);
+for var i = 0; i < 8; ++i {
+    buffer_write(buf, buffer_u8, i + 1);
+}
+buf2 = buffer_create(7, buffer_wrap, 1);
+buffer_copy(buf, 0, 15, buf2, 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 6);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 7);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 1);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_get_size(buf2), 7);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_fixed, 1);
+for var i = 0; i < 8; ++i {
+    buffer_write(buf, buffer_u8, i + 1);
+}
+buf2 = buffer_create(7, buffer_wrap, 1);
+buffer_copy(buf, 0, 8, buf2, 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 6);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 7);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 8);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_get_size(buf2), 7);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, 1);
+for var i = 0; i < 8; ++i {
+    buffer_write(buf, buffer_u8, i + 1);
+}
+buf2 = buffer_create(7, buffer_fixed, 1);
+buffer_copy(buf, 0, 8, buf2, 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 1);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_get_size(buf2), 7);
+
+buffer_seek(buf2, buffer_seek_start, 0);
+buffer_copy(buf, 0, 5, buf2, 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 1);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 2);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_get_size(buf2), 7);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+game_end();

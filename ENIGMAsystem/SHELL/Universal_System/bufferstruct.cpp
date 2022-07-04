@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/buffers_data.h"
 #include "buffers.h"
 #include "buffers_internal.h"
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
-#include "../Graphics_Systems/graphics_mandatory.h"
-#include "../Graphics_Systems/General/GSsurface.h"
-#include "../Widget_Systems/widgets_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cassert>
 #include <cstring>
@@ -323,25 +324,78 @@ bool buffer_exists(buffer_t buffer) {
           enigma::buffers[buffer].get() != nullptr);
 }
 
-void buffer_copy(int src_buffer, std::size_t src_offset, std::size_t size, int dest_buffer, std::size_t dest_offset) {
+void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer, std::size_t dest_offset) {
   GET_BUFFER(srcbuff, src_buffer);
   GET_BUFFER(dstbuff, dest_buffer);
 
-  std::size_t over = size - srcbuff->GetSize();
+  if (src_offset >= srcbuff->GetSize()) {
+    if (srcbuff->type == buffer_wrap) {
+      src_offset = src_offset % srcbuff->GetSize();
+    } else {
+      DEBUG_MESSAGE("buffer_copy: source offset greater than source size, aborting write", MESSAGE_TYPE::M_ERROR);
+      return;
+    }
+  }
+
+  if (dest_offset >= dstbuff->GetSize()) {
+    if (dstbuff->type == buffer_wrap) {
+      dest_offset = dest_offset % dstbuff->GetSize();
+    } else {
+      DEBUG_MESSAGE("buffer_copy: destination offset greater than destination size, aborting write", MESSAGE_TYPE::M_ERROR);
+      return;
+    }
+  }
+
+  std::size_t written_bytes = [&srcbuff, &src_offset, &size]() {
+    if (srcbuff->type == buffer_wrap) {
+      return size;
+    } else {
+      return std::min(srcbuff->GetSize(), size) - src_offset;
+    }
+  }();
+
+  if (dstbuff->type == buffer_fixed || dstbuff->type == buffer_fast) {
+    if (dest_offset + written_bytes > dstbuff->GetSize()) {
+      DEBUG_MESSAGE("buffer_copy: bytes written out of range for fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
+      written_bytes = std::min(dstbuff->GetSize(), written_bytes) - dest_offset;
+    }
+  }
+
   switch (dstbuff->type) {
-    case buffer_wrap:
-      dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset,
-                           srcbuff->data.begin() + src_offset + size - over);
-      dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin(), srcbuff->data.begin() + over);
+    case buffer_wrap: {
+      if (srcbuff->type == buffer_wrap && src_offset + written_bytes >= srcbuff->GetSize()) {
+        for (std::size_t i = 0; i < size; i++) {
+          dstbuff->data[(i + dest_offset) % dstbuff->GetSize()] = srcbuff->data[(i + src_offset) % srcbuff->GetSize()];
+        }
+      } else {
+        for (std::size_t i = 0; i < size; i++) {
+          dstbuff->data[(i + dest_offset) % dstbuff->GetSize()] = srcbuff->data[i + src_offset];
+        }
+      }
       break;
-    case buffer_grow:
-      dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset,
-                           srcbuff->data.begin() + src_offset + size);
+    }
+
+    case buffer_grow: {
+      if (dest_offset + written_bytes >= dstbuff->GetSize()) {
+        dstbuff->Resize(dest_offset + written_bytes + 1);
+      }
+
+      [[fallthrough]];
+    }
+
+    case buffer_fixed:
+    case buffer_fast: {
+      if (srcbuff->type == buffer_wrap && src_offset + written_bytes >= srcbuff->GetSize()) {
+        for (std::size_t i = 0; i < size; i++) {
+          dstbuff->data[i + dest_offset] = srcbuff->data[(i + src_offset) % srcbuff->GetSize()];
+        }
+      } else {
+        for (std::size_t i = 0; i < size; i++) {
+          dstbuff->data[i + dest_offset] = srcbuff->data[i + src_offset];
+        }
+      }
       break;
-    default:
-      dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset,
-                           srcbuff->data.begin() + src_offset + size - over);
-      break;
+    }
   }
 }
 
