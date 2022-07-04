@@ -32,6 +32,8 @@ override CXXFLAGS += -std=c++17
 override CFLAGS += -std=c++17
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
+else
+	LDFLAGS += -lshell32 -lole32 -luuid
 endif
 SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
