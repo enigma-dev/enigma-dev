@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -302,6 +303,25 @@ void write_to_buffer(enigma::BinaryBuffer *binbuff, const std::vector<std::byte>
   }
 }
 
+void write_to_file(std::ofstream &file, const std::vector<std::byte>::iterator bytes, std::size_t size) {
+  // Hide the unsafe code inside a safe abstraction
+  file.write(reinterpret_cast<const char *>(&*bytes), size);
+}
+
+std::vector<std::byte> read_from_file(std::ifstream &file, std::size_t size) {
+  // Hide the unsafe code inside a safe abstraction
+  std::vector<std::byte> result{};
+  result.resize(size);
+  file.read(reinterpret_cast<char *>(result.data()), size);
+  return result;
+}
+
+void read_from_file(std::ifstream &file, std::vector<std::byte>::iterator bytes, std::size_t size) {
+  // Hide the unsafe code inside a safe abstraction
+  // Very easy buffer overflow bug here, caller has to ensure enough space is there
+  file.read(reinterpret_cast<char *>(&*bytes), size);
+}
+
 buffer_t make_new_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
   auto buffer = std::make_unique<enigma::BinaryBuffer>(std::vector<std::byte>(size), 0, alignment, type);
   if (std::size_t id = enigma::get_free_buffer(); id == enigma::buffers.size()) {
@@ -408,9 +428,7 @@ void buffer_save(buffer_t buffer, string filename) {
     return;
   }
 
-  std::transform(binbuff->data.begin(), binbuff->data.end(), std::ostreambuf_iterator<char>(myfile),
-                 [](std::byte b) { return static_cast<char>(b); });
-
+  write_to_file(myfile, binbuff->data.begin(), binbuff->GetSize());
   myfile.close();
 }
 
@@ -445,9 +463,7 @@ void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::
     size = std::min(binbuff->GetSize(), size) - offset;
   }
 
-  std::transform(binbuff->data.begin() + offset, binbuff->data.begin() + offset + size, std::ostreambuf_iterator(myfile),
-                 [](std::byte b) { return static_cast<char>(b); });
-
+  write_to_file(myfile, binbuff->data.begin() + offset, size);
   myfile.close();
 }
 
@@ -461,8 +477,9 @@ buffer_t buffer_load(string filename) {
     return -1;
   }
 
-  std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
-                 std::back_inserter(buffer->data), [](char x) { return static_cast<std::byte>(x); });
+  auto size = std::filesystem::file_size(filename);
+  buffer->data.resize(size);
+  read_from_file(myfile, buffer->data.begin(), size);
   myfile.close();
 
   return id;
@@ -476,10 +493,8 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
-  std::vector<std::byte> data;
-  std::transform(std::istreambuf_iterator(myfile), std::istreambuf_iterator<char>(),
-                 std::back_inserter(data), [](char x) { return static_cast<std::byte>(x); });
 
+  std::vector<std::byte> data = read_from_file(myfile, std::filesystem::file_size(filename));
   write_to_buffer(binbuff, data, offset);
 
   myfile.close();
