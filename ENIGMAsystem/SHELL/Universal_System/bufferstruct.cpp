@@ -410,33 +410,43 @@ void buffer_save(buffer_t buffer, string filename) {
 
   std::transform(binbuff->data.begin(), binbuff->data.end(), std::ostreambuf_iterator<char>(myfile),
                  [](std::byte b) { return static_cast<char>(b); });
-  // myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
+
   myfile.close();
 }
 
 void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
+
+  // NOTE: There is an incompatibility with GMS here, in terms of two things:
+  // - GMS only seems to write the bytes which were actually written to the buffer, and not the entirety of the buffer
+  //   itself, i.e. if you wrote 2 bytes to the buffer and saved it, the resulting file would be only 2 bytes long
+  // - When @c offset is greater than @c size, GMS seems to write the last written byte to the file and then stops, which
+  //   I really do not understand.
+
   if (!myfile.is_open()) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
 
-  std::size_t over = size - binbuff->GetSize();
-  switch (binbuff->type) {
-    case buffer_wrap:
-      myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), size - over);
-      myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), over);
-      break;
-    case buffer_grow:
-      //TODO: Might need to use min(size, binbuff->GetSize()); for the last parameter.
-      //Depends on whether Stupido will write 0's to fill in the entire size you gave it even though the data isn't that big.
-      myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), size);
-      break;
-    default:
-      myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), binbuff->GetSize());
-      break;
+  if (offset >= binbuff->GetSize()) {
+    if (binbuff->type == buffer_wrap) {
+      offset = offset % binbuff->GetSize();
+    } else {
+      DEBUG_MESSAGE("buffer_save_ext: offset beyond end of buffer, aborting write", MESSAGE_TYPE::M_ERROR);
+      return;
+    }
   }
+
+  if (offset + size >= binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_save_ext: offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
+                  ") greater than buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating to buffer end",
+                  MESSAGE_TYPE::M_WARNING);
+    size = std::min(binbuff->GetSize(), size) - offset;
+  }
+
+  std::transform(binbuff->data.begin() + offset, binbuff->data.begin() + offset + size, std::ostreambuf_iterator(myfile),
+                 [](std::byte b) { return static_cast<char>(b); });
 
   myfile.close();
 }
@@ -660,7 +670,8 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
 
   std::vector<std::byte> data = serialize_to_type(value, type);
 
-  if (!resize && (data.size() + offset) >= binbuff->GetSize() && binbuff->type == buffer_grow) {
+  if ((data.size() + offset) > binbuff->GetSize() && ((!resize && binbuff->type == buffer_grow) ||
+      binbuff->type == buffer_fixed || binbuff->type == buffer_fast)) {
     DEBUG_MESSAGE("buffer_poke: Write would go off end of buffer, aborting", MESSAGE_TYPE::M_ERROR);
     return;
   }
