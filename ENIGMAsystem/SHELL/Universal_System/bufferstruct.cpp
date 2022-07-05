@@ -25,6 +25,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -329,7 +330,27 @@ char to_base64_char(std::uint8_t index) {
   }
 }
 
-std::string base64_encode(std::vector<std::byte>::iterator bytes, std::size_t size) {
+std::uint8_t from_base64_char(char ch) {
+  if ('A' <= ch && ch <= 'Z') {
+    return ch - 'A';
+  } else if ('a' <= ch && ch <= 'z') {
+    return 26 + (ch - 'a');
+  } else if ('0' <= ch && ch <= '9') {
+    return 52 + (ch - '0');
+  } else if (ch == '+') {
+    return 62;
+  } else if (ch == '/') {
+    return 63;
+  } else if (ch == '=') {
+    return 0;
+  } else {
+    DEBUG_MESSAGE("from_base64_char: character '" + std::string{ch} + "' cannot be converted to an index",
+                  MESSAGE_TYPE::M_FATAL_ERROR);
+    return 255;
+  }
+}
+
+std::string internal_buffer_base64_encode(std::vector<std::byte>::iterator bytes, std::size_t size) {
   std::string result{};
 
   std::size_t remainder = size % 3;
@@ -370,6 +391,51 @@ std::string base64_encode(std::vector<std::byte>::iterator bytes, std::size_t si
       result += to_base64_char(second);
       result += to_base64_char(third);
       result += '=';
+    }
+  }
+
+  return result;
+}
+
+std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
+  if (str.length() % 4 != 0) {
+    DEBUG_MESSAGE("internal_buffer_base64_decode: string length not a multiple of 4, padded incorrectly",
+                  MESSAGE_TYPE::M_WARNING);
+  }
+
+  std::vector<std::byte> result{};
+
+  std::size_t remainder = str.length() % 4;
+  std::size_t i = 0;
+  for (; i < str.length() - remainder; i += 4) {
+    std::uint32_t value = from_base64_char(str[i]) << 18 |
+                          from_base64_char(str[i + 1]) << 12 |
+                          from_base64_char(str[i + 2]) << 6 |
+                          from_base64_char(str[i + 3]);
+
+    result.push_back(static_cast<std::byte>(value >> 16));
+    if (str[i + 2] != '=') {
+      result.push_back(static_cast<std::byte>(value >> 8));
+    }
+    if (str[i + 3] != '=') {
+      result.push_back(static_cast<std::byte>(value));
+    }
+  }
+
+  // We have unpadded data :(
+  if (remainder != 0) {
+    if (remainder == 2) {
+      std::uint8_t value = from_base64_char(str[str.length() - 2]) << 2 |
+                           from_base64_char(str[str.length() - 1]) >> 4;
+
+      result.push_back(std::byte{value});
+    } else if (remainder == 3) {
+      std::uint16_t value = from_base64_char(str[str.length() - 3]) << 10 |
+                            from_base64_char(str[str.length() - 2]) << 4 |
+                            from_base64_char(str[str.length() - 1]) >> 2;
+
+      result.push_back(static_cast<std::byte>(value >> 8));
+      result.push_back(static_cast<std::byte>(value & 0b11111111));
     }
   }
 
@@ -780,23 +846,61 @@ string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size) {
 }
 
 buffer_t buffer_base64_decode(string str) {
-//  enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
-//  buffer->type = buffer_grow;
-//  buffer->alignment = 1;
-//  int id = enigma::get_free_buffer();
-//  enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
-  //TODO: Write this function
-//  return id;
+  buffer_t id = make_new_buffer(0, buffer_grow, 1);
+  enigma::BinaryBuffer *buffer = enigma::buffers.get(id).get();
+
+  std::vector<std::byte> decoded = internal_buffer_base64_decode(str);
+  buffer->data.resize(decoded.size() + 1);
+  std::copy(decoded.begin(), decoded.end(), buffer->data.begin());
+
+  return id;
 }
 
 void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
-  //GET_BUFFER_R(binbuff, buffer, -1);
-  //TODO: Write this function
+  GET_BUFFER(binbuff, buffer);
+
+  std::vector<std::byte> decoded = internal_buffer_base64_decode(str);
+
+  switch(binbuff->type) {
+    case buffer_grow: {
+      if (offset + decoded.size() >= binbuff->GetSize()) {
+        binbuff->Resize(offset + decoded.size() + 1);
+      }
+      std::copy(decoded.begin(), decoded.end(), binbuff->data.begin() + offset);
+      break;
+    }
+    case buffer_wrap: {
+      binbuff->Seek(offset);
+      for (auto &byte : decoded) {
+        binbuff->WriteByte(byte);
+      }
+      break;
+    }
+    case buffer_fixed:
+    case buffer_fast: {
+      if (offset >= binbuff->GetSize()) {
+        DEBUG_MESSAGE("buffer_base64_decode_ext: offset greater than fixed/fast buffer size, aborting write",
+                      MESSAGE_TYPE::M_ERROR);
+        return;
+      }
+      std::size_t written = decoded.size();
+      if (offset + decoded.size() >= binbuff->GetSize()) {
+        DEBUG_MESSAGE("buffer_base64_decode_ext: offset (" + std::to_string(offset) + ") + decoded string size (" +
+                      std::to_string(decoded.size()) + ") greater than fixed/fast buffer size (" +
+                      std::to_string(binbuff->GetSize()) + "), truncating data",
+                      MESSAGE_TYPE::M_WARNING);
+        written = std::min(binbuff->GetSize(), decoded.size()) - offset;
+      }
+
+      std::copy(decoded.begin(), decoded.begin() + written, binbuff->data.begin() + offset);
+      break;
+    }
+  }
 }
 
 std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size) {
   GET_BUFFER_R(binbuff, buffer, "");
-  return base64_encode(binbuff->data.begin() + offset, size);
+  return internal_buffer_base64_encode(binbuff->data.begin() + offset, size);
 }
 
 void game_save_buffer(buffer_t buffer) {
