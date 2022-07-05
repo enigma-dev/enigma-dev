@@ -31,8 +31,6 @@
 #include <iostream>
 #include <iterator>
 
-using std::string;
-
 namespace enigma {
 AssetArray<BinaryBufferAsset> buffers{};
 
@@ -320,6 +318,62 @@ void read_from_file(std::ifstream &file, std::vector<std::byte>::iterator bytes,
   // Hide the unsafe code inside a safe abstraction
   // Very easy buffer overflow bug here, caller has to ensure enough space is there
   file.read(reinterpret_cast<char *>(&*bytes), size);
+}
+
+char to_base64_char(std::uint8_t index) {
+  if (index > 63) {
+    DEBUG_MESSAGE("to_base64_char: index (" + std::to_string(index) + ") out of range", MESSAGE_TYPE::M_FATAL_ERROR);
+    return '!';
+  } else {
+    return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"[index];
+  }
+}
+
+std::string base64_encode(std::vector<std::byte>::iterator bytes, std::size_t size) {
+  std::string result{};
+
+  std::size_t remainder = size % 3;
+  std::size_t i = 0;
+  for (; i < size - remainder; i += 3) {
+    std::uint32_t triplet = static_cast<std::uint32_t>(bytes[i]) << 16 |
+                            static_cast<std::uint32_t>(bytes[i + 1]) << 8 |
+                            static_cast<std::uint32_t>(bytes[i + 2]);
+
+    std::uint8_t first  = (triplet & (0b111111 << 18)) >> 18;
+    std::uint8_t second = (triplet & (0b111111 << 12)) >> 12;
+    std::uint8_t third  = (triplet & (0b111111 << 6)) >> 6;
+    std::uint8_t fourth = triplet & 0b111111;
+    result += to_base64_char(first);
+    result += to_base64_char(second);
+    result += to_base64_char(third);
+    result += to_base64_char(fourth);
+  }
+
+  // We have some of a triplet still left
+  if (remainder != 0) {
+    if (remainder == 1) {
+      std::uint8_t singlet = static_cast<std::uint8_t>(bytes[size - 1]);
+      std::uint8_t first  = (singlet & (0b111111 << 2)) >> 2;
+      std::uint8_t second = (singlet & 0b11) << 4;
+
+      result += to_base64_char(first);
+      result += to_base64_char(second);
+      result += "==";
+    } else if (remainder == 2) {
+      std::uint16_t doublet = static_cast<std::uint8_t>(bytes[size - 2]) << 8 |
+                             static_cast<std::uint8_t>(bytes[size - 1]);
+      std::uint8_t first  = (doublet & (0b111111 << 10)) >> 10;
+      std::uint8_t second = (doublet & (0b111111 << 4)) >> 4;
+      std::uint8_t third  = (doublet & 0b11111) << 2;
+
+      result += to_base64_char(first);
+      result += to_base64_char(second);
+      result += to_base64_char(third);
+      result += '=';
+    }
+  }
+
+  return result;
 }
 
 buffer_t make_new_buffer(std::size_t size, buffer_type_t type, std::size_t alignment) {
@@ -740,10 +794,9 @@ void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
   //TODO: Write this function
 }
 
-string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size) {
-  //GET_BUFFER_R(binbuff, buffer, 0);
-  //TODO: Write this function
-  return NULL;
+std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size) {
+  GET_BUFFER_R(binbuff, buffer, "");
+  return base64_encode(binbuff->data.begin() + offset, size);
 }
 
 void game_save_buffer(buffer_t buffer) {
