@@ -6,7 +6,6 @@ for var offset = 0; offset < 10; offset++ {
     buffer_seek(buf, buffer_seek_start, offset);
     buffer_write(buf, buffer_u8, 255);
     gtest_assert_eq(buffer_tell(buf), offset + 1);
-    buffer_save(buf, "buf.bin");
     if ((offset + buffer_sizeof(buffer_u8)) < 8) {
         gtest_assert_eq(buffer_get_size(buf), 8);
     } else {

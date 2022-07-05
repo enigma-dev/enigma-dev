@@ -28,6 +28,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 
 using std::string;
 
@@ -406,7 +407,10 @@ void buffer_save(buffer_t buffer, string filename) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
-  myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
+
+  std::transform(binbuff->data.begin(), binbuff->data.end(), std::ostreambuf_iterator<char>(myfile),
+                 [](std::byte b) { return static_cast<char>(b); });
+  // myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
   myfile.close();
 }
 
@@ -473,6 +477,10 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
 
 void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size) {
   GET_BUFFER(binbuff, buffer);
+
+  // NOTE: There is an incompatibility with GMS here: the game completely hangs if you try to fill a buffer which
+  // doesn't have enough space for @c size bytes. To avoid this issue, I clamp @c size to the buffer end if it is
+  // too large instead of emulating a hang.
 
   std::size_t orig_off = offset;
   while (offset % binbuff->alignment != 0 && offset < binbuff->GetSize()) {
