@@ -41,6 +41,7 @@ void buffer_base64_decode_ext(buffer_t buffer, std::string str, std::size_t offs
 std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size);
 std::string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size);
 std::string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size);
+variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size);
 
 void *buffer_get_address(buffer_t buffer);
 std::size_t buffer_get_size(buffer_t buffer);

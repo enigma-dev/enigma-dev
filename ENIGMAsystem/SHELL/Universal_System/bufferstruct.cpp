@@ -31,6 +31,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <zlib.h>
 
 namespace enigma {
 AssetArray<BinaryBufferAsset> buffers{};
@@ -843,6 +844,39 @@ string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size) {
   //GET_BUFFER_R(binbuff, buffer, 0);
   //TODO: Write this function
   return NULL;
+}
+
+variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
+  GET_BUFFER_R(binbuff, buffer, -1);
+
+  // NOTE: There is an incompatibility with GMS here: because I do not know what
+  // generator polynomial they are using, I have no way of (at least trying to)
+  // exactly replicating how it works in GMS.
+  //
+  // I have approximated it as:
+  // - if offset greater than buffer size, only wrap for buffer_wrap, otherwise
+  //   abort with 0
+  // - if offset + size greater than buffer size, truncate data being hashed
+
+  if (offset > binbuff->GetSize()) {
+    if (binbuff->type == buffer_wrap) {
+      offset = offset % binbuff->GetSize();
+    } else {
+      DEBUG_MESSAGE("buffer_crc32: offset (" + std::to_string(offset) + ") > buffer size (" +
+                    std::to_string(binbuff->GetSize()) + "), aborting",
+                    MESSAGE_TYPE::M_ERROR);
+      return crc32_z(0, nullptr, 0);
+    }
+  }
+
+  if (offset + size >= binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_crc32:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
+                  ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
+                  MESSAGE_TYPE::M_ERROR);
+    size = std::min(binbuff->GetSize(), size) - offset;
+  }
+
+  return crc32_z(0, reinterpret_cast<const unsigned char *>(binbuff->data.data() + offset), size);
 }
 
 buffer_t buffer_base64_decode(string str) {
