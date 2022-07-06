@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2022 Dhruv Chawla
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,7 +22,7 @@
 
 #include "md5.h"
 #include "sha1.h"
-#include "Resources/AssetArray.h" // TODO: start actually using for this resource
+#include "Resources/AssetArray.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -1049,13 +1050,7 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
 }
   
 void *buffer_get_address(buffer_t buffer) {
-  #ifdef DEBUG_MODE
-  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or enigma::buffers[buffer].get() == nullptr) {
-    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
-    return nullptr;
-  }
-  #endif
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer].get();
+  GET_BUFFER_R(binbuff, buffer, nullptr);
   return reinterpret_cast<void *>(binbuff->data.data());
 }
 
@@ -1180,11 +1175,8 @@ std::size_t buffer_tell(buffer_t buffer) {
 variant buffer_peek(buffer_t buffer, std::size_t offset, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
   if (type != buffer_string && type != buffer_text) {
-    //std::size_t dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-    //NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
-    //TODO: Fix floating point precision.
-    variant value = deserialize_from_type(binbuff->data.begin() + offset, binbuff->data.begin() + offset + buffer_sizeof(type), type);
-    return value;
+    return deserialize_from_type(binbuff->data.begin() + offset, binbuff->data.begin() + offset + buffer_sizeof(type),
+                                 type);
   } else {
     std::string data;
     for (std::size_t pos = offset; pos < binbuff->GetSize() && binbuff->data[pos] != std::byte{0};) {

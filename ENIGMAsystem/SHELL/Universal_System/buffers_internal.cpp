@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2022 Dhruv Chawla
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,6 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include "buffers.h"
 #include "buffers_internal.h"
 #include "../libEGMstd.h"
