@@ -33,7 +33,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
   // resources for xml nodes which are not present in tiledEnigmaResourceNameMap are not created
   if(tiledEnigmaResourceNameMap.find(xmlNode.name()) == tiledEnigmaResourceNameMap.end()) {
-    std::cout << "Unsupported resource type: " << xmlNode.name() << std::endl;
+    errStream << "Unsupported resource type: " << xmlNode.name() << std::endl;
     return true;
   }
 
@@ -51,7 +51,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   if(imgNode.empty()) {
     pugi::xml_object_range<pugi::xml_named_node_iterator> tileChildrenItr = xmlNode.children("tile");
 
-    std::cout<<"Adding tile as background"<<std::endl;
+    outStream << "Adding tile as background" << std::endl;
 
     for(pugi::xml_node tileChild : tileChildrenItr) {
       // TODO: Needs improvement: All compatible* individual tiles can be combined into a single tileset, just like in Tiled
@@ -74,7 +74,6 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
     // if single image is holding all the tiles then set use_as_tileset as true
     protoNode->mutable_background()->set_use_as_tileset(true);
   }
-
 
   return true;
 }
