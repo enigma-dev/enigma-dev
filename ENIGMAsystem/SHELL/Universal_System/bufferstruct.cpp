@@ -19,6 +19,8 @@
 #include "buffers.h"
 #include "buffers_internal.h"
 
+#include "md5.h"
+#include "sha1.h"
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
@@ -440,6 +442,111 @@ std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
       result.push_back(static_cast<std::byte>(value >> 8));
       result.push_back(static_cast<std::byte>(value & 0b11111111));
     }
+  }
+
+  return result;
+}
+
+char to_base16_char(std::uint8_t index) {
+  if (index > 15) {
+    DEBUG_MESSAGE("to_base16: index out of range", MESSAGE_TYPE::M_ERROR);
+  }
+  return "0123456789abcdef"[index];
+}
+
+std::string internal_md5(const std::string &str) {
+  MD5_CTX ctx;
+  std::uint8_t digest[16];
+
+  MD5Init(&ctx);
+  MD5Update(&ctx, reinterpret_cast<std::uint8_t *>(const_cast<char *>(str.data())), str.length());
+  MD5Final(digest, &ctx);
+
+  std::string result{};
+  result.reserve(32);
+  for (std::uint8_t value : digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string internal_md5(std::vector<std::byte>::iterator bytes, std::size_t size) {
+  MD5_CTX ctx;
+  std::uint8_t digest[16];
+
+  MD5Init(&ctx);
+  MD5Update(&ctx, reinterpret_cast<std::uint8_t *>(&*bytes), size);
+  MD5Final(digest, &ctx);
+
+  std::string result{};
+  result.reserve(32);
+  for (std::uint8_t value : digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string internal_sha1(const std::string &str) {
+  SHA1Context ctx;
+  std::uint8_t message_digest[20];
+  int err = SHA1Reset(&ctx);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Input(&ctx, reinterpret_cast<const std::uint8_t *>(str.data()), str.length());
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Result(&ctx, message_digest);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  std::string result{};
+  result.reserve(40);
+  for (std::uint8_t value : message_digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string internal_sha1(std::vector<std::byte>::iterator bytes, std::size_t size) {
+  SHA1Context ctx;
+  std::uint8_t message_digest[20];
+  int err = SHA1Reset(&ctx);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Input(&ctx, reinterpret_cast<const std::uint8_t *>(&*bytes), size);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Result(&ctx, message_digest);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  std::string result{};
+  result.reserve(40);
+  for (std::uint8_t value : message_digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
   }
 
   return result;
@@ -1028,15 +1135,43 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
 }
 
 string buffer_md5(buffer_t buffer, std::size_t offset, std::size_t size) {
-  //GET_BUFFER_R(binbuff, buffer, 0);
-  //TODO: Write this function
-  return NULL;
+  GET_BUFFER_R(binbuff, buffer, internal_md5(""));
+
+  if (offset > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_md5: offset (" + std::to_string(offset) + ") > buffer size (" +
+                      std::to_string(binbuff->GetSize()) + "), making empty stream",
+                  MESSAGE_TYPE::M_ERROR);
+    offset = binbuff->GetSize();
+  }
+
+  if (offset + size > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_md5:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
+                      ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
+                  MESSAGE_TYPE::M_ERROR);
+    size = binbuff->GetSize() - offset;
+  }
+
+  return internal_md5(binbuff->data.begin() + offset, size);
 }
 
 string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size) {
-  //GET_BUFFER_R(binbuff, buffer, 0);
-  //TODO: Write this function
-  return NULL;
+  GET_BUFFER_R(binbuff, buffer, internal_sha1(""));
+
+  if (offset > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_sha1: offset (" + std::to_string(offset) + ") > buffer size (" +
+                      std::to_string(binbuff->GetSize()) + "), making empty stream",
+                  MESSAGE_TYPE::M_ERROR);
+    offset = binbuff->GetSize();
+  }
+
+  if (offset + size > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_sha1:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
+                      ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
+                  MESSAGE_TYPE::M_ERROR);
+    size = binbuff->GetSize() - offset;
+  }
+
+  return internal_sha1(binbuff->data.begin() + offset, size);
 }
 
 variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
