@@ -31,7 +31,6 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <zlib.h>
 
@@ -1008,7 +1007,6 @@ void buffer_get_surface(buffer_t buffer, int surface, std::size_t offset) {
   std::uint32_t height = 0;
 
   std::uint8_t *pixels = enigma::graphics_copy_texture_pixels(texture, &width, &height);
-  std::cout << "width: " << width << " height: " << height << '\n';
 
   if (binbuff->GetSize() - offset < width * height * 4) {
     if (binbuff->type == buffer_grow) {
