@@ -60,7 +60,7 @@ private:
         folderNode = resourceFolderRefs[resType];
 
       if(folderNode == NULL) {
-        std::cout << "Folder with name \""<< resType <<"\" not found" << std::endl;
+        errStream << "Folder with name \""<< resType <<"\" not found" << std::endl;
         return false;
       }
 
@@ -73,7 +73,7 @@ private:
         // load tsx xml
         pugi::xml_document tilesetDoc;
         if(!tilesetDoc.load_file(tsxPath.c_str())) {
-          std::cout << "Could not found tsx file with path: " << tsxPath << std::endl;
+          errStream << "Could not found tsx file with path: " << tsxPath << std::endl;
           return false;
         }
 
@@ -83,7 +83,7 @@ private:
         tilesetIdSourcePathMap[tilesetFirstGid] = tilesetSrc;
       }
       else {
-        std::cout << "Fatal error: Tileset source or firstgid is invalid." << std::endl;
+        errStream << "Fatal error: Tileset source or firstgid is invalid." << std::endl;
         return false;
       }
     }
@@ -109,7 +109,7 @@ private:
       folderNode = resourceFolderRefs[resType];
 
     if(folderNode == NULL) {
-      std::cout << "Folder with name \""<< resType <<"\" not found" << std::endl;
+      errStream << "Folder with name \""<< resType <<"\" not found" << std::endl;
       return false;
     }
 
@@ -123,7 +123,7 @@ private:
 
     bool room_tilesOk = LoadObjects(mapNode, resNode);
     if(!room_tilesOk){
-      std::cout << "Something went wrong while loading Room.Tiles" << std::endl;
+      errStream << "Something went wrong while loading Room.Tiles" << std::endl;
       return false;
     }
 
@@ -135,13 +135,19 @@ private:
     pugi::xml_object_range<pugi::xml_named_node_iterator> objectGroups = mapNode.children("objectgroup");
     // iterate over all objectGroups
     for(pugi::xml_node objectGroupChild : objectGroups) {
+      bool hasOpacity = false;
+      pugi::xml_attribute opacityAttr = objectGroupChild.attribute("opacity");
+      if(!opacityAttr.empty())
+        hasOpacity = true;
+
       // iterate over all children, which is most probably objects, create new tiles out of them
       pugi::xml_object_range<pugi::xml_named_node_iterator> objects = objectGroupChild.children("object");
       for(pugi::xml_node objectChild : objects) {
 
         // let's update some not so directly corresponding fields
         unsigned int gid = objectChild.attribute("gid").as_uint();
-        int localId = ConvertGlobalTileIdToLocal(gid);
+        bool hasHorizontalFlip=false, hasVerticalFlip=false;;
+        int localId = ConvertGlobalTileIdToLocal(gid, hasHorizontalFlip, hasVerticalFlip);
 
         // find the tileset which this tile belongs to
         // using lower_bound( O(log(n)) ) to find first equal to or greater matching firstgid of a tileset
@@ -155,20 +161,34 @@ private:
 
           itr--;
           localId = localId - itr->first;
-          std::cout<<"localId: "<<localId<<" and source "<<itr->second<<std::endl;
           fs::path tilesetSourcePath(itr->second);
           std::string backgroundName = tilesetSourcePath.stem().string() + "_" + std::to_string(localId);
+
           tile->set_background_name(backgroundName);
+          tile->set_name(backgroundName+"_"+std::to_string(idx++));
+
+          // convert tiled origin from bottom-left to top-left
+          tile->set_y(tile->y()-tile->height());
+
           tile->set_xoffset(0);
           tile->set_yoffset(0);
-          tile->set_name(backgroundName+"_"+std::to_string(idx++));
           tile->set_depth(0);
-          tile->set_xscale(1);
-          tile->set_yscale(1);
-          tile->set_color(2147483647);
+
+          if(hasHorizontalFlip)
+            tile->set_xscale(-1.0);
+          else
+            tile->set_xscale(1.0);
+
+          if(hasVerticalFlip)
+            tile->set_yscale(-1.0);
+          else
+            tile->set_yscale(1.0);
+
+          if(hasOpacity)
+            tile->set_alpha(opacityAttr.as_double());
         }
         else {
-          std::cout<<"localId: "<<localId<<std::endl;
+          outStream << "localId attribute not present(template are not yet supported) or its value is zero" << std::endl;
         }
       }
     }
@@ -294,7 +314,7 @@ private:
     }
   }
 
-  int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId) {
+  int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId, bool& hasHorizontalFlip, bool& hasVerticalFlip) {
     const unsigned int FLIPPED_HORIZONTALLY_FLAG =  0X80000000; // tile is horizontally flipped or not
     const unsigned int FLIPPED_VERTICALLY_FLAG =    0X40000000; // tile is vertically flipped or not
     const unsigned int FLIPPED_DIAGONALLY_FLAG =    0X20000000; // indicates diogonal flip(bot left <-> top right) of tile in ortho/iso maps or
@@ -303,9 +323,9 @@ private:
 
     unsigned int tileId = globalTileId;
     // uncomment when required
-    /*bool flippedHorizontally = tileId & FLIPPED_HORIZONTALLY_FLAG;
-    bool flippedVertically = tileId & FLIPPED_VERTICALLY_FLAG;
-    bool flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
+    hasHorizontalFlip = tileId & FLIPPED_HORIZONTALLY_FLAG;
+    hasVerticalFlip = tileId & FLIPPED_VERTICALLY_FLAG;
+    /*bool flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
     bool rotatedHex120 = tileId & ROTATED_HEXAGONAL_120_FLAG;*/
 
     tileId &= ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG | ROTATED_HEXAGONAL_120_FLAG);
@@ -331,11 +351,11 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
     return NULL;
   }
 
-  /*std::string str;
+  std::string str;
   google::protobuf::TextFormat::PrintToString(proj->game(), &str);
   std::ofstream out("/home/kash/github/radialgm-stuff/textProtos/test1tmx.txt");
   out<<str<<std::endl;
-  out.close();*/
+  out.close();
 
   std::cout<<"END LOADING TMX"<<std::endl;
   return proj;
