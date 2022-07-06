@@ -48,10 +48,6 @@ std::size_t get_free_buffer() {
   }
   return buffers.size();
 }
-
-std::vector<std::byte> valToBytes(variant value, enigma_user::buffer_data_t type) {
-  return enigma_user::serialize_to_type(value, type);
-}
 }  // namespace enigma
 
 namespace enigma_user {
