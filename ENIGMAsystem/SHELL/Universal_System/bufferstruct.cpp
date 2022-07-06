@@ -32,6 +32,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <zlib.h>
 
 #define ZLIB_CHUNK_SIZE 16384
@@ -721,6 +722,90 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
 
   std::vector<std::byte> data = read_from_file(myfile, std::filesystem::file_size(filename));
   write_to_buffer(binbuff, data, offset);
+
+  myfile.close();
+}
+
+void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len, std::size_t dest_offset) {
+  GET_BUFFER(dstbuff, buffer);
+
+  std::ifstream myfile(filename.c_str());
+  if (!myfile.is_open()) {
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+
+  std::size_t file_size = std::filesystem::file_size(filename.c_str());
+  if (src_offset >= file_size) {
+    DEBUG_MESSAGE("buffer_load_partial: source offset (" + std::to_string(src_offset) + ") greater than file size (" +
+                  std::to_string(file_size) + "), aborting read", MESSAGE_TYPE::M_ERROR);
+    myfile.close();
+    return;
+  }
+
+  if (src_offset + src_len > file_size) {
+    DEBUG_MESSAGE("buffer_load_partial: file size (" + std::to_string(file_size) + ") lesser than source offset (" +
+                  std::to_string(src_offset) + ") + source length (" + std::to_string(src_len) + "), truncating read",
+                  MESSAGE_TYPE::M_WARNING);
+    src_len = file_size - src_offset;
+  }
+
+  if (dest_offset >= dstbuff->GetSize()) {
+    switch (dstbuff->type) {
+      case buffer_grow:
+        dstbuff->data.resize(dest_offset + src_len + 1);
+        break;
+      case buffer_wrap:
+        dest_offset = dest_offset % dstbuff->GetSize();
+        break;
+      case buffer_fixed:
+      case buffer_fast:
+        DEBUG_MESSAGE("buffer_load_partial: destination offset (" + std::to_string(dest_offset) +
+                      ") greater than fixed/fast buffer size (" + std::to_string(dstbuff->GetSize()) +
+                      "), aborting write", MESSAGE_TYPE::M_ERROR);
+        myfile.close();
+        return;
+    }
+  }
+
+  if (dest_offset + src_len > dstbuff->GetSize()) {
+    switch (dstbuff->type) {
+      case buffer_grow:
+        dstbuff->data.resize(dest_offset + src_len + 1);
+        break;
+      case buffer_wrap:
+        break;
+      case buffer_fixed:
+      case buffer_fast:
+        DEBUG_MESSAGE("buffer_load_partial: destination offset (" + std::to_string(dest_offset) +
+                      ") + source length (" + std::to_string(src_len) + ") greater than fixed/fast buffer size (" +
+                      std::to_string(dstbuff->GetSize()) + "), aborting write", MESSAGE_TYPE::M_ERROR);
+        myfile.close();
+        return;
+    }
+  }
+
+  for (std::size_t i = 0; i < src_offset; i++) {
+    myfile.get();
+  }
+
+  std::vector<std::byte> bytes = read_from_file(myfile, src_len);
+
+  switch (dstbuff->type) {
+    case buffer_wrap: {
+      for (std::size_t i = 0; i < bytes.size(); i++) {
+        dstbuff->data[(i + dest_offset) % dstbuff->GetSize()] = bytes[i];
+      }
+      break;
+    }
+
+    case buffer_grow:
+    case buffer_fixed:
+    case buffer_fast: {
+      std::copy(bytes.begin(), bytes.end(), dstbuff->data.begin() + dest_offset);
+      break;
+    }
+  }
 
   myfile.close();
 }

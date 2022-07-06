@@ -35,6 +35,7 @@ void buffer_save(buffer_t buffer, std::string filename);
 void buffer_save_ext(buffer_t buffer, std::string filename, std::size_t offset, std::size_t size);
 buffer_t buffer_load(std::string filename);
 void buffer_load_ext(buffer_t buffer, std::string filename, std::size_t offset);
+void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len, std::size_t dest_offset);
 
 buffer_t buffer_compress(buffer_t buffer, std::size_t offset, std::size_t size);
 buffer_t buffer_decompress(buffer_t buffer);
