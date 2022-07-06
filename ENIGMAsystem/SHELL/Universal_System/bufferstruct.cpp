@@ -33,6 +33,8 @@
 #include <iterator>
 #include <zlib.h>
 
+#define ZLIB_CHUNK_SIZE 16384
+
 namespace enigma {
 AssetArray<BinaryBufferAsset> buffers{};
 
@@ -619,6 +621,197 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
   write_to_buffer(binbuff, data, offset);
 
   myfile.close();
+}
+
+std::string zlib_error_string(int ret) {
+  switch (ret) {
+    case Z_ERRNO:
+      return "Z_ERRORNO: " + std::to_string(ret);
+    case Z_STREAM_ERROR:
+      return "invalid compression level";
+    case Z_DATA_ERROR:
+      return "invalid or incomplete deflate data";
+    case Z_MEM_ERROR:
+      return "out of memory";
+    case Z_VERSION_ERROR:
+      return "zlib version mismatch";
+    default:
+      return "unknown error";
+  }
+}
+
+buffer_t buffer_compress(buffer_t buffer, std::size_t offset, std::size_t size) {
+  GET_BUFFER_R(srcbuff, buffer, -1);
+
+  buffer_t id = make_new_buffer(0, buffer_grow, 1);
+  enigma::BinaryBuffer *dstbuff = enigma::buffers.get(id).get();
+
+  if (offset > srcbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_compress: offset (" + std::to_string(offset) + ") > buffer size (" +
+                  std::to_string(srcbuff->GetSize()) + "), making empty stream",
+                  MESSAGE_TYPE::M_ERROR);
+    offset = srcbuff->GetSize();
+  }
+
+  if (offset + size > srcbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_compress:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
+                  ") >= buffer size (" + std::to_string(srcbuff->GetSize()) + "), truncating",
+                  MESSAGE_TYPE::M_ERROR);
+    size = srcbuff->GetSize() - offset;
+  }
+
+  z_stream stream;
+  std::byte in[ZLIB_CHUNK_SIZE];
+  std::byte out[ZLIB_CHUNK_SIZE];
+
+  stream.zalloc = Z_NULL;
+  stream.zfree = Z_NULL;
+  stream.opaque = Z_NULL;
+  stream.avail_in = 0;
+  stream.next_in = Z_NULL;
+
+  int ret = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+  if (ret != Z_OK) {
+    DEBUG_MESSAGE("buffer_compress: error initializing zlib stream (" + zlib_error_string(ret) + ")",
+                  MESSAGE_TYPE::M_FATAL_ERROR);
+    return -1;
+  }
+
+  int flush{};
+  std::size_t read = 0;
+  do {
+    if (read < size && (size - read) > ZLIB_CHUNK_SIZE) {
+      stream.avail_in = ZLIB_CHUNK_SIZE;
+
+      std::copy_n(srcbuff->data.begin() + offset + read, ZLIB_CHUNK_SIZE, in);
+
+      read += ZLIB_CHUNK_SIZE;
+      flush = Z_NO_FLUSH;
+    } else if (read <= size) {
+      std::size_t remaining = size - read;
+      stream.avail_in = remaining;
+
+      std::copy_n(srcbuff->data.begin() + offset + read, remaining, in);
+
+      read = srcbuff->GetSize();
+      flush = Z_FINISH;
+    }
+
+    stream.next_in = reinterpret_cast<unsigned char *>(in);
+
+    do {
+      stream.avail_out = ZLIB_CHUNK_SIZE;
+      stream.next_out = reinterpret_cast<unsigned char *>(out);
+
+      ret = deflate(&stream, flush);
+      if (ret == Z_STREAM_ERROR) {
+        DEBUG_MESSAGE("buffer_compress: zlib compression error (" + zlib_error_string(ret) + ")",
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
+      std::size_t have = ZLIB_CHUNK_SIZE - stream.avail_out;
+      std::size_t written = dstbuff->GetSize();
+
+      dstbuff->Resize(dstbuff->GetSize() + have);
+      std::copy_n(out, have, dstbuff->data.begin() + written);
+    } while (stream.avail_out == 0);
+
+    if (stream.avail_in != 0) {
+      DEBUG_MESSAGE("buffer_compress: input not consumed fully", MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+  } while (flush != Z_FINISH);
+
+  if (ret != Z_STREAM_END) {
+    DEBUG_MESSAGE("buffer_compress: buffer not compressed fully (" + zlib_error_string(ret) + ")",
+                  MESSAGE_TYPE::M_FATAL_ERROR);
+  }
+
+  (void)deflateEnd(&stream);
+
+  return id;
+}
+
+buffer_t buffer_decompress(buffer_t buffer) {
+  GET_BUFFER_R(srcbuff, buffer, -1);
+
+  buffer_t id = make_new_buffer(0, buffer_grow, 1);
+  enigma::BinaryBuffer *dstbuff = enigma::buffers.get(id).get();
+
+  z_stream stream;
+  std::byte in[ZLIB_CHUNK_SIZE];
+  std::byte out[ZLIB_CHUNK_SIZE];
+
+  stream.zalloc = Z_NULL;
+  stream.zfree = Z_NULL;
+  stream.opaque = Z_NULL;
+  stream.avail_in = 0;
+  stream.next_in = Z_NULL;
+
+  int ret = inflateInit(&stream);
+  if (ret != Z_OK) {
+    DEBUG_MESSAGE("buffer_decompress: error initializing zlib stream (" + zlib_error_string(ret) + ")",
+                  MESSAGE_TYPE::M_FATAL_ERROR);
+    return -1;
+  }
+
+  std::size_t read = 0;
+  do {
+    if (read < srcbuff->GetSize() && (srcbuff->GetSize() - read) > ZLIB_CHUNK_SIZE) {
+      stream.avail_in = ZLIB_CHUNK_SIZE;
+
+      std::copy_n(srcbuff->data.begin() + read, ZLIB_CHUNK_SIZE, in);
+
+      read += ZLIB_CHUNK_SIZE;
+    } else if (read < srcbuff->GetSize()) {
+      std::size_t remaining = srcbuff->GetSize() - read;
+      stream.avail_in = remaining;
+
+      std::copy_n(srcbuff->data.begin() + read, remaining, in);
+
+      read = srcbuff->GetSize();
+    }
+
+    stream.next_in = reinterpret_cast<unsigned char *>(in);
+
+    do {
+      stream.avail_out = ZLIB_CHUNK_SIZE;
+      stream.next_out = reinterpret_cast<unsigned char *>(out);
+
+      ret = inflate(&stream, Z_NO_FLUSH);
+      if (ret == Z_STREAM_ERROR) {
+        DEBUG_MESSAGE("buffer_compress: zlib decompression error (" + zlib_error_string(ret) + ")",
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+
+      switch (ret) {
+        case Z_NEED_DICT:
+          ret = Z_DATA_ERROR;
+        case Z_DATA_ERROR:
+        case Z_MEM_ERROR:
+          DEBUG_MESSAGE("buffer_decompress: zlib decompression error, aborting (" + zlib_error_string(ret) + ")",
+                        MESSAGE_TYPE::M_FATAL_ERROR);
+          (void)inflateEnd(&stream);
+          return -1;
+      }
+
+      std::size_t have = ZLIB_CHUNK_SIZE - stream.avail_out;
+      std::size_t written = dstbuff->GetSize();
+
+      dstbuff->Resize(dstbuff->GetSize() + have);
+      std::copy_n(out, have, dstbuff->data.begin() + written);
+    } while (stream.avail_out == 0);
+  } while (ret != Z_STREAM_END);
+
+  (void)inflateEnd(&stream);
+  dstbuff->Seek(0);
+
+  if (ret == Z_STREAM_END) {
+    return id;
+  } else {
+    DEBUG_MESSAGE("buffer_decompress: zlib decompression error (" + zlib_error_string(ret) + ")",
+                  MESSAGE_TYPE::M_FATAL_ERROR);
+    return -1;
+  }
 }
 
 void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, variant value, std::size_t size) {

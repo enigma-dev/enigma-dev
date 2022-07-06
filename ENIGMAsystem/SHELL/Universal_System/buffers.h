@@ -36,6 +36,9 @@ void buffer_save_ext(buffer_t buffer, std::string filename, std::size_t offset, 
 buffer_t buffer_load(std::string filename);
 void buffer_load_ext(buffer_t buffer, std::string filename, std::size_t offset);
 
+buffer_t buffer_compress(buffer_t buffer, std::size_t offset, std::size_t size);
+buffer_t buffer_decompress(buffer_t buffer);
+
 buffer_t buffer_base64_decode(std::string str);
 void buffer_base64_decode_ext(buffer_t buffer, std::string str, std::size_t offset);
 std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size);
