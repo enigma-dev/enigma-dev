@@ -1,0 +1,65 @@
+const char *str = "Many hands make light work.";
+var check = 0xa8af03b6;
+var buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "";
+check = 0x0;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "a";
+check = 0xe8b7be43;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "abc";
+check = 0x352441c2;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "message digest";
+check = 0x20159d7f;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "abcdefghijklmnopqrstuvwxyz";
+check = 0x4c2750bd;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+check = 0x1fc2e6d2;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+str = "12345678901234567890123456789012345678901234567890123456789012345678901234567890";
+check = 0x7ca94a72;
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_crc32(buf, 0, strlen(str)), check);
+
+buffer_delete(buf);
+
+game_end();
