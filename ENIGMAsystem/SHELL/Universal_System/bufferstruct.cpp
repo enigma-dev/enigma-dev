@@ -990,21 +990,67 @@ buffer_type_t buffer_get_type(buffer_t buffer) {
   return binbuff->type;
 }
 
-void buffer_get_surface(buffer_t buffer, int surface, int mode, std::size_t offset, int modulo) {
-  //GET_BUFFER(binbuff, buffer);
-  //TODO: Write this function
-  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
+void buffer_get_surface(buffer_t buffer, int surface, std::size_t offset) {
+  GET_BUFFER(binbuff, buffer);
+
+  if (binbuff->alignment != 1) {
+    DEBUG_MESSAGE("buffer_get_surface: alignment is not 1, ignoring and using 1 anyways", MESSAGE_TYPE::M_WARNING);
+  }
+
+  if (offset >= binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_get_surface: offset (" + std::to_string(offset) + ") greater than buffer size (" +
+                  std::to_string(binbuff->GetSize()) + "), aborting", MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+
+  int texture = surface_get_texture(surface);
+  std::uint32_t width = 0;
+  std::uint32_t height = 0;
+
+  std::uint8_t *pixels = enigma::graphics_copy_texture_pixels(texture, &width, &height);
+  std::cout << "width: " << width << " height: " << height << '\n';
+
+  if (binbuff->GetSize() - offset < width * height * 4) {
+    if (binbuff->type == buffer_grow) {
+      binbuff->Resize(offset + (width * height * 4));
+    } else {
+      DEBUG_MESSAGE("buffer_get_surface: buffer not big enough; offset (" + std::to_string(offset) + ") + size (" +
+                    std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
+                    std::to_string(height) + ") * 4, aborting", MESSAGE_TYPE::M_ERROR);
+      delete[] pixels;
+      return;
+    }
+  }
+
+  std::transform(pixels, pixels + width * height * 4, binbuff->data.begin() + offset,
+                 [](std::uint8_t value) { return std::byte{value}; });
 }
 
-void buffer_set_surface(buffer_t buffer, int surface, int mode, std::size_t offset, int modulo) {
-  int tex = surface_get_texture(surface);
-  int wid = surface_get_width(surface);
-  int hgt = surface_get_height(surface);
-  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
-    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
-  } else { // execution can not continue safely with wrong buffer size
-    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
+void buffer_set_surface(buffer_t buffer, int surface, std::size_t offset) {
+  GET_BUFFER(binbuff, buffer);
+
+  if (offset >= binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_set_surface: offset (" + std::to_string(offset) + ") greater than buffer size (" +
+                  std::to_string(binbuff->GetSize()) + "), aborting", MESSAGE_TYPE::M_ERROR);
+    return;
   }
+
+  int texture = surface_get_texture(surface);
+  std::uint32_t width = surface_get_width(surface);
+  std::uint32_t height = surface_get_height(surface);
+
+  if (binbuff->GetSize() - offset < width * height * 4) {
+    if (binbuff->type == buffer_grow) {
+      binbuff->Resize(offset + (width * height * 4));
+    } else {
+      DEBUG_MESSAGE("buffer_set_surface: buffer not big enough; offset (" + std::to_string(offset) + ") + size (" +
+                    std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
+                    std::to_string(height) + ") * 4, aborting", MESSAGE_TYPE::M_ERROR);
+      return;
+    }
+  }
+
+  enigma::graphics_push_texture_pixels(texture, width, height, reinterpret_cast<std::uint8_t *>(binbuff->data.data() + offset));
 }
 
 void buffer_resize(buffer_t buffer, std::size_t size) {
