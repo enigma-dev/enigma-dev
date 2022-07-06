@@ -1,0 +1,57 @@
+var buf = buffer_create(8, buffer_grow, 1);
+const char *str = "";
+var md5 = "d41d8cd98f00b204e9800998ecf8427e";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "a";
+md5 = "0cc175b9c0f1b6a831c399e269772661";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "abc";
+md5 = "900150983cd24fb0d6963f7d28e17f72";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "message digest";
+md5 = "f96b697d7cb7938d525a2f31aaf161d0";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "abcdefghijklmnopqrstuvwxyz";
+md5 = "c3fcd3d76192e4007dfb496cca67e13b";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+md5 = "d174ab98d277d9f5a5611c2c9f419d9f";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "12345678901234567890123456789012345678901234567890123456789012345678901234567890";
+md5 = "57edf4a22be3c955ac49da2e2107b67a";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_md5(buf, 0, strlen(str)), md5);
+buffer_delete(buf);
+
+game_end();
