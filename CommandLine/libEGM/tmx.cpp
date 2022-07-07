@@ -46,7 +46,7 @@ private:
   // same as of saying LoadBackgrounds
   bool LoadTilesets(pugi::xml_node& mapNode, std::string resType) {
     pugi::xml_object_range<pugi::xml_named_node_iterator> tilesets = mapNode.children("tileset");
-    for(pugi::xml_node tileset : tilesets) {
+    for(const pugi::xml_node &tileset : tilesets) {
 
       buffers::TreeNode *folderNode;
       if(resourceFolderRefs.find(resType) == resourceFolderRefs.end()) {
@@ -121,9 +121,15 @@ private:
     resNode->mutable_room()->set_width(resNode->room().width() * resNode->room().hsnap());
     resNode->mutable_room()->set_height(resNode->room().height() * resNode->room().vsnap());
 
-    bool room_tilesOk = LoadObjects(mapNode, resNode);
-    if(!room_tilesOk){
-      errStream << "Something went wrong while loading Room.Tiles" << std::endl;
+    bool room_tilesFromObjectsOk = LoadObjects(mapNode, resNode);
+    if(!room_tilesFromObjectsOk) {
+      errStream << "Something went wrong while loading Room.Tiles from Objects" << std::endl;
+      return false;
+    }
+
+    bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode);
+    if(!room_tiledFromLayerDataOk) {
+      errStream << "Something went wrong while laoding Room.Tiles from Layer Data" << std::endl;
       return false;
     }
 
@@ -131,10 +137,10 @@ private:
   }
 
   // same as of saying LoadRoom.Tiles
-  bool LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNode){
+  bool LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNode) {
     pugi::xml_object_range<pugi::xml_named_node_iterator> objectGroups = mapNode.children("objectgroup");
     // iterate over all objectGroups
-    for(pugi::xml_node objectGroupChild : objectGroups) {
+    for(const pugi::xml_node &objectGroupChild : objectGroups) {
       bool hasOpacity = false;
       pugi::xml_attribute opacityAttr = objectGroupChild.attribute("opacity");
       if(!opacityAttr.empty())
@@ -142,7 +148,7 @@ private:
 
       // iterate over all children, which is most probably objects, create new tiles out of them
       pugi::xml_object_range<pugi::xml_named_node_iterator> objects = objectGroupChild.children("object");
-      for(pugi::xml_node objectChild : objects) {
+      for(const pugi::xml_node &objectChild : objects) {
 
         // let's update some not so directly corresponding fields
         unsigned int gid = objectChild.attribute("gid").as_uint();
@@ -196,6 +202,30 @@ private:
     return true;
   }
 
+  // same as of saying LoadRoom.Tiles
+  bool LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *resNode) {
+    pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
+    for(const pugi::xml_node &layer : layers) {
+      const pugi::xml_node &dataNode = layer.child("data");
+      std::string dataStr = dataNode.first_child().value();
+
+      if(dataStr.empty()) {
+        errStream << "Error while loading tiles, Layer Data contains empty string" << std::endl;
+        return false;
+      }
+
+
+      std::cout << dataStr << std::endl;
+    }
+
+    return true;
+  }
+
+  std::vector<unsigned char> Base64Decode(const std::string &encodedData) {
+    int remDataLength = encodedData.size();
+    enigma_user::
+  }
+
   virtual bool for_each(pugi::xml_node &xmlNode){
     return true;
   }
@@ -230,7 +260,7 @@ private:
     errStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
   }
 
-  void PackRes(pugi::xml_node &xmlNode, google::protobuf::Message *m, const std::string& resType) {
+  void PackRes(const pugi::xml_node &xmlNode, google::protobuf::Message *m, const std::string& resType) {
     const google::protobuf::Descriptor *desc = m->GetDescriptor();
     const google::protobuf::Reflection *refl = m->GetReflection();
 

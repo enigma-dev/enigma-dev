@@ -26,8 +26,8 @@ private:
   buffers::TreeNode *backgroundFolderRef;
 
   virtual bool for_each(pugi::xml_node& xmlNode) override;
-  void AddResource(buffers::TreeNode *protoNode, std::string resType, pugi::xml_node &xmlNode);
-  void PackRes(pugi::xml_node &xmlNode, google::protobuf::Message *m, const std::string& resType, std::string fieldPrefix = "");
+  void AddResource(buffers::TreeNode *protoNode, std::string resType, const pugi::xml_node &xmlNode);
+  void PackRes(const pugi::xml_node &xmlNode, google::protobuf::Message *m, const std::string& resType, std::string fieldPrefix = "");
 };
 
 } // namespace egm
