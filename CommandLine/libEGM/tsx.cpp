@@ -53,7 +53,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
     outStream << "Adding tile as background" << std::endl;
 
-    for(pugi::xml_node tileChild : tileChildrenItr) {
+    for(const pugi::xml_node &tileChild : tileChildrenItr) {
       // TODO: Needs improvement: All compatible* individual tiles can be combined into a single tileset, just like in Tiled
 
       buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
@@ -78,7 +78,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   return true;
 }
 
-void TSXTilesetLoader::AddResource(buffers::TreeNode *protoNode, std::string resType, pugi::xml_node &xmlNode) {
+void TSXTilesetLoader::AddResource(buffers::TreeNode *protoNode, std::string resType, const pugi::xml_node &xmlNode) {
   using buffers::TreeNode;
   using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
   using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
@@ -108,7 +108,7 @@ void TSXTilesetLoader::AddResource(buffers::TreeNode *protoNode, std::string res
   errStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
 }
 
-void TSXTilesetLoader::PackRes(pugi::xml_node &xmlNode, google::protobuf::Message *m,
+void TSXTilesetLoader::PackRes(const pugi::xml_node &xmlNode, google::protobuf::Message *m,
                                const std::string& resType, std::string fieldPrefix) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
