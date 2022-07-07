@@ -20,7 +20,7 @@ gtest_assert_eq(buffer_tell(buf), 0);
 
 buffer_poke(buf, 5, buffer_string, str);
 gtest_assert_eq(buffer_peek(buf, 5, buffer_string), str);
-gtest_assert_eq(buffer_tell(buf), 5);
+gtest_assert_eq(buffer_tell(buf), 0);
 
 buffer_delete(buf);
 game_end();

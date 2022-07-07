@@ -1310,7 +1310,7 @@ variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
       DEBUG_MESSAGE("buffer_crc32: offset (" + std::to_string(offset) + ") > buffer size (" +
                     std::to_string(binbuff->GetSize()) + "), aborting",
                     MESSAGE_TYPE::M_ERROR);
-      return crc32_z(0, nullptr, 0);
+      return crc32(0, nullptr, 0);
     }
   }
 
@@ -1321,7 +1321,7 @@ variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
     size = std::min(binbuff->GetSize(), size) - offset;
   }
 
-  return crc32_z(0, reinterpret_cast<const unsigned char *>(binbuff->data.data() + offset), size);
+  return crc32(0, reinterpret_cast<const unsigned char *>(binbuff->data.data() + offset), size);
 }
 
 buffer_t buffer_base64_decode(string str) {
