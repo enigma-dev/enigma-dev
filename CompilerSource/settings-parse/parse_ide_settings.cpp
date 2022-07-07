@@ -142,15 +142,12 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // The number of compile jobs
+  num_make_jobs = "1";
   if (settree.exists("jobs")) {
     const std::string &jobs = settree.get("jobs");
     if (std::all_of(jobs.begin(), jobs.end(), [](char c) { return std::isdigit(c); })) {
       num_make_jobs = settree.get("jobs").toString();
-    } else {
-      num_make_jobs = "1";
     }
-  } else {
-    num_make_jobs = "1";
   }
 
   // Path to enigma sources
