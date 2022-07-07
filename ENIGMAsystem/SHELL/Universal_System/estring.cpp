@@ -71,15 +71,15 @@ static const char ldgrs[256] = {
 namespace enigma_user {
 
 bool is_base64(unsigned char c) {
-  return libbase64_is_base64(c);
+  return ::is_base64(c);
 }
 
 string base64_encode(string const& str) {
-  return libbase64_encode(str);
+  return ::base64_encode(str);
 }
 
 string base64_decode(string const& str) {
-  return libbase64_decode(str);
+  return ::base64_decode(str);
 }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
