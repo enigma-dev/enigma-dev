@@ -1,6 +1,6 @@
-#include <cctype>
-
 #include "libbase64_util.h"
+
+#include <cctype>
 
 static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

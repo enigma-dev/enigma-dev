@@ -17,19 +17,24 @@ TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPat
   root->set_name("/");
   nodes.push_back(root);
   tiledEnigmaResourceNameMap["tileset"] = "background";
+  backgroundNamePtrMapRef = NULL;
 }
 
 // constructor which fills up the background folder of a pre-existing project
 TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
                                    std::vector<buffers::TreeNode *> &existingTreeNode,
-                                   buffers::TreeNode *existingBgFolderRef) : tsxPath(fPath) {
+                                   buffers::TreeNode *existingBgFolderRef,
+                                   const std::string &backgroundName,
+                                   std::unordered_map<std::string, buffers::TreeNode *> *backgroundNamePtrMap) : tsxPath(fPath) {
   nodes = existingTreeNode;
   backgroundFolderRef = existingBgFolderRef;
   tiledEnigmaResourceNameMap["tileset"] = "background";
+  backgroundResName = backgroundName;
+  backgroundNamePtrMapRef = backgroundNamePtrMap;
 }
 
 bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
-  std::string resName = xmlNode.attribute("name").value();
+//  std::string resName = xmlNode.attribute("name").value();
 
   // resources for xml nodes which are not present in tiledEnigmaResourceNameMap are not created
   if(tiledEnigmaResourceNameMap.find(xmlNode.name()) == tiledEnigmaResourceNameMap.end()) {
@@ -58,7 +63,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
       buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
       std::string tileId = tileChild.attribute("id").value();
-      std::string protoNodeName = resName+"_"+tileId;
+      std::string protoNodeName = backgroundResName + "_" + tileId;
       protoNode->set_name(protoNodeName);
       AddResource(protoNode, resType, tileChild);
 
@@ -68,11 +73,12 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   }
   else {
     buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
-    protoNode->set_name(resName);
+    protoNode->set_name(backgroundResName);
     AddResource(protoNode, resType, xmlNode);
 
     // if single image is holding all the tiles then set use_as_tileset as true
     protoNode->mutable_background()->set_use_as_tileset(true);
+    backgroundNamePtrMapRef->insert({backgroundResName, protoNode});
   }
 
   return true;
