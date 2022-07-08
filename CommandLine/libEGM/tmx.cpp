@@ -1,9 +1,14 @@
 #include "tmx.h"
 #include "tsx.h"
+#include "General/zlib_util.h"
+#include "strings_util.h"
+#include "libbase64_util/libbase64_util.h"
 
 #include "pugixml.hpp"
 
 #include <google/protobuf/text_format.h>
+
+#include <cmath>
 
 using CppType = google::protobuf::FieldDescriptor::CppType;
 
@@ -39,7 +44,9 @@ private:
   std::unordered_map<std::string, buffers::TreeNode *> resourceFolderRefs;
   // helps in generating ids for repetable messages present in resources like Room.proto
   std::unordered_map<std::string, int> resourceTypeIdCountMap;
-  std::map<int, std::string> tilesetIdSourcePathMap;
+  std::map<int, std::string> tilesetIdNameMap;
+  // for fast access of backgrounds (based only on tileset) by name
+  std::unordered_map<std::string, buffers::TreeNode *> tilesetBgNamePtrMap;
   // TODO: Remove this hack and use "resource name generator"
   int idx=0;
 
@@ -64,11 +71,11 @@ private:
         return false;
       }
 
-      std::string tilesetSrc = tileset.attribute("source").value();
+      fs::path tilesetSrcPath(tileset.attribute("source").value());
       int tilesetFirstGid = tileset.attribute("firstgid").as_int(-1);
-      if(!tilesetSrc.empty() && tilesetFirstGid != -1) {
+      if(!tilesetSrcPath.empty() && tilesetFirstGid != -1) {
         std::string parentDirPath = tmxPath.parent_path().string()+"/";
-        std::string tsxPath = parentDirPath + tilesetSrc;
+        std::string tsxPath = parentDirPath + tilesetSrcPath.string();
 
         // load tsx xml
         pugi::xml_document tilesetDoc;
@@ -77,10 +84,12 @@ private:
           return false;
         }
 
-        TSXTilesetLoader background_walker(tsxPath, nodes, folderNode);
+        std::string backgroundName = tilesetSrcPath.stem().string();
+        TSXTilesetLoader background_walker(tsxPath, nodes, folderNode, backgroundName, &tilesetBgNamePtrMap);
         tilesetDoc.traverse(background_walker);
 
-        tilesetIdSourcePathMap[tilesetFirstGid] = tilesetSrc;
+        // todo change the name!!!
+        tilesetIdNameMap[tilesetFirstGid] = backgroundName;
       }
       else {
         errStream << "Fatal error: Tileset source or firstgid is invalid." << std::endl;
@@ -127,7 +136,7 @@ private:
       return false;
     }
 
-    bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode);
+    bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, resNode->room().hsnap(), resNode->room().vsnap());
     if(!room_tiledFromLayerDataOk) {
       errStream << "Something went wrong while laoding Room.Tiles from Layer Data" << std::endl;
       return false;
@@ -149,36 +158,130 @@ private:
       // iterate over all children, which is most probably objects, create new tiles out of them
       pugi::xml_object_range<pugi::xml_named_node_iterator> objects = objectGroupChild.children("object");
       for(const pugi::xml_node &objectChild : objects) {
+        unsigned int globalTileId = objectChild.attribute("gid").as_uint();
 
-        // let's update some not so directly corresponding fields
-        unsigned int gid = objectChild.attribute("gid").as_uint();
-        bool hasHorizontalFlip=false, hasVerticalFlip=false;;
-        int localId = ConvertGlobalTileIdToLocal(gid, hasHorizontalFlip, hasVerticalFlip);
+        bool hasHorizontalFlip=false, hasVerticalFlip=false;
+        std::string tilesetName = "";
+        int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
 
-        // find the tileset which this tile belongs to
-        // using lower_bound( O(log(n)) ) to find first equal to or greater matching firstgid of a tileset
-        // then decrementing the iterator by one to get the first tileset with firstgid less than or equal to given
-        // local id of tile
-        std::map<int, std::string>::iterator itr = tilesetIdSourcePathMap.lower_bound(localId);
-        if(itr != tilesetIdSourcePathMap.begin()) {
+        if(localTileId == 0)
+          continue;
+
+        std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
+
+        buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
+
+        // if xmlNode is empty then we are dealing with compressed tiled data case
+        PackRes(objectChild, tile, "tiles/tile");
+
+        tile->set_background_name(backgroundName);
+        tile->set_name(backgroundName+"_"+std::to_string(idx++));
+
+        // convert tiled origin from bottom-left to top-left
+        tile->set_y(tile->y()-tile->height());
+
+        tile->set_xoffset(0);
+        tile->set_yoffset(0);
+        tile->set_depth(0);
+
+        if(hasHorizontalFlip)
+          tile->set_xscale(-1.0);
+        else
+          tile->set_xscale(1.0);
+
+        if(hasVerticalFlip)
+          tile->set_yscale(-1.0);
+        else
+          tile->set_yscale(1.0);
+
+        if(tile && hasOpacity)
+          tile->set_alpha(opacityAttr.as_double());
+      }
+    }
+
+    return true;
+  }
+
+  // same as of saying LoadRoom.Tiles
+  bool LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight) {
+    pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
+    for(const pugi::xml_node &layer : layers) {
+      const pugi::xml_node &dataNode = layer.child("data");
+      std::string dataStr = dataNode.first_child().value();
+
+      dataStr = StrTrim(dataStr);
+
+      if(dataStr.empty()) {
+        errStream << "Error while loading tiles, Layer Data contains empty string" << std::endl;
+        return false;
+      }
+
+      // decode base64 data
+      std::string decodedStr = base64_decode(dataStr);
+
+      // decompress zlib compressed data
+      std::istringstream istr(decodedStr);
+      Decoder decoder(istr);
+      size_t dataSize = decodedStr.size();
+      std::unique_ptr<char[]> layerDataCharPtr = decoder.decompress(dataSize, 0);
+
+      int layerWidth = layer.attribute("width").as_int();
+      int layerHeight = layer.attribute("height").as_int();
+      size_t expectedSize = layerWidth * layerHeight * 4;
+      if(dataSize != expectedSize) {
+        errStream << "I/O error, not able to load complete layer data" << std::endl;
+        return false;
+      }
+
+      unsigned int tileIndex = 0;
+      for (int y=0; y < layerHeight; ++y) {
+        for (int x=0; x < layerWidth; ++x) {
+          unsigned int globalTileId = layerDataCharPtr[tileIndex] |
+                                      layerDataCharPtr[tileIndex + 1] << 8 |
+                                      layerDataCharPtr[tileIndex + 2] << 16 |
+                                      layerDataCharPtr[tileIndex + 3] << 24;
+          tileIndex += 4;
+
+          bool hasHorizontalFlip=false, hasVerticalFlip=false;
+          std::string tilesetName = "";
+          int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
+
+          if(localTileId == 0)
+            continue;
+
+          // std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
+          std::string backgroundName = tilesetName;
+
+          buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
+
+          if(bgPtr == NULL)
+            continue;
 
           buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
-          PackRes(objectChild, tile, "tiles/tile");
 
-          itr--;
-          localId = localId - itr->first;
-          fs::path tilesetSourcePath(itr->second);
-          std::string backgroundName = tilesetSourcePath.stem().string() + "_" + std::to_string(localId);
+          // if xmlNode is empty then we are dealing with compressed tiled data case
+          // PackRes(objectChild, tile, "tiles/tile");
 
           tile->set_background_name(backgroundName);
           tile->set_name(backgroundName+"_"+std::to_string(idx++));
 
           // convert tiled origin from bottom-left to top-left
-          tile->set_y(tile->y()-tile->height());
+          tile->set_x(x*tileWidth);
+          tile->set_y(y*tileHeight);
 
-          tile->set_xoffset(0);
-          tile->set_yoffset(0);
+          tile->set_width(tileWidth);
+          tile->set_height(tileHeight);
+
+          int xOffset = localTileId % bgPtr->columns();
+          xOffset = xOffset * (tileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
+          int yOffset = floor(localTileId / (1.0f * bgPtr->columns()));
+          yOffset = yOffset * (tileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
+
+          tile->set_xoffset(xOffset);
+          tile->set_yoffset(yOffset);
           tile->set_depth(0);
+
+          tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
 
           if(hasHorizontalFlip)
             tile->set_xscale(-1.0);
@@ -189,12 +292,6 @@ private:
             tile->set_yscale(-1.0);
           else
             tile->set_yscale(1.0);
-
-          if(hasOpacity)
-            tile->set_alpha(opacityAttr.as_double());
-        }
-        else {
-          outStream << "localId attribute not present(template are not yet supported) or its value is zero" << std::endl;
         }
       }
     }
@@ -202,28 +299,26 @@ private:
     return true;
   }
 
-  // same as of saying LoadRoom.Tiles
-  bool LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *resNode) {
-    pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
-    for(const pugi::xml_node &layer : layers) {
-      const pugi::xml_node &dataNode = layer.child("data");
-      std::string dataStr = dataNode.first_child().value();
+  int GetLocalTileIdInfo(const unsigned int &globalTileId, bool &hasHorizontalFlip, bool &hasVerticalFlip,
+                         std::string& tilesetName) {
+    int localId = ConvertGlobalTileIdToLocal(globalTileId, hasHorizontalFlip, hasVerticalFlip);
 
-      if(dataStr.empty()) {
-        errStream << "Error while loading tiles, Layer Data contains empty string" << std::endl;
-        return false;
-      }
+    // find the tileset which this tile belongs to
+    // using lower_bound( O(log(n)) ) to find first equal to or greater matching firstgid of a tileset
+    // then decrementing the iterator by one to get the first tileset with firstgid less than or equal to given
+    // local id of tile
+    std::map<int, std::string>::iterator itr = tilesetIdNameMap.lower_bound(localId);
+    if(itr != tilesetIdNameMap.begin()) {
+      itr--;
+      localId = localId - itr->first;
+      tilesetName = itr->second;
 
-
-      std::cout << dataStr << std::endl;
+      return localId;
     }
-
-    return true;
-  }
-
-  std::vector<unsigned char> Base64Decode(const std::string &encodedData) {
-    int remDataLength = encodedData.size();
-    enigma_user::
+    else {
+      outStream << "localId attribute not present(template are not yet supported) or its value is zero" << std::endl;
+      return 0;
+    }
   }
 
   virtual bool for_each(pugi::xml_node &xmlNode){
@@ -282,7 +377,6 @@ private:
       if(field->name() == "id") {
         // not sure what Getextension returns in cases when id_start extension is absent
         int id = opts.GetExtension(buffers::id_start) + resourceTypeIdCountMap[m->GetTypeName()]++;
-        outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
         refl->SetInt32(m, field, id);
       }
       else if(!attr.empty()) {
@@ -347,9 +441,13 @@ private:
   int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId, bool& hasHorizontalFlip, bool& hasVerticalFlip) {
     const unsigned int FLIPPED_HORIZONTALLY_FLAG =  0X80000000; // tile is horizontally flipped or not
     const unsigned int FLIPPED_VERTICALLY_FLAG =    0X40000000; // tile is vertically flipped or not
-    const unsigned int FLIPPED_DIAGONALLY_FLAG =    0X20000000; // indicates diogonal flip(bot left <-> top right) of tile in ortho/iso maps or
+
+    const unsigned int FLIPPED_DIAGONALLY_FLAG =    0X20000000; // indicates diogonal flip (both left <-> top right)
+                                                                // of tile in ortho/iso maps or
                                                                 // 60 deg clock rot in case of hexagonal maps
-    const unsigned int ROTATED_HEXAGONAL_120_FLAG = 0X10000000; // ignored in ortho or iso maps, indicates 120 deg clock rot in hexagonal maps
+
+    const unsigned int ROTATED_HEXAGONAL_120_FLAG = 0X10000000; // ignored in ortho or iso maps, indicates
+                                                                // 120 deg clock rot in hexagonal maps
 
     unsigned int tileId = globalTileId;
     // uncomment when required
