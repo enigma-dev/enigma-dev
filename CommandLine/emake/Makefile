@@ -18,11 +18,11 @@ ifeq ($(UNIX_BASED), true)
 	else ifeq ($(OS), Linux)
 		OS_LIBS += -lprocps
 	else ifeq ($(OS), FreeBSD)
-		OS_LIBS += -lgrpc++ -lpugixml -lyaml-cpp -lprotobuf -lprocstat -lutil -lc
+		OS_LIBS += -lprocstat -lutil -lc
 	else ifeq ($(OS), DragonFly)
-		OS_LIBS += -lgrpc++ -lpugixml -lyaml-cpp -lprotobuf -lkvm -lc
+		OS_LIBS += -lkvm -lc
 	else ifeq ($(OS), OpenBSD)
-		OS_LIBS += -lgrpc++ -lpugixml -lyaml-cpp -lprotobuf -lkvm -lc
+		OS_LIBS += -lkvm -lc
 	endif
 endif
 
