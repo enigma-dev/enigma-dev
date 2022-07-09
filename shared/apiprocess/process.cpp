@@ -794,7 +794,7 @@ namespace ngs::proc {
         }
       }
       pwd = environ_from_proc_id_ex(proc_id, "PWD");
-      if (strlen(pwd)) {
+      if (pwd && *pwd) {
         char exe[PATH_MAX];
         if (realpath((std::string(pwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
           static std::string str; str = exe; 
@@ -936,8 +936,16 @@ namespace ngs::proc {
       }
       procstat_close(proc_stat);
     }
-    #elif defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
-    #if defined(__OpenBSD__)
+    #elif defined(__DragonFly__)
+    const char *pwd = environ_from_proc_id_ex(proc_id, "PWD");
+    if (pwd && *pwd) {
+      char cwd[PATH_MAX];
+      if (realpath(pwd, cwd)) {
+        static std::string str; str = cwd; 
+        *buffer = (char *)str.c_str();
+      }
+    }
+    #elif defined(__OpenBSD__)
     int mib[3]; std::size_t s = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_CWD;
@@ -950,18 +958,12 @@ namespace ngs::proc {
         *buffer = (char *)str2.c_str();
       }
     }
-    #else
+    #elif defined(__NetBSD__)
     int mib[4]; std::size_t s = 0;
     mib[0] = CTL_KERN;
-    #if defined(__NetBSD__)
     mib[1] = KERN_PROC_ARGS;
     mib[2] = proc_id;
     mib[3] = KERN_PROC_CWD;
-    #else
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_CWD;
-    mib[3] = proc_id;
-    #endif
     if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
       std::vector<char> str1; str1.resize(s, '\0');
       char *cwd = str1.data();
@@ -970,7 +972,6 @@ namespace ngs::proc {
         *buffer = (char *)str2.c_str();
       }
     }
-    #endif
     #endif
   }
 
