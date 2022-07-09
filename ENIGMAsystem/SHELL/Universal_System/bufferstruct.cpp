@@ -17,6 +17,7 @@
 **/
 
 #include "Universal_System/buffers_data.h"
+#include "Universal_System/estring.h"
 #include "buffers.h"
 #include "buffers_internal.h"
 
@@ -444,29 +445,10 @@ std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
   return result;
 }
 
-char to_base16_char(std::uint8_t index) {
-  if (index > 15) {
-    DEBUG_MESSAGE("to_base16: index out of range", MESSAGE_TYPE::M_ERROR);
-  }
-  return "0123456789abcdef"[index];
-}
+extern char to_base16_char(std::uint8_t index);
 
 std::string internal_md5(const std::string &str) {
-  MD5_CTX ctx;
-  std::uint8_t digest[16];
-
-  MD5Init(&ctx);
-  MD5Update(&ctx, reinterpret_cast<std::uint8_t *>(const_cast<char *>(str.data())), str.length());
-  MD5Final(digest, &ctx);
-
-  std::string result{};
-  result.reserve(32);
-  for (std::uint8_t value : digest) {
-    result += to_base16_char(value >> 4);
-    result += to_base16_char(value & 0xf);
-  }
-
-  return result;
+  return md5_string_utf8(str);
 }
 
 std::string internal_md5(std::vector<std::byte>::iterator bytes, std::size_t size) {
@@ -488,34 +470,7 @@ std::string internal_md5(std::vector<std::byte>::iterator bytes, std::size_t siz
 }
 
 std::string internal_sha1(const std::string &str) {
-  SHA1Context ctx;
-  std::uint8_t message_digest[20];
-  int err = SHA1Reset(&ctx);
-  if (err != 0) {
-    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
-    return "";
-  }
-
-  err = SHA1Input(&ctx, reinterpret_cast<const std::uint8_t *>(str.data()), str.length());
-  if (err != 0) {
-    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
-    return "";
-  }
-
-  err = SHA1Result(&ctx, message_digest);
-  if (err != 0) {
-    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
-    return "";
-  }
-
-  std::string result{};
-  result.reserve(40);
-  for (std::uint8_t value : message_digest) {
-    result += to_base16_char(value >> 4);
-    result += to_base16_char(value & 0xf);
-  }
-
-  return result;
+  return sha1_string_utf8(str);
 }
 
 std::string internal_sha1(std::vector<std::byte>::iterator bytes, std::size_t size) {

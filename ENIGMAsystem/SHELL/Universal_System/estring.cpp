@@ -391,7 +391,12 @@ var string_split(const std::string &str, const std::string &delim,
 
 #define CHUNK_SIZE 16384
 
-extern char to_base16_char(std::uint8_t index);
+char to_base16_char(std::uint8_t index) {
+  if (index > 15) {
+    DEBUG_MESSAGE("to_base16: index out of range", MESSAGE_TYPE::M_ERROR);
+  }
+  return "0123456789abcdef"[index];
+}
 
 std::string md5_string_utf8(std::string str) {
   MD5_CTX ctx;
