@@ -1255,8 +1255,10 @@ namespace ngs::proc {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
         for (int j = 0; j < (int)equalssplit.size(); j++) {
           std::string str1 = name;
+          #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
           std::transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
+          #endif
           if (j == equalssplit.size() - 1 && equalssplit[0] == str1) {
             if (str1.empty()) { *value = (char *)"\0"; } else {
               static std::string str2; str2 = equalssplit[j];
