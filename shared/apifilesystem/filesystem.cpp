@@ -576,7 +576,7 @@ namespace ngs::fs {
         }
       }
       pwd = getenv("PWD");
-      if (pwd) {
+      if (pwd && *pwd) {
         char buffer[PATH_MAX];
         if (realpath((std::string(pwd) + "/" + arg).c_str(), buffer)) {
           path = buffer; 
