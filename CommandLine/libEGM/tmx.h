@@ -2,7 +2,6 @@
 #define TMX_H
 
 #include "file-format.h"
-//#include "libbase64_util/libbase64_util.h"
 
 namespace egm {
 

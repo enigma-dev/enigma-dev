@@ -24,14 +24,13 @@ public:
 private:
   std::vector<buffers::TreeNode *> nodes;
   fs::path tsxPath;
-  std::unordered_map<std::string, std::string> tiledEnigmaResourceNameMap;
   buffers::TreeNode *backgroundFolderRef;
   std::string backgroundResName;
   std::unordered_map<std::string, buffers::TreeNode *> *backgroundNamePtrMapRef;
+  std::unordered_map<std::string, int> resourceTypeIdCountMap;
 
   virtual bool for_each(pugi::xml_node& xmlNode) override;
-  void AddResource(buffers::TreeNode *protoNode, std::string resType, const pugi::xml_node &xmlNode);
-  void PackRes(const pugi::xml_node &xmlNode, google::protobuf::Message *m, const std::string& resType, std::string fieldPrefix = "");
+  void UpdateImageHelper(const pugi::xml_node &innerImgNode, buffers::TreeNode *protoNode);
 };
 
 } // namespace egm

@@ -22,10 +22,10 @@ message Background {
   optional int32 v_tile = 12 [(gmx) = "VTile"];
   optional int32 texture_group = 13 [(gmx) = "TextureGroups/TextureGroup0"];
   optional bool for3D = 14 [(gmx) = "For3D"];
-  optional uint32 width = 15 [(tmx) = "image/width"];
-  optional uint32 height = 16 [(tmx) = "image/height"];
+  optional uint32 width = 15;// [(tmx) = "image/width"];
+  optional uint32 height = 16;// [(tmx) = "image/height"];
 
-  optional string image = 17 [(gmx) = "data", (file_path) = true, (file_kind) = IMAGE, (tmx) = "image/source"];
+  optional string image = 17 [(gmx) = "data", (file_path) = true, (file_kind) = IMAGE];//, (tmx) = "image/source"];
 
   // additional fields for tmx compatibility
   optional string tsx_source_path = 18 [(tmx) = "source"];
