@@ -560,7 +560,7 @@ void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, 
   if (dstbuff->type == buffer_fixed || dstbuff->type == buffer_fast) {
     if (dest_offset + written_bytes > dstbuff->GetSize()) {
       DEBUG_MESSAGE("buffer_copy: bytes written out of range for fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
-      written_bytes = std::min(dstbuff->GetSize(), written_bytes) - dest_offset;
+      written_bytes = dstbuff->GetSize() - dest_offset;
     }
   }
 
@@ -642,7 +642,7 @@ void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::
     DEBUG_MESSAGE("buffer_save_ext: offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
                   ") greater than buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating to buffer end",
                   MESSAGE_TYPE::M_WARNING);
-    size = std::min(binbuff->GetSize(), size) - offset;
+    size = binbuff->GetSize() - offset;
   }
 
   write_to_file(myfile, binbuff->data.begin() + offset, size);
@@ -1273,7 +1273,7 @@ variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
     DEBUG_MESSAGE("buffer_crc32:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
                   ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
                   MESSAGE_TYPE::M_ERROR);
-    size = std::min(binbuff->GetSize(), size) - offset;
+    size = binbuff->GetSize() - offset;
   }
 
   return crc32(0, reinterpret_cast<const unsigned char *>(binbuff->data.data() + offset), size);
@@ -1323,7 +1323,7 @@ void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
                       std::to_string(decoded.size()) + ") greater than fixed/fast buffer size (" +
                       std::to_string(binbuff->GetSize()) + "), truncating data",
                       MESSAGE_TYPE::M_WARNING);
-        written = std::min(binbuff->GetSize(), decoded.size()) - offset;
+        written = binbuff->GetSize() - offset;
       }
 
       std::copy(decoded.begin(), decoded.begin() + written, binbuff->data.begin() + offset);
