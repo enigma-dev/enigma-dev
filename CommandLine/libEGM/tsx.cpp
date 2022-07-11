@@ -78,7 +78,12 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
 
     // if single image is holding all the tiles then set use_as_tileset as true
     protoNode->mutable_background()->set_use_as_tileset(true);
-    backgroundNamePtrMapRef->insert({backgroundResName, protoNode});
+
+    // we only store the backgrounds based on tilesets. This later on helps in loading Room.tiles from TMX files.
+    // It distinguishes whether a background is based on tileset(if there is an entry present in map)
+    // or not(if no such entry with given background name is in map)
+    if(backgroundNamePtrMapRef != NULL)
+      backgroundNamePtrMapRef->insert({backgroundResName, protoNode});
   }
 
   return true;

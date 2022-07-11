@@ -15,7 +15,7 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 namespace egm {
 namespace {
 
-class TMXMapLoader : public pugi::xml_tree_walker {
+class TMXMapLoader {
 public:
   TMXMapLoader(buffers::TreeNode *root, const fs::path &fPath) : tmxPath(fPath) {
     root->set_name("/");
@@ -164,8 +164,10 @@ private:
         std::string tilesetName = "";
         int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
 
-        if(localTileId == 0)
+        if(localTileId == 0){
+          errStream << "localId attribute not present(templates are not yet supported) or its value is zero" << std::endl;
           continue;
+        }
 
         std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
 
@@ -246,12 +248,9 @@ private:
           std::string tilesetName = "";
           int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
 
-          if(localTileId == 0)
-            continue;
-
-          // std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
           std::string backgroundName = tilesetName;
 
+          // get pointer to the background to be used in setting Room.tile properties
           buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
 
           if(bgPtr == NULL)
@@ -259,29 +258,24 @@ private:
 
           buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
 
-          // if xmlNode is empty then we are dealing with compressed tiled data case
-          // PackRes(objectChild, tile, "tiles/tile");
-
           tile->set_background_name(backgroundName);
           tile->set_name(backgroundName+"_"+std::to_string(idx++));
 
-          // convert tiled origin from bottom-left to top-left
           tile->set_x(x*tileWidth);
           tile->set_y(y*tileHeight);
 
           tile->set_width(tileWidth);
           tile->set_height(tileHeight);
 
-          int xOffset = localTileId % bgPtr->columns();
+          int numColumns = bgPtr->columns();
+          int xOffset = localTileId % numColumns;
           xOffset = xOffset * (tileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
-          int yOffset = floor(localTileId / (1.0f * bgPtr->columns()));
+
+          int yOffset = floor(localTileId / (1.0f * numColumns));
           yOffset = yOffset * (tileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
 
           tile->set_xoffset(xOffset);
           tile->set_yoffset(yOffset);
-          tile->set_depth(0);
-
-          tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
 
           if(hasHorizontalFlip)
             tile->set_xscale(-1.0);
@@ -292,6 +286,10 @@ private:
             tile->set_yscale(-1.0);
           else
             tile->set_yscale(1.0);
+
+          // TODO: Find a good implementation to set depth and id
+          tile->set_depth(0);
+          tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
         }
       }
     }
@@ -304,25 +302,18 @@ private:
     int localId = ConvertGlobalTileIdToLocal(globalTileId, hasHorizontalFlip, hasVerticalFlip);
 
     // find the tileset which this tile belongs to
-    // using lower_bound( O(log(n)) ) to find first equal to or greater matching firstgid of a tileset
-    // then decrementing the iterator by one to get the first tileset with firstgid less than or equal to given
-    // local id of tile
+    // We use lower_bound( O(log(n)) ) to find iterator to first equal to or greater matching firstgid of a tileset,
+    // then decrement the iterator by one to get the first tileset with firstgid less than or equal to given
+    // local id of tile.
+    // The purpose of storing tileset id and name in a map is to reduce search time. Note: Binary search
+    // could also be used with a vector of pairs
     std::map<int, std::string>::iterator itr = tilesetIdNameMap.lower_bound(localId);
-    if(itr != tilesetIdNameMap.begin()) {
+    if(itr != tilesetIdNameMap.begin())
       itr--;
-      localId = localId - itr->first;
-      tilesetName = itr->second;
+    localId = localId - itr->first;
+    tilesetName = itr->second;
 
-      return localId;
-    }
-    else {
-      outStream << "localId attribute not present(template are not yet supported) or its value is zero" << std::endl;
-      return 0;
-    }
-  }
-
-  virtual bool for_each(pugi::xml_node &xmlNode){
-    return true;
+    return localId;
   }
 
   void AddResource(buffers::TreeNode *protoNode, std::string resType, pugi::xml_node &xmlNode) {
@@ -440,6 +431,7 @@ private:
 
   int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId, bool& hasHorizontalFlip, bool& hasVerticalFlip) {
     const unsigned int FLIPPED_HORIZONTALLY_FLAG =  0X80000000; // tile is horizontally flipped or not
+
     const unsigned int FLIPPED_VERTICALLY_FLAG =    0X40000000; // tile is vertically flipped or not
 
     const unsigned int FLIPPED_DIAGONALLY_FLAG =    0X20000000; // indicates diogonal flip (both left <-> top right)
@@ -450,11 +442,12 @@ private:
                                                                 // 120 deg clock rot in hexagonal maps
 
     unsigned int tileId = globalTileId;
-    // uncomment when required
+
     hasHorizontalFlip = tileId & FLIPPED_HORIZONTALLY_FLAG;
     hasVerticalFlip = tileId & FLIPPED_VERTICALLY_FLAG;
-    /*bool flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
-    bool rotatedHex120 = tileId & ROTATED_HEXAGONAL_120_FLAG;*/
+    // TODO: Figure out implementation for flippedDiagonally and rotateHex120
+    // bool flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
+    // bool rotatedHex120 = tileId & ROTATED_HEXAGONAL_120_FLAG;
 
     tileId &= ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG | ROTATED_HEXAGONAL_120_FLAG);
 
