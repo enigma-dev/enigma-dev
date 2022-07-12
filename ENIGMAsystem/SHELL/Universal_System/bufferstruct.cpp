@@ -274,9 +274,17 @@ void write_to_buffer(enigma::BinaryBuffer *binbuff, const std::vector<std::byte>
       }
 
       if (data.size() + offset > binbuff->data.size()) {
-        std::size_t extra = (data.size() + offset) - binbuff->data.size();
-        std::copy(data.begin(), data.end() - extra, binbuff->data.begin() + offset);
-        std::copy(data.end() - extra, data.end(), binbuff->data.begin());
+        if (data.size() > binbuff->data.size()) {
+          // Instead of doing more writes than we need, we can just find out the subset of the bytes that we will be
+          // writing to the buffer
+          std::size_t first = data.size() - binbuff->data.size();
+          std::copy(data.begin() + first, data.end() - offset, binbuff->data.begin() + offset);
+          std::copy(data.end() - offset, data.end(), binbuff->data.begin());
+        } else {
+          std::size_t extra = (data.size() + offset) - binbuff->data.size();
+          std::copy(data.begin(), data.end() - extra, binbuff->data.begin() + offset);
+          std::copy(data.end() - extra, data.end(), binbuff->data.begin());
+        }
       } else {
         std::copy(data.begin(), data.end(), binbuff->data.begin() + offset);
       }
@@ -553,7 +561,7 @@ void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, 
     if (srcbuff->type == buffer_wrap) {
       return size;
     } else {
-      return std::min(srcbuff->GetSize(), size) - src_offset;
+      return std::min(srcbuff->GetSize() - src_offset, size);
     }
   }();
 
@@ -1196,7 +1204,7 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value) {
   std::vector<std::byte> data = serialize_to_type(value, type);
   write_to_buffer(binbuff, data, binbuff->position);
 
-  if (type != buffer_string && type != buffer_string) {
+  if (type != buffer_string && type != buffer_text) {
     binbuff->Seek(binbuff->position + buffer_sizeof(type));
   } else {
     while (binbuff->position < binbuff->GetSize() && binbuff->data[binbuff->position] != std::byte{0}) {

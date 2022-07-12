@@ -58,4 +58,38 @@ for var offset = 0; offset < 8; ++offset {
 }
 
 buffer_delete(buf);
+
+buf = buffer_create(32, buffer_fixed, 1);
+for var i = 0; i < 32; i++ {
+    buffer_write(buf, buffer_u8, i);
+}
+
+buffer_save(buf, "buf.bin");
+var buf2 = buffer_create(8, buffer_wrap, 1);
+buffer_load_ext(buf2, "buf.bin", 2);
+/*
+ * From GMS:
+ * 0: 30
+ * 1: 31
+ * 2: 24
+ * 3: 25
+ * 4: 26
+ * 5: 27
+ * 6: 28
+ * 7: 29
+ */
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 30);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 31);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 24);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 25);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 26);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 27);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 28);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 29);
+
+
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
 game_end();
