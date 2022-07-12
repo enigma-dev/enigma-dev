@@ -9,17 +9,35 @@
 
 namespace enigma::parsing {
 
-
 class AstBuilder {
 
 Lexer *lexer;
 ErrorHandler *herr;
+SyntaxMode mode;
+
 Token token;
+
+template <typename T1, typename T2>
+bool map_contains(const std::unordered_map<T1, T2> &map, const T1 &value) {
+  return map.find(value) != map.end();
+}
+
+template <typename T2, typename T1, typename = std::enable_if_t<std::is_base_of_v<T1, T2>>>
+std::unique_ptr<T2> dynamic_unique_pointer_cast(std::unique_ptr<T1> value) {
+  return std::unique_ptr<T2>(dynamic_cast<T2*>(value.release()));
+}
+
+AstBuilder(SyntaxMode mode): mode{mode} {
+  token = lexer->ReadToken();
+}
+
+AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
+  token = lexer->ReadToken();
+}
 
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
 std::unique_ptr<AST::Node> TryParseOperand() {
-  token = lexer->ReadToken();
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
     case TT_ENDPARENTH: case TT_ENDBRACKET:
@@ -69,13 +87,14 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       Token unary_op = token;
       token = lexer->ReadToken();
       if (auto exp = TryParseExpression(Precedence::kUnaryPrefix))
-        return std::make_unique<AST::UnaryExpression>(std::move(exp), unary_op.type);
+        return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
       herr->Error(unary_op) << "Expected expression following unary operator";
+      break;
     }
 
     case TT_BEGINPARENTH: {
       token = lexer->ReadToken();
-      auto exp = TryParseExpression(Precedence::kMin);
+      auto exp = TryParseExpression(Precedence::kAll);
       if (token.type == TT_ENDPARENTH) {
         token = lexer->ReadToken();
       } else {
@@ -101,9 +120,12 @@ std::unique_ptr<AST::Node> TryParseOperand() {
 
     case TT_IDENTIFIER:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
-    case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
-      return std::make_unique<AST::Literal>(token);
-    
+    case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT: {
+      Token res = token;
+      token = lexer->ReadToken();
+      return std::make_unique<AST::Literal>(std::move(res));
+    }
+
     case TT_SCOPEACCESS:
 
     case TT_TYPE_NAME:
@@ -126,6 +148,13 @@ std::unique_ptr<AST::Node> TryParseOperand() {
   }
 }
 
+static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
+                                   int target_prec) {
+  return target_prec > prec.precedence ||
+            (target_prec == prec.precedence &&
+                prec.associativity == Associativity::RTL);
+}
+
 std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
   if (auto operand = TryParseOperand()) {
     // TODO: Handle binary operators, unary postfix operators
@@ -133,33 +162,155 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
     // XXX: Maybe handle TT_IDENTIFIER here when `operand` names a type
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
-    (void) precedence;
+    while (token.type != TT_ENDOFCODE) {
+      auto find_binop = Precedence::kBinaryPrec.find(token.type);
+      if (find_binop != Precedence::kBinaryPrec.end()) {
+        if (!ShouldAcceptPrecedence(find_binop->second, precedence))
+          break;
+        return TryParseBinaryExpression(precedence, std::move(operand));
+      }
+      if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
+        if (precedence <= Precedence::kUnaryPostfix) break;
+        return TryParseBinaryExpression(precedence, std::move(operand));
+      }
+      if (token.type == TT_BEGINBRACKET) {
+        if (precedence <= Precedence::kUnaryPostfix) break;
+        operand = TryParseSubscriptExpression(precedence, std::move(operand));
+      } else if (token.type == TT_BEGINPARENTH) {
+        operand = TryParseFunctionCallExpression(precedence, std::move(operand));
+      }
+    }
     return operand;
   }
   return nullptr;
 }
 
-/// Reads if()/for()/while()/with()/switch() statements.
-///
-/// Syntax rule: In quirks mode, all binary operators are presumed to
-/// extend a parenthetical expression, EXCLUDING the star operator but
-/// INCLUDING the ampersand operator. The rationale for this is that
-/// `if (expr) *stmt = ...;` is far more likely to appear in code than
-/// `if (expr) &expr...;`, and `if (expr1) & (expr2)` is far more likely
-/// to appear than `if (expr2) * (expr2)`. In quirks mode, use of either
-/// token will result in a warning.
-///
-/// In strict mode, only the first parenthesized expression is taken.
-///
-/// In GML mode, a complete expression is read; unary * and & do not
-/// exist and so are not ambiguous (same for prefix ++ and --).
-template<typename ExpNode>
-std::unique_ptr<ExpNode> ReadConditionalStatement() {
-  
+std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  while (map_contains(Precedence::kBinaryPrec, token.type) &&
+         precedence >= Precedence::kBinaryPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
+    Token oper = token;
+    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
+    token = lexer->ReadToken(); // Consume the operator
+
+    auto right = (rule.associativity == Associativity::LTR)
+        ? TryParseExpression(rule.precedence - 1)
+        : (rule.associativity == Associativity::RTL)
+            ? TryParseExpression(rule.precedence)
+            : nullptr;
+
+    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+  }
+
+  return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
+}
+
+std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  while (Precedence::kUnaryPostfixPrec.find(token.type) != Precedence::kUnaryPostfixPrec.end() &&
+         precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
+    Token oper = token;
+    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
+    token = lexer->ReadToken(); // Consume the operator
+
+    operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
+  }
+
+  return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
+}
+
+std::unique_ptr<AST::TernaryExpression> TryParseTernaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  Token oper = token;
+  token = lexer->ReadToken(); // Consume the operator
+
+  auto middle = TryParseExpression(Precedence::kBoolOr);
+
+  if (token.type != TT_COLON) {
+    herr->Error(token) << "Expected colon after expression in conditional operator";
+  } else {
+    token = lexer->ReadToken();
+  }
+
+  auto right = TryParseExpression(Precedence::kTernary);
+  operand = std::make_unique<AST::TernaryExpression>(std::move(operand), std::move(middle), std::move(right));
+
+  return dynamic_unique_pointer_cast<AST::TernaryExpression>(std::move(operand));
+}
+
+std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  while (token.type == TT_BEGINBRACKET) {
+    Token oper = token;
+    token = lexer->ReadToken(); // Consume the operator
+
+    auto right = TryParseExpression(Precedence::kMin);
+    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+    if (token.type != TT_ENDBRACKET) {
+      herr->Error(token) << "Expected closing bracket (']') at the end of array subscript";
+    } else {
+      token = lexer->ReadToken();
+    }
+  }
+
+  return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
+}
+std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  while (token.type == TT_BEGINPARENTH) {
+    Token oper = token;
+    token = lexer->ReadToken(); // Consume the operator
+
+    std::vector<std::unique_ptr<AST::Node>> arguments{};
+    while (token.type != TT_ENDPARENTH && token.type != TT_ENDOFCODE) {
+      arguments.emplace_back(TryParseExpression(Precedence::kTernary));
+      if (token.type != TT_COMMA && token.type != TT_ENDPARENTH) {
+        herr->Error(token) << "Expected ',' or ')' after function argument";
+      } else if (token.type == TT_COMMA) {
+        token = lexer->ReadToken();
+      }
+    }
+
+    if (token.type != TT_ENDPARENTH) {
+      herr->Error(token) << "Expected ')' after function call";
+    } else {
+      token = lexer->ReadToken();
+    }
+
+    operand = std::make_unique<AST::FunctionCallExpression>(std::move(operand), std::move(arguments));
+  }
+
+  return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
+}
+
+std::unique_ptr<AST::Node> TryParseControlExpression() {
+  switch (mode) {
+    case SyntaxMode::STRICT: {
+      if (token.type == TT_BEGINPARENTH) {
+        token = lexer->ReadToken();
+      } else {
+        herr->Error(token) << "Expected '(' before control expression";
+      }
+      auto expr = TryParseExpression(Precedence::kAll);
+      if (token.type == TT_ENDPARENTH) {
+        token = lexer->ReadToken();
+      } else {
+        herr->Error(token) << "Expected ')' after control expression";
+      }
+      return expr;
+    }
+    case SyntaxMode::QUIRKS: {
+      auto operand = TryParseOperand();
+      if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
+        Token oper = token;
+        token = lexer->ReadToken(); // Consume the token
+        auto right = TryParseControlExpression();
+        operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+      }
+      // TODO: handle [] for array access and () for direct func call
+      return operand;
+    }
+    case SyntaxMode::GML:
+      return TryParseExpression(Precedence::kAll);
+  }
 }
 
 std::unique_ptr<AST::Node> TryReadStatement() {
-  token = lexer->ReadToken();
   switch (token.type) {
     case TTM_WHITESPACE:
     case TTM_CONCAT:
@@ -265,69 +416,137 @@ std::unique_ptr<AST::Node> TryReadStatement() {
 
     case TT_S_TRY: case TT_S_CATCH:
     case TT_S_NEW: case TT_S_DELETE:
-    case TT_CLASS: case TT_STRUCT:
-      herr->ReportError(token, "Internal error: Unsupported C++ keyword");
-      token = lexer->ReadToken();
-      return nullptr;
+
 
     case TT_ENDOFCODE: return nullptr;
-    ;
+      ;
   }
+}
+
+// Parse control flow statement body
+std::unique_ptr<AST::Node> ParseCFStmtBody() {
+  return TryReadStatement();
 }
 
 // TODO: the following.
 std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
 }
-std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression() {
-  
-}
-std::unique_ptr<AST::UnaryExpression> ParseUnaryExpression() {
-  
-}
-std::unique_ptr<AST::TernaryExpression> ParseTernaryExpression() {
-  
-}
+
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
-  
+  token = lexer->ReadToken();
+  auto condition = TryParseControlExpression();
+  if (token.type == TT_S_THEN) {
+    if (mode == SyntaxMode::STRICT) {
+      herr->Warning(token) << "Use of `then` keyword in if statement";
+    }
+    token = lexer->ReadToken();
+  }
+
+  auto true_branch = ParseCFStmtBody();
+
+  if (token.type == TT_S_ELSE) {
+    token = lexer->ReadToken();
+    auto false_branch = ParseCFStmtBody();
+    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
+  } else {
+    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), nullptr);
+  }
 }
+
 std::unique_ptr<AST::ForLoop> ParseForLoop() {
-  
+
 }
+
 std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
-  
+  token = lexer->ReadToken();
+  auto condition = TryParseControlExpression();
+  auto body = ParseCFStmtBody();
+
+  return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::WHILE);
 }
+
 std::unique_ptr<AST::WhileLoop> ParseUntilLoop() {
-  
+  token = lexer->ReadToken();
+  auto condition = TryParseControlExpression();
+  auto body = ParseCFStmtBody();
+
+  return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::UNTIL);
 }
+
 std::unique_ptr<AST::DoLoop> ParseDoLoop() {
-  
+  token = lexer->ReadToken();
+  auto body = ParseCFStmtBody();
+
+  Token kind = token;
+  if (token.type == TT_S_WHILE || token.type == TT_S_UNTIL) {
+    token = lexer->ReadToken();
+  } else {
+    herr->Error(token) << "Expected `while` or `until` after do loop body";
+  }
+
+  auto condition = TryParseControlExpression();
+
+  return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }
-std::unique_ptr<AST::DoLoop> ParseRepeatStatement() {
-  
+
+std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
+  token = lexer->ReadToken();
+  auto condition = TryParseControlExpression();
+  auto body = ParseCFStmtBody();
+
+  return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
 }
+
 std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
-  
+  token = lexer->ReadToken();
+  auto value = TryParseExpression(Precedence::kAll);
+
+  return std::make_unique<AST::ReturnStatement>(std::move(value), false);
 }
+
 std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
-  
+  token = lexer->ReadToken(); // Consume the break
+  if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
+      token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
+    return std::make_unique<AST::BreakStatement>(nullptr);
+  } else {
+    return std::make_unique<AST::BreakStatement>(TryParseOperand());
+  }
 }
-std::unique_ptr<AST::BreakStatement> ParseContinueStatement() {
-  
+
+std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
+  token = lexer->ReadToken(); // Consume the break
+  if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
+      token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
+    return std::make_unique<AST::ContinueStatement>(nullptr);
+  } else {
+    return std::make_unique<AST::ContinueStatement>(TryParseOperand());
+  }
 }
+
 std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {
-  
+  token = lexer->ReadToken();
+  return std::make_unique<AST::ReturnStatement>(nullptr, true);
 }
+
 std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement() {
-  
+
 }
+
 std::unique_ptr<AST::CaseStatement> ParseCaseStatement() {
-  
+
 }
+
 std::unique_ptr<AST::CaseStatement> ParseDefaultStatement() {
-  
+
 }
-std::unique_ptr<AST::CaseStatement> ParseWithStatement() {
-  
+
+std::unique_ptr<AST::WithStatement> ParseWithStatement() {
+  token = lexer->ReadToken();
+  auto object = TryParseControlExpression();
+  auto body = ParseCFStmtBody();
+
+  return std::make_unique<AST::WithStatement>(std::move(object), std::move(body));
 }
 
 };  // class AstBuilder

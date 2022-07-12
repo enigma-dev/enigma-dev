@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_COMPILER_PARSER_PARSER_COMPONENTS_h
+#define ENIGMA_COMPILER_PARSER_PARSER_COMPONENTS_h
+
 typedef size_t pt; //Use size_t as our pos type; this will prevent errors with size_t's like std::string::npos
 
 #include "darray.h"
@@ -42,4 +45,4 @@ int quickscope();
 int initscope(string name);
 int quicktype(unsigned flags, string name);
 
-
+#endif

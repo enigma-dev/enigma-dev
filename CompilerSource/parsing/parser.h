@@ -8,6 +8,10 @@
 
 namespace enigma::parsing {
 
+enum class SyntaxMode {
+  STRICT, QUIRKS, GML
+};
+
 std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr);
 
 } // namespace enigma::parsing

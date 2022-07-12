@@ -41,7 +41,8 @@ class AST {
     ERROR = 0,
     BLOCK = 1,
     BINARY_EXPRESSION,
-    UNARY_EXPRESSION,
+    UNARY_PREFIX_EXPRESSION,
+    UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
@@ -71,9 +72,10 @@ class AST {
     /// cache of the latest computed spelling.
     std::optional<std::string> literal_representation;
 
-    ConstValue(const Token &t);
-    std::string ToCppLiteral() const;
-    std::string ToCppLiteral();
+    // TODO: Make this parse the data correctly
+    ConstValue(const Token &t): value{std::string{t.content}} {}
+    std::string ToCppLiteral() const { return ""; }
+    std::string ToCppLiteral() { return "";}
   };
 
   // Simple block of code, containing zero or more statements.
@@ -90,11 +92,24 @@ class AST {
         left(std::move(left_)), right(std::move(right_)),
         operation(operation_) {}
   };
-  // Unary expressions; generally top-level will be "++varname"
-  struct UnaryExpression : TypedNode<NodeType::UNARY_EXPRESSION> {
+  // Function call expression, foo(bar)
+  struct FunctionCallExpression: TypedNode<NodeType::FUNCTION_CALL> {
+    PNode function;
+    std::vector<PNode> arguments;
+    FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_): function{std::move(function_)}, arguments{std::move(arguments_)} {}
+  };
+  // Unary prefix expressions; generally top-level will be "++varname"
+  struct UnaryPrefixExpression : TypedNode<NodeType::UNARY_PREFIX_EXPRESSION> {
     PNode operand;
     TokenType operation;
-    UnaryExpression(PNode operand_, TokenType operation_):
+    UnaryPrefixExpression(PNode operand_, TokenType operation_):
+        operand(std::move(operand_)), operation(operation_) {}
+  };
+  // Unary postfix expression
+  struct UnaryPostfixExpression: TypedNode<NodeType::UNARY_POSTFIX_EXPRESSION> {
+    PNode operand;
+    TokenType operation;
+    UnaryPostfixExpression(PNode operand_, TokenType operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
   // Ternary expression; the only one is ?:
@@ -102,6 +117,8 @@ class AST {
     PNode condition;
     PNode true_expression;
     PNode false_expression;
+    TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
+      condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
   };
   // No-op tree node that allows true-to-original pretty printing and
   // establishes a formal place for empty (null) nodes in a complete tree.
@@ -119,30 +136,39 @@ class AST {
   };
   struct Literal : TypedNode<NodeType::LITERAL> {
     ConstValue value;
-    Literal(const Token &token);
+    Literal(const Token &token): value{token} {}
   };
   
   struct IfStatement : TypedNode<NodeType::IF> {
     PNode condition;
     PNode true_branch, false_branch;
+
+    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_): condition{std::move(condition_)},
+        true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)} {}
   };
   struct ForLoop : TypedNode<NodeType::FOR> {
     PNode assignment, condition, increment;
     PNode body;
+
+    ForLoop(PNode assignment_, PNode condition_, PNode increment_, PNode body_): assignment{std::move(assignment_)},
+        condition{std::move(condition_)}, increment{std::move(increment_)}, body{std::move(body_)} {}
   };
   struct WhileLoop : TypedNode<NodeType::WHILE> {
     PNode condition;
     PNode body;
-    bool is_until;
 
-    WhileLoop(bool until): is_until(until) {}
+    enum class Kind { WHILE, UNTIL, REPEAT } kind;
+
+    WhileLoop(PNode condition_, PNode body_, Kind kind_): condition{std::move(condition_)},
+        body{std::move(body_)}, kind{kind_} {}
   };
   struct DoLoop : TypedNode<NodeType::DO> {
     PNode body;
     PNode condition;
     bool is_until;
 
-    DoLoop(bool until): is_until(until) {}
+    DoLoop(PNode body_, PNode condition_, bool until): body{std::move(body_)}, condition{std::move(condition_)},
+        is_until(until) {}
   };
   struct CaseStatement : TypedNode<NodeType::CASE> {
     PNode value;
@@ -160,14 +186,27 @@ class AST {
   struct ReturnStatement : TypedNode<NodeType::RETURN> {
     // Optional: the return value. Default: T()
     PNode expression;
+    bool is_exit;
+
+    ReturnStatement(PNode expression_, bool is_exit_): expression{std::move(expression_)}, is_exit{is_exit_} {}
   };
   struct BreakStatement : TypedNode<NodeType::BREAK> {
     // Optional: the number of nested loops to break out of (default = 1)
     PNode count;
+
+    explicit BreakStatement(PNode count_): count{std::move(count_)} {}
   };
   struct ContinueStatement : TypedNode<NodeType::CONTINUE> {
     // Optional: the number of nested loops to continue past (default = 1)
     PNode count;
+
+    explicit ContinueStatement(PNode count_): count{std::move(count_)} {}
+  };
+  struct WithStatement : TypedNode<NodeType::WITH> {
+    PNode object;
+    PNode body;
+
+    WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
   };
 
   // Used to adapt to current single-error syntax checking interface.

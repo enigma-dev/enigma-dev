@@ -18,7 +18,7 @@
 #include "precedence.h"
 
 namespace enigma::parsing {
-      
+
 std::unordered_map<TokenType, OperatorPrecedence> Precedence::kBinaryPrec{
     {TT_SCOPEACCESS,  {Precedence::kScope,          Associativity::LTR}},
     {TT_DOT,          {Precedence::kMemberAccess,   Associativity::LTR}},
@@ -56,6 +56,19 @@ std::unordered_map<TokenType, OperatorPrecedence> Precedence::kBinaryPrec{
     // TODO: TT_ kYield RTL
 };
 
+std::unordered_map<TokenType, OperatorPrecedence> Precedence::kUnaryPostfixPrec {
+    {TT_INCREMENT,    {Precedence::kUnaryPostfix, Associativity::LTR}},
+    {TT_DECREMENT,    {Precedence::kUnaryPostfix, Associativity::LTR}},
+};
+
+std::unordered_map<TokenType, OperatorPrecedence> Precedence::kTernaryPrec {
+    {TT_QMARK, {Precedence::kTernary, Associativity::RTL}},
+};
+
+std::unordered_map<TokenType, OperatorPrecedence> Precedence::kSpecialPrec {
+    {TT_BEGINBRACKET, {Precedence::kSubscript, Associativity::LTR}},
+    {TT_BEGINPARENTH, {Precedence::kFuncCall,  Associativity::LTR}},
+};
 
 std::unordered_set<TokenType> Precedence::kUnaryPrefixOps{
     TT_PLUS, TT_MINUS, TT_STAR, TT_AMPERSAND, TT_TILDE, TT_NOT, TT_BANG,
