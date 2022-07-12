@@ -1342,6 +1342,19 @@ void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
 
 std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_t size) {
   GET_BUFFER_R(binbuff, buffer, "");
+
+  if (offset >= binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_base64_encode: offset beyond end of buffer, aborting", MESSAGE_TYPE::M_ERROR);
+    return base64_encode("");
+  }
+
+  if (offset + size > binbuff->GetSize()) {
+    DEBUG_MESSAGE("buffer_base64_encode: given offset (" + std::to_string(offset) + ") + size (" + std::to_string(size)
+                  + ") greater than buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating encode",
+                  MESSAGE_TYPE::M_WARNING);
+    size = std::min(binbuff->GetSize() - offset, size);
+  }
+
   return internal_buffer_base64_encode(binbuff->data.begin() + offset, size);
 }
 
