@@ -1165,7 +1165,7 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
 
   auto result = buffer_peek(buffer, binbuff->position, type);
 
-  if (type != buffer_string && type != buffer_string) {
+  if (type != buffer_string && type != buffer_text) {
     binbuff->Seek(binbuff->position + buffer_sizeof(type));
   } else {
     while (binbuff->position < binbuff->GetSize() && binbuff->data[binbuff->position] != std::byte{0}) {
@@ -1180,9 +1180,8 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   GET_BUFFER(binbuff, buffer);
 
   // NOTE: there is a GMS incompatibility here; in GMS if the data cannot fit within the current size of the buffer, the
-  // write is simply aborted. Here, if the buffer is not large enough, there are 2 cases handled:
-  // - buffer_grow: Expand the buffer
-  // - buffer_fixed/buffer_fast: Truncate the data being written
+  // write is simply aborted. Here, if the buffer is not large enough, it can be resized if its type is @c buffer_grow and
+  // the value @c true is passed for the @c resize parameter.
 
   std::vector<std::byte> data = serialize_to_type(value, type);
 
