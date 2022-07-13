@@ -96,7 +96,7 @@ namespace enigma
         }
         return 0;
 
-      case WM_SETFOCUS: enigma::platform_focus_gained(); return 0;
+      case WM_SETFOCUS:  enigma::platform_focus_gained(); return 0;
       case WM_KILLFOCUS: enigma::platform_focus_lost(); return 0;
 
       case WM_SIZE:
