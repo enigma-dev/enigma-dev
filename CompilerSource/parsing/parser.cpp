@@ -27,10 +27,6 @@ std::unique_ptr<T2> dynamic_unique_pointer_cast(std::unique_ptr<T1> value) {
   return std::unique_ptr<T2>(dynamic_cast<T2*>(value.release()));
 }
 
-AstBuilder(SyntaxMode mode): mode{mode} {
-  token = lexer->ReadToken();
-}
-
 AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
   token = lexer->ReadToken();
 }
@@ -163,20 +159,28 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence) {
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
     while (token.type != TT_ENDOFCODE) {
-      auto find_binop = Precedence::kBinaryPrec.find(token.type);
-      if (find_binop != Precedence::kBinaryPrec.end()) {
-        if (!ShouldAcceptPrecedence(find_binop->second, precedence))
+      if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
+        if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
           break;
+        }
         return TryParseBinaryExpression(precedence, std::move(operand));
       }
+
       if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
-        if (precedence <= Precedence::kUnaryPostfix) break;
+        if (precedence <= Precedence::kUnaryPostfix) {
+          break;
+        }
         return TryParseBinaryExpression(precedence, std::move(operand));
       }
+
       if (token.type == TT_BEGINBRACKET) {
-        if (precedence <= Precedence::kUnaryPostfix) break;
+        if (precedence <= Precedence::kUnaryPostfix) {
+          break;
+        }
         operand = TryParseSubscriptExpression(precedence, std::move(operand));
-      } else if (token.type == TT_BEGINPARENTH) {
+      }
+
+      if (token.type == TT_BEGINPARENTH) {
         operand = TryParseFunctionCallExpression(precedence, std::move(operand));
       }
     }
