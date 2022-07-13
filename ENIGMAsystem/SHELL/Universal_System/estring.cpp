@@ -34,6 +34,10 @@ using std::string;
 #include "../../../CompilerSource/OS_Switchboard.h"
 #include "../../../shared/libbase64_util/libbase64_util.h"
 
+using ::is_base64;
+using ::base64_encode;
+using ::base64_decode;
+
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
 #define byte __windows_byte_workaround
@@ -71,15 +75,15 @@ static const char ldgrs[256] = {
 namespace enigma_user {
 
 bool is_base64(unsigned char c) {
-  return ::is_base64(c);
+  return is_base64(c);
 }
 
 string base64_encode(string const& str) {
-  return ::base64_encode(str);
+  return base64_encode(str);
 }
 
 string base64_decode(string const& str) {
-  return ::base64_decode(str);
+  return base64_decode(str);
 }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
