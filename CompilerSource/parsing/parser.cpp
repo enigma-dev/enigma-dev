@@ -148,7 +148,7 @@ class AstBuilder {
 
   static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                                      int target_prec) {
-    return target_prec > prec.precedence ||
+    return target_prec >= prec.precedence ||
               (target_prec == prec.precedence &&
                   prec.associativity == Associativity::RTL);
   }
@@ -165,25 +165,28 @@ class AstBuilder {
           if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
             break;
           }
-          return TryParseBinaryExpression(precedence, std::move(operand));
-        }
-
-        if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
-          if (precedence <= Precedence::kUnaryPostfix) {
+          operand = TryParseBinaryExpression(precedence, std::move(operand));
+        } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
+          if (precedence < Precedence::kUnaryPostfix) {
             break;
           }
-          return TryParseBinaryExpression(precedence, std::move(operand));
-        }
-
-        if (token.type == TT_BEGINBRACKET) {
-          if (precedence <= Precedence::kUnaryPostfix) {
+          operand = TryParseBinaryExpression(precedence, std::move(operand));
+        } else if (map_contains(Precedence::kTernaryPrec, token.type)) {
+          if (precedence < Precedence::kTernary) {
+            break;
+          }
+          operand = TryParseTernaryExpression(precedence, std::move(operand));
+        } else if (token.type == TT_BEGINBRACKET) {
+          if (precedence < Precedence::kUnaryPostfix) {
             break;
           }
           operand = TryParseSubscriptExpression(precedence, std::move(operand));
-        }
-
-        if (token.type == TT_BEGINPARENTH) {
+        } else if (token.type == TT_BEGINPARENTH) {
           operand = TryParseFunctionCallExpression(precedence, std::move(operand));
+        } else {
+          // If we reach this point, then the token that we are at is not an operator, otherwise it would have been picked
+          // up by one of the branches, thus we need to break from the loop
+          break;
         }
       }
       return operand;
