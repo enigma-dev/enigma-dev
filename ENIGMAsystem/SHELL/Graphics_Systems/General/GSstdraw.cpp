@@ -22,6 +22,7 @@
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/math_consts.h"
+#include "Platforms/platforms_mandatory.h"
 
 #include <list>
 #include <math.h>
@@ -54,8 +55,8 @@ bool drawevent_enabled = true;
 
 void draw_enable_drawevent(bool enable) {
   if (drawevent_enabled == enable) return;
-  if (enable) EnableDrawing(nullptr);
-  else DisableDrawing(nullptr);
+  if (enable) enigma::EnableDrawing(nullptr);
+  else enigma::DisableDrawing(nullptr);
   drawevent_enabled = enable;
 }
 
