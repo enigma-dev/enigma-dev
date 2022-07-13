@@ -182,6 +182,9 @@ class AstBuilder {
           }
           operand = TryParseSubscriptExpression(precedence, std::move(operand));
         } else if (token.type == TT_BEGINPARENTH) {
+          if (precedence < Precedence::kFuncCall) {
+            break;
+          }
           operand = TryParseFunctionCallExpression(precedence, std::move(operand));
         } else {
           // If we reach this point, then the token that we are at is not an operator, otherwise it would have been picked
