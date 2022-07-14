@@ -27,14 +27,24 @@ class AstBuilder {
     return std::unique_ptr<T2>(dynamic_cast<T2*>(value.release()));
   }
 
-  bool consume_if(TokenType tt, std::string_view message) {
-    if (token.type == tt) {
+  template <typename... Messages>
+  bool require_any_of(std::initializer_list<TokenType> tt, Messages &&...messages) {
+    if (std::any_of(tt.begin(), tt.end(), [this](TokenType tt) { return token.type == tt; })) {
       token = lexer->ReadToken();
       return true;
     } else {
-      herr->Error(token) << message;
+      if constexpr (sizeof...(messages) > 0) {
+        (herr->Error(token) << ... << messages);
+      } else {
+        herr->Error(token) << "Unexpected token: `" << token.ToString() << '`';
+      }
       return false;
     }
+  }
+
+  template <typename ... Messages>
+  bool require_token(TokenType tt, Messages &&...messages) {
+    return require_any_of({tt}, std::forward<Messages>(messages)...);
   }
 
  public:
@@ -94,8 +104,10 @@ class AstBuilder {
       case TT_INCREMENT: case TT_DECREMENT: {
         Token unary_op = token;
         token = lexer->ReadToken();
-        if (auto exp = TryParseExpression(Precedence::kUnaryPrefix))
+
+        if (auto exp = TryParseExpression(Precedence::kUnaryPrefix)) {
           return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
+        }
         herr->Error(unary_op) << "Expected expression following unary operator";
         break;
       }
@@ -103,26 +115,21 @@ class AstBuilder {
       case TT_BEGINPARENTH: {
         token = lexer->ReadToken();
         auto exp = TryParseExpression(Precedence::kAll);
-        if (token.type == TT_ENDPARENTH) {
-          token = lexer->ReadToken();
-        } else {
-          herr->Error(token) << "Expected closing parenthesis before " << token;
-        }
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis before", token);
+
         return std::make_unique<AST::Parenthetical>(std::move(exp));
       }
       case TT_BEGINBRACKET: {
         token = lexer->ReadToken();
         std::vector<std::unique_ptr<AST::Node>> elements;
+
         while (std::unique_ptr<AST::Node> element = TryParseExpression(Precedence::kComma)) {
           elements.push_back(std::move(element));
           if (token.type != TT_COMMA) break;
           token = lexer->ReadToken();
         }
-        if (token.type == TT_ENDBRACKET) {
-          token = lexer->ReadToken();
-        } else {
-          herr->Error(token) << "Expected closing `]` for array";
-        }
+
+        require_token(TT_ENDBRACKET, "Expected closing `]` for array");
         return std::make_unique<AST::Array>(std::move(elements));
       }
 
@@ -137,45 +144,53 @@ class AstBuilder {
       case TT_SIZEOF: {
         auto oper = token;
         token = lexer->ReadToken();
+
         if (token.type == TT_BEGINPARENTH) {
           // TODO: Implement sizeof type
         } else if (token.type == TT_ELLIPSES) {
           token = lexer->ReadToken();
-          consume_if(TT_BEGINPARENTH, "Expected opening '(' after 'sizeof ...'");
+          require_token(TT_BEGINPARENTH, "Expected opening '(' after 'sizeof ...'");
           auto arg = token;
-          consume_if(TT_IDENTIFIER, "Expected identifier as argument to variadic sizeof");
-          consume_if(TT_ENDPARENTH, "Expected closing ')' after variadic sizeof");
-          return std::make_unique<AST::UnaryPrefixExpression>(std::make_unique<AST::Literal>(arg), TT_VAR_SIZEOF);
+          if (require_token(TT_IDENTIFIER, "Expected identifier as argument to variadic sizeof")) {
+            require_token(TT_ENDPARENTH, "Expected closing ')' after variadic sizeof");
+            return std::make_unique<AST::UnaryPrefixExpression>(std::make_unique<AST::Literal>(arg), TT_VAR_SIZEOF);
+          } else {
+            return nullptr;
+          }
         } else {
           auto operand = TryParseExpression(Precedence::kUnaryPrefix);
           return std::make_unique<AST::UnaryPrefixExpression>(std::move(operand), oper.type);
         }
       }
+
       case TT_ALIGNOF: {
-        if (consume_if(TT_BEGINPARENTH, "Expected opening '(' after 'alignof'")) {
+        if (require_token(TT_BEGINPARENTH, "Expected opening '(' after 'alignof'")) {
           // TODO: Implement alignof type
         } else {
           return nullptr;
         }
       }
+
       case TT_CO_AWAIT: {
         auto oper = token;
         token = lexer->ReadToken();
         auto expr = TryParseExpression(Precedence::kUnaryPrefix);
         return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
       }
+
       case TT_NOEXCEPT: {
         auto oper = token;
         token = lexer->ReadToken();
-        if (consume_if(TT_BEGINPARENTH, "Expected opening '(' after noexcept")) {
+        if (require_token(TT_BEGINPARENTH, "Expected opening '(' after noexcept")) {
           token = lexer->ReadToken();
           auto expr = TryParseExpression(Precedence::kAll);
-          consume_if(TT_ENDPARENTH, "Expected closing ')' after noexcept expression");
+          require_token(TT_ENDPARENTH, "Expected closing ')' after noexcept expression");
           return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
         } else {
           return nullptr;
         }
       }
+
       case TT_DYNAMIC_CAST:
       case TT_STATIC_CAST:
       case TT_REINTERPRET_CAST:
@@ -295,11 +310,7 @@ class AstBuilder {
 
     auto middle = TryParseExpression(Precedence::kBoolOr);
 
-    if (token.type != TT_COLON) {
-      herr->Error(token) << "Expected colon after expression in conditional operator";
-    } else {
-      token = lexer->ReadToken();
-    }
+    require_token(TT_COLON, "Expected colon (':') after expression in conditional operator");
 
     auto right = TryParseExpression(Precedence::kTernary);
     operand = std::make_unique<AST::TernaryExpression>(std::move(operand), std::move(middle), std::move(right));
@@ -314,11 +325,8 @@ class AstBuilder {
 
       auto right = TryParseExpression(Precedence::kMin);
       operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
-      if (token.type != TT_ENDBRACKET) {
-        herr->Error(token) << "Expected closing bracket (']') at the end of array subscript";
-      } else {
-        token = lexer->ReadToken();
-      }
+
+      require_token(TT_ENDBRACKET, "Expected closing bracket (']') at the end of array subscript");
     }
 
     return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
@@ -338,12 +346,7 @@ class AstBuilder {
         }
       }
 
-      if (token.type != TT_ENDPARENTH) {
-        herr->Error(token) << "Expected ')' after function call";
-      } else {
-        token = lexer->ReadToken();
-      }
-
+      require_token(TT_ENDPARENTH, "Expected ')' after function call");
       operand = std::make_unique<AST::FunctionCallExpression>(std::move(operand), std::move(arguments));
     }
 
@@ -353,17 +356,9 @@ class AstBuilder {
   std::unique_ptr<AST::Node> TryParseControlExpression() {
     switch (mode) {
       case SyntaxMode::STRICT: {
-        if (token.type == TT_BEGINPARENTH) {
-          token = lexer->ReadToken();
-        } else {
-          herr->Error(token) << "Expected '(' before control expression";
-        }
+        require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
         auto expr = TryParseExpression(Precedence::kAll);
-        if (token.type == TT_ENDPARENTH) {
-          token = lexer->ReadToken();
-        } else {
-          herr->Error(token) << "Expected ')' after control expression";
-        }
+        require_token(TT_ENDPARENTH, "Expected ')' after control expression");
         return expr;
       }
       case SyntaxMode::QUIRKS: {
@@ -438,9 +433,7 @@ class AstBuilder {
 
       case TT_BEGINBRACE: {
         auto code = ParseCodeBlock();
-        if (token.type != TT_ENDBRACE) {
-          herr->ReportError(token, "Expected closing brace");
-        }
+        require_token(TT_ENDBRACE, "Expected closing brace ('}') after code block");
         return code;
       }
 
@@ -550,11 +543,7 @@ class AstBuilder {
     auto body = ParseCFStmtBody();
 
     Token kind = token;
-    if (token.type == TT_S_WHILE || token.type == TT_S_UNTIL) {
-      token = lexer->ReadToken();
-    } else {
-      herr->Error(token) << "Expected `while` or `until` after do loop body";
-    }
+    require_any_of({TT_S_WHILE, TT_S_UNTIL}, "Expected `while` or `until` after do loop body");
 
     auto condition = TryParseControlExpression();
 
