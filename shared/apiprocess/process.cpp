@@ -1248,6 +1248,7 @@ namespace ngs::proc {
   }
 
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value) {
+    if (proc_id == proc_id_from_self()) { *value = (char *)environment_get_variable(name); return; }
     char **buffer = nullptr; int size = 0; *value = (char *)"\0";
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
@@ -1263,6 +1264,7 @@ namespace ngs::proc {
             if (str1.empty()) { *value = (char *)"\0"; } else {
               static std::string str2; str2 = equalssplit[j];
               *value = (char *)str2.c_str();
+              break;
             }
           }
         }
@@ -1279,6 +1281,7 @@ namespace ngs::proc {
   }
 
   bool environ_from_proc_id_ex_exists(PROCID proc_id, const char *name) {
+    if (proc_id == proc_id_from_self()) return environment_get_variable_exists(name);
     char **buffer = nullptr; int size = 0; bool result = false;
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
@@ -1287,10 +1290,13 @@ namespace ngs::proc {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
         if (!equalssplit.empty()) {
           std::string str = name;
+          #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
           std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+          #endif
           if (equalssplit[0] == str) {
             result = true;
+            break;
           }
         }
       }
@@ -1302,9 +1308,17 @@ namespace ngs::proc {
   const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
-    char *value = (char *)"\0";
-    environ_from_proc_id_ex(proc_id_from_self(), name, &value);
-    str = value;
+    std::size_t sz = 0;
+    std::wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
+    if (buf) {
+      _wgetenv_s(&sz, buf, sz, wname.c_str());
+      str = narrow(buf);
+      free(buf);
+    } else {
+      str = "\0";
+    }
     #else
     char *value = getenv(name);
     str = value ? value : "\0";
@@ -1314,7 +1328,10 @@ namespace ngs::proc {
 
   bool environment_get_variable_exists(const char *name) {
     #if defined(_WIN32)
-    return environ_from_proc_id_ex_exists(proc_id_from_self(), name);
+    std::size_t sz = 0;
+    std::wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    return (sz != 0);
     #else
     char *value = getenv(name);
     return (value != nullptr);
