@@ -42,7 +42,7 @@ void WindowResized() {
   enigma_user::draw_clear(enigma_user::window_get_color());
 }
 
-static enableDC = false;
+static bool enableDC = false;
 
 void EnableDrawing(void*)
 {
