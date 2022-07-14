@@ -80,6 +80,7 @@ static TokenTrie token_lookup {
   { "/",   TT_SLASH        },
   { "/=",  TT_ASSOP        },
   { ".",   TT_DOT          },
+  { "...", TT_ELLIPSES     },
   { "->",  TT_ARROW        },
   { ".*",  TT_DOT_STAR     },
   { "->*", TT_ARROW_STAR   },
@@ -112,9 +113,11 @@ static TokenTrie token_lookup {
 };
 
 static std::map<std::string, TokenType, std::less<>> keyword_lookup {
+  { "alignof",  TT_ALIGNOF   },
   { "break",    TT_BREAK     },
   { "case",     TT_S_CASE    },
   { "catch",    TT_S_CATCH   },
+  { "co_await", TT_CO_AWAIT  },
   { "continue", TT_CONTINUE  },
   { "default",  TT_S_DEFAULT },
   { "do",       TT_S_DO      },
@@ -122,8 +125,10 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "exit",     TT_EXIT      },
   { "for",      TT_S_FOR     },
   { "if",       TT_S_IF      },
+  { "noexcept", TT_NOEXCEPT  },
   { "return",   TT_RETURN    },
   { "repeat",   TT_S_REPEAT  },
+  { "sizeof",   TT_SIZEOF    },
   { "switch",   TT_S_SWITCH  },
   { "try",      TT_S_TRY     },
   { "until",    TT_S_UNTIL   },
@@ -136,6 +141,11 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "not", TT_NOT },
   { "or",  TT_OR  },
   { "xor", TT_XOR },
+
+  { "dynamic_cast", TT_DYNAMIC_CAST },
+  { "static_cast", TT_STATIC_CAST },
+  { "reinterpret_cast", TT_REINTERPRET_CAST },
+  { "const_cast", TT_CONST_CAST },
 };
 
 #define PURE_VIRTUAL(t, x) t x final { \

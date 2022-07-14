@@ -27,6 +27,16 @@ class AstBuilder {
     return std::unique_ptr<T2>(dynamic_cast<T2*>(value.release()));
   }
 
+  bool consume_if(TokenType tt, std::string_view message) {
+    if (token.type == tt) {
+      token = lexer->ReadToken();
+      return true;
+    } else {
+      herr->Error(token) << message;
+      return false;
+    }
+  }
+
  public:
 
   AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
@@ -124,7 +134,57 @@ class AstBuilder {
         return std::make_unique<AST::Literal>(std::move(res));
       }
 
+      case TT_SIZEOF: {
+        auto oper = token;
+        token = lexer->ReadToken();
+        if (token.type == TT_BEGINPARENTH) {
+          // TODO: Implement sizeof type
+        } else if (token.type == TT_ELLIPSES) {
+          token = lexer->ReadToken();
+          consume_if(TT_BEGINPARENTH, "Expected opening '(' after 'sizeof ...'");
+          auto arg = token;
+          consume_if(TT_IDENTIFIER, "Expected identifier as argument to variadic sizeof");
+          consume_if(TT_ENDPARENTH, "Expected closing ')' after variadic sizeof");
+          return std::make_unique<AST::UnaryPrefixExpression>(std::make_unique<AST::Literal>(arg), TT_VAR_SIZEOF);
+        } else {
+          auto operand = TryParseExpression(Precedence::kUnaryPrefix);
+          return std::make_unique<AST::UnaryPrefixExpression>(std::move(operand), oper.type);
+        }
+      }
+      case TT_ALIGNOF: {
+        if (consume_if(TT_BEGINPARENTH, "Expected opening '(' after 'alignof'")) {
+          // TODO: Implement alignof type
+        } else {
+          return nullptr;
+        }
+      }
+      case TT_CO_AWAIT: {
+        auto oper = token;
+        token = lexer->ReadToken();
+        auto expr = TryParseExpression(Precedence::kUnaryPrefix);
+        return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
+      }
+      case TT_NOEXCEPT: {
+        auto oper = token;
+        token = lexer->ReadToken();
+        if (consume_if(TT_BEGINPARENTH, "Expected opening '(' after noexcept")) {
+          token = lexer->ReadToken();
+          auto expr = TryParseExpression(Precedence::kAll);
+          consume_if(TT_ENDPARENTH, "Expected closing ')' after noexcept expression");
+          return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
+        } else {
+          return nullptr;
+        }
+      }
+      case TT_DYNAMIC_CAST:
+      case TT_STATIC_CAST:
+      case TT_REINTERPRET_CAST:
+      case TT_CONST_CAST:
+        // TODO: Implement casts
+        return nullptr;
+
       case TT_SCOPEACCESS:
+
 
       case TT_TYPE_NAME:
 

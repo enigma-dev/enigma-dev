@@ -39,6 +39,7 @@ enum TokenType {
   TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>= &= ^= |=
   TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
   TT_DOT,             // A dot ('.'). Is neither preceeded nor followed by a numeral.
+  TT_ELLIPSES,        // Three dots in a row ('...')
   TT_ARROW,           // The -> operator.
   TT_DOT_STAR,        // The .* operator (pointer-to-member).
   TT_ARROW_STAR,      // The ->* operator (pointer-to-pointer-member).
@@ -90,6 +91,15 @@ enum TokenType {
   TT_EXIT,            // Legacy `exit` keyword (return void)
   TT_BREAK,           // The `break` keyword
   TT_CONTINUE,        // The `continue` keyword
+  TT_CO_AWAIT,        // co_await
+  TT_NOEXCEPT,        // noexcept
+  TT_ALIGNOF,         // alignof
+  TT_SIZEOF,          // sizeof
+  TT_VAR_SIZEOF,      // sizeof... (this token can't actually exist, it is just used to disambiguate sizeof and sizeof...)
+  TT_STATIC_CAST,     // static_cast
+  TT_DYNAMIC_CAST,    // dynamic_cast
+  TT_REINTERPRET_CAST,// reinterpret_cast
+  TT_CONST_CAST,      // const_cast
   TT_S_SWITCH,        // switch
   TT_S_REPEAT,        // repeat
   TT_S_CASE,          // case
