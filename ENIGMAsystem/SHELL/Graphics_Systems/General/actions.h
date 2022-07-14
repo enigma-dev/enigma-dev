@@ -285,9 +285,4 @@ inline void set_automatic_draw(bool enable)
     automatic_redraw = enable;
 }
 
-inline void draw_enable_drawevent(bool enable)
-{
-    automatic_redraw = enable;
-}
-
 }

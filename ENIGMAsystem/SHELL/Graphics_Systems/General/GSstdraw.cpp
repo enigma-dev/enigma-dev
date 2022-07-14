@@ -51,13 +51,9 @@ bool draw_get_state_dirty() { return drawStateDirty; }
 
 namespace enigma_user {
 
-bool drawevent_enabled = true;	
-
 void draw_enable_drawevent(bool enable) {
-  if (drawevent_enabled == enable) return;
   if (enable) enigma::EnableDrawing(nullptr);
   else enigma::DisableDrawing(nullptr);
-  drawevent_enabled = enable;
 }
 
 void draw_state_flush() {
