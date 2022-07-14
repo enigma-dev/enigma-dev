@@ -723,10 +723,14 @@ namespace ngs::fs {
   string environment_get_variable(string name) {
     #if defined(_WIN32)
     string value;
-    wchar_t buffer[32767];
-    wstring u8name = widen(name);
-    if (GetEnvironmentVariableW(u8name.c_str(), buffer, 32767) != 0) {
-      value = narrow(buffer);
+    std::size_t sz = 0;
+    wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
+    if (buf) {
+      _wgetenv_s(&sz, buf, sz, wname.c_str());
+      value = narrow(buf);
+      free(buf);
     }
     return value;
     #else
@@ -737,11 +741,10 @@ namespace ngs::fs {
 
   bool environment_get_variable_exists(string name) {
     #if defined(_WIN32)
-    string value;
-    wchar_t buffer[32767];
-    wstring u8name = widen(name);
-    GetEnvironmentVariableW(u8name.c_str(), buffer, 32767);
-    return (GetLastError() != ERROR_ENVVAR_NOT_FOUND);
+    std::size_t sz = 0;
+    wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    return (sz != 0);
     #else
     return (getenv(name.c_str()) != nullptr);
     #endif
