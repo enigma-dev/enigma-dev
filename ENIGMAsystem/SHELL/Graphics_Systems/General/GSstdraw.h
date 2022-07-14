@@ -46,6 +46,7 @@ namespace enigma_user
     rs_solid  // Normal render mode
   };
 
+  void draw_enable_drawevent(bool enable);
   void draw_state_flush();
   void draw_set_fill_mode(int fill);
   void draw_set_line_width(float value);
