@@ -1834,9 +1834,9 @@ namespace ngs::proc {
     std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
     opt_thread.join();
     #else
-    wchar_t cwstr_command[32767];
     std::wstring wstr_command = widen(command); bool proceed = true;
-    wcsncpy_s(cwstr_command, 32767, wstr_command.c_str(), 32767);
+    wchar_t *cwstr_command = new wchar_t[wstr_command.length() + 1]();
+    wcsncpy_s(cwstr_command, wstr_command.length() + 1, wstr_command.c_str(), wstr_command.length() + 1);
     HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
     HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
     SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
@@ -1852,7 +1852,9 @@ namespace ngs::proc {
     si.hStdOutput = stdout_write;
     si.hStdInput = stdin_read;
     PROCESS_INFORMATION pi = { 0 }; LOCALPROCID proc_index = 0;
-    if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+    BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+    delete[] cwstr_command;
+    if (success) {
       CloseHandle(stdout_write);
       CloseHandle(stdin_read);
       PROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = (LOCALPROCID)proc_id;
