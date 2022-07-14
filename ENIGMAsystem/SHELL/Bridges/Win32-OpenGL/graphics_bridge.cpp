@@ -57,7 +57,7 @@ void EnableDrawing(void*)
   PIXELFORMATDESCRIPTOR pfd;
   int iFormat;
 
-  enigma::window_hDC = GetDCEx(hWnd, nullptr, DCX_CLIPCHILDREN | DCX_CLIPSIBLINGS);
+  enigma::window_hDC = GetDC(hWnd);
   ZeroMemory (&pfd, sizeof (pfd));
   pfd.nSize = sizeof (pfd);
   pfd.nVersion = 1;
