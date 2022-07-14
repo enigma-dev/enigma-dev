@@ -24,6 +24,8 @@
 #include "Universal_System/math_consts.h"
 #include "Platforms/platforms_mandatory.h"
 
+#include <windows.h>
+
 #include <list>
 #include <math.h>
 #include <stdio.h>
@@ -50,11 +52,6 @@ bool draw_get_state_dirty() { return drawStateDirty; }
 } // namespace enigma
 
 namespace enigma_user {
-
-void draw_enable_drawevent(bool enable) {
-  if (enable) enigma::EnableDrawing(nullptr);
-  else enigma::DisableDrawing(nullptr);
-}
 
 void draw_state_flush() {
   // track whether we are already flushing the state
