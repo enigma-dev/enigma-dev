@@ -42,8 +42,14 @@ void WindowResized() {
   enigma_user::draw_clear(enigma_user::window_get_color());
 }
 
+static bool initDC = false;
+
 void EnableDrawing(void*)
 {
+  if (initDC) {
+    RestoreDC(GetDC(hWnd), -1);
+	return;
+  }
   WindowResizedCallback = &WindowResized;
   /**
    * Edited by Cool Breeze on 16th October 2013
@@ -95,6 +101,8 @@ void EnableDrawing(void*)
   } else { // unable to get a core context, use the legacy context
     hRC = LegacyRC;
   }
+  SaveDC(GetDC(hWnd));
+  initDC = true;
 }
 
 void DisableDrawing(void*)
