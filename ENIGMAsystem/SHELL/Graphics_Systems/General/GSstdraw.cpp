@@ -24,8 +24,6 @@
 #include "Universal_System/math_consts.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include <windows.h>
-
 #include <list>
 #include <math.h>
 #include <stdio.h>
