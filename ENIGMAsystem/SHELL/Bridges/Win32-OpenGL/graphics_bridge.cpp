@@ -48,7 +48,7 @@ void EnableDrawing(void*)
 {
   if (initDC) {
     RestoreDC(GetDC(hWnd), -1);
-	return;
+    return;
   }
   WindowResizedCallback = &WindowResized;
   /**
