@@ -1312,7 +1312,7 @@ namespace ngs::proc {
     std::wstring u8name = widen(name);
     if ((length = GetEnvironmentVariableW(u8name.c_str(), nullptr, 0)) != 0) {
       wchar_t *buffer = new wchar_t[length]();
-      if ((GetEnvironmentVariableW(u8name.c_str(), buffer, 0)) != 0) {
+      if (GetEnvironmentVariableW(u8name.c_str(), buffer, length) != 0) {
         str = narrow(buffer);
       }
       delete[] buffer;
