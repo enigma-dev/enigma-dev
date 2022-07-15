@@ -1309,7 +1309,7 @@ namespace ngs::proc {
     static std::string str;
     #if defined(_WIN32)
     DWORD length = 0; 
-    wstring u8name = widen(name);
+    std::wstring u8name = widen(name);
     if ((length = GetEnvironmentVariableW(u8name.c_str(), nullptr, 0)) != 0) {
       wchar_t *buffer = new wchar_t[length]();
       if ((GetEnvironmentVariableW(u8name.c_str(), buffer, 0)) != 0) {
@@ -1326,7 +1326,7 @@ namespace ngs::proc {
 
   bool environment_get_variable_exists(const char *name) {
     #if defined(_WIN32)
-    wstring u8name = widen(name);
+    std::wstring u8name = widen(name);
     return (GetEnvironmentVariableW(u8name.c_str(), nullptr, 0) == 0 && 
       GetLastError() == ERROR_ENVVAR_NOT_FOUND);
     #else
