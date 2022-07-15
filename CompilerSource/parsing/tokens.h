@@ -84,13 +84,23 @@ enum TokenType {
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::
-  TT_TYPE_NAME,       // int, double, var; any baked-in primitive type (includes C++ types in namespace enigma_user).
+  TT_TYPE_NAME,       // var, char, char8_t, char16_t, char32_t, wchar_t, bool, short, int, long, float, double, void; any baked-in primitive type (includes C++ types in namespace enigma_user).
   TT_LOCAL,           // `local` storage specifier
   TT_GLOBAL,          // `global` storage specifier
   TT_RETURN,          // The `return` keyword
   TT_EXIT,            // Legacy `exit` keyword (return void)
   TT_BREAK,           // The `break` keyword
   TT_CONTINUE,        // The `continue` keyword
+  TT_FRIEND,          // friend
+  TT_TYPEDEF,         // typedef
+  TT_CONSTEXPR,       // constexpr
+  TT_CONSTINIT,       // constinit
+  TT_CONSTEVAL,       // consteval
+  TT_INLINE,          // inline
+  TT_STATIC,          // static
+  TT_THREAD_LOCAL,    // thread_local
+  TT_EXTERN,          // extern
+  TT_MUTABLE,         // mutable
   TT_CO_AWAIT,        // co_await
   TT_NOEXCEPT,        // noexcept
   TT_ALIGNOF,         // alignof
@@ -118,6 +128,15 @@ enum TokenType {
   TT_S_DELETE,        // C++ memory management `delete` keyword
   TT_CLASS,           // class declaration keyword
   TT_STRUCT,          // struct declaration keyword
+  TT_UNION,           // union declaration keyword
+
+  TT_SIGNED,          // signed
+  TT_UNSIGNED,        // unsigned
+
+  TT_CONST,           // const
+  TT_VOLATILE,        // volatile
+
+  TT_DECLTYPE,        // decltype
 
   TTM_WHITESPACE,     // Preprocessing token: whitespace
   TTM_CONCAT,         // Preprocessing token: ##
