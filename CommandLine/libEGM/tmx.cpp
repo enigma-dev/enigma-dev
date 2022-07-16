@@ -239,10 +239,12 @@ private:
       unsigned int tileIndex = 0;
       for (int y=0; y < layerHeight; ++y) {
         for (int x=0; x < layerWidth; ++x) {
-          unsigned int globalTileId = layerDataCharPtr[tileIndex] |
-                                      layerDataCharPtr[tileIndex + 1] << 8 |
-                                      layerDataCharPtr[tileIndex + 2] << 16 |
-                                      layerDataCharPtr[tileIndex + 3] << 24;
+          // loading 4 bytes of stream into uint following little endian order
+          unsigned int globalTileId = static_cast<unsigned char>(layerDataCharPtr[tileIndex]) |
+                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 1]) << 8 |
+                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 2]) << 16 |
+                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 3]) << 24;
+
           tileIndex += 4;
 
           bool hasHorizontalFlip=false, hasVerticalFlip=false;
@@ -254,7 +256,7 @@ private:
           // get pointer to the background to be used in setting Room.tile properties
           buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
 
-          if(bgPtr == NULL)
+          if(localTileId < 0 || bgPtr == NULL)
             continue;
 
           buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();

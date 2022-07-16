@@ -31,6 +31,9 @@ private:
 
   virtual bool for_each(pugi::xml_node& xmlNode) override;
   void UpdateImageHelper(const pugi::xml_node &innerImgNode, buffers::TreeNode *protoNode);
+  void LoadTilesetAsIndividualBackgrounds(const pugi::xml_node& xmlNode, const std::string& resType);
+  void LoadTilesetAsSingleBackground(const pugi::xml_node& xmlNode, const std::string& resType,
+                                     const pugi::xml_node& childXmlNode);
 };
 
 } // namespace egm
