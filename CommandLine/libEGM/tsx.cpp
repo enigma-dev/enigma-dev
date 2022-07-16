@@ -53,45 +53,53 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   // presence of image child node is used to distinguish between loading a tileset based background and an image based background
   pugi::xml_node imgNode = xmlNode.child("image");
   if(imgNode.empty()) {
-    pugi::xml_object_range<pugi::xml_named_node_iterator> tileChildrenItr = xmlNode.children("tile");
-
-    outStream << "Adding tile as background" << std::endl;
-
-    for(const pugi::xml_node &tileChild : tileChildrenItr) {
-      // TODO: Needs improvement: All compatible* individual tiles can be combined into a single tileset, just like in Tiled
-
-      buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
-      AddTiledResource(protoNode, resType, tileChild, resourceTypeIdCountMap, tsxPath);
-
-      // set indirectly linked properties
-      pugi::xml_node innerImgNode = tileChild.child("image");
-      UpdateImageHelper(innerImgNode, protoNode);
-      std::string tileId = tileChild.attribute("id").value();
-      std::string protoNodeName = backgroundResName + "_" + tileId;
-      protoNode->set_name(protoNodeName);
-
-      // use_as_tileset should be false for stanalone tile converted to background
-      protoNode->mutable_background()->set_use_as_tileset(false);
-    }
+    outStream << "Adding tileset as individual backgrounds" << std::endl;
+    LoadTilesetAsIndividualBackgrounds(xmlNode, resType);
   }
   else {
-    buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
-    AddTiledResource(protoNode, resType, xmlNode, resourceTypeIdCountMap, tsxPath);
-
-    // set indirectly linked properties
-    UpdateImageHelper(imgNode, protoNode);
-    protoNode->set_name(backgroundResName);
-    // if single image is holding all the tiles then set use_as_tileset as true
-    protoNode->mutable_background()->set_use_as_tileset(true);
-
-    // we only store the backgrounds based on tilesets. This later on helps in loading Room.tiles from TMX files.
-    // It distinguishes whether a background is based on tileset(if there is an entry present in map)
-    // or not(if no such entry with given background name is in map)
-    if(backgroundNamePtrMapRef != NULL)
-      backgroundNamePtrMapRef->insert({backgroundResName, protoNode});
+    LoadTilesetAsSingleBackground(xmlNode, resType, imgNode);
   }
 
   return true;
+}
+
+void TSXTilesetLoader::LoadTilesetAsIndividualBackgrounds(const pugi::xml_node& xmlNode, const std::string& resType) {
+  pugi::xml_object_range<pugi::xml_named_node_iterator> tileChildrenItr = xmlNode.children("tile");
+
+  for(const pugi::xml_node &tileChild : tileChildrenItr) {
+    // TODO: Needs improvement: All compatible* individual tiles can be combined into a single tileset, just like in Tiled
+
+    buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
+    AddTiledResource(protoNode, resType, tileChild, resourceTypeIdCountMap, tsxPath);
+
+    // set indirectly linked properties
+    pugi::xml_node innerImgNode = tileChild.child("image");
+    UpdateImageHelper(innerImgNode, protoNode);
+    std::string tileId = tileChild.attribute("id").value();
+    std::string protoNodeName = backgroundResName + "_" + tileId;
+    protoNode->set_name(protoNodeName);
+
+    // use_as_tileset should be false for stanalone tile converted to background
+    protoNode->mutable_background()->set_use_as_tileset(false);
+  }
+}
+
+void TSXTilesetLoader::LoadTilesetAsSingleBackground(const pugi::xml_node& xmlNode, const std::string& resType,
+                                                     const pugi::xml_node& childXmlNode) {
+  buffers::TreeNode *protoNode = backgroundFolderRef->mutable_folder()->add_children();
+  AddTiledResource(protoNode, resType, xmlNode, resourceTypeIdCountMap, tsxPath);
+
+  // set indirectly linked properties
+  UpdateImageHelper(childXmlNode, protoNode);
+  protoNode->set_name(backgroundResName);
+  // if single image is holding all the tiles then set use_as_tileset as true
+  protoNode->mutable_background()->set_use_as_tileset(true);
+
+  // we only store the backgrounds based on tilesets. This later on helps in loading Room.tiles from TMX files.
+  // It distinguishes whether a background is based on tileset(if there is an entry present in map)
+  // or not(if no such entry with given background name is in map)
+  if(backgroundNamePtrMapRef != NULL)
+    backgroundNamePtrMapRef->insert({backgroundResName, protoNode});
 }
 
 void TSXTilesetLoader::UpdateImageHelper(const pugi::xml_node &innerImgNode, buffers::TreeNode *protoNode) {
