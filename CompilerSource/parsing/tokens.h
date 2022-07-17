@@ -91,8 +91,10 @@ enum TokenType {
   TT_EXIT,            // Legacy `exit` keyword (return void)
   TT_BREAK,           // The `break` keyword
   TT_CONTINUE,        // The `continue` keyword
-  TT_FRIEND,          // friend
+  TT_ENUM,            // enum
   TT_TYPEDEF,         // typedef
+  TT_TYPENAME,        // typename
+  TT_OPERATOR,        // operator
   TT_CONSTEXPR,       // constexpr
   TT_CONSTINIT,       // constinit
   TT_CONSTEVAL,       // consteval

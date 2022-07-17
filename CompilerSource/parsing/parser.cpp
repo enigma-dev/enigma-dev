@@ -47,10 +47,250 @@ class AstBuilder {
     return require_any_of({tt}, std::forward<Messages>(messages)...);
   }
 
+  bool next_is_class_key() {
+    switch (token.type) {
+      case TT_CLASS:
+      case TT_STRUCT:
+      case TT_UNION:
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+  bool next_is_cv_qualifier() {
+    return token.type == TT_CONST || token.type == TT_VOLATILE;
+  }
+
+  bool require_operatorkw() {
+    if (next_is_operatorkw()) {
+      if (token.type == TT_S_NEW || token.type == TT_S_DELETE) {
+        TokenType type = token.type;
+        token = lexer->ReadToken();
+        if (token.type == TT_BEGINBRACKET) {
+          token = lexer->ReadToken();
+          require_token(TT_ENDBRACKET, "Expected ']' after '[' in '", type == TT_S_NEW ? "new" : "delete", "[]'");
+        }
+      } else if (token.type == TT_BEGINPARENTH) {
+        token = lexer->ReadToken();
+        require_token(TT_ENDPARENTH, "Expected ')' after '('");
+      } else if (token.type == TT_BEGINBRACKET) {
+        token = lexer->ReadToken();
+        require_token(TT_ENDBRACKET, "Expected ']' after '['");
+      } else {
+        token = lexer->ReadToken();
+      }
+    } else {
+      herr->Error(token) << "Expected an overloadable operator";
+    }
+  }
+
+  bool next_is_operatorkw() {
+    switch (token.type) {
+      case TT_S_NEW:
+      case TT_S_DELETE:
+      case TT_CO_AWAIT:
+      case TT_BEGINPARENTH:
+      case TT_BEGINBRACKET:
+      case TT_ARROW:
+      case TT_ARROW_STAR:
+      case TT_TILDE:
+      case TT_BANG:
+      case TT_PLUS:
+      case TT_MINUS:
+      case TT_STAR:
+      case TT_DIV:
+      case TT_PERCENT:
+      case TT_AMPERSAND:
+      case TT_CARET:
+      case TT_PIPE:
+      case TT_EQUALS:
+      case TT_EQUALTO:
+      case TT_NOTEQUAL:
+      case TT_LESS:
+      case TT_LESSEQUAL:
+      case TT_GREATER:
+      case TT_GREATEREQUAL:
+      case TT_THREEWAY:
+      case TT_AND:
+      case TT_OR:
+      case TT_XOR:
+      case TT_LSH:
+      case TT_RSH:
+      case TT_INCREMENT:
+      case TT_DECREMENT:
+      case TT_COMMA:
+        // TODO: compound assignment operators
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+  bool next_maybe_type_specifier() {
+    switch (token.type) {
+      case TT_DECLTYPE:
+      case TT_ENUM:
+      case TT_OPERATOR:
+      case TT_SCOPEACCESS:
+      case TT_TYPE_NAME:
+      case TT_TYPENAME:
+        return true;
+
+      case TT_IDENTIFIER:
+        // TODO: Lookup name and make sure it is a type
+
+      default:
+        return next_is_class_key();
+    }
+  }
+
+  bool next_is_template_type() {
+    // TODO: Implement me
+    return false;
+  }
+
  public:
 
   AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
     token = lexer->ReadToken();
+  }
+
+  std::unique_ptr<AST::Node> TryParseIdExpression() {
+    if (token.type == TT_IDENTIFIER) {
+      TryParsePrefixIdentifier();
+    } else if (token.type == TT_OPERATOR) {
+      token = lexer->ReadToken();
+      require_operatorkw();
+
+      if (token.type == TT_LESS) {
+        TryParseTemplateArgs();
+      }
+    } else if (token.type == TT_TILDE) {
+      if (token.type == TT_IDENTIFIER) {
+        token = lexer->ReadToken();
+        if (token.type == TT_LESS && next_is_template_type()) {
+          TryParseTemplateArgs();
+        }
+      } else if (token.type == TT_DECLTYPE) {
+        TryParseDecltype();
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParseDecltype() {
+    Token tok = token;
+    require_token(TT_DECLTYPE, "Expected 'decltype' keyword");
+    require_token(TT_BEGINPARENTH, "Expected '(' after 'decltype'");
+    auto expr = TryParseExpression(Precedence::kAll);
+    require_token(TT_ENDPARENTH, "Expected ')' after decltype expression");
+
+    return nullptr;
+  }
+
+  std::vector<std::unique_ptr<AST::Node>> TryParseTemplateArgs() {
+    require_token(TT_LESS, "Expected '<' at start of template arguments");
+    // TODO: Yeah I have no clue what to do here 🤷
+    require_token(TT_GREATER, "Expected '>' after template arguments");
+    return {};
+  }
+
+  std::unique_ptr<AST::Node> TryParseTypenameSpecifier() {
+    require_token(TT_TYPENAME, "Expected 'typename' in typename specifier");
+
+    if (token.type == TT_IDENTIFIER) {
+      TryParsePrefixIdentifier();
+    } else if (token.type == TT_DECLTYPE) {
+      TryParseDecltype();
+      TryParseNestedNameSpecifier();
+    } else if (token.type == TT_SCOPEACCESS) {
+      TryParseNestedNameSpecifier();
+    } else {
+      herr->Error(token) << "Expected nested name specifier after 'typename'";
+      return nullptr;
+    }
+
+    return nullptr;
+  }
+
+  std::vector<std::unique_ptr<AST::Node>> TryParsePrefixIdentifier() {
+    require_token(TT_IDENTIFIER, "Expected identifier");
+
+    if (token.type == TT_SCOPEACCESS) {
+      TryParseNestedNameSpecifier();
+    } else if (token.type == TT_LESS && next_is_template_type()) {
+      TryParseTemplateArgs();
+    }
+
+    return {};
+  }
+
+  std::unique_ptr<AST::Node> TryParseNestedNameSpecifier() {
+    if (token.type != TT_SCOPEACCESS) {
+      herr->Error(token) << "Expected scope access '::' in nested name specifier";
+      return nullptr;
+    }
+
+    while (token.type == TT_SCOPEACCESS) {
+      token = lexer->ReadToken();
+      if (token.type == TT_IDENTIFIER) {
+        TryParsePrefixIdentifier();
+      } else if (token.type == TT_DECLTYPE) {
+        auto decl = TryParseDecltype();
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParseTypeSpecifier() {
+    if (token.type == TT_TYPE_NAME) {
+      token = lexer->ReadToken();
+    } else if (token.type == TT_IDENTIFIER) {
+      TryParsePrefixIdentifier();
+    } else if (token.type == TT_SCOPEACCESS) {
+      TryParseNestedNameSpecifier();
+    } else if (token.type == TT_DECLTYPE) {
+      auto decl = TryParseDecltype();
+
+      if (token.type == TT_SCOPEACCESS) {
+        TryParseNestedNameSpecifier();
+      }
+    } else if (token.type == TT_TYPENAME) {
+      token = lexer->ReadToken();
+    } else if (next_is_cv_qualifier()) {
+      token = lexer->ReadToken();
+    } else if (next_is_class_key()) {
+      Token type = token;
+      token = lexer->ReadToken();
+      if (token.type == TT_IDENTIFIER) {
+        TryParsePrefixIdentifier();
+      } else {
+        herr->Error(token) << "Expected identifier after '" << type.ToString() << "'";
+      }
+    } else if (token.type == TT_ENUM) {
+      token = lexer->ReadToken();
+      if (token.type == TT_IDENTIFIER) {
+        token = lexer->ReadToken();
+        if (token.type == TT_SCOPEACCESS) {
+          TryParseNestedNameSpecifier();
+        }
+      } else {
+        herr->Error(token) << "Expected identifier after 'enum'";
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParseTypeID() {
+    while (next_maybe_type_specifier()) {
+      TryParseTypeSpecifier();
+    }
   }
 
   /// Parse an operand--this includes variables, literals, arrays, and

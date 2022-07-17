@@ -23,6 +23,7 @@
 #include "tokens.h"
 #include "darray.h"
 
+#include <JDI/src/Storage/full_type.h>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -47,7 +48,7 @@ class AST {
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
     IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
-    BREAK, CONTINUE, RETURN,
+    BREAK, CONTINUE, RETURN, DEFINITION,
   };
   struct Node {
     NodeType type;
@@ -207,6 +208,13 @@ class AST {
     PNode body;
 
     WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
+  };
+
+  struct Definition: TypedNode<NodeType::DEFINITION> {
+      jdi::full_type type;
+
+      Definition() = default;
+      Definition(const jdi::full_type& type_): type{type_} {}
   };
 
   // Used to adapt to current single-error syntax checking interface.
