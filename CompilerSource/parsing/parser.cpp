@@ -47,7 +47,7 @@ class AstBuilder {
     return require_any_of({tt}, std::forward<Messages>(messages)...);
   }
 
-  bool next_is_class_key() {
+  bool is_class_key(const Token &tok) {
     switch (token.type) {
       case TT_CLASS:
       case TT_STRUCT:
@@ -59,8 +59,24 @@ class AstBuilder {
     }
   }
 
+  bool next_is_class_key() {
+    return is_class_key(token);
+  }
+
+  bool is_cv_qualifier(const Token &tok) {
+    return tok.type == TT_CONST || tok.type == TT_VOLATILE;
+  }
+
   bool next_is_cv_qualifier() {
-    return token.type == TT_CONST || token.type == TT_VOLATILE;
+    return is_cv_qualifier(token);
+  }
+
+  bool is_ref_qualifier(const Token &tok) {
+    return tok.type == TT_AMPERSAND || tok.type == TT_AND;
+  }
+
+  bool next_is_ref_qualifier() {
+    return is_ref_qualifier(token);
   }
 
   bool require_operatorkw() {
@@ -86,8 +102,8 @@ class AstBuilder {
     }
   }
 
-  bool next_is_operatorkw() {
-    switch (token.type) {
+  bool is_operatorkw(const Token &tok) {
+    switch (tok.type) {
       case TT_S_NEW:
       case TT_S_DELETE:
       case TT_CO_AWAIT:
@@ -129,8 +145,12 @@ class AstBuilder {
     }
   }
 
-  bool next_maybe_type_specifier() {
-    switch (token.type) {
+  bool next_is_operatorkw() {
+    return is_operatorkw(token);
+  }
+
+  bool maybe_type_specifier(const Token &tok) {
+    switch (tok.type) {
       case TT_DECLTYPE:
       case TT_ENUM:
       case TT_OPERATOR:
@@ -143,19 +163,98 @@ class AstBuilder {
         // TODO: Lookup name and make sure it is a type
 
       default:
-        return next_is_class_key();
+        return is_class_key(tok);
     }
   }
 
-  bool next_is_template_type() {
+  bool next_maybe_type_specifier() {
+    return maybe_type_specifier(token);
+  }
+
+  bool maybe_nested_name(const Token &tok) {
+    switch (tok.type) {
+      case TT_SCOPEACCESS:
+      case TT_IDENTIFIER:
+      case TT_DECLTYPE:
+        return true;
+
+      default:
+        return false;
+    }
+  }
+
+  bool next_maybe_nested_name() {
+    return maybe_nested_name(token);
+  }
+
+  bool is_template_type(const Token &tok) {
     // TODO: Implement me
     return false;
+  }
+
+  bool next_is_template_type() {
+    return is_template_type(token);
+  }
+
+  bool maybe_ptr_operator(const Token &tok) {
+    return tok.type == TT_STAR || is_ref_qualifier(tok) || maybe_nested_name(tok);
+  }
+
+  bool next_maybe_ptr_operator() {
+    return maybe_ptr_operator(token);
   }
 
  public:
 
   AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
     token = lexer->ReadToken();
+  }
+
+  std::unique_ptr<AST::Node> TryParseConstantExpression() {
+    return TryParseExpression(Precedence::kTernary);
+  }
+
+  std::unique_ptr<AST::Node> TryParseArrayBoundsExpression() {
+    require_token(TT_BEGINBRACKET, "Expected '[' before array bounds expression");
+    if (token.type != TT_ENDBRACKET) {
+      TryParseConstantExpression();
+    }
+    require_token(TT_ENDBRACKET, "Expected ']' after array bounds expression");
+  }
+
+  std::unique_ptr<AST::Node> TryParseNoexceptSpecifier() {
+    require_token(TT_NOEXCEPT, "Expected 'noexcept' in noexcept specifier");
+    if (token.type == TT_BEGINPARENTH) {
+      token = lexer->ReadToken();
+      TryParseConstantExpression();
+      require_token(TT_ENDPARENTH, "Expected ')' after noexcept expression");
+    }
+  }
+
+  std::unique_ptr<AST::Node> TryParseParametersAndQualifiers() {
+    require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
+    if (token.type != TT_ENDPARENTH) {
+      // TODO: Parse function parameters
+    }
+    require_token(TT_ENDPARENTH, "Expected ')' after function parameters");
+
+    if (next_is_cv_qualifier()) {
+      token = lexer->ReadToken();
+    }
+    if (next_is_ref_qualifier()) {
+      token = lexer->ReadToken();
+    }
+    if (token.type == TT_NOEXCEPT) {
+      TryParseNoexceptSpecifier();
+    }
+  }
+
+  std::unique_ptr<AST::Node> TryParseTypeName() {
+    Token name = token;
+    require_token(TT_IDENTIFIER, "Expected identifier in type name");
+    if (is_template_type(name) && token.type == TT_LESS) {
+      TryParseTemplateArgs();
+    }
   }
 
   std::unique_ptr<AST::Node> TryParseIdExpression() {
@@ -170,10 +269,7 @@ class AstBuilder {
       }
     } else if (token.type == TT_TILDE) {
       if (token.type == TT_IDENTIFIER) {
-        token = lexer->ReadToken();
-        if (token.type == TT_LESS && next_is_template_type()) {
-          TryParseTemplateArgs();
-        }
+        TryParseTypeName();
       } else if (token.type == TT_DECLTYPE) {
         TryParseDecltype();
       }
@@ -218,11 +314,12 @@ class AstBuilder {
   }
 
   std::vector<std::unique_ptr<AST::Node>> TryParsePrefixIdentifier() {
+    Token id = token;
     require_token(TT_IDENTIFIER, "Expected identifier");
 
     if (token.type == TT_SCOPEACCESS) {
       TryParseNestedNameSpecifier();
-    } else if (token.type == TT_LESS && next_is_template_type()) {
+    } else if (token.type == TT_LESS && is_template_type(id)) {
       TryParseTemplateArgs();
     }
 
@@ -238,7 +335,11 @@ class AstBuilder {
     while (token.type == TT_SCOPEACCESS) {
       token = lexer->ReadToken();
       if (token.type == TT_IDENTIFIER) {
-        TryParsePrefixIdentifier();
+        Token id = token;
+        token = lexer->ReadToken();
+        if (token.type == TT_LESS && is_template_type(id)) {
+          TryParseTemplateArgs();
+        }
       } else if (token.type == TT_DECLTYPE) {
         auto decl = TryParseDecltype();
       }
@@ -270,17 +371,98 @@ class AstBuilder {
       if (token.type == TT_IDENTIFIER) {
         TryParsePrefixIdentifier();
       } else {
-        herr->Error(token) << "Expected identifier after '" << type.ToString() << "'";
+        herr->Error(token) << "Expected identifier after '" << type << "'";
       }
     } else if (token.type == TT_ENUM) {
       token = lexer->ReadToken();
+      require_token(TT_IDENTIFIER, "Expected identifier after 'enum'");
+      if (token.type == TT_SCOPEACCESS) {
+        TryParseNestedNameSpecifier();
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParsePtrOperator() {
+    if (token.type == TT_STAR) {
+      token = lexer->ReadToken();
+      if (next_is_cv_qualifier()) {
+        token = lexer->ReadToken();
+      }
+    } else if (next_is_ref_qualifier()) {
+      token = lexer->ReadToken();
+    } else if (next_maybe_nested_name()) {
       if (token.type == TT_IDENTIFIER) {
         token = lexer->ReadToken();
-        if (token.type == TT_SCOPEACCESS) {
-          TryParseNestedNameSpecifier();
+      } else if (token.type == TT_DECLTYPE) {
+        TryParseDecltype();
+      }
+
+      TryParseNestedNameSpecifier();
+      require_token(TT_STAR, "Expected '*' after nested name specifier");
+
+      if (next_is_cv_qualifier()) {
+        token = lexer->ReadToken();
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParseNoPtrAbstractDeclarator() {
+    if (token.type == TT_BEGINPARENTH) {
+      if (next_maybe_ptr_operator()) {
+        while (next_maybe_ptr_operator()) {
+          TryParsePtrOperator();
         }
+        require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
       } else {
-        herr->Error(token) << "Expected identifier after 'enum'";
+        TryParseParametersAndQualifiers();
+        if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+          TryParseNoPtrAbstractDeclarator();
+        }
+      }
+    } else if (token.type == TT_BEGINBRACKET) {
+      TryParseArrayBoundsExpression();
+      if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+        TryParseNoPtrAbstractDeclarator();
+      }
+    }
+
+    return nullptr;
+  }
+
+  std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
+    if (next_maybe_ptr_operator()) {
+      while(next_maybe_ptr_operator()) {
+        TryParsePtrOperator();
+      }
+
+      if (token.type == TT_ELLIPSES) {
+        token = lexer->ReadToken();
+        while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+          if (token.type == TT_BEGINPARENTH) {
+            TryParseParametersAndQualifiers();
+          } else {
+            TryParseArrayBoundsExpression();
+          }
+        }
+      }
+    } else if (token.type == TT_BEGINPARENTH) {
+      TryParseParametersAndQualifiers();
+      if (token.type == TT_ARROW) {
+        token = lexer->ReadToken();
+        TryParseTypeID();
+      }
+    } else {
+      TryParseNoPtrAbstractDeclarator();
+      if (token.type == TT_BEGINPARENTH) {
+        TryParseParametersAndQualifiers();
+        if (token.type == TT_ARROW) {
+          token = lexer->ReadToken();
+          TryParseTypeID();
+        }
       }
     }
 
