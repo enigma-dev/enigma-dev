@@ -40,6 +40,11 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
     return false;
   }
 
+  if(xmlNode.attribute("visited").as_bool() == true)
+    return true;
+  else
+    xmlNode.append_attribute("visited") = true;
+
   std::string resType = "background";
 
   // add new resource according to resType
@@ -60,7 +65,9 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
     LoadTilesetAsSingleBackground(xmlNode, resType, imgNode);
   }
 
-  return true;
+  // This hack is to deal with TMX files in which both internal and external tilesets are present, we append
+  // visited attribute in tileset nodes and only allow loading of single tileset in each call of traverse
+  return false;
 }
 
 void TSXTilesetLoader::LoadTilesetAsIndividualBackgrounds(const pugi::xml_node& xmlNode, const std::string& resType) {
