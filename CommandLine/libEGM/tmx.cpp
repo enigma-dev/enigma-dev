@@ -54,14 +54,12 @@ private:
   // same as of saying LoadBackgrounds
   bool LoadTilesets(pugi::xml_node& mapNode, std::string resType) {
     pugi::xml_object_range<pugi::xml_named_node_iterator> tilesets = mapNode.children("tileset");
-    for(const pugi::xml_node &tileset : tilesets) {
+    for(pugi::xml_node &tileset : tilesets) {
 
       buffers::TreeNode *folderNode;
       if(resourceFolderRefs.find(resType) == resourceFolderRefs.end()) {
         folderNode = nodes.back()->mutable_folder()->add_children();
-        std::string fixName = resType + 's'; // add an 's' at the end
-        fixName[0] -= 32; // make first character capital
-        folderNode->set_name(fixName);
+        folderNode->set_name(GetFolderName(resType));
         resourceFolderRefs[resType] = folderNode;
       }
       else
@@ -72,31 +70,63 @@ private:
         return false;
       }
 
-      fs::path tilesetSrcPath(tileset.attribute("source").value());
+      fs::path tilesetSrcPath(tileset.attribute("source").as_string());
       int tilesetFirstGid = tileset.attribute("firstgid").as_int(-1);
-      if(!tilesetSrcPath.empty() && tilesetFirstGid != -1) {
+      if(tilesetFirstGid == -1) {
+        errStream << "Can't load tileset, firstgid is invalid." << std::endl;
+        return false;
+      }
+
+      // empty source path refers to internal tileset
+      if(tilesetSrcPath.empty()) {
         std::string parentDirPath = tmxPath.parent_path().string()+"/";
         std::string tsxPath = parentDirPath + tilesetSrcPath.string();
-
-        // load tsx xml
-        pugi::xml_document tilesetDoc;
-        if(!tilesetDoc.load_file(tsxPath.c_str())) {
-          errStream << "Could not found tsx file with path: " << tsxPath << std::endl;
-          return false;
-        }
-
         std::string backgroundName = tilesetSrcPath.stem().string();
+
         TSXTilesetLoader background_walker(tsxPath, nodes, folderNode, backgroundName, &tilesetBgNamePtrMap);
-        tilesetDoc.traverse(background_walker);
+
+        LoadInternalTileset(tileset, background_walker);
 
         // todo change the name!!!
         tilesetIdNameMap[tilesetFirstGid] = backgroundName;
       }
       else {
-        errStream << "Fatal error: Tileset source or firstgid is invalid." << std::endl;
-        return false;
+
+        std::string parentDirPath = tmxPath.parent_path().string()+"/";
+        std::string tsxPath = parentDirPath + tilesetSrcPath.string();
+        std::string backgroundName = tilesetSrcPath.stem().string();
+
+        TSXTilesetLoader background_walker(tsxPath, nodes, folderNode, backgroundName, &tilesetBgNamePtrMap);
+
+        bool ok = LoadExternalTileset(tsxPath, background_walker);
+        if(!ok)
+          return false;
+
+        // todo change the name!!!
+        tilesetIdNameMap[tilesetFirstGid] = backgroundName;
       }
     }
+
+    return true;
+  }
+
+  void LoadInternalTileset(pugi::xml_node &tileset, TSXTilesetLoader &background_walker) {
+    // NEED IMPROVEMENT: This call of traverse using xml node can cause lot of trouble, obvious one is, in case
+    // of TMX file with multiple tilesets, where internal and external tilesets are mixed matched, we will load very
+    // first internal tileset total_internal_tilesets-1 times.
+    // CURRENT FIX: This is currently being handled by a hack present in tsx walker for_each loop
+    tileset.parent().traverse(background_walker);
+  }
+
+  bool LoadExternalTileset(const std::string &tsxPath, TSXTilesetLoader &background_walker) {
+    // load tsx xml
+    pugi::xml_document tilesetDoc;
+    if(!tilesetDoc.load_file(tsxPath.c_str())) {
+      errStream << "Error: Could not found tsx file with path: " << tsxPath << std::endl;
+      return false;
+    }
+
+    tilesetDoc.traverse(background_walker);
 
     return true;
   }
@@ -111,15 +141,13 @@ private:
     buffers::TreeNode *folderNode;
     if(resourceFolderRefs.find(resType) == resourceFolderRefs.end()) {
       folderNode = nodes.back()->mutable_folder()->add_children();
-      std::string fixName = resType + 's'; // add an 's' at the end
-      fixName[0] -= 32; // make first character capital
-      folderNode->set_name(fixName);
+      folderNode->set_name(GetFolderName(resType));
     }
     else
       folderNode = resourceFolderRefs[resType];
 
     if(folderNode == NULL) {
-      errStream << "Folder with name \""<< resType <<"\" not found" << std::endl;
+      errStream << "Folder with name \"" << resType << "\" not found" << std::endl;
       return false;
     }
 
@@ -144,6 +172,12 @@ private:
     }
 
     return true;
+  }
+
+  std::string GetFolderName(const std::string& resType) {
+    std::string fixName = resType + 's';  // add an 's' at the end
+    fixName[0] -= 32;                     // make first character capital
+    return fixName;
   }
 
   // same as of saying LoadRoom.Tiles
@@ -210,94 +244,170 @@ private:
     pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
     for(const pugi::xml_node &layer : layers) {
       const pugi::xml_node &dataNode = layer.child("data");
+
+      if(dataNode.empty()) {
+        outStream << "Error loading tiles, layer node does not contain data node" << std::endl;
+        return false;
+      }
+
+      std::string encoding = dataNode.attribute("encoding").as_string();
+
       std::string dataStr = dataNode.first_child().value();
-
       dataStr = StrTrim(dataStr);
-
       if(dataStr.empty()) {
         errStream << "Error while loading tiles, Layer Data contains empty string" << std::endl;
         return false;
       }
 
-      // decode base64 data
-      std::string decodedStr = base64_decode(dataStr);
-
-      // decompress zlib compressed data
-      std::istringstream istr(decodedStr);
-      Decoder decoder(istr);
-      size_t dataSize = decodedStr.size();
-      std::unique_ptr<char[]> layerDataCharPtr = decoder.decompress(dataSize, 0);
-
-      int layerWidth = layer.attribute("width").as_int();
-      int layerHeight = layer.attribute("height").as_int();
-      size_t expectedSize = layerWidth * layerHeight * 4;
-      if(dataSize != expectedSize) {
-        errStream << "I/O error, not able to load complete layer data" << std::endl;
-        return false;
-      }
-
-      unsigned int tileIndex = 0;
-      for (int y=0; y < layerHeight; ++y) {
-        for (int x=0; x < layerWidth; ++x) {
-          // loading 4 bytes of stream into uint following little endian order
-          unsigned int globalTileId = static_cast<unsigned char>(layerDataCharPtr[tileIndex]) |
-                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 1]) << 8 |
-                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 2]) << 16 |
-                                      static_cast<unsigned char>(layerDataCharPtr[tileIndex + 3]) << 24;
-
-          tileIndex += 4;
-
-          bool hasHorizontalFlip=false, hasVerticalFlip=false;
-          std::string tilesetName = "";
-          int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
-
-          std::string backgroundName = tilesetName;
-
-          // get pointer to the background to be used in setting Room.tile properties
-          buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
-
-          if(localTileId < 0 || bgPtr == NULL)
-            continue;
-
-          buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
-
-          tile->set_background_name(backgroundName);
-          tile->set_name(backgroundName+"_"+std::to_string(idx++));
-
-          tile->set_x(x*tileWidth);
-          tile->set_y(y*tileHeight);
-
-          tile->set_width(tileWidth);
-          tile->set_height(tileHeight);
-
-          int numColumns = bgPtr->columns();
-          int xOffset = localTileId % numColumns;
-          xOffset = xOffset * (tileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
-
-          int yOffset = floor(localTileId / (1.0f * numColumns));
-          yOffset = yOffset * (tileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
-
-          tile->set_xoffset(xOffset);
-          tile->set_yoffset(yOffset);
-
-          if(hasHorizontalFlip)
-            tile->set_xscale(-1.0);
-          else
-            tile->set_xscale(1.0);
-
-          if(hasVerticalFlip)
-            tile->set_yscale(-1.0);
-          else
-            tile->set_yscale(1.0);
-
-          // TODO: Find a good implementation to set depth and id
-          tile->set_depth(0);
-          tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
+      if(encoding == "base64") {
+        std::string compression = dataNode.attribute("compression").as_string();
+        if(compression == "zlib") {
+          bool ok = LoadBase64ZlibLayerData(layer, dataStr, resNode, tileWidth, tileHeight);
+          if(!ok)
+            return false;
         }
+        else {
+          outStream << "Error loading tiles, unsupported compression type: " << compression << std::endl;
+          return false;
+        }
+      }
+      else if(encoding == "csv") {
+        return LoadCsvLayerData(layer, dataStr, resNode, tileWidth, tileHeight);
+      }
+      else {
+        outStream << "Error loading tiles, unsupported encoding type: " << encoding << std::endl;
+        return false;
       }
     }
 
     return true;
+  }
+
+  bool LoadBase64ZlibLayerData(const pugi::xml_node &layerNode, const std::string &dataStr, buffers::TreeNode *resNode,
+                          const int& tileWidth, const int& tileHeight) {
+    // decode base64 data
+    std::string decodedStr = base64_decode(dataStr);
+
+    // decompress zlib compressed data
+    std::istringstream istr(decodedStr);
+    Decoder decoder(istr);
+    size_t dataSize = decodedStr.size();
+    std::unique_ptr<char[]> layerDataCharPtr = decoder.decompress(dataSize, 0);
+
+    int layerWidth = layerNode.attribute("width").as_int();
+    int layerHeight = layerNode.attribute("height").as_int();
+    size_t expectedSize = layerWidth * layerHeight * 4;
+    if(dataSize != expectedSize) {
+      errStream << "Error loading tiles, zlib decompressed layer data corrupted." << std::endl;
+      return false;
+    }
+
+    unsigned int tileIndex = 0;
+    for (int y=0; y < layerHeight; ++y) {
+      for (int x=0; x < layerWidth; ++x) {
+        // loading 4 bytes of stream into uint following little endian order
+        unsigned int globalTileId = static_cast<unsigned char>(layerDataCharPtr[tileIndex]) |
+                                    static_cast<unsigned char>(layerDataCharPtr[tileIndex + 1]) << 8 |
+                                    static_cast<unsigned char>(layerDataCharPtr[tileIndex + 2]) << 16 |
+                                    static_cast<unsigned char>(layerDataCharPtr[tileIndex + 3]) << 24;
+
+        tileIndex += 4;
+
+        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+      }
+    }
+
+    return true;
+  }
+
+  bool LoadCsvLayerData(const pugi::xml_node &layerNode, const std::string &dataStr, buffers::TreeNode *resNode,
+                        const int& tileWidth, const int& tileHeight) {
+    std::vector<unsigned int> globalTileIds;
+    std::istringstream istr(dataStr);
+    std::string line;
+
+    while(std::getline(istr, line)) {
+      std::stringstream lineStream(line);
+      std::string globalId;
+      while(std::getline(lineStream, globalId, ',')) {
+        // get the global tile ids into unsigned long, as stoui does not exist(it is guranteed to not overflow uint)
+        unsigned long gidULong = std::stoul(globalId);
+        if(gidULong > std::numeric_limits<unsigned int>::max()) {
+          errStream << "Error laoding tiles, global id out of range." << std::endl;
+          return false;
+        }
+
+        unsigned int gidUInt = static_cast<unsigned int>(gidULong);
+        globalTileIds.push_back(gidUInt);
+      }
+    }
+
+    int layerWidth = layerNode.attribute("width").as_int();
+    int layerHeight = layerNode.attribute("height").as_int();
+    size_t expectedSize = layerWidth * layerHeight;
+    if(globalTileIds.size() != expectedSize) {
+      errStream << "Error laoding tiles, csv layer data corrupted." << std::endl;
+      return false;
+    }
+
+    for (int y=0; y < layerHeight; ++y) {
+      for (int x=0; x < layerWidth; ++x) {
+        unsigned int globalTileId = globalTileIds[y*layerWidth + x];
+        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+      }
+    }
+
+    return true;
+  }
+
+  void CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int& tileWidth,
+                              const int& tileHeight, const int& currX, const int& currY) {
+    bool hasHorizontalFlip=false, hasVerticalFlip=false;
+    std::string tilesetName = "";
+    int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
+
+    std::string backgroundName = tilesetName;
+
+    // get pointer to the background to be used in setting Room.tile properties
+    buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
+
+    if(localTileId < 0 || bgPtr == NULL)
+      return;
+
+    buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
+
+    tile->set_background_name(backgroundName);
+    tile->set_name(backgroundName+"_"+std::to_string(idx++));
+
+    tile->set_x(currX*tileWidth);
+    tile->set_y(currY*tileHeight);
+
+    tile->set_width(tileWidth);
+    tile->set_height(tileHeight);
+
+    int numColumns = bgPtr->columns();
+    int xOffset = localTileId % numColumns;
+    xOffset = xOffset * (tileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
+
+    int yOffset = floor(localTileId / (1.0f * numColumns));
+    yOffset = yOffset * (tileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
+
+    tile->set_xoffset(xOffset);
+    tile->set_yoffset(yOffset);
+
+    if(hasHorizontalFlip)
+      tile->set_xscale(-1.0);
+    else
+      tile->set_xscale(1.0);
+
+    if(hasVerticalFlip)
+      tile->set_yscale(-1.0);
+    else
+      tile->set_yscale(1.0);
+
+    // TODO: Find a good implementation to set depth and id
+    tile->set_depth(0);
+    tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
   }
 
   int GetLocalTileIdInfo(const unsigned int &globalTileId, bool &hasHorizontalFlip, bool &hasVerticalFlip,
@@ -357,18 +467,20 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
   TMXMapLoader mapWalker(game->mutable_root(), fPath);
 
   bool success = mapWalker.Load(doc);
-  if(!success){
-    std::cout<<"Error occured while loading selected Tiled map"<<std::endl;
+  if(!success) {
+    std::cout << "Error occured while loading selected Tiled map." << std::endl;
     return NULL;
   }
 
+  // temp code start
   std::string str;
   google::protobuf::TextFormat::PrintToString(proj->game(), &str);
   std::ofstream out("/home/kash/github/radialgm-stuff/textProtos/test1tmx.txt");
   out<<str<<std::endl;
   out.close();
-
   std::cout<<"END LOADING TMX"<<std::endl;
+  // temp code end
+
   return proj;
 }
 
