@@ -48,7 +48,7 @@ bool require_token(TokenType tt, Messages &&...messages) {
 }
 
 bool is_class_key(const Token &tok) {
-  switch (token.type) {
+  switch (tok.type) {
     case TT_CLASS:
     case TT_STRUCT:
     case TT_UNION:
@@ -149,26 +149,28 @@ bool next_is_operatorkw() {
   return is_operatorkw(token);
 }
 
-bool maybe_type_specifier(const Token &tok) {
+bool is_type_specifier(const Token &tok) {
   switch (tok.type) {
-    case TT_DECLTYPE:
-    case TT_ENUM:
-    case TT_OPERATOR:
-    case TT_SCOPEACCESS:
     case TT_TYPE_NAME:
     case TT_TYPENAME:
+    case TT_SCOPEACCESS:
+    case TT_DECLTYPE:
+    case TT_ENUM:
+    case TT_SIGNED:
+    case TT_UNSIGNED:
       return true;
 
     case TT_IDENTIFIER:
-      // TODO: Lookup name and make sure it is a type
+      // TODO: Implement checking if its a type
+      return true;
 
     default:
-      return is_class_key(tok);
+      return is_cv_qualifier(tok) || is_class_key(tok);
   }
 }
 
-bool next_maybe_type_specifier() {
-  return maybe_type_specifier(token);
+bool next_is_type_specifier() {
+  return is_type_specifier(token);
 }
 
 bool maybe_nested_name(const Token &tok) {
@@ -189,7 +191,7 @@ bool next_maybe_nested_name() {
 
 bool is_template_type(const Token &tok) {
   // TODO: Implement me
-  return false;
+  return true;
 }
 
 bool next_is_template_type() {
@@ -202,6 +204,28 @@ bool maybe_ptr_operator(const Token &tok) {
 
 bool next_maybe_ptr_operator() {
   return maybe_ptr_operator(token);
+}
+
+bool is_decl_specifier(const Token &tok) {
+  switch (tok.type) {
+    case TT_TYPEDEF:
+    case TT_CONSTEXPR:
+    case TT_CONSTINIT:
+    case TT_CONSTEVAL:
+    case TT_MUTABLE:
+    case TT_INLINE:
+    case TT_STATIC:
+    case TT_THREAD_LOCAL:
+    case TT_EXTERN:
+      return true;
+
+    default:
+      return is_type_specifier(tok);
+  }
+}
+
+bool next_is_decl_specifier() {
+  return is_decl_specifier(token);
 }
 
 public:
@@ -220,6 +244,7 @@ std::unique_ptr<AST::Node> TryParseArrayBoundsExpression() {
     TryParseConstantExpression();
   }
   require_token(TT_ENDBRACKET, "Expected ']' after array bounds expression");
+  return nullptr;
 }
 
 std::unique_ptr<AST::Node> TryParseNoexceptSpecifier() {
@@ -229,12 +254,41 @@ std::unique_ptr<AST::Node> TryParseNoexceptSpecifier() {
     TryParseConstantExpression();
     require_token(TT_ENDPARENTH, "Expected ')' after noexcept expression");
   }
+
+  return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseParametersAndQualifiers() {
-  require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
+std::unique_ptr<AST::Node> TryParseParametersAndQualifiers(bool did_consume_paren = false) {
+  if (!did_consume_paren) {
+    require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
+  }
   if (token.type != TT_ENDPARENTH) {
-    // TODO: Parse function parameters
+    while (token.type != TT_ENDPARENTH) {
+      TryParseDeclSpecifierSeq();
+      TryParseDeclarator();
+
+      if (token.type == TT_EQUALS) {
+        token = lexer->ReadToken();
+        // TODO: Parse initializer clause
+      }
+
+      if (token.type == TT_COMMA) {
+        token = lexer->ReadToken();
+        if (token.type == TT_ELLIPSES) {
+          token = lexer->ReadToken();
+          if (token.type != TT_ENDPARENTH) {
+            herr->Error(token) << "Extra parameters after ellipses in function parameter";
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+
+    if (token.type == TT_ELLIPSES) {
+      token = lexer->ReadToken();
+    }
   }
   require_token(TT_ENDPARENTH, "Expected ')' after function parameters");
 
@@ -247,6 +301,8 @@ std::unique_ptr<AST::Node> TryParseParametersAndQualifiers() {
   if (token.type == TT_NOEXCEPT) {
     TryParseNoexceptSpecifier();
   }
+
+  return nullptr;
 }
 
 std::unique_ptr<AST::Node> TryParseTypeName() {
@@ -255,6 +311,8 @@ std::unique_ptr<AST::Node> TryParseTypeName() {
   if (is_template_type(name) && token.type == TT_LESS) {
     TryParseTemplateArgs();
   }
+
+  return nullptr;
 }
 
 std::unique_ptr<AST::Node> TryParseIdExpression() {
@@ -362,7 +420,7 @@ std::unique_ptr<AST::Node> TryParseTypeSpecifier() {
       TryParseNestedNameSpecifier();
     }
   } else if (token.type == TT_TYPENAME) {
-    token = lexer->ReadToken();
+    TryParseTypenameSpecifier();
   } else if (next_is_cv_qualifier()) {
     token = lexer->ReadToken();
   } else if (next_is_class_key()) {
@@ -379,6 +437,8 @@ std::unique_ptr<AST::Node> TryParseTypeSpecifier() {
     if (token.type == TT_SCOPEACCESS) {
       TryParseNestedNameSpecifier();
     }
+  } else if (token.type == TT_SIGNED || token.type == TT_UNSIGNED) {
+    token = lexer->ReadToken();
   }
 
   return nullptr;
@@ -412,13 +472,14 @@ std::unique_ptr<AST::Node> TryParsePtrOperator() {
 
 std::unique_ptr<AST::Node> TryParseNoPtrAbstractDeclarator() {
   if (token.type == TT_BEGINPARENTH) {
+    token = lexer->ReadToken();
     if (next_maybe_ptr_operator()) {
       while (next_maybe_ptr_operator()) {
         TryParsePtrOperator();
       }
       require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
     } else {
-      TryParseParametersAndQualifiers();
+      TryParseParametersAndQualifiers(true);
       if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
         TryParseNoPtrAbstractDeclarator();
       }
@@ -437,6 +498,10 @@ std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
   if (next_maybe_ptr_operator()) {
     while(next_maybe_ptr_operator()) {
       TryParsePtrOperator();
+    }
+
+    while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+      TryParseNoPtrAbstractDeclarator();
     }
 
     if (token.type == TT_ELLIPSES) {
@@ -470,8 +535,85 @@ std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
 }
 
 std::unique_ptr<AST::Node> TryParseTypeID() {
-  while (next_maybe_type_specifier()) {
+  while (next_is_type_specifier()) {
     TryParseTypeSpecifier();
+  }
+  if (next_maybe_ptr_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+    TryParseAbstractDeclarator();
+  }
+
+  return nullptr;
+}
+
+std::unique_ptr<AST::Node> TryParseDeclSpecifier() {
+  if (token.type == TT_TYPEDEF) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_CONSTEXPR) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_CONSTINIT) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_CONSTEVAL) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_MUTABLE) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_INLINE) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_STATIC) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_THREAD_LOCAL) {
+    token = lexer->ReadToken();
+  } else if (token.type == TT_EXTERN) {
+    token = lexer->ReadToken();
+  } else if (next_is_type_specifier()) {
+    TryParseTypeSpecifier();
+  }
+
+  return nullptr;
+}
+
+std::unique_ptr<AST::Node> TryParseDeclSpecifierSeq() {
+  while (next_is_decl_specifier()) {
+    TryParseDeclSpecifier();
+  }
+}
+
+std::unique_ptr<AST::Node> TryParsePtrDeclarator() {
+  while (next_maybe_ptr_operator()) {
+    TryParsePtrOperator();
+  }
+
+  TryParseNoPtrDeclarator();
+}
+
+std::unique_ptr<AST::Node> TryParseNoPtrDeclarator() {
+  if (token.type == TT_BEGINPARENTH) {
+    TryParsePtrDeclarator();
+    require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
+  } else {
+    if (token.type == TT_ELLIPSES) {
+      token = lexer->ReadToken();
+    }
+    TryParseIdExpression();
+  }
+
+  while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+    if (token.type == TT_BEGINPARENTH) {
+      TryParseParametersAndQualifiers();
+    } else {
+      TryParseArrayBoundsExpression();
+    }
+  }
+}
+
+std::unique_ptr<AST::Node> TryParseDeclarator() {
+  if (next_maybe_ptr_operator()) {
+    TryParsePtrDeclarator();
+  } else {
+    TryParseNoPtrDeclarator();
+    if (token.type == TT_ARROW) {
+      token = lexer->ReadToken();
+      TryParseTypeID();
+    }
   }
 }
 
