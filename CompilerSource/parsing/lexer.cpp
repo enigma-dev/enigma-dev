@@ -217,6 +217,16 @@ const ParseContext &ParseContext::ForPreprocessorEvaluation() {
   return kEmptyContextCpp;
 }
 
+void ParseContext::AddMacro(Macro macro) {
+  macro_map.insert({macro.name, macro});
+}
+
+void Lexer::AddMacro(Macro macro) {
+  // TODO: This is a horrible, horrible, atrocious, despicable hack to get this to work, namely because everywhere
+  // context is passed as a const pointer so its easier to have one @c const_cast versus changing many call sites
+  const_cast<ParseContext *>(context)->AddMacro(macro);
+}
+
 bool Lexer::MacroRecurses(std::string_view name) const {
   for (const auto &macro : open_macros) if (macro.name == name) return true;
   return false;
