@@ -40,5 +40,8 @@ target_link_libraries(${LIB_EGM} PRIVATE ${PNG_LIBRARY})
 find_package(ZLIB)
 target_link_libraries(${LIB_EGM} PRIVATE ${ZLIB_LIBRARIES})
 
+find_library(LIB_ZSTD NAMES zstd)
+target_link_libraries(${LIB_EGM} PRIVATE ${LIB_ZSTD})
+
 install(TARGETS ${LIB_EGM} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB_EGM}.dir/Debug/${LIB_EGM}.pdb" DESTINATION . OPTIONAL)

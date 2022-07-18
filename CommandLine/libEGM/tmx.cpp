@@ -8,6 +8,7 @@
 #include "pugixml.hpp"
 
 #include <google/protobuf/text_format.h>
+#include <zstd.h>
 
 #include <cmath>
 
@@ -266,7 +267,14 @@ private:
           if(!ok)
             return false;
         }
+        else if(compression == "gzip") {
+
+        }
+        else if(compression == "zstd") {
+
+        }
         else {
+          // compression isnt specified for uncompressed format
           outStream << "Error loading tiles, unsupported compression type: " << compression << std::endl;
           return false;
         }
