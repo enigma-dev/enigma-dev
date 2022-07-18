@@ -14,6 +14,7 @@ class AstBuilder {
 Lexer *lexer;
 ErrorHandler *herr;
 SyntaxMode mode;
+LanguageFrontend *frontend;
 
 Token token;
 
@@ -160,9 +161,13 @@ bool is_type_specifier(const Token &tok) {
     case TT_UNSIGNED:
       return true;
 
-    case TT_IDENTIFIER:
-      // TODO: Implement checking if its a type
-      return true;
+    case TT_IDENTIFIER: {
+      if (auto def = frontend->look_up(tok.content); def != nullptr) {
+        return def->flags & (jdi::DEF_TYPENAME | jdi::DEF_CLASS | jdi::DEF_ENUM | jdi::DEF_TYPED | jdi::DEF_TEMPLATE);
+      } else {
+        return false;
+      }
+    }
 
     default:
       return is_cv_qualifier(tok) || is_class_key(tok);
@@ -190,8 +195,10 @@ bool next_maybe_nested_name() {
 }
 
 bool is_template_type(const Token &tok) {
-  // TODO: Implement me
-  return true;
+  if (auto def = frontend->look_up(tok.content); def != nullptr) {
+    return def->flags & jdi::DEF_TEMPLATE;
+  }
+  return false;
 }
 
 bool next_is_template_type() {
@@ -230,7 +237,9 @@ bool next_is_decl_specifier() {
 
 public:
 
-AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode): lexer{lexer}, herr{herr}, mode{mode} {
+AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
+  mode{mode}, frontend{frontend} {
+  frontend->definitionsModified(nullptr, "");
   token = lexer->ReadToken();
 }
 
@@ -309,7 +318,7 @@ std::unique_ptr<AST::Node> TryParseTypeName() {
   Token name = token;
   require_token(TT_IDENTIFIER, "Expected identifier in type name");
   if (is_template_type(name) && token.type == TT_LESS) {
-    TryParseTemplateArgs();
+    TryParseTemplateArgs(frontend->look_up(name.content));
   }
 
   return nullptr;
@@ -319,11 +328,12 @@ std::unique_ptr<AST::Node> TryParseIdExpression() {
   if (token.type == TT_IDENTIFIER) {
     TryParsePrefixIdentifier();
   } else if (token.type == TT_OPERATOR) {
+    Token op = token;
     token = lexer->ReadToken();
     require_operatorkw();
 
-    if (token.type == TT_LESS) {
-      TryParseTemplateArgs();
+    if (token.type == TT_LESS && is_template_type(op)) {
+      TryParseTemplateArgs(frontend->look_up(op.content));
     }
   } else if (token.type == TT_TILDE) {
     if (token.type == TT_IDENTIFIER) {
@@ -346,10 +356,25 @@ std::unique_ptr<AST::Node> TryParseDecltype() {
   return nullptr;
 }
 
-std::vector<std::unique_ptr<AST::Node>> TryParseTemplateArgs() {
-  require_token(TT_LESS, "Expected '<' at start of template arguments");
-  // TODO: Yeah I have no clue what to do here 🤷
-  require_token(TT_GREATER, "Expected '>' after template arguments");
+std::vector<std::unique_ptr<AST::Node>> TryParseTemplateArgs(jdi::definition *def) {
+  if (def->flags & jdi::DEF_TEMPLATE) {
+    require_token(TT_LESS, "Expected '<' at start of template arguments");
+    for (std::size_t i = 0; token.type != TT_GREATER && token.type != TT_ENDOFCODE;) {
+      if (reinterpret_cast<jdi::definition_template *>(def)->params[i]->flags & jdi::DEF_TYPENAME) {
+        TryParseTypeID();
+      } else {
+        TryParseConstantExpression();
+      }
+
+      if (token.type == TT_COMMA) {
+        token = lexer->ReadToken();
+        i++;
+      } else {
+        break;
+      }
+    }
+    require_token(TT_GREATER, "Expected '>' after template arguments");
+  }
   return {};
 }
 
@@ -378,7 +403,7 @@ std::vector<std::unique_ptr<AST::Node>> TryParsePrefixIdentifier() {
   if (token.type == TT_SCOPEACCESS) {
     TryParseNestedNameSpecifier();
   } else if (token.type == TT_LESS && is_template_type(id)) {
-    TryParseTemplateArgs();
+    TryParseTemplateArgs(frontend->look_up(id.content));
   }
 
   return {};
@@ -396,7 +421,7 @@ std::unique_ptr<AST::Node> TryParseNestedNameSpecifier() {
       Token id = token;
       token = lexer->ReadToken();
       if (token.type == TT_LESS && is_template_type(id)) {
-        TryParseTemplateArgs();
+        TryParseTemplateArgs(frontend->look_up(id.content));
       }
     } else if (token.type == TT_DECLTYPE) {
       auto decl = TryParseDecltype();
