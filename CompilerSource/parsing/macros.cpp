@@ -177,7 +177,7 @@ static Token PasteTokens(
     const Token &left, const Token &right, const ErrorContext &errc) {
   static const MacroMap no_macros;
   Lexer l(std::move(TokContentCat(left, right)),
-          &ParseContext::ForPreprocessorEvaluation(), errc.herr);
+          &ParseContext::StaticForPreprocessorEvaluation(), errc.herr);
   Token res = l.ReadRawToken();
   Token end = l.ReadRawToken();
   if (end.type != TT_ENDOFCODE) {
@@ -300,7 +300,7 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
 TokenVector Macro::ParseTokens(
     std::shared_ptr<const std::string> owned_raw_string, ErrorHandler *herr) {
   TokenVector definiens;
-  Lexer lex(owned_raw_string, &ParseContext::ForPreprocessorEvaluation(), herr);
+  Lexer lex(owned_raw_string, &ParseContext::StaticForPreprocessorEvaluation(), herr);
   lex.UseCppOptions();
   for (auto t = lex.ReadToken(); t.type != TT_ENDOFCODE; t = lex.ReadToken()) {
     definiens.push_back(t);

@@ -210,10 +210,18 @@ struct TestingContext : ParseContext {
 
 static ParseContext kEmptyContextCpp(&kNullLanguageCpp, kNoNames);
 static ParseContext kEmptyContextGml(&kNullLanguageGml, kNoNames);
-const ParseContext &ParseContext::ForTesting(bool use_cpp) {
+
+ParseContext ParseContext::ForTesting(bool use_cpp) {
+  return ParseContext{use_cpp ? &kNullLanguageCpp : &kNullLanguageGml, kNoNames};
+}
+const ParseContext &ParseContext::StaticForTesting(bool use_cpp) {
   return use_cpp ? kEmptyContextCpp : kEmptyContextGml;
 }
-const ParseContext &ParseContext::ForPreprocessorEvaluation() {
+
+ParseContext ParseContext::ForPreprocessorEvaluation() {
+  return kEmptyContextCpp;
+}
+const ParseContext &ParseContext::StaticForPreprocessorEvaluation() {
   return kEmptyContextCpp;
 }
 

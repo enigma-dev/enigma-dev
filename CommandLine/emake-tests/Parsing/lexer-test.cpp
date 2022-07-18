@@ -24,14 +24,14 @@ class TestFailureErrorHandler : public ErrorHandler {
 
 struct LexerTester {
   TestFailureErrorHandler herr;
-  const ParseContext *context;
+  ParseContext context;
   Lexer lexer;
 
   Lexer *operator->() { return &lexer; }
 
-  LexerTester(std::string code, bool use_cpp = false):
-      context(&ParseContext::ForTesting(use_cpp)),
-      lexer(std::move(code), context, &herr) {}
+  explicit LexerTester(std::string code, bool use_cpp = false):
+      context(ParseContext::ForTesting(use_cpp)),
+      lexer(std::move(code), &context, &herr) {}
 };
 
 TEST(LexerTest, GreedyTokenization) {

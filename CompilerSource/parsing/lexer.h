@@ -46,8 +46,10 @@ struct ParseContext {
   /// Options controlling how code is interpreted.
   setting::CompatibilityOptions compatibility_opts;
 
-  static const ParseContext &ForTesting(bool use_cpp);
-  static const ParseContext &ForPreprocessorEvaluation();
+  static ParseContext ForTesting(bool use_cpp);
+  static const ParseContext &StaticForTesting(bool use_cpp);
+  static ParseContext ForPreprocessorEvaluation();
+  static const ParseContext &StaticForPreprocessorEvaluation();
 
   /// Disallow null construction.
   ParseContext(nullptr_t) = delete;
