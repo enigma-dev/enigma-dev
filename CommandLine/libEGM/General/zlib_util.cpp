@@ -282,7 +282,9 @@ std::unique_ptr<char[]> Decoder::decompress(size_t &length, size_t off) {
   std::unique_ptr<char[]> src = read(length, off);
 
   z_stream zs = {}; // zero-initialize
-  if (inflateInit(&zs) != Z_OK) {
+  // using inflateInit2 with windowBits(2nd argument) set to MAX_WBITS | 32, triggers header detection to properly
+  // decompress both zlib and gzip streams
+  if (inflateInit2(&zs, MAX_WBITS | 32) != Z_OK) {
     errStream << "Failed to initialize zlib inflate" << std::endl;
     return nullptr;
   }
