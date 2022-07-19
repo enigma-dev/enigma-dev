@@ -261,17 +261,25 @@ private:
       }
 
       if(encoding == "base64") {
+        // decode base64 data
+        std::string decodedStr = base64_decode(dataStr);
+
+        int layerWidth = layer.attribute("width").as_int();
+        int layerHeight = layer.attribute("height").as_int();
+        size_t expectedSize = layerWidth * layerHeight * 4;
+
         std::string compression = dataNode.attribute("compression").as_string();
-        if(compression == "zlib") {
-          bool ok = LoadBase64ZlibLayerData(layer, dataStr, resNode, tileWidth, tileHeight);
+        if(compression == "zlib" || compression == "gzip") {
+          bool ok = LoadBase64ZlibLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
+                                            layerHeight);
           if(!ok)
             return false;
         }
-        else if(compression == "gzip") {
-
-        }
         else if(compression == "zstd") {
-
+          bool ok = LoadBase64ZstdLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
+                                            layerHeight);
+          if(!ok)
+            return false;
         }
         else {
           // compression isnt specified for uncompressed format
@@ -280,7 +288,9 @@ private:
         }
       }
       else if(encoding == "csv") {
-        return LoadCsvLayerData(layer, dataStr, resNode, tileWidth, tileHeight);
+        bool ok = LoadCsvLayerData(layer, dataStr, resNode, tileWidth, tileHeight);
+        if(!ok)
+          return false;
       }
       else {
         outStream << "Error loading tiles, unsupported encoding type: " << encoding << std::endl;
@@ -291,20 +301,14 @@ private:
     return true;
   }
 
-  bool LoadBase64ZlibLayerData(const pugi::xml_node &layerNode, const std::string &dataStr, buffers::TreeNode *resNode,
-                          const int& tileWidth, const int& tileHeight) {
-    // decode base64 data
-    std::string decodedStr = base64_decode(dataStr);
-
-    // decompress zlib compressed data
+  bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
+                           const int& tileWidth, const int& tileHeight, const int& layerWidth, const int& layerHeight) {
+    // decompress zlib/gzip compressed data
     std::istringstream istr(decodedStr);
     Decoder decoder(istr);
     size_t dataSize = decodedStr.size();
     std::unique_ptr<char[]> layerDataCharPtr = decoder.decompress(dataSize, 0);
 
-    int layerWidth = layerNode.attribute("width").as_int();
-    int layerHeight = layerNode.attribute("height").as_int();
-    size_t expectedSize = layerWidth * layerHeight * 4;
     if(dataSize != expectedSize) {
       errStream << "Error loading tiles, zlib decompressed layer data corrupted." << std::endl;
       return false;
@@ -318,6 +322,38 @@ private:
                                     static_cast<unsigned char>(layerDataCharPtr[tileIndex + 1]) << 8 |
                                     static_cast<unsigned char>(layerDataCharPtr[tileIndex + 2]) << 16 |
                                     static_cast<unsigned char>(layerDataCharPtr[tileIndex + 3]) << 24;
+
+        tileIndex += 4;
+
+        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+      }
+    }
+
+    return true;
+  }
+
+  bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
+                           const int& tileWidth, const int& tileHeight, const int& layerWidth, const int& layerHeight) {
+
+    std::vector<unsigned char> outTileData;
+    outTileData.resize(expectedSize);
+
+    // decompress zstd compressed data
+    size_t const outSize = ZSTD_decompress(outTileData.data(), outTileData.size(),
+                                         decodedStr.data(), decodedStr.size());
+    if(ZSTD_isError(outSize)) {
+      errStream << "Error loading tile layer data, zstd compressed stream corrupted." << std::endl;
+      return false;
+    }
+
+    unsigned int tileIndex = 0;
+    for (int y=0; y < layerHeight; ++y) {
+      for (int x=0; x < layerWidth; ++x) {
+        // loading 4 bytes of stream into uint following little endian order
+        unsigned int globalTileId = outTileData[tileIndex] |
+                                    outTileData[tileIndex + 1] << 8 |
+                                    outTileData[tileIndex + 2] << 16 |
+                                    outTileData[tileIndex + 3] << 24;
 
         tileIndex += 4;
 
