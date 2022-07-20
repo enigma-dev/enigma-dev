@@ -51,7 +51,7 @@ endif
 WINDRES = windres.exe --codepage=65001
 
 # Default find
-FIND = find/opt/local/include
+FIND = find
 
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
