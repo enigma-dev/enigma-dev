@@ -37,7 +37,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-#if (defined(__APPLE__) && defined(__MACH__) && defined(PROCESS_XQUARTZ_IMPL)) || (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+#if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
 #include <X11/Xlib.h>
 #endif
 
