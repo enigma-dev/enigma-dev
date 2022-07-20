@@ -125,8 +125,8 @@ bool widget_system_initialize() {
 string create_shell_dialog(string command) {
   string output;
   ngs::proc::PROCID pid = ProcessExecute(command.c_str()); modify_shell_dialog(pid);
-  output = executed_process_read_from_standard_output(pid);
-  free_executed_process_standard_output(pid);
+  output = ngs::proc::executed_process_read_from_standard_output(pid);
+  ngs::proc::free_executed_process_standard_output(pid);
   while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
     output.pop_back();
   return output;
