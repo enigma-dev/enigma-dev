@@ -1,4 +1,7 @@
-SOURCES += $(wildcard Widget_Systems/xlib/*.cpp) Widget_Systems/General/WSdialogs.cpp
+
+SHARED_SRC_DIR := ../../shared
+override CXXFLAGS += -I$(SHARED_SRC_DIR)/apiprocess -std=c++17
+override CFLAGS += -I$(SHARED_SRC_DIR)/apiprocess -std=c++17
 ifeq ($(OS), Linux)
 	override LDLIBS += -lprocps
 	override CXXFLAGS +=  $(shell pkg-config x11 --cflags)
@@ -15,3 +18,4 @@ else ifeq ($(OS), Darwin)
 	override CFLAGS += $(shell pkg-config x11 --cflags)
 	override LDLIBS += $(shell pkg-config x11 --libs)
 endif
+SOURCES += $(wildcard Widget_Systems/xlib/*.cpp) Widget_Systems/General/WSdialogs.cpp
