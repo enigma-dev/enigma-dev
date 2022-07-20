@@ -41,6 +41,20 @@
 #include <climits>
 #include <cstdio>
 
+#if defined(PROCESS_GUIWINDOW_IMPL)
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#if (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
+#include <CoreGraphics/CoreGraphics.h>
+#include <CoreFoundation/CoreFoundation.h>
+#include <AppKit/AppKit.h>
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
+#include <X11/Xlib.h>
+#endif
+#endif
+#endif
+
 #include "process.h"
 #if defined(PROCESS_WIN32EXE_INCLUDES)
 #if defined(_WIN64)
