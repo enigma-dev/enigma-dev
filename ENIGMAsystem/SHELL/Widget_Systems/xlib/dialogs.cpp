@@ -25,8 +25,16 @@
 #include <chrono>
 #include <vector>
 
-#include "dialogs.h"
+ifndef PROCESS_XQUARTZ_IMPL
+#define PROCESS_XQUARTZ_IMPL
+#endif
+
+ifndef PROCESS_GUIWINDOW_IMPL
+#define PROCESS_GUIWINDOW_IMPL
+#endif
+
 #include "apiprocess/process.h"
+#include "dialogs.h"
 
 #include "../../../../CompilerSource/OS_Switchboard.h"
 
@@ -50,14 +58,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
-
-ifndef PROCESS_XQUARTZ_IMPL
-#define PROCESS_XQUARTZ_IMPL
-#endif
-
-ifndef PROCESS_GUIWINDOW_IMPL
-#define PROCESS_GUIWINDOW_IMPL
-#endif
 
 using std::string;
 using std::vector;
