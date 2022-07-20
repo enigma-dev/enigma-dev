@@ -1446,15 +1446,15 @@ namespace ngs::proc {
     if (!proc_id_exists(proc_id)) return;
     #if defined(_WIN32)
     HWND hWnd = GetTopWindow(GetDesktopWindow());
-    PROCID pid = 0; proc_id_from_window_id(window_id_from_native_window(hWnd), &pid);
+    PROCID pid = 0; proc_id_from_window_id(window_id_from_native_window((WINDOW)hWnd), &pid);
     if (proc_id == pid) {
-      wid_vec_1.push_back(window_id_from_native_window(hWnd)); i++;
+      wid_vec_1.push_back(window_id_from_native_window((WINDOW)hWnd)); i++;
     }
     while (hWnd = GetWindow(hWnd, GW_HWNDNEXT)) {
       message_pump();
-      PROCID pid = 0; proc_id_from_window_id(window_id_from_native_window(hWnd), &pid);
+      PROCID pid = 0; proc_id_from_window_id(window_id_from_native_window((WINDOW)hWnd), &pid);
       if (proc_id == pid) {
-        wid_vec_1.push_back(window_id_from_native_window(hWnd)); i++;
+        wid_vec_1.push_back(window_id_from_native_window((WINDOW)hWnd)); i++;
       }
     }
     #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
@@ -1492,9 +1492,9 @@ namespace ngs::proc {
       if (actual_format == 32) {
         unsigned long *array = (unsigned long *)prop;
         for (int j = nitems - 1; j >= 0; j--) {
-          PROCID pid; proc_id_from_window_id(window_id_from_native_window(array[j]), &pid);
+          PROCID pid; proc_id_from_window_id(window_id_from_native_window((WINDOW)array[j]), &pid);
           if (proc_id == pid) {
-            wid_vec_1.push_back(window_id_from_native_window(array[j])); i++;
+            wid_vec_1.push_back(window_id_from_native_window((WINDOW)array[j])); i++;
           }
         }
       }
