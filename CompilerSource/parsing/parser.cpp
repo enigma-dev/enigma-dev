@@ -81,7 +81,7 @@ bool next_is_ref_qualifier() {
   return is_ref_qualifier(token);
 }
 
-bool require_operatorkw() {
+std::string read_required_operatorkw() {
   if (next_is_operatorkw()) {
     if (token.type == TT_S_NEW || token.type == TT_S_DELETE) {
       TokenType type = token.type;
@@ -89,18 +89,26 @@ bool require_operatorkw() {
       if (token.type == TT_BEGINBRACKET) {
         token = lexer->ReadToken();
         require_token(TT_ENDBRACKET, "Expected ']' after '[' in '", type == TT_S_NEW ? "new" : "delete", "[]'");
+        return type == TT_S_NEW ? " new[]" : " delete[]";
+      } else {
+        return type == TT_S_NEW ? " new" : " delete";
       }
     } else if (token.type == TT_BEGINPARENTH) {
       token = lexer->ReadToken();
       require_token(TT_ENDPARENTH, "Expected ')' after '('");
+      return "()";
     } else if (token.type == TT_BEGINBRACKET) {
       token = lexer->ReadToken();
       require_token(TT_ENDBRACKET, "Expected ']' after '['");
+      return "[]";
     } else {
+      std::string oper{token.content};
       token = lexer->ReadToken();
+      return oper;
     }
   } else {
     herr->Error(token) << "Expected an overloadable operator";
+    return "";
   }
 }
 
@@ -422,25 +430,43 @@ jdi::definition *TryParseTypeName() {
 }
 
 jdi::definition *TryParseIdExpression() {
-  if (token.type == TT_IDENTIFIER) {
-    return TryParsePrefixIdentifier();
-  } else if (token.type == TT_OPERATOR) {
-    Token op = token;
-    token = lexer->ReadToken();
-    require_operatorkw();
+  switch (token.type) {
+    case TT_IDENTIFIER: return TryParsePrefixIdentifier();
 
-    if (token.type == TT_LESS && is_template_type(op)) {
-      TryParseTemplateArgs(frontend->look_up(op.content));
+    case TT_OPERATOR: {
+      Token op = token;
+      token = lexer->ReadToken();
+      std::string type = read_required_operatorkw();
+
+      if (type != "") {
+        std::string oper = "operator" + type;
+        if (token.type == TT_LESS && is_template_type(op)) {
+          TryParseTemplateArgs(frontend->look_up(oper));
+        } else {
+          return frontend->look_up(oper);
+        }
+      } else {
+        return nullptr;
+      }
     }
-  } else if (token.type == TT_TILDE) {
-    if (token.type == TT_IDENTIFIER) {
-      return TryParseTypeName();
-    } else if (token.type == TT_DECLTYPE) {
-      return TryParseDecltype();
+
+    case TT_TILDE: {
+      token = lexer->ReadToken();
+      if (token.type == TT_IDENTIFIER) {
+        return TryParseTypeName();
+      } else if (token.type == TT_DECLTYPE) {
+        return TryParseDecltype();
+      } else {
+        herr->Error(token) << "Given token is not valid for specifying a destructor to call";
+        return nullptr;
+      }
+    }
+
+    default: {
+      herr->Error(token) << "Given token cannot be used to specify a qualified or unqualified expression";
+      return nullptr;
     }
   }
-
-  return nullptr;
 }
 
 jdi::definition *TryParseDecltype() {
@@ -478,15 +504,15 @@ std::vector<std::unique_ptr<AST::Node>> TryParseTemplateArgs(jdi::definition *de
 jdi::definition *TryParseTypenameSpecifier() {
   require_token(TT_TYPENAME, "Expected 'typename' in typename specifier");
 
-  if (token.type == TT_IDENTIFIER) {
-    return TryParsePrefixIdentifier();
-  } else if (token.type == TT_DECLTYPE) {
-    return TryParseNestedNameSpecifier(TryParseDecltype());
-  } else if (token.type == TT_SCOPEACCESS) {
-    return TryParseNestedNameSpecifier(nullptr);
-  } else {
-    herr->Error(token) << "Expected nested name specifier after 'typename'";
-    return nullptr;
+  switch (token.type) {
+    case TT_IDENTIFIER: return TryParsePrefixIdentifier();
+    case TT_DECLTYPE: return TryParseNestedNameSpecifier(TryParseDecltype());
+    case TT_SCOPEACCESS: return TryParseNestedNameSpecifier(nullptr);
+
+    default: {
+      herr->Error(token) << "Expected nested name specifier after 'typename'";
+      return nullptr;
+    }
   }
 }
 
@@ -517,7 +543,7 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
     def = global_scope.get();
   }
 
-  Token prev = token;
+  Token prev{};
   while (token.type == TT_SCOPEACCESS) {
     prev = token;
     token = lexer->ReadToken();
@@ -554,9 +580,11 @@ bool matches_token_type(jdi::definition *def, const Token &tok) {
 
 void TryParseElaboratedName(jdi::full_type *ft) {
   Token type = token;
+
   token = lexer->ReadToken();
   Token name = token;
   jdi::definition *def = nullptr;
+
   if (token.type == TT_IDENTIFIER) {
     def = frontend->look_up(token.content);
     token = lexer->ReadToken();
@@ -580,50 +608,74 @@ void TryParseElaboratedName(jdi::full_type *ft) {
 }
 
 void TryParseTypeSpecifier(jdi::full_type *ft) {
-  if (token.type == TT_TYPE_NAME) {
-    if (ft->def != nullptr) {
-      herr->Error(token) << "Usage of two different types in one type specifier";
-    } else {
-      auto type = std::make_unique<jdi::definition_atomic>(std::string{token.content}, nullptr,
-                                                           jdi::DEF_TYPENAME, sizeof_builtin_type(token.content));
-      ft->def = type.release();
-    }
-    token = lexer->ReadToken();
-  } else if (token.type == TT_IDENTIFIER) {
-    ft->def = TryParsePrefixIdentifier();
-  } else if (token.type == TT_SCOPEACCESS) {
-    ft->def = TryParseNestedNameSpecifier(nullptr);
-  } else if (token.type == TT_DECLTYPE) {
-    Token tok = token;
-    auto def = TryParseDecltype();
-
-    if (token.type == TT_SCOPEACCESS) {
-      def = TryParseNestedNameSpecifier(def);
+  switch (token.type) {
+    case TT_TYPE_NAME: {
+      if (ft->def != nullptr) {
+        herr->Error(token) << "Usage of two different types in one type specifier";
+      } else {
+        auto type = std::make_unique<jdi::definition_atomic>(std::string{token.content}, nullptr,
+                                                             jdi::DEF_TYPENAME, sizeof_builtin_type(token.content));
+        ft->def = type.release();
+      }
+      token = lexer->ReadToken();
+      break;
     }
 
-    if (def != nullptr) {
-      ft->def = def;
-    } else {
-      herr->Error(tok) << "Could not parse decltype specifier";
+    case TT_IDENTIFIER: {
+      if (auto *def = TryParsePrefixIdentifier(); def != nullptr) {
+        ft->def = def;
+      }
+      break;
     }
-  } else if (token.type == TT_TYPENAME) {
-    if (auto def = TryParseTypenameSpecifier(); def != nullptr) {
-      ft->def = def;
+
+    case TT_SCOPEACCESS: {
+      if (auto *def = TryParseNestedNameSpecifier(nullptr); def != nullptr) {
+        ft->def = def;
+      }
+      break;
     }
-  } else if (next_is_cv_qualifier()) {
-    ft->flags |= jdi_decflag_bitmask(token.content);
-    token = lexer->ReadToken();
-  } else if (next_is_class_key() || token.type == TT_ENUM) {
-    TryParseElaboratedName(ft);
-  } else if (token.type == TT_SIGNED || token.type == TT_UNSIGNED) {
-    if (ft->def == nullptr) {
-      // If no type is there then implicitly synthesize `int`
-      auto type = std::make_unique<jdi::definition_atomic>("int", nullptr, jdi::DEF_TYPENAME,
-                                                           sizeof_builtin_type("int"));
-      ft->def = type.release();
+
+    case TT_DECLTYPE: {
+      Token tok = token;
+      auto def = TryParseDecltype();
+
+      if (token.type == TT_SCOPEACCESS) {
+        def = TryParseNestedNameSpecifier(def);
+      }
+
+      if (def != nullptr) {
+        ft->def = def;
+      } else {
+        herr->Error(tok) << "Could not parse decltype specifier";
+      }
+      break;
     }
-    ft->flags |= jdi_decflag_bitmask(token.content);
-    token = lexer->ReadToken();
+
+    case TT_TYPENAME: {
+      if (auto def = TryParseTypenameSpecifier(); def != nullptr) {
+        ft->def = def;
+      }
+      break;
+    }
+
+    case TT_SIGNED:
+    case TT_UNSIGNED: {
+      ft->flags |= jdi_decflag_bitmask(token.content);
+      token = lexer->ReadToken();
+      break;
+    }
+
+    default: {
+      if (next_is_cv_qualifier()) {
+        ft->flags |= jdi_decflag_bitmask(token.content);
+        token = lexer->ReadToken();
+      } else if (next_is_class_key() || token.type == TT_ENUM) {
+        TryParseElaboratedName(ft);
+      } else {
+        herr->Error(token) << "Given token does not specify a valid type specifier";
+      }
+      break;
+    }
   }
 }
 
