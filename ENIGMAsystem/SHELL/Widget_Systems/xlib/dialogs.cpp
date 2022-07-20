@@ -240,11 +240,3 @@ void widget_set_caption(string title) {
 }
 
 } // namespace enigma_user
-
-ifdef PROCESS_XQUARTZ_IMPL
-#undef PROCESS_XQUARTZ_IMPL
-#endif
-
-ifdef PROCESS_GUIWINDOW_IMPL
-#undef PROCESS_GUIWINDOW_IMPL
-#endif
