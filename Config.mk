@@ -1,5 +1,11 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
-OS := $(shell uname -s)
+
+# Define current OS, while treating MidnightBSD as FreeBSD
+if ($(shell uname -s), MidnightBSD)
+	OS := FreeBSD
+else
+	OS := $(shell uname -s)
+andif
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
