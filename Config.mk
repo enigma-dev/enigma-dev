@@ -1,7 +1,7 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
 
 # Define current OS, while treating MidnightBSD as FreeBSD
-if ($(shell uname -s), MidnightBSD)
+ifeq ($(shell uname -s), MidnightBSD)
 	OS := FreeBSD
 else
 	OS := $(shell uname -s)
