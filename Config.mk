@@ -57,10 +57,10 @@ LDFLAGS := -g
 
 # MacPorts include and lib folders
 ifeq ($(OS), Darwin)
-	CXXFLAGS += -I/opt/local/include
-	CFLAGS   += -I/opt/local/include
-	LDFLAGS  += -L/opt/local/lib
-	LDFLIBS  += -L/opt/local/lib
+	CXXFLAGS += -I/opt/local/include -I/usr/local/include
+	CFLAGS   += -I/opt/local/include -I/usr/local/include
+	LDFLAGS  += -L/opt/local/lib -L/usr/local/lib
+	LDFLIBS  += -L/opt/local/lib -L/usr/local/lib
 endif
 
 # FreeBSD include and lib folders
