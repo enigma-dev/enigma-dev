@@ -23,9 +23,8 @@ Supported Platforms:
 - Windows x86-64 7/8/8.1/10/11
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
-- FreeBSD/GhostBSD/DragonFly
+- FreeBSD/GhostBSD/helloSystem
 - Limited Mac 10.15+ Support
-- NetBSD/OpenBSD is a WIP
 
 Complete Games:
 
