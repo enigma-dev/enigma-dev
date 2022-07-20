@@ -5,7 +5,7 @@ if ($(shell uname -s), MidnightBSD)
 	OS := FreeBSD
 else
 	OS := $(shell uname -s)
-andif
+endif
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
