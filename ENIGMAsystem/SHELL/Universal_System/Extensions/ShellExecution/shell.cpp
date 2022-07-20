@@ -12,7 +12,6 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 using std::string;
-using namespace ngs::proc;
 
 namespace enigma_user {
 
