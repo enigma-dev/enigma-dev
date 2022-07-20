@@ -614,31 +614,35 @@ void TryParseElaboratedName(jdi::full_type *ft) {
   }
 }
 
+void maybe_assign_full_type(jdi::full_type *ft, jdi::definition *def, Token token, bool is_allocated = false) {
+  if (def != nullptr && ft->def == nullptr) {
+    ft->def = def;
+  } else if (ft->def != nullptr) {
+    if (is_allocated) {
+      delete def;
+    }
+    herr->Error(token) << "Usage of two different types in type specifier";
+  }
+}
+
 void TryParseTypeSpecifier(jdi::full_type *ft) {
   switch (token.type) {
     case TT_TYPE_NAME: {
-      if (ft->def != nullptr) {
-        herr->Error(token) << "Usage of two different types in one type specifier";
-      } else {
-        auto type = std::make_unique<jdi::definition_atomic>(std::string{token.content}, nullptr,
-                                                             jdi::DEF_TYPENAME, sizeof_builtin_type(token.content));
-        ft->def = type.release();
-      }
+      maybe_assign_full_type(ft,
+        std::make_unique<jdi::definition_atomic>(std::string{token.content}, nullptr, jdi::DEF_TYPENAME,
+                                                 sizeof_builtin_type(token.content)).release(),
+        token, true);
       token = lexer->ReadToken();
       break;
     }
 
     case TT_IDENTIFIER: {
-      if (auto *def = TryParsePrefixIdentifier(); def != nullptr) {
-        ft->def = def;
-      }
+      maybe_assign_full_type(ft, TryParsePrefixIdentifier(), token);
       break;
     }
 
     case TT_SCOPEACCESS: {
-      if (auto *def = TryParseNestedNameSpecifier(nullptr); def != nullptr) {
-        ft->def = def;
-      }
+      maybe_assign_full_type(ft, TryParseNestedNameSpecifier(nullptr), token);
       break;
     }
 
@@ -651,7 +655,7 @@ void TryParseTypeSpecifier(jdi::full_type *ft) {
       }
 
       if (def != nullptr) {
-        ft->def = def;
+        maybe_assign_full_type(ft, def, tok);
       } else {
         herr->Error(tok) << "Could not parse decltype specifier";
       }
@@ -659,22 +663,17 @@ void TryParseTypeSpecifier(jdi::full_type *ft) {
     }
 
     case TT_TYPENAME: {
-      if (auto def = TryParseTypenameSpecifier(); def != nullptr) {
-        ft->def = def;
-      }
-      break;
-    }
-
-    case TT_SIGNED:
-    case TT_UNSIGNED: {
-      ft->flags |= jdi_decflag_bitmask(token.content);
-      token = lexer->ReadToken();
+      maybe_assign_full_type(ft, TryParseTypenameSpecifier(), token);
       break;
     }
 
     default: {
-      if (next_is_cv_qualifier()) {
-        ft->flags |= jdi_decflag_bitmask(token.content);
+      if (token.type == TT_SIGNED || token.type == TT_UNSIGNED || next_is_cv_qualifier()) {
+        if ((ft->flags & jdi_decflag_bitmask(token.content)) == jdi_decflag_bitmask(token.content)) {
+          herr->Warning(token) << "Duplicate usage of flags in type specifier";
+        } else {
+          ft->flags |= jdi_decflag_bitmask(token.content);
+        }
         token = lexer->ReadToken();
       } else if (next_is_class_key() || token.type == TT_ENUM) {
         TryParseElaboratedName(ft);
