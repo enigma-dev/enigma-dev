@@ -30,25 +30,22 @@
 namespace ngs::proc {
 
   #if !defined(_WIN32)
-  typedef int PROCID;
+  #define PROCID int
   #else
-  typedef unsigned long PROCID;
+  #define PROCID unsigned long
   #endif
-  typedef PROCID LOCALPROCID;
+  #define LOCALPROCID PROCID
   #if defined(PROCESS_GUIWINDOW_IMPL)
-  #if defined(_WIN32)
-  typedef void *WINDOW;
-  #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
-  typedef void *WINDOW;
+  #if defined(_WIN32) || ((defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL))
+  #define WINDOW void *
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
-  typedef unsigned long WINDOW;
+  #define WINDOW unsigned long
   #endif
-  typedef char *WINDOWID;
+  #define WINDOWID char *
   #endif
-  typedef int PROCLIST;
-  typedef int PROCINFO;
-  typedef int KINFOFLAGS;
-
+  #define PROCLIST int
+  #define PROCINFO int
+  #define KINFOFLAGS int
   #define KINFO_EXEP 0x1000
   #define KINFO_CWDP 0x2000
   #define KINFO_PPID 0x0100
