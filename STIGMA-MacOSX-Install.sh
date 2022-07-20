@@ -3,7 +3,7 @@ sudo xcode-select --install
 if [ -f "/opt/local/bin/port" ]; then
   sudo port -N install curl wget gdb gmake cmake pkgconf protobuf-c glew glm libpng libGLU libvpx box2D freetype libffi openjdk8 jna rapidjson libyaml boost pugixml yaml-cpp grpc
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  brew install flac opusfile mpg123 modplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 sdl2_mixer dumb
+  brew install flac opusfile mpg123 libmodplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 sdl2_mixer dumb
   sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
   cd /Applications/stigma-dev
   sudo env CC=clang CXX=clang++ gmake && sudo env CC=clang CXX=clang++ gmake emake
