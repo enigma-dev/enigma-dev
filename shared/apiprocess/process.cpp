@@ -1550,7 +1550,7 @@ namespace ngs::proc {
   void proc_id_from_window_id(WINDOWID win_id, PROCID *proc_id) {
     *proc_id = 0;
     #if defined(_WIN32)
-    DWORD pid = 0; GetWindowThreadProcessId(native_window_from_window_id(win_id), &pid);
+    DWORD pid = 0; GetWindowThreadProcessId((HWND)native_window_from_window_id(win_id), &pid);
     *proc_id = (PROCID)pid;
     #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
     CFArrayRef window_array = CGWindowListCopyWindowInfo(
@@ -1586,7 +1586,7 @@ namespace ngs::proc {
     int actual_format = 0, status = 0;
     unsigned long nitems = 0, bytes_after = 0;
     filter_atom = XInternAtom(display, "_NET_WM_PID", true);
-    status = XGetWindowProperty(display, native_window_from_window_id(win_id), filter_atom, 0, 1000, false,
+    status = XGetWindowProperty(display, (Window)native_window_from_window_id(win_id), filter_atom, 0, 1000, false,
     AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
     if (status == Success && prop != nullptr) {
       property = prop[0] + (prop[1] << 8) + (prop[2] << 16) + (prop[3] << 24);
