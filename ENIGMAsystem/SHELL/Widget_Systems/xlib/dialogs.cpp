@@ -120,13 +120,15 @@ bool widget_system_initialize() {
 string create_shell_dialog(string command) {
   string output;
   ngs::proc::PROCID pid = ngs::proc::process_execute_async(command.c_str());
-  while (pid != 0 || !ngs::proc::completion_status_from_executed_process(pid)) {
-    modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  if (pid) {
+    while (!ngs::proc::completion_status_from_executed_process(pid)) {
+      modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    output = ngs::proc::executed_process_read_from_standard_output(pid);
+    ngs::proc::free_executed_process_standard_output(pid);
+    while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
+      output.pop_back();
   }
-  output = ngs::proc::executed_process_read_from_standard_output(pid);
-  ngs::proc::free_executed_process_standard_output(pid);
-  while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
-    output.pop_back();
   return output;
 }
 
