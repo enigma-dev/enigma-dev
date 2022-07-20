@@ -112,7 +112,6 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
   XInternAtom(display, "UTF8_STRING", false),
   8, PropModeReplace, (unsigned char *)buffer, len);
   delete[] buffer; XCloseDisplay(display);
-  return nullptr;
 }
 
 bool widget_system_initialize() {
