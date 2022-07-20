@@ -1,17 +1,17 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFmain.h"
 
-#if defined(_WIN32)
-#define PROCID unsigned long
-#define LOCALPROCID unsigned long
-#else
-#define PROCID int
-#define LOCALPROCID int
+#ifndef PROCESS_XQUARTZ_IMPL
+#define PROCESS_XQUARTZ_IMPL
 #endif
 
-#define PROCLIST   int
-#define PROCINFO   int
-#define KINFOFLAGS int
+#if defined(__MACH__) && defined(__APPLE__)
+#ifndef PROCESS_GUIWINDOW_IMPL
+#define PROCESS_GUIWINDOW_IMPL
+#endif
+#endif
+
+#include "process.h"
 
 namespace enigma_user {
 
