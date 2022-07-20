@@ -94,7 +94,6 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
   SetErrorHandlers(); int sz = 0;
   ngs::proc::WINDOWID *arr = nullptr;
   Display *display = XOpenDisplay(nullptr); Window wid = 0;
-  
   ngs::proc::window_id_from_proc_id(pid, &arr, &sz);
   for (int i = 0; i < sz; i++) {
     wid = (Window)ngs::proc::native_window_from_window_id(arr[i]);
@@ -131,7 +130,7 @@ string create_shell_dialog(string command) {
   ngs::proc::PROCID pid = ngs::proc::process_execute_async(command.c_str());
   if (pid) {
     while (!ngs::proc::completion_status_from_executed_process(pid)) {
-      modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     output = ngs::proc::executed_process_read_from_standard_output(pid);
     ngs::proc::free_executed_process_standard_output(pid);
