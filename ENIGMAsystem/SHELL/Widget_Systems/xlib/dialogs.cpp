@@ -101,7 +101,7 @@ static void modify_shell_dialog(PROCID pid) {
       XSynchronize(display, true);
       Atom property = XInternAtom(display, "_NET_WM_ICON", false);
       XChangeProperty(display, wid, property, XA_CARDINAL, 32, 
-      PropModeReplace, (unsigned char *)xwindow_icon_default, 3); 
+      PropModeReplace, (unsigned char *)xwindow_icon_default, 2 + (64 * 64)); 
       XFlush(display);
     } else {
       XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
