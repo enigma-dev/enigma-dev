@@ -10,7 +10,6 @@ if [ -f "/opt/local/bin/port" ]; then
   sudo chmod +x ./install.sh
   sudo ./install.sh
   sudo chmod +x ./start.sh
-  sudo port -f deactivate libiconv
   echo "Installation Complete! You may now run the \"/Applications/stigma-dev/start.sh\" script from the terminal app!"
 else
   echo "Macports installation not found! Please download and install Macports first from www.macports.org"
