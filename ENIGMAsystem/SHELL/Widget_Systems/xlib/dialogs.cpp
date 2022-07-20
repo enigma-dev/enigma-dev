@@ -85,25 +85,29 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
   SetErrorHandlers(); int sz = 0;
   ngs::proc::WINDOWID *arr = nullptr;
   Display *display = XOpenDisplay(nullptr); Window wid = 0;
+  
   ngs::proc::window_id_from_proc_id(pid, &arr, &sz);
-  wid = (Window)ngs::proc::native_window_from_window_id(arr[sz - 1]);
-  ngs::proc::free_window_id(arr);
-  if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
-    XSynchronize(display, true);
-    unsigned long empty[] = { 1, 1, 0x0 };
-    Atom property = XInternAtom(display, "_NET_WM_ICON", false);
-    XChangeProperty(display, wid, property, XA_CARDINAL, 32, 
-    PropModeReplace, (unsigned char *)empty, 3); XFlush(display);
-  } else {
-    XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
+  for (int i = 0; i < sz; i++) {
+    wid = (Window)ngs::proc::native_window_from_window_id(arr[i]);
+    ngs::proc::free_window_id(arr);
+    if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
+      XSynchronize(display, true);
+      unsigned long empty[] = { 1, 1, 0x0 };
+      Atom property = XInternAtom(display, "_NET_WM_ICON", false);
+      XChangeProperty(display, wid, property, XA_CARDINAL, 32, 
+      PropModeReplace, (unsigned char *)empty, 3); XFlush(display);
+    } else {
+      XSetIconFromSprite(display, wid, enigma_user::window_get_icon_index(), enigma_user::window_get_icon_subimg());
+    }
+    XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
+    int len = enigma_user::widget_get_caption().length() + 1; char *buffer = new char[len]();
+    strcpy(buffer, enigma_user::widget_get_caption().c_str()); XChangeProperty(display, wid,
+    XInternAtom(display, "_NET_WM_NAME", false),
+    XInternAtom(display, "UTF8_STRING", false),
+    8, PropModeReplace, (unsigned char *)buffer, len);
+    delete[] buffer;
   }
-  XSetTransientForHint(display, wid, (Window)(std::intptr_t)enigma_user::window_handle());
-  int len = enigma_user::widget_get_caption().length() + 1; char *buffer = new char[len]();
-  strcpy(buffer, enigma_user::widget_get_caption().c_str()); XChangeProperty(display, wid,
-  XInternAtom(display, "_NET_WM_NAME", false),
-  XInternAtom(display, "UTF8_STRING", false),
-  8, PropModeReplace, (unsigned char *)buffer, len);
-  delete[] buffer; XCloseDisplay(display);
+  XCloseDisplay(display);
 }
 
 bool widget_system_initialize() {
@@ -115,8 +119,10 @@ bool widget_system_initialize() {
 
 string create_shell_dialog(string command) {
   string output;
-  ngs::proc::PROCID pid = ngs::proc::process_execute(command.c_str()); 
-  modify_shell_dialog(pid);
+  ngs::proc::PROCID pid = ngs::proc::process_execute_async(command.c_str());
+  while (pid != 0 || !ngs::proc::completion_status_from_executed_process(pic)) 
+    modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::seconds(1));
+  }
   output = ngs::proc::executed_process_read_from_standard_output(pid);
   ngs::proc::free_executed_process_standard_output(pid);
   while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
