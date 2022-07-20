@@ -35,7 +35,7 @@ ifndef PROCESS_GUIWINDOW_IMPL
 #endif
 #endif
 
-#include "apiprocess/process.h"
+#include "process.h"
 #include "dialogs.h"
 
 #include "../../../../CompilerSource/OS_Switchboard.h"
