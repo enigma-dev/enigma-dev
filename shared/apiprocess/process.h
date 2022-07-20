@@ -37,14 +37,20 @@ namespace ngs::proc {
   typedef PROCID LOCALPROCID;
   #if defined(PROCESS_GUIWINDOW_IMPL)
   #if defined(_WIN32)
-  typedef void *HWND;
+  #ifndef HWND
+  #define HWND void *
+  #endif
   typedef HWND WINDOW;
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
-  typedef void NSWindow;
+  #ifndef NSWindow
+  #define NSWindow void
   typedef NSWindow *WINDOW;
+  #endif
   #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
-  typedef unsigned long Window;
+  #ifndef Window
+  #define Window unsigned long
   typedef Window WINDOW;
+  #endif
   #endif
   typedef char *WINDOWID;
   #endif
@@ -139,5 +145,19 @@ namespace ngs::proc {
   void free_executed_process_standard_output(LOCALPROCID proc_index);
   bool completion_status_from_executed_process(LOCALPROCID proc_index);
   const char *current_process_read_from_standard_input();
+  
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  #if defined(_WIN32)
+  #ifdef HWND
+  #undef HWND
+  #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL)
+  #ifdef NSWindow
+  #undef NSWindow
+  #endif
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
+  #ifdef Window
+  #undef Window
+  #endif
+  #endif
 
 } // namespace ngs::proc
