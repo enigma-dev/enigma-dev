@@ -1458,7 +1458,7 @@ namespace ngs::proc {
           CFNumberRef windowID = (CFNumberRef)CFDictionaryGetValue(
           windowInfoDictionary, kCGWindowNumber);
           CGWindowID wid; CFNumberGetValue(windowID, kCGWindowIDCFNumberType, &wid);
-          wid_vec_1.push_back(std::to_string((unsigned int)wid)); i++;
+          wid_vec_1.push_back(std::to_string((unsigned long)wid)); i++;
         }
       }
     }
