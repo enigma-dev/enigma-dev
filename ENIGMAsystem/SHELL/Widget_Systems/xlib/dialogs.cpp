@@ -126,8 +126,9 @@ string create_shell_dialog(string command) {
     }
     output = ngs::proc::executed_process_read_from_standard_output(pid);
     ngs::proc::free_executed_process_standard_output(pid);
-    while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
+    while (!output.empty() && (output.back() == '\r' || output.back() == '\n')) {
       output.pop_back();
+    }
   }
   return output;
 }
