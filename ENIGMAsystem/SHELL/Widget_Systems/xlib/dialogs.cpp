@@ -89,7 +89,6 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
   ngs::proc::window_id_from_proc_id(pid, &arr, &sz);
   for (int i = 0; i < sz; i++) {
     wid = (Window)ngs::proc::native_window_from_window_id(arr[i]);
-    ngs::proc::free_window_id(arr);
     if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
       XSynchronize(display, true);
       unsigned long empty[] = { 1, 1, 0x0 };
@@ -107,6 +106,7 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
     8, PropModeReplace, (unsigned char *)buffer, len);
     delete[] buffer;
   }
+  ngs::proc::free_window_id(arr);
   XCloseDisplay(display);
 }
 
@@ -121,7 +121,7 @@ string create_shell_dialog(string command) {
   string output;
   ngs::proc::PROCID pid = ngs::proc::process_execute_async(command.c_str());
   while (pid != 0 || !ngs::proc::completion_status_from_executed_process(pid)) {
-    modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::seconds(1));
+    modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
   output = ngs::proc::executed_process_read_from_standard_output(pid);
   ngs::proc::free_executed_process_standard_output(pid);
