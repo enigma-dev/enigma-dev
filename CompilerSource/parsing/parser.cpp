@@ -5,6 +5,7 @@
 #include "tokens.h"
 #include "precedence.h"
 
+#include <JDI/src/System/builtins.h>
 #include <memory>
 
 namespace enigma::parsing {
@@ -15,7 +16,6 @@ Lexer *lexer;
 ErrorHandler *herr;
 SyntaxMode mode;
 LanguageFrontend *frontend;
-std::unique_ptr<jdi::definition_scope> global_scope;
 
 Token token;
 
@@ -343,7 +343,7 @@ jdi::definition_scope *require_scope_type(jdi::definition *def, const Token &tok
 public:
 
 AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
-  mode{mode}, frontend{frontend}, global_scope{std::make_unique<jdi::definition_scope>()} {
+  mode{mode}, frontend{frontend} {
   frontend->definitionsModified(nullptr, "");
   token = lexer->ReadToken();
 }
@@ -539,9 +539,9 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
   jdi::definition *def = scope;
   if (def != nullptr && !(def->flags & jdi::DEF_SCOPE)) {
     herr->Error(token) << "Given specifier does not refer to any existing scopes";
-  } else if (def == nullptr) {
-    def = global_scope.get();
   }
+
+  bool is_global_scope = def == nullptr;
 
   Token prev{};
   while (token.type == TT_SCOPEACCESS) {
@@ -552,8 +552,15 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
       token = lexer->ReadToken();
       if (token.type == TT_LESS && is_template_type(id)) {
         TryParseTemplateArgs(frontend->look_up(id.content));
-      } else if (auto *scope = require_scope_type(def, prev); scope != nullptr) {
-        def = scope->look_up(std::string{id.content});
+      } else if (is_global_scope) {
+        is_global_scope = false;
+        def = frontend->look_up(id.content);
+        if (def == nullptr) {
+          herr->Error(id) << "Given name does not exist in the scope";
+          return nullptr;
+        }
+      } else if (auto *def_scope = require_scope_type(def, prev); def_scope != nullptr) {
+        def = def_scope->look_up(std::string{id.content});
         if (def == nullptr) {
           herr->Error(id) << "Given name does not exist in the scope";
           return nullptr;
