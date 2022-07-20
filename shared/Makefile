@@ -28,8 +28,8 @@ ifeq ($(UNIX_BASED), false)
 	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
 endif
 
-override CXXFLAGS += -std=c++17
-override CFLAGS += -std=c++17
+override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL
+override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
 else
