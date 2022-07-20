@@ -5,7 +5,7 @@
 #define OS_MACOSX    2
 #define OS_FREEBSD   3
 #define OS_DRAGONFLY 4
-#define OS_OPENBSD  5
+#define OS_OPENBSD   5
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
   #define CURRENT_PLATFORM_NAME "Windows"
