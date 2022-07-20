@@ -86,7 +86,7 @@ static void modify_shell_dialog(ngs::proc::PROCID pid) {
   ngs::proc::WINDOWID *arr = nullptr;
   Display *display = XOpenDisplay(nullptr); Window wid = 0;
   ngs::proc::window_id_from_proc_id(pid, &arr, &sz);
-  wid = (Window)ngs::proc::native_window_from_window_id(arr[sz - 1])
+  wid = (Window)ngs::proc::native_window_from_window_id(arr[sz - 1]);
   ngs::proc::free_window_id(arr);
   if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
     XSynchronize(display, true);
