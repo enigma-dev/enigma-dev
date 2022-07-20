@@ -91,9 +91,9 @@ static bool kwin_running() {
 }
 
 // set dialog transient; set title caption.
-static void modify_shell_dialog(PROCID pid) {
+static void modify_shell_dialog(ngs::proc::PROCID pid) {
   SetErrorHandlers(); int sz = 0;
-  WINDOWID *arr = nullptr;
+  ngs::proc::WINDOWID *arr = nullptr;
   Display *display = XOpenDisplay(nullptr); Window wid = 0;
   ngs::proc::window_id_from_proc_id(pid, &arr, &sz);
   wid = (Window)ngs::proc::native_window_from_window_id(arr[sz - 1])
