@@ -69,34 +69,32 @@ DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
 
 ifeq ($(OS), Darwin)
-	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2
-	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2
+	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
+	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
 	override LDFLAGS += "/usr/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
 	override LDLIBS += "/usr/local/lib/libSDL2.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
-		override CXXFLAGS += -ObjC++
-		override CFLAGS += -ObjC++
 else ifeq ($(OS), FreeBSD)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
 	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
 else ifeq ($(OS), DragonFly)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 else ifeq ($(OS), OpenBSD)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
 else
 	ifeq ($(OS), Linux)
-	override LDLIBS += -lpthread -lprocps
-	override LDLDFLAGS += -lpthread -lprocps
+	override LDLIBS += -lpthread -lprocps -DPROCESS_GUIWINDOW_IMPL
+	override LDLDFLAGS += -lpthread -lprocps -DPROCESS_GUIWINDOW_IMPL
 	endif
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += $(shell pkg-config --libs --static sdl2)
 	override LDFLAGS += $(shell pkg-config --libs --static sdl2)
 endif
