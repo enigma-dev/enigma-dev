@@ -25,16 +25,6 @@
 #include <chrono>
 #include <vector>
 
-#ifndef PROCESS_XQUARTZ_IMPL
-#define PROCESS_XQUARTZ_IMPL
-#endif
-
-#if defined(__MACH__) && defined(__APPLE__)
-#ifndef PROCESS_GUIWINDOW_IMPL
-#define PROCESS_GUIWINDOW_IMPL
-#endif
-#endif
-
 #include "process.h"
 #include "dialogs.h"
 
