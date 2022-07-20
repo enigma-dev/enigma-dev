@@ -4,10 +4,10 @@ ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += Universal_System/Extensions/ExternalFuncs/Win32/ExternalFuncs.cpp
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
-		override LDFLAGS += /usr/local/opt/libffi/lib/libffi.a
-		override LDLIBS += /usr/local/opt/libffi/lib/libffi.a
-		override CXXFLAGS += -I/usr/local/opt/libffi/include
-		override CFLAGS += -I/usr/local/opt/libffi/include
+		override LDFLAGS += /opt/local/lib/libffi.a
+		override LDLIBS += /opt/local/lib/libffi.a
+		override CXXFLAGS += -I/opt/local/include
+		override CFLAGS += -I/opt/local/include
 	else ifeq ($(OS), FreeBSD)
 		override LDFLAGS += /usr/local/lib/libffi.a
 		override LDLIBS += /usr/local/lib/libffi.a

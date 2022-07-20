@@ -8,7 +8,12 @@ PROTO_DIR := ./protos/.eobjs
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
 LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
-ifeq ($(OS), Linux)
+ifeq ($(OS), Darwin)
+	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
+	override LDLIBS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
+	override CXXFLAGS += -ObjC++
+	override CFLAGS += -ObjC++
+else ifeq ($(OS), Linux)
 	override LDFLAGS += -lpthread -lprocps -lz -lpng
 else ifeq ($(OS), FreeBSD)
 	override LDFLAGS += -lc -lkvm -lutil -lprocstat -lz -lpng
