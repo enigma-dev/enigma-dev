@@ -107,11 +107,6 @@
 #define KINFO_PROC kinfo_proc2
 #endif
 
-using ngs::proc::PROCID;
-#if defined(PROCESS_GUIWINDOW_IMPL)
-using ngs::proc::WINDOWID;
-#endif
-
 namespace {
 
   #if !defined(_MSC_VER)
