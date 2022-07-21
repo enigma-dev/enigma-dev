@@ -283,8 +283,10 @@ private:
         }
         else {
           // compression isnt specified for uncompressed format
-          outStream << "Error loading tiles, unsupported compression type: " << compression << std::endl;
-          return false;
+          bool ok = LoadBase64UncompressedLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
+                                            layerHeight);
+          if(!ok)
+            return false;
         }
       }
       else if(encoding == "csv") {
@@ -397,6 +399,31 @@ private:
     for (int y=0; y < layerHeight; ++y) {
       for (int x=0; x < layerWidth; ++x) {
         unsigned int globalTileId = globalTileIds[y*layerWidth + x];
+        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+      }
+    }
+
+    return true;
+  }
+
+  bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
+                           const int& tileWidth, const int& tileHeight, const int& layerWidth, const int& layerHeight) {
+    if(decodedStr.size() != expectedSize) {
+      errStream << "Error loading tile layer data, uncompressed stream corrupted." << std::endl;
+      return false;
+    }
+
+    unsigned int tileIndex = 0;
+    for (int y=0; y < layerHeight; ++y) {
+      for (int x=0; x < layerWidth; ++x) {
+        // loading 4 bytes of stream into uint following little endian order
+        unsigned int globalTileId = static_cast<unsigned char>(decodedStr[tileIndex]) |
+                                    static_cast<unsigned char>(decodedStr[tileIndex + 1]) << 8 |
+                                    static_cast<unsigned char>(decodedStr[tileIndex + 2]) << 16 |
+                                    static_cast<unsigned char>(decodedStr[tileIndex + 3]) << 24;
+
+        tileIndex += 4;
+
         CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
       }
     }
