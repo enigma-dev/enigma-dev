@@ -231,7 +231,7 @@ bool next_is_template_type() {
 }
 
 bool maybe_ptr_operator(const Token &tok) {
-  return tok.type == TT_STAR || is_ref_qualifier(tok) || maybe_nested_name(tok);
+  return tok.type == TT_STAR || is_ref_qualifier(tok);
 }
 
 bool next_maybe_ptr_operator() {
@@ -352,16 +352,23 @@ std::unique_ptr<AST::Node> TryParseConstantExpression() {
   return TryParseExpression(Precedence::kTernary);
 }
 
-std::unique_ptr<AST::Node> TryParseArrayBoundsExpression() {
+std::unique_ptr<AST::Node> TryParseArrayBoundsExpression(jdi::ref_stack *ft) {
   require_token(TT_BEGINBRACKET, "Expected '[' before array bounds expression");
+  std::unique_ptr<AST::Node> expr = nullptr;
   if (token.type != TT_ENDBRACKET) {
-    TryParseConstantExpression();
+    expr = TryParseConstantExpression();
   }
   require_token(TT_ENDBRACKET, "Expected ']' after array bounds expression");
+
+  // TODO: Check that expression is constant, then evaluate it
+  ft->push_array(jdi::ref_stack::node_array::nbound);
+
   return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseNoexceptSpecifier() {
+jdi::definition *TryParseNoexceptSpecifier() {
+  herr->Error(token) << "Unimplemented: noexcept";
+
   require_token(TT_NOEXCEPT, "Expected 'noexcept' in noexcept specifier");
   if (token.type == TT_BEGINPARENTH) {
     token = lexer->ReadToken();
@@ -378,8 +385,9 @@ std::unique_ptr<AST::Node> TryParseParametersAndQualifiers(bool did_consume_pare
   }
   if (token.type != TT_ENDPARENTH) {
     while (token.type != TT_ENDPARENTH) {
-      TryParseDeclSpecifierSeq();
-      TryParseDeclarator();
+      jdi::full_type ft;
+      TryParseDeclSpecifierSeq(&ft);
+      TryParseDeclarator(&ft);
 
       if (token.type == TT_EQUALS) {
         token = lexer->ReadToken();
@@ -685,7 +693,7 @@ void TryParseTypeSpecifier(jdi::full_type *ft) {
   }
 }
 
-std::unique_ptr<AST::Node> TryParsePtrOperator() {
+void TryParsePtrOperator(jdi::full_type *ft) {
   if (token.type == TT_STAR) {
     token = lexer->ReadToken();
     if (next_is_cv_qualifier()) {
@@ -707,42 +715,38 @@ std::unique_ptr<AST::Node> TryParsePtrOperator() {
       token = lexer->ReadToken();
     }
   }
-
-  return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseNoPtrAbstractDeclarator() {
+void TryParseNoPtrAbstractDeclarator(jdi::full_type *ft) {
   if (token.type == TT_BEGINPARENTH) {
     token = lexer->ReadToken();
     if (next_maybe_ptr_operator()) {
       while (next_maybe_ptr_operator()) {
-        TryParsePtrOperator();
+        TryParsePtrOperator(ft);
       }
       require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
     } else {
       TryParseParametersAndQualifiers(true);
       if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-        TryParseNoPtrAbstractDeclarator();
+        TryParseNoPtrAbstractDeclarator(ft);
       }
     }
   } else if (token.type == TT_BEGINBRACKET) {
-    TryParseArrayBoundsExpression();
+    TryParseArrayBoundsExpression(&ft->refs);
     if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-      TryParseNoPtrAbstractDeclarator();
+      TryParseNoPtrAbstractDeclarator(ft);
     }
   }
-
-  return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
+void TryParseAbstractDeclarator(jdi::full_type *ft) {
   if (next_maybe_ptr_operator()) {
     while(next_maybe_ptr_operator()) {
-      TryParsePtrOperator();
+      TryParsePtrOperator(ft);
     }
 
     while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-      TryParseNoPtrAbstractDeclarator();
+      TryParseNoPtrAbstractDeclarator(ft);
     }
 
     if (token.type == TT_ELLIPSES) {
@@ -751,7 +755,7 @@ std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
         if (token.type == TT_BEGINPARENTH) {
           TryParseParametersAndQualifiers();
         } else {
-          TryParseArrayBoundsExpression();
+          TryParseArrayBoundsExpression(&ft->refs);
         }
       }
     }
@@ -762,7 +766,7 @@ std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
       TryParseTypeID();
     }
   } else {
-    TryParseNoPtrAbstractDeclarator();
+    TryParseNoPtrAbstractDeclarator(ft);
     if (token.type == TT_BEGINPARENTH) {
       TryParseParametersAndQualifiers();
       if (token.type == TT_ARROW) {
@@ -771,8 +775,6 @@ std::unique_ptr<AST::Node> TryParseAbstractDeclarator() {
       }
     }
   }
-
-  return nullptr;
 }
 
 jdi::full_type TryParseTypeID() {
@@ -781,55 +783,51 @@ jdi::full_type TryParseTypeID() {
     TryParseTypeSpecifier(&ft);
   }
   if (next_maybe_ptr_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-    TryParseAbstractDeclarator();
+    TryParseAbstractDeclarator(&ft);
   }
 
   return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseDeclSpecifier() {
-  if (token.type == TT_TYPEDEF) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_CONSTEXPR) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_CONSTINIT) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_CONSTEVAL) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_MUTABLE) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_INLINE) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_STATIC) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_THREAD_LOCAL) {
-    token = lexer->ReadToken();
-  } else if (token.type == TT_EXTERN) {
-    token = lexer->ReadToken();
-  } else if (next_is_type_specifier()) {
-    TryParseTypeSpecifier(nullptr);
-  }
+void TryParseDeclSpecifier(jdi::full_type *ft) {
+  switch (token.type) {
+    case TT_TYPEDEF:
+    case TT_CONSTEXPR:
+    case TT_CONSTINIT:
+    case TT_CONSTEVAL:
+    case TT_MUTABLE:
+    case TT_INLINE:
+    case TT_STATIC:
+    case TT_THREAD_LOCAL:
+    case TT_EXTERN:
+      token = lexer->ReadToken();
+      break;
 
-  return nullptr;
+    default:
+      if (next_is_type_specifier()) {
+        TryParseTypeSpecifier(ft);
+        break;
+      }
+  }
 }
 
-std::unique_ptr<AST::Node> TryParseDeclSpecifierSeq() {
+void TryParseDeclSpecifierSeq(jdi::full_type *ft) {
   while (next_is_decl_specifier()) {
-    TryParseDeclSpecifier();
+    TryParseDeclSpecifier(ft);
   }
 }
 
-std::unique_ptr<AST::Node> TryParsePtrDeclarator() {
+void TryParsePtrDeclarator(jdi::full_type *ft) {
   while (next_maybe_ptr_operator()) {
-    TryParsePtrOperator();
+    TryParsePtrOperator(ft);
   }
 
-  TryParseNoPtrDeclarator();
+  TryParseNoPtrDeclarator(ft);
 }
 
-std::unique_ptr<AST::Node> TryParseNoPtrDeclarator() {
+void TryParseNoPtrDeclarator(jdi::full_type *ft) {
   if (token.type == TT_BEGINPARENTH) {
-    TryParsePtrDeclarator();
+    TryParsePtrDeclarator(ft);
     require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
   } else {
     if (token.type == TT_ELLIPSES) {
@@ -842,16 +840,16 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator() {
     if (token.type == TT_BEGINPARENTH) {
       TryParseParametersAndQualifiers();
     } else {
-      TryParseArrayBoundsExpression();
+      TryParseArrayBoundsExpression(&ft->refs);
     }
   }
 }
 
-std::unique_ptr<AST::Node> TryParseDeclarator() {
+void TryParseDeclarator(jdi::full_type *ft) {
   if (next_maybe_ptr_operator()) {
-    TryParsePtrDeclarator();
+    TryParsePtrDeclarator(ft);
   } else {
-    TryParseNoPtrDeclarator();
+    TryParseNoPtrDeclarator(ft);
     if (token.type == TT_ARROW) {
       token = lexer->ReadToken();
       TryParseTypeID();
