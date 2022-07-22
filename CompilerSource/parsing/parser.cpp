@@ -36,9 +36,9 @@ bool require_any_of(std::initializer_list<TokenType> tt, Messages &&...messages)
     return true;
   } else {
     if constexpr (sizeof...(messages) > 0) {
-      (herr->Error(token) << ... << messages);
+      (herr->Error(token) << ... << messages) << ", got: '" << token.content << '\'';
     } else {
-      herr->Error(token) << "Unexpected token: `" << token.ToString() << '`';
+      herr->Error(token) << "Unexpected token: '" << token.ToString() << '\'';
     }
     return false;
   }
@@ -107,7 +107,7 @@ std::string read_required_operatorkw() {
       return oper;
     }
   } else {
-    herr->Error(token) << "Expected an overloadable operator";
+    herr->Error(token) << "Expected an overloadable operator, got: '" << token.content << '\'';
     return "";
   }
 }
@@ -230,12 +230,12 @@ bool next_is_template_type() {
   return is_template_type(token);
 }
 
-bool maybe_ptr_operator(const Token &tok) {
-  return tok.type == TT_STAR || is_ref_qualifier(tok);
+bool maybe_ptr_decl_operator(const Token &tok) {
+  return tok.type == TT_STAR || is_ref_qualifier(tok) || maybe_nested_name(tok);
 }
 
-bool next_maybe_ptr_operator() {
-  return maybe_ptr_operator(token);
+bool next_maybe_ptr_decl_operator() {
+  return maybe_ptr_decl_operator(token);
 }
 
 bool is_decl_specifier(const Token &tok) {
@@ -316,7 +316,7 @@ jdi::definition *require_defined_type(const Token &tok) {
   if (auto def = frontend->look_up(tok.content); def != nullptr) {
     return def;
   } else {
-    herr->Error(tok) << "Invalid type name";
+    herr->Error(tok) << "Invalid type name: '" << tok.content << '\'';
     return nullptr;
   }
 }
@@ -326,7 +326,7 @@ jdi::definition *require_scope_type(const Token &tok) {
       def != nullptr && (def->flags & jdi::DEF_SCOPE || def->flags & jdi::DEF_CLASS)) {
     return def;
   } else {
-    herr->Error(tok) << "The given identifier is not a scope name";
+    herr->Error(tok) << "The given identifier is not a scope name: '" << tok.content << '\'';
     return nullptr;
   }
 }
@@ -379,15 +379,15 @@ jdi::definition *TryParseNoexceptSpecifier() {
   return nullptr;
 }
 
-std::unique_ptr<AST::Node> TryParseParametersAndQualifiers(bool did_consume_paren = false) {
+void TryParseParametersAndQualifiers(jdi::full_type *ft, bool did_consume_paren = false) {
   if (!did_consume_paren) {
     require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
   }
   if (token.type != TT_ENDPARENTH) {
     while (token.type != TT_ENDPARENTH) {
-      jdi::full_type ft;
-      TryParseDeclSpecifierSeq(&ft);
-      TryParseDeclarator(&ft);
+      jdi::full_type param;
+      TryParseDeclSpecifierSeq(&param);
+      TryParseDeclarator(&param);
 
       if (token.type == TT_EQUALS) {
         token = lexer->ReadToken();
@@ -423,8 +423,6 @@ std::unique_ptr<AST::Node> TryParseParametersAndQualifiers(bool did_consume_pare
   if (token.type == TT_NOEXCEPT) {
     TryParseNoexceptSpecifier();
   }
-
-  return nullptr;
 }
 
 jdi::definition *TryParseTypeName() {
@@ -437,9 +435,20 @@ jdi::definition *TryParseTypeName() {
   return frontend->look_up(name.content);
 }
 
-jdi::definition *TryParseIdExpression() {
+jdi::definition *TryParseIdExpression(jdi::ref_stack *rt = nullptr, bool is_declarator = false) {
   switch (token.type) {
-    case TT_IDENTIFIER: return TryParsePrefixIdentifier();
+    case TT_IDENTIFIER: {
+      if (next_is_user_defined_type()) {
+        return TryParsePrefixIdentifier(rt, is_declarator);
+      } else {
+        auto def = frontend->look_up(token.content);
+        if (def == nullptr) {
+          herr->Error(token) << "No such name exists in global scope";
+        }
+        token = lexer->ReadToken();
+        return def;
+      }
+    }
 
     case TT_OPERATOR: {
       Token op = token;
@@ -524,23 +533,25 @@ jdi::definition *TryParseTypenameSpecifier() {
   }
 }
 
-jdi::definition *TryParsePrefixIdentifier() {
+jdi::definition *TryParsePrefixIdentifier(jdi::ref_stack *rt = nullptr, bool is_declarator = false) {
   Token id = token;
   require_token(TT_IDENTIFIER, "Expected identifier");
   auto def = require_defined_type(id);
 
-  if (token.type == TT_SCOPEACCESS) {
-    return TryParseNestedNameSpecifier(def);
-  } else if (token.type == TT_LESS && is_template_type(def)) {
+  if (token.type == TT_LESS && is_template_type(def)) {
     TryParseTemplateArgs(def);
+  }
+
+  if (token.type == TT_SCOPEACCESS) {
+    return TryParseNestedNameSpecifier(def, rt, is_declarator);
   }
 
   return def;
 }
 
-jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
+jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, jdi::ref_stack *rt = nullptr, bool is_declarator = false) {
   if (token.type != TT_SCOPEACCESS) {
-    herr->Error(token) << "Expected scope access '::' in nested name specifier";
+    herr->Error(token) << "Expected scope access '::' in nested name specifier, got: '" << token.content << '\'';
     return nullptr;
   }
 
@@ -552,11 +563,13 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
   bool is_global_scope = def == nullptr;
 
   Token prev{};
+  Token name{};
   while (token.type == TT_SCOPEACCESS) {
     prev = token;
     token = lexer->ReadToken();
     if (token.type == TT_IDENTIFIER) {
       Token id = token;
+      name = token;
       token = lexer->ReadToken();
       if (token.type == TT_LESS && is_template_type(id)) {
         TryParseTemplateArgs(frontend->look_up(id.content));
@@ -564,16 +577,24 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope) {
         is_global_scope = false;
         def = frontend->look_up(id.content);
         if (def == nullptr) {
-          herr->Error(id) << "Given name does not exist in the scope";
+          herr->Error(id) << "Given name does not exist in the scope: '" << id.content << '\'';
           return nullptr;
         }
       } else if (auto *def_scope = require_scope_type(def, prev); def_scope != nullptr) {
         def = def_scope->look_up(std::string{id.content});
         if (def == nullptr) {
-          herr->Error(id) << "Given name does not exist in the scope";
+          herr->Error(id) << "Given name does not exist in the scope: '" << id.content << '\'';
           return nullptr;
         }
       }
+    }
+  }
+
+  if (is_declarator) {
+    if (rt == nullptr) {
+      herr->Error(name) << "Internal error: nullptr jdi::ref_stack passed to TryParseNestedNameSpecifier()";
+    } else {
+      rt->name = name.content;
     }
   }
 
@@ -695,83 +716,49 @@ void TryParseTypeSpecifier(jdi::full_type *ft) {
 
 void TryParsePtrOperator(jdi::full_type *ft) {
   if (token.type == TT_STAR) {
+    ft->refs.push(jdi::ref_stack::RT_POINTERTO);
     token = lexer->ReadToken();
     if (next_is_cv_qualifier()) {
+      herr->Warning(token) << "Unimplemented: const/volatile pointer";
       token = lexer->ReadToken();
     }
   } else if (next_is_ref_qualifier()) {
+    if (token.type == TT_AND) {
+      herr->Warning(token) << "Unimplemented: universal references";
+    } else {
+      ft->refs.push(jdi::ref_stack::RT_REFERENCE);
+    }
     token = lexer->ReadToken();
-  } else if (next_maybe_nested_name()) {
+  }
+}
+
+void TryParseMaybeNestedPtrOperator(jdi::full_type *ft, bool is_abstract) {
+  if (next_maybe_nested_name()) {
+    jdi::definition *def = nullptr;
     if (token.type == TT_IDENTIFIER) {
+      def = frontend->look_up(token.content);
       token = lexer->ReadToken();
     } else if (token.type == TT_DECLTYPE) {
-      TryParseDecltype();
+      def = TryParseDecltype();
     }
 
-    TryParseNestedNameSpecifier(nullptr);
-    require_token(TT_STAR, "Expected '*' after nested name specifier");
-
-    if (next_is_cv_qualifier()) {
-      token = lexer->ReadToken();
-    }
-  }
-}
-
-void TryParseNoPtrAbstractDeclarator(jdi::full_type *ft) {
-  if (token.type == TT_BEGINPARENTH) {
-    token = lexer->ReadToken();
-    if (next_maybe_ptr_operator()) {
-      while (next_maybe_ptr_operator()) {
-        TryParsePtrOperator(ft);
+    def = TryParseNestedNameSpecifier(def);
+    if (token.type == TT_STAR) {
+      if (!(def->flags & jdi::DEF_CLASS)) {
+        herr->Error(token) << "Member pointer to non-class type";
+      } else {
+        ft->refs.push_memptr(reinterpret_cast<jdi::definition_class *>(def));
       }
-      require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
-    } else {
-      TryParseParametersAndQualifiers(true);
-      if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-        TryParseNoPtrAbstractDeclarator(ft);
-      }
-    }
-  } else if (token.type == TT_BEGINBRACKET) {
-    TryParseArrayBoundsExpression(&ft->refs);
-    if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-      TryParseNoPtrAbstractDeclarator(ft);
-    }
-  }
-}
-
-void TryParseAbstractDeclarator(jdi::full_type *ft) {
-  if (next_maybe_ptr_operator()) {
-    while(next_maybe_ptr_operator()) {
-      TryParsePtrOperator(ft);
-    }
-
-    while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-      TryParseNoPtrAbstractDeclarator(ft);
-    }
-
-    if (token.type == TT_ELLIPSES) {
       token = lexer->ReadToken();
-      while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-        if (token.type == TT_BEGINPARENTH) {
-          TryParseParametersAndQualifiers();
-        } else {
-          TryParseArrayBoundsExpression(&ft->refs);
-        }
-      }
-    }
-  } else if (token.type == TT_BEGINPARENTH) {
-    TryParseParametersAndQualifiers();
-    if (token.type == TT_ARROW) {
-      token = lexer->ReadToken();
-      TryParseTypeID();
-    }
-  } else {
-    TryParseNoPtrAbstractDeclarator(ft);
-    if (token.type == TT_BEGINPARENTH) {
-      TryParseParametersAndQualifiers();
-      if (token.type == TT_ARROW) {
+      if (next_is_cv_qualifier()) {
+        herr->Warning(token) << "Unimplemented: const/volatile pointer";
         token = lexer->ReadToken();
-        TryParseTypeID();
+      }
+    }
+    if (!is_abstract) {
+      std::string name{token.content};
+      if (require_token(TT_IDENTIFIER, "Expected name in declarator")) {
+        ft->refs.name = name;
       }
     }
   }
@@ -782,11 +769,11 @@ jdi::full_type TryParseTypeID() {
   while (next_is_type_specifier()) {
     TryParseTypeSpecifier(&ft);
   }
-  if (next_maybe_ptr_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-    TryParseAbstractDeclarator(&ft);
+  if (next_maybe_ptr_decl_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
+    TryParseDeclarator(&ft, true);
   }
 
-  return nullptr;
+  return ft;
 }
 
 void TryParseDeclSpecifier(jdi::full_type *ft) {
@@ -817,39 +804,44 @@ void TryParseDeclSpecifierSeq(jdi::full_type *ft) {
   }
 }
 
-void TryParsePtrDeclarator(jdi::full_type *ft) {
-  while (next_maybe_ptr_operator()) {
-    TryParsePtrOperator(ft);
+void TryParsePtrDeclarator(jdi::full_type *ft, bool is_abstract) {
+  while (next_maybe_ptr_decl_operator()) {
+    if (next_maybe_nested_name()) {
+      TryParseMaybeNestedPtrOperator(ft, is_abstract);
+    } else {
+      TryParsePtrOperator(ft);
+    }
   }
 
-  TryParseNoPtrDeclarator(ft);
+  TryParseNoPtrDeclarator(ft, is_abstract);
 }
 
-void TryParseNoPtrDeclarator(jdi::full_type *ft) {
+void TryParseNoPtrDeclarator(jdi::full_type *ft, bool is_abstract) {
   if (token.type == TT_BEGINPARENTH) {
-    TryParsePtrDeclarator(ft);
+    token = lexer->ReadToken();
+    TryParsePtrDeclarator(ft, is_abstract);
     require_token(TT_ENDPARENTH, "Expected ')' after pointer declarator");
-  } else {
+  } else if (!is_abstract) {
     if (token.type == TT_ELLIPSES) {
       token = lexer->ReadToken();
     }
-    TryParseIdExpression();
+    TryParseIdExpression(&ft->refs, true);
   }
 
   while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
     if (token.type == TT_BEGINPARENTH) {
-      TryParseParametersAndQualifiers();
+      TryParseParametersAndQualifiers(ft);
     } else {
       TryParseArrayBoundsExpression(&ft->refs);
     }
   }
 }
 
-void TryParseDeclarator(jdi::full_type *ft) {
-  if (next_maybe_ptr_operator()) {
-    TryParsePtrDeclarator(ft);
+void TryParseDeclarator(jdi::full_type *ft, bool is_abstract = false) {
+  if (next_maybe_ptr_decl_operator()) {
+    TryParsePtrDeclarator(ft, is_abstract);
   } else {
-    TryParseNoPtrDeclarator(ft);
+    TryParseNoPtrDeclarator(ft, is_abstract);
     if (token.type == TT_ARROW) {
       token = lexer->ReadToken();
       TryParseTypeID();
