@@ -191,7 +191,7 @@ LOCALPROCID process_execute(const char *command) {
     while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
       int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
-      char **cmd = nullptr; int cmdsize; cmdline_from_proc_id(fork_proc_id, &cmd, &cmdsize);
+      char **cmd = nullptr; int cmdsize; ngs::proc::cmdline_from_proc_id(fork_proc_id, &cmd, &cmdsize);
       if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
       if (wait_proc_id > 0) proc_id = wait_proc_id; } free_cmdline(cmd); }
     }
