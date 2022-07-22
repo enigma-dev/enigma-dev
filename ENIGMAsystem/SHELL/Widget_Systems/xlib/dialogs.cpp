@@ -127,7 +127,7 @@ bool widget_system_initialize() {
 
 string create_shell_dialog(string command) {
   string output;
-  PROCID pid = ngs::proc::process_execute_async((command + "; exec 2> /dev/null").c_str());
+  PROCID pid = ngs::proc::process_execute_async(command.c_str());
   if (pid) {
     while (!ngs::proc::completion_status_from_executed_process(pid)) {
       modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(5));
