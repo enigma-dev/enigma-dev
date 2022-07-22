@@ -14,13 +14,13 @@ ifeq ($(OS), Darwin)
 	override CXXFLAGS += -ObjC++
 	override CFLAGS += -ObjC++
 else ifeq ($(OS), Linux)
-	override LDFLAGS += -lpthread -lprocps -lz -lpng
+	override LDFLAGS += -lpthread -lprocps -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), FreeBSD)
-	override LDFLAGS += -lc -lkvm -lutil -lprocstat -lz -lpng
+	override LDFLAGS += -lc -lkvm -lutil -lprocstat -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS += -lc -lkvm -lz -lpng
+	override LDFLAGS += -lc -lkvm -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS += -lc -lkvm -lz -lpng
+	override LDFLAGS += -lc -lkvm -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 endif
 
 ifeq ($(UNIX_BASED), false)
