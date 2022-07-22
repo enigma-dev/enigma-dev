@@ -177,9 +177,9 @@ static inline void output_thread(std::intptr_t file, LOCALPROCID proc_index) {
 static inline PROCID proc_id_from_fork_proc_id(PROCID proc_id) {
   PROCID *pid = nullptr; int pidsize = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
+  ngs::proc::proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
   if (pid) { if (pidsize) { proc_id = pid[pidsize - 1]; }
-  free_proc_id(pid); }
+  ngs::proc::free_proc_id(pid); }
   return proc_id;
 }
 
@@ -197,7 +197,7 @@ static inline LOCALPROCID process_execute(const char *command) {
       int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
       char **cmd = nullptr; int cmdsize; ngs::proc::cmdline_from_proc_id(fork_proc_id, &cmd, &cmdsize);
       if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
-      if (wait_proc_id > 0) proc_id = wait_proc_id; } free_cmdline(cmd); }
+      if (wait_proc_id > 0) proc_id = wait_proc_id; } ngs::proc::free_cmdline(cmd); }
     }
   } else { proc_id = 0; }
   child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
