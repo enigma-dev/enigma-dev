@@ -1,6 +1,8 @@
 #include <parsing/ast.h>
 #include <parsing/parser.cpp>
+#include <languages/lang_CPP.h>
 
+#include <JDI/src/System/builtins.h>
 #include <gtest/gtest.h>
 
 using namespace ::enigma::parsing;
@@ -21,6 +23,7 @@ struct ParserTester {
   TestFailureErrorHandler herr;
   const ParseContext *context;
   Lexer lexer;
+  lang_CPP cpp{};
   AstBuilder builder;
 
   AstBuilder *operator->() { return &builder; }
@@ -28,7 +31,7 @@ struct ParserTester {
   ParserTester(std::string code, bool use_cpp = false)
       : context(&ParseContext::ForTesting(use_cpp)),
         lexer(std::move(code), context, &herr),
-        builder{&lexer, &herr, SyntaxMode::STRICT} {}
+        builder{&lexer, &herr, SyntaxMode::STRICT, &cpp} {}
 };
 
 TEST(ParserTest, Basics) {
@@ -86,4 +89,21 @@ TEST(ParserTest, Basics) {
   auto *arg = (*args)[0].get();
   ASSERT_EQ(arg->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(arg)->value.value), "6");
+}
+
+bool contains_flag(jdi::full_type *ft, std::size_t decflag) {
+  return (ft->flags & decflag) == decflag;
+}
+
+bool def_type_is(jdi::full_type *ft, std::size_t dectype) {
+  return (ft->def->flags & dectype) == dectype;
+}
+
+TEST(ParserTest, TypeSpecifier) {
+  ParserTester test{"const unsigned int ****(***)[10]"};
+  jdi::full_type ft = test->TryParseTypeID();
+  EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
+  EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__const->value));
+  EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__unsigned->value));
+  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
