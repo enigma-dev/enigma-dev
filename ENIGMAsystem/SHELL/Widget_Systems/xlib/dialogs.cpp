@@ -185,7 +185,6 @@ static inline PROCID proc_id_from_fork_proc_id(PROCID proc_id) {
 
 static inline LOCALPROCID process_execute(const char *command) {
   index++;
-  #if !defined(_WIN32)
   int infd = 0, outfd = 0;
   PROCID proc_id = 0, fork_proc_id = 0, wait_proc_id = 0;
   fork_proc_id = process_execute_helper(command, &infd, &outfd);
