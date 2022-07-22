@@ -262,17 +262,17 @@ bool next_is_decl_specifier() {
 
 std::size_t sizeof_builtin_type(std::string_view type) {
   static const std::unordered_map<std::string_view, std::size_t> sizes{
-    { "char",     1 },
+    { "char",     sizeof(char) },
     { "char8_t",  1 },
-    { "char16_t", 2 },
-    { "char32_t", 4 },
-    { "wchar_t",  2 },
-    { "bool",     1 },
-    { "short",    2 },
-    { "int",      4 },
-    { "long",     8 },
-    { "float",    4 },
-    { "double",   8 },
+    { "char16_t", sizeof(char16_t) },
+    { "char32_t", sizeof(char32_t) },
+    { "wchar_t",  sizeof(wchar_t) },
+    { "bool",     sizeof(bool) },
+    { "short",    sizeof(short) },
+    { "int",      sizeof(int) },
+    { "long",     sizeof(long) },
+    { "float",    sizeof(float) },
+    { "double",   sizeof(double) },
     { "void",     1 },
   };
 
