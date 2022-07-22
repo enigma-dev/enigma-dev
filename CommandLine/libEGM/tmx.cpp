@@ -160,6 +160,19 @@ private:
     resNode->mutable_room()->set_width(resNode->room().width() * resNode->room().hsnap());
     resNode->mutable_room()->set_height(resNode->room().height() * resNode->room().vsnap());
 
+    // Tiled map stores backgroundcolor in hex format, so we convert it to int32 for Room color
+    string hexColorStr = mapNode.attribute("backgroundcolor").as_string();
+    if(!hexColorStr.empty()) {
+      if(hexColorStr[0] == '#')
+        hexColorStr = hexColorStr.substr(1,6);
+      int hexColorInt = 0;
+      std::stringstream strStream;
+      strStream << std::hex << hexColorStr;
+      strStream >> hexColorInt;
+      resNode->mutable_room()->set_color(hexColorInt);
+      resNode->mutable_room()->set_show_color(true);
+    }
+
     bool room_tilesFromObjectsOk = LoadObjects(mapNode, resNode);
     if(!room_tilesFromObjectsOk) {
       errStream << "Something went wrong while loading Room.Tiles from Objects" << std::endl;

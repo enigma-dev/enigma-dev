@@ -11,10 +11,10 @@ message Room {
   optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"]; // tmx height unit is no. of tiles
   optional uint32 hsnap = 4 [(tmx) = "tilewidth"]; // tmx tilewidth unit is probably in pixels
   optional uint32 vsnap = 5 [(tmx) = "tileheight"]; // tmx tileheight unit is probably in pixels
-  optional bool isometric = 6 [(tmx) = "orientation"]; // TODO: Handle type conversion exclusively. Add support to staggered and hexagonal orientations of tmx
+  optional bool isometric = 6;
   optional uint32 speed = 27;
   optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
-  optional int32 color = 8 [(gmx) = "colour", (tmx) = "backgroundcolor"]; // TODO: Handle type conversion exclusively
+  optional int32 color = 8 [(gmx) = "colour"];
   optional bool show_color = 9 [(gmx) = "showcolour"];
   optional string creation_code = 10;
   optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
@@ -132,5 +132,7 @@ message Room {
   }
 
   optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
+
+  optional string orientation = 21 [(tmx) = "orientation"]; // Tiled orientation: orthogonal, isometric, staggered, hexagonal
 
 }
