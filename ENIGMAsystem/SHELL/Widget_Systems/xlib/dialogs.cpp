@@ -29,10 +29,12 @@
 #include <cstring>
 #include <climits>
 
+#include <mutex>
 #include <string>
 #include <thread>
 #include <chrono>
 #include <vector>
+#include <unordered_map>
 
 #include "process.h"
 #include "dialogs.h"
@@ -89,6 +91,137 @@ static bool kwin_running() {
   return bKWinRunning;
 }
 
+static int index = -1;
+static std::unordered_map<int, PROCID> child_proc_id;
+static std::unordered_map<int, bool> proc_did_execute;
+
+const char *executed_process_read_from_standard_output(LOCALPROCID proc_index) {
+  if (stdopt_map.find(proc_index) == stdopt_map.end()) return "\0";
+  std::lock_guard<std::mutex> guard(stdopt_mutex);
+  return stdopt_map.find(proc_index)->second.c_str();
+}
+
+void free_executed_process_standard_input(LOCALPROCID proc_index) {
+  if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
+  stdipt_map.erase(proc_index);
+}
+
+void free_executed_process_standard_output(LOCALPROCID proc_index) {
+  if (stdopt_map.find(proc_index) == stdopt_map.end()) return;
+  stdopt_map.erase(proc_index);
+}
+
+bool completion_status_from_executed_process(LOCALPROCID proc_index) {
+  if (complete_map.find(proc_index) == complete_map.end()) return false;
+  return complete_map.find(proc_index)->second;
+}
+
+static PROCID process_execute_helper(const char *command, int *infp, int *outfp) {
+  int p_stdin[2];
+  int p_stdout[2];
+  PROCID pid = -1;
+  if (pipe(p_stdin) == -1)
+    return -1;
+  if (pipe(p_stdout) == -1) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    close(p_stdout[0]);
+    close(p_stdout[1]);
+    return pid;
+  } else if (pid == 0) {
+    close(p_stdin[1]);
+    dup2(p_stdin[0], 0);
+    close(p_stdout[0]);
+    dup2(p_stdout[1], 1);
+    dup2(open("/dev/null", O_RDONLY), 2);
+    for (int i = 3; i < 4096; i++)
+      close(i);
+    setsid();
+    execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
+    exit(0);
+  }
+  close(p_stdin[0]);
+  close(p_stdout[1]);
+  if (infp == nullptr) {
+    close(p_stdin[1]);
+  } else {
+    *infp = p_stdin[1];
+  }
+  if (outfp == nullptr) {
+    close(p_stdout[0]);
+  } else {
+    *outfp = p_stdout[0];
+  }
+  return pid;
+}
+
+static inline void output_thread(std::intptr_t file, LOCALPROCID proc_index) {
+  ssize_t nRead = 0; char buffer[BUFSIZ];
+  while ((nRead = read((int)file, buffer, BUFSIZ)) > 0) {
+    buffer[nRead] = '\0';
+    std::lock_guard<std::mutex> guard(stdopt_mutex);
+    stdopt_map[proc_index].append(buffer, nRead);
+  }
+}
+
+static inline PROCID proc_id_from_fork_proc_id(PROCID proc_id) {
+  PROCID *pid = nullptr; int pidsize = 0;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  proc_id_from_parent_proc_id(proc_id, &pid, &pidsize);
+  if (pid) { if (pidsize) { proc_id = pid[pidsize - 1]; }
+  free_proc_id(pid); }
+  return proc_id;
+}
+
+LOCALPROCID process_execute(const char *command) {
+  index++;
+  #if !defined(_WIN32)
+  int infd = 0, outfd = 0;
+  PROCID proc_id = 0, fork_proc_id = 0, wait_proc_id = 0;
+  fork_proc_id = process_execute_helper(command, &infd, &outfd);
+  proc_id = fork_proc_id; wait_proc_id = proc_id;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  if (fork_proc_id != -1) {
+    while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
+      char **cmd = nullptr; int cmdsize; cmdline_from_proc_id(fork_proc_id, &cmd, &cmdsize);
+      if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
+      if (wait_proc_id > 0) proc_id = wait_proc_id; } free_cmdline(cmd); }
+    }
+  } else { proc_id = 0; }
+  child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  proc_did_execute[index] = true; LOCALPROCID proc_index = (LOCALPROCID)proc_id;
+  stdipt_map.insert(std::make_pair(proc_index, (std::intptr_t)infd));
+  std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
+  opt_thread.join();
+  free_executed_process_standard_input(proc_index);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  complete_map[proc_index] = true;
+  return proc_index;
+}
+
+LOCALPROCID process_execute_async(const char *command) {
+  int prevIndex = index;
+  std::thread proc_thread(process_execute, command);
+  while (prevIndex == index) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+  while (proc_did_execute.find(index) == proc_did_execute.end() || !proc_did_execute[index]) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  }
+  LOCALPROCID proc_index = (LOCALPROCID)child_proc_id[index];
+  complete_map[proc_index] = false;
+  proc_thread.detach();
+  return proc_index;
+}
+
 // set dialog transient; set title caption.
 static void modify_shell_dialog(PROCID pid) {
   SetErrorHandlers(); int sz = 0;
@@ -127,13 +260,13 @@ bool widget_system_initialize() {
 
 string create_shell_dialog(string command) {
   string output;
-  PROCID pid = ngs::proc::process_execute_async(command.c_str());
+  PROCID pid = process_execute_async(command.c_str());
   if (pid) {
-    while (!ngs::proc::completion_status_from_executed_process(pid)) {
+    while (!completion_status_from_executed_process(pid)) {
       modify_shell_dialog(pid); std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
-    output = ngs::proc::executed_process_read_from_standard_output(pid);
-    ngs::proc::free_executed_process_standard_output(pid);
+    output = executed_process_read_from_standard_output(pid);
+    free_executed_process_standard_output(pid);
     while (!output.empty() && (output.back() == '\r' || output.back() == '\n')) {
       output.pop_back();
     }
