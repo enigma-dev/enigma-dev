@@ -17,6 +17,12 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 namespace egm {
 namespace {
 
+struct HexMapUtil {
+  unsigned int hexSideLength;
+  string staggerAxis;
+  string staggerIndex;
+};
+
 class TMXMapLoader {
 public:
   TMXMapLoader(buffers::TreeNode *root, const fs::path &fPath) : tmxPath(fPath) {
@@ -51,6 +57,8 @@ private:
   std::unordered_map<std::string, buffers::TreeNode *> tilesetBgNamePtrMap;
   // TODO: Remove this hack and use "resource name generator"
   int idx=0;
+  // pointer to store hexagonal map details
+  std::unique_ptr<HexMapUtil> hexMapUtil;
 
   // same as of saying LoadBackgrounds
   bool LoadTilesets(pugi::xml_node& mapNode, std::string resType) {
@@ -157,8 +165,30 @@ private:
     AddTiledResource(resNode, resType, mapNode, resourceTypeIdCountMap, tmxPath);
 
     // correct width and height, convert from no. of tiles to no. of pixels
-    resNode->mutable_room()->set_width(resNode->room().width() * resNode->room().hsnap());
-    resNode->mutable_room()->set_height(resNode->room().height() * resNode->room().vsnap());
+    unsigned int nHoriTiles = resNode->room().width();
+    unsigned int nVertTiles = resNode->room().height();
+    unsigned int tileWidthPixels = resNode->room().hsnap();
+    unsigned int tileHeightPixels = resNode->room().vsnap();
+
+    if(resNode->mutable_room()->orientation() == "hexagonal") {
+      hexMapUtil = std::make_unique<HexMapUtil>();
+      hexMapUtil->hexSideLength = resNode->room().hexsidelength();
+      hexMapUtil->staggerAxis = resNode->room().staggeraxis();
+      hexMapUtil->staggerIndex = resNode->room().staggerindex();
+
+      if(hexMapUtil->staggerAxis == "x") {
+        resNode->mutable_room()->set_width((3 * nHoriTiles + 1) * hexMapUtil->hexSideLength / 2);
+        resNode->mutable_room()->set_height((nVertTiles * tileHeightPixels) + hexMapUtil->hexSideLength);
+      }
+      else {
+        resNode->mutable_room()->set_width((nHoriTiles * tileWidthPixels) + hexMapUtil->hexSideLength);
+        resNode->mutable_room()->set_height((3 * nVertTiles + 1) * hexMapUtil->hexSideLength / 2);
+      }
+    }
+    else {
+      resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
+      resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+    }
 
     // Tiled map stores backgroundcolor in hex format, so we convert it to int32 for Room color
     string hexColorStr = mapNode.attribute("backgroundcolor").as_string();
@@ -209,9 +239,10 @@ private:
       for(const pugi::xml_node &objectChild : objects) {
         unsigned int globalTileId = objectChild.attribute("gid").as_uint();
 
-        bool hasHorizontalFlip=false, hasVerticalFlip=false;
+        bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
         std::string tilesetName = "";
-        int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
+        int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
+                                             flippedDiagonally, rotatedHex120);
 
         if(localTileId == 0){
           errStream << "localId attribute not present(templates are not yet supported) or its value is zero" << std::endl;
@@ -446,9 +477,10 @@ private:
 
   void CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int& tileWidth,
                               const int& tileHeight, const int& currX, const int& currY) {
-    bool hasHorizontalFlip=false, hasVerticalFlip=false;
+    bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
     std::string tilesetName = "";
-    int localTileId = GetLocalTileIdInfo(globalTileId, hasHorizontalFlip, hasVerticalFlip, tilesetName);
+    int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
+                                         flippedDiagonally, rotatedHex120);
 
     std::string backgroundName = tilesetName;
 
@@ -463,8 +495,28 @@ private:
     tile->set_background_name(backgroundName);
     tile->set_name(backgroundName+"_"+std::to_string(idx++));
 
-    tile->set_x(currX*tileWidth);
-    tile->set_y(currY*tileHeight);
+    if(hexMapUtil) {
+      if(hexMapUtil->staggerAxis == "x") {
+        tile->set_x(currX * (tileWidth - (hexMapUtil->hexSideLength/2)));
+
+        if((currX%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currX%2 != 0 && hexMapUtil->staggerIndex == "even"))
+          tile->set_y(currY*tileHeight);
+        else
+          tile->set_y(currY*tileHeight + hexMapUtil->hexSideLength);
+      }
+      else {
+        tile->set_y(currY * (tileHeight - (hexMapUtil->hexSideLength/2)));
+
+        if((currX%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currX%2 != 0 && hexMapUtil->staggerIndex == "even"))
+          tile->set_x(currX*tileWidth);
+        else
+          tile->set_x(currX*tileWidth + hexMapUtil->hexSideLength);
+      }
+    }
+    else {
+      tile->set_x(currX*tileWidth);
+      tile->set_y(currY*tileHeight);
+    }
 
     tile->set_width(tileWidth);
     tile->set_height(tileHeight);
@@ -489,14 +541,24 @@ private:
     else
       tile->set_yscale(1.0);
 
+    // below two flags are only tested in hex maps, doing a little hack by using hexMapUtil to know if this map is
+    // hexagoanl or not
+    if(hexMapUtil) {
+      if(flippedDiagonally)
+        tile->set_rotation(60.0);
+      if(rotatedHex120)
+        tile->set_rotation(120.0);
+    }
+
     // TODO: Find a good implementation to set depth and id
     tile->set_depth(0);
     tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
   }
 
-  int GetLocalTileIdInfo(const unsigned int &globalTileId, bool &hasHorizontalFlip, bool &hasVerticalFlip,
-                         std::string& tilesetName) {
-    int localId = ConvertGlobalTileIdToLocal(globalTileId, hasHorizontalFlip, hasVerticalFlip);
+  int GetLocalTileIdInfo(std::string& tilesetName, const unsigned int &globalTileId,
+                         bool &hasHorizontalFlip, bool &hasVerticalFlip, bool &flippedDiagonally, bool &rotatedHex120) {
+    int localId = ConvertGlobalTileIdToLocal(globalTileId, hasHorizontalFlip, hasVerticalFlip, flippedDiagonally,
+                                             rotatedHex120);
 
     // find the tileset which this tile belongs to
     // We use lower_bound( O(log(n)) ) to find iterator to first equal to or greater matching firstgid of a tileset,
@@ -513,7 +575,8 @@ private:
     return localId;
   }
 
-  int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId, bool& hasHorizontalFlip, bool& hasVerticalFlip) {
+  int ConvertGlobalTileIdToLocal(const unsigned int& globalTileId, bool& hasHorizontalFlip, bool& hasVerticalFlip,
+                                 bool& flippedDiagonally, bool& rotatedHex120) {
     const unsigned int FLIPPED_HORIZONTALLY_FLAG =  0X80000000; // tile is horizontally flipped or not
 
     const unsigned int FLIPPED_VERTICALLY_FLAG =    0X40000000; // tile is vertically flipped or not
@@ -529,9 +592,8 @@ private:
 
     hasHorizontalFlip = tileId & FLIPPED_HORIZONTALLY_FLAG;
     hasVerticalFlip = tileId & FLIPPED_VERTICALLY_FLAG;
-    // TODO: Figure out implementation for flippedDiagonally and rotateHex120
-    // bool flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
-    // bool rotatedHex120 = tileId & ROTATED_HEXAGONAL_120_FLAG;
+    flippedDiagonally = tileId & FLIPPED_DIAGONALLY_FLAG;
+    rotatedHex120 = tileId & ROTATED_HEXAGONAL_120_FLAG;
 
     tileId &= ~(FLIPPED_HORIZONTALLY_FLAG | FLIPPED_VERTICALLY_FLAG | FLIPPED_DIAGONALLY_FLAG | ROTATED_HEXAGONAL_120_FLAG);
 
