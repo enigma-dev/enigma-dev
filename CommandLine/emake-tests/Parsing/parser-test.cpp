@@ -105,5 +105,27 @@ TEST(ParserTest, TypeSpecifier) {
   EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__const->value));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__unsigned->value));
+  auto first = ft.refs.begin();
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_ARRAYBOUND);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  jdi::full_type ft2;
+  ParserTester test2{"const unsigned int **(*var::*y)[10]"};
+  test2->TryParseTypeSpecifierSeq(&ft2);
+  test2->TryParseDeclarator(&ft2, false);
+  first = ft2.refs.begin();
+  EXPECT_EQ(ft2.refs.name, "y");
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_MEMBER_POINTER);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_ARRAYBOUND);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ(test2.lexer.ReadToken().type, TT_ENDOFCODE);
 }
