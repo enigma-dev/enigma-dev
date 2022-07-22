@@ -69,20 +69,20 @@ namespace enigma {
 
 CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
 
-static int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
+static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
   return 0;
 }
 
-static int XIOErrorHandlerImpl(Display *display) {
+static inline int XIOErrorHandlerImpl(Display *display) {
   return 0;
 }
 
-static void SetErrorHandlers() {
+static inline void SetErrorHandlers() {
   XSetErrorHandler(XErrorHandlerImpl);
   XSetIOErrorHandler(XIOErrorHandlerImpl);
 }
 
-static bool kwin_running() {
+static inline bool kwin_running() {
   SetErrorHandlers();
   Display *d = XOpenDisplay(nullptr);
   Atom aKWinRunning = XInternAtom(d, "KWIN_RUNNING", True);
@@ -94,29 +94,33 @@ static bool kwin_running() {
 static int index = -1;
 static std::unordered_map<int, PROCID> child_proc_id;
 static std::unordered_map<int, bool> proc_did_execute;
+static std::unordered_map<LOCALPROCID, std::intptr_t> stdipt_map;
+static std::unordered_map<LOCALPROCID, std::string> stdopt_map;
+static std::unordered_map<LOCALPROCID, bool> complete_map;
+static std::mutex stdopt_mutex;
 
-const char *executed_process_read_from_standard_output(LOCALPROCID proc_index) {
+static inline const char *executed_process_read_from_standard_output(LOCALPROCID proc_index) {
   if (stdopt_map.find(proc_index) == stdopt_map.end()) return "\0";
   std::lock_guard<std::mutex> guard(stdopt_mutex);
   return stdopt_map.find(proc_index)->second.c_str();
 }
 
-void free_executed_process_standard_input(LOCALPROCID proc_index) {
+static inline void free_executed_process_standard_input(LOCALPROCID proc_index) {
   if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
   stdipt_map.erase(proc_index);
 }
 
-void free_executed_process_standard_output(LOCALPROCID proc_index) {
+static inline void free_executed_process_standard_output(LOCALPROCID proc_index) {
   if (stdopt_map.find(proc_index) == stdopt_map.end()) return;
   stdopt_map.erase(proc_index);
 }
 
-bool completion_status_from_executed_process(LOCALPROCID proc_index) {
+static inline bool completion_status_from_executed_process(LOCALPROCID proc_index) {
   if (complete_map.find(proc_index) == complete_map.end()) return false;
   return complete_map.find(proc_index)->second;
 }
 
-static PROCID process_execute_helper(const char *command, int *infp, int *outfp) {
+static inline PROCID process_execute_helper(const char *command, int *infp, int *outfp) {
   int p_stdin[2];
   int p_stdout[2];
   PROCID pid = -1;
@@ -179,7 +183,7 @@ static inline PROCID proc_id_from_fork_proc_id(PROCID proc_id) {
   return proc_id;
 }
 
-LOCALPROCID process_execute(const char *command) {
+static inline LOCALPROCID process_execute(const char *command) {
   index++;
   #if !defined(_WIN32)
   int infd = 0, outfd = 0;
@@ -207,7 +211,7 @@ LOCALPROCID process_execute(const char *command) {
   return proc_index;
 }
 
-LOCALPROCID process_execute_async(const char *command) {
+static inline LOCALPROCID process_execute_async(const char *command) {
   int prevIndex = index;
   std::thread proc_thread(process_execute, command);
   while (prevIndex == index) {
@@ -223,7 +227,7 @@ LOCALPROCID process_execute_async(const char *command) {
 }
 
 // set dialog transient; set title caption.
-static void modify_shell_dialog(PROCID pid) {
+static inline void modify_shell_dialog(PROCID pid) {
   SetErrorHandlers(); int sz = 0;
   WINDOWID *arr = nullptr; Window wid = 0;
   Display *display = XOpenDisplay(nullptr);
