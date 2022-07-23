@@ -360,6 +360,24 @@ bool next_is_start_of_initializer() {
   return is_start_of_initializer(token);
 }
 
+bool is_start_of_id_expression(const Token &tok) {
+  switch (tok.type) {
+    case TT_TILDE:
+    case TT_IDENTIFIER:
+    case TT_OPERATOR:
+    case TT_SCOPEACCESS:
+    case TT_DECLTYPE:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool next_is_start_of_id_expression() {
+  return is_start_of_id_expression(token);
+}
+
 public:
 
 AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
@@ -407,23 +425,31 @@ void TryParseParametersAndQualifiers(jdi::ref_stack *rt, bool did_consume_paren 
   if (!did_consume_paren) {
     require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
   }
+
+  jdi::ref_stack::parameter_ct params;
   if (token.type != TT_ENDPARENTH) {
     while (token.type != TT_ENDPARENTH) {
-      jdi::full_type param;
-      TryParseDeclSpecifierSeq(&param);
-      TryParseDeclarator(&param, AST::DeclaratorType::MAYBE_ABSTRACT);
+      jdi::ref_stack::parameter param;
+      jdi::full_type type;
+      TryParseDeclSpecifierSeq(&type);
+      TryParseDeclarator(&type, AST::DeclaratorType::MAYBE_ABSTRACT);
 
+      param.swap_in(type);
       if (token.type == TT_EQUALS) {
+        herr->Error(token) << "Unimplemented: default values in function arguments";
         token = lexer->ReadToken();
-        // TODO: Parse initializer clause
+        auto init = TryParseExprOrBracedInitList(true, false);
+        // param.default_value = init.release();
+        // TODO: Somehow fix JDI or inherit from it to handle this
       }
+      params.throw_on(param);
 
       if (token.type == TT_COMMA) {
         token = lexer->ReadToken();
         if (token.type == TT_ELLIPSES) {
           token = lexer->ReadToken();
           if (token.type != TT_ENDPARENTH) {
-            herr->Error(token) << "Extra parameters after ellipses in function parameter";
+            herr->Error(token) << "Extra junk after ellipses in function parameter";
           }
           break;
         }
@@ -433,9 +459,12 @@ void TryParseParametersAndQualifiers(jdi::ref_stack *rt, bool did_consume_paren 
     }
 
     if (token.type == TT_ELLIPSES) {
+      herr->Error(token) << "Unimplemented: varargs";
       token = lexer->ReadToken();
     }
   }
+
+  rt->push_func(params);
   require_token(TT_ENDPARENTH, "Expected ')' after function parameters");
 
   if (next_is_cv_qualifier()) {
@@ -528,26 +557,82 @@ jdi::definition *TryParseDecltype() {
   return nullptr;
 }
 
-std::vector<std::unique_ptr<AST::Node>> TryParseTemplateArgs(jdi::definition *def) {
+void TryParseTemplateArgs(jdi::definition *def) {
   if (def->flags & jdi::DEF_TEMPLATE) {
     require_token(TT_LESS, "Expected '<' at start of template arguments");
-    for (std::size_t i = 0; token.type != TT_GREATER && token.type != TT_ENDOFCODE;) {
-      if (reinterpret_cast<jdi::definition_template *>(def)->params[i]->flags & jdi::DEF_TYPENAME) {
-        TryParseTypeID();
+    auto template_def = reinterpret_cast<jdi::definition_template *>(def);
+    jdi::arg_key argk;
+    argk.mirror_types(template_def);
+    std::size_t args_given = 0;
+    for (; token.type != TT_GREATER && token.type != TT_ENDOFCODE;) {
+      if (template_def->params[args_given]->flags & jdi::DEF_TYPENAME) {
+        jdi::full_type ft = TryParseTypeID();
+        if (ft.def) {
+          argk[args_given].ft().swap(ft);
+        }
+      } else if (next_is_start_of_id_expression()) {
+        herr->Error(token) << "Unimplemented: id-expressions as template arguments";
+        auto id = TryParseIdExpression(nullptr, false);
       } else {
-        TryParseConstantExpression();
+        herr->Error(token) << "Unimplemented: NTTP template arguments";
+        auto expr = TryParseConstantExpression();
+      }
+
+      if (token.type == TT_ELLIPSES) {
+        herr->Error(token) << "Unimplemented: variadic template arguments";
+        token = lexer->ReadToken();
       }
 
       if (token.type == TT_COMMA) {
         token = lexer->ReadToken();
-        i++;
+        args_given++;
+        if (args_given > template_def->params.size()) {
+          herr->Error(token) << "Too many types in template instantiation";
+          break;
+        }
       } else {
         break;
       }
     }
-    require_token(TT_GREATER, "Expected '>' after template arguments");
+
+    if (require_token(TT_GREATER, "Expected '>' after template arguments")) {
+      jdi::remap_set remap;
+      for (std::size_t i = 0; i < args_given; i++) {
+        if (argk[i].type == jdi::arg_key::AKT_FULLTYPE) {
+          remap[template_def->params[i].get()] =
+              std::make_unique<jdi::definition_typed>(template_def->params[i]->name, template_def, argk[i].ft(),
+                                                      jdi::DEF_TYPENAME | jdi::DEF_TYPED).release();
+        } else if (argk[i].type == jdi::arg_key::AKT_VALUE) {
+          remap[template_def->params[i].get()] =
+              std::make_unique<jdi::definition_valued>(template_def->params[i]->name, template_def,
+                                                       template_def->params[i]->integer_type.def,
+                                                       template_def->params[i]->integer_type.flags,
+                                                       jdi::DEF_VALUED, argk[i].val()).release();
+        } else {
+          herr->Error(token) << "Internal error: type of template parameter unknown";
+        }
+      }
+
+      // TODO: Fix whatever this garbage is
+      auto errc = jdi::ErrorContext{new jdi::DefaultErrorHandler{}, jdi::SourceLocation{"lol", token.position, token.line}};
+      for (std::size_t i = args_given; i < template_def->params.size(); i++) {
+        if (template_def->params[i]->default_assignment) {
+          jdi::AST ast(*template_def->params[i]->default_assignment, true);
+          ast.remap(remap, errc);
+          if (template_def->params[i]->flags & jdi::DEF_TYPENAME)
+            argk.put_type(i, ast.coerce(errc));
+          else
+            argk.put_value(i, ast.eval(errc));
+        } else {
+          herr->Error(token) << "Expected template argument, parameter " << i << " has no default value";
+        }
+      }
+
+      for (auto &value: remap) {
+        delete value.second;
+      }
+    }
   }
-  return {};
 }
 
 jdi::definition *TryParseTypenameSpecifier() {
@@ -861,17 +946,8 @@ void TryParseNoPtrDeclarator(jdi::full_type *ft, AST::DeclaratorType is_abstract
       token = lexer->ReadToken();
     }
     TryParseIdExpression(&ft->refs, true);
-  } else if (is_abstract == AST::DeclaratorType::MAYBE_ABSTRACT) {
-    switch (token.type) {
-      case TT_IDENTIFIER:
-      case TT_OPERATOR:
-      case TT_TILDE:
-        TryParseIdExpression(&ft->refs, true);
-        break;
-
-      default:
-        break;
-    }
+  } else if (is_abstract == AST::DeclaratorType::MAYBE_ABSTRACT && next_is_start_of_id_expression()) {
+    TryParseIdExpression(&ft->refs, true);
   }
 
   jdi::ref_stack post_declarators;
