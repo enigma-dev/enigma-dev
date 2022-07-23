@@ -368,6 +368,10 @@ AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *
   token = lexer->ReadToken();
 }
 
+const Token &current_token() {
+  return token;
+}
+
 std::unique_ptr<AST::Node> TryParseConstantExpression() {
   return TryParseExpression(Precedence::kTernary);
 }
@@ -489,9 +493,9 @@ jdi::definition *TryParseIdExpression(jdi::ref_stack *rt = nullptr, bool is_decl
         } else {
           return frontend->look_up(oper);
         }
-      } else {
-        return nullptr;
       }
+
+      return nullptr;
     }
 
     case TT_TILDE: {
@@ -984,14 +988,13 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
       } else {
         return AST::Initializer::from(AST::AssignmentInitializer::from(TryParseExpression(Precedence::kAssign)));
       }
-      break;
     }
 
     case TT_BEGINBRACE: return AST::Initializer::from(TryParseBraceInitializer());
 
     case TT_BEGINPARENTH: {
       if (!allow_paren_init) {
-        TryParseExpression(Precedence::kAll);
+        return AST::Initializer::from(TryParseExpression(Precedence::kAll));
       } else {
         AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
         init->kind = AST::BraceOrParenInitializer::Kind::PAREN_INIT;
@@ -1000,12 +1003,13 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
           init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
         }
         require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after initializer");
+        return AST::Initializer::from(std::move(init));
       }
-      break;
     }
 
     default: {
       herr->Error(token) << "Junk in initializer, expected one of =, {, (; got: '" << token.content << '\'';
+      return nullptr;
     }
   }
 }

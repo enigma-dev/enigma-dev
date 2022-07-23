@@ -99,7 +99,7 @@ bool def_type_is(jdi::full_type *ft, std::size_t dectype) {
   return (ft->def->flags & dectype) == dectype;
 }
 
-TEST(ParserTest, TypeSpecifier) {
+TEST(ParserTest, TypeSpecifierAndDeclarator) {
   ParserTester test{"const unsigned int ****(***)[10]"};
   jdi::full_type ft = test->TryParseTypeID();
   EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
@@ -115,12 +115,15 @@ TEST(ParserTest, TypeSpecifier) {
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+}
 
+TEST(ParserTest, Declarator_1) {
   jdi::full_type ft2;
   ParserTester test2{"const unsigned int **(*var::*y)[10]"};
   test2->TryParseTypeSpecifierSeq(&ft2);
-  test2->TryParseDeclarator(&ft2, false);
-  first = ft2.refs.begin();
+  test2->TryParseDeclarator(&ft2, AST::DeclaratorType::NON_ABSTRACT);
+
+  auto first = ft2.refs.begin();
   EXPECT_EQ(ft2.refs.name, "y");
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_MEMBER_POINTER);
@@ -128,4 +131,23 @@ TEST(ParserTest, TypeSpecifier) {
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ(test2.lexer.ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(ParserTest, Declarator_2) {
+  jdi::full_type ft3;
+  ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
+  test3->TryParseTypeSpecifierSeq(&ft3);
+  test3->TryParseDeclarator(&ft3);
+
+  EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(ParserTest, Declaration) {
+  ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
+  jdi::full_type ft;
+  test->TryParseTypeSpecifierSeq(&ft);
+  test->TryParseDeclarator(&ft);
+  test->TryParseInitializer();
+  EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
