@@ -48,7 +48,7 @@ class AST {
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
     IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
-    BREAK, CONTINUE, RETURN, DEFINITION, INITIALIZER
+    BREAK, CONTINUE, RETURN, DECLARATION, INITIALIZER
   };
   struct Node {
     NodeType type;
@@ -266,6 +266,19 @@ class AST {
       // I don't have the energy to constrain T
       return std::make_unique<Initializer>(std::forward<T>(value), is_variadic);
     }
+  };
+
+  struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {
+    struct Declaration {
+      jdi::full_type declarator;
+      InitializerNode init;
+    };
+
+    jdi::definition *type;
+    std::vector<Declaration> declarations;
+
+    DeclarationStatement(jdi::definition *type, std::vector<Declaration> declarations): type{type},
+      declarations{std::move(declarations)} {}
   };
 
   // Used to adapt to current single-error syntax checking interface.

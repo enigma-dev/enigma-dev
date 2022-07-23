@@ -151,3 +151,28 @@ TEST(ParserTest, Declaration) {
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(ParserTest, Declarations) {
+  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
+
+  auto node = test->TryParseDeclarations();
+  EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = reinterpret_cast<AST::DeclarationStatement *>(node.get());
+  EXPECT_EQ(decls->type->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+
+  EXPECT_EQ(decls->declarations.size(), 3);
+  EXPECT_NE(decls->declarations[0].init, nullptr);
+  EXPECT_EQ(decls->declarations[0].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[0].declarator.refs.begin()->type, jdi::ref_stack::RT_POINTERTO);
+
+  EXPECT_EQ(decls->declarations[1].init, nullptr);
+  EXPECT_EQ(decls->declarations[1].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[1].declarator.refs.size(), 0);
+
+  EXPECT_NE(decls->declarations[2].init, nullptr);
+  EXPECT_EQ(decls->declarations[2].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[2].declarator.refs.size(), 2);
+}

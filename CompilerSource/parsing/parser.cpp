@@ -1090,6 +1090,42 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
   }
 }
 
+std::unique_ptr<AST::Node> TryParseDeclarations() {
+  if (next_is_decl_specifier()) {
+    using Declaration = AST::DeclarationStatement::Declaration;
+
+    jdi::full_type ft;
+    TryParseDeclSpecifierSeq(&ft);
+
+    if (ft.def == nullptr) {
+      herr->Error(token) << "Unable to parse type specifier in declaration";
+      return nullptr;
+    }
+
+    std::vector<Declaration> decls{};
+
+    auto parse_decl = [this](jdi::full_type *ft) -> Declaration {
+      Declaration decl{};
+      decl.declarator.def = ft->def;
+      TryParseDeclarator(&decl.declarator);
+      if (next_is_start_of_initializer()) {
+        decl.init = TryParseInitializer();
+      }
+      return decl;
+    };
+
+    decls.emplace_back(parse_decl(&ft));
+    while (token.type == TT_COMMA) {
+      token = lexer->ReadToken();
+      decls.emplace_back(parse_decl(&ft));
+    }
+
+    return std::make_unique<AST::DeclarationStatement>(ft.def, std::move(decls));
+  } else {
+    return nullptr;
+  }
+}
+
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
 std::unique_ptr<AST::Node> TryParseOperand() {
