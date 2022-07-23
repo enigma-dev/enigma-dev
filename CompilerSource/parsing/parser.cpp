@@ -344,6 +344,22 @@ jdi::definition_scope *require_scope_type(jdi::definition *def, const Token &tok
   }
 }
 
+bool is_start_of_initializer(const Token &tok) {
+  switch (tok.type) {
+    case TT_EQUALS:
+    case TT_BEGINBRACE:
+    case TT_BEGINPARENTH:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+bool next_is_start_of_initializer() {
+  return is_start_of_initializer(token);
+}
+
 public:
 
 AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
@@ -866,6 +882,119 @@ void TryParseDeclarator(jdi::full_type *ft, bool is_abstract = false) {
     if (token.type == TT_ARROW) {
       token = lexer->ReadToken();
       TryParseTypeID();
+    }
+  }
+}
+
+AST::InitializerNode TryParseExprOrBracedInitList(bool is_init_clause, bool in_init_list) {
+  // This function handles:
+  // <brace-or-equal-initializer>    ::= = <initializer-clause>
+  //                                   | <braced-init-list>
+  // <initializer-clause>            ::= <assignment-expression>
+  //                                   | <braced-init-list>
+  // and the `...` in
+  // <initializer-list>              ::= <initializer-clause> ...?
+  if (token.type == TT_EQUALS && !is_init_clause) {
+    token = lexer->ReadToken();
+    if (token.type == TT_BEGINBRACE) {
+      return AST::Initializer::from(AST::AssignmentInitializer::from(TryParseBraceInitializer()));
+    } else {
+      return AST::Initializer::from(AST::AssignmentInitializer::from(TryParseExpression(Precedence::kAssign)));
+    }
+  } else if (token.type == TT_BEGINBRACE) {
+    auto val = AST::Initializer::from(TryParseBraceInitializer());
+    if (token.type == TT_ELLIPSES) {
+      if (in_init_list) {
+        token = lexer->ReadToken();
+        val->is_variadic = true;
+      } else {
+        herr->Error(token) << "Cannot use ellipses in brace initializer";
+        token = lexer->ReadToken();
+      }
+    }
+    return val;
+  } else if (is_init_clause) {
+    auto val = AST::Initializer::from(TryParseExpression(Precedence::kAssign));
+    if (token.type == TT_ELLIPSES) {
+      if (in_init_list) {
+        token = lexer->ReadToken();
+        val->is_variadic = true;
+      } else {
+        herr->Error(token) << "Cannot use ellipses in initializer";
+        token = lexer->ReadToken();
+      }
+    }
+    return val;
+  } else {
+    herr->Error(token) << "Expected equals ('=') or opening brace ('{') at start of initializer, got: '"
+                       << token.content << '\'';
+    return nullptr;
+  }
+}
+
+AST::BraceOrParenInitNode TryParseBraceInitializer() {
+  require_token(TT_BEGINBRACE, "Expected opening brace ('{') at the start of brace initializer");
+  AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
+  if (token.type == TT_DOT) {
+    init->kind = AST::BraceOrParenInitializer::Kind::DESIGNATED_INIT;
+    while (token.type != TT_ENDBRACE) {
+      token = lexer->ReadToken();
+      std::string name{token.content};
+      require_token(TT_IDENTIFIER, "Expected identifier after dot in designated initializer");
+      init->values.emplace_back(name, TryParseExprOrBracedInitList(false, false));
+      if (token.type == TT_COMMA) {
+        token = lexer->ReadToken();
+      } else {
+        break;
+      }
+    }
+  } else {
+    init->kind = AST::BraceOrParenInitializer::Kind::BRACE_INIT;
+    while (token.type != TT_ENDBRACE) {
+      init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
+      if (token.type == TT_COMMA) {
+        token = lexer->ReadToken();
+      } else {
+        break;
+      }
+    }
+  }
+  require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of brace initializer");
+
+  return init;
+}
+
+AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
+  switch (token.type) {
+    case TT_EQUALS: {
+      token = lexer->ReadToken();
+      if (token.type == TT_BEGINBRACE) {
+        return AST::Initializer::from(AST::AssignmentInitializer::from(TryParseBraceInitializer()));
+      } else {
+        return AST::Initializer::from(AST::AssignmentInitializer::from(TryParseExpression(Precedence::kAssign)));
+      }
+      break;
+    }
+
+    case TT_BEGINBRACE: return AST::Initializer::from(TryParseBraceInitializer());
+
+    case TT_BEGINPARENTH: {
+      if (!allow_paren_init) {
+        TryParseExpression(Precedence::kAll);
+      } else {
+        AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
+        init->kind = AST::BraceOrParenInitializer::Kind::PAREN_INIT;
+        token = lexer->ReadToken();
+        while (token.type != TT_ENDPARENTH) {
+          init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
+        }
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after initializer");
+      }
+      break;
+    }
+
+    default: {
+      herr->Error(token) << "Junk in initializer, expected one of =, {, (; got: '" << token.content << '\'';
     }
   }
 }

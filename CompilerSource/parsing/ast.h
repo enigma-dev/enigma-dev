@@ -48,7 +48,7 @@ class AST {
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
     IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
-    BREAK, CONTINUE, RETURN, DEFINITION,
+    BREAK, CONTINUE, RETURN, DEFINITION, INITIALIZER
   };
   struct Node {
     NodeType type;
@@ -210,11 +210,58 @@ class AST {
     WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
   };
 
-  struct Definition: TypedNode<NodeType::DEFINITION> {
-      jdi::full_type type;
+  struct Initializer;
+  struct BraceOrParenInitializer;
+  struct AssignmentInitializer;
 
-      Definition() = default;
-      Definition(const jdi::full_type& type_): type{type_} {}
+  using InitializerNode = std::unique_ptr<Initializer>;
+  using BraceOrParenInitNode = std::unique_ptr<BraceOrParenInitializer>;
+  using AssignmentInitNode = std::unique_ptr<AssignmentInitializer>;
+
+  struct BraceOrParenInitializer {
+    enum class Kind { BRACE_INIT, DESIGNATED_INIT, PAREN_INIT } kind;
+    std::vector<std::pair<std::string, InitializerNode>> values{};
+
+    template <typename T>
+    static BraceOrParenInitNode from(T&& value, Kind kind = Kind::BRACE_INIT) {
+      return std::make_unique<BraceOrParenInitializer>(kind, std::forward<T>(value));
+    }
+  };
+
+  struct AssignmentInitializer {
+    enum class Kind { BRACE_INIT, EXPR } kind;
+    std::variant<BraceOrParenInitNode, PNode> initializer{};
+
+    explicit AssignmentInitializer(BraceOrParenInitNode init): kind{Kind::BRACE_INIT}, initializer{std::move(init)} {}
+    explicit AssignmentInitializer(PNode expr): kind{Kind::EXPR}, initializer{std::move(expr)} {}
+
+    template <typename T>
+    static AssignmentInitNode from(T&& value) {
+      return std::make_unique<AssignmentInitializer>(std::forward<T>(value));
+    }
+  };
+
+  struct Initializer : TypedNode<NodeType::INITIALIZER> {
+    enum class Kind { BRACE_INIT, ASSIGN_EXPR } kind;
+    std::variant<BraceOrParenInitNode, AssignmentInitNode> initializer;
+    bool is_variadic{};
+
+    explicit Initializer(BraceOrParenInitNode init, bool is_variadic = false):
+      kind{Kind::BRACE_INIT}, initializer{std::move(init)}, is_variadic{is_variadic} {}
+    explicit Initializer(BraceOrParenInitializer init, bool is_variadic = false):
+      Initializer(std::make_unique<BraceOrParenInitializer>(std::move(init)), is_variadic) {}
+    explicit Initializer(AssignmentInitNode node, bool is_variadic = false):
+      kind{Kind::ASSIGN_EXPR}, initializer{std::move(node)}, is_variadic{is_variadic} {}
+    explicit Initializer(AssignmentInitializer node, bool is_variadic = false):
+      Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
+    explicit Initializer(PNode node, bool is_variadic = false):
+      Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
+
+    template <typename T>
+    static InitializerNode from(T&& value, bool is_variadic = false) {
+      // I don't have the energy to constrain T
+      return std::make_unique<Initializer>(std::forward<T>(value), is_variadic);
+    }
   };
 
   // Used to adapt to current single-error syntax checking interface.
