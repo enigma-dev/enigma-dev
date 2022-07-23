@@ -107,7 +107,6 @@ enum TokenType {
   TT_NOEXCEPT,        // noexcept
   TT_ALIGNOF,         // alignof
   TT_SIZEOF,          // sizeof
-  TT_VAR_SIZEOF,      // sizeof... (this token can't actually exist, it is just used to disambiguate sizeof and sizeof...)
   TT_STATIC_CAST,     // static_cast
   TT_DYNAMIC_CAST,    // dynamic_cast
   TT_REINTERPRET_CAST,// reinterpret_cast

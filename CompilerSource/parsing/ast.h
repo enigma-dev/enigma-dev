@@ -45,6 +45,7 @@ class AST {
     UNARY_PREFIX_EXPRESSION,
     UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
+    SIZEOF, ALIGNOF, CAST,
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
     IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
@@ -121,6 +122,39 @@ class AST {
     TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
       condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
   };
+  // Sizeof expression
+  struct SizeofExpression : TypedNode<NodeType::SIZEOF> {
+    enum class Kind { EXPR, VARIADIC, TYPE } kind;
+    std::variant<PNode, std::string, jdi::full_type> argument;
+
+    explicit SizeofExpression(PNode arg): kind{Kind::EXPR}, argument{std::move(arg)} {}
+    explicit SizeofExpression(std::string ident): kind{Kind::VARIADIC}, argument{std::move(ident)} {}
+    explicit SizeofExpression(jdi::full_type ft): kind{Kind::TYPE}, argument{std::move(ft)} {}
+  };
+  // Alignof expression
+  struct AlignofExpression : TypedNode<NodeType::ALIGNOF> {
+    jdi::full_type ft;
+
+    explicit AlignofExpression(const jdi::full_type &ft): ft{ft} {}
+  };
+  // Cast expressions
+  struct CastExpression : TypedNode<NodeType::CAST> {
+    enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST } kind;
+    jdi::full_type type;
+    PNode expr;
+
+    CastExpression(const Token &token, const jdi::full_type &ft, PNode expr): type{ft}, expr{std::move(expr)} {
+      switch (token.type) {
+        case TT_BEGINPARENTH:     kind = Kind::C_STYLE; break;
+        case TT_STATIC_CAST:      kind = Kind::STATIC; break;
+        case TT_DYNAMIC_CAST:     kind = Kind::DYNAMIC; break;
+        case TT_REINTERPRET_CAST: kind = Kind::REINTERPRET; break;
+        case TT_CONST_CAST:       kind = Kind::CONST; break;
+        default:                  break;
+      }
+    }
+  };
+
   // No-op tree node that allows true-to-original pretty printing and
   // establishes a formal place for empty (null) nodes in a complete tree.
   struct Parenthetical : TypedNode<NodeType::PARENTHETICAL> {

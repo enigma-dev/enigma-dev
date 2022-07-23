@@ -287,7 +287,7 @@ std::size_t sizeof_builtin_type(std::string_view type) {
   }
 }
 
-std::size_t jdi_decflag_bitmask(std::string_view tok) {
+std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
   static const std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>> bitmasks{
     { "volatile",  {jdi::builtin_flag__volatile->mask,  jdi::builtin_flag__volatile->value}  },
     { "static",    {jdi::builtin_flag__static->mask,    jdi::builtin_flag__static->value}    },
@@ -310,9 +310,9 @@ std::size_t jdi_decflag_bitmask(std::string_view tok) {
   };
 
   if (auto bitmask = bitmasks.find(tok); bitmask != bitmasks.end()) {
-    return bitmask->second.second;
+    return bitmask->second;
   } else {
-    return -1;
+    return {-1, -1};
   }
 }
 
@@ -760,24 +760,64 @@ void TryParseElaboratedName(jdi::full_type *ft) {
   }
 }
 
+bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
+  auto builtin = jdi_decflag_bitmask(name);
+  return (combined & builtin.first) == builtin.second;
+}
+
 void maybe_assign_full_type(jdi::full_type *ft, jdi::definition *def, Token token, bool is_allocated = false) {
   if (def != nullptr && ft->def == nullptr) {
     ft->def = def;
   } else if (ft->def != nullptr) {
-    if (is_allocated) {
-      delete def;
-    }
-    herr->Error(token) << "Usage of two different types in type specifier";
+    herr->Error(token) << "Usage of two types in type specifier";
+  }
+}
+
+jdi::definition *get_builtin(std::string_view name) {
+  if (name == "char" || name == "char8_t") {
+    return jdi::builtin_type__char;
+  } else if (name == "char16_t" || name == "wchar_t") {
+    return jdi::builtin_type__wchar_t;
+  } else if (name == "char32_t" || name == "int") {
+    return jdi::builtin_type__int;
+  } else if (name == "bool") {
+    return jdi::builtin_type__bool;
+  } else if (name == "float") {
+    return jdi::builtin_type__float;
+  } else if (name == "double") {
+    return jdi::builtin_type__double;
+  } else if (name == "void") {
+    return jdi::builtin_type__void;
+  } else {
+    return nullptr;
   }
 }
 
 void TryParseTypeSpecifier(jdi::full_type *ft) {
   switch (token.type) {
     case TT_TYPE_NAME: {
-      maybe_assign_full_type(ft,
-        std::make_unique<jdi::definition_atomic>(std::string{token.content}, nullptr, jdi::DEF_TYPENAME,
-                                                 sizeof_builtin_type(token.content)).release(),
-        token, true);
+      if (token.content == "long" || token.content == "short") {
+        if (contains_decflag_bitmask(ft->flags, "long")) {
+           if (token.content == "long") {
+             ft->flags &= ~jdi_decflag_bitmask("long").second;
+             ft->flags |= jdi_decflag_bitmask("long long").second;
+           } else if (token.content == "short") {
+             herr->Error(token) << "Conflicting usage of 'long' and 'short' in the same type specifier";
+           }
+        } else if (contains_decflag_bitmask(ft->flags, "short") && token.content == "long") {
+          herr->Error(token) << "Conflicting usage of 'short' and 'long' in the same type specifier";
+        } else if (contains_decflag_bitmask(ft->flags, "long long")) {
+          if (token.content == "long") {
+            herr->Error(token) << "Too many 'long's in type specifier";
+          } else if (token.content == "short") {
+            herr->Error(token) << "Conflicting usage of 'short' and 'long long' in the same type specifier";
+          }
+        } else {
+          ft->flags |= jdi_decflag_bitmask(token.content).second;
+        }
+      } else {
+        maybe_assign_full_type(ft, get_builtin(token.content), token);
+      }
       token = lexer->ReadToken();
       break;
     }
@@ -815,10 +855,16 @@ void TryParseTypeSpecifier(jdi::full_type *ft) {
 
     default: {
       if (token.type == TT_SIGNED || token.type == TT_UNSIGNED || next_is_cv_qualifier()) {
-        if ((ft->flags & jdi_decflag_bitmask(token.content)) == jdi_decflag_bitmask(token.content)) {
+//        if (contains_decflag_bitmask(ft->flags, "signed") && token.type == TT_UNSIGNED) {
+//          // TODO: There is no way to actually detect this, as signed's value is 0
+//          herr->Error(token) << "Conflicting use of 'signed' and 'unsigned' in the same type specifier";
+//        } else
+        if (contains_decflag_bitmask(ft->flags, "unsigned") && token.type == TT_SIGNED) {
+          herr->Error(token) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
+        } else if (contains_decflag_bitmask(ft->flags, token.content)) {
           herr->Warning(token) << "Duplicate usage of flags in type specifier";
         } else {
-          ft->flags |= jdi_decflag_bitmask(token.content);
+          ft->flags |= jdi_decflag_bitmask(token.content).second;
         }
         token = lexer->ReadToken();
       } else if (next_is_class_key() || token.type == TT_ENUM) {
@@ -886,6 +932,14 @@ jdi::full_type TryParseTypeID() {
   while (next_is_type_specifier()) {
     TryParseTypeSpecifier(&ft);
   }
+  // This is a pretty hacky way to implicitly infer int, but it is the only way I can think of to prevent `int int x`
+  // from being legal
+  if (ft.def == nullptr && (contains_decflag_bitmask(ft.flags, "long")
+                            || contains_decflag_bitmask(ft.flags, "short")
+                            || contains_decflag_bitmask(ft.flags, "long long"))) {
+    ft.def = jdi::builtin_type__int;
+  }
+
   if (next_maybe_ptr_decl_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
     TryParseDeclarator(&ft, AST::DeclaratorType::ABSTRACT);
   }
@@ -1186,12 +1240,20 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     }
 
     case TT_BEGINPARENTH: {
+      auto paren = token;
       token = lexer->ReadToken();
-      auto exp = TryParseExpression(Precedence::kAll);
-      require_token(TT_ENDPARENTH, "Expected closing parenthesis before", token);
-
-      return std::make_unique<AST::Parenthetical>(std::move(exp));
+      if (next_is_type_specifier()) {
+        jdi::full_type type = TryParseTypeID();
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis before '", token.content, "'");
+        auto expr = TryParseExpression(Precedence::kUnaryPrefix);
+        return std::make_unique<AST::CastExpression>(paren, type, std::move(expr));
+      } else {
+        auto exp = TryParseExpression(Precedence::kAll);
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis before '", token.content, "'");
+        return std::make_unique<AST::Parenthetical>(std::move(exp));
+      }
     }
+
     case TT_BEGINBRACKET: {
       token = lexer->ReadToken();
       std::vector<std::unique_ptr<AST::Node>> elements;
@@ -1215,30 +1277,34 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     }
 
     case TT_SIZEOF: {
-      auto oper = token;
       token = lexer->ReadToken();
-
       if (token.type == TT_BEGINPARENTH) {
-        // TODO: Implement sizeof type
+        token = lexer->ReadToken();
+        jdi::full_type ft = TryParseTypeID();
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after sizeof-expression");
+        return std::make_unique<AST::SizeofExpression>(ft);
       } else if (token.type == TT_ELLIPSES) {
         token = lexer->ReadToken();
         require_token(TT_BEGINPARENTH, "Expected opening '(' after 'sizeof ...'");
         auto arg = token;
         if (require_token(TT_IDENTIFIER, "Expected identifier as argument to variadic sizeof")) {
           require_token(TT_ENDPARENTH, "Expected closing ')' after variadic sizeof");
-          return std::make_unique<AST::UnaryPrefixExpression>(std::make_unique<AST::Literal>(arg), TT_VAR_SIZEOF);
+          return std::make_unique<AST::SizeofExpression>(std::string{arg.content});
         } else {
           return nullptr;
         }
       } else {
         auto operand = TryParseExpression(Precedence::kUnaryPrefix);
-        return std::make_unique<AST::UnaryPrefixExpression>(std::move(operand), oper.type);
+        return std::make_unique<AST::SizeofExpression>(std::move(operand));
       }
     }
 
     case TT_ALIGNOF: {
-      if (require_token(TT_BEGINPARENTH, "Expected opening '(' after 'alignof'")) {
-        // TODO: Implement alignof type
+      token = lexer->ReadToken();
+      if (require_token(TT_BEGINPARENTH, "Expected opening parenthesis ('(') after 'alignof'")) {
+        jdi::full_type ft = TryParseTypeID();
+        require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after alignof-expression");
+        return std::make_unique<AST::AlignofExpression>(ft);
       } else {
         return nullptr;
       }
@@ -1267,9 +1333,17 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     case TT_DYNAMIC_CAST:
     case TT_STATIC_CAST:
     case TT_REINTERPRET_CAST:
-    case TT_CONST_CAST:
-      // TODO: Implement casts
-      return nullptr;
+    case TT_CONST_CAST: {
+      Token oper = token;
+      token = lexer->ReadToken();
+      require_token(TT_LESS, "Expected '<' after '", oper.content, "'");
+      jdi::full_type type = TryParseTypeID();
+      require_token(TT_GREATER, "Expected '>' after '", oper.content, "' type");
+      require_token(TT_BEGINPARENTH, "Expected '(' before '", oper.content, "' expression");
+      auto expr = TryParseExpression(Precedence::kAll);
+      require_token(TT_ENDPARENTH, "Expected ')' after '", oper.content, "' expression");
+      return std::make_unique<AST::CastExpression>(oper, type, std::move(expr));
+    }
 
     case TT_SCOPEACCESS:
 
