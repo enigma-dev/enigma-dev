@@ -91,6 +91,84 @@ TEST(ParserTest, Basics) {
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(arg)->value.value), "6");
 }
 
+TEST(ParserTest, SizeofExpression) {
+  ParserTester test{"sizeof 5"};
+  auto expr = test->TryParseExpression(Precedence::kAll);
+
+  ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
+  auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
+  ASSERT_EQ(sizeof_->kind, AST::SizeofExpression::Kind::EXPR);
+  ASSERT_TRUE(std::holds_alternative<AST::PNode>(sizeof_->argument));
+
+  auto &value = std::get<AST::PNode>(sizeof_->argument);
+  ASSERT_EQ(value->type, AST::NodeType::LITERAL);
+  auto *literal = dynamic_cast<AST::Literal *>(value.get());
+  ASSERT_EQ(std::get<std::string>(literal->value.value), "5");
+}
+
+TEST(ParserTest, SizeofVariadic) {
+  ParserTester test{"sizeof...(ident)"};
+  auto expr = test->TryParseExpression(Precedence::kAll);
+
+  ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
+  auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
+  ASSERT_EQ(sizeof_->kind, AST::SizeofExpression::Kind::VARIADIC);
+  ASSERT_TRUE(std::holds_alternative<std::string>(sizeof_->argument));
+
+  auto &value = std::get<std::string>(sizeof_->argument);
+  ASSERT_EQ(value, "ident");
+}
+
+#include <bitset>
+
+TEST(ParserTest, SizeofType) {
+  ParserTester test{"sizeof(const volatile unsigned long long int **(*)[10])"};
+  auto expr = test->TryParseExpression(Precedence::kAll);
+
+  ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
+  auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
+  ASSERT_EQ(sizeof_->kind, AST::SizeofExpression::Kind::TYPE);
+  ASSERT_TRUE(std::holds_alternative<jdi::full_type>(sizeof_->argument));
+
+  auto &value = std::get<jdi::full_type>(sizeof_->argument);
+  auto has_value = [&value](jdi::typeflag *builtin) -> bool {
+    return (value.flags & builtin->mask) == builtin->value;
+  };
+  ASSERT_TRUE(has_value(jdi::builtin_flag__const));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__volatile));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__unsigned));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__long_long));
+  ASSERT_EQ(value.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  ASSERT_EQ(value.def->name, "int");
+  ASSERT_EQ(value.refs.size(), 4);
+  auto first = value.refs.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+}
+
+TEST(ParserTest, AlignofType) {
+  ParserTester test{"alignof(const volatile unsigned long long *)"};
+  auto expr = test->TryParseExpression(Precedence::kAll);
+
+  ASSERT_EQ(expr->type, AST::NodeType::ALIGNOF);
+  auto *alignof_ = dynamic_cast<AST::AlignofExpression *>(expr.get());
+  auto &value = alignof_->ft;
+  auto has_value = [&value](jdi::typeflag *builtin) -> bool {
+    return (value.flags & builtin->mask) == builtin->value;
+  };
+  ASSERT_TRUE(has_value(jdi::builtin_flag__const));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__volatile));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__unsigned));
+  ASSERT_TRUE(has_value(jdi::builtin_flag__long_long));
+  ASSERT_EQ(value.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  ASSERT_EQ(value.def->name, "int");
+  ASSERT_EQ(value.refs.size(), 1);
+  auto first = value.refs.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+}
+
 bool contains_flag(jdi::full_type *ft, std::size_t decflag) {
   return (ft->flags & decflag) == decflag;
 }
