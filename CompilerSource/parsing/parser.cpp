@@ -407,7 +407,7 @@ void TryParseParametersAndQualifiers(jdi::ref_stack *rt, bool did_consume_paren 
     while (token.type != TT_ENDPARENTH) {
       jdi::full_type param;
       TryParseDeclSpecifierSeq(&param);
-      TryParseDeclarator(&param);
+      TryParseDeclarator(&param, AST::DeclaratorType::MAYBE_ABSTRACT);
 
       if (token.type == TT_EQUALS) {
         token = lexer->ReadToken();
@@ -798,7 +798,7 @@ jdi::full_type TryParseTypeID() {
     TryParseTypeSpecifier(&ft);
   }
   if (next_maybe_ptr_decl_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
-    TryParseDeclarator(&ft, true);
+    TryParseDeclarator(&ft, AST::DeclaratorType::ABSTRACT);
   }
 
   return ft;
@@ -832,7 +832,7 @@ void TryParseDeclSpecifierSeq(jdi::full_type *ft) {
   }
 }
 
-void TryParsePtrDeclarator(jdi::full_type *ft, bool is_abstract) {
+void TryParsePtrDeclarator(jdi::full_type *ft, AST::DeclaratorType is_abstract) {
   while (next_maybe_ptr_decl_operator()) {
     if (next_maybe_nested_name()) {
       TryParseMaybeNestedPtrOperator(ft);
@@ -844,7 +844,7 @@ void TryParsePtrDeclarator(jdi::full_type *ft, bool is_abstract) {
   TryParseNoPtrDeclarator(ft, is_abstract);
 }
 
-void TryParseNoPtrDeclarator(jdi::full_type *ft, bool is_abstract) {
+void TryParseNoPtrDeclarator(jdi::full_type *ft, AST::DeclaratorType is_abstract) {
   jdi::full_type inner;
   bool has_inner = false;
   if (token.type == TT_BEGINPARENTH) {
@@ -852,11 +852,22 @@ void TryParseNoPtrDeclarator(jdi::full_type *ft, bool is_abstract) {
     token = lexer->ReadToken();
     TryParsePtrDeclarator(&inner, is_abstract);
     require_token(TT_ENDPARENTH, "Expected ')' after declarator");
-  } else if (!is_abstract) {
+  } else if (is_abstract == AST::DeclaratorType::NON_ABSTRACT) {
     if (token.type == TT_ELLIPSES) {
       token = lexer->ReadToken();
     }
     TryParseIdExpression(&ft->refs, true);
+  } else if (is_abstract == AST::DeclaratorType::MAYBE_ABSTRACT) {
+    switch (token.type) {
+      case TT_IDENTIFIER:
+      case TT_OPERATOR:
+      case TT_TILDE:
+        TryParseIdExpression(&ft->refs, true);
+        break;
+
+      default:
+        break;
+    }
   }
 
   jdi::ref_stack post_declarators;
@@ -874,7 +885,7 @@ void TryParseNoPtrDeclarator(jdi::full_type *ft, bool is_abstract) {
   }
 }
 
-void TryParseDeclarator(jdi::full_type *ft, bool is_abstract = false) {
+void TryParseDeclarator(jdi::full_type *ft, AST::DeclaratorType is_abstract = AST::DeclaratorType::NON_ABSTRACT) {
   if (next_maybe_ptr_decl_operator()) {
     TryParsePtrDeclarator(ft, is_abstract);
   } else {

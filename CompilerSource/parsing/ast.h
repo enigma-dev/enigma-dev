@@ -210,6 +210,10 @@ class AST {
     WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
   };
 
+  enum class DeclaratorType {
+    ABSTRACT, NON_ABSTRACT, MAYBE_ABSTRACT
+  };
+
   struct Initializer;
   struct BraceOrParenInitializer;
   struct AssignmentInitializer;
