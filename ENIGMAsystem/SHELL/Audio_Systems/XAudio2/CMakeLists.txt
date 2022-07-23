@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.14)
 
-include_directories(Info/)
+target_include_directories(Info/)
 
-set(TARGET xAudio2)
+set(TARGET_LIB "x_audio2")
 
-add_library(${TARGET} 
-XAadvanced.cpp
-XAbasic.cpp
-XAsystem.cpp
+message("this is ${TARGET_LIB}")
+
+# adding XAudio2 as module
+add_library(${TARGET_LIB} 
+    *.cpp
+    *.h
 )

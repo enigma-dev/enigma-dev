@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.14)
 
+target_include_directories(General/)
+
+# getting flags from compiler
 set(-DAUDIO_SYSTEM "SDL")
 set(AUDIO -DAUDIO_SYSTEM)
 
-#add_subdirectory(OpenAL)
+# checking which audio_system to link
 if(-DAUDIO_SYSTEM STREQUAL "OpenAL")
     add_subdirectory(OpenAL)
 elseif(-DAUDIO_SYSTEM STREQUAL "DirectSound")

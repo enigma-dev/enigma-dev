@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.14)
 
-include_directories(Info/)
+target_include_directories(Info/)
 
-set(TARGET direct_sound)
+set(TARGET_LIB "direct_sound")
 
-# adding DirectSound as library
-add_library(${TARGET} 
-DSbasic.cpp 
-DSsystem.cpp 
+message("this is ${TARGET_LIB}")
+
+# adding DirectSound as module
+add_library(${TARGET_LIB} 
+    *.cpp
+    *.h
 )
 
