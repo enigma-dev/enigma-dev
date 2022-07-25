@@ -75,7 +75,7 @@ private:
         folderNode = resourceFolderRefs[resType];
 
       if(folderNode == NULL) {
-        errStream << "Folder with name \""<< resType <<"\" not found" << std::endl;
+        errStream << "Folder with name \""<< resType <<"\" not found." << std::endl;
         return false;
       }
 
@@ -89,18 +89,16 @@ private:
       // empty source path refers to internal tileset
       if(tilesetSrcPath.empty()) {
         std::string parentDirPath = tmxPath.parent_path().string()+"/";
-        std::string tsxPath = parentDirPath + tilesetSrcPath.string();
-        std::string backgroundName = tilesetSrcPath.stem().string();
+        std::string tsxPath = parentDirPath;
+        std::string backgroundName = tileset.attribute("name").as_string();
 
         TSXTilesetLoader background_walker(tsxPath, nodes, folderNode, backgroundName, &tilesetBgNamePtrMap);
 
         LoadInternalTileset(tileset, background_walker);
 
-        // todo change the name!!!
         tilesetIdNameMap[tilesetFirstGid] = backgroundName;
       }
       else {
-
         std::string parentDirPath = tmxPath.parent_path().string()+"/";
         std::string tsxPath = parentDirPath + tilesetSrcPath.string();
         std::string backgroundName = tilesetSrcPath.stem().string();
@@ -111,7 +109,6 @@ private:
         if(!ok)
           return false;
 
-        // todo change the name!!!
         tilesetIdNameMap[tilesetFirstGid] = backgroundName;
       }
     }
@@ -156,7 +153,7 @@ private:
       folderNode = resourceFolderRefs[resType];
 
     if(folderNode == NULL) {
-      errStream << "Folder with name \"" << resType << "\" not found" << std::endl;
+      errStream << "Folder with name \"" << resType << "\" not found." << std::endl;
       return false;
     }
 
@@ -205,13 +202,13 @@ private:
 
     bool room_tilesFromObjectsOk = LoadObjects(mapNode, resNode);
     if(!room_tilesFromObjectsOk) {
-      errStream << "Something went wrong while loading Room.Tiles from Objects" << std::endl;
+      errStream << "Something went wrong while loading Room.Tiles from Objects." << std::endl;
       return false;
     }
 
     bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, resNode->room().hsnap(), resNode->room().vsnap());
     if(!room_tiledFromLayerDataOk) {
-      errStream << "Something went wrong while laoding Room.Tiles from Layer Data" << std::endl;
+      errStream << "Something went wrong while laoding Room.Tiles from Layer Data." << std::endl;
       return false;
     }
 
@@ -245,7 +242,7 @@ private:
                                              flippedDiagonally, rotatedHex120);
 
         if(localTileId == 0){
-          errStream << "localId attribute not present(templates are not yet supported) or its value is zero" << std::endl;
+          errStream << "localId attribute not present(templates are not yet supported) or its value is zero." << std::endl;
           continue;
         }
 
@@ -291,7 +288,7 @@ private:
       const pugi::xml_node &dataNode = layer.child("data");
 
       if(dataNode.empty()) {
-        outStream << "Error loading tiles, layer node does not contain data node" << std::endl;
+        outStream << "Error loading tiles, layer node does not contain data node." << std::endl;
         return false;
       }
 
@@ -300,7 +297,7 @@ private:
       std::string dataStr = dataNode.first_child().value();
       dataStr = StrTrim(dataStr);
       if(dataStr.empty()) {
-        errStream << "Error while loading tiles, Layer Data contains empty string" << std::endl;
+        errStream << "Error while loading tiles, Layer Data contains empty string." << std::endl;
         return false;
       }
 
@@ -371,7 +368,8 @@ private:
 
         tileIndex += 4;
 
-        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+        if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+          return false;
       }
     }
 
@@ -403,7 +401,8 @@ private:
 
         tileIndex += 4;
 
-        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+        if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+           return false;
       }
     }
 
@@ -443,7 +442,8 @@ private:
     for (int y=0; y < layerHeight; ++y) {
       for (int x=0; x < layerWidth; ++x) {
         unsigned int globalTileId = globalTileIds[y*layerWidth + x];
-        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+        if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+           return false;
       }
     }
 
@@ -468,15 +468,16 @@ private:
 
         tileIndex += 4;
 
-        CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y);
+        if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+          return false;
       }
     }
 
     return true;
   }
 
-  void CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int& mapTileWidth,
-                              const int& mapTileHeight, const int& currX, const int& currY) {
+  bool CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int &mapTileWidth,
+                              const int &mapTileHeight, const int &currX, const int &currY) {
     bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
     std::string tilesetName = "";
     int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
@@ -485,10 +486,18 @@ private:
     std::string backgroundName = tilesetName;
 
     // get pointer to the background to be used in setting Room.tile properties
-    buffers::resources::Background* bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
+    buffers::resources::Background* bgPtr;
 
-    if(localTileId < 0 || bgPtr == NULL)
-      return;
+    if(tilesetBgNamePtrMap.find(backgroundName) != tilesetBgNamePtrMap.end())
+      bgPtr = tilesetBgNamePtrMap[backgroundName]->mutable_background();
+    else {
+      errStream << "Error loading tiles, background not found." << std::endl;
+      return false;
+    }
+
+    // for negative localTileId dont quit loading map, just skip this tile
+    if(localTileId < 0)
+      return true;
 
     buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
 
@@ -518,16 +527,23 @@ private:
       tile->set_y(currY * mapTileHeight);
     }
 
-    // In some cases numColumns is not present/specified, so deduce numColumns from imageWidth / tileWidth
-    int numColumns;
+    // In some cases numColumns is not present/specified, so deduce numColumns using (imageWidth / tileWidth)
+    int numColumns = 0;
     if(!bgPtr->has_columns() || bgPtr->columns() == 0) {
-      if(bgPtr->has_width())
+      // TODO: Find an alternative for following (hint: load image in memory and get its dimensions)
+      // In some cases even imageWidth is not present so user is prompted to fix the tsx file first
+      if(bgPtr->has_width()) {
         numColumns = bgPtr->width() / bgPtr->tile_width();
-      else
-        return;
+        bgPtr->set_columns(numColumns);
+      }
     }
     else
       numColumns = bgPtr->columns();
+
+    if(numColumns == 0) {
+      errStream << "Error loading tiles, source image width/height is zero in .tsx file." << std::endl;
+      return false;
+    }
 
     // tilesetTile[Width[Height]] is different from mapTile[Width[Height]] and should be used appropriately
     int tilesetTileWidth = bgPtr->tile_width();
@@ -567,6 +583,8 @@ private:
     // TODO: Find a good implementation to set depth and id
     tile->set_depth(0);
     tile->set_id(10000001 + resourceTypeIdCountMap["buffers.resources.Room.Tile"]++);
+
+    return true;
   }
 
   int GetLocalTileIdInfo(std::string& tilesetName, const unsigned int &globalTileId,
@@ -629,7 +647,7 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
 
   bool success = mapWalker.Load(doc);
   if(!success) {
-    std::cout << "Error occured while loading selected Tiled map." << std::endl;
+    outStream << "Error occured while loading selected Tiled map." << std::endl;
     return NULL;
   }
 
