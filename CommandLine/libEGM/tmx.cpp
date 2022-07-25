@@ -475,8 +475,8 @@ private:
     return true;
   }
 
-  void CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int& tileWidth,
-                              const int& tileHeight, const int& currX, const int& currY) {
+  void CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int& mapTileWidth,
+                              const int& mapTileHeight, const int& currX, const int& currY) {
     bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
     std::string tilesetName = "";
     int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
@@ -497,36 +497,50 @@ private:
 
     if(hexMapUtil) {
       if(hexMapUtil->staggerAxis == "x") {
-        tile->set_x(currX * (tileWidth - (hexMapUtil->hexSideLength/2)));
+        tile->set_x(currX * (mapTileWidth - (hexMapUtil->hexSideLength / 2)));
 
         if((currX%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currX%2 != 0 && hexMapUtil->staggerIndex == "even"))
-          tile->set_y(currY*tileHeight);
+          tile->set_y(currY * mapTileHeight);
         else
-          tile->set_y(currY*tileHeight + hexMapUtil->hexSideLength);
+          tile->set_y((currY * mapTileHeight) + hexMapUtil->hexSideLength);
       }
       else {
-        tile->set_y(currY * (tileHeight - (hexMapUtil->hexSideLength/2)));
+        tile->set_y(currY * (mapTileHeight - (hexMapUtil->hexSideLength / 2)));
 
-        if((currX%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currX%2 != 0 && hexMapUtil->staggerIndex == "even"))
-          tile->set_x(currX*tileWidth);
+        if((currY%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currY%2 != 0 && hexMapUtil->staggerIndex == "even"))
+          tile->set_x(currX * mapTileWidth);
         else
-          tile->set_x(currX*tileWidth + hexMapUtil->hexSideLength);
+          tile->set_x((currX * mapTileWidth) + hexMapUtil->hexSideLength);
       }
     }
     else {
-      tile->set_x(currX*tileWidth);
-      tile->set_y(currY*tileHeight);
+      tile->set_x(currX * mapTileWidth);
+      tile->set_y(currY * mapTileHeight);
     }
 
-    tile->set_width(tileWidth);
-    tile->set_height(tileHeight);
+    // In some cases numColumns is not present/specified, so deduce numColumns from imageWidth / tileWidth
+    int numColumns;
+    if(!bgPtr->has_columns() || bgPtr->columns() == 0) {
+      if(bgPtr->has_width())
+        numColumns = bgPtr->width() / bgPtr->tile_width();
+      else
+        return;
+    }
+    else
+      numColumns = bgPtr->columns();
 
-    int numColumns = bgPtr->columns();
+    // tilesetTile[Width[Height]] is different from mapTile[Width[Height]] and should be used appropriately
+    int tilesetTileWidth = bgPtr->tile_width();
+    int tilesetTileHeight = bgPtr->tile_height();
+
+    tile->set_width(tilesetTileWidth);
+    tile->set_height(tilesetTileHeight);
+
     int xOffset = localTileId % numColumns;
-    xOffset = xOffset * (tileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
+    xOffset = xOffset * (tilesetTileWidth + bgPtr->horizontal_spacing()) + bgPtr->horizontal_offset();
 
     int yOffset = floor(localTileId / (1.0f * numColumns));
-    yOffset = yOffset * (tileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
+    yOffset = yOffset * (tilesetTileHeight + bgPtr->vertical_spacing()) + bgPtr->vertical_offset();
 
     tile->set_xoffset(xOffset);
     tile->set_yoffset(yOffset);
@@ -569,6 +583,7 @@ private:
     std::map<int, std::string>::iterator itr = tilesetIdNameMap.lower_bound(localId);
     if(itr != tilesetIdNameMap.begin())
       itr--;
+
     localId = localId - itr->first;
     tilesetName = itr->second;
 
@@ -619,11 +634,11 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
   }
 
   // temp code start
-  std::string str;
+  /*std::string str;
   google::protobuf::TextFormat::PrintToString(proj->game(), &str);
   std::ofstream out("/home/kash/github/radialgm-stuff/textProtos/test1tmx.txt");
   out<<str<<std::endl;
-  out.close();
+  out.close();*/
   std::cout<<"END LOADING TMX"<<std::endl;
   // temp code end
 
