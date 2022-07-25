@@ -36,12 +36,14 @@ TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
 bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   // this importer only imports tileset xml nodes
   if(xmlNode.name() != std::string("tileset")) {
-    errStream << "Unsupported resource type: " << xmlNode.name() << std::endl;
-    return false;
+    outStream << "Skipping unsupported resource type: " << xmlNode.name() << std::endl;
+    return true;
   }
 
-  if(xmlNode.attribute("visited").as_bool() == true)
+  if(xmlNode.attribute("visited").as_bool() == true) {
+    outStream << "Skipping node, tileset already visited." << std::endl;
     return true;
+  }
   else
     xmlNode.append_attribute("visited") = true;
 
@@ -58,7 +60,7 @@ bool TSXTilesetLoader::for_each(pugi::xml_node& xmlNode) {
   // presence of image child node is used to distinguish between loading a tileset based background and an image based background
   pugi::xml_node imgNode = xmlNode.child("image");
   if(imgNode.empty()) {
-    outStream << "Adding tileset as individual backgrounds" << std::endl;
+    outStream << "Adding tileset as individual backgrounds." << std::endl;
     LoadTilesetAsIndividualBackgrounds(xmlNode, resType);
   }
   else {
