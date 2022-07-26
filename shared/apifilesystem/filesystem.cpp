@@ -57,6 +57,9 @@
 #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/sysctl.h>
 #if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__OpenBSD__)
+#if defined(__OpenBSD__)
+#include <kvm.h>
+#endif
 #include <sys/user.h>
 #endif
 #endif
@@ -544,7 +547,11 @@ namespace ngs::fs {
     char **cmdbuf = nullptr; 
     std::size_t cmdsize = 0;
     const char *pwd = nullptr, 
-    *cwd = nullptr, *penv = nullptr; 
+    *cwd = nullptr, *penv = nullptr;
+    char errbuf[_POSIX2_LINE_MAX];
+    kinfo_file *kif = nullptr;
+    int cntp = 0; bool ok = false;
+    static kvm_t *kd = nullptr;
     std::string arg; int mib[4];
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
@@ -606,7 +613,23 @@ namespace ngs::fs {
         }
       }
     }
-    path.clear();
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
+    if (!kd) { path.clear(); goto finish3; }
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+      for (int i = 0; i < cntp; i++) {
+        if (kif[i].fd_fd == KERN_FILE_TEXT) {
+          struct stat st = { 0 }; 
+          if (!stat(path.c_str(), &st)) {
+            if (st.st_dev == kif[i].va_fsid || st.st_ino == kif[i].va_fileid) {
+              ok = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (!ok) { path.clear(); }
+    kvm_close(kd);
     finish3:
     #endif
     return path;
