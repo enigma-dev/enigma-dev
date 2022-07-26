@@ -825,7 +825,26 @@ namespace ngs::proc {
         }
       }
     }
+    char errbuf[_POSIX2_LINE_MAX];
+    kinfo_file *kif = nullptr; int cntp = 0; bool ok = false;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
+    if (!kd) { *buffer = (char *)"\0"; return; }
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
+      for (int i = 0; i < cntp; i++) {
+        if (kif[i].fd_fd == KERN_FILE_TEXT) {
+          struct stat st = { 0 }; 
+          if (!stat(*buffer, &st)) {
+            if (st.st_dev == kif[i].va_fsid || st.st_ino == kif[i].va_fileid) {
+              ok = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (!ok) { *buffer = (char *)"\0"; }
     free_cmdline(cmdbuf);
+    kvm_close(kd);
     #endif
   }
 
