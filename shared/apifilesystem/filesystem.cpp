@@ -539,51 +539,76 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    std::string arg; 
-    char *pwd = nullptr;
-    char **buffer = nullptr;
-    int mib[4]; std::size_t s = 0;
+    char exe[PATH_MAX]; 
+    struct stat st = { 0 };
+    char **cmdbuf = nullptr; 
+    std::size_t cmdsize = 0;
+    const char *pwd = nullptr, 
+    *cwd = nullptr, *penv = nullptr; 
+    std::string arg; int mib[4];
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = getpid();
     mib[3] = KERN_PROC_ARGV; 
-    if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
-      if ((buffer = (char **)malloc(s))) {
-        if (sysctl(mib, 4, buffer, &s, nullptr, 0) == 0) {
-          arg = string(buffer[0]) + "\0";
+    if (sysctl(mib, 4, nullptr, &cmdsize, nullptr, 0) == 0) {
+      if ((cmdbuf = (char **)malloc(cmdsize))) {
+        if (sysctl(mib, 4, cmdbuf, &cmdsize, nullptr, 0) == 0) {
+          arg = string(cmdbuf[0]) + "\0";
         }
-        free(buffer);
+        free(cmdbuf);
       }
     }
     if (!arg.empty()) {
       if (arg[0] == '/') {
-        char buffer[PATH_MAX];
-        if (realpath(arg.c_str(), buffer)) {
-          path = buffer;
-          goto finish;
+        if (realpath(arg.c_str(), exe)) {
+          goto finish1;
         }
-      } else if (arg.find('/') == string::npos) {
-        vector<string> env = string_split(getenv("PATH") ? getenv("PATH") : "", ':');
-        for (std::size_t i = 0; i < env.size(); i++) {
-          char buffer[PATH_MAX];
-          if (realpath((std::string(env[i]) + "/" + arg).c_str(), buffer)) {
-            struct stat st = { 0 };
-            if (!stat(buffer, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-              path = buffer;
-              goto finish;
+      } else if (std::string(arg).find('/') == std::string::npos) {
+        std::vector<std::string> env; std::string tmp;
+        penv = getenv("PATH");
+        if (penv && *penv) {
+          std::stringstream sstr(penv); 
+          while (std::getline(sstr, tmp, ':')) {
+            env.push_back(tmp);
+          }
+          for (std::size_t i = 0; i < env.size(); i++) {
+            path = std::string(env[i]) + "/" + std::string(arg);
+            if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+              goto finish2;
             }
+            path.clear();
           }
         }
       }
       pwd = getenv("PWD");
       if (pwd && *pwd) {
-        char buffer[PATH_MAX];
-        if (realpath((std::string(pwd) + "/" + arg).c_str(), buffer)) {
-          path = buffer; 
+        path = std::string(pwd) + "/" + std::string(arg);
+        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+          goto finish2;
+        } else {
+          goto fallback;
+        }
+      } else {
+        fallback:
+        cwd = getcwd(exe, PATH_MAX);
+        if (cwd && *cwd) {
+          path = std::string(cwd) + "/" + std::string(arg);
+        }
+      }
+      finish1:
+      if (!path.empty()) {
+        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+          finish2:
+          if (realpath(path.c_str(), exe)) {
+            static std::string str; str = exe; 
+            path = (char *)str.c_str();
+            goto finish3;
+          }
         }
       }
     }
-    finish:
+    path.clear();
+    finish3:
     #endif
     return path;
   }
