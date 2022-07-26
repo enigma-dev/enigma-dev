@@ -1003,7 +1003,7 @@ namespace ngs::proc {
       }
     }
     #endif
-    if (buffer && *buffer) return;
+    if (*buffer && **buffer) return;
     #if !defined(_WIN32)
     const char *env = "PWD";
     #else
