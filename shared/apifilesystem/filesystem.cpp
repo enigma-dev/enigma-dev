@@ -613,8 +613,9 @@ namespace ngs::fs {
         }
       }
     }
+    finish3:
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
-    if (!kd) { path.clear(); goto finish3; }
+    if (!kd) { path.clear(); goto finish4; }
     if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
       for (int i = 0; i < cntp; i++) {
         if (kif[i].fd_fd == KERN_FILE_TEXT) {
@@ -630,7 +631,7 @@ namespace ngs::fs {
     }
     if (!ok) { path.clear(); }
     kvm_close(kd);
-    finish3:
+    finish4:
     #endif
     return path;
   }
