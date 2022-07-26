@@ -560,9 +560,8 @@ namespace ngs::fs {
     }
     if (!arg.empty()) {
       if (arg[0] == '/') {
-        if (realpath(arg.c_str(), exe)) {
-          goto finish1;
-        }
+        path = arg;
+        goto finish1;
       } else if (std::string(arg).find('/') == std::string::npos) {
         std::vector<std::string> env; std::string tmp;
         penv = getenv("PATH");
