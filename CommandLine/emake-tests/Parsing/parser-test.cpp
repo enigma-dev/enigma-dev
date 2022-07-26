@@ -378,3 +378,63 @@ TEST(ParserTest, NewExpression_4) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
 }
+
+TEST(ParserTest, DeleteExpression_1) {
+  ParserTester test{"delete x;"};
+  auto node = test->TryParseExpression(Precedence::kAll);
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_FALSE(delete_->is_global);
+  ASSERT_FALSE(delete_->is_array);
+
+  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+}
+
+TEST(ParserTest, DeleteExpression_2) {
+  ParserTester test{"::delete x;"};
+  auto node = test->TryParseExpression(Precedence::kAll);
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_TRUE(delete_->is_global);
+  ASSERT_FALSE(delete_->is_array);
+
+  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+}
+
+TEST(ParserTest, DeleteExpression_3) {
+  ParserTester test{"delete[] x;"};
+  auto node = test->TryParseExpression(Precedence::kAll);
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_FALSE(delete_->is_global);
+  ASSERT_TRUE(delete_->is_array);
+
+  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+}
+
+TEST(ParserTest, DeleteExpression_4) {
+  ParserTester test{"::delete[] x;"};
+  auto node = test->TryParseExpression(Precedence::kAll);
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_TRUE(delete_->is_global);
+  ASSERT_TRUE(delete_->is_array);
+
+  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+}

@@ -313,14 +313,17 @@ class AST {
 
     NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, const jdi::full_type &type,
                   std::unique_ptr<Initializer> initializer):
-                                                              is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{type},
-                                                              initializer{std::move(initializer)} {}
+      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{type},
+      initializer{std::move(initializer)} {}
   };
   // Delete expression
   struct DeleteExpression : TypedNode<NodeType::DELETE> {
     bool is_global;
     bool is_array;
     PNode expression;
+
+    DeleteExpression(bool is_global, bool is_array, PNode expression): is_global{is_global}, is_array{is_array},
+                                                                       expression{std::move(expression)} {}
   };
 
   struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {

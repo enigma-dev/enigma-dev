@@ -1256,6 +1256,19 @@ std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
   return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), type, std::move(initializer));
 }
 
+std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
+  require_token(TT_S_DELETE, "Expected 'delete' in delete-expression");
+
+  bool is_array = false;
+  if (token.type == TT_BEGINBRACKET) {
+    token = lexer->ReadToken();
+    is_array = true;
+    require_token(TT_ENDBRACKET, "Expected ']' to close '[' in delete-expression");
+  }
+
+  return std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+}
+
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
 std::unique_ptr<AST::Node> TryParseOperand() {
@@ -1426,6 +1439,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       if (token.type == TT_S_NEW) {
         return TryParseNewExpression(true);
       } else if (token.type == TT_S_DELETE) {
+        return TryParseDeleteExpression(true);
       } else {
         // TODO: Make this thing return a node
         TryParseIdExpression(nullptr, false);
@@ -1433,13 +1447,8 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       }
     }
 
-    case TT_S_NEW: {
-      return TryParseNewExpression(false);
-    }
-
-    case TT_S_DELETE: {
-      break;
-    }
+    case TT_S_NEW: return TryParseNewExpression(false);
+    case TT_S_DELETE: return TryParseDeleteExpression(false);
 
     case TT_TYPE_NAME:
 
