@@ -773,46 +773,61 @@ namespace ngs::proc {
       }
     }
     #elif defined(__OpenBSD__)
+    char exe[PATH_MAX]; struct stat st = { 0 };
     char **cmdbuf = nullptr; int cmdsize = 0;
+    const char *pwd = nullptr, *cwd = nullptr, 
+    *penv = nullptr; std::string path;
     cmdline_from_proc_id(proc_id, &cmdbuf, &cmdsize);
-    const char *pwd = nullptr;
     if (cmdsize) {
       if (*cmdbuf[0] == '/') {
         char exe[PATH_MAX];
         if (realpath(cmdbuf[0], exe)) {
-          static std::string str; str = exe; 
-          *buffer = (char *)str.c_str();
-          goto finish;
+          goto finish1;
         }
       } else if (std::string(cmdbuf[0]).find('/') == std::string::npos) {
-        std::vector<std::string> env; std::string tmp;
-        std::stringstream sstr(environ_from_proc_id_ex(proc_id, "PATH")); 
-        while (std::getline(sstr, tmp, ':')) {
-          env.push_back(tmp);
-        }
-        for (std::size_t i = 0; i < env.size(); i++) {
-          char exe[PATH_MAX];
-          if (realpath((std::string(env[i]) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
-            struct stat st = { 0 };
-            if (!stat(exe, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-              static std::string str; str = exe; 
-              *buffer = (char *)str.c_str();
-              goto finish;
+        penv = environ_from_proc_id_ex(proc_id, "PATH");
+        if (penv && *penv) {
+          std::vector<std::string> env; std::string tmp;
+          std::stringstream sstr(penv); 
+          while (std::getline(sstr, tmp, ':')) {
+            env.push_back(tmp);
+          }
+          for (std::size_t i = 0; i < env.size(); i++) {
+            path = std::string(env[i]) + "/" + std::string(cmdbuf[0]);
+            if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+              goto finish2;
             }
+           path.clear();
           }
         }
       }
       pwd = environ_from_proc_id_ex(proc_id, "PWD");
       if (pwd && *pwd) {
-        char exe[PATH_MAX];
-        if (realpath((std::string(pwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
-          static std::string str; str = exe; 
-          *buffer = (char *)str.c_str();
+        path = std::string(pwd) + "/" + std::string(cmdbuf[0]);
+        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+          goto finish2;
+        } else {
+          goto fallback;
+        }
+      } else {
+        fallback:
+        cwd = cwd_from_proc_id(proc_id);
+        if (cwd && *cwd) {
+          path = std::string(cwd) + "/" + std::string(cmdbuf[0]);
         }
       }
-      finish:
-      free_cmdline(cmdbuf);
+      finish1:
+      if (!path.empty()) {
+        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+          finish2:
+          if (realpath(path.c_str(), exe)) {
+            static std::string str; str = exe; 
+            *buffer = (char *)str.c_str();
+          }
+        }
+      }
     }
+    free_cmdline(cmdbuf);
     #endif
   }
 
