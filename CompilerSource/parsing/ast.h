@@ -46,6 +46,7 @@ class AST {
     UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
     SIZEOF, ALIGNOF, CAST,
+    NEW, DELETE,
     PARENTHETICAL, ARRAY,
     IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
     IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
@@ -280,7 +281,7 @@ class AST {
   };
 
   struct Initializer : TypedNode<NodeType::INITIALIZER> {
-    enum class Kind { BRACE_INIT, ASSIGN_EXPR } kind;
+    enum class Kind { BRACE_INIT, ASSIGN_EXPR, PLACEMENT_NEW } kind;
     std::variant<BraceOrParenInitNode, AssignmentInitNode> initializer;
     bool is_variadic{};
 
@@ -300,6 +301,26 @@ class AST {
       // I don't have the energy to constrain T
       return std::make_unique<Initializer>(std::forward<T>(value), is_variadic);
     }
+  };
+
+  // New expression
+  struct NewExpression : TypedNode<NodeType::NEW> {
+    bool is_global;
+    bool is_array;
+    std::unique_ptr<Initializer> placement;
+    jdi::full_type type;
+    std::unique_ptr<Initializer> initializer;
+
+    NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, const jdi::full_type &type,
+                  std::unique_ptr<Initializer> initializer):
+                                                              is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{type},
+                                                              initializer{std::move(initializer)} {}
+  };
+  // Delete expression
+  struct DeleteExpression : TypedNode<NodeType::DELETE> {
+    bool is_global;
+    bool is_array;
+    PNode expression;
   };
 
   struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {

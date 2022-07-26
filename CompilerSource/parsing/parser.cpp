@@ -1077,6 +1077,19 @@ AST::InitializerNode TryParseExprOrBracedInitList(bool is_init_clause, bool in_i
   }
 }
 
+AST::BraceOrParenInitNode TryParseInitializerList(TokenType closing) {
+  AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
+  while (token.type != closing) {
+    init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
+    if (token.type == TT_COMMA) {
+      token = lexer->ReadToken();
+    } else {
+      break;
+    }
+  }
+  return init;
+}
+
 AST::BraceOrParenInitNode TryParseBraceInitializer() {
   require_token(TT_BEGINBRACE, "Expected opening brace ('{') at the start of brace initializer");
   AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
@@ -1094,15 +1107,8 @@ AST::BraceOrParenInitNode TryParseBraceInitializer() {
       }
     }
   } else {
+    init = TryParseInitializerList(TT_ENDBRACE);
     init->kind = AST::BraceOrParenInitializer::Kind::BRACE_INIT;
-    while (token.type != TT_ENDBRACE) {
-      init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
-      if (token.type == TT_COMMA) {
-        token = lexer->ReadToken();
-      } else {
-        break;
-      }
-    }
   }
   require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of brace initializer");
 
@@ -1131,6 +1137,11 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
         token = lexer->ReadToken();
         while (token.type != TT_ENDPARENTH) {
           init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
+          if (token.type == TT_COMMA) {
+            token = lexer->ReadToken();
+          } else {
+            break;
+          }
         }
         require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after initializer");
         return AST::Initializer::from(std::move(init));
@@ -1178,6 +1189,71 @@ std::unique_ptr<AST::Node> TryParseDeclarations() {
   } else {
     return nullptr;
   }
+}
+
+std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
+  require_token(TT_S_NEW, "Expected 'new' in new-expression");
+
+  bool is_array = false;
+  AST::InitializerNode placement = nullptr;
+  jdi::full_type type;
+  AST::InitializerNode initializer = nullptr;
+
+  if (token.type == TT_BEGINPARENTH) {
+    token = lexer->ReadToken();
+    if (next_is_type_specifier()) {
+      type = TryParseTypeID();
+      require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after new-expression type");
+      if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACE) {
+        initializer = TryParseInitializer(true);
+      }
+      is_array = type.refs.size() != 0 && type.refs.begin()->type == jdi::ref_stack::RT_ARRAYBOUND;
+
+      return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), type, std::move(initializer));
+    } else {
+      auto init = TryParseInitializerList(TT_ENDPARENTH);
+      init->kind = AST::BraceOrParenInitializer::Kind::PAREN_INIT;
+      placement = AST::Initializer::from(std::move(init));
+      placement->kind = AST::Initializer::Kind::PLACEMENT_NEW;
+      require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after placement-new arguments");
+    }
+  }
+
+  // At this point we have handled:
+  // ::? new ( <type-id> ) <new-initializer>?
+
+  // Remaining:
+  // ::? new <new-placement> ( <type-id> ) <new-initializer>?
+  // ::? new <new-placement> <new-type-id> <new-initializer>?
+  // ::? new <new-type-id> <new-initializer>?
+  //
+  // This code path is taken only when <new-placement> is present, otherwise the paren would've been picked up earlier
+  if (token.type == TT_BEGINPARENTH) {
+    token = lexer->ReadToken();
+    type = TryParseTypeID();
+    require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after new-expression type");
+  } else {
+    TryParseTypeSpecifierSeq(&type);
+    while (next_maybe_ptr_decl_operator()) {
+      if (next_maybe_nested_name()) {
+        TryParseMaybeNestedPtrOperator(&type);
+      } else {
+        TryParsePtrOperator(&type);
+      }
+    }
+
+    while (token.type == TT_BEGINBRACKET) {
+      TryParseArrayBoundsExpression(&type.refs);
+    }
+  }
+
+  if (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACE) {
+    initializer = TryParseInitializer(true);
+  }
+
+  is_array = type.refs.size() != 0 && type.refs.begin()->type == jdi::ref_stack::RT_ARRAYBOUND;
+
+  return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), type, std::move(initializer));
 }
 
 /// Parse an operand--this includes variables, literals, arrays, and
@@ -1345,8 +1421,25 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       return std::make_unique<AST::CastExpression>(oper, type, std::move(expr));
     }
 
-    case TT_SCOPEACCESS:
+    case TT_SCOPEACCESS: {
+      token = lexer->ReadToken();
+      if (token.type == TT_S_NEW) {
+        return TryParseNewExpression(true);
+      } else if (token.type == TT_S_DELETE) {
+      } else {
+        // TODO: Make this thing return a node
+        TryParseIdExpression(nullptr, false);
+        break;
+      }
+    }
 
+    case TT_S_NEW: {
+      return TryParseNewExpression(false);
+    }
+
+    case TT_S_DELETE: {
+      break;
+    }
 
     case TT_TYPE_NAME:
 
@@ -1358,7 +1451,6 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     case TT_S_FOR:    case TT_S_DO:   case TT_S_WHILE: case TT_S_UNTIL:
     case TT_S_REPEAT: case TT_S_IF:   case TT_S_THEN:  case TT_S_ELSE:
     case TT_S_WITH:   case TT_S_TRY:  case TT_S_CATCH:
-    case TT_S_NEW:    case TT_S_DELETE:
 
     case TT_CLASS:    case TT_STRUCT:
     case TTM_WHITESPACE: case TTM_CONCAT: case TTM_STRINGIFY:
