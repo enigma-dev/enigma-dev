@@ -1680,9 +1680,8 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       return nullptr;
 
     case TT_BEGINBRACE: {
-      auto code = ParseCodeBlock();
-      require_token(TT_ENDBRACE, "Expected closing brace ('}') after code block");
-      return code;
+      herr->Error(token) << "Internal error: trying to parse <block-stmt> within <stmt>";
+      return ParseCodeBlock(); // Parse it anyways
     }
 
     case TT_IDENTIFIER: {
@@ -1709,8 +1708,8 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_CONTINUE: return ParseContinueStatement();
     case TT_S_SWITCH: return ParseSwitchStatement();
     case TT_S_REPEAT: return ParseRepeatStatement();
-    case TT_S_CASE:   return ParseCaseStatement();
-    case TT_S_DEFAULT: return ParseDefaultStatement();
+    case TT_S_CASE:   return ParseCaseOrDefaultStatement(false);
+    case TT_S_DEFAULT: return ParseCaseOrDefaultStatement(true);
     case TT_S_FOR: return ParseForLoop();
     case TT_S_IF: return ParseIfStatement();
     case TT_S_DO: return ParseDoLoop();
@@ -1738,11 +1737,30 @@ std::unique_ptr<AST::Node> TryReadStatement() {
 
 // Parse control flow statement body
 std::unique_ptr<AST::Node> ParseCFStmtBody() {
-  return TryReadStatement();
+  if (token.type == TT_BEGINBRACE) {
+    return ParseCodeBlock();
+  } else {
+    return TryReadStatement();
+  }
 }
 
 // TODO: the following.
 std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
+  require_token(TT_BEGINBRACE, "Expected opening brace ('{') at the start of code block");
+  std::vector<std::unique_ptr<AST::Node>> statements{};
+
+  while (token.type != TT_ENDBRACE) {
+    if (token.type == TT_BEGINBRACE) {
+      statements.emplace_back(ParseCodeBlock());
+    } else if (next_is_decl_specifier()) {
+      statements.emplace_back(TryParseDeclarations());
+    } else {
+      statements.emplace_back(TryReadStatement());
+    }
+  }
+
+  require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of code block");
+  return std::make_unique<AST::CodeBlock>(std::move(statements));
 }
 
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
@@ -1839,15 +1857,58 @@ std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {
 }
 
 std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement() {
+  require_token(TT_S_SWITCH, "Expected 'switch' in switch-statement");
 
+  auto switch_ = std::make_unique<AST::SwitchStatement>();
+  switch_->expression = TryParseControlExpression();
+  switch_->body = std::make_unique<AST::CodeBlock>();
+  require_token(TT_BEGINBRACE, "Expected '{' after switch-statement condition");
+  while (token.type != TT_ENDBRACE) {
+    if (token.type == TT_S_CASE) {
+      // TODO: Handle case mappings
+      switch_->body->statements.emplace_back(ParseCaseOrDefaultStatement(false));
+    } else if (token.type == TT_S_DEFAULT) {
+      if (switch_->default_branch.has_value()) {
+        herr->Error(token) << "Redefinition of default case of switch";
+        ParseCaseOrDefaultStatement(true); // ignore the default case
+      } else {
+        switch_->body->statements.emplace_back(ParseCaseOrDefaultStatement(true));
+        switch_->default_branch = std::make_optional<std::size_t>(switch_->body->statements.size() - 1);
+      }
+    } else {
+      herr->Error(token) << "Expected 'case' or 'default' in switch body";
+    }
+  }
+  require_token(TT_ENDBRACE, "Expected closing brace ('}') after switch-statement");
+
+  return switch_;
 }
 
-std::unique_ptr<AST::CaseStatement> ParseCaseStatement() {
+std::unique_ptr<AST::Node> ParseCaseOrDefaultStatement(bool is_default) {
+  std::unique_ptr<AST::Node> expr = nullptr;
+  if (is_default) {
+    require_token(TT_S_DEFAULT, "Expected 'default' at the start of default statement");
+    require_token(TT_COLON, "Expected colon (':') after 'default'");
+  } else {
+    require_token(TT_S_CASE, "Expected 'case' at the start of case statement");
+    expr = TryParseExpression(Precedence::kAll);
+    require_token(TT_COLON, "Expected colon (':') after case expression");
+  }
 
-}
+  auto body = std::make_unique<AST::CodeBlock>();
+  while (token.type != TT_S_CASE && token.type != TT_S_DEFAULT && token.type != TT_ENDBRACE) {
+    if (token.type == TT_BEGINBRACE) {
+      body->statements.emplace_back(ParseCodeBlock());
+    } else {
+      body->statements.emplace_back(TryReadStatement());
+    }
+  }
 
-std::unique_ptr<AST::CaseStatement> ParseDefaultStatement() {
-
+  if (is_default) {
+    return std::make_unique<AST::DefaultStatement>(std::move(body));
+  } else {
+    return std::make_unique<AST::CaseStatement>(std::move(expr), std::move(body));
+  }
 }
 
 std::unique_ptr<AST::WithStatement> ParseWithStatement() {

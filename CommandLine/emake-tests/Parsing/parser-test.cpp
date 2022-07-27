@@ -438,3 +438,35 @@ TEST(ParserTest, DeleteExpression_4) {
   ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
 }
+
+TEST(ParserTest, SwitchStatement) {
+  ParserTester test{"switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break };"};
+  auto node = test->TryReadStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 3);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::CASE);
+  auto *case1 = dynamic_cast<AST::CaseStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(case1->value->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(case1->value.get())->value.value), "1");
+  ASSERT_EQ(case1->statements->statements.size(), 2);
+  ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::RETURN);
+  ASSERT_EQ(case1->statements->statements[1]->type, AST::NodeType::BREAK);
+
+  ASSERT_EQ(switch_->body->statements[1]->type, AST::NodeType::CASE);
+  auto *case2 = dynamic_cast<AST::CaseStatement *>(switch_->body->statements[1].get());
+  ASSERT_EQ(case2->value->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(case2->value.get())->value.value), "2");
+  ASSERT_EQ(case2->statements->statements.size(), 2);
+  ASSERT_EQ(case2->statements->statements[0]->type, AST::NodeType::RETURN);
+  ASSERT_EQ(case2->statements->statements[1]->type, AST::NodeType::BREAK);
+
+  ASSERT_EQ(switch_->body->statements[2]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[2].get());
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BREAK);
+}

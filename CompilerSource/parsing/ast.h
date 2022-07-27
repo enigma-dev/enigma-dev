@@ -86,6 +86,9 @@ class AST {
   struct CodeBlock : TypedNode<NodeType::BLOCK> {
     // Individual statements or 
     std::vector<PNode> statements;
+
+    CodeBlock() noexcept = default;
+    CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {}
   };
   // Binary expressions; generally top-level will be "foo = expression"
   struct BinaryExpression : TypedNode<NodeType::BINARY_EXPRESSION> {
@@ -206,19 +209,32 @@ class AST {
     DoLoop(PNode body_, PNode condition_, bool until): body{std::move(body_)}, condition{std::move(condition_)},
         is_until(until) {}
   };
+
   struct CaseStatement : TypedNode<NodeType::CASE> {
     PNode value;
+    std::unique_ptr<AST::CodeBlock> statements;
+
+    CaseStatement(PNode value, std::unique_ptr<AST::CodeBlock> statements): value{std::move(value)},
+                                                                             statements{std::move(statements)} {}
   };
+
   struct DefaultStatement : TypedNode<NodeType::DEFAULT> {
+    std::unique_ptr<AST::CodeBlock> statements;
+
+    DefaultStatement(std::unique_ptr<AST::CodeBlock> statements): statements{std::move(statements)} {}
   };
+
   struct SwitchStatement : TypedNode<NodeType::SWITCH> {
     PNode expression;
-    PNode body;
+    std::unique_ptr<AST::CodeBlock> body;
     // Need to track these because case labels must be unique
     // and there can only be one default label.
-    std::unordered_map<ConstValue::HardwareValue, CaseStatement*> cases;
-    DefaultStatement *default_branch = nullptr;
+    //
+    // Use @c std::size_t as vector addresses are not stable thus pointers can cause bugs
+    std::unordered_map<ConstValue::HardwareValue, std::size_t> cases;
+    std::optional<std::size_t> default_branch = std::nullopt;
   };
+
   struct ReturnStatement : TypedNode<NodeType::RETURN> {
     // Optional: the return value. Default: T()
     PNode expression;
