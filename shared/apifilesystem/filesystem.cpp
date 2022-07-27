@@ -614,6 +614,7 @@ namespace ngs::fs {
       }
     }
     finish3:
+    if (path.empty()) return path;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
     if (!kd) { path.clear(); goto finish4; }
     if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
