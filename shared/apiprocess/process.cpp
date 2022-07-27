@@ -825,6 +825,7 @@ namespace ngs::proc {
         }
       }
     }
+    if (!(*buffer && **buffer)) return;
     char errbuf[_POSIX2_LINE_MAX];
     kinfo_file *kif = nullptr; int cntp = 0; bool ok = false;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
