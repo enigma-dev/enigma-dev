@@ -832,10 +832,9 @@ namespace ngs::proc {
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
     if (!kd) { *buffer = (char *)"\0"; return; }
     if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
-      for (int i = 0; i < cntp; i++) {
-        if (kif[i].fd_fd == KERN_FILE_TEXT) {
-          struct stat st = { 0 }; 
-          if (!stat(*buffer, &st)) {
+      if (!stat(*buffer, &st)) {
+        for (int i = 0; i < cntp; i++) {
+          if (kif[i].fd_fd == KERN_FILE_TEXT) {
             if (st.st_dev == kif[i].va_fsid || st.st_ino == kif[i].va_fileid) {
               ok = true;
               break;
