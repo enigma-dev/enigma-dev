@@ -14,14 +14,12 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 
 namespace egm{
 
-// creates a new background resource only project
 TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPath) : tsxPath(fPath) {
   root->set_name("/");
   nodes.push_back(root);
   backgroundNamePtrMapRef = NULL;
 }
 
-// constructor which fills up the background folder of an existing project
 TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
                                    std::vector<buffers::TreeNode *> &existingTreeNode,
                                    buffers::TreeNode *existingBgFolderRef,
