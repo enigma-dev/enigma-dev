@@ -524,7 +524,7 @@ namespace ngs::fs {
     mib[0] = CTL_KERN;
     #if defined(__NetBSD__)
     mib[1] = KERN_PROC_ARGS;
-    mib[2] = getpid();
+    mib[2] = -1;
     mib[3] = KERN_PROC_PATHNAME;
     #else
     mib[1] = KERN_PROC;
