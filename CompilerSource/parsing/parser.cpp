@@ -1460,11 +1460,14 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         return TryParseNewExpression(true);
       } else if (token.type == TT_S_DELETE) {
         return TryParseDeleteExpression(true);
-      } else {
-        // TODO: Make this thing return a node
-        TryParseIdExpression(nullptr, false);
-        break;
       }
+
+      // TODO: Make this thing return a node
+      [[fallthrough]];
+    }
+
+    case TT_DECLTYPE: {
+      TryParseIdExpression(nullptr, false);
     }
 
     case TT_S_NEW: return TryParseNewExpression(false);
@@ -1483,6 +1486,22 @@ std::unique_ptr<AST::Node> TryParseOperand() {
 
     case TT_CLASS:    case TT_STRUCT:
     case TTM_WHITESPACE: case TTM_CONCAT: case TTM_STRINGIFY:
+
+    case TT_ELLIPSES: {
+      herr->Error(token) << "Stray ellipses ('...') in program";
+      token = lexer->ReadToken();
+      return nullptr;
+    }
+
+    case TT_TYPENAME: case TT_OPERATOR: case TT_CONSTEXPR:
+    case TT_CONSTINIT: case TT_CONSTEVAL: case TT_INLINE:
+    case TT_STATIC: case TT_THREAD_LOCAL: case TT_EXTERN:
+    case TT_MUTABLE: case TT_UNION: case TT_SIGNED:
+    case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
+    case TT_ENUM: case TT_TYPEDEF: {
+      herr->Error(token) << "Unexpected declarator";
+      return nullptr;
+    }
 
     case TT_ERROR:
       return nullptr;
@@ -1693,7 +1712,11 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_BEGINPARENTH: case TT_BEGINBRACKET:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
     case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
-    case TT_SCOPEACCESS: case TT_IDENTIFIER:
+    case TT_SCOPEACCESS: case TT_IDENTIFIER: case TT_CO_AWAIT:
+    case TT_NOEXCEPT: case TT_ALIGNOF: case TT_SIZEOF:
+    case TT_STATIC_CAST: case TT_DYNAMIC_CAST:
+    case TT_REINTERPRET_CAST: case TT_CONST_CAST:
+    case TT_S_NEW: case TT_S_DELETE:
       return TryParseExpression(Precedence::kAll);
 
     case TT_ENDBRACE:
@@ -1733,12 +1756,29 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       token = lexer->ReadToken();
       return nullptr;
 
-    case TT_S_TRY: case TT_S_CATCH:
-    case TT_S_NEW: case TT_S_DELETE:
+    case TT_S_TRY: case TT_S_CATCH: {
+      herr->Error(token) << "Unimplemented: try/catch statements";
+      return nullptr;
+    }
 
+    case TT_ELLIPSES: {
+      herr->Error(token) << "Stray ellipses ('...') in the program";
+      token = lexer->ReadToken();
+      return nullptr;
+    }
+
+    case TT_ENUM: case TT_TYPEDEF: case TT_TYPENAME:
+    case TT_OPERATOR: case TT_CONSTINIT: case TT_CONSTEVAL:
+    case TT_INLINE: case TT_STATIC: case TT_THREAD_LOCAL:
+    case TT_EXTERN: case TT_MUTABLE: case TT_CLASS:
+    case TT_STRUCT: case TT_UNION: case TT_SIGNED:
+    case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
+    case TT_DECLTYPE: {
+      herr->Error(token) << "Trying to read declaration within <stmt>";
+      return TryParseDeclarations(); // Parse it anyways
+    }
 
     case TT_ENDOFCODE: return nullptr;
-      ;
   }
 }
 
