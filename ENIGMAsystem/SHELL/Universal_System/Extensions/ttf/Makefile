@@ -4,5 +4,5 @@ ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += /opt/local/lib/libfreetype.a
 else
 	override CXXFLAGS += $(shell pkg-config --cflags freetype2)
-	override LDLIBS += $(shell pkg-config --libs --static freetype2) -lfreetype
+	override LDLIBS += $(shell pkg-config --libs freetype2)
 endif
