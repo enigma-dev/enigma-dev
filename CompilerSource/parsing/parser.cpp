@@ -568,7 +568,6 @@ jdi::definition *TryParseIdExpression(jdi::ref_stack *rt = nullptr, bool is_decl
 }
 
 jdi::definition *TryParseDecltype() {
-  Token tok = token;
   require_token(TT_DECLTYPE, "Expected 'decltype' keyword");
   require_token(TT_BEGINPARENTH, "Expected '(' after 'decltype'");
   auto expr = TryParseExpression(Precedence::kAll);
@@ -592,7 +591,8 @@ void TryParseTemplateArgs(jdi::definition *def) {
         }
       } else if (next_is_start_of_id_expression()) {
         herr->Error(token) << "Unimplemented: id-expressions as template arguments";
-        auto id = TryParseIdExpression(nullptr, false);
+//        auto id = TryParseIdExpression(nullptr, false);
+        // TODO: this thing
       } else {
         herr->Error(token) << "Unimplemented: NTTP template arguments";
         auto expr = TryParseConstantExpression();
@@ -785,7 +785,7 @@ bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
   return (combined & builtin.first) == builtin.second;
 }
 
-void maybe_assign_full_type(jdi::full_type *ft, jdi::definition *def, Token token, bool is_allocated = false) {
+void maybe_assign_full_type(jdi::full_type *ft, jdi::definition *def, Token token) {
   if (def != nullptr && ft->def == nullptr) {
     ft->def = def;
   } else if (ft->def != nullptr) {
@@ -1345,7 +1345,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
       }
       herr->Error(unary_op) << "Expected expression following unary operator";
-      break;
+      return nullptr;
     }
 
     case TT_BEGINPARENTH: {
@@ -1468,6 +1468,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
 
     case TT_DECLTYPE: {
       TryParseIdExpression(nullptr, false);
+      return nullptr;
     }
 
     case TT_S_NEW: return TryParseNewExpression(false);
@@ -1486,6 +1487,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
 
     case TT_CLASS:    case TT_STRUCT:
     case TTM_WHITESPACE: case TTM_CONCAT: case TTM_STRINGIFY:
+      return nullptr;
 
     case TT_ELLIPSES: {
       herr->Error(token) << "Stray ellipses ('...') in program";
@@ -1582,7 +1584,7 @@ std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int 
   while (Precedence::kUnaryPostfixPrec.find(token.type) != Precedence::kUnaryPostfixPrec.end() &&
          precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
     Token oper = token;
-    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
+//    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
     token = lexer->ReadToken(); // Consume the operator
 
     operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
@@ -1592,7 +1594,8 @@ std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int 
 }
 
 std::unique_ptr<AST::TernaryExpression> TryParseTernaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
-  Token oper = token;
+  (void)precedence;
+//  Token oper = token;
   token = lexer->ReadToken(); // Consume the operator
 
   auto middle = TryParseExpression(Precedence::kBoolOr);
@@ -1606,6 +1609,7 @@ std::unique_ptr<AST::TernaryExpression> TryParseTernaryExpression(int precedence
 }
 
 std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  (void)precedence;
   while (token.type == TT_BEGINBRACKET) {
     Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
@@ -1619,8 +1623,9 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
 std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+  (void)precedence;
   while (token.type == TT_BEGINPARENTH) {
-    Token oper = token;
+//    Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
@@ -1773,7 +1778,7 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_EXTERN: case TT_MUTABLE: case TT_CLASS:
     case TT_STRUCT: case TT_UNION: case TT_SIGNED:
     case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
-    case TT_DECLTYPE: {
+    case TT_DECLTYPE: case TT_CONSTEXPR: {
       herr->Error(token) << "Trying to read declaration within <stmt>";
       return TryParseDeclarations(); // Parse it anyways
     }
