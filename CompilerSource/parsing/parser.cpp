@@ -1693,7 +1693,7 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_BEGINPARENTH: case TT_BEGINBRACKET:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
     case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
-    case TT_SCOPEACCESS:
+    case TT_SCOPEACCESS: case TT_IDENTIFIER:
       return TryParseExpression(Precedence::kAll);
 
     case TT_ENDBRACE:
@@ -1702,19 +1702,6 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_BEGINBRACE: {
       herr->Error(token) << "Internal error: trying to parse <block-stmt> within <stmt>";
       return ParseCodeBlock(); // Parse it anyways
-    }
-
-    case TT_IDENTIFIER: {
-      // TODO: Verify that template instantiations are covered by kScope
-      auto name = TryParseExpression(Precedence::kScope);
-      // TODO:
-      // if (name.IsTypeIdentifier()) {
-      //   // Handle reading decl-specifier-seq and init-declarator-list
-      //   return ReadDeclaration(name);
-      // } else {
-      //   return TryParseBinaryExpression(name, Precedence::kAll);
-      // }
-      return name;
     }
 
     case TT_TYPE_NAME:  // TODO: rename TT_DECLARATOR, exclude var/variant/C++ classes,

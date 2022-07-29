@@ -470,3 +470,17 @@ TEST(ParserTest, SwitchStatement) {
   ASSERT_EQ(default_->statements->statements.size(), 1);
   ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BREAK);
 }
+
+TEST(ParserTest, CodeBlock) {
+  ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
+  auto node = test->ParseCodeBlock();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = dynamic_cast<AST::CodeBlock *>(node.get());
+  ASSERT_EQ(block->statements.size(), 4);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[1]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
+}
