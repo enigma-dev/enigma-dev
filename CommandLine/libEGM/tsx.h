@@ -6,8 +6,9 @@
 
 namespace egm {
 
+
 /**
- * @brief Provides functionality to load Tiled .tsx files independently
+ * @brief The TSXFileFormat class provides functionality to load Tiled .tsx files independently
  */
 class TSXFileFormat : public FileFormat {
 public:
@@ -25,20 +26,21 @@ public:
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fPath) const override;
 };
 
+
 /**
- * @brief Manages Tiled .tsx file format
+ * @brief The TSXTilesetLoader class manages parsing of Tiled .tsx file format
  */
 class TSXTilesetLoader : public pugi::xml_tree_walker {
 public:
   /**
-   * @brief Constructor to load standalone Tiled .tsx file into EGM Background resource
+   * @brief Constructor to init variables required to load standalone Tiled .tsx file(s)
    * @param root Pointer to TreeNode proto message
    * @param fPath .tsx file path
    */
   TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPath);
 
   /**
-   * @brief Constructor to load Tiled tileset into a new Background resource of a pre-existing EGM project
+   * @brief Constructor to init variables to load Tiled tileset into a new Background resource for an existing EGM project
    * @param fPath .tsx file path
    * @param existingTreeNode Reference to existing EGM project TreeNode heirarchy
    * @param existingBgFolderRef Pointer to existing Background resource folder(if already exist)
@@ -53,14 +55,14 @@ public:
 
 private:
   /**
-   * @brief Stores TreeNode heirarchy of an existing or a new EGM project
-   */
-  std::vector<buffers::TreeNode *> nodes;
-
-  /**
    * @brief Stores path to the .tsx file
    */
   fs::path tsxPath;
+
+  /**
+   * @brief Stores TreeNode heirarchy of an existing or a new EGM project
+   */
+  std::vector<buffers::TreeNode *> nodes;
 
   /**
    * @brief Stores pointer to Background resource folder
