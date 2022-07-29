@@ -378,6 +378,26 @@ bool next_is_start_of_id_expression() {
   return is_start_of_id_expression(token);
 }
 
+bool maybe_functional_cast(const Token &tok) {
+  switch (tok.type) {
+    case TT_SCOPEACCESS:
+    case TT_TYPENAME:
+    case TT_TYPE_NAME:
+    case TT_DECLTYPE:
+      return true;
+
+    case TT_IDENTIFIER:
+      return is_user_defined_type(tok);
+
+    default:
+      return false;
+  }
+}
+
+bool next_maybe_functional_cast() {
+  return maybe_functional_cast(token);
+}
+
 public:
 
 AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
@@ -1784,8 +1804,75 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 }
 
-std::unique_ptr<AST::ForLoop> ParseForLoop() {
+std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration() {
+  if (next_maybe_functional_cast()) {
+    jdi::full_type ft;
+    TryParseTypeSpecifier(&ft);
+    if (next_is_type_specifier() || (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH)) {
+      using Declaration = AST::DeclarationStatement::Declaration;
+      TryParseTypeSpecifierSeq(&ft);
+      std::vector<Declaration> decls{};
+      while (true) {
+        jdi::full_type decl;
+        decl.def = ft.def;
+        TryParseDeclarator(&decl);
+        decls.emplace_back(decl, next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
+        if (token.type == TT_COMMA) {
+          token = lexer->ReadToken();
+        } else {
+          break;
+        }
+      }
 
+      return std::make_unique<AST::DeclarationStatement>(ft.def, std::move(decls));
+    } else if (token.type == TT_BEGINBRACE) {
+      Token tok = token;
+      return std::make_unique<AST::CastExpression>(tok, ft, TryParseInitializer());
+    } else if (token.type == TT_BEGINPARENTH) {
+      // TODO: implement functional cast using ()
+    }
+  } else {
+    return TryParseDeclarations();
+  }
+}
+
+std::unique_ptr<AST::ForLoop> ParseForLoop() {
+  require_token(TT_S_FOR, "Expected 'for' in for-loop");
+
+  std::unique_ptr<AST::Node> init = nullptr;
+  std::unique_ptr<AST::Node> cond = nullptr;
+  std::unique_ptr<AST::Node> incr = nullptr;
+
+  bool is_conventional = false; // Conventional means `for ()`
+  if (token.type == TT_BEGINPARENTH) {
+    token = lexer->ReadToken();
+    is_conventional = true;
+  }
+  if (next_is_decl_specifier()) {
+    init = TryParseEitherFunctionalCastOrDeclaration();
+  } else {
+    init = TryParseExpression(Precedence::kAll);
+  }
+  if (token.type == TT_ENDPARENTH) {
+    is_conventional = false;
+    token = lexer->ReadToken();
+  }
+  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
+  if (token.type != TT_SEMICOLON) {
+    cond = TryParseControlExpression();
+  }
+  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
+  if (token.type != TT_SEMICOLON) {
+    incr = TryParseExpression(Precedence::kAll);
+  }
+
+  if (is_conventional) {
+    require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after for-loop header");
+  }
+
+  auto body = ParseCFStmtBody();
+  return std::make_unique<AST::ForLoop>(std::move(init), std::move(cond),
+                                        std::move(incr), std::move(body));
 }
 
 std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {

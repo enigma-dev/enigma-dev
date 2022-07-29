@@ -143,7 +143,7 @@ class AST {
   };
   // Cast expressions
   struct CastExpression : TypedNode<NodeType::CAST> {
-    enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST } kind;
+    enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
     jdi::full_type type;
     PNode expr;
 
@@ -154,6 +154,7 @@ class AST {
         case TT_DYNAMIC_CAST:     kind = Kind::DYNAMIC; break;
         case TT_REINTERPRET_CAST: kind = Kind::REINTERPRET; break;
         case TT_CONST_CAST:       kind = Kind::CONST; break;
+        case TT_BEGINBRACE:       kind = Kind::FUNCTIONAL; break;
         default:                  break;
       }
     }
@@ -346,6 +347,9 @@ class AST {
     struct Declaration {
       jdi::full_type declarator;
       InitializerNode init;
+
+      Declaration() noexcept = default;
+      Declaration(jdi::full_type declarator, InitializerNode init): declarator{declarator}, init{std::move(init)} {}
     };
 
     jdi::definition *type;
