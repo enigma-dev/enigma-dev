@@ -14,7 +14,22 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 
 namespace egm{
 
-TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPath) : tsxPath(fPath) {
+std::unique_ptr<buffers::Project> TSXFileFormat::LoadProject(const fs::path& fPath) const {
+
+  pugi::xml_document doc;
+  if(!doc.load_file(fPath.c_str())) return nullptr;
+
+  std::unique_ptr<buffers::Project> proj = std::make_unique<buffers::Project>();
+  buffers::Game* game = proj->mutable_game();
+
+  TSXTilesetLoader background_walker(game->mutable_root(), fPath);
+  doc.traverse(background_walker);
+
+  return proj;
+}
+
+TSXTilesetLoader::TSXTilesetLoader(buffers::TreeNode *root, const fs::path &fPath) {
+  tsxPath = fPath;
   root->set_name("/");
   nodes.push_back(root);
   backgroundNamePtrMapRef = NULL;
@@ -24,7 +39,8 @@ TSXTilesetLoader::TSXTilesetLoader(const fs::path &fPath,
                                    std::vector<buffers::TreeNode *> &existingTreeNode,
                                    buffers::TreeNode *existingBgFolderRef,
                                    const std::string &backgroundName,
-                                   std::unordered_map<std::string, buffers::TreeNode *> *backgroundNamePtrMap) : tsxPath(fPath) {
+                                   std::unordered_map<std::string, buffers::TreeNode *> *backgroundNamePtrMap) {
+  tsxPath = fPath;
   nodes = existingTreeNode;
   backgroundFolderRef = existingBgFolderRef;
   backgroundResName = backgroundName;
@@ -119,20 +135,6 @@ void TSXTilesetLoader::UpdateImageHelper(const pugi::xml_node &innerImgNode, buf
     protoNode->mutable_background()->set_width(imageWidth);
     protoNode->mutable_background()->set_height(imageHeight);
   }
-}
-
-std::unique_ptr<buffers::Project> TSXFileFormat::LoadProject(const fs::path& fPath) const {
-
-  pugi::xml_document doc;
-  if(!doc.load_file(fPath.c_str())) return nullptr;
-
-  std::unique_ptr<buffers::Project> proj = std::make_unique<buffers::Project>();
-  buffers::Game* game = proj->mutable_game();
-
-  TSXTilesetLoader background_walker(game->mutable_root(), fPath);
-  doc.traverse(background_walker);
-
-  return proj;
 }
 
 } // namespace egm
