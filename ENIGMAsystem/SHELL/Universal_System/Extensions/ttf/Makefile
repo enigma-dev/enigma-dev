@@ -3,7 +3,7 @@ ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDFLAGS += /opt/local/lib/libfreetype.a
 	override LDLIBS += /opt/local/lib/libfreetype.a
 else ifeq ($(TARGET-PLATFORM), Windows)
-        FREETYPE := $(shell echo "$MSYSTEM_PREFIX/lib/libfreetype.a")
+        FREETYPE := $(shell echo "${MSYSTEM_PREFIX}/lib/libfreetype.a")
 	override LDFLAGS += $(FREETYPE)
 	override LDLIBS += $(FREETYPE)
 else
