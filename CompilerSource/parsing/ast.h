@@ -18,12 +18,12 @@
 #ifndef ENIGMA_COMPILER_PARSING_AST_h
 #define ENIGMA_COMPILER_PARSING_AST_h
 
+#include "full_type.h"
 #include "error_reporting.h"
 #include "lexer.h"
 #include "tokens.h"
 #include "darray.h"
 
-#include <JDI/src/Storage/full_type.h>
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -129,25 +129,25 @@ class AST {
   // Sizeof expression
   struct SizeofExpression : TypedNode<NodeType::SIZEOF> {
     enum class Kind { EXPR, VARIADIC, TYPE } kind;
-    std::variant<PNode, std::string, jdi::full_type> argument;
+    std::variant<PNode, std::string, FullType> argument;
 
     explicit SizeofExpression(PNode arg): kind{Kind::EXPR}, argument{std::move(arg)} {}
     explicit SizeofExpression(std::string ident): kind{Kind::VARIADIC}, argument{std::move(ident)} {}
-    explicit SizeofExpression(jdi::full_type ft): kind{Kind::TYPE}, argument{std::move(ft)} {}
+    explicit SizeofExpression(FullType ft): kind{Kind::TYPE}, argument{std::move(ft)} {}
   };
   // Alignof expression
   struct AlignofExpression : TypedNode<NodeType::ALIGNOF> {
-    jdi::full_type ft;
+    FullType type;
 
-    explicit AlignofExpression(const jdi::full_type &ft): ft{ft} {}
+    explicit AlignofExpression(FullType type): type{std::move(type)} {}
   };
   // Cast expressions
   struct CastExpression : TypedNode<NodeType::CAST> {
     enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
-    jdi::full_type type;
+    FullType type;
     PNode expr;
 
-    CastExpression(const Token &token, const jdi::full_type &ft, PNode expr): type{ft}, expr{std::move(expr)} {
+    CastExpression(const Token &token, FullType type, PNode expr): type{std::move(type)}, expr{std::move(expr)} {
       switch (token.type) {
         case TT_BEGINPARENTH:     kind = Kind::C_STYLE; break;
         case TT_STATIC_CAST:      kind = Kind::STATIC; break;
@@ -325,12 +325,12 @@ class AST {
     bool is_global;
     bool is_array;
     std::unique_ptr<Initializer> placement;
-    jdi::full_type type;
+    FullType type;
     std::unique_ptr<Initializer> initializer;
 
-    NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, const jdi::full_type &type,
+    NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, FullType type,
                   std::unique_ptr<Initializer> initializer):
-      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{type},
+      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{std::move(type)},
       initializer{std::move(initializer)} {}
   };
   // Delete expression
@@ -345,11 +345,11 @@ class AST {
 
   struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {
     struct Declaration {
-      jdi::full_type declarator;
+      FullType declarator;
       InitializerNode init;
 
       Declaration() noexcept = default;
-      Declaration(jdi::full_type declarator, InitializerNode init): declarator{declarator}, init{std::move(init)} {}
+      Declaration(FullType declarator, InitializerNode init): declarator{std::move(declarator)}, init{std::move(init)} {}
     };
 
     jdi::definition *type;
