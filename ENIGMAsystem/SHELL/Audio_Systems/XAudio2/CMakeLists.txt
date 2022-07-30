@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 target_include_directories(Info/)
 
 set(TARGET_LIB "x_audio2")

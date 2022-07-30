@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
-
-include_directories(Info/)
+target_include_directories(Info/)
 
 set(TARGET_LIB "none")
 
@@ -11,4 +9,3 @@ add_library(${TARGET_LIB}
     *.cpp
     *.h
 )
-
