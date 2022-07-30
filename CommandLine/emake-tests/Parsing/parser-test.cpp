@@ -128,9 +128,9 @@ TEST(ParserTest, SizeofType) {
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
   auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
   ASSERT_EQ(sizeof_->kind, AST::SizeofExpression::Kind::TYPE);
-  ASSERT_TRUE(std::holds_alternative<jdi::full_type>(sizeof_->argument));
+  ASSERT_TRUE(std::holds_alternative<FullType>(sizeof_->argument));
 
-  auto &value = std::get<jdi::full_type>(sizeof_->argument);
+  auto &value = std::get<FullType>(sizeof_->argument);
   auto has_value = [&value](jdi::typeflag *builtin) -> bool {
     return (value.flags & builtin->mask) == builtin->value;
   };
@@ -140,8 +140,10 @@ TEST(ParserTest, SizeofType) {
   ASSERT_TRUE(has_value(jdi::builtin_flag__long_long));
   ASSERT_EQ(value.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
   ASSERT_EQ(value.def->name, "int");
-  ASSERT_EQ(value.refs.size(), 4);
-  auto first = value.refs.begin();
+  ASSERT_EQ(value.decl.components.size(), 3);
+  jdi::ref_stack stack;
+  value.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
@@ -154,7 +156,7 @@ TEST(ParserTest, AlignofType) {
 
   ASSERT_EQ(expr->type, AST::NodeType::ALIGNOF);
   auto *alignof_ = dynamic_cast<AST::AlignofExpression *>(expr.get());
-  auto &value = alignof_->ft;
+  auto &value = alignof_->type;
   auto has_value = [&value](jdi::typeflag *builtin) -> bool {
     return (value.flags & builtin->mask) == builtin->value;
   };
@@ -164,26 +166,30 @@ TEST(ParserTest, AlignofType) {
   ASSERT_TRUE(has_value(jdi::builtin_flag__long_long));
   ASSERT_EQ(value.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
   ASSERT_EQ(value.def->name, "int");
-  ASSERT_EQ(value.refs.size(), 1);
-  auto first = value.refs.begin();
+  ASSERT_EQ(value.decl.components.size(), 1);
+  jdi::ref_stack stack;
+  value.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
 }
 
-bool contains_flag(jdi::full_type *ft, std::size_t decflag) {
+bool contains_flag(FullType *ft, std::size_t decflag) {
   return (ft->flags & decflag) == decflag;
 }
 
-bool def_type_is(jdi::full_type *ft, std::size_t dectype) {
+bool def_type_is(FullType *ft, std::size_t dectype) {
   return (ft->def->flags & dectype) == dectype;
 }
 
 TEST(ParserTest, TypeSpecifierAndDeclarator) {
   ParserTester test{"const unsigned int ****(***)[10]"};
-  jdi::full_type ft = test->TryParseTypeID();
+  FullType ft = test->TryParseTypeID();
   EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__const->value));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__unsigned->value));
-  auto first = ft.refs.begin();
+  jdi::ref_stack stack;
+  ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
@@ -196,13 +202,15 @@ TEST(ParserTest, TypeSpecifierAndDeclarator) {
 }
 
 TEST(ParserTest, Declarator_1) {
-  jdi::full_type ft2;
+  FullType ft2;
   ParserTester test2{"const unsigned int **(*var::*y)[10]"};
   test2->TryParseTypeSpecifierSeq(&ft2);
   test2->TryParseDeclarator(&ft2, AST::DeclaratorType::NON_ABSTRACT);
 
-  auto first = ft2.refs.begin();
-  EXPECT_EQ(ft2.refs.name, "y");
+  jdi::ref_stack stack;
+  ft2.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  EXPECT_EQ(ft2.decl.name, "y");
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_MEMBER_POINTER);
   EXPECT_EQ((first++)->type, jdi::ref_stack::RT_ARRAYBOUND);
@@ -212,7 +220,7 @@ TEST(ParserTest, Declarator_1) {
 }
 
 TEST(ParserTest, Declarator_2) {
-  jdi::full_type ft3;
+  FullType ft3;
   ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
   test3->TryParseTypeSpecifierSeq(&ft3);
   test3->TryParseDeclarator(&ft3);
@@ -220,9 +228,74 @@ TEST(ParserTest, Declarator_2) {
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
+TEST(ParserTest, Declarator_3) {
+  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  auto node = test->TryParseDeclarations();
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  ASSERT_EQ(decls->declarations.size(), 1);
+
+  ASSERT_EQ(decls->declarations[0].init, nullptr);
+  auto &decl1 = decls->declarations[0].declarator.decl;
+  ASSERT_EQ(decl1.name, "a");
+  ASSERT_EQ(decl1.components.size(), 2);
+
+  ASSERT_EQ(decl1.components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &ptr = decl1.components[0].as<PointerNode>();
+  ASSERT_EQ(ptr.is_const, false);
+  ASSERT_EQ(ptr.is_volatile, false);
+  ASSERT_EQ(ptr.class_def, nullptr);
+
+  ASSERT_EQ(decl1.components[1].kind, DeclaratorNode::Kind::NESTED);
+  auto *nested = decl1.components[1].as<NestedNode>().contained.get();
+  ASSERT_EQ(nested->components.size(), 3);
+
+  ASSERT_EQ(nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &nested_ptr = nested->components[0].as<PointerNode>();
+  ASSERT_EQ(nested_ptr.is_const, false);
+  ASSERT_EQ(nested_ptr.is_volatile, false);
+  ASSERT_EQ(nested_ptr.class_def, nullptr);
+
+  ASSERT_EQ(nested->components[1].kind, DeclaratorNode::Kind::NESTED);
+  auto *nested_nested = nested->components[1].as<NestedNode>().contained.get();
+  ASSERT_EQ(nested_nested->components.size(), 3);
+  ASSERT_EQ(nested_nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &nested_nested_ptr = nested_nested->components[0].as<PointerNode>();
+  ASSERT_EQ(nested_nested_ptr.is_const, false);
+  ASSERT_EQ(nested_nested_ptr.is_volatile, false);
+  ASSERT_EQ(nested_nested_ptr.class_def, nullptr);
+  ASSERT_EQ(nested_nested->components[1].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+  ASSERT_EQ(nested_nested->components[2].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+
+  ASSERT_EQ(nested->components[2].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+}
+
+TEST(ParserTest, Declarator_4) {
+  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  auto node = test->TryParseDeclarations();
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  ASSERT_EQ(decls->declarations.size(), 1);
+
+  ASSERT_EQ(decls->declarations[0].init, nullptr);
+  auto &decl1 = decls->declarations[0].declarator.decl;
+  ASSERT_EQ(decl1.name, "a");
+  ASSERT_EQ(decl1.components.size(), 2);
+
+  jdi::ref_stack stack;
+  decl1.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+}
+
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
-  jdi::full_type ft;
+  FullType ft;
   test->TryParseTypeSpecifierSeq(&ft);
   test->TryParseDeclarator(&ft);
   test->TryParseInitializer();
@@ -244,15 +317,15 @@ TEST(ParserTest, Declarations) {
   EXPECT_EQ(decls->declarations.size(), 3);
   EXPECT_NE(decls->declarations[0].init, nullptr);
   EXPECT_EQ(decls->declarations[0].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[0].declarator.refs.begin()->type, jdi::ref_stack::RT_POINTERTO);
+  EXPECT_EQ(decls->declarations[0].declarator.decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
 
   EXPECT_EQ(decls->declarations[1].init, nullptr);
   EXPECT_EQ(decls->declarations[1].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[1].declarator.refs.size(), 0);
+  EXPECT_EQ(decls->declarations[1].declarator.decl.components.size(), 0);
 
   EXPECT_NE(decls->declarations[2].init, nullptr);
   EXPECT_EQ(decls->declarations[2].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[2].declarator.refs.size(), 2);
+  EXPECT_EQ(decls->declarations[2].declarator.decl.components.size(), 1);
 }
 
 void check_placement(AST::NewExpression *new_) {
@@ -307,8 +380,8 @@ TEST(ParserTest, NewExpression_1) {
   check_placement(new_);
 
   EXPECT_EQ(new_->type.def, jdi::builtin_type__int);
-  ASSERT_EQ(new_->type.refs.size(), 1);
-  ASSERT_EQ(new_->type.refs.begin()->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(new_->type.decl.components.size(), 1);
+  ASSERT_EQ(new_->type.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
 
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
@@ -326,8 +399,10 @@ TEST(ParserTest, NewExpression_2) {
 
   ASSERT_EQ(new_->placement, nullptr);
   EXPECT_EQ(new_->type.def, jdi::builtin_type__int);
-  ASSERT_EQ(new_->type.refs.size(), 2);
-  auto first = new_->type.refs.begin();
+  ASSERT_EQ(new_->type.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->type.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
 
@@ -348,8 +423,10 @@ TEST(ParserTest, NewExpression_3) {
   check_placement(new_);
 
   ASSERT_EQ(new_->type.def, jdi::builtin_type__int);
-  ASSERT_EQ(new_->type.refs.size(), 4);
-  auto first = new_->type.refs.begin();
+  ASSERT_EQ(new_->type.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->type.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
@@ -371,8 +448,10 @@ TEST(ParserTest, NewExpression_4) {
 
   ASSERT_EQ(new_->placement, nullptr);
   ASSERT_EQ(new_->type.def, jdi::builtin_type__int);
-  ASSERT_EQ(new_->type.refs.size(), 4);
-  auto first = new_->type.refs.begin();
+  ASSERT_EQ(new_->type.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->type.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
