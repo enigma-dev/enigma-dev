@@ -31,6 +31,9 @@ struct FullType {
   FullType(FullType &&) noexcept = default;
   FullType &operator=(FullType &&) noexcept = default;
 
+  FullType(jdi::definition *def, Declarator decl, std::size_t flags);
+  FullType(jdi::definition *def);
+
   jdi::full_type to_jdi_fulltype();
 };
 }

@@ -17,6 +17,11 @@
 #include "full_type.h"
 
 namespace enigma::parsing {
+FullType::FullType(jdi::definition *def, Declarator decl, std::size_t flags):
+ def{def}, decl{std::move(decl)}, flags{flags} {}
+
+FullType::FullType(jdi::definition *def): FullType(def, {}, 0) {}
+
 jdi::full_type FullType::to_jdi_fulltype() {
   jdi::ref_stack rt;
   decl.to_jdi_refstack(rt);
