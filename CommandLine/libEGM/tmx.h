@@ -30,14 +30,9 @@ public:
 
 
 /**
- * @brief The HexMapUtil struct stores details of hexagonal Tiled map
+ * @brief The StaggerUtil struct captures stagger details of a Tiled map
  */
-struct HexMapUtil {
-  /**
-   * @brief Length of side of hexagonal tile
-   */
-  unsigned int hexSideLength;
-
+struct StaggerUtil {
   /**
    * @brief Specifies the alignment of hex tiles, can be either "x" or "y"
    */
@@ -50,12 +45,34 @@ struct HexMapUtil {
   std::string staggerIndex;
 };
 
+
+/**
+ * @brief The HexMapUtil struct captures details of a hexagonal Tiled map
+ */
+struct HexMapUtil {
+  /**
+   * @brief Length of side of hexagonal tile
+   */
+  unsigned int hexSideLength;
+
+  /**
+   * @brief Hex map is a staggered map
+   */
+  StaggerUtil staggerUtil;
+};
+
+
+/**
+ * @brief The RoomOrientation enum defines types of Tiled maps supported by this importer
+ */
 enum RoomOrientation {
   orthogonal,
   hexagonal,
   isometric,
+  staggered,  // Staggered version of isometric maps
   unknown
 };
+
 
 /**
  * @brief The TMXMapLoader class manages parsing of Tiled .tmx file format
@@ -117,6 +134,11 @@ private:
    */
   RoomOrientation roomOrientation;
 
+  /**
+   * @brief Stores staggered isometric map deatils in heap
+   */
+  std::unique_ptr<StaggerUtil> staggeredIsoMapUtil;
+
   // TODO: Remove this hack and use "resource name generator"
   int idx=0;
 
@@ -174,6 +196,10 @@ private:
    */
   bool LoadLayerData(pugi::xml_node &mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight);
 
+  bool LoadLayerDataHelper(const std::string &dataStr, const int &layerWidth, const int &layerHeight,
+                           const std::string &encoding, const std::string &compression, buffers::TreeNode *resNode,
+                           const int& tileWidth, const int& tileHeight, const int &chunkXIdx = 0, const int &chunkYIdx = 0);
+
   /**
    * @brief Helper method to decompress and add tile data stored in Glib and Zlib streams to Room Resource
    * @param decodedStr Base64 decoded string data
@@ -186,7 +212,8 @@ private:
    * @return Returns true if parsing succeeds else false
    */
   bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                           const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight);
+                           const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight,
+                           const int &xStartIdx = 0, const int &yStartIdx = 0);
 
   /**
    * @brief Helper method to decompress and add tile data stored in Zstd stream to Room Resource
@@ -200,7 +227,8 @@ private:
    * @return Returns true if parsing succeeds else false
    */
   bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                           const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight);
+                               const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight,
+                               const int &chunkXIdx = 0, const int &chunkYIdx = 0);
 
   /**
    * @brief Helper method to decompress and add tile data stored in base64 stream to Room Resource
@@ -214,7 +242,8 @@ private:
    * @return Returns true if parsing succeeds else false
    */
   bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                           const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight);
+                                       const int &tileWidth, const int &tileHeight, const int &layerWidth,
+                                       const int &layerHeight, const int &chunkXIdx = 0, const int &chunkYIdx = 0);
 
   /**
    * @brief Helper method to load and add tile data stored in CSV format to Room Resource
@@ -227,7 +256,8 @@ private:
    * @return Returns true if parsing succeeds else false
    */
   bool LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int &tileWidth,
-                        const int &tileHeight, const int &layerWidth, const int &layerHeight);
+                        const int &tileHeight, const int &layerWidth, const int &layerHeight, const int &chunkXIdx = 0,
+                        const int &chunkYIdx = 0);
 
   /**
    * @brief Creates Tile instances for EGM Room resource

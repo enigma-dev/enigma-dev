@@ -171,19 +171,25 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
   unsigned int tileWidthPixels = resNode->room().hsnap();
   unsigned int tileHeightPixels = resNode->room().vsnap();
 
-  if(resNode->mutable_room()->orientation() == "orthogonal") {
-    roomOrientation = RoomOrientation::orthogonal;
+  const std::string &orientation = resNode->mutable_room()->orientation();
+
+  if(orientation == "orthogonal" || orientation == "isometric") {
+    if(orientation == "orthogonal")
+      roomOrientation = RoomOrientation::orthogonal;
+    else if(orientation == "isometric")
+      roomOrientation = RoomOrientation::isometric;
+
     resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
     resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
   }
-  else if(resNode->mutable_room()->orientation() == "hexagonal") {
+  else if(orientation == "hexagonal") {
     roomOrientation = RoomOrientation::hexagonal;
     hexMapUtil = std::make_unique<HexMapUtil>();
     hexMapUtil->hexSideLength = resNode->room().hexsidelength();
-    hexMapUtil->staggerAxis = resNode->room().staggeraxis();
-    hexMapUtil->staggerIndex = resNode->room().staggerindex();
+    hexMapUtil->staggerUtil.staggerAxis = resNode->room().staggeraxis();
+    hexMapUtil->staggerUtil.staggerIndex = resNode->room().staggerindex();
 
-    if(hexMapUtil->staggerAxis == "x") {
+    if(hexMapUtil->staggerUtil.staggerAxis == "x") {
       resNode->mutable_room()->set_width((3 * nHoriTiles + 1) * hexMapUtil->hexSideLength / 2);
       resNode->mutable_room()->set_height((nVertTiles * tileHeightPixels) + hexMapUtil->hexSideLength);
     }
@@ -192,13 +198,23 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
       resNode->mutable_room()->set_height((3 * nVertTiles + 1) * hexMapUtil->hexSideLength / 2);
     }
   }
-  else if(resNode->mutable_room()->orientation() == "isometric") {
-    roomOrientation = RoomOrientation::isometric;
-    resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
-    resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+  else if(orientation == "staggered") {
+    roomOrientation = RoomOrientation::staggered;
+    staggeredIsoMapUtil = std::make_unique<StaggerUtil>();
+    staggeredIsoMapUtil->staggerAxis = resNode->room().staggeraxis();
+    staggeredIsoMapUtil->staggerIndex = resNode->room().staggerindex();
+
+    if(staggeredIsoMapUtil->staggerAxis == "x") {
+      resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels / 2);
+      resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+    }
+    else {
+      resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
+      resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels / 2);
+    }
   }
   else {
-    errStream << "Error loading map, unsupported map orientation." << std::endl;
+    errStream << "Error loading map, unsupported map orientation: " << resNode->mutable_room()->orientation() << std::endl;
     return false;
   }
 
@@ -306,46 +322,81 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
     }
 
     std::string encoding = dataNode.attribute("encoding").as_string();
+    std::string compression = dataNode.attribute("compression").as_string();
 
     std::string dataStr = dataNode.first_child().value();
     dataStr = StrTrim(dataStr);
-    if(dataStr.empty()) {
-      errStream << "Error while loading tiles, Layer Data contains empty string." << std::endl;
-      return false;
+
+    // In infinite Tiled maps, data string is stored in chunk nodes
+    pugi::xml_object_range<pugi::xml_named_node_iterator> chunks = dataNode.children("chunk");
+
+    // data string can be found in child of <chunk> node(s) (for infinite Tiled maps) or directly in child node
+    if(!chunks.empty()) {
+      for(const pugi::xml_node &chunk : chunks) {
+        std::string chunkDataStr = chunk.first_child().value();
+        chunkDataStr = StrTrim(chunkDataStr);
+
+        int chunkXIdx = chunk.attribute("x").as_int();
+        int chunkYIdx = chunk.attribute("y").as_int();
+        int chunkWidth = chunk.attribute("width").as_int();
+        int chunkHeight = chunk.attribute("height").as_int();
+
+        bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, resNode, tileWidth,
+                                      tileHeight, chunkXIdx, chunkYIdx);
+        if(!ok) {
+          errStream << "Error while loading tiles from Layer Data Chunk." << std::endl;
+          return false;
+        }
+      }
     }
+    else {
+      int layerWidth = layer.attribute("width").as_int();
+      int layerHeight = layer.attribute("height").as_int();
 
-    int layerWidth = layer.attribute("width").as_int();
-    int layerHeight = layer.attribute("height").as_int();
+      bool ok = LoadLayerDataHelper(dataStr, layerWidth, layerHeight, encoding, compression, resNode, tileWidth,
+                                    tileHeight);
+      if(!ok) {
+        errStream << "Error while loading tiles from Layer Data." << std::endl;
+        return false;
+      }
+    }
+  }
 
+  return true;
+}
+
+bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int &layerWidth, const int &layerHeight,
+                                       const std::string &encoding, const std::string &compression, buffers::TreeNode *resNode,
+                                       const int& tileWidth, const int& tileHeight, const int &chunkXIdx, const int &chunkYIdx) {
+  if(!dataStr.empty()) {
     if(encoding == "base64") {
       // decode base64 data
       std::string decodedStr = base64_decode(dataStr);
 
       size_t expectedSize = layerWidth * layerHeight * 4;
 
-      std::string compression = dataNode.attribute("compression").as_string();
       if(compression == "zlib" || compression == "gzip") {
         bool ok = LoadBase64ZlibLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight);
+                                          layerHeight, chunkXIdx, chunkYIdx);
         if(!ok)
           return false;
       }
       else if(compression == "zstd") {
         bool ok = LoadBase64ZstdLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight);
+                                          layerHeight, chunkXIdx, chunkYIdx);
         if(!ok)
           return false;
       }
       else {
         // compression isnt specified for uncompressed format
         bool ok = LoadBase64UncompressedLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight);
+                                          layerHeight, chunkXIdx, chunkYIdx);
         if(!ok)
           return false;
       }
     }
     else if(encoding == "csv") {
-      bool ok = LoadCsvLayerData(dataStr, resNode, tileWidth, tileHeight, layerWidth, layerHeight);
+      bool ok = LoadCsvLayerData(dataStr, resNode, tileWidth, tileHeight, layerWidth, layerHeight, chunkXIdx, chunkYIdx);
       if(!ok)
         return false;
     }
@@ -354,13 +405,18 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
       return false;
     }
   }
+  else {
+    errStream << "Error while loading tiles, empty data string passed." << std::endl;
+    return false;
+  }
 
   return true;
 }
 
 bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t &expectedSize,
                                            buffers::TreeNode *resNode, const int& tileWidth, const int& tileHeight,
-                                           const int& layerWidth, const int& layerHeight) {
+                                           const int& layerWidth, const int& layerHeight, const int &xStartIdx,
+                                           const int &yStartIdx) {
   // decompress zlib/gzip compressed data
   std::istringstream istr(decodedStr);
   Decoder decoder(istr);
@@ -373,8 +429,8 @@ bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const 
   }
 
   unsigned int tileIndex = 0;
-  for (int y=0; y < layerHeight; ++y) {
-    for (int x=0; x < layerWidth; ++x) {
+  for (int y = yStartIdx; y < yStartIdx + layerHeight; ++y) {
+    for (int x = xStartIdx; x < xStartIdx + layerWidth; ++x) {
       // loading 4 bytes of stream into uint following little endian order
       unsigned int globalTileId = static_cast<unsigned char>(layerDataCharPtr[tileIndex]) |
                                   static_cast<unsigned char>(layerDataCharPtr[tileIndex + 1]) << 8 |
@@ -393,7 +449,8 @@ bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const 
 
 bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t &expectedSize,
                                            buffers::TreeNode *resNode, const int& tileWidth, const int& tileHeight,
-                                           const int& layerWidth, const int& layerHeight) {
+                                           const int& layerWidth, const int& layerHeight, const int &xStartIdx,
+                                           const int &yStartIdx) {
 
   std::vector<unsigned char> outTileData;
   outTileData.resize(expectedSize);
@@ -407,8 +464,8 @@ bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const 
   }
 
   unsigned int tileIndex = 0;
-  for (int y=0; y < layerHeight; ++y) {
-    for (int x=0; x < layerWidth; ++x) {
+  for (int y = yStartIdx; y < yStartIdx + layerHeight; ++y) {
+    for (int x = xStartIdx; x < xStartIdx + layerWidth; ++x) {
       // loading 4 bytes of stream into uint following little endian order
       unsigned int globalTileId = outTileData[tileIndex] |
                                   outTileData[tileIndex + 1] << 8 |
@@ -427,15 +484,16 @@ bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const 
 
 bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t &expectedSize,
                                                    buffers::TreeNode *resNode, const int& tileWidth,
-                                                   const int& tileHeight, const int& layerWidth, const int& layerHeight) {
+                                                   const int& tileHeight, const int& layerWidth, const int& layerHeight,
+                                                   const int &xStartIdx, const int &yStartIdx) {
   if(decodedStr.size() != expectedSize) {
     errStream << "Error loading tile layer data, uncompressed stream corrupted." << std::endl;
     return false;
   }
 
   unsigned int tileIndex = 0;
-  for (int y=0; y < layerHeight; ++y) {
-    for (int x=0; x < layerWidth; ++x) {
+  for (int y = yStartIdx; y < yStartIdx + layerHeight; ++y) {
+    for (int x = xStartIdx; x < xStartIdx + layerWidth; ++x) {
       // loading 4 bytes of stream into uint following little endian order
       unsigned int globalTileId = static_cast<unsigned char>(decodedStr[tileIndex]) |
                                   static_cast<unsigned char>(decodedStr[tileIndex + 1]) << 8 |
@@ -453,7 +511,8 @@ bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr
 }
 
 bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int& tileWidth,
-                                    const int& tileHeight, const int& layerWidth, const int& layerHeight) {
+                                    const int& tileHeight, const int& layerWidth, const int& layerHeight,
+                                    const int &xStartIdx, const int &yStartIdx) {
   std::vector<unsigned int> globalTileIds;
   std::istringstream istr(dataStr);
   std::string line;
@@ -480,8 +539,8 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNod
     return false;
   }
 
-  for (int y=0; y < layerHeight; ++y) {
-    for (int x=0; x < layerWidth; ++x) {
+  for (int y = yStartIdx; y < yStartIdx + layerHeight; ++y) {
+    for (int x = xStartIdx; x < xStartIdx + layerWidth; ++x) {
       unsigned int globalTileId = globalTileIds[y*layerWidth + x];
       if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
          return false;
@@ -530,10 +589,11 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
       return false;
     }
 
-    if(hexMapUtil->staggerAxis == "x") {
+    if(hexMapUtil->staggerUtil.staggerAxis == "x") {
       tile->set_x(currX * (mapTileWidth - (hexMapUtil->hexSideLength / 2)));
 
-      if((currX%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currX%2 != 0 && hexMapUtil->staggerIndex == "even"))
+      if((currX%2 == 0 && hexMapUtil->staggerUtil.staggerIndex == "odd") ||
+         (currX%2 != 0 && hexMapUtil->staggerUtil.staggerIndex == "even"))
         tile->set_y(currY * mapTileHeight);
       else
         tile->set_y((currY * mapTileHeight) + hexMapUtil->hexSideLength);
@@ -541,7 +601,8 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
     else {
       tile->set_y(currY * (mapTileHeight - (hexMapUtil->hexSideLength / 2)));
 
-      if((currY%2 == 0 && hexMapUtil->staggerIndex == "odd") || (currY%2 != 0 && hexMapUtil->staggerIndex == "even"))
+      if((currY%2 == 0 && hexMapUtil->staggerUtil.staggerIndex == "odd") ||
+         (currY%2 != 0 && hexMapUtil->staggerUtil.staggerIndex == "even"))
         tile->set_x(currX * mapTileWidth);
       else
         tile->set_x((currX * mapTileWidth) + hexMapUtil->hexSideLength);
@@ -555,6 +616,31 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
     int y = (currY * mapTileHeight / 2) + (currX * mapTileHeight / 2);
     tile->set_x(x);
     tile->set_y(y);
+  }
+  else if(roomOrientation == RoomOrientation::staggered) {
+    if(!staggeredIsoMapUtil) {
+      errStream << "Error loading tiles for staggered iso map, staggered map details incomplete." << std::endl;
+      return false;
+    }
+
+    if(staggeredIsoMapUtil->staggerAxis == "x") {
+      tile->set_x(currX * mapTileWidth / 2);
+
+      if((currX%2 == 0 && staggeredIsoMapUtil->staggerIndex == "odd") ||
+         (currX%2 != 0 && staggeredIsoMapUtil->staggerIndex == "even"))
+        tile->set_y(currY * mapTileHeight);
+      else
+        tile->set_y((currY * mapTileHeight) + mapTileHeight / 2);
+    }
+    else {
+      tile->set_y(currY * mapTileHeight / 2);
+
+      if((currY%2 == 0 && staggeredIsoMapUtil->staggerIndex == "odd") ||
+         (currY%2 != 0 && staggeredIsoMapUtil->staggerIndex == "even"))
+        tile->set_x(currX * mapTileWidth);
+      else
+        tile->set_x((currX * mapTileWidth) + mapTileWidth / 2);
+    }
   }
   else {
     errStream << "Error loading tiles, unsupported map format." << std::endl;
