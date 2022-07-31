@@ -137,17 +137,17 @@ class AST {
   };
   // Alignof expression
   struct AlignofExpression : TypedNode<NodeType::ALIGNOF> {
-    FullType type;
+    FullType ft;
 
-    explicit AlignofExpression(FullType type): type{std::move(type)} {}
+    explicit AlignofExpression(FullType type): ft{std::move(type)} {}
   };
   // Cast expressions
   struct CastExpression : TypedNode<NodeType::CAST> {
     enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
-    FullType type;
+    FullType ft;
     PNode expr;
 
-    CastExpression(const Token &token, FullType type, PNode expr): type{std::move(type)}, expr{std::move(expr)} {
+    CastExpression(const Token &token, FullType type, PNode expr): ft{std::move(type)}, expr{std::move(expr)} {
       switch (token.type) {
         case TT_BEGINPARENTH:     kind = Kind::C_STYLE; break;
         case TT_STATIC_CAST:      kind = Kind::STATIC; break;
@@ -157,6 +157,11 @@ class AST {
         case TT_BEGINBRACE:       kind = Kind::FUNCTIONAL; break;
         default:                  break;
       }
+    }
+
+    CastExpression(Kind kind_, const Token &token, FullType type, PNode expr):
+      CastExpression(token, std::move(type), std::move(expr)) {
+      kind = kind_;
     }
   };
 
@@ -325,12 +330,12 @@ class AST {
     bool is_global;
     bool is_array;
     std::unique_ptr<Initializer> placement;
-    FullType type;
+    FullType ft;
     std::unique_ptr<Initializer> initializer;
 
     NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, FullType type,
                   std::unique_ptr<Initializer> initializer):
-      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, type{std::move(type)},
+      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, ft{std::move(type)},
       initializer{std::move(initializer)} {}
   };
   // Delete expression
@@ -352,10 +357,10 @@ class AST {
       Declaration(FullType declarator, InitializerNode init): declarator{std::move(declarator)}, init{std::move(init)} {}
     };
 
-    jdi::definition *type;
+    jdi::definition *def;
     std::vector<Declaration> declarations;
 
-    DeclarationStatement(jdi::definition *type, std::vector<Declaration> declarations): type{type},
+    DeclarationStatement(jdi::definition *type, std::vector<Declaration> declarations): def{type},
       declarations{std::move(declarations)} {}
   };
 
