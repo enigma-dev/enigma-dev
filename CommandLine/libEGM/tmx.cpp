@@ -43,6 +43,7 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
 TMXMapLoader::TMXMapLoader(buffers::TreeNode *root, const fs::path &fPath) : tmxPath(fPath) {
   root->set_name("/");
   nodes.push_back(root);
+  roomOrientation = RoomOrientation::unknown;
 }
 
 bool TMXMapLoader::Load(pugi::xml_document &xmlDoc) {
@@ -170,7 +171,13 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
   unsigned int tileWidthPixels = resNode->room().hsnap();
   unsigned int tileHeightPixels = resNode->room().vsnap();
 
-  if(resNode->mutable_room()->orientation() == "hexagonal") {
+  if(resNode->mutable_room()->orientation() == "orthogonal") {
+    roomOrientation = RoomOrientation::orthogonal;
+    resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
+    resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+  }
+  else if(resNode->mutable_room()->orientation() == "hexagonal") {
+    roomOrientation = RoomOrientation::hexagonal;
     hexMapUtil = std::make_unique<HexMapUtil>();
     hexMapUtil->hexSideLength = resNode->room().hexsidelength();
     hexMapUtil->staggerAxis = resNode->room().staggeraxis();
@@ -185,9 +192,14 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
       resNode->mutable_room()->set_height((3 * nVertTiles + 1) * hexMapUtil->hexSideLength / 2);
     }
   }
-  else {
+  else if(resNode->mutable_room()->orientation() == "isometric") {
+    roomOrientation = RoomOrientation::isometric;
     resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
     resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+  }
+  else {
+    errStream << "Error loading map, unsupported map orientation." << std::endl;
+    return false;
   }
 
   // Tiled map stores backgroundcolor in hex format, so we convert it to int32 for Room color
@@ -371,7 +383,7 @@ bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const 
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
         return false;
     }
   }
@@ -405,7 +417,7 @@ bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const 
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
          return false;
     }
   }
@@ -432,7 +444,7 @@ bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
         return false;
     }
   }
@@ -471,7 +483,7 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNod
   for (int y=0; y < layerHeight; ++y) {
     for (int x=0; x < layerWidth; ++x) {
       unsigned int globalTileId = globalTileIds[y*layerWidth + x];
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y))
+      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
          return false;
     }
   }
@@ -481,7 +493,7 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNod
 
 bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode,
                                           const int &mapTileWidth, const int &mapTileHeight, const int &currX,
-                                          const int &currY) {
+                                          const int &currY, const int &layerWidth) {
   bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
   std::string tilesetName = "";
   int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
@@ -508,7 +520,16 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
   tile->set_background_name(backgroundName);
   tile->set_name(backgroundName+"_"+std::to_string(idx++));
 
-  if(hexMapUtil) {
+  if(roomOrientation == RoomOrientation::orthogonal) {
+    tile->set_x(currX * mapTileWidth);
+    tile->set_y(currY * mapTileHeight);
+  }
+  else if(roomOrientation == RoomOrientation::hexagonal) {
+    if(!hexMapUtil) {
+      errStream << "Error loading tiles for hex map, hexagonal map details incomplete." << std::endl;
+      return false;
+    }
+
     if(hexMapUtil->staggerAxis == "x") {
       tile->set_x(currX * (mapTileWidth - (hexMapUtil->hexSideLength / 2)));
 
@@ -526,9 +547,18 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
         tile->set_x((currX * mapTileWidth) + hexMapUtil->hexSideLength);
     }
   }
+  else if(roomOrientation == RoomOrientation::isometric) {
+    int xStart = ((layerWidth * mapTileWidth) / 2)  /*Mid x coordinate of the room in pixels*/
+                 - (mapTileWidth / 2)               /*Reposition by an offset of half of tileWidth*/
+                 - (currY * (mapTileWidth / 2));    /*Reposition x coordinate depending on the row index or currY*/
+    int x = xStart + (currX * mapTileWidth / 2);
+    int y = (currY * mapTileHeight / 2) + (currX * mapTileHeight / 2);
+    tile->set_x(x);
+    tile->set_y(y);
+  }
   else {
-    tile->set_x(currX * mapTileWidth);
-    tile->set_y(currY * mapTileHeight);
+    errStream << "Error loading tiles, unsupported map format." << std::endl;
+    return false;
   }
 
   // In some cases numColumns is not present/specified, so deduce numColumns using (imageWidth / tileWidth)
@@ -577,7 +607,7 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
 
   // below two flags are only tested in hex maps, doing a little hack by using hexMapUtil to know if this map is
   // hexagoanl or not
-  if(hexMapUtil) {
+  if(roomOrientation == RoomOrientation::hexagonal) {
     if(flippedDiagonally)
       tile->set_rotation(60.0);
     if(rotatedHex120)

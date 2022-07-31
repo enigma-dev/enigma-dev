@@ -50,6 +50,12 @@ struct HexMapUtil {
   std::string staggerIndex;
 };
 
+enum RoomOrientation {
+  orthogonal,
+  hexagonal,
+  isometric,
+  unknown
+};
 
 /**
  * @brief The TMXMapLoader class manages parsing of Tiled .tmx file format
@@ -105,6 +111,11 @@ private:
    * @brief Stores hexagonal map details in heap
    */
   std::unique_ptr<HexMapUtil> hexMapUtil;
+
+  /**
+   * @brief Stores current Room or Tiled Map orientation
+   */
+  RoomOrientation roomOrientation;
 
   // TODO: Remove this hack and use "resource name generator"
   int idx=0;
@@ -229,7 +240,7 @@ private:
    * @return Returns true if parsing succeeds else false
    */
   bool CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int &mapTileWidth,
-                              const int &mapTileHeight, const int &currX, const int &currY);
+                              const int &mapTileHeight, const int &currX, const int &currY, const int &layerWidth);
 
   /**
    * @brief Get local tile id by selecting tileset it belongs to
