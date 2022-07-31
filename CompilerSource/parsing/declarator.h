@@ -19,10 +19,11 @@
 
 #include <JDI/src/Storage/references.h>
 
+#include "tokens.h"
+
 #include <deque>
 #include <memory>
 #include <string>
-#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -41,6 +42,8 @@ struct ReferenceNode {};
 
 struct ArrayBoundNode {
   std::size_t size{};
+  bool outside_nested = false;
+
   static constexpr std::size_t nsize = -1;
 };
 
@@ -56,11 +59,41 @@ struct FunctionParameterNode {
     Parameter(Parameter &&) noexcept = default;
     Parameter &operator=(Parameter &&) noexcept = default;
 
+    Parameter(const Parameter &) = delete;
+    Parameter &operator=(const Parameter &) = delete;
+
     ~Parameter();
   };
 
-  using Parameters = std::vector<Parameter>;
+  enum class Kind { EXPRESSION, DECLARATOR } kind;
+
+  using ParameterList = std::vector<Parameter>;
+  using Parameters = std::variant<ParameterList, void *>;
+
+  bool outside_nested = false;
   Parameters parameters{};
+
+  FunctionParameterNode() noexcept = default;
+  FunctionParameterNode(FunctionParameterNode &&) = default;
+  FunctionParameterNode &operator=(FunctionParameterNode &&) = default;
+  FunctionParameterNode(const FunctionParameterNode &) = delete;
+  FunctionParameterNode &operator=(const FunctionParameterNode &) = delete;
+
+  FunctionParameterNode(std::vector<Parameter> params, bool outside_nested);
+  FunctionParameterNode(Parameters params, bool outside_nested);
+  FunctionParameterNode(void *expression, bool outside_nested);
+
+  template <typename T>
+  [[nodiscard]] bool is() const noexcept {
+    return std::holds_alternative<T>(parameters);
+  }
+
+  template <typename T>
+  T &as() {
+    return std::get<T>(parameters);
+  }
+
+  ~FunctionParameterNode();
 };
 
 struct NestedNode {
@@ -83,6 +116,12 @@ struct DeclaratorNode {
   using ValueType = std::variant<PointerNode, ReferenceNode, ArrayBoundNode, FunctionParameterNode, NestedNode>;
   ValueType value{};
 
+  DeclaratorNode() noexcept = default;
+  DeclaratorNode(DeclaratorNode &&) noexcept = default;
+  DeclaratorNode &operator=(DeclaratorNode &&) noexcept = default;
+  DeclaratorNode(const DeclaratorNode &) = delete;
+  DeclaratorNode &operator=(const DeclaratorNode &) = delete;
+
   DeclaratorNode(Kind kind, ValueType value): kind{kind}, value{std::move(value)} {}
   DeclaratorNode(jdi::definition_class *class_def, PointerNode ptr) {
     if (class_def != nullptr) {
@@ -90,7 +129,7 @@ struct DeclaratorNode {
     } else {
       kind = Kind::POINTER_TO;
     }
-    value = std::move(ptr);
+    value = ptr;
   }
   DeclaratorNode(Kind kind, ReferenceNode ref): kind{kind}, value{ref} {}
   explicit DeclaratorNode(ArrayBoundNode array): kind{Kind::ARRAY_BOUND}, value{array} {}
@@ -103,7 +142,7 @@ struct DeclaratorNode {
   [[nodiscard]] bool is(Kind kind_) const noexcept { return kind == kind_; }
 
   template <typename T>
-  const T &as() { return std::get<T>(value); }
+  T &as() { return std::get<T>(value); }
 };
 
 struct Declarator {
@@ -115,12 +154,12 @@ struct Declarator {
   /**
    * @brief The name of the variable being defined by the declarator (the @c x in <tt> **(*x)[10] </tt>)
    */
-  std::string name;
+  Token name;
 
   /**
    * @brief The definition that this declarator comes from
    */
-  jdi::definition *ndef;
+  jdi::definition *ndef = nullptr;
 
   /**
    * @brief The nested declarator (i.e. the <tt> <noptr-declarator> ::= ( <ptr-declarator> ) </tt> rule)
@@ -128,10 +167,23 @@ struct Declarator {
   std::size_t nested_declarator{};
   bool has_nested_declarator = false;
 
+  /**
+   * @brief Store synthesized strings for tokens
+   */
+   std::deque<std::string> token_contents{};
+
+   Declarator() noexcept = default;
+   Declarator(Declarator &&) noexcept = default;
+   Declarator &operator=(Declarator &&) noexcept = default;
+   Declarator(const Declarator &) = delete;
+   Declarator &operator=(const Declarator &) = delete;
+
   void add_pointer(jdi::definition_class *class_def, bool is_const, bool is_volatile);
   void add_reference(DeclaratorNode::Kind kind);
-  void add_array_bound(std::size_t bound);
-  void add_function_params(std::vector<FunctionParameterNode::Parameter> params);
+  void add_array_bound(std::size_t bound, bool outside_nested);
+  void add_function_params(std::vector<FunctionParameterNode::Parameter> params, bool outside_nested);
+  void add_function_params(FunctionParameterNode::Parameters params, bool outside_nested);
+  void add_function_params(FunctionParameterNode params);
   void add_nested(std::unique_ptr<Declarator> node);
 
   void *to_expression();
