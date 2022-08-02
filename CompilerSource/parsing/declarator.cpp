@@ -38,6 +38,38 @@ FunctionParameterNode::~FunctionParameterNode() {
   }
 }
 
+NestedNode::NestedNode(std::unique_ptr<Declarator> decl):
+  kind{Kind::DECLARATOR}, contained{std::move(decl)} {}
+NestedNode::NestedNode(void *expr):
+  kind{Kind::EXPRESSION}, contained{expr} {}
+
+NestedNode::NestedNode(NestedNode &&node) noexcept: kind{node.kind} {
+  *this = std::move(node);
+}
+
+NestedNode &NestedNode::operator=(NestedNode &&node) noexcept {
+  if (&node != this) {
+    kind = node.kind;
+    contained = std::move(node.contained);
+    switch (kind) {
+      case Kind::EXPRESSION:
+        node.as<void *>() = nullptr;
+        break;
+      case Kind::DECLARATOR:
+        break;
+    }
+  }
+
+  return *this;
+}
+
+NestedNode::~NestedNode() noexcept {
+  if (is<void *>()) {
+    auto node = reinterpret_cast<AST::Node *>(as<void *>());
+    delete node;
+  }
+}
+
 void Declarator::add_pointer(jdi::definition_class *class_def, bool is_const, bool is_volatile) {
   components.emplace_back(class_def, PointerNode{is_const, is_volatile, class_def});
 }
@@ -66,6 +98,12 @@ void Declarator::add_nested(std::unique_ptr<Declarator> node) {
   nested_declarator = components.size();
   has_nested_declarator = true;
   components.emplace_back(NestedNode{std::move(node)});
+}
+
+void Declarator::add_nested(void *expr) {
+  nested_declarator = components.size();
+  has_nested_declarator = true;
+  components.emplace_back(NestedNode{expr});
 }
 
 void make_array_subscript_expression(ArrayBoundNode &node, std::unique_ptr<AST::Node> &expr, std::deque<std::string> &token_contents) {
@@ -102,8 +140,25 @@ void make_function_call_expression(FunctionParameterNode &node, std::unique_ptr<
 void *Declarator::to_expression() {
   std::unique_ptr<AST::Node> expr = nullptr;
   if (has_nested_declarator && components[nested_declarator].is<NestedNode>()) {
-    expr = std::unique_ptr<AST::Node>{
-        reinterpret_cast<AST::Node *>(components[nested_declarator].as<NestedNode>().contained->to_expression())};
+    if (components[nested_declarator].as<NestedNode>().is<std::unique_ptr<Declarator>>()) {
+      expr = std::unique_ptr<AST::Node>{
+          reinterpret_cast<AST::Node *>(components[nested_declarator]
+                                            .as<NestedNode>()
+                                            .as<std::unique_ptr<Declarator>>()
+                                            ->to_expression())};
+    } else if (components[nested_declarator].as<NestedNode>().is<void *>()) {
+      if (components[nested_declarator].as<NestedNode>().as<void *>() == nullptr) {
+        std::cerr << "Internal error: trying to convert nullptr nested_declarator to expression more than once\n";
+        return nullptr;
+      } else {
+        expr = std::unique_ptr<AST::Node>{
+            reinterpret_cast<AST::Node *>(components[nested_declarator].as<NestedNode>().as<void *>())};
+        components[nested_declarator].as<NestedNode>().as<void *>() = nullptr;
+      }
+    } else {
+      std::cerr << "This code is unreachable: (" << __FILE__ << ":" << __LINE__ << ")\n";
+      return nullptr;
+    }
   } else if (!name.content.empty()) {
     expr = std::make_unique<AST::Literal>(name);
   }
@@ -214,7 +269,15 @@ void Declarator::to_jdi_refstack(jdi::ref_stack &result) {
 
   if (has_nested_declarator && components[nested_declarator].is<NestedNode>()) {
     jdi::ref_stack nested;
-    components[nested_declarator].as<NestedNode>().contained->to_jdi_refstack(nested);
+    if (components[nested_declarator].as<NestedNode>().is<std::unique_ptr<Declarator>>()) {
+      components[nested_declarator]
+          .as<NestedNode>()
+          .as<std::unique_ptr<Declarator>>()
+          ->to_jdi_refstack(nested);
+    } else {
+      std::cerr << "Internal error: cannot convert nested expression to ref_stack";
+    }
+
     result.append_c(nested);
   }
 }

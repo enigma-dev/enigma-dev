@@ -65,13 +65,13 @@ struct FunctionParameterNode {
     ~Parameter();
   };
 
-  enum class Kind { EXPRESSION, DECLARATOR } kind;
+  enum class Kind { EXPRESSION, DECLARATOR } kind{};
 
   using ParameterList = std::vector<Parameter>;
   using Parameters = std::variant<ParameterList, void *>;
 
-  bool outside_nested = false;
   Parameters parameters{};
+  bool outside_nested = false;
 
   FunctionParameterNode() noexcept = default;
   FunctionParameterNode(FunctionParameterNode &&) = default;
@@ -97,7 +97,29 @@ struct FunctionParameterNode {
 };
 
 struct NestedNode {
-  std::unique_ptr<Declarator> contained{};
+  enum class Kind { EXPRESSION, DECLARATOR } kind;
+  std::variant<std::unique_ptr<Declarator>, void *> contained{};
+
+  template <typename T>
+  [[nodiscard]] bool is() const noexcept {
+    return std::holds_alternative<T>(contained);
+  }
+
+  template <typename T>
+  T &as() {
+    return std::get<T>(contained);
+  }
+
+  explicit NestedNode(std::unique_ptr<Declarator> decl);
+  explicit NestedNode(void *expr);
+
+  NestedNode(NestedNode &&) noexcept;
+  NestedNode &operator=(NestedNode &&) noexcept;
+
+  NestedNode(const NestedNode &) = delete;
+  NestedNode &operator=(const NestedNode &) = delete;
+
+  ~NestedNode() noexcept;
 };
 
 struct DeclaratorNode {
@@ -111,7 +133,7 @@ struct DeclaratorNode {
     ARRAY_BOUND,
     FUNCTION,
     NESTED,
-  } kind;
+  } kind{};
 
   using ValueType = std::variant<PointerNode, ReferenceNode, ArrayBoundNode, FunctionParameterNode, NestedNode>;
   ValueType value{};
@@ -185,6 +207,7 @@ struct Declarator {
   void add_function_params(FunctionParameterNode::Parameters params, bool outside_nested);
   void add_function_params(FunctionParameterNode params);
   void add_nested(std::unique_ptr<Declarator> node);
+  void add_nested(void *expr);
 
   void *to_expression();
 
