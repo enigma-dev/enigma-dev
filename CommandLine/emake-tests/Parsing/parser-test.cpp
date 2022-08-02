@@ -247,7 +247,8 @@ TEST(ParserTest, Declarator_3) {
   ASSERT_EQ(ptr.class_def, nullptr);
 
   ASSERT_EQ(decl1.components[1].kind, DeclaratorNode::Kind::NESTED);
-  auto *nested = decl1.components[1].as<NestedNode>().contained.get();
+  ASSERT_TRUE(decl1.components[1].as<NestedNode>().is<std::unique_ptr<Declarator>>());
+  auto *nested = decl1.components[1].as<NestedNode>().as<std::unique_ptr<Declarator>>().get();
   ASSERT_EQ(nested->components.size(), 3);
 
   ASSERT_EQ(nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
@@ -257,7 +258,8 @@ TEST(ParserTest, Declarator_3) {
   ASSERT_EQ(nested_ptr.class_def, nullptr);
 
   ASSERT_EQ(nested->components[1].kind, DeclaratorNode::Kind::NESTED);
-  auto *nested_nested = nested->components[1].as<NestedNode>().contained.get();
+  ASSERT_TRUE(nested->components[1].as<NestedNode>().is<std::unique_ptr<Declarator>>());
+  auto *nested_nested = nested->components[1].as<NestedNode>().as<std::unique_ptr<Declarator>>().get();
   ASSERT_EQ(nested_nested->components.size(), 3);
   ASSERT_EQ(nested_nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
   auto &nested_nested_ptr = nested_nested->components[0].as<PointerNode>();
@@ -625,14 +627,16 @@ TEST(ParserTest, TemporaryInitialization_2) {
 
   ASSERT_EQ(declarator.components[1].kind, DeclaratorNode::Kind::NESTED);
   auto &nested = declarator.components[1].as<NestedNode>();
-  ASSERT_EQ(nested.contained->components.size(), 2);
-  ASSERT_EQ(nested.contained->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
-  auto &nested_ptr = nested.contained->components[0].as<PointerNode>();
+  ASSERT_TRUE(nested.is<std::unique_ptr<Declarator>>());
+  auto &nested_decl = nested.as<std::unique_ptr<Declarator>>();
+  ASSERT_EQ(nested_decl->components.size(), 2);
+  ASSERT_EQ(nested_decl->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &nested_ptr = nested_decl->components[0].as<PointerNode>();
   ASSERT_EQ(nested_ptr.class_def, nullptr);
   ASSERT_EQ(nested_ptr.is_const, false);
   ASSERT_EQ(nested_ptr.is_volatile, false);
 
-  ASSERT_EQ(nested.contained->components[1].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+  ASSERT_EQ(nested_decl->components[1].kind, DeclaratorNode::Kind::ARRAY_BOUND);
   ASSERT_NE(decl1->init, nullptr);
   ASSERT_EQ(decl1->init->type, AST::NodeType::INITIALIZER);
   ASSERT_EQ(decl1->init->is_variadic, false);
@@ -683,4 +687,40 @@ TEST(ParserTest, TemporaryInitialization_3) {
 
   ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
 //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "b");
+}
+
+TEST(ParserTest, TemporaryInitialization_4) {
+  ParserTester test{"int(*(*(*(*x + 4))))"};
+  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, false);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::CAST);
+  auto *cast = dynamic_cast<AST::CastExpression *>(node.get());
+  ASSERT_EQ(cast->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(cast->ft.flags, 0);
+  ASSERT_EQ(cast->ft.decl.components.size(), 0);
+  ASSERT_EQ(cast->ft.decl.name.content, "");
+  ASSERT_EQ(cast->ft.decl.has_nested_declarator, false);
+
+  ASSERT_EQ(cast->kind, AST::CastExpression::Kind::FUNCTIONAL);
+  ASSERT_EQ(cast->expr->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  auto *unary = dynamic_cast<AST::UnaryPrefixExpression *>(cast->expr.get());
+  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  unary = dynamic_cast<AST::UnaryPrefixExpression *>(unary->operand.get());
+  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  unary = dynamic_cast<AST::UnaryPrefixExpression *>(unary->operand.get());
+  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *binary = dynamic_cast<AST::BinaryExpression *>(unary->operand.get());
+  ASSERT_EQ(binary->operation, TT_PLUS);
+  ASSERT_EQ(binary->left->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  unary = dynamic_cast<AST::UnaryPrefixExpression *>(binary->left.get());
+  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(unary->operand.get())->value.value), "x");
+
+  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "4");
 }
