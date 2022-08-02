@@ -1102,29 +1102,50 @@ std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::Declarator
 }
 
 std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
+  auto maybe_prefix_operator = [this]() {
+    return Precedence::kUnaryPrefixOps.find(token.type) != Precedence::kUnaryPrefixOps.end();
+  };
+
+  auto maybe_infix_operator = [this]() {
+    return map_contains(Precedence::kBinaryPrec, token.type) ||
+           map_contains(Precedence::kTernaryPrec, token.type);
+  };
+
+  auto maybe_postfix_operator = [this]() {
+    return map_contains(Precedence::kUnaryPostfixPrec, token.type);
+  };
+
   // Do not accidentally consume the pointer declarators
-  if (maybe_expression && next_is_operatorkw() &&
-      token.type != TT_STAR && token.type != TT_AMPERSAND && token.type != TT_AND &&
-      token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET) {
+  if (maybe_expression && maybe_prefix_operator() &&
+      token.type != TT_STAR && token.type != TT_AMPERSAND) {
     return TryParseExpression(Precedence::kAll);
   }
 
   if (token.type == TT_BEGINPARENTH) {
+    std::unique_ptr<AST::Node> expr = nullptr;
     token = lexer->ReadToken();
     FullType inner;
-    TryParsePtrDeclarator(&inner, is_abstract);
+    auto inner_decl_expr = TryParsePtrDeclarator(&inner, is_abstract, maybe_expression);
     // Check if the next token is an operator but don't accidentally eat array bounds specifiers or function parameter
     // declarators
-    if (maybe_expression && next_is_operatorkw() && token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET && token.type != TT_EQUALS) {
+    if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
+        token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET && token.type != TT_EQUALS) {
+      if (inner_decl_expr == nullptr) {
+        inner_decl_expr = TryParseExpression(Precedence::kAll,
+                                        std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(inner.decl.to_expression())));
+      } else {
+        inner_decl_expr = TryParseExpression(Precedence::kAll, std::move(inner_decl_expr));
+      }
       require_token(TT_ENDPARENTH, "Expected ')' after expression");
-      return TryParseExpression(Precedence::kAll,
-                                std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(inner.decl.to_expression())));
-    } else {
+    } else if (inner_decl_expr == nullptr) {
       require_token(TT_ENDPARENTH, "Expected ')' after declarator");
       if (!inner.decl.name.content.empty()) {
         type->decl.name = inner.decl.name;
       }
+    } else {
+      require_token(TT_ENDPARENTH, "Expected ')' after expression");
     }
+
     while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
       if (token.type == TT_BEGINPARENTH) {
         TryParseParametersAndQualifiers(&inner.decl, true, false, maybe_expression);
@@ -1133,11 +1154,24 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
       }
     }
 
-    type->decl.add_nested(std::make_unique<Declarator>(std::move(inner.decl)));
-    if (maybe_expression && next_is_operatorkw() && token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET &&
-                                                    token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
-      return TryParseExpression(Precedence::kAll,
-                                std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression())));
+    if (inner_decl_expr != nullptr) {
+      type->decl.add_nested(reinterpret_cast<void *>(inner_decl_expr.release()));
+      inner_decl_expr = std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression()));
+    } else {
+      type->decl.add_nested(std::make_unique<Declarator>(std::move(inner.decl)));
+    }
+
+    if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
+        token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET &&
+        token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
+      if (inner_decl_expr != nullptr) {
+        return TryParseExpression(Precedence::kAll, std::move(inner_decl_expr));
+      } else {
+        return TryParseExpression(
+            Precedence::kAll, std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression())));
+      }
+    } else if (inner_decl_expr != nullptr) {
+      return inner_decl_expr;
     }
   } else if (is_abstract == AST::DeclaratorType::NON_ABSTRACT) {
     if (token.type == TT_ELLIPSES) {
@@ -1157,7 +1191,8 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
   }
 
   // All the array bounds specifiers and function parameter declarators would have been eaten before this
-  if (maybe_expression && next_is_operatorkw() && token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
+  if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
+      token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
     return TryParseExpression(Precedence::kAll,
                               std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression())));
   }
