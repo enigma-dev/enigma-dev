@@ -454,6 +454,36 @@ namespace ngs::fs {
       return result;
     }
 
+  #if defined(__OpenBSD__)
+  bool is_executable(const char *in, char **out) {
+    static kvm_t *kd = nullptr;
+    bool ok = false; *out = nullptr; struct stat st = { 0 };
+    if (!stat(in, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+      char executable[PATH_MAX];
+      if (realpath(in, executable)) {
+        kinfo_file *kif = nullptr; int cntp = 0;
+        kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+        if (!kd) { return false; }
+        if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+          for (int i = 0; i < cntp; i++) {
+            if (kif[i].fd_fd == KERN_FILE_TEXT) {
+              if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
+                static std::string result; 
+                result = executable;
+                *out = (char *)result.c_str();
+                ok = true;
+                break;
+              }
+            }
+          }
+        }
+        kvm_close(kd);
+      }
+    }
+    return ok;
+  }
+  #endif
+
   } // anonymous namespace
 
   string directory_get_current_working() {
@@ -542,13 +572,11 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char exe[PATH_MAX]; 
-    struct stat st = { 0 };
+    char **buffer = nullptr;
     char **cmdbuf = nullptr; 
     std::size_t cmdsize = 0;
-    const char *pwd = nullptr, 
-    *cwd = nullptr, *penv = nullptr;
-    char errbuf[_POSIX2_LINE_MAX];
+    const char *pwd = nullptr;
+    const char *penv = nullptr;
     kinfo_file *kif = nullptr;
     int cntp = 0; bool ok = false;
     static kvm_t *kd = nullptr;
@@ -566,72 +594,42 @@ namespace ngs::fs {
       }
     }
     if (!arg.empty()) {
+      bool is_exe = false;
       if (arg[0] == '/') {
         path = arg;
-        goto finish1;
-      } else if (std::string(arg).find('/') == std::string::npos) {
-        std::vector<std::string> env; std::string tmp;
+        is_exe = is_executable(path.c_str(), buffer);
+      } else if (arg.find('/') == std::string::npos) {
         penv = getenv("PATH");
         if (penv && *penv) {
-          std::stringstream sstr(penv); 
-          while (std::getline(sstr, tmp, ':')) {
-            env.push_back(tmp);
-          }
+          std::vector<std::string> env = string_split(penv, ':');
           for (std::size_t i = 0; i < env.size(); i++) {
-            path = std::string(env[i]) + "/" + std::string(arg);
-            if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-              goto finish2;
+            path = env[i] + "/" + arg;
+            is_exe = is_executable(path.c_str(), buffer);
+            if (is_exe) break;
+            if (arg[0] == '-') {
+              path = env[i] + "/" + arg.substr(1);
+              is_exe = is_executable(path.c_str(), buffer);
+              if (is_exe) break;
             }
-            path.clear();
           }
-        }
-      }
-      pwd = getenv("PWD");
-      if (pwd && *pwd) {
-        path = std::string(pwd) + "/" + std::string(arg);
-        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-          goto finish2;
-        } else {
-          goto fallback;
         }
       } else {
-        fallback:
-        cwd = getcwd(exe, PATH_MAX);
-        if (cwd && *cwd) {
-          path = std::string(cwd) + "/" + std::string(arg);
+        pwd = getenv("PWD");
+        if (pwd && *pwd) {
+          path = std::string(pwd) + "/" + arg;
+          is_exe = is_executable(path.c_str(), buffer);
         }
-      }
-      finish1:
-      if (!path.empty()) {
-        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-          finish2:
-          if (realpath(path.c_str(), exe)) {
-            static std::string str; str = exe; 
-            path = (char *)str.c_str();
-            goto finish3;
+        if (!is_exe) {
+          char cwd[PATH_MAX];
+          getcwd(cwd, PATH_MAX);
+          if (*cwd) {
+            path = std::string(cwd) + "/" + arg;
+            is_exe = is_executable(path.c_str(), buffer);
           }
         }
       }
     }
-    finish3:
-    if (path.empty()) return path;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); 
-    if (!kd) { path.clear(); goto finish4; }
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-      if (!stat(path.c_str(), &st)) {
-        for (int i = 0; i < cntp; i++) {
-          if (kif[i].fd_fd == KERN_FILE_TEXT) {
-            if (st.st_dev == kif[i].va_fsid || st.st_ino == kif[i].va_fileid) {
-              ok = true;
-              break;
-            }
-          }
-        }
-      }
-    }
-    if (!ok) { path.clear(); }
-    kvm_close(kd);
-    finish4:
+    path = ((buffer && *buffer) ? *buffer : "");
     #endif
     return path;
   }
