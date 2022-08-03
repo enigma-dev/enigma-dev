@@ -577,9 +577,6 @@ namespace ngs::fs {
     std::size_t cmdsize = 0;
     const char *pwd = nullptr;
     const char *penv = nullptr;
-    kinfo_file *kif = nullptr;
-    int cntp = 0; bool ok = false;
-    static kvm_t *kd = nullptr;
     std::string arg; int mib[4];
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
