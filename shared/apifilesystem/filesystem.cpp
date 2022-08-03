@@ -572,7 +572,7 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    char **buffer = nullptr;
+    char *buffer = nullptr;
     char **cmdbuf = nullptr; 
     std::size_t cmdsize = 0;
     const char *pwd = nullptr;
@@ -594,18 +594,18 @@ namespace ngs::fs {
       bool is_exe = false;
       if (arg[0] == '/') {
         path = arg;
-        is_exe = is_executable(path.c_str(), buffer);
+        is_exe = is_executable(path.c_str(), &buffer);
       } else if (arg.find('/') == std::string::npos) {
         penv = getenv("PATH");
         if (penv && *penv) {
           std::vector<std::string> env = string_split(penv, ':');
           for (std::size_t i = 0; i < env.size(); i++) {
             path = env[i] + "/" + arg;
-            is_exe = is_executable(path.c_str(), buffer);
+            is_exe = is_executable(path.c_str(), &buffer);
             if (is_exe) break;
             if (arg[0] == '-') {
               path = env[i] + "/" + arg.substr(1);
-              is_exe = is_executable(path.c_str(), buffer);
+              is_exe = is_executable(path.c_str(), &buffer);
               if (is_exe) break;
             }
           }
@@ -614,19 +614,19 @@ namespace ngs::fs {
         pwd = getenv("PWD");
         if (pwd && *pwd) {
           path = std::string(pwd) + "/" + arg;
-          is_exe = is_executable(path.c_str(), buffer);
+          is_exe = is_executable(path.c_str(), &buffer);
         }
         if (!is_exe) {
           char cwd[PATH_MAX];
           getcwd(cwd, PATH_MAX);
           if (*cwd) {
             path = std::string(cwd) + "/" + arg;
-            is_exe = is_executable(path.c_str(), buffer);
+            is_exe = is_executable(path.c_str(), &buffer);
           }
         }
       }
     }
-    path = ((buffer && *buffer) ? *buffer : "");
+    path = ((buffer) ? buffer : "");
     #endif
     return path;
   }
