@@ -120,7 +120,7 @@ void make_function_call_expression(FunctionParameterNode &node, std::unique_ptr<
     call->function = std::move(expr);
     expr = std::unique_ptr<AST::Node>(call);
   } else {
-    std::cerr << "Internal error: This part of Declarator::to_expression (" << __FILE__ << ":" << __LINE__ << ") should be unreachable";
+    std::cerr << "Internal error: This part of Declarator::to_expression (" << __FILE__ << ":" << __LINE__ << ") should be unreachable\n";
     auto call = std::make_unique<AST::FunctionCallExpression>(
         std::move(expr), std::vector<std::unique_ptr<AST::Node>>{});
     for (auto &param : node.as<FunctionParameterNode::ParameterList>()) {

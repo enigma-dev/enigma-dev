@@ -20,6 +20,15 @@ LanguageFrontend *frontend;
 
 Token token;
 
+/**
+ * @brief Store a mapping from variable name to the @c FullType of its definition
+ *
+ * This is designed around the assumption that EDL does not yet support namespaces, so there is no need to consider
+ * stacks here. If EDL were to support namespaces, this would have to be changed to a <tt> std::stack<...> </tt> and the
+ * namespace or nested scope parser would have to push a new map onto the stack.
+ */
+std::unordered_map<std::string_view, FullType *> declarations;
+
 template <typename T1, typename T2>
 bool map_contains(const std::unordered_map<T1, T2> &map, const T1 &value) {
   return map.find(value) != map.end();
@@ -407,6 +416,7 @@ std::unique_ptr<AST::DeclarationStatement> parse_declarations(jdi::definition *d
       decl.def = def;
       TryParseDeclarator(&decl, decl_type);
       decls.emplace_back(std::move(decl), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
+      declarations[decls.back().declarator->decl.name.content] = decls.back().declarator.get();
     }
     if (token.type == TT_COMMA && parse_unbounded) {
       token = lexer->ReadToken();
@@ -416,6 +426,18 @@ std::unique_ptr<AST::DeclarationStatement> parse_declarations(jdi::definition *d
   }
 
   return std::make_unique<AST::DeclarationStatement>(def, std::move(decls));
+}
+
+void maybe_infer_int(FullType &type) {
+  // This is a pretty hacky way to implicitly infer int, but it is the only way I can think of to prevent `int int x`
+  // from being legal
+  if (type.def == nullptr && (contains_decflag_bitmask(type.flags, "long")
+                              || contains_decflag_bitmask(type.flags, "short")
+                              || contains_decflag_bitmask(type.flags, "long long")
+                              || contains_decflag_bitmask(type.flags, "signed")
+                              || contains_decflag_bitmask(type.flags, "unsigned"))) {
+    type.def = jdi::builtin_type__int;
+  }
 }
 
 public:
@@ -485,7 +507,7 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
           } else {
             auto param = FunctionParameterNode::Parameter{
                 false, param_decl->declarations[0].init.release(),
-                std::make_unique<FullType>(std::move(param_decl->declarations[0].declarator))};
+                std::unique_ptr<FullType>(param_decl->declarations[0].declarator.release())};
             params.as<FunctionParameterNode::ParameterList>().emplace_back(std::move(param));
           }
         } else {
@@ -521,7 +543,6 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
         TryParseDeclarator(&type, AST::DeclaratorType::MAYBE_ABSTRACT);
         param.type = std::make_unique<FullType>(std::move(type));
         if (token.type == TT_EQUALS) {
-          herr->Error(token) << "Unimplemented: default values in function arguments";
           token = lexer->ReadToken();
           auto init = TryParseExprOrBracedInitList(true, false);
           param.default_value = reinterpret_cast<void *>(init.release());
@@ -579,6 +600,26 @@ jdi::definition *TryParseTypeName() {
 
 jdi::definition *TryParseIdExpression(Declarator *decl = nullptr, bool is_declarator = false) {
   switch (token.type) {
+    case TT_SCOPEACCESS: {
+      token = lexer->ReadToken();
+      if (next_is_start_of_id_expression() && token.type != TT_SCOPEACCESS) {
+        return TryParseIdExpression(decl, is_declarator);
+      } else {
+        herr->Error(token) << "Expected qualified-id after '::', got: '" << token.content << '\'';
+        return nullptr;
+      }
+    }
+
+    case TT_DECLTYPE: {
+      auto decltype_ = TryParseDecltype();
+      if (token.type == TT_SCOPEACCESS) {
+        return TryParseNestedNameSpecifier(decltype_, decl, is_declarator);
+      } else {
+        herr->Error(token) << "Expected qualified-id after decltype-expression, got: '" << token.content << '\'';
+        return nullptr;
+      }
+    }
+
     case TT_IDENTIFIER: {
       if (next_is_user_defined_type()) {
         return TryParsePrefixIdentifier(decl, is_declarator);
@@ -591,6 +632,8 @@ jdi::definition *TryParseIdExpression(Declarator *decl = nullptr, bool is_declar
           decl->ndef = def;
         } else if (token.type == TT_SCOPEACCESS) {
           return TryParseNestedNameSpecifier(def, decl, is_declarator);
+        } else if (map_contains(declarations, name.content)) {
+          return declarations[name.content]->def;
         } else if (def == nullptr) {
           herr->Error(token) << "No such name exists in global scope";
         }
@@ -794,6 +837,9 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, Declarator 
           break;
         }
       }
+    } else if (token.type != TT_STAR) {
+      herr->Error(token) << "Expected either identifier or star ('*') after nested name specifier";
+      return nullptr;
     }
   }
 
@@ -1046,13 +1092,8 @@ FullType TryParseTypeID() {
   while (next_is_type_specifier()) {
     TryParseTypeSpecifier(&type);
   }
-  // This is a pretty hacky way to implicitly infer int, but it is the only way I can think of to prevent `int int x`
-  // from being legal
-  if (type.def == nullptr && (contains_decflag_bitmask(type.flags, "long")
-                            || contains_decflag_bitmask(type.flags, "short")
-                            || contains_decflag_bitmask(type.flags, "long long"))) {
-    type.def = jdi::builtin_type__int;
-  }
+
+  maybe_infer_int(type);
 
   if (next_maybe_ptr_decl_operator() || token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
     TryParseDeclarator(&type, AST::DeclaratorType::ABSTRACT);
@@ -1163,7 +1204,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
 
     if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
         token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET &&
-        token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
+        token.type != TT_EQUALS && token.type != TT_BEGINBRACE && token.type != TT_COMMA) {
       if (inner_decl_expr != nullptr) {
         return TryParseExpression(Precedence::kAll, std::move(inner_decl_expr));
       } else {
@@ -1192,7 +1233,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
 
   // All the array bounds specifiers and function parameter declarators would have been eaten before this
   if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
-      token.type != TT_EQUALS && token.type != TT_BEGINBRACE) {
+      token.type != TT_EQUALS && token.type != TT_BEGINBRACE && token.type != TT_COMMA) {
     return TryParseExpression(Precedence::kAll,
                               std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression())));
   }
@@ -1340,7 +1381,7 @@ std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
   if (next_is_decl_specifier()) {
     FullType type;
     TryParseDeclSpecifierSeq(&type);
-
+    maybe_infer_int(type);
     if (type.def == nullptr) {
       herr->Error(token) << "Unable to parse type specifier in declaration";
       return nullptr;
@@ -1479,7 +1520,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       return nullptr;
 
     case TT_NOT: case TT_BANG: case TT_PLUS: case TT_MINUS:
-    case TT_STAR: case TT_AMPERSAND: case TT_TILDE:
+    case TT_STAR: case TT_AMPERSAND:
     case TT_INCREMENT: case TT_DECREMENT: {
       Token unary_op = token;
       token = lexer->ReadToken();
@@ -1487,7 +1528,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       if (auto exp = TryParseExpression(Precedence::kUnaryPrefix)) {
         return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
       }
-      herr->Error(unary_op) << "Expected expression following unary operator";
+      herr->Error(unary_op) << "Expected expression following unary operator, got: '" << token.content << '\'';
       return nullptr;
     }
 
@@ -1498,7 +1539,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         FullType type = TryParseTypeID();
         require_token(TT_ENDPARENTH, "Expected closing parenthesis before '", token.content, "'");
         auto expr = TryParseExpression(Precedence::kUnaryPrefix);
-        return std::make_unique<AST::CastExpression>(paren, std::move(type), std::move(expr));
+        return std::make_unique<AST::CastExpression>(paren, std::move(type), std::move(expr), TT_BEGINPARENTH);
       } else {
         auto exp = TryParseExpression(Precedence::kAll);
         require_token(TT_ENDPARENTH, "Expected closing parenthesis before '", token.content, "'");
@@ -1520,7 +1561,6 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       return std::make_unique<AST::Array>(std::move(elements));
     }
 
-    case TT_IDENTIFIER:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
     case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT: {
       Token res = token;
@@ -1594,7 +1634,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       require_token(TT_BEGINPARENTH, "Expected '(' before '", oper.content, "' expression");
       auto expr = TryParseExpression(Precedence::kAll);
       require_token(TT_ENDPARENTH, "Expected ')' after '", oper.content, "' expression");
-      return std::make_unique<AST::CastExpression>(oper, std::move(type), std::move(expr));
+      return std::make_unique<AST::CastExpression>(oper, std::move(type), std::move(expr), TT_ERROR);
     }
 
     case TT_SCOPEACCESS: {
@@ -1603,24 +1643,91 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         return TryParseNewExpression(true);
       } else if (token.type == TT_S_DELETE) {
         return TryParseDeleteExpression(true);
+      } else {
+        Token start = token;
+        Declarator decl;
+        auto id = TryParseIdExpression(&decl, true);
+        if (decl.name.content.empty()) {
+          herr->Error(start) << "Unable to parse id-expression";
+          return nullptr;
+        } else if (map_contains(declarations, decl.name.content)) {
+          return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+        } else {
+          return std::make_unique<AST::IdentifierAccess>(id, decl.name);
+        }
       }
+    }
 
-      // TODO: Make this thing return a node
-      [[fallthrough]];
+    case TT_TILDE: {
+      if (!next_is_user_defined_type() && token.type != TT_DECLTYPE) {
+        Token unary_op = token;
+        token = lexer->ReadToken();
+
+        if (auto exp = TryParseExpression(Precedence::kUnaryPrefix)) {
+          return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
+        }
+        herr->Error(unary_op) << "Expected expression following unary operator";
+        return nullptr;
+      } else {
+        [[fallthrough]];
+      }
     }
 
     case TT_DECLTYPE: {
-      TryParseIdExpression(nullptr, false);
-      return nullptr;
+      Declarator decl;
+      auto def = TryParseIdExpression(&decl, true);
+      if (decl.name.content.empty()) {
+        herr->Error(token) << "Unable to parse id-expression";
+        return nullptr;
+      } else if (map_contains(declarations, decl.name.content)) {
+        return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+      }
     }
 
     case TT_S_NEW: return TryParseNewExpression(false);
     case TT_S_DELETE: return TryParseDeleteExpression(false);
 
-    case TT_TYPE_NAME:
+    case TT_IDENTIFIER:
+    case TT_TYPE_NAME: {
+      if (next_maybe_functional_cast()) {
+        FullType type;
+        TryParseTypeSpecifier(&type);
+        if (token.type == TT_BEGINPARENTH) {
+          auto tok = token;
+          auto expr = TryParseExpression(Precedence::kAll);
+          require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after functional cast");
+          return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok,
+                                                       std::move(type), std::move(expr), TT_BEGINPARENTH);
+        } else if (token.type == TT_BEGINBRACE) {
+          auto tok = token;
+          auto init = TryParseInitializer(false);
+          require_token(TT_ENDBRACE, "Expected closing brace ('}') after temporary object initializer");
+          return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok,
+                                                       std::move(type), std::move(init), TT_BEGINBRACE);
+        } else {
+          herr->Error(token) << "Expected opening parenthesis ('(') or brace ('{') after functional-cast type";
+          return nullptr;
+        }
+      } else {
+        Declarator decl;
+        auto def = TryParseIdExpression(&decl, true);
+        if (decl.name.content.empty()) {
+          herr->Error(token) << "Unable to parse id-expression";
+          return nullptr;
+        } else if (map_contains(declarations, decl.name.content)) {
+          return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+        } else {
+          return std::make_unique<AST::IdentifierAccess>(def, decl.name);
+        }
+      }
+    }
 
     case TT_LOCAL:
-    case TT_GLOBAL:
+    case TT_GLOBAL: {
+      herr->Error(token) << "Unimplemented: 'local' and 'global' flags";
+      token = lexer->ReadToken();
+      return nullptr;
+    }
 
     case TT_RETURN:   case TT_EXIT:   case TT_BREAK:   case TT_CONTINUE:
     case TT_S_SWITCH: case TT_S_CASE: case TT_S_DEFAULT:
@@ -1815,6 +1922,24 @@ std::unique_ptr<AST::Node> TryParseControlExpression() {
   }
 }
 
+std::unique_ptr<AST::Node> TryParseStatementOrDeclaration() {
+  if (next_is_decl_specifier() || next_maybe_functional_cast()) {
+    if (token.type == TT_SCOPEACCESS) {
+      token = lexer->ReadToken();
+      if (token.type == TT_S_NEW) {
+        return TryParseNewExpression(true);
+      } else if (token.type == TT_S_DELETE) {
+        return TryParseDeleteExpression(true);
+      }
+    }
+    return TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true);
+  } else if (token.type == TT_BEGINBRACE) {
+    return ParseCodeBlock();
+  } else {
+    return TryReadStatement();
+  }
+}
+
 std::unique_ptr<AST::Node> TryReadStatement() {
   switch (token.type) {
     case TTM_WHITESPACE:
@@ -1863,7 +1988,7 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_BEGINPARENTH: case TT_BEGINBRACKET:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
     case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
-    case TT_SCOPEACCESS: case TT_IDENTIFIER: case TT_CO_AWAIT:
+    case TT_SCOPEACCESS: case TT_CO_AWAIT:
     case TT_NOEXCEPT: case TT_ALIGNOF: case TT_SIZEOF:
     case TT_STATIC_CAST: case TT_DYNAMIC_CAST:
     case TT_REINTERPRET_CAST: case TT_CONST_CAST:
@@ -1878,10 +2003,26 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       return ParseCodeBlock(); // Parse it anyways
     }
 
-    case TT_TYPE_NAME:  // TODO: rename TT_DECLARATOR, exclude var/variant/C++ classes,
-                        // include cv-qualifiers, storage-specifiers, etc
+    case TT_DECLTYPE:
+    case TT_TYPENAME:
+    case TT_IDENTIFIER:
+    case TT_TYPE_NAME: {
+      if (next_is_decl_specifier() || next_maybe_functional_cast()) {
+        Token start = token;
+        auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true);
+        if (decl->type == AST::NodeType::DECLARATION) {
+          herr->Error(start) << "Trying to parse declaration within <stmt>";
+        }
+        // Parse it anyways
+        return decl;
+      } else {
+        return TryParseExpression(Precedence::kAll);
+      }
+    }
+
     case TT_LOCAL:      // XXX: Treat as storage-specifiers?
     case TT_GLOBAL:
+      return nullptr;
 
     case TT_RETURN: return ParseReturnStatement();
     case TT_EXIT: return ParseExitStatement();
@@ -1918,13 +2059,13 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       return nullptr;
     }
 
-    case TT_ENUM: case TT_TYPEDEF: case TT_TYPENAME:
+    case TT_ENUM: case TT_TYPEDEF:
     case TT_OPERATOR: case TT_CONSTINIT: case TT_CONSTEVAL:
     case TT_INLINE: case TT_STATIC: case TT_THREAD_LOCAL:
     case TT_EXTERN: case TT_MUTABLE: case TT_CLASS:
     case TT_STRUCT: case TT_UNION: case TT_SIGNED:
     case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
-    case TT_DECLTYPE: case TT_CONSTEXPR: {
+    case TT_CONSTEXPR: {
       herr->Error(token) << "Trying to read declaration within <stmt>";
       return TryParseDeclarations(true); // Parse it anyways
     }
@@ -1991,22 +2132,28 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::Declar
       return parse_declarations(type.def, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;
-      return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def}, TryParseInitializer());
+      return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def},
+                                                   TryParseInitializer(), TT_BEGINBRACE);
     } else if (token.type == TT_BEGINPARENTH) {
-      token = lexer->ReadToken();
       Token tok = token;
-      auto declarator = TryParsePtrDeclarator(&type, decl_type, true);
+      auto declarator = TryParseNoPtrDeclarator(&type, decl_type, true);
       if (declarator != nullptr) {
-        require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after expression");
-        return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def}, std::move(declarator));
+        return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def},
+                                                     std::move(declarator), TT_BEGINPARENTH);
       } else {
-        require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after declarator");
+        if (type.decl.has_nested_declarator && type.decl.nested_declarator == 0) {
+          type.decl = std::move(*type.decl.components[0]
+                                 .as<NestedNode>()
+                                 .as<std::unique_ptr<Declarator>>()
+                                 .release());
+        }
         std::vector<AST::DeclarationStatement::Declaration> decls = {};
         decls.emplace_back(std::move(type), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
         if (token.type == TT_COMMA && parse_unbounded) {
-          return parse_declarations(decls[0].declarator.def, decl_type, parse_unbounded, std::move(decls), true);
+          auto def = decls[0].declarator->def;
+          return parse_declarations(def, decl_type, parse_unbounded, std::move(decls), true);
         } else {
-          return std::make_unique<AST::DeclarationStatement>(decls[0].declarator.def, std::move(decls));
+          return std::make_unique<AST::DeclarationStatement>(decls[0].declarator->def, std::move(decls));
         }
       }
     } else {
