@@ -146,8 +146,10 @@ class AST {
     enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
     FullType ft;
     PNode expr;
+    TokenType functional_cast_type;
 
-    CastExpression(const Token &token, FullType type, PNode expr): ft{std::move(type)}, expr{std::move(expr)} {
+    CastExpression(const Token &token, FullType type, PNode expr, TokenType cast_type):
+       ft{std::move(type)}, expr{std::move(expr)}, functional_cast_type{cast_type} {
       switch (token.type) {
         case TT_BEGINPARENTH:     kind = Kind::C_STYLE; break;
         case TT_STATIC_CAST:      kind = Kind::STATIC; break;
@@ -159,8 +161,8 @@ class AST {
       }
     }
 
-    CastExpression(Kind kind_, const Token &token, FullType type, PNode expr):
-      CastExpression(token, std::move(type), std::move(expr)) {
+    CastExpression(Kind kind_, const Token &token, FullType type, PNode expr, TokenType cast_type):
+      CastExpression(token, std::move(type), std::move(expr), cast_type) {
       kind = kind_;
     }
   };
@@ -175,10 +177,17 @@ class AST {
     std::vector<PNode> elements;
     Array(std::vector<PNode> &&elements_): elements(std::move(elements_)) {}
   };
-  
-  struct Variable : TypedNode<NodeType::IDENTIFIER> {
-    std::string name;
+
+  struct IdentifierAccess: TypedNode<NodeType::IDENTIFIER> {
+    // We can access identifiers declared either in C++ or EDL
+    enum class Kind { EDL, CPP } kind;
+    std::variant<FullType *, jdi::definition *> type;
+    Token name;
+
+    IdentifierAccess(FullType *type, Token name): kind{Kind::EDL}, type{type}, name{name} {}
+    IdentifierAccess(jdi::definition *type, Token name): kind{Kind::CPP}, type{type}, name{name} {}
   };
+
   struct Literal : TypedNode<NodeType::LITERAL> {
     ConstValue value;
     Literal(const Token &token): value{token} {}
@@ -350,11 +359,12 @@ class AST {
 
   struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {
     struct Declaration {
-      FullType declarator;
+      std::unique_ptr<FullType> declarator;
       InitializerNode init;
 
       Declaration() noexcept = default;
-      Declaration(FullType declarator, InitializerNode init): declarator{std::move(declarator)}, init{std::move(init)} {}
+      Declaration(FullType declarator, InitializerNode init):
+        declarator{std::make_unique<FullType>(std::move(declarator))}, init{std::move(init)} {}
     };
 
     jdi::definition *def;
