@@ -2,7 +2,6 @@
 #include <parsing/parser.cpp>
 #include <languages/lang_CPP.h>
 
-#include <JDI/src/System/builtins.h>
 #include <gtest/gtest.h>
 
 using namespace ::enigma::parsing;
@@ -28,16 +27,21 @@ struct ParserTester {
 
   AstBuilder *operator->() { return &builder; }
 
-  ParserTester(std::string code, bool use_cpp = false)
+  explicit ParserTester(std::string code, bool use_cpp = false)
       : context(&ParseContext::ForTesting(use_cpp)),
         lexer(std::move(code), context, &herr),
         builder{&lexer, &herr, SyntaxMode::STRICT, &cpp} {}
 };
 
+void assert_identifier_is(AST::Node *node, std::string_view name) {
+  ASSERT_EQ(node->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(dynamic_cast<AST::IdentifierAccess *>(node)->name.content, name);
+}
+
 TEST(ParserTest, Basics) {
   ParserTester test{"(x ? y : z ? a : (z[5](6)))"};
 
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(node->type, AST::NodeType::PARENTHETICAL);
 
   auto *expr = dynamic_cast<AST::Parenthetical *>(node.get())->expression.get();
@@ -47,11 +51,8 @@ TEST(ParserTest, Basics) {
   auto *cond = ternary->condition.get();
   auto *true_ = ternary->true_expression.get();
   auto *false_ = ternary->false_expression.get();
-  ASSERT_EQ(cond->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(cond)->value.value), "x");
-
-  ASSERT_EQ(true_->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(true_)->value.value), "y");
+  assert_identifier_is(cond, "x");
+  assert_identifier_is(true_, "y");
 
   ASSERT_EQ(false_->type, AST::NodeType::TERNARY_EXPRESSION);
 
@@ -60,11 +61,8 @@ TEST(ParserTest, Basics) {
   true_ = ternary->true_expression.get();
   false_ = ternary->false_expression.get();
 
-  ASSERT_EQ(cond->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(cond)->value.value), "z");
-
-  ASSERT_EQ(true_->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(true_)->value.value), "a");
+  assert_identifier_is(cond, "z");
+  assert_identifier_is(true_, "a");
 
   ASSERT_EQ(false_->type, AST::NodeType::PARENTHETICAL);
   expr = dynamic_cast<AST::Parenthetical *>(false_)->expression.get();
@@ -77,9 +75,7 @@ TEST(ParserTest, Basics) {
 
   auto *bin = dynamic_cast<AST::BinaryExpression*>(called);
   ASSERT_EQ(bin->operation, TokenType::TT_BEGINBRACKET);
-  ASSERT_EQ(bin->left->type, AST::NodeType::LITERAL);
-  auto *left = dynamic_cast<AST::Literal*>(bin->left.get());
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(left)->value.value), "z");
+  assert_identifier_is(bin->left.get(), "z");
 
   ASSERT_EQ(bin->right->type, AST::NodeType::LITERAL);
   auto *right = dynamic_cast<AST::Literal*>(bin->right.get());
@@ -93,7 +89,7 @@ TEST(ParserTest, Basics) {
 
 TEST(ParserTest, SizeofExpression) {
   ParserTester test{"sizeof 5"};
-  auto expr = test->TryParseExpression(Precedence::kAll);
+  auto expr = test->TryParseStatementOrDeclaration();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
   auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
@@ -108,7 +104,7 @@ TEST(ParserTest, SizeofExpression) {
 
 TEST(ParserTest, SizeofVariadic) {
   ParserTester test{"sizeof...(ident)"};
-  auto expr = test->TryParseExpression(Precedence::kAll);
+  auto expr = test->TryParseStatementOrDeclaration();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
   auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
@@ -119,11 +115,9 @@ TEST(ParserTest, SizeofVariadic) {
   ASSERT_EQ(value, "ident");
 }
 
-#include <bitset>
-
 TEST(ParserTest, SizeofType) {
   ParserTester test{"sizeof(const volatile unsigned long long int **(*)[10])"};
-  auto expr = test->TryParseExpression(Precedence::kAll);
+  auto expr = test->TryParseStatementOrDeclaration();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
   auto *sizeof_ = dynamic_cast<AST::SizeofExpression *>(expr.get());
@@ -152,7 +146,7 @@ TEST(ParserTest, SizeofType) {
 
 TEST(ParserTest, AlignofType) {
   ParserTester test{"alignof(const volatile unsigned long long *)"};
-  auto expr = test->TryParseExpression(Precedence::kAll);
+  auto expr = test->TryParseStatementOrDeclaration();
 
   ASSERT_EQ(expr->type, AST::NodeType::ALIGNOF);
   auto *alignof_ = dynamic_cast<AST::AlignofExpression *>(expr.get());
@@ -222,21 +216,20 @@ TEST(ParserTest, Declarator_1) {
 TEST(ParserTest, Declarator_2) {
   FullType ft3;
   ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
-  test3->TryParseTypeSpecifierSeq(&ft3);
-  test3->TryParseDeclarator(&ft3);
+  auto node = test3->TryParseStatementOrDeclaration();
 
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarator_3) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseDeclarations(false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
-  auto &decl1 = decls->declarations[0].declarator.decl;
+  auto &decl1 = decls->declarations[0].declarator->decl;
   ASSERT_EQ(decl1.name.content, "a");
   ASSERT_EQ(decl1.components.size(), 2);
 
@@ -274,13 +267,13 @@ TEST(ParserTest, Declarator_3) {
 
 TEST(ParserTest, Declarator_4) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseDeclarations(false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
-  auto &decl1 = decls->declarations[0].declarator.decl;
+  auto &decl1 = decls->declarations[0].declarator->decl;
   ASSERT_EQ(decl1.name.content, "a");
   ASSERT_EQ(decl1.components.size(), 2);
 
@@ -297,10 +290,7 @@ TEST(ParserTest, Declarator_4) {
 
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
-  FullType ft;
-  test->TryParseTypeSpecifierSeq(&ft);
-  test->TryParseDeclarator(&ft);
-  test->TryParseInitializer();
+  auto node = test->TryParseStatementOrDeclaration();
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
@@ -308,7 +298,7 @@ TEST(ParserTest, Declaration) {
 TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
 
-  auto node = test->TryParseDeclarations(true);
+  auto node = test->TryParseStatementOrDeclaration();
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -318,16 +308,16 @@ TEST(ParserTest, Declarations) {
 
   EXPECT_EQ(decls->declarations.size(), 3);
   EXPECT_NE(decls->declarations[0].init, nullptr);
-  EXPECT_EQ(decls->declarations[0].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[0].declarator.decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
+  EXPECT_EQ(decls->declarations[0].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[0].declarator->decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
 
   EXPECT_EQ(decls->declarations[1].init, nullptr);
-  EXPECT_EQ(decls->declarations[1].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[1].declarator.decl.components.size(), 0);
+  EXPECT_EQ(decls->declarations[1].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[1].declarator->decl.components.size(), 0);
 
   EXPECT_NE(decls->declarations[2].init, nullptr);
-  EXPECT_EQ(decls->declarations[2].declarator.def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[2].declarator.decl.components.size(), 1);
+  EXPECT_EQ(decls->declarations[2].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[2].declarator->decl.components.size(), 1);
 }
 
 void check_placement(AST::NewExpression *new_) {
@@ -343,8 +333,7 @@ void check_placement(AST::NewExpression *new_) {
   auto *placement_arg = std::get<AST::AssignmentInitNode>(placement_args->values[0].second->initializer).get();
   ASSERT_EQ(placement_arg->kind, AST::AssignmentInitializer::Kind::EXPR);
   auto *placement_expr = std::get<std::unique_ptr<AST::Node>>(placement_arg->initializer).get();
-  ASSERT_EQ(placement_expr->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(placement_expr)->value.value), "nullptr");
+  assert_identifier_is(placement_expr, "nullptr");
 }
 
 void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::Kind kind) {
@@ -370,7 +359,7 @@ void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::K
 
 TEST(ParserTest, NewExpression_1) {
   ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5};"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();;
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -390,7 +379,7 @@ TEST(ParserTest, NewExpression_1) {
 
 TEST(ParserTest, NewExpression_2) {
   ParserTester test{"::new int[][15]{1, 2, 3, 4, 5};"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -413,7 +402,7 @@ TEST(ParserTest, NewExpression_2) {
 
 TEST(ParserTest, NewExpression_3) {
   ParserTester test{"::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5);"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -439,7 +428,7 @@ TEST(ParserTest, NewExpression_3) {
 
 TEST(ParserTest, NewExpression_4) {
   ParserTester test{"new (int *(**)[10]);"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -462,7 +451,7 @@ TEST(ParserTest, NewExpression_4) {
 
 TEST(ParserTest, DeleteExpression_1) {
   ParserTester test{"delete x;"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -471,13 +460,12 @@ TEST(ParserTest, DeleteExpression_1) {
   ASSERT_FALSE(delete_->is_global);
   ASSERT_FALSE(delete_->is_array);
 
-  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+  assert_identifier_is(delete_->expression.get(), "x");
 }
 
 TEST(ParserTest, DeleteExpression_2) {
   ParserTester test{"::delete x;"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -486,13 +474,12 @@ TEST(ParserTest, DeleteExpression_2) {
   ASSERT_TRUE(delete_->is_global);
   ASSERT_FALSE(delete_->is_array);
 
-  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+  assert_identifier_is(delete_->expression.get(), "x");
 }
 
 TEST(ParserTest, DeleteExpression_3) {
   ParserTester test{"delete[] x;"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -501,13 +488,12 @@ TEST(ParserTest, DeleteExpression_3) {
   ASSERT_FALSE(delete_->is_global);
   ASSERT_TRUE(delete_->is_array);
 
-  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+  assert_identifier_is(delete_->expression.get(), "x");
 }
 
 TEST(ParserTest, DeleteExpression_4) {
   ParserTester test{"::delete[] x;"};
-  auto node = test->TryParseExpression(Precedence::kAll);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -516,13 +502,12 @@ TEST(ParserTest, DeleteExpression_4) {
   ASSERT_TRUE(delete_->is_global);
   ASSERT_TRUE(delete_->is_array);
 
-  ASSERT_EQ(delete_->expression->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(delete_->expression.get())->value.value), "x");
+  assert_identifier_is(delete_->expression.get(), "x");
 }
 
 TEST(ParserTest, SwitchStatement) {
   ParserTester test{"switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break };"};
-  auto node = test->TryReadStatement();
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -554,7 +539,7 @@ TEST(ParserTest, SwitchStatement) {
 
 TEST(ParserTest, CodeBlock) {
   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
-  auto node = test->ParseCodeBlock();
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
@@ -568,7 +553,7 @@ TEST(ParserTest, CodeBlock) {
 
 TEST(ParserTest, TemporaryInitialization_1) {
   ParserTester test{"int((*x)[5] + 6)"};
-  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_NE(node.get(), nullptr);
@@ -605,7 +590,7 @@ TEST(ParserTest, TemporaryInitialization_1) {
 
 TEST(ParserTest, TemporaryInitialization_2) {
   ParserTester test{"int(*(*a)[10]) = nullptr;"};
-  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -614,10 +599,10 @@ TEST(ParserTest, TemporaryInitialization_2) {
   ASSERT_EQ(decl->declarations.size(), 1);
   ASSERT_EQ(decl->def, jdi::builtin_type__int);
   auto *decl1 = &decl->declarations[0];
-  ASSERT_EQ(decl1->declarator.def, jdi::builtin_type__int);
-  ASSERT_EQ(decl1->declarator.flags, 0);
+  ASSERT_EQ(decl1->declarator->def, jdi::builtin_type__int);
+  ASSERT_EQ(decl1->declarator->flags, 0);
 
-  auto &declarator = decl1->declarator.decl;
+  auto &declarator = decl1->declarator->decl;
   ASSERT_EQ(declarator.components.size(), 2);
   ASSERT_EQ(declarator.components[0].kind, DeclaratorNode::Kind::POINTER_TO);
   auto &decl_ptr = declarator.components[0].as<PointerNode>();
@@ -644,13 +629,12 @@ TEST(ParserTest, TemporaryInitialization_2) {
   auto *init = std::get<AST::AssignmentInitNode>(decl1->init->initializer).get();
   ASSERT_EQ(init->kind, AST::AssignmentInitializer::Kind::EXPR);
   auto *expr = std::get<std::unique_ptr<AST::Node>>(init->initializer).get();
-  ASSERT_EQ(expr->type, AST::NodeType::LITERAL);
-  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(expr)->value.value), "nullptr");
+  assert_identifier_is(expr, "nullptr");
 }
 
 TEST(ParserTest, TemporaryInitialization_3) {
   ParserTester test{"int(*(*a)[10] + b);"};
-  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -685,13 +669,12 @@ TEST(ParserTest, TemporaryInitialization_3) {
   ASSERT_EQ(operand->right->type, AST::NodeType::LITERAL);
 //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(operand->right.get())->value.value), "10");
 
-  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
-//  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "b");
+  assert_identifier_is(binary->right.get(), "b");
 }
 
 TEST(ParserTest, TemporaryInitialization_4) {
   ParserTester test{"int(*(*(*(*x + 4))))"};
-  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, false);
+  auto node = test->TryParseStatementOrDeclaration();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::CAST);
