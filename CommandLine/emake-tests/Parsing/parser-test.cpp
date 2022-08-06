@@ -707,3 +707,35 @@ TEST(ParserTest, TemporaryInitialization_4) {
   ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "4");
 }
+
+TEST(ParserTest, ForLoop_1) {
+  ParserTester test{"for (int i = 0; i < 5; i++) {}"};
+  auto node = test->TryParseStatementOrDeclaration();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+}
+
+TEST(ParserTest, ForLoop_2) {
+  ParserTester test{"for int i = 0; i < 5; i++ {}"};
+  auto node = test->TryParseStatementOrDeclaration();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+}
+
+TEST(ParserTest, ForLoop_3) {
+  ParserTester test{"for (int)(i = 0); i < 5; i++ {}"};
+  auto node = test->TryParseStatementOrDeclaration();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+}
+
+TEST(ParserTest, ForLoop_4) {
+  ParserTester test{"for int(i = 5); i < 5; i++ {}"};
+  auto node = test->TryParseStatementOrDeclaration();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+}
