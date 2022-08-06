@@ -1170,7 +1170,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
     // Check if the next token is an operator but don't accidentally eat array bounds specifiers or function parameter
     // declarators
     if (maybe_expression && (maybe_infix_operator() || maybe_postfix_operator()) &&
-        token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET && token.type != TT_EQUALS) {
+        token.type != TT_BEGINPARENTH && token.type != TT_BEGINBRACKET) {
       if (inner_decl_expr == nullptr) {
         inner_decl_expr = TryParseExpression(Precedence::kAll,
                                         std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(inner.decl.to_expression())));
@@ -1787,7 +1787,7 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
         if (precedence < Precedence::kUnaryPostfix) {
           break;
         }
-        operand = TryParseBinaryExpression(precedence, std::move(operand));
+        operand = TryParseUnaryPostfixExpression(precedence, std::move(operand));
       } else if (map_contains(Precedence::kTernaryPrec, token.type)) {
         if (precedence < Precedence::kTernary) {
           break;
@@ -1898,8 +1898,8 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
   return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::Node> TryParseControlExpression() {
-  switch (mode) {
+std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
+  switch (mode_) {
     case SyntaxMode::STRICT: {
       require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
       auto expr = TryParseExpression(Precedence::kAll);
@@ -1911,7 +1911,7 @@ std::unique_ptr<AST::Node> TryParseControlExpression() {
       if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
         Token oper = token;
         token = lexer->ReadToken(); // Consume the token
-        auto right = TryParseControlExpression();
+        auto right = TryParseControlExpression(mode);
         operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
       }
       // TODO: handle [] for array access and () for direct func call
@@ -2104,7 +2104,7 @@ std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
 
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   token = lexer->ReadToken();
-  auto condition = TryParseControlExpression();
+  auto condition = TryParseControlExpression(mode);
   if (token.type == TT_S_THEN) {
     if (mode == SyntaxMode::STRICT) {
       herr->Warning(token) << "Use of `then` keyword in if statement";
@@ -2123,11 +2123,15 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType decl_type, bool parse_unbounded) {
+std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType decl_type, bool parse_unbounded,
+                                                                     bool maybe_c_style_cast = false) {
   if (next_maybe_functional_cast()) {
     FullType type;
     TryParseTypeSpecifier(&type);
-    if (next_is_type_specifier() || (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH)) {
+    if (next_is_type_specifier() ||
+        // Make sure we don't accidentally consume a c-style cast when its required
+        (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
+         (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
       TryParseTypeSpecifierSeq(&type);
       return parse_declarations(type.def, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
@@ -2156,6 +2160,10 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::Declar
           return std::make_unique<AST::DeclarationStatement>(decls[0].declarator->def, std::move(decls));
         }
       }
+    } else if (token.type == TT_ENDPARENTH && maybe_c_style_cast) {
+      token = lexer->ReadToken();
+      return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::C_STYLE, token, std::move(type),
+                                                   TryParseExpression(Precedence::kAll), TT_BEGINPARENTH);
     } else {
       // This should be unreachable...
       return TryParseDeclarations(parse_unbounded);
@@ -2178,7 +2186,13 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     is_conventional = true;
   }
   if (next_is_decl_specifier()) {
-    init = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true);
+    init = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, is_conventional);
+    if (init->type == AST::NodeType::CAST) {
+      auto *cast = dynamic_cast<AST::CastExpression *>(init.get());
+      if (cast->kind == AST::CastExpression::Kind::C_STYLE && is_conventional) {
+        is_conventional = false;
+      }
+    }
   } else {
     init = TryParseExpression(Precedence::kAll);
   }
@@ -2188,7 +2202,7 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
   }
   require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
   if (token.type != TT_SEMICOLON) {
-    cond = TryParseControlExpression();
+    cond = TryParseControlExpression(SyntaxMode::GML);
   }
   require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
   if (token.type != TT_SEMICOLON) {
@@ -2206,7 +2220,7 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
 
 std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
   token = lexer->ReadToken();
-  auto condition = TryParseControlExpression();
+  auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
 
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::WHILE);
@@ -2214,7 +2228,7 @@ std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
 
 std::unique_ptr<AST::WhileLoop> ParseUntilLoop() {
   token = lexer->ReadToken();
-  auto condition = TryParseControlExpression();
+  auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
 
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::UNTIL);
@@ -2227,14 +2241,14 @@ std::unique_ptr<AST::DoLoop> ParseDoLoop() {
   Token kind = token;
   require_any_of({TT_S_WHILE, TT_S_UNTIL}, "Expected `while` or `until` after do loop body");
 
-  auto condition = TryParseControlExpression();
+  auto condition = TryParseControlExpression(mode);
 
   return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }
 
 std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
   token = lexer->ReadToken();
-  auto condition = TryParseControlExpression();
+  auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
 
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
@@ -2276,7 +2290,7 @@ std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement() {
   require_token(TT_S_SWITCH, "Expected 'switch' in switch-statement");
 
   auto switch_ = std::make_unique<AST::SwitchStatement>();
-  switch_->expression = TryParseControlExpression();
+  switch_->expression = TryParseControlExpression(mode);
   switch_->body = std::make_unique<AST::CodeBlock>();
   require_token(TT_BEGINBRACE, "Expected '{' after switch-statement condition");
   while (token.type != TT_ENDBRACE) {
@@ -2329,7 +2343,7 @@ std::unique_ptr<AST::Node> ParseCaseOrDefaultStatement(bool is_default) {
 
 std::unique_ptr<AST::WithStatement> ParseWithStatement() {
   token = lexer->ReadToken();
-  auto object = TryParseControlExpression();
+  auto object = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
 
   return std::make_unique<AST::WithStatement>(std::move(object), std::move(body));
