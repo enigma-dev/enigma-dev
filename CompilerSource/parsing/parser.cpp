@@ -1104,17 +1104,28 @@ FullType TryParseTypeID() {
 
 void TryParseDeclSpecifier(FullType *type) {
   switch (token.type) {
-    case TT_TYPEDEF:
+    case TT_TYPEDEF: {
+      TryParseTypeSpecifierSeq(type);
+      TryParseDeclarator(type, AST::DeclaratorType::NON_ABSTRACT);
+      break;
+    }
+
     case TT_CONSTEXPR:
     case TT_CONSTINIT:
     case TT_CONSTEVAL:
-    case TT_MUTABLE:
-    case TT_INLINE:
-    case TT_STATIC:
-    case TT_THREAD_LOCAL:
     case TT_EXTERN:
+    case TT_THREAD_LOCAL: {
+      herr->Error(token) << "Unimplemented: '" << token.content << '\'';
       token = lexer->ReadToken();
       break;
+    }
+
+    case TT_MUTABLE:
+    case TT_INLINE:
+    case TT_STATIC: {
+      type->flags |= jdi_decflag_bitmask(token.content).second;
+      token = lexer->ReadToken();
+    }
 
     default:
       if (next_is_type_specifier()) {
