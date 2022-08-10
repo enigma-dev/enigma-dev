@@ -26,5 +26,5 @@ EXE-Vars:
   resources: $exe
   Build-Extension: .app
   Run-output: $tempfile
-  Run-Program: open $game
+  Run-Program: $game
   Run-Params:
