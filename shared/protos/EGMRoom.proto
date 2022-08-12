@@ -1,0 +1,79 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+// according to Tiled Map
+message EGMRoom {
+  optional int32 id = 29;
+
+  optional uint32 width = 2;
+  optional uint32 height = 3;
+  optional uint32 tilewidth = 4;
+  optional uint32 tileheight = 5;
+  optional int32 color = 8;
+  optional string orientation = 9;
+  optional uint32 hexsidelength = 10;
+  optional string staggeraxis = 11;
+  optional string staggerindex = 12;
+
+  message Background {
+    optional bool visible = 1;
+    optional bool foreground = 2;
+    optional string background_name = 3;
+    optional int32 x = 4;
+    optional int32 y = 5;
+    optional bool htiled = 6;
+    optional bool vtiled = 7;
+    optional double hspeed = 8;
+    optional double vspeed = 9;
+    optional bool stretch = 10;
+    optional int32 color = 11 [default = 0xFFFFFF];
+    optional double alpha = 12 [default = 1.0];
+  }
+
+  repeated Background backgrounds = 15;
+
+  message Tile {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional string background_name = 3;
+    optional double x = 4;
+    optional double y = 5;
+    optional uint32 width = 8;
+    optional uint32 height = 9;
+    option double rotation = 15;
+
+    message EditorSettings {
+      optional bool locked = 1;
+    }
+
+    optional EditorSettings editor_settings = 31;
+  }
+
+  repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
+
+  message ObjectGroup {
+    message Object {
+    }
+
+    repeated Object objects = 1;
+  }
+
+  repeated ObectGroup objectGroups = 21;
+
+  message Layer {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
+
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
+  }
+
+  repeated Layer layers = 20;
+
+  optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
+
+}

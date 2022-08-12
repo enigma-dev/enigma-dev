@@ -3,7 +3,8 @@ package buffers.resources;
 
 import "options.proto";
 
-message Room {
+// According to Game Maker Room
+message GMRoom {
   optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
 
   optional string caption = 1;
