@@ -278,7 +278,7 @@ bool TMXMapLoader::LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNo
 
       std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
 
-      buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
+      buffers::resources::EGMRoom::Tile* tile = resNode->mutable_room()->add_tiles();
 
       // if xmlNode is empty then we are dealing with compressed tiled data case
       PackTiledRes(objectChild, tile, resourceTypeIdCountMap, tmxPath);
@@ -574,7 +574,7 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int &globalTileId, buff
   if(localTileId < 0)
     return true;
 
-  buffers::resources::Room::Tile* tile = resNode->mutable_room()->add_tiles();
+  buffers::resources::EGMRoom::Tile* tile = resNode->mutable_room()->add_tiles();
 
   tile->set_background_name(backgroundName);
   tile->set_name(backgroundName+"_"+std::to_string(idx++));

@@ -55,7 +55,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   // Add our room
   buffers::TreeNode* rm_node = game_root->mutable_folder()->add_children();
   rm_node->set_name("test_room");
-  buffers::resources::Room* rm = rm_node->mutable_room();
+  buffers::resources::EGMRoom* rm = rm_node->mutable_room();
   rm->set_caption ("");
   rm->set_width(640);
   rm->set_height(480);
@@ -66,7 +66,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   rm->set_creation_code("");
   
   // Add obj to room
-  buffers::resources::Room::Instance* inst = rm->add_instances();
+  buffers::resources::EGMRoom::Instance* inst = rm->add_instances();
   inst->set_id(100001);
   inst->set_x(0);
   inst->set_y(0);

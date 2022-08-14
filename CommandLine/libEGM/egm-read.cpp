@@ -128,7 +128,7 @@ inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const
   yamlErrorPosition(yaml[field->name()].Mark());
 }
 
-void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
+void RepackLayers(buffers::resources::EGMRoom *room, bool tiles, YAML::Node& yaml,
                   const fs::path& fPath) {
   // All layers require a "format" and a "data" key in the YAML
   YAML::Node format = yaml["Format"];
@@ -277,9 +277,9 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
         case CppType::CPPTYPE_MESSAGE: {
           for (auto n : node) {
             if (key == "instance-layers")
-              RepackLayers((buffers::resources::Room*) m, false, n, fPath);
+              RepackLayers((buffers::resources::EGMRoom*) m, false, n, fPath);
             else if (key == "tile-layers")
-              RepackLayers((buffers::resources::Room*) m, true, n, fPath);
+              RepackLayers((buffers::resources::EGMRoom*) m, true, n, fPath);
             else {
               google::protobuf::Message* msg = refl->AddMessage(m, field);
               RecursivePackBuffer(msg, id, n, fPath, depth + 1);
@@ -328,7 +328,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
 
 namespace {
 
-inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm) {
+inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::EGMRoom* rm) {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string edlFile = f.path().stem().string();
@@ -352,7 +352,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
       // See if we have an instance with matching a name
       auto instances = rm->instances();
       auto instItr = std::find_if(instances.begin(), instances.end(),
-        [&instName](const buffers::resources::Room_Instance inst) {
+        [&instName](const buffers::resources::EGMRoom_Instance inst) {
           return (inst.name() == instName);
         });
 
@@ -369,7 +369,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
       // If its a number check if we have a matching id
       int id = std::stoi(instName);
       instItr = std::find_if(instances.begin(), instances.end(),
-        [&id](const buffers::resources::Room_Instance inst) {
+        [&id](const buffers::resources::EGMRoom_Instance inst) {
           return (inst.id() == id);
         });
 
@@ -430,7 +430,7 @@ bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Messag
   RecursivePackBuffer(m, id, yaml, fPath, 0);
 
   if (ext == ".rm") {
-    LoadInstanceEDL(fPath, static_cast<buffers::resources::Room*>(m));
+    LoadInstanceEDL(fPath, static_cast<buffers::resources::EGMRoom*>(m));
   }
 
   return true;

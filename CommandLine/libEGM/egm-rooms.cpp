@@ -31,7 +31,7 @@
 #include <sstream>
 
 using std::string;
-using buffers::resources::Room;
+using buffers::resources::EGMRoom;
 using google::protobuf::RepeatedPtrField;
 using google::protobuf::util::MessageDifferencer;
 using namespace egm::serialization;
@@ -48,13 +48,13 @@ void BuildLayers(const Entities &entities, std::vector<Layer> *out) {
 namespace egm {
 namespace util {
 
-std::vector<InstanceLayer> BuildInstanceLayers(const Room &room) {
+std::vector<InstanceLayer> BuildInstanceLayers(const EGMRoom &room) {
   std::vector<InstanceLayer> res;
   BuildLayers(room.instances(), &res);
   return res;
 }
 
-std::vector<TileLayer> BuildTileLayers(const Room &room) {
+std::vector<TileLayer> BuildTileLayers(const EGMRoom &room) {
   std::vector<TileLayer> res;
   BuildLayers(room.tiles(), &res);
   return res;
