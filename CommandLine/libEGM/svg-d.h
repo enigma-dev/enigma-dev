@@ -12,17 +12,17 @@
 namespace egm {
 namespace svg_d {
 
-using buffers::resources::Room;
+using buffers::resources::EGMRoom;
 using google::protobuf::RepeatedPtrField;
 
-InstanceLayer BuildLayer(const RepeatedPtrField<Room::Instance> &instances);
-TileLayer     BuildLayer(const RepeatedPtrField<Room::Tile> &tiles);
+InstanceLayer BuildLayer(const RepeatedPtrField<EGMRoom::Instance> &instances);
+TileLayer     BuildLayer(const RepeatedPtrField<EGMRoom::Tile> &tiles);
 
 void ParseInstances(
-    const std::string &layer_data, Room *dest_message,
+    const std::string &layer_data, EGMRoom *dest_message,
     const std::string &error_details);
 void ParseTiles(
-    const std::string &layer_data, Room *dest_message,
+    const std::string &layer_data, EGMRoom *dest_message,
     const std::string &error_details);
 
 }  // namespace svg_d

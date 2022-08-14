@@ -316,9 +316,9 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
   }
 }
 
-RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
+EGMRoomData::EGMRoomData(const buffers::resources::EGMRoom &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
+EGMRoomData::EGMRoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
   data.set_id(room.id);

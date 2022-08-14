@@ -583,8 +583,8 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string&
   return object;
 }
 
-std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
-  auto room = std::make_unique<Room>();
+std::unique_ptr<EGMRoom> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
+  auto room = std::make_unique<EGMRoom>();
 
   room->set_caption(dec.readStr());
   room->set_width(dec.read4());

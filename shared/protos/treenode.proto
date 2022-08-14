@@ -10,7 +10,7 @@ import "Shader.proto";
 import "Path.proto";
 import "Font.proto";
 import "Timeline.proto";
-import "Room.proto";
+import "EGMRoom.proto";
 import "Include.proto";
 import "Settings.proto";
 
@@ -27,7 +27,7 @@ message TreeNode {
     resources.Object object = 1;
     resources.Sprite sprite = 2;
     resources.Sound sound = 3;
-    resources.Room room = 4;
+    resources.EGMRoom room = 4;
     resources.Background background = 5;
     resources.Path path = 6;
     resources.Script script = 7;

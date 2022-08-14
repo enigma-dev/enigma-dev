@@ -14,7 +14,7 @@ struct InstanceLayer {
   // The raw string encoding of the compacted data.
   std::string data;
   // Any instances with noncompactable attributes.
-  std::vector<buffers::resources::Room::Instance> snowflakes;
+  std::vector<buffers::resources::EGMRoom::Instance> snowflakes;
 };
 
 struct TileLayer {
@@ -23,13 +23,13 @@ struct TileLayer {
   // The raw string encoding of the compacted data.
   std::string data;
   // Any instances with noncompactable attributes.
-  std::vector<buffers::resources::Room::Tile> snowflakes;
+  std::vector<buffers::resources::EGMRoom::Tile> snowflakes;
 };
 
 namespace util {
 
-std::vector<InstanceLayer> BuildInstanceLayers(const buffers::resources::Room &room);
-std::vector<TileLayer> BuildTileLayers(const buffers::resources::Room &room);
+std::vector<InstanceLayer> BuildInstanceLayers(const buffers::resources::EGMRoom &room);
+std::vector<TileLayer> BuildTileLayers(const buffers::resources::EGMRoom &room);
 
 }  // namespace util
 }  // namespace egm

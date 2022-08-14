@@ -193,11 +193,11 @@ bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
 }
 
 bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
-               buffers::resources::Room *room) {
+               buffers::resources::EGMRoom *room) {
   if (!CreateDirectory(dir))
     return false;
 
-  buffers::resources::Room cleaned = *room;
+  buffers::resources::EGMRoom cleaned = *room;
   cleaned.clear_instances();
   cleaned.clear_tiles();
   cleaned.clear_creation_code();
