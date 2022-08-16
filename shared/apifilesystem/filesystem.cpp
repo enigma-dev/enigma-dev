@@ -626,6 +626,9 @@ namespace ngs::fs {
       }
     }
     path = ((buffer) ? buffer : "");
+    #elif defined(__sun)
+    const char *cstr = getexecname();
+    path = ((cstr) ? cstr : "");
     #endif
     return path;
   }
