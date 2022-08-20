@@ -60,6 +60,11 @@ namespace enigma
       object_planar();
       object_planar(unsigned, int);
       virtual ~object_planar();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize();
+      std::size_t deserialize_self(std::byte *iter);
+      static std::pair<object_planar, std::size_t> deserialize(std::byte *iter);
   };
 
   void propagate_locals(object_planar*);

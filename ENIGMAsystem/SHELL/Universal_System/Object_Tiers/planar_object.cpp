@@ -28,6 +28,7 @@
 
 #include "Universal_System/var4.h"
 #include "object.h"
+#include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
 
@@ -72,6 +73,75 @@ namespace enigma
 
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
+
+  std::vector<std::byte> object_planar::serialize() {
+    std::vector<std::byte> bytes = object_basic::serialize();
+    std::size_t len = 0;
+
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(x);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(y);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(xprevious);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(yprevious);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(xstart);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(ystart);
+#ifdef ISLOCAL_persistent
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(persistent);
+#endif
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(direction);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(speed);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(hspeed);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(vspeed);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(gravity);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(gravity_direction);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(friction);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_planar::deserialize_self(std::byte *iter) {
+    auto len = object_basic::deserialize_self(iter);
+
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(x);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(y);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(xprevious);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(yprevious);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(xstart);
+#ifdef ISLOCAL_persistent
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(persistent);
+#endif
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(direction)
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(speed)
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(hspeed)
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(vspeed)
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(gravity);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(gravity_direction);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(friction);
+
+    hspeed.vspd    = &vspeed.rval.d;
+    hspeed.dir     = &direction.rval.d;
+    hspeed.spd     = &speed.rval.d;
+
+    vspeed.hspd    = &hspeed.rval.d;
+    vspeed.dir     = &direction.rval.d;
+    vspeed.spd     = &speed.rval.d;
+
+    direction.spd  = &speed.rval.d;
+    direction.hspd = &hspeed.rval.d;
+    direction.vspd = &vspeed.rval.d;
+
+    speed.dir      = &direction.rval.d;
+    speed.hspd     = &hspeed.rval.d;
+    speed.vspd     = &vspeed.rval.d;
+
+    return len;
+  }
+
+  std::pair<object_planar, std::size_t> object_planar::deserialize(std::byte *iter) {
+    object_planar result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 
   void propagate_locals(object_planar* instance)
   {
