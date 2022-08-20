@@ -36,6 +36,11 @@ namespace enigma
       object_transform();
       object_transform(unsigned x, int y);
       virtual ~object_transform();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize();
+      std::size_t deserialize_self(std::byte *iter);
+      static std::pair<object_transform, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace ennigma
 

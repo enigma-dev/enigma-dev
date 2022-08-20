@@ -22,9 +22,37 @@
 
 #include "transform_object.h"
 
+#include "serialization.h"
+
 namespace enigma
 {
   object_transform::object_transform(): object_graphics() {}
   object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
   object_transform::~object_transform() {}
+
+  std::vector<std::byte> object_transform::serialize() {
+    auto bytes = object_graphics::serialize();
+    std::size_t len = 0;
+
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_alpha);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_blend);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_transform::deserialize_self(std::byte *iter) {
+    auto len = object_graphics::deserialize_self(iter);
+
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_alpha);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_blend);
+
+    return len;
+  }
+
+  std::pair<object_transform, std::size_t> object_transform::deserialize(std::byte *iter) {
+    object_transform result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 }
