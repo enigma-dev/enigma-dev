@@ -25,6 +25,8 @@
 
 #include "timelines_object.h"
 
+#include "serialization.h"
+
 namespace enigma
 {
   std::vector< std::map<int, int> > object_timelines::timeline_moments_maps;
@@ -99,5 +101,59 @@ namespace enigma
     }
   }
 
+  std::vector<std::byte> object_timelines::serialize() {
+    auto bytes = object_planar::serialize();
+    std::size_t len = 0;
 
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_moments_maps.size());
+    for (auto &map : timeline_moments_maps) {
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(map.size());
+      for (auto &[key, value]: map) {
+        ENIGMA_INTERNAL_OBJECT_SERIALIZE(key);
+        ENIGMA_INTERNAL_OBJECT_SERIALIZE(value);
+      }
+    }
+
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_index);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(timeline_running);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_speed);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_position);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(timeline_loop);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_timelines::deserialize_self(std::byte *iter) {
+    auto len = object_planar::deserialize_self(iter);
+
+    std::size_t timeline_maps_len{};
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_maps_len);
+    timeline_moments_maps.resize(timeline_maps_len);
+    for (auto &map: timeline_moments_maps) {
+      std::size_t map_len{};
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(map_len);
+      for (std::size_t i = 0; i < map_len; i++) {
+        int key{};
+        int value{};
+        ENIGMA_INTERNAL_OBJECT_DESERIALIZE(key);
+        ENIGMA_INTERNAL_OBJECT_DESERIALIZE(value);
+        map[key] = value;
+      }
+    }
+
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_index);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(timeline_running);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_speed);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_position);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(timeline_loop);
+
+    return len;
+  }
+
+  std::pair<object_timelines, std::size_t> object_timelines::deserialize(std::byte *iter) {
+    object_timelines result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 }
