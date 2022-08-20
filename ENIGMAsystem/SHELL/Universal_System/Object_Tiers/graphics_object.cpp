@@ -23,6 +23,7 @@
 
 #include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
+#include "serialization.h"
 
 #include <math.h>
 #include <floatcomp.h>
@@ -90,4 +91,44 @@ namespace enigma
   int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_xoffset(sprite_index)*image_xscale; }
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index)*image_yscale; }
   int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
+
+  std::vector<std::byte> object_graphics::serialize() {
+    auto bytes = object_timelines::serialize();
+    std::size_t len = 0;
+
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(sprite_index);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_index);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_speed);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_single);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(depth);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(visible);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_xscale);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_yscale);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_angle);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_graphics::deserialize_self(std::byte *iter) {
+    auto len = object_timelines::deserialize_self(iter);
+
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(sprite_index);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_index);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_speed);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(image_single);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(depth);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(visible);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_xscale);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_yscale);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_angle);
+
+    return len;
+  }
+
+  std::pair<object_graphics, std::size_t> object_graphics::deserialize(std::byte *iter) {
+    object_graphics result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 }

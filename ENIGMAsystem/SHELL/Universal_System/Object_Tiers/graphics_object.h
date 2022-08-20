@@ -96,6 +96,11 @@ namespace enigma
       object_graphics();
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize();
+      std::size_t deserialize_self(std::byte *iter);
+      static std::pair<object_graphics, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma
 
