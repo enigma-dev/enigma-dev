@@ -21,6 +21,7 @@
 #include "Universal_System/reflexive_types.h"
 #include "object.h"
 #include "libEGMstd.h"
+#include "serialization.h"
 
 #ifdef DEBUG_MODE
   #include "Universal_System/Instances/instance_system.h"
@@ -86,6 +87,29 @@ namespace enigma
         objectdata.resize(object_idmax);
         for (int i = 0; i < objectcount; i++)
             objectdata[objs[i].id] = &objs[i];
+    }
+
+    std::vector<std::byte> object_basic::serialize() {
+      std::vector<std::byte> bytes{};
+      std::size_t len = 0;
+
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(id);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(object_index);
+
+      bytes.shrink_to_fit();
+      return bytes;
+    }
+
+    std::size_t object_basic::deserialize_self(std::byte *iter) {
+      *const_cast<unsigned int*>(&id) = enigma::deserialize<unsigned int>(iter);
+      *const_cast<int *>(&object_index) = enigma::deserialize<int>(iter + sizeof(id));
+      return sizeof(id) + sizeof(object_index);
+    }
+
+    std::pair<object_basic, std::size_t> object_basic::deserialize(std::byte *iter) {
+      object_basic result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
     }
 }
 
