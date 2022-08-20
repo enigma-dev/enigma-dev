@@ -70,6 +70,11 @@ namespace enigma
       object_collisions();
       object_collisions(unsigned, int);
       virtual ~object_collisions();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize();
+      std::size_t deserialize_self(std::byte *iter);
+      static std::pair<object_collisions, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma
 

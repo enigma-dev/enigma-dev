@@ -22,6 +22,8 @@
  */
 
 #include "collisions_object.h"
+
+#include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
@@ -139,4 +141,38 @@ namespace enigma
     }
 
     object_collisions::~object_collisions() {}
+
+    std::vector<std::byte> object_collisions::serialize() {
+      auto bytes = object_transform::serialize();
+      std::size_t len = 0;
+
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(mask_index);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(solid);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_index);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_xscale);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_yscale);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_angle);
+
+      bytes.shrink_to_fit();
+      return bytes;
+    }
+
+    std::size_t object_collisions::deserialize_self(std::byte* iter) {
+      auto len = object_transform::deserialize_self(iter);
+
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(mask_index);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(solid);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_index);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_xscale);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_yscale);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_angle);
+
+      return len;
+    }
+
+    std::pair<object_collisions, std::size_t> object_collisions::deserialize(std::byte* iter) {
+      object_collisions result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
+    }
 }
