@@ -328,8 +328,8 @@ EGMRoomData::EGMRoomData(const deprecated::JavaStruct::Room &room, const ESLooku
   data.set_width(room.width);
   data.set_height(room.height);
 
-  data.set_hsnap(room.snapX);
-  data.set_vsnap(room.snapY);
+  data.set_tilewidth(room.snapX);
+  data.set_tileheight(room.snapY);
   data.set_isometric(room.isometric);
 
   data.set_speed(room.speed);
