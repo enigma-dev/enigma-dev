@@ -53,7 +53,7 @@
 namespace enigma {
 namespace utility {
 template <typename T, typename U>
-T bit_cast(const U &value) {
+inline T bit_cast(const U &value) {
   T result;
   std::memcpy(reinterpret_cast<void *>(&result), reinterpret_cast<const void *>(&value), sizeof(T));
   return result;
@@ -62,7 +62,7 @@ T bit_cast(const U &value) {
 
 namespace {
 template <typename Base, typename T>
-void serialize_any_into(std::byte *iter, T value) {
+inline void serialize_any_into(std::byte *iter, T value) {
   std::size_t i = sizeof(T) - 1;
   std::size_t as_unsigned = utility::bit_cast<Base>(value);
 
@@ -73,14 +73,14 @@ void serialize_any_into(std::byte *iter, T value) {
 }
 
 template <typename Base, typename T>
-std::array<std::byte, sizeof(T)> serialize_any(T value) {
+inline std::array<std::byte, sizeof(T)> serialize_any(T value) {
   std::array<std::byte, sizeof(T)> result{};
   serialize_any_into<Base, T>(result.data(), value);
   return result;
 }
 
 template <typename Base, typename T>
-T deserialize_any(std::byte *iter) {
+inline T deserialize_any(std::byte *iter) {
   Base result;
   for (std::size_t i = 0; i < sizeof(T); i++) {
     result = (result << 8) | static_cast<Base>(*(iter + i));
@@ -91,20 +91,20 @@ T deserialize_any(std::byte *iter) {
 }
 
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-void serialize_integral_into(std::byte *iter, T value) {
+inline void serialize_integral_into(std::byte *iter, T value) {
   serialize_any_into<std::make_unsigned_t<T>>(iter, value);
 }
 
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-std::array<std::byte, sizeof(T)> serialize_integral(T value) {
+inline std::array<std::byte, sizeof(T)> serialize_integral(T value) {
   return serialize_any<std::make_unsigned_t<T>>(value);
 }
 
 template <typename T>
-constexpr bool always_false = false;
+inline constexpr bool always_false = false;
 
 template <typename T>
-void serialize_floating_into(std::byte *iter, T value) {
+inline void serialize_floating_into(std::byte *iter, T value) {
   if constexpr (std::is_same_v<T, float>) {
     serialize_any_into<std::uint32_t>(iter, value);
   } else if constexpr (std::is_same_v<T, double>) {
@@ -115,7 +115,7 @@ void serialize_floating_into(std::byte *iter, T value) {
 }
 
 template <typename T>
-std::array<std::byte, sizeof(T)> serialize_floating(T value) {
+inline std::array<std::byte, sizeof(T)> serialize_floating(T value) {
   if constexpr (std::is_same_v<T, float>) {
     return serialize_any<std::uint32_t>(value);
   } else if constexpr (std::is_same_v<T, double>) {
@@ -126,7 +126,7 @@ std::array<std::byte, sizeof(T)> serialize_floating(T value) {
 }
 
 template <typename T>
-void serialize_numeric_into(std::byte *iter, T value) {
+inline void serialize_numeric_into(std::byte *iter, T value) {
   if constexpr (std::is_integral_v<T>) {
     serialize_integral_into(iter, value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -137,7 +137,7 @@ void serialize_numeric_into(std::byte *iter, T value) {
 }
 
 template <typename T>
-std::array<std::byte, sizeof(T)> serialize_numeric(T value) {
+inline std::array<std::byte, sizeof(T)> serialize_numeric(T value) {
   if constexpr (std::is_integral_v<T>) {
     return serialize_integral(value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -148,12 +148,12 @@ std::array<std::byte, sizeof(T)> serialize_numeric(T value) {
 }
 
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-T deserialize_integral(std::byte *iter) {
+inline T deserialize_integral(std::byte *iter) {
   return deserialize_any<std::make_unsigned_t<T>, T>(iter);
 }
 
 template <typename T>
-T deserialize_floating(std::byte *iter) {
+inline T deserialize_floating(std::byte *iter) {
   if constexpr (std::is_same_v<T, float>) {
     return deserialize_any<std::uint32_t, T>(iter);
   } else if constexpr (std::is_same_v<T, double>) {
@@ -164,7 +164,7 @@ T deserialize_floating(std::byte *iter) {
 }
 
 template <typename T>
-T deserialize_numeric(std::byte *iter) {
+inline T deserialize_numeric(std::byte *iter) {
   if constexpr (std::is_integral_v<T>) {
     return deserialize_integral<T>(iter);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -174,7 +174,7 @@ T deserialize_numeric(std::byte *iter) {
   }
 }
 
-void serialize_variant_into(std::byte *iter, const variant &value) {
+inline void serialize_variant_into(std::byte *iter, const variant &value) {
   if (value.type == variant::ty_real) {
     *(iter++) = static_cast<std::byte>(variant::ty_real);
     serialize_floating_into(iter, value.rval.d);
@@ -188,7 +188,7 @@ void serialize_variant_into(std::byte *iter, const variant &value) {
   }
 }
 
-std::vector<std::byte> serialize_variant(const variant &value) {
+inline std::vector<std::byte> serialize_variant(const variant &value) {
   std::vector<std::byte> result{};
   if (value.type == variant::ty_real) {
     result.resize(9);
@@ -201,7 +201,7 @@ std::vector<std::byte> serialize_variant(const variant &value) {
   return result;
 }
 
-variant deserialize_variant(std::byte *iter) {
+inline variant deserialize_variant(std::byte *iter) {
   variant result;
   if (static_cast<int>(*iter) == variant::ty_real) {
     result.rval.d = deserialize_floating<double>(iter + 1);
@@ -217,7 +217,7 @@ variant deserialize_variant(std::byte *iter) {
 }
 
 template <typename T>
-void serialize_into(std::byte *iter, T &&value) {
+inline void serialize_into(std::byte *iter, T &&value) {
   if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     if constexpr (std::is_pointer_v<T>) {
       serialize_variant_into(iter, *value);
@@ -236,7 +236,7 @@ void serialize_into(std::byte *iter, T &&value) {
 }
 
 template <typename T>
-auto serialize(T &&value) {
+inline auto serialize(T &&value) {
   if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     if constexpr (std::is_pointer_v<T>) {
       return serialize_variant(*value);
@@ -255,7 +255,7 @@ auto serialize(T &&value) {
 }
 
 template <typename T>
-T deserialize(std::byte *iter) {
+inline T deserialize(std::byte *iter) {
   if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     return deserialize_variant(iter);
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
@@ -266,11 +266,11 @@ T deserialize(std::byte *iter) {
 }
 
 template <typename T>
-void resize_buffer_for_value(std::vector<std::byte> &buffer, T) {
+inline void resize_buffer_for_value(std::vector<std::byte> &buffer, T) {
   buffer.resize(buffer.size() + sizeof(T));
 }
 
-void resize_buffer_for_variant(std::vector<std::byte> &buffer, const variant &value) {
+inline void resize_buffer_for_variant(std::vector<std::byte> &buffer, const variant &value) {
   if (value.type == variant::ty_real) {
     buffer.resize(buffer.size() + 9);
   } else {
@@ -279,7 +279,7 @@ void resize_buffer_for_variant(std::vector<std::byte> &buffer, const variant &va
 }
 
 template <typename T>
-void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
+inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   if constexpr (std::is_same_v<T, variant>) {
     resize_buffer_for_variant(buffer, value);
   } else {
