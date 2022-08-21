@@ -4,22 +4,58 @@ package buffers.resources;
 import "options.proto";
 
 message EGMRoom {
-  optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
 
-  optional string caption = 1;
-  optional uint32 width = 2 [(yyp) = "roomSettings/Width", (tmx) = "width"]; // tmx width unit is no. of tiles
-  optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"]; // tmx height unit is no. of tiles
-  optional uint32 hsnap = 4 [(tmx) = "tilewidth"]; // tmx tilewidth unit is in pixels
-  optional uint32 vsnap = 5 [(tmx) = "tileheight"]; // tmx tileheight unit is in pixels
-  optional bool isometric = 6;
-  optional uint32 speed = 27;
-  optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
-  optional int32 color = 8 [(gmx) = "colour"];
-  optional bool show_color = 9 [(gmx) = "showcolour"];
-  optional string creation_code = 10;
-  optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
-  optional bool clear_view_background = 12 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
-  optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
+  message Tileset {
+    optional int32 firstgid = 1;
+    optional string source = 2;
+    optional string name = 3;
+    optional uint32 tilewidth = 4;
+    optional uint32 tileheight = 5;
+    optional uint32 tilecount = 6;
+    optional uint32 columns = 7;
+  }
+
+  message ObjectGroup {
+
+    message Object {
+
+      message Properties {
+
+        message Property {
+          optional string name = 1;
+          optional string type = 2;
+          optional int32 value = 3;
+        }
+
+        repeated Property propertyTags = 1;
+      }
+
+      optional int32 id = 1;
+      optional uint32 gid = 2;
+      optional double x = 3;
+      optional double y = 4;
+      optional uint32 width = 5;
+      optional uint32 height = 6;
+      optional Properties propertiesTag = 7;
+      optional double rotation = 8;
+      /*optional bool has_horizontal_flip = 9 [default = false];
+      optional bool has_vertical_flip = 10 [default = false];
+      optional bool flipped_diagonally = 11 [default = false];
+      optional bool rotated_hex120 = 12 [default = false];*/
+      optional string background_name = 13;
+      optional double xscale = 14 [default = 1.0];
+      optional double yscale = 15 [default = 1.0];
+    }
+
+    optional int32 id = 1;
+    optional string name = 2;
+    optional int32 parallaxx = 3;
+    optional int32 parallaxy = 4;
+
+    repeated Object objects = 5;
+
+    optional double opacity = 6;
+  }
 
   message Background {
     optional bool visible = 1;
@@ -35,27 +71,6 @@ message EGMRoom {
     optional int32 color = 11 [default = 0xFFFFFF];
     optional double alpha = 12 [default = 1.0];
   }
-
-  repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
-
-  message View {
-    optional bool visible = 1;
-    optional int32 xview = 2;
-    optional int32 yview = 3;
-    optional uint32 wview = 4;
-    optional uint32 hview = 5;
-    optional int32 xport = 6;
-    optional int32 yport = 7;
-    optional uint32 wport = 8;
-    optional uint32 hport = 9;
-    optional int32 hborder = 10;
-    optional int32 vborder = 11;
-    optional double hspeed = 12;
-    optional double vspeed = 13;
-    optional string object_following = 14 [(resource_ref)="object", (gmx) = "objName"];
-  }
-
-  repeated View views = 16 [(gmx) = "views/view", (yyp) = "views"];
 
   message Instance {
     optional string name = 1;
@@ -80,24 +95,39 @@ message EGMRoom {
     optional EditorSettings editor_settings = 31;
   }
 
-  repeated Instance instances = 17 [(gmx) = "instances/instance"];
+  message View {
+    optional bool visible = 1;
+    optional int32 xview = 2;
+    optional int32 yview = 3;
+    optional uint32 wview = 4;
+    optional uint32 hview = 5;
+    optional int32 xport = 6;
+    optional int32 yport = 7;
+    optional uint32 wport = 8;
+    optional uint32 hport = 9;
+    optional int32 hborder = 10;
+    optional int32 vborder = 11;
+    optional double hspeed = 12;
+    optional double vspeed = 13;
+    optional string object_following = 14 [(resource_ref)="object", (gmx) = "objName"];
+  }
 
   message Tile {
     optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000001];
     optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
-    optional double x = 4 [(tmx) = "x"];
-    optional double y = 5 [(tmx) = "y"];
+    optional double x = 4;
+    optional double y = 5;
     optional int32 xoffset = 6 [(gmx) = "xo"];
     optional int32 yoffset = 7 [(gmx) = "yo"];
-    optional uint32 width = 8 [(gmx) = "w", (tmx) = "width"];
-    optional uint32 height = 9 [(gmx) = "h", (tmx) = "height"];
+    optional uint32 width = 8 [(gmx) = "w"];
+    optional uint32 height = 9 [(gmx) = "h"];
     optional int32 depth = 10;
     optional double xscale = 11 [default = 1.0, (gmx) = "scaleX"];
     optional double yscale = 12 [default = 1.0, (gmx) = "scaleY"];
     optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
     optional double alpha = 14 [default = 1.0];
-    optional double rotation = 15 [default = 0.0, (tmx) = "rotation"];
+    optional double rotation = 15 [default = 0.0];
 
     message EditorSettings {
       optional bool locked = 1;
@@ -105,8 +135,6 @@ message EGMRoom {
 
     optional EditorSettings editor_settings = 31;
   }
-
-  repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
 
   message Layer {
     optional string name = 1;
@@ -117,8 +145,6 @@ message EGMRoom {
     repeated Instance instances = 5;
     repeated Tile tiles = 6;
   }
-
-  repeated Layer layers = 20;
 
   message RoomPhysicsSettings {
     optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];
@@ -131,10 +157,53 @@ message EGMRoom {
     optional double phy_world_pixel_meters = 8 [(gmx) = "PhysicsWorldPixToMeters"];
   }
 
-  optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
+  optional string orientation = 1;
+  optional string renderorder = 2;
+  optional uint32 width = 3 [(yyp) = "roomSettings/Width"];
+  optional uint32 height = 4 [(yyp) = "roomSettings/Height"];
+  optional uint32 tilewidth = 5 [(gmx) = "hsnap"];
+  optional uint32 tileheight = 6 [(gmx) = "vsnap"];
+  optional int32 infinite = 7;
+  optional int32 parallaxoriginx = 8;
+  optional int32 parallaxoriginy = 9;
+//  optional string backgroundcolor = 10;
+  optional int32 nextlayerid = 10;
+  optional int32 nextobjectid = 11;
+  optional int32 firstgid = 12;
+  optional string source = 13;
+  optional uint32 hexsidelength = 14;
+  optional string staggeraxis = 15; // can be "x" or "y"
+  optional string staggerindex = 16; // can be "even" or "odd"
 
-  optional string orientation = 21 [(tmx) = "orientation"]; // Tiled orientation: orthogonal, isometric, staggered, hexagonal
-  optional uint32 hexsidelength = 22 [(tmx) = "hexsidelength"];
-  optional string staggeraxis = 23 [(tmx) = "staggeraxis"]; // can be "x" or "y"
-  optional string staggerindex = 24 [(tmx) = "staggerindex"]; // can be "even" or "odd"
+  optional int32 id = 17 [(gmx) = "GMX_DEPRECATED"];
+  optional string caption = 18;
+//  optional uint32 width = 2 [(yyp) = "roomSettings/Width", (tmx) = "width"]; // tmx width unit is no. of tiles
+//  optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"]; // tmx height unit is no. of tiles
+//  optional uint32 hsnap = 4 [(tmx) = "tilewidth"]; // tmx tilewidth unit is in pixels
+//  optional uint32 vsnap = 5 [(tmx) = "tileheight"]; // tmx tileheight unit is in pixels
+  optional bool isometric = 19;
+  optional uint32 speed = 20;
+  optional bool persistent = 21 [(yyp) = "roomSettings/persistent"];
+  optional int32 color = 22 [(gmx) = "colour"];
+  optional bool show_color = 23 [(gmx) = "showcolour"];
+  optional string creation_code = 24;
+  optional bool enable_views = 25 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
+  optional bool clear_view_background = 26 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
+  optional bool clear_display_buffer = 27 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
+
+  repeated Tileset tilesets = 28;
+
+  repeated ObjectGroup objectGroups = 29;
+
+  repeated Background backgrounds = 30 [(gmx) = "backgrounds/background"];
+
+  repeated View views = 31 [(gmx) = "views/view", (yyp) = "views"];
+
+  repeated Instance instances = 32 [(gmx) = "instances/instance"];
+
+  repeated Tile tiles = 33 [(gmx) = "tiles/tile"];
+
+  repeated Layer layers = 34;
+
+  optional RoomPhysicsSettings physics_settings = 35 [(gmx) = "EGM_NESTED"];
 }

@@ -46,11 +46,14 @@ void PackTiledRes(const pugi::xml_node &xmlNode, google::protobuf::Message *m,
 
     const google::protobuf::FieldOptions opts = field->options();
 
-    if(!opts.HasExtension(buffers::tmx))
+    // WIP Changes: Whether to use extension or field name or both for tsx property name?
+    /*if(!opts.HasExtension(buffers::tmx))
       continue;
 
     // tmx_option_string is used to fetch correct attribute from current xml node
-    std::string tsxPropertyName = opts.GetExtension(buffers::tmx);
+    std::string tsxPropertyName = opts.GetExtension(buffers::tmx);*/
+
+    std::string tsxPropertyName = field->name();
 
     pugi::xml_attribute attr = xmlNode.attribute(tsxPropertyName.c_str());
 

@@ -168,8 +168,8 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
   // correct width and height, convert from no. of tiles to no. of pixels
   unsigned int nHoriTiles = resNode->room().width();
   unsigned int nVertTiles = resNode->room().height();
-  unsigned int tileWidthPixels = resNode->room().hsnap();
-  unsigned int tileHeightPixels = resNode->room().vsnap();
+  unsigned int tileWidthPixels = resNode->room().tilewidth();
+  unsigned int tileHeightPixels = resNode->room().tileheight();
 
   const std::string &orientation = resNode->mutable_room()->orientation();
 
@@ -237,7 +237,7 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
     return false;
   }
 
-  bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, resNode->room().hsnap(), resNode->room().vsnap());
+  bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, resNode->room().tilewidth(), resNode->room().tileheight());
   if(!room_tiledFromLayerDataOk) {
     errStream << "Something went wrong while laoding Room.Tiles from Layer Data." << std::endl;
     return false;
@@ -256,55 +256,57 @@ bool TMXMapLoader::LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNo
   pugi::xml_object_range<pugi::xml_named_node_iterator> objectGroups = mapNode.children("objectgroup");
   // iterate over all objectGroups
   for(const pugi::xml_node &objectGroupChild : objectGroups) {
-    bool hasOpacity = false;
-    pugi::xml_attribute opacityAttr = objectGroupChild.attribute("opacity");
-    if(!opacityAttr.empty())
-      hasOpacity = true;
 
-    // iterate over all children, which is most probably objects, create new tiles out of them
+    buffers::resources::EGMRoom::ObjectGroup* objectGroup = resNode->mutable_room()->add_objectgroups();
+    PackTiledRes(objectGroupChild, objectGroup, resourceTypeIdCountMap, tmxPath);
+
     pugi::xml_object_range<pugi::xml_named_node_iterator> objects = objectGroupChild.children("object");
     for(const pugi::xml_node &objectChild : objects) {
-      unsigned int globalTileId = objectChild.attribute("gid").as_uint();
+      buffers::resources::EGMRoom::ObjectGroup::Object* object = objectGroup->add_objects();
+      PackTiledRes(objectChild, object, resourceTypeIdCountMap, tmxPath);
 
+      // get-set backgroundname (IMPROVEMENT: Try using tileset id directly)
+      unsigned int globalTileId = object->gid();
       bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
       std::string tilesetName = "";
       int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
                                            flippedDiagonally, rotatedHex120);
-
       if(localTileId == 0){
         errStream << "localId attribute not present(templates are not yet supported) or its value is zero." << std::endl;
         continue;
       }
-
       std::string backgroundName = tilesetName + "_" + std::to_string(localTileId);
+      object->set_background_name(backgroundName);
 
-      buffers::resources::EGMRoom::Tile* tile = resNode->mutable_room()->add_tiles();
-
-      // if xmlNode is empty then we are dealing with compressed tiled data case
-      PackTiledRes(objectChild, tile, resourceTypeIdCountMap, tmxPath);
-
-      tile->set_background_name(backgroundName);
-      tile->set_name(backgroundName+"_"+std::to_string(idx++));
-
-      // convert tiled origin from bottom-left to top-left
-      tile->set_y(tile->y()-tile->height());
-
-      tile->set_xoffset(0);
-      tile->set_yoffset(0);
-      tile->set_depth(0);
+      /*object->set_has_horizontal_flip(hasHorizontalFlip);
+      object->set_has_vertical_flip(hasVerticalFlip);
+      object->set_flipped_diagonally(flippedDiagonally);
+      object->set_rotated_hex120(rotatedHex120);*/
 
       if(hasHorizontalFlip)
-        tile->set_xscale(-1.0);
+        object->set_xscale(-1.0);
       else
-        tile->set_xscale(1.0);
+        object->set_xscale(1.0);
 
       if(hasVerticalFlip)
-        tile->set_yscale(-1.0);
+        object->set_yscale(-1.0);
       else
-        tile->set_yscale(1.0);
+        object->set_yscale(1.0);
 
-      if(tile && hasOpacity)
-        tile->set_alpha(opacityAttr.as_double());
+      object->set_y(object->y() - object->height());
+
+      // set properties
+      pugi::xml_node propertiesTag = objectChild.child("properties");
+      if(!propertiesTag.empty()) {
+        buffers::resources::EGMRoom::ObjectGroup::Object::Properties* properties = object->mutable_propertiestag();
+        pugi::xml_object_range<pugi::xml_named_node_iterator> propertiesTagItr = propertiesTag.children("property");
+
+        for(const pugi::xml_node &propertyTag : propertiesTagItr) {
+          buffers::resources::EGMRoom::ObjectGroup::Object::Properties::Property* property = properties->add_propertytags();
+          PackTiledRes(propertyTag, property, resourceTypeIdCountMap, tmxPath);
+
+        }
+      }
     }
   }
 

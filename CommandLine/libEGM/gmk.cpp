@@ -589,8 +589,10 @@ std::unique_ptr<EGMRoom> LoadRoom(Decoder &dec, int ver, const std::string& /*na
   room->set_caption(dec.readStr());
   room->set_width(dec.read4());
   room->set_height(dec.read4());
-  room->set_vsnap(dec.read4());
-  room->set_hsnap(dec.read4());
+//  room->set_vsnap(dec.read4());
+//  room->set_hsnap(dec.read4());
+  room->set_tileheight(dec.read4());
+  room->set_tilewidth(dec.read4());
   room->set_isometric(dec.readBool());
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
