@@ -39,6 +39,7 @@ enum TokenType {
   TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>= &= ^= |=
   TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
   TT_DOT,             // A dot ('.'). Is neither preceeded nor followed by a numeral.
+  TT_ELLIPSES,        // Three dots in a row ('...')
   TT_ARROW,           // The -> operator.
   TT_DOT_STAR,        // The .* operator (pointer-to-member).
   TT_ARROW_STAR,      // The ->* operator (pointer-to-pointer-member).
@@ -83,13 +84,33 @@ enum TokenType {
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::
-  TT_TYPE_NAME,       // int, double, var; any baked-in primitive type (includes C++ types in namespace enigma_user).
+  TT_TYPE_NAME,       // var, char, char8_t, char16_t, char32_t, wchar_t, bool, short, int, long, float, double, void; any baked-in primitive type (includes C++ types in namespace enigma_user).
   TT_LOCAL,           // `local` storage specifier
   TT_GLOBAL,          // `global` storage specifier
   TT_RETURN,          // The `return` keyword
   TT_EXIT,            // Legacy `exit` keyword (return void)
   TT_BREAK,           // The `break` keyword
   TT_CONTINUE,        // The `continue` keyword
+  TT_ENUM,            // enum
+  TT_TYPEDEF,         // typedef
+  TT_TYPENAME,        // typename
+  TT_OPERATOR,        // operator
+  TT_CONSTEXPR,       // constexpr
+  TT_CONSTINIT,       // constinit
+  TT_CONSTEVAL,       // consteval
+  TT_INLINE,          // inline
+  TT_STATIC,          // static
+  TT_THREAD_LOCAL,    // thread_local
+  TT_EXTERN,          // extern
+  TT_MUTABLE,         // mutable
+  TT_CO_AWAIT,        // co_await
+  TT_NOEXCEPT,        // noexcept
+  TT_ALIGNOF,         // alignof
+  TT_SIZEOF,          // sizeof
+  TT_STATIC_CAST,     // static_cast
+  TT_DYNAMIC_CAST,    // dynamic_cast
+  TT_REINTERPRET_CAST,// reinterpret_cast
+  TT_CONST_CAST,      // const_cast
   TT_S_SWITCH,        // switch
   TT_S_REPEAT,        // repeat
   TT_S_CASE,          // case
@@ -108,6 +129,15 @@ enum TokenType {
   TT_S_DELETE,        // C++ memory management `delete` keyword
   TT_CLASS,           // class declaration keyword
   TT_STRUCT,          // struct declaration keyword
+  TT_UNION,           // union declaration keyword
+
+  TT_SIGNED,          // signed
+  TT_UNSIGNED,        // unsigned
+
+  TT_CONST,           // const
+  TT_VOLATILE,        // volatile
+
+  TT_DECLTYPE,        // decltype
 
   TTM_WHITESPACE,     // Preprocessing token: whitespace
   TTM_CONCAT,         // Preprocessing token: ##

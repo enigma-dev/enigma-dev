@@ -2,6 +2,7 @@
 #define ENIGMA_COMPILER_PARSING_PARSER_h
 
 #include "ast.h"
+#include "language_frontend.h"
 #include "lexer.h"
 
 #include <memory>
