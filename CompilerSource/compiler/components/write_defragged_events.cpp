@@ -41,6 +41,10 @@ int lang_CPP::compile_writeDefraggedEvents(
   ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").u8string().c_str());
   wto << license;
 
+  wto << "#include <vector>\n";
+  wto << "#include <cstddef>\n";
+  wto << "#include \"Universal_System/Object_Tiers/serialization.h\"\n";
+
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
   for (size_t i = 0; i < game.timelines.size(); i++) {
     for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
@@ -57,6 +61,14 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
+  wto << "    std::vector<std::byte> serialize() { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
+  wto << "    std::size_t deserialize_self(std::byte *iter) { return " << system_get_uppermost_tier() << "::deserialize_self(iter); }\n\n";
+  wto << "    std::pair<event_parent, std::size_t> deserialize(std::byte *iter) {\n"
+         "      event_parent result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n\n";
+
   for (const auto &event : used_events) {
     const string fname = event.FunctionName();
     const bool e_is_inst = event.IsStacked();
