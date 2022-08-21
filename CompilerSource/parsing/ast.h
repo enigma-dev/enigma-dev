@@ -381,14 +381,6 @@ class AST {
   // The raw input code, owned by the lexer.
   const std::string &code;
 
-  // Original ENIGMA code/synt bufs
-  struct HackyTackyThingyThing {
-    string code;
-    string synt;
-    unsigned int strc;
-    varray<string> strs;
-  } junkshit;
-
   bool HasError() { return !herr.errors.empty(); }
   std::string ErrorString() {
     if (herr.errors.empty()) return "No error";
@@ -405,10 +397,16 @@ class AST {
   void ExtractDeclarations(ParsedScope *destination_scope);
 
   // Pretty-prints this code to a stream with the given base indentation.
-  // The caller is responsible for having already printed applicable function
-  // declarations and opening braces, statements, etc, and for printing the
-  // closing statements and braces afterward.
-  void PrettyPrint(std::ofstream &of, int base_indent = 2) const;
+  // void PrettyPrint(std::ofstream &of, int base_indent = 2) const;
+
+  // Writes this code in C++ format to the given stream with the given
+  // base indentation. The compiler will attempt to preserve token line
+  // numbers and will emit a #file directive for the original source.
+  //
+  // The caller is responsible for having already printed applicable
+  // function declarations and opening braces, statements, etc, and for
+  // printing the closing statements and braces afterward.
+  void WriteCppToStream(std::ofstream &of, int base_indent = 2) const;
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.
@@ -419,6 +417,7 @@ class AST {
   AST(AST &&other) = default;
 
  private:
+  std::unique_ptr<Node> root_;
   // When specified, emits code to apply to a specific instance.
   std::optional<int> apply_to_;
   // Constructs an AST from the code it will parse. Does not initiate parse.

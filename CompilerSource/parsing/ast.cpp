@@ -16,7 +16,7 @@
 **/
 
 #include "ast.h"
-#include "parser/parser.h"  // print_to_file, parser_main
+#include "parser.h"
 #include "parser/collect_variables.h"  // collect_variables
 
 #include <string>
@@ -26,30 +26,29 @@
 
 namespace enigma::parsing {
 
-bool AST::empty() const { return junkshit.code.empty(); }  // HACK
+bool AST::empty() const { return !root_; }
 
 // Utility routine: Apply this AST to a specified instance.
 void AST::ApplyTo(int instance_id) {
   apply_to_ = instance_id;
 }
 
-void AST::PrettyPrint(std::ofstream &of, int base_indent) const {
+void AST::WriteCppToStream(std::ofstream &of, int base_indent) const {
+  // TODO: Implement
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
-    print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-                  junkshit.strc, junkshit.strs, base_indent, of);
+    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
+    //               junkshit.strc, junkshit.strs, base_indent, of);
     of << std::string(base_indent, ' ') << "}\n";
   } else {
-    print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-                  junkshit.strc, junkshit.strs, base_indent, of);
+    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
+    //               junkshit.strc, junkshit.strs, base_indent, of);
   }
 }
 
 AST AST::Parse(std::string code, const ParseContext *ctex) {
   AST res(std::move(code), ctex);
-  // For now, we're not building the actual AST.
-  // We should probably do some syntax checking, though...
-  parser_main(&res, *ctex);
+  res.root_ = enigma::parsing::Parse(res.lexer.get(), &res.herr);
   return res;
 }
 

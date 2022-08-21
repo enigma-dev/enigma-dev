@@ -746,22 +746,8 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
     wto << "  ";
-    auto &upev = (scr->global_code ? *scr->global_code : scr->code).ast.junkshit;
-
-    // TODO(JoshDreamland): Super-hacky
-    string override_code, override_synt;
-    if (upev.code.compare(0, 12, "with((self))") == 0) {
-      override_code = upev.code.substr(12);
-      override_synt = upev.synt.substr(12);
-    }
-    print_to_file(
-      state.parse_context,
-      override_code.empty() ? upev.code : override_code,
-      override_synt.empty() ? upev.synt : override_synt,
-      upev.strc,
-      upev.strs,
-      2,wto
-    );
+    auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
+    ast.WriteCppToStream(wto, 2);
     wto << "\n  return 0;\n}\n\n";
   }
 }
@@ -773,21 +759,10 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
   for (const auto &tline : state.timeline_lookup) {\
     for (const auto &moment : tline.second.moments) {
       wto << "void TLINE_" << tline.first << "_MOMENT_" << moment.step << "() {\n";
-      auto& upev = (moment.script->global_code
-          ? *moment.script->global_code : moment.script->code).ast.junkshit;
+      auto& ast = (moment.script->global_code
+          ? *moment.script->global_code : moment.script->code).ast;
 
-      string override_code, override_synt;
-      if (upev.code.compare(0, 12, "with((self))") == 0) {
-        override_code = upev.code.substr(12);
-        override_synt = upev.synt.substr(12);
-      }
-      print_to_file(
-          state.parse_context,
-          override_code.empty() ? upev.code : override_code,
-          override_synt.empty() ? upev.synt : override_synt,
-          upev.strc,
-          upev.strs,
-          2, wto);
+      ast.WriteCppToStream(wto, 2);
       wto << "\n}\n\n";
     }
   }
@@ -825,27 +800,11 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
   for (const ParsedEvent &event : object->all_events) {
     string evname = event.ev_id.TrueFunctionName();
 
-    // Inherit default code from object_locals. Don't generate the same default
-    // code for all objects.
+    // Inherit default code from object_locals.
+    // Don't generate the same default code for all objects.
     if (event.ast.empty()) continue;
 
-    bool defined_inherited = false;
-
-    // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
-    // for no reason 99% of the time, and it doesn't allow us to give any
-    // feedback as to why a call to event_inherited() may not be valid.
-    if (object->InheritsSpecifically(event.ev_id) &&
-        event.ast.junkshit.code.find("event_inherited") != std::string::npos) {
-      wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
-      defined_inherited = true;
-    }
-
     write_event_func(wto, event, object->name, evname, mode);
-
-    if (defined_inherited) {
-      wto << "#undef event_inherited\n";
-    }
-
     if (event.ev_id.HasSubCheck()) {
       // Write event sub check code
       wto << "inline bool enigma::OBJ_" << object->name
@@ -870,10 +829,7 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
     PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
-
-  wto << "  // " << event.ast.junkshit.code << "\n";
-  wto << "  // " << event.ast.junkshit.synt << "\n";
-  event.ast.PrettyPrint(wto);
+  event.ast.WriteCppToStream(wto, 2);
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -891,7 +847,7 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      subscr->second->code.ast.PrettyPrint(wto, 2);
+      subscr->second->code.ast.WriteCppToStream(wto, 2);
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -908,7 +864,7 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        scr->code.ast.PrettyPrint(wto);
+        scr->code.ast.WriteCppToStream(wto);
         wto << "}\n";
       }
       wto << "\n";

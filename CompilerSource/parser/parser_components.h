@@ -38,7 +38,6 @@ int parser_ready_input(string&,string&,unsigned int&,varray<string>&,const enigm
 int  parser_fix_templates(string &code,pt pos,pt spos,string *synt);
 void parser_add_semicolons(string &code,string &synt);
 void print_the_fucker(string code,string synt);
-int parser_reinterpret(string&,string&);
 
 int dropscope();
 int quickscope();
