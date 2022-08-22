@@ -30,42 +30,56 @@ public:
 
 
 /**
+ * @brief The StaggerAxis enum defines the types of axis used in stagger maps
+ */
+enum class StaggerAxis {
+  x,
+  y,
+  unknown
+};
+
+
+/**
+ * @brief The StaggerIndex enum defines the types of indices used to stagger map in a particular axis
+ */
+enum class StaggerIndex {
+  even,
+  odd,
+  unknown
+};
+
+
+/**
  * @brief The StaggerUtil struct captures stagger details of a Tiled map
  */
-struct StaggerUtil {
+struct StaggerInfo {
   /**
-   * @brief Specifies the alignment of hex tiles, can be either "x" or "y"
+   * @brief Specifies the alignment of hex tiles in a particular axis
    */
-  std::string staggerAxis;
+  StaggerAxis staggerAxis;
 
   /**
-   * @brief Specifies index(among each pair of neighbouring indices) to be shifted to create hex map,
-   * can be either "even" or "odd"
+   * @brief Specifies index(among each pair of neighbouring indices) to be shifted to create hex map
    */
-  std::string staggerIndex;
+  StaggerIndex staggerIndex;
 };
 
 
 /**
  * @brief The HexMapUtil struct captures details of a hexagonal Tiled map
  */
-struct HexMapUtil {
+struct HexMapInfo : public StaggerInfo {
   /**
    * @brief Length of side of hexagonal tile
    */
   unsigned int hexSideLength;
-
-  /**
-   * @brief Hex map is a staggered map
-   */
-  StaggerUtil staggerUtil;
 };
 
 
 /**
  * @brief The RoomOrientation enum defines types of Tiled maps supported by this importer
  */
-enum RoomOrientation {
+enum class RoomOrientation {
   orthogonal,
   hexagonal,
   isometric,
@@ -125,9 +139,9 @@ private:
   std::unordered_map<std::string, buffers::TreeNode *> tilesetBgNamePtrMap;
 
   /**
-   * @brief Stores hexagonal map details in heap
+   * @brief Stores hexagonal map details
    */
-  std::unique_ptr<HexMapUtil> hexMapUtil;
+  HexMapInfo hexMapInfo;
 
   /**
    * @brief Stores current Room or Tiled Map orientation
@@ -135,9 +149,9 @@ private:
   RoomOrientation roomOrientation;
 
   /**
-   * @brief Stores staggered isometric map deatils in heap
+   * @brief Stores staggered isometric map details
    */
-  std::unique_ptr<StaggerUtil> staggeredIsoMapUtil;
+  StaggerInfo staggeredIsoMapInfo;
 
   // TODO: Remove this hack and use "resource name generator"
   int idx=0;
@@ -196,9 +210,9 @@ private:
    */
   bool LoadLayerData(pugi::xml_node &mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight);
 
-  bool LoadLayerDataHelper(const std::string &dataStr, const int &layerWidth, const int &layerHeight,
+  bool LoadLayerDataHelper(const std::string &dataStr, const int layerWidth, const int layerHeight,
                            const std::string &encoding, const std::string &compression, buffers::TreeNode *resNode,
-                           const int& tileWidth, const int& tileHeight, const int &chunkXIdx = 0, const int &chunkYIdx = 0);
+                           const int tileWidth, const int tileHeight, const int chunkXIdx = 0, const int chunkYIdx = 0);
 
   /**
    * @brief Helper method to decompress and add tile data stored in Glib and Zlib streams to Room Resource
@@ -211,9 +225,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                           const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight,
-                           const int &xStartIdx = 0, const int &yStartIdx = 0);
+  bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+                           const int tileWidth, const int tileHeight, const int layerWidth, const int layerHeight,
+                           const int xStartIdx = 0, const int yStartIdx = 0);
 
   /**
    * @brief Helper method to decompress and add tile data stored in Zstd stream to Room Resource
@@ -226,9 +240,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                               const int &tileWidth, const int &tileHeight, const int &layerWidth, const int &layerHeight,
-                               const int &chunkXIdx = 0, const int &chunkYIdx = 0);
+  bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+                               const int tileWidth, const int tileHeight, const int layerWidth, const int layerHeight,
+                               const int chunkXIdx = 0, const int chunkYIdx = 0);
 
   /**
    * @brief Helper method to decompress and add tile data stored in base64 stream to Room Resource
@@ -241,9 +255,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t &expectedSize, buffers::TreeNode *resNode,
-                                       const int &tileWidth, const int &tileHeight, const int &layerWidth,
-                                       const int &layerHeight, const int &chunkXIdx = 0, const int &chunkYIdx = 0);
+  bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+                                       const int tileWidth, const int tileHeight, const int layerWidth,
+                                       const int layerHeight, const int chunkXIdx = 0, const int chunkYIdx = 0);
 
   /**
    * @brief Helper method to load and add tile data stored in CSV format to Room Resource
@@ -255,9 +269,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int &tileWidth,
-                        const int &tileHeight, const int &layerWidth, const int &layerHeight, const int &chunkXIdx = 0,
-                        const int &chunkYIdx = 0);
+  bool LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int tileWidth,
+                        const int tileHeight, const int layerWidth, const int layerHeight, const int chunkXIdx = 0,
+                        const int chunkYIdx = 0);
 
   /**
    * @brief Creates Tile instances for EGM Room resource
@@ -269,8 +283,8 @@ private:
    * @param currY Current row of tile in Room
    * @return Returns true if parsing succeeds else false
    */
-  bool CreateTileFromGlobalId(const unsigned int &globalTileId, buffers::TreeNode *resNode, const int &mapTileWidth,
-                              const int &mapTileHeight, const int &currX, const int &currY, const int &layerWidth);
+  bool CreateTileFromGlobalId(const unsigned int globalTileId, buffers::TreeNode *resNode, const int mapTileWidth,
+                              const int mapTileHeight, const int currX, const int currY, const int layerWidth);
 
   /**
    * @brief Get local tile id by selecting tileset it belongs to
@@ -282,7 +296,7 @@ private:
    * @param rotatedHex120 Reference to rotated hex flip flag
    * @return Returns true if parsing succeeds else false
    */
-  int GetLocalTileIdInfo(std::string &tilesetName, const unsigned int &globalTileId,
+  int GetLocalTileIdInfo(std::string &tilesetName, const unsigned int globalTileId,
                          bool &hasHorizontalFlip, bool &hasVerticalFlip, bool &flippedDiagonally, bool &rotatedHex120);
 
   /**
@@ -294,7 +308,7 @@ private:
    * @param rotatedHex120 Reference to rotated hex flip flag
    * @return Returns true if parsing succeeds else false
    */
-  int ConvertGlobalTileIdToLocal(const unsigned int &globalTileId, bool &hasHorizontalFlip, bool &hasVerticalFlip,
+  int ConvertGlobalTileIdToLocal(const unsigned int globalTileId, bool &hasHorizontalFlip, bool &hasVerticalFlip,
                                  bool &flippedDiagonally, bool &rotatedHex120);
 };
 
