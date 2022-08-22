@@ -92,6 +92,8 @@ else ifeq ($(OS), DragonFly)
 	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), OpenBSD)
 	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
+else
+	override LDFLAGS += -lz -lpng
 endif
  
 ifeq ($(GMODE), Debug)
