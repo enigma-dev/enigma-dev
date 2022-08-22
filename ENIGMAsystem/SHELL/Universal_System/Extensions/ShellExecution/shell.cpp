@@ -46,12 +46,12 @@ using std::string;
 namespace enigma_user {
 
 // execute process from the shell, return process id
-LOCALPROCID ProcessExecute(string command) {
+CPROCID ProcessExecute(string command) {
   return process_execute(command.c_str());
 }
 
 // execute process from the shell async, return process id
-LOCALPROCID ProcessExecuteAsync(string command) {
+CPROCID ProcessExecuteAsync(string command) {
   return process_execute_async(command.c_str());
 }
 
@@ -113,12 +113,12 @@ void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId) {
 }
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex) {
+bool CompletionStatusFromExecutedProcess(CPROCID procIndex) {
   return completion_status_from_executed_process(procIndex);
 }
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, string input) {
+void ExecutedProcessWriteToStandardInput(CPROCID procIndex, string input) {
   executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
@@ -128,47 +128,47 @@ std::string CurrentProcessReadFromStandardInput() {
 }
 
 // read from executed process standard output file descriptor based on process id
-string ExecutedProcessReadFromStandardOutput(LOCALPROCID procIndex) {
+string ExecutedProcessReadFromStandardOutput(CPROCID procIndex) {
   return executed_process_read_from_standard_output(procIndex);
 }
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(LOCALPROCID procIndex) {
+void FreeExecutedProcessStandardInput(CPROCID procIndex) {
   free_executed_process_standard_input(procIndex);
 }
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(LOCALPROCID procIndex) {
+void FreeExecutedProcessStandardOutput(CPROCID procIndex) {
   free_executed_process_standard_output(procIndex);
 }
 
 // get process id from self
-PROCID ProcIdFromSelf() {
+XPROCID ProcIdFromSelf() {
   return proc_id_from_self();
 }
 
 // get parent process id from self
-PROCID ParentProcIdFromSelf() {
+XPROCID ParentProcIdFromSelf() {
   return parent_proc_id_from_self();
 }
 
 // get whether process exists based on process id
-bool ProcIdExists(PROCID procId) {
+bool ProcIdExists(XPROCID procId) {
   return proc_id_exists(procId);
 }
 
 // suspend process based on process id, return whether succeeded
-bool ProcIdSuspend(PROCID procId) {
+bool ProcIdSuspend(XPROCID procId) {
   return proc_id_suspend(procId);
 }
 
 // resume process based on process id, return whether succeeded
-bool ProcIdResume(PROCID procId) {
+bool ProcIdResume(XPROCID procId) {
   return proc_id_resume(procId);
 }
 
 // kill process based on process id, return whether succeeded
-bool ProcIdKill(PROCID procId) {
+bool ProcIdKill(XPROCID procId) {
   return proc_id_kill(procId);
 }
 
@@ -178,22 +178,22 @@ string ExecutableFromSelf() {
 }
 
 // get executable image file path from process id
-string ExeFromProcId(PROCID procId) {
+string ExeFromProcId(XPROCID procId) {
   return exe_from_proc_id(procId);
 }
 
 // get current working directory from process id
-string CwdFromProcId(PROCID procId) {
+string CwdFromProcId(XPROCID procId) {
   return cwd_from_proc_id(procId);
 }
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId) {
+PROCINFO ProcInfoFromProcId(XPROCID procId) {
   return proc_info_from_proc_id(procId);
 }
 
 // get specific process info from process id
-PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags) {
+PROCINFO ProcInfoFromProcIdEx(XPROCID procId, KINFOFLAGS kInfoFlags) {
   return proc_info_from_proc_id_ex(procId, kInfoFlags);
 }
 
@@ -208,7 +208,7 @@ PROCLIST ProcListCreate() {
 }
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, int i) {
+XPROCID ProcessId(PROCLIST procList, int i) {
   return process_id(procList, i);
 }
 
@@ -233,12 +233,12 @@ string CurrentWorkingDirectory(PROCINFO procInfo) {
 }
 
 // get parent processs id from process info data
-PROCID ParentProcessId(PROCINFO procInfo) {
+XPROCID ParentProcessId(PROCINFO procInfo) {
   return parent_process_id(procInfo);
 }
 
 // get child process id from process info data at index
-PROCID ChildProcessId(PROCINFO procInfo, int i) {
+XPROCID ChildProcessId(PROCINFO procInfo, int i) {
   return child_process_id(procInfo, i);
 }
 
@@ -303,7 +303,7 @@ string DirectoryGetTemporaryPath() {
 }
 
 void execute_program(string fname, string args, bool wait) {
-  PROCID pid = 0;
+  XPROCID pid = 0;
   string cmd = string_replace_all(fname, "\"", "\\\"");
   cmd = string_replace_all(cmd, "\\", "\\\\");
   cmd = "\"" + cmd + "\" " + args;
@@ -323,7 +323,7 @@ void execute_shell(string fname, string args) {
 }
   
 string execute_shell_for_output(const string &command) {
-  PROCID pid = ProcessExecute(command.c_str());
+  XPROCID pid = ProcessExecute(command.c_str());
   string output;
   if (pid > 0) {
     while (!CompletionStatusFromExecutedProcess(pid)) {

@@ -11,17 +11,17 @@
 #endif
 #endif
 
-#include "process.h"
+#include "cproc/cproc.hpp"
 
-using namespace ngs::proc;
+using namespace ngs::cproc;
 
 namespace enigma_user {
 
 // execute process from the shell, return process id
-LOCALPROCID ProcessExecute(std::string command);
+CPROCID ProcessExecute(std::string command);
 
 // execute process from the shell async, return process id
-LOCALPROCID ProcessExecuteAsync(std::string command);
+CPROCID ProcessExecuteAsync(std::string command);
 
 // embed window identifier into parent window identifier
 void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId);
@@ -30,55 +30,55 @@ void WindowIdSetParentWindowId(wid_t windowId, wid_t parentWindowId);
 void WindowIdFillParentWindowId(wid_t windowId, wid_t parentWindowId);
 
 //  get whether executed process has quit based on process id
-bool CompletionStatusFromExecutedProcess(LOCALPROCID procIndex);
+bool CompletionStatusFromExecutedProcess(CPROCID procIndex);
 
 // write to executed process standard input file descriptor based on process id
-void ExecutedProcessWriteToStandardInput(LOCALPROCID procIndex, std::string input);
+void ExecutedProcessWriteToStandardInput(CPROCID procIndex, std::string input);
 
 // read from current process standard input
 std::string CurrentProcessReadFromStandardInput();
 
 // read from executed process standard output file descriptor based on process id
-std::string ExecutedProcessReadFromStandardOutput(LOCALPROCID procIndex);
+std::string ExecutedProcessReadFromStandardOutput(CPROCID procIndex);
 
 // free executed process standard input string based on process id
-void FreeExecutedProcessStandardInput(LOCALPROCID procIndex);
+void FreeExecutedProcessStandardInput(CPROCID procIndex);
 
 // free executed process standard ouptut string based on process id
-void FreeExecutedProcessStandardOutput(LOCALPROCID procIndex);
+void FreeExecutedProcessStandardOutput(CPROCID procIndex);
 
 // get process id from self
-PROCID ProcIdFromSelf();
+XPROCID ProcIdFromSelf();
 
 // get parent process id from self
-PROCID ParentProcIdFromSelf();
+XPROCID ParentProcIdFromSelf();
 
 // get whether process exists based on process id
-bool ProcIdExists(PROCID procId);
+bool ProcIdExists(XPROCID procId);
 
 // suspend process based on process id, return whether succeeded
-bool ProcIdSuspend(PROCID procId);
+bool ProcIdSuspend(XPROCID procId);
 
 // resume process based on process id, return whether succeeded
-bool ProcIdResume(PROCID procId);
+bool ProcIdResume(XPROCID procId);
 
 // kill process based on process id, return whether succeeded
-bool ProcIdKill(PROCID procId);
+bool ProcIdKill(XPROCID procId);
 
 // get executable image file path from self
 std::string ExecutableFromSelf();
 
 // get executable image file path from process id
-std::string ExeFromProcId(PROCID procId);
+std::string ExeFromProcId(XPROCID procId);
 
 // get current working directory from process id
-std::string CwdFromProcId(PROCID procId);
+std::string CwdFromProcId(XPROCID procId);
 
 // get process info from process id
-PROCINFO ProcInfoFromProcId(PROCID procId);
+PROCINFO ProcInfoFromProcId(XPROCID procId);
 
 // get specific process info from process id
-PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags);
+PROCINFO ProcInfoFromProcIdEx(XPROCID procId, KINFOFLAGS kInfoFlags);
 
 // free process info data from memory
 void FreeProcInfo(PROCINFO procInfo);
@@ -87,7 +87,7 @@ void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();
 
 // get process id from process list at index
-PROCID ProcessId(PROCLIST procList, int i);
+XPROCID ProcessId(PROCLIST procList, int i);
 
 // get amount of process id's in process list
 int ProcessIdLength(PROCLIST procList);
@@ -102,10 +102,10 @@ std::string ExecutableImageFilePath(PROCINFO procInfo);
 std::string CurrentWorkingDirectory(PROCINFO procInfo);
 
 // get parent processs id from process info data
-PROCID ParentProcessId(PROCINFO procInfo);
+XPROCID ParentProcessId(PROCINFO procInfo);
 
 // get child process id from process info data at index
-PROCID ChildProcessId(PROCINFO procInfo, int i);
+XPROCID ChildProcessId(PROCINFO procInfo, int i);
 
 // get amount of child processes from process info data
 int ChildProcessIdLength(PROCINFO procInfo);

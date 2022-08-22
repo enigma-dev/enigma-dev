@@ -73,30 +73,25 @@ ifeq ($(OS), Darwin)
 	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
 	override LDFLAGS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
 	override LDLIBS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit
-else ifeq ($(OS), FreeBSD)
+else ifeq ($(OS), Linux)
 	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libutil.a /usr/lib/libprocstat.a /usr/lib/libz.a
+	override LDLIBS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
+	override LDFLAGS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
+endif
+ifeq ($(OS), Darwin)
+	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
+	override LDLIBS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
+	override CXXFLAGS += -ObjC++
+	override CFLAGS += -ObjC++
+else ifeq ($(OS), Linux)
+	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
+else ifeq ($(OS), FreeBSD)  
+	override LDFLAGS += /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), DragonFly)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), OpenBSD)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
-	override LDFLAGS += -lc -L/usr/local/lib /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a  /usr/lib/libdl.a /usr/lib/libelf.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libdl.a /usr/lib/libkvm.a /usr/lib/libz.a
-else
-	ifeq ($(OS), Linux)
-	override LDLIBS += -lpthread -lprocps -DPROCESS_GUIWINDOW_IMPL
-	override LDLDFLAGS += -lpthread -lprocps -DPROCESS_GUIWINDOW_IMPL
-	endif
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += $(shell pkg-config --libs --static sdl2)
-	override LDFLAGS += $(shell pkg-config --libs --static sdl2)
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 endif
  
 ifeq ($(GMODE), Debug)
@@ -189,7 +184,8 @@ ifeq ($(UNIX_BASED), false)
 endif
 
 override CXXFLAGS += -fexceptions
-SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
+SOURCES += $(wildcard ../../shared/lib/cproc/*.cpp) 
+SOURCES += $(wildcard ../../shared/lib/xproc/*.cpp)
 SOURCES += $(wildcard ../../shared/apifilesystem/*.cpp)
 SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
 

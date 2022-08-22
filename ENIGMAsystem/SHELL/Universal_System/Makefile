@@ -2,11 +2,8 @@ SOURCES += $(wildcard Universal_System/*.cpp)\
            $(wildcard Universal_System/Object_Tiers/*.cpp)\
            $(wildcard Universal_System/Instances/*.cpp)\
            $(wildcard Universal_System/Resources/*.cpp)
-ifeq ($(OS), Darwin)
-else ifeq ($(OS), FreeBSD)
-else ifeq ($(OS), DragonFly)
-else ifeq ($(OS), OpenBSD)
-else
+           
+ifeq ($(UNIX_BASED), false)
 	override LDFLAGS += -lz
 	override LDLIBS += -lz
 endif

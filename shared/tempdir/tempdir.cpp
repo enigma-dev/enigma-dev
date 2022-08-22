@@ -1,11 +1,11 @@
 #include <string>
 
-#include "apiprocess/process.h"
+#include "lib/cproc/cproc.hpp"
 
 namespace enigma_user {
 
 std::string get_temp_directory() { 
-  std::string result = ::ngs::proc::directory_get_temporary_path();
+  std::string result = ::ngs::cproc::directory_get_temporary_path();
   #if defined(_WIN32)
   if (!result.empty() && result.back() != '/' && result.back() != '\\') result.push_back('\\');
   #else

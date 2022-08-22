@@ -14,23 +14,13 @@ ifeq ($(OS), Darwin)
 	override CXXFLAGS += -ObjC++
 	override CFLAGS += -ObjC++
 else ifeq ($(OS), Linux)
-	override LDFLAGS += -lpthread -lprocps -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
-else ifeq ($(OS), FreeBSD)
-	override LDFLAGS += -lc -lkvm -lutil -lprocstat -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
+	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
+else ifeq ($(OS), FreeBSD)  
+	override LDFLAGS += /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS += -lc -lkvm -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS += -lc -lkvm -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
-endif
-
-ifeq ($(UNIX_BASED), false)
-	APIPROCESS := $(shell APIPROCESS=process32.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw32 -no-start -here -lc "g++ apiprocess/process.cpp -o apiprocess/process32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";fi)
-	APIPROCESS += $(shell APIPROCESS=process64.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else "$(dirname $MSYSTEM_PREFIX)/msys2_shell.cmd" -defterm -mingw64 -no-start -here -lc "g++ apiprocess/process.cpp -o apiprocess/process64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";fi)
-	APIPROCESS += $(shell APIPROCESS=process32.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else cd apiprocess;xxd -i process32 > process32.h;fi)
-	APIPROCESS += $(shell APIPROCESS=process64.h;if test -f "$APIPROCESS"; then echo $APIPROCESS exists;else cd apiprocess;xxd -i process64 > process64.h;fi)
-	APIPROCESS += $(shell rm -f "apiprocess/process32.exe" "apiprocess/process64.exe")
-	override CXXFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
-	override CFLAGS += -DXPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/bin/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 endif
 
 override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL
@@ -40,6 +30,6 @@ ifeq ($(UNIX_BASED), true)
 else
 	LDFLAGS += -lshell32 -lole32 -luuid
 endif
-SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
+SHARED_SOURCES += $(call rwildcard,lib/cproc,*.cpp) $(call rwildcard,lib/xproc,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
