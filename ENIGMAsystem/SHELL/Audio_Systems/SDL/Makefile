@@ -10,9 +10,9 @@ else ifeq  ($(TARGET-PLATFORM), MacOSX)
 else ifeq  ($(TARGET-PLATFORM), Linux)
 	override LDLIBS += $(shell pkg-config --libs SDL2_mixer) -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123
 else ifeq  ($(TARGET-PLATFORM), FreeBSD)
-	override LDLIBS += /usr/local/lib/libSDL2_mixer.a /usr/local/lib/libogg.a /usr/local/lib/libvorbis.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbisfile.a /usr/local/lib/libFLAC.a /usr/local/lib/libopus.a /usr/local/lib/libopusfile.a /usr/local/lib/libdumb.a -lmodplug -lmpg123 -lfluidsynth -lsndfile -lssp
+	override LDLIBS += $(shell pkg-config --libs SDL2_mixer) -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123
 else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
-	override LDLIBS += /usr/local/lib/libSDL2_mixer.a /usr/local/lib/libogg.a /usr/local/lib/libvorbis.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbisfile.a /usr/local/lib/libFLAC.a /usr/local/lib/libopus.a /usr/local/lib/libopusfile.a /usr/local/lib/libdumb.a -lmodplug -lmpg123 -lfluidsynth -lsndfile -lssp
+	override LDLIBS += $(shell pkg-config --libs SDL2_mixer) -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123
 else ifeq  ($(TARGET-PLATFORM), OpenBSD)
-	override LDLIBS += /usr/local/lib/libSDL2_mixer.a /usr/local/lib/libogg.a /usr/local/lib/libvorbis.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbisfile.a /usr/local/lib/libFLAC.a /usr/local/lib/libopus.a /usr/local/lib/libopusfile.a /usr/local/lib/libdumb.a -lmodplug -lmpg123 -lfluidsynth -lsndfile -lssp
+	override LDLIBS += $(shell pkg-config --libs SDL2_mixer) -lvorbisfile -lvorbis -lopusfile -lopus -logg -lFLAC -lsndfile -lmodplug -lmpg123
 endif
