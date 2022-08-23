@@ -78,6 +78,11 @@ else ifeq ($(OS), Linux)
 	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDFLAGS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
+else
+	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL
 endif
 
 ifeq ($(OS), Darwin)
