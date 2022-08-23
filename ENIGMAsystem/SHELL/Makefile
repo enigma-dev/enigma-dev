@@ -93,16 +93,12 @@ else ifeq ($(OS), OpenBSD)
 	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
 	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
 	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+else
+	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL
+	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL
 endif
-
-clang++: error: linker command failed with exit code 1 (use -v to see invocation)
-gmake[1]: *** [Makefile:229: compile_game] Error 1
-gmake[1]: Leaving directory '/usr/local/bin/stigma-dev/ENIGMAsystem/SHELL'
-gmake: Leaving directory '/usr/local/bin/stigma-dev'
-ld: error: unable to find library -lmodplug
-ld: error: unable to find library -lmpg123
-ld: error: unable to find library -lfluidsynth
-ld: error: unable to find library -lsndfile
 
 ifeq ($(OS), Darwin)
 	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
