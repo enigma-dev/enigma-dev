@@ -8,15 +8,15 @@ else ifeq ($(TARGET-PLATFORM), Linux)
 else ifeq ($(TARGET-PLATFORM), FreeBSD)
 	override CFLAGS += -DGLEW_STATIC
 	override CXXFLAGS += -DGLEW_STATIC
-	override LDLIBS += -lGL -lGLEW
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), DragonFlyBSD)
 	override CFLAGS += -DGLEW_STATIC
 	override CXXFLAGS += -DGLEW_STATIC
-	override LDLIBS += -lGL -lGLEW
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), OpenBSD)
 	override CFLAGS += -DGLEW_STATIC
 	override CXXFLAGS += -DGLEW_STATIC
-	override LDLIBS += -lGL -lGLEW
+	override LDLIBS += -lGL /usr/local/lib/libGLEW.a -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
 	override LDLIBS += -framework OpenGL /opt/local/lib/libGLEW.a
 endif
