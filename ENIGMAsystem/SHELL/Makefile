@@ -78,11 +78,21 @@ else ifeq ($(OS), Linux)
 	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDLIBS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
 	override LDFLAGS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
-else
-	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL
-	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL
+else ifeq ($(OS), FreeBSD)
+	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+else ifeq ($(OS), DragonFly)
+	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+else ifeq ($(OS), OpenBSD)
+	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
 endif
 
 clang++: error: linker command failed with exit code 1 (use -v to see invocation)
@@ -102,11 +112,11 @@ ifeq ($(OS), Darwin)
 else ifeq ($(OS), Linux)
 	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), FreeBSD)  
-	override LDFLAGS += -lxcb -lGL -lGLEW /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
+	override LDFLAGS += /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), DragonFly)
-	override LDFLAGS += -lxcb -lGL -lGLEW -lsndfile /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else ifeq ($(OS), OpenBSD)
-	override LDFLAGS += -lxcb -lGL -lGLEW /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
+	override LDFLAGS += /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/local/lib/libSDL2.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/lib/libusbhid.a /usr/lib/librt.a /usr/lib/libthr.a /usr/local/lib/libpng.a -lxcb /usr/local/lib/libX11.a /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a /usr/local/lib/libXau.a /usr/local/lib/libXdmcp.a /usr/local/lib/libXext.a /usr/local/lib/libXrender.a
 else
 	override LDFLAGS += -lz -lpng
 endif
