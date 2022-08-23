@@ -1,11 +1,15 @@
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
-ifeq ($(TARGET-PLATFORM), MacOSX)
-	override LDFLAGS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a /opt/local/lib/libdumb.a /opt/local/lib/libsndfile.a
-	override LDLIBS += -framework OpenAL /usr/local/Cellar/alure/1.2_1/lib/libalure-static.a /opt/local/lib/libogg.a /opt/local/lib/libvorbis.a /opt/local/lib/libvorbisenc.a /opt/local/lib/libvorbisfile.a /opt/local/lib/libdumb.a /opt/local/lib/libsndfile.a
-else ifeq ($(UNIX_BASED), true)
+ifeq  ($(TARGET-PLATFORM), Windows)
+	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lssp -lwinmm -lole32 -lshlwapi -fstack-protector
+else ifeq  ($(TARGET-PLATFORM), MacOSX)
+	override LDLIBS += /usr/local/lib/libalure-static.a -framework OpenAL /usr/local/lib/libvorbisfile.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libvorbis.a /usr/local/lib/libopusfile.a /usr/local/lib/libopus.a /usr/local/lib/libogg.a /usr/local/lib/libFLAC.a /usr/local/lib/libdumb.a /usr/local/lib/libmodplug.a /usr/local/lib/libmpg123.a
+else ifeq  ($(TARGET-PLATFORM), Linux)
 	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
-else ifeq ($(TARGET-PLATFORM), Windows)
-	override CXXFLAGS += $(shell pkg-config --cflags openal)
-	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp -lwinmm -lole32 -lshlwapi -fstack-protector
+else ifeq  ($(TARGET-PLATFORM), FreeBSD)
+	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
+else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
+	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
+else ifeq  ($(TARGET-PLATFORM), OpenBSD)
+	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
 endif
