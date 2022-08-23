@@ -8,15 +8,6 @@ else
 		override LDLIBS += /opt/local/lib/libffi.a
 		override CXXFLAGS += -I/opt/local/include
 		override CFLAGS += -I/opt/local/include
-	else ifeq ($(OS), FreeBSD)
-		override LDFLAGS += /usr/local/lib/libffi.a
-		override LDLIBS += /usr/local/lib/libffi.a
-	else ifeq ($(OS), DragonFly)
-		override LDFLAGS += /usr/local/lib/libffi.a
-		override LDLIBS += /usr/local/lib/libffi.a
-	else ifeq ($(OS), OpenBSD)
-		override LDFLAGS += /usr/local/lib/libffi.a
-		override LDLIBS += /usr/local/lib/libffi.a
 	else
 		override LDFLAGS += -lffi -ldl
 		override LDLIBS += -lffi -ldl
