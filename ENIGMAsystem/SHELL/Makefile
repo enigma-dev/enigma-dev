@@ -110,17 +110,17 @@ else ifeq ($(OS), Linux)
 	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), FreeBSD)  
-	override CXXFLAGS += $(shell pkg-config --cflags x11)
-	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += -lprocstat -lutil -lc -lpthread -lkvm -lz -lm -lusbhid /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
+	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override LDFLAGS += -lprocstat -lutil -lc -lpthread -lkvm -lz -lm $(shell pkg-config --clibs sdl2) /usr/local/lib/libinotify.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 else ifeq ($(OS), DragonFly)
-	override CXXFLAGS += $(shell pkg-config --cflags x11)
-	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += -lc -lpthread -lkvm -lz -lm -lusbhid /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a
+	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override LDFLAGS += -lc -lpthread -lkvm -lz -lm $(shell pkg-config --libs sdl2) /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a
 else ifeq ($(OS), OpenBSD)
-	override CXXFLAGS += $(shell pkg-config --cflags x11)
-	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += -lc -lpthread -lkvm -lz -lm -lusbhid /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
+	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override LDFLAGS += -lc -lpthread -lkvm -lz -lm $(shell pkg-config --libs sdl2) /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 else
 	override LDFLAGS += -lz -lpng
 endif
