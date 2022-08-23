@@ -106,9 +106,9 @@ ifeq ($(OS), Darwin)
 	override CXXFLAGS += -ObjC++
 	override CFLAGS += -ObjC++
 else ifeq ($(OS), Linux)
-	override CXXFLAGS += $(shell pkg-config --cflags x11)
-	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
+	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lpthread -lz -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), FreeBSD)  
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
