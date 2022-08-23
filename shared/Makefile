@@ -14,12 +14,20 @@ ifeq ($(OS), Darwin)
 	override CXXFLAGS += -ObjC++
 	override CFLAGS += -ObjC++
 else ifeq ($(OS), Linux)
+	override CXXFLAGS += $(shell pkg-config --cflags x11)
+	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
 else ifeq ($(OS), FreeBSD)  
+	override CXXFLAGS += $(shell pkg-config --cflags x11)
+	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lprocstat -lutil -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 else ifeq ($(OS), DragonFly)
+	override CXXFLAGS += $(shell pkg-config --cflags x11)
+	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a
 else ifeq ($(OS), OpenBSD)
+	override CXXFLAGS += $(shell pkg-config --cflags x11)
+	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 endif
 
