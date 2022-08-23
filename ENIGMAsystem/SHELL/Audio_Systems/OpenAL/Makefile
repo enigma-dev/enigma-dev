@@ -7,5 +7,5 @@ else ifeq ($(UNIX_BASED), true)
 	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
 else ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
-	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp -lwinmm -lole32
+	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp -lwinmm -lole32 -lshlwapi -fstack-protector
 endif
