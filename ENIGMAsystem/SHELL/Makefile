@@ -109,18 +109,18 @@ else ifeq ($(OS), Linux)
 	override CXXFLAGS += $(shell pkg-config --cflags x11)
 	override CFLAGS += $(shell pkg-config --cflags x11)
 	override LDFLAGS += -lz -lpng $(shell pkg-config x11 --libs) -lXrandr -lXinerama
-else ifeq ($(OS), FreeBSD)
+else ifeq ($(OS), FreeBSD)  
 	override CXXFLAGS += $(shell pkg-config --cflags x11)
 	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a $(shell pkg-config --libs --static x11) -lXrandr -lXinerama /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/lib/libm.a /usr/lib/librt.a /usr/lib/libthr.a /usr/lib/libprocstat.a /usr/lib/libutil.a
+	override LDFLAGS += -lprocstat -lutil -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 else ifeq ($(OS), DragonFly)
 	override CXXFLAGS += $(shell pkg-config --cflags x11)
 	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a $(shell pkg-config --libs --static x11) -lXrandr -lXinerama /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/lib/libm.a /usr/lib/librt.a /usr/lib/libthr.a
+	override LDFLAGS += -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a
 else ifeq ($(OS), OpenBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags x11)
 	override CFLAGS += $(shell pkg-config --cflags x11)
-	override LDFLAGS += /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/local/lib/libpng.a $(shell pkg-config --libs --static x11) -lXrandr -lXinerama /usr/lib/libkvm.a /usr/lib/libc.a /usr/lib/libelf.a /usr/lib/libz.a /usr/lib/libdl.a /usr/lib/libusbhid.a /usr/lib/libc++.a /usr/lib/libcxxrt.a /usr/lib/libm.a /usr/lib/librt.a /usr/lib/libthr.a
+	override LDFLAGS += -lc -lpthread -lkvm -lz -lm /usr/local/lib/libSDL2.a /usr/local/lib/libinotify.a /usr/lib/libm.a /usr/local/lib/libpng.a -lxcb -lX11 /usr/local/lib/libXrandr.a /usr/local/lib/libXinerama.a -lc
 else
 	override LDFLAGS += -lz -lpng
 endif
