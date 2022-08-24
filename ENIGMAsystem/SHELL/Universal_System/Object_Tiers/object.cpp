@@ -93,8 +93,8 @@ namespace enigma
       std::vector<std::byte> bytes{};
       std::size_t len = 0;
 
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(id);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(object_index);
+      enigma_internal_serialize(id, len, bytes);
+      enigma_internal_serialize(object_index, len, bytes);
 
       bytes.shrink_to_fit();
       return bytes;

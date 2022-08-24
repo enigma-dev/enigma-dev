@@ -146,12 +146,12 @@ namespace enigma
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(mask_index);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(solid);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_index);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_xscale);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_yscale);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_angle);
+      enigma_internal_serialize(mask_index, len, bytes);
+      enigma_internal_serialize(solid, len, bytes);
+      enigma_internal_serialize(polygon_index, len, bytes);
+      enigma_internal_serialize(polygon_xscale, len, bytes);
+      enigma_internal_serialize(polygon_yscale, len, bytes);
+      enigma_internal_serialize(polygon_angle, len, bytes);
 
       bytes.shrink_to_fit();
       return bytes;
@@ -160,12 +160,12 @@ namespace enigma
     std::size_t object_collisions::deserialize_self(std::byte* iter) {
       auto len = object_transform::deserialize_self(iter);
 
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(mask_index);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(solid);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_index);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_xscale);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_yscale);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_angle);
+      enigma_internal_deserialize(mask_index, iter, len);
+      enigma_internal_deserialize(solid, iter, len);
+      enigma_internal_deserialize(polygon_index, iter, len);
+      enigma_internal_deserialize(polygon_xscale, iter, len);
+      enigma_internal_deserialize(polygon_yscale, iter, len);
+      enigma_internal_deserialize(polygon_angle, iter, len);
 
       return len;
     }

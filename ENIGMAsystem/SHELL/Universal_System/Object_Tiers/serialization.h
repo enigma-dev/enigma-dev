@@ -25,23 +25,6 @@
 
 #include "../var4.h"
 
-#define ENIGMA_INTERNAL_OBJECT_SERIALIZE(value)                                \
-    len = bytes.size();                                                        \
-    resize_buffer_for(bytes, value);                                           \
-    serialize_into(bytes.data() + len, value)
-
-#define ENIGMA_INTERNAL_OBJECT_DESERIALIZE(value)                              \
-    value = enigma::deserialize<decltype(value)>(iter + len);                  \
-    len += sizeof(value)
-
-#define ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(value)                      \
-    value = enigma::deserialize<variant>(iter + len);                          \
-    if (value.type == variant::ty_real) {                                      \
-      len += 9;                                                                \
-    } else {                                                                   \
-      len += 1 + sizeof(std::size_t) + value.sval().length();                  \
-    }
-
 namespace enigma {
 namespace utility {
 template <typename T, typename U>
@@ -319,6 +302,28 @@ T deserialize_integral(std::byte *iter) {
   return result;
 }
 */
+
+template <typename T>
+inline void enigma_internal_serialize(const T &value, std::size_t &len, std::vector<std::byte> &bytes) {
+  len = bytes.size();
+  resize_buffer_for(bytes, value);
+  serialize_into(bytes.data() + len, value);
+}
+
+template <typename T>
+inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &len) {
+  value = enigma::deserialize<T>(iter + len);
+  len += sizeof(T);
+}
+
+inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len) {
+  value = enigma::deserialize<variant>(iter + len);
+  if (value.type == variant::ty_real) {
+    len += 9;
+  } else {
+    len += 1 + sizeof(std::size_t) + value.sval().length();
+  }
+}
 
 }
 

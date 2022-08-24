@@ -34,8 +34,8 @@ namespace enigma
     auto bytes = object_graphics::serialize();
     std::size_t len = 0;
 
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_alpha);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_blend);
+    enigma_internal_serialize(image_alpha, len, bytes);
+    enigma_internal_serialize(image_blend, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -44,8 +44,8 @@ namespace enigma
   std::size_t object_transform::deserialize_self(std::byte *iter) {
     auto len = object_graphics::deserialize_self(iter);
 
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_alpha);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_blend);
+    enigma_internal_deserialize(image_alpha, iter, len);
+    enigma_internal_deserialize(image_blend, iter, len);
 
     return len;
   }

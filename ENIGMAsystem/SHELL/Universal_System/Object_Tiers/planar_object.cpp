@@ -78,22 +78,22 @@ namespace enigma
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(x);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(y);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(xprevious);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(yprevious);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(xstart);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(ystart);
+    enigma_internal_serialize(x, len, bytes);
+    enigma_internal_serialize(y, len, bytes);
+    enigma_internal_serialize(xprevious, len, bytes);
+    enigma_internal_serialize(yprevious, len, bytes);
+    enigma_internal_serialize(xstart, len, bytes);
+    enigma_internal_serialize(ystart, len, bytes);
 #ifdef ISLOCAL_persistent
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(persistent);
+    enigma_internal_serialize(persistent, len, bytes);
 #endif
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(direction);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(speed);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(hspeed);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(vspeed);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(gravity);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(gravity_direction);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(friction);
+    enigma_internal_serialize(direction, len, bytes);
+    enigma_internal_serialize(speed, len, bytes);
+    enigma_internal_serialize(hspeed, len, bytes);
+    enigma_internal_serialize(vspeed, len, bytes);
+    enigma_internal_serialize(gravity, len, bytes);
+    enigma_internal_serialize(gravity_direction, len, bytes);
+    enigma_internal_serialize(friction, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -102,21 +102,21 @@ namespace enigma
   std::size_t object_planar::deserialize_self(std::byte *iter) {
     auto len = object_basic::deserialize_self(iter);
 
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(x);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(y);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(xprevious);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(yprevious);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(xstart);
+    enigma_internal_deserialize(x, iter, len);
+    enigma_internal_deserialize(y, iter, len);
+    enigma_internal_deserialize(xprevious, iter, len);
+    enigma_internal_deserialize(yprevious, iter, len);
+    enigma_internal_deserialize(xstart, iter, len);
 #ifdef ISLOCAL_persistent
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(persistent);
+    enigma_internal_deserialize(persistent, iter, len);
 #endif
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(direction)
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(speed)
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(hspeed)
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(vspeed)
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(gravity);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(gravity_direction);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(friction);
+    enigma_internal_deserialize_variant(direction, iter, len);
+    enigma_internal_deserialize_variant(speed, iter, len);
+    enigma_internal_deserialize_variant(hspeed, iter, len);
+    enigma_internal_deserialize_variant(vspeed, iter, len);
+    enigma_internal_deserialize(gravity, iter, len);
+    enigma_internal_deserialize(gravity_direction, iter, len);
+    enigma_internal_deserialize(friction, iter, len);
 
     hspeed.vspd    = &vspeed.rval.d;
     hspeed.dir     = &direction.rval.d;

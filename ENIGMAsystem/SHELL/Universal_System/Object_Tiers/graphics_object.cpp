@@ -96,15 +96,15 @@ namespace enigma
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(sprite_index);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_index);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_speed);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_single);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(depth);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(visible);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_xscale);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_yscale);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(image_angle);
+    enigma_internal_serialize(sprite_index, len, bytes);
+    enigma_internal_serialize(image_index, len, bytes);
+    enigma_internal_serialize(image_speed, len, bytes);
+    enigma_internal_serialize(image_single, len, bytes);
+    enigma_internal_serialize(depth, len, bytes);
+    enigma_internal_serialize(visible, len, bytes);
+    enigma_internal_serialize(image_xscale, len, bytes);
+    enigma_internal_serialize(image_yscale, len, bytes);
+    enigma_internal_serialize(image_angle, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -113,15 +113,15 @@ namespace enigma
   std::size_t object_graphics::deserialize_self(std::byte *iter) {
     auto len = object_timelines::deserialize_self(iter);
 
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(sprite_index);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_index);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_speed);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(image_single);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_VARIANT(depth);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(visible);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_xscale);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_yscale);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(image_angle);
+    enigma_internal_deserialize(sprite_index, iter, len);
+    enigma_internal_deserialize(image_index, iter, len);
+    enigma_internal_deserialize(image_speed, iter, len);
+    enigma_internal_deserialize_variant(image_single, iter, len);
+    enigma_internal_deserialize_variant(depth, iter, len);
+    enigma_internal_deserialize(visible, iter, len);
+    enigma_internal_deserialize(image_xscale, iter, len);
+    enigma_internal_deserialize(image_yscale, iter, len);
+    enigma_internal_deserialize(image_angle, iter, len);
 
     return len;
   }

@@ -105,20 +105,20 @@ namespace enigma
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_moments_maps.size());
+    enigma_internal_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE(map.size());
+      enigma_internal_serialize(map.size(), len, bytes);
       for (auto &[key, value]: map) {
-        ENIGMA_INTERNAL_OBJECT_SERIALIZE(key);
-        ENIGMA_INTERNAL_OBJECT_SERIALIZE(value);
+        enigma_internal_serialize(key, len, bytes);
+        enigma_internal_serialize(value, len, bytes);
       }
     }
 
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_index);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_running);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_speed);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_position);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_loop);
+    enigma_internal_serialize(timeline_index, len, bytes);
+    enigma_internal_serialize(timeline_running, len, bytes);
+    enigma_internal_serialize(timeline_speed, len, bytes);
+    enigma_internal_serialize(timeline_position, len, bytes);
+    enigma_internal_serialize(timeline_loop, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -128,25 +128,25 @@ namespace enigma
     auto len = object_planar::deserialize_self(iter);
 
     std::size_t timeline_maps_len{};
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_maps_len);
+    enigma_internal_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);
     for (auto &map: timeline_moments_maps) {
       std::size_t map_len{};
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(map_len);
+      enigma_internal_deserialize(map_len, iter, len);
       for (std::size_t i = 0; i < map_len; i++) {
         int key{};
         int value{};
-        ENIGMA_INTERNAL_OBJECT_DESERIALIZE(key);
-        ENIGMA_INTERNAL_OBJECT_DESERIALIZE(value);
+        enigma_internal_deserialize(key, iter, len);
+        enigma_internal_deserialize(value, iter, len);
         map[key] = value;
       }
     }
 
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_index);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_running);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_speed);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_position);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_loop);
+    enigma_internal_deserialize(timeline_index, iter, len);
+    enigma_internal_deserialize(timeline_running, iter, len);
+    enigma_internal_deserialize(timeline_speed, iter, len);
+    enigma_internal_deserialize(timeline_position, iter, len);
+    enigma_internal_deserialize(timeline_loop, iter, len);
 
     return len;
   }
