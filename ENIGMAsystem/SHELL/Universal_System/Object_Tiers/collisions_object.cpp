@@ -147,7 +147,7 @@ namespace enigma
       std::size_t len = 0;
 
       ENIGMA_INTERNAL_OBJECT_SERIALIZE(mask_index);
-      ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(solid);
+      ENIGMA_INTERNAL_OBJECT_SERIALIZE(solid);
       ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_index);
       ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_xscale);
       ENIGMA_INTERNAL_OBJECT_SERIALIZE(polygon_yscale);
@@ -161,7 +161,7 @@ namespace enigma
       auto len = object_transform::deserialize_self(iter);
 
       ENIGMA_INTERNAL_OBJECT_DESERIALIZE(mask_index);
-      ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(solid);
+      ENIGMA_INTERNAL_OBJECT_DESERIALIZE(solid);
       ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_index);
       ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_xscale);
       ENIGMA_INTERNAL_OBJECT_DESERIALIZE(polygon_yscale);

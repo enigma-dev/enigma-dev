@@ -115,10 +115,10 @@ namespace enigma
     }
 
     ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_index);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(timeline_running);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_running);
     ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_speed);
     ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_position);
-    ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(timeline_loop);
+    ENIGMA_INTERNAL_OBJECT_SERIALIZE(timeline_loop);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -143,10 +143,10 @@ namespace enigma
     }
 
     ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_index);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(timeline_running);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_running);
     ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_speed);
     ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_position);
-    ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(timeline_loop);
+    ENIGMA_INTERNAL_OBJECT_DESERIALIZE(timeline_loop);
 
     return len;
   }

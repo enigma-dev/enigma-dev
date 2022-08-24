@@ -30,11 +30,6 @@
     resize_buffer_for(bytes, value);                                           \
     serialize_into(bytes.data() + len, value)
 
-#define ENIGMA_INTERNAL_OBJECT_SERIALIZE_BOOL(value)                           \
-    len = bytes.size();                                                        \
-    bytes.resize(bytes.size() + 1);                                            \
-    bytes.back() = static_cast<std::byte>(value);
-
 #define ENIGMA_INTERNAL_OBJECT_DESERIALIZE(value)                              \
     value = enigma::deserialize<decltype(value)>(iter + len);                  \
     len += sizeof(value)
@@ -46,9 +41,6 @@
     } else {                                                                   \
       len += 1 + sizeof(std::size_t) + value.sval().length();                  \
     }
-
-#define ENIGMA_INTERNAL_OBJECT_DESERIALIZE_BOOL(value)                         \
-  value = static_cast<bool>(*(iter++))
 
 namespace enigma {
 namespace utility {
@@ -218,7 +210,9 @@ inline variant deserialize_variant(std::byte *iter) {
 
 template <typename T>
 inline void serialize_into(std::byte *iter, T &&value) {
-  if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
+  if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
+    *iter = static_cast<std::byte>(value);
+  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     if constexpr (std::is_pointer_v<T>) {
       serialize_variant_into(iter, *value);
     } else {
@@ -231,13 +225,15 @@ inline void serialize_into(std::byte *iter, T &&value) {
       serialize_numeric_into(iter, value);
     }
   } else {
-    static_assert(always_false<T>, "'serialize_into' takes 'variant', integral or floating types");
+    static_assert(always_false<T>, "'serialize_into' takes 'variant', bool, integral or floating types");
   }
 }
 
 template <typename T>
 inline auto serialize(T &&value) {
-  if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
+  if (std::is_same_v<bool, std::decay_t<T>>) {
+    return std::vector<std::byte>{static_cast<std::byte>(value)};
+  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     if constexpr (std::is_pointer_v<T>) {
       return serialize_variant(*value);
     } else {
@@ -250,18 +246,20 @@ inline auto serialize(T &&value) {
       return serialize_numeric(value);
     }
   } else {
-    static_assert(always_false<T>, "'serialize' takes 'variant', integral or floating types");
+    static_assert(always_false<T>, "'serialize' takes 'variant', bool, integral or floating types");
   }
 }
 
 template <typename T>
 inline T deserialize(std::byte *iter) {
-  if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
+  if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
+    return static_cast<bool>(*iter);
+  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     return deserialize_variant(iter);
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
     return deserialize_numeric<T>(iter);
   } else {
-    static_assert(always_false<T>, "'deserialize' takes 'variant', integral or floating types");
+    static_assert(always_false<T>, "'deserialize' takes 'variant', bool, integral or floating types");
   }
 }
 
