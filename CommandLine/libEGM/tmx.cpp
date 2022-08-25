@@ -19,8 +19,9 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
 
   std::unique_ptr<buffers::Project> proj = std::make_unique<buffers::Project>();
   buffers::Game* game = proj->mutable_game();
+  buffers::TreeNode* root = game->mutable_root();
 
-  TMXMapLoader mapWalker(game->mutable_root(), fPath);
+  TMXMapLoader mapWalker(root, fPath);
 
   bool success = mapWalker.Load(doc);
   if(!success) {
@@ -56,24 +57,53 @@ TMXMapLoader::TMXMapLoader(buffers::TreeNode *root, const fs::path &fPath) : tmx
 bool TMXMapLoader::Load(pugi::xml_document &xmlDoc) {
   pugi::xml_node mapNode = xmlDoc.child("map");
 
-  // first load all tileset(s) in background(s)
-  bool backgroundsOk = LoadTilesets(mapNode);
+  // Init EGMRoom proto node
+  std::string resType = "room";
+  std::string name = mapNode.attribute("name").value();
+  // TODO: Remove this hack using "resource name generator"
+  if(name.empty())
+    name = resType+std::to_string(idx++);
+  buffers::TreeNode *folderNode;
+  if(resourceFolderRefs.find(resType) == resourceFolderRefs.end()) {
+    folderNode = nodes.back()->mutable_folder()->add_children();
+    folderNode->set_name(GetFolderName(resType));
+  }
+  else
+    folderNode = resourceFolderRefs[resType];
+
+  if(folderNode == NULL) {
+    errStream << "Folder with name \"" << resType << "\" not found." << std::endl;
+    return false;
+  }
+  buffers::TreeNode *resNode = folderNode->mutable_folder()->add_children();
+  resNode->set_name(name);
+  AddTiledResource(resNode, resType, mapNode, resourceTypeIdCountMap, tmxPath);
+
+  // first load all tileset(s) in EGMRoom.Tilesets as well background(s)
+  bool backgroundsOk = LoadTilesets(mapNode, resNode);
   if(!backgroundsOk)
     return false;
 
   // now load map, backgrounds are available for setting room.tile and/or room.background
-  bool roomOk = LoadMap(mapNode);
+  bool roomOk = LoadMap(mapNode, resNode);
   if(!roomOk)
     return false;
 
   return true;
 }
 
-bool TMXMapLoader::LoadTilesets(pugi::xml_node& mapNode) {
+bool TMXMapLoader::LoadTilesets(pugi::xml_node& mapNode, buffers::TreeNode *resNode) {
   std::string resType = "background";
 
   pugi::xml_object_range<pugi::xml_named_node_iterator> tilesets = mapNode.children("tileset");
   for(pugi::xml_node &tileset : tilesets) {
+    // Load tileset into EGMRoom.tilesets
+    buffers::resources::EGMRoom::Tileset* tilesetProto = resNode->mutable_room()->add_tilesets();
+    PackTiledRes(tileset, tilesetProto, resourceTypeIdCountMap, tmxPath);
+    // load internal
+    if(tilesetProto->has_source()) {
+      tilesetProto->set_source(tmxPath.parent_path().string()+"/"+tilesetProto->source());
+    }
 
     buffers::TreeNode *folderNode;
     if(resourceFolderRefs.find(resType) == resourceFolderRefs.end()) {
@@ -130,7 +160,7 @@ void TMXMapLoader::LoadInternalTileset(pugi::xml_node &tileset, TSXTilesetLoader
   // NEED IMPROVEMENT: This call of traverse using xml node can cause lot of trouble, obvious one is, in case
   // of TMX file with multiple tilesets, where internal and external tilesets are mixed matched, we will load very
   // first internal tileset total_internal_tilesets-1 times.
-  // CURRENT FIX: This is currently being handled by a hack present in tsx walker for_each loop
+  // CURRENT FIX: This is currently being handled by a hack to return false(and end iteration) from tsx walker for_each loop
   tileset.parent().traverse(background_walker);
 }
 
@@ -147,8 +177,8 @@ bool TMXMapLoader::LoadExternalTileset(const std::string &tsxPath, TSXTilesetLoa
   return true;
 }
 
-bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
-  std::string resType = "room";
+bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) {
+  /*std::string resType = "room";
 
   std::string name = mapNode.attribute("name").value();
   // TODO: Remove this hack using "resource name generator"
@@ -170,7 +200,7 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode) {
 
   buffers::TreeNode *resNode = folderNode->mutable_folder()->add_children();
   resNode->set_name(name);
-  AddTiledResource(resNode, resType, mapNode, resourceTypeIdCountMap, tmxPath);
+  AddTiledResource(resNode, resType, mapNode, resourceTypeIdCountMap, tmxPath);*/
 
   // correct width and height, convert from no. of tiles to no. of pixels
   unsigned int nHoriTiles = resNode->room().width();

@@ -38,6 +38,8 @@ message EGMRoom {
       optional uint32 height = 6;
       optional Properties propertiesTag = 7;
       optional double rotation = 8;
+      optional string name = 16;
+      optional string class = 17;
       /*optional bool has_horizontal_flip = 9 [default = false];
       optional bool has_vertical_flip = 10 [default = false];
       optional bool flipped_diagonally = 11 [default = false];
@@ -49,12 +51,13 @@ message EGMRoom {
 
     optional int32 id = 1;
     optional string name = 2;
-    optional int32 parallaxx = 3;
-    optional int32 parallaxy = 4;
+    optional double parallaxx = 3;
+    optional double parallaxy = 4;
 
     repeated Object objects = 5;
 
     optional double opacity = 6;
+    optional bool visible = 7;
   }
 
   message Background {
@@ -159,18 +162,18 @@ message EGMRoom {
 
   optional string orientation = 1;
   optional string renderorder = 2;
-  optional uint32 width = 3 [(yyp) = "roomSettings/Width"];
-  optional uint32 height = 4 [(yyp) = "roomSettings/Height"];
-  optional uint32 tilewidth = 5 [(gmx) = "hsnap"];
-  optional uint32 tileheight = 6 [(gmx) = "vsnap"];
-  optional int32 infinite = 7;
-  optional int32 parallaxoriginx = 8;
-  optional int32 parallaxoriginy = 9;
+  optional int32 width = 3 [(yyp) = "roomSettings/Width"];
+  optional int32 height = 4 [(yyp) = "roomSettings/Height"];
+  optional int32 tilewidth = 5 [(gmx) = "hsnap"];
+  optional int32 tileheight = 6 [(gmx) = "vsnap"];
+  optional bool infinite = 7;
+  optional double parallaxoriginx = 8;
+  optional double parallaxoriginy = 9;
 //  optional string backgroundcolor = 10;
   optional int32 nextlayerid = 10;
   optional int32 nextobjectid = 11;
   optional int32 firstgid = 12;
-  optional string source = 13;
+//  optional string source = 13;
   optional uint32 hexsidelength = 14;
   optional string staggeraxis = 15; // can be "x" or "y"
   optional string staggerindex = 16; // can be "even" or "odd"
