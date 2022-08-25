@@ -72,7 +72,6 @@
 #elif defined(_WIN32) && defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
 #endif
-#pragma comment(lib, "Dwmapi.lib")
 #endif
 
 using std::string;
@@ -204,10 +203,10 @@ namespace {
     colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
     colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
     colors[ImGuiCol_DragDropTarget]        = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    colors[ImGuiCol_NavHighlight]          = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 0.00f, 0.00f, 0.70f);
-    colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
-    colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
+    colors[ImGuiCol_NavHighlight]          = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
+    colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
+    colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
     ImGuiStyle& style = ImGui::GetStyle();
     style.WindowPadding                    = ImVec2(8.00f, 8.00f);
     style.FramePadding                     = ImVec2(5.00f, 2.00f);
@@ -252,19 +251,6 @@ namespace {
     #endif
     return dname;
   }
-
-  #if defined(_WIN32)
-  BOOL is_light_theme() {
-    auto buffer = std::vector<char>(4);
-    auto cbData = static_cast<DWORD>(buffer.size() * sizeof(char));
-    auto res = RegGetValueW(HKEY_CURRENT_USER, 
-      L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", L"AppsUseLightTheme",
-      RRF_RT_REG_DWORD, nullptr, buffer.data(), &cbData);
-    if (res != ERROR_SUCCESS) return TRUE;
-    auto i = int(buffer[3] << 24 | buffer[2] << 16 | buffer[1] << 8 | buffer[0]);
-    return (BOOL)(i == 1);
-  }
-  #endif
 
   vector<string> fonts;
   #if (defined(__MACH__) && defined(__APPLE__))
@@ -333,7 +319,6 @@ namespace {
     SetWindowLongPtrW(hWnd, GWL_STYLE, GetWindowLongPtrW(hWnd, GWL_STYLE) & ~(WS_MAXIMIZEBOX | WS_MINIMIZEBOX));
     SetWindowLongPtrW(hWnd, GWL_EXSTYLE, GetWindowLongPtrW(hWnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
     SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-    BOOL b = !is_light_theme(); DwmSetWindowAttribute(hWnd, 20, &b, sizeof(BOOL));
     #elif defined(__APPLE__) && defined(__MACH__)
     SDL_SysWMinfo system_info;
     SDL_VERSION(&system_info.version);
@@ -478,7 +463,7 @@ namespace {
     SDL_GL_DeleteContext(gl_context);
     #endif
     SDL_DestroyWindow(window);
-    // SDL_Quit();
+    SDL_Quit();
     return result;
   }
 

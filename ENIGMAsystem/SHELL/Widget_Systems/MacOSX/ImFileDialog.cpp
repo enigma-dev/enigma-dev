@@ -388,17 +388,17 @@ namespace ifd {
     std::error_code ec;
 
     // Quick Access
-    wchar_t userProfile[32767];
-    ghc::filesystem::path homePath;
-    if (GetEnvironmentVariableW(L"USERPROFILE", userProfile, 32767))
-      homePath = userProfile;
-    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH").empty())
-      ngs::fs::environment_set_variable("IMGUI_CONFIG_PATH", homePath.string() + "\\.config\\filedialogs");
-    if (!ngs::fs::directory_exists(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH")))
-      ngs::fs::directory_create(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH"));
+    ghc::filesystem::path homePath = ngs::fs::environment_get_variable("USERPROFILE");
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_FOLDER", "filedialogs");
+    if (!ngs::fs::directory_exists(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER")))
+      ngs::fs::directory_create(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER"));
+    int attr = GetFileAttributesW(ghc::filesystem::path(homePath.string() + "\\.config\\").wstring().c_str());
+    if ((attr & FILE_ATTRIBUTE_HIDDEN) == 0)
+      SetFileAttributesW(ghc::filesystem::path(homePath.string() + "\\.config\\").wstring().c_str(), attr | FILE_ATTRIBUTE_HIDDEN);
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
       ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
-    if (!ngs::fs::file_exists(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+    if (!ngs::fs::file_exists(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"))) {
       std::vector<std::string> favorites;
       favorites.push_back(homePath.string() + "\\");
@@ -408,7 +408,7 @@ namespace ifd {
       favorites.push_back(ngs::fs::directory_get_music_path());
       favorites.push_back(ngs::fs::directory_get_pictures_path());
       favorites.push_back(ngs::fs::directory_get_videos_path());
-      int desc = ngs::fs::file_text_open_write(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+      int desc = ngs::fs::file_text_open_write(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
         ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"));
       if (desc != -1) {
         for (std::size_t i = 0; i < favorites.size(); i++) {
@@ -418,7 +418,7 @@ namespace ifd {
         ngs::fs::file_text_close(desc);
       }
     }
-    std::string conf = ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+    std::string conf = homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
     if (ngs::fs::file_exists(conf)) {
       int fd = ngs::fs::file_text_open_read(conf);
@@ -443,14 +443,14 @@ namespace ifd {
     std::error_code ec;
     
     // Quick Access
-    ghc::filesystem::path homePath = getenv("HOME") ? getenv("HOME") : "";
-    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH").empty())
-      ngs::fs::environment_set_variable("IMGUI_CONFIG_PATH", homePath.string() + "/.config/filedialogs");
-    if (!ngs::fs::directory_exists(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH")))
-      ngs::fs::directory_create(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH"));
+    ghc::filesystem::path homePath = ngs::fs::environment_get_variable("HOME");
+    if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER").empty())
+      ngs::fs::environment_set_variable("IMGUI_CONFIG_FOLDER", "filedialogs");
+    if (!ngs::fs::directory_exists(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER")))
+      ngs::fs::directory_create(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER"));
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
       ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
-    if (!ngs::fs::file_exists(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+    if (!ngs::fs::file_exists(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"))) {
       std::vector<std::string> favorites;
       favorites.push_back(homePath.string() + "/");
@@ -460,7 +460,7 @@ namespace ifd {
       favorites.push_back(ngs::fs::directory_get_music_path());
       favorites.push_back(ngs::fs::directory_get_pictures_path());
       favorites.push_back(ngs::fs::directory_get_videos_path());
-      int desc = ngs::fs::file_text_open_write(ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+      int desc = ngs::fs::file_text_open_write(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
         ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"));
       if (desc != -1) {
         for (std::size_t i = 0; i < favorites.size(); i++) {
@@ -470,7 +470,7 @@ namespace ifd {
         ngs::fs::file_text_close(desc);
       }
     }
-    std::string conf = ngs::fs::environment_get_variable("IMGUI_CONFIG_PATH") + "/" + 
+    std::string conf = homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
     if (ngs::fs::file_exists(conf)) {
       int fd = ngs::fs::file_text_open_read(conf);
@@ -586,9 +586,9 @@ namespace ifd {
   void FileDialog::Close() {
     std::error_code ec;
     #if defined(_WIN32)
-    int fd = ngs::fs::file_text_open_write("${IMGUI_CONFIG_PATH}\\${IMGUI_CONFIG_FILE}");
+    int fd = ngs::fs::file_text_open_write("${USERPROFILE}\\.config\\${IMGUI_CONFIG_FOLDER}\\${IMGUI_CONFIG_FILE}");
     #else
-    int fd = ngs::fs::file_text_open_write("${IMGUI_CONFIG_PATH}/${IMGUI_CONFIG_FILE}");
+    int fd = ngs::fs::file_text_open_write("${HOME}/.config/${IMGUI_CONFIG_FOLDER}/${IMGUI_CONFIG_FILE}");
     #endif
     if (fd != -1) {
       for (auto& p : m_treeCache) {
@@ -1378,8 +1378,8 @@ namespace ifd {
       ImGui::OpenPopup((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str());
     if (openNewDirectoryDlg)
       ImGui::OpenPopup((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str());
-    ImGui::SetNextWindowSize(ImVec2((float)((GImGui->FontSize * strlen(IFD_ARE_YOU_SURE_YOU_WANT_TO_DELETE)) / 2.85), (float)(GImGui->FontSize * 6)), ImGuiCond_FirstUseEver);
-    if (ImGui::BeginPopupModal((IFD_ARE_YOU_SURE + std::string("##delete")).c_str())) {
+    ImGui::SetNextWindowSize(ImVec2(ImGui::CalcTextSize(IFD_ARE_YOU_SURE_YOU_WANT_TO_DELETE).x, 0.0f), 0);
+    if (ImGui::BeginPopupModal((IFD_ARE_YOU_SURE + std::string("##delete")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
       if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
         ImGui::CloseCurrentPopup();
       else {
@@ -1397,8 +1397,8 @@ namespace ifd {
       }
       ImGui::EndPopup();
     }
-    ImGui::SetNextWindowSize(ImVec2((float)((GImGui->FontSize * strlen(IFD_ARE_YOU_SURE_YOU_WANT_TO_OVERWRITE)) / 2.85), (float)(GImGui->FontSize * 6)), ImGuiCond_FirstUseEver);
-    if (ImGui::BeginPopupModal((IFD_OVERWRITE_FILE + std::string("##overwrite")).c_str())) {
+    ImGui::SetNextWindowSize(ImVec2(ImGui::CalcTextSize(IFD_ARE_YOU_SURE_YOU_WANT_TO_OVERWRITE).x, 0.0f), 0);
+    if (ImGui::BeginPopupModal((IFD_OVERWRITE_FILE + std::string("##overwrite")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
       if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
         ImGui::CloseCurrentPopup();
       else {
@@ -1416,8 +1416,8 @@ namespace ifd {
       }
       ImGui::EndPopup();
     }
-    if (ImGui::BeginPopupModal((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str())) {
-      ImGui::PushItemWidth(250.0f);
+    if (ImGui::BeginPopupModal((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::PushItemWidth(ImGui::CalcTextSize((IFD_ENTER_FILE_NAME + std::string("##newfile")).c_str()).x);
       ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
       ImGui::PopItemWidth();
 
@@ -1438,8 +1438,8 @@ namespace ifd {
       }
       ImGui::EndPopup();
     }
-    if (ImGui::BeginPopupModal((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str())) {
-      ImGui::PushItemWidth(250.0f);
+    if (ImGui::BeginPopupModal((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::PushItemWidth(ImGui::CalcTextSize((IFD_ENTER_DIRECTORY_NAME + std::string("##newdir")).c_str()).x);
       ImGui::InputText("##newfilename", m_newEntryBuffer, 1024); // TODO: remove hardcoded literals
       ImGui::PopItemWidth();
 
