@@ -161,7 +161,7 @@ private:
    * @param mapNode Reference to <map> xml node of .tmx file
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadTilesets(pugi::xml_node &mapNode);
+  bool LoadTilesets(pugi::xml_node &mapNode, buffers::TreeNode *resNode);
 
   /**
    * @brief Helper method to create Background resource(s) based on internal tileset(s) present in .tmx file
@@ -183,7 +183,7 @@ private:
    * @param mapNode Reference to <map> xml node of .tmx file
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadMap(pugi::xml_node &mapNode);
+  bool LoadMap(pugi::xml_node &mapNode, buffers::TreeNode *resNode);
 
   /**
    * @brief Helper method to generate folder name from resource type
