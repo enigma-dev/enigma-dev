@@ -210,7 +210,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const CompileState &st
         wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << int_ev_pair.first << "'\");\n  ";
       }
 
-      int_ev_pair.second.code->ast.WriteCppToStream();
+      int_ev_pair.second.code->ast.WriteCppToStream(wto, 2);
       wto << "  return 0;\n}\n\n";
     }
 
