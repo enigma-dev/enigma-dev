@@ -117,7 +117,7 @@ class has_size_method
 };
 
 template <typename T>
-constexpr static bool inline has_size_method_v = has_size_method<T>::value;
+constexpr static inline bool has_size_method_v = has_size_method<T>::value;
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
@@ -175,7 +175,7 @@ inline std::array<std::byte, sizeof(T)> serialize_integral(T value) {
 }
 
 template <typename T>
-inline constexpr bool always_false = false;
+constexpr static inline bool always_false = false;
 
 template <typename T>
 inline void serialize_floating_into(std::byte *iter, T value) {
@@ -368,6 +368,9 @@ template <typename T>
 inline void serialize_into(std::byte *iter, T &&value) {
   if constexpr (std::is_pointer_v<std::decay_t<T>>) {
     serialize_into<std::size_t>(iter, 0);
+  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
+    serialize_into<std::size_t>(iter, value.size());
+    std::transform(value.begin(), value.end(), iter, [](char c) { return static_cast<std::byte>(c); });
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     *iter = static_cast<std::byte>(value);
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -377,7 +380,8 @@ inline void serialize_into(std::byte *iter, T &&value) {
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>){
     serialize_numeric_into(iter, value);
   } else {
-    static_assert(always_false<T>, "'serialize_into' takes 'variant', 'var', bool, integral or floating types");
+    static_assert(always_false<T>,
+        "'serialize_into' takes 'variant', 'var', 'std::string', bool, integral or floating types");
   }
 }
 
@@ -385,6 +389,11 @@ template <typename T>
 inline auto serialize(T &&value) {
   if constexpr (std::is_pointer_v<std::decay_t<T>>) {
     return serialize_numeric<std::size_t>(0);
+  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
+    std::vector<std::byte> result;
+    result.resize(sizeof(std::size_t) + value.size());
+    serialize_into<std::size_t>(result.data(), 0);
+    std::transform(value.begin(), value.end(), result.data(), [](char c) { return static_cast<std::byte>(c); });
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     return std::vector<std::byte>{static_cast<std::byte>(value)};
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -394,7 +403,8 @@ inline auto serialize(T &&value) {
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>){
     return serialize_numeric(value);
   } else {
-    static_assert(always_false<T>, "'serialize' takes 'variant', 'var', bool, integral or floating types");
+    static_assert(always_false<T>,
+        "'serialize' takes 'variant', 'var', 'std::string', bool, integral or floating types");
   }
 }
 
@@ -402,6 +412,14 @@ template <typename T>
 inline T deserialize(std::byte *iter) {
   if constexpr (std::is_pointer_v<std::decay_t<T>>) {
     return nullptr;
+  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
+    std::size_t len = deserialize_numeric<std::size_t>(iter);
+    std::size_t offset = sizeof(std::size_t);
+    std::string result{};
+    result.resize(len + 1);
+    std::transform(iter + offset, iter + offset + len, result.data(), [](std::byte b) { return static_cast<char>(b); });
+    result.back() = 0;
+    return result;
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     return static_cast<bool>(*iter);
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -411,7 +429,8 @@ inline T deserialize(std::byte *iter) {
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
     return deserialize_numeric<T>(iter);
   } else {
-    static_assert(always_false<T>, "'deserialize' takes 'variant', 'var', bool, integral or floating types");
+    static_assert(always_false<T>,
+        "'deserialize' takes 'variant', 'var', 'std::string', bool, integral or floating types");
   }
 }
 
@@ -428,7 +447,9 @@ template <typename T>
 inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   if constexpr (std::is_same_v<T, variant>) {
     resize_buffer_for_variant(buffer, value);
-  } else {
+  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
+    buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
+  }  else {
     resize_buffer_for_value(buffer, value);
   }
 }
