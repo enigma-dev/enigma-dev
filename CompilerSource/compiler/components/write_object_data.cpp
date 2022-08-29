@@ -223,6 +223,7 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
     }
   }
 
+  std::vector<std::pair<std::string, dectrip>> locals;
   for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
     bool writeit = true; // Whether this "local" should be declared such
     if (parent_declares(object->parent, ii)) {
@@ -243,10 +244,39 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
       }
     }
     if (writeit) {
+      locals.emplace_back(ii->first, ii->second);
       wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first
           << ii->second.suffix << ";\n    ";
     }
   }
+
+  wto << "\n    std::vector<std::byte> serialize() {\n"
+         "      auto bytes = " << (object->parent ? object->parent->name : "object_locals") << "::serialize();\n";
+  if (!locals.empty()) {
+    wto << "      std::size_t len = 0;\n\n";
+  }
+  for (auto &[name, type]: locals) {
+    wto << "      enigma_internal_serialize(" << name << ", len, bytes);\n";
+  }
+  if (!locals.empty()) {
+    wto << "      bytes.shrink_to_fit();\n";
+  }
+  wto << "      return bytes;\n"
+         "    }\n";
+
+  wto << "\n    std::size_t deserialize_self(std::byte *iter) {\n"
+         "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
+  for (auto &[name, type]: locals) {
+    wto << "      enigma_internal_deserialize(" << name << ", iter, len);\n";
+  }
+  wto << "      return len;\n"
+         "    }\n";
+
+  wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
+         "      OBJ_" << object->name << " result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n";
 }
 
 static inline void write_object_scripts(std::ostream &wto, parsed_object *object, const CompileState &state) {
