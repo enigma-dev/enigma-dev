@@ -53,10 +53,6 @@ template <class T> struct lua_table {
   typedef std::vector<T> dense_type;
   typedef std::map<size_t,T> sparse_type;
 
-  friend void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
-  friend lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter);
-  friend std::size_t enigma_internal_sizeof_lua_table(const lua_table<T> &table);
-
  private:
   dense_type dense;
   sparse_type sparse;
