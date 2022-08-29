@@ -113,6 +113,53 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::map<string, var> *vmap;\n";
   wto << "    object_locals() {vmap = NULL;}\n";
   wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
+  wto << "\n    std::vector<std::byte> serialize() {\n"
+         "      auto bytes = event_parent::serialize();\n"
+         "      std::size_t len = 0;\n"
+         "      if (vmap != nullptr) {\n"
+         "        resize_buffer_for(bytes, vmap->size());\n"
+         "        for (auto &[key, value] : *vmap) {\n"
+         "          enigma_internal_serialize(key, len, bytes);\n"
+         "          enigma_internal_serialize(value, len, bytes);\n"
+         "        }\n"
+         "        bytes.shrink_to_fit();\n"
+         "      } else {\n"
+         "        std::byte *iter = &bytes.back();\n"
+         "        bytes.resize(bytes.size() + sizeof(std::size_t));\n"
+         "        serialize_into<std::size_t>(iter, 0);\n"
+         "      }\n"
+         "      \n"
+         "      return bytes;\n"
+         "    }";
+
+  wto << "    std::size_t deserialize_self(std::byte *iter) {\n"
+         "      auto len = event_parent::deserialize_self(iter);\n"
+         "      std::size_t map_size = 0;\n"
+         "      enigma_internal_deserialize(map_size, iter, len);\n"
+         "\n"
+         "      if (map_size != 0) {\n"
+         "        if (vmap == nullptr) {\n"
+         "          vmap = new std::map<string, var>;\n"
+         "        }\n"
+         "\n"
+         "        for (std::size_t i = 0; i < map_size; i++) {\n"
+         "          std::string key;\n"
+         "          var value;\n"
+         "          enigma_internal_deserialize(key, iter, len);\n"
+         "          enigma_internal_deserialize(value, iter, len);\n"
+         "          vmap->emplace(std::move(key), std::move(value));\n"
+         "        }\n"
+         "      }\n"
+         "\n"
+         "      return len;\n"
+         "    }\n";
+
+  wto << "    std::pair<object_locals, std::size_t> deserialize(std::byte *iter) {\n"
+         "      object_locals result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n";
+
   wto << "  };\n";
 }
 
