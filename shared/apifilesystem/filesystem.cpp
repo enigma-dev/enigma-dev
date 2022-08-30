@@ -116,10 +116,10 @@ namespace ngs::fs {
       int result = -1;
       #if defined(_WIN32)
       wstring wfname = widen(fname);
-      struct _stat info = { 0 }; 
+      struct _stat info; 
       result = _wstat(wfname.c_str(), &info);
       #else
-      struct stat info = { 0 }; 
+      struct stat info; 
       result = stat(fname.c_str(), &info);
       #endif
       if (result == -1) return 0;
@@ -134,7 +134,7 @@ namespace ngs::fs {
       int result = -1;
       time_t time = file_datetime_helper(fname, timestamp);
       #if defined(_WIN32)
-      struct tm timeinfo = { 0 };
+      struct tm timeinfo;
       if (localtime_s(&timeinfo, &time)) return -1;
       switch (measurement) {
         case  0: return timeinfo.tm_year + 1900;
@@ -163,10 +163,10 @@ namespace ngs::fs {
     int file_bin_datetime(int fd, int timestamp, int measurement) {
       int result = -1;
       #if defined(_WIN32)
-      struct _stat info = { 0 }; 
+      struct _stat info; 
       result = _fstat(fd, &info);
       #else
-      struct stat info = { 0 }; 
+      struct stat info; 
       result = fstat(fd, &info);
       #endif
       time_t time = 0; 
@@ -175,7 +175,7 @@ namespace ngs::fs {
       if (timestamp == 2) time = info.st_ctime;
       if (result == -1) return result;
       #if defined(_WIN32)
-      struct tm timeinfo = { 0 };
+      struct tm timeinfo;
       if (localtime_s(&timeinfo, &time)) return -1;
       switch (measurement) {
         case  0: return timeinfo.tm_year + 1900;
@@ -310,7 +310,7 @@ namespace ngs::fs {
             ghc::filesystem::path file_path = ghc::filesystem::path(filename_absolute(dir_ite->path().string()));
             #if defined(_WIN32)
             int fd = -1;
-            BY_HANDLE_FILE_INFORMATION info = { 0 };
+            BY_HANDLE_FILE_INFORMATION info;
             if (file_exists(file_path.string())) {
               // printf("%s\n", file_path.string().c_str());
               if (!_wsopen_s(&fd, file_path.wstring().c_str(), _O_RDONLY, _SH_DENYNO, _S_IREAD)) {
@@ -332,7 +332,7 @@ namespace ngs::fs {
               }
             }
             #else
-            struct stat info = { 0 }; 
+            struct stat info; 
             if (file_exists(file_path.string())) {
               // printf("%s\n", file_path.string().c_str());
               if (!stat(file_path.string().c_str(), &info)) {
@@ -454,36 +454,6 @@ namespace ngs::fs {
       return result;
     }
 
-  #if defined(__OpenBSD__)
-  bool is_executable(const char *in, char **out) {
-    static kvm_t *kd = nullptr;
-    bool ok = false; *out = nullptr; struct stat st = { 0 };
-    if (!stat(in, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-      char executable[PATH_MAX];
-      if (realpath(in, executable)) {
-        kinfo_file *kif = nullptr; int cntp = 0;
-        kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
-        if (!kd) { return false; }
-        if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-          for (int i = 0; i < cntp; i++) {
-            if (kif[i].fd_fd == KERN_FILE_TEXT) {
-              if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
-                static std::string result; 
-                result = executable;
-                *out = (char *)result.c_str();
-                ok = true;
-                break;
-              }
-            }
-          }
-        }
-        kvm_close(kd);
-      }
-    }
-    return ok;
-  }
-  #endif
-
   } // anonymous namespace
 
   string directory_get_current_working() {
@@ -531,53 +501,96 @@ namespace ngs::fs {
   }
 
   string executable_get_pathname() {
-    string path;
-    #if defined(_WIN32) 
+    std::string path;
+    #if defined(_WIN32)
     wchar_t buffer[MAX_PATH];
-    if (GetModuleFileNameW(nullptr, buffer, MAX_PATH) != 0) {
-      path = narrow(buffer);
+    if (GetModuleFileNameW(nullptr, exe, MAX_PATH) != 0) {
+      wchar_t exe[MAX_PATH];
+      if (_wfullpath(exe, buffer, MAX_PATH)) {
+        path = narrow(exe);
+      }
     }
-    #elif defined(__APPLE__) && defined(__MACH__)
-    char buffer[PROC_PIDPATHINFO_MAXSIZE];
-    if (proc_pidpath(getpid(), buffer, sizeof(buffer)) > 0) {
-      path = string(buffer) + "\0";
+    #elif (defined(__APPLE__) && defined(__MACH__))
+    char exe[PROC_PIDPATHINFO_MAXSIZE];
+    if (proc_pidpath(proc_id, getpid(), sizeof(exe)) > 0) {
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
     }
-    #elif defined(__linux__)
-    char *buffer = nullptr;
-    if ((buffer = realpath("/proc/self/exe", nullptr))) {
-      path = buffer;
-      free(buffer);
+    #elif (defined(__linux__) && !defined(__ANDROID__))
+    char exe[PATH_MAX];
+    if (realpath("/proc/self/exe", exe)) {
+      path = exe;
     }
-    #elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__)
+    #elif defined(__FreeBSD__) || defined(__DragonFly__)
     int mib[4]; 
-    std::size_t length = 0;
+    std::size_t len;
     mib[0] = CTL_KERN;
-    #if defined(__NetBSD__)
-    mib[1] = KERN_PROC_ARGS;
-    mib[2] = -1;
-    mib[3] = KERN_PROC_PATHNAME;
-    #else
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
     mib[3] = -1;
-    #endif
-    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) == 0) {
-      path.resize(length, '\0');
-      char *buffer = path.data();
-      if (sysctl(mib, 4, buffer, &length, nullptr, 0) == 0) {
-        char exe[PATH_MAX];
-        if (realpath(buffer, exe)) {
-          path = exe;
+    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
+      std::string strbuff;
+      strbuff.resize(len, '\0');
+      char *exe = strbuff.data();
+      if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) {
+        char buffer[PATH_MAX];
+        if (realpath(exe, buffer)) {
+          path = buffer;
+        }
+      }
+    }
+    #elif defined(__NetBSD__)
+    int mib[4]; 
+    std::size_t len;
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC_ARGS;
+    mib[2] = -1;
+    mib[3] = KERN_PROC_PATHNAME;
+    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
+      std::string strbuff;
+      strbuff.resize(len, '\0');
+      char *exe = strbuff.data();
+      if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) {
+        char buffer[PATH_MAX];
+        if (realpath(exe, buffer)) {
+          path = buffer;
         }
       }
     }
     #elif defined(__OpenBSD__)
-    char *buffer = nullptr;
-    char **cmdbuf = nullptr; 
+    auto is_executable = [](std::string in, std::string *out) {
+      *out = "";
+      bool success = false;
+      struct stat st;
+      if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+        char executable[PATH_MAX];
+        if (realpath(in.c_str(), executable)) {
+          int cntp = 0;
+          kinfo_file *kif = nullptr;
+          kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+          if (!kd) return false;
+          if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+            for (int i = 0; i < cntp; i++) {
+              if (kif[i].fd_fd == KERN_FILE_TEXT) {
+                if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
+                  *out = executable;
+                  success = true;
+                  break;
+                }
+              }
+            }
+          }
+          kvm_close(kd);
+        }
+      }
+      return success;
+    };
+    int mib[4];
+    char **cmdbuf = nullptr;
     std::size_t cmdsize = 0;
-    const char *pwd = nullptr;
-    const char *penv = nullptr;
-    std::string arg; int mib[4];
+    std::string arg;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = getpid();
@@ -585,51 +598,53 @@ namespace ngs::fs {
     if (sysctl(mib, 4, nullptr, &cmdsize, nullptr, 0) == 0) {
       if ((cmdbuf = (char **)malloc(cmdsize))) {
         if (sysctl(mib, 4, cmdbuf, &cmdsize, nullptr, 0) == 0) {
-          arg = string(cmdbuf[0]) + "\0";
+          arg = cmdbuf[0];
         }
         free(cmdbuf);
       }
     }
     if (!arg.empty()) {
       bool is_exe = false;
-      if (arg[0] == '/') {
-        path = arg;
-        is_exe = is_executable(path.c_str(), &buffer);
+      std::string argv0;
+      if (!arg.empty() && arg[0] == '/') {
+        argv0 = arg;
+        is_exe = is_executable(argv0.c_str(), &path);
       } else if (arg.find('/') == std::string::npos) {
-        penv = getenv("PATH");
-        if (penv && *penv) {
+        const char *cenv = getenv("PATH");
+        std::string penv = cenv ? cenv : "";
+        if (!penv.empty()) {
           std::vector<std::string> env = string_split(penv, ':');
           for (std::size_t i = 0; i < env.size(); i++) {
-            path = env[i] + "/" + arg;
-            is_exe = is_executable(path.c_str(), &buffer);
+            argv0 = env[i] + "/" + arg;
+            is_exe = is_executable(argv0.c_str(), &path);
             if (is_exe) break;
             if (arg[0] == '-') {
-              path = env[i] + "/" + arg.substr(1);
-              is_exe = is_executable(path.c_str(), &buffer);
+              argv0 = env[i] + "/" + arg.substr(1);
+              is_exe = is_executable(argv0.c_str(), &path);
               if (is_exe) break;
             }
           }
         }
       } else {
-        pwd = getenv("PWD");
-        if (pwd && *pwd) {
-          path = std::string(pwd) + "/" + arg;
-          is_exe = is_executable(path.c_str(), &buffer);
+        const char *cpwd = getenv("PWD");
+        std::string pwd = cpwd ? cpwd : "";
+        if (!pwd.empty()) {
+          argv0 = pwd + "/" + arg;
+          is_exe = is_executable(argv0.c_str(), &path);
         }
         if (!is_exe) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, sizeof(cwd)) && *cwd) {
-            path = std::string(cwd) + "/" + arg;
-            is_exe = is_executable(path.c_str(), &buffer);
+            argv0 = std::string(cwd) + "/" + arg;
+            is_exe = is_executable(argv0.c_str(), &path);
           }
         }
       }
     }
-    path = ((buffer) ? buffer : "");
     #elif defined(__sun)
-    char buffer[PATH_MAX];
-    if (realpath("/proc/self/path/a.out", buffer)) {
-      path = buffer;
+    char exe[PATH_MAX];
+    if (realpath("/proc/self/path/a.out", exe)) {
+      path = exe;
     }
     #endif
     return path;
@@ -713,12 +728,12 @@ namespace ngs::fs {
 
   std::uintmax_t file_bin_numblinks(int fd) {
     #if defined(_WIN32)
-    BY_HANDLE_FILE_INFORMATION info = { 0 };
+    BY_HANDLE_FILE_INFORMATION info;
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info)) {
       return info.nNumberOfLinks;
     }
     #else
-    struct stat info = { 0 };
+    struct stat info;
     if (!fstat(fd, &info)) {
       return info.st_nlink;
     }
@@ -729,10 +744,10 @@ namespace ngs::fs {
   string file_bin_hardlinks(int fd, string dnames, bool recursive) {
     string paths;
     #if defined(_WIN32)
-    BY_HANDLE_FILE_INFORMATION info = { 0 };
+    BY_HANDLE_FILE_INFORMATION info;
     if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &info) && info.nNumberOfLinks) {
     #else
-    struct stat info = { 0 };
+    struct stat info;
     if (!fstat(fd, &info) && info.st_nlink) {
     #endif
       file_bin_hardlinks_result.clear();
@@ -1408,10 +1423,10 @@ namespace ngs::fs {
   
   long file_bin_size(int fd) {
     #if defined(_WIN32)
-    struct _stat info = { 0 }; 
+    struct _stat info; 
     int result = _fstat(fd, &info);
     #else
-    struct stat info = { 0 }; 
+    struct stat info; 
     int result = fstat(fd, &info);
     #endif
     if (result != -1) {
