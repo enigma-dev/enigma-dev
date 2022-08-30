@@ -211,8 +211,9 @@ private:
   bool LoadLayerData(pugi::xml_node &mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight);
 
   bool LoadLayerDataHelper(const std::string &dataStr, const int layerWidth, const int layerHeight,
-                           const std::string &encoding, const std::string &compression, buffers::TreeNode *resNode,
-                           const int tileWidth, const int tileHeight, const int chunkXIdx = 0, const int chunkYIdx = 0);
+                           const std::string &encoding, const std::string &compression, buffers::resources::EGMRoom::TileLayer *tileLayer,
+                           const int tileWidth, const int tileHeight, const int chunkXIdx = 0, const int chunkYIdx = 0,
+                           const int chunkIdx = -1);
 
   /**
    * @brief Helper method to decompress and add tile data stored in Glib and Zlib streams to Room Resource
@@ -225,9 +226,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+  bool LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::resources::EGMRoom::TileLayer *tileLayer,
                            const int tileWidth, const int tileHeight, const int layerWidth, const int layerHeight,
-                           const int xStartIdx = 0, const int yStartIdx = 0);
+                           const int xStartIdx = 0, const int yStartIdx = 0, const int chunkIdx = -1);
 
   /**
    * @brief Helper method to decompress and add tile data stored in Zstd stream to Room Resource
@@ -240,9 +241,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+  bool LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::resources::EGMRoom::TileLayer *tileLayer,
                                const int tileWidth, const int tileHeight, const int layerWidth, const int layerHeight,
-                               const int chunkXIdx = 0, const int chunkYIdx = 0);
+                               const int chunkXIdx = 0, const int chunkYIdx = 0, const int chunkIdx = -1);
 
   /**
    * @brief Helper method to decompress and add tile data stored in base64 stream to Room Resource
@@ -255,9 +256,10 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::TreeNode *resNode,
+  bool LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t expectedSize, buffers::resources::EGMRoom::TileLayer *tileLayer,
                                        const int tileWidth, const int tileHeight, const int layerWidth,
-                                       const int layerHeight, const int chunkXIdx = 0, const int chunkYIdx = 0);
+                                       const int layerHeight, const int chunkXIdx = 0, const int chunkYIdx = 0,
+                                       const int chunkIdx = -1);
 
   /**
    * @brief Helper method to load and add tile data stored in CSV format to Room Resource
@@ -269,9 +271,9 @@ private:
    * @param layerHeight Number of tiles in vertical direction
    * @return Returns true if parsing succeeds else false
    */
-  bool LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int tileWidth,
+  bool LoadCsvLayerData(const std::string &dataStr, buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth,
                         const int tileHeight, const int layerWidth, const int layerHeight, const int chunkXIdx = 0,
-                        const int chunkYIdx = 0);
+                        const int chunkYIdx = 0, const int chunkIdx = -1);
 
   /**
    * @brief Creates Tile instances for EGM Room resource
@@ -283,8 +285,9 @@ private:
    * @param currY Current row of tile in Room
    * @return Returns true if parsing succeeds else false
    */
-  bool CreateTileFromGlobalId(const unsigned int globalTileId, buffers::TreeNode *resNode, const int mapTileWidth,
-                              const int mapTileHeight, const int currX, const int currY, const int layerWidth);
+  bool CreateTileFromGlobalId(const unsigned int globalTileId, buffers::resources::EGMRoom::TileLayer *tileLayer, const int mapTileWidth,
+                              const int mapTileHeight, const int currX, const int currY, const int layerWidth,
+                              const int chunkIdx = -1);
 
   /**
    * @brief Get local tile id by selecting tileset it belongs to
