@@ -693,7 +693,7 @@ namespace ngs::xproc {
       wchar_t buffer[MAX_PATH];
       if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) {
         wchar_t exe[MAX_PATH];
-        if (_wfullpath(exe, buffer, sizeof(exe))) {
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
           path = narrow(exe);
         }
       }
@@ -704,7 +704,7 @@ namespace ngs::xproc {
       DWORD size = sizeof(buffer);
       if (QueryFullProcessImageNameW(proc, 0, buffer, &size) != 0) {
         wchar_t exe[MAX_PATH];
-        if (_wfullpath(exe, buffer, sizeof(exe))) {
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
           path = narrow(exe);
         }
       }
@@ -851,7 +851,7 @@ namespace ngs::xproc {
     cwd_cmd_env_from_proc(proc, &buffer, MEMCWD);
     if (buffer) {
       wchar_t cwd[MAX_PATH];
-      if (_wfullpath(cwd, buffer, sizeof(cwd))) {
+      if (_wfullpath(cwd, buffer, MAX_PATH)) {
         path = narrow(cwd);
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
           path = path.substr(0, path.length() - 1);
