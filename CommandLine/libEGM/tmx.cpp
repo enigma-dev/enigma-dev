@@ -29,15 +29,6 @@ std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPa
     return NULL;
   }
 
-  // temp code start
-  /*std::string str;
-  google::protobuf::TextFormat::PrintToString(proj->game(), &str);
-  std::ofstream out("/home/kash/github/radialgm-stuff/textProtos/test1tmx.txt");
-  out<<str<<std::endl;
-  out.close();*/
-  std::cout<<"END LOADING TMX"<<std::endl;
-  // temp code end
-
   return proj;
 }
 
@@ -241,7 +232,6 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
       hexMapInfo.staggerIndex = StaggerIndex::even;
     else if(resNode->room().staggerindex() == "odd")
       hexMapInfo.staggerIndex = StaggerIndex::odd;
-
   }
   else if(orientation == "staggered") {
     roomOrientation = RoomOrientation::staggered;
@@ -263,7 +253,6 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
       staggeredIsoMapInfo.staggerIndex = StaggerIndex::even;
     if(resNode->room().staggerindex() == "odd")
       staggeredIsoMapInfo.staggerIndex = StaggerIndex::odd;
-
   }
   else {
     errStream << "Error loading map, unsupported map orientation: " << resNode->mutable_room()->orientation() << std::endl;
@@ -378,7 +367,7 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
       return false;
     }
 
-    buffers::resources::EGMRoom::TileLayer::Data* layerDataProto = layerProto->mutable_data();
+    buffers::resources::EGMRoom::TileLayer::Data *layerDataProto = layerProto->mutable_data();
     PackTiledRes(dataNode, layerDataProto, resourceTypeIdCountMap, tmxPath);
 
     std::string encoding = layerDataProto->encoding();
@@ -391,16 +380,21 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
     if(!chunks.empty()) {
       int chunkIdx = 0;
       for(const pugi::xml_node &chunk : chunks) {
+        buffers::resources::EGMRoom::TileLayer::Data::Chunk *layerDataChunkProto = layerDataProto->add_chunks();
+        PackTiledRes(chunk, layerDataChunkProto, resourceTypeIdCountMap, tmxPath);
+
+        int chunkXIdx = layerDataChunkProto->x();
+        int chunkYIdx = layerDataChunkProto->y();
+        int chunkWidth = layerDataChunkProto->width();
+        int chunkHeight = layerDataChunkProto->height();
+
         std::string chunkDataStr = chunk.first_child().value();
         chunkDataStr = StrTrim(chunkDataStr);
 
-        int chunkXIdx = chunk.attribute("x").as_int();
-        int chunkYIdx = chunk.attribute("y").as_int();
-        int chunkWidth = chunk.attribute("width").as_int();
-        int chunkHeight = chunk.attribute("height").as_int();
-
         bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, layerProto, tileWidth,
-                                      tileHeight, chunkXIdx, chunkYIdx, chunkIdx++);
+                                      tileHeight, chunkXIdx, chunkYIdx, chunkIdx);
+        chunkIdx++;
+
         if(!ok) {
           errStream << "Error while loading tiles from Layer Data Chunk." << std::endl;
           return false;
@@ -616,6 +610,18 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::resourc
 bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int globalTileId, buffers::resources::EGMRoom::TileLayer *tileLayer,
                                           const int mapTileWidth, const int mapTileHeight, const int currX,
                                           const int currY, const int layerWidth, const int chunkIdx) {
+  // create a tile instance irrespective of existence of tile in that place, as it is required as a placeholder while
+  // loading tiles again in egm plugin of Tiled
+  buffers::resources::EGMRoom::Tile* tile;
+  if(chunkIdx == -1)
+    tile = tileLayer->mutable_data()->add_tiles();
+  else
+    tile = tileLayer->mutable_data()->mutable_chunks(chunkIdx)->add_tiles();
+
+  // do not fill empty tiles i.e. with globalId = 0
+  if(globalTileId <= 0)
+    return true;
+
   bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
   std::string tilesetName = "";
   int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
@@ -632,21 +638,6 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int globalTileId, buffe
     errStream << "Error loading tiles, background not found." << std::endl;
     return false;
   }
-
-  // for negative localTileId dont quit loading map, just skip this tile
-
-  buffers::resources::EGMRoom::Tile* tile;
-
-  // create a tile instance irrespective of existence of tile in that place, as it is required as a placeholder while
-  // loading tiles again in egm plugin of Tiled
-  if(chunkIdx == -1)
-    tile = tileLayer->mutable_data()->add_tiles();
-  else
-    tile = tileLayer->mutable_data()->mutable_chunks(chunkIdx)->add_tiles();
-
-  // do not fill empty tiles
-  if(localTileId < 0)
-    return true;
 
   tile->set_gid(globalTileId);
 
