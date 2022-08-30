@@ -6,6 +6,13 @@ import "options.proto";
 message EGMRoom {
 
   message Tileset {
+    message Image {
+      optional string source = 1;
+      optional int32 width = 2;
+      optional int32 height = 3;
+      optional string trans = 4;
+    }
+
     optional int32 firstgid = 1;
     optional string source = 2;
     optional string name = 3;
@@ -13,6 +20,8 @@ message EGMRoom {
     optional uint32 tileheight = 5;
     optional uint32 tilecount = 6;
     optional uint32 columns = 7;
+
+    optional Image image = 8;
   }
 
   message ObjectGroup {
@@ -131,6 +140,7 @@ message EGMRoom {
     optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
     optional double alpha = 14 [default = 1.0];
     optional double rotation = 15 [default = 0.0];
+    optional uint32 gid = 16; // stores Tiled tile gid
 
     message EditorSettings {
       optional bool locked = 1;
@@ -158,6 +168,43 @@ message EGMRoom {
     optional double phy_world_xgravity = 6 [(gmx) = "PhysicsWorldGravityX"];
     optional double phy_world_ygravity = 7 [(gmx) = "PhysicsWorldGravityY"];
     optional double phy_world_pixel_meters = 8 [(gmx) = "PhysicsWorldPixToMeters"];
+  }
+
+  message TileLayer { // layer nodes of TMX represent TileLayer
+    message Data {
+      message Chunk {
+        optional int32 x = 1;
+        optional int32 y = 2;
+        optional int32 width = 3;
+        optional int32 height = 4;
+
+        repeated Tile tiles = 5;
+      }
+
+      optional string encoding = 1;
+      optional string compression = 2;
+
+      repeated Tile tiles = 3; // tiles in uncompressed form, does not directly maps to Tiled
+      repeated Chunk chunks = 4;
+    }
+
+    optional int32 id = 16;
+    optional string name = 1;
+    optional int32 width = 2;
+    optional int32 height = 3;
+    optional int32 x = 5;
+    optional int32 y = 6;
+    optional string class = 7;
+    optional double opacity = 8;
+    optional string tintcolor = 9;
+    optional int32 visible = 10;
+    optional int32 locked = 11;
+    optional double offsetx = 12;
+    optional double offsety = 13;
+    optional double parallaxx = 14;
+    optional double parallaxy = 15;
+
+    optional Data data = 4;
   }
 
   optional string orientation = 1;
@@ -197,6 +244,8 @@ message EGMRoom {
   repeated Tileset tilesets = 28;
 
   repeated ObjectGroup objectGroups = 29;
+
+  repeated TileLayer tileLayers = 36;
 
   repeated Background backgrounds = 30 [(gmx) = "backgrounds/background"];
 

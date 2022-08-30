@@ -368,6 +368,9 @@ bool TMXMapLoader::LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNo
 bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight) {
   pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
   for(const pugi::xml_node &layer : layers) {
+    buffers::resources::EGMRoom::TileLayer* layerProto = resNode->mutable_room()->add_tilelayers();
+    PackTiledRes(layer, layerProto, resourceTypeIdCountMap, tmxPath);
+
     const pugi::xml_node &dataNode = layer.child("data");
 
     if(dataNode.empty()) {
@@ -375,17 +378,18 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
       return false;
     }
 
-    std::string encoding = dataNode.attribute("encoding").as_string();
-    std::string compression = dataNode.attribute("compression").as_string();
+    buffers::resources::EGMRoom::TileLayer::Data* layerDataProto = layerProto->mutable_data();
+    PackTiledRes(dataNode, layerDataProto, resourceTypeIdCountMap, tmxPath);
 
-    std::string dataStr = dataNode.first_child().value();
-    dataStr = StrTrim(dataStr);
+    std::string encoding = layerDataProto->encoding();
+    std::string compression = layerDataProto->compression();
 
     // In infinite Tiled maps, data string is stored in chunk nodes
     pugi::xml_object_range<pugi::xml_named_node_iterator> chunks = dataNode.children("chunk");
 
     // data string can be found in child of <chunk> node(s) (for infinite Tiled maps) or directly in child node
     if(!chunks.empty()) {
+      int chunkIdx = 0;
       for(const pugi::xml_node &chunk : chunks) {
         std::string chunkDataStr = chunk.first_child().value();
         chunkDataStr = StrTrim(chunkDataStr);
@@ -395,8 +399,8 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
         int chunkWidth = chunk.attribute("width").as_int();
         int chunkHeight = chunk.attribute("height").as_int();
 
-        bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, resNode, tileWidth,
-                                      tileHeight, chunkXIdx, chunkYIdx);
+        bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, layerProto, tileWidth,
+                                      tileHeight, chunkXIdx, chunkYIdx, chunkIdx++);
         if(!ok) {
           errStream << "Error while loading tiles from Layer Data Chunk." << std::endl;
           return false;
@@ -404,10 +408,13 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
       }
     }
     else {
-      int layerWidth = layer.attribute("width").as_int();
-      int layerHeight = layer.attribute("height").as_int();
+      int layerWidth = layerProto->width();
+      int layerHeight = layerProto->height();
 
-      bool ok = LoadLayerDataHelper(dataStr, layerWidth, layerHeight, encoding, compression, resNode, tileWidth,
+      std::string dataStr = dataNode.first_child().value();
+      dataStr = StrTrim(dataStr);
+
+      bool ok = LoadLayerDataHelper(dataStr, layerWidth, layerHeight, encoding, compression, layerProto, tileWidth,
                                     tileHeight);
       if(!ok) {
         errStream << "Error while loading tiles from Layer Data." << std::endl;
@@ -420,8 +427,9 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
 }
 
 bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int layerWidth, const int layerHeight,
-                                       const std::string &encoding, const std::string &compression, buffers::TreeNode *resNode,
-                                       const int tileWidth, const int tileHeight, const int chunkXIdx, const int chunkYIdx) {
+                                       const std::string &encoding, const std::string &compression, buffers::resources::EGMRoom::TileLayer *tileLayer,
+                                       const int tileWidth, const int tileHeight, const int chunkXIdx, const int chunkYIdx,
+                                       const int chunkIdx) {
   if(!dataStr.empty()) {
     if(encoding == "base64") {
       // decode base64 data
@@ -430,27 +438,28 @@ bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int lay
       size_t expectedSize = layerWidth * layerHeight * 4;
 
       if(compression == "zlib" || compression == "gzip") {
-        bool ok = LoadBase64ZlibLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight, chunkXIdx, chunkYIdx);
+        bool ok = LoadBase64ZlibLayerData(decodedStr, expectedSize, tileLayer, tileWidth, tileHeight, layerWidth,
+                                          layerHeight, chunkXIdx, chunkYIdx, chunkIdx);
         if(!ok)
           return false;
       }
       else if(compression == "zstd") {
-        bool ok = LoadBase64ZstdLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight, chunkXIdx, chunkYIdx);
+        bool ok = LoadBase64ZstdLayerData(decodedStr, expectedSize, tileLayer, tileWidth, tileHeight, layerWidth,
+                                          layerHeight, chunkXIdx, chunkYIdx, chunkIdx);
         if(!ok)
           return false;
       }
       else {
         // compression isnt specified for uncompressed format
-        bool ok = LoadBase64UncompressedLayerData(decodedStr, expectedSize, resNode, tileWidth, tileHeight, layerWidth,
-                                          layerHeight, chunkXIdx, chunkYIdx);
+        bool ok = LoadBase64UncompressedLayerData(decodedStr, expectedSize, tileLayer, tileWidth, tileHeight, layerWidth,
+                                          layerHeight, chunkXIdx, chunkYIdx, chunkIdx);
         if(!ok)
           return false;
       }
     }
     else if(encoding == "csv") {
-      bool ok = LoadCsvLayerData(dataStr, resNode, tileWidth, tileHeight, layerWidth, layerHeight, chunkXIdx, chunkYIdx);
+      bool ok = LoadCsvLayerData(dataStr, tileLayer, tileWidth, tileHeight, layerWidth, layerHeight, chunkXIdx, chunkYIdx,
+                                 chunkIdx);
       if(!ok)
         return false;
     }
@@ -468,9 +477,9 @@ bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int lay
 }
 
 bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t expectedSize,
-                                           buffers::TreeNode *resNode, const int tileWidth, const int tileHeight,
+                                           buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth, const int tileHeight,
                                            const int layerWidth, const int layerHeight, const int xStartIdx,
-                                           const int yStartIdx) {
+                                           const int yStartIdx, const int chunkIdx) {
   // decompress zlib/gzip compressed data
   std::istringstream istr(decodedStr);
   Decoder decoder(istr);
@@ -493,7 +502,7 @@ bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const 
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
+      if(!CreateTileFromGlobalId(globalTileId, tileLayer, tileWidth, tileHeight, x, y, layerWidth, chunkIdx))
         return false;
     }
   }
@@ -502,9 +511,9 @@ bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const 
 }
 
 bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const size_t expectedSize,
-                                           buffers::TreeNode *resNode, const int tileWidth, const int tileHeight,
+                                           buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth, const int tileHeight,
                                            const int layerWidth, const int layerHeight, const int xStartIdx,
-                                           const int yStartIdx) {
+                                           const int yStartIdx, const int chunkIdx) {
 
   std::vector<unsigned char> outTileData;
   outTileData.resize(expectedSize);
@@ -528,7 +537,7 @@ bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const 
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
+      if(!CreateTileFromGlobalId(globalTileId, tileLayer, tileWidth, tileHeight, x, y, layerWidth, chunkIdx))
          return false;
     }
   }
@@ -537,9 +546,9 @@ bool TMXMapLoader::LoadBase64ZstdLayerData(const std::string &decodedStr, const 
 }
 
 bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr, const size_t expectedSize,
-                                                   buffers::TreeNode *resNode, const int tileWidth,
+                                                   buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth,
                                                    const int tileHeight, const int layerWidth, const int layerHeight,
-                                                   const int xStartIdx, const int yStartIdx) {
+                                                   const int xStartIdx, const int yStartIdx, const int chunkIdx) {
   if(decodedStr.size() != expectedSize) {
     errStream << "Error loading tile layer data, uncompressed stream corrupted." << std::endl;
     return false;
@@ -556,7 +565,7 @@ bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr
 
       tileIndex += 4;
 
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
+      if(!CreateTileFromGlobalId(globalTileId, tileLayer, tileWidth, tileHeight, x, y, layerWidth, chunkIdx))
         return false;
     }
   }
@@ -564,9 +573,9 @@ bool TMXMapLoader::LoadBase64UncompressedLayerData(const std::string &decodedStr
   return true;
 }
 
-bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNode *resNode, const int tileWidth,
+bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth,
                                     const int tileHeight, const int layerWidth, const int layerHeight,
-                                    const int xStartIdx, const int yStartIdx) {
+                                    const int xStartIdx, const int yStartIdx, const int chunkIdx) {
   std::vector<unsigned int> globalTileIds;
   std::istringstream istr(dataStr);
   std::string line;
@@ -596,7 +605,7 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNod
   for (int y = yStartIdx; y < yStartIdx + layerHeight; ++y) {
     for (int x = xStartIdx; x < xStartIdx + layerWidth; ++x) {
       unsigned int globalTileId = globalTileIds[y*layerWidth + x];
-      if(!CreateTileFromGlobalId(globalTileId, resNode, tileWidth, tileHeight, x, y, layerWidth))
+      if(!CreateTileFromGlobalId(globalTileId, tileLayer, tileWidth, tileHeight, x, y, layerWidth, chunkIdx))
          return false;
     }
   }
@@ -604,9 +613,9 @@ bool TMXMapLoader::LoadCsvLayerData(const std::string &dataStr, buffers::TreeNod
   return true;
 }
 
-bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int globalTileId, buffers::TreeNode *resNode,
+bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int globalTileId, buffers::resources::EGMRoom::TileLayer *tileLayer,
                                           const int mapTileWidth, const int mapTileHeight, const int currX,
-                                          const int currY, const int layerWidth) {
+                                          const int currY, const int layerWidth, const int chunkIdx) {
   bool hasHorizontalFlip=false, hasVerticalFlip=false, flippedDiagonally=false, rotatedHex120=false;
   std::string tilesetName = "";
   int localTileId = GetLocalTileIdInfo(tilesetName, globalTileId, hasHorizontalFlip, hasVerticalFlip,
@@ -625,10 +634,21 @@ bool TMXMapLoader::CreateTileFromGlobalId(const unsigned int globalTileId, buffe
   }
 
   // for negative localTileId dont quit loading map, just skip this tile
+
+  buffers::resources::EGMRoom::Tile* tile;
+
+  // create a tile instance irrespective of existence of tile in that place, as it is required as a placeholder while
+  // loading tiles again in egm plugin of Tiled
+  if(chunkIdx == -1)
+    tile = tileLayer->mutable_data()->add_tiles();
+  else
+    tile = tileLayer->mutable_data()->mutable_chunks(chunkIdx)->add_tiles();
+
+  // do not fill empty tiles
   if(localTileId < 0)
     return true;
 
-  buffers::resources::EGMRoom::Tile* tile = resNode->mutable_room()->add_tiles();
+  tile->set_gid(globalTileId);
 
   tile->set_background_name(backgroundName);
   tile->set_name(backgroundName+"_"+std::to_string(idx++));
