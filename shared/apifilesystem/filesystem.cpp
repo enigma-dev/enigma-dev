@@ -506,7 +506,7 @@ namespace ngs::fs {
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) {
       wchar_t exe[MAX_PATH];
-      if (_wfullpath(exe, buffer, sizeof(exe))) {
+      if (_wfullpath(exe, buffer, MAX_PATH)) {
         path = narrow(exe);
       }
     }
