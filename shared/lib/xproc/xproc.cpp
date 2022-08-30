@@ -690,16 +690,23 @@ namespace ngs::xproc {
     std::string path;
     #if defined(_WIN32)
     if (proc_id == GetCurrentProcessId()) {
-      wchar_t exe[MAX_PATH];
-      if (GetModuleFileNameW(nullptr, exe, MAX_PATH) != 0) {
-        path = narrow(exe);
+      wchar_t buffer[MAX_PATH];
+      if (GetModuleFileNameW(nullptr, buffer, MAX_PATH) != 0) {
+        wchar_t exe[MAX_PATH];
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
+          path = narrow(exe);
+        }
       }
     } else {
       HANDLE proc = open_process_with_debug_privilege(proc_id);
       if (proc == nullptr) return path;
-      wchar_t exe[MAX_PATH]; DWORD size = MAX_PATH;
-      if (QueryFullProcessImageNameW(proc, 0, exe, &size) != 0) {
-        path = narrow(exe);
+      DWORD size = MAX_PATH;
+      wchar_t buffer[MAX_PATH];
+      if (QueryFullProcessImageNameW(proc, 0, buffer, &size) != 0) {
+        wchar_t exe[MAX_PATH];
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
+          path = narrow(exe);
+        }
       }
       CloseHandle(proc);
     }
