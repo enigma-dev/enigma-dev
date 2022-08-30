@@ -429,7 +429,7 @@ namespace ngs::fs {
               FILE *fp = popen(("echo " + line.substr(pos + fid.length())).c_str(), "r");
               if (fp) {
                 char buf[PATH_MAX];
-                if (fgets(buf, PATH_MAX, fp)) {
+                if (fgets(buf, sizeof(buf), fp)) {
                   string str = buf;
                   size_t pos = str.find("\n", strlen(buf) - 1);
                   if (pos != string::npos) {
@@ -504,9 +504,9 @@ namespace ngs::fs {
     std::string path;
     #if defined(_WIN32)
     wchar_t buffer[MAX_PATH];
-    if (GetModuleFileNameW(nullptr, exe, MAX_PATH) != 0) {
+    if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) {
       wchar_t exe[MAX_PATH];
-      if (_wfullpath(exe, buffer, MAX_PATH)) {
+      if (_wfullpath(exe, buffer, sizeof(exe))) {
         path = narrow(exe);
       }
     }
