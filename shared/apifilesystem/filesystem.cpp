@@ -512,7 +512,7 @@ namespace ngs::fs {
     }
     #elif (defined(__APPLE__) && defined(__MACH__))
     char exe[PROC_PIDPATHINFO_MAXSIZE];
-    if (proc_pidpath(proc_id, getpid(), sizeof(exe)) > 0) {
+    if (proc_pidpath(getpid(), exe, sizeof(exe)) > 0) {
       char buffer[PATH_MAX];
       if (realpath(exe, buffer)) {
         path = buffer;
