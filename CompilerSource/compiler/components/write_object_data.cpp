@@ -113,7 +113,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::map<string, var> *vmap;\n";
   wto << "    object_locals() {vmap = NULL;}\n";
   wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
-  wto << "\n    std::vector<std::byte> serialize() {\n"
+  wto << "\n    std::vector<std::byte> serialize() override {\n"
          "      auto bytes = event_parent::serialize();\n"
          "      std::size_t len = 0;\n"
          "      if (vmap != nullptr) {\n"
@@ -124,15 +124,15 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "        }\n"
          "        bytes.shrink_to_fit();\n"
          "      } else {\n"
-         "        std::byte *iter = &bytes.back();\n"
+         "        std::byte *iter = &bytes.back() + 1;\n"
          "        bytes.resize(bytes.size() + sizeof(std::size_t));\n"
          "        serialize_into<std::size_t>(iter, 0);\n"
          "      }\n"
          "      \n"
          "      return bytes;\n"
-         "    }";
+         "    }\n\n";
 
-  wto << "    std::size_t deserialize_self(std::byte *iter) {\n"
+  wto << "    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = event_parent::deserialize_self(iter);\n"
          "      std::size_t map_size = 0;\n"
          "      enigma_internal_deserialize(map_size, iter, len);\n"
@@ -152,13 +152,13 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "      }\n"
          "\n"
          "      return len;\n"
-         "    }\n";
+         "    }\n\n";
 
   wto << "    std::pair<object_locals, std::size_t> deserialize(std::byte *iter) {\n"
          "      object_locals result;\n"
          "      auto len = result.deserialize_self(iter);\n"
          "      return {std::move(result), len};\n"
-         "    }\n";
+         "    }\n\n";
 
   wto << "  };\n";
 }
@@ -297,11 +297,12 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
     }
   }
 
-  wto << "\n    std::vector<std::byte> serialize() {\n"
+  wto << "\n    std::vector<std::byte> serialize() override {\n"
          "      auto bytes = " << (object->parent ? object->parent->name : "object_locals") << "::serialize();\n";
   if (!locals.empty()) {
     wto << "      std::size_t len = 0;\n\n";
   }
+  wto << "      enigma_internal_serialize<unsigned char>(0xBB, len, bytes);\n";
   for (auto &[name, type]: locals) {
     wto << "      enigma_internal_serialize(" << name << ", len, bytes);\n";
   }
@@ -311,8 +312,10 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
   wto << "      return bytes;\n"
          "    }\n";
 
-  wto << "\n    std::size_t deserialize_self(std::byte *iter) {\n"
+  wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
+  wto << "      unsigned char type;\n";
+  wto << "      enigma_internal_deserialize(type, iter, len);\n";
   for (auto &[name, type]: locals) {
     wto << "      enigma_internal_deserialize(" << name << ", iter, len);\n";
   }

@@ -72,8 +72,8 @@ namespace enigma
       virtual ~object_collisions();
 
     // Serialization and deserialization
-      std::vector<std::byte> serialize();
-      std::size_t deserialize_self(std::byte *iter);
+      std::vector<std::byte> serialize() override;
+      std::size_t deserialize_self(std::byte *iter) override;
       static std::pair<object_collisions, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma

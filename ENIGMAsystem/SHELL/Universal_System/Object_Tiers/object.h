@@ -74,8 +74,8 @@ namespace enigma
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();
 
-      std::vector<std::byte> serialize();
-      std::size_t deserialize_self(std::byte *iter);
+      virtual std::vector<std::byte> serialize();
+      virtual std::size_t deserialize_self(std::byte *iter);
       static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
 
       object_basic();

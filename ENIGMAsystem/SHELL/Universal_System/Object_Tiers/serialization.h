@@ -70,6 +70,9 @@ inline std::size_t enigma_internal_sizeof_lua_table(const lua_table<T> &table) {
 inline std::size_t var_size(const var &value) {
   std::size_t len = variant_size(value) + enigma_internal_sizeof_lua_table(value.array1d);
   len += (3 * sizeof(std::size_t));
+  for (auto &[key, elem] : value.array2d.sparse_part()) {
+    len += enigma_internal_sizeof_lua_table(elem);
+  }
   for (auto &elem : value.array2d.dense_part()) {
     len += enigma_internal_sizeof_lua_table(elem);
   }
@@ -137,10 +140,10 @@ inline std::size_t enigma_internal_sizeof(T &&value) {
 namespace {
 template <typename Base, typename T>
 inline void serialize_any_into(std::byte *iter, T value) {
-  std::size_t i = sizeof(T) - 1;
+  std::size_t i = sizeof(Base) - 1;
   std::size_t as_unsigned = utility::bit_cast<Base>(value);
 
-  while (as_unsigned > 0) {
+  for (std::size_t j = 0; j < sizeof(Base); j++) {
     iter[i--] = static_cast<std::byte>(as_unsigned & 0xff);
     as_unsigned >>= 8;
   }
@@ -292,22 +295,31 @@ inline variant deserialize_variant(std::byte *iter) {
 
 template <typename T>
 inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {
+  std::size_t pos = 0;
   serialize_into(iter, table.mx_size_part());
-  serialize_into(iter, table.dense_part().size());
+  pos += sizeof(std::size_t);
+  serialize_into(iter + pos, table.dense_part().size());
+  pos += sizeof(std::size_t);
   for (auto &elem: table.dense_part()) {
     if constexpr (is_lua_table_v<std::decay_t<T>>) {
-      enigma_internal_serialize_lua_table(iter, elem);
+      enigma_internal_serialize_lua_table(iter + pos, elem);
+      pos += enigma_internal_sizeof_lua_table(elem);
     } else {
-      serialize_into(iter, elem);
+      serialize_into(iter + pos, elem);
+      pos += enigma_internal_sizeof(elem);
     }
   }
-  serialize_into(iter, table.sparse_part().size());
+  serialize_into(iter + pos, table.sparse_part().size());
+  pos += sizeof(std::size_t);
   for (auto &[key, value]: table.sparse_part()) {
-    serialize_into(iter, key);
+    serialize_into(iter + pos, key);
+    pos += enigma_internal_sizeof(key);
     if constexpr (is_lua_table_v<std::decay_t<T>>) {
-      enigma_internal_serialize_lua_table(iter, value);
+      enigma_internal_serialize_lua_table(iter + pos, value);
+      pos += enigma_internal_sizeof_lua_table(value);
     } else {
-      serialize_into(iter, value);
+      serialize_into(iter + pos, value);
+      pos += enigma_internal_sizeof(value);
     }
   }
 }
@@ -439,13 +451,19 @@ inline void resize_buffer_for_value(std::vector<std::byte> &buffer, T) {
   buffer.resize(buffer.size() + sizeof(T));
 }
 
+inline void resize_buffer_for_var(std::vector<std::byte> &buffer, const var &value) {
+  buffer.resize(buffer.size() + var_size(value));
+}
+
 inline void resize_buffer_for_variant(std::vector<std::byte> &buffer, const variant &value) {
   buffer.resize(buffer.size() + variant_size(value));
 }
 
 template <typename T>
 inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
-  if constexpr (std::is_same_v<T, variant>) {
+  if constexpr (std::is_same_v<var, std::decay_t<T>>) {
+    resize_buffer_for_var(buffer, value);
+  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     resize_buffer_for_variant(buffer, value);
   } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
     buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
@@ -494,13 +512,14 @@ inline void enigma_internal_serialize(const T &value, std::size_t &len, std::vec
   len = bytes.size();
   resize_buffer_for(bytes, value);
   serialize_into(bytes.data() + len, value);
+  len = bytes.size();
 }
 
 template <typename T>
 inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &len) {
   if constexpr (std::is_same_v<var, std::decay_t<T>>) {
     value = deserialize_var(iter + len);
-    len += variant_size(value);
+    len += var_size(value);
   } else if constexpr (is_lua_table_v<std::decay_t<T>>) {
     value = enigma_internal_deserialize_lua_table<typename is_lua_table<T>::inner_type>(iter);
     len += enigma_internal_sizeof_lua_table(value);
