@@ -146,6 +146,7 @@ namespace enigma
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
+      enigma_internal_serialize<unsigned char>(0xBA, len, bytes);
       enigma_internal_serialize(mask_index, len, bytes);
       enigma_internal_serialize(solid, len, bytes);
       enigma_internal_serialize(polygon_index, len, bytes);
@@ -160,6 +161,8 @@ namespace enigma
     std::size_t object_collisions::deserialize_self(std::byte* iter) {
       auto len = object_transform::deserialize_self(iter);
 
+      unsigned char type;
+      enigma_internal_deserialize(type, iter, len);
       enigma_internal_deserialize(mask_index, iter, len);
       enigma_internal_deserialize(solid, iter, len);
       enigma_internal_deserialize(polygon_index, iter, len);

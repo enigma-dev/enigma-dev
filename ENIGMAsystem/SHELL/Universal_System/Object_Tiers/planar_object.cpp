@@ -78,6 +78,7 @@ namespace enigma
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
+    enigma_internal_serialize<unsigned char>(0xAB, len, bytes);
     enigma_internal_serialize(x, len, bytes);
     enigma_internal_serialize(y, len, bytes);
     enigma_internal_serialize(xprevious, len, bytes);
@@ -102,11 +103,14 @@ namespace enigma
   std::size_t object_planar::deserialize_self(std::byte *iter) {
     auto len = object_basic::deserialize_self(iter);
 
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
     enigma_internal_deserialize(x, iter, len);
     enigma_internal_deserialize(y, iter, len);
     enigma_internal_deserialize(xprevious, iter, len);
     enigma_internal_deserialize(yprevious, iter, len);
     enigma_internal_deserialize(xstart, iter, len);
+    enigma_internal_deserialize(ystart, iter, len);
 #ifdef ISLOCAL_persistent
     enigma_internal_deserialize(persistent, iter, len);
 #endif

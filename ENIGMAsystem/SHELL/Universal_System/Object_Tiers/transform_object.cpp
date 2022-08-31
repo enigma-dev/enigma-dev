@@ -34,6 +34,7 @@ namespace enigma
     auto bytes = object_graphics::serialize();
     std::size_t len = 0;
 
+    enigma_internal_serialize<unsigned char>(0xAF, len, bytes);
     enigma_internal_serialize(image_alpha, len, bytes);
     enigma_internal_serialize(image_blend, len, bytes);
 
@@ -44,6 +45,8 @@ namespace enigma
   std::size_t object_transform::deserialize_self(std::byte *iter) {
     auto len = object_graphics::deserialize_self(iter);
 
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
     enigma_internal_deserialize(image_alpha, iter, len);
     enigma_internal_deserialize(image_blend, iter, len);
 

@@ -96,6 +96,7 @@ namespace enigma
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
+    enigma_internal_serialize<unsigned char>(0xAE, len, bytes);
     enigma_internal_serialize(sprite_index, len, bytes);
     enigma_internal_serialize(image_index, len, bytes);
     enigma_internal_serialize(image_speed, len, bytes);
@@ -113,6 +114,8 @@ namespace enigma
   std::size_t object_graphics::deserialize_self(std::byte *iter) {
     auto len = object_timelines::deserialize_self(iter);
 
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
     enigma_internal_deserialize(sprite_index, iter, len);
     enigma_internal_deserialize(image_index, iter, len);
     enigma_internal_deserialize(image_speed, iter, len);

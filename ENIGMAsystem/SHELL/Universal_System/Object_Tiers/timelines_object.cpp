@@ -105,6 +105,7 @@ namespace enigma
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
+    enigma_internal_serialize<unsigned char>(0xAC, len, bytes);
     enigma_internal_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
       enigma_internal_serialize(map.size(), len, bytes);
@@ -127,6 +128,8 @@ namespace enigma
   std::size_t object_timelines::deserialize_self(std::byte *iter) {
     auto len = object_planar::deserialize_self(iter);
 
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
     std::size_t timeline_maps_len{};
     enigma_internal_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);

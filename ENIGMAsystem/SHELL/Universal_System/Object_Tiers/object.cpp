@@ -93,6 +93,7 @@ namespace enigma
       std::vector<std::byte> bytes{};
       std::size_t len = 0;
 
+      enigma_internal_serialize<unsigned char>(0xAA, len, bytes);
       enigma_internal_serialize(id, len, bytes);
       enigma_internal_serialize(object_index, len, bytes);
 
@@ -101,9 +102,10 @@ namespace enigma
     }
 
     std::size_t object_basic::deserialize_self(std::byte *iter) {
-      *const_cast<unsigned int*>(&id) = enigma::deserialize<unsigned int>(iter);
-      *const_cast<int *>(&object_index) = enigma::deserialize<int>(iter + sizeof(id));
-      return sizeof(id) + sizeof(object_index);
+      auto type = enigma::deserialize<unsigned char>(iter);
+      *const_cast<unsigned int*>(&id) = enigma::deserialize<unsigned int>(iter + 1);
+      *const_cast<int *>(&object_index) = enigma::deserialize<int>(iter + 1 + sizeof(id));
+      return sizeof(id) + sizeof(object_index) + 1;
     }
 
     std::pair<object_basic, std::size_t> object_basic::deserialize(std::byte *iter) {
