@@ -22,6 +22,9 @@
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance_system_frontend.h"
+#include "Universal_System/Object_Tiers/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -31,7 +34,7 @@
 using std::string;
 
 namespace enigma {
-std::vector<BinaryBuffer*> buffers(0);
+std::vector<BinaryBuffer *> buffers(0);
 
 BinaryBuffer::BinaryBuffer(unsigned size) {
   data.resize(size, 0);
@@ -90,6 +93,8 @@ std::vector<unsigned char> valToBytes(variant value, unsigned count) {
   }
   return result;
 }
+
+object_basic *instance_create_id(int x, int y, int object, int idn);
 }  // namespace enigma
 
 namespace enigma_user {
@@ -185,7 +190,9 @@ int buffer_load(string filename) {
     DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
-  myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
+  buffer->data.resize(std::filesystem::file_size(filename));
+//  myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
+  std::copy(std::istreambuf_iterator<char>(myfile), std::istreambuf_iterator<char>(), buffer->data.data());
   myfile.close();
 
   return id;
@@ -414,13 +421,51 @@ string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
 }
 
 void game_save_buffer(int buffer) {
-  //get_buffer(binbuff, buffer);
-  //TODO: Write this function
+  get_buffer(binbuff, buffer);
+  std::size_t ptr = 0;
+
+  binbuff->data.resize(sizeof(std::size_t));
+  enigma::serialize_into<std::size_t>(reinterpret_cast<std::byte *>(&binbuff->data[ptr]), enigma::instance_list.size());
+  for (auto &[id, obj] : enigma::instance_list) {
+    auto buf = obj->inst->serialize();
+    ptr = binbuff->data.size();
+    binbuff->data.resize(binbuff->data.size() + buf.size());
+    std::move(buf.begin(), buf.end(), reinterpret_cast<std::byte *>(&binbuff->data[ptr]));
+  }
+
+  ptr = binbuff->data.size();
+  binbuff->data.resize(binbuff->data.size() + sizeof(std::size_t));
+  enigma::serialize_into<std::size_t>(reinterpret_cast<std::byte *>(&binbuff->data[ptr]),
+                                      enigma::instance_deactivated_list.size());
+  for (auto &[id, obj] : enigma::instance_deactivated_list) {
+    auto buf = obj->serialize();
+    ptr = binbuff->data.size();
+    binbuff->data.resize(binbuff->data.size() + buf.size());
+    std::move(buf.begin(), buf.end(), reinterpret_cast<std::byte *>(&binbuff->data[ptr]));
+  }
 }
 
 void game_load_buffer(int buffer) {
-  //get_buffer(binbuff, buffer);
-  //TODO: Write this function
+  get_buffer(binbuff, buffer);
+  std::byte *ptr = reinterpret_cast<std::byte *>(&binbuff->data[0]);
+  std::size_t active_size = enigma::deserialize<std::size_t>(ptr);
+  ptr += sizeof(std::size_t);
+  for (std::size_t i = 0; i < active_size; i++) {
+    // This should be an object, where `id` is serialized first and `object_id` second
+    auto obj_ind = enigma::deserialize<int>(ptr + 1 + sizeof(unsigned int));
+    auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+    ptr += obj->deserialize_self(ptr);
+    obj->activate();
+  }
+
+  std::size_t inactive_size = enigma::deserialize<std::size_t>(ptr);
+  ptr += sizeof(std::size_t);
+  for (std::size_t i = 0; i < inactive_size; i++) {
+    auto obj_ind = enigma::deserialize<int>(ptr + sizeof(unsigned int));
+    auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+    ptr += obj->deserialize_self(ptr);
+    obj->deactivate();
+  }
 }
 
 }  // namespace enigma_user
