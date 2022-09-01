@@ -376,32 +376,34 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
     // In infinite Tiled maps, data string is stored in chunk nodes
     pugi::xml_object_range<pugi::xml_named_node_iterator> chunks = dataNode.children("chunk");
 
+    // TODO: Add support to load data present in <tile> nodes instead as a string node
+
     // data string can be found in child of <chunk> node(s) (for infinite Tiled maps) or directly in child node
-    if(!chunks.empty()) {
-      int chunkIdx = 0;
-      for(const pugi::xml_node &chunk : chunks) {
-        buffers::resources::EGMRoom::TileLayer::Data::Chunk *layerDataChunkProto = layerDataProto->add_chunks();
-        PackTiledRes(chunk, layerDataChunkProto, resourceTypeIdCountMap, tmxPath);
+    int chunkIdx = 0;
+    for(const pugi::xml_node &chunk : chunks) {
+      buffers::resources::EGMRoom::TileLayer::Data::Chunk *layerDataChunkProto = layerDataProto->add_chunks();
+      PackTiledRes(chunk, layerDataChunkProto, resourceTypeIdCountMap, tmxPath);
 
-        int chunkXIdx = layerDataChunkProto->x();
-        int chunkYIdx = layerDataChunkProto->y();
-        int chunkWidth = layerDataChunkProto->width();
-        int chunkHeight = layerDataChunkProto->height();
+      int chunkXIdx = layerDataChunkProto->x();
+      int chunkYIdx = layerDataChunkProto->y();
+      int chunkWidth = layerDataChunkProto->width();
+      int chunkHeight = layerDataChunkProto->height();
 
-        std::string chunkDataStr = chunk.first_child().value();
-        chunkDataStr = StrTrim(chunkDataStr);
+      std::string chunkDataStr = chunk.first_child().value();
+      chunkDataStr = StrTrim(chunkDataStr);
 
-        bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, layerProto, tileWidth,
-                                      tileHeight, chunkXIdx, chunkYIdx, chunkIdx);
-        chunkIdx++;
+      bool ok = LoadLayerDataHelper(chunkDataStr, chunkWidth, chunkHeight, encoding, compression, layerProto, tileWidth,
+                                    tileHeight, chunkXIdx, chunkYIdx, chunkIdx);
+      chunkIdx++;
 
-        if(!ok) {
-          errStream << "Error while loading tiles from Layer Data Chunk." << std::endl;
-          return false;
-        }
+      if(!ok) {
+        errStream << "Error while loading tiles from Layer Data Chunk." << std::endl;
+        return false;
       }
     }
-    else {
+
+    // if no chunks found then data/tiles are directly present as first child
+    if(chunkIdx == 0) {
       int layerWidth = layerProto->width();
       int layerHeight = layerProto->height();
 
@@ -421,9 +423,9 @@ bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *res
 }
 
 bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int layerWidth, const int layerHeight,
-                                       const std::string &encoding, const std::string &compression, buffers::resources::EGMRoom::TileLayer *tileLayer,
-                                       const int tileWidth, const int tileHeight, const int chunkXIdx, const int chunkYIdx,
-                                       const int chunkIdx) {
+                                       const std::string &encoding, const std::string &compression,
+                                       buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth,
+                                       const int tileHeight, const int chunkXIdx, const int chunkYIdx, const int chunkIdx) {
   if(!dataStr.empty()) {
     if(encoding == "base64") {
       // decode base64 data
@@ -471,9 +473,9 @@ bool TMXMapLoader::LoadLayerDataHelper(const std::string &dataStr, const int lay
 }
 
 bool TMXMapLoader::LoadBase64ZlibLayerData(const std::string &decodedStr, const size_t expectedSize,
-                                           buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth, const int tileHeight,
-                                           const int layerWidth, const int layerHeight, const int xStartIdx,
-                                           const int yStartIdx, const int chunkIdx) {
+                                           buffers::resources::EGMRoom::TileLayer *tileLayer, const int tileWidth,
+                                           const int tileHeight, const int layerWidth, const int layerHeight,
+                                           const int xStartIdx, const int yStartIdx, const int chunkIdx) {
   // decompress zlib/gzip compressed data
   std::istringstream istr(decodedStr);
   Decoder decoder(istr);
