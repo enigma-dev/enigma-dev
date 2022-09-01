@@ -338,7 +338,7 @@ namespace ngs::fs {
               if (!stat(file_path.string().c_str(), &info)) {
                 if (info.st_dev == s->info.st_dev && info.st_ino == s->info.st_ino && 
                   info.st_size == s->info.st_size && info.st_mtime == s->info.st_mtime) {
-                 file_bin_hardlinks_result.push_back(file_path.string());
+                  file_bin_hardlinks_result.push_back(file_path.string());
                   if (file_bin_hardlinks_result.size() >= info.st_nlink) {
                     s->info.st_nlink = info.st_nlink; s->x.clear();
                     return;
