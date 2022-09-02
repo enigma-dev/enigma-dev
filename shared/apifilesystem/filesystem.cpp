@@ -635,7 +635,7 @@ namespace ngs::fs {
         }
         if (!is_exe) {
           char cwd[PATH_MAX];
-          if (getcwd(cwd, sizeof(cwd)) && *cwd) {
+          if (getcwd(cwd, sizeof(cwd))) {
             argv0 = std::string(cwd) + "/" + arg;
             is_exe = is_executable(argv0.c_str(), &path);
           }
