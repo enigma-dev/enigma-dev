@@ -564,6 +564,7 @@ namespace ngs::fs {
       *out = "";
       bool success = false;
       struct stat st;
+      static kvm_t *kd = nullptr;
       if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
         char executable[PATH_MAX];
         if (realpath(in.c_str(), executable)) {
