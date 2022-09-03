@@ -93,7 +93,8 @@ bool TMXMapLoader::LoadTilesets(pugi::xml_node& mapNode, buffers::TreeNode *resN
     PackTiledRes(tileset, tilesetProto, resourceTypeIdCountMap, tmxPath);
     // load internal
     if(tilesetProto->has_source()) {
-      tilesetProto->set_source(tmxPath.parent_path().string()+"/"+tilesetProto->source());
+      std::string absolutePath = tmxPath.parent_path().string() + "/" + tilesetProto->mutable_source()->data();
+      tilesetProto->set_source(absolutePath);
     }
 
     buffers::TreeNode *folderNode;
@@ -199,7 +200,9 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
   unsigned int tileWidthPixels = resNode->room().tilewidth();
   unsigned int tileHeightPixels = resNode->room().tileheight();
 
-  const std::string &orientation = resNode->mutable_room()->orientation();
+  std::string orientation = "";
+  if(resNode->room().has_orientation())
+    orientation = resNode->mutable_room()->mutable_orientation()->data();
 
   if(orientation == "orthogonal" || orientation == "isometric") {
     if(orientation == "orthogonal")

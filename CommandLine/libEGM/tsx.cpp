@@ -101,6 +101,7 @@ void TSXTilesetLoader::LoadTilesetAsIndividualBackgrounds(const pugi::xml_node& 
     std::string tileId = tileChild.attribute("id").value();
     std::string protoNodeName = backgroundResName + "_" + tileId;
     protoNode->set_name(protoNodeName);
+    protoNode->mutable_background()->set_name(protoNodeName);
 
     // use_as_tileset should be false for stanalone tile converted to background
     protoNode->mutable_background()->set_use_as_tileset(false);
@@ -115,6 +116,7 @@ void TSXTilesetLoader::LoadTilesetAsSingleBackground(const pugi::xml_node& xmlNo
   // set indirectly linked properties
   UpdateImageHelper(childXmlNode, protoNode);
   protoNode->set_name(backgroundResName);
+  protoNode->mutable_background()->set_name(backgroundResName);
   // if single image is holding all the tiles then set use_as_tileset as true
   protoNode->mutable_background()->set_use_as_tileset(true);
 
