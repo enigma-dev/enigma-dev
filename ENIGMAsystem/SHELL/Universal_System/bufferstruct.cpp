@@ -22,6 +22,7 @@
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "sha1.h"
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance_system_frontend.h"
@@ -421,6 +422,62 @@ string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
   return NULL;
 }
 
+namespace {
+std::array<std::uint8_t, SHA1HashSize> internal_sha1_checksum(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last) {
+  SHA1Context ctx;
+  int err = SHA1Reset(&ctx);
+  if (err != 0) {
+    DEBUG_MESSAGE("calculate_checksum: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return {};
+  }
+
+  std::array<std::uint8_t, SHA1HashSize> digest{};
+  err = SHA1Input(&ctx, reinterpret_cast<std::uint8_t *>(&*first), std::distance(first, last));
+  if (err != 0) {
+    DEBUG_MESSAGE("calculate_checksum: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return {};
+  }
+
+  err = SHA1Result(&ctx, digest.data());
+  if (err != 0) {
+    DEBUG_MESSAGE("calculate_checksum: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return {};
+  }
+
+  return digest;
+}
+
+std::array<std::uint8_t, SHA1HashSize> calculate_checksum(std::vector<std::byte> &buffer) {
+  return internal_sha1_checksum(buffer.begin(), buffer.end());
+}
+
+void store_checksum(std::vector<std::byte> &buffer, std::array<uint8_t, SHA1HashSize> digest) {
+  std::transform(digest.begin(), digest.end(), std::back_inserter(buffer),
+                 [](std::uint8_t v) { return std::byte{v}; });
+  buffer.shrink_to_fit();
+}
+
+bool verify_checksum(std::vector<std::byte> &buffer) {
+  if (buffer.size() < SHA1HashSize) {
+    DEBUG_MESSAGE("verify_checksum: buffer size too small to contain checksum", MESSAGE_TYPE::M_FATAL_ERROR);
+    return false;
+  }
+
+  std::array<std::uint8_t, SHA1HashSize> expected = internal_sha1_checksum(buffer.begin(), buffer.end() - SHA1HashSize);
+
+  std::array<std::uint8_t, SHA1HashSize> digest{};
+  std::transform(buffer.end() - SHA1HashSize, buffer.end(), digest.begin(),
+                 [](std::byte b) { return static_cast<std::uint8_t>(b); });
+
+  for (std::size_t i = 0; i < SHA1HashSize; i++) {
+    if (expected[i] != digest[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+}
+
 void game_save_buffer(int buffer) {
   get_buffer(binbuff, buffer);
   std::size_t ptr = 0;
@@ -444,9 +501,19 @@ void game_save_buffer(int buffer) {
     binbuff->data.resize(binbuff->data.size() + buf.size());
     std::move(buf.begin(), buf.end(), reinterpret_cast<std::byte *>(&binbuff->data[ptr]));
   }
+
+// TODO: Uncomment this once my PR is merged
+//  store_checksum(binbuff->data, calculate_checksum(binbuff->data));
 }
 
 void game_load_buffer(int buffer) {
+  get_buffer(binbuff, buffer);
+// TODO: Uncomment this once my PR is merged
+//  if (!verify_checksum(binbuff->data)) {
+//    DEBUG_MESSAGE("game_load_buffer: Checksum is not correct, aborting", MESSAGE_TYPE::M_FATAL_ERROR);
+//    return;
+//  }
+
   std::vector<int> active_ids{};
   std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
                  [](auto &value) { return value.first; });
@@ -459,7 +526,7 @@ void game_load_buffer(int buffer) {
   for (int id : inactive_ids) {
     instance_destroy(id);
   }
-  get_buffer(binbuff, buffer);
+
   std::byte *ptr = reinterpret_cast<std::byte *>(&binbuff->data[0]);
   std::size_t active_size = enigma::deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
