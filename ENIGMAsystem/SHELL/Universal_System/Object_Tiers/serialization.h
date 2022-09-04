@@ -382,7 +382,7 @@ inline void serialize_into(std::byte *iter, T &&value) {
     serialize_into<std::size_t>(iter, 0);
   } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
     serialize_into<std::size_t>(iter, value.size());
-    std::transform(value.begin(), value.end(), iter, [](char c) { return static_cast<std::byte>(c); });
+    std::transform(value.begin(), value.end(), iter + sizeof(std::size_t), [](char c) { return static_cast<std::byte>(c); });
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     *iter = static_cast<std::byte>(value);
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -405,7 +405,7 @@ inline auto serialize(T &&value) {
     std::vector<std::byte> result;
     result.resize(sizeof(std::size_t) + value.size());
     serialize_into<std::size_t>(result.data(), 0);
-    std::transform(value.begin(), value.end(), result.data(), [](char c) { return static_cast<std::byte>(c); });
+    std::transform(value.begin(), value.end(), result.data() + sizeof(std::size_t), [](char c) { return static_cast<std::byte>(c); });
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     return std::vector<std::byte>{static_cast<std::byte>(value)};
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -427,10 +427,7 @@ inline T deserialize(std::byte *iter) {
   } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
     std::size_t len = deserialize_numeric<std::size_t>(iter);
     std::size_t offset = sizeof(std::size_t);
-    std::string result{};
-    result.resize(len + 1);
-    std::transform(iter + offset, iter + offset + len, result.data(), [](std::byte b) { return static_cast<char>(b); });
-    result.back() = 0;
+    std::string result{reinterpret_cast<char *>(iter + offset), reinterpret_cast<char *>(iter + offset + len)};
     return result;
   } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
     return static_cast<bool>(*iter);
@@ -525,6 +522,9 @@ inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &
     len += enigma_internal_sizeof_lua_table(value);
   } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     enigma_internal_deserialize_variant(value, iter, len);
+  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
+    value = enigma::deserialize<std::string>(iter + len);
+    len += value.length() + sizeof(std::size_t);
   } else {
     value = enigma::deserialize<T>(iter + len);
     len += sizeof(T);
