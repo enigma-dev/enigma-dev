@@ -26,6 +26,7 @@
 #include "timelines_object.h"
 
 #include "serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
 {
@@ -105,7 +106,7 @@ namespace enigma
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(0xAC, len, bytes);
+    enigma_internal_serialize<unsigned char>(object_timelines::objtype, len, bytes);
     enigma_internal_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
       enigma_internal_serialize(map.size(), len, bytes);
@@ -130,6 +131,11 @@ namespace enigma
 
     unsigned char type;
     enigma_internal_deserialize(type, iter, len);
+    if (type != object_timelines::objtype) {
+      DEBUG_MESSAGE("object_timelines::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_timelines::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
     std::size_t timeline_maps_len{};
     enigma_internal_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);

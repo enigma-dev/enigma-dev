@@ -35,6 +35,8 @@ namespace enigma
 {
   struct object_planar: object_basic
   {
+    static constexpr unsigned char objtype = 0xAB;
+
     //Position
       cs_scalar x, y;
       cs_scalar  xprevious, yprevious;

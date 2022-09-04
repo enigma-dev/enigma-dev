@@ -60,6 +60,8 @@ namespace enigma
 
     struct object_basic
     {
+      static constexpr unsigned char objtype = 0xAA;
+
       const unsigned id;
       const int object_index;
 

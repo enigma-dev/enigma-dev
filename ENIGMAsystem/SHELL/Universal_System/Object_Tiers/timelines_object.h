@@ -40,6 +40,8 @@ namespace enigma
 {
   struct object_timelines : object_planar
   {
+    static constexpr unsigned char objtype = 0xAC;
+
     //Used as a global lookup for timeline moments. Filled at runtime.
     //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
     static std::vector< std::map<int, int> > timeline_moments_maps;

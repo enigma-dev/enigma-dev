@@ -41,6 +41,8 @@ namespace enigma
 {
   struct object_collisions: object_transform
   {
+    static constexpr unsigned char objtype = 0xAF;
+
     // Bit Mask
       int mask_index;
       bool solid;

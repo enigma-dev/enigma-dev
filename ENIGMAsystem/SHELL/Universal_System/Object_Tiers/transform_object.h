@@ -29,6 +29,8 @@ namespace enigma
 {
   struct object_transform: object_graphics
   {
+    static constexpr unsigned char objtype = 0xAE;
+
     //Other attributes that logically don't belong here
         double image_alpha;
         int    image_blend;

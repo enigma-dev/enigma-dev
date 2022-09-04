@@ -31,6 +31,7 @@
 #include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "planar_object.h"
 
@@ -78,7 +79,7 @@ namespace enigma
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(0xAB, len, bytes);
+    enigma_internal_serialize<unsigned char>(object_planar::objtype, len, bytes);
     enigma_internal_serialize(x, len, bytes);
     enigma_internal_serialize(y, len, bytes);
     enigma_internal_serialize(xprevious, len, bytes);
@@ -105,6 +106,11 @@ namespace enigma
 
     unsigned char type;
     enigma_internal_deserialize(type, iter, len);
+    if (type != object_planar::objtype) {
+      DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_planar::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
     enigma_internal_deserialize(x, iter, len);
     enigma_internal_deserialize(y, iter, len);
     enigma_internal_deserialize(xprevious, iter, len);

@@ -53,6 +53,8 @@ namespace enigma
   };
   struct object_graphics: object_timelines
   {
+    static constexpr unsigned char objtype = 0xAD;
+
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
       gs_scalar image_index;

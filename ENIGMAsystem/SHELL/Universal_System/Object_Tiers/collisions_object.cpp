@@ -27,6 +27,7 @@
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cmath>
 #include <floatcomp.h>
@@ -146,7 +147,7 @@ namespace enigma
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
-      enigma_internal_serialize<unsigned char>(0xBA, len, bytes);
+      enigma_internal_serialize<unsigned char>(object_collisions::objtype, len, bytes);
       enigma_internal_serialize(mask_index, len, bytes);
       enigma_internal_serialize(solid, len, bytes);
       enigma_internal_serialize(polygon_index, len, bytes);
@@ -163,6 +164,11 @@ namespace enigma
 
       unsigned char type;
       enigma_internal_deserialize(type, iter, len);
+      if (type != object_collisions::objtype) {
+        DEBUG_MESSAGE("object_collisions::deserialize_self: Object type '" + std::to_string(type) +
+                          "' does not match expected: " + std::to_string(object_collisions::objtype),
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+      }
       enigma_internal_deserialize(mask_index, iter, len);
       enigma_internal_deserialize(solid, iter, len);
       enigma_internal_deserialize(polygon_index, iter, len);

@@ -24,6 +24,7 @@
 #include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
 #include "serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <math.h>
 #include <floatcomp.h>
@@ -96,7 +97,7 @@ namespace enigma
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(0xAE, len, bytes);
+    enigma_internal_serialize<unsigned char>(object_graphics::objtype, len, bytes);
     enigma_internal_serialize(sprite_index, len, bytes);
     enigma_internal_serialize(image_index, len, bytes);
     enigma_internal_serialize(image_speed, len, bytes);
@@ -116,6 +117,11 @@ namespace enigma
 
     unsigned char type;
     enigma_internal_deserialize(type, iter, len);
+    if (type != object_graphics::objtype) {
+      DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_graphics::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
     enigma_internal_deserialize(sprite_index, iter, len);
     enigma_internal_deserialize(image_index, iter, len);
     enigma_internal_deserialize(image_speed, iter, len);
