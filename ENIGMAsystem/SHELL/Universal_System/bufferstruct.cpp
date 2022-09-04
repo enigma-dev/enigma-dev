@@ -22,6 +22,7 @@
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance_system_frontend.h"
 #include "Universal_System/Object_Tiers/serialization.h"
@@ -446,14 +447,27 @@ void game_save_buffer(int buffer) {
 }
 
 void game_load_buffer(int buffer) {
+  std::vector<int> active_ids{};
+  std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
+                 [](auto &value) { return value.first; });
+  for (int id : active_ids) {
+    instance_destroy(id);
+  }
+  std::vector<int> inactive_ids{};
+  std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
+                 [](auto &value) { return value.first; });
+  for (int id : inactive_ids) {
+    instance_destroy(id);
+  }
   get_buffer(binbuff, buffer);
   std::byte *ptr = reinterpret_cast<std::byte *>(&binbuff->data[0]);
   std::size_t active_size = enigma::deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
   for (std::size_t i = 0; i < active_size; i++) {
     // This should be an object, where `id` is serialized first and `object_id` second
+    auto obj_id = enigma::deserialize<int>(ptr + 1);
     auto obj_ind = enigma::deserialize<int>(ptr + 1 + sizeof(unsigned int));
-    auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+    auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
     ptr += obj->deserialize_self(ptr);
     obj->activate();
   }
