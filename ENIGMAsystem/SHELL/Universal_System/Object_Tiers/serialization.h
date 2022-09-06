@@ -23,6 +23,7 @@
 #include <cstring>
 #include <type_traits>
 
+#include "Universal_System/detect_serialization.h"
 #include "../var4.h"
 
 namespace enigma {
@@ -108,28 +109,16 @@ struct is_lua_table<lua_table<U>> : std::true_type {
 template <typename T>
 constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
-template<typename T>
-class has_size_method
-{
-  template <typename U, std::size_t (U::*)() const noexcept> struct Check;
-  template <typename U> static char func(Check<U, &U::size> *);
-  template <typename U> static int func(...);
- public:
-  typedef has_size_method type;
-  enum { value = sizeof(func<T>(0)) == sizeof(char) };
-};
-
-template <typename T>
-constexpr static inline bool has_size_method_v = has_size_method<T>::value;
-
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
   if constexpr (std::is_same_v<variant, std::decay_t<T>>) {
     return variant_size(value);
   } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
     return var_size(value);
-  } else if constexpr (has_size_method_v<T>) {
+  } else if constexpr (has_size_method_v<std::decay_t<T>>) {
     return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
+  } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
+    return value.byte_size();
   } else if constexpr (is_lua_table_v<std::decay_t<T>>) {
     return enigma_internal_sizeof_lua_table(value);
   } else {
@@ -444,8 +433,8 @@ inline T deserialize(std::byte *iter) {
 }
 
 template <typename T>
-inline void resize_buffer_for_value(std::vector<std::byte> &buffer, T) {
-  buffer.resize(buffer.size() + sizeof(T));
+inline void resize_buffer_for_value(std::vector<std::byte> &buffer, T &&value) {
+  buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 inline void resize_buffer_for_var(std::vector<std::byte> &buffer, const var &value) {
@@ -456,6 +445,15 @@ inline void resize_buffer_for_variant(std::vector<std::byte> &buffer, const vari
   buffer.resize(buffer.size() + variant_size(value));
 }
 
+inline void resize_buffer_for_string(std::vector<std::byte> &buffer, const std::string &value) {
+  buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
+}
+
+template <typename T, typename = std::enable_if_t<has_byte_size_method_v<T>>>
+inline void resize_buffer_using_byte_size(std::vector<std::byte> &buffer, const T &value) {
+  buffer.resize(buffer.size() + value.byte_size());
+}
+
 template <typename T>
 inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   if constexpr (std::is_same_v<var, std::decay_t<T>>) {
@@ -463,8 +461,10 @@ inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
     resize_buffer_for_variant(buffer, value);
   } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
-  }  else {
+    resize_buffer_for_string(buffer, value);
+  } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
+    resize_buffer_using_byte_size(buffer, value);
+  } else {
     resize_buffer_for_value(buffer, value);
   }
 }
@@ -525,9 +525,12 @@ inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &
   } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
     value = enigma::deserialize<std::string>(iter + len);
     len += value.length() + sizeof(std::size_t);
+  } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
+    value = enigma::deserialize<T>(iter + len);
+    len += value.byte_size();
   } else {
     value = enigma::deserialize<T>(iter + len);
-    len += sizeof(T);
+    len += enigma_internal_sizeof(value);
   }
 }
 
