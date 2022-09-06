@@ -22,6 +22,9 @@
 #include <string>
 #include <utility>
 
+#include "Universal_System/Object_Tiers/serialization.h"
+#include "Universal_System/detect_serialization.h"
+
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
   #define CHECK_ID(id, ret) \
@@ -190,6 +193,57 @@ class AssetArray {
 
   void resize(size_t count) {
     assets_.resize(count);
+  }
+
+  std::vector<std::byte> serialize() {
+    std::vector<std::byte> result{};
+    std::size_t len = 0;
+    if constexpr (has_serialize_method_v<T>) {
+      enigma::enigma_internal_serialize(assets_.size(), len, result);
+      for (std::size_t i = 0; i < assets_.size(); i++) {
+        std::vector<std::byte> serialized = assets_[i].serialize();
+        std::copy(serialized.begin(), serialized.end(), std::back_inserter(result));
+      }
+    } else if constexpr (HAS_SERIALIZE_FUNCTION()) {
+      enigma::enigma_internal_serialize(assets_.size(), len, result);
+      for (std::size_t i = 0; i < assets_.size(); i++) {
+        enigma::enigma_internal_serialize(operator[](i), len, result);
+      }
+    }
+    return result;
+  }
+
+  std::size_t deserialize_self(std::byte *iter) {
+    if constexpr (has_deserialize_self_method_v<T>) {
+      std::size_t len = 0;
+      std::size_t elements = 0;
+      enigma::enigma_internal_deserialize(elements, iter, len);
+      resize(elements);
+      for (std::size_t i = 0; i < elements; i++) {
+        len += assets_[i].deserialize_self(iter + len);
+      }
+      return len;
+    } else if constexpr (HAS_DESERIALIZE_FUNCTION()) {
+      std::size_t len = 0;
+      std::size_t elements = 0;
+      enigma::enigma_internal_deserialize(elements, iter, len);
+      resize(elements);
+      for (std::size_t i = 0; i < elements; i++) {
+        enigma::enigma_internal_deserialize(assets_[i], iter, len);
+      }
+      return len;
+    } else {
+      return 0;
+    }
+  }
+
+  static std::pair<AssetArray<T, LEFT>, std::size_t> deserialize(std::byte *iter) {
+    if constexpr (has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION()) {
+      AssetArray<T, LEFT> result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
+    }
+    return {};
   }
 
  private:
