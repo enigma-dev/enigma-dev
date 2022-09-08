@@ -1,0 +1,95 @@
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+
+buffer_fill(buf, 0, buffer_u8, 170, 8);
+buffer_save(buf, "buf.bin");
+
+for var offset = 0; offset < 8; ++offset {
+    var buf2 = buffer_create(8, buffer_grow, buffer_sizeof(buffer_u8));
+    buffer_load_ext(buf2, "buf.bin", offset);
+    gtest_assert_eq(buffer_get_size(buf2), 8 + offset);
+
+    var len = buffer_get_size(buf2);
+    for var i = 0; i < offset; ++i {
+        gtest_assert_eq(buffer_tell(buf2), i);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+    }
+    for var i = 0; i < len - offset; ++i {
+        gtest_assert_eq(buffer_tell(buf2), i + offset);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
+    }
+    buffer_delete(buf2);
+}
+
+for var offset = 0; offset < 8; ++offset {
+    var buf2 = buffer_create(12, buffer_wrap, buffer_sizeof(buffer_u8));
+    buffer_load_ext(buf2, "buf.bin", offset);
+    gtest_assert_eq(buffer_get_size(buf2), 12);
+
+    var len = buffer_get_size(buf2);
+    buffer_seek(buf2, buffer_seek_start, (len - (4 - offset)));
+    for var i = 0; i < (len - 8); ++i {
+        int off = (i + len - (4 - offset));
+        gtest_assert_eq(buffer_tell(buf2), off % buffer_get_size(buf2));
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+    }
+    for var i = 0; i < 8; ++i {
+        int off = i + offset;
+        gtest_assert_eq(buffer_tell(buf2), off % 12);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
+    }
+    buffer_delete(buf2);
+}
+
+for var offset = 0; offset < 8; ++offset {
+    var buf2 = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+    buffer_load_ext(buf2, "buf.bin", offset);
+    gtest_assert_eq(buffer_get_size(buf2), 8);
+
+    var len = buffer_get_size(buf2);
+    for var i = 0; i < offset; ++i {
+        gtest_assert_eq(buffer_tell(buf2), i);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+    }
+    for var i = 0; i < len - offset; ++i {
+        gtest_assert_eq(buffer_tell(buf2), i + offset);
+        gtest_assert_eq(buffer_read(buf2, buffer_u8), 170);
+    }
+    buffer_delete(buf2);
+}
+
+buffer_delete(buf);
+
+buf = buffer_create(32, buffer_fixed, 1);
+for var i = 0; i < 32; i++ {
+    buffer_write(buf, buffer_u8, i);
+}
+
+buffer_save(buf, "buf.bin");
+var buf2 = buffer_create(8, buffer_wrap, 1);
+buffer_load_ext(buf2, "buf.bin", 2);
+/*
+ * From GMS:
+ * 0: 30
+ * 1: 31
+ * 2: 24
+ * 3: 25
+ * 4: 26
+ * 5: 27
+ * 6: 28
+ * 7: 29
+ */
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 30);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 31);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 24);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 25);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 26);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 27);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 28);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 29);
+
+
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+game_end();

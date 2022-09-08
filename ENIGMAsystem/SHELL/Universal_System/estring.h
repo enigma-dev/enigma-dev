@@ -88,6 +88,15 @@ std::string filename_change_ext(std::string fname, std::string newext);
 var string_split(const std::string &str, const std::string &delim,
                  bool skip_empty = false);
 
+std::string md5_string_utf8(std::string str);
+std::string md5_string_unicode(std::string str);
+std::string md5_string_unicode(std::u16string str);
+std::string md5_file(std::string filename);
+
+std::string sha1_string_utf8(std::string str);
+std::string sha1_string_unicode(std::string str);
+std::string sha1_string_unicode(std::u16string str);
+std::string sha1_file(std::string filename);
 }  //namespace enigma_user
 
 #endif  //ENIGMA_ESTRING_H

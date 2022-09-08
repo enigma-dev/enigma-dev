@@ -30,9 +30,9 @@ gtest_expect_eq(buffer_tell(buffer_fixed_test), 0);
 gtest_expect_eq(buffer_read(buffer_fixed_test, buffer_u8), 0);
 gtest_expect_eq(buffer_tell(buffer_fixed_test), 1);
 buffer_seek(buffer_fixed_test, buffer_seek_end, 0);
-gtest_expect_eq(buffer_tell(buffer_fixed_test), 137);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 136);
 buffer_seek(buffer_fixed_test, buffer_seek_relative, -10);
-gtest_expect_eq(buffer_tell(buffer_fixed_test), 127);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 126);
 buffer_seek(buffer_fixed_test, buffer_seek_start, 23);
 gtest_expect_eq(buffer_tell(buffer_fixed_test), 23);
 
