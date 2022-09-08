@@ -539,6 +539,16 @@ inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter,
   len += variant_size(value);
 }
 
+template <typename ... Ts>
+inline void enigma_internal_serialize_many(std::size_t &len, std::vector<std::byte> &bytes, Ts &&...values) {
+  (enigma_internal_serialize(std::forward<Ts>(values), len, bytes), ...);
+}
+
+template <typename ... Ts>
+inline void enigma_internal_deserialize_many(std::byte *iter, std::size_t &len, Ts &&...values) {
+  (enigma_internal_deserialize(std::forward<Ts>(values), iter, len), ...);
+}
+
 }
 
 #endif

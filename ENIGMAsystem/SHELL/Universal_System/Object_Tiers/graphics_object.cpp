@@ -98,15 +98,8 @@ namespace enigma
     std::size_t len = 0;
 
     enigma_internal_serialize<unsigned char>(object_graphics::objtype, len, bytes);
-    enigma_internal_serialize(sprite_index, len, bytes);
-    enigma_internal_serialize(image_index, len, bytes);
-    enigma_internal_serialize(image_speed, len, bytes);
-    enigma_internal_serialize(image_single, len, bytes);
-    enigma_internal_serialize(depth, len, bytes);
-    enigma_internal_serialize(visible, len, bytes);
-    enigma_internal_serialize(image_xscale, len, bytes);
-    enigma_internal_serialize(image_yscale, len, bytes);
-    enigma_internal_serialize(image_angle, len, bytes);
+    enigma_internal_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -122,15 +115,8 @@ namespace enigma
                         "' does not match expected: " + std::to_string(object_graphics::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize(sprite_index, iter, len);
-    enigma_internal_deserialize(image_index, iter, len);
-    enigma_internal_deserialize(image_speed, iter, len);
-    enigma_internal_deserialize_variant(image_single, iter, len);
-    enigma_internal_deserialize_variant(depth, iter, len);
-    enigma_internal_deserialize(visible, iter, len);
-    enigma_internal_deserialize(image_xscale, iter, len);
-    enigma_internal_deserialize(image_yscale, iter, len);
-    enigma_internal_deserialize(image_angle, iter, len);
+    enigma_internal_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
 
     return len;
   }

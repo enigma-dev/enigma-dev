@@ -148,12 +148,8 @@ namespace enigma
       std::size_t len = 0;
 
       enigma_internal_serialize<unsigned char>(object_collisions::objtype, len, bytes);
-      enigma_internal_serialize(mask_index, len, bytes);
-      enigma_internal_serialize(solid, len, bytes);
-      enigma_internal_serialize(polygon_index, len, bytes);
-      enigma_internal_serialize(polygon_xscale, len, bytes);
-      enigma_internal_serialize(polygon_yscale, len, bytes);
-      enigma_internal_serialize(polygon_angle, len, bytes);
+      enigma_internal_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
+                                     polygon_yscale, polygon_angle);
 
       bytes.shrink_to_fit();
       return bytes;
@@ -169,12 +165,8 @@ namespace enigma
                           "' does not match expected: " + std::to_string(object_collisions::objtype),
                       MESSAGE_TYPE::M_FATAL_ERROR);
       }
-      enigma_internal_deserialize(mask_index, iter, len);
-      enigma_internal_deserialize(solid, iter, len);
-      enigma_internal_deserialize(polygon_index, iter, len);
-      enigma_internal_deserialize(polygon_xscale, iter, len);
-      enigma_internal_deserialize(polygon_yscale, iter, len);
-      enigma_internal_deserialize(polygon_angle, iter, len);
+      enigma_internal_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
+                                     polygon_yscale, polygon_angle);
 
       return len;
     }
