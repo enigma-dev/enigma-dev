@@ -27,6 +27,8 @@
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance_system_frontend.h"
 #include "Universal_System/Object_Tiers/serialization.h"
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/backgrounds_internal.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -502,6 +504,15 @@ void game_save_buffer(int buffer) {
     std::move(buf.begin(), buf.end(), reinterpret_cast<std::byte *>(&binbuff->data[ptr]));
   }
 
+  ptr = binbuff->data.size();
+  binbuff->data.resize(binbuff->data.size() + enigma::backgrounds.byte_size());
+  auto buf = enigma::backgrounds.serialize();
+  std::copy(buf.begin(), buf.end(), reinterpret_cast<std::byte *>(&binbuff->data[ptr]));
+
+  ptr = binbuff->data.size();
+  binbuff->data.resize(binbuff->data.size() + sizeof(int));
+  enigma::serialize_into(reinterpret_cast<std::byte *>(&binbuff->data[ptr]), static_cast<int>(enigma_user::room.rval.d));
+
 // TODO: Uncomment this once my PR is merged
 //  store_checksum(binbuff->data, calculate_checksum(binbuff->data));
 }
@@ -547,6 +558,12 @@ void game_load_buffer(int buffer) {
     ptr += obj->deserialize_self(ptr);
     obj->deactivate();
   }
+
+  ptr += enigma::backgrounds.deserialize_self(ptr);
+
+  auto room_index = enigma::deserialize<int>(ptr);
+  enigma_user::room_goto(room_index);
+  ptr += sizeof(int);
 }
 
 }  // namespace enigma_user
