@@ -690,16 +690,23 @@ namespace ngs::xproc {
     std::string path;
     #if defined(_WIN32)
     if (proc_id == GetCurrentProcessId()) {
-      wchar_t exe[MAX_PATH];
-      if (GetModuleFileNameW(nullptr, exe, MAX_PATH) != 0) {
-        path = narrow(exe);
+      wchar_t buffer[MAX_PATH];
+      if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) {
+        wchar_t exe[MAX_PATH];
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
+          path = narrow(exe);
+        }
       }
     } else {
       HANDLE proc = open_process_with_debug_privilege(proc_id);
       if (proc == nullptr) return path;
-      wchar_t exe[MAX_PATH]; DWORD size = MAX_PATH;
-      if (QueryFullProcessImageNameW(proc, 0, exe, &size) != 0) {
-        path = narrow(exe);
+      wchar_t buffer[MAX_PATH];
+      DWORD size = sizeof(buffer);
+      if (QueryFullProcessImageNameW(proc, 0, buffer, &size) != 0) {
+        wchar_t exe[MAX_PATH];
+        if (_wfullpath(exe, buffer, MAX_PATH)) {
+          path = narrow(exe);
+        }
       }
       CloseHandle(proc);
     }
@@ -843,9 +850,9 @@ namespace ngs::xproc {
     wchar_t *buffer = nullptr;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCWD);
     if (buffer) {
-      wchar_t wbuffer[MAX_PATH];
-      if (_wfullpath(wbuffer, buffer, MAX_PATH)) {
-        path = narrow(wbuffer);
+      wchar_t cwd[MAX_PATH];
+      if (_wfullpath(cwd, buffer, MAX_PATH)) {
+        path = narrow(cwd);
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
           path = path.substr(0, path.length() - 1);
         }
@@ -898,7 +905,7 @@ namespace ngs::xproc {
       " substr($0, 5)'}").c_str(), "r");
     if (fp) {
       char buffer[PATH_MAX];
-      if (fgets(buffer, PATH_MAX, fp)) {
+      if (fgets(buffer, sizeof(buffer), fp)) {
         std::string str = buffer;
         std::size_t pos = str.find("\n", strlen(buffer) - 1);
         if (pos != std::string::npos) {
