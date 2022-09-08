@@ -121,8 +121,8 @@ namespace ifd {
 
     std::vector<int> m_iconIndices;
     std::vector<std::string> m_iconFilepaths; // m_iconIndices[x] <-> m_iconFilepaths[x]
-    std::unordered_map<std::string, void*> m_icons;
-    void* m_getIcon(const ghc::filesystem::path& path);
+    std::unordered_map<std::string, void *> m_icons;
+    void *m_getIcon(const ghc::filesystem::path& path);
     void m_clearIcons();
     void m_refreshIconPreview();
     void m_clearIconPreview();

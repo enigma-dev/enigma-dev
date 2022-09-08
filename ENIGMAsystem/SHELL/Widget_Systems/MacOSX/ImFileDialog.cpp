@@ -1,5 +1,12 @@
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#if defined(_WIN32)
+#if defined(_MSC_VER)
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
+#endif
+#ifndef STBI_WINDOWS_UTF8
+#define STBI_WINDOWS_UTF8
+#endif
 #endif
 
 #include <fstream>
@@ -9,12 +16,30 @@
 #include "ImFileDialogMacros.h"
 #include "filedialogs.h"
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#endif
+
 #include "stb_image.h"
+
+#ifndef NANOSVG_IMPLEMENTATION
+#define NANOSVG_IMPLEMENTATION
+#endif
+
+#include "nanosvg.h"
+
+#ifndef NANOSVGRAST_IMPLEMENTATION
+#define NANOSVGRAST_IMPLEMENTATION
+#endif
+
+#include "nanosvgrast.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -26,6 +51,9 @@
 #else
 #if (defined(__MACH__) && defined(__APPLE__))
 #include <AppKit/AppKit.h>
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#include <gio/gio.h>
+#include <gtk/gtk.h>
 #endif
 #include <unistd.h>
 #endif
@@ -37,8 +65,8 @@
 #define PI 3.141592f
 
 namespace ifd {
-  static const char* GetDefaultFolderIcon();
-  static const char* GetDefaultFileIcon();
+  static const char *GetDefaultFolderIcon();
+  static const char *GetDefaultFileIcon();
 
   /* UI CONTROLS */
   bool FolderNode(const char* label, ImTextureID icon, bool& clicked) {
@@ -147,7 +175,7 @@ namespace ifd {
       ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, ImGui::GetStyle().ItemSpacing.y));
       ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
       bool isFirstElement = true;
-      for (size_t i = 0; i < btnList.size(); i++) {
+      for (std::size_t i = 0; i < btnList.size(); i++) {
         if (totalWidth > size.x - 30 && i != btnList.size() - 1) { // trim some buttons if there's not enough space
           float elSize = ImGui::CalcTextSize(btnList[i].c_str()).x + style.FramePadding.x * 2.0f + GUI_ELEMENT_SIZE;
           totalWidth -= elSize;
@@ -164,9 +192,11 @@ namespace ifd {
           #ifdef _WIN32
           std::string newPath = "";
           #else
-          std::string newPath = "/";
+          std::string newPath;
+          if (btnList[0] != IFD_QUICK_ACCESS && btnList[0] != IFD_THIS_PC)
+            newPath += "/";
           #endif
-          for (size_t j = 0; j <= i; j++) {
+          for (std::size_t j = 0; j <= i; j++) {
             newPath += btnList[j];
             #ifdef _WIN32
             if (j != i)
@@ -347,7 +377,8 @@ namespace ifd {
     std::error_code ec;
     Path = path;
     IsDirectory = ghc::filesystem::is_directory(path, ec);
-    Size = (size_t)ghc::filesystem::file_size(path, ec);
+    if (IsDirectory) Size = (std::size_t)-1;
+    else Size = (std::size_t)ghc::filesystem::file_size(path, ec);
 
     struct stat attr;
     stat(path.string().c_str(), &attr);
@@ -593,7 +624,7 @@ namespace ifd {
     if (fd != -1) {
       for (auto& p : m_treeCache) {
         if (p->Path == IFD_QUICK_ACCESS) {
-          for (size_t i = 0; i < p->Children.size(); i++) {
+          for (std::size_t i = 0; i < p->Children.size(); i++) {
             if (ghc::filesystem::exists(p->Children[i]->Path.string(), ec)) {
               ngs::fs::file_text_write_string(fd, p->Children[i]->Path.string());
               ngs::fs::file_text_writeln(fd);
@@ -641,7 +672,7 @@ namespace ifd {
     // remove from sidebar
     for (auto& p : m_treeCache)
       if (p->Path == IFD_QUICK_ACCESS) {
-        for (size_t i = 0; i < p->Children.size(); i++)
+        for (std::size_t i = 0; i < p->Children.size(); i++)
           if (p->Children[i]->Path == path) {
             p->Children.erase(p->Children.begin() + i);
             break;
@@ -778,9 +809,9 @@ namespace ifd {
 
     std::vector<std::string> exts;
 
-    size_t lastSplit = 0, lastExt = 0;
+    std::size_t lastSplit = 0, lastExt = 0;
     bool inExtList = false;
-    for (size_t i = 0; i < filter.size(); i++) {
+    for (std::size_t i = 0; i < filter.size(); i++) {
       if (filter[i] == ',') {
         if (!inExtList)
           lastSplit = i + 1;
@@ -819,8 +850,8 @@ namespace ifd {
     }
   }
 
-  void* FileDialog::m_getIcon(const ghc::filesystem::path& path) {
-#ifdef _WIN32
+  void *FileDialog::m_getIcon(const ghc::filesystem::path& path) {
+    #ifdef _WIN32
     if (m_icons.count(path.string()) > 0)
       return m_icons[path.string()];
 
@@ -870,68 +901,190 @@ namespace ifd {
     if (byteSize == 0)
       return nullptr;
 
-    uint8_t* data = (uint8_t*)malloc(byteSize);
-    GetBitmapBits(iconInfo.hbmColor, byteSize, data);
-
-    m_icons[pathU8] = this->CreateTexture(data, ds.dsBm.bmWidth, ds.dsBm.bmHeight, 0);
-
-    free(data);
+    uint8_t *data = (uint8_t *)malloc(byteSize);
+    if (data) {
+      GetBitmapBits(iconInfo.hbmColor, byteSize, data);
+      m_icons[pathU8] = this->CreateTexture(data, ds.dsBm.bmWidth, ds.dsBm.bmHeight, 0);
+      free(data);
+    }
 
     return m_icons[pathU8];
-    #else
+    #elif (defined(__APPLE__) && defined(__MACH__))
     if (m_icons.count(path.string()) > 0)
       return m_icons[path.string()];
 
     std::string pathU8 = path.string();
 
-    m_icons[pathU8] = nullptr;
-
     std::error_code ec;
-    int iconID = 1;
-    if (ghc::filesystem::is_directory(path, ec))
-      iconID = 0;
+    m_icons[pathU8] = nullptr;
+    
+    std::string apath = ghc::filesystem::absolute(path, ec).string();
+    NSImage *icon = nullptr;
+    struct stat fileInfo;
 
+    if (ghc::filesystem::exists(apath, ec)) {
+      if (stat(path.string().c_str(), &fileInfo) == -1) return nullptr;
+      icon = [[NSWorkspace sharedWorkspace] iconForFile:[NSString stringWithUTF8String:apath.c_str()]];
+    } else {
+      if (stat("/dev", &fileInfo) == -1) return nullptr;
+      icon = [[NSWorkspace sharedWorkspace] iconForFile:@"/dev"];
+    }
+    
+    if (icon == nullptr) return nullptr;
     // check if icon is already loaded
-    auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), iconID);
+    auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), (int)fileInfo.st_ino);
     if (itr != m_iconIndices.end()) {
       const std::string& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
       m_icons[pathU8] = m_icons[existingIconFilepath];
       return m_icons[pathU8];
     }
 
-    m_iconIndices.push_back(iconID);
+    m_iconIndices.push_back(fileInfo.st_ino);
     m_iconFilepaths.push_back(pathU8);
 
-    ImVec4 wndBg = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+    [icon setSize:NSMakeSize(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)];
 
-    // light theme - load default icons
-    if ((wndBg.x + wndBg.y + wndBg.z) / 3.0f > 0.5f) {
-      uint8_t* data = (uint8_t*)ifd::GetDefaultFileIcon();
-      if (iconID == 0)
-        data = (uint8_t*)ifd::GetDefaultFolderIcon();
-      m_icons[pathU8] = this->CreateTexture(data, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, 0);
+    CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)[icon TIFFRepresentation], nullptr);
+    CGImageRef imageRef =  CGImageSourceCreateImageAtIndex(source, 0, nullptr);
+
+    NSUInteger width = CGImageGetWidth(imageRef);
+    NSUInteger height = CGImageGetHeight(imageRef);
+
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    unsigned char *rawData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
+
+    if (rawData) {
+      NSUInteger bytesPerPixel = 4;
+      NSUInteger bytesPerRow = bytesPerPixel * width;
+      NSUInteger bitsPerComponent = 8;
+      CGContextRef context = CGBitmapContextCreate(rawData, width, height,
+      bitsPerComponent, bytesPerRow, colorSpace,
+      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+      CGColorSpaceRelease(colorSpace);
+      CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
+      CGContextRelease(context);
+      unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
+      if (invData) {
+        for (int y = 0; y < height; y++) {
+          for (int x = 0; x < width; x++) {
+            int index = (y * width + x) * 4;
+            invData[index + 2] = rawData[index + 0];
+            invData[index + 1] = rawData[index + 1];
+            invData[index + 0] = rawData[index + 2];
+            invData[index + 3] = rawData[index + 3];
+          }
+        }
+        m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
+        free(invData);
+      }
+      free(rawData);
     }
-    // dark theme - invert the colors
-    else {
-      uint8_t* data = (uint8_t*)ifd::GetDefaultFileIcon();
-      if (iconID == 0)
-        data = (uint8_t*)ifd::GetDefaultFolderIcon();
 
-      uint8_t* invData = (uint8_t*)malloc(DEFAULT_ICON_SIZE * DEFAULT_ICON_SIZE * 4);
-      for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 32; x++) {
-          int index = (y* DEFAULT_ICON_SIZE + x) * 4;
-          invData[index + 0] = 255 - data[index + 0];
-          invData[index + 1] = 255 - data[index + 1];
-          invData[index + 2] = 255 - data[index + 2];
-          invData[index + 3] = data[index + 3];
+    return m_icons[pathU8];
+    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+    if (m_icons.count(path.string()) > 0)
+      return m_icons[path.string()];
+
+    std::string pathU8 = path.string();
+
+    std::error_code ec;
+    m_icons[pathU8] = nullptr;
+    
+    std::string apath = ghc::filesystem::absolute(path, ec).string();
+    struct stat fileInfo;
+    GFile *file = nullptr;
+
+    if (ghc::filesystem::exists(apath, ec)) {
+      if (stat(path.string().c_str(), &fileInfo) == -1) return nullptr;
+      file = g_file_new_for_path(apath.c_str());
+    } else {
+      if (stat("/bin", &fileInfo) == -1) return nullptr;
+      file = g_file_new_for_path("/bin");
+    }
+
+    if (!G_IS_OBJECT(file)) return nullptr;
+    GFileInfo *file_info = g_file_query_info(file, "standard::*", G_FILE_QUERY_INFO_NONE, nullptr, nullptr);
+    if (!G_IS_OBJECT(file_info)) {
+      if (G_IS_OBJECT(file)) g_object_unref(file);
+      return nullptr;
+    }
+
+    GIcon *icon = g_file_info_get_icon(file_info);
+    if (!G_IS_OBJECT(icon)) {
+      if (G_IS_OBJECT(file_info)) g_object_unref(file_info);
+      if (G_IS_OBJECT(file)) g_object_unref(file);
+      return nullptr;
+    }
+
+    // check if icon is already loaded
+    auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), (int)fileInfo.st_ino);
+    if (itr != m_iconIndices.end()) {
+      const std::string& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
+      m_icons[pathU8] = m_icons[existingIconFilepath];
+      return m_icons[pathU8];
+    }
+
+    m_iconIndices.push_back(fileInfo.st_ino);
+    m_iconFilepaths.push_back(pathU8);
+    if (!G_IS_OBJECT(icon) || !G_IS_THEMED_ICON(icon)) {
+      if (G_IS_OBJECT(file_info)) g_object_unref(file_info);
+      if (G_IS_OBJECT(file)) g_object_unref(file);
+      return nullptr;
+    }
+    const char * const *fnames = g_themed_icon_get_names(G_THEMED_ICON(icon));
+    GtkIconInfo *gtkicon_info = nullptr;
+
+    static bool gtkinit;
+    if (!gtkinit) gtk_init(nullptr, nullptr);
+    gtkinit = true;
+
+    gtkicon_info = gtk_icon_theme_choose_icon(gtk_icon_theme_get_default(), (const char **)fnames, 32, (GtkIconLookupFlags)0);
+    if (gtkicon_info) {
+      const char *fname = gtk_icon_info_get_filename(gtkicon_info);
+      int width, height, nrChannels;
+      unsigned char *image = nullptr;
+      std::string ext = ghc::filesystem::path(fname).extension().string();
+      if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga") {
+        image = stbi_load(fname, &width, &height, &nrChannels, STBI_rgb_alpha);
+        if (image == nullptr) goto finish;
+      } else if (ext == ".svg") {
+        NSVGimage *svg_image = nsvgParseFromFile(fname, "px", 96.0);
+        width = svg_image->width;
+        height = svg_image->height;
+        image = (unsigned char *)calloc(width * height * 4, sizeof(unsigned char));
+        if (image == nullptr) goto finish;
+        NSVGrasterizer *rasterizer = nsvgCreateRasterizer();
+        nsvgRasterize(rasterizer, svg_image, 0, 0, 1, image, width, height, width * 4);
+        nsvgDeleteRasterizer(rasterizer);
+	nsvgDelete(svg_image);
+      }
+
+      if (image) {
+        unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
+        if (invData) {
+          for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+              int index = (y * width + x) * 4;
+              invData[index + 2] = image[index + 0];
+              invData[index + 1] = image[index + 1];
+              invData[index + 0] = image[index + 2];
+              invData[index + 3] = image[index + 3];
+            }
+          }
+          m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
+          free(invData);
+          free(image);
+        } else {
+          m_icons[pathU8] = this->CreateTexture(image, width, height, 0);
+          free(image);
         }
       }
-      m_icons[pathU8] = this->CreateTexture(invData, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, 0);
-
-      free(invData);
     }
-
+    
+    finish:
+    if (G_IS_OBJECT(gtkicon_info)) g_object_unref(gtkicon_info);
+    if (G_IS_OBJECT(file_info)) g_object_unref(file_info); 
+    if (G_IS_OBJECT(file)) g_object_unref(file);
     return m_icons[pathU8];
     #endif
   }
@@ -974,7 +1127,7 @@ namespace ifd {
       this->DeleteTexture(data.IconPreview);
 
       if (data.IconPreviewData != nullptr) {
-        stbi_image_free(data.IconPreviewData);
+        free(data.IconPreviewData);
         data.IconPreviewData = nullptr;
       }
     }
@@ -993,7 +1146,7 @@ namespace ifd {
   }
 
   void FileDialog::m_loadPreview() {
-    for (size_t i = 0; m_previewLoaderRunning && i < m_content.size(); i++) {
+    for (std::size_t i = 0; m_previewLoaderRunning && i < m_content.size(); i++) {
       auto& data = m_content[i];
 
       if (data.HasIconPreview)
@@ -1003,10 +1156,70 @@ namespace ifd {
         std::string ext = data.Path.extension().string();
         if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga") {
           int width, height, nrChannels;
-          unsigned char* image = stbi_load(data.Path.string().c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
-
-          if (image == nullptr || width == 0 || height == 0)
+          unsigned char *image = stbi_load(data.Path.string().c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
+          
+          if (image == nullptr) 
             continue;
+
+          #if (defined(__APPLE__) && defined(__MACH__))
+          if (image) {
+            unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
+            if (invData) {
+              for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                  int index = (y * width + x) * 4;
+                  invData[index + 2] = image[index + 0];
+                  invData[index + 1] = image[index + 1];
+                  invData[index + 0] = image[index + 2];
+                  invData[index + 3] = image[index + 3];
+                }
+              }
+              free(image);
+              image = invData;
+            }
+          }
+          #endif
+
+          data.HasIconPreview = true;
+          data.IconPreviewData = image;
+          data.IconPreviewWidth = width;
+          data.IconPreviewHeight = height;
+        } else if (ext == ".svg") {
+          int width = 0, height = 0;
+          NSVGimage *svg_image = nsvgParseFromFile(data.Path.string().c_str(), "px", 96.0);
+          width = svg_image->width;
+          height = svg_image->height;
+          unsigned char *image = (unsigned char *)calloc(width * height * 4, sizeof(unsigned char));
+          
+          if (image == nullptr) 
+            continue;
+
+          NSVGrasterizer *rasterizer = nsvgCreateRasterizer();
+          nsvgRasterize(rasterizer, svg_image, 0, 0, 1, image, width, height, width * 4);
+          nsvgDeleteRasterizer(rasterizer);
+	  nsvgDelete(svg_image);
+
+          if (image == nullptr) 
+            continue;
+
+          #if (defined(__APPLE__) && defined(__MACH__))
+          if (image) {
+            unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
+            if (invData) {
+              for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                  int index = (y * width + x) * 4;
+                  invData[index + 2] = image[index + 0];
+                  invData[index + 1] = image[index + 1];
+                  invData[index + 0] = image[index + 2];
+                  invData[index + 3] = image[index + 3];
+                }
+              }
+              free(image);
+              image = invData;
+            }
+          }
+          #endif
 
           data.HasIconPreview = true;
           data.IconPreviewData = image;
@@ -1152,7 +1365,7 @@ namespace ifd {
 
     if (m_content.size() > 0) {
       // find where the file list starts
-      size_t fileIndex = 0;
+      std::size_t fileIndex = 0;
       for (; fileIndex < m_content.size(); fileIndex++)
         if (!m_content[fileIndex].IsDirectory)
           break;
@@ -1302,7 +1515,9 @@ namespace ifd {
 
           // size
           ImGui::TableSetColumnIndex(2);
-          ImGui::Text("%.3f KiB", entry.Size/1024.0f);
+          if (!entry.IsDirectory)
+            ImGui::Text("%.3f KiB", entry.Size / 1024.0f);
+          else ImGui::Text("---");
         }
 
         ImGui::EndTable();
@@ -1315,7 +1530,7 @@ namespace ifd {
       for (auto& entry : m_content) {
         if (entry.HasIconPreview && entry.IconPreviewData != nullptr) {
           entry.IconPreview = this->CreateTexture(entry.IconPreviewData, entry.IconPreviewWidth, entry.IconPreviewHeight, 1);
-          stbi_image_free(entry.IconPreviewData);
+          free(entry.IconPreviewData);
           entry.IconPreviewData = nullptr;
         }
 
@@ -1325,8 +1540,9 @@ namespace ifd {
 
         bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
 
-        if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
-          std::error_code ec;
+        std::error_code ec;
+        if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), 
+        ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
           bool isDir = ghc::filesystem::is_directory(entry.Path, ec);
 
           if (ImGui::IsMouseDoubleClicked(0)) {
@@ -1576,7 +1792,7 @@ namespace ifd {
       ImGui::SetNextItemWidth(-FLT_MIN);
       int sel = static_cast<int>(m_filterSelection);
       if (ImGui::Combo("##ext_combo", &sel, m_filter.c_str())) {
-        m_filterSelection = static_cast<size_t>(sel);
+        m_filterSelection = static_cast<std::size_t>(sel);
         m_setDirectory(m_currentDirectory, false); // refresh
       }
     }
@@ -1625,9 +1841,11 @@ namespace ifd {
       m_isOpen = false;
   }
 }
-const char* ifd::GetDefaultFolderIcon() {
-  return (const char*)&folder_icon[0];
+
+const char *ifd::GetDefaultFolderIcon() {
+  return (const char *)&folder_icon[0];
 }
-const char* ifd::GetDefaultFileIcon() {
-  return (const char*)&file_icon[0];
+
+const char *ifd::GetDefaultFileIcon() {
+  return (const char *)&file_icon[0];
 }
