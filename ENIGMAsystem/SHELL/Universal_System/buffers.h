@@ -566,7 +566,128 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
  */
 void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
 
+/**
+ * @brief Serialize the game state (objects, backgrounds and room index) into a buffer
+ *
+ * This function serializes (in the following order):
+ * - The number of active objects
+ * - The active objects themselves
+ * - The number of inactive objects
+ * - The inactive objects themselves
+ * - A header byte for the @c enigma::backgrounds @c AssetArray
+ * - @c enigma::backgrounds itself
+ * - A footer byte for the @c enigma::backgrounds @c AssetArray
+ * - The current room index
+ * - A SHA1-checksum
+ *
+ * The serialization for objects works in the following manner: for each class in the object hierarchy, a leading byte
+ * is emitted to identify the object and verify that the data following it is valid. The bytes are written as follows:
+ * - @c object_basic : @c 0xAA
+ * - @c object_planar : @c 0xAB
+ * - @c object_timelines : @c 0xAC
+ * - @c object_graphics : @c 0xAD
+ * - @c object_transform : @c 0xAE
+ * - @c object_collisions : @c 0xAF
+ * - Any user defined object : @c 0xBB
+ *
+ * These leading bytes are then followed by the data of each class. While the data that is serialized for the inner
+ * classes does not change over time in terms of the contained variables, modifications to the user defined objects can
+ * lead to generation of classes whose contents do not remain stable over time.
+ *
+ * To ensure backwards compatibility of previously saved game state with a future revision of the user-defined object, a
+ * symbol table is emitted before each object's data block which maps the name of the serialized variable to the offset
+ * from the end of the symbol table where its data is stored. On the C++ side, the compiler emits a table for every
+ * object which maps the name of each variable in the object to a function which is responsible for deserializing its
+ * state from a byte stream. Then, the intersection of these two tables are taken at runtime, which gives the set of
+ * variables that exist both in the current revision of the object and the one serialized as part of the older game state,
+ * along with deserialization routines for each variable.
+ *
+ * As a proof of concept of implementing serialization and deserialization for an object type, the required routines are
+ * defined for the @c AssetArray and the @c Background classes to allow serializing and deserializing <tt> enigma::backgrounds </tt>,
+ * which is a <tt> AssetArray<Background> </tt>. The methods are:
+ * - <tt> std::size_t byte_size() const noexcept </tt> - Get the size (in bytes) of the object
+ * - <tt> std::vector<std::size_t> serialize() </tt> - Serialize the object into a byte stream
+ * - <tt> std::size_t deserialize_self(std::byte *iter) </tt> - Deserialize @c this from the byte stream and return the
+ *                                                              total number of bytes read
+ * - <tt> static std::pair<std::size_t, T> deserialize(std::byte *iter) - Deserialize an object from the given byte stream
+ *                                                                        and return it along with its size
+ *
+ * Out of these four, @c byte_size() and @c deserialize() are automatically picked up by the routines defined in
+ * @c serialization.h . The other methods have to be detected at compile time by the caller, using code like the following:
+ *
+ * @code{.cpp}
+ * if constexpr (has_serialize_method_v<T>) {
+ *   for (std::size_t i = 0; i < assets_.size(); i++) {
+ *     std::vector<std::byte> serialized = assets_[i].serialize();
+ *     // ...
+ *   }
+ * } else if constexpr (HAS_SERIALIZE_FUNCTION()) {
+ *   for (std::size_t i = 0; i < assets_.size(); i++) {
+ *     enigma::enigma_internal_serialize(operator[](i), len, result);
+ *     // ...
+ *   }
+ * }
+ * @endcode
+ *
+ * Both of the functions used in the <tt> if constexpr </tt> blocks are defined in @c detect_serialization.h . The first
+ * one, <tt> has_serialize_method_v<T> </tt>, checks if the object has a method of the form <tt> object.serialize() </tt>
+ * following the type given before. The second one, <tt> HAS_SERIALIZE_FUNCTION() </tt>, checks if the <tt> enigma::serialize </tt>
+ * function is invocable with the object's type. Together, these allow handling both cases of <tt> object.serialize() </tt>
+ * and <tt> serialize(object) </tt>.
+ *
+ * After all the state is serialized, the SHA-1 checksum of the buffer's data is calculated and written at the end.
+ *
+ * An example of the serialized state may look like the following:
+ *
+ * ┌────────┬─────────────────────────┬─────────────────────────┬────────┬────────┐
+ * │00000000│ 00 00 00 00 00 00 00 01 ┊ aa 00 01 86 a1 00 00 00 │0000000•┊×0•××000│
+ * │00000010│ 00 ab 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 00 │0×000000┊00000000│
+ * │00000020│ 00 00 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 00 │00000000┊00000000│
+ * │*       │                         ┊                         │        ┊        │
+ * │00000060│ 00 00 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 40 │00000000┊0000000@│
+ * │00000070│ 70 e0 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 ac │p×000000┊0000000×│
+ * │00000080│ 00 00 00 00 00 00 00 00 ┊ ff ff ff ff 00 3f 80 00 │00000000┊××××0?×0│
+ * │00000090│ 00 00 00 00 00 00 ad ff ┊ ff ff ff 00 00 00 00 3f │000000××┊×××0000?│
+ * │000000a0│ 80 00 00 00 bf f0 00 00 ┊ 00 00 00 00 00 00 00 00 │×000××00┊00000000│
+ * │000000b0│ 00 00 00 00 00 01 3f 80 ┊ 00 00 3f 80 00 00 00 00 │00000•?×┊00?×0000│
+ * │000000c0│ 00 00 ae 3f f0 00 00 00 ┊ 00 00 00 00 ff ff ff af │00×?×000┊0000××××│
+ * │000000d0│ ff ff ff ff 00 ff ff ff ┊ ff 3f 80 00 00 3f 80 00 │××××0×××┊×?×00?×0│
+ * │000000e0│ 00 00 00 00 00 00 00 00 ┊ 00 00 00 00 00 bb 00 00 │00000000┊00000×00│
+ * │000000f0│ 00 00 00 00 00 02 00 00 ┊ 00 00 00 00 00 06 66 6f │00000•00┊00000•fo│
+ * │00000100│ 6f 62 61 72 00 00 00 00 ┊ 00 00 00 39 00 00 00 00 │obar0000┊00090000│
+ * │00000110│ 00 00 00 06 62 61 72 66 ┊ 6f 6f 00 00 00 00 00 00 │000•barf┊oo000000│
+ * │00000120│ 00 00 00 00 00 00 00 00 ┊ 00 72 00 40 20 00 00 00 │00000000┊0r0@ 000│
+ * │00000130│ 00 00 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 00 │00000000┊00000000│
+ * │*       │                         ┊                         │        ┊        │
+ * │00000160│ 00 00 00 00 40 18 00 00 ┊ 00 00 00 00 00 00 00 00 │0000@•00┊00000000│
+ * │00000170│ 00 00 00 00 00 00 00 00 ┊ 00 00 00 00 00 00 00 00 │00000000┊00000000│
+ * │*       │                         ┊                         │        ┊        │
+ * │000001a0│ 00 00 00 00 ee 00 00 00 ┊ 00 00 00 00 00 ef 00 00 │0000×000┊00000×00│
+ * │000001b0│ 00 00 df f2 d6 04 a3 26 ┊ f5 ff 44 d2 0e 25 34 ec │00×××•×&┊××D×•%4×│
+ * │000001c0│ 85 c7 7f c5 91 0c       ┊                         │××•××_  ┊        │
+ * └────────┴─────────────────────────┴─────────────────────────┴────────┴────────┘
+ *
+ * @see game_load_buffer
+ *
+ * @param buffer The buffer to store the game state into
+ */
 void game_save_buffer(buffer_t buffer);
+
+/**
+ * @brief Load previously saved state from a buffer
+ *
+ * This function firstly checks the checksum of the buffer's data. If it matches the checksum written at the end of the
+ * buffer, it proceeds with deserializing the state written in the buffer. Before deserializing anything, however,
+ * it clears the active and inactive instance lists to avoid issues with clashing object IDs. It then deserializes each
+ * object by reading its object index (a unique identifier for each type), and calling the virtual @c deserialize_self()
+ * function of the object after using <tt> enigma::instance_create_id </tt> to create the specific object type. After
+ * checking the header of the <tt> enigma::backgrounds </tt> data, it reads that as well and verifies the footer. Finally,
+ * it reads the room index and calls <tt> enigma::room_goto </tt> with the index.
+ *
+ * @see game_save_buffer
+ *
+ * @param buffer The buffer to load the game state from
+ */
 void game_load_buffer(buffer_t buffer);
 
 }  //namespace enigma_user
