@@ -1445,9 +1445,17 @@ void game_save_buffer(buffer_t buffer) {
   }
 
   ptr = binbuff->data.size();
+  binbuff->data.resize(binbuff->data.size() + 1);
+  binbuff->data[ptr] = std::byte{0xee};
+
+  ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + enigma::backgrounds.byte_size());
   auto buf = enigma::backgrounds.serialize();
   std::copy(buf.begin(), buf.end(), &binbuff->data[ptr]);
+
+  ptr = binbuff->data.size();
+  binbuff->data.resize(binbuff->data.size() + 1);
+  binbuff->data[ptr] = std::byte{0xef};
 
   ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + sizeof(int));
@@ -1497,7 +1505,19 @@ void game_load_buffer(buffer_t buffer) {
     obj->deactivate();
   }
 
+  auto type = enigma::deserialize<unsigned char>(ptr);
+  if (type != 0xee) {
+    DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
+  }
+  ptr += 1;
+
   ptr += enigma::backgrounds.deserialize_self(ptr);
+
+  type = enigma::deserialize<unsigned char>(ptr);
+  if (type != 0xef) {
+    DEBUG_MESSAGE("Invalid enigma::backgrounds footer", MESSAGE_TYPE::M_FATAL_ERROR);
+  }
+  ptr += 1;
 
   auto room_index = enigma::deserialize<int>(ptr);
   enigma_user::room_goto(room_index);
