@@ -403,6 +403,8 @@ inline auto serialize(T &&value) {
     return serialize_variant(value);
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>){
     return serialize_numeric(value);
+  } else if constexpr (has_serialize_method_v<std::decay_t<T>>) {
+    return value.serialize();
   } else {
     static_assert(always_false<T>,
         "'serialize' takes 'variant', 'var', 'std::string', bool, integral or floating types");
@@ -426,6 +428,12 @@ inline T deserialize(std::byte *iter) {
     return deserialize_variant(iter);
   } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
     return deserialize_numeric<T>(iter);
+  } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
+    T result;
+    result.deserialize_self(iter);
+    return std::move(result);
+  } else if (has_deserialize_function_v<std::decay_t<T>>) {
+    return deserialize<T>(iter).second;
   } else {
     static_assert(always_false<T>,
         "'deserialize' takes 'variant', 'var', 'std::string', bool, integral or floating types");
@@ -508,7 +516,12 @@ template <typename T>
 inline void enigma_internal_serialize(const T &value, std::size_t &len, std::vector<std::byte> &bytes) {
   len = bytes.size();
   resize_buffer_for(bytes, value);
-  serialize_into(bytes.data() + len, value);
+  if constexpr (has_serialize_method_v<std::decay_t<T>>) {
+    std::vector<std::byte> serialized = value.serialize();
+    std::copy(serialized.begin(), serialized.end(), bytes.begin() + len);
+  } else {
+    serialize_into(bytes.data() + len, value);
+  }
   len = bytes.size();
 }
 

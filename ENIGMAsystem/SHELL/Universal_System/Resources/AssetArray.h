@@ -210,50 +210,35 @@ class AssetArray {
   }
 
   std::vector<std::byte> serialize() {
+    static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
+                  "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
+
     std::vector<std::byte> result{};
     std::size_t len = 0;
-    if constexpr (has_serialize_method_v<T>) {
-      enigma::enigma_internal_serialize(assets_.size(), len, result);
-      for (std::size_t i = 0; i < assets_.size(); i++) {
-        std::vector<std::byte> serialized = assets_[i].serialize();
-        std::copy(serialized.begin(), serialized.end(), std::back_inserter(result));
-      }
-    } else if constexpr (HAS_SERIALIZE_FUNCTION()) {
-      enigma::enigma_internal_serialize(assets_.size(), len, result);
-      for (std::size_t i = 0; i < assets_.size(); i++) {
-        enigma::enigma_internal_serialize(operator[](i), len, result);
-      }
+    enigma::enigma_internal_serialize(assets_.size(), len, result);
+    for (std::size_t i = 0; i < assets_.size(); i++) {
+      enigma::enigma_internal_serialize(operator[](i), len, result);
     }
     result.shrink_to_fit();
     return result;
   }
 
   std::size_t deserialize_self(std::byte *iter) {
-    if constexpr (has_deserialize_self_method_v<T>) {
-      std::size_t len = 0;
-      std::size_t elements = 0;
-      enigma::enigma_internal_deserialize(elements, iter, len);
-      resize(elements);
-      for (std::size_t i = 0; i < elements; i++) {
-        len += assets_[i].deserialize_self(iter + len);
-      }
-      return len;
-    } else if constexpr (HAS_DESERIALIZE_FUNCTION()) {
-      std::size_t len = 0;
-      std::size_t elements = 0;
-      enigma::enigma_internal_deserialize(elements, iter, len);
-      resize(elements);
-      for (std::size_t i = 0; i < elements; i++) {
-        enigma::enigma_internal_deserialize(assets_[i], iter, len);
-      }
-      return len;
-    } else {
-      return 0;
+    static_assert(has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION(),
+                  "Given type is required to have at least one of `x.deserialize_self()` or `deserialize<T>()`");
+
+    std::size_t len = 0;
+    std::size_t elements = 0;
+    enigma::enigma_internal_deserialize(elements, iter, len);
+    resize(elements);
+    for (std::size_t i = 0; i < elements; i++) {
+      enigma::enigma_internal_deserialize(assets_[i], iter, len);
     }
+    return len;
   }
 
   static std::pair<AssetArray<T, LEFT>, std::size_t> deserialize(std::byte *iter) {
-    if constexpr (has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION()) {
+    if constexpr (has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION()) {
       AssetArray<T, LEFT> result;
       auto len = result.deserialize_self(iter);
       return {std::move(result), len};
