@@ -31,9 +31,13 @@ void Background::FreeTexture() {
 }
 
 std::size_t Background::byte_size() const noexcept {
-  // NOTE: This doesn't compute the texture size
-  return sizeof(width) + sizeof(height) + sizeof(textureBounds) + sizeof(isTileset) +
-         sizeof(tileWidth) + sizeof(tileHeight) + sizeof(hOffset) + sizeof(vOffset) + sizeof(hSep) + sizeof(vSep);
+  unsigned texture_width = 0;
+  unsigned texture_height = 0;
+  auto texture = graphics_copy_texture_pixels(textureID, &texture_width, &texture_height);
+  delete[] texture;
+  return sizeof(width) + sizeof(height) + sizeof(textureBounds) + sizeof(isTileset) + (2 * sizeof(unsigned)) +
+         (texture_width * texture_height * 4) + sizeof(tileWidth) + sizeof(tileHeight) + sizeof(hOffset) +
+         sizeof(vOffset) + sizeof(hSep) + sizeof(vSep);
 }
 
 std::vector<std::byte> Background::serialize() {
@@ -69,6 +73,7 @@ std::size_t Background::deserialize_self(std::byte* iter) {
   len += texture_width * texture_height * 4;
   enigma_internal_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w,
                                  isTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+  _destroyed = false;
 
   return len;
 }
