@@ -202,19 +202,11 @@ class AssetArray {
   }
 
   std::size_t byte_size() const noexcept {
-    if constexpr (std::is_same_v<Background, std::decay_t<T>> && has_byte_size_method_v<T>) {
-      std::size_t len = sizeof(std::size_t);
-      for (std::size_t i = 0; i < size(); i++) {
-        len += assets_[i].byte_size() + (enigma_user::background_get_width(i) * enigma_user::background_get_height(i) * 4);
-      }
-      return len;
-    } else {
-      std::size_t len = sizeof(std::size_t);
-      for (std::size_t i = 0; i < size(); i++) {
-        len += assets_[i].byte_size();
-      }
-      return len;
+    std::size_t len = sizeof(std::size_t);
+    for (std::size_t i = 0; i < size(); i++) {
+      len += assets_[i].byte_size();
     }
+    return len;
   }
 
   std::vector<std::byte> serialize() {
@@ -232,6 +224,7 @@ class AssetArray {
         enigma::enigma_internal_serialize(operator[](i), len, result);
       }
     }
+    result.shrink_to_fit();
     return result;
   }
 
