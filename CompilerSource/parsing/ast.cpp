@@ -59,4 +59,102 @@ void AST::ExtractDeclarations(ParsedScope *destination_scope) {
   std::cout << " done." << std::endl;
 }
 
+template<typename... SubNodes>
+void AST::Node::RV(AST::Visitor &visitor, const SubNodes &...nodes) {
+  (RVF(visitor, nodes), ...);
+}
+void AST::Node::RVF(AST::Visitor &visitor, const PNode &single_node) {
+  if (single_node) single_node->RecurusiveVisit(visitor);
+}
+void AST::Node::RVF(AST::Visitor &visitor,
+                    const std::vector<PNode> &node_list) {
+  for (const PNode &node : node_list) node->RecurusiveVisit(visitor);
+}
+
+void AST::CodeBlock::RecursiveSubVisit(AST::Visitor &visitor) {
+  RV(visitor, statements);
+}
+void AST::BinaryExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, left, right);
+}
+void AST::FunctionCallExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, function, arguments);
+}
+void AST::UnaryPrefixExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, operand);
+}
+void AST::UnaryPostfixExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, operand);
+}
+void AST::TernaryExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, condition, true_expression, false_expression);
+}
+void AST::SizeofExpression::RecursiveSubVisit(Visitor &visitor) {
+  if (std::holds_alternative<PNode>(argument))
+    RV(visitor, std::get<PNode>(argument));
+}
+void AST::AlignofExpression::RecursiveSubVisit(Visitor &visitor) {
+  (void) visitor;  // Nothing to visit.
+}
+void AST::CastExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, expr);
+}
+void AST::Parenthetical::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, expression);
+}
+void AST::Array::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, elements);
+}
+void AST::IdentifierAccess::RecursiveSubVisit(Visitor &visitor) {
+  (void) visitor;  // Varname token that appeared in code; it's a leaf.
+}
+void AST::Literal::RecursiveSubVisit(Visitor &visitor) {
+  (void) visitor;  // Literal in the middle of code; also a leaf.
+}
+void AST::IfStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, condition, true_branch, false_branch);
+}
+void AST::ForLoop::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, assignment, condition, increment, body);
+}
+void AST::WhileLoop::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, condition, body);
+}
+void AST::DoLoop::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, body, condition);
+}
+void AST::CaseStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, value);
+}
+void AST::DefaultStatement::RecursiveSubVisit(Visitor &visitor) {
+  (void) visitor;  // Label must preceed a statement, but does not own it
+}
+void AST::SwitchStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, expression);
+}
+void AST::ReturnStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, expression);
+}
+void AST::BreakStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, count);
+}
+void AST::ContinueStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, count);
+}
+void AST::WithStatement::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, object, body);
+}
+void AST::Initializer::RecursiveSubVisit(Visitor &visitor) {
+  
+}
+void AST::NewExpression::RecursiveSubVisit(Visitor &visitor) {
+  
+}
+void AST::DeleteExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, expression);
+}
+void AST::DeclarationStatement::RecursiveSubVisit(Visitor &visitor) {
+  
+}
+
 }  // namespace enigma::parsing

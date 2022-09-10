@@ -74,8 +74,6 @@ void lang_CPP::load_extension_locals() {
 
 #include <System/builtins.h>
 
-void parser_init();
-
 namespace {
 
 std::string TranscribeTokens(const jdi::token_vector &tokens) {
@@ -196,10 +194,6 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
     builtin_macros_.insert({macro_pair.first,
                             TranslateMacro(*macro_pair.second, &hack)});
 
-  cout << "Initializing EDL Parser...\n";
-
-  parser_init();
-
   cout << "Grabbing locals...\n";
 
   load_shared_locals();  // Extensions were separated above
@@ -264,4 +258,3 @@ jdi::definition* lang_CPP::look_up(std::string_view n) const {
 
 // TODO: This could use better plumbing.
 lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
-

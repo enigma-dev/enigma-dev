@@ -343,8 +343,6 @@
 		<Unit filename="parser/object_storage.h" />
 		<Unit filename="parser/parser.cpp" />
 		<Unit filename="parser/parser.h" />
-		<Unit filename="parser/parser_components.cpp" />
-		<Unit filename="parser/parser_components.h" />
 		<Unit filename="settings-parse/crawler.cpp" />
 		<Unit filename="settings-parse/crawler.h" />
 		<Unit filename="settings-parse/eyaml.cpp" />

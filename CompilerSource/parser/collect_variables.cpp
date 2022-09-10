@@ -73,6 +73,12 @@ class DeclGatheringVisitor : public AST::Visitor {
     node.RecursiveSubVisit(sub);
     return false;
   }
+  
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
+    for (const auto &decl : node.declarations) {
+      
+    }
+  }
 
  public:
   DeclGatheringVisitor(const LanguageFrontend *language_fe,

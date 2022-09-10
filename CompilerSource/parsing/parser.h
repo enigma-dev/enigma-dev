@@ -3,15 +3,10 @@
 
 #include "ast.h"
 #include "language_frontend.h"
+#include "settings.h"
 #include "lexer.h"
 
-#include <memory>
-
 namespace enigma::parsing {
-
-enum class SyntaxMode {
-  STRICT, QUIRKS, GML
-};
 
 std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr);
 

@@ -35,8 +35,6 @@
 
 using namespace std;
 
-#include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"

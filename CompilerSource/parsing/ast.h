@@ -53,7 +53,9 @@ class AST {
     BREAK, CONTINUE, RETURN, DECLARATION, INITIALIZER
   };
 
+  struct Node;
   class Visitor;
+  typedef std::unique_ptr<Node> PNode;
 
   struct Node {
     NodeType type;
@@ -67,8 +69,15 @@ class AST {
 
     Node(NodeType t = NodeType::ERROR): type(t) {}
     virtual ~Node() = default;
+
+   protected:
+    template<typename... SubNodes>
+    void RV(Visitor &visitor, const SubNodes &...nodes);
+
+   private:
+    void RVF(Visitor &visitor, const PNode &single_node);
+    void RVF(Visitor &visitor, const std::vector<PNode> &node_list);
   };
-  typedef std::unique_ptr<Node> PNode;
 
   template<NodeType kType> struct TypedNode : Node {
     TypedNode(): Node(kType) {}
@@ -91,10 +100,10 @@ class AST {
     std::string ToCppLiteral() { return "";}
   };
 
-# define BASIC_NODE_ROUTINES(name)                         \
-  void RecurusiveVisit(Visitor &visitor) final {           \
-    if (visitor.Visit ## name(*this)) RecursiveSubVisit(visitor); \
-  }                                                        \
+# define BASIC_NODE_ROUTINES(name)                                 \
+  void RecurusiveVisit(Visitor &visitor) final {                   \
+    if (visitor.Visit ## name(*this)) RecursiveSubVisit(visitor);  \
+  }                                                                \
   void RecursiveSubVisit(Visitor &visitor) final
 
   // Simple block of code, containing zero or more statements.
@@ -444,14 +453,22 @@ class AST {
       Declaration(FullType declarator, InitializerNode init):
         declarator{std::make_unique<FullType>(std::move(declarator))}, init{std::move(init)} {}
     };
+    enum class StorageClass {
+      TEMPORARY,
+      LOCAL,
+      GLOBAL,
+    };
 
     jdi::definition *def;
+    StorageClass storage_class;
     std::vector<Declaration> declarations;
 
     BASIC_NODE_ROUTINES(DeclarationStatement);
 
-    DeclarationStatement(jdi::definition *type, std::vector<Declaration> declarations): def{type},
-      declarations{std::move(declarations)} {}
+    DeclarationStatement(StorageClass sc, jdi::definition *type,
+                         std::vector<Declaration> declarations):
+        def{type}, storage_class{sc},
+        declarations{std::move(declarations)} {}
   };
 
   class Visitor {
@@ -538,6 +555,8 @@ class AST {
   std::unique_ptr<Node> root_;
   // When specified, emits code to apply to a specific instance.
   std::optional<int> apply_to_;
+  
+
   // Constructs an AST from the code it will parse. Does not initiate parse.
   AST(std::string &&code_, const ParseContext *ctex):
       lexer(std::make_unique<Lexer>(std::move(code_), ctex, &herr)),

@@ -3,8 +3,9 @@
 #include "ast.h"
 #include "full_type.h"
 #include "lexer.h"
-#include "tokens.h"
 #include "precedence.h"
+#include "settings.h"
+#include "tokens.h"
 
 #include <JDI/src/System/builtins.h>
 #include <memory>
@@ -13,10 +14,12 @@ namespace enigma::parsing {
 
 class AstBuilder {
 
+using SyntaxMode = setting::SyntaxMode;
+
 Lexer *lexer;
 ErrorHandler *herr;
 SyntaxMode mode;
-LanguageFrontend *frontend;
+const LanguageFrontend *frontend;
 
 Token token;
 
@@ -270,10 +273,6 @@ bool is_decl_specifier(const Token &tok) {
   }
 }
 
-bool next_is_decl_specifier() {
-  return is_decl_specifier(token);
-}
-
 std::size_t sizeof_builtin_type(std::string_view type) {
   static const std::unordered_map<std::string_view, std::size_t> sizes{
     { "char",     sizeof(char) },
@@ -408,7 +407,9 @@ bool next_maybe_functional_cast() {
   return maybe_functional_cast(token);
 }
 
-std::unique_ptr<AST::DeclarationStatement> parse_declarations(jdi::definition *def, AST::DeclaratorType decl_type,
+std::unique_ptr<AST::DeclarationStatement> parse_declarations(
+    AST::DeclarationStatement::StorageClass sc, jdi::definition *def,
+    AST::DeclaratorType decl_type,
   bool parse_unbounded, std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first = false) {
   while (true) {
     if (!already_parsed_first) {
@@ -425,7 +426,7 @@ std::unique_ptr<AST::DeclarationStatement> parse_declarations(jdi::definition *d
     }
   }
 
-  return std::make_unique<AST::DeclarationStatement>(def, std::move(decls));
+  return std::make_unique<AST::DeclarationStatement>(sc, def, std::move(decls));
 }
 
 void maybe_infer_int(FullType &type) {
@@ -442,9 +443,10 @@ void maybe_infer_int(FullType &type) {
 
 public:
 
-AstBuilder(Lexer *lexer, ErrorHandler *herr, SyntaxMode mode, LanguageFrontend *frontend): lexer{lexer}, herr{herr},
-  mode{mode}, frontend{frontend} {
-  frontend->definitionsModified(nullptr, "");
+AstBuilder(Lexer *lexer, ErrorHandler *herr):
+  lexer{lexer}, herr{herr},
+  mode{lexer->GetContext().compatibility_opts.syntax_mode},
+  frontend{lexer->GetContext().language_fe} {
   token = lexer->ReadToken();
 }
 
@@ -496,8 +498,10 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
   params.kind = FunctionParameterNode::Kind::DECLARATOR;
   if (token.type != TT_ENDPARENTH) {
     while (token.type != TT_ENDPARENTH) {
-      if (next_is_decl_specifier() && maybe_expression) {
-        auto declaration = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::MAYBE_ABSTRACT, false);
+      if (is_decl_specifier(token) && maybe_expression) {
+        auto declaration = TryParseEitherFunctionalCastOrDeclaration(
+            AST::DeclaratorType::MAYBE_ABSTRACT, false, false,
+            AST::DeclarationStatement::StorageClass::TEMPORARY);
 
         if (declaration->type == AST::NodeType::DECLARATION) {
           auto *param_decl = dynamic_cast<AST::DeclarationStatement *>(declaration.get());
@@ -598,12 +602,12 @@ jdi::definition *TryParseTypeName() {
   return frontend->look_up(name.content);
 }
 
-jdi::definition *TryParseIdExpression(Declarator *decl = nullptr, bool is_declarator = false) {
+jdi::definition *TryParseIdExpression(Declarator *decl) {
   switch (token.type) {
     case TT_SCOPEACCESS: {
       token = lexer->ReadToken();
       if (next_is_start_of_id_expression() && token.type != TT_SCOPEACCESS) {
-        return TryParseIdExpression(decl, is_declarator);
+        return TryParseIdExpression(decl);
       } else {
         herr->Error(token) << "Expected qualified-id after '::', got: '" << token.content << '\'';
         return nullptr;
@@ -613,7 +617,7 @@ jdi::definition *TryParseIdExpression(Declarator *decl = nullptr, bool is_declar
     case TT_DECLTYPE: {
       auto decltype_ = TryParseDecltype();
       if (token.type == TT_SCOPEACCESS) {
-        return TryParseNestedNameSpecifier(decltype_, decl, is_declarator);
+        return TryParseNestedNameSpecifier(decltype_, decl);
       } else {
         herr->Error(token) << "Expected qualified-id after decltype-expression, got: '" << token.content << '\'';
         return nullptr;
@@ -622,16 +626,17 @@ jdi::definition *TryParseIdExpression(Declarator *decl = nullptr, bool is_declar
 
     case TT_IDENTIFIER: {
       if (next_is_user_defined_type()) {
-        return TryParsePrefixIdentifier(decl, is_declarator);
+        return TryParsePrefixIdentifier(decl);
       } else {
         Token name = token;
         auto def = frontend->look_up(token.content);
         token = lexer->ReadToken();
+        const bool is_declarator = decl;
         if (is_declarator && token.type != TT_SCOPEACCESS) {
-          decl->name = name; // If we're not accessing a scope then we're probably declaring a variable
+          decl->name = name;  // If we're not accessing a scope then we're probably declaring a variable
           decl->ndef = def;
         } else if (token.type == TT_SCOPEACCESS) {
-          return TryParseNestedNameSpecifier(def, decl, is_declarator);
+          return TryParseNestedNameSpecifier(def, decl);
         } else if (map_contains(declarations, name.content)) {
           return declarations[name.content]->def;
         } else if (def == nullptr) {
@@ -1136,7 +1141,7 @@ void TryParseDeclSpecifier(FullType *type) {
 }
 
 void TryParseDeclSpecifierSeq(FullType *type) {
-  while (next_is_decl_specifier()) {
+  while (is_decl_specifier(token)) {
     TryParseDeclSpecifier(type);
   }
 }
@@ -1229,9 +1234,9 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
     if (token.type == TT_ELLIPSES) {
       token = lexer->ReadToken();
     }
-    TryParseIdExpression(&type->decl, true);
+    TryParseIdExpression(&type->decl);
   } else if (is_abstract == AST::DeclaratorType::MAYBE_ABSTRACT && next_is_start_of_id_expression()) {
-    TryParseIdExpression(&type->decl, true);
+    TryParseIdExpression(&type->decl);
   }
 
   while (token.type == TT_BEGINPARENTH || token.type == TT_BEGINBRACKET) {
@@ -1389,7 +1394,7 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
 }
 
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
-  if (next_is_decl_specifier()) {
+  if (is_decl_specifier(token)) {
     FullType type;
     TryParseDeclSpecifierSeq(&type);
     maybe_infer_int(type);
@@ -1398,7 +1403,9 @@ std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
       return nullptr;
     }
 
-    return parse_declarations(type.def, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
+    // XXX: Implementation disallows, e.g, `int global foo;`
+    auto sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
+    return parse_declarations(sc, type.def, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
   } else {
     return nullptr;
   }
@@ -1482,6 +1489,19 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
   }
 
   return std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+}
+
+std::unique_ptr<AST::Node> TryParseIdExpression() {
+  Declarator decl;
+  auto def = TryParseIdExpression(&decl);
+  if (decl.name.content.empty()) {
+    herr->Error(token) << "Unable to parse id-expression";
+    return nullptr;
+  } else if (map_contains(declarations, decl.name.content)) {
+    return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+  } else {
+    return std::make_unique<AST::IdentifierAccess>(def, decl.name);
+  }
 }
 
 /// Parse an operand--this includes variables, literals, arrays, and
@@ -1655,17 +1675,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       } else if (token.type == TT_S_DELETE) {
         return TryParseDeleteExpression(true);
       } else {
-        Token start = token;
-        Declarator decl;
-        auto id = TryParseIdExpression(&decl, true);
-        if (decl.name.content.empty()) {
-          herr->Error(start) << "Unable to parse id-expression";
-          return nullptr;
-        } else if (map_contains(declarations, decl.name.content)) {
-          return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
-        } else {
-          return std::make_unique<AST::IdentifierAccess>(id, decl.name);
-        }
+        return TryParseIdExpression();
       }
     }
 
@@ -1685,21 +1695,16 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     }
 
     case TT_DECLTYPE: {
-      Declarator decl;
-      auto def = TryParseIdExpression(&decl, true);
-      if (decl.name.content.empty()) {
-        herr->Error(token) << "Unable to parse id-expression";
-        return nullptr;
-      } else if (map_contains(declarations, decl.name.content)) {
-        return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
-      }
+      return TryParseIdExpression();
     }
 
     case TT_S_NEW: return TryParseNewExpression(false);
     case TT_S_DELETE: return TryParseDeleteExpression(false);
 
     case TT_IDENTIFIER:
-    case TT_TYPE_NAME: {
+    case TT_TYPE_NAME:
+    case TT_GLOBAL:
+    case TT_LOCAL: {
       if (next_maybe_functional_cast()) {
         FullType type;
         TryParseTypeSpecifier(&type);
@@ -1720,23 +1725,9 @@ std::unique_ptr<AST::Node> TryParseOperand() {
           return nullptr;
         }
       } else {
-        Declarator decl;
-        auto def = TryParseIdExpression(&decl, true);
-        if (decl.name.content.empty()) {
-          herr->Error(token) << "Unable to parse id-expression";
-          return nullptr;
-        } else if (map_contains(declarations, decl.name.content)) {
-          return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
-        } else {
-          return std::make_unique<AST::IdentifierAccess>(def, decl.name);
-        }
+        return TryParseIdExpression();
       }
-    }
-
-    case TT_LOCAL:
-    case TT_GLOBAL: {
-      herr->Error(token) << "Unimplemented: 'local' and 'global' flags";
-      token = lexer->ReadToken();
+      herr->Error(token) << "INTERNAL ERROR: " __FILE__ ":" << __LINE__ << ": Unreachable";
       return nullptr;
     }
 
@@ -1769,6 +1760,9 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     case TT_ERROR:
       return nullptr;
   }
+  herr->Error(token)
+      << "Internal error: unreachable (" __FILE__ ":" << __LINE__ << ")";
+  return nullptr;
 }
 
 static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
@@ -1889,7 +1883,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
 std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
   while (token.type == TT_BEGINPARENTH) {
-//    Token oper = token;
+    // Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
@@ -1917,6 +1911,11 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
       require_token(TT_ENDPARENTH, "Expected ')' after control expression");
       return expr;
     }
+    default:
+      herr->Error(token)
+          << "Internal error: unreachable (" __FILE__ ":" << __LINE__
+          << "): SyntaxMode " << (int) mode_ << " unknown to system";
+      [[fallthrough]];
     case SyntaxMode::QUIRKS: {
       auto operand = TryParseOperand();
       if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
@@ -1933,25 +1932,7 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseStatementOrDeclaration() {
-  if (next_is_decl_specifier() || next_maybe_functional_cast()) {
-    if (token.type == TT_SCOPEACCESS) {
-      token = lexer->ReadToken();
-      if (token.type == TT_S_NEW) {
-        return TryParseNewExpression(true);
-      } else if (token.type == TT_S_DELETE) {
-        return TryParseDeleteExpression(true);
-      }
-    }
-    return TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true);
-  } else if (token.type == TT_BEGINBRACE) {
-    return ParseCodeBlock();
-  } else {
-    return TryReadStatement();
-  }
-}
-
-std::unique_ptr<AST::Node> TryReadStatement() {
+std::unique_ptr<AST::Node> TryParseStatement() {
   switch (token.type) {
     case TTM_WHITESPACE:
     case TTM_CONCAT:
@@ -2017,10 +1998,24 @@ std::unique_ptr<AST::Node> TryReadStatement() {
     case TT_DECLTYPE:
     case TT_TYPENAME:
     case TT_IDENTIFIER:
-    case TT_TYPE_NAME: {
-      if (next_is_decl_specifier() || next_maybe_functional_cast()) {
+    case TT_TYPE_NAME:
+    case TT_TYPEDEF:
+    case TT_CONSTEXPR: case TT_CONSTINIT: case TT_CONSTEVAL:
+    case TT_SIGNED: case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
+    case TT_INLINE: case TT_STATIC: case TT_EXTERN:
+    case TT_MUTABLE: case TT_THREAD_LOCAL: {
+      AST::DeclarationStatement::StorageClass sc;
+      if (false) {
+        if (false) case TT_LOCAL:
+          sc = AST::DeclarationStatement::StorageClass::LOCAL;
+        if (false) case TT_GLOBAL:
+          sc = AST::DeclarationStatement::StorageClass::GLOBAL;
+      } else {
+        sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
+      }
+      if (is_decl_specifier(token) || next_maybe_functional_cast()) {
         Token start = token;
-        auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true);
+        auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, false, sc);
         if (decl->type == AST::NodeType::DECLARATION) {
           herr->Error(start) << "Trying to parse declaration within <stmt>";
         }
@@ -2030,10 +2025,6 @@ std::unique_ptr<AST::Node> TryReadStatement() {
         return TryParseExpression(Precedence::kAll);
       }
     }
-
-    case TT_LOCAL:      // XXX: Treat as storage-specifiers?
-    case TT_GLOBAL:
-      return nullptr;
 
     case TT_RETURN: return ParseReturnStatement();
     case TT_EXIT: return ParseExitStatement();
@@ -2070,19 +2061,17 @@ std::unique_ptr<AST::Node> TryReadStatement() {
       return nullptr;
     }
 
-    case TT_ENUM: case TT_TYPEDEF:
-    case TT_OPERATOR: case TT_CONSTINIT: case TT_CONSTEVAL:
-    case TT_INLINE: case TT_STATIC: case TT_THREAD_LOCAL:
-    case TT_EXTERN: case TT_MUTABLE: case TT_CLASS:
-    case TT_STRUCT: case TT_UNION: case TT_SIGNED:
-    case TT_UNSIGNED: case TT_CONST: case TT_VOLATILE:
-    case TT_CONSTEXPR: {
+    case TT_ENUM: case TT_CLASS: case TT_STRUCT: case TT_UNION:
+    case TT_OPERATOR: {
       herr->Error(token) << "Trying to read declaration within <stmt>";
       return TryParseDeclarations(true); // Parse it anyways
     }
 
     case TT_ENDOFCODE: return nullptr;
   }
+  herr->Error(token)
+      << "Internal error: unreachable (" __FILE__ ":" << __LINE__ << ")";
+  return nullptr;
 }
 
 // Parse control flow statement body
@@ -2090,27 +2079,29 @@ std::unique_ptr<AST::Node> ParseCFStmtBody() {
   if (token.type == TT_BEGINBRACE) {
     return ParseCodeBlock();
   } else {
-    return TryReadStatement();
+    return TryParseStatement();
   }
 }
 
-// TODO: the following.
-std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
-  require_token(TT_BEGINBRACE, "Expected opening brace ('{') at the start of code block");
+std::unique_ptr<AST::CodeBlock> ParseCode() {
   std::vector<std::unique_ptr<AST::Node>> statements{};
 
-  while (token.type != TT_ENDBRACE) {
-    if (token.type == TT_BEGINBRACE) {
-      statements.emplace_back(ParseCodeBlock());
-    } else if (next_is_decl_specifier()) {
-      statements.emplace_back(TryParseDeclarations(true));
-    } else {
-      statements.emplace_back(TryReadStatement());
-    }
+  while (token.type != TT_ENDOFCODE) {
+    if (auto node = TryParseStatement()) {
+      statements.push_back(std::move(node));
+    } else if (token.type == TT_SEMICOLON) {
+      token = lexer->ReadToken();
+    } else break;
   }
 
-  require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of code block");
   return std::make_unique<AST::CodeBlock>(std::move(statements));
+}
+
+std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
+  require_token(TT_BEGINBRACE, "Internal error: Expected opening brace ('{') at the start of code block");
+  auto res = ParseCode();
+  require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of code block");
+  return res;
 }
 
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
@@ -2134,8 +2125,9 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType decl_type, bool parse_unbounded,
-                                                                     bool maybe_c_style_cast = false) {
+std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
+    AST::DeclaratorType decl_type, bool parse_unbounded,
+    bool maybe_c_style_cast, AST::DeclarationStatement::StorageClass sc) {
   if (next_maybe_functional_cast()) {
     FullType type;
     TryParseTypeSpecifier(&type);
@@ -2144,7 +2136,7 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::Declar
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
       TryParseTypeSpecifierSeq(&type);
-      return parse_declarations(type.def, decl_type, parse_unbounded, {});
+      return parse_declarations(sc, type.def, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;
       return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def},
@@ -2166,9 +2158,9 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(AST::Declar
         decls.emplace_back(std::move(type), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
         if (token.type == TT_COMMA && parse_unbounded) {
           auto def = decls[0].declarator->def;
-          return parse_declarations(def, decl_type, parse_unbounded, std::move(decls), true);
+          return parse_declarations(sc, def, decl_type, parse_unbounded, std::move(decls), true);
         } else {
-          return std::make_unique<AST::DeclarationStatement>(decls[0].declarator->def, std::move(decls));
+          return std::make_unique<AST::DeclarationStatement>(sc, decls[0].declarator->def, std::move(decls));
         }
       }
     } else if (token.type == TT_ENDPARENTH && maybe_c_style_cast) {
@@ -2196,8 +2188,10 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     token = lexer->ReadToken();
     is_conventional = true;
   }
-  if (next_is_decl_specifier()) {
-    init = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, is_conventional);
+  if (is_decl_specifier(token)) {
+    init = TryParseEitherFunctionalCastOrDeclaration(
+        AST::DeclaratorType::NON_ABSTRACT, true, is_conventional,
+        AST::DeclarationStatement::StorageClass::TEMPORARY);
     if (init->type == AST::NodeType::CAST) {
       auto *cast = dynamic_cast<AST::CastExpression *>(init.get());
       if (cast->kind == AST::CastExpression::Kind::C_STYLE && is_conventional) {
@@ -2341,7 +2335,8 @@ std::unique_ptr<AST::Node> ParseCaseOrDefaultStatement(bool is_default) {
     if (token.type == TT_BEGINBRACE) {
       body->statements.emplace_back(ParseCodeBlock());
     } else {
-      body->statements.emplace_back(TryReadStatement());
+      if (auto stmt = TryParseStatement())
+        body->statements.emplace_back(std::move(stmt));
     }
   }
 
@@ -2361,4 +2356,10 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
 }
 
 };  // class AstBuilder
+
+std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
+  AstBuilder ab(lexer, herr);
+  return ab.ParseCode();
+}
+
 }  // namespace enigma::parsing
