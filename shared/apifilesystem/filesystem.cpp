@@ -89,12 +89,14 @@ namespace ngs::fs {
 
     #if defined(_WIN32) 
     wstring widen(string str) {
-      size_t wchar_count = str.size() + 1; vector<wchar_t> buf(wchar_count);
+      size_t wchar_count = str.size() + 1; 
+      vector<wchar_t> buf(wchar_count);
       return wstring{ buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
     }
 
     string narrow(wstring wstr) {
-      int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); vector<char> buf(nbytes);
+      int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
+      vector<char> buf(nbytes);
       return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
     }
     #endif
@@ -501,7 +503,7 @@ namespace ngs::fs {
   }
 
   string executable_get_pathname() {
-    std::string path;
+    string path;
     #if defined(_WIN32)
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer)) != 0) {
@@ -525,13 +527,13 @@ namespace ngs::fs {
     }
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
     int mib[4]; 
-    std::size_t len;
+    size_t len = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
     mib[3] = -1;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-      std::string strbuff;
+      string strbuff;
       strbuff.resize(len, '\0');
       char *exe = strbuff.data();
       if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) {
@@ -543,13 +545,13 @@ namespace ngs::fs {
     }
     #elif defined(__NetBSD__)
     int mib[4]; 
-    std::size_t len;
+    size_t len = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = -1;
     mib[3] = KERN_PROC_PATHNAME;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-      std::string strbuff;
+      string strbuff;
       strbuff.resize(len, '\0');
       char *exe = strbuff.data();
       if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) {
@@ -560,7 +562,7 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_executable = [](std::string in, std::string *out) {
+    auto is_executable = [](string in, string *out) {
       *out = "";
       bool success = false;
       struct stat st;
@@ -590,8 +592,8 @@ namespace ngs::fs {
     };
     int mib[4];
     char **cmdbuf = nullptr;
-    std::size_t cmdsize = 0;
-    std::string arg;
+    size_t cmdsize = 0;
+    string arg;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = getpid();
@@ -606,16 +608,16 @@ namespace ngs::fs {
     }
     if (!arg.empty()) {
       bool is_exe = false;
-      std::string argv0;
+      string argv0;
       if (!arg.empty() && arg[0] == '/') {
         argv0 = arg;
         is_exe = is_executable(argv0.c_str(), &path);
-      } else if (arg.find('/') == std::string::npos) {
+      } else if (arg.find('/') == string::npos) {
         const char *cenv = getenv("PATH");
-        std::string penv = cenv ? cenv : "";
+        string penv = cenv ? cenv : "";
         if (!penv.empty()) {
-          std::vector<std::string> env = string_split(penv, ':');
-          for (std::size_t i = 0; i < env.size(); i++) {
+          vector<string> env = string_split(penv, ':');
+          for (size_t i = 0; i < env.size(); i++) {
             argv0 = env[i] + "/" + arg;
             is_exe = is_executable(argv0.c_str(), &path);
             if (is_exe) break;
@@ -628,7 +630,7 @@ namespace ngs::fs {
         }
       } else {
         const char *cpwd = getenv("PWD");
-        std::string pwd = cpwd ? cpwd : "";
+        string pwd = cpwd ? cpwd : "";
         if (!pwd.empty()) {
           argv0 = pwd + "/" + arg;
           is_exe = is_executable(argv0.c_str(), &path);
@@ -636,7 +638,7 @@ namespace ngs::fs {
         if (!is_exe) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, sizeof(cwd))) {
-            argv0 = std::string(cwd) + "/" + arg;
+            argv0 = string(cwd) + "/" + arg;
             is_exe = is_executable(argv0.c_str(), &path);
           }
         }
@@ -882,7 +884,7 @@ namespace ngs::fs {
     return result;
   }
 
-  bool filename_equivalent(std::string fname1, std::string fname2) {
+  bool filename_equivalent(string fname1, string fname2) {
     std::error_code ec;
     fname1 = expand_without_trailing_slash(fname1);
     fname2 = expand_without_trailing_slash(fname2);
@@ -1082,32 +1084,32 @@ namespace ngs::fs {
         std::reverse(directory_contents.begin(), directory_contents.end());
       } else if (directory_contents_order == DC_AOTON) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 0) < file_datetime_helper(r, 0));
         });
       } else if (directory_contents_order == DC_ANTOO) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 0) > file_datetime_helper(r, 0));
         });
       } else if (directory_contents_order == DC_MOTON) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 1) < file_datetime_helper(r, 1));
         });
       } else if (directory_contents_order == DC_MNTOO) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 1) > file_datetime_helper(r, 1));
         });
       } else if (directory_contents_order == DC_COTON) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 2) < file_datetime_helper(r, 2));
         });
       } else if (directory_contents_order == DC_CNTOO) {
         std::sort(directory_contents.begin(), directory_contents.end(),
-        [](const std::string &l, const std::string &r) {
+        [](const string &l, const string &r) {
         return (file_datetime_helper(l, 2) > file_datetime_helper(r, 2));
         });
       } else if (directory_contents_order == DC_RAND) {
