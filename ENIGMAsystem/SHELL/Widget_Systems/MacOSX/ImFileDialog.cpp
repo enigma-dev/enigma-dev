@@ -1051,9 +1051,10 @@ namespace ifd {
                 invData[index + 0] = image[index + 2];
                 invData[index + 3] = image[index + 3];
               }
-            m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
-            free(invData);
-            free(image);
+              m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
+              free(invData);
+              free(image);
+            }
           } else {
             m_icons[pathU8] = this->CreateTexture(image, width, height, 0);
             free(image);
