@@ -56,7 +56,9 @@
 #define DEFAULT_ICON_SIZE 32
 #define PI 3.141592f
 
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 using namespace lunasvg;
+#endif
 
 namespace ifd {
   static const char *GetDefaultFolderIcon();
