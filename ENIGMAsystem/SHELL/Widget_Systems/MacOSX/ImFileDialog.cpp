@@ -29,17 +29,9 @@
 
 #include "stb_image.h"
 
-#ifndef NANOSVG_IMPLEMENTATION
-#define NANOSVG_IMPLEMENTATION
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#include "lunasvg/include/lunasvg.h"
 #endif
-
-#include "nanosvg.h"
-
-#ifndef NANOSVGRAST_IMPLEMENTATION
-#define NANOSVGRAST_IMPLEMENTATION
-#endif
-
-#include "nanosvgrast.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -63,6 +55,8 @@
 #define GUI_ELEMENT_SIZE std::max(GImGui->FontSize + 10.f, 24.f)
 #define DEFAULT_ICON_SIZE 32
 #define PI 3.141592f
+
+using namespace lunasvg;
 
 namespace ifd {
   static const char *GetDefaultFolderIcon();
@@ -1047,40 +1041,20 @@ namespace ifd {
       if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".tga") {
         image = stbi_load(fname, &width, &height, &nrChannels, STBI_rgb_alpha);
         if (image == nullptr) goto finish;
+        m_icons[pathU8] = this->CreateTexture(image, width, height, 0);
+        free(image);
       } else if (ext == ".svg") {
-        NSVGimage *svg_image = nsvgParseFromFile(fname, "px", 96.0);
-        width = svg_image->width;
-        height = svg_image->height;
-        image = (unsigned char *)calloc(width * height * 4, sizeof(unsigned char));
-        if (image == nullptr) goto finish;
-        NSVGrasterizer *rasterizer = nsvgCreateRasterizer();
-        nsvgRasterize(rasterizer, svg_image, 0, 0, 1, image, width, height, width * 4);
-        nsvgDeleteRasterizer(rasterizer);
-	nsvgDelete(svg_image);
-      }
-
-      if (image) {
-        unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
-        if (invData) {
-          for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-              int index = (y * width + x) * 4;
-              invData[index + 2] = image[index + 0];
-              invData[index + 1] = image[index + 1];
-              invData[index + 0] = image[index + 2];
-              invData[index + 3] = image[index + 3];
-            }
+        std::uint32_t width = 32, height = 32;
+        std::uint32_t bgColor = 0x00000000;
+        auto document = Document::loadFromFile(fname);
+        if (document) {
+          auto bitmap = document->renderToBitmap(width, height, bgColor);
+          if (bitmap.valid()) {
+            m_icons[pathU8] = this->CreateTexture(bitmap.data(), width, height, 0);
           }
-          m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
-          free(invData);
-          free(image);
-        } else {
-          m_icons[pathU8] = this->CreateTexture(image, width, height, 0);
-          free(image);
         }
       }
     }
-    
     finish:
     if (G_IS_OBJECT(gtkicon_info)) g_object_unref(gtkicon_info);
     if (G_IS_OBJECT(file_info)) g_object_unref(file_info); 
@@ -1158,47 +1132,6 @@ namespace ifd {
           int width, height, nrChannels;
           unsigned char *image = stbi_load(data.Path.string().c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
           
-          if (image == nullptr) 
-            continue;
-
-          #if (defined(__APPLE__) && defined(__MACH__))
-          if (image) {
-            unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
-            if (invData) {
-              for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                  int index = (y * width + x) * 4;
-                  invData[index + 2] = image[index + 0];
-                  invData[index + 1] = image[index + 1];
-                  invData[index + 0] = image[index + 2];
-                  invData[index + 3] = image[index + 3];
-                }
-              }
-              free(image);
-              image = invData;
-            }
-          }
-          #endif
-
-          data.HasIconPreview = true;
-          data.IconPreviewData = image;
-          data.IconPreviewWidth = width;
-          data.IconPreviewHeight = height;
-        } else if (ext == ".svg") {
-          int width = 0, height = 0;
-          NSVGimage *svg_image = nsvgParseFromFile(data.Path.string().c_str(), "px", 96.0);
-          width = svg_image->width;
-          height = svg_image->height;
-          unsigned char *image = (unsigned char *)calloc(width * height * 4, sizeof(unsigned char));
-          
-          if (image == nullptr) 
-            continue;
-
-          NSVGrasterizer *rasterizer = nsvgCreateRasterizer();
-          nsvgRasterize(rasterizer, svg_image, 0, 0, 1, image, width, height, width * 4);
-          nsvgDeleteRasterizer(rasterizer);
-	  nsvgDelete(svg_image);
-
           if (image == nullptr) 
             continue;
 
