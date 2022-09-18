@@ -22,6 +22,8 @@
 #include "SoundEmitter.h"
 #include "SoundResource.h"
 
+#include "Audio_Systems/General/ASutil.h"
+
 #include "Widget_Systems/widgets_mandatory.h"  // show_error
 
 #include <time.h>
@@ -137,8 +139,11 @@ int sound_add_from_file(int id, string fname) {
     next_sound_id = id + 1;
   }
 
+  size_t flen = 0;
   ALuint &buf = snd->buf[0];
-  buf = alureCreateBufferFromFile(fname.c_str());
+  ALubyte *bytes = (ALubyte *)read_all_bytes(fname.c_str(), flen);
+  
+  buf = alureCreateBufferFromMemory(bytes, (ALsizei)flen);
 
   if (!buf) {
     DEBUG_MESSAGE("Could not add sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
@@ -152,9 +157,11 @@ int sound_add_from_file(int id, string fname) {
 int sound_replace_from_file(int id, string fname) {
   get_sound(snd, id, -1);
 
+  size_t flen = 0;
   ALuint &buf = snd->buf[0];
   garbageBuffers.push_back(buf);
-  buf = alureCreateBufferFromFile(fname.c_str());
+  ALubyte *bytes = (ALubyte *)read_all_bytes(fname.c_str(), flen);
+  buf = alureCreateBufferFromMemory(bytes, (ALsizei)flen);
 
   if (!buf) {
     DEBUG_MESSAGE("Could not replace sound " + fname + " from file: " + alureGetErrorString(), MESSAGE_TYPE::M_USER_ERROR);
