@@ -39,7 +39,12 @@ cp -p -r "${PWD}" "${TEST_HARNESS_MASTER_DIR}"
 PREVIOUS_PWD=${PWD}
 pushd "${TEST_HARNESS_MASTER_DIR}"
 make all -j$MAKE_JOBS
-./test-runner
+if [ "$TRAVIS_OS_NAME" == "windows" ]; then
+  ./test-runner --gtest_filter=*-Regression.image_load_save_test --gtest_output=xml:test-harness-out/TestReport.xml
+else
+  ./test-runner --gtest_output=xml:test-harness-out/TestReport.xml
+fi
+
 if [[ "$TRAVIS" -eq "true" ]]; then
   # upload coverage report before running regression tests
   bash <(curl -s https://codecov.io/bash) -f "*.info" -t "$_CODECOV_UPLOAD_TOKEN"
@@ -76,7 +81,11 @@ if [[ "${PWD}" == "${TEST_HARNESS_MASTER_DIR}" ]]; then
   make all -j$MAKE_JOBS
   echo "Generating regression comparison images..."
   mkdir -p "${PWD}/test-harness-out"
-  ./test-runner --gtest_filter=Regression.*
+  if [ "$TRAVIS_OS_NAME" == "windows" ]; then
+    ./test-runner --gtest_filter=Regression.*-Regression.image_load_save_test
+  else
+    ./test-runner --gtest_filter=Regression.*
+  fi
 
   popd
 else

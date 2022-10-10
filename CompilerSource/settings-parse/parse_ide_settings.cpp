@@ -25,6 +25,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -107,6 +108,7 @@ bool codegen_only = false;
 std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
+std::string num_make_jobs;
 
 void parse_ide_settings(const char* eyaml)
 {
@@ -138,6 +140,15 @@ void parse_ide_settings(const char* eyaml)
   }
   setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
+
+  // The number of compile jobs
+  num_make_jobs = "1";
+  if (settree.exists("jobs")) {
+    const std::string &jobs = settree.get("jobs");
+    if (std::all_of(jobs.begin(), jobs.end(), [](char c) { return std::isdigit(c); })) {
+      num_make_jobs = settree.get("jobs").toString();
+    }
+  }
 
   // Path to enigma sources
   enigma_root = settree.get("enigma-root").toString();

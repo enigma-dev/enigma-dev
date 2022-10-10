@@ -364,6 +364,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
   	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
     make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
+    make += "-j" + num_make_jobs + " ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -725,6 +726,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  make += "-j" + num_make_jobs + " ";
 
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")

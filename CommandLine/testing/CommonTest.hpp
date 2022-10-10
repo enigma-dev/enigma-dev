@@ -6,6 +6,9 @@
 #include <gtest/gtest.h>
 
 inline void test_common(TestHarness* test_harness, const std::string& name, bool save_image = true) {
+  std::string tracemsg = name.substr(name.find_first_of("["));
+  SCOPED_TRACE(tracemsg);
+
   if (!test_harness) FAIL() << "Game could not be run.";
   
   ASSERT_TRUE(test_harness->game_is_running())
