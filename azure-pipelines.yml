@@ -22,12 +22,16 @@ jobs:
 
 - job: TestHarness
   displayName: 'Test Harness'
+  strategy:
+    parallel: 1
   variables:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "linux"
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    AGENT_N: $(System.JobPositionInPhase)
+    TOTAL_AGENTS: $(System.TotalJobsInPhase)
   pool:
     vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 360
@@ -69,12 +73,16 @@ jobs:
 
 - job: TestHarnessWindows
   displayName: 'Test Harness Windows'
+  strategy:
+    parallel: 5
   variables:
     TEST_HARNESS: "true"
     TRAVIS_OS_NAME: "windows"
     TRAVIS: "true"
     TRAVIS_PULL_REQUEST: $(System.PullRequest.PullRequestNumber)
     TRAVIS_PULL_REQUEST_SHA: $(Build.SourceVersion)
+    AGENT_N: $(System.JobPositionInPhase)
+    TOTAL_AGENTS: $(System.TotalJobsInPhase)
   pool:
     vmImage: 'windows-latest'
   timeoutInMinutes: 360
