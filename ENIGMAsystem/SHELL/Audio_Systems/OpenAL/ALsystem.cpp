@@ -142,7 +142,6 @@ int sound_add_from_file(int id, string fname) {
   size_t flen = 0;
   ALuint &buf = snd->buf[0];
   ALubyte *bytes = (ALubyte *)read_all_bytes(fname.c_str(), flen);
-  
   buf = alureCreateBufferFromMemory(bytes, (ALsizei)flen);
 
   if (!buf) {
