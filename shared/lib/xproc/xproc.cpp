@@ -46,7 +46,7 @@
 #include <fcntl.h>
 #endif
 
-#if defined(_WIN32
+
 #include <shlwapi.h>
 #include <Objbase.h>
 #include <tlhelp32.h>
