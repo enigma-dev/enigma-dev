@@ -922,8 +922,8 @@ namespace ifd {
       if (stat(path.string().c_str(), &fileInfo) == -1) return nullptr;
       icon = [[NSWorkspace sharedWorkspace] iconForFile:[NSString stringWithUTF8String:apath.c_str()]];
     } else {
-      if (stat("/dev", &fileInfo) == -1) return nullptr;
-      icon = [[NSWorkspace sharedWorkspace] iconForFile:@"/dev"];
+      if (stat("/bin", &fileInfo) == -1) return nullptr;
+      icon = [[NSWorkspace sharedWorkspace] iconForFile:@"/bin"];
     }
     
     if (icon == nullptr) return nullptr;
