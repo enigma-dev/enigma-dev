@@ -609,7 +609,7 @@ namespace ngs::fs {
     if (!arg.empty()) {
       bool is_exe = false;
       string argv0;
-      if (!arg.empty() && arg[0] == '/') {
+      if (arg[0] == '/') {
         argv0 = arg;
         is_exe = is_executable(argv0.c_str(), &path);
       } else if (arg.find('/') == string::npos) {
