@@ -339,8 +339,12 @@ namespace {
     #endif
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(); ifd_load_fonts();
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_WIDTH").empty())
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(800));
+     if (ngs::fs::environment_get_variable("IMGUI_FONT_HEIGHT").empty())
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(400));
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
-    ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(18));
+    ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(32));
     ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
     config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 }; 
     float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
