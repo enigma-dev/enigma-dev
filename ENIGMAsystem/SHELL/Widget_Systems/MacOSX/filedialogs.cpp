@@ -295,6 +295,10 @@ namespace {
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_ALWAYS_ON_TOP | 
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #endif
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_WIDTH").empty())
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(800));
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_HEIGHT").empty())
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(400));
     window = SDL_CreateWindow(title.c_str(), 
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
@@ -339,10 +343,6 @@ namespace {
     #endif
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(); ifd_load_fonts();
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_WIDTH").empty())
-    ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(800));
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_HEIGHT").empty())
-    ngs::fs::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(400));
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
     ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(32));
     ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
