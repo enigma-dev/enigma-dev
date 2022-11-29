@@ -1,11 +1,18 @@
-target_include_directories(Info/)
+cmake_minimum_required(VERSION 3.14)
 
-set(TARGET_LIB "x_audio2")
+set(X2LIB "xAudio2LIB")
+set(X2LIB_DESCRIPTION "XAudio2 Audio System")
+# set(CMAKE_DEBUG_POSTFIX d)
 
-message("this is ${TARGET_LIB}")
+project(${X2LIB} DESCRIPTION ${X2LIB_DESCRIPTION})
 
-# adding XAudio2 as module
-add_library(${TARGET_LIB} 
-    *.cpp
-    *.h
-)
+# include(CTest)
+# enable_testing()
+
+file(GLOB_RECURSE X2LIB_SOURCES *.cpp)
+
+add_library(${X2LIB} ${X2LIB_SOURCES})
+
+# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+# include(CPack)

@@ -1,15 +1,18 @@
 cmake_minimum_required(VERSION 3.14)
 
-target_include_directories(Info/)
+set(OpenALLIB "openALLIB")
+set(OpenALLIB_DESCRIPTION "OpenAL Audio System")
+# set(CMAKE_DEBUG_POSTFIX d)
 
-set(TARGET_LIB "open_AL")
+project(${OpenALLIB} DESCRIPTION ${OpenALLIB_DESCRIPTION})
 
-message("this is ${TARGET_LIB}")
+# include(CTest)
+# enable_testing()
 
-add_library(${TARGET_LIB} 
-    *.cpp
-    *.h
-)
+file(GLOB_RECURSE OpenALLIB_SOURCES *.cpp)
 
+add_library(${OpenALLIB} ${OpenALLIB_SOURCES})
 
-
+# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+# include(CPack)

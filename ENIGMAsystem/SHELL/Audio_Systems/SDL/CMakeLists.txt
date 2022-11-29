@@ -1,11 +1,18 @@
-target_include_directories(Info/)
+cmake_minimum_required(VERSION 3.14)
 
-set(TARGET_LIB "SDL")
+set(SDLLIB "sDLLIB")
+set(SDLLIB_DESCRIPTION "SDL Audio System")
+# set(CMAKE_DEBUG_POSTFIX d)
 
-message("this is ${TARGET_LIB}")
+project(${SDLLIB} DESCRIPTION ${SDLLIB_DESCRIPTION})
 
-# adding SDL as module
-add_library(${TARGET_LIB} 
-    *.cpp
-    *.h
-)
+# include(CTest)
+# enable_testing()
+
+file(GLOB_RECURSE SDLLIB_SOURCES *.cpp)
+
+add_library(${SDLLIB} ${SDLLIB_SOURCES})
+
+# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+# include(CPack)

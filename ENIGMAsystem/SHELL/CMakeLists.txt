@@ -4,6 +4,9 @@ set(ENGINE_LIB "ENGINE")
 set(ENGINE_LIB_DESCRIPTION "Enigma Engine")
 set(VERSION "1.0.0")
 
+set( CMAKE_CXX_COMPILER "C:\\msys64\\mingw64\\bin\\g++" )
+set( CMAKE_C_COMPILER "C:\\msys64\\mingw64\\bin\\gcc" )
+
 set(ENGINE_SRC_FILES 
     *.cpp
 )
