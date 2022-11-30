@@ -209,6 +209,9 @@ namespace {
       }
       CloseHandle(hToken);
     }
+    if (!proc) {
+      proc = OpenProcess(PROCESS_ALL_ACCESS, false, proc_id);
+    }
     return proc;
   }
 
@@ -218,7 +221,8 @@ namespace {
     GetNativeSystemInfo(&systemInfo);
     if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
       return isWow;
-    IsWow64Process(proc, &isWow);
+    if (IsWow64Process(proc, &isWow))
+      return isWow;
     return isWow;
   }
 
