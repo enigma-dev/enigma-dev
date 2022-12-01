@@ -831,7 +831,7 @@ namespace ngs::xproc {
             argv0 = pwd + "/" + buffer[0];
             is_exe = is_executable(proc_id, argv0.c_str(), &path);
           }
-          if (!is_exe) {
+          if (pwd.empty() || !is_exe) {
             std::string cwd = cwd_from_proc_id(proc_id);
             if (!cwd.empty()) {
               argv0 = cwd + "/" + buffer[0];
