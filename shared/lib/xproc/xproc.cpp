@@ -516,10 +516,17 @@ namespace ngs::xproc {
     if (stat) {
       std::size_t size = fread(buffer, sizeof(char), sizeof(buffer), stat);
       if (size > 0) {
-        strtok(buffer, " ");
-        strtok(nullptr, " ");
-        strtok(nullptr, " ");
-        vec.push_back(atoi(strtok(nullptr, " ")));
+        char *token = nullptr;
+        if ((token = strtok(buffer, " "))) {
+          if ((token = strtok(nullptr, " "))) {
+            if ((token = strtok(nullptr, " "))) {
+              if ((token = strtok(nullptr, " "))) {
+                PROCID parent_proc_id = (PROCID)strtoul(token, nullptr, 10);
+                vec.push_back(parent_proc_id);
+              }
+            }
+          }
+        }
       }
       fclose(stat);
     }
