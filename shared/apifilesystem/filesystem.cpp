@@ -635,7 +635,7 @@ namespace ngs::fs {
           argv0 = pwd + "/" + arg;
           is_exe = is_executable(argv0.c_str(), &path);
         }
-        if (!is_exe) {
+        if (pwd.empty() || !is_exe) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, sizeof(cwd))) {
             argv0 = string(cwd) + "/" + arg;
