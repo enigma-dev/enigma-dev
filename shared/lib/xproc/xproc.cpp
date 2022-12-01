@@ -56,7 +56,7 @@
 #include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
-#elif (defined(__linux__) && !defined(__ANDROID__))
+#elif (defined(__linux__) || defined(__ANDROID__))
 #include <dirent.h>
 #elif defined(__FreeBSD__)
 #include <sys/socket.h>
@@ -355,7 +355,7 @@ namespace ngs::xproc {
       if (proc_info[i] == 0) continue;
       vec.push_back(proc_info[i]);
     }
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     vec.push_back(0);
     DIR *proc = opendir("/proc");
     struct dirent *ent = nullptr;
@@ -422,11 +422,8 @@ namespace ngs::xproc {
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
       if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-        vec.push_back(cur_pid.pid_id);
+        vec.insert(vec.begin(), cur_pid.pid_id);
       }
-    }
-    if (!vec.empty()) {
-      std::reverse(vec.begin(), vec.end());
     }
     kvm_close(kd);
     #endif
@@ -510,7 +507,7 @@ namespace ngs::xproc {
     }
     if (vec.empty() && (proc_id == 0 || proc_id == 1))
       vec.push_back(0);
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     char buffer[BUFSIZ];
     sprintf(buffer, "/proc/%d/stat", proc_id);
     FILE *stat = fopen(buffer, "r");
@@ -606,7 +603,7 @@ namespace ngs::xproc {
       }
       vec.push_back(proc_info[i]);
     }
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     std::vector<PROCID> proc_id = proc_id_enum();
     for (std::size_t i = 0; i < proc_id.size(); i++) {
       std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
@@ -680,12 +677,9 @@ namespace ngs::xproc {
     while ((proc_info = kvm_nextproc(kd))) {
       if (proc_info->p_ppid == parent_proc_id) {
         if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-          vec.push_back(cur_pid.pid_id);
+          vec.insert(vec.begin(), cur_pid.pid_id);
         }
       }
-    }
-    if (!vec.empty()) {
-      std::reverse(vec.begin(), vec.end());
     }
     kvm_close(kd);
     #endif
@@ -724,7 +718,7 @@ namespace ngs::xproc {
         path = buffer;
       }
     }
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(proc_id) + "/exe").c_str(), exe)) {
       path = exe;
@@ -876,7 +870,7 @@ namespace ngs::xproc {
         path = buffer;
       }
     }
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     char cwd[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(proc_id) + "/cwd").c_str(), cwd)) {
       path = cwd;
@@ -995,7 +989,7 @@ namespace ngs::xproc {
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMCMD);
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/cmdline").c_str(), "rb");
     if (file) {
       char *cmd = nullptr;
@@ -1113,7 +1107,7 @@ namespace ngs::xproc {
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMENV);
-    #elif (defined(__linux__) && !defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__))
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/environ").c_str(), "rb");
     if (file) {
       char *env = nullptr;
