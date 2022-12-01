@@ -336,6 +336,7 @@ namespace ngs::xproc {
     std::vector<PROCID> vec;
     #if defined(_WIN32)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!hp) return vec;
     PROCESSENTRY32 pe;
     pe.dwSize = sizeof(PROCESSENTRY32);
     if (Process32First(hp, &pe)) {
@@ -488,6 +489,7 @@ namespace ngs::xproc {
     std::vector<PROCID> vec;
     #if defined(_WIN32)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!hp) return vec;
     PROCESSENTRY32 pe;
     pe.dwSize = sizeof(PROCESSENTRY32);
     if (Process32First(hp, &pe)) {
@@ -580,6 +582,7 @@ namespace ngs::xproc {
     std::vector<PROCID> vec;
     #if defined(_WIN32)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (!hp) return vec;
     PROCESSENTRY32 pe;
     pe.dwSize = sizeof(PROCESSENTRY32);
     if (Process32First(hp, &pe)) {
