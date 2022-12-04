@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 set(NLIB "noneLIB")
 set(NLIB_DESCRIPTION "No Audio System")
 # set(CMAKE_DEBUG_POSTFIX d)

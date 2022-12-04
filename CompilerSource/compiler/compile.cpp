@@ -710,6 +710,21 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   idpr("Starting compile (This may take a while...)", 30);
 
+  // string cmake = 
+
+  // int cmakeres = e_execs(compilerInfo.MAKE_location, cmake, cflags);
+  // if (build_stopping) { build_stopping = false; return 0; }
+
+  // Stop redirecting GCC output
+  // if (redirect_make)
+  //   ide_output_redirect_reset();
+
+  // if (cmakeres) {
+  //   idpr("Compile failed at C++ level.",-1);
+  //   return E_ERROR_BUILD;
+  // }
+  // user << "******** CMake Completed Successfully ******** \n";
+
   string make = compilerInfo.make_vars["MAKEFLAGS"];
 
   make += "-C \"" + unixfy_path(enigma_root) + "\" ";

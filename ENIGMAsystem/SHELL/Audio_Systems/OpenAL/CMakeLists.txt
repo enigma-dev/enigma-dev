@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 set(OpenALLIB "openALLIB")
 set(OpenALLIB_DESCRIPTION "OpenAL Audio System")
 # set(CMAKE_DEBUG_POSTFIX d)

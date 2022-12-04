@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 set(DSLIB "directSoundLIB")
 set(DSLIB_DESCRIPTION "Direct Sound Audio System")
 # set(CMAKE_DEBUG_POSTFIX d)

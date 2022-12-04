@@ -7,38 +7,51 @@ set(VERSION "1.0.0")
 set( CMAKE_CXX_COMPILER "C:\\msys64\\mingw64\\bin\\g++" )
 set( CMAKE_C_COMPILER "C:\\msys64\\mingw64\\bin\\gcc" )
 
-set(ENGINE_SRC_FILES 
-    *.cpp
-)
-
 project(${ENGINE_LIB} VERSION ${VERSION} DESCRIPTION ${ENGINE_LIB_DESCRIPTION})
 
-# for headers needed for Direct Sound system
-include_directories(Audio_Systems/DirectSound/Info)
-include_directories(Audio_Systems/General/)
-include_directories(Audio_Systems/)
-include_directories(Universal_System/)
+# GMODE { Run, Build, Debug, Compile }
+if(GMODE STREQUAL "")
+    set(GMODE Run)
+endif()
 
-# for headers needed for OpenAL system
+# GRAPHICS { Graphics_Systems/* }
+if(GRAPHICS STREQUAL "")
+    set(GRAPHICS OpenGL1)
+endif()
 
-# for headers needed for SDL system
+# AUDIO { Audio_Systems/* }
+if(AUDIO STREQUAL "")
+    set(AUDIO OpenAL)
+endif()
 
-# for headers needed for XAudio2 system
+# COLLISION { Collision_Systems/* }
+if(COLLISION STREQUAL "")
+    set(COLLISION BBox)
+endif()
 
-# for headers needed if there's no system
-add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/)
+# WIDGETS { Widget_Systems/* }
+if(WIDGETS STREQUAL "")
+    set(WIDGETS None)
+endif()
 
-add_executable(${ENGINE_LIB}
-    ${ENGINE_SRC_FILES}
-)
+# NETWORKING { Networking_Systems/* }
+if(NETWORKING STREQUAL "")
+    set(NETWORKING None)
+endif()
 
-target_link_libraries(${ENGINE_LIB} PUBLIC 
-    ${AUDIO_LIB}
-)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/${AUDIO})
 
-target_include_directories(${ENGINE_LIB} PUBLIC 
-    ${CMAKE_SOURCE_DIR}/Audio_Systems/General/
-    ${CMAKE_SOURCE_DIR}/Audio_Systems/${AUDIO_SYSTEM}/Info/
-)
+# add_executable(${ENGINE_LIB}
+#     ${ENGINE_SRC_FILES}
+# )
 
-#target_link_libraries(${ENGINE_LIB} ${TARGET})
+# target_link_libraries(${ENGINE_LIB} PUBLIC 
+#     ${AUDIO_LIB}
+# )
+
+# target_include_directories(${ENGINE_LIB} PUBLIC 
+#     ${CMAKE_SOURCE_DIR}/Audio_Systems/General/
+#     ${CMAKE_SOURCE_DIR}/Audio_Systems/${AUDIO_SYSTEM}/Info/
+# )
+
+# target_link_libraries(${ENGINE_LIB} ${TARGET})

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-
 set(X2LIB "xAudio2LIB")
 set(X2LIB_DESCRIPTION "XAudio2 Audio System")
 # set(CMAKE_DEBUG_POSTFIX d)
