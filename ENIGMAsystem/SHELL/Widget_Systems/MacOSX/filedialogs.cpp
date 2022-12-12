@@ -259,7 +259,8 @@ namespace {
   #endif
 
   void ifd_load_fonts() {
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty()) {
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty() && 
+      ngs::fs::environment_get_variable("IMGUI_FONT_FILES").empty()) {
       if (!fonts.empty()) fonts.clear();
       ngs::fs::environment_set_variable("IMGUI_FONT_PATH", ngs::fs::executable_get_directory() + "fonts");
       fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
@@ -348,8 +349,14 @@ namespace {
     ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
     config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 }; 
     float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
-    for (unsigned i = 0; i < fonts.size(); i++) if (ngs::fs::file_exists(fonts[i])) io.Fonts->AddFontFromFileTTF(fonts[i].c_str(), fontSize, (!i) ? nullptr : &config, ranges);
-    io.Fonts->Build(); ApplyDefaultStyle();
+    for (unsigned i = 0; i < fonts.size(); i++) {
+      message_pump();
+      if (ngs::fs::file_exists(fonts[i])) {
+        io.Fonts->AddFontFromFileTTF(fonts[i].c_str(), fontSize, (!i) ? nullptr : &config, ranges);
+      }
+    }
+    if (!io.Fonts->Fonts.empty()) io.Fonts->Build();
+    ApplyDefaultStyle();
     #if (!defined(__MACH__) && !defined(__APPLE__))
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
@@ -486,6 +493,12 @@ namespace ngs::imgui {
       }
       if (!fonts.empty()) fonts.pop_back();
       ngs::fs::directory_contents_close();
+    } else if (!ngs::fs::environment_get_variable("IMGUI_FONT_FILES").empty()) {
+      fonts = string_split(string_replace_all(ngs::fs::environment_get_variable("IMGUI_FONT_FILES"), "\r", ""), '\n');
+      while (!fonts.empty() && fonts[fonts.size() - 1].empty()) {
+        message_pump();
+        fonts.pop_back();
+      }
     }
   }
 
