@@ -152,6 +152,7 @@ namespace {
     selectFolder
   };
 
+  /*
   void ApplyDefaultStyle() {
     ImVec4 *colors = ImGui::GetStyle().Colors;
     colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
@@ -231,6 +232,7 @@ namespace {
     style.LogSliderDeadzone                = 4;
     style.TabRounding                      = 4;
   }
+  */
 
   string expand_without_trailing_slash(string dname) {
     std::error_code ec;
@@ -356,7 +358,7 @@ namespace {
       }
     }
     if (!io.Fonts->Fonts.empty()) io.Fonts->Build();
-    ApplyDefaultStyle();
+    // ApplyDefaultStyle();
     #if (!defined(__MACH__) && !defined(__APPLE__))
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
