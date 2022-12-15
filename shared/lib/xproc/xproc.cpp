@@ -3,7 +3,6 @@
  MIT License
  
  Copyright © 2021-2022 Samuel Venable
- Copyright © 2021 Lars Nilsson
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -365,7 +364,7 @@ namespace ngs::xproc {
     while ((ent = readdir(proc))) {
       if (!isdigit(*ent->d_name))
         continue;
-      tgid = atoi(ent->d_name);
+      tgid = (PROCID)strtoul(ent->d_name, nullptr, 10);
       vec.push_back(tgid);
     }
     closedir(proc);
