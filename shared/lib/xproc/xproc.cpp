@@ -81,6 +81,12 @@
 #include <sys/proc.h>
 #endif
 
+#if defined(_WIN32)
+#if defined(_MSC_VER)
+#pragma comment(lib, "ntdll.lib")
+#endif
+#endif
+
 namespace {
 
   void message_pump() {
@@ -120,65 +126,65 @@ namespace {
    https://github.com/processhacker/phnt/
    CC BY 4.0 licence */
 
-  #define CURDIR struct {\
-    UNICODE_STRING DosPath;\
-    HANDLE Handle;\
-  }
+  typedef struct {
+    UNICODE_STRING DosPath;
+    HANDLE Handle;
+  } CURDIR;
 
   /* RTL_DRIVE_LETTER_CURDIR struct from:
    https://github.com/processhacker/phnt/
    CC BY 4.0 licence */
 
-  #define RTL_DRIVE_LETTER_CURDIR struct {\
-    USHORT Flags;\
-    USHORT Length;\
-    ULONG TimeStamp;\
-    STRING DosPath;\
-  }
+  typedef struct {
+    USHORT Flags;
+    USHORT Length;
+    ULONG TimeStamp;
+    STRING DosPath;
+  } RTL_DRIVE_LETTER_CURDIR;
 
   /* RTL_USER_PROCESS_PARAMETERS struct from:
    https://github.com/processhacker/phnt/
    CC BY 4.0 licence */
 
-  #define RTL_USER_PROCESS_PARAMETERS struct {\
-    ULONG MaximumLength;\
-    ULONG Length;\
-    ULONG Flags;\
-    ULONG DebugFlags;\
-    HANDLE ConsoleHandle;\
-    ULONG ConsoleFlags;\
-    HANDLE StandardInput;\
-    HANDLE StandardOutput;\
-    HANDLE StandardError;\
-    CURDIR CurrentDirectory;\
-    UNICODE_STRING DllPath;\
-    UNICODE_STRING ImagePathName;\
-    UNICODE_STRING CommandLine;\
-    PVOID Environment;\
-    ULONG StartingX;\
-    ULONG StartingY;\
-    ULONG CountX;\
-    ULONG CountY;\
-    ULONG CountCharsX;\
-    ULONG CountCharsY;\
-    ULONG FillAttribute;\
-    ULONG WindowFlags;\
-    ULONG ShowWindowFlags;\
-    UNICODE_STRING WindowTitle;\
-    UNICODE_STRING DesktopInfo;\
-    UNICODE_STRING ShellInfo;\
-    UNICODE_STRING RuntimeData;\
-    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[32];\
-    ULONG_PTR EnvironmentSize;\
-    ULONG_PTR EnvironmentVersion;\
-    PVOID PackageDependencyData;\
-    ULONG ProcessGroupId;\
-    ULONG LoaderThreads;\
-    UNICODE_STRING RedirectionDllName;\
-    UNICODE_STRING HeapPartitionName;\
-    ULONG_PTR DefaultThreadpoolCpuSetMasks;\
-    ULONG DefaultThreadpoolCpuSetMaskCount;\
-  }
+  typedef struct {
+    ULONG MaximumLength;
+    ULONG Length;
+    ULONG Flags;
+    ULONG DebugFlags;
+    HANDLE ConsoleHandle;
+    ULONG ConsoleFlags;
+    HANDLE StandardInput;
+    HANDLE StandardOutput;
+    HANDLE StandardError;
+    CURDIR CurrentDirectory;
+    UNICODE_STRING DllPath;
+    UNICODE_STRING ImagePathName;
+    UNICODE_STRING CommandLine;
+    PVOID Environment;
+    ULONG StartingX;
+    ULONG StartingY;
+    ULONG CountX;
+    ULONG CountY;
+    ULONG CountCharsX;
+    ULONG CountCharsY;
+    ULONG FillAttribute;
+    ULONG WindowFlags;
+    ULONG ShowWindowFlags;
+    UNICODE_STRING WindowTitle;
+    UNICODE_STRING DesktopInfo;
+    UNICODE_STRING ShellInfo;
+    UNICODE_STRING RuntimeData;
+    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[32];
+    ULONG_PTR EnvironmentSize;
+    ULONG_PTR EnvironmentVersion;
+    PVOID PackageDependencyData;
+    ULONG ProcessGroupId;
+    ULONG LoaderThreads;
+    UNICODE_STRING RedirectionDllName;
+    UNICODE_STRING HeapPartitionName;
+    ULONG_PTR DefaultThreadpoolCpuSetMasks;
+    ULONG DefaultThreadpoolCpuSetMaskCount;
+  } RTL_USER_PROCESS_PARAMETERS;
 
   #if !defined(_MSC_VER)
   #pragma pack(pop)
@@ -187,6 +193,7 @@ namespace {
   #endif
 
   std::string narrow(std::wstring wstr) {
+    if (wstr.empty()) return "";
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
     std::vector<char> buf(nbytes);
     return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
@@ -225,24 +232,20 @@ namespace {
     return isWow;
   }
 
-  void cwd_cmd_env_from_proc(HANDLE proc, wchar_t **buffer, int type) {
+  std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type) {
+    std::vector<wchar_t> buffer;
     PEB peb;
     SIZE_T nRead = 0; 
     ULONG len = 0;
     PROCESS_BASIC_INFORMATION pbi;
     RTL_USER_PROCESS_PARAMETERS upp;
-    typedef NTSTATUS (__stdcall *NTQIP)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
-    HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
-    if (!hModule) return;
-    FARPROC farProc = GetProcAddress(hModule, "NtQueryInformationProcess");
-    if (!farProc) return;
-    NTQIP NtQueryInformationProcess = (NTQIP)farProc;
     NTSTATUS status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
-    if (status) return;
+    ULONG error = RtlNtStatusToDosError(status);
+    if (error) return buffer;
     ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead);
-    if (!nRead) return;
+    if (!nRead) return buffer;
     ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead);
-    if (!nRead) return;
+    if (!nRead) return buffer;
     PVOID buf = nullptr; len = 0;
     if (type == MEMCWD) {
       buf = upp.CurrentDirectory.DosPath.Buffer;
@@ -254,11 +257,11 @@ namespace {
       buf = upp.CommandLine.Buffer;
       len = upp.CommandLine.Length;
     }
-    wchar_t *res = new wchar_t[len / 2 + 1];
-    ReadProcessMemory(proc, buf, res, len, &nRead);
-    if (!nRead) return;
-    res[len / 2] = L'\0';
-    *buffer = res;
+    buffer.resize(len / 2 + 1);
+    ReadProcessMemory(proc, buf, &buffer[0], len, &nRead);
+    if (!nRead) return buffer;
+    buffer[len / 2] = L'\0';
+    return buffer;
   }
   #endif
 
@@ -449,8 +452,9 @@ namespace ngs::xproc {
     if (!farProc) return false;
     NTSP NtSuspendProcess = (NTSP)farProc;
     NTSTATUS status = NtSuspendProcess(proc);
+    ULONG error = RtlNtStatusToDosError(status);
     CloseHandle(proc);
-    return (!status);
+    return (!error);
     #endif
   }
 
@@ -467,8 +471,9 @@ namespace ngs::xproc {
     if (!farProc) return false;
     NTRP NtResumeProcess = (NTRP)farProc;
     NTSTATUS status = NtResumeProcess(proc);
+    ULONG error = RtlNtStatusToDosError(status);
     CloseHandle(proc);
-    return (!status);
+    return (!error);
     #endif
   }
 
@@ -858,17 +863,15 @@ namespace ngs::xproc {
       CloseHandle(proc); 
       return path;
     }
-    wchar_t *buffer = nullptr;
-    cwd_cmd_env_from_proc(proc, &buffer, MEMCWD);
-    if (buffer) {
+    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCWD);
+    if (!buffer.empty()) {
       wchar_t cwd[MAX_PATH];
-      if (_wfullpath(cwd, buffer, MAX_PATH)) {
+      if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
         path = narrow(cwd);
         if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
           path = path.substr(0, path.length() - 1);
         }
       }
-      delete[] buffer;
     }
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
@@ -981,11 +984,10 @@ namespace ngs::xproc {
       CloseHandle(proc); 
       return vec;
     }
-    wchar_t *buffer = nullptr;
     int cmdsize = 0;
-    cwd_cmd_env_from_proc(proc, &buffer, MEMCMD);
-    if (buffer) {
-      wchar_t **cmd = CommandLineToArgvW(buffer, &cmdsize);
+    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCMD);
+    if (!buffer.empty()) {
+      wchar_t **cmd = CommandLineToArgvW(&buffer[0], &cmdsize);
       if (cmd) {
         for (int i = 0; i < cmdsize; i++) {
           message_pump();
@@ -993,7 +995,6 @@ namespace ngs::xproc {
         }
         LocalFree(cmd);
       }
-      delete[] buffer;
     }
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
@@ -1102,16 +1103,14 @@ namespace ngs::xproc {
       CloseHandle(proc);
       return vec;
     }
-    wchar_t *buffer = nullptr;
-    cwd_cmd_env_from_proc(proc, &buffer, MEMENV);
+    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMENV);
     int i = 0;
-    if (buffer) {
+    if (!buffer.empty()) {
       while (buffer[i] != L'\0') {
         message_pump();
         vec.push_back(narrow(&buffer[i]));
-        i += (int)(wcslen(buffer + i) + 1);
+        i += (int)(wcslen(&buffer[0] + i) + 1);
       }
-      delete[] buffer;
     }
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
