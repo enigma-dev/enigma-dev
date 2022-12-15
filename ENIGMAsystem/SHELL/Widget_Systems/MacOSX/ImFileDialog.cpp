@@ -943,8 +943,8 @@ namespace ifd {
     CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)[icon TIFFRepresentation], nullptr);
     CGImageRef imageRef =  CGImageSourceCreateImageAtIndex(source, 0, nullptr);
 
-    NSUInteger width = CGImageGetWidth(imageRef);
-    NSUInteger height = CGImageGetHeight(imageRef);
+    NSUInteger width = DEFAULT_ICON_SIZE;
+    NSUInteger height = DEFAULT_ICON_SIZE;
 
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     unsigned char *rawData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
