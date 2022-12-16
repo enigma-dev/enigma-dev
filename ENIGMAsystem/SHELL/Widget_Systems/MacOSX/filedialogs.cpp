@@ -152,88 +152,6 @@ namespace {
     selectFolder
   };
 
-  /*
-  void ApplyDefaultStyle() {
-    ImVec4 *colors = ImGui::GetStyle().Colors;
-    colors[ImGuiCol_Text]                  = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-    colors[ImGuiCol_TextDisabled]          = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
-    colors[ImGuiCol_WindowBg]              = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
-    colors[ImGuiCol_ChildBg]               = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_PopupBg]               = ImVec4(0.19f, 0.19f, 0.19f, 0.92f);
-    colors[ImGuiCol_Border]                = ImVec4(0.19f, 0.19f, 0.19f, 0.29f);
-    colors[ImGuiCol_BorderShadow]          = ImVec4(0.00f, 0.00f, 0.00f, 0.24f);
-    colors[ImGuiCol_FrameBg]               = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    colors[ImGuiCol_FrameBgHovered]        = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-    colors[ImGuiCol_FrameBgActive]         = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    colors[ImGuiCol_TitleBg]               = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_TitleBgActive]         = ImVec4(0.06f, 0.06f, 0.06f, 1.00f);
-    colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_MenuBarBg]             = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.40f, 0.40f, 0.40f, 0.54f);
-    colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    colors[ImGuiCol_CheckMark]             = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    colors[ImGuiCol_SliderGrab]            = ImVec4(0.34f, 0.34f, 0.34f, 0.54f);
-    colors[ImGuiCol_SliderGrabActive]      = ImVec4(0.56f, 0.56f, 0.56f, 0.54f);
-    colors[ImGuiCol_Button]                = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
-    colors[ImGuiCol_ButtonHovered]         = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
-    colors[ImGuiCol_ButtonActive]          = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    colors[ImGuiCol_Header]                = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_HeaderHovered]         = ImVec4(0.00f, 0.00f, 0.00f, 0.36f);
-    colors[ImGuiCol_HeaderActive]          = ImVec4(0.20f, 0.22f, 0.23f, 0.33f);
-    colors[ImGuiCol_Separator]             = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    colors[ImGuiCol_SeparatorHovered]      = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
-    colors[ImGuiCol_SeparatorActive]       = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
-    colors[ImGuiCol_ResizeGrip]            = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    colors[ImGuiCol_ResizeGripHovered]     = ImVec4(0.44f, 0.44f, 0.44f, 0.29f);
-    colors[ImGuiCol_ResizeGripActive]      = ImVec4(0.40f, 0.44f, 0.47f, 1.00f);
-    colors[ImGuiCol_Tab]                   = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_TabHovered]            = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    colors[ImGuiCol_TabActive]             = ImVec4(0.20f, 0.20f, 0.20f, 0.36f);
-    colors[ImGuiCol_TabUnfocused]          = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_TabUnfocusedActive]    = ImVec4(0.14f, 0.14f, 0.14f, 1.00f);
-    colors[ImGuiCol_PlotLines]             = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_PlotLinesHovered]      = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_PlotHistogram]         = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_PlotHistogramHovered]  = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_TableHeaderBg]         = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_TableBorderStrong]     = ImVec4(0.00f, 0.00f, 0.00f, 0.52f);
-    colors[ImGuiCol_TableBorderLight]      = ImVec4(0.28f, 0.28f, 0.28f, 0.29f);
-    colors[ImGuiCol_TableRowBg]            = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-    colors[ImGuiCol_TableRowBgAlt]         = ImVec4(1.00f, 1.00f, 1.00f, 0.06f);
-    colors[ImGuiCol_TextSelectedBg]        = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
-    colors[ImGuiCol_DragDropTarget]        = ImVec4(0.33f, 0.67f, 0.86f, 1.00f);
-    colors[ImGuiCol_NavHighlight]          = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    colors[ImGuiCol_NavWindowingHighlight] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
-    colors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.00f, 0.00f, 0.00f, 0.20f);
-    colors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.35f);
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.WindowPadding                    = ImVec2(8.00f, 8.00f);
-    style.FramePadding                     = ImVec2(5.00f, 2.00f);
-    style.CellPadding                      = ImVec2(6.00f, 6.00f);
-    style.ItemSpacing                      = ImVec2(6.00f, 6.00f);
-    style.ItemInnerSpacing                 = ImVec2(6.00f, 6.00f);
-    style.TouchExtraPadding                = ImVec2(0.00f, 0.00f);
-    style.IndentSpacing                    = 25;
-    style.ScrollbarSize                    = 15;
-    style.GrabMinSize                      = 10;
-    style.WindowBorderSize                 = 1;
-    style.ChildBorderSize                  = 1;
-    style.PopupBorderSize                  = 1;
-    style.FrameBorderSize                  = 1;
-    style.TabBorderSize                    = 1;
-    style.WindowRounding                   = 0;
-    style.ChildRounding                    = 4;
-    style.FrameRounding                    = 3;
-    style.PopupRounding                    = 0;
-    style.ScrollbarRounding                = 9;
-    style.GrabRounding                     = 3;
-    style.LogSliderDeadzone                = 4;
-    style.TabRounding                      = 4;
-  }
-  */
-
   string expand_without_trailing_slash(string dname) {
     std::error_code ec;
     dname = ngs::fs::environment_expand_variables(dname);
@@ -292,17 +210,17 @@ namespace {
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     #if (!defined(__MACH__) && !defined(__APPLE__))
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | 
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
     SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #else
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_ALWAYS_ON_TOP | 
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_ALWAYS_ON_TOP |
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #endif
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
     ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(640));
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty())
     ngs::fs::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(360));
-    window = SDL_CreateWindow(title.c_str(), 
+    window = SDL_CreateWindow(title.c_str(),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
     #if (defined(__MACH__) && defined(__APPLE__))
@@ -349,7 +267,7 @@ namespace {
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
     ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
     ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
-    config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 }; 
+    config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 };
     float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
     for (unsigned i = 0; i < fonts.size(); i++) {
       message_pump();
@@ -358,7 +276,17 @@ namespace {
       }
     }
     if (!io.Fonts->Fonts.empty()) io.Fonts->Build();
-    // ApplyDefaultStyle();
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty()) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", "0");
+    }
+    int theme = (int)strtoul(ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").c_str(), nullptr, 10);
+    if (theme == -1) {
+      ImGui::StyleColorsClassic();
+    } else if (theme == 0) {
+      ImGui::StyleColorsDark();
+    } else if (theme == 1) {
+      ImGui::StyleColorsLight();
+    }
     #if (!defined(__MACH__) && !defined(__APPLE__))
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
