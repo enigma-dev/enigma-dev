@@ -42,6 +42,7 @@ using std::string;
 using std::vector;
 
 tstring widen(const string &str) {
+  if (str.empty()) return L"";
   // Number of shorts will be <= number of bytes; add one for null terminator
   const size_t wchar_count = str.size() + 1;
   vector<WCHAR> buf(wchar_count);
@@ -49,6 +50,7 @@ tstring widen(const string &str) {
 }
 
 string shorten(tstring str) {
+  if (str.empty()) return "";
   int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
   vector<char> buf((size_t)nbytes);
   return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
