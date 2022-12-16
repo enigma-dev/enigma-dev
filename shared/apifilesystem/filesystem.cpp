@@ -89,12 +89,14 @@ namespace ngs::fs {
 
     #if defined(_WIN32) 
     wstring widen(string str) {
+      if (str.empty()) return L"";
       size_t wchar_count = str.size() + 1; 
       vector<wchar_t> buf(wchar_count);
       return wstring{ buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
     }
 
     string narrow(wstring wstr) {
+      if (wstr.empty()) return "";
       int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
       vector<char> buf(nbytes);
       return string{ buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
@@ -102,8 +104,7 @@ namespace ngs::fs {
     #endif
 
     bool is_digit(char byte) {
-      return (byte == '0' || byte == '1' || byte == '2' || byte == '3' || byte == '4' || 
-        byte == '5' || byte == '6' || byte == '7' || byte == '8' || byte == '9');
+      return (byte >= '0' && byte <= '9');
     }
 
     vector<string> directory_contents;
