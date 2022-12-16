@@ -19,13 +19,14 @@
 namespace strings_util {
 
 inline std::wstring widen(const std::string &str) {
-  // Number of shorts will be <= number of bytes; add one for null terminator
+  if (str.empty()) return L"";
   const size_t wchar_count = str.size() + 1;
   std::vector<WCHAR> buf(wchar_count);
   return std::wstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
 inline std::string shorten(std::wstring str) {
+  if (str.empty()) return "";
   int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
   std::vector<char> buf((size_t)nbytes);
   return std::string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, nullptr, nullptr)};
