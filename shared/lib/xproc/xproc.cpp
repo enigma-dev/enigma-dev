@@ -700,6 +700,45 @@ namespace ngs::xproc {
     return vec;
   }
 
+  std::vector<PROCID> proc_id_from_exe(std::string exe) {
+    auto fnamecmp = [](std::string fname1, std::string fname2) {
+      #if defined(_WIN32)
+      std::size_t fp = fname2.find_last_of("\\/");
+      bool abspath = (!fname1.empty() && fname1.size() > 3 && fname1[1] == ':' &&
+        (fname1[2] == '\\' || fname1[2] == '/'));
+      #else
+      std::size_t fp = fname2.find_last_of("/");
+      bool abspath = (!fname1.empty() && fname1.size() > 1 && fname1[0] == '/');
+      #endif
+      if (fname1.empty() || fname2.empty() || fp == std::string::npos) return false;
+      if (abspath) return (fname1 == fname2 || fname1 == fname2.substr(0, fp));
+      return (fname1 == fname2.substr(fp + 1));
+    };
+    std::vector<PROCID> vec;
+    std::vector<PROCID> proc_id = proc_id_enum();
+    for (std::size_t i = 0; i < proc_id.size(); i++) {
+      if (fnamecmp(exe, exe_from_proc_id(proc_id[i]))) {
+        vec.push_back(proc_id[i]);
+      }
+    }
+    return vec;
+  }
+
+  std::vector<PROCID> proc_id_from_cwd(std::string cwd) {
+    auto fnamecmp = [](std::string fname1, std::string fname2) {
+      if (fname1.empty() || fname2.empty()) return false;
+      return (fname1 == fname2);
+    };
+    std::vector<PROCID> vec;
+    std::vector<PROCID> proc_id = proc_id_enum();
+    for (std::size_t i = 0; i < proc_id.size(); i++) {
+      if (fnamecmp(cwd, cwd_from_proc_id(proc_id[i]))) {
+        vec.push_back(proc_id[i]);
+      }
+    }
+    return vec;
+  }
+
   std::string exe_from_proc_id(PROCID proc_id) {
     std::string path;
     #if defined(_WIN32)

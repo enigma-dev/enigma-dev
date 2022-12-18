@@ -44,6 +44,8 @@ namespace ngs::xproc {
   bool proc_id_kill(PROCID proc_id);
   std::vector<PROCID> parent_proc_id_from_proc_id(PROCID proc_id);
   std::vector<PROCID> proc_id_from_parent_proc_id(PROCID parent_proc_id);
+  std::vector<PROCID> proc_id_from_exe(std::string exe);
+  std::vector<PROCID> proc_id_from_cwd(std::string cwd);
   std::string exe_from_proc_id(PROCID proc_id);
   std::string cwd_from_proc_id(PROCID proc_id);
   std::vector<std::string> cmdline_from_proc_id(PROCID proc_id);
