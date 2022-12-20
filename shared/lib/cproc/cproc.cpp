@@ -400,7 +400,7 @@ namespace ngs::cproc {
     if (tempdir.empty()) tempdir = environment_get_variable("TEMP");
     if (tempdir.empty()) tempdir = environment_get_variable("TEMPDIR");
     if (tempdir.empty()) tempdir = "/tmp";
-    struct stat sb = { 0 };
+    struct stat sb;
     if (stat(tempdir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
       while (!tempdir.empty() && tempdir.back() == '/') {
         tempdir.pop_back();
@@ -851,7 +851,7 @@ namespace ngs::cproc {
     } else { proc_id = 0; }
     child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
     proc_did_execute[index] = true; CPROCID proc_index = (CPROCID)proc_id;
-    stdipt_map.insert(std::make_pair(proc_index, (std::intptr_t)infd));
+    stdipt_map[proc_index] = (std::intptr_t)infd;
     std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
     opt_thread.join();
     #else
@@ -866,13 +866,14 @@ namespace ngs::cproc {
     SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
     proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
     if (proceed == false) return 0;
-    STARTUPINFOW si = { 0 };
+    STARTUPINFOW si;
+    ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(STARTUPINFOW);
     si.dwFlags = STARTF_USESTDHANDLES;
     si.hStdError = stdout_write;
     si.hStdOutput = stdout_write;
     si.hStdInput = stdin_read;
-    PROCESS_INFORMATION pi = { 0 }; CPROCID proc_index = 0;
+    PROCESS_INFORMATION pi; ZeroMemory(&pi, sizeof(pi)); CPROCID proc_index = 0;
     BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
     delete[] cwstr_command;
     if (success) {
@@ -880,7 +881,7 @@ namespace ngs::cproc {
       CloseHandle(stdin_read);
       XPROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = (CPROCID)proc_id;
       std::this_thread::sleep_for(std::chrono::milliseconds(5)); proc_did_execute[index] = true;
-      stdipt_map.insert(std::make_pair(proc_index, (std::intptr_t)(void *)stdin_write));
+      stdipt_map[proc_index] = (std::intptr_t)(void *)stdin_write;
       HANDLE wait_handles[] = { pi.hProcess, stdout_read };
       std::thread opt_thread(output_thread, (std::intptr_t)(void *)stdout_read, proc_index);
       while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
