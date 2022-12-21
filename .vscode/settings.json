@@ -1,4 +1,0 @@
-{
-    "makefile.extensionOutputFolder": "./.vscode",
-    "cmake.sourceDirectory": "${workspaceFolder}/ENIGMAsystem/SHELL"
-}
