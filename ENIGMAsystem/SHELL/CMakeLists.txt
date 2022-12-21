@@ -2,12 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 set(ENGINE_LIB "ENGINE")
 set(ENGINE_LIB_DESCRIPTION "Enigma Engine")
-set(VERSION "1.0.0")
 
-set( CMAKE_CXX_COMPILER "C:\\msys64\\mingw64\\bin\\g++" )
-set( CMAKE_C_COMPILER "C:\\msys64\\mingw64\\bin\\gcc" )
-
-project(${ENGINE_LIB} VERSION ${VERSION} DESCRIPTION ${ENGINE_LIB_DESCRIPTION})
+project(${ENGINE_LIB} DESCRIPTION ${ENGINE_LIB_DESCRIPTION})
 
 # GMODE { Run, Build, Debug, Compile }
 if(GMODE STREQUAL "")
