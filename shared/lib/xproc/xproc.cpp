@@ -704,13 +704,18 @@ namespace ngs::xproc {
     auto fnamecmp = [](std::string fname1, std::string fname2) {
       #if defined(_WIN32)
       std::size_t fp = fname2.find_last_of("\\/");
-      bool abspath = (!fname1.empty() && fname1.size() > 3 && fname1[1] == ':' &&
+      bool abspath = (!fname1.empty() && fname1.length() >= 3 && fname1[1] == ':' &&
         (fname1[2] == '\\' || fname1[2] == '/'));
       #else
       std::size_t fp = fname2.find_last_of("/");
-      bool abspath = (!fname1.empty() && fname1.size() > 1 && fname1[0] == '/');
+      bool abspath = (!fname1.empty() && fname1.length() >= 1 && fname1[0] == '/');
       #endif
       if (fname1.empty() || fname2.empty() || fp == std::string::npos) return false;
+      #if defined(_WIN32)
+      if (abspath && fname1.length() == 3) return (fname1 == fname2.substr(0, fp + 1));
+      #else
+      if (abspath && fname1.length() == 1) return (fname1 == fname2.substr(0, fp + 1));
+      #endif
       if (abspath) return (fname1 == fname2 || fname1 == fname2.substr(0, fp));
       return (fname1 == fname2.substr(fp + 1));
     };
