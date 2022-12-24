@@ -314,17 +314,20 @@ int cocoa_get_color(int defcol, const char *title) {
     if ([[myColorPanel standardWindowButton:NSWindowCloseButton] state] == NSControlStateValueOn) {
       [[myColorPanel standardWindowButton:NSWindowCloseButton] setState:NSControlStateValueOff];
       [NSApp endModalSession:colorSession];
+      break;
     }
 
     if ([myOKButton state] == NSControlStateValueOn) {
       [NSApp endModalSession:colorSession];
       colorOKPressed = true;
       [myColorPanel close];
+      break;
     }
 
     if ([myCancelButton state] == NSControlStateValueOn) {
       [NSApp endModalSession:colorSession];
       [myColorPanel close];
+      break;
     }
   }
 
