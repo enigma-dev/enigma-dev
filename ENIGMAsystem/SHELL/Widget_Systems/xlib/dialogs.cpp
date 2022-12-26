@@ -253,7 +253,7 @@ static inline void modify_shell_dialog(XPROCID pid) {
     delete[] buffer; Window focus; int revert; while (!modifyInit) { 
     XSynchronize(display, true); XRaiseWindow(display, wid);
     XSetInputFocus(display, wid, RevertToParent, CurrentTime);
-    XFlush(display); XGetInputFocus(display, &focus, &revert) 
+    XFlush(display); XGetInputFocus(display, &focus, &revert);
     if (wid == focus) modifyInit = true; }
   }
   ngs::cproc::free_window_id(arr);
