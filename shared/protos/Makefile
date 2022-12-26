@@ -13,7 +13,7 @@ endif
 TARGET := ../../libProtocols$(LIB_EXT)
 
 CXXFLAGS += -I$(OBJ_DIR) -fPIC
-LDFLAGS += -shared -lprotobuf lgrpc++ -Wl,--no-allow-shlib-undefined
+LDFLAGS += -shared -lprotobuf -lgrpc++ -Wl,--no-allow-shlib-undefined
 
 GENERATED := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.cc) $(PROTO_SOURCES:.proto=.pb.h) $(SOURCES_GRPC:.proto=.grpc.pb.cc) $(SOURCES_GRPC:.proto=.grpc.pb.h))
 OBJECTS := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.o) $(SOURCES_GRPC:.proto=.grpc.pb.o))
