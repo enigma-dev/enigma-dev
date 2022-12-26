@@ -268,8 +268,9 @@ string get_open_filename(string filter, string fname) override {
 }
 
 string get_open_filename_ext(string filter, string fname, string dir, string title) override {
-  string str_command; string pwd;
+  string str_command; string pwd; string caption_previous = dialog_caption;
   string str_title = add_escaping(title, true, "Open");
+  dialog_caption = (str_title == "Open") ? "Open" : title;
   string str_fname = filename_name(filename_absolute(fname));
   string str_dir = filename_absolute(dir);
   string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
@@ -277,6 +278,7 @@ string get_open_filename_ext(string filter, string fname, string dir, string tit
   string("--file-selection --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter) + string(");echo $ans");
   string result = create_shell_dialog(str_command);
+  dialog_caption = caption_previous;
   return file_exists(result) ? result : "";
 }
 
@@ -285,8 +287,9 @@ string get_open_filenames(string filter, string fname) override {
 }
 
 string get_open_filenames_ext(string filter, string fname, string dir, string title) override {
-  string str_command; string pwd;
+  string str_command; string pwd; string caption_previous = dialog_caption;
   string str_title = add_escaping(title, true, "Open");
+  dialog_caption = (str_title == "Open") ? "Open" : title;
   string str_fname = filename_name(filename_absolute(fname));
   string str_dir = filename_absolute(dir);
   string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
@@ -294,6 +297,7 @@ string get_open_filenames_ext(string filter, string fname, string dir, string ti
   string("--file-selection --multiple --separator='\n' --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter);
   string result = create_shell_dialog(str_command);
+  dialog_caption = caption_previous;
   std::vector<string> stringVec = split_string(result, '\n');
   bool success = true;
   for (const string &str : stringVec) {
@@ -308,15 +312,18 @@ string get_save_filename(string filter, string fname) override {
 }
 
 string get_save_filename_ext(string filter, string fname, string dir, string title) override {
-  string str_command; string pwd;
+  string str_command; string pwd; string caption_previous = dialog_caption;
   string str_title = add_escaping(title, true, "Save As");
+  dialog_caption = (str_title == "Save As") ? "Save As" : title;
   string str_fname = filename_name(filename_absolute(fname));
   string str_dir = filename_absolute(dir);
   string str_path; if (!str_dir.empty()) str_path = str_dir + string("/") + str_fname;
   str_command = string("ans=$(zenity ") +
   string("--file-selection  --save --confirm-overwrite --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_path, false, "") + string("\"") + zenity_filter(filter) + string(");echo $ans");
-  return create_shell_dialog(str_command);
+  string result = create_shell_dialog(str_command);
+  dialog_caption = caption_previous;
+  return result;
 }
 
 string get_directory(string dname) override {
@@ -324,14 +331,17 @@ string get_directory(string dname) override {
 }
 
 string get_directory_alt(string capt, string root) override {
-  string str_command; string pwd;
+  string str_command; string pwd; string caption_previous = dialog_caption;
   string str_title = add_escaping(capt, true, "Select Directory");
+  dialog_caption = (str_title == "Select Directory") ? "Select Directory" : capt;
   string str_dname = root;
   string str_end = ");if [ $ans = / ] ;then echo $ans;elif [ $? = 1 ] ;then echo $ans/;else echo $ans;fi";
   str_command = string("ans=$(zenity ") +
   string("--file-selection --directory --title=\"") + str_title + string("\" --filename=\"") +
   add_escaping(str_dname, false, "") + string("\"") + str_end;
-  return create_shell_dialog(str_command);
+  string result = create_shell_dialog(str_command);
+  dialog_caption = caption_previous;
+  return result;
 }
 
 int get_color(int defcol) override {
@@ -339,8 +349,9 @@ int get_color(int defcol) override {
 }
 
 int get_color_ext(int defcol, string title) override {
-  string str_command;
+  string str_command; string caption_previous = dialog_caption;
   string str_title = add_escaping(title, true, "Color");
+  dialog_caption = (str_title == "Color") ? "Color" : title;
   string str_defcol;
   string str_result;
 
@@ -356,6 +367,7 @@ int get_color_ext(int defcol, string title) override {
   str_defcol + string("');if [ $? = 0 ] ;then echo $ans;else echo -1;fi");
 
   str_result = create_shell_dialog(str_command);
+  dialog_caption = caption_previous;
   if (str_result == "-1") return strtod(str_result.c_str(), nullptr);
   str_result = string_replace_all(str_result, "rgba(", "");
   str_result = string_replace_all(str_result, "rgb(", "");
