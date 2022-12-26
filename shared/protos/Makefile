@@ -2,8 +2,8 @@ include ../../Config.mk
 
 PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
 SOURCES_GRPC := server.proto
-LDFLAGS += -lgrpc++
-CXXFLAGS += --Wno-allow-shlib-undefined
+LDFLAGS += -lgrpc++ -Wl,--no-allow-shlib-undefined
+CXXFLAGS += -Wl,--no-allow-shlib-undefined
 ifeq ($(UNIX_BASED), true)
 	GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)
 else
