@@ -69,7 +69,7 @@ namespace enigma {
 
 CommandLineWidgetEngine *current_widget_engine = zenity_widgets;
  
-static int modifyInit = 0;
+static bool modifyInit = false;
 
 static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
   return 0;
@@ -250,10 +250,11 @@ static inline void modify_shell_dialog(XPROCID pid) {
     XInternAtom(display, "_NET_WM_NAME", false),
     XInternAtom(display, "UTF8_STRING", false),
     8, PropModeReplace, (unsigned char *)buffer, len);
-    delete[] buffer; if (modifyInit < 50) { 
+    delete[] buffer; Window focus; int revert; while (!modifyInit) { 
     XSynchronize(display, true); XRaiseWindow(display, wid);
-    XSetInputFocus(display, wid, RevertToPointerRoot, CurrentTime);
-    XFlush(display); modifyInit++; }
+    XSetInputFocus(display, wid, RevertToParent, CurrentTime);
+    XFlush(display); XSetInputFocus(display, &focus, &revert) 
+    if (wid == focus) modifyInit = true; }
   }
   ngs::cproc::free_window_id(arr);
   XCloseDisplay(display);
@@ -267,7 +268,7 @@ bool widget_system_initialize() {
 }
 
 string create_shell_dialog(string command) {
-  string output; modifyInit = 0;
+  string output; modifyInit = false;
   XPROCID pid = process_execute_async(command.c_str());
   if (pid) {
     while (!completion_status_from_executed_process(pid)) {
