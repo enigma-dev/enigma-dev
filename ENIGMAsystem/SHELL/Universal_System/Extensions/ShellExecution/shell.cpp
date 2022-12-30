@@ -255,27 +255,27 @@ void action_webpage(const string& url) {
   url_open(url);
 }
 
-WINDOWID WindowIdFromNativeWindow(WINDOW window) {
+char *WindowIdFromNativeWindow(void *window) {
   return window_id_from_native_window(window);
 }
 
-WINDOW NativeWindowFromWindowId(WINDOWID winid) {
+WINDOW NativeWindowFromWindowId(char *winid) {
   return native_window_from_window_id(win_id);
 }
 
-bool WindowIdExists(WINDOWID winId) {
+bool WindowIdExists(char *winId) {
   return window_id_exists(winId);
 }
 
-bool WindowIdSuspend(WINDOWID winId) {
+bool WindowIdSuspend(char *winId) {
   return window_id_suspend(winId);
 }
 
-bool WindowIdResume(WINDOWID winId) {
+bool WindowIdResume(char *winId) {
   return window_id_resume(winId);
 }
 
-bool WindowidKill(WINDOWID winId) {
+bool WindowidKill(char *winId) {
   return window_id_kill(winId);
 }
 
