@@ -259,7 +259,7 @@ char *WindowIdFromNativeWindow(void *window) {
   return (char *)window_id_from_native_window((WINDOW)window);
 }
 
-void *NativeWindowFromWindowId(char *winid) {
+void *NativeWindowFromWindowId(char *winId) {
   return (void *)native_window_from_window_id((WINDOWID)winId);
 }
 
