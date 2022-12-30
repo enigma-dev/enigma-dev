@@ -279,8 +279,8 @@ bool WindowidKill(WINDOWID winId) {
   return window_id_kill(winId);
 }
 
-WINDOWID OwnedWindowId(PROCINFO procInfo, int i) {
-  return owned_window_id(procInfo, i);
+char *OwnedWindowId(PROCINFO procInfo, int i) {
+  return (char *)owned_window_id(procInfo, i);
 }
 
 int OwnedWindowIdLength(PROCINFO procInfo) {
