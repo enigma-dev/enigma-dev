@@ -256,27 +256,27 @@ void action_webpage(const string& url) {
 }
 
 char *WindowIdFromNativeWindow(void *window) {
-  return window_id_from_native_window(window);
+  return (char *)window_id_from_native_window((WINDOW)window);
 }
 
-WINDOW NativeWindowFromWindowId(char *winid) {
-  return native_window_from_window_id(win_id);
+void *NativeWindowFromWindowId(char *winid) {
+  return (void *)native_window_from_window_id((WINDOWID)winId);
 }
 
 bool WindowIdExists(char *winId) {
-  return window_id_exists(winId);
+  return window_id_exists((WINDOWID)winId);
 }
 
 bool WindowIdSuspend(char *winId) {
-  return window_id_suspend(winId);
+  return window_id_suspend((WINDOWID)winId);
 }
 
 bool WindowIdResume(char *winId) {
-  return window_id_resume(winId);
+  return window_id_resume((WINDOWID)winId);
 }
 
 bool WindowidKill(char *winId) {
-  return window_id_kill(winId);
+  return window_id_kill((WINDOWID)winId);
 }
 
 char *OwnedWindowId(PROCINFO procInfo, int i) {
