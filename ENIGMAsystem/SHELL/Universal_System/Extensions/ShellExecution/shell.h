@@ -1,10 +1,8 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFmain.h"
 
-#if defined(__MACH__) && defined(__APPLE__)
 #ifndef PROCESS_GUIWINDOW_IMPL
 #define PROCESS_GUIWINDOW_IMPL
-#endif
 #endif
 
 #include "cproc/cproc.hpp"
