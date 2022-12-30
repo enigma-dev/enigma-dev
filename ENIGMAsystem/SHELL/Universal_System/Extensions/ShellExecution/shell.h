@@ -53,13 +53,13 @@ bool EnvironmentGetVariableExists(std::string name);
 bool EnvironmentSetVariable(std::string name, std::string value);
 bool EnvironmentUnsetVariable(std::string name);
 std::string DirectoryGetTemporaryPath();
-WINDOWID WindowIdFromNativeWindow(WINDOW window);
-WINDOW NativeWindowFromWindowId(WINDOWID winid);
-bool WindowIdExists(WINDOWID winId);
-bool WindowIdSuspend(WINDOWID winId);
-bool WindowIdResume(WINDOWID winId);
-bool WindowidKill(WINDOWID winId);
-WINDOWID OwnedWindowId(PROCINFO procInfo, int i);
+char *WindowIdFromNativeWindow(void *window);
+void *NativeWindowFromWindowId(char *winId);
+bool WindowIdExists(char *winId);
+bool WindowIdSuspend(char *winId);
+bool WindowIdResume(char *winId);
+bool WindowidKill(char *winId);
+char *OwnedWindowId(PROCINFO procInfo, int i);
 int OwnedWindowIdLength(PROCINFO procInfo);
 
 } // namespace enigma_user
