@@ -18,6 +18,10 @@
 
 #define INCLUDED_FROM_SHELLMAIN 1
 
+#ifndef PROCESS_GUIWINDOW_IMPL
+#define PROCESS_GUIWINDOW_IMPL
+#endif
+
 // Simple Universal libraries
 ///////////////////////////////
 
