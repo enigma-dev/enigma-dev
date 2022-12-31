@@ -897,7 +897,6 @@ namespace ngs::cproc {
       child_proc_id[index] = 0;
     }
     #endif
-    free_executed_process_standard_input(proc_index);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     complete_map[proc_index] = true;
     return proc_index;
@@ -920,14 +919,21 @@ namespace ngs::cproc {
     return proc_index;
   }
 
-  void executed_process_write_to_standard_input(CPROCID proc_index, const char *input) {
-    if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
-    std::string str = input;
+  ssize_t executed_process_write_to_standard_input(CPROCID proc_index, const char *input) {
+    if (stdipt_map.find(proc_index) == stdipt_map.end()) return -1;
+    std::string s = input;
+    std::vector<char> v(s.length());
+    std::copy(s.c_str(), s.c_str() + s.length(), v.begin());
     #if !defined(_WIN32)
-    write((int)stdipt_map[proc_index], str.data(), str.length() + 1);
+    ssize_t nwritten = -1;
+    lseek((int)stdipt_map[proc_index], 0, SEEK_END);
+    nwritten = write((int)stdipt_map[proc_index], &v[0], v.size());
+    return nwritten;
     #else
-    DWORD dwwritten; WriteFile((HANDLE)(void *)stdipt_map[proc_index], str.data(),
-    (DWORD)(str.length() + 1), &dwwritten, nullptr);
+    DWORD dwwritten = -1;
+    SetFilePointer((HANDLE)(void *)stdipt_map[proc_index], 0, NULL, FILE_END);
+    WriteFile((HANDLE)(void *)stdipt_map[proc_index], &v[0], (DWORD)v.size(), &dwwritten, nullptr);
+    return (ssize_t)dwwritten;
     #endif
   }
 
@@ -937,14 +943,16 @@ namespace ngs::cproc {
     return stdopt_map.find(proc_index)->second.c_str();
   }
 
-  void free_executed_process_standard_input(CPROCID proc_index) {
-    if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
+  bool free_executed_process_standard_input(CPROCID proc_index) {
+    if (stdipt_map.find(proc_index) == stdipt_map.end()) return false;
     stdipt_map.erase(proc_index);
+    return true;
   }
 
-  void free_executed_process_standard_output(CPROCID proc_index) {
-    if (stdopt_map.find(proc_index) == stdopt_map.end()) return;
+  bool free_executed_process_standard_output(CPROCID proc_index) {
+    if (stdopt_map.find(proc_index) == stdopt_map.end()) return false;
     stdopt_map.erase(proc_index);
+    return true;
   }
 
   bool completion_status_from_executed_process(CPROCID proc_index) {
