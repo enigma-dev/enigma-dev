@@ -14,13 +14,14 @@ namespace enigma_user {
 CPROCID ProcessExecute(std::string command);
 CPROCID ProcessExecuteAsync(std::string command);
 bool CompletionStatusFromExecutedProcess(CPROCID procIndex);
-void ExecutedProcessWriteToStandardInput(CPROCID procIndex, std::string input);
+ssize_t ExecutedProcessWriteToStandardInput(CPROCID procIndex, std::string input);
 std::string CurrentProcessReadFromStandardInput();
 std::string ExecutedProcessReadFromStandardOutput(CPROCID procIndex);
-void FreeExecutedProcessStandardInput(CPROCID procIndex);
-void FreeExecutedProcessStandardOutput(CPROCID procIndex);
+bool FreeExecutedProcessStandardInput(CPROCID procIndex);
+bool FreeExecutedProcessStandardOutput(CPROCID procIndex);
 XPROCID ProcIdFromSelf();
 XPROCID ParentProcIdFromSelf();
+XPROCID ParentProcIdFromProcId(XPROCID procId);
 bool ProcIdExists(XPROCID procId);
 bool ProcIdSuspend(XPROCID procId);
 bool ProcIdResume(XPROCID procId);
