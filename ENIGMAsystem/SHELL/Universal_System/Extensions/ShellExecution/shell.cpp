@@ -57,8 +57,8 @@ bool CompletionStatusFromExecutedProcess(CPROCID procIndex) {
   return completion_status_from_executed_process(procIndex);
 }
 
-void ExecutedProcessWriteToStandardInput(CPROCID procIndex, string input) {
-  executed_process_write_to_standard_input(procIndex, input.c_str());
+ssize_t ExecutedProcessWriteToStandardInput(CPROCID procIndex, string input) {
+  return executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
 std::string CurrentProcessReadFromStandardInput() {
@@ -69,12 +69,12 @@ string ExecutedProcessReadFromStandardOutput(CPROCID procIndex) {
   return executed_process_read_from_standard_output(procIndex);
 }
 
-void FreeExecutedProcessStandardInput(CPROCID procIndex) {
-  free_executed_process_standard_input(procIndex);
+bool FreeExecutedProcessStandardInput(CPROCID procIndex) {
+  return free_executed_process_standard_input(procIndex);
 }
 
-void FreeExecutedProcessStandardOutput(CPROCID procIndex) {
-  free_executed_process_standard_output(procIndex);
+bool FreeExecutedProcessStandardOutput(CPROCID procIndex) {
+  return free_executed_process_standard_output(procIndex);
 }
 
 XPROCID ProcIdFromSelf() {
@@ -83,6 +83,10 @@ XPROCID ProcIdFromSelf() {
 
 XPROCID ParentProcIdFromSelf() {
   return parent_proc_id_from_self();
+}
+
+XPROCID ParentProcIdFromProcId(XPROCID procId) {
+  return parent_proc_id_from_proc_id(procId);
 }
 
 bool ProcIdExists(XPROCID procId) {
