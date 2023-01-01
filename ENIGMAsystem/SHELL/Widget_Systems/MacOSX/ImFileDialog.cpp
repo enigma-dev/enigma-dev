@@ -938,27 +938,16 @@ namespace ifd {
     m_iconIndices.push_back(fileInfo.st_ino);
     m_iconFilepaths.push_back(pathU8);
 
+    [icon lockFocus];
+    int width = DEFAULT_ICON_SIZE, height = DEFAULT_ICON_SIZE;
     [icon setSize:NSMakeSize(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)];
-
-    CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)[icon TIFFRepresentation], nullptr);
-    CGImageRef imageRef =  CGImageSourceCreateImageAtIndex(source, 0, nullptr);
-
-    NSUInteger width = DEFAULT_ICON_SIZE;
-    NSUInteger height = DEFAULT_ICON_SIZE;
-
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    unsigned char *rawData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
-
-    if (rawData) {
-      NSUInteger bytesPerPixel = 4;
-      NSUInteger bytesPerRow = bytesPerPixel * width;
-      NSUInteger bitsPerComponent = 8;
-      CGContextRef context = CGBitmapContextCreate(rawData, width, height,
-      bitsPerComponent, bytesPerRow, colorSpace,
-      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
-      CGColorSpaceRelease(colorSpace);
-      CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
-      CGContextRelease(context);
+    NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:[icon
+    CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
+    [imageRep setSize:NSMakeSize(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)];
+    [icon unlockFocus];
+    NSData *data = [imageRep TIFFRepresentation];
+    unsigned char *rawData = (unsigned char *)[data bytes];
+    if (imageRep && rawData) {
       unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
       if (invData) {
         for (int y = 0; y < height; y++) {
@@ -973,7 +962,7 @@ namespace ifd {
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
         free(invData);
       }
-      free(rawData);
+      [imageRep release];
     }
 
     return m_icons[pathU8];
