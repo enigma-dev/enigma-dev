@@ -939,31 +939,33 @@ namespace ifd {
     m_iconFilepaths.push_back(pathU8);
 
     [icon lockFocus];
-    int width = DEFAULT_ICON_SIZE, height = DEFAULT_ICON_SIZE;
-    [icon setSize:NSMakeSize(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)];
+    int width = DEFAULT_ICON_SIZE;
+    int height = DEFAULT_ICON_SIZE;
+    [icon setSize:NSMakeSize(width, height)];
     NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:[icon
-    CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
-    [imageRep setSize:NSMakeSize(DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE)];
-    [icon unlockFocus];
+      CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
+    [imageRep setSize:NSMakeSize(width, height)];
     NSData *data = [imageRep TIFFRepresentation];
     unsigned char *rawData = (unsigned char *)[data bytes];
-    if (imageRep && rawData) {
+    if (rawData) {
       unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
       if (invData) {
         for (int y = 0; y < height; y++) {
           for (int x = 0; x < width; x++) {
-            int index = (y * width + x) * 4;
-            invData[index + 2] = rawData[index + 0];
-            invData[index + 1] = rawData[index + 1];
-            invData[index + 0] = rawData[index + 2];
-            invData[index + 3] = rawData[index + 3];
+            int index1 = (y * width + x + 2) * 4;
+            int index2 = (y * width + x) * 4;
+            invData[index2 + 2] = rawData[index1 + 0];
+            invData[index2 + 1] = rawData[index1 + 1];
+            invData[index2 + 0] = rawData[index1 + 2];
+            invData[index2 + 3] = rawData[index1 + 3];
           }
         }
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
         free(invData);
       }
-      [imageRep release];
     }
+    [icon unlockFocus];
+    [imageRep release];
 
     return m_icons[pathU8];
     #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
