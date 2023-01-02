@@ -20,8 +20,12 @@
 #include "libEGMstd.h"
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
+
+#ifndef GRAPHICS_NONE
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#endif
+
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -262,6 +266,7 @@ int buffer_get_type(int buffer) {
   return binbuff->type;
 }
 
+#ifndef GRAPHICS_NONE
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
@@ -297,7 +302,7 @@ void buffer_set_surface(int buffer, int surface, unsigned offset) {
     DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
   }
 }
-
+#endif
 
 void buffer_resize(int buffer, unsigned size) {
   get_buffer(binbuff, buffer);
