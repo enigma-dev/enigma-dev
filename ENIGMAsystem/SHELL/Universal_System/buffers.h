@@ -77,10 +77,14 @@ void *buffer_get_address(int buffer);
 unsigned buffer_get_size(int buffer);
 unsigned buffer_get_alignment(int buffer);
 int buffer_get_type(int buffer);
+
+#ifndef GRAPHICS_NONE
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo);
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo);
 void buffer_get_surface(int buffer, int surface, unsigned offset);
 void buffer_set_surface(int buffer, int surface, unsigned offset);
+#endif
+
 void buffer_resize(int buffer, unsigned size);
 void buffer_seek(int buffer, int base, unsigned offset);
 unsigned buffer_sizeof(int type);
