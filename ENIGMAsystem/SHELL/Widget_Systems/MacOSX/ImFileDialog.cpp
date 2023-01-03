@@ -938,13 +938,12 @@ namespace ifd {
     m_iconIndices.push_back(fileInfo.st_ino);
     m_iconFilepaths.push_back(pathU8);
 
-    [icon lockFocus];
     int width = DEFAULT_ICON_SIZE;
     int height = DEFAULT_ICON_SIZE;
     [icon setSize:NSMakeSize(width, height)];
     NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:[icon
       CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
-    [imageRep setSize:NSMakeSize(width, height)];
+    [imageRep setSize:[icon size]];
     NSData *data = [imageRep TIFFRepresentation];
     unsigned char *rawData = (unsigned char *)[data bytes];
     if (rawData) {
@@ -964,7 +963,6 @@ namespace ifd {
         free(invData);
       }
     }
-    [icon unlockFocus];
     [imageRep release];
 
     return m_icons[pathU8];
