@@ -975,6 +975,7 @@ namespace ifd {
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
         free(invData);
       }
+      free(rawData);
     }
     [imageRep release];
     CFRelease(source);
