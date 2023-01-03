@@ -222,9 +222,9 @@ namespace ifd {
         *state &= 0b110;
 
       // hover state
-      if (!anyOtherHC && hovered && !clicked) 
+      if (!anyOtherHC && hovered && !clicked)
         *state |= 0b010;
-      else 
+      else
         *state &= 0b101;
 
       ImGui::PopClipRect();
@@ -243,7 +243,7 @@ namespace ifd {
           *state |= 0b100;
       }
       ghc::filesystem::path pathToCheckExistenceFor = pathBuffer;
-      if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, ImGuiInputTextFlags_EnterReturnsTrue) && 
+      if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, ImGuiInputTextFlags_EnterReturnsTrue) &&
         #if defined(_WIN32)
         (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)) {
         #else
@@ -252,7 +252,7 @@ namespace ifd {
         std::error_code ec;
         std::string tempStr(pathBuffer);
         if (ghc::filesystem::exists(tempStr, ec))
-          path = ghc::filesystem::path(tempStr); 
+          path = ghc::filesystem::path(tempStr);
         ret = true;
       }
       if (!skipActiveCheck && !ImGui::IsItemActive())
@@ -425,7 +425,7 @@ namespace ifd {
       SetFileAttributesW(ghc::filesystem::path(homePath.string() + "\\.config\\").wstring().c_str(), attr | FILE_ATTRIBUTE_HIDDEN);
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
       ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
-    if (!ngs::fs::file_exists(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
+    if (!ngs::fs::file_exists(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" +
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"))) {
       std::vector<std::string> favorites;
       favorites.push_back(homePath.string() + "\\");
@@ -435,17 +435,17 @@ namespace ifd {
       favorites.push_back(ngs::fs::directory_get_music_path());
       favorites.push_back(ngs::fs::directory_get_pictures_path());
       favorites.push_back(ngs::fs::directory_get_videos_path());
-      int desc = ngs::fs::file_text_open_write(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
+      int desc = ngs::fs::file_text_open_write(homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" +
         ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"));
       if (desc != -1) {
         for (std::size_t i = 0; i < favorites.size(); i++) {
           ngs::fs::file_text_write_string(desc, favorites[i]);
           ngs::fs::file_text_writeln(desc);
-        }   
+        }
         ngs::fs::file_text_close(desc);
       }
     }
-    std::string conf = homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" + 
+    std::string conf = homePath.string() + "\\.config\\" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "\\" +
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
     if (ngs::fs::file_exists(conf)) {
       int fd = ngs::fs::file_text_open_read(conf);
@@ -477,7 +477,7 @@ namespace ifd {
       ngs::fs::directory_create(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER"));
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE").empty())
       ngs::fs::environment_set_variable("IMGUI_CONFIG_FILE", "filedialogs.txt");
-    if (!ngs::fs::file_exists(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
+    if (!ngs::fs::file_exists(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" +
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"))) {
       std::vector<std::string> favorites;
       favorites.push_back(homePath.string() + "/");
@@ -487,17 +487,17 @@ namespace ifd {
       favorites.push_back(ngs::fs::directory_get_music_path());
       favorites.push_back(ngs::fs::directory_get_pictures_path());
       favorites.push_back(ngs::fs::directory_get_videos_path());
-      int desc = ngs::fs::file_text_open_write(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
+      int desc = ngs::fs::file_text_open_write(homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" +
         ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE"));
       if (desc != -1) {
         for (std::size_t i = 0; i < favorites.size(); i++) {
           ngs::fs::file_text_write_string(desc, favorites[i]);
           ngs::fs::file_text_writeln(desc);
-        }   
+        }
         ngs::fs::file_text_close(desc);
       }
     }
-    std::string conf = homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" + 
+    std::string conf = homePath.string() + "/.config/" + ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER") + "/" +
       ngs::fs::environment_get_variable("IMGUI_CONFIG_FILE");
     if (ngs::fs::file_exists(conf)) {
       int fd = ngs::fs::file_text_open_read(conf);
@@ -775,18 +775,18 @@ namespace ifd {
     }
 
     std::error_code ec;
-    if (!m_result.empty() && m_type == IFD_DIALOG_SAVE && 
+    if (!m_result.empty() && m_type == IFD_DIALOG_SAVE &&
       !ghc::filesystem::exists(m_result.back(), ec) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
     } else if (!m_result.size() && m_type == IFD_DIALOG_SAVE && filename.empty()) {
       m_isOpen = false;
       return true;
-    } else if (m_result.size() && m_type == IFD_DIALOG_FILE && 
+    } else if (m_result.size() && m_type == IFD_DIALOG_FILE &&
       ghc::filesystem::exists(m_result.back(), ec) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
-    } else if (m_result.size() && m_type == IFD_DIALOG_DIRECTORY && 
+    } else if (m_result.size() && m_type == IFD_DIALOG_DIRECTORY &&
       ghc::filesystem::exists(m_result.back(), ec) && ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
@@ -938,25 +938,37 @@ namespace ifd {
     m_iconIndices.push_back(fileInfo.st_ino);
     m_iconFilepaths.push_back(pathU8);
 
-    int width = DEFAULT_ICON_SIZE;
-    int height = DEFAULT_ICON_SIZE;
+    NSUInteger width = DEFAULT_ICON_SIZE;
+    NSUInteger height = DEFAULT_ICON_SIZE;
     [icon setSize:NSMakeSize(width, height)];
     NSBitmapImageRep *imageRep = [[NSBitmapImageRep alloc] initWithCGImage:[icon
-      CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
+    CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
     [imageRep setSize:[icon size]];
     NSData *data = [imageRep TIFFRepresentation];
     unsigned char *rawData = (unsigned char *)[data bytes];
+    CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)data, nullptr);
+    CGImageRef imageRef =  CGImageSourceCreateImageAtIndex(source, 0, nullptr);
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+
     if (rawData) {
+      NSUInteger bytesPerPixel = 4;
+      NSUInteger bytesPerRow = bytesPerPixel * width;
+      NSUInteger bitsPerComponent = 8;
+      CGContextRef context = CGBitmapContextCreate(rawData, width, height,
+      bitsPerComponent, bytesPerRow, colorSpace,
+      kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
+      CGColorSpaceRelease(colorSpace);
+      CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
+      CGContextRelease(context);
       unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
       if (invData) {
         for (int y = 0; y < height; y++) {
           for (int x = 0; x < width; x++) {
-            int index1 = (y * width + x + 2) * 4;
-            int index2 = (y * width + x) * 4;
-            invData[index2 + 2] = rawData[index1 + 0];
-            invData[index2 + 1] = rawData[index1 + 1];
-            invData[index2 + 0] = rawData[index1 + 2];
-            invData[index2 + 3] = rawData[index1 + 3];
+            int index = (y * width + x) * 4;
+            invData[index + 2] = rawData[index + 0];
+            invData[index + 1] = rawData[index + 1];
+            invData[index + 0] = rawData[index + 2];
+            invData[index + 3] = rawData[index + 3];
           }
         }
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
@@ -1064,7 +1076,7 @@ namespace ifd {
       }
     }
     if (G_IS_OBJECT(gtkicon_info)) g_object_unref(gtkicon_info);
-    if (G_IS_OBJECT(file_info)) g_object_unref(file_info); 
+    if (G_IS_OBJECT(file_info)) g_object_unref(file_info);
     if (G_IS_OBJECT(file)) g_object_unref(file);
     return m_icons[pathU8];
     #endif
@@ -1139,7 +1151,7 @@ namespace ifd {
           int width, height, nrChannels;
           unsigned char *image = stbi_load(data.Path.string().c_str(), &width, &height, &nrChannels, STBI_rgb_alpha);
           
-          if (image == nullptr) 
+          if (image == nullptr)
             continue;
 
           #if (defined(__APPLE__) && defined(__MACH__))
@@ -1233,7 +1245,7 @@ namespace ifd {
           for (auto& c : node->Children)
             m_content.push_back(FileData(c->Path));
       }
-    } 
+    }
     else if (p.string() == IFD_THIS_PC) {
       for (auto& node : m_treeCache) {
         if (node->Path == p)
@@ -1481,7 +1493,7 @@ namespace ifd {
         bool isSelected = std::count(m_selections.begin(), m_selections.end(), entry.Path);
 
         std::error_code ec;
-        if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path), 
+        if (FileIcon(filename.c_str(), isSelected, entry.HasIconPreview ? entry.IconPreview : (ImTextureID)m_getIcon(entry.Path),
         ImVec2(32 + 16 * m_zoom, 32 + 16 * m_zoom), entry.HasIconPreview, entry.IconPreviewWidth, entry.IconPreviewHeight)) {
           bool isDir = ghc::filesystem::is_directory(entry.Path, ec);
 
@@ -1517,10 +1529,10 @@ namespace ifd {
       ImGui::EndPopup();
     }
     std::error_code ec;
-    if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type == IFD_DIALOG_SAVE && 
+    if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type == IFD_DIALOG_SAVE &&
       ghc::filesystem::exists(m_currentDirectory / m_inputTextbox, ec) && !ghc::filesystem::is_directory(m_currentDirectory / m_inputTextbox, ec))
       openOverwriteDlg = true;
-    if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type != IFD_DIALOG_DIRECTORY && 
+    if (m_result.size() && m_isOpen && strlen(m_inputTextbox) && m_type != IFD_DIALOG_DIRECTORY &&
       ghc::filesystem::exists(m_currentDirectory / m_inputTextbox, ec) && ghc::filesystem::is_directory(m_currentDirectory / m_inputTextbox, ec)) {
       m_setDirectory(m_currentDirectory / m_inputTextbox, false);
       m_inputTextbox[0] = 0;
@@ -1655,7 +1667,7 @@ namespace ifd {
     if (FavoriteButton("##dirfav", std::count(m_favorites.begin(), m_favorites.end(), m_currentDirectory.string()))) {
       if (std::count(m_favorites.begin(), m_favorites.end(), m_currentDirectory.string()))
         RemoveFavorite(m_currentDirectory.string());
-      else 
+      else
         AddFavorite(m_currentDirectory.string());
     }
     ImGui::SameLine();
@@ -1669,9 +1681,9 @@ namespace ifd {
     /***** CONTENT *****/
     float bottomBarHeight = (GImGui->FontSize + ImGui::GetStyle().FramePadding.y + ImGui::GetStyle().ItemSpacing.y * 2.0f) * 2;
     if (ImGui::BeginTable("##table", 2, ImGuiTableFlags_Resizable, ImVec2(0, -bottomBarHeight))) {
-      ImGui::TableSetupColumn("##tree", ImGuiTableColumnFlags_WidthFixed, (float)(GImGui->FontSize - ImGui::GetStyle().FramePadding.x / 2 + 
-      ImGui::GetStyle().ItemSpacing.x) * 2 + (ImGui::GetColumnOffset(0) * 2) + ImGui::CalcTextSize(((ImGui::CalcTextSize(IFD_QUICK_ACCESS).x >= 
-      ImGui::CalcTextSize(IFD_THIS_PC).x) ? IFD_QUICK_ACCESS : IFD_THIS_PC)).x); 
+      ImGui::TableSetupColumn("##tree", ImGuiTableColumnFlags_WidthFixed, (float)(GImGui->FontSize - ImGui::GetStyle().FramePadding.x / 2 +
+      ImGui::GetStyle().ItemSpacing.x) * 2 + (ImGui::GetColumnOffset(0) * 2) + ImGui::CalcTextSize(((ImGui::CalcTextSize(IFD_QUICK_ACCESS).x >=
+      ImGui::CalcTextSize(IFD_THIS_PC).x) ? IFD_QUICK_ACCESS : IFD_THIS_PC)).x);
       ImGui::TableSetupColumn("##content", ImGuiTableColumnFlags_WidthStretch);
       ImGui::TableNextRow();
 
@@ -1702,7 +1714,7 @@ namespace ifd {
     ImGui::Text(IFD_FILE_NAME_WITH_COLON);
     ImGui::SameLine();
     ghc::filesystem::path pathToCheckExistenceFor = m_currentDirectory / m_inputTextbox;
-    if (ImGui::InputTextEx("##file_input", IFD_FILE_NAME_WITHOUT_COLON, m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue) && 
+    if (ImGui::InputTextEx("##file_input", IFD_FILE_NAME_WITHOUT_COLON, m_inputTextbox, 1024, ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue) &&
       #if defined(_WIN32)
       ((m_type == IFD_DIALOG_SAVE) || (m_isMultiselect && m_selections.size() > 1) || (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND))) {
       #else
