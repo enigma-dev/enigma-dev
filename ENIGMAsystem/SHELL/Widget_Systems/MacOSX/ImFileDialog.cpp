@@ -938,6 +938,7 @@ namespace ifd {
     m_iconIndices.push_back(fileInfo.st_ino);
     m_iconFilepaths.push_back(pathU8);
 
+    [icon lockFocus];
     NSUInteger width = DEFAULT_ICON_SIZE;
     NSUInteger height = DEFAULT_ICON_SIZE;
     [icon setSize:NSMakeSize(width, height)];
@@ -945,10 +946,10 @@ namespace ifd {
     CGImageForProposedRect:nullptr context:nullptr hints:nullptr]];
     [imageRep setSize:[icon size]];
     NSData *data = [imageRep TIFFRepresentation];
-    unsigned char *rawData = (unsigned char *)[data bytes];
     CGImageSourceRef source = CGImageSourceCreateWithData((CFDataRef)data, nullptr);
     CGImageRef imageRef =  CGImageSourceCreateImageAtIndex(source, 0, nullptr);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    unsigned char *rawData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
 
     if (rawData) {
       NSUInteger bytesPerPixel = 4;
@@ -976,6 +977,10 @@ namespace ifd {
       }
     }
     [imageRep release];
+    CFRelease(source);
+    CFRelease(imageRef);
+    CFRelease(colorSpace);
+    [icon unlockFocus];
 
     return m_icons[pathU8];
     #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
