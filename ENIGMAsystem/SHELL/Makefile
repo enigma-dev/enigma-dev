@@ -210,8 +210,8 @@ include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
 ifeq ($(UNIX_BASED), false)
-	override CXXFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
-	override CFLAGS += -DPROCESS_WIN32EXE_INCLUDES -std=c++17
+	override CXXFLAGS += -std=c++17
+	override CFLAGS += -std=c++17
 endif
 
 override CXXFLAGS += -fexceptions
