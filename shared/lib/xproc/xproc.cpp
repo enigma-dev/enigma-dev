@@ -50,6 +50,7 @@
 #include <Objbase.h>
 #include <tlhelp32.h>
 #include <winternl.h>
+#include <dbghelp.h>
 #include <psapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -84,6 +85,7 @@
 #if defined(_WIN32)
 #if defined(_MSC_VER)
 #pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "Dbghelp.lib")
 #endif
 #endif
 
@@ -221,15 +223,21 @@ namespace {
     return proc;
   }
 
-  BOOL is_x86_process(HANDLE proc) {
-    BOOL isWow = true;
-    SYSTEM_INFO systemInfo;
-    GetNativeSystemInfo(&systemInfo);
-    if (systemInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
-      return isWow;
-    if (IsWow64Process(proc, &isWow))
-      return isWow;
-    return isWow;
+  bool target_proc_matches_current_arch(HANDLE proc) {
+    IMAGE_NT_HEADERS *curHeaders = ImageNtHeader(GetModuleHandle(nullptr));
+    if (curHeaders) {
+      HMODULE hMod[1];
+      DWORD cbNeeded = 0;
+      if (EnumProcessModules(proc, hMod, sizeof(hMod), &cbNeeded)) {
+        IMAGE_NT_HEADERS *extHeaders = ImageNtHeader(hMod[0]);
+        if (extHeaders) {
+          if (curHeaders->FileHeader.Machine == extHeaders->FileHeader.Machine) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type) {
@@ -903,7 +911,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return path;
-    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+    if (target_proc_matches_current_arch(proc)) {
       CloseHandle(proc); 
       return path;
     }
@@ -1024,7 +1032,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+    if (target_proc_matches_current_arch(proc)) {
       CloseHandle(proc); 
       return vec;
     }
@@ -1143,7 +1151,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+    if (target_proc_matches_current_arch(proc)) {
       CloseHandle(proc);
       return vec;
     }
