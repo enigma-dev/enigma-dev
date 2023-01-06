@@ -50,7 +50,6 @@
 #include <Objbase.h>
 #include <tlhelp32.h>
 #include <winternl.h>
-#include <dbghelp.h>
 #include <psapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -85,7 +84,6 @@
 #if defined(_WIN32)
 #if defined(_MSC_VER)
 #pragma comment(lib, "ntdll.lib")
-#pragma comment(lib, "Dbghelp.lib")
 #endif
 #endif
 
@@ -221,23 +219,6 @@ namespace {
       proc = OpenProcess(PROCESS_ALL_ACCESS, false, proc_id);
     }
     return proc;
-  }
-
-  bool target_proc_matches_current_arch(HANDLE proc) {
-    IMAGE_NT_HEADERS *curHeaders = ImageNtHeader(GetModuleHandle(nullptr));
-    if (curHeaders) {
-      HMODULE hMod[1];
-      DWORD cbNeeded = 0;
-      if (EnumProcessModules(proc, hMod, sizeof(hMod), &cbNeeded)) {
-        IMAGE_NT_HEADERS *extHeaders = ImageNtHeader(hMod[0]);
-        if (extHeaders) {
-          if (curHeaders->FileHeader.Machine == extHeaders->FileHeader.Machine) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
   }
 
   std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type) {
@@ -911,10 +892,6 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return path;
-    if (target_proc_matches_current_arch(proc)) {
-      CloseHandle(proc); 
-      return path;
-    }
     std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCWD);
     if (!buffer.empty()) {
       wchar_t cwd[MAX_PATH];
@@ -1032,10 +1009,6 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (target_proc_matches_current_arch(proc)) {
-      CloseHandle(proc); 
-      return vec;
-    }
     int cmdsize = 0;
     std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCMD);
     if (!buffer.empty()) {
@@ -1151,10 +1124,6 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (target_proc_matches_current_arch(proc)) {
-      CloseHandle(proc);
-      return vec;
-    }
     std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMENV);
     int i = 0;
     if (!buffer.empty()) {
