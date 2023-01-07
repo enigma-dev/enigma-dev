@@ -6,7 +6,7 @@ SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.
 PROTO_DIR := ./protos/.eobjs
 
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
-LDFLAGS += -shared -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
+LDFLAGS += -shared -lz -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
 ifeq ($(OS), Darwin)
 	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
