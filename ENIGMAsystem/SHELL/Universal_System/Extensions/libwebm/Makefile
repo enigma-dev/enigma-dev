@@ -26,7 +26,7 @@ ifeq ($(UNIX_BASED), true)
 		override CXXFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override CFLAGS += -std=c++17 -IUniversal_System/Extensions/libwebm/include/ `pkg-config --cflags sdl2` -I$(SHARED_SRC_DIR)/libwebm -Wno-narrowing -fexceptions
 		override LDFLAGS += -lpthread -lvorbis -logg -lvpx `pkg-config --libs sdl2 --static` -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
-		override LDLIBS += -lpthread -lvorbis -logg -lvpx`pkg-config --libs sdl2 --static` -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
+		override LDLIBS += -lpthread -lvorbis -logg -lvpx `pkg-config --libs sdl2 --static` -lwebm -L$(SHARED_SRC_DIR)/libwebm $(SHARED_SRC_DIR)/libwebm/libwebm.a -Wno-narrowing -fexceptions
 	endif
 	ifeq ($(OS), Linux)
 		override LDFLAGS += -latomic
