@@ -302,7 +302,7 @@ namespace {
     }
     sp = cp;
     int i = 0, j = 0;
-    while (*sp != '\0' && sp < &procargs[s]) {
+    while ((*sp != '\0' || j < nargs) && sp < &procargs[s]) {
       if (type && j >= nargs) { 
         vec.push_back(sp); i++;
       } else if (!type && j < nargs) {
