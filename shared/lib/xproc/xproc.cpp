@@ -301,14 +301,15 @@ namespace {
       return vec;
     }
     sp = cp;
-    int i = 0, j = 0;
-    while ((*sp != '\0' || j < nargs) && sp < &procargs[s]) {
-      if (type && j >= nargs) { 
-        vec.push_back(sp); i++;
-      } else if (!type && j < nargs) {
-        vec.push_back(sp); i++;
+    int i = 0;
+    while ((*sp != '\0' || i < nargs) && sp < &procargs[s]) {
+      if (type && i >= nargs) {
+        vec.push_back(sp);
+      } else if (!type && i < nargs) {
+        vec.push_back(sp);
       }
-      sp += strlen(sp) + 1; j++;
+      sp += strlen(sp) + 1;
+      i++;
     }
     free(procargs);
     return vec;
