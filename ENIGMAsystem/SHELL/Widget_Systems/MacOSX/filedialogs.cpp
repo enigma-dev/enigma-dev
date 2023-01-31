@@ -303,7 +303,7 @@ namespace {
         Window parentFrameRoot = 0; int parentFrameX = 0, parentFrameY = 0;
         Window parentWindow = 0, rootWindow = 0, *childrenWindows = nullptr;
         XSetTransientForHint(display, xWnd, window);
-        unsigned numberOfChildren;
+        unsigned numberOfChildren = 0;
         while (true) {
           if (XQueryTree(display, window, &rootWindow, &parentWindow, &childrenWindows,
             &numberOfChildren) == 0) {
