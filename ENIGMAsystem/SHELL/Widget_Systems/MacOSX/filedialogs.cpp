@@ -52,13 +52,14 @@
 #include <sys/stat.h>
 #if defined(_WIN32) 
 #include <windows.h>
-#include <dwmapi.h>
 #define STR_SLASH "\\"
 #define CHR_SLASH '\\'
 #define HOME_PATH "USERPROFILE"
 #else
 #if defined(__APPLE__) && defined(__MACH__)
 #include <AppKit/AppKit.h>
+#else
+#include <X11/Xlib.h>
 #endif
 #include <unistd.h>
 #define STR_SLASH "/"
@@ -216,9 +217,11 @@ namespace {
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     #if (!defined(__MACH__) && !defined(__APPLE__))
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
-    SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
+    ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) | 
+    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #else
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_ALWAYS_ON_TOP |
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
+    ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
     #endif
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
@@ -248,8 +251,23 @@ namespace {
     if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
     HWND hWnd = system_info.info.win.window;
     SetWindowLongPtrW(hWnd, GWL_STYLE, GetWindowLongPtrW(hWnd, GWL_STYLE) & ~(WS_MAXIMIZEBOX | WS_MINIMIZEBOX));
-    SetWindowLongPtrW(hWnd, GWL_EXSTYLE, GetWindowLongPtrW(hWnd, GWL_EXSTYLE) | WS_EX_TOPMOST);
-    SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    SetWindowLongPtrW(hWnd, GWL_EXSTYLE, GetWindowLongPtrW(hWnd, GWL_EXSTYLE) | 
+    ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? WS_EX_TOPMOST : 0));
+    SetWindowPos(hWnd, ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ?  HWND_TOPMOST : HWND_TOP), 
+    0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+    if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+      SetWindowLongPtrW(hWnd, GWLP_HWNDPARENT, (LONG_PTR)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10));
+      RECT parentFrame; GetWindowRect((HWND)(void *)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), &parentFrame);
+      int parentFrameWidth = parentFrame.right - parentFrame.left; 
+      int parentFrameHeight = parentFrame.bottom - parentFrame.top;
+      RECT childFrame; GetWindowRect(hWnd, &childFrame);
+      int childFrameWidth = childFrame.right - childFrame.left; 
+      int childFrameHeight = childFrame.bottom - childFrame.top;
+      MoveWindow(hWnd, (parentFrame.left + (parentFrameWidth / 2)) - (childFrameWidth / 2),
+      (parentFrame.top + (parentFrameHeight / 2)) - (childFrameHeight / 2), childFrameWidth, childFrameHeight, TRUE);
+    }
     #elif defined(__APPLE__) && defined(__MACH__)
     SDL_SysWMinfo system_info;
     SDL_VERSION(&system_info.version);
@@ -261,6 +279,43 @@ namespace {
     [[nsWnd standardWindowButton:NSWindowCloseButton] setEnabled:YES];
     [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
     [[nsWnd standardWindowButton:NSWindowZoomButton] setEnabled:NO];
+    if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+      [(NSWindow *)(void *)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
+      addChildWindow:nsWnd ordered:NSWindowAbove];
+      NSRect parentFrame = [(NSWindow *)(void *)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10) frame];
+      NSRect childFrame = [nsWnd frame]; [nsWnd setFrame:NSMakeRect(
+      (parentFrame.origin.x + (parentFrame.size.width / 2)) - (childFrame.size.width / 2),
+      (parentFrame.origin.y + (parentFrame.size.height / 2)) - (childFrame.size.height / 2),
+      childFrame.size.width, childFrame.size.height) display:YES];
+    }
+    #else
+    SDL_SysWMinfo system_info;
+    SDL_VERSION(&system_info.version);
+    if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
+    Display *display = system_info.info.x11.display;
+    if (display) {
+      Window xWnd = system_info.info.x11.window;
+      if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+        XSetTransientForHint(display, xWnd, (Window)(std::uintptr_t)strtoull(
+        ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10));
+        Window parentFrameRoot = 0; int parentFrameX = 0, parentFrameY = 0;
+        XWindowAttributes parentWA; XGetWindowAttributes(display, (Window)(std::uintptr_t)strtoull(
+        ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), &parentWA);
+        unsigned parentFrameWidth = 0, parentFrameHeight = 0, parentFrameBorder = 0, parentFrameDepth = 0;
+        XGetGeometry(display, (Window)(std::uintptr_t)strtoull(
+        ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), 
+        &parentFrameRoot, &parentFrameX, &parentFrameY, &parentFrameWidth, &parentFrameHeight, 
+        &parentFrameBorder, &parentFrameDepth);
+        Window childFrameRoot = 0; int childFrameX = 0, childFrameY = 0;
+        unsigned childFrameWidth = 0, childFrameHeight = 0, childFrameBorder = 0, childFrameDepth = 0;
+        XGetGeometry(display, xWnd, &childFrameRoot, &childFrameX, &childFrameY, 
+        &childFrameWidth, &childFrameHeight, &childFrameBorder, &childFrameDepth);
+        XMoveWindow(display, xWnd, (parentWA.x + (parentFrameWidth / 2)) - (childFrameWidth / 2),
+        (parentWA.y + (parentFrameHeight / 2)) - (childFrameHeight / 2));
+      }
+    }
     #endif
     #if (!defined(__MACH__) && !defined(__APPLE__))
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
