@@ -1,16 +1,8 @@
 set(SDL_AUDIO_SYS_LIB "sdl_audio_sys_lib")
 set(SDL_AUDIO_SYS_LIB_DESCRIPTION "SDL Audio System")
-# set(CMAKE_DEBUG_POSTFIX d)
 
 project(${SDL_AUDIO_SYS_LIB} DESCRIPTION ${SDL_AUDIO_SYS_LIB_DESCRIPTION})
-
-# include(CTest)
-# enable_testing()
 
 file(GLOB_RECURSE SDL_AUDIO_SYS_LIB_SOURCES *.cpp)
 
 add_library(${SDL_AUDIO_SYS_LIB} ${SDL_AUDIO_SYS_LIB_SOURCES})
-
-# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-# include(CPack)

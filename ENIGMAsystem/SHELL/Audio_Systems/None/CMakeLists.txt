@@ -1,16 +1,8 @@
 set(NONE_AUDIO_SYS_LIB "none_audio_sys_lib")
 set(NONE_AUDIO_SYS_LIB_DESCRIPTION "None Audio System")
-# set(CMAKE_DEBUG_POSTFIX d)
 
 project(${NONE_AUDIO_SYS_LIB} DESCRIPTION ${NONE_AUDIO_SYS_LIB_DESCRIPTION})
-
-# include(CTest)
-# enable_testing()
 
 file(GLOB_RECURSE NONE_AUDIO_SYS_LIB_SOURCES *.cpp)
 
 add_library(${NONE_AUDIO_SYS_LIB} ${NONE_AUDIO_SYS_LIB_SOURCES})
-
-# set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-# set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-# include(CPack)

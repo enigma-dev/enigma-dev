@@ -17,7 +17,7 @@ endif()
 
 # AUDIO { Audio_Systems/* }
 if(AUDIO STREQUAL "")
-    set(AUDIO OpenAL)
+    set(AUDIO "OpenAL")
 endif()
 
 # COLLISION { Collision_Systems/* }
@@ -35,19 +35,21 @@ if(NETWORKING STREQUAL "")
     set(NETWORKING None)
 endif()
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/${AUDIO})
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/OpenAL)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/DirectSound)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/None)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/SDL)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Audio_Systems/XAudio2)
 
-# add_executable(${ENGINE_LIB}
-#     ${ENGINE_SRC_FILES}
-# )
+add_subdirectory(${CMAKE_SOURCE_DIR}/Collision_Systems/BBox)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Collision_Systems/General)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Collision_Systems/None)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Collision_Systems/Polygon)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Collision_Systems/Precise)
 
-# target_link_libraries(${ENGINE_LIB} PUBLIC 
-#     ${AUDIO_LIB}
-# )
+# add_subdirectory(${CMAKE_SOURCE_DIR}/Networking_Systems/Asynchronous)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Networking_Systems/BerkeleySockets)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Networking_Systems/DirectPlay)
+# add_subdirectory(${CMAKE_SOURCE_DIR}/Networking_Systems/None)
 
-# target_include_directories(${ENGINE_LIB} PUBLIC 
-#     ${CMAKE_SOURCE_DIR}/Audio_Systems/General/
-#     ${CMAKE_SOURCE_DIR}/Audio_Systems/${AUDIO_SYSTEM}/Info/
-# )
-
-# target_link_libraries(${ENGINE_LIB} ${TARGET})
+add_subdirectory(${CMAKE_SOURCE_DIR}/Universal_System)
