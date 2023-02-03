@@ -25,6 +25,10 @@
 #include "libEGMstd.h"
 
 #include "Platforms/General/PFmain.h"
+#include "Universal_System/directoryglobals.h"
+#include "Universal_System/fileio.h"
+#include "Universal_System/estring.h"
+#include "apifilesystem/filesystem.hpp"
 #include "Universal_System/joysticks.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
@@ -32,17 +36,10 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__MACH__) && defined(__APPLE__)
-#include <libproc.h>
-#include <unistd.h>
-#elif defined(__linux__)
-#include <climits>
-#endif
-
 #include <ctime>
 #include <cstdio>
+
+using enigma_user::get_program_pathname;
 
 namespace enigma_user
 {
@@ -80,48 +77,20 @@ namespace enigma
     timeline_system_initialize();
     input_initialize();
     joystick_init();
-    widget_system_initialize();
 
     // Open the exe for resource load
     do { // Allows break
       FILE* resfile = nullptr; 
       #if !defined(_WIN32)
-      #if defined(__MACH__) && defined(__APPLE__)
-      char exename[PROC_PIDPATHINFO_MAXSIZE];
-      proc_pidpath(getpid(), exename, sizeof(exename));
-      #elif defined(__linux__)
-      char exename[PATH_MAX];
-      realpath("/proc/self/exe", exename);
+      resfile = fopen((enigma_user::filename_change_ext(program_pathname, "") + ".res").c_str(),"rb");
       #else
-      char *exename = nullptr;
-      windowsystem_write_exename(&exename);
+      resfile = _wfopen(ghc::filesystem::path(enigma_user::filename_change_ext(program_pathname, "") + ".res").wstring().c_str(), L"rb");
       #endif
-      if (!(resfile = fopen(exename,"rb"))) {
-      #else
-      wchar_t exename[MAX_PATH];
-      GetModuleFileNameW(nullptr, exename, MAX_PATH);
-      if (!(resfile = _wfopen(exename,L"rb"))) {
-      #endif
-        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
+
+      if (!enigma_user::file_exists(enigma_user::filename_change_ext(program_pathname, "") + ".res") || !resfile) {
+        exit(0);
         break;
       }
-      int nullhere;
-      // Read the magic number so we know we're looking at our own data
-      fseek(resfile,-8,SEEK_END);
-      char str_quad[4];
-      if (!fread(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
-        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR); 
-        break;
-      }
-
-      // Get where our resources are located in the module
-      int pos;
-      if (!fread(&pos,4,1,resfile)) break;
-
-      // Go to the start of the resource data
-      fseek(resfile,pos,SEEK_SET);
-      if (!fread(&nullhere,4,1,resfile)) break;
-      if(nullhere) break;
 
       enigma::exe_loadsprs(resfile);
       enigma::exe_loadsounds(resfile);

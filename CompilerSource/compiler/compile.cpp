@@ -296,6 +296,26 @@ std::set<EventGroupKey> ListUsedEvents(
   return used_events;
 }
 
+std::string filename_name(std::string fname)
+{
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(fp+1);
+}
+
+std::string filename_path(std::string fname)
+{
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(0,fp+1);
+}
+
+std::string filename_change_ext(std::string fname, std::string newext)
+{
+  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
+  if (fp == filename_path(fname).length() + std::string::npos)
+    return fname + newext;
+  return fname.replace(fp,fname.length(),newext);
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
@@ -737,10 +757,15 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   FILE *gameModule;
   int resourceblock_start = 0;
   std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
-  cout << "`" << resfile.u8string() << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
-  if (resfile == "$exe")
+  #ifdef _WIN32
+  std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
+  #else
+  std::filesystem::path datares = "/tmp/stigma.res";
+  #endif
+  cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
+  if (resfile.u8string() == filename_change_ext(gameFname.u8string(), ".res"))
   {
-    gameModule = fopen(gameFname.u8string().c_str(),"ab");
+    gameModule = fopen(datares.u8string().c_str(),"ab");
     if (!gameModule) {
       user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
       idpr("Failed to add resources.",-1); return 12;
@@ -817,6 +842,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     getcwd (prevdir.data(), 4096);
     chdir(newdir.c_str());
     #endif
+
+    std::error_code ec;
+    std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
+    std::filesystem::rename(datares, resFname, ec);
 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());

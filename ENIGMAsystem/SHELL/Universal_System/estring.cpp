@@ -363,8 +363,8 @@ string filename_ext(string fname)
 
 string filename_change_ext(string fname, string newext)
 {
-  size_t fp = fname.find_last_of(".");
-  if (fp == string::npos)
+  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
+  if (fp == filename_path(fname).length() + string::npos)
     return fname + newext;
   return fname.replace(fp,fname.length(),newext);
 }
