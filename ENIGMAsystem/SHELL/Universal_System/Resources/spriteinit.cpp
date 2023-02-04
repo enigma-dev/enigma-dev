@@ -39,6 +39,7 @@ namespace enigma
     int xorig, yorig;
 
     if (!fread(&nullhere,4,1,exe)) return;
+    if (!fread(&nullhere,4,1,exe)) return;
     if (memcmp(&nullhere, "SPR ", sizeof(int)) != 0)
       return;
 
