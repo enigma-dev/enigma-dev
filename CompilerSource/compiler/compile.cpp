@@ -755,21 +755,19 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   #endif
 
   FILE *gameModule;
+  int resourceblock_start = 0;
   std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
   #ifdef _WIN32
   std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
   #else
   std::filesystem::path datares = "/tmp/stigma.res";
   #endif
-
-  std::error_code ec;
-  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
-  std::filesystem::rename(datares, resFname, ec);
- 
-  gameModule = fopen(resFname.u8string().c_str(),"wb");
+  cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
+  auto resname = resfile.u8string();
+  gameModule = fopen(resname.c_str(),"wb");
   if (!gameModule) {
-    user << "Failed to write resources file. Did compile actually succeed?" << flushl;
-    idpr("Failed to write resources file.",-1); return 12;
+    user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+    idpr("Failed to write resources.",-1); return 12;
   }
 
   // Start by setting off our location with a DWord of NULLs
@@ -791,10 +789,18 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   current_language->module_write_paths(game, gameModule);
 
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+
   // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
+
+  std::error_code ec;
+  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
+  std::filesystem::rename(datares, resFname, ec);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
