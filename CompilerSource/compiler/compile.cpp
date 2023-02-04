@@ -762,33 +762,23 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   #else
   std::filesystem::path datares = "/tmp/stigma.res";
   #endif
-  cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
-  /*if (resfile.u8string() == filename_change_ext(gameFname.u8string(), ".res"))
-  {
-    gameModule = fopen(datares.u8string().c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources file. Did compile actually succeed?" << flushl;
-      idpr("Failed to write resources file.",-1); return 12;
-    }
 
-    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
-    resourceblock_start = ftell(gameModule);
-
-    if (resourceblock_start < 128) {
-      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
-      idpr("Failed to add resources.",-1); return 13;
-    }
+  std::error_code ec;
+  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
+  std::filesystem::rename(datares, resFname, ec);
+ 
+  gameModule = fopen(resFname.u8string().c_str(),"wb");
+  if (!gameModule) {
+    user << "Failed to write resources file. Did compile actually succeed?" << flushl;
+    idpr("Failed to write resources file.",-1); return 12;
   }
-  else*/
-  {
-    auto resname = resfile.u8string();
-    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname.u8string());
-    gameModule = fopen(resname.c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-      idpr("Failed to write resources.",-1); return 12;
-    }
+
+  fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
+  resourceblock_start = ftell(gameModule);
+
+  if (resourceblock_start < 128) {
+    user << "Compiled game is clearly not a working module; cannot continue" << flushl;
+    idpr("Failed to add resources.",-1); return 13;
   }
 
   // Start by setting off our location with a DWord of NULLs
@@ -814,10 +804,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
-
-  std::error_code ec;
-  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
-  std::filesystem::rename(datares, resFname, ec);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
