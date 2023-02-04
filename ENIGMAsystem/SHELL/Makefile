@@ -108,21 +108,27 @@ ifeq ($(OS), Darwin)
 else ifeq ($(OS), Linux)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lpthread -lz -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lpthread -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), FreeBSD)  
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lprocstat -lutil -lc -lpthread -lkvm -lz -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lprocstat -lutil -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), DragonFly)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lz -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), OpenBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lz -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else
-	override LDFLAGS += -lz -lpng
+	override LDFLAGS += -lpng
+endif
+
+ifeq ($(OS), Darwin)
+else
+	override LDFLAGS += -lz
+	override LDLIBS += -lz
 endif
  
 ifeq ($(GMODE), Debug)
