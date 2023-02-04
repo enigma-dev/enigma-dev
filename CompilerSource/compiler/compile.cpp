@@ -763,7 +763,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path datares = "/tmp/stigma.res";
   #endif
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
-  if (resfile.u8string() == filename_change_ext(gameFname.u8string(), ".res"))
+  if (resfile.u8string() == datares.u8string())
   {
     gameModule = fopen(datares.u8string().c_str(),"wb");
     if (!gameModule) {
@@ -815,6 +815,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
 
+  std::error_code ec;
+  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
+  std::filesystem::rename(datares, resFname, ec);
+
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
   {
@@ -838,10 +842,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     getcwd (prevdir.data(), 4096);
     chdir(newdir.c_str());
     #endif
- 
-    std::error_code ec;
-    std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
-    std::filesystem::rename(datares, resFname, ec);
 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());
@@ -857,10 +857,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     chdir(prevdir.data());
     #endif
   }
-
-  std::error_code ec;
-  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
-  std::filesystem::rename(datares, resFname, ec);
 
   idpr("Done.", 100);
   return 0;
