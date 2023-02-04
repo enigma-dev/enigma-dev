@@ -765,10 +765,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
   if (resfile.u8string() == filename_change_ext(gameFname.u8string(), ".res"))
   {
-    gameModule = fopen(datares.u8string().c_str(),"ab");
+    gameModule = fopen(datares.u8string().c_str(),"wb");
     if (!gameModule) {
-      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
-      idpr("Failed to add resources.",-1); return 12;
+      user << "Failed to write resources file. Did compile actually succeed?" << flushl;
+      idpr("Failed to write resources file.",-1); return 12;
     }
 
     fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
