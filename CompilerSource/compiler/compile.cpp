@@ -23,7 +23,6 @@
 #include "darray.h"
 #include "treenode.pb.h"
 
-#include <cstdlib>
 #include <cstdio>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
@@ -823,11 +822,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::error_code ec;
   std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
   std::filesystem::rename(datares, resFname, ec);
- 
-  #if !defined(_WIN32)
-  // WSL doesn't mark built file as executable; blame microsoft.
-  system(("chmod +x \"" + gameFname.u8string() + "\"").c_str());
-  #endif
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
