@@ -763,7 +763,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path datares = "/tmp/stigma.res";
   #endif
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
-  if (resfile.u8string() == datares.u8string())
+  /*if (resfile.u8string() == filename_change_ext(gameFname.u8string(), ".res"))
   {
     gameModule = fopen(datares.u8string().c_str(),"wb");
     if (!gameModule) {
@@ -779,7 +779,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       idpr("Failed to add resources.",-1); return 13;
     }
   }
-  else
+  else*/
   {
     auto resname = resfile.u8string();
     for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
