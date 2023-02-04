@@ -794,10 +794,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   current_language->module_write_paths(game, gameModule);
 
-  // Tell where the resources start
-  //fwrite("\0\0\0\0res0",8,1,gameModule);
-  //fwrite(&resourceblock_start,4,1,gameModule);
-
   // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
