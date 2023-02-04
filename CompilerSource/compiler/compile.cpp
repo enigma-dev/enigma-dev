@@ -755,7 +755,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   #endif
 
   FILE *gameModule;
-  int resourceblock_start = 0;
   std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
   #ifdef _WIN32
   std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
@@ -771,14 +770,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   if (!gameModule) {
     user << "Failed to write resources file. Did compile actually succeed?" << flushl;
     idpr("Failed to write resources file.",-1); return 12;
-  }
-
-  fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
-  resourceblock_start = ftell(gameModule);
-
-  if (resourceblock_start < 128) {
-    user << "Compiled game is clearly not a working module; cannot continue" << flushl;
-    idpr("Failed to add resources.",-1); return 13;
   }
 
   // Start by setting off our location with a DWord of NULLs
