@@ -5,6 +5,13 @@ set(ENGINE_LIB_DESCRIPTION "Enigma Engine")
 
 project(${ENGINE_LIB} DESCRIPTION ${ENGINE_LIB_DESCRIPTION})
 
+set(LINUX-PLATFORM "Linux")
+set(FREEBSD-PLATFORM "FreeBSD")
+set(ANDROID-PLATFORM "Android")
+set(WINDOWS-PLATFORM "Windows")
+set(MACOSX-PLATFORM "MacOSX")
+set(DRAGONFLY-PLATFORM "DragonFly")
+
 set(GENERAL_DIR "General")
 
 # GMODE { Run, Build, Debug, Compile }
@@ -21,7 +28,7 @@ message("Graphics Sys: ${GRAPHICS}")
 
 # AUDIO { Audio_Systems/* }
 if(NOT DEFINED AUDIO)
-  set(AUDIO "OpenAL")
+  set(AUDIO "None") # OpenAL
 endif()
 
 message("Audio Sys: ${AUDIO}")
@@ -86,3 +93,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/Universal_System/Extensions/XRandR/)
 add_subdirectory(${CMAKE_SOURCE_DIR}/Universal_System/Extensions/XTEST/)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/Widget_Systems/${WIDGETS})
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/Platforms/SDL)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Platforms/Win32)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Platforms/xlib)
