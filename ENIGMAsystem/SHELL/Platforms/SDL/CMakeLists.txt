@@ -1,3 +1,7 @@
+if(NOT DEFINED PKG-CONFIG)
+  set(PKG-CONFIG "pkg-config")
+endif()
+
 set(SDL_PLATFORM_LIB "sdl_platform_lib")
 set(SDL_PLATFORM_LIB_DESCRIPTION "SDL Plaform")
 

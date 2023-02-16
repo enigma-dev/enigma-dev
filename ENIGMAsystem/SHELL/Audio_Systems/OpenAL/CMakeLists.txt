@@ -6,6 +6,8 @@ project(${OPENAL_AUDIO_SYS_LIB} DESCRIPTION ${OPENAL_AUDIO_SYS_LIB_DESCRIPTION})
 file(GLOB_RECURSE OPENAL_AUDIO_SYS_LIB_SOURCES 
     *.cpp)
 
-message("Audio_Systems/OpenAL Sources: ${OPENAL_AUDIO_SYS_LIB_SOURCES}")
+# todo: check makefile
+
+#message("Audio_Systems/OpenAL Sources: ${OPENAL_AUDIO_SYS_LIB_SOURCES}")
 
 add_library(${OPENAL_AUDIO_SYS_LIB} ${OPENAL_AUDIO_SYS_LIB_SOURCES})
