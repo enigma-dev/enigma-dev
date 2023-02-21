@@ -218,11 +218,13 @@ namespace {
     #if (!defined(__MACH__) && !defined(__APPLE__))
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) | 
-    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
+    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
+    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0));
     #else
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
-    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN);
+    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
+    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0));
     #endif
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
     ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(640));
@@ -414,7 +416,8 @@ namespace {
       #else
       ImGui_ImplSDLRenderer_NewFrame();
       #endif 
-      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); dir = expand_without_trailing_slash(dir);
+      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); 
+      ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
       if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, fname.c_str(), dir.c_str());
       if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, fname.c_str(), dir.c_str());
