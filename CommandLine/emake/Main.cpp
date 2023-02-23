@@ -26,7 +26,25 @@ int main(int argc, char* argv[])
 {
   std::ofstream egmlog(fs::temp_directory_path().string() + "/enigma_libegm.log", std::ofstream::out);
   std::ofstream elog(fs::temp_directory_path().string() + "/enigma_compiler.log", std::ofstream::out);
+  
+  OptionsParser options;
+  options.ReadArgs(argc, argv);
+  int result = options.HandleArgs();
 
+  if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
+    return result;
+
+   std::string input_file = options.GetOption("input").as<std::string>();
+
+  std::unique_ptr<buffers::Project> project;
+  
+  if (input_file.empty()) {
+    project = std::make_unique<buffers::Project>();
+    std::cerr << "Warning: No game file specified. "
+                "Building an empty game." << std::endl;
+    return plugin.BuildGame(project->game(), mode, output_file.c_str());
+  }
+  
   std::string ENIGMA_DEBUG = (std::getenv("ENIGMA_DEBUG") ? std::getenv("ENIGMA_DEBUG") : "");
   if (ENIGMA_DEBUG == "TRUE") {
     outputStream.rdbuf(std::cout.rdbuf());
@@ -39,12 +57,7 @@ int main(int argc, char* argv[])
   }
   
   
-  OptionsParser options;
-  options.ReadArgs(argc, argv);
-  int result = options.HandleArgs();
-
-  if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
-    return result;
+ 
 
   EnigmaPlugin plugin;
   plugin.Load();
@@ -118,17 +131,7 @@ int main(int argc, char* argv[])
     return OPTIONS_ERROR;
   }
   
-  std::string input_file = options.GetOption("input").as<std::string>();
-
-  std::unique_ptr<buffers::Project> project;
-  
-  if (input_file.empty()) {
-    project = std::make_unique<buffers::Project>();
-    std::cerr << "Warning: No game file specified. "
-                "Building an empty game." << std::endl;
-    return plugin.BuildGame(project->game(), mode, output_file.c_str());
-  }
-
+ 
   // Load event data
   EventData event_data(ParseEventFile((fs::path(options.EnigmaRoot())/"events.ey").u8string()));
 
