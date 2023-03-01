@@ -9,7 +9,9 @@
 #endif
 #endif
 
+#include <cmath>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 
 #include "ImFileDialog.h"
@@ -59,6 +61,19 @@
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 using namespace lunasvg;
 #endif
+
+struct HumanReadable {
+  std::uintmax_t size{};
+  private: friend
+  std::ostream& operator<<(std::ostream& os, HumanReadable hr) {
+    int i{};
+    double mantissa = hr.size;
+    for (; mantissa >= 1024.; mantissa /= 1024., ++i) { }
+    mantissa = std::ceil(mantissa * 10.) / 10.;
+    os << mantissa << "BKMGTPE"[i];
+    return i == 0 ? os : os << "B (" << hr.size << ')';
+  }
+};
 
 namespace ifd {
   static const char *GetDefaultFolderIcon();
@@ -1490,8 +1505,11 @@ namespace ifd {
 
           // size
           ImGui::TableSetColumnIndex(2);
-          if (!entry.IsDirectory)
-            ImGui::Text("%.3f KiB", entry.Size / 1024.0f);
+          if (!entry.IsDirectory) {
+            std::stringstream ss;
+            ss << HumanReadable{entry.Size};
+            ImGui::Text(ss.str().c_str());
+          }
           else ImGui::Text("---");
         }
 
