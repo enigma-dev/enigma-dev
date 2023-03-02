@@ -233,8 +233,8 @@ static inline void modify_shell_dialog(XPROCID pid) {
   WINDOWID *arr = nullptr; Window wid = 0;
   Display *display = XOpenDisplay(nullptr);
   ngs::cproc::window_id_from_proc_id(pid, &arr, &sz);
-  for (int i = 0; i < sz; i++) {
-    wid = (Window)ngs::cproc::native_window_from_window_id(arr[i]);
+  if (sz) {
+    wid = (Window)ngs::cproc::native_window_from_window_id(arr[sz - 1]);
     if (!enigma_user::sprite_exists(enigma_user::window_get_icon_index())) {
       XSynchronize(display, true);
       Atom property = XInternAtom(display, "_NET_WM_ICON", false);
@@ -255,8 +255,7 @@ static inline void modify_shell_dialog(XPROCID pid) {
     XSetInputFocus(display, wid, RevertToParent, CurrentTime);
     XFlush(display); XGetInputFocus(display, &focus, &revert);
     if (wid == focus) modifyInit = true; }
-  }
-  ngs::cproc::free_window_id(arr);
+  } ngs::cproc::free_window_id(arr); }
   XCloseDisplay(display);
 }
 
