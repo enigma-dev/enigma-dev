@@ -35,6 +35,10 @@ override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL
 override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
+	ifeq ($(OS), Darwin)
+	else
+		LSVGREPOS := $(shell cd "lunasvg";cmake .;make;cd ..)
+	endif
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif

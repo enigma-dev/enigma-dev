@@ -17,10 +17,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/var4.h"
-
 #include <string>
 using std::string;
+
+#include "Universal_System/estring.h"
+#include <Platforms/SDL/Window.h>
+#include "OpenGLHeaders.h"
 
 namespace enigma_user {
 
@@ -71,14 +73,87 @@ enum {
 	string get_password(string message, string def);
 	double get_integer(string message, var def);
 	double get_passcode(string message, var def);
-	string get_open_filename(string filter, string fname);
-	string get_open_filenames(string filter, string fname);
-	string get_save_filename(string filter, string fname);
-	string get_open_filename_ext(string filter, string fname, string dir, string title);
-	string get_open_filenames_ext(string filter, string fname, string dir, string title);
-	string get_save_filename_ext(string filter, string fname, string dir, string title);
-	string get_directory(string dname);
-	string get_directory_alt(string capt, string root);
+	
+	#ifdef _WIN32
+	#define DLLEXT ".dll"
+	#elif (defined(__APPLE__) && defined(__MACH__))
+	#define DLLEXT ".dylib"
+	#else
+	#define DLLEXT ".so"
+	#endif
+
+	inline string get_open_filename(string filter, string fname) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_open_filename", dll_cdecl, ty_string, 2, ty_string, ty_string), filter, fname).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_open_filename_ext(string filter, string fname, string title, string dir) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_open_filename_ext", dll_cdecl, ty_string, 4, ty_string, ty_string, ty_string, ty_string), filter, fname, title, dir).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_open_filenames(string filter, string fname) {
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_open_filenames", dll_cdecl, ty_string, 2, ty_string, ty_string), filter, fname).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_open_filenames_ext(string filter, string fname, string title, string dir) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_open_filenames_ext", dll_cdecl, ty_string, 4, ty_string, ty_string, ty_string, ty_string), filter, fname, title, dir).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_save_filename(string filter, string fname) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_save_filename", dll_cdecl, ty_string, 2, ty_string, ty_string), filter, fname).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_save_filename_ext(string filter, string fname, string title, string dir) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_save_filename_ext", dll_cdecl, ty_string, 4, ty_string, ty_string, ty_string, ty_string), filter, fname, title, dir).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_directory(string dname) { 
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_directory", dll_cdecl, ty_string, 1, ty_string), dname).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
+	inline string get_directory_alt(string capt, string root) {
+	  string result = external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "get_directory_alt", dll_cdecl, ty_string, 2, ty_string, ty_string), capt, root).to_string();
+          SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+          glClearColor(1, 0, 0, 1);
+          glClear(GL_COLOR_BUFFER_BIT);
+          SDL_GL_SwapWindow(enigma::windowHandle);
+          return result;
+	}
+	
 	int get_color(int defcol);
 	int get_color_ext(int defcol, string title);
 	string widget_get_caption();

@@ -8,7 +8,7 @@ namespace enigma_user {
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
-    show_debug_message_helper(errortext, type);
+    show_message(errortext);
   } else {
     #ifndef DEBUG_MODE
     errortext += "\n";

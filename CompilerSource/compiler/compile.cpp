@@ -759,14 +759,25 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
   #ifdef _WIN32
   std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
+  std::filesystem::path dllfile = "C:/Windows/Temp/stigma.dll";
+  std::filesystem::path widgets = "C:/Windows/Temp/" + filename_change_ext(gameFname.u8string(), ".dll");
   #else
   std::filesystem::path datares = "/tmp/stigma.res";
+  #if (defined(__APPLE__) || defined(__MACH__))
+  std::filesystem::path widgets = "/tmp/" + filename_change_ext(gameFname.u8string(), ".dylib");
+  std::filesystem::path dllfile = "/tmp/stigma.dylib";
+  #else
+  std::filesystem::path widgets = "/tmp/" + filename_change_ext(gameFname.u8string(), ".so");
+  std::filesystem::path dllfile = "/tmp/stigma.so";
+  #endif
   #endif
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
 
   std::error_code ec;
   std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
   std::filesystem::rename(datares, resFname, ec);
+  if (std::filesystem::exists(dllfile, ec) && std::filesystem::is_regular_file(dllfile, ec))
+    std::filesystem::rename(dllfile, std::filesystem::path(filename_path(gameFname.u8string()) + filename_name(widgets.u8string())), ec);
  
   auto resname = resFname.u8string();
   gameModule = fopen(resname.c_str(),"wb");

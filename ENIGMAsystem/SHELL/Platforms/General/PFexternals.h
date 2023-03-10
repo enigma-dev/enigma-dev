@@ -20,8 +20,13 @@
 namespace enigma_user
 {
 
-static int dll_cdecl   = 0;
-static int dll_stdcall = 1;
+#ifndef dll_cdecl
+#define dll_cdecl   0
+#endif
+
+#ifndef dll_stdcall
+#define dll_stdcall 1
+#endif
 
 int external_define(std::string lib,std::string func,int calltype,bool returntype,int argcount,
                     bool t01=0,bool t02=0,bool t03=0,bool t04=0,bool t05=0,bool t06=0,bool t07=0,bool t08=0,

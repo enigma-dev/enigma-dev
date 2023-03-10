@@ -5,6 +5,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/fileio.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
 #include <chrono> // std::chrono::microseconds
@@ -169,11 +170,18 @@ int updateTimer() {
 int enigma_main(int argc, char** argv) {
   // Copy our parameters
   set_program_args(argc, argv);
+  
+  #ifdef SDL_VIDEO_DRIVER_X11
+  enigma_user::environment_set_variable("SDL_VIDEODRIVER", "x11");
+  #endif
 
   if (!initGameWindow()) {
     DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
     return -4;
   }
+  
+  enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  enigma_user::environment_set_variable("IMGUI_DIALOG_RESIZE", "1");
 
   initTimer();
   initInput();

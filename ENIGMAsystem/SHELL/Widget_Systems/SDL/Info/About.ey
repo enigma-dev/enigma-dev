@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: SDL
+Identifier: SDL
+Build-Platforms: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Represents: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Description: SDL dialogs
+Author: Samuel Venable
