@@ -1,14 +1,15 @@
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Platforms/SDL/Window.h"
 
 using std::string;
-
-void show_debug_message_helper(string errortext, MESSAGE_TYPE type);
 
 namespace enigma_user {
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
   if (type != M_INFO && type != M_WARNING) {
-    show_message(errortext);
+    SDL_ShowSimpleMessageBox(0,
+    enigma_user::window_get_caption().c_str(), errortext.c_str(), enigma::windowHandle);
   } else {
     #ifndef DEBUG_MODE
     errortext += "\n";
