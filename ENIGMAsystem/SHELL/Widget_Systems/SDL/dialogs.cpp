@@ -46,7 +46,10 @@ namespace enigma {
 
 namespace enigma_user {
 
-int show_message(const string &message) { return printf("%s\n", message.c_str()); }
+int show_message(const string &message) { 
+  return SDL_ShowSimpleMessageBox(0,
+  enigma_user::window_get_caption().c_str(), message.c_str(), enigma::windowHandle); 
+}
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { }
 
