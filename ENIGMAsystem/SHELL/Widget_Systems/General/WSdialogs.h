@@ -20,8 +20,9 @@
 #include <string>
 using std::string;
 
+#include "Platforms/General/PFwindow.h"
 #include "Universal_System/estring.h"
-#include <Platforms/SDL/Window.h>
+#include "Platforms/SDL/Window.h"
 #include "OpenGLHeaders.h"
 
 namespace enigma_user {
@@ -57,22 +58,8 @@ enum {
 };
 */
 
-	static string ws_win32       = "Win32";
-	static string ws_cocoa       = "Cocoa";
-	static string ws_x11_zenity  = "Zenity";
-	static string ws_x11_kdialog = "KDialog";
-
-	string widget_get_system();
-	void widget_set_system(string sys);
-	int show_message_cancelable(string message);
-	int show_message_ext(string message, string but1, string but2, string but3);
+	int show_message(const string &message);
 	bool show_question(string message);
-	int show_question_cancelable(string message);
-	int show_attempt(string errortext);
-	string get_string(string message, string def);
-	string get_password(string message, string def);
-	double get_integer(string message, var def);
-	double get_passcode(string message, var def);
 	
 	#ifdef _WIN32
 	#define DLLEXT ".dll"
