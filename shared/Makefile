@@ -38,6 +38,7 @@ ifeq ($(UNIX_BASED), true)
 	ifeq ($(OS), Darwin)
 	else
 		LSVGREPOS := $(shell cd "lunasvg";cmake .;make;cd ..)
+		LSVGREPOS += $(shell chmod +x ../ENIGMAsystem/SHELL/Widget_Systems/SDL/imgui.sh)
 	endif
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
