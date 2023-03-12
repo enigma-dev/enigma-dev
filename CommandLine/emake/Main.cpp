@@ -46,6 +46,11 @@ int main(int argc, char* argv[])
   if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
     return result;
 
+  std::string input_file = options.GetOption("input").as<std::string>();
+  if (!input_file.empty() && !fs::exists(input_file)) {
+    std::cerr << "File: " + input_file + " does not exist" << std::endl;
+    return result;
+  }
   EnigmaPlugin plugin;
   plugin.Load();
   CallBack ecb;
@@ -117,9 +122,6 @@ int main(int argc, char* argv[])
     std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
-  
-  std::string input_file = options.GetOption("input").as<std::string>();
-
   std::unique_ptr<buffers::Project> project;
   
   if (input_file.empty()) {
