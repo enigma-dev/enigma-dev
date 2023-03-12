@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   std::string input_file = options.GetOption("input").as<std::string>();
   if (!input_file.empty() && !fs::exists(input_file)) {
-    std::cerr << "File: " + input_file + " does not exists" << std::endl;
+    std::cerr << "File: " + input_file + " does not exist" << std::endl;
     return result;
   }
   EnigmaPlugin plugin;
