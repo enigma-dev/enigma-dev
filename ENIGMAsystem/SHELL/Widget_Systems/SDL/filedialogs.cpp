@@ -601,15 +601,15 @@ namespace ngs::imgui {
   }
   
   string show_message(string message) {
-    return file_dialog_helper("", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), "", oneButton, message);
+    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), oneButton, message);
   }
 
   string show_question(string message) {
-    return file_dialog_helper("", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), "", twoButtons, message);
+    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), twoButtons, message);
   }
 
   string show_question_ext(string message) {
-    return file_dialog_helper("", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), "", threeButtons, message);
+    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), threeButtons, message);
   }
 
 } // namespace ngs::imgui
