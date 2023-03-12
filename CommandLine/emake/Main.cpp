@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
   std::unique_ptr<buffers::Project> project;
   
-  if (input_file.empty()) {
+  if (!fs::exists(input_file)) {
     project = std::make_unique<buffers::Project>();
     std::cerr << "Warning: No game file specified. "
                 "Building an empty game." << std::endl;
