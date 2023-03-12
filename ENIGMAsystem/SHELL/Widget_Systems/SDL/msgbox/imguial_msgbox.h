@@ -1,6 +1,7 @@
-MIT License
+/*
+The MIT License (MIT)
 
-Copyright © 2016 Andre Leiradella
+Copyright (c) 2016 Andre Leiradella
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,38 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+
+#pragma once
+
+#include <vector>
+#include <string>
+
+namespace ImGuiAl
+{
+  class MsgBox
+  {
+  public:
+    inline MsgBox() {}
+    virtual ~MsgBox();
+    
+    bool Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions, bool show_checkbox = false );
+    int  Draw();
+    void Open();
+    
+    inline void AskAgain()
+    {
+      m_DontAskAgain = false;
+      m_Selected = 0;
+    }
+    
+  protected:
+    const char* m_Title;
+    const char* m_Icon;
+    const char* m_Text;
+    std::vector<std::string> m_Captions;
+    bool m_ShowCheckbox;
+    bool m_DontAskAgain;
+    int m_Selected;
+  };
+}
