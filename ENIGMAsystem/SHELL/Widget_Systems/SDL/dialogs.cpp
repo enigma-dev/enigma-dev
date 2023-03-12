@@ -29,12 +29,8 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFexternals.h"
-#include "Universal_System/directoryglobals.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
-#include "Universal_System/fileio.h"
 
 namespace enigma {
 
@@ -46,15 +42,8 @@ namespace enigma {
 
 namespace enigma_user {
 
-int show_message(const string &message) { 
-  return SDL_ShowSimpleMessageBox(0,
-  enigma_user::window_get_caption().c_str(), message.c_str(), enigma::windowHandle); 
-}
-
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { }
 
 void show_info() { }
-
-bool show_question(string str) { return false; }
 
 }

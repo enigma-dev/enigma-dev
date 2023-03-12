@@ -37,6 +37,9 @@ namespace ngs::imgui {
   std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title);
   std::string get_directory(std::string dname);
   std::string get_directory_alt(std::string capt, std::string root);
+  std::string show_message(std::string message);
+  std::string show_question(std::string message);
+  std::string show_question_ext(std::string message);
 
 } // namespace ngs::imgui
 
@@ -55,4 +58,7 @@ EXPORTED_FUNCTION const char *get_save_filename(const char *filter, const char *
 EXPORTED_FUNCTION const char *get_save_filename_ext(const char *filter, const char *fname, const char *dir, const char *title);
 EXPORTED_FUNCTION const char *get_directory(const char *dname);
 EXPORTED_FUNCTION const char *get_directory_alt(const char *capt, const char *root);
+EXPORTED_FUNCTION const char *show_message(const char *message);
+EXPORTED_FUNCTION const char *show_question(const char *message);
+EXPORTED_FUNCTION const char *show_question_ext(const char *message);
 #endif
