@@ -27,6 +27,15 @@ SOFTWARE.
 
 ImGuiAl::MsgBox::~MsgBox() {}
 
+void AlignForWidth(float width, float alignment = 0.5f)
+{
+  ImGuiStyle& style = ImGui::GetStyle();
+  float avail = ImGui::GetContentRegionAvail().x;
+  float off = (avail - width) * alignment;
+  if (off > 0.0f)
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+}
+
 bool ImGuiAl::MsgBox::Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions, bool show_checkbox )
 {
   m_Title = title;
@@ -81,10 +90,17 @@ int ImGuiAl::MsgBox::Draw()
       
       ImVec2 size = ImVec2( 50.0f, 0.0f );
       int count;
-      
+
+      ImGuiStyle& style = ImGui::GetStyle();
+      float width = 0.0f;
       for ( count = 0; count < m_Captions.size(); count++ )
       {
-        ImGui::PushID( count );
+        width += ImGui::CalcTextSize(m_Captions[count].c_str()).x;
+        width += style.ItemSpacing.x;
+      }
+      AlignForWidth(width);
+      for ( count = 0; count < m_Captions.size(); count++ )
+      {
         if ( ImGui::Button( m_Captions[ count ].c_str(), size ) )
         {
           index = count + 1;
