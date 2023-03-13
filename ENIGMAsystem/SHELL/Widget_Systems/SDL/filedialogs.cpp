@@ -209,12 +209,14 @@ namespace {
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) | 
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
-    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0));
+    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
+    std::to_string(1)) ? SDL_WINDOW_BORDERLESS : 0));
     #else
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
-    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0));
+    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
+    std::to_string(1)) ? SDL_WINDOW_BORDERLESS : 0));
     #endif
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
     ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(640));
