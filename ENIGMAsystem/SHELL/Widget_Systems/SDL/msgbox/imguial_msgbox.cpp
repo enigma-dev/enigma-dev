@@ -97,9 +97,10 @@ int ImGuiAl::MsgBox::Draw()
       float width = 0.0f;
       for ( count = 0; count < m_Captions.size(); count++ )
       {
-        width += size;
+        width += size.x;
         width += style.ItemSpacing.x;
       }
+      width -= style.ItemSpacing.x;
       AlignForWidth(width);
       for ( count = 0; count < m_Captions.size(); count++ )
       {
