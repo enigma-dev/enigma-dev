@@ -432,7 +432,7 @@ namespace {
         buttons.push_back(IFD_OK); 
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
-        //ImGui::PushID(msgbox[0]);
+        ImGui::PushID(msgbox[0]);
         msgbox[0]->Init("##msgbox1", nullptr, message.c_str(), buttons, false);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
@@ -440,7 +440,7 @@ namespace {
           case 0: result = "(null)"; break;
           case 1: result = IFD_OK; break;
         }
-        //ImGui::PopID();
+        ImGui::PopID();
         delete msgbox[0];
         msgbox.pop_back();
         if (result != "(null)") goto finish;
@@ -450,7 +450,7 @@ namespace {
         buttons.push_back(IFD_NO); 
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
-        //ImGui::PushID(msgbox[0]);
+        ImGui::PushID(msgbox[0]);
         msgbox[0]->Init("##msgbox2", nullptr, message.c_str(), buttons, false);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
@@ -459,7 +459,7 @@ namespace {
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
         }
-        //ImGui::PopID();
+        ImGui::PopID();
         delete msgbox[0];
         msgbox.pop_back();
         if (result != "(null)") goto finish;
@@ -470,7 +470,7 @@ namespace {
         buttons.push_back(IFD_CANCEL);
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
-        //ImGui::PushID(msgbox[0]);
+        ImGui::PushID(msgbox[0]);
         msgbox[0]->Init("##msgbox3", nullptr, message.c_str(), buttons, false);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
@@ -480,7 +480,7 @@ namespace {
           case 2: result = IFD_NO; break;
           case 3: result = IFD_CANCEL; break;
         }
-        //ImGui::PopID();
+        ImGui::PopID();
         delete msgbox[0];
         msgbox.pop_back();
         if (result != "(null)") goto finish;
