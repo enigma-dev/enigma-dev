@@ -104,6 +104,7 @@ int ImGuiAl::MsgBox::Draw()
       AlignForWidth(width);
       for ( count = 0; count < m_Captions.size(); count++ )
       {
+        ImGui::PushID(count);
         if ( ImGui::Button( m_Captions[ count ].c_str(), size ) )
         {
           index = count + 1;
