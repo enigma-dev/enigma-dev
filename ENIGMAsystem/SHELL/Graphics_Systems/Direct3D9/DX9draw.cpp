@@ -17,35 +17,49 @@
 **/
 
 #include "Direct3D9Headers.h"
+<<<<<<< HEAD
 #include "Bridges/Win32-Direct3D9/DX9Context.h"
+=======
+>>>>>>> master
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
+<<<<<<< HEAD
 #include "Platforms/General/PFwindow.h"
 
 #include "Universal_System/roomsystem.h"
+=======
+using namespace enigma::dx9;
+>>>>>>> master
 
-#include <vector>
-#include <math.h>
-#include <stdio.h>
-using std::vector;
+namespace enigma_user {
 
-namespace enigma {
-extern unsigned char currentcolor[4];
+void draw_clear_alpha(int col, float alpha)
+{
+	draw_batch_flush(batch_flush_deferred);
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), CLAMP_ALPHA(alpha)), 1.0f, 0);
 }
 
-namespace enigma_user
+void draw_clear(int col)
 {
+	draw_batch_flush(batch_flush_deferred);
+	d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
+}
 
 int draw_get_msaa_maxlevel()
 {
+<<<<<<< HEAD
   return display_aa;
+=======
+  return 0; //TODO: implement
+>>>>>>> master
 }
 
 bool draw_get_msaa_supported()
 {
+<<<<<<< HEAD
   return display_aa > 0;
 }
 
@@ -175,18 +189,9 @@ int draw_getpixel_ext(int x, int y)
 	pBackBuffer->Release();
 	pDestBuffer->Release();
 	return ret;
+=======
+  return false; //TODO: implement
+>>>>>>> master
 }
 
 } // namespace enigma_user
-
-namespace enigma {
-
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
-  enigma_user::draw_batch_flush(enigma_user::batch_flush_deferred);
-  //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
-  //      on a convex-only polygon drawing routine that works on any platform.
-  return false;
-}
-
-} // namespace enigma

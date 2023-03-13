@@ -12,13 +12,17 @@
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <memory>
 #include <future>
+#include <vector>
+
+namespace fs = std::filesystem;
 
 using namespace grpc;
 using namespace buffers;
+
+std::promise<void> exit_requested;
 
 class CompilerServiceImpl final : public Compiler::Service {
   public:
@@ -27,9 +31,8 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
-    auto fnc = [=] {
-      const CompileRequest req = *request;
-      plugin.BuildGame(const_cast<buffers::Game*>(&req.game()), emode_run, req.name().c_str());
+    auto fnc = [&] {
+      plugin.BuildGame(request->game(), emode_run, request->name().c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
@@ -116,13 +119,35 @@ class CompilerServiceImpl final : public Compiler::Service {
           id = about.get("id"); // allow alias
         if (id.empty()) {
           // compilers use filename minus ext as id
-          boost::filesystem::path ey(subsystem);
+          fs::path ey(subsystem);
           id = ey.stem().string();
         }
 
         // allow author alias used by compiler descriptors
         if (author.empty())
           author = about.get("maintainer");
+
+        eyit represents = about.values.find("represents");
+        if (represents != about.values.end()) {
+          std::string repsStr = (represents->second)->data().get("build-platforms");
+          std::stringstream ss(repsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_represents(token);
+          }
+        }
+
+        eyit depends = about.values.find("depends");
+        if (depends != about.values.end()) {
+          std::string depsStr = (depends->second)->data().get("build-platforms");
+          std::stringstream ss(depsStr);
+          std::string token;
+          while (ss >> token) {
+            if (token.back() == ',') token.pop_back();
+            subInfo->add_depends(token);
+          }
+        }
 
         subInfo->set_name(name);
         subInfo->set_id(id);
@@ -159,11 +184,16 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
-    vector<const char*> script_names;
+    std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
     for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
     syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());
     reply->CopyFrom(GetSyntaxError(err));
+    return Status::OK;
+  }
+
+  Status Teardown(ServerContext*, const ::buffers::Empty*, ::buffers::Empty*) override {
+    exit_requested.set_value();
     return Status::OK;
   }
 
@@ -181,6 +211,16 @@ int RunServer(const std::string& address, EnigmaPlugin& plugin, OptionsParser &o
   builder.RegisterService(&service);
   std::unique_ptr<Server> server(builder.BuildAndStart());
   std::cout << "Server listening on " << address << std::endl;
-  server->Wait();
+
+  auto serveFn = [&]() {
+    server->Wait();
+  };
+
+  std::thread serving_thread(serveFn);
+  auto f = exit_requested.get_future();
+  f.wait();
+  server->Shutdown();
+  serving_thread.join();
+
   return 0;
 }

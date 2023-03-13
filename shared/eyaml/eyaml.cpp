@@ -62,6 +62,11 @@ ey_string::ey_string(string x, string y): ey_base(x, true), value(y) {}
 
 ey_data::ey_data(): ey_base(false), values(), values_order() {}
 ey_data::ey_data(string n): ey_base(n, false), values(), values_order() {}
+ey_data::ey_data(ey_data &&ed):
+    ey_base(ed.name, false), values(std::move(ed.values)),
+    values_order(ed.values_order), values_order_last(ed.values_order_last) {
+  ed.values_order.next = NULL;
+}
 ey_data::~ey_data() {
   for (eycit it = values_order.next; it != NULL; ) {
     eycit t = it; it = it->next;

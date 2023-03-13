@@ -19,7 +19,10 @@
 #include "buffers_internal.h"
 #include "libEGMstd.h"
 
+#include "Resources/AssetArray.h" // TODO: start actually using for this resource
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
 #include <fstream>
@@ -52,7 +55,7 @@ void BinaryBuffer::Seek(unsigned offset) {
         position -= GetSize();
         return;
       default:
-        position = GetSize() - 1;
+        position = GetSize() - (position - GetSize());
         return;
     }
   }
@@ -103,6 +106,11 @@ int buffer_create(unsigned size, int type, unsigned alignment) {
 void buffer_delete(int buffer) {
   get_buffer(binbuff, buffer);
   delete binbuff;
+  enigma::buffers[buffer] = nullptr;
+}
+
+bool buffer_exists(int buffer) {
+  return (buffer >= 0 && (size_t)buffer < enigma::buffers.size() && enigma::buffers[buffer] != nullptr);
 }
 
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
@@ -131,7 +139,7 @@ void buffer_save(int buffer, string filename) {
   get_buffer(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
   myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
@@ -142,7 +150,7 @@ void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size
   get_buffer(binbuff, buffer);
   std::ofstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -174,7 +182,7 @@ int buffer_load(string filename) {
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return -1;
   }
   myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
@@ -188,7 +196,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 
   std::ifstream myfile(filename.c_str());
   if (!myfile.is_open()) {
-    std::cout << "Unable to open file " << filename;
+    DEBUG_MESSAGE("Unable to open file " + filename, MESSAGE_TYPE::M_ERROR);
     return;
   }
   std::vector<char> data;
@@ -227,6 +235,17 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
     }
   }
 }
+  
+void *buffer_get_address(int buffer) {
+  #ifdef DEBUG_MODE
+  if (buffer < 0 or size_t(buffer) >= enigma::buffers.size() or !enigma::buffers[buffer]) {
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buffer), MESSAGE_TYPE::M_USER_ERROR);
+    return nullptr;
+  }
+  #endif
+  enigma::BinaryBuffer *binbuff = enigma::buffers[buffer];
+  return reinterpret_cast<void *>(binbuff->data.data());
+}
 
 unsigned buffer_get_size(int buffer) {
   get_bufferr(binbuff, buffer, -1);
@@ -243,10 +262,21 @@ int buffer_get_type(int buffer) {
   return binbuff->type;
 }
 
-//NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
+  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
+}
+
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
+  int tex = surface_get_texture(surface);
+  int wid = surface_get_width(surface);
+  int hgt = surface_get_height(surface);
+  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
+    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
+  } else { // execution can not continue safely with wrong buffer size
+    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
+  }
 }
 
 void buffer_resize(int buffer, unsigned size) {
@@ -271,31 +301,18 @@ void buffer_seek(int buffer, int base, unsigned offset) {
 
 unsigned buffer_sizeof(int type) {
   switch (type) {
-    case buffer_u8:
+    case buffer_u8: case buffer_s8: case buffer_bool:
       return 1;
-    case buffer_s8:
-      return 1;
-    case buffer_u16:
+    case buffer_u16: case buffer_s16: case buffer_f16:
       return 2;
-    case buffer_s16:
-      return 2;
-    case buffer_u32:
+    case buffer_u32: case buffer_s32: case buffer_f32:
       return 4;
-    case buffer_s32:
-      return 4;
-    case buffer_f16:
-      return 2;
-    case buffer_f32:
-      return 4;
-    case buffer_f64:
+    case buffer_u64: case buffer_f64:
       return 8;
-    case buffer_bool:
-      return 1;
-    case buffer_string:
-      return 0;
-    default:
-      return 0;
+    case buffer_string: case buffer_text: default:
+      break;
   }
+  return 0;
 }
 
 int buffer_tell(int buffer) {

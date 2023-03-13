@@ -25,5 +25,5 @@ message Background {
   optional uint32 width = 15;
   optional uint32 height = 16;
 
-  optional string image = 17 [(gmx) = "data", (file_path) = true];
+  optional string image = 17 [(gmx) = "data", (file_path) = true, (file_kind) = IMAGE];
 }

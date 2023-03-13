@@ -21,7 +21,10 @@
 
 #include "Platforms/General/PFmain.h"
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 
 namespace enigma //TODO: Find where this belongs
 {
@@ -30,8 +33,5 @@ namespace enigma //TODO: Find where this belongs
   extern HDC window_hDC;
   extern HANDLE mainthread;
 }
-
-void enigma_catchmouse_backend(bool x);
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
 #endif //ENIGMA_WINDOWS_MAIN

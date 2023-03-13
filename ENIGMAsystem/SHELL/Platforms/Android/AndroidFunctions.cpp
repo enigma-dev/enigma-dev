@@ -72,7 +72,7 @@ int loopy() {
 
 int init() {
 	LOGE("Before initilise everything!",1,1);
-	enigma::parameters=new char* [0]; 
+	enigma::parameters=new char* [0];
 	enigma::parameters[0]="/data/data/org.enigmadev/lib/libndkEnigmaGame.so";
 enigma::initialize_everything();
 }

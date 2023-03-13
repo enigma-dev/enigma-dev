@@ -21,9 +21,9 @@
 // In this case, we treat instances as their bounding box (BBox).
 ////////////////////////////////////
 
-#include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Object_Tiers/collisions_object.h"
+#include "Universal_System/Instances/instance_system.h" //iter
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
 
 #include "PRECimpl.h"
@@ -59,10 +59,8 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
     }
 }
 
-static inline int min(int x, int y) { return x<y? x : y; }
-static inline double min(double x, double y) { return x<y? x : y; }
-static inline int max(int x, int y) { return x>y? x : y; }
-static inline double max(double x, double y) { return x>y? x : y; }
+template<typename T> static inline T min(T x, T y) { return x<y? x : y; }
+template<typename T> static inline T max(T x, T y) { return x>y? x : y; }
 
 static bool precise_collision_single(int intersection_left, int intersection_right, int intersection_top, int intersection_bottom,
                                 double x1, double y1,
@@ -288,12 +286,12 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         return NULL;
     }
 
-    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::BoundingBox &box = inst1->$bbox_relative();
     const double xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
     int left1, top1, right1, bottom1;
 
-    get_border(&left1, &right1, &top1, &bottom1, box.left, box.top, box.right, box.bottom, x, y, xscale1, yscale1, ia1);
+    get_border(&left1, &right1, &top1, &bottom1, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale1, yscale1, ia1);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -305,12 +303,12 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
         if (inst2->sprite_index == -1 && inst2->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::BoundingBox &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
         int left2, top2, right2, bottom2;
-        get_border(&left2, &right2, &top2, &bottom2, box2.left, box2.top, box2.right, box2.bottom, x2, y2, xscale2, yscale2, ia2);
+        get_border(&left2, &right2, &top2, &bottom2, box2.left(), box2.top(), box2.right(), box2.bottom(), x2, y2, xscale2, yscale2, ia2);
 
         if (left1 <= right2 && left2 <= right1 && top1 <= bottom2 && top2 <= bottom1) {
 
@@ -318,14 +316,14 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
             const int collsprite_index1 = inst1->mask_index != -1 ? inst1->mask_index : inst1->sprite_index;
             const int collsprite_index2 = inst2->mask_index != -1 ? inst2->mask_index : inst2->sprite_index;
 
-            enigma::sprite* sprite1 = enigma::spritestructarray[collsprite_index1];
-            enigma::sprite* sprite2 = enigma::spritestructarray[collsprite_index2];
+            enigma::Sprite& sprite1 = enigma::sprites.get(collsprite_index1);
+            enigma::Sprite& sprite2 = enigma::sprites.get(collsprite_index2);
 
-            const int usi1 = ((int) inst1->image_index) % sprite1->subcount;
-            const int usi2 = ((int) inst2->image_index) % sprite2->subcount;
+            const int usi1 = ((int) inst1->image_index) % sprite1.SubimageCount();
+            const int usi2 = ((int) inst2->image_index) % sprite2.SubimageCount();
 
-            unsigned char* pixels1 = (unsigned char*) (sprite1->colldata[usi1]);
-            unsigned char* pixels2 = (unsigned char*) (sprite2->colldata[usi2]);
+            unsigned char* pixels1 = (unsigned char*) (sprite1.GetSubimage(usi1).collisionData);
+            unsigned char* pixels2 = (unsigned char*) (sprite2.GetSubimage(usi2).collisionData);
 
             if (pixels1 == 0 && pixels2 == 0) { //bbox vs. bbox.
                 return inst2;
@@ -337,15 +335,15 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
                 const int ins_top = max(top1, top2);
                 const int ins_bottom = min(bottom1, bottom2);
 
-                const int w1 = sprite1->width;
-                const int h1 = sprite1->height;
-                const int w2 = sprite2->width;
-                const int h2 = sprite2->height;
+                const int w1 = sprite1.width;
+                const int h1 = sprite1.height;
+                const int w2 = sprite2.width;
+                const int h2 = sprite2.height;
 
-                const double xoffset1 = sprite1->xoffset;
-                const double yoffset1 = sprite1->yoffset;
-                const double xoffset2 = sprite2->xoffset;
-                const double yoffset2 = sprite2->yoffset;
+                const double xoffset1 = sprite1.xoffset;
+                const double yoffset1 = sprite1.yoffset;
+                const double xoffset2 = sprite2.xoffset;
+                const double yoffset2 = sprite2.yoffset;
 
                 if (pixels1 != 0 && pixels2 == 0) { //precise vs. bbox.
                     const bool coll_result = precise_collision_single(
@@ -416,12 +414,12 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
          if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if (left <= x2 && x1 <= right && top <= y2 && y1 <= bottom) {
 
@@ -432,11 +430,11 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
             if (pixels == 0) { //bbox.
                 return inst;
@@ -450,11 +448,11 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
                 //Check per pixel.
 
-                const int w = sprite->width;
-                const int h = sprite->height;
+                const int w = sprite.width;
+                const int h = sprite.height;
 
-                const double xoffset = sprite->xoffset;
-                const double yoffset = sprite->yoffset;
+                const double xoffset = sprite.xoffset;
+                const double yoffset = sprite.yoffset;
 
                 const bool coll_result = precise_collision_single(
                     ins_left, ins_right, ins_top, ins_bottom,
@@ -491,12 +489,12 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         if (inst->sprite_index == -1 && inst->mask_index == -1) // No sprite/mask then no collision.
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         double minX = max(min(x1,x2),left);
         double maxX = min(max(x1,x2),right);
@@ -538,11 +536,11 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
             else {
                 const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-                enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+                enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-                const int usi = ((int) inst->image_index) % sprite->subcount;
+                const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-                unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+                unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
                 if (pixels == NULL) { // Bounding box.
                     return inst;
@@ -556,11 +554,11 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
 
                     // Check per pixel.
 
-                    const int w = sprite->width;
-                    const int h = sprite->height;
+                    const int w = sprite.width;
+                    const int h = sprite.height;
 
-                    const double xoffset = sprite->xoffset;
-                    const double yoffset = sprite->yoffset;
+                    const double xoffset = sprite.xoffset;
+                    const double yoffset = sprite.yoffset;
 
                     // x1 != x2 || y1 != y2 is true here.
                     const bool coll_result = precise_collision_line(
@@ -596,12 +594,12 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
 
@@ -612,11 +610,11 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
             if (pixels == 0) { //bbox.
                 return inst;
@@ -630,11 +628,11 @@ enigma::object_collisions* const collide_inst_point(int object, bool solid_only,
 
                 //Check per pixel.
 
-                const int w = sprite->width;
-                const int h = sprite->height;
+                const int w = sprite.width;
+                const int h = sprite.height;
 
-                const double xoffset = sprite->xoffset;
-                const double yoffset = sprite->yoffset;
+                const double xoffset = sprite.xoffset;
+                const double yoffset = sprite.yoffset;
 
                 const bool coll_result = precise_collision_single(
                     ins_left, ins_right, ins_top, ins_bottom,
@@ -689,12 +687,12 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
         if (inst->sprite_index == -1 && inst->mask_index == -1) // No sprite/mask then no collision.
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         const bool intersects = line_ellipse_intersects(rx, ry, left-x1, top-y1, bottom-y1) ||
                                  line_ellipse_intersects(rx, ry, right-x1, top-y1, bottom-y1) ||
@@ -710,11 +708,11 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
             if (pixels == 0) { // Bounding Box.
                 return inst;
@@ -728,11 +726,11 @@ enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_onl
 
                 // Check per pixel.
 
-                const int w = sprite->width;
-                const int h = sprite->height;
+                const int w = sprite.width;
+                const int h = sprite.height;
 
-                const double xoffset = sprite->xoffset;
-                const double yoffset = sprite->yoffset;
+                const double xoffset = sprite.xoffset;
+                const double yoffset = sprite.yoffset;
 
                 const bool coll_result = precise_collision_ellipse(
                     ins_left, ins_right, ins_top, ins_bottom,
@@ -764,22 +762,22 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
             if (pixels == 0) { //bbox.
                 enigma_user::instance_destroy(inst->id);
@@ -793,11 +791,11 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
                 //Check per pixel.
 
-                const int w = sprite->width;
-                const int h = sprite->height;
+                const int w = sprite.width;
+                const int h = sprite.height;
 
-                const double xoffset = sprite->xoffset;
-                const double yoffset = sprite->yoffset;
+                const double xoffset = sprite.xoffset;
+                const double yoffset = sprite.yoffset;
 
                 const bool coll_result = precise_collision_single(
                     ins_left, ins_right, ins_top, ins_bottom,
@@ -825,22 +823,22 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
             continue;
 
-        const enigma::bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::BoundingBox &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
                      xscale = inst->image_xscale, yscale = inst->image_yscale,
                      ia = inst->image_angle;
         int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+        get_border(&left, &right, &top, &bottom, box.left(), box.top(), box.right(), box.bottom(), x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom) {
 
             const int collsprite_index = inst->mask_index != -1 ? inst->mask_index : inst->sprite_index;
 
-            enigma::sprite* sprite = enigma::spritestructarray[collsprite_index];
+            enigma::Sprite& sprite = enigma::sprites.get(collsprite_index);
 
-            const int usi = ((int) inst->image_index) % sprite->subcount;
+            const int usi = ((int) inst->image_index) % sprite.SubimageCount();
 
-            unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
+            unsigned char* pixels = (unsigned char*) (sprite.GetSubimage(usi).collisionData);
 
             if (pixels == 0) { //bbox.
                 enigma::instance_change_inst(obj, perf, inst);
@@ -854,11 +852,11 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
 
                 //Check per pixel.
 
-                const int w = sprite->width;
-                const int h = sprite->height;
+                const int w = sprite.width;
+                const int h = sprite.height;
 
-                const double xoffset = sprite->xoffset;
-                const double yoffset = sprite->yoffset;
+                const double xoffset = sprite.xoffset;
+                const double yoffset = sprite.yoffset;
 
                 const bool coll_result = precise_collision_single(
                     ins_left, ins_right, ins_top, ins_bottom,
@@ -877,4 +875,3 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
         }
     }
 }
-

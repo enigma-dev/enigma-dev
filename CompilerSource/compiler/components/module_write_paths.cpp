@@ -36,7 +36,7 @@ using namespace std;
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
 
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
@@ -70,20 +70,20 @@ int lang_CPP::module_write_paths(const GameData &game, FILE *gameModule)
   {
     writei(game.paths[i].id(), gameModule); //id
 
-    writei(game.paths[i].smooth(), gameModule);
-    writei(game.paths[i].closed(), gameModule);
-    writei(game.paths[i].precision(), gameModule);
+    writei(game.paths[i]->smooth(), gameModule);
+    writei(game.paths[i]->closed(), gameModule);
+    writei(game.paths[i]->precision(), gameModule);
     // possibly snapX/Y?
 
     // Track how many path points we're copying
-    int pointCount = game.paths[i].points().size();
+    int pointCount = game.paths[i]->points().size();
     writei(pointCount,gameModule);
 
     for (int ii = 0; ii < pointCount; ii++)
     {
-      writei(game.paths[i].points(ii).x(), gameModule);
-      writei(game.paths[i].points(ii).y(), gameModule);
-      writei(game.paths[i].points(ii).speed(), gameModule);
+      writei(game.paths[i]->points(ii).x(), gameModule);
+      writei(game.paths[i]->points(ii).y(), gameModule);
+      writei(game.paths[i]->points(ii).speed(), gameModule);
     }
   }
 

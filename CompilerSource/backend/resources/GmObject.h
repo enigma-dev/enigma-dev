@@ -12,6 +12,9 @@
 #include "backend/sub/MainEvent.h"
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct GmObject
 {
   String name;
@@ -24,9 +27,13 @@ struct GmObject
   boolean persistent;
   int parentId;
   int maskId;
+  // int polygonId;  // TODO: Uncomment if/when LGM supports polygons.
 
   MainEvent *mainEvents;
   int mainEventCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

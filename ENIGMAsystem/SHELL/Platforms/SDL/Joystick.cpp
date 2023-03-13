@@ -64,7 +64,7 @@ bool joystick_button(int id, int numb) {
 double joystick_axis(int id, int numb) {
   double axis;
   double pos = 0;
-  axis = SDL_JoystickGetAxis(joystick_get_handle(id), axis - 1);
+  axis = SDL_JoystickGetAxis(joystick_get_handle(id), numb - 1);
   if (axis != -256 && axis != 0) // don't ask why this shit is necessary; it just is...
     pos = (axis / 32768);
   else if (joystick_exists(id))
@@ -81,24 +81,24 @@ bool joystick_init() {
   init = (SDL_InitSubSystem(SDL_INIT_JOYSTICK) > 0);
   if (joystick1 == NULL)
     joystick1 = SDL_JoystickOpen(0);
-  
+
   if (joystick2 == NULL)
     joystick2 = SDL_JoystickOpen(1);
-  
+
   return init;
 }
 
 void joystick_uninit() {
   if (joystick1 != NULL)
     SDL_JoystickClose(joystick1);
-  
+
   if (joystick2 != NULL)
     SDL_JoystickClose(joystick2);
-  
+
   SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
 }
-  
-void joystick_update() {  
+
+void joystick_update() {
   int joystick_count = SDL_NumJoysticks();
   if (joystick_count <= 0) {
     if (joystick1 != NULL) {
@@ -121,5 +121,5 @@ void joystick_update() {
 
   SDL_JoystickUpdate();
 }
-  
+
 } // namespace enigma

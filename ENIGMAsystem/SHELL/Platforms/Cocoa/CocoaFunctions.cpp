@@ -41,7 +41,7 @@ namespace enigma
 	extern int initialize_everything();
 }
 
-namespace enigma_user 
+namespace enigma_user
 {
   extern int keyboard_key;
   extern int keyboard_lastkey;
@@ -72,11 +72,11 @@ char cocoa_last_mousestatus[3];
 
 
 int loopy() {
-	
+
 	enigma::ENIGMA_events();
-	
+
 	cocoa_io_handle();
-	
+
 
 	return 0;
 }
@@ -88,7 +88,7 @@ namespace enigma {
     long int current_time() {
         const int64_t kOneMillion = 1000 * 1000;
         static mach_timebase_info_data_t s_timebase_info;
-        
+
         if (s_timebase_info.denom == 0) {
             (void) mach_timebase_info(&s_timebase_info);
         }
@@ -100,7 +100,7 @@ namespace enigma {
   timeAtStartup=mach_absolute_time();
   enigma::initialize_everything();
   enigma::initkeymap();
-    
+
     return 0;
 }
 
@@ -112,17 +112,17 @@ void key_press(int keycode) {
 	int actualKey = enigma::keymap[keycode];
 	enigma_user::keyboard_lastkey = actualKey;
 	enigma_user::keyboard_key = actualKey;
-	
+
 	if (cocoa_keybdstatus[actualKey]==1) {
 		cocoa_last_keybdstatus[actualKey]=1; //its already handeled the key press
-		
+
 	} else {
 		cocoa_keybdstatus[actualKey]=1;
 	cocoa_last_keybdstatus[actualKey]=0; //handle key press
-		
+
 	}
-	
-	
+
+
 }
 void key_release(int keycode) {
 	int actualKey =enigma::keymap[keycode];
@@ -133,17 +133,17 @@ void key_release(int keycode) {
 extern int enigma_user::mouse_button;
 
 void mouse_press(int x, int y) {
-    
+
     if (cocoa_mousestatus[enigma_user::mb_left-1]==1) {
 		cocoa_last_mousestatus[enigma_user::mb_left-1]=1; //its already handeled the mouse press
-		
+
 	} else {
 		cocoa_mousestatus[enigma_user::mb_left-1]=1;
         cocoa_last_mousestatus[enigma_user::mb_left-1]=0; //handle mouse press
-		
+
 	}
     enigma_user::mouse_button=enigma_user::mb_left;
-    
+
 }
 
 
@@ -164,7 +164,7 @@ void mouse_right_release(int x, int y) {
 }
 
 void cocoa_io_handle() {
-    
+
 	for(int i=0;i<256;i++){
 		if (enigma::last_keybdstatus[i]==0 && enigma::keybdstatus[i]==1) {
             //in the last frame, i was pressed event, so make last_keybdstatus now equal 1
@@ -190,7 +190,3 @@ void cocoa_io_handle() {
     memcpy(enigma::mousestatus, cocoa_mousestatus, sizeof(enigma::mousestatus));
 	memcpy(enigma::last_mousestatus, cocoa_last_mousestatus, sizeof(enigma::last_mousestatus));
 }
-
-
-
-

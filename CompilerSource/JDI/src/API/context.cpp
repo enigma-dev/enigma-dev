@@ -116,7 +116,10 @@ void context::add_search_directory(string dir)
 }
 
 static definition* find_mirror(definition *x, definition_scope* root) {
-  if (x) return ((definition_scope*)find_mirror(x->parent, root))->look_up(x->name);
+  if (x) {
+    definition_scope *n = (definition_scope*)find_mirror(x->parent, root);
+    return n? n->look_up(x->name) : n;
+  }
   return root;
 }
 
@@ -130,7 +133,10 @@ void context::reset_all()
 }
 void context::copy(const context &ct)
 {
-  ct.global->copy(global);
+  remap_set n;
+  ct.global->copy(global, n);
+  ct.global->remap(n, error_context(def_error_handler, "Internal Copy Operation", 0, 0));
+  
   for (macro_iter_c mi = ct.macros.begin(); mi != ct.macros.end(); ++mi){
     pair<macro_iter,bool> dest = macros.insert(pair<string,macro_type*>(mi->first,NULL));
     if (dest.second) {
@@ -147,7 +153,7 @@ void context::copy(const context &ct)
 }
 void context::swap(context &ct) {
   if (!parse_open and !ct.parse_open) {
-    { register definition_scope* gs = ct.global;
+    { definition_scope* gs = ct.global;
       ct.global = global; global = gs; }
     macros.swap(ct.macros);
     variadics.swap(ct.variadics);
@@ -194,17 +200,10 @@ void context::output_definitions(ostream &out) {
   out << global->toString();
 }
 
-definition_scope* context::get_global() {
-  return global;
-}
-
-context::context(): parse_open(false), lex(NULL), herr(def_error_handler), global(new definition_scope()) {
+context::context(): parse_open(false), global(new definition_scope()) {
   copy(*builtin);
 }
-
-const macro_map& context::get_macros() { return macros; }
-
-context::context(int): parse_open(false), lex(NULL), herr(def_error_handler), global(new definition_scope()) { }
+context::context(int): parse_open(false), global(new definition_scope()) { }
 
 size_t context::search_dir_count() { return search_directories.size(); }
 string context::search_dir(size_t index) { return search_directories[index]; }
@@ -215,15 +214,7 @@ void context::dump_macros() {
     macro_type::free(it->second);
 }
 
-decpair context::declare_c_struct(string n, definition* def) {
-  pair<map<string,definition*>::iterator, bool> insp = c_structs.insert(pair<string,definition*>(n,def));
-  return decpair(&insp.first->second, insp.second);
-}
-
 context::~context() {
   delete global;
-  delete lex;
-  for (map<string,definition*>::iterator it = c_structs.begin(); it != c_structs.end(); ++it)
-    delete it->second;
   dump_macros();
 }

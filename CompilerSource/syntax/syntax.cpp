@@ -48,7 +48,6 @@ extern std::map <string, char> unimplemented_function_list;
 #include <System/lex_cpp.h>
 #include <Storage/definition.h>
 #include "languages/language_adapter.h"
-#include <compiler/jdi_utility.h>
 
 using namespace std;
 
@@ -82,7 +81,7 @@ namespace syncheck
     TT_DIGIT,           // 0 1 2... (...)
     TT_STRING,          // "", ''
     TT_SCOPEACCESS,     // ::
-    TT_FUNCTION,   // game_end
+    TT_FUNCTION,        // game_end
     TT_TYPE_NAME,       // int, double, whatever
     TT_NAMESPACE,       // std, enigma, sf
     TT_LOCGLOBAL,       // global/local
@@ -311,7 +310,7 @@ namespace syncheck
 
         if (shared_object_locals.find(name) == shared_object_locals.end())
         {
-          jdi::definition *d = main_context->get_global()->look_up(name);
+          jdi::definition *d = current_language->look_up(name);
           if (d)
           {
             // Handle typenames
@@ -334,7 +333,7 @@ namespace syncheck
               continue;
             }
 
-            if (definition_is_function(d)) {
+            if (current_language->definition_is_function(d)) {
               lex.push_back(token(TT_FUNCTION, d, name, superPos, name.length(), false, true, false, mymacroind));
               continue;
             }
@@ -556,6 +555,7 @@ namespace syncheck
               while (++pos < code.length() and (code[pos] != '/' or code[pos-1] != '*'));
               pos++; continue;
             }
+          /* Falls through. */
         case '%':
             if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike) {
               syerr = "Primary expression expected before operator";
@@ -572,6 +572,7 @@ namespace syncheck
               lex.push_back(token(TT_OPERATOR, "!=", superPos, 2, false, false, true, mymacroind)), pos += 2;
               continue;
             }
+          /* Falls through. */
         case '~':
             if (!lex.size() or lex[lexlast].separator or lex[lexlast].operatorlike)
               lex.push_back(token(TT_UNARYPRE, code.substr(pos,1), superPos, 1, false, false, true, mymacroind)), ++pos; // ~ !
@@ -637,7 +638,7 @@ namespace syncheck
           {
             bool contented = false;
             unsigned params = 0, exceeded_at = 0;
-            unsigned minarg, maxarg; definition_parameter_bounds(lex[i].ext, minarg, maxarg);
+            unsigned minarg, maxarg; current_language->definition_parameter_bounds(lex[i].ext, minarg, maxarg);
             const unsigned lm = lex[i+1].match;
             for (unsigned ii = i+2; ii < lm; ii++)
             {

@@ -17,7 +17,7 @@
 
 
 #include "OS_Switchboard.h"
-#include "makedir.h"
+#include "settings.h"
 #include "gcc_backend.h"
 #include "settings.h"
 
@@ -35,13 +35,13 @@
 #include <fstream>
 #include <cstdlib>
 
-#include <sys/time.h>
-
 #ifdef _WIN32
- #include <windows.h>
- #define dllexport extern "C" __declspec(dllexport)
+  #define byte __windows_byte_workaround
+  #include <windows.h>
+  #undef byte
+ #define DLLEXPORT extern "C" __declspec(dllexport)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
 #endif
 
@@ -56,7 +56,7 @@ bool init_load_successful = false;
 
 static char errbuf[1024];
 static string lastbearings;
-static string lastcodegen_directory;
+static std::filesystem::path lastcodegen_directory;
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
@@ -72,10 +72,10 @@ static bool toolchain_parseout(string line, string &exename, string &command, st
 
     if (line[pos] == '"' and ++spos)
       while (line[++pos] != '"' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else if (line[pos] == '\'' and ++spos)
       while (line[++pos] != '\'' and pos<line.length())
-        if (line[pos] == '\\') pos++; else;
+        if (line[pos] == '\\') pos++; else {}
     else while (!is_useless(line[++pos]) and pos<line.length());
 
   exename = line.substr(spos,pos-spos);
@@ -101,12 +101,12 @@ static bool toolchain_parseout(string line, string &exename, string &command, st
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,("\"" + codegen_directory + "enigma_blank.txt\"").c_str());
+      command.replace(srp,6,("\"" + (codegen_directory/"enigma_blank.txt").u8string() + "\"").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
     if (mblank)
-      fclose(fopen((codegen_directory + "enigma_blank.txt").c_str(),"wb"));
+      fclose(fopen((codegen_directory/"enigma_blank.txt").u8string().c_str(),"wb"));
 
   /* Return whether or not to redirect */
   return redir;
@@ -135,42 +135,33 @@ const char* establish_bearings(const char *compiler)
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
   static bool cmake = (!compilerInfo.make_vars["CMAKE"].empty());
   
-  std::string dirs = "CODEGEN=" + codegen_directory + " ";
-  dirs += "WORKDIR=" + eobjs_directory + " ";
-  
-  if (cmake) {
-    const std::string compilerName = string_replace_all(compilerInfo.name, " ", "_");
-    const std::string relCompilePath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + compilerName;
-    const std::string fullCompilePath = eobjs_directory + "/" + relCompilePath + "/Debug";
-    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" -B \"" + fullCompilePath + 
-      "/FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\" -DCODEGEN=\"" + codegen_directory + "\" -DWORKDIR=\"" + eobjs_directory + "\"");
-    e_execs(cmd);
-  } else e_execs("make", dirs, "required-directories");
+  std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
+  dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
+  e_execs("make", dirs, "required-directories");
 
-  if (compilerInfo.defines_cmd != "JDI CANNOT PARSE STL") {
-    /* Get a list of all macros defined by our compiler.
-    ** These will help us through parsing available libraries.
-    ***********************************************************/
-    cmd = compilerInfo.defines_cmd;
-    redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
-    cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-    got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-    if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
-    else cout << "Call succeeded" << endl;
+  /* Get a list of all macros defined by our compiler.
+  ** These will help us through parsing available libraries.
+  ***********************************************************/
+  cmd = compilerInfo.defines_cmd;
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""));
+  cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + (codegen_directory/"enigma_defines.txt").u8string() + "\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
+  else cout << "Call succeeded" << endl;
 
-    /* Get a list of all available search directories.
-    ** These are where we'll look for headers to parse.
-    ****************************************************/
-    cmd = compilerInfo.searchdirs_cmd;
-    redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
-    cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-    got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
-    if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
-    else cout << "Call succeeded" << endl;
+  /* Get a list of all available search directories.
+  ** These are where we'll look for headers to parse.
+  ****************************************************/
+  cmd = compilerInfo.searchdirs_cmd;
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + (codegen_directory/"enigma_searchdirs.txt").u8string() + "\""));
+  cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + (codegen_directory/"enigma_searchdirs.txt").u8string() + "\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
+  else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc((codegen_directory + "enigma_searchdirs.txt").c_str());
+    string idirs = fc((codegen_directory/"enigma_searchdirs.txt").u8string().c_str());
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -185,9 +176,10 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
-    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
-    jdi::builtin->add_search_directory(codegen_directory.c_str());
+  
+    jdi::builtin->add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    jdi::builtin->add_search_directory((enigma_root/"shared").u8string().c_str());
+    jdi::builtin->add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -210,11 +202,12 @@ const char* establish_bearings(const char *compiler)
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader((codegen_directory + "enigma_defines.txt").c_str());
+    llreader macro_reader((codegen_directory/"enigma_defines.txt").u8string().c_str());
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory + "enigma_defines.txt").c_str());
+    int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory/"enigma_defines.txt").u8string().c_str());
+    jdi::builtin->add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
   } else { // Skip all that stl parsing crap and just point to fake stl
@@ -239,7 +232,7 @@ const char* establish_bearings(const char *compiler)
   return 0;
 }
 
-/*dllexport const char* gccDefinePath(const char* compiler)
+/*DLLEXPORT const char* gccDefinePath(const char* compiler)
 {
   return establish_bearings(compiler);
 }*/

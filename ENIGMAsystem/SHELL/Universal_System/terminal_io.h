@@ -33,7 +33,6 @@
 namespace enigma_user {
 void cons_show_message(std::string message);
 void cons_print_overwritable(std::string message);
-void show_debug_message(std::string message);
 char cons_get_byte();
 std::string cons_get_char();
 std::string cons_get_string();

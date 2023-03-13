@@ -43,6 +43,17 @@
   @param herr   The error handler to which errors can be reported.
 */
 extern void* (*handle_function_implementation)(jdi::lexer *lex, jdip::token_t &token, jdi::definition_scope *scope, jdi::error_handler *herr);
+/**
+  Function pointer to handle parsing constructor initializer lists.
+  This function will be invoked with token.type = TT_COLON.
+  This function should finish with token.type = TT_LEFTBRACE.
+  
+  @param lex    The lexer to use to poll for further tokens.
+  @param token  The initial token which invoked this function call.
+  @param scope  The scope from which definitions can be read.
+  @param herr   The error handler to which errors can be reported.
+*/
+extern void* (*handle_constructor_initializers)(jdi::lexer *lex, jdip::token_t &token, jdi::definition_scope *scope, jdi::error_handler *herr);
 
 /**
   Function pointer to handle freeing function code content as allocated by a corresponding
@@ -51,5 +62,13 @@ extern void* (*handle_function_implementation)(jdi::lexer *lex, jdip::token_t &t
   @param impl  The implementation data, as returned by handle_function_implementation.
 */
 extern void (*delete_function_implementation)(void *impl);
+
+/**
+  Function pointer to handle freeing initializer list content as allocated by a corresponding
+  call to handle_constructor_initializers. Invoked on destruct of the owning function definition.
+  
+  @param impl  The implementation data, as returned by handle_constructor_initializers.
+*/
+extern void (*delete_constructor_initializers)(void *impl);
 
 #endif

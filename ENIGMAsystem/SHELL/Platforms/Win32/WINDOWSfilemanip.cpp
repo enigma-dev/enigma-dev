@@ -28,92 +28,27 @@
 
 #include <string>
 #include <sstream>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include "Universal_System/estring.h"
 #include <time.h>
 #include <sys/stat.h>
 
-#include "../General/PFini.h"
-
 using namespace std;
-
-static std::string iniFilename = "";
 
 namespace enigma_user
 {
 
-void ini_open(std::string fname)
-{
-	iniFilename = fname;
-}
-
-void ini_close()
-{
-	iniFilename = "";
-}
-
-std::string ini_read_string(std::string section, std::string key, std::string defaultValue)
-{
-	char buffer[1024];
-	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
-
-	return buffer;
-}
-
-float ini_read_real(std::string section, std::string key, float defaultValue)
-{
-	char res[255];
-	char def[255];
-	sprintf(def, "%f", defaultValue);
-	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str());
-	return atof(res);
-	//return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
-}
-
-void ini_write_string(std::string section, std::string key, std::string value)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
-}
-
-void ini_write_real(std::string section, std::string key, float value)
-{
-	std::stringstream ss;
-	ss << value;
-
-	WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
-}
-
-bool ini_key_exists(std::string section, std::string key)
-{
-	char buffer[1024];
-	return GetPrivateProfileString(section.c_str(), key.c_str(), "", buffer, 1024, iniFilename.c_str()) != 0;
-}
-
-bool ini_section_exists(std::string section)
-{
-	char buffer[1024];
-	return GetPrivateProfileSection(section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
-}
-
-void ini_key_delete(std::string section, std::string key)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), NULL, iniFilename.c_str());
-}
-
-void ini_section_delete(std::string section)
-{
-  WritePrivateProfileString(section.c_str(), NULL, NULL, iniFilename.c_str());
-}
-
 /* OS Specific; should be moved */
 
 int file_exists(std::string fname) {
-    DWORD attributes = GetFileAttributes(fname.c_str());
-    if(attributes == INVALID_FILE_ATTRIBUTES) {
-        return 0;
-    } else {
-        return 1;
-    }
+  DWORD file_attr;
+  tstring tstr_fname = widen(fname);
+  file_attr = GetFileAttributesW(tstr_fname.c_str());
+  return (file_attr != INVALID_FILE_ATTRIBUTES &&
+    !(file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 int file_delete(std::string fname) {
@@ -162,10 +97,11 @@ int file_copy(std::string fname, std::string newname) {
 }
 
 int directory_exists(std::string dname) {
-  DWORD dwAttrib = GetFileAttributes(dname.c_str());
-
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
-         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+  DWORD file_attr;
+  tstring tstr_dname = widen(dname);
+  file_attr = GetFileAttributesW(tstr_dname.c_str());
+  return (file_attr != INVALID_FILE_ATTRIBUTES &&
+    (file_attr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // NOTICE: May behave differently than GM. May fail if there are
@@ -205,7 +141,9 @@ enum {
   fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
   fa_volumeid  = 0x00000008,
   fa_directory = FILE_ATTRIBUTE_DIRECTORY,
-  fa_archive   = FILE_ATTRIBUTE_ARCHIVE
+  fa_archive   = FILE_ATTRIBUTE_ARCHIVE,
+  fa_files_all = fa_readonly | fa_hidden | fa_sysfile | fa_volumeid | fa_archive,
+  fa_all       = fa_files_all | fa_directory
 };
 
 }
@@ -216,6 +154,8 @@ static WIN32_FIND_DATA found;
 
 namespace enigma_user
 {
+
+string file_find_next();
 
 string file_find_first(string name,int attributes)
 {
@@ -233,7 +173,10 @@ string file_find_first(string name,int attributes)
   }
 
   current_find=d;
-  return found.cFileName;
+  string res = found.cFileName;
+  if (res == "." || res == "..")
+    return file_find_next();
+  return res;
 }
 
 string file_find_next()
@@ -245,7 +188,11 @@ string file_find_next()
     if (FindNextFile(current_find,&found)==0)
     return "";
   }
-  return found.cFileName;
+
+  string res = found.cFileName;
+  if (res == "." || res == "..")
+    return file_find_next();
+  return res;
 }
 
 int file_find_close() {

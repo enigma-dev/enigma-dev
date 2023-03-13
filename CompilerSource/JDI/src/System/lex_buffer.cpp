@@ -64,7 +64,7 @@ namespace jdip {
   }
   
   lex_buffer::lex_buffer(lexer* fallback): cur_token(base.data), base(), cur_chunk(&base), at_index(0), total(0), modulo(chunk_size), fallback_lexer(fallback) {}
-  lex_buffer::~lex_buffer() { for (chunk *n = base.next; n;) { register chunk *const delme = n; n = n->next; delete delme; } }
+  lex_buffer::~lex_buffer() { for (chunk *n = base.next; n;) { chunk *const delme = n; n = n->next; delete delme; } }
   
   lex_buffer::chunk::chunk(): next(NULL) {}
   lex_buffer::chunk::chunk(chunk* prev): next(NULL) { prev->next = this; }

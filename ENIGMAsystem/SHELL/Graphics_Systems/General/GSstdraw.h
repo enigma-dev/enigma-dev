@@ -23,9 +23,33 @@
 
 #include <list>
 
+namespace enigma {
+
+extern bool lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
+extern unsigned short lineStipplePattern;
+extern unsigned char alphaTestRef;
+extern float drawPointSize, drawLineWidth;
+extern int drawFillMode, lineStippleScale;
+
+void draw_set_state_dirty(bool dirty=true);
+bool draw_get_state_dirty();
+
+void graphics_state_flush();
+
+} // namespace enigma
+
 namespace enigma_user
 {
+  enum {
+    rs_point, // Render vertices as points
+    rs_line,  // Render in wireframe mode
+    rs_solid  // Normal render mode
+  };
 
+  void draw_state_flush();
+  void draw_set_fill_mode(int fill);
+  void draw_set_line_width(float value);
+  void draw_set_point_size(float value);
   int draw_get_msaa_maxlevel();
   bool draw_get_msaa_supported();
   void draw_set_msaa_enabled(bool enable);
@@ -34,7 +58,8 @@ namespace enigma_user
   void draw_set_alpha_test(bool enable);
   void draw_set_alpha_test_ref_value(unsigned val);
   void draw_enable_alphablend(bool enable);
-  void draw_set_line_pattern(int pattern, int scale);
+  void draw_set_line_stipple(bool enable);
+  void draw_set_line_pattern(int scale, unsigned short pattern);
   void draw_point(gs_scalar x, gs_scalar y);
   void draw_point_color(gs_scalar x, gs_scalar y, int color);
   void draw_line(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
@@ -88,32 +113,8 @@ namespace enigma_user
   int draw_getpixel(int,int);
   int draw_getpixel_ext(int, int);
 
-  void draw_polygon_begin();
-  void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
-  void draw_polygon_end(bool outline, bool allowHoles=true);
-
   #define draw_get_pixel draw_getpixel
   #define draw_get_pixel_ext draw_getpixel_ext
-}
-
-namespace enigma
-{
-  ///Simple container class for a Vertex in a Polygon.
-  ///A color of -1 means "the color of the previous vertex", and defaults to the current draw_color.
-  struct PolyVertex {
-    PolyVertex(gs_scalar x, gs_scalar y, int color) : x(x),y(y),color(color) {}
-    gs_scalar x;
-    gs_scalar y;
-    int color;
-  };
-
-  extern std::list<PolyVertex> currComplexPoly;
-
-
-  ///The draw_polygon functions use this to fill in convex/self-intersecting polygons.
-  ///The return value indicates success; if false, a "backup" convex-only polygon drawing routine will be used.
-  ///Its implementation is platform-specific.
-  bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
 }
 
 #endif //ENIGMA_GSSTDRAW_H

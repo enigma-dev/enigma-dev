@@ -17,30 +17,32 @@
 
 #ifndef BGUI_STYLES_H
 #define BGUI_STYLES_H
-#include <array>
-using std::array;
 
 #include "common.h"
 
-namespace gui
-{
-	class Style{
-		public:
-			unsigned int id;
+#include <array>
 
-			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
+namespace enigma {
+namespace gui {
+class Style {
+ public:
+  unsigned int id;
 
-      array<int,6> sprites;
-      array<render_style,6> sprite_styles;
+  std::array<font_style, 6>
+      font_styles;  //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
-			rect box;
-			rect_offset border;
-			rect_offset padding;
+  std::array<int, 6> sprites;
+  std::array<render_style, 6> sprite_styles;
 
-			offset image_offset;
+  rect box;
+  rect_offset border;
+  rect_offset padding;
 
-			Style();
-	};
-}
+  offset image_offset;
+
+  Style();
+};
+}  //namespace gui
+}  //namespace enigma
 
 #endif

@@ -27,8 +27,6 @@ void gmw_init();
 namespace enigma_user {
 void sleep(int ms);
 
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
-
 }
 
 namespace enigma {

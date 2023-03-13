@@ -2,13 +2,13 @@
 #include "Event.h"
 #include "Joystick.h"
 #include "Gamepad.h"
+#include "Icon.h"
 
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-
+#include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
-
 
 #include <array>
 #include <string>
@@ -32,7 +32,25 @@ namespace enigma {
 void (*WindowResizedCallback)();
 
 SDL_Window* windowHandle = nullptr;
+unsigned sdl_window_flags = SDL_WINDOW_HIDDEN;
 
+// this is to be implemented by an SDL bridge
+// it is for setting any attributes on the
+// window before it is created
+// (e.g, SDL's OpenGL context attributes)
+void init_sdl_window_bridge_attributes();
+
+bool initGameWindow() {
+  SDL_Init(SDL_INIT_VIDEO);
+  if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
+  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
+  init_sdl_window_bridge_attributes();
+  windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
+  bool notnull = (windowHandle != nullptr);
+  if (notnull) window_init();
+  return notnull;
+}
 namespace keyboard {
   using namespace enigma_user;
   std::unordered_map<int,SDL_Keycode> keymap = {
@@ -59,7 +77,7 @@ namespace keyboard {
 }
 
 static SDL_Event_Handler eventHandler;
-static std::array<SDL_Cursor*, -enigma_user::cr_size_all> cursors;
+static std::array<SDL_Cursor*, -enigma_user::cr_size_all+1> cursors;
 
 void handleInput() {
   input_push();
@@ -116,10 +134,28 @@ int handleEvents() { return eventHandler.processEvents(); }
 
 namespace enigma_user {
 
-void io_handle() {
-  enigma::input_push();
-  if (enigma::handleEvents() != 0) exit(0);
-  enigma::update_mouse_variables();
+static int currentIconIndex = -1;
+static unsigned currentIconFrame;
+
+int window_get_icon_index() {
+  return currentIconIndex;
+}
+
+unsigned window_get_icon_subimg() {
+  return currentIconFrame;
+}
+
+void window_set_icon(int ind, unsigned subimg) {
+  // the line below prevents glitchy minimizing when 
+  // icons are changed rapidly (i.e. for animation).
+  if (window_get_minimized()) return;
+
+  // needs to be visible first to prevent segfault
+  if (!window_get_visible()) window_set_visible(true);
+  enigma::SetIconFromSprite(windowHandle, ind, subimg);
+
+  currentIconIndex = ind;
+  currentIconFrame = subimg;
 }
 
 int window_get_visible() {
@@ -232,18 +268,18 @@ void window_set_rectangle(int x, int y, int w, int h) {
 }
 
 int window_get_width() {
-  int w;
-  SDL_GetWindowSize(windowHandle, &w, nullptr);
-  return w;
+  int viewportWidth, viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportWidth;
+
 }
 
 int window_get_height() {
-  int h;
-  SDL_GetWindowSize(windowHandle, nullptr, &h);
-  return h;
-}
+  int viewportWidth, viewportHeight;
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  return viewportHeight;
 
-void window_set_size(unsigned w, unsigned h) { SDL_SetWindowSize(windowHandle, w, h); }
+}
 
 bool window_get_fullscreen() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
@@ -252,14 +288,14 @@ bool window_get_fullscreen() {
 
 void window_set_fullscreen(bool fullscreen) {
   if (fullscreen) {
-    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
+    int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
 
-    if (r != 0) printf("Could not set window to fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
-    if (r != 0) printf("Could not unset window fullscreen! SDL Error: %s\n", SDL_GetError());
+    if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
 }
 
@@ -275,27 +311,43 @@ int window_set_cursor(int cursorID) {
   }
 
 #ifdef DEBUG_MODE
-  printf("Cursor lookup failure\n");
+  DEBUG_MESSAGE("Cursor lookup failure", MESSAGE_TYPE::M_ERROR);
 #endif
 
   return 0;
 }
 
+int display_get_x() {
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.x : 0;
+}
+
+int display_get_y() {;
+  SDL_Rect r;
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  return (SDL_GetDisplayBounds(d, &r) == 0) ? r.y : 0;
+}
+
 int display_get_width() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.w;
 }
 
 int display_get_height() {
   SDL_DisplayMode DM;
-  SDL_GetCurrentDisplayMode(0, &DM);
+  int d = SDL_GetWindowDisplayIndex(windowHandle);
+  SDL_GetCurrentDisplayMode(d, &DM);
   return DM.h;
 }
 
 bool keyboard_check_direct(int key) {
   const Uint8* state = SDL_GetKeyboardState(nullptr);
-  return state[enigma::keyboard::inverse_keymap[key]];
+  const SDL_Keycode keycode = enigma::keyboard::inverse_keymap[key];
+  const SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+  return state[scancode];
 }
 
 void keyboard_key_press(int key) {

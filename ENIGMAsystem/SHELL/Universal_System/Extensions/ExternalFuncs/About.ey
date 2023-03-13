@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: External Functions
+Identifier: ExternalFuncs
+Author: Josh Ventura
+Description: Enables the use of GameMaker's external functions for calling stuff from various DLL's. Requires the libffi dependency.
+Default: false
+Icon: ExternalFuncs.png
+
+Depends:
+  Build-Platforms: Windows, MacOSX, Linux, FreeBSD
+Dependencies: None

@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct View
 {
   boolean visible;
@@ -28,5 +31,8 @@ struct View
   int speedV;
 	int objectId;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

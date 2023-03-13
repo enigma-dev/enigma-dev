@@ -18,7 +18,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../makedir.h"
+#include "settings.h"
 #include <ctime>
 #include <cstdio>
 #include "languages/lang_CPP.h"
@@ -51,16 +51,16 @@ void lang_CPP::load_extension_locals() {
   }
 }
 
-const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
-
 #ifdef _WIN32
+ #define byte __windows_byte_workaround
  #include <windows.h>
- #define dllexport extern "C" __declspec(dllexport)
+ #undef byte
+ #define DLLEXPORT extern "C" __declspec(dllexport)
    #define DECLARE_TIME_TYPE clock_t
    #define CURRENT_TIME(t) t = clock()
    #define PRINT_TIME(ts, te) (((te - ts) * 1000)/CLOCKS_PER_SEC)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
  #include <sys/time.h>
    #define DECLARE_TIME_TYPE timeval
@@ -74,7 +74,6 @@ const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
 
 #include <System/builtins.h>
 
-extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 void parser_init();
 
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
@@ -89,12 +88,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   main_context = new jdi::context();
   
   cout << "Dumping whiteSpace definitions..." << endl;
-  FILE *of = wscode ? fopen((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").c_str(),"wb") : NULL;
+  FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << endl;
   
-  llreader f("ENIGMAsystem/SHELL/SHELLmain.cpp");
+  llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
@@ -120,7 +119,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   } else cerr << "ERROR! No var type found!" << endl;
   if ((d = main_context->get_global()->look_up("enigma"))) {
     if (d->flags & jdi::DEF_NAMESPACE) {
-      if ((d = ((jdi::definition_scope*)d)->look_up("varargs"))) {
+      namespace_enigma = (jdi::definition_scope*) d;
+      if ((d = namespace_enigma->look_up("varargs"))) {
         enigma_type__varargs = d;
         if (!(d->flags & jdi::DEF_TYPENAME))
           cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
@@ -129,10 +129,15 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
       } else cerr << "ERROR! No varargs type found!" << endl;
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
+  namespace_enigma_user = main_context->get_global();
+  if ((d = main_context->get_global()->look_up("enigma_user"))) {
+    if (d->flags & jdi::DEF_NAMESPACE) {
+      namespace_enigma_user = (jdi::definition_scope*) d;
+    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
+  } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
   
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
-    cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
     cout << "Continuing anyway." << endl;
@@ -206,7 +211,12 @@ int lang_CPP::load_shared_locals() {
   return 0;
 }
 
-lang_CPP::~lang_CPP() {
-  
+jdi::definition* lang_CPP::look_up(const string &name) {
+  auto builtin = jdip::builtin_declarators.find(name);
+  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
+  return namespace_enigma_user->find_local(name);
 }
+
+// TODO: This could use better plumbing.
+lang_CPP::lang_CPP(): evdata_(ParseEventFile((enigma_root/"events.ey").u8string())) {}
 

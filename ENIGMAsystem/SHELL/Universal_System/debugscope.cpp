@@ -24,22 +24,25 @@
 namespace enigma {
 
   static std::vector<std::string> scope_stack;
-  
-  debug_scope::debug_scope(std::string x) 
-  { 
+
+  debug_scope::debug_scope(std::string x)
+  {
     scope_stack.push_back(x);
   }
-  
-  debug_scope::~debug_scope() { 
+
+  debug_scope::~debug_scope() {
     scope_stack.pop_back();
-  }  
-  
+  }
+
   std::string debug_scope::GetErrors()
   {
-    std::string str;
+    if (scope_stack.empty())
+      return "Debug error stack is empty. Error may stem from engine internals.";
+
+    std::string str = "Stack trace (most recent frame first):\n";
     for (std::vector<std::string>::reverse_iterator it = scope_stack.rbegin(); it != scope_stack.rend(); it++)
-      str += "\n" + *it;
-      
+      str += "  " + *it + "\n";
+
     return str;
   }
 

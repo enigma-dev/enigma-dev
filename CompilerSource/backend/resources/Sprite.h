@@ -13,6 +13,9 @@
 #include "backend/sub/SubImage.h"
 #include "backend/util/Polygon.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Sprite
 {
   String name;
@@ -39,5 +42,8 @@ struct Sprite
   Polygon_LOLWINDOWS *maskShapes;
   int maskShapeCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

@@ -36,6 +36,7 @@ enum {
   os_winphone = 7,
   os_tizen = 8,
   os_win8native = 9,
+  os_bsd = 10,
 };
 
 enum {

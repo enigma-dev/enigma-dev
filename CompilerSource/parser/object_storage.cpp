@@ -33,7 +33,7 @@
 
 using namespace std;
 
-#include "general/darray.h"
+#include "darray.h"
 
 #include <Storage/definition.h>
 #include "object_storage.h"
@@ -64,22 +64,19 @@ bool decquad::operator!= (const decquad& x) const {
   return type != x.type or prefix != x.prefix or suffix != x.suffix or value != x.value;
 }
 
-parsed_event::parsed_event():                               id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(NULL) {}
-parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
-parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_object::parsed_object(): parent(NULL) {}
 parsed_object::parsed_object(string n, int i, string s, string m, string p,
                              bool vis, bool sol, double d,bool pers):
     name(n), id(i), sprite_name(s), mask_name(m), parent_name(p), visible(vis),
     solid(sol), persistent(pers), depth(d), parent(NULL) {}
 
-void parsed_object::copy_from(parsed_object& source, string sourcename, string destname)
-{
-  parsed_object& dest = *this;
+void ParsedScope::copy_from(const ParsedScope &source,
+                            const string &sourcename, const string &destname) {
+  ParsedScope &dest = *this;
   //Copy
-  for (parsed_object::dotit vit = source.dots.begin(); vit != source.dots.end(); vit++)
+  for (auto vit = source.dots.begin(); vit != source.dots.end(); vit++)
     dest.dots[vit->first] = 0;
-  for (parsed_object::locit vit = source.locals.begin(); vit != source.locals.end(); vit++)
+  for (auto vit = source.locals.begin(); vit != source.locals.end(); vit++)
   {
     dectrip &t = dest.locals[vit->first];
     if (!t.defined())
@@ -87,7 +84,7 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
-  for (parsed_object::ambit vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
+  for (auto vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
   {
     dectrip &t = dest.ambiguous[vit->first];
     if (!t.defined())
@@ -95,7 +92,7 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
-  for (parsed_object::globit vit = source.globals.begin(); vit != source.globals.end(); vit++)
+  for (auto vit = source.globals.begin(); vit != source.globals.end(); vit++)
   {
     dectrip &t = dest.globals[vit->first];
     if (!t.defined())
@@ -103,7 +100,7 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
-  for (parsed_object::constit vit = source.consts.begin(); vit != source.consts.end(); vit++)
+  for (auto vit = source.consts.begin(); vit != source.consts.end(); vit++)
   {
     decquad &t = dest.consts[vit->first];
     if (!t.defined())
@@ -112,19 +109,19 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
 }
-//subscr->second
-void parsed_object::copy_calls_from(parsed_object& source)
+
+void ParsedScope::copy_calls_from(const ParsedScope &source)
 {
-  for (parsed_object::funcit sit = source.funcs.begin(); sit != source.funcs.end(); sit++)
+  for (auto sit = source.funcs.begin(); sit != source.funcs.end(); sit++)
   {
     int &x = funcs[sit->first]; //copy the function into curscript's called list.
     x = x > sit->second ? x : sit->second; //use larger max param count
   }
 }
 
-void parsed_object::copy_tlines_from(parsed_object& source)
+void ParsedScope::copy_tlines_from(const ParsedScope &source)
 {
-  for (parsed_object::tlineit sit = source.tlines.begin(); sit != source.tlines.end(); sit++)
+  for (auto sit = source.tlines.begin(); sit != source.tlines.end(); sit++)
   {
     tlines[sit->first] = 1;
   }

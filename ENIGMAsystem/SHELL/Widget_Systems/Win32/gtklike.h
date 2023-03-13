@@ -70,14 +70,22 @@ struct gtkl_container: gtkl_placer
   gtkl_container(int id,int w, int h, int t):  gtkl_placer(id,w,h,t) {}
   virtual void clear() {}
   virtual void remove(char cid) {}
-  virtual void resize(int xr, int yr, int wr, int hr) { printf("Error: Mindless resize of widget %d\n",id); }
+  virtual void resize(int xr, int yr, int wr, int hr) { DEBUG_MESSAGE("Mindless resize of widget " + std::to_string(id), MESSAGE_TYPE::M_ERROR); }
 };
 
 
 #include <vector>
 #include <map>
+<<<<<<< HEAD
 #include <algorithm> //std::min
 
+=======
+#include <vector>
+#include <algorithm> //std::min
+
+using std::min;
+
+>>>>>>> master
 // Above we have the basic class layout;
 // Now we provide some useful algorithms
 struct gtkl_table: gtkl_container
@@ -115,8 +123,15 @@ struct gtkl_table: gtkl_container
   {
     x=xnew, y=ynew, w=dwid, h=dhgt;
     int cw = dwid / gsx, ch = dhgt / gsy;
+<<<<<<< HEAD
     if (ch<gsy) ch=gsy; if (cw<gsx) cw=gsx;
 
+=======
+
+    if (ch<gsy) ch=gsy; 
+    if (cw<gsx) cw=gsx;
+    
+>>>>>>> master
     std::vector<std::vector<int>> givex(gsx), givey(gsx);
     // Make all occupied cells yield max give
     for (int i = 0; i < gsx; i++) {

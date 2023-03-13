@@ -25,8 +25,11 @@
 #ifndef ENIGMA_GSMODEL_IMPL_H
 #define ENIGMA_GSMODEL_IMPL_H
 
+#include "GSmodel.h"
 #include "GScolors.h"
 #include "Universal_System/scalar.h"
+#include "Universal_System/Resources/AssetArray.h"
+using enigma::AssetArray;
 
 #include <vector>
 using std::vector;
@@ -49,7 +52,9 @@ struct Primitive {
     type(type), format(format), format_started(format_exists), format_defined(format_exists), vertex_offset(offset), vertex_count(0) {}
 };
 
-struct Model {
+class Model {
+  bool destroyed;
+ public:
   int type; // one of the enigma_user model type constants (e.g, model_static is the default)
   int vertex_buffer; // index of the user vertex buffer this model uses to buffer its vertex data
   Primitive current_primitive; // the current primitive being specified by the user
@@ -68,14 +73,23 @@ struct Model {
   // NOTE: vertex_colored waits until the next vertex or primitive end to add the color
   //       because GM has always specified color as the last argument on its vertex formats
 
-  Model(int type, bool use_draw_color):
-    type(type), vertex_buffer(-1), current_primitive(), vertex_started(false), use_draw_color(use_draw_color),
-    vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
+  Model(int type = enigma_user::model_static, bool use_draw_color = false):
+    destroyed(false), type(type), vertex_buffer(-1), current_primitive(), vertex_started(false),
+    use_draw_color(use_draw_color), vertex_colored(true), vertex_color(enigma_user::c_white), vertex_alpha(1.0) {}
+
+  void destroy() {
+    destroyed = true;
+    // this will give us 0 size and 0 capacity
+    vector<Primitive>().swap(primitives);
+  }
+
+  bool isDestroyed() const { return destroyed; }
+
+  static const char* getAssetTypeName() { return "model"; }
 };
 
+extern AssetArray<Model> models;
 
-extern vector<Model*> models;
+} // namespace enigma
 
-}
-
-#endif
+#endif // ENIGMA_GSMODEL_IMPL_H

@@ -91,14 +91,14 @@ int lang_CPP::module_write_sprites(const GameData &game, FILE *gameModule)
 
     writei(swidth, gameModule); //width
     writei(sheight,gameModule); //height
-    writei(game.sprites[i].origin_x(),  gameModule); // xorig
-    writei(game.sprites[i].origin_y(),  gameModule); // yorig
-    writei(game.sprites[i].bbox_top(),    gameModule); // BBox Top
-    writei(game.sprites[i].bbox_bottom(), gameModule); // BBox Bottom
-    writei(game.sprites[i].bbox_left(),   gameModule); // BBox Left
-    writei(game.sprites[i].bbox_right(),  gameModule); // BBox Right
-    writei(game.sprites[i].bbox_mode(),   gameModule); // BBox Mode
-    writei(game.sprites[i].shape(),    gameModule); // Mask shape
+    writei(game.sprites[i]->origin_x(),  gameModule); // xorig
+    writei(game.sprites[i]->origin_y(),  gameModule); // yorig
+    writei(game.sprites[i]->bbox_top(),    gameModule); // BBox Top
+    writei(game.sprites[i]->bbox_bottom(), gameModule); // BBox Bottom
+    writei(game.sprites[i]->bbox_left(),   gameModule); // BBox Left
+    writei(game.sprites[i]->bbox_right(),  gameModule); // BBox Right
+    writei(game.sprites[i]->bbox_mode(),   gameModule); // BBox Mode
+    writei(game.sprites[i]->shape(),    gameModule); // Mask shape
 
     writei(subCount,gameModule); //subimages
 

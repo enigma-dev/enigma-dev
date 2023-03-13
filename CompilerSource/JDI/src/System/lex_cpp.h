@@ -5,7 +5,8 @@
  * This file defines two subclasses of \c jdi::lexer. The first is meant to lex
  * C++ definitions, and so returns a wide range of token types. It will also do
  * any needed preprocessing, handing the second lexer to \c jdi::AST to handle
- * #if expression evaluation. The second lexer is much simpler, and treats 
+ * `#if` expression evaluation. The second lexer is much simpler, and treats all
+ * identifiers the same.
  * 
  * @section License
  * 
@@ -47,6 +48,7 @@ namespace jdip {
   **/
   struct openfile {
     const char* filename; ///< The name of the open file.
+    string searchdir; ///< The search directory from which this file was included, or the empty string.
     size_t line; ///< The index of the current line.
     size_t lpos; ///< The position of the most recent line break.
     llreader file; ///< The llreader of this file.
@@ -54,10 +56,11 @@ namespace jdip {
     openfile(const char* fname); ///< Construct a new openfile at position 0 with the given filename.
     /// Construct a new openfile with the works.
     /// @param fname     The name of the file in use
+    /// @param sdir      The search directory from which this file was included, or the empty string
     /// @param line_num  The number of the line, to store
     /// @param line_pos  The position of the last newline, to store
     /// @param consume   The llreader to consume for storage
-    openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume);
+    openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume);
     void swap(openfile&); ///< Swap with another openfile.
   };
   
@@ -71,6 +74,7 @@ namespace jdip {
     macro_map &macros; ///< Reference to the \c jdi::macro_map which will be used to store and retrieve macros.
     
     const char* filename; ///< The name of the open file.
+    string sdir; ///< The last loaded search directory.
     size_t line; ///< The current line number in the file
     size_t lpos; ///< The index in the file of the most recent line break.
     
@@ -90,6 +94,7 @@ namespace jdip {
     /** Sole constructor; consumes an llreader and attaches a new \c lex_macro.
         @param input    The file from which to read definitions. This file will be manipulated by the system.
         @param pmacros  A \c jdi::macro_map which will receive and be probed for macros.
+        @param fname    The name of the file that was first opened.
     **/
     lexer_cpp(llreader& input, macro_map &pmacros, const char *fname = "stdcall/file.cpp");
     /** Destructor; free the attached macro lexer. **/
@@ -106,11 +111,11 @@ namespace jdip {
     void handle_preprocessor(error_handler *herr);
     
     /// Utility function to skip a single-line comment; invoke with pos indicating one of the slashes.
-    inline void skip_comment();
+    void skip_comment();
     /// Utility function to skip a multi-line comment; invoke with pos indicating the starting slash.
-    inline void skip_multiline_comment();
+    void skip_multiline_comment();
     /// Utility function to skip a string; invoke with pos indicating the quotation mark. Terminates indicating match.
-    inline void skip_string(error_handler *herr);
+    void skip_string(error_handler *herr);
     /// Skip anything that cannot be interpreted as code in any way.
     inline void skip_whitespace();
     /// Function used by the preprocessor to read in macro parameters in compliance with ISO.
@@ -154,7 +159,7 @@ namespace jdip {
     
     set<string> visited_files; ///< For record and reporting purposes only.
   protected:
-    /// Storage mechanism for conditionals, such as #if, #ifdef, and #1ifndef
+    /// Storage mechanism for conditionals, such as <code>\#if</code>, <code>\#ifdef</code>, and <code>\#ifndef</code>.
     struct condition {
       bool is_true; ///< True if code in this layer is to be parsed; ie, the condition given is true.
       bool can_be_true; ///< True if an `else` statement or the like can set is_true to true.
@@ -163,8 +168,9 @@ namespace jdip {
     };
     /// FLatten a macro parameter, evaluating nested macro functions.
     static string _flatten(string param, const macro_map& macros, const token_t &errep, error_handler *herr);
-    quick::stack<condition> conditionals; ///< Our conditional levels (one for each nested #if*)
+    quick::stack<condition> conditionals; ///< Our conditional levels (one for each nested `\#if*`)
     lexer_macro *mlex; ///< The macro lexer that will be passed to the AST builder for #if directives.
+    context_parser *mctex; ///< A context used for constructing ASTs from preprocessor expressions.
   };
   
   /**

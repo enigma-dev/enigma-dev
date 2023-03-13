@@ -1,17 +1,17 @@
-// 
+//
 // Copyright (C) 2014 Seth N. Hetu
-// 
+//
 // This file is a part of the ENIGMA Development Environment.
-// 
+//
 // ENIGMA is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, version 3 of the license or any later version.
-// 
+//
 // This application and its source code is distributed AS-IS, WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
@@ -19,8 +19,10 @@
 #include "GM5Drawing.h"
 
 #include <cmath>
+#include <vector>
 #include <list>
 #include <algorithm>
+#include <utility>
 #include <cstdio>
 
 #include "Graphics_Systems/General/GSstdraw.h"
@@ -28,23 +30,30 @@
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 
-namespace {
+using std::vector;
+using std::swap;
 
+namespace enigma {
 
-template <typename T>
-void swap(T& val1, T& val2){
-  T temp = val1;
-  val1 = val2;
-  val2 = temp;
-}
-}
+///Simple container class for a Vertex in a Polygon.
+///A color of -1 means "the color of the previous vertex", and defaults to the current draw_color.
+struct PolyVertex {
+  PolyVertex(gs_scalar x, gs_scalar y, int color) : x(x),y(y),color(color) {}
+  gs_scalar x;
+  gs_scalar y;
+  int color;
+};
 
-namespace enigma_user
-{
+//List of vertices we are buffering to draw.
+std::list<PolyVertex> currComplexPoly;
+
+} // namespace enigma
+
+namespace enigma_user {
 
 //GM5 draw state.
 gs_scalar pen_size = 1;
-int brush_style = enigma_user::bs_solid; 
+int brush_style = enigma_user::bs_solid;
 int pen_color = enigma_user::c_black;
 enigma::BindPropRW brush_color(&draw_get_color, &draw_set_color);
 
@@ -152,7 +161,7 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 
   //These are needed to prevent the top half-width of the line from overlapping for wide lines.
   //This is clearly massively inefficient; currently it rotates the entire shape through each half-width
-  //  in an attempt to cover blank spots. 
+  //  in an attempt to cover blank spots.
   for(gs_scalar i=pr;i<M_PI;i+=pr) {
     gs_scalar xc1 = cos(i+pr/2)*hr;
     gs_scalar yc1 = sin(i+pr/2)*vr;
@@ -228,6 +237,63 @@ void draw_circle(gs_scalar x, gs_scalar y, float radius)
   draw_set_color(old_color);
 }
 
+void draw_polygon_begin()
+{
+  enigma::currComplexPoly.clear();
+}
+
+void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
+{
+  //-1 means "the color of the previous vertex.
+  //The default color (first vertex) is the current draw color.
+  //This conforms to GM5's treatment of draw colors.
+  enigma::currComplexPoly.push_back(enigma::PolyVertex(x, y, color));
+}
+
+void draw_polygon_end(bool outline, bool allowHoles)
+{
+  std::list<enigma::PolyVertex>& currPoly = enigma::currComplexPoly;
+  if (outline) {
+    if (currPoly.size() >= 2) {
+      int color = draw_get_color();
+      gs_scalar alpha = draw_get_alpha();
+
+      //Close it, ensure the correct color.
+      currPoly.push_back(currPoly.front());
+      if (currPoly.back().color==-1) { currPoly.back().color = color; }
+
+      //Draw it.
+      draw_primitive_begin(pr_linestrip);
+      for (const auto& v : currPoly) {
+        color = (v.color!=-1 ? v.color : color);
+        draw_vertex_color(v.x, v.y, color, alpha);
+      }
+
+      //Close it.
+      draw_primitive_end();
+    }
+  } else {
+    if (currPoly.size() >= 3) {
+      //Self-intersecting polygons makes this much harder than "outline" mode
+      //Use a triangle fan as a backup for now. This will work for concave polygons only.
+
+      int color = draw_get_color();
+      gs_scalar alpha = draw_get_alpha();
+
+      //Draw it.
+      draw_primitive_begin(pr_trianglefan);
+      for (const auto& v : currPoly) {
+        color = (v.color!=-1 ? v.color : color);
+        draw_vertex_color(v.x, v.y, color, alpha);
+      }
+
+      //Close it.
+      draw_primitive_end();
+    }
+  }
+
+  currPoly.clear();
+}
 
 void draw_polygon_end()
 {
@@ -249,15 +315,11 @@ void draw_polygon_end()
   int old_color = draw_get_color();
   draw_set_color(pen_color);
   enigma::PolyVertex lastPt = *(--cachedPoly.end());
-  for (std::list<enigma::PolyVertex>::iterator it = cachedPoly.begin(); it!=cachedPoly.end(); it++) {
-    enigma::PolyVertex currPt = *it;
-    draw_line_width(lastPt.x,lastPt.y, currPt.x,currPt.y , lwid);
-    lastPt = currPt;
+  for (const auto& v : cachedPoly) {
+    draw_line_width(lastPt.x,lastPt.y, v.x,v.y , lwid);
+    lastPt = v;
   }
   draw_set_color(old_color);
 }
 
-
-
-}
-
+} // namespace enigma_user

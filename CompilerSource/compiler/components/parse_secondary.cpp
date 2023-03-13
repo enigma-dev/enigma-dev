@@ -50,8 +50,8 @@ int lang_CPP::compile_parseSecondary(CompileState &state) {
 
   // Give all objects and events a second pass
   for (parsed_object *oto : state.parsed_objects) {
-    for (unsigned iit = 0; iit < oto->events.size; iit++)
-      parser_secondary(state, oto->events[iit].code, oto->events[iit].synt, oto, &oto->events[iit]);
+    for (auto &pev : oto->all_events)
+      parser_secondary(state, &pev);
   }
 
   // Build an inheritance tree
@@ -60,39 +60,32 @@ int lang_CPP::compile_parseSecondary(CompileState &state) {
     if (parent_it != po_by_name.end()) {
       obj->parent = parent_it->second;
       parent_it->second->children.push_back(obj);
-      printf("Object %s (%d) is a child of %s (%d)\n", obj->name.c_str(), obj->id, obj->parent->name.c_str(), obj->parent->id);
+      printf("Object %s (%d) is a child of %s (%d)\n", obj->name.c_str(),
+             obj->id, obj->parent->name.c_str(), obj->parent->id);
     }
   }
 
   // Give all scripts a second pass
-  for (size_t i = 0; i < scripts.size(); i++) {
-    parser_secondary(state, scripts[i]->pev.code,scripts[i]->pev.synt,&scripts[i]->obj,&scripts[i]->pev);
-    if (scripts[i]->pev_global)
-      parser_secondary(state, scripts[i]->pev_global->code,scripts[i]->pev_global->synt,&scripts[i]->obj,scripts[i]->pev_global);
+  for (ParsedScript *scr : scripts) {
+    parser_secondary(state, &scr->code);
+    if (scr->global_code) parser_secondary(state, scr->global_code);
   }
 
-  //Give all timelines a second pass
-  for (size_t i=0; i < tlines.size(); i++) {
-    parser_secondary(state, tlines[i]->pev.code,tlines[i]->pev.synt,&tlines[i]->obj,&tlines[i]->pev);
-    if (tlines[i]->pev_global)
-      parser_secondary(state, tlines[i]->pev_global->code,tlines[i]->pev_global->synt,&tlines[i]->obj,tlines[i]->pev_global);
+  // Give all timelines a second pass
+  // Apparently they're still individual moments, at this point(?)
+  for (ParsedScript *tline : tlines) {
+    parser_secondary(state, &tline->code);
+    if (tline->global_code) parser_secondary(state, tline->global_code);
   }
 
   // Give all room creation codes a second pass
-  for (auto room : state.parsed_rooms){
-    parsed_object *oto; // The object into which we will dump locals
-    oto = room; // Start by dumping into this room; rooms are treated like objects, here
-    if (room->events.size)
-      parser_secondary(state, oto->events[0].code,oto->events[0].synt,oto,&oto->events[0]);
-    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = room->instance_create_codes.begin(); ici != room->instance_create_codes.end(); ici++)
-    {
-      oto = po_by_name[ici->second.object_name];
-      parser_secondary(state, ici->second.pe->code,ici->second.pe->synt,oto,ici->second.pe);
+  for (auto room : state.parsed_rooms) {
+    if (room->creation_code) parser_secondary(state, room->creation_code);
+    for (const auto &icc : room->instance_create_codes) {
+      parser_secondary(state, icc.second.code);
     }
-    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = room->instance_precreate_codes.begin(); ici != room->instance_precreate_codes.end(); ici++)
-    {
-      oto = po_by_name[ici->second.object_name];
-      parser_secondary(state, ici->second.pe->code,ici->second.pe->synt,oto,ici->second.pe);
+    for (const auto &icc : room->instance_precreate_codes) {
+      parser_secondary(state, icc.second.code);
     }
   }
 

@@ -11,10 +11,16 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Event
 {
 	int id;
 	String code;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

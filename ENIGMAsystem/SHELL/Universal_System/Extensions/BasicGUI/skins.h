@@ -18,21 +18,22 @@
 #ifndef BGUI_SKINS_H
 #define BGUI_SKINS_H
 
-namespace gui
-{
-	class Skin{
-		public:
-			unsigned int id;
-			int button_style;
-			int window_style;
-			int toggle_style;
-			int slider_style;
-      int scrollbar_style;
-			int label_style;
-			int textbox_style;
+namespace enigma {
+namespace gui {
+class Skin {
+ public:
+  unsigned int id;
+  int button_style;
+  int window_style;
+  int toggle_style;
+  int slider_style;
+  int scrollbar_style;
+  int label_style;
+  int textbox_style;
 
-			Skin();
-	};
-}
+  Skin();
+};
+}  // namespace gui
+}  //namespace enigma
 
 #endif

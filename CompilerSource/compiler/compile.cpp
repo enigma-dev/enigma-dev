@@ -16,21 +16,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "makedir.h"
+#include "strings_util.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
-#include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "backend/GameData.h"
 #include "settings.h"
-
-#include "general/darray.h"
+#include "darray.h"
+#include "treenode.pb.h"
 
 #include <cstdio>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
  #include <windows.h>
  #define sleep Sleep
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <unistd.h>
  #define sleep(x) usleep(x * 1000)
 #endif
@@ -57,7 +57,7 @@ using namespace std;
 #include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-
+#include "System/builtins.h"
 
 #include "settings-parse/crawler.h"
 
@@ -67,10 +67,6 @@ using namespace std;
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-
-#include "compiler/jdi_utility.h"
-
-#include <enigma_strings.h>
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
@@ -83,30 +79,11 @@ inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-inline string GetWorkingDir() {
-  std::vector<char> dir(size_t(4096));
-  #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  GetCurrentDirectory( 4096, dir.data() );
-  #else
-  getcwd (dir.data(), 4096);
-  #endif
-  return string(dir.begin(), dir.end());
-}
-
-inline void SetWorkingDir(const string& dir) {
-  #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  SetCurrentDirectory(dir.c_str());
-  #else
-  chdir(dir.c_str());
-  #endif
-}
-
-inline void write_desktop_entry(const std::string fPath, const GameData& game) {
+inline void write_desktop_entry(const std::filesystem::path& fname, const GameData& game) {
   std::ofstream wto;
-  std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
   const buffers::resources::General &gameSet = game.settings.general();
 
-  wto.open(fPath + ".desktop");
+  wto.open(fname/".desktop");
   wto << "[Desktop Entry]\n";
   wto << "Type=Application\n";
   wto << "Version="
@@ -114,10 +91,10 @@ inline void write_desktop_entry(const std::string fPath, const GameData& game) {
         << gameSet.version_minor()   << "."
         << gameSet.version_release() << "."
         << gameSet.version_build()   << "\n";
-  wto << "Name=" << fName << "\n";
+  wto << "Name=" << fname.u8string() << "\n";
   wto << "Comment=" << gameSet.description() << "\n";
   wto << "Path=.\n";
-  wto << "Exec=./" << fName << "\n";
+  wto << "Exec=./" << fname.u8string() << "\n";
   //NOTE: Due to security concerns linux doesn't allow releative paths for icons
   // hardcoding icon because relative paths search /usr/share/icons and full paths aren't portable
   wto << "Icon=applications-games-symbolic.svg\n";
@@ -127,16 +104,16 @@ inline void write_desktop_entry(const std::string fPath, const GameData& game) {
   wto.close();
 
   #if CURRENT_PLATFORM_ID != OS_WINDOWS
-  chmod((fPath + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
+  chmod((fname/".desktop").u8string().c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
   #endif
 }
 
-inline void write_exe_info(const std::string codegen_directory, const GameData &game) {
+inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
   const string &gloss_version = game.settings.info().version();
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
   wto << "#include <windows.h>\n";
   if (!gameSet.game_icon().empty()) {
@@ -158,29 +135,66 @@ inline void write_exe_info(const std::string codegen_directory, const GameData &
       << "VALUE \"FileVersion\",         \"" << gloss_version << "\\0\"\n"
       << "VALUE \"ProductName\",         \"" << gameSet.product() << "\"\n"
       << "VALUE \"ProductVersion\",      \"" << gloss_version << "\\0\"\n"
-      << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n";
-  if (!game.filename.empty()) {
-    wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(game.filename,"\\","/") << "\"\n";
-  } else {
-    wto << "VALUE \"OriginalFilename\",         \"\"\n";
-  }
-  wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
-  wto << "VALUE \"Translation\", 0x409, 1252\n";
-  wto << "END\nEND";
+      << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n"
+      << "VALUE \"OriginalFilename\",    \"" << string_replace_all(game.filename,"\\","/") << "\"\n"
+      << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n"
+      << "VALUE \"Translation\", 0x409, 1252\n"
+      << "END\nEND";
   wto.close();
 }
 
-#include "System/builtins.h"
+#define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(GameData(es), exe_filename, mode);
+static int write_res_helper(FILE* gameModule, int& resourceblock_start, const GameData &game) {
+  // Start by setting off our location with a DWord of NULLs
+  fwrite("\0\0\0",1,4,gameModule);
+
+  idpr("Adding Sprites",90);
+
+  int res = current_language->module_write_sprites(game, gameModule);
+  if (res) { 
+    idpr("Error occurred; see scrollback for details.",-1); 
+    return res;
+  }
+
+  edbg << "Finalized sprites." << flushl;
+  idpr("Adding Sounds",93);
+
+  current_language->module_write_sounds(game, gameModule);
+
+  current_language->module_write_backgrounds(game, gameModule);
+
+  current_language->module_write_fonts(game, gameModule);
+
+  current_language->module_write_paths(game, gameModule);
+
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+
+  // Close the game module; we're done adding resources
+  idpr("Closing game module and running if requested.",99);
+  edbg << "Closing game module and running if requested." << flushl;
+  fclose(gameModule);
+
+  return res;
+}
+
+DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
+  return current_language->compile(GameData(es, &current_language->event_data()),
+                                   exe_filename, mode);
+}
+
+DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
+  GameData gameData(*proj, &current_language->event_data());
+  return current_language->compile(gameData, exe_filename, mode);
 }
 
 static bool run_game = true;
-dllexport void ide_handles_game_launch() { run_game = false; }
+DLLEXPORT void ide_handles_game_launch() { run_game = false; }
 
 static bool redirect_make = true;
-dllexport void log_make_to_console() { redirect_make = false; }
+DLLEXPORT void log_make_to_console() { redirect_make = false; }
 
 template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
   int max = 0;
@@ -202,6 +216,118 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   }
   wto << "}\n";
   wto << "namespace enigma { size_t " << kind << "_idmax = " << max << "; }\n\n";
+}   
+ 
+void wite_asset_enum(const std::filesystem::path& fName) {
+  std::ofstream wto;
+  wto.open(fName.u8string().c_str());
+  
+  wto<< "#ifndef ASSET_ENUM_H\n#define ASSET_ENUM_H\n\n";
+  
+  wto << "namespace enigma_user {\n\nenum AssetType : int {\n";
+  
+  // ""any" needs to be added manually
+  wto << "  asset_any = -2,\n";
+  
+  buffers::TreeNode tn;
+  google::protobuf::Message *m = &tn;
+  const google::protobuf::Descriptor *desc = m->GetDescriptor();
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      // NOTE: -1 because protobutt doesn't allow index 0 and we're trying to match GM's values 
+      wto << "  asset_" << field->name() << " = " << field->number()-1 <<  "," << std::endl;
+  }
+  
+  // This one doesn't really exist but added for GM compatibility
+  wto << "  asset_tileset = asset_background\n";
+  wto << "};\n\n}\n\n";
+  
+  wto << "namespace enigma {\n\nstatic const enigma_user::AssetType assetTypes[] = {\n";
+  
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor *field = desc->field(i);
+    if (field->containing_oneof() && field->cpp_type() == google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE)
+      wto << "  enigma_user::asset_" << field->name() << "," << std::endl;
+  }
+  
+  wto << "};\n\n}\n\n#endif\n";
+  
+  wto.close();
+}
+    
+template<typename T> void write_asset_map(std::string& str, vector<T> resources, const std::string& type) {
+  str += "\n{ enigma_user::" + type + ",\n  {\n";
+  for (const T &res : resources) {
+    str += "    { \"" + res.name  + "\", " + std::to_string(res.id()) + " },\n";
+  }
+  
+  if (resources.size() > 0) { str.pop_back(); str.back() = '\n'; }
+  
+  str += "  }\n},\n";
+}
+
+// TODO: this doesn't belong here. It doesn't obviously belong anywhere else,
+// though, either, because the rest of the codebase suggests it belongs in
+// lang_CPP, but this isn't language specific! Wherever this ends up living,
+// move generate_robertvecs (from write_object_data.cpp) there, too.
+std::set<EventGroupKey> ListUsedEvents(
+    const std::vector<parsed_object*> &parsed_objects,
+    const EventData &event_data) {
+  /* Generate a new list of events used by the objects in
+  ** this game. Only events on this list will be exported.
+  ***********************************************************/
+  std::set<EventGroupKey> used_events;
+
+  // Defragged events must be written before object data, or object data cannot
+  // determine which events were used.
+  for (const parsed_object *object : parsed_objects) {
+    for (const ParsedEvent &event : object->all_events) {
+      if (event.ev_id.RegistersIterator())
+        used_events.insert({event.ev_id});
+    }
+  }
+
+  /* Some events are included in all objects, even if the user
+  ** hasn't specified code for them. Account for those here.
+  ***********************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    // We may not be using this event, but it may have default code.
+    if (event_desc.HasDefaultCode()) {  // (defaulted includes "constant")
+      // Defaulted events may NOT be parameterized.
+      if (event_desc.IsParameterized()) {
+        std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                  << " (" << event_desc.HumanName()
+                  << ") is parameterized, but has default code.";
+        continue;
+      }
+      // This is a valid construction because we just checked that the event
+      // has no parameters. It's neither stacked nor specialized.
+      Event event{event_desc};
+      if (event.RegistersIterator()) used_events.insert({event});
+
+      for (parsed_object *obj : parsed_objects) { // Then shell it out into the other objects.
+        obj->InheritDefaultedEvent(event);
+      }
+    }
+  }
+
+  /* Lastly, add any events that have Instead code to our used_event map for
+  ** consideration. These will simply have their instead blocks thrown in.
+  *****************************************************************************/
+  for (const EventDescriptor &event_desc : event_data.events()) {
+    if (!event_desc.HasInsteadCode()) continue;
+    // Inlined events may NOT be parameterized.
+    if (event_desc.IsParameterized()) {
+      std::cerr << "INTERNAL ERROR: Event " << event_desc.internal_id
+                << " (" << event_desc.HumanName()
+                << ") is parameterized, but has inlined event loop code.";
+      continue;
+    }
+    used_events.insert({Event{event_desc}});
+  }
+
+  return used_events;
 }
 
 static inline std::string wantsTheD(bool cmake, const std::string& input) {
@@ -209,27 +335,40 @@ static inline std::string wantsTheD(bool cmake, const std::string& input) {
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  std::filesystem::path exename;
+  if (exe_filename) {
+    exename = exe_filename;
+    const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
+    if (!string_ends_with(exename.u8string(), buildext.u8string())) {
+      exename += buildext;
+      exe_filename = exename.u8string().c_str();
+    }
+  }
 
   cout << "Initializing dialog boxes" << endl;
-  ide_dia_clear();
+  // reset this as IDE will soon enable stop button
+  build_stopping = false;
+  ide_dia_clear(); // <- stop button usually enabled IDE side
   ide_dia_open();
   cout << "Initialized." << endl;
-  
+
   CompileState state;
-  
+
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
-  string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
+  std::filesystem::path compilepath = std::filesystem::path(CURRENT_PLATFORM_NAME)/compilerInfo.target_platform/name;
 
   if (mode == emode_rebuild)
   {
     edbg << "Cleaning..." << flushl;
 
   	string make = compilerInfo.make_vars["MAKEFLAGS"];
+    make += " -C \"" + unixfy_path(enigma_root) + "\"";
     make += " clean-game ";
-  	make += "COMPILEPATH=\"" + compilepath + "\" ";
-  	make += "WORKDIR=\"" + eobjs_directory + "\" ";
-    make += "CODEGEN=\"" + codegen_directory + "\" ";
+  	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
+  	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
+    make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
+    make += "-j" + num_make_jobs + " ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -240,31 +379,30 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // Clean up from any previous executions.
-  edbg << "Cleaning up from previous executions" << flushl;
-  event_info_clear();     //Forget event definitions, we'll re-get them
-  edbg << " - Cleared event info." << flushl;
-
   // Re-establish ourself
   // Read the global locals: locals that will be included with each instance
   {
-    set<string> extnp, extlp;
+    set<string> exts_new_parse, exts_last_parse;
     for (const auto &ext : game.extensions) {
-      extnp.insert(ext.path + ext.name);
+      exts_new_parse.insert(ext.path + "/" + ext.name);
     }
     for (const string &ext : requested_extensions_last_parse) {
-      extlp.insert(ext);
+      exts_last_parse.insert(ext);
     }
     edbg << "Loading shared locals from extensions list" << flushl;
-    if (extnp != extnp) {
+    if (exts_new_parse != exts_last_parse) {
       user << "The IDE didn't tell ENIGMA what extensions "
               "were selected before requesting a build.";
-      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+
+      cout << "Extensions I have loaded:" << endl;
+      for (const string &e : exts_last_parse) cout << "- " << e << endl;
+      cout << "Extensions I should have loaded:" << endl;
+      for (const string &e : exts_new_parse) cout << "- " << e << endl;
+
+      //idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+      user << "...Continuing anyway..." << flushl;
     }
   }
-
-  //Read the types of events
-  event_parse_resourcefile();
 
   /**** Segment One: This segment of the compile process is responsible for
   * @ * translating the code into C++. Basically, anything essential to the
@@ -275,7 +413,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
 
   idpr("Copying resources",1);
 
@@ -283,54 +421,48 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Copying resources:" << flushl;
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
-  for (size_t i = 0; i < game.sprites.size(); i++) {
-    cout << "Name on this side: " << globals_scope.name << endl;
-    cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
-    cout << "Pointer on this side: " << (&globals_scope) << endl;
-    cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sprites[i].name);
-  }
+  for (size_t i = 0; i < game.sprites.size(); i++)
+    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.sounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.backgrounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.paths[i].name);
+    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    quickmember_script(&globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.shaders[i].name);
+    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.fonts[i].name);
+    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.timelines[i].name);
+    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.objects[i].name);
+    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.rooms[i].name);
+    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    quickmember_variable(&globals_scope,jdi::builtin_type__int,game.constants[i].name);
+    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -343,15 +475,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   used_funcs::zero();
 
-  int res;
-  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
-
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
   for (size_t i = 0; i < game.scripts.size(); i++)
     script_names.insert(game.scripts[i].name);
 
-  res = current_language->compile_parseAndLink(game, state);
+  int res = current_language->compile_parseAndLink(game, state);
   irrr();
 
 
@@ -364,8 +493,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   // Modes, settings and executable information.
 
   idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
-  string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
+  std::filesystem::path desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
+  std::filesystem::path gameFname = mode == emode_design ? desstr.u8string().c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   edbg << "Writing executable information and resources." << flushl;
   if (compilerInfo.target_platform == "Windows")
@@ -374,7 +503,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     write_desktop_entry(gameFname, game);
 
   edbg << "Writing modes and settings" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").u8string().c_str(),ios_base::out);
   wto << license;
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
@@ -386,20 +515,20 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << '\n';
   wto.close();
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").u8string().c_str(),ios_base::out);
   wto << license;
   wto << "#define BUILDMODE " << 0 << "\n";
   wto << "#define DEBUGMODE " << 0 << "\n";
   wto << '\n';
   wto.close();
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").u8string().c_str(),ios_base::out);
   wto.close();
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").u8string().c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (auto *obj : state.parsed_objects) {
@@ -414,8 +543,13 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   //NEXT FILE ----------------------------------------
   //Resource names: Defines integer constants for all resources.
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").u8string().c_str(),ios_base::out);
   wto << license;
+
+  wto << "namespace enigma {\n";
+  std::string res_in = (compilerInfo.exe_vars["RESOURCES_IN"] != "") ? "RESOURCES_IN" : "RESOURCES";
+  wto << "const char *resource_file_path=\"" << compilerInfo.exe_vars[res_in] << "\";\n";
+  wto << "}\n";
 
   write_resource_meta(wto,     "object", game.objects);
   write_resource_meta(wto,     "sprite", game.sprites);
@@ -427,13 +561,40 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   write_resource_meta(wto,     "script", game.scripts);
   write_resource_meta(wto,     "shader", game.shaders);
   write_resource_meta(wto,       "room", game.rooms, false);
+  
+  // asset_get_index/type map
+  wite_asset_enum(codegen_directory/"AssetEnum.h");
+  
+  wto << "#include \"AssetEnum.h\"\n";
+  wto << "namespace enigma {\n\n";
+  wto << "std::map<enigma_user::AssetType, std::map<std::string, int>> assetMap = {\n";
+  
+  std::string assets;
+  write_asset_map(assets, game.objects,     "asset_object");
+  write_asset_map(assets, game.sprites,     "asset_sprite");
+  write_asset_map(assets, game.backgrounds, "asset_background");
+  write_asset_map(assets, game.fonts,       "asset_font");
+  write_asset_map(assets, game.timelines,   "asset_timeline");
+  write_asset_map(assets, game.paths,       "asset_path");
+  write_asset_map(assets, game.sounds,      "asset_sound");
+  write_asset_map(assets, game.scripts,     "asset_script");
+  write_asset_map(assets, game.shaders,     "asset_shader");
+  write_asset_map(assets, game.rooms,       "asset_room");
+  while (!assets.empty() && (assets.back() == ',' || assets.back() == '\n')) {
+    assets.pop_back();
+  }
+  
+  wto << assets;
+  
+  wto << "\n};\n";
+  wto << "\n\n}\n";
   wto.close();
 
 
   //NEXT FILE ----------------------------------------
   //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").u8string().c_str(),ios_base::out);
   {
     wto << license;
     wto <<"namespace enigma {\n\n";
@@ -447,8 +608,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     wto <<"  std::map<int, int> curr;\n\n";
     for (size_t i=0; i<game.timelines.size(); i++) {
       wto <<"  curr.clear();\n";
-      for (int j = 0; j < game.timelines[i].moments().size(); j++) {
-        wto << "  curr[" << game.timelines[i].moments()[j].step()
+      for (int j = 0; j < game.timelines[i]->moments().size(); j++) {
+        wto << "  curr[" << game.timelines[i]->moments()[j].step()
                          << "] = " << j <<";\n";
       }
       wto <<"  res.push_back(curr);\n\n";
@@ -470,8 +631,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(state);
 
+  state.used_events = ListUsedEvents(state.parsed_objects, event_data());
+
   edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(game, state.parsed_objects);
+  res = current_language->compile_writeDefraggedEvents(game, state.used_events, state.parsed_objects);
   irrr();
 
   edbg << "Writing object data" << flushl;
@@ -516,7 +679,34 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     outputFile.close();
 #endif
 
+  if (codegen_only) {
+    edbg << "The \"codegen-only\" flag was passed. Skipping compile and exiting," << flushl;
+    return 0;
+  }
 
+  FILE *gameModule;
+  int resourceblock_start = 0;
+  std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
+  cout << "`" << resfile.u8string() << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
+
+  // need to write res file before compile for android
+  if (resfile != "$exe")
+  {
+    auto resname = resfile.u8string();
+    auto respath = resfile.parent_path().u8string();
+   
+    e_execs("mkdir -p " + respath);
+   
+    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
+      resname.replace(p,4,gameFname.u8string());
+    gameModule = fopen(resname.c_str(),"wb");
+    if (!gameModule) {
+      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+      idpr("Failed to write resources.",-1); return 12;
+    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
+  }
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
@@ -526,88 +716,64 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   static bool cmake = (!compilerInfo.make_vars["CMAKE"].empty());
 
   idpr("Starting compile (This may take a while...)", 30);
-  
-  string make;
-  const std::string modeStr = ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run");
-  const std::string fullCompilePath = eobjs_directory + "/" + compilepath + "/" + modeStr; 
-  
-  // Don't want cmakeflags in with the rest of makevars
-  std::string cmakeFlags = compilerInfo.make_vars["CMAKEFLAGS"];
-  compilerInfo.make_vars["CMAKEFLAGS"] = "";
-  if (!cmakeFlags.empty()) cmakeFlags += " ";
-  
-  std::string envVars;
+
+  string make = compilerInfo.make_vars["MAKEFLAGS"];
+
+  make += "-C \"" + unixfy_path(enigma_root) + "\" ";
+  make += "Game ";
+  make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
+  make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
+  make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
+  make += " ";
+  make += "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ";
+  make += "AUDIO=\"" + extensions::targetAPI.audioSys + "\" ";
+  make += "COLLISION=\"" + extensions::targetAPI.collisionSys + "\" ";
+  make += "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ";
+  make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
+  make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
+  make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  make += "-j" + num_make_jobs + " ";
+
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
       envVars += "\"" + key.first + "=" + key.second + "\"";
   }
-  if (envVars.back() == ',') envVars.pop_back();
-  
-  if (cmake) {
-    make += compilerInfo.make_vars["CMAKE"];
-    make += " -G \"" + compilerInfo.make_vars["CMAKEGENERATOR"] + "\" ";
-    make += "-B \"" + fullCompilePath + "\" ";
-    make += "\"ENIGMAsystem/SHELL/\" ";
-    make += "-DCMAKE_BUILD_TYPE=";
-    make += (mode == emode_debug) ? "\"Debug\" " : "\"Release\" ";
-    make += cmakeFlags;
-  } else {
-    make += compilerInfo.MAKE_location;
-    make += (compilerInfo.make_vars["MAKEFLAGS"].empty()) ? " " : " " + compilerInfo.make_vars["MAKEFLAGS"] + " ";
-    make += "Game ";
-  }
-  
-  make += wantsTheD(cmake, "GMODE=\"");
-  make += ((mode == emode_debug) ? "Debug" : (mode == emode_design) ? "Design" : (mode == emode_compile) ? "Compile" : "Run") + string("\" ");
-  make += wantsTheD(cmake, "WORKDIR=\"" + eobjs_directory + "\" ");
-  make += wantsTheD(cmake, "CODEGEN=\"" + codegen_directory + "\" ");
-  make += wantsTheD(cmake, "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ");
-  make += wantsTheD(cmake, "AUDIO=\"" + extensions::targetAPI.audioSys + "\" ");
-  make += wantsTheD(cmake, "COLLISION=\"" + extensions::targetAPI.collisionSys + "\" ");
-  make += wantsTheD(cmake, "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ");
-  make += wantsTheD(cmake, "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ");
-  make += wantsTheD(cmake, "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ");
-  make += wantsTheD(cmake, "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ");
-  make += wantsTheD(cmake, "COMPILEPATH=\"" + compilepath + "\" ");
+
+  make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
   	extstr += " " + parsed_extensions[i].pathname;
   make += wantsTheD(cmake, extstr + "\" ");
 
-  string mfgfn = gameFname;
+  string mfgfn = gameFname.u8string();
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
-  make += wantsTheD(cmake, string("OUTPUTNAME=\"") + mfgfn + "\" ");
+  make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
 
-  edbg << "Full command line: " << make << flushl;
-  
+  edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
+  edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
+
   string flags = "";
 
   if (redirect_make) {
 
-    std::string dirs = wantsTheD(cmake, "CODEGEN=") + codegen_directory + " ";
-    dirs += wantsTheD(cmake, "WORKDIR=") + eobjs_directory + " ";
-    const std::string cmd = (compilerInfo.make_vars["CMAKE"] + " -G " + compilerInfo.make_vars["CMAKEGENERATOR"] + "\"" + fullCompilePath + "/FakeCMake\" \"ENIGMAsystem/SHELL/FakeCMake\"" + dirs);
-    if (cmake) e_execs(cmd);
-    else e_execs(compilerInfo.MAKE_location, dirs, "required-directories");
+    std::string dirs = "CODEGEN=" + codegen_directory.u8string() + " ";
+    dirs += "WORKDIR=" + eobjs_directory.u8string() + " ";
+    e_execs("make", dirs, "required-directories");
 
     // Pick a file and flush it
-    const string redirfile = (eobjs_directory + "enigma_compile.log");
-    fclose(fopen(redirfile.c_str(),"wb"));
+    const std::filesystem::path redirfile = (eobjs_directory/"enigma_compile.log");
+    fclose(fopen(redirfile.u8string().c_str(),"wb"));
 
     // Redirect it
-    ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+    ide_output_redirect_file(redirfile.u8string().c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
 
-    flags += "&> \"" + redirfile + "\"";
+    flags += "&> \"" + redirfile.u8string() + "\"";
   }
 
-  int makeres; 
-  if (cmake) {
-    makeres = e_execs(make.c_str(), "");
-    string cmakeBuildMode = (mode == emode_debug) ? "Debug" : "Release";
-    makeres = e_execs(compilerInfo.make_vars["CMAKE"] + " --build " + fullCompilePath + " --target install --config " + cmakeBuildMode);
-  } else makeres = e_execs(make, flags, envVars.c_str());
+  int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
+  if (build_stopping) { build_stopping = false; return 0; }
 
   // Stop redirecting GCC output
   if (redirect_make)
@@ -626,17 +792,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
-  #ifdef OS_ANDROID
-    "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
-  #endif
-
-  FILE *gameModule;
-  int resourceblock_start = 0;
-  std::string resfile = compilerInfo.exe_vars["RESOURCES"];
-  cout << "`" << resfile << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
   if (resfile == "$exe")
   {
-    gameModule = fopen(gameFname.c_str(),"ab");
+    gameModule = fopen(gameFname.u8string().c_str(),"ab");
     if (!gameModule) {
       user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
       idpr("Failed to add resources.",-1); return 12;
@@ -649,46 +807,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       user << "Compiled game is clearly not a working module; cannot continue" << flushl;
       idpr("Failed to add resources.",-1); return 13;
     }
-  }
-  else
-  {
-    string resname = resfile;
-    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
-      resname.replace(p,4,gameFname);
-    gameModule = fopen(resname.c_str(),"wb");
-    if (!gameModule) {
-      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-      idpr("Failed to write resources.",-1); return 12;
-    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
   }
 
-  // Start by setting off our location with a DWord of NULLs
-  fwrite("\0\0\0",1,4,gameModule);
-
-  idpr("Adding Sprites",90);
-
-  res = current_language->module_write_sprites(game, gameModule);
-  irrr();
-
-  edbg << "Finalized sprites." << flushl;
-  idpr("Adding Sounds",93);
-
-  current_language->module_write_sounds(game, gameModule);
-
-  current_language->module_write_backgrounds(game, gameModule);
-
-  current_language->module_write_fonts(game, gameModule);
-
-  current_language->module_write_paths(game, gameModule);
-
-  // Tell where the resources start
-  fwrite("\0\0\0\0res0",8,1,gameModule);
-  fwrite(&resourceblock_start,4,1,gameModule);
-
-  // Close the game module; we're done adding resources
-  idpr("Closing game module and running if requested.",99);
-  edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
@@ -709,8 +831,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     SetWorkingDir(newdir.c_str());
 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
-    rprog = string_replace_all(rprog,"$game",gameFname);
-    rparam = string_replace_all(rparam,"$game",gameFname);
+    rprog = string_replace_all(rprog,"$game",gameFname.u8string());
+    rparam = string_replace_all(rparam,"$game",gameFname.u8string());
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";

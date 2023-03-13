@@ -4,7 +4,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2013 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -19,11 +19,10 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <Parser/bodies.h>
+#include <Parser/context_parser.h>
 #include <API/context.h>
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
-#include <Parser/parse_context.h>
 #include <cstdio>
 using namespace jdip;
 using namespace jdi;

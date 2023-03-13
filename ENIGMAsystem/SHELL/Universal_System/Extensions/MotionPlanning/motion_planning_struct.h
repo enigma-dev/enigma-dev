@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs GrÃ®nbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -25,11 +25,6 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <vector>
-#include <cstdlib>
-#include <map>
-using std::vector;
-using std::multimap;
 
 #ifdef INCLUDED_FROM_SHELLMAIN
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
@@ -42,6 +37,14 @@ using std::multimap;
 #ifndef PATH_EXT_SET
 	#error The motion planning extension requires the paths extension.
 #endif
+
+#include <vector>
+#include <map>
+#include <cstddef>
+
+
+using std::vector;
+using std::multimap;
 
 namespace enigma
 {

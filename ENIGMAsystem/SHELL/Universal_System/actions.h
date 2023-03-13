@@ -27,10 +27,18 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "instance_system_base.h"
+#include "Instances/instance_system_base.h"
 #include "lives.h"
 
 #include <stdio.h>
+
+namespace enigma {
+
+    int initialize_everything();
+    variant ev_perf(int type, int numb);
+
+} // namespace enigma
+
 
 namespace enigma_user
 {
@@ -86,14 +94,14 @@ inline bool action_if_variable(const variant& variable, const variant& value, in
 }
 
 inline void action_move_to(const double xx, const double yy) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
-    }
-    else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x=xx;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y=yy;
-	}
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+=xx;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+=yy;
+  }
+  else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x=xx;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y=yy;
+  }
 }
 
 inline void action_set_score(double newscore) {
@@ -130,35 +138,37 @@ inline bool action_if_number(const int object, const double number, const int op
 inline void action_kill_object() { instance_destroy(); }
 
 inline void action_set_vspeed(const double newvspeed) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
-    } else
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed+=newvspeed;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->vspeed=newvspeed;
+  }
 }
 
 inline void action_set_hspeed(const double newhspeed) {
-	if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
-    } else
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed+=newhspeed;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->hspeed=newhspeed;
+  }
 }
 
 inline void action_set_gravity(const double direction, const double newgravity) {
-    if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
-    } else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
-    }
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction+=direction;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity+=newgravity;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity_direction=direction;
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->gravity=newgravity;
+  }
 }
 
 inline void action_set_friction(const double newfriction) {
-	if (argument_relative) {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
-    } else {
-        ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
-    }
+  if (argument_relative) {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction+=newfriction;
+  } else {
+    ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->friction=newfriction;
+  }
 }
 
 inline bool action_if_dice(double sides) {
@@ -330,7 +340,7 @@ inline bool action_if_health(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(health - value) < _V_EPSILON); break;
-	    case 1:	return (health < value); break;
+	    case 1: return (health < value); break;
 	    case 2: return (health > value); break;
       case 3: return (health <= value); break;
       case 4: return (health >= value); break;
@@ -343,7 +353,7 @@ inline bool action_if_life(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(lives - value) < _V_EPSILON); break;
-	    case 1:	return (lives < value); break;
+	    case 1: return (lives < value); break;
 	    case 2: return (lives > value); break;
       case 3: return (lives <= value); break;
       case 4: return (lives >= value); break;
@@ -356,7 +366,7 @@ inline bool action_if_score(const double value, const int operation)
 	switch (operation)
 	{
 	    case 0: return (fabs(score - value) < _V_EPSILON); break;
-	    case 1:	return (score < value); break;
+	    case 1: return (score < value); break;
 	    case 2: return (score > value); break;
       case 3: return (score <= value); break;
       case 4: return (score >= value); break;
@@ -521,14 +531,6 @@ enum
     ev_step_end     = 2
 };
 
-}
-
-namespace enigma
-{
-    int initialize_everything();
-    variant ev_perf(int type, int numb);
-}
-
 inline variant event_perform(int type, int numb) {
     return enigma::ev_perf(type, numb);
 }
@@ -537,12 +539,15 @@ inline variant event_user(int numb) {
     return event_perform(enigma_user::ev_other, numb + enigma_user::ev_user0);
 }
 
-inline void event_inherited() {
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
-  show_error("Event inherited called on an object that has no event to inherit.", false);
 #endif
+
+inline void event_inherited() {
+  DEBUG_MESSAGE("Event inherited called on an object that has no event to inherit.", MESSAGE_TYPE::M_ERROR);
+}
+
 }
 
 #define action_inherited event_inherited

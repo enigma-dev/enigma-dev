@@ -47,7 +47,19 @@ static void* code_ignorer(lexer *lex, token_t &token, definition_scope *, error_
   }
   return NULL;
 }
+static void *initializer_ignorer(lexer *lex, token_t &token, definition_scope *scope, error_handler *herr) {
+  do {
+    token = lex->get_token_in_scope(scope);
+    if (token.type == TT_SEMICOLON || token.type == TT_ENDOFCODE) {
+      token.report_error(herr, "Expected constructor body here after initializers.");
+      return NULL;
+    }
+  } while (token.type != TT_LEFTBRACE);
+  return NULL;
+}
 static void do_nothing(void*) {}
 
 void* (*handle_function_implementation)(lexer *lex, token_t &token, definition_scope *scope, error_handler *herr) = code_ignorer;
+void* (*handle_constructor_initializers)(lexer *lex, token_t &token, definition_scope *scope, error_handler *herr) = initializer_ignorer;
 void  (*delete_function_implementation)(void* impl) = do_nothing;
+void  (*delete_constructor_initializers)(void* impl) = do_nothing;

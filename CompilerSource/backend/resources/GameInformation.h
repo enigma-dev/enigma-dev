@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct GameInformation
 {
   int backgroundColor;
@@ -32,5 +35,8 @@ struct GameInformation
   }
 
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

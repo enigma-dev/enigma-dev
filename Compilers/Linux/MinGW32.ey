@@ -12,9 +12,9 @@ Make-Vars:
   cc: i686-w64-mingw32-gcc
   cxx: i686-w64-mingw32-g++
   cppflags:
-  cxxflags: -std=c++11 -I../Additional/i686-w64-mingw32/include
+  cxxflags: -I../Additional/i686-w64-mingw32/include -I/mingw32/include/
   cflags:
-  ldflags: -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
+  ldflags: -L../Additional/i686-w64-mingw32/lib -L/mingw32/lib -static-libgcc -static-libstdc++ -static
   links:
   windres: i686-w64-mingw32-windres
   pkg-config: i686-w64-mingw32-pkg-config

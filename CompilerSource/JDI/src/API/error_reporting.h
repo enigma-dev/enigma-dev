@@ -50,10 +50,12 @@ namespace jdi {
   /// Default class for error handling and warning reporting.
   /// Prints all errors and warnings to stderr alike. No other action is taken.
   struct default_error_handler: error_handler {
+    unsigned error_count, warning_count;
     /// Prints the error to stderr, in the format "ERROR[(<file>[:<line>[:<pos>]])]: <error string>"
     void error(std::string err, std::string filename = "", int line = -1, int pos = -1);
     /// Prints the error to stderr, in the format "Warning[(<file>[:<line>[:<pos>]])]: <warning string>"
     void warning(std::string err, std::string filename = "", int line = -1, int pos = -1);
+    default_error_handler();
   };
 
   /// A pointer to an instance of \c default_error_handler, for use wherever.

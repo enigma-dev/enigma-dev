@@ -34,23 +34,22 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream> // std::stringstream
+#include <fstream> // std::ifstream
+#include <iostream> // std::cerr
 
+// TODO: delete me once this has a permenant home in shared
 inline std::string fc(const char* fn) {
-  FILE* pt = fopen(fn, "rb");
-  if (pt == NULL)
+  std::ifstream t(fn);
+  
+  if (!t.is_open()) {
+    std::cerr << "Failed to open " << fn << std::endl;
     return "";
-  else {
-    fseek(pt, 0, SEEK_END);
-    size_t sz = ftell(pt);
-    fseek(pt, 0, SEEK_SET);
-
-    char a[sz + 1];
-    sz = fread(a, 1, sz, pt);
-    fclose(pt);
-
-    a[sz] = 0;
-    return a;
   }
+  
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  return buffer.str();
 }
 
 inline int rdir_system(std::string x, std::string y) { return system((x + " " + y).c_str()); }
@@ -67,12 +66,6 @@ static inline std::vector<std::string> explode(std::string n) {
   }
   if (n.length() > pos) ret.push_back(n.substr(pos));
   return ret;
-}
-
-inline std::string tolower(std::string x) {
-  for (size_t i = 0; i < x.length(); i++)
-    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
-  return x;
 }
 
 #endif

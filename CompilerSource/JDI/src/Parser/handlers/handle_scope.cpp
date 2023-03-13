@@ -6,7 +6,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -21,13 +21,15 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <Parser/bodies.h>
+#include <Parser/context_parser.h>
 #include <API/AST.h>
 #include <API/compile_settings.h>
 #include <System/builtins.h>
 #include <System/lex_buffer.h>
 #include <Parser/handlers/handle_function_impl.h>
 #include <cstdio>
+
+using namespace jdi;
 
 int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, unsigned inherited_flags)
 {
@@ -50,13 +52,19 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
           handled_declarator_block:
           if (token.type != TT_SEMICOLON) {
             if (token.type == TT_LEFTBRACE || token.type == TT_ASM) {
-              if (!(decl and decl->flags & DEF_FUNCTION)) {
+              if (!(decl and decl->flags & DEF_OVERLOAD)) {
                 token.report_error(herr, "Unexpected opening brace here; declaration is not a function");
                 FATAL_RETURN(1);
                 handle_function_implementation(lex,token,scope,herr);
               }
-              else
-                ((definition_function*)decl)->implementation = handle_function_implementation(lex,token,scope,herr);
+              else {
+                definition_overload *ovr = ((definition_overload*)decl);
+                if (ovr->implementation != NULL) {
+                  token.report_error(herr, "Multiple implementations of function" FATAL_TERNARY("", "; old implementation discarded"));
+                  delete_function_implementation(ovr->implementation);
+                }
+                ovr->implementation = handle_function_implementation(lex,token,scope,herr);
+              }
               if (token.type != TT_RIGHTBRACE && token.type != TT_SEMICOLON) {
                 token.report_error(herr, "Expected closing symbol to function");
                 continue;
@@ -98,10 +106,13 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
           }
           else if (token.type == TT_TEMPLATE) {
             token = read_next_token(scope);
-            if (token.type != TT_CLASS and token.type != TT_STRUCT and token.type != TT_DECLARATOR and token.type != TT_DEFINITION) {
+            if (token.type != TT_CLASS and token.type != TT_STRUCT and token.type != TT_DECLARATOR and token.type != TT_DECFLAG and token.type != TT_DEFINITION) {
               token.report_errorf(herr, "Expected template specialization following `extern template' directive; %s unhandled");
               FATAL_RETURN(1);
             }
+            if (handle_template_extern(scope, token, inherited_flags))
+              FATAL_RETURN(1);
+            break;
           }
         goto handle_declarator_block;
       
@@ -169,29 +180,54 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
         if ((token = read_next_token(scope)).type != TT_COLON)
           token.report_error(herr, "Colon expected following `protected' token"); break;
       
+      case TT_FRIEND:
+          if (!(scope->flags & DEF_CLASS)) {
+            token.report_error(herr, "`friend' statement may only appear in a class or structure");
+            FATAL_RETURN(1);
+            while ((token = read_next_token(scope)).type != TT_SEMICOLON && token.type != TT_RIGHTBRACE && token.type != TT_ENDOFCODE);
+          }
+          else {
+            if (handle_friend(scope, token, (definition_class*)scope))
+              FATAL_RETURN(1);
+            if (token.type == TT_SEMICOLON)
+              token = read_next_token(scope);
+            else {
+              token.report_errorf(herr, "Expected semicolon before %s");
+              FATAL_RETURN(1);
+            }
+          }
+        continue;
+      
       case TT_USING:
           token = read_next_token(scope);
           if (token.type == TT_NAMESPACE) {
-            token = lex->get_token(herr);
-            if (token.type == TT_IDENTIFIER) {
-              definition* d = scope->look_up(token.content.toString());
+            token = lex->get_token_in_scope(scope, herr);
+            if (token.type == TT_DEFINITION) {
+              definition *d = read_qualified_definition(token, scope);
               if (!d) {
-                token.report_errorf(herr, "Expected id to use before %s");
+                token.report_errorf(herr, "Expected namespace-name following `namespace' token");
                 FATAL_RETURN(1);
               }
               else {
                 if (d->flags & DEF_NAMESPACE)
                   scope->use_namespace((definition_scope*)d);
                 else
-                  token.report_error(herr, "Expected namespace name following `namespace' token");
+                  token.report_error(herr, "Expected namespace-name following `namespace' token");
               }
-              token = read_next_token(scope);
+              if (token.type == TT_SEMICOLON)
+                token = read_next_token(scope);
+              else {
+                token.report_errorf(herr, "Expected semicolon before %s");
+                FATAL_RETURN(1);
+              }
             }
-            else
-              token.report_error(herr, "Expected namespace name following `namespace' token");
+            else {
+              token.report_errorf(herr, "Expected namespace to use before %s");
+              FATAL_RETURN(1);
+            }
           }
           else {
-            definition *usedef = read_qualified_definition(lex, scope, token, this, herr);
+            definition *usedef = read_qualified_definition(token, scope);
             if (usedef)
               scope->use_general(usedef->name, usedef);
             else {
@@ -203,11 +239,25 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
               FATAL_RETURN(1);
             }
           }
-        break;
+        continue;
       
       case TT_SCOPE:
-          token = read_next_token(global);
+          token = read_next_token(ctex->get_global());
         continue;
+      case TT_MEMBEROF:
+          token.report_error(herr, "Unexpected (scope::*) reference");
+        return 1;
+      
+      case TT_STATIC_ASSERT:
+          token.report_error(herr, "Unimplemented: static assert");
+        break;
+      case TT_AUTO:
+          token.report_error(herr, "Unimplemented: `auto' type inference");
+        break;
+      case TT_CONSTEXPR:
+          token.report_error(herr, "Unimplemented: const expressions outside enum");
+        break;
+      
       case TT_DEFINITION: {
         if (token.def->flags & DEF_NAMESPACE) {
           definition_scope* dscope = (definition_scope*)token.def;
@@ -234,12 +284,12 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
             full_type ft;
             ft.def = scope;
             token = read_next_token(scope);
-            read_function_params(ft.refs, lex, token, scope, this, herr);
+            read_function_params(ft.refs, token, scope);
             if (handle_declarators(scope,token,ft,inherited_flags | DEF_TYPENAME,decl))
               FATAL_RETURN(1);
             goto handled_declarator_block;
           }
-          token.report_error(herr, "Unexpected identifier in this scope; `" + tname + "' does not name a type");
+          token.report_error(herr, "Unexpected identifier in this scope (" + scope->name + "); `" + tname + "' does not name a type");
         } break;
       
       case TT_TEMPLATE:
@@ -249,50 +299,21 @@ int jdip::context_parser::handle_scope(definition_scope *scope, token_t& token, 
         }
         break;
       
-      case TT_OPERATORKW:
-          token = read_next_token(scope);
-          if (token.type != TT_DECLARATOR and token.type != TT_DECFLAG and token.type != TT_DECLTYPE) {
-            token.report_errorf(herr, "Expected cast type to overload before %s");
-            FATAL_RETURN(1);
-          }
-          else {
-            lex_buffer lb(lex);
-            while (token.type != TT_LEFTPARENTH and token.type != TT_LEFTBRACE and token.type != TT_SEMICOLON and token.type != TT_ENDOFCODE)
-              lb.push(token), token = read_next_token(scope);
-            if (token.type != TT_LEFTPARENTH) {
-              token.report_error(herr, "Expected function parmeters before %s");
-              FATAL_RETURN(1); break;
-            }
-            
-            token.type = TT_ENDOFCODE; lb.push(token);
-            token.type = TT_LEFTPARENTH;
-            lb.reset(); token_t kick = lb.get_token(herr);
-            full_type ft = read_fulltype(&lb, kick, scope, this, herr);
-            
-            string opname; {
-              ref_stack my_func_refs;
-              read_referencers_post(my_func_refs, lex, token, scope, this, herr);
-              if (my_func_refs.empty() or my_func_refs.top().type != ref_stack::RT_FUNCTION) {
-                token.report_error(herr, "Expected function parameters for operator overload");
-                return 1;
-              }
-              opname = "operator " + ft.toString();
-              ft.refs.append_c(my_func_refs);
-            }
-            
-            definition_function *const df = new definition_function(opname, scope, ft.def, ft.refs, ft.flags, inherited_flags);
-            decl = df;
-            
-            decpair ins = scope->declare(decl->name, decl);
-            if (!ins.inserted) { arg_key k(df->referencers); decl = ((definition_function*)ins.def)->overload(k, df, herr); }
-            goto handled_declarator_block;
-          }
-        break;
+      case TT_OPERATORKW: {
+          full_type ft = read_operatorkw_cast_type(token, scope);
+          if (!ft.def)
+            return 1;
+          if (!(decl = scope->overload_function("(cast)", ft, inherited_flags, token, herr)))
+            return 1;
+          goto handled_declarator_block;
+      } break;
       
-      case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY:
+      case TT_ASM: case TT_SIZEOF: case TT_ISEMPTY: case TT_ALIGNOF: case TT_ALIGNAS:
       case TT_OPERATOR: case TT_ELLIPSIS: case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COLON:
       case TT_DECLITERAL: case TT_HEXLITERAL: case TT_OCTLITERAL: case TT_STRINGLITERAL: case TT_CHARLITERAL:
       case TT_NEW: case TT_DELETE: case TTM_CONCAT: case TTM_TOSTRING: case TT_INVALID:
+      case TT_CONST_CAST: case TT_STATIC_CAST: case TT_DYNAMIC_CAST: case TT_REINTERPRET_CAST:
+      case TT_NOEXCEPT: case TT_TYPEID:
       #include <User/token_cases.h>
       default:
         token.report_errorf(herr, "Unexpected %s in this scope");

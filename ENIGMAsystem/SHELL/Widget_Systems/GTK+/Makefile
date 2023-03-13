@@ -1,4 +1,4 @@
-SOURCES += $(wildcard Widget_Systems/GTK+/*.cpp)
+SOURCES += $(wildcard Widget_Systems/GTK+/*.cpp) Widget_Systems/General/WSdialogs.cpp
 override LDLIBS += -lgthread-2.0
 
 ifeq ($(PLATFORM), xlib)

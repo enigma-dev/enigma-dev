@@ -85,6 +85,9 @@ std::string filename_drive(std::string fname);
 std::string filename_ext(std::string fname);
 std::string filename_change_ext(std::string fname, std::string newext);
 
+var string_split(const std::string &str, const std::string &delim,
+                 bool skip_empty = false);
+
 }  //namespace enigma_user
 
 #endif  //ENIGMA_ESTRING_H

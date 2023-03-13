@@ -32,6 +32,7 @@
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <unordered_map>
+#include <memory>
 
 namespace {
 
@@ -50,9 +51,9 @@ enigma::VertexFormat currentVertexFormat;
 
 namespace enigma {
 
-vector<VertexFormat*> vertexFormats;
-vector<VertexBuffer*> vertexBuffers;
-vector<IndexBuffer*> indexBuffers;
+vector<std::unique_ptr<VertexFormat>> vertexFormats;
+vector<std::unique_ptr<VertexBuffer>> vertexBuffers;
+vector<std::unique_ptr<IndexBuffer>> indexBuffers;
 
 } // namespace enigma
 
@@ -132,19 +133,18 @@ unsigned vertex_format_get_hash(int id) {
 
 int vertex_create_buffer() {
   int id = enigma::vertexBuffers.size();
-  enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
+  enigma::vertexBuffers.push_back(std::make_unique<enigma::VertexBuffer>());
   return id;
 }
 
 int vertex_create_buffer_ext(unsigned size) {
   int id = enigma::vertexBuffers.size();
-  enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
+  enigma::vertexBuffers.push_back(std::make_unique<enigma::VertexBuffer>());
   return id;
 }
 
 void vertex_delete_buffer(int buffer) {
   enigma::graphics_delete_vertex_buffer_peer(buffer);
-  delete enigma::vertexBuffers[buffer];
   enigma::vertexBuffers[buffer] = nullptr;
 }
 
@@ -157,15 +157,15 @@ void vertex_set_format(int buffer, int format) {
 }
 
 unsigned vertex_get_buffer_size(int buffer) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   return vertexBuffer->getNumber() * sizeof(enigma::VertexElement);
 }
 
 unsigned vertex_get_number(int buffer) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const auto& vertexBuffer = enigma::vertexBuffers[buffer];
   if (vertex_format_exists(vertexBuffer->format)) {
-    const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+    const auto& vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
     return vertexBuffer->getNumber() / vertexFormat->stride;
   }
@@ -174,7 +174,7 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer, bool dynamic) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   // we can freeze the vertex buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
@@ -185,7 +185,7 @@ void vertex_freeze(int buffer, bool dynamic) {
 }
 
 void vertex_clear(int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   // clear it just for good measure, even though it's probably already empty
   // since we do that just after uploading it to the GPU "peer"
@@ -200,7 +200,7 @@ void vertex_clear(int buffer) {
 }
 
 void vertex_begin(int buffer, int format) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   vertexBuffer->vertices.clear();
   vertexBuffer->format = format;
@@ -212,22 +212,22 @@ void vertex_begin(int buffer, int format) {
 }
 
 void vertex_end(int buffer) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
 
   if (vertexBuffer->frozen) return;
   vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
 void vertex_data(int buffer, const enigma::varargs& data) {
-  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  auto& vertexBuffer = enigma::vertexBuffers[buffer];
   #ifdef DEBUG_MODE
   if (!vertex_format_exists(vertexBuffer->format)) {
-    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
-               " does not exist and is required for vertex_data to decode varargs", false);
+    DEBUG_MESSAGE("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " does not exist and is required for vertex_data to decode varargs", MESSAGE_TYPE::M_ERROR);
     return;
   }
   #endif
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+  const auto& vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   int attrIndex = 0;
   for (int i = 0; i < data.argc;) {
     attrIndex = attrIndex % vertexFormat->flags.size();
@@ -257,8 +257,8 @@ void vertex_data(int buffer, const enigma::varargs& data) {
         continue;
     }
 
-    show_error("Vertex format " + enigma_user::toString(vertexBuffer->format) +
-               " contains attribute with unknown type " + enigma_user::toString(attr.first), false);
+    DEBUG_MESSAGE("Vertex format " + enigma_user::toString(vertexBuffer->format) +
+               " contains attribute with unknown type " + enigma_user::toString(attr.first), MESSAGE_TYPE::M_ERROR);
     break;
   }
 }
@@ -336,19 +336,18 @@ void vertex_submit_offset(int buffer, int primitive, int texture, unsigned offse
 
 int index_create_buffer() {
   int id = enigma::indexBuffers.size();
-  enigma::indexBuffers.push_back(new enigma::IndexBuffer());
+  enigma::indexBuffers.push_back(std::make_unique<enigma::IndexBuffer>());
   return id;
 }
 
 int index_create_buffer_ext(unsigned size) {
   int id = enigma::indexBuffers.size();
-  enigma::indexBuffers.push_back(new enigma::IndexBuffer());
+  enigma::indexBuffers.push_back(std::make_unique<enigma::IndexBuffer>());
   return id;
 }
 
 void index_delete_buffer(int buffer) {
   enigma::graphics_delete_index_buffer_peer(buffer);
-  delete enigma::indexBuffers[buffer];
   enigma::indexBuffers[buffer] = nullptr;
 }
 
@@ -365,7 +364,7 @@ unsigned index_get_number(int buffer) {
 }
 
 void index_freeze(int buffer, bool dynamic) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   // we can freeze the index buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
@@ -376,7 +375,7 @@ void index_freeze(int buffer, bool dynamic) {
 }
 
 void index_clear(int buffer) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   // clear it just for good measure, even though it's probably already empty
   // since we do that just after uploading it to the GPU "peer"
@@ -391,7 +390,7 @@ void index_clear(int buffer) {
 }
 
 void index_begin(int buffer, int type) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   indexBuffer->indices.clear();
   indexBuffer->type = type;
@@ -403,7 +402,7 @@ void index_begin(int buffer, int type) {
 }
 
 void index_end(int buffer) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
 
   if (indexBuffer->frozen) return;
   indexBuffer->number = indexBuffer->indices.size();
@@ -412,7 +411,7 @@ void index_end(int buffer) {
 }
 
 void index_data(int buffer, const enigma::varargs& data) {
-  enigma::IndexBuffer* indexBuffer = enigma::indexBuffers[buffer];
+  auto& indexBuffer = enigma::indexBuffers[buffer];
   for (int i = 0; i < data.argc; i++) {
     if (indexBuffer->type == index_type_uint) {
       uint32_t ind = data.get(i);

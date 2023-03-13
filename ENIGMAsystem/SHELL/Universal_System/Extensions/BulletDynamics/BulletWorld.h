@@ -20,17 +20,17 @@
   #include "libEGMstd.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Bullet Dynamics physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } BulletWorld* w = bulletWorlds[id];
   #define get_world(w,id) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Bullet Dynamics physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } BulletWorld* w = bulletWorlds[id];
   #define get_worldc(w,id, c) \
     if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot cast Bullet Dynamics physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot cast Bullet Dynamics physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } c w = (c) bulletWorlds[id]->dynamicsWorld;
 #else

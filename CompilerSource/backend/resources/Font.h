@@ -13,6 +13,9 @@
 #include "backend/JavaStruct.h"
 #include "backend/sub/GlyphRange.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Font
 {
 	String name;
@@ -26,5 +29,8 @@ struct Font
 	int glyphRangeCount;
 	GlyphRange *glyphRanges;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

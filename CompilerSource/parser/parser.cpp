@@ -45,7 +45,7 @@
 using namespace std; //More ease //To interface with externally defined types and functions
 #include "parser_components.h" //duh
 
-#include "general/darray.h"
+#include "darray.h"
 #include "general/parse_basics_old.h"
 #include "object_storage.h"
 
@@ -151,14 +151,15 @@ void parser_init()
 
 
 
-string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names, bool isObject)
+void parser_main(ParsedCode* pev, const std::set<std::string>& script_names, bool isObject)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
 
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
 
-  string synt;
+  string &code = pev->code;
+  string &synt = pev->synt;
 
   //Reset things
     //Nothing to reset :trollface:
@@ -182,15 +183,14 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
   }
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, code,synt,pev, script_names, isObject); cout << " done>"; fflush(stdout);
+    collect_variables(current_language, pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
-
-  return code;
 }
 
 typedef map<string,dectrip> localscope;
 pt move_to_beginning(string& code, string& synt, pt pos)
 {
+  (void) code;
   bool lparenth = false; // true if the last symbol set skipped from this block was a set of brackets
   backloop:
   while (synt[pos] == ']' or synt[pos] == ')') // Seek to beginning of array subscripts and function args
@@ -269,7 +269,10 @@ bool is_literal(const lexpair& lp) {
     }
   return 1;
 }
-int make_hash(const lexpair& lp, parsed_event* pev) {
+
+namespace {
+
+int make_hash(const lexpair& lp, ParsedCode* pev) {
   if (!is_literal(lp)) return -1;
   if (is_integer(lp)) return atol(lp.code.c_str());
   if (is_float(lp)) return int(atof(lp.code.c_str()) * 65536);
@@ -288,8 +291,6 @@ int make_hash(const lexpair& lp, parsed_event* pev) {
   return r;
 }
 
-
-namespace {
 //Retrieve the current token based on a syntax tag. Returns false if the end of the string is reached (there will always be a closing "};").
 //Also advances the current position in the syntax string (which runs in parallel to code); it will point to the first letter not matching the tag.
 bool scan_token(string& res, pt& pos, const string& code, const string& synt, char syntaxTag) {
@@ -323,12 +324,12 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
   return true;
 }
 
+}  // namespace
 
-} 
+int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
+  string &code = parsed_code->code;
+  string &synt = parsed_code->synt;
 
-
-int parser_secondary(CompileState &state, string& code, string& synt,
-                     parsed_object* obj, parsed_event* pev) {
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
   int slev = 0;
@@ -745,7 +746,7 @@ int parser_secondary(CompileState &state, string& code, string& synt,
   }
 
   // Handle switch statements. Badly.
-  if (pev) // We need to know this to deal with string hashes
+  if (parsed_code) // We need to know this to deal with string hashes
   {
     static int switch_count = 0;
     int string_index = 0; // Number of strings before this statement
@@ -859,7 +860,7 @@ int parser_secondary(CompileState &state, string& code, string& synt,
         // Order hashes
         map<int,vector<int> > hashes; // hash KEY by vector of case id's VALUE
         for (size_t i = 0; i < cases.size(); i++) {
-          int hash = make_hash(cases[i], pev);
+          int hash = make_hash(cases[i], parsed_code);
           hashes[hash].push_back(i);
         }
 
@@ -878,7 +879,7 @@ int parser_secondary(CompileState &state, string& code, string& synt,
           const int lower_bound = cases[0].stri, upper_bound = cases[cases.size()-1].stri + cases[cases.size()-1].strc - 1;
           map<int,string> reorder;
           for (int i = lower_bound; i <= upper_bound; i++)
-            reorder[i] = pev->strs[i];
+            reorder[i] = parsed_code->strs[i];
 
           int overwrite_at = lower_bound;
           for (map<int,vector<int> >::iterator i = hashes.begin(); i != hashes.end(); i++)
@@ -903,7 +904,7 @@ int parser_secondary(CompileState &state, string& code, string& synt,
               for (int iii = 0; iii < cases[casenum].strc; iii++)
               {
                 int indx = cases[casenum].stri + iii;
-                pev->strs[overwrite_at++] = reorder[indx];
+                parsed_code->strs[overwrite_at++] = reorder[indx];
                 reorder.erase(indx);
               }
             }
@@ -918,7 +919,7 @@ int parser_secondary(CompileState &state, string& code, string& synt,
           }
 
           for (map<int,string>::iterator i = reorder.begin(); i != reorder.end(); i++)
-            pev->strs[overwrite_at++] = i->second;
+            parsed_code->strs[overwrite_at++] = i->second;
         }
         icode += deflcode + deflsufcode;
         isynt += deflsynt + deflsufsynt;

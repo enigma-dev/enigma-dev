@@ -32,6 +32,7 @@ namespace jdi {
 
 #include <System/token.h>
 #include <API/error_reporting.h>
+#include <Storage/definition.h>
 
 namespace jdi {
   /**

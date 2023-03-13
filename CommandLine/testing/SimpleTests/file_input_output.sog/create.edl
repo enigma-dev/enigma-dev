@@ -1,0 +1,228 @@
+/// BINARY FILES
+var bin_path = "file_bin_test.bin";
+var bin_white = "file_bin_test_white.bin";
+
+// BINARY WRITE
+var bin_write;
+bin_write = file_bin_open(bin_path,1);
+gtest_assert_ge(bin_write, 0);
+file_bin_write_byte(bin_write, 3);
+file_bin_write_byte(bin_write, 255);
+file_bin_write_byte(bin_write, 7);
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),file_bin_size(bin_write));
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),0);
+gtest_expect_ne(file_bin_position(bin_write),file_bin_size(bin_write));
+
+// reading in write mode should fail
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_read_byte(bin_write),-1);
+
+// rewrite should change mode from write to read+write
+file_bin_rewrite(bin_write);
+file_bin_write_byte(bin_write,64);
+file_bin_seek(bin_write,0);
+gtest_expect_eq(file_bin_read_byte(bin_write),64);
+
+// restore file for next test
+file_bin_rewrite(bin_write);
+file_bin_write_byte(bin_write,99);
+file_bin_write_byte(bin_write,-1); // underflows to 255
+file_bin_write_byte(bin_write,256); // overflows to 0
+gtest_expect_eq(file_bin_size(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),3);
+gtest_expect_eq(file_bin_position(bin_write),file_bin_size(bin_write));
+file_bin_close(bin_write);
+
+// BINARY READ
+var bin_read;
+bin_read = file_bin_open(bin_path,0);
+gtest_assert_ge(bin_read, 0);
+gtest_expect_eq(file_bin_size(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),0);
+gtest_expect_ne(file_bin_position(bin_read),file_bin_size(bin_read));
+gtest_expect_eq(file_bin_read_byte(bin_read),99);
+gtest_expect_eq(file_bin_read_byte(bin_read),255);
+gtest_expect_eq(file_bin_read_byte(bin_read),0);
+gtest_expect_eq(file_bin_size(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),3);
+gtest_expect_eq(file_bin_position(bin_read),file_bin_size(bin_read));
+
+// writing in read mode should fail
+file_bin_seek(bin_read,0);
+file_bin_write_byte(bin_read,64);
+file_bin_seek(bin_read,0);
+gtest_expect_eq(file_bin_read_byte(bin_read),99);
+
+// rewrite should change mode from read to read+write
+file_bin_rewrite(bin_read);
+file_bin_write_byte(bin_read,64);
+file_bin_seek(bin_read,0);
+gtest_expect_eq(file_bin_read_byte(bin_read),64);
+
+// restore file for next test
+file_bin_rewrite(bin_read);
+file_bin_write_byte(bin_read,99);
+file_bin_write_byte(bin_read,-1); // underflows to 255
+file_bin_write_byte(bin_read,256); // overflows to 0
+file_bin_close(bin_read);
+
+// Test byte reading exhaustively
+file_text_close(file_text_open_write(bin_white));
+bin_write = file_bin_open(bin_white,2);
+
+for (int bytes0to255=0; bytes0to255<$100; bytes0to255+=1)
+	{
+	file_bin_write_byte(bin_write,bytes0to255);
+	file_bin_seek(bin_write,bytes0to255);
+	gtest_expect_eq(file_bin_read_byte(bin_write),bytes0to255)
+	}
+file_bin_close(bin_write);
+
+// BINARY READ & WRITE
+var bin_read_write;
+bin_read_write = file_bin_open(bin_path,2);
+gtest_assert_ge(bin_read_write, 0);
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_ne(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_seek(bin_read_write,file_bin_size(bin_read_write));
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_rewrite(bin_read_write);
+gtest_expect_eq(file_bin_size(bin_read_write),0);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_eq(file_bin_position(bin_read_write),file_bin_size(bin_read_write));
+file_bin_write_byte(bin_read_write,1);
+file_bin_write_byte(bin_read_write,2);
+file_bin_write_byte(bin_read_write,3);
+file_bin_seek(bin_read_write,0);
+gtest_expect_eq(file_bin_size(bin_read_write),3);
+gtest_expect_eq(file_bin_position(bin_read_write),0);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),1);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),2);
+gtest_expect_eq(file_bin_read_byte(bin_read_write),3);
+file_bin_close(bin_read_write);
+	
+/// TEXT FILES
+var text_path = "file_text_test.txt";
+
+// TEXT WRITING
+var text_write;
+text_write = file_text_open_write(text_path);
+gtest_assert_ge(text_write, 0);
+file_text_write_string(text_write, "apple");
+file_text_write_string(text_write, " pear");
+file_text_write_string(text_write, ' ');
+file_text_write_string(text_write, "bear");
+file_text_writeln(text_write);
+file_text_write_real(text_write, 0);
+file_text_write_real(text_write, -1);
+file_text_write_real(text_write, 253);
+file_text_writeln(text_write);
+file_text_write_real(text_write, 0.1875);
+file_text_write_real(text_write, -59.234375);
+file_text_write_real(text_write, 489.703125);
+file_text_writeln(text_write);
+file_text_close(text_write);
+
+// TEXT APPEND
+var text_append;
+text_append = file_text_open_append(text_path);
+gtest_assert_ge(text_append, 0);
+file_text_write_real(text_append, 2);
+file_text_write_real(text_append, 5);
+file_text_write_string(text_append, " b");
+file_text_writeln(text_append);
+file_text_writeln(text_append, " 45 -89 -102.5");
+file_text_writeln(text_append, "holy moly moo");
+file_text_close(text_append);
+
+// TEXT READ
+var text_read;
+text_read = file_text_open_read(text_path);
+gtest_assert_ge(text_read, 0);
+gtest_expect_false(file_text_eof(text_read));
+gtest_expect_false(file_text_eoln(text_read));
+gtest_expect_eq(file_text_read_string(text_read),"apple pear bear");
+gtest_expect_false(file_text_eof(text_read));
+gtest_expect_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),0);
+gtest_expect_eq(file_text_read_real(text_read),-1);
+gtest_expect_eq(file_text_read_real(text_read),253);
+gtest_expect_false(file_text_eof(text_read));
+gtest_expect_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),0.1875);
+gtest_expect_eq(file_text_read_real(text_read),-59.234375);
+gtest_expect_eq(file_text_read_real(text_read),489.703125);
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),2);
+gtest_expect_eq(file_text_read_string(text_read)," 5 b");
+file_text_readln(text_read);
+gtest_expect_eq(file_text_read_real(text_read),45);
+gtest_expect_eq(file_text_readln(text_read)," -89 -102.5");
+gtest_expect_eq(file_text_readln(text_read),"holy moly moo");
+// Unix convention/end of file line is empty
+gtest_expect_false(file_text_eof(text_read));
+gtest_expect_true(file_text_eoln(text_read));
+file_text_readln(text_read);
+gtest_expect_true(file_text_eof(text_read));
+gtest_expect_true(file_text_eoln(text_read));
+file_text_close(text_read);
+
+/// General File Functions
+gtest_expect_false(file_exists("ENIGMA John Doe.txt"));
+gtest_expect_false(directory_exists("ENIGMA Folders"));
+file_text_close(file_text_open_write("ENIGMA John Doe.txt"));
+directory_create("ENIGMA Folders");
+gtest_expect_true(file_exists("ENIGMA John Doe.txt"));
+gtest_expect_true(directory_exists("ENIGMA Folders"));
+
+gtest_expect_false(file_exists("Games Are Fun.txt"));
+file_rename("ENIGMA John Doe.txt","Games Are Fun.txt");
+gtest_expect_false(file_exists("ENIGMA John Doe.txt"));
+gtest_expect_true(file_exists("Games Are Fun.txt"));
+
+gtest_expect_false(file_exists("Development Community.txt"));
+file_copy("Games Are Fun.txt","Development Community.txt");
+gtest_expect_true(file_exists("Games Are Fun.txt"));
+gtest_expect_true(file_exists("Development Community.txt"));
+
+file_delete("Development Community.txt");
+gtest_expect_true(file_exists("Games Are Fun.txt"));
+gtest_expect_false(file_exists("Development Community.txt"));
+
+file_delete("Games Are Fun.txt");
+gtest_expect_false(file_exists("Games Are Fun.txt"));
+gtest_expect_false(file_exists("Development Community.txt"));
+gtest_expect_false(file_exists("ENIGMA John Doe.txt"));
+
+directory_destroy("ENIGMA Folders");
+gtest_expect_false(directory_exists("ENIGMA Folders"));
+
+gtest_expect_eq(filename_name("C:/John/Doe/Smoe.txt"),"Smoe.txt");
+gtest_expect_eq(filename_path("C:/John/Doe/Smoe.txt"),"C:/John/Doe/");
+gtest_expect_eq(filename_dir("C:/John/Doe/Smoe.txt"),"C:/John/Doe");
+gtest_expect_eq(filename_drive("C:/John/Doe/Smoe.txt"),"C:");
+gtest_expect_eq(filename_drive("C/John/Doe/Smoe.txt"),"");
+gtest_expect_eq(filename_drive("/c/John/Doe/Smoe.txt"),"");
+gtest_expect_eq(filename_drive("Smoe.txt"),"");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.txt"),".txt");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/Makefile"),"");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/Makefile.txt"),".txt");
+gtest_expect_eq(filename_ext("archive.tar.gz"),".gz");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe/datafiles/archive.tar.gz"),".gz");
+gtest_expect_eq(filename_ext("C:/John/Doe/Smoe.gmx/datafiles/archive.tar.gz"),".gz");
+gtest_expect_eq(filename_change_ext("C:/John/Doe/Smoe.txt",".dingtwo"),"C:/John/Doe/Smoe.dingtwo");
+
+/// We're done!
+file_delete(bin_path);
+file_delete(bin_white);
+file_delete(text_path);
+game_end();

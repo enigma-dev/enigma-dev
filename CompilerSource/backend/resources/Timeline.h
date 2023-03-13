@@ -12,6 +12,9 @@
 #include "backend/sub/Moment.h"
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Timeline
 {
 	String name;
@@ -20,5 +23,8 @@ struct Timeline
 	Moment *moments;
 	int momentCount;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

@@ -44,6 +44,7 @@ namespace enigma_user {
   void screen_refresh();
   void screen_init();
   void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
+  void screen_reset_viewport();
 
   unsigned int display_get_gui_width();
   unsigned int display_get_gui_height();

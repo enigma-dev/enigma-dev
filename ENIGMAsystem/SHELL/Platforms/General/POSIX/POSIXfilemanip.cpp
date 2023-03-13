@@ -17,6 +17,7 @@
 
 #include "Platforms/General/PFfilemanip.h"
 
+#include <fstream> // for file_copy
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -48,7 +49,12 @@ int file_delete(string fname) { return remove(fname.c_str()); }
 int file_rename(string oldname, string newname) { return rename(oldname.c_str(), newname.c_str()); }
 
 int file_copy(string fname, string newname) {
-  return system(("cp " + fname + " " + newname).c_str());  // Hackish, but there's no good implementation on Linux
+  std::ifstream from(fname);
+  if (!from.good()) return false;
+  std::ofstream to(newname);
+  if (!to.good()) return false;
+  to << from.rdbuf();
+  return true;
 }
 
 int directory_exists(string dname) {

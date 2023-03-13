@@ -15,29 +15,45 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+<<<<<<< HEAD
 #include <iostream>
 #include <string>
 
 #include "Bridges/Win32-Direct3D9/DX9Context.h"
+=======
+>>>>>>> master
 #include "Direct3D9Headers.h"
-using namespace std;
+
 #include "DIRECTX9Std.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  bool pbo_isgo;
 
-  void graphicssystem_initialize()
-  {
-  }
-}
+#include <iostream>
+#include <string>
+
+using namespace std;
+using namespace enigma::dx9;
+
+namespace enigma {
+
+bool Direct3D9Managed = true;
+
+void graphicssystem_initialize() {}
+
+} // namespace enigma
 
 namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
+
 string draw_get_graphics_error()
 {
+<<<<<<< HEAD
   return "";
 }
 }
+=======
+  return ""; //TODO: implement
+}
+
+} // namespace enigma_user
+>>>>>>> master

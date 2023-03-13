@@ -26,7 +26,7 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "general/darray.h"
+#include "darray.h"
 
 
 #include "syntax/syncheck.h"
@@ -42,9 +42,9 @@ int m_prog_loop_cfp();
 
 #ifdef _WIN32
  #include <windows.h>
- #define dllexport extern "C" __declspec(dllexport)
+ #define DLLEXPORT extern "C" __declspec(dllexport)
 #else
- #define dllexport extern "C"
+ #define DLLEXPORT extern "C"
  #include <cstdio>
 #endif
 
@@ -95,11 +95,10 @@ syntax_error *definitionsModified(const char*,const char*);
 #include "OS_Switchboard.h"
 #include "general/bettersystem.h"
 #include <System/builtins.h>
-#include "compiler/jdi_utility.h"
 
 void do_cli(jdi::context &ct);
 syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code);
-int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode);
+int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode);
 int main(int argc, char* argv[])
 {
   puts("Attempting to run");
@@ -148,7 +147,7 @@ int main(int argc, char* argv[])
   printf("Line %d, position %d (absolute index %d): %s\r\n",a->line,a->position,a->absolute_index,a->err_str);
   {
     jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
-    quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
+    current_language->quickmember_integer("sprite0");
   }
 
   EnigmaStruct es;
@@ -166,7 +165,7 @@ int main(int argc, char* argv[])
   obj.mainEventCount = 1;
   obj.mainEvents = &mev;
   obj.name = "obj_boobs";
-  obj.spriteId = obj.parentId = obj.maskId = -1;
+  obj.spriteId = obj.parentId = obj.maskId = obj.polygonId = -1;
 
   es.gmObjects = &obj;
   es.gmObjectCount = 1;

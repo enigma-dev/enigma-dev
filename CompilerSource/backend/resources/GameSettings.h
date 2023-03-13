@@ -13,6 +13,9 @@
 #include "backend/util/Image.h"
 //import org.lateralgm.file.iconio.ICOFile;
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct GameSettings
 {
 	int gameId; // randomized in GmFile constructor
@@ -73,5 +76,8 @@ struct GameSettings
 
 	String gameIcon; //filename
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

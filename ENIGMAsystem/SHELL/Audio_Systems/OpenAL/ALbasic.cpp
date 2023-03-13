@@ -32,7 +32,6 @@ using std::string;
 #include "SoundResource.h"
 
 #ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
 #endif
 
@@ -248,8 +247,6 @@ void sound_seek_all(float position) {
     alSourcef(sound_channels[i]->source, AL_SEC_OFFSET, position);  // Non Streams
   }
 }
-
-void action_sound(int snd, bool loop) { (loop ? sound_loop : sound_play)(snd); }
 
 const char* sound_get_audio_error() { return alureGetErrorString(); }
 

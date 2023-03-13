@@ -49,13 +49,13 @@ namespace enigma
 #include "Widget_Systems/widgets_mandatory.h"
 #define get_buffer(binbuff,buff)\
   if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
-    show_error("Attempting to access non-existing buffer " + toString(buff), false);\
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buff), MESSAGE_TYPE::M_USER_ERROR);\
     return;\
   }\
   enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
 #define get_bufferr(binbuff,buff,r)\
   if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
-    show_error("Attempting to access non-existing buffer " + toString(buff), false);\
+    DEBUG_MESSAGE("Attempting to access non-existing buffer " + toString(buff), MESSAGE_TYPE::M_USER_ERROR);\
     return r;\
   }\
   enigma::BinaryBuffer *binbuff = enigma::buffers[buff];

@@ -46,7 +46,7 @@ void sound_seek_all(float position);
 bool sound_isplaying(int sound);
 bool sound_ispaused(int sound);
 
-void action_sound(int snd, bool loop);
+inline void action_sound(int snd, bool loop) { (loop ? sound_loop : sound_play)(snd); }
 
 int sound_add(string fname, int kind, bool preload);
 bool sound_replace(int sound, string fname, int kind, bool preload);

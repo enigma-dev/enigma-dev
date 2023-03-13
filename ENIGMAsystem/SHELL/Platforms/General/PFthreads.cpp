@@ -1,7 +1,7 @@
 #include "PFthreads_impl.h"
 #include "PFthreads.h"
 
-#include "Universal_System/resource_data.h" //script_execute
+#include "Universal_System/Resources/resource_data.h" //script_execute
 
 using enigma::ethread;
 using enigma::threads;

@@ -24,7 +24,7 @@ message Room {
   message Background {
     optional bool visible = 1;
     optional bool foreground = 2;
-    optional string background_name = 3 [(gmx) = "name"];
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "name"];
     optional int32 x = 4;
     optional int32 y = 5;
     optional bool htiled = 6;
@@ -52,15 +52,15 @@ message Room {
     optional int32 vborder = 11;
     optional double hspeed = 12;
     optional double vspeed = 13;
-    optional string object_following = 14 [(gmx) = "objName"];
+    optional string object_following = 14 [(resource_ref)="object", (gmx) = "objName"];
   }
 
   repeated View views = 16 [(gmx) = "views/view", (yyp) = "views"];
 
   message Instance {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 100000];
-    optional string object_type = 3 [(gmx) = "objName"];
+    optional int32 id = 2 [(id_start) = 100001];
+    optional string object_type = 3 [(resource_ref)="object", (gmx) = "objName"];
     optional double x = 4;
     optional double y = 5;
     optional double z = 6;
@@ -84,8 +84,8 @@ message Room {
 
   message Tile {
     optional string name = 1;
-    optional int32 id = 2 [(id_start) = 10000000];
-    optional string background_name = 3 [(gmx) = "bgName"];
+    optional int32 id = 2 [(id_start) = 10000001];
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
     optional double x = 4;
     optional double y = 5;
     optional int32 xoffset = 6 [(gmx) = "xo"];
@@ -106,6 +106,18 @@ message Room {
   }
 
   repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
+
+  message Layer {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
+
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
+  }
+
+  repeated Layer layers = 20;
 
   message RoomPhysicsSettings {
     optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];

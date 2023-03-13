@@ -99,19 +99,24 @@ inline TT statement_type(string name)
       break;
     case 'i':
       if (name == "if") return TT_S_IF;
+      break;
     case 'r':
       if (name == "return") return TT_SHORTSTATEMENT;
       if (name == "repeat") return TT_GEN_STATEMENT;
       break;
     case 's':
       if (name == "switch") return TT_S_SWITCH;
+      break;
     case 't':
       if (name == "try") return TT_S_TRY;
+      break;
     case 'u':
       if (name == "until") return TT_SHORTSTATEMENT;
+      break;
     case 'w':
       if (name == "while") return TT_SHORTSTATEMENT;
       if (name == "with") return TT_SHORTSTATEMENT;
+      break;
   }
   return TT_ERROR;
 }

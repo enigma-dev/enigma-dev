@@ -141,7 +141,6 @@ void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, 
     }
     if (cost>max_cost){max_cost=cost;}
     if (grid->threshold<max_cost){grid->threshold=max_cost;}
-    //std::cout << "mp_grid_add_rectangle(grid," << floor(x1/grid->cellwidth)*grid->cellwidth << "," << floor(y1/grid->cellheight)*grid->cellheight << "," << ceil(x2/grid->cellwidth)*grid->cellwidth << "," << ceil(y2/grid->cellheight)*grid->cellheight<< ");" << std::endl;
 }
 
 void mp_grid_add_instances(unsigned id,int obj,bool prec,unsigned cost)
@@ -152,7 +151,6 @@ void mp_grid_add_instances(unsigned id,int obj,bool prec,unsigned cost)
     for (unsigned int i=0; i<grid->hcells; i++){
         for (unsigned int c=0; c<grid->vcells; c++){
             if (grid->nodearray[i*grid->vcells+c].cost>max_cost){max_cost=grid->nodearray[i*grid->vcells+c].cost;}
-            //std::cout<<"collision_rectangle("<<i*grid->cellwidth<<","<<c*grid->cellheight<<","<<(i+1)*grid->cellwidth<<","<<(c+1)*grid->cellheight<<","<<obj<<","<<prec<<","<<false<<")"<<std::endl;
             if (collision_rectangle(x+i*grid->cellwidth,y+c*grid->cellheight,x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight,obj,prec,false)!=-4){
                 grid->nodearray[i*grid->vcells+c].cost = cost;
             }
@@ -219,8 +217,7 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     if (xs>int(gr->hcells)-1 or xg>int(gr->hcells)-1) return false;
     if (ys<0 or yg<0) return false;
     if (ys>int(gr->vcells)-1 or yg>int(gr->vcells)-1) return false;
-    //if (xstart==xgoal && ystart==ygoal) return;
-
+    
     bool status = true; //status to check if we can reach the destination
     multimap<unsigned,enigma::node*> nodelist = enigma::find_path(id, &gr->nodearray[xs*vc+ys], &gr->nodearray[xg*vc+yg], allowdiag, status);
     enigma::path *path = enigma::pathstructarray[pathid];

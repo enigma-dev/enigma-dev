@@ -20,12 +20,12 @@
 
 #include <stack>
 #include <vector>
+<<<<<<< HEAD
 #include <algorithm> // msvc min/max
+=======
+#include <algorithm> // min/max
+>>>>>>> master
 #include <math.h>
-
-namespace enigma{
-    extern unsigned char currentcolor[4];
-}
 
 int pr_curve_detail = 20;
 int pr_curve_mode = enigma_user::pr_linestrip;

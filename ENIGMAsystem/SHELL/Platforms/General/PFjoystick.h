@@ -16,7 +16,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_PLATFORM_JOYSTICK
+#define ENIGMA_PLATFORM_JOYSTICK
+
 #include <string>
+
+namespace enigma {
+  void init_joysticks();
+  void handle_joysticks();
+}
 
 namespace enigma_user {
 
@@ -36,6 +44,8 @@ int joystick_direction(int id, int axis1=0, int axis2=1); // Numpad key style. W
 #define joystick_vpos(id) joystick_axis(id,6)
 double joystick_pov(int id);
 double joystick_pov(int id, int axis1, int axis2);
+void joystick_map_button(int id, int butnum, char key);
+void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 
 double joystick_axis(int id, int axis);
 bool joystick_button(int id, int button);
@@ -46,3 +56,5 @@ bool joystick_button(int id, int button);
 extern int joystick_lastbutton;
 
 }
+
+#endif

@@ -16,7 +16,10 @@
 **/
 
 #include "Universal_System/scalar.h"
+<<<<<<< HEAD
 #include "Bridges/Win32-Direct3D11/DX11Context.h"
+=======
+>>>>>>> master
 #include "Direct3D11Headers.h"
 #include "DX11shader.h"
 #include <math.h>

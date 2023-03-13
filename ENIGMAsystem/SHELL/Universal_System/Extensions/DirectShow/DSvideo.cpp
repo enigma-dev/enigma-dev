@@ -18,7 +18,10 @@
 
 #include "VideoStruct.h"
 #include "DSvideo.h"
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <dshow.h>
 
 #include "Platforms/Win32/WINDOWSmain.h"

@@ -18,11 +18,6 @@
 #ifndef ENIGMA_SOUND_EMITTER_H
 #define ENIGMA_SOUND_EMITTER_H
 
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
-
 #include <vector>
 using std::vector;
 

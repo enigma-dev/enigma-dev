@@ -22,11 +22,15 @@
 #include "resources/Timeline.h"
 #include "resources/GmObject.h"
 #include "resources/Room.h"
+#include "resources/Polygon.h"
 
 #include "other/Trigger.h"
 #include "other/Constant.h"
 #include "other/Include.h"
 #include "other/Extension.h"
+
+namespace deprecated {
+namespace JavaStruct {
 
 /// Structure once used for communicating game information between an IDE via
 /// a shared-memory model. @deprecated Use `GameData` instead.
@@ -55,6 +59,9 @@ struct EnigmaStruct
 	int gmObjectCount;
 	Room *rooms;
 	int roomCount;
+	// TODO(Nabeel): Add this when you have Proto for Polygons
+	// Polygon *polygons;
+	// int polygonCount;
 
 	Trigger *triggers;
 	int triggerCount;
@@ -76,8 +83,7 @@ struct EnigmaStruct
 	int lastTileId;
 };
 
-#undef String
-#undef boolean
-#undef byte
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

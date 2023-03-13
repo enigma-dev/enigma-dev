@@ -14,7 +14,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <wininet.h>
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
@@ -30,7 +33,7 @@ void os_powersave_enable(bool enable) {}
 
 bool os_is_network_connected() {
 	DWORD dwFlags = 0;
-	return InternetGetConnectedState(&dwFlags, NULL);
+	return InternetGetConnectedState(&dwFlags, 0);
 }
 
 }  // namespace enigma_user

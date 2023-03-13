@@ -1,10 +1,18 @@
 #include "Gamepad.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <string>
 
 namespace enigma {
 
-static std::vector<Gamepad> gamepads;
+std::vector<Gamepad> gamepads;
+
+using namespace enigma_user;
+
+int digitalButtons[gp_axisrv] = {
+  gp_face1, gp_face2, gp_face3, gp_face4, gp_select, 0, gp_start, gp_stickl, gp_stickr, gp_shoulderl, gp_shoulderr,
+  gp_padu, gp_padd, gp_padl, gp_padr, 0, 0, 0, 0
+};
 
 void Gamepad::clear() {
   for (unsigned i = 0; i < enigma_user::gp_padr; ++i) {
@@ -25,18 +33,24 @@ void initGamepads() {
 }
 
 void cleanupGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) removeGamepad(i);
+  for (size_t i = 0; i < gamepads.size(); ++i) removeGamepad(i);
 }
 
 void pushGamepads() {
-  for (int i = 0; i < SDL_NumJoysticks(); ++i) gamepads[i].push();
+  for (Gamepad& gp : gamepads) gp.push();
 }
 
-void setGamepadButton(int gamepad, int btn, bool pressed) { gamepads[gamepad].state.buttonStatus[btn] = pressed; }
+void setGamepadButton(int gamepad, int btn, bool pressed) {
+#ifdef DEBUG_MODE
+  if (gamepad < 0 || gamepad >= static_cast<int>(gamepads.size())) return;
+  if (btn < 0 || btn >= gp_axisrv) return;
+#endif
+  gamepads[gamepad].state.buttonStatus[digitalButtons[btn]] = pressed;
+}
 
 void addGamepad(unsigned i) {
   if (!SDL_IsGameController(i)) {
-    fprintf(stderr, "Could not open gamepad %i: %s\n", i, SDL_GetError());
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -45,11 +59,11 @@ void addGamepad(unsigned i) {
   g.controller = SDL_GameControllerOpen(i);
 
   if (g.controller == nullptr) {
-    fprintf(stderr, "Could not open gamepad %i: %s\n", i, SDL_GetError());
+    DEBUG_MESSAGE("Could not open gamepad " + std::to_string(i) + ": " + SDL_GetError(), MESSAGE_TYPE::M_ERROR);
     return;
   }
 
-  printf("Connected gamepad %u %s\n", i, SDL_GameControllerName(g.controller));
+  DEBUG_MESSAGE("Connected gamepad " + std::to_string(i) + " " + SDL_GameControllerName(g.controller), MESSAGE_TYPE::M_INFO);
 
   SDL_Joystick* j = SDL_GameControllerGetJoystick(g.controller);
 
@@ -57,9 +71,9 @@ void addGamepad(unsigned i) {
     g.haptic = SDL_HapticOpenFromJoystick(j);
 
     if (SDL_HapticRumbleSupported(g.haptic) && SDL_HapticRumbleInit(g.haptic))
-      printf("Rumble Supported: yes\n");
+      DEBUG_MESSAGE("Rumble Supported: yes", MESSAGE_TYPE::M_INFO);
     else
-      printf("Rumble Supported: no\n");
+      DEBUG_MESSAGE("Rumble Supported: no", MESSAGE_TYPE::M_INFO);
   }
 
   if (i < gamepads.size())
@@ -69,9 +83,13 @@ void addGamepad(unsigned i) {
 }
 
 void removeGamepad(unsigned i) {
-  printf("Disconnected gamepad %u %s\n", i, SDL_GameControllerName(gamepads[i].controller));
+  if (gamepads[i].controller == nullptr) return;
+
+  DEBUG_MESSAGE("Disconnected gamepad " + std::to_string(i) + ": " + SDL_GameControllerName(gamepads[i].controller), MESSAGE_TYPE::M_INFO);
   if (gamepads[i].haptic != nullptr) SDL_HapticClose(gamepads[i].haptic);
   SDL_GameControllerClose(gamepads[i].controller);
+  gamepads[i].haptic = nullptr;
+  gamepads[i].controller = nullptr;
 }
 
 }  // namespace enigma

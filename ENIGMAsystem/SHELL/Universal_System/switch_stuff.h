@@ -36,7 +36,7 @@ namespace enigma
     else
     {
       int ret = 0;
-      const string& n = x.sval;
+      const string& n = x;
       for (size_t i = 0; i < n.length(); i++)
         ret = 31*ret + n[i];
       return ret;

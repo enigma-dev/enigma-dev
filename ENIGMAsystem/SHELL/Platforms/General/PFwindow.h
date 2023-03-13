@@ -24,6 +24,7 @@
 #include <string>
 
 namespace enigma {
+
 extern char mousestatus[3];
 extern char last_mousestatus[3];
 extern char last_keybdstatus[256];
@@ -32,8 +33,16 @@ extern int cursorInt;
 extern int windowX;
 extern int windowY;
 
+extern int window_min_width;
+extern int window_max_width;
+extern int window_min_height;
+extern int window_max_height;
+
 void input_initialize();
 void input_push();
+void input_key_down(int key);
+void input_key_up(int key);
+
 }  // namespace enigma
 
 namespace enigma_user {
@@ -150,6 +159,7 @@ enum {
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
 extern std::string keyboard_lastchar;
+extern int keyboard_key;
 extern int keyboard_lastkey;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
@@ -187,6 +197,8 @@ void mouse_clear(const int button);
 int display_mouse_get_x();
 int display_mouse_get_y();
 void display_mouse_set(int x, int y);
+int display_get_x();
+int display_get_y();
 int display_get_width();
 int display_get_height();
 int display_get_colordepth();
@@ -204,13 +216,10 @@ bool display_set_all(int w, int h, int freq, int bitdepth);
 bool display_test_all(int w, int h, int freq, int bitdepth);
 void set_synchronization(bool enable);
 
-//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
-#if GM_COMPATIBILITY_VERSION <= 81
-unsigned long long window_handle();
-#else
-void* window_handle();
-#endif
-
+window_t window_handle();
+wid_t window_identifier(); // a string containing the number corresponding to the game's main window handle (shell script)
+wid_t window_get_identifier(window_t hwnd); // a string containing the number corresponding to the specified window handle
+  
 int window_get_x();
 int window_get_y();
 
@@ -229,7 +238,7 @@ void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
-void window_default(bool center_size);  // default false specified in platforms mandatory
+void window_default(bool center);  // default true specified in platforms mandatory
 void window_set_region_size(int w, int h, bool adaptwindow);
 
 int window_get_region_width();
@@ -237,9 +246,17 @@ int window_get_region_height();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+void window_set_min_width(int width);
+void window_set_min_height(int height);
+void window_set_max_width(int width);
+void window_set_max_height(int height);
+
 void window_set_minimized(bool minimized);
 void window_set_maximized(bool maximized);
+void window_set_icon(int ind, unsigned subimg);
 void window_set_visible(bool visible);
+int window_get_icon_index();
+unsigned window_get_icon_subimg();
 int window_get_visible();
 bool window_get_stayontop();
 bool window_get_sizeable();
@@ -248,6 +265,7 @@ bool window_get_showicons();
 bool window_get_freezeonlosefocus();
 bool window_get_minimized();
 bool window_get_maximized();
+bool window_has_focus();
 
 int window_mouse_get_x();
 int window_mouse_get_y();

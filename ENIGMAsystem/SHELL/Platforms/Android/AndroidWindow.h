@@ -37,5 +37,3 @@ namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);
 }
-
-#define enigmacatchmouse() //Linux should hopefully do that automatically.

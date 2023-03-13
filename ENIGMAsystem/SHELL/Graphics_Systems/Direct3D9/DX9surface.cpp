@@ -15,33 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+<<<<<<< HEAD
 #include "Bridges/Win32-Direct3D9/DX9Context.h"
 #include "DX9SurfaceStruct.h"
 #include "DX9TextureStruct.h"
+=======
+#include "DX9surface_impl.h"
+#include "DX9textures_impl.h"
+>>>>>>> master
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GStextures_impl.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
-#include "Graphics_Systems/General/GScolor_macros.h"
-
-#include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
-#include "Collision_Systems/collision_types.h"
-
-#include <iostream>
-#include <cstddef>
-#include <math.h>
-#include <stdio.h> //for file writing (surface_save)
 
 using namespace std;
-
-namespace enigma {
-
-vector<Surface*> Surfaces(0);
-D3DCOLOR get_currentcolor();
-
-} // namespace enigma
+using namespace enigma::dx9;
 
 namespace enigma_user {
 
@@ -54,62 +43,68 @@ bool surface_is_supported()
 int surface_create(int width, int height, bool depthbuffer, bool, bool)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
-  //d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(std::make_unique<enigma::DX9Texture>(texture));
+  auto& gmTexture = enigma::textures.back();
+  gmTexture->width = gmTexture->fullwidth = width;
+  gmTexture->height = gmTexture->fullheight = height;
+  //d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   texture->GetSurfaceLevel(0,&surface->surf);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
 {
   LPDIRECT3DTEXTURE9 texture = NULL;
-  d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
+  d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
-  TextureStruct* gmTexture = new TextureStruct(texture);
-  textureStructs.push_back(gmTexture);
-  d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
-  enigma::Surfaces.push_back(surface);
-  return enigma::Surfaces.size() - 1;
+  const int texid = enigma::textures.size();
+  enigma::textures.push_back(std::make_unique<enigma::DX9Texture>(texture));
+  auto& gmTexture = enigma::textures.back();
+  gmTexture->width = gmTexture->fullwidth = width;
+  gmTexture->height = gmTexture->fullheight = height;
+  d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+  surface->texture = texid; surface->width = width; surface->height = height;
+  enigma::surfaces.push_back(surface);
+  return enigma::surfaces.size() - 1;
 }
-
-LPDIRECT3DSURFACE9 pBackBuffer;
 
 void surface_set_target(int id)
 {
   draw_batch_flush(batch_flush_deferred);
 
   get_surface(surface,id);
-  d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
-  d3dmgr->device->SetRenderTarget(0, surface->surf);
+  d3ddev->SetRenderTarget(0, surface.surf);
 
-  d3d_set_projection_ortho(0, 0, surface->width, surface->height, 0);
+  d3d_set_projection_ortho(0, 0, surface.width, surface.height, 0);
 }
 
 void surface_reset_target()
 {
   draw_batch_flush(batch_flush_deferred);
 
-  //d3dmgr->ResetRenderTarget();
-  d3dmgr->device->SetRenderTarget(0, pBackBuffer);
+  LPDIRECT3DSURFACE9 pBackBuffer;
+  d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+  d3ddev->SetRenderTarget(0, pBackBuffer);
   pBackBuffer->Release();
-  pBackBuffer = NULL;
 }
 
 int surface_get_target()
 {
+<<<<<<< HEAD
   return -1;
+=======
+  return 0; //TODO: implement
+>>>>>>> master
 }
 
 void surface_free(int id)
 {
+<<<<<<< HEAD
   get_surface(surf, id);
   delete surf;
 }
@@ -286,6 +281,9 @@ void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, in
 void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 {
 
+=======
+  delete enigma::surfaces[id];
+>>>>>>> master
 }
 
 }

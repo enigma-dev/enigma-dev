@@ -18,9 +18,13 @@
 
 #include "var4.h"
 #include "dynamic_args.h"
-#include "generic_args.h"
 
 #include <limits>
+<<<<<<< HEAD
+=======
+#include <algorithm> // min/max
+#include <stdlib.h>
+>>>>>>> master
 #include <cmath>
 #include <algorithm> // msvc min/max
 #include <stdlib.h>
@@ -219,7 +223,7 @@ namespace enigma_user
 
   ma_scalar max(const enigma::varargs &t)
   {
-    register ma_scalar ret = t.get(0), tst;
+    ma_scalar ret = t.get(0), tst;
     for (int i = 1; i < t.argc; i++)
       if ((tst = t.get(i)) > ret)
         ret = tst;
@@ -228,7 +232,7 @@ namespace enigma_user
 
   ma_scalar min(const enigma::varargs &t)
   {
-    register ma_scalar ret = t.get(0), tst;
+    ma_scalar ret = t.get(0), tst;
     for (int i = 1; i < t.argc; i++)
       if ((tst = t.get(i)) < ret)
         ret = tst;
@@ -245,7 +249,7 @@ namespace enigma_user
 
   ma_scalar mean(const enigma::varargs &t)
   {
-    register ma_scalar ret = 0;
+    ma_scalar ret = 0;
     for (int i = 0; i < t.argc; i++)
         ret += t.get(i);
     return ret/t.argc;

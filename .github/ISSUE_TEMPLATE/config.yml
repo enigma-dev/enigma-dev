@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: RadialGM
+    url: "https://github.com/enigma-dev/RadialGM"
+    about: "Problems related to ENIGMA's frontend Qt IDE such as UI quirks, i18n, and editing or general feature requests."
+  - name: LateralGM
+    url: "https://github.com/IsmAvatar/LateralGM"
+    about: "Problems related to the free Game Maker file editor such as file reading, UI quirks, i18n, and editing or general feature requests."
+  - name: JoshEdit Syntax Highlighted Text Component
+    url: "https://github.com/JoshDreamland/JoshEdit"
+    about: "Problems related only to the LGM code editor such as text & caret painting, formatting, encoding, and serialization."
+  - name: ENIGMA Java Plugin for LateralGM
+    url: "https://github.com/enigma-dev/lgmplugin/"
+    about: "Problems with ENIGMA⟷LGM plugin related UI issues, such as extension & API selection, logging, and populating resources."
+  - name: The Website
+    url: "https://github.com/enigma-dev/Site"
+    about: "Problems related to the https://enigma-dev.org website, community, forum, and Wiki."

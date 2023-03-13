@@ -11,6 +11,9 @@
 
 #include "backend/JavaStruct.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct Trigger
 {
   String name;
@@ -18,5 +21,8 @@ struct Trigger
   int checkStep;
   String constant;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

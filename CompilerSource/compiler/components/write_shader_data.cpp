@@ -15,26 +15,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "makedir.h"
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-
-using namespace std;
-
+#include "settings.h"
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
+#include "languages/lang_CPP.h"
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <math.h> //log2 to calculate passes.
+
+using namespace std;
 
 #define flushl '\n' << flush
 #define flushs flush
-
-#include "languages/lang_CPP.h"
 
 #define SHADERSTRUCT "struct ShaderStruct { \
     string fragment; \
@@ -57,9 +54,10 @@ static string esc(string str) {
   return res;
 }
 
-int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMglobal)
+int lang_CPP::compile_writeShaderData(const GameData &game, ParsedScope *EGMglobal)
 {
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
+  (void) EGMglobal;  // Currently not needed.
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").u8string().c_str(),ios_base::out);
 
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
   wto << "  std::vector<ShaderStruct> shaderstructarray = {\n";
@@ -69,14 +67,14 @@ int lang_CPP::compile_writeShaderData(const GameData &game, parsed_object *EGMgl
     while (idmax < shader.id()) {
       ++idmax, wto << "ShaderStruct(),\n";
     }
-    string vertexcode  =  shader.vertex_code();
-    string fragmentcode = shader.fragment_code();
+    string vertexcode  =  shader->vertex_code();
+    string fragmentcode = shader->fragment_code();
     //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "
         << '"' << esc(fragmentcode) << "\", "
-        << '"' << shader.type() << "\", "
-        << (shader.precompile()? "true" : "false")
+        << '"' << shader->type() << "\", "
+        << (shader->precompile()? "true" : "false")
         << " },\n";
     idmax += 1;
   }

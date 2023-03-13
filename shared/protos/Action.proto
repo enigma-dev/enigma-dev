@@ -1,0 +1,75 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+enum ArgumentKind {
+  ARG_EXPRESSION = 0;
+  ARG_STRING = 1;
+  ARG_BOTH = 2;
+  ARG_BOOLEAN = 3;
+  ARG_MENU = 4;
+  ARG_COLOR = 13;
+  ARG_FONTSTRING = 15;
+  ARG_SPRITE = 5;
+  ARG_SOUND = 6;
+  ARG_BACKGROUND = 7;
+  ARG_PATH = 8;
+  ARG_SCRIPT = 9;
+  ARG_OBJECT = 10;
+  ARG_ROOM = 11;
+  ARG_FONT = 12;
+  ARG_TIMELINE = 14;
+}
+
+message Argument {
+  optional ArgumentKind kind = 1;
+  oneof value {
+    string string = 2;
+    string sprite = 3;
+    string sound = 4;
+    string background = 5;
+    string path = 6;
+    string script = 7;
+    string object = 8;
+    string room = 9;
+    string font = 10;
+    string timeline = 11;
+  }
+}
+
+enum ActionKind {
+  ACT_NORMAL = 0;
+  ACT_BEGIN = 1;
+  ACT_END = 2;
+  ACT_ELSE = 3;
+  ACT_EXIT = 4;
+  ACT_REPEAT = 5;
+  ACT_VARIABLE = 6;
+  ACT_CODE = 7;
+  ACT_PLACEHOLDER = 8;
+  ACT_SEPARATOR = 9;
+  ACT_LABEL = 10;
+}
+
+enum ActionExecution {
+  EXEC_NONE = 0;
+  EXEC_FUNCTION = 1;
+  EXEC_CODE = 2;
+}
+
+message Action {
+  optional int32 libid = 1;
+  optional int32 id = 2;
+  optional ActionKind kind = 3;
+  optional bool use_relative = 4 [(gmx) = "userelative"];
+  optional bool is_question = 5 [(gmx) = "isquestion"];
+  optional bool use_apply_to = 6 [(gmx) = "useapplyto"];
+  optional ActionExecution exe_type = 7 [(gmx) = "exetype"];
+  optional string function_name = 8 [(gmx) = "functionname"];
+  optional string code_string = 9 [(gmx) = "codestring"];
+  optional string who_name = 10 [(gmx) = "whoName"];
+  optional bool relative = 11;
+  optional bool is_not = 12 [(gmx) = "isnot"];
+  repeated Argument arguments = 13 [(gmx) = "arguments/argument"];
+}

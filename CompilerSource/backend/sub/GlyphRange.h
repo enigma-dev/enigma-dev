@@ -11,11 +11,17 @@
 
 #include "backend/sub/Glyph.h"
 
+namespace deprecated {
+namespace JavaStruct {
+
 struct GlyphRange
 {
 	int rangeMin;
 	int rangeMax;
 	Glyph *glyphs;
 };
+
+}  // namespace JavaStruct
+}  // namespace deprecated
 
 #endif

@@ -16,7 +16,10 @@
 **/
 
 #include <math.h>
+#define byte __windows_byte_workaround
 #include <windows.h>
+#undef byte
+
 #include <string>
 using std::string;
 
@@ -33,7 +36,6 @@ bool joystick_load(int id)
 {
 	JOYINFO joyinfo;
 	UINT wNumDevs;
-	BOOL bDevAttached;
 
     if((wNumDevs = joyGetNumDevs()) == 0)
         return false;
@@ -46,11 +48,7 @@ bool joystick_load(int id)
         return false;
     }
 
-	bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED;
-    if (!bDevAttached)
-        return false;
-
-	return true;
+	return (joyGetPos(JOYSTICKID1 + id, &joyinfo) == JOYERR_NOERROR);
 }
 
 double joystick_axis(int id, int axisnum) {
@@ -169,4 +167,3 @@ double joystick_pov(int id, int axis1, int axis2) {
 }
 
 }
-

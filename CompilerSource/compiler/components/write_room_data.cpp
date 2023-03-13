@@ -26,11 +26,12 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "makedir.h"
+#include "settings.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -49,6 +50,7 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
+<<<<<<< HEAD
 // GCC Bug on travis
 #if defined(__GNUC__) && (__GNUC__ < 5) && !defined(__clang__)
  #define vla(x, y) ""
@@ -57,6 +59,9 @@ using namespace std;
 #endif
 
 inline std::string format_color(uint32_t color) { 
+=======
+inline std::string format_color(uint32_t color) {
+>>>>>>> master
   std::stringstream ss;
   ss << "0x" << std::hex << color;
   return ss.str();
@@ -66,9 +71,9 @@ inline string resname(string name) {
   return name.empty() ? "-1" : name;
 }
 
-int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, parsed_object *EGMglobal, int mode)
+int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &parsed_rooms, ParsedScope *EGMglobal, int mode)
 {
-  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").u8string().c_str(),ios_base::out);
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << game.rooms.size() << ";\n";
@@ -76,6 +81,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   int room_highid = 0, room_highinstid = 100000, room_hightileid = 10000000;
 
   for (const auto &room : game.rooms) {
+<<<<<<< HEAD
     wto << "  tile tiles_" << room.id() << "[" << vla(1, room.tiles_size()) << "]" << " = {\n";
     for (int ii = 0, modme = 0; ii < room.tiles().size(); ii++) {
       wto << "{"
@@ -93,17 +99,40 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
           << room.tiles(ii).alpha()   << ","
           << room.tiles(ii).color()   << "},";
 
+=======
+    wto << "  std::vector<tile> tiles_" << room.id() << " = {\n";
+    int modme = 0;
+    for (const auto &tile : room->tiles()) {
+      wto << "{"
+          << tile.id()      << ","
+          << resname(tile.background_name()) << ","
+          << tile.xoffset() << ","
+          << tile.yoffset() << ","
+          << tile.depth()   << ","
+          << tile.height()  << ","
+          << tile.width()   << ","
+          << tile.x()       << ","
+          << tile.y()       << ","
+          << tile.xscale()  << ","
+          << tile.yscale()  << ","
+          << tile.alpha()   << ","
+          << tile.color()   << "},";
+>>>>>>> master
         if (++modme % 16 == 0) wto << "\n        ";
-      if (room.tiles(ii).id() > room_hightileid)
-        room_hightileid = room.tiles(ii).id();
+      if (tile.id() > room_hightileid)
+        room_hightileid = tile.id();
     }
     wto << "  };\n";
   }
 
   for (const auto &room : game.rooms) {
+<<<<<<< HEAD
     wto << "  inst insts_" << room.id() << "[" << vla(1, room.instances_size()) << "]" << " = {\n";
+=======
+    wto << "  std::vector<inst> insts_" << room.id() << " = {\n";
+>>>>>>> master
     int modme = 0;
-    for (const auto &instance : room.instances()) {
+    for (const auto &instance : room->instances()) {
       wto << "{" <<
         instance.id() << "," <<
         instance.object_type() << "," <<
@@ -124,24 +153,24 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     << room.id() << ", "  // The ID of this room
     << room_index << ", \""  // The tree order index of this room
     << room.name << "\",  \""  // The name of this room
-    << room.caption() << "\",\n      "  // The caption of this room
+    << room->caption() << "\",\n      "  // The caption of this room
 
-    << format_color(room.color()) << ", "  // Background color
-    << (room.show_color() ? "true" : "false")  // Draw background color
+    << format_color(room->color()) << ", "  // Background color
+    << (room->show_color() ? "true" : "false")  // Draw background color
     << ", roomcreate" << room.id() << ",\n      "  // Creation code
     << "roomprecreate" << room.id() << ",\n      "  // PreCreation code
 
-    << room.width() << ", " << room.height() << ", " // Width and Height
-    << room.speed() << ",  "  // Speed
-    << (room.persistent() ? "true" : "false") << ",  "  // Persistent
+    <<  room->width() << ", " << room->height() << ", "  // Width and Height
+    <<  room->speed() << ",  "  // Speed
+    << (room->persistent() ? "true" : "false")  << ",  "  // Persistent
 
-    << (room.enable_views() ? "true" : "false") << ", {\n"; // Views Enabled
+    << (room->enable_views() ? "true" : "false") << ", {\n";  // Views Enabled
 
-    for (const auto &view : room.views()) {
+    for (const auto &view : room->views()) {
       wto << "        { "
           << (view.visible() ? "true" : "false") << ",   " // Visible
 
-          << view.xview() << ", "   // Xview 
+          << view.xview() << ", "   // Xview
           << view.yview() << ",  "  // Yview
           << view.wview() << ", "    // Wview
           << view.hview() << ",   "  // Hview
@@ -158,25 +187,25 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     }
     //Start of Backgrounds
     wto << "      }, {\n      ";
-     for (const auto &background : room.backgrounds()) {
+     for (const auto &background : room->backgrounds()) {
         wto << "  { "
         << (background.visible() ? "true" : "false")    << ", "    // Visible
         << (background.foreground() ? "true" : "false") << ", "    // Foreground
-        << resname(background.background_name())        << ",  "   // Background
-        << background.x()                               << ", "    // X
-        << background.y()                               << ",   "  // Y
-        << background.hspeed()                          << ", "    // HSpeed
-        << background.vspeed()                          << ",   "  // VSpeed
+        <<  resname(background.background_name())       << ",  "   // Background
+        <<  background.x()                              << ", "    // X
+        <<  background.y()                              << ",   "  // Y
+        <<  background.hspeed()                         << ", "    // HSpeed
+        <<  background.vspeed()                         << ",   "  // VSpeed
         << (background.htiled()  ? "true" : "false")    << ", "    // tileHor
         << (background.vtiled()  ? "true" : "false")    << ",   "  // tileVert
         << (background.stretch() ? "true" : "false")    << ",   "  // Stretch
-        << background.alpha() << ",   "    // Alpha
-        << background.color() << " },\n      ";  // Color
+        <<  background.alpha()                          << ",   "  // Alpha
+        <<  background.color()  << " },\n      ";                  // Color
      }
     wto <<
     " },\n" //End of Backgrounds
-    "      " << room.instances().size() << ", insts_" << room.id() << ",\n"
-    "      " << room.tiles().size() << ", tiles_" << room.id() << "\n"
+    "      " << "insts_" << room.id() << ",\n"
+    "      " << "tiles_" << room.id() << "\n"
     "    },\n";
 
     if (room.id() > room_highid)
@@ -203,7 +232,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
   wto.close();
 
 
-  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
+  wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").u8string().c_str(),ios_base::out);
   wto << license;
 
   wto << "namespace enigma {\n\n";
@@ -227,17 +256,17 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
       std::string codeOvr;
       std::string syntOvr;
-      if (int_ev_pair.second.pe->code.find("with((")==0) {
+      if (int_ev_pair.second.code->code.find("with((")==0) {
         //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
         //This is because room-instance-creation code might need a deactivated instance, which "with" cannot find.
-        codeOvr = "with_room_inst(" + int_ev_pair.second.pe->code.substr(5);
-        syntOvr = "ssssssssssssss(" + int_ev_pair.second.pe->synt.substr(5);
+        codeOvr = "with_room_inst(" + int_ev_pair.second.code->code.substr(5);
+        syntOvr = "ssssssssssssss(" + int_ev_pair.second.code->synt.substr(5);
       }
 
       print_to_file(
-        codeOvr.empty() ? int_ev_pair.second.pe->code : codeOvr,
-        syntOvr.empty() ? int_ev_pair.second.pe->synt : syntOvr,
-        int_ev_pair.second.pe->strc, int_ev_pair.second.pe->strs, 2, wto
+        codeOvr.empty() ? int_ev_pair.second.code->code : codeOvr,
+        syntOvr.empty() ? int_ev_pair.second.code->synt : syntOvr,
+        int_ev_pair.second.code->strc, int_ev_pair.second.code->strs, 2, wto
       );
       wto << "  return 0;\n}\n\n";
     }
@@ -251,17 +280,17 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
 
       std::string codeOvr;
       std::string syntOvr;
-      if (it->second.pe->code.find("with((")==0) {
+      if (it->second.code->code.find("with((")==0) {
         //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
         //This is because room-instance-precreation code might need a deactivated instance, which "with" cannot find.
-        codeOvr = "with_room_inst(" + it->second.pe->code.substr(5);
-        syntOvr = "ssssssssssssss(" + it->second.pe->synt.substr(5);
+        codeOvr = "with_room_inst(" + it->second.code->code.substr(5);
+        syntOvr = "ssssssssssssss(" + it->second.code->synt.substr(5);
       }
 
       print_to_file(
-        codeOvr.empty() ? it->second.pe->code : codeOvr,
-        syntOvr.empty() ? it->second.pe->synt : syntOvr,
-        it->second.pe->strc, it->second.pe->strs, 2, wto
+        codeOvr.empty() ? it->second.code->code : codeOvr,
+        syntOvr.empty() ? it->second.code->synt : syntOvr,
+        it->second.code->strc, it->second.code->strs, 2, wto
       );
       wto << "  return 0;\n}\n\n";
     }
@@ -285,8 +314,8 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << room.name << "'\");\n";
     }
-    parsed_event& ev = pr->events[0];
-    print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
+    print_to_file(pr->creation_code->code, pr->creation_code->synt,
+                  pr->creation_code->strc, pr->creation_code->strs, 2, wto);
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< room.id() <<"_instancecreate_" << it->first << "();";

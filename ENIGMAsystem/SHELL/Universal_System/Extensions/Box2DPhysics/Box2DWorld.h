@@ -76,22 +76,22 @@ extern vector<B2DBody*> b2dbodies;
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \
     if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } B2DWorld* w = b2dworlds[id];
   #define get_world(w,id) \
     if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics world with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } B2DWorld* w = b2dworlds[id];
   #define get_bodyr(b,id,r) \
     if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics body with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return r; \
     } B2DBody* b = b2dbodies[id];
   #define get_body(b,id) \
     if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+      DEBUG_MESSAGE("Cannot access Box2D physics body with id " + toString(id), MESSAGE_TYPE::M_USER_ERROR); \
       return; \
     } B2DBody* b = b2dbodies[id];
 #else

@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018-2020 Robert B. Colton, Greg Williamson
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,6 +16,7 @@
 **/
 
 #include "yyp.h"
+#include "strings_util.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -28,7 +29,6 @@
 #include <functional>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -37,22 +37,7 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 using namespace buffers;
 using namespace buffers::resources;
 
-namespace yyp {
-std::ostream out(nullptr);
-std::ostream err(nullptr);
-
-namespace {
-
-std::vector<std::string> SplitString(const std::string &str, char delimiter) {
-  std::vector<std::string> vec;
-  std::stringstream sstr(str);
-  std::string tmp;
-  while (std::getline(sstr, tmp, delimiter)) vec.push_back(tmp);
-
-  return vec;
-}
-
-} // Anonymous namespace
+namespace egm {
 
 void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
@@ -65,7 +50,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
 
     if (field->name() == "id") {
       id += opts.GetExtension(buffers::id_start);
-      out << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
+      outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else {
       const std::string yypName = opts.GetExtension(buffers::yyp);
@@ -98,7 +83,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
       if (child->IsNull()) continue; // no point
 
       if (field->is_repeated()) {  // Repeated fields (are usally messages or file_paths(strings)
-        out << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
+        outStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
         switch (field->cpp_type()) {
           case CppType::CPPTYPE_MESSAGE: {
@@ -119,14 +104,14 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
                 const int eventType = n["eventtype"].GetInt();
                 const int eventNumber = n["enumb"].GetInt();
                 if (eventType < 0 || eventType > 13) {
-                  err << "No event name for event type '" << eventType << "' so it will not be loaded" << std::endl;
+                  errStream << "No event name for event type '" << eventType << "' so it will not be loaded" << std::endl;
                 } else {
                   std::string eventName = eventNames[eventType];
                   std::string fileName = dir + eventName + "_" + std::to_string(eventNumber) + ".gml";
 
                   FILE *afile = fopen(fileName.c_str(),"r");
                   if (!afile) {
-                    err << "WARNING: Could not open event code file for reading: " << fileName << std::endl;
+                    errStream << "WARNING: Could not open event code file for reading: " << fileName << std::endl;
                     continue;
                   }
                   fseek(afile,0,SEEK_END);
@@ -134,7 +119,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
                   char *fdata = new char[flen];
                   fseek(afile,0,SEEK_SET);
                   if (fread(fdata,1,flen,afile) != flen)
-                    err << "WARNING: Resource stream cut short while loading event code: " << fileName << std::endl;
+                    errStream << "WARNING: Resource stream cut short while loading event code: " << fileName << std::endl;
                   fclose(afile);
 
                   eventRefl->SetString(msg, codeField, fdata);
@@ -148,7 +133,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
            * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
            * from exploding and gives them a warning of why their shit don't work and a clue where to implement a fix */
           default: {
-            err << "Error: missing condition for repeated type: " << field->type_name()
+            errStream << "Error: missing condition for repeated type: " << field->type_name()
                           << ". Instigated by: " << field->type_name() << std::endl;
             break;
           }
@@ -157,7 +142,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
         std::string splitValue;
 
         if (isSplit) { // if data use a comma delimiter eg. (0,7,9)
-          std::vector<std::string> split = SplitString(node.GetString(), ',');
+          std::vector<std::string> split = split_string(node.GetString(), ',');
           splitValue = split[static_cast<int>(alias.back()) - '0'];
         }
 
@@ -166,7 +151,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
         child->Accept(writer);
 
         std::string value = (isSplit) ? splitValue : buffer.GetString();
-        out << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
+        outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
 
         switch (field->cpp_type()) {
           // If field is a singular message we need to recurse into this method again
@@ -224,10 +209,12 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
   }
 }
 
-buffers::Project *LoadYYP(std::string fName) {
+std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPath) const {
+  std::string fName = fPath.u8string();
+
   std::ifstream ifs(fName);
   if (!ifs) {
-    err << "Could not open YYP for reading: " << fName << std::endl;
+    errStream << "Could not open YYP for reading: " << fName << std::endl;
     return nullptr;
   }
   std::string yypDir = fName.substr(0, fName.find_last_of("/\\\\") + 1);
@@ -257,7 +244,7 @@ buffers::Project *LoadYYP(std::string fName) {
     std::string resDir = nodePath.substr(0, nodePath.find_last_of("/\\\\") + 1);
     std::ifstream ifsNode(nodePath);
     if (!ifsNode) {
-      err << "Could not open YYP resource for reading: " << nodePath << std::endl;
+      errStream << "Could not open YYP resource for reading: " << nodePath << std::endl;
       continue;
     }
     rapidjson::IStreamWrapper iswNode(ifsNode);
@@ -267,7 +254,6 @@ buffers::Project *LoadYYP(std::string fName) {
     TreeNode* node = new TreeNode();
     nodes[key] = node;
     if (strcmp(resourceType, "GMFolder") == 0) {
-      node->set_folder(true);
       node->set_name(nodeDoc["folderName"].GetString());
       const auto filterType = nodeDoc["filterType"].GetString();
       if (strcmp(filterType, "root") == 0)
@@ -284,8 +270,8 @@ buffers::Project *LoadYYP(std::string fName) {
       }
       parents.emplace_back(std::make_pair(node, childrenVector));
     } else {
-      node->set_folder(false);
       node->set_name(nodeDoc["name"].GetString());
+      node->mutable_folder();
 
       using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
       using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
@@ -308,13 +294,14 @@ buffers::Project *LoadYYP(std::string fName) {
         auto *res = createFunc->second(node);
         PackRes(resDir, idCount[node->type_case()]++, nodeDoc, res, 0);
       } else {
-        err << "Unsupported resource type: " << resourceType << " " << node->name() << std::endl;
+        node->mutable_unknown();
+        errStream << "Unsupported resource type: " << resourceType << " " << node->name() << std::endl;
       }
     }
   }
 
   if (roots.empty()) {
-    err << "The project contained no root tree nodes and could not finish loading" << std::endl;
+    errStream << "The project contained no root tree nodes and could not finish loading" << std::endl;
     return nullptr;
   }
 
@@ -325,19 +312,21 @@ buffers::Project *LoadYYP(std::string fName) {
       const auto &key = child;
       const auto &childNodeIt = nodes.find(key);
       if (childNodeIt == nodes.end()) {
-        err << "Could not find child '" << key << "'" << std::endl;
+        errStream << "Could not find child '" << key << "'" << std::endl;
         continue;
       }
       TreeNode *childNode = childNodeIt->second;
-      node->mutable_child()->AddAllocated(childNode);
+      node->mutable_folder()->mutable_children()->AddAllocated(childNode);
     }
   }
 
-  buffers::Project *proj = new buffers::Project();
+  auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(roots[0]);
+  
+  LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
 }
 
-}  //namespace yyp
+}  //namespace egm
