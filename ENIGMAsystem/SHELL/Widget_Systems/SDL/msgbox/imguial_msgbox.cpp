@@ -102,6 +102,10 @@ int ImGuiAl::MsgBox::Draw()
       }
       width -= style.ItemSpacing.x;
       AlignForWidth(width);
+		  ImVec2 cursor_pos = ImGui::GetCursorPos();
+		  int text_height = ImGui::GetFontSize() * 1;
+		  cursor_pos.y += text_height + style.FramePadding.y * 2;
+		  ImGui::SetCursorPos(cursor_pos);
       for ( count = 0; count < m_Captions.size(); count++ )
       {
         ImGui::PushID(count);
