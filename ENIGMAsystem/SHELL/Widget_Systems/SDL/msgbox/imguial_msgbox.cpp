@@ -91,7 +91,7 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::Checkbox( "Don't ask me again", &m_DontAskAgain );
       }
       
-      ImVec2 size = ImVec2( 10.0f * ImGui::GetFontSize(), 0.0f );
+      ImVec2 size = ImVec2( 5.0f * ImGui::GetFontSize(), 0.0f );
       int count;
 
       ImGuiStyle& style = ImGui::GetStyle();
@@ -117,7 +117,7 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::PopID();
       }
       
-      size = ImVec2( ( 4 - count ) * 10.0f * ImGui::GetFontSize(), 1.0f );
+      size = ImVec2( ( 4 - count ) * 5.0f * ImGui::GetFontSize(), ImGui::GetFontSize() );
       ImGui::Dummy( size );
       
       if ( m_DontAskAgain )
