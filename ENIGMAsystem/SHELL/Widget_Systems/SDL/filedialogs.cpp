@@ -190,22 +190,7 @@ namespace {
   #endif
 
   void ifd_load_fonts() {
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty() && 
-      ngs::fs::environment_get_variable("IMGUI_FONT_FILES").empty()) {
-      if (!fonts.empty()) fonts.clear();
-      ngs::fs::environment_set_variable("IMGUI_FONT_PATH", ngs::fs::executable_get_directory() + "fonts");
-      fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::environment_get_variable("IMGUI_FONT_PATH"), "*.ttf;*.otf", false, false));
-      while (!fonts[fonts.size() - 1].empty()) {
-        message_pump();
-        fonts.push_back(ngs::fs::directory_contents_next());
-      }
-      if (!fonts.empty()) fonts.pop_back();
-      ngs::fs::directory_contents_close();
-    } else {
-      #if !defined(IFD_SHARED_LIBRARY)
-      ngs::imgui::ifd_load_fonts();
-      #endif
-    }
+    ngs::imgui::ifd_load_fonts();
   }
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
