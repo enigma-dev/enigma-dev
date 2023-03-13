@@ -90,14 +90,14 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::Checkbox( "Don't ask me again", &m_DontAskAgain );
       }
       
-      ImVec2 size = ImVec2( 50.0f, 0.0f );
+      ImVec2 size = ImVec2( 200.0f, 0.0f );
       int count;
 
       ImGuiStyle& style = ImGui::GetStyle();
       float width = 0.0f;
       for ( count = 0; count < m_Captions.size(); count++ )
       {
-        width += ImGui::CalcTextSize(m_Captions[count].c_str()).x;
+        width += size;
         width += style.ItemSpacing.x;
       }
       AlignForWidth(width);
