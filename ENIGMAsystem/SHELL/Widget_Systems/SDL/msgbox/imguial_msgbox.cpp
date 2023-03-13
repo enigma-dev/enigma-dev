@@ -36,9 +36,7 @@ void AlignForWidth(float width, float alignment = 0.5f)
   float off = (avail - width) * alignment;
   if (off > 0.0f);
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
-  int text_height = ImGui::GetFontSize();
-  float hgt = (text_height + style.FramePadding.y) * 0.25;
-  ImGui::SetCursorPosY(ImGui::GetContentRegionAvail().y - hgt);
+  ImGui::SetCursorPosY(ImGui::GetContentRegionAvail().y);
 }
 
 bool ImGuiAl::MsgBox::Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions, bool show_checkbox )
