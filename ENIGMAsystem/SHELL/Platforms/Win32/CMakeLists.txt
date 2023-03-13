@@ -1,0 +1,12 @@
+set(WIN32_PLATFORM_LIB "win32_platform_lib")
+set(WIN32_PLATFORM_LIB_DESCRIPTION "Win32 Plaform")
+
+project(${WIN32_PLATFORM_LIB} DESCRIPTION ${WIN32_PLATFORM_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE WIN32_PLATFORM_LIB_SOURCES 
+    *.cpp 
+    ../General/PFshell/PFshell.cpp)
+
+#message("Platform/Win32 Sources: ${WIN32_PLATFORM_LIB_SOURCES}")
+
+add_library(${WIN32_PLATFORM_LIB} ${WIN32_PLATFORM_LIB_SOURCES})
