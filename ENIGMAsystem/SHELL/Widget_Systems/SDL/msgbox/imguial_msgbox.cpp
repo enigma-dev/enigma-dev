@@ -39,7 +39,7 @@ void AlignForWidth(float width, float alignment = 0.5f)
   float cursor_pos = ImGui::GetCursorPosY();
   int text_height = ImGui::GetFontSize() * 1;
   cursor_pos += text_height + style.FramePadding.y * 2;
-  ImGui::SetCursorPosX(ImGui::GetContentRegionAvail().y - cursor_pos);
+  ImGui::SetCursorPosY(ImGui::GetContentRegionAvail().y - cursor_pos);
 }
 
 bool ImGuiAl::MsgBox::Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions, bool show_checkbox )
@@ -94,7 +94,7 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::Checkbox( "Don't ask me again", &m_DontAskAgain );
       }
       
-      ImVec2 size = ImVec2( 100.0f * ImGui::GetFontSize(), 0.0f );
+      ImVec2 size = ImVec2( 10.0f * ImGui::GetFontSize(), 0.0f );
       int count;
 
       ImGuiStyle& style = ImGui::GetStyle();
@@ -120,7 +120,7 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::PopID();
       }
       
-      size = ImVec2( ( 4 - count ) * 100.0f * ImGui::GetFontSize(), 1.0f );
+      size = ImVec2( ( 4 - count ) * 10.0f * ImGui::GetFontSize(), 1.0f );
       ImGui::Dummy( size );
       
       if ( m_DontAskAgain )
