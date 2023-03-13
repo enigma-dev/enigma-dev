@@ -116,7 +116,7 @@ int ImGuiAl::MsgBox::Draw()
         ImGui::SameLine();
       }
       
-      size = ImVec2( ( 4 - count ) * 50.0f, 1.0f );
+      size = ImVec2( ( 4 - count ) * 200.0f, 1.0f );
       ImGui::Dummy( size );
       
       if ( m_DontAskAgain )
