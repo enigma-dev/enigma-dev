@@ -28,11 +28,6 @@
 #include <string>
 #include <vector>
 
-#define endl "\n"
-
-std::string short_json_to_json(std::string data);
-std::string json_to_short_json(std::string data);
-
 namespace enigma_user {
 variant short_json_decode(std::string data);
 

@@ -27,17 +27,14 @@
 namespace enigma_user {
 
 variant short_json_decode(std::string data) {
-  string *json = new string;
-  ShortJSONReader shortJSONReader;
-  bool readingSuccessful = shortJSONReader.read(data, json);
-  if (!readingSuccessful) {
+  enigma::ShortJSONReader shortJSONReader;
+  std::pair<bool, std::string> status_pair = shortJSONReader.read(data);
+  if (!(status_pair.first)) {
     DEBUG_MESSAGE("Failed to read configuration", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 
-  variant temp_variant = enigma_user::json_decode(*json);
-
-  delete json;  // delete the allocated memory
+  variant temp_variant = enigma_user::json_decode(status_pair.second);
 
   return temp_variant;
 }
