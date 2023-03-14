@@ -20,152 +20,43 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "short_json.h"
-
-class ShortJSON {
-
-private: 
-    enum ShortJSONState {
-        arrayState,
-        objectState,
-        valueState,
-        errorState
-    };
-    std::stack<std::pair<ShortJSONState, int>> shortStack;
-    int pointer_ = -1;
-    int old_pointer_ = -1;
-    int object_index = 0;
-    int value_index = 0;
-    std::string json;
+#include "short_json_converter.h"
 
 
-public: 
+class ShortJSONReader {
+ private:
+  enum ShortJSONState { arrayState, objectState, valueState, successState, errorState };
+  int pointer_ = -1;
+  ShortJSONState currentState;
+  std::stack<std::pair<std::string, bool>> levels;
+  std::stack<int> indices;
 
-    ShortJSON();
-
-    std::string read(std::string data) {
-        // remove all spaces and new lines inside data
-        data.erase(std::remove_if(data.begin(), data.end(), isspace), data.end());
-
-        auto first_state = readArray(data);
-
-        switch (first_state) {
-        case objectState:
-            first_state = readObject(data);
-            break;
-        case arrayState:
-            break;
-        }
-
-        return json;
-    }
-
-    ShortJSONState readArray(std::string data) {
-        
-        pointer_++;
-
-        switch (data.at(pointer_))
-        {
-        case '"':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-        case '-':
-        case 't':
-        case 'f':
-            return objectState;
+  ShortJSONState pushLevel(std::string data) {
+    while (1) {
+      pointer_++;
+      if (!(pointer_ < ((int)(data.length())))) return successState;
+      switch (data.at(pointer_)) {
         case '[':
-        {
-            int u = pointer_;
-
-            shortStack.push({ arrayState, pointer_ });
-            auto state = readArray(data);
-            switch (state) {
-            case arrayState:
-            {
-                auto temp_state = readArray(data);
-
-                return temp_state;
-            }
-            case objectState:
-            {
-                old_pointer_ = pointer_;
-                pointer_ = shortStack.top().second;
-                shortStack.pop();
-                auto temp_state = readObject(data);
-
-
-                return temp_state;
-            }
+          levels.push({"", true});  // we assume worst case which is array of objects until otherwise
+          indices.push(0);
+          currentState = pushLevel(data);
+          switch (currentState) {
+            case errorState:
+              return errorState;
             default:
-
-                return errorState;
-            }
-        }
-        default:
-            return errorState;
-        }
-    }
-
-    ShortJSONState readObject(std::string data) {
-        
-
-        if (data.at(pointer_) == ',') pointer_++;
-
-        int temp_pointer;
-
-        std::vector<std::string> object_json;
-
-        if (json != "") object_json.emplace_back(json);
-
-        switch (data.at(pointer_))
-        {
-        case '[':
-        {
-            shortStack.push({ objectState, pointer_ });
-            if (old_pointer_ != -1) pointer_ = old_pointer_;
-
-            int u = pointer_;
-
-            while (1) {
-                auto state = readValue(data);
-                object_json.emplace_back(json);
-                if (pointer_ < (data.length()) && data.at(pointer_) == ',') pointer_++;
-                if (pointer_ < (data.length()) && data.at(pointer_) == ']') {
-                    pointer_++;
-                    break;
-                }
-            }
-
-            auto state = objectToJSON(object_json);
-
-            shortStack.pop();
-
-            return shortStack.top().first;
-        }
-
-        default:
-            return errorState;
-        }
-    }
-
-    ShortJSONState readValue(std::string data) {
-
-        if (data.at(pointer_) == ',') pointer_++;
-
-        int temp_pointer;
-
-        std::string value_json;
-
-        switch (data.at(pointer_))
-        {
+              break;
+          }
+          break;
+        case ']':
+          indices.pop();
+          currentState = popLevel();
+          switch (currentState) {
+            case errorState:
+              return errorState;
+            default:
+              break;
+          }
+          break;
         case '"':
         case '0':
         case '1':
@@ -180,44 +71,114 @@ public:
         case '-':
         case 't':
         case 'f':
-        {
-            shortStack.push({ valueState, pointer_ });
-            temp_pointer = pointer_;
-            while (((temp_pointer + 1) < (data.length())) && ((data.at(temp_pointer + 1)) != ',') && ((data.at(temp_pointer + 1) != ']'))) temp_pointer++;
-            if (temp_pointer >= (data.length())) return errorState;
-            value_json.append("\"");
-            value_json.append(std::to_string(object_index));
-            value_json.append("\"");
-            value_json.append(":");
-            value_json.append(data.substr(pointer_, temp_pointer - pointer_ + 1));
-            object_index++;
-            pointer_ += temp_pointer - pointer_ + 1;
-
-            shortStack.pop();
-
-            json = value_json;
-            return valueState;
-        }
+          levels.top().second = false;  // then it's object
+          currentState = read_value(data);
+          switch (currentState) {
+            case errorState:
+              return errorState;
+            default:
+              break;
+          }
+          break;
+        case ',':
+          levels.top().first += ',';
+          indices.top()++;
+          continue;
         default:
-            return errorState;
-        }
+          return errorState;
+      }
     }
+  }  // pushLevel
 
-    ShortJSONState objectToJSON(std::vector<std::string> object_json) {
-        std::string temp_object_json;
+  ShortJSONState popLevel() {
+    if (levels.top().second)
+      return array_to_json(levels.top().first);
+    else
+      return object_to_json(levels.top().first);
+  }  // popLevel()
 
-        temp_object_json += '{';
+  ShortJSONState read_value(std::string data) {
+    int temp_pointer;
 
-        for (int i{ 0 }; i < object_json.size(); i++) {
-            temp_object_json.append(object_json.at(i));
-            if (i != (object_json.size() - 1)) temp_object_json += ',';
-        }
+    std::string value_json;
 
-        temp_object_json += '}';
-
-        json = temp_object_json;
-
-        return objectState;
+    switch (data.at(pointer_)) {
+      case '"':
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case '-':
+      case 't':
+      case 'f': {
+        temp_pointer = pointer_;
+        while (((temp_pointer + 1) < ((int)(data.length()))) && ((data.at(temp_pointer + 1)) != ',') &&
+               ((data.at(temp_pointer + 1) != ']')))
+          temp_pointer++;
+        if (temp_pointer >= ((int)(data.length()))) return errorState;
+        add_index();
+        levels.top().first.append(data.substr(pointer_, temp_pointer - pointer_ + 1));
+        pointer_ += temp_pointer - pointer_;
+        return valueState;
+      }
+      default:
+        return errorState;
     }
+  }  // read_value()
 
+  ShortJSONState array_to_json(std::string data) {
+    std::string array;
+    array += '[';
+    array.append(data);
+    array += ']';
+    levels.pop();
+    add_index();
+    levels.top().first.append(array);
+    return arrayState;
+  }  // array_to_json()
+
+  ShortJSONState object_to_json(std::string data) {
+    std::string object;
+    object += '{';
+    object.append(data);
+    object += '}';
+    levels.pop();
+    add_index();
+    levels.top().first.append(object);
+    return objectState;
+  }  // object_to_json()
+
+  void add_index() {
+    if (!(indices.empty())) {
+      levels.top().first += '"';
+      levels.top().first += std::to_string(indices.top());
+      levels.top().first += '"';
+      levels.top().first += ':';
+    }
+  }  // add_index()
+
+ public:
+  ShortJSONReader();
+
+  bool read(std::string data, std::string *json) {
+    // This is pre-first level which will contains full json.
+    // Note that, true and false here has no meaning because we only interseted in the string (see return statement).
+    levels.push({"", true});
+
+    currentState = pushLevel(data);
+
+    switch (currentState) {
+      case errorState:
+        return false;
+      default:
+        *json = levels.top().first;
+        return true;
+    }
+  }  // read()
 };

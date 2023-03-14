@@ -21,23 +21,30 @@
 **/
 
 #include "short_json.h"
-#include "json.h"
 #include "short_json_converter.cpp"
+#include "json.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-	variant short_json_decode(std::string data) {
+variant short_json_decode(std::string data) {
+  string *json = new string;
+  ShortJSONReader shortJSONReader;
+  bool readingSuccessful = shortJSONReader.read(data, json);
+  if (!readingSuccessful) {
+    DEBUG_MESSAGE("Failed to read configuration", MESSAGE_TYPE::M_ERROR);
+    return -1;
+  }
 
-        std::string json = ShortJSON().read(data);
+  variant temp_variant = enigma_user::json_decode(*json);
 
-        return enigma_user::json_decode(json);
-    }
+  delete json;  // delete the allocated memory
 
-	std::string short_json_encode(variant ds_map) {
-
-        // TODO: implement reverse operation
-
-        return enigma_user::json_encode(ds_map);
-    }
+  return temp_variant;
 }
+
+std::string short_json_encode(variant ds_map) {
+  // TODO: implement reverse operation
+
+  return enigma_user::json_encode(ds_map);
+}
+}  // namespace enigma_user
