@@ -19,6 +19,7 @@
 #ifndef ENIGMA_WIDGETS_MANDATORY_H
 #define ENIGMA_WIDGETS_MANDATORY_H
 
+#include "Widget_Systems/General/WSdialogs.h"
 #include "libEGMstd.h"
 
 #include <string>
