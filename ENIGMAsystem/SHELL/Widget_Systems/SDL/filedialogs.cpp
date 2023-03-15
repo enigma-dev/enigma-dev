@@ -195,9 +195,7 @@ namespace {
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
     SDL_Window *window = nullptr;
-    /*if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-      return "";
-    }*/
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)
     #if (!defined(__MACH__) && !defined(__APPLE__))
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -673,4 +671,3 @@ const char *show_question_ext(const char *message) {
 }
 
 #endif
-
