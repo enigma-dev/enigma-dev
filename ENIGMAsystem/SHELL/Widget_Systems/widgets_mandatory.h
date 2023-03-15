@@ -19,7 +19,6 @@
 #ifndef ENIGMA_WIDGETS_MANDATORY_H
 #define ENIGMA_WIDGETS_MANDATORY_H
 
-#include "Widget_Systems/General/WSdialogs.h"
 #include "libEGMstd.h"
 
 #include <string>
@@ -104,6 +103,20 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 inline void action_show_info() { show_info(); }
 
+}
+
+bool show_question(std::string message);
+int show_question_ext(std::string message);
+std::string get_open_filename(std::string filter, std::string fname);
+std::string get_open_filename_ext(std::string filter, std::string fname, std::string title, std::string dir);
+std::string get_open_filenames(std::string filter, std::string fname);
+std::string get_open_filenames_ext(std::string filter, std::string fname, std::string title, std::string dir);
+std::string get_save_filename(std::string filter, std::string fname);
+std::string get_save_filename_ext(std::string filter, std::string fname, std::string title, std::string dir);
+std::string get_directory(std::string dname);
+std::string get_directory_alt(std::string capt, std::string root);
+inline bool action_if_question(std::string message) {
+  return show_question(message);
 }
 
 #endif
