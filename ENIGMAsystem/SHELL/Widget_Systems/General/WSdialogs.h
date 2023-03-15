@@ -22,50 +22,18 @@ using std::string;
 
 namespace enigma_user {
 
-enum {
-	text_type,
-	button_type,
-	input_type
-};
+bool show_question(string message);
+int show_question_ext(string message);
+string get_open_filename(string filter, string fname);
+string get_open_filename_ext(string filter, string fname, string title, string dir);
+string get_open_filenames(string filter, string fname);
+string get_open_filenames_ext(string filter, string fname, string title, string dir);
+string get_save_filename(string filter, string fname);
+string get_save_filename_ext(string filter, string fname, string title, string dir);
+string get_directory(string dname);
+string get_directory_alt(string capt, string root);
+inline bool action_if_question(string message) {
+  return show_question(message);
+}
 
-// These are constants defined inside one of the win32 headers in mingw, no need to define them 2x
-/*
-enum {
-	ANSI_CHARSET,
-	DEFAULT_CHARSET,
-	EASTEUROPE_CHARSET,
-	RUSSIAN_CHARSET,
-	SYMBOL_CHARSET,
-	SHIFTJIS_CHARSET,
-	HANGEUL_CHARSET,
-	GB2312_CHARSET,
-	CHINESEBIG5_CHARSET,
-	JOHAB_CHARSET,
-	HEBREW_CHARSET,
-	ARABIC_CHARSET,
-	GREEK_CHARSET,
-	TURKISH_CHARSET,
-	VIETNAMESE_CHARSET,
-	THAI_CHARSET,
-	MAC_CHARSET,
-	BALTIC_CHARSET,
-	OEM_CHARSET
-};
-*/
-
-	bool show_question(string message);
-	int show_question_ext(string message);
-	string get_open_filename(string filter, string fname);
-	string get_open_filename_ext(string filter, string fname, string title, string dir);
-	string get_open_filenames(string filter, string fname);
-	string get_open_filenames_ext(string filter, string fname, string title, string dir);
-	string get_save_filename(string filter, string fname);
-	string get_save_filename_ext(string filter, string fname, string title, string dir);
-	string get_directory(string dname);
-	string get_directory_alt(string capt, string root);
-	
-	inline bool action_if_question(string message)
-	{
-		return show_question(message);
-	}
 }
