@@ -30,12 +30,17 @@
 #include <cstdio>
 
 #include "Widget_Systems/SDL/dialogs.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFwindow.h"
+
+#include "Universal_System/directoryglobals.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/fileio.h"
-#include "Universal_System/directoryglobals.h"
+
 #include "Platforms/SDL/Window.h"
+
 #include "OpenGLHeaders.h"
 
 #ifdef _WIN32
