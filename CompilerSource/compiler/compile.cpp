@@ -755,7 +755,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   #endif
 
   FILE *gameModule;
-  int resourceblock_start = 0;
   std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
   #ifdef _WIN32
   std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
