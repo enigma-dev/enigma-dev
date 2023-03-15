@@ -119,4 +119,6 @@ inline bool action_if_question(std::string message) {
   return show_question(message);
 }
 
+} // namespace enigma_user
+
 #endif
