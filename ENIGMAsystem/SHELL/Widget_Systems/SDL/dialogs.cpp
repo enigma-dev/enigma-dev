@@ -69,7 +69,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
   fflush(stderr);
   #endif
   if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
-      type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
     string ok = environment_get_variable("IMGUI_YES");
     string caption = environment_get_variable("IMGUI_DIALOG_CAPTION");
     environment_set_variable("IMGUI_DIALOG_CAPTION", "Fatal Error");
