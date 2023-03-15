@@ -26,6 +26,8 @@
 
 #include <string>
 
+#include "Widget_Systems/widgets_mandatory.h"
+
 namespace enigma_user {
 
 int show_question_ext(std::string message);
