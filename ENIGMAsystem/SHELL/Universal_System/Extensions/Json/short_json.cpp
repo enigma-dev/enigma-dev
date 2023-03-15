@@ -34,9 +34,7 @@ variant short_json_decode(std::string data) {
     return -1;
   }
 
-  variant temp_variant = enigma_user::json_decode(status_pair.second);
-
-  return temp_variant;
+  return enigma_user::json_decode(status_pair.second);
 }
 
 std::string short_json_encode(variant ds_map) {
