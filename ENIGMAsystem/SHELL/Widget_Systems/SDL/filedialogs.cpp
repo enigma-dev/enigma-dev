@@ -231,8 +231,12 @@ namespace {
       SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::folder_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
       SDL_SetWindowIcon(window, surface);
       SDL_FreeSurface(surface);
-    } else {
+    } else if (type == openFile || type == openFiles || type == saveFile) {
       SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::file_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+      SDL_SetWindowIcon(window, surface);
+      SDL_FreeSurface(surface);
+    } else {
+      SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::msgbox_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
       SDL_SetWindowIcon(window, surface);
       SDL_FreeSurface(surface);
     }
@@ -671,3 +675,4 @@ const char *show_question_ext(const char *message) {
 }
 
 #endif
+
