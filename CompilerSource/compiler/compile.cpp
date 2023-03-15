@@ -776,7 +776,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::error_code ec;
   std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
   std::filesystem::rename(datares, resFname, ec);
-  std::filesystem::rename(dllfile, widgets, ec);
+  std::filesystem::copy(dllfile, widgets, ec);
  
   auto resname = resFname.u8string();
   gameModule = fopen(resname.c_str(),"wb");
