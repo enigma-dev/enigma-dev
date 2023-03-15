@@ -29,7 +29,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/SDL/dialogs.h"
 #include "Platforms/General/PFexternals.h"
 #include "Platforms/General/PFwindow.h"
 #include "Universal_System/estring.h"
