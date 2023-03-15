@@ -26,7 +26,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "egmicon.h"
 #include "settings.h"
 #include <stdio.h>
 #include <iostream>
@@ -123,7 +122,6 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << "  bool gameInfoAllowResize = " << gameInfo.allow_resize() << ";" << endl;
   wto << "  bool gameInfoStayOnTop = " << gameInfo.stay_on_top() << ";" << endl;
   wto << "  bool gameInfoPauseGame = " << gameInfo.pause_game() << ";" << endl;
-  EGMICON
   wto << "}" << endl;
 
   for (parsed_object::cglobit i = global->globals.begin(); i != global->globals.end(); i++)
