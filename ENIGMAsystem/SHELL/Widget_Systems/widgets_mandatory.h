@@ -111,8 +111,6 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 inline void action_show_info() { show_info(); }
 
-}
-
 } // namespace enigma_user
 
 #endif
