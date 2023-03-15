@@ -195,7 +195,7 @@ namespace {
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
     SDL_Window *window = nullptr;
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER)
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
     #if (!defined(__MACH__) && !defined(__APPLE__))
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
