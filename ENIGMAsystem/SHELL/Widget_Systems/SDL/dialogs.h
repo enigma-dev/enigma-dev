@@ -42,5 +42,3 @@ inline bool action_if_question(std::string message) {
 }
 
 } // namespace enigma_user
-
-#endif
