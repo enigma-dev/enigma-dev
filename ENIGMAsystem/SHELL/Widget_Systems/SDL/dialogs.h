@@ -28,6 +28,7 @@
 
 namespace enigma_user {
 
+bool show_question(std::string message);
 int show_question_ext(std::string message);
 std::string get_open_filename(std::string filter, std::string fname);
 std::string get_open_filename_ext(std::string filter, std::string fname, std::string title, std::string dir);
