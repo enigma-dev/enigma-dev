@@ -33,16 +33,7 @@
 #include "SDL.h"
 #include "SDL_syswm.h"
 #include "filedialogs.h"
-#if defined(__APPLE__) && defined(__MACH__)
 #include "imgui_impl_sdlrenderer.h"
-#else
-#include "imgui_impl_opengl2.h"
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include "SDL_opengles2.h"
-#else
-#include "SDL_opengl.h"
-#endif
-#endif
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "ImFileDialog.h"
@@ -184,34 +175,19 @@ namespace {
   }
 
   vector<string> fonts;
-  #if (defined(__MACH__) && defined(__APPLE__))
   SDL_Renderer *renderer = nullptr;
   SDL_Surface *surf = nullptr;
-  #endif
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
     SDL_Window *window = nullptr;
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    #endif
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
-    ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) | 
-    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
-    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
-    std::to_string(1)) ? SDL_WINDOW_BORDERLESS : 0));
-    #else
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
     std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
     std::to_string(1)) ? SDL_WINDOW_BORDERLESS : 0));
-    #endif
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
     ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(640));
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty())
@@ -221,10 +197,8 @@ namespace {
     if (window == nullptr) return "";
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    #if (defined(__MACH__) && defined(__APPLE__))
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return "";
-    #else
     if (type == selectFolder) {
       SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::folder_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
       SDL_SetWindowIcon(window, surface);
@@ -238,7 +212,6 @@ namespace {
       SDL_SetWindowIcon(window, surface);
       SDL_FreeSurface(surface);
     }
-    #endif
     #if defined(_WIN32)
     SDL_SysWMinfo system_info;
     SDL_VERSION(&system_info.version);
@@ -325,11 +298,6 @@ namespace {
       }
     }
     #endif
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(1);
-    #endif
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(); ngs::imgui::ifd_load_fonts();
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
@@ -355,43 +323,16 @@ namespace {
     } else if (theme == 1) {
       ImGui::StyleColorsLight();
     }
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL2_Init();
-    #else
     ImGui_ImplSDL2_InitForSDLRenderer(window);
     ImGui_ImplSDLRenderer_Init(renderer); 
-    #endif
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
-      #if (!defined(__MACH__) && !defined(__APPLE__))
-      GLuint tex;
-      glGenTextures(1, &tex);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      #if defined(IMGUI_IMPL_OPENGL_ES2)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-      #else
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-      #endif
-      glBindTexture(GL_TEXTURE_2D, 0);
-      return (void *)(uintptr_t)tex;
-      #else
       if (surf) SDL_FreeSurface(surf);
       surf = SDL_CreateRGBSurfaceFrom((void *)data, w, h, 32, w * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
       SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surf);
       return (void *)tex;
-      #endif
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
-      #if (!defined(__MACH__) && !defined(__APPLE__))
-      GLuint texID = (GLuint)(uintptr_t)tex;
-      glDeleteTextures(1, &texID);
-      #else
       SDL_DestroyTexture((SDL_Texture *)tex);
-      #endif
     };
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder)); 
@@ -403,11 +344,7 @@ namespace {
           quit = true;
         }
       }
-      #if (!defined(__MACH__) && !defined(__APPLE__))
-      ImGui_ImplOpenGL2_NewFrame();
-      #else
-      ImGui_ImplSDLRenderer_NewFrame();
-      #endif 
+      ImGui_ImplSDLRenderer_NewFrame(); 
       ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); 
       ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
@@ -500,35 +437,19 @@ namespace {
         goto finish;
       }
       ImGui::Render();
-      #if (!defined(__MACH__) && !defined(__APPLE__))
-      glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-      glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-      glClear(GL_COLOR_BUFFER_BIT);
-      ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-      SDL_GL_SwapWindow(window);
-      #else
       SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
       SDL_RenderClear(renderer);
       ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
       SDL_RenderPresent(renderer);
-      #endif
       if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
         SDL_ShowWindow(window);
       }
     }
     finish:
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    ImGui_ImplOpenGL2_Shutdown();
-    #else
     ImGui_ImplSDLRenderer_Shutdown();
-    #endif
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
-    #if (!defined(__MACH__) && !defined(__APPLE__))
-    SDL_GL_DeleteContext(gl_context);
-    #endif
     SDL_DestroyWindow(window);
-    //SDL_Quit();
     return result;
   }
 
