@@ -21,8 +21,8 @@
 **/
 
 #include "short_json.h"
-#include "short_json_converter.cpp"
 #include "json.h"
+#include "short_json_converter.h"
 
 namespace enigma_user {
 

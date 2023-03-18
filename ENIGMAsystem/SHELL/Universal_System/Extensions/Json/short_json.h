@@ -20,12 +20,15 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#ifndef SHORT_JSON_H
+#define SHORT_JSON_H
+
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <iostream>
-#include <stack>
 #include <queue>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -34,3 +37,5 @@ variant short_json_decode(std::string data);
 
 std::string short_json_encode(variant ds_map);
 }  // namespace enigma_user
+
+#endif
