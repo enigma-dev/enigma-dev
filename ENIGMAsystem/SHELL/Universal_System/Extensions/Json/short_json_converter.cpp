@@ -149,7 +149,11 @@ ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
 
   levels_entities_indices_.push(0);
 
-  levels_boundaries_pointers_.push({pointer_, 0});  // 0 means that, the end of current level is unknown
+  /*
+    Push this new level start index.
+    Note that we have no idea where the end of the new level is so we push start index in both start and end indices.
+  */
+  levels_boundaries_pointers_.push({pointer_, pointer_});
 
   std::queue<std::pair<size_t, size_t>> level_entities_boundaries_pointers_;
   levels_entities_boundaries_pointers_.push(level_entities_boundaries_pointers_);

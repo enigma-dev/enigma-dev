@@ -1,5 +1,5 @@
 /**
- *  @file short_json_converter.cpp
+ *  @file short_json_converter.h
  *  @section License
  *
  *      Copyright (C) 2023 Saif Kandil
