@@ -23,40 +23,175 @@
 #include "short_json.h"
 
 namespace enigma {
-class ShortJSONReader {
+class ShortToJSONConverter {
  private:
-  enum ShortJSONState { arrayState, objectState, valueState, successState, errorState };
-  int pointer_{-1};
-  ShortJSONState currentState;
-  std::stack<std::pair<std::string, bool>> levels;
-  std::stack<int> indices;
+  enum resultState { successState, errorState };
 
-  ShortJSONState pushLevel(std::string data) {
+  /*
+          Level theory here means that: whenever we find '[' we push a new level into the stack,
+          and if we find ']' we pop the new level from the stack.
+
+          We always assume that: the current level is an array of objects until otherwise.
+      */
+  enum levelState { arrayState, objectState };
+
+  /*
+          This is our string data iterator.
+      */
+  size_t pointer_{0};
+
+  /*
+          This variable will contain our output if it succeded
+      */
+  std::string json_;
+
+  /*
+          Whenever we are in a level, we need to accumulate values, objects, and arrays.
+      */
+  std::stack<std::string> levels_accumulators_;
+
+  /*
+          Whenever we are in a level, we need to keep track of this level state.
+      */
+  std::stack<levelState> levels_states_;
+
+  /*
+          This stack keeps track of current object's index in each level.
+
+          Entities can be key/value pair or object or array.
+      */
+  std::stack<size_t> levels_entities_indices_;
+
+  /*
+          Stores boundaries of each level.
+      */
+  std::stack<std::pair<size_t, size_t>> levels_boundaries_pointers_;
+
+  /*
+          This queue stores boundaries of each object/array and number of objects/array inside it in a specific level.
+
+          Entities can be object or array.
+
+          For example:
+
+                  0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16  --> indices
+                  | | | | | | | | | | |  |  |  |  |  |  |
+                  [ [ [ 1 , 4 ] , 4 ] ,  [  1  ,  4  ]  ]   --> this is short json example
+                    |               |
+                    |---------------|--> this object has boundaries {1,9} and containes only 1 object
+
+      */
+  std::stack<std::queue<std::pair<size_t, size_t>>> levels_entities_boundaries_pointers_;
+
+  /*
+          Stores offsets needed to pass every object inside a specific level.
+
+          Entities can be object or array of objects.
+
+          For example:
+
+                            9                  5           --> offset that we need to skip (those are offsets relative to short jsons
+                                                               which means that for normal jsons they are larger and that's what
+                                                               correct_pointers_positions() function about).
+                    |---------------|    |-----------|
+                    |               |    |           |
+                  [ [ [ 1 , 4 ] , 4 ] ,  [  1  ,  4  ]  ]  --> this is short json example
+                  |                                     |
+                  |-------------------------------------|  --> this is our specific level
+
+      */
+  std::stack<std::queue<size_t>> levels_entities_offsets_;
+
+  std::stack<size_t> levels_cumulative_offsets_;
+
+  resultState parse(std::string &data) {
+    if (data.length() == 0) return errorState;
+
     while (1) {
-      pointer_++;
-      if (!(pointer_ < ((int)(data.length())))) return successState;
+      if (pointer_ >= data.length()) return successState;
       switch (data.at(pointer_)) {
-        case '[':
-          levels.push({"", true});  // we assume worst case which is array of objects until otherwise
-          indices.push(0);
-          currentState = pushLevel(data);
-          switch (currentState) {
-            case errorState:
-              return errorState;
-            default:
-              break;
+        case '[': {
+          if (push_level() == errorState) return errorState;
+          break;
+        }
+        case ']': {
+          /*
+                          For each level we pushed 0 for its end but now we know the index of that end so we set it.
+                      */
+          levels_boundaries_pointers_.top().second = pointer_;
+
+          /*
+                          This snippet fixes current level if we found that it's an object.
+
+                          Checks:
+
+                           - Our code assumes that: current level is an array until we find key/value pair which means that:
+                             current level is an object, so we start add indices to each key/value pair, objects, and arrays
+                             when we find our first key/value pair in current level which means that we may have entities without indices before our
+                             first key/value pair which also means that we need to fix them. Our first key/value pair maybe preceding objects or arrays so
+                             if there's no objects/arrays before our first key/value pair, then nothing need to be fixed. Our "levels_entities_boundaries_pointers_"
+                             contains boundaries of entities for each level so for current level we must make sure that it contains some entities to be fixed.
+
+                           - When we get out of a specific level, we must make sure that this level contains entities inside its boundaries because this
+                             level maybe considered an object inside level.
+
+                             For example:
+
+                                                    l       m       ---> we must make sure that ((x < l) && (m < y))
+                                        |-------|   |-------|
+                                        |       |   |       |
+                                        |       |   |       |
+                                      [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  --> this is short json example
+                                      |                           |
+                                      |---------------------------|  --> this is our specific level
+                                      x                           y
+
+                           - Array of objects doesn't need any kind of indices for its objects so we must make sure that our level is an object.
+
+                      */
+          if (!(levels_entities_boundaries_pointers_.top().empty()) &&
+              ((levels_boundaries_pointers_.top().first < levels_entities_boundaries_pointers_.top().front().first) &&
+               (levels_boundaries_pointers_.top().second >
+                levels_entities_boundaries_pointers_.top().front().second)) &&
+              (levels_states_.top() == objectState)) {
+            map_short_json_indices();
           }
-          continue;
-        case ']':
-          indices.pop();
-          currentState = popLevel();
-          switch (currentState) {
-            case errorState:
-              return errorState;
-            default:
-              break;
+
+          std::string level_json_;
+
+          /*
+                        If it's an array, wrap with array square brackets; else wrap with object parenthesis;
+                    */
+          if (levels_states_.top() == arrayState) {
+            level_json_ += '[';
+            if (!(levels_accumulators_.empty())) level_json_ += levels_accumulators_.top();
+            level_json_ += ']';
+          } else {
+            level_json_ += '{';
+            if (!(levels_accumulators_.empty())) level_json_ += levels_accumulators_.top();
+            level_json_ += '}';
           }
-          continue;
+
+          if (pop_level() == errorState) return errorState;
+
+          if (pointer_ == data.length() - 1) {
+            json_ = level_json_;
+          } else {
+            if (levels_states_.top() != objectState)
+              levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
+            size_t current_level_offset_{levels_cumulative_offsets_.top()};
+            levels_cumulative_offsets_.pop();
+            levels_cumulative_offsets_.top() += current_level_offset_;
+
+            if (levels_states_.top() == objectState) {
+              levels_cumulative_offsets_.top() += 4;
+              accumulate_index();
+            }
+            levels_accumulators_.top() += level_json_;
+          }
+
+          break;
+        }
         case '"':
         case '0':
         case '1':
@@ -70,192 +205,188 @@ class ShortJSONReader {
         case '9':
         case '-':
         case 't':
-        case 'f':
-          levels.top().second = false;  // then it's object
-          currentState = read_value(data);
-          switch (currentState) {
-            case errorState:
-              return errorState;
-            default:
-              break;
+        case 'f': {
+          if (levels_states_.top() != objectState) {
+            levels_states_.top() = objectState;  // then it's object
           }
-          continue;
-        case ',':
-          levels.top().first += ',';
-          indices.top()++;
-          continue;
+          levels_cumulative_offsets_.top() += 4;
+          if (read_key_value_pair(data) == errorState) return errorState;
+          break;
+        }
+        case ',': {
+          levels_accumulators_.top() += ',';
+          levels_entities_indices_.top()++;
+          break;
+        }
         default:
           return errorState;
       }
+      pointer_++;
     }
-  }  // pushLevel
+  }  // parse()
 
-  ShortJSONState popLevel() {
-    if (levels.top().second)
-      return array_to_json(levels.top().first);
-    else
-      return object_to_json(levels.top().first);
-  }  // popLevel()
+  resultState push_level() {
+    levels_accumulators_.push("");
+    levels_states_.push(arrayState);  // We assume worst case (array of objects) until otherwise (object)
 
-  ShortJSONState read_value(std::string data) {
-    switch (data.at(pointer_)) {
-      case '"':
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-      case '-':
-      case 't':
-      case 'f': {
-        int temp_pointer_{pointer_};
-        while (((temp_pointer_ + 1) < ((int)(data.length()))) && ((data.at(temp_pointer_ + 1)) != ',') &&
-               ((data.at(temp_pointer_ + 1) != ']')))
-          temp_pointer_++;
-        if (!(temp_pointer_ < ((int)(data.length())))) return errorState;
-        add_index();
-        levels.top().first.append(data.substr(pointer_, temp_pointer_ - pointer_ + 1));
-        pointer_ += temp_pointer_ - pointer_;
-        return valueState;
+    levels_entities_indices_.push(0);
+
+    levels_boundaries_pointers_.push({pointer_, 0});  // 0 means that, the end of current level is unknown
+
+    std::queue<std::pair<size_t, size_t>> level_entities_boundaries_pointers_;
+    levels_entities_boundaries_pointers_.push(level_entities_boundaries_pointers_);
+
+    std::queue<size_t> level_entities_offsets_;
+    levels_entities_offsets_.push(level_entities_offsets_);
+
+    levels_cumulative_offsets_.push(0);
+
+    return successState;
+  }  // push_level()
+
+  resultState pop_level() { return accumulate_level(); }  // pop_level()
+
+  resultState accumulate_level() {
+    /*
+                We pop our accumulator level and stack level.
+            */
+    levels_accumulators_.pop();
+    levels_states_.pop();
+
+    /*
+                We pop current level, so that we add current level boundaries to previous level entities as well as offsets.
+
+                For example:
+
+                            1       5   7       11
+                            |       |   |       |
+                          [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  ---> this level entities boundaries should be {{1 , 5 } , { 7 , 11}}.
+            */
+    levels_entities_boundaries_pointers_.pop();
+    levels_entities_offsets_.pop();
+
+    /*
+                as long as it's an array we keep pushing because it maybe an object eventually
+                if it's object, then no need to continue pushing
+            */
+    if (!(levels_entities_boundaries_pointers_.empty()) && !(levels_states_.empty())) {
+      if (levels_states_.top() != objectState)
+        levels_entities_boundaries_pointers_.top().push({levels_boundaries_pointers_.top()});
+    }
+
+    levels_boundaries_pointers_.pop();
+
+    levels_entities_indices_.pop();
+
+    return successState;
+  }  // accumulate_level()
+
+  void accumulate_index() {
+    levels_accumulators_.top() += '"';
+    levels_accumulators_.top() += std::to_string(levels_entities_indices_.top());
+    levels_accumulators_.top() += '"';
+    levels_accumulators_.top() += ':';
+  }  // accumulate_index()
+
+  resultState map_short_json_indices() {
+    size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
+    size_t shift_left_{levels_entities_boundaries_pointers_.top().front().first};
+
+    size_t offset_{0};
+
+    /*
+                This loop loops number of entities in current level times
+
+                levels_entities_indices_.top() + 1
+            */
+    for (size_t i{0}; i < number_of_entities_; i++) {
+      levels_entities_boundaries_pointers_.top().front().first -= shift_left_;
+      levels_entities_boundaries_pointers_.top().front().second -= shift_left_;
+
+      levels_entities_boundaries_pointers_.top().front().first += offset_;
+      levels_entities_boundaries_pointers_.top().front().second += offset_ + levels_entities_offsets_.top().front();
+
+      offset_ += levels_entities_offsets_.top().front();
+
+      levels_entities_offsets_.top().pop();
+
+      levels_entities_boundaries_pointers_.top().push(levels_entities_boundaries_pointers_.top().front());
+      levels_entities_boundaries_pointers_.top().pop();
+    }
+
+    return accumulate_missing_indices();
+  }  // map_short_json_indices()
+
+  resultState accumulate_missing_indices() {
+    size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
+    size_t next_entity_index{0};
+    std::string corrected_json_;
+
+    size_t breakdown_index_{levels_entities_boundaries_pointers_.top().front().second + 1};
+
+    /*
+                This loop loops number of entities in current level times
+
+                levels_entities_indices_.top() + 1
+            */
+    for (size_t i{0}; i < number_of_entities_; i++) {
+      corrected_json_ += '"';
+      corrected_json_ += std::to_string(next_entity_index);
+      corrected_json_ += '"';
+      corrected_json_ += ':';
+      corrected_json_ +=
+          levels_accumulators_.top().substr(levels_entities_boundaries_pointers_.top().front().first,
+                                            levels_entities_boundaries_pointers_.top().front().second -
+                                                levels_entities_boundaries_pointers_.top().front().first + 1);
+
+      levels_cumulative_offsets_.top() += 4;
+
+      levels_entities_boundaries_pointers_.top().pop();
+
+      next_entity_index++;
+
+      if (i != number_of_entities_ - 1) {
+        breakdown_index_ = levels_entities_boundaries_pointers_.top().front().second + 1;
+        corrected_json_ += ',';
       }
-      default:
-        return errorState;
     }
-  }  // read_value()
 
-  ShortJSONState array_to_json(std::string data) {
-    std::string json_array_{"["};
-    json_array_.append(data);
-    json_array_ += ']';
-    levels.pop();
-    add_index();
-    levels.top().first.append(json_array_);
-    return arrayState;
-  }  // array_to_json()
+    // Rest of the string
+    corrected_json_ += levels_accumulators_.top().substr(breakdown_index_);
 
-  ShortJSONState object_to_json(std::string data) {
-    std::string json_object_{"{"};
-    json_object_.append(data);
-    json_object_ += '}';
-    levels.pop();
-    add_index();
-    levels.top().first.append(json_object_);
-    add_index_if_not_exist();  // iterate over last object and fix it
-    return objectState;
-  }  // object_to_json()
+    levels_accumulators_.top() = corrected_json_;
 
-  void add_index() {
-    if ((!(indices.empty())) && (!(levels.top().second))) {
-      levels.top().first += '"';
-      levels.top().first += std::to_string(indices.top());
-      levels.top().first += '"';
-      levels.top().first += ':';
-    }
-  }  // add_index()
+    return successState;
+  }  // accumulate_missing_indices()
 
-  ShortJSONState add_index_if_not_exist() {
-    int json_length_{(int)(levels.top().first.length())}, next_object_index{0};
-    std::string defective_json_{levels.top().first}, perfect_json_{"{"};
-    int temp_pointer_ = 1;  // ignore the first parenthesis because it's already added in the initialization step
+  resultState read_key_value_pair(std::string &data) {
+    size_t new_pointer_{pointer_};
+
     while (1) {
-      switch (defective_json_.at(temp_pointer_)) {
-        case '{': {
-          perfect_json_ += '"';
-          perfect_json_ += std::to_string(next_object_index);
-          perfect_json_ += '"';
-          perfect_json_ += ':';
-
-          int temp_temp_pointer_ = temp_pointer_;
-
-          // this stack for skipping the current object/array
-          std::stack<char> temp_stack_;
-
-          while (1) {
-            if (defective_json_.at(temp_temp_pointer_) == '{')
-              temp_stack_.push('{');
-            else if (defective_json_.at(temp_temp_pointer_) == '}')
-              temp_stack_.pop();
-
-            temp_temp_pointer_++;
-
-            // when stack is empty this means parenthesis has been balanced
-            if (!(temp_temp_pointer_ < (json_length_ - 1)) || temp_stack_.empty()) break;
-          }
-
-          perfect_json_.append(defective_json_.substr(temp_pointer_, temp_temp_pointer_ - temp_pointer_));
-          next_object_index++;
-          temp_pointer_ = temp_temp_pointer_;
-        }
-          continue;
-        case '[': {
-          perfect_json_ += '"';
-          perfect_json_ += std::to_string(next_object_index);
-          perfect_json_ += '"';
-          perfect_json_ += ':';
-
-          int temp_temp_pointer_ = temp_pointer_;
-
-          // this stack for skipping the current object/array
-          std::stack<char> temp_stack_;
-
-          while (1) {
-            if (defective_json_.at(temp_temp_pointer_) == '[')
-              temp_stack_.push('[');
-            else if (defective_json_.at(temp_temp_pointer_) == ']')
-              temp_stack_.pop();
-
-            temp_temp_pointer_++;
-
-            // when stack is empty this means parenthesis has been balanced
-            if (!(temp_temp_pointer_ < (json_length_ - 1)) || temp_stack_.empty()) break;
-          }
-
-          perfect_json_.append(defective_json_.substr(temp_pointer_, temp_temp_pointer_ - temp_pointer_));
-          next_object_index++;
-          temp_pointer_ = temp_temp_pointer_;
-        }
-          continue;
+      if (new_pointer_ >= data.length()) return errorState;
+      switch (data.at(new_pointer_)) {
         case ',':
-          perfect_json_ += ',';
-          temp_pointer_++;
-          continue;
-        case '"':
-          // finding this double quote means that, we found the first added index so no need to continue adding indices
-          if ((perfect_json_.length()) >
-              1) {  // correctedJSON var has default length equal to 1, that's because the open parenthesis we added
-            perfect_json_.append(
-                defective_json_.substr(temp_pointer_));  // the rest of the string including the last parenthesis
-            bool temp_bool_ = levels.top().second;       // we save our level state
-            levels.pop();                                // remove wrong top and push the right one
-            levels.push({perfect_json_, temp_bool_});
-          }
+        case ']':
+          accumulate_index();
+          levels_accumulators_.top() += data.substr(pointer_, new_pointer_ - pointer_);
+          pointer_ += new_pointer_ - pointer_ - 1;
           return successState;
         default:
-          return errorState;
+          break;
       }
+      new_pointer_++;
     }
-  }  // add_index_if_not_exist()
+  }  // read_key_value_pair()
 
  public:
-  ShortJSONReader() = default;
+  ShortToJSONConverter() = default;
 
-  std::pair<bool,std::string> read(std::string data) {
-    // This is pre-first level which will contains full json.
-    // Note that, true and false here has no meaning because we only interseted in the string (see return statement).
-    levels.push({"", true});
-
-    currentState = pushLevel(data);
-
-    switch (currentState) {
+  std::pair<bool, std::string> read(std::string data) {
+    switch (parse(data)) {
       case errorState:
         return {false, ""};
       default:
-        return {true, levels.top().first};
+        return {true, json_};
     }
   }  // read()
 };
