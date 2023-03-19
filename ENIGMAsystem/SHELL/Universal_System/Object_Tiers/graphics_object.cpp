@@ -23,6 +23,8 @@
 
 #include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
+#include "serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <math.h>
 #include <floatcomp.h>
@@ -90,4 +92,38 @@ namespace enigma
   int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_xoffset(sprite_index)*image_xscale; }
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index)*image_yscale; }
   int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
+
+  std::vector<std::byte> object_graphics::serialize() {
+    auto bytes = object_timelines::serialize();
+    std::size_t len = 0;
+
+    enigma_internal_serialize<unsigned char>(object_graphics::objtype, len, bytes);
+    enigma_internal_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_graphics::deserialize_self(std::byte *iter) {
+    auto len = object_timelines::deserialize_self(iter);
+
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
+    if (type != object_graphics::objtype) {
+      DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_graphics::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    enigma_internal_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
+
+    return len;
+  }
+
+  std::pair<object_graphics, std::size_t> object_graphics::deserialize(std::byte *iter) {
+    object_graphics result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 }
