@@ -37,23 +37,14 @@ namespace ImGuiAl
     inline MsgBox() {}
     virtual ~MsgBox();
     
-    bool Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions, bool show_checkbox = false );
+    bool Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions );
     int  Draw();
     void Open();
-    
-    inline void AskAgain()
-    {
-      m_DontAskAgain = false;
-      m_Selected = 0;
-    }
     
   protected:
     const char* m_Title;
     const char* m_Icon;
     const char* m_Text;
     std::vector<std::string> m_Captions;
-    bool m_ShowCheckbox;
-    bool m_DontAskAgain;
-    int m_Selected;
   };
 }
