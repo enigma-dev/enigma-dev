@@ -408,7 +408,8 @@ namespace {
         delete msgbox[0];
         msgbox.pop_back();
         if (result != "(null)") goto finish;
-      } else if (ifd::FileDialog::Instance().IsDone("GetOpenFileName")) {
+      }
+      if (ifd::FileDialog::Instance().IsDone("GetOpenFileName")) {
         if (ifd::FileDialog::Instance().HasResult()) {
           result = ifd::FileDialog::Instance().GetResult().string();
         }
