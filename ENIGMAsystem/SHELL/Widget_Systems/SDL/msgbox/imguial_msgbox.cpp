@@ -39,10 +39,9 @@ void AlignForWidth(float width, float alignment = 0.5f)
   ImGui::SetCursorPosY(ImGui::GetContentRegionMax().y - (ImGui::GetFontSize() + (ImGui::GetFontSize() / 2)));
 }
 
-bool ImGuiAl::MsgBox::Init( const char* title, const char* icon, const char* text, std::vector<std::string> captions )
+bool ImGuiAl::MsgBox::Init( const char* title, const char* text, std::vector<std::string> captions )
 {
   m_Title = title;
-  m_Icon = icon;
   m_Text = text;
   m_Captions = captions;
   return true;
@@ -53,26 +52,7 @@ int ImGuiAl::MsgBox::Draw()
   int index = 0;
   if ( ImGui::BeginPopupModal( m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove ) )
   {
-    if ( m_Icon != nullptr )
-    {
-      ImVec2 size = ImGui::CalcTextSize( m_Icon );
-      ImVec2 pos = ImGui::GetCursorPos();
-      float save_y = pos.y;
-      pos.y += size.y;
-        
-      ImGui::SetCursorPos( pos );
-      ImGui::Text( "%s", m_Icon );
-        
-      pos.x += size.x + pos.x;
-      pos.y = save_y;
-        
-      ImGui::SetCursorPos( pos );
-      ImGui::TextWrapped( "%s", m_Text );
-    }
-    else
-    {
-      ImGui::TextWrapped( "%s", m_Text );
-    }
+    ImGui::TextWrapped( "%s", m_Text );
       
     ImGui::Separator();
 
