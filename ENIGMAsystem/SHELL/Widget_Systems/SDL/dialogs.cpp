@@ -41,8 +41,6 @@
 
 #include "Platforms/SDL/Window.h"
 
-#include "OpenGLHeaders.h"
-
 #ifdef _WIN32
 #define DLLEXT ".dll"
 #elif (defined(__APPLE__) && defined(__MACH__))
