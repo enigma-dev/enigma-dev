@@ -357,7 +357,7 @@ namespace {
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
         ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox1", nullptr, message.c_str(), buttons);
+        msgbox[0]->Init("##msgbox1", message.c_str(), buttons);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
         switch (selected) {
@@ -375,7 +375,7 @@ namespace {
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
         ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox2", nullptr, message.c_str(), buttons);
+        msgbox[0]->Init("##msgbox2", message.c_str(), buttons);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
         switch (selected) {
@@ -395,7 +395,7 @@ namespace {
         vector<ImGuiAl::MsgBox *> msgbox;
         msgbox.push_back(new ImGuiAl::MsgBox());
         ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox3", nullptr, message.c_str(), buttons);
+        msgbox[0]->Init("##msgbox3", message.c_str(), buttons);
         msgbox[0]->Open();
         int selected = msgbox[0]->Draw();
         switch (selected) {
