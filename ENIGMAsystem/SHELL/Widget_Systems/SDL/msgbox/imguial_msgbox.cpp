@@ -56,7 +56,7 @@ int ImGuiAl::MsgBox::Draw()
       
     ImGui::Separator();
 
-    ImVec2 size = ImVec2( 4.5f * ImGui::GetFontSize(), 0.0f );
+    ImVec2 size = ImVec2( 4.75f * ImGui::GetFontSize(), 0.0f );
     int count;
 
     ImGuiStyle& style = ImGui::GetStyle();
@@ -82,7 +82,7 @@ int ImGuiAl::MsgBox::Draw()
       ImGui::PopID();
     }
       
-    size = ImVec2( ( 4 - count ) * 4.5f * ImGui::GetFontSize(), ImGui::GetFontSize() );
+    size = ImVec2( ( 4 - count ) * 4.75f * ImGui::GetFontSize(), ImGui::GetFontSize() );
     ImGui::Dummy( size );
     
     ImGui::EndPopup();
