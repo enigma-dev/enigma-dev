@@ -76,7 +76,7 @@ int ImGuiAl::MsgBox::Draw()
       
     ImGui::Separator();
 
-    m ImVec2 size = ImVec2( 2.5f * ImGui::GetFontSize(), 0.0f );
+    ImVec2 size = ImVec2( 2.5f * ImGui::GetFontSize(), 0.0f );
     int count;
 
     ImGuiStyle& style = ImGui::GetStyle();
