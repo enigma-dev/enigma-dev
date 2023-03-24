@@ -340,8 +340,11 @@ namespace {
     string result; while (!quit) {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
-        if (e.type == SDL_QUIT) {
-          quit = true;
+        if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE) {
+          if (SDL_GetWindowID(window) == e.window.windowID) {
+            result = "(null)";
+            quit = true;
+          }
         }
       }
       ImGui_ImplSDLRenderer_NewFrame(); 
@@ -354,50 +357,43 @@ namespace {
       else if (type == oneButton) {
         vector<string> buttons;
         buttons.push_back(IFD_OK); 
-        vector<ImGuiAl::MsgBox *> msgbox;
-        msgbox.push_back(new ImGuiAl::MsgBox());
-        ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox1", message.c_str(), buttons);
-        msgbox[0]->Open();
-        int selected = msgbox[0]->Draw();
+        ImGuiAl::MsgBox msgbox;
+        ImGui::PushID("##msgbox");
+        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Open();
+        int selected = msgbox.Draw();
         switch (selected) {
           case 0: result = "(null)"; break;
           case 1: result = IFD_OK; break;
         }
         ImGui::PopID();
-        delete msgbox[0];
-        msgbox.pop_back();
         if (result != "(null)") goto finish;
       } else if (type == twoButtons) {
         vector<string> buttons;
         buttons.push_back(IFD_YES);
         buttons.push_back(IFD_NO); 
-        vector<ImGuiAl::MsgBox *> msgbox;
-        msgbox.push_back(new ImGuiAl::MsgBox());
-        ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox2", message.c_str(), buttons);
-        msgbox[0]->Open();
-        int selected = msgbox[0]->Draw();
+        ImGuiAl::MsgBox msgbox;
+        ImGui::PushID("##msgbox");
+        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Open();
+        int selected = msgbox.Draw();
         switch (selected) {
           case 0: result = "(null)"; break;
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
         }
         ImGui::PopID();
-        delete msgbox[0];
-        msgbox.pop_back();
         if (result != "(null)") goto finish;
       } else if (type == threeButtons) {
         vector<string> buttons;
         buttons.push_back(IFD_YES);
         buttons.push_back(IFD_NO); 
         buttons.push_back(IFD_CANCEL);
-        vector<ImGuiAl::MsgBox *> msgbox;
-        msgbox.push_back(new ImGuiAl::MsgBox());
-        ImGui::PushID(msgbox[0]);
-        msgbox[0]->Init("##msgbox3", message.c_str(), buttons);
-        msgbox[0]->Open();
-        int selected = msgbox[0]->Draw();
+        ImGuiAl::MsgBox msgbox;
+        ImGui::PushID("##msgbox");
+        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Open();
+        int selected = msgbox.Draw();
         switch (selected) {
           case 0: result = "(null)"; break;
           case 1: result = IFD_YES; break;
@@ -405,8 +401,6 @@ namespace {
           case 3: result = IFD_CANCEL; break;
         }
         ImGui::PopID();
-        delete msgbox[0];
-        msgbox.pop_back();
         if (result != "(null)") goto finish;
       }
       if (ifd::FileDialog::Instance().IsDone("GetOpenFileName")) {
