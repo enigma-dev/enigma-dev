@@ -373,8 +373,8 @@ namespace ngs::xproc {
     #elif defined(__DragonFly__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    const char *nlistf, *memf;
-    nlistf = memf = "/dev/null";
+    const char *nlistf = "/dev/null";
+    const char *memf   = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
     if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
@@ -541,8 +541,8 @@ namespace ngs::xproc {
     #elif defined(__DragonFly__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    const char *nlistf, *memf;
-    nlistf = memf = "/dev/null";
+    const char *nlistf = "/dev/null";
+    const char *memf   = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
     if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
@@ -636,8 +636,8 @@ namespace ngs::xproc {
     #elif defined(__DragonFly__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    const char *nlistf, *memf;
-    nlistf = memf = "/dev/null";
+    const char *nlistf = "/dev/null";
+    const char *memf   = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
@@ -783,7 +783,7 @@ namespace ngs::xproc {
     }
     #elif defined(__FreeBSD__) || defined(__DragonFly__)
     int mib[4]; 
-    std::size_t len;
+    std::size_t len = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC;
     mib[2] = KERN_PROC_PATHNAME;
@@ -801,7 +801,7 @@ namespace ngs::xproc {
     }
     #elif defined(__NetBSD__)
     int mib[4]; 
-    std::size_t len;
+    std::size_t len = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = proc_id;
@@ -1072,8 +1072,8 @@ namespace ngs::xproc {
     #elif defined(__DragonFly__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    const char *nlistf, *memf;
-    nlistf = memf = "/dev/null";
+    const char *nlistf = "/dev/null";
+    const char *memf   = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
@@ -1189,8 +1189,8 @@ namespace ngs::xproc {
     #elif defined(__DragonFly__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
-    const char *nlistf, *memf;
-    nlistf = memf = "/dev/null";
+    const char *nlistf = "/dev/null";
+    const char *memf   = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
