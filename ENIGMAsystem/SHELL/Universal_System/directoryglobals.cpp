@@ -27,32 +27,42 @@
 #include <string>
 
 #include "Platforms/General/PFmain.h"
+#include "apifilesystem/ghc/filesystem.hpp"
 
 namespace enigma_user {
 
-std::string get_working_directory() { 
-  std::string result = ::ngs::cproc::directory_get_current_working();
+std::string get_working_directory() {
+  std::string result = ghc::filesystem::current_path(ec).string();
+  if (ec.value() != 0) return "";
   #if defined(_WIN32)
-  return (!result.empty() && result.back() != '\\') ? result + "\\" : result;
+  return ((!result.empty() && result.back() != '\\') ? result + "\\" : result);
   #else
-  return (!result.empty() && result.back() != '/') ? result + "/" : result;
+  return ((!result.empty() && result.back() != '/') ? result + "/" : result);
   #endif
 }
 
 std::string get_program_filename() { 
-  return enigma_user::filename_name(::ngs::cproc::executable_from_self()); 
+  return ngs::fs::executable_get_filename(); 
 }
 
 std::string get_program_directory() { 
-  return enigma_user::filename_path(::ngs::cproc::executable_from_self()); 
+  return ngs::fs::executable_get_directory(); 
 }
 
 std::string get_program_pathname() { 
-  return ::ngs::cproc::executable_from_self(); 
+  return ngs::fs::executable_get_pathname(); 
 }
 
 bool set_working_directory(std::string dname) {
-  return ::ngs::cproc::directory_set_current_working(dname.c_str());
+  std::error_code ec;
+  #if !defined(_WIN32)
+  while (!dname.empty() && dname.end() == '/')
+  #else
+  while (!dname.empty() && (dname.end() == '\\' || dname.end() == '/'))
+  #endif
+  ghc::filesystem::path path = ghc::filesystem::path(dname);
+  ghc::filesystem::current_path(path, ec);
+  return (ec.value() == 0);
 }
 
 } // namespace enigma_user
