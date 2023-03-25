@@ -947,7 +947,7 @@ namespace ngs::ps {
         path = buffer;
       }
     }
-    #elif (defined(__linux__) || defined(__ANDROID__))
+    #elif ((defined(__linux__) || defined(__ANDROID__)) || defined(__sun))
     char cwd[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(proc_id) + "/cwd").c_str(), cwd)) {
       path = cwd;
@@ -1030,11 +1030,6 @@ namespace ngs::ps {
           path = buffer;
         }
       }
-    }
-    #elif defined(__sun)
-    char cwd[PATH_MAX];
-    if (realpath(("/proc/" + std::to_string(proc_id) + "/cwd").c_str(), cwd)) {
-      path = cwd;
     }
     #endif
     return path;
