@@ -12,7 +12,7 @@
 #define NOMINMAX
 #endif
 
-#include "filesystem.h"
+#include "ghc/filesystem.hpp"
 #include "filesystem.hpp"
 
 #define IFD_DIALOG_FILE      0
