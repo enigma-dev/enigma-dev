@@ -25,6 +25,7 @@
 */
 
 #include <string>
+#include <system_error>
 
 #include "Platforms/General/PFmain.h"
 #include "apifilesystem/ghc/filesystem.hpp"
