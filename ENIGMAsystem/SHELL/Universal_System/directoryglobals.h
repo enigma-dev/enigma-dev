@@ -28,7 +28,7 @@
 
 #include "estring.h"
 
-#include "lib/cproc/cproc.hpp"
+#include "apifilesystem/filesystem.hpp"
 #include "tempdir/tempdir.h"
 
 namespace enigma_user {
