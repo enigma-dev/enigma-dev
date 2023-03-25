@@ -221,8 +221,7 @@ ifeq ($(UNIX_BASED), false)
 endif
 
 override CXXFLAGS += -fexceptions
-SOURCES += $(wildcard ../../shared/lib/cproc/*.cpp) 
-SOURCES += $(wildcard ../../shared/lib/xproc/*.cpp)
+SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
 SOURCES += $(wildcard ../../shared/apifilesystem/*.cpp)
 SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
 
