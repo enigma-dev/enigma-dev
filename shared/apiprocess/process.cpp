@@ -1432,7 +1432,7 @@ namespace ngs::ps {
       if (fork_proc_id != -1) {
         while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
           std::this_thread::sleep_for(std::chrono::milliseconds(5));
-          int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
+          int status = 0; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
           std::string exe = exe_from_proc_id(fork_proc_id);
           if (exe.empty()) {
             proc_id = 0;
