@@ -25,7 +25,6 @@
 */
 
 #include <string>
-#include <system_error>
 
 #include "Platforms/General/PFmain.h"
 #include "apifilesystem/ghc/filesystem.hpp"
@@ -33,13 +32,7 @@
 namespace enigma_user {
 
 std::string get_working_directory() {
-  std::string result = ghc::filesystem::current_path(ec).string();
-  if (ec.value() != 0) return "";
-  #if defined(_WIN32)
-  return ((!result.empty() && result.back() != '\\') ? result + "\\" : result);
-  #else
-  return ((!result.empty() && result.back() != '/') ? result + "/" : result);
-  #endif
+  return ngs::fs::directory_get_current_working();
 }
 
 std::string get_program_filename() { 
@@ -55,15 +48,7 @@ std::string get_program_pathname() {
 }
 
 bool set_working_directory(std::string dname) {
-  std::error_code ec;
-  #if !defined(_WIN32)
-  while (!dname.empty() && dname.end() == '/')
-  #else
-  while (!dname.empty() && (dname.end() == '\\' || dname.end() == '/'))
-  #endif
-  ghc::filesystem::path path = ghc::filesystem::path(dname);
-  ghc::filesystem::current_path(path, ec);
-  return (ec.value() == 0);
+  return ngs::fs::directory_set_current_working(dname);
 }
 
 } // namespace enigma_user
