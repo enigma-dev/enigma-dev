@@ -32,15 +32,15 @@
 
 #include "SDL.h"
 #include "SDL_syswm.h"
-#include "filedialogs.h"
+#include "filedialogs.hpp"
 #include "imgui_impl_sdlrenderer.h"
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "ImFileDialog.h"
 #include "msgbox/imguial_msgbox.h"
 #include "ImFileDialogMacros.h"
+#include "ghc/filesystem.hpp"
 #include "filesystem.hpp"
-#include "filesystem.h"
 
 #include <sys/stat.h>
 #if defined(_WIN32) 
