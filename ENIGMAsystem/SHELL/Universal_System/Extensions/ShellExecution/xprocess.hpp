@@ -28,11 +28,31 @@
 
 #include "apiprocess/process.hpp"
 
-#if !defined(_WIN32)
-#define PROCID int
-#else
-#define PROCID unsigned long
-#endif
+  #if !defined(_WIN32)
+  #define PROCID int
+  #else
+  #define PROCID unsigned long
+  #endif
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  #if defined(_WIN32) || ((defined(__APPLE__) && defined(__MACH__)) && !defined(PROCESS_XQUARTZ_IMPL))
+  #define WINDOW void *
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun) || defined(PROCESS_XQUARTZ_IMPL)
+  #define WINDOW unsigned long
+  #endif
+  #define WINDOWID char *
+  #endif
+  #define PROCLIST int
+  #define PROCINFO int
+  #define KINFOFLAGS int
+  #define KINFO_EXEP 0x1000
+  #define KINFO_CWDP 0x2000
+  #define KINFO_PPID 0x0100
+  #define KINFO_CPID 0x0200
+  #define KINFO_ARGV 0x0010
+  #define KINFO_ENVV 0x0020
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  #define KINFO_OWID 0x0001
+  #endif
 
 namespace xprocess {
 
