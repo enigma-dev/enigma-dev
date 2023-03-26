@@ -7,6 +7,9 @@
 
 #include "xprocess.hpp"
 
+#define PROCINFO   int
+#define KINFOFLAGS int
+
 using namespace xprocess;
 
 namespace enigma_user {
