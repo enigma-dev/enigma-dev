@@ -5,11 +5,8 @@
 #define PROCESS_GUIWINDOW_IMPL
 #endif
 
+#include "apiprocess/process.hpp"
 #include "xprocess.hpp"
-
-#define PROCINFO   int
-#define PROCLIST   int
-#define KINFOFLAGS int
 
 using namespace xprocess;
 
