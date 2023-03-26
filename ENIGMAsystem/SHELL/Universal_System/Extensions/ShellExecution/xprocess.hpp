@@ -67,9 +67,9 @@ namespace xprocess {
   bool proc_id_resume(PROCID proc_id);
   bool proc_id_kill(PROCID proc_id);
   const char *executable_from_self();
-  void parent_proc_id_from_proc_id(PROCID proc_id, XPROCID *parent_proc_id);
+  void parent_proc_id_from_proc_id(PROCID proc_id, PROCID *parent_proc_id);
   PROCID parent_proc_id_from_proc_id(PROCID proc_id);
-  void proc_id_from_parent_proc_id(PROCID parent_proc_id, XPROCID **proc_id, int *size);
+  void proc_id_from_parent_proc_id(PROCID parent_proc_id, PROCID **proc_id, int *size);
   const char *exe_from_proc_id(PROCID proc_id);
   void exe_from_proc_id(PROCID proc_id, char **buffer);
   const char *directory_get_current_working();
@@ -99,7 +99,7 @@ namespace xprocess {
   WINDOWID window_id_from_native_window(WINDOW window);
   WINDOW native_window_from_window_id(WINDOWID winid);
   void window_id_enumerate(WINDOWID **win_id, int *size);
-  void proc_id_from_window_id(WINDOWID win_id, XPROCID *proc_id);
+  void proc_id_from_window_id(WINDOWID win_id, PROCID *proc_id);
   void window_id_from_proc_id(PROCID proc_id, WINDOWID **win_id, int *size);
   void free_window_id(WINDOWID *win_id);
   bool window_id_exists(WINDOWID win_id);
