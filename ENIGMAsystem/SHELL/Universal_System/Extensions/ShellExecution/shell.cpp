@@ -45,19 +45,19 @@ using std::string;
 
 namespace enigma_user {
 
-NGS_PROCID ProcessExecute(string command) {
+PROCID ProcessExecute(string command) {
   return process_execute(command.c_str());
 }
 
-NGS_PROCID ProcessExecuteAsync(string command) {
+PROCID ProcessExecuteAsync(string command) {
   return process_execute_async(command.c_str());
 }
 
-bool CompletionStatusFromExecutedProcess(NGS_PROCID procIndex) {
+bool CompletionStatusFromExecutedProcess(PROCID procIndex) {
   return completion_status_from_executed_process(procIndex);
 }
 
-ssize_t ExecutedProcessWriteToStandardInput(NGS_PROCID procIndex, string input) {
+ssize_t ExecutedProcessWriteToStandardInput(PROCID procIndex, string input) {
   return executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
@@ -65,43 +65,43 @@ std::string CurrentProcessReadFromStandardInput() {
   return current_process_read_from_standard_input();
 }
 
-string ExecutedProcessReadFromStandardOutput(NGS_PROCID procIndex) {
+string ExecutedProcessReadFromStandardOutput(PROCID procIndex) {
   return executed_process_read_from_standard_output(procIndex);
 }
 
-bool FreeExecutedProcessStandardInput(NGS_PROCID procIndex) {
+bool FreeExecutedProcessStandardInput(PROCID procIndex) {
   return free_executed_process_standard_input(procIndex);
 }
 
-bool FreeExecutedProcessStandardOutput(NGS_PROCID procIndex) {
+bool FreeExecutedProcessStandardOutput(PROCID procIndex) {
   return free_executed_process_standard_output(procIndex);
 }
 
-NGS_PROCID ProcIdFromSelf() {
+PROCID ProcIdFromSelf() {
   return proc_id_from_self();
 }
 
-NGS_PROCID ParentProcIdFromSelf() {
+PROCID ParentProcIdFromSelf() {
   return parent_proc_id_from_self();
 }
 
-NGS_PROCID ParentProcIdFromProcId(NGS_PROCID procId) {
+PROCID ParentProcIdFromProcId(PROCID procId) {
   return parent_proc_id_from_proc_id(procId);
 }
 
-bool ProcIdExists(NGS_PROCID procId) {
+bool ProcIdExists(PROCID procId) {
   return proc_id_exists(procId);
 }
 
-bool ProcIdSuspend(NGS_PROCID procId) {
+bool ProcIdSuspend(PROCID procId) {
   return proc_id_suspend(procId);
 }
 
-bool ProcIdResume(NGS_PROCID procId) {
+bool ProcIdResume(PROCID procId) {
   return proc_id_resume(procId);
 }
 
-bool ProcIdKill(NGS_PROCID procId) {
+bool ProcIdKill(PROCID procId) {
   return proc_id_kill(procId);
 }
 
@@ -109,19 +109,19 @@ string ExecutableFromSelf() {
   return executable_from_self();
 }
 
-string ExeFromProcId(NGS_PROCID procId) {
+string ExeFromProcId(PROCID procId) {
   return exe_from_proc_id(procId);
 }
 
-string CwdFromProcId(NGS_PROCID procId) {
+string CwdFromProcId(PROCID procId) {
   return cwd_from_proc_id(procId);
 }
 
-PROCINFO ProcInfoFromProcId(NGS_PROCID procId) {
+PROCINFO ProcInfoFromProcId(PROCID procId) {
   return proc_info_from_proc_id(procId);
 }
 
-PROCINFO ProcInfoFromProcIdEx(NGS_PROCID procId, KINFOFLAGS kInfoFlags) {
+PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags) {
   return proc_info_from_proc_id_ex(procId, kInfoFlags);
 }
 
@@ -133,7 +133,7 @@ PROCLIST ProcListCreate() {
   return proc_list_create();
 }
 
-NGS_PROCID ProcessId(PROCLIST procList, int i) {
+PROCID ProcessId(PROCLIST procList, int i) {
   return process_id(procList, i);
 }
 
@@ -153,11 +153,11 @@ string CurrentWorkingDirectory(PROCINFO procInfo) {
   return current_working_directory(procInfo);
 }
 
-NGS_PROCID ParentProcessId(PROCINFO procInfo) {
+PROCID ParentProcessId(PROCINFO procInfo) {
   return parent_process_id(procInfo);
 }
 
-NGS_PROCID ChildProcessId(PROCINFO procInfo, int i) {
+PROCID ChildProcessId(PROCINFO procInfo, int i) {
   return child_process_id(procInfo, i);
 }
 
@@ -210,7 +210,7 @@ string DirectoryGetTemporaryPath() {
 }
 
 void execute_program(string fname, string args, bool wait) {
-  NGS_PROCID pid = 0;
+  PROCID pid = 0;
   string cmd = string_replace_all(fname, "\"", "\\\"");
   cmd = string_replace_all(cmd, "\\", "\\\\");
   cmd = "\"" + cmd + "\" " + args;
@@ -230,7 +230,7 @@ void execute_shell(string fname, string args) {
 }
   
 string execute_shell_for_output(const string &command) {
-  NGS_PROCID pid = ProcessExecute(command.c_str());
+  PROCID pid = ProcessExecute(command.c_str());
   string output;
   if (pid > 0) {
     while (!CompletionStatusFromExecutedProcess(pid)) {

@@ -8,40 +8,45 @@
 #include "apiprocess/process.hpp"
 #include "xprocess.hpp"
 
-using ngs::ps::NGS_PROCID;
+#if !defined(_WIN32)
+#define PROCID int
+#else
+#define PROCID unsigned long
+#endif
+
 using namespace xprocess;
 
 namespace enigma_user {
 
-NGS_PROCID ProcessExecute(std::string command);
-NGS_PROCID ProcessExecuteAsync(std::string command);
-bool CompletionStatusFromExecutedProcess(NGS_PROCID procIndex);
-ssize_t ExecutedProcessWriteToStandardInput(NGS_PROCID procIndex, std::string input);
+PROCID ProcessExecute(std::string command);
+PROCID ProcessExecuteAsync(std::string command);
+bool CompletionStatusFromExecutedProcess(PROCID procIndex);
+ssize_t ExecutedProcessWriteToStandardInput(PROCID procIndex, std::string input);
 std::string CurrentProcessReadFromStandardInput();
-std::string ExecutedProcessReadFromStandardOutput(NGS_PROCID procIndex);
-bool FreeExecutedProcessStandardInput(NGS_PROCID procIndex);
-bool FreeExecutedProcessStandardOutput(NGS_PROCID procIndex);
-NGS_PROCID ProcIdFromSelf();
-NGS_PROCID ParentProcIdFromSelf();
-NGS_PROCID ParentProcIdFromProcId(NGS_PROCID procId);
-bool ProcIdExists(NGS_PROCID procId);
-bool ProcIdSuspend(NGS_PROCID procId);
-bool ProcIdResume(NGS_PROCID procId);
-bool ProcIdKill(NGS_PROCID procId);
+std::string ExecutedProcessReadFromStandardOutput(PROCID procIndex);
+bool FreeExecutedProcessStandardInput(PROCID procIndex);
+bool FreeExecutedProcessStandardOutput(PROCID procIndex);
+PROCID ProcIdFromSelf();
+PROCID ParentProcIdFromSelf();
+PROCID ParentProcIdFromProcId(PROCID procId);
+bool ProcIdExists(PROCID procId);
+bool ProcIdSuspend(PROCID procId);
+bool ProcIdResume(PROCID procId);
+bool ProcIdKill(PROCID procId);
 std::string ExecutableFromSelf();
-std::string ExeFromProcId(NGS_PROCID procId);
-std::string CwdFromProcId(NGS_PROCID procId);
-PROCINFO ProcInfoFromProcId(NGS_PROCID procId);
-PROCINFO ProcInfoFromProcIdEx(NGS_PROCID procId, KINFOFLAGS kInfoFlags);
+std::string ExeFromProcId(PROCID procId);
+std::string CwdFromProcId(PROCID procId);
+PROCINFO ProcInfoFromProcId(PROCID procId);
+PROCINFO ProcInfoFromProcIdEx(PROCID procId, KINFOFLAGS kInfoFlags);
 void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();
-NGS_PROCID ProcessId(PROCLIST procList, int i);
+PROCID ProcessId(PROCLIST procList, int i);
 int ProcessIdLength(PROCLIST procList);
 void FreeProcList(PROCLIST procList);
 std::string ExecutableImageFilePath(PROCINFO procInfo);
 std::string CurrentWorkingDirectory(PROCINFO procInfo);
-NGS_PROCID ParentProcessId(PROCINFO procInfo);
-NGS_PROCID ChildProcessId(PROCINFO procInfo, int i);
+PROCID ParentProcessId(PROCINFO procInfo);
+PROCID ChildProcessId(PROCINFO procInfo, int i);
 int ChildProcessIdLength(PROCINFO procInfo);
 std::string CommandLine(PROCINFO procInfo, int i);
 int CommandLineLength(PROCINFO procInfo);
