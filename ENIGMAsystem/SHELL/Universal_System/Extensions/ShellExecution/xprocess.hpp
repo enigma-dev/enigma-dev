@@ -28,6 +28,8 @@
 
 #include "apiprocess/process.hpp"
 
+namespace xprocess {
+
   #if !defined(_WIN32)
   #define PROCID int
   #else
@@ -53,8 +55,6 @@
   #if defined(PROCESS_GUIWINDOW_IMPL)
   #define KINFO_OWID 0x0001
   #endif
-
-namespace xprocess {
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
   void free_proc_id(PROCID *proc_id);
