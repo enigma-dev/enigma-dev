@@ -5,7 +5,6 @@
 #define PROCESS_GUIWINDOW_IMPL
 #endif
 
-#include "apiprocess/process.hpp"
 #include "xprocess.hpp"
 
 using namespace xprocess;
