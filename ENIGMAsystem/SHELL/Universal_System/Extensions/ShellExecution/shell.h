@@ -8,6 +8,7 @@
 #include "xprocess.hpp"
 
 #define PROCINFO   int
+#define PROCLIST   int
 #define KINFOFLAGS int
 
 using namespace xprocess;
