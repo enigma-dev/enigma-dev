@@ -28,7 +28,6 @@
 
 #include <climits>
 
-#include "apiprocess/process.hpp"
 #include "xprocess.hpp"
 
 #if defined(PROCESS_GUIWINDOW_IMPL)
