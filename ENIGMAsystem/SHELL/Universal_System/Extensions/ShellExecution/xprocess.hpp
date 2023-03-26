@@ -28,6 +28,12 @@
 
 #include "apiprocess/process.hpp"
 
+#if !defined(_WIN32)
+#define PROCID int
+#else
+#define PROCID unsigned long
+#endif
+
 namespace xprocess {
 
   void proc_id_enumerate(PROCID **proc_id, int *size);
