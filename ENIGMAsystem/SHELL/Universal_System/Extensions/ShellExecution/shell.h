@@ -8,12 +8,6 @@
 #include "apiprocess/process.hpp"
 #include "xprocess.hpp"
 
-#if !defined(_WIN32)
-#define PROCID int
-#else
-#define PROCID unsigned long
-#endif
-
 using namespace xprocess;
 
 namespace enigma_user {
