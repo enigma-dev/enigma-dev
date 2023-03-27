@@ -1378,20 +1378,20 @@ namespace ngs::ps {
         for (int i = 3; i < 4096; i++)
           close(i);
         setsid();
+        #if !defined(__ANDROID__)
         const char *env   = getenv("SHELL");
         const char *shell = ((env) ? env : "/bin/sh");
         char buffer[PATH_MAX];
         if (realpath(shell, buffer)) {
-          #if !defined(__ANDROID__)
           execl(buffer, buffer, "-c", command, nullptr);
-          #else
-          if (system(nullptr)) {
-            std::string tmp = string_replace_all(command, "\\", "\\\\");
-            tmp = "\"" + string_replace_all(tmp, "\"", "\\\"") + "\"";
-            system(("$SHELL -c " + tmp).c_str());
-          }
-          #endif
         }
+        #else
+        if (system(nullptr)) {
+          std::string tmp = string_replace_all(command, "\\", "\\\\");
+          tmp = "\"" + string_replace_all(tmp, "\"", "\\\"") + "\"";
+          system(("$SHELL -c " + tmp).c_str());
+        }
+        #endif
         _exit(-1);
       }
       close(p_stdin[0]);
@@ -1452,13 +1452,26 @@ namespace ngs::ps {
             proc_id = 0;
             break;
           }
+          char envbuf[PATH_MAX];
+          char shlbuf[PATH_MAX];
           const char *env   = getenv("SHELL");
-          std::string shell = ((env) ? env : "/bin/sh");
-          char envbuf[PATH_MAX]; 
-          if (realpath(env, envbuf)) {
-            shell = envbuf;
-            if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
-              if (wait_proc_id > 0) proc_id = wait_proc_id;
+          const char *shl   = "/bin/sh";
+          if (realpath(shl, shlbuf)) {
+            std::string shell = ((env) ? env : shlbuf);
+            if (realpath(env, envbuf)) {
+              shell = envbuf;
+              if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : shlbuf)) == 0) {
+                if (wait_proc_id > 0) { 
+                  proc_id = wait_proc_id;
+                }
+              } else if (strcmp(exe.c_str(), shlbuf) == 0) {
+                if (wait_proc_id > 0) { 
+                  proc_id = wait_proc_id;
+                }
+              }
+            } else {
+              proc_id = 0;
+              break;
             }
           } else {
             proc_id = 0;
@@ -1606,3 +1619,4 @@ namespace ngs::ps {
   }
 
 } // namespace ngs::ps
+ 
