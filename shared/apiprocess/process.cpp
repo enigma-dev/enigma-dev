@@ -1452,8 +1452,10 @@ namespace ngs::ps {
                 if (wait_proc_id > 0)
                   proc_id = wait_proc_id;
               } else if (strcmp(exe.c_str(), eco) == 0) {
-                if (wait_proc_id > 0)
+                if (wait_proc_id > 0) {
                   proc_id = wait_proc_id;
+                  break;
+                }
               } else {
                 goto finish;
               }
