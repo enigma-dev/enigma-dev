@@ -1388,6 +1388,15 @@ namespace ngs::ps {
         #else
         if (system(nullptr)) {
           std::string tmp = string_replace_all(command, "\\", "\\\\");
+          tmp = string_replace_all(command, "\0", "\\0");
+          tmp = string_replace_all(command, "\a", "\\a");
+          tmp = string_replace_all(command, "\b", "\\b");
+          tmp = string_replace_all(command, "\f", "\\f");
+          tmp = string_replace_all(command, "\n", "\\n");
+          tmp = string_replace_all(command, "\r", "\\r");
+          tmp = string_replace_all(command, "\t", "\\t");
+          tmp = string_replace_all(command, "\v", "\\v");
+          tmp = string_replace_all(command, "'", "\'");
           tmp = "\"" + string_replace_all(tmp, "\"", "\\\"") + "\"";
           system(("$SHELL -c " + tmp).c_str());
         }
@@ -1619,4 +1628,3 @@ namespace ngs::ps {
   }
 
 } // namespace ngs::ps
- 
