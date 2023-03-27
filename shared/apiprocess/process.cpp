@@ -1379,27 +1379,9 @@ namespace ngs::ps {
           close(i);
         setsid();
         #if !defined(__ANDROID__)
-        const char *env   = getenv("SHELL");
-        const char *shell = ((env) ? env : "/bin/sh");
-        char buffer[PATH_MAX];
-        if (realpath(shell, buffer)) {
-          execl(buffer, buffer, "-c", command, nullptr);
-        }
+        execl("/bin/sh", "sh", "-c", command, nullptr);
         #else
-        if (system(nullptr)) {
-          std::string tmp = string_replace_all(command, "\\", "\\\\");
-          tmp = string_replace_all(command, "\0", "\\0");
-          tmp = string_replace_all(command, "\a", "\\a");
-          tmp = string_replace_all(command, "\b", "\\b");
-          tmp = string_replace_all(command, "\f", "\\f");
-          tmp = string_replace_all(command, "\n", "\\n");
-          tmp = string_replace_all(command, "\r", "\\r");
-          tmp = string_replace_all(command, "\t", "\\t");
-          tmp = string_replace_all(command, "\v", "\\v");
-          tmp = string_replace_all(command, "'", "\'");
-          tmp = "\"" + string_replace_all(tmp, "\"", "\\\"") + "\"";
-          system(("$SHELL -c " + tmp).c_str());
-        }
+        execl("/system/bin/sh", "sh", "-c", command, nullptr);
         #endif
         _exit(-1);
       }
@@ -1461,22 +1443,16 @@ namespace ngs::ps {
             proc_id = 0;
             break;
           }
-          char envbuf[PATH_MAX];
           char shlbuf[PATH_MAX];
-          const char *env   = getenv("SHELL");
-          const char *shl   = "/bin/sh";
+          #if !defined(__ANDROID__)
+          const char *shl = "/bin/sh";
+          #else
+          const char *shl = "/system/bin/sh";
+          #endif
           if (realpath(shl, shlbuf)) {
-            std::string shell = ((env) ? env : shlbuf);
-            if (realpath(env, envbuf)) {
-              shell = envbuf;
-              if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : shlbuf)) == 0) {
-                if (wait_proc_id > 0) { 
-                  proc_id = wait_proc_id;
-                }
-              } else if (strcmp(exe.c_str(), shlbuf) == 0) {
-                if (wait_proc_id > 0) { 
-                  proc_id = wait_proc_id;
-                }
+            if (strcmp(exe.c_str(), shlbuf) == 0) {
+              if (wait_proc_id > 0) { 
+                proc_id = wait_proc_id;
               }
             } else {
               proc_id = 0;
