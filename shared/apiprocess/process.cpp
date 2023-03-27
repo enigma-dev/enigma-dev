@@ -2,7 +2,7 @@
 
  MIT License
  
- Copyright © 2021-2022 Samuel Venable
+ Copyright © 2021-2023 Samuel Venable
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -1525,7 +1525,7 @@ namespace ngs::ps {
       }
       return str;
     };
-    for (int i = 2; i < vec.size(); i++) {
+    for (int i = 2; i < (int)vec.size(); i++) {
       for (int j = 0; j < (int)strlen(vec[i].c_str()) + 1; j++) {
         if (isspace(vec[i][j])) {
           std::string tmp = string_replace_all(vec[i], "\\", "\\\\");
