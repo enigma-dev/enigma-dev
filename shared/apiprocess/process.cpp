@@ -1438,26 +1438,34 @@ namespace ngs::ps {
             break;
           }
           char shlbuf[PATH_MAX];
+          char ecobuf[PATH_MAX];
           #if !defined(__ANDROID__)
           const char *shl = "/bin/sh";
+          const char *eco = "/bin/echo";
           #else
           const char *shl = "/system/bin/sh";
+          const char *eco = "/system/bin/echo";
           #endif
           if (realpath(shl, shlbuf)) {
-            if (strcmp(exe.c_str(), shlbuf) == 0) {
-              if (wait_proc_id > 0) { 
-                proc_id = wait_proc_id;
+            if (realpath(eco, ecobuf)) {
+              if (strcmp(exe.c_str(), shlbuf) == 0) {
+                if (wait_proc_id > 0)
+                  proc_id = wait_proc_id;
+              } else if (strcmp(exe.c_str(), eco) == 0) {
+                if (wait_proc_id > 0)
+                  proc_id = wait_proc_id;
+              } else {
+                goto finish;
               }
             } else {
-              proc_id = 0;
-              break;
+              goto finish;
             }
           } else {
-            proc_id = 0;
-            break;
+            goto finish;
           }
         }
       } else {
+        finish:
         proc_id = 0;
       }
       child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
