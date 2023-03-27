@@ -62,6 +62,7 @@ namespace ngs::ps {
   std::vector<std::string> environ_from_proc_id(NGS_PROCID proc_id);
   std::string envvar_value_from_proc_id(NGS_PROCID proc_id, std::string name);
   bool envvar_exists_from_proc_id(NGS_PROCID proc_id, std::string name);
+  std::string cmdline_vector_to_string(std::vector<std::string> vec);
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait);
   std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id);
   ssize_t write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);
