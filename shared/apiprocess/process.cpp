@@ -1540,7 +1540,7 @@ namespace ngs::ps {
   }
 
   std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id) {
-    if (stdopt_map.find(proc_id) == stdopt_map.end()) return "\0";
+    if (stdopt_map.find(proc_id) == stdopt_map.end()) return "";
     std::lock_guard<std::mutex> guard(stdopt_mutex);
     return stdopt_map.find(proc_id)->second.c_str();
   }
