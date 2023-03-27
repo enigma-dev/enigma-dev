@@ -1524,7 +1524,7 @@ namespace ngs::ps {
         pos += nstr.length();
       }
       return str;
-    }
+    };
     for (int i = 2; i < vec.size(); i++) {
       for (int j = 0; j < (int)strlen(vec[i].c_str()) + 1; j++) {
         if (isspace(vec[i][j])) {
