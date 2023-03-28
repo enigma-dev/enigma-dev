@@ -32,7 +32,7 @@
 #include <cstdlib>
 
 #include "shell.h"
-#include "xprocess.h"
+#include "xprocess.hpp"
 #include "strings_util.h"
 
 #if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
