@@ -36,7 +36,6 @@
 #include <cstring>
 #include <climits>
 #include <cstdio>
-#include <cctype>
 
 #include "process.hpp"
 
@@ -1512,41 +1511,6 @@ namespace ngs::ps {
     }
 
   } // anonymous namespace
-
-  std::string cmdline_vector_to_string(std::vector<std::string> vec) {
-    std::string command;
-    auto string_replace_all = [](std::string str, std::string substr, std::string nstr) {
-      std::size_t pos = 0;
-      while ((pos = str.find(substr, pos)) != std::string::npos) {
-        str.replace(pos, substr.length(), nstr);
-        pos += nstr.length();
-      }
-      return str;
-    };
-    for (int i = 2; i < (int)vec.size(); i++) {
-      for (int j = 0; j < (int)strlen(vec[i].c_str()) + 1; j++) {
-        if (isspace(vec[i][j])) {
-          std::string tmp = string_replace_all(vec[i], "\\", "\\\\");
-          tmp = string_replace_all(tmp, "\0", "\\\0");
-          tmp = string_replace_all(tmp, "\a", "\\\a");
-          tmp = string_replace_all(tmp, "\b", "\\\b");
-          tmp = string_replace_all(tmp, "\f", "\\\f");
-          tmp = string_replace_all(tmp, "\n", "\\\n");
-          tmp = string_replace_all(tmp, "\r", "\\\r");
-          tmp = string_replace_all(tmp, "\t", "\\\t");
-          tmp = string_replace_all(tmp, "\v", "\\\v");
-          tmp = string_replace_all(tmp, "'", "\\'");
-          command += "\"" + string_replace_all(tmp, "\"", "\\\"") + "\" ";
-          goto next;
-        }
-      }
-      command += std::string(vec[i]) + " ";
-      next:;
-    }
-    if (!command.empty() && command.back() == ' ')
-      command.pop_back();
-    return command;
-  }
 
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait) {
     if (wait) return spawn_child_proc_id_helper(command);
