@@ -751,6 +751,10 @@ namespace xprocess {
     return result.c_str();
   }
 
+  bool free_executed_process_standard_input(NGS_PROCID proc_index) {
+    return ::free_stdin_for_child_proc_id(proc_index);
+  }
+
   bool free_executed_process_standard_output(NGS_PROCID proc_index) {
     return ::free_stdout_for_child_proc_id(proc_index);
   }
