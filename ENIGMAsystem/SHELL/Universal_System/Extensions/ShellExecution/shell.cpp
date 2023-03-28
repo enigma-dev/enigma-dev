@@ -32,7 +32,10 @@
 #include <cstdlib>
 
 #include "shell.h"
-#include "xprocess.hpp"
+
+#include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFmain.h"
+
 #include "strings_util.h"
 
 #if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
@@ -40,7 +43,6 @@
 #endif
 
 using std::string;
-using namespace xprocess;
 
 namespace enigma_user {
 
