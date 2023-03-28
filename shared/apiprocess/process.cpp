@@ -859,7 +859,7 @@ namespace ngs::ps {
             for (int i = 0; i < cntp; i++) {
               if (kif[i].fd_fd == KERN_FILE_TEXT) {
                 if (st.st_nlink == 1) {
-                  if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
+                  if (st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
                     *out = executable;
                     success = true;
                     break;
