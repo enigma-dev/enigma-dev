@@ -1414,7 +1414,7 @@ namespace ngs::ps {
     NGS_PROCID proc_id_from_fork_proc_id(NGS_PROCID proc_id) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
       std::vector<NGS_PROCID> ppid = proc_id_from_parent_proc_id(proc_id);
-      if (ppid.size()) proc_id = ppid[ppid.size() - 1];
+      if (!ppid.empty()) proc_id = ppid[0];
       return proc_id;
     }
     #endif
