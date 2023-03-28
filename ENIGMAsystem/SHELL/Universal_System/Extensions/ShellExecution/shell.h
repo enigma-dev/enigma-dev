@@ -1,13 +1,6 @@
-#include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFmain.h"
-
 #ifndef PROCESS_GUIWINDOW_IMPL
 #define PROCESS_GUIWINDOW_IMPL
 #endif
-
-#include "xprocess.hpp"
-
-using namespace xprocess;
 
 namespace enigma_user {
 
