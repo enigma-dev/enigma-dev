@@ -42,6 +42,7 @@
 #endif
 
 using std::string;
+using namespace xprocess;
 
 namespace enigma_user {
 
