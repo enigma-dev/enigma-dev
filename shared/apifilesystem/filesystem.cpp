@@ -563,8 +563,8 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_exe = [](std::string exe, bool fallback) {
-      std::string res;
+    auto is_exe = [](string exe, bool fallback) {
+      string res;
       kinfo_file *kif = nullptr;
       static kvm_t *kd = nullptr;
       kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
@@ -581,13 +581,13 @@ namespace ngs::fs {
               res = buffer;
             }
             if (fallback) {
-              std::string comm = kif[i].p_comm;
+              string comm = kif[i].p_comm;
               if (comm.empty()) break;
               const char *cenv = getenv("PATH");
-              std::string penv = cenv ? cenv : "";
+              string penv = cenv ? cenv : "";
               if (!penv.empty()) {
-                std::vector<std::string> env = string_split(penv, ':');
-                for (std::size_t i = 0; i < env.size(); i++) {
+                vector<string> env = string_split(penv, ':');
+                for (size_t i = 0; i < env.size(); i++) {
                   exe = env[i] + "/" + comm;
                   if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
                   (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
@@ -598,7 +598,7 @@ namespace ngs::fs {
               }
               if (res.empty()) {
                 const char *cpwd = getenv("PWD");
-                std::string pwd = cpwd ? cpwd : "";
+                string pwd = cpwd ? cpwd : "";
                 if (!pwd.empty()) {
                   exe = pwd + "/" + comm;
                   if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
@@ -610,7 +610,7 @@ namespace ngs::fs {
                 if (pwd.empty() || res.empty()) {
                   char cwd[PATH_MAX];
                   if (getcwd(cwd, sizeof(cwd))) {
-                    exe = std::string(cwd) + "/" + comm;
+                    exe = string(cwd) + "/" + comm;
                     if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
                     (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
                     st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
@@ -629,7 +629,7 @@ namespace ngs::fs {
     };
     int mib[4];
     char **cmd = nullptr;
-    std::size_t len = 0;
+    size_t len = 0;
     string buffer;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
@@ -644,17 +644,17 @@ namespace ngs::fs {
       }
     }
     if (!buffer.empty()) {
-      std::string argv0;
+      string argv0;
       if (!buffer.empty()) {
         if (buffer[0] == '/') {
           argv0 = buffer;
           path = is_exe(argv0.c_str(), false);
-        } else if (buffer.find('/') == std::string::npos) {
+        } else if (buffer.find('/') == string::npos) {
           const char *cenv = getenv("PATH");
-          std::string penv = cenv ? cenv : "";
+          string penv = cenv ? cenv : "";
           if (!penv.empty()) {
-            std::vector<std::string> env = string_split(penv, ':');
-            for (std::size_t i = 0; i < env.size(); i++) {
+            vector<string> env = string_split(penv, ':');
+            for (size_t i = 0; i < env.size(); i++) {
               argv0 = env[i] + "/" + buffer;
               path = is_exe(argv0.c_str(), false);
               if (!path.empty()) break;
@@ -667,7 +667,7 @@ namespace ngs::fs {
           }
         } else {
           const char *cpwd = getenv("PWD");
-          std::string pwd = cpwd ? cpwd : "";
+          string pwd = cpwd ? cpwd : "";
           if (!pwd.empty()) {
             argv0 = pwd + "/" + buffer;
             path = is_exe(argv0.c_str(), false);
@@ -675,7 +675,7 @@ namespace ngs::fs {
           if (pwd.empty() || path.empty()) {
             char cwd[PATH_MAX];
             if (getcwd(cwd, sizeof(cwd))) {
-              argv0 = std::string(cwd) + "/" + buffer;
+              argv0 = string(cwd) + "/" + buffer;
               path = is_exe(argv0.c_str(), false);
             }
           }
