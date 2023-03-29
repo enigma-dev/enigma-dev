@@ -575,7 +575,7 @@ namespace ngs::fs {
           if (kif[i].fd_fd == KERN_FILE_TEXT) {
             struct stat st; 
             char buffer[PATH_MAX];
-            if (fallback) {
+            if (!fallback) {
               if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
               (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
               st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
