@@ -56,10 +56,12 @@
 #include <winternl.h>
 #include <psapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
+#include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif (defined(__linux__) || defined(__ANDROID__))
+#include <sys/param.h>
 #include <dirent.h>
 #elif defined(__FreeBSD__)
 #include <sys/socket.h>
@@ -89,8 +91,8 @@
 #pragma comment(lib, "ntdll.lib")
 #endif
 
-#if !defined(MAXCOMMLEN)
-#define MAXCOMMLEN 255
+#if !defined(MAXCOMLEN)
+#define MAXCOMLEN 24
 #endif
 
 namespace {
@@ -405,7 +407,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__NetBSD__)
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -416,7 +419,8 @@ namespace ngs::ps {
         vec.push_back(proc_info[i].p_pid);
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__OpenBSD__)
     vec.push_back(0);
     int cntp = 0;
@@ -428,7 +432,8 @@ namespace ngs::ps {
         vec.push_back(proc_info[i].p_pid);
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__sun)
     struct pid cur_pid;
     proc *proc_info = nullptr;
@@ -439,7 +444,8 @@ namespace ngs::ps {
         vec.insert(vec.begin(), cur_pid.pid_id);
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #endif
     return vec;
   }
@@ -571,7 +577,8 @@ namespace ngs::ps {
         vec.push_back(proc_info->kp_ppid);
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     if (vec.empty() && proc_id == 0)
       vec.push_back(0);
     #elif defined(__NetBSD__)
@@ -582,7 +589,8 @@ namespace ngs::ps {
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       vec.push_back(proc_info->p_ppid);
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__OpenBSD__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -591,7 +599,8 @@ namespace ngs::ps {
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       vec.push_back(proc_info->p_ppid);
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     if (vec.empty() && proc_id == 0)
       vec.push_back(0);
     #elif defined(__sun)
@@ -601,7 +610,8 @@ namespace ngs::ps {
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       vec.push_back(proc_info->p_ppid);
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #endif
     return vec;
   }
@@ -671,7 +681,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__NetBSD__)
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -684,7 +695,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__OpenBSD__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -700,7 +712,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__sun)
     struct pid cur_pid;
     proc *proc_info = nullptr;
@@ -713,7 +726,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #endif
     return vec;
   }
@@ -845,43 +859,78 @@ namespace ngs::ps {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_executable = [](NGS_PROCID proc_id, std::string in, std::string *out) {
-      *out = "";
-      bool success = false;
-      struct stat st;
-      if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-        char executable[PATH_MAX];
-        if (realpath(in.c_str(), executable)) {
-          int cntp = 0;
-          kinfo_file *kif = nullptr;
-          kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-          if (!kd) return false;
-          if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
-            for (int i = 0; i < cntp; i++) {
-              if (kif[i].fd_fd == KERN_FILE_TEXT) {
-                if (st.st_nlink == 1) {
-                  if (st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                    *out = executable;
-                    success = true;
-                    break;
+    auto is_exe = [](NGS_PROCID proc_id, std::string exe, bool fallback) {
+      std::string res;
+      kinfo_file *kif = nullptr;
+      kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+      if (!kd) return res;
+      int cntp = 0;
+      if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
+        for (int i = 0; i < cntp; i++) {
+          if (kif[i].fd_fd == KERN_FILE_TEXT) {
+            struct stat st; 
+            char buffer[PATH_MAX];
+            if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+            (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+            st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+              res = buffer;
+            }
+            if (fallback) {
+              std::string comm = kif[i].p_comm;
+              if (comm.empty()) break;
+              std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
+              if (!penv.empty()) {
+                std::vector<std::string> env;
+                std::string tmp;
+                std::stringstream sstr(penv); 
+                while (std::getline(sstr, tmp, ':'))
+                  env.push_back(tmp);
+                for (std::size_t i = 0; i < env.size(); i++) {
+                  exe = env[i] + "/" + comm;
+                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                    res = buffer;
+                  }
+                }
+              }
+              if (res.empty()) {
+                std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
+                if (!pwd.empty()) {
+                  exe = pwd + "/" + comm;
+                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                    res = buffer;
+                  }
+                }
+                if (pwd.empty() || res.empty()) {
+                  std::string cwd = cwd_from_proc_id(proc_id);
+                  if (!cwd.empty()) {
+                    exe = cwd + "/" + comm;
+                    if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                    (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                    st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                      res = buffer;
+                    }
                   }
                 }
               }
             }
           }
-          kvm_close(kd);
         }
       }
-      return success;
+      if (kd) kvm_close(kd);
+      kd = nullptr;
+      return res;
     };
     std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
     if (!buffer.empty()) {
-      bool is_exe = false;
       std::string argv0;
       if (!buffer[0].empty()) {
         if (buffer[0][0] == '/') {
           argv0 = buffer[0];
-          is_exe = is_executable(proc_id, argv0.c_str(), &path);
+          path = is_exe(proc_id, argv0.c_str(), false);
         } else if (buffer[0].find('/') == std::string::npos) {
           std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
           if (!penv.empty()) {
@@ -893,12 +942,12 @@ namespace ngs::ps {
             }
             for (std::size_t i = 0; i < env.size(); i++) {
               argv0 = env[i] + "/" + buffer[0];
-              is_exe = is_executable(proc_id, argv0.c_str(), &path);
-              if (is_exe) break;
+              path = is_exe(proc_id, argv0.c_str(), false);
+              if (!path.empty()) break;
               if (buffer[0][0] == '-') {
                 argv0 = env[i] + "/" + buffer[0].substr(1);
-                is_exe = is_executable(proc_id, argv0.c_str(), &path);
-                if (is_exe) break;
+                path = is_exe(proc_id, argv0.c_str(), false);
+                if (!path.empty()) break;
               }
             }
           }
@@ -906,16 +955,19 @@ namespace ngs::ps {
           std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
           if (!pwd.empty()) {
             argv0 = pwd + "/" + buffer[0];
-            is_exe = is_executable(proc_id, argv0.c_str(), &path);
+            path = is_exe(proc_id, argv0.c_str(), false);
           }
-          if (pwd.empty() || !is_exe) {
+          if (pwd.empty() || path.empty()) {
             std::string cwd = cwd_from_proc_id(proc_id);
             if (!cwd.empty()) {
               argv0 = cwd + "/" + buffer[0];
-              is_exe = is_executable(proc_id, argv0.c_str(), &path);
+              path = is_exe(proc_id, argv0.c_str(), false);
             }
           }
         }
+      }
+      if (path.empty()) {
+        path = is_exe(proc_id, argv0.c_str(), true);
       }
     }
     #elif defined(__sun)
@@ -1049,7 +1101,7 @@ namespace ngs::ps {
     std::size_t pos = exe.find_last_of("\\/");
     #endif
     if (pos != std::string::npos) {
-      return exe.substr(pos + 1, MAXCOMMLEN);
+      return exe.substr(pos + 1, MAXCOMLEN);
     }
     return exe;
   }
@@ -1120,7 +1172,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__NetBSD__)
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -1134,7 +1187,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__OpenBSD__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -1148,7 +1202,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__sun)
     char **cmd = nullptr;
     proc *proc_info = nullptr;
@@ -1165,7 +1220,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #endif
     return vec;
   }
@@ -1237,7 +1293,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__NetBSD__)
     int cntp = 0;
     kinfo_proc2 *proc_info = nullptr;
@@ -1251,7 +1308,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__OpenBSD__)
     int cntp = 0;
     kinfo_proc *proc_info = nullptr;
@@ -1265,7 +1323,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #elif defined(__sun)
     char **env = nullptr;
     proc *proc_info = nullptr;
@@ -1282,7 +1341,8 @@ namespace ngs::ps {
         }
       }
     }
-    kvm_close(kd);
+    if (kd) kvm_close(kd);
+    kd = nullptr; 
     #endif
     return vec;
   }
