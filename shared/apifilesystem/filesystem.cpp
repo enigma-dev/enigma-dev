@@ -563,88 +563,126 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_executable = [](string in, string *out) {
-      *out = "";
-      bool success = false;
-      struct stat st;
+    auto is_exe = [](std::string exe, bool fallback) {
+      std::string res;
+      kinfo_file *kif = nullptr;
       static kvm_t *kd = nullptr;
-      if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-        char executable[PATH_MAX];
-        if (realpath(in.c_str(), executable)) {
-          int cntp = 0;
-          kinfo_file *kif = nullptr;
-          kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
-          if (!kd) return false;
-          if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-            for (int i = 0; i < cntp; i++) {
-              if (kif[i].fd_fd == KERN_FILE_TEXT) {
-                if (st.st_nlink == 1) {
-                  if (st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                    *out = executable;
-                    success = true;
-                    break;
+      kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+      if (!kd) return res;
+      int cntp = 0;
+      if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+        for (int i = 0; i < cntp; i++) {
+          if (kif[i].fd_fd == KERN_FILE_TEXT) {
+            struct stat st; 
+            char buffer[PATH_MAX];
+            if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+            (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+            st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+              res = buffer;
+            }
+            if (fallback) {
+              std::string comm = kif[i].p_comm;
+              if (comm.empty()) break;
+              const char *cenv = getenv("PATH");
+              std::string penv = cenv ? cenv : "";
+              if (!penv.empty()) {
+                std::vector<std::string> env = string_split(penv, ':');
+                for (std::size_t i = 0; i < env.size(); i++) {
+                  exe = env[i] + "/" + comm;
+                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                    res = buffer;
+                  }
+                }
+              }
+              if (res.empty()) {
+                const char *cpwd = getenv("PWD");
+                std::string pwd = cpwd ? cpwd : "";
+                if (!pwd.empty()) {
+                  exe = pwd + "/" + comm;
+                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                    res = buffer;
+                  }
+                }
+                if (pwd.empty() || res.empty()) {
+                  char cwd[PATH_MAX];
+                  if (getcwd(cwd, sizeof(cwd))) {
+                    exe = std::string(cwd) + "/" + comm;
+                    if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+                    (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+                    st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                      res = buffer;
+                    }
                   }
                 }
               }
             }
           }
-          kvm_close(kd);
         }
       }
-      return success;
+      if (kd) kvm_close(kd);
+      kd = nullptr;
+      return res;
     };
     int mib[4];
-    char **cmdbuf = nullptr;
-    size_t cmdsize = 0;
-    string arg;
+    char **cmd = nullptr;
+    std::size_t len = 0;
+    string buffer;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = getpid();
-    mib[3] = KERN_PROC_ARGV; 
-    if (sysctl(mib, 4, nullptr, &cmdsize, nullptr, 0) == 0) {
-      if ((cmdbuf = (char **)malloc(cmdsize))) {
-        if (sysctl(mib, 4, cmdbuf, &cmdsize, nullptr, 0) == 0) {
-          arg = cmdbuf[0];
+    mib[3] = KERN_PROC_ARGV;
+    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
+      if ((cmd = (char **)malloc(len))) {
+        if (sysctl(mib, 4, cmd, &len, nullptr, 0) == 0) {
+          buffer = cmd[0];
         }
-        free(cmdbuf);
+        free(cmd);
       }
     }
-    if (!arg.empty()) {
-      bool is_exe = false;
-      string argv0;
-      if (arg[0] == '/') {
-        argv0 = arg;
-        is_exe = is_executable(argv0.c_str(), &path);
-      } else if (arg.find('/') == string::npos) {
-        const char *cenv = getenv("PATH");
-        string penv = cenv ? cenv : "";
-        if (!penv.empty()) {
-          vector<string> env = string_split(penv, ':');
-          for (size_t i = 0; i < env.size(); i++) {
-            argv0 = env[i] + "/" + arg;
-            is_exe = is_executable(argv0.c_str(), &path);
-            if (is_exe) break;
-            if (arg[0] == '-') {
-              argv0 = env[i] + "/" + arg.substr(1);
-              is_exe = is_executable(argv0.c_str(), &path);
-              if (is_exe) break;
+    if (!buffer.empty()) {
+      std::string argv0;
+      if (!buffer.empty()) {
+        if (buffer[0] == '/') {
+          argv0 = buffer;
+          path = is_exe(argv0.c_str(), false);
+        } else if (buffer.find('/') == std::string::npos) {
+          const char *cenv = getenv("PATH");
+          std::string penv = cenv ? cenv : "";
+          if (!penv.empty()) {
+            std::vector<std::string> env = string_split(penv, ':');
+            for (std::size_t i = 0; i < env.size(); i++) {
+              argv0 = env[i] + "/" + buffer;
+              path = is_exe(argv0.c_str(), false);
+              if (!path.empty()) break;
+              if (buffer[0] == '-') {
+                argv0 = env[i] + "/" + buffer.substr(1);
+                path = is_exe(argv0.c_str(), false);
+                if (!path.empty()) break;
+              }
+            }
+          }
+        } else {
+          const char *cpwd = getenv("PWD");
+          std::string pwd = cpwd ? cpwd : "";
+          if (!pwd.empty()) {
+            argv0 = pwd + "/" + buffer;
+            path = is_exe(argv0.c_str(), false);
+          }
+          if (pwd.empty() || path.empty()) {
+            char cwd[PATH_MAX];
+            if (getcwd(cwd, sizeof(cwd))) {
+              argv0 = std::string(cwd) + "/" + buffer;
+              path = is_exe(argv0.c_str(), false);
             }
           }
         }
-      } else {
-        const char *cpwd = getenv("PWD");
-        string pwd = cpwd ? cpwd : "";
-        if (!pwd.empty()) {
-          argv0 = pwd + "/" + arg;
-          is_exe = is_executable(argv0.c_str(), &path);
-        }
-        if (pwd.empty() || !is_exe) {
-          char cwd[PATH_MAX];
-          if (getcwd(cwd, sizeof(cwd))) {
-            argv0 = string(cwd) + "/" + arg;
-            is_exe = is_executable(argv0.c_str(), &path);
-          }
-        }
+      }
+      if (path.empty()) {
+        path = is_exe(argv0.c_str(), true);
       }
     }
     #elif defined(__sun)
