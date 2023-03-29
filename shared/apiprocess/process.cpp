@@ -868,12 +868,13 @@ namespace ngs::ps {
           if (kif[i].fd_fd == KERN_FILE_TEXT) {
             struct stat st; 
             char buffer[PATH_MAX];
-            if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
-            (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
-            st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-              res = buffer;
-            }
-            if (fallback) {
+            if (!fallback) {
+              if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+              (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+              st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+                res = buffer;
+              }
+            } else {
               std::string comm = kif[i].p_comm;
               if (comm.empty()) break;
               std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
