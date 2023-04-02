@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Steam API
+Identifier: Steamworks
+Author: null
+Description: Steamworks API allows your game to take full advantage of Steam by accessing all of the underlying systems provided through the API.
+Default: false
+Icon: steamworks.svg
+
+Depends: None
+Dependencies: None
