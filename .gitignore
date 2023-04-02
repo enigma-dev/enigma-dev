@@ -32,6 +32,10 @@
 /CompilerSource/stupidity-buffer/obj
 /ENIGMAsystem/SHELL/.vs/*
 /ENIGMAsystem/SHELL/.vscode/*
+/.vscode/*
+/CMakeFiles/*
+/ENIGMAsystem/SHELL/.build/*
+CMakeCache
 .DS_Store
 
 enigma-launch.bat
