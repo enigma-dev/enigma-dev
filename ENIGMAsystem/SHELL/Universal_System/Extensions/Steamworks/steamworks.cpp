@@ -32,16 +32,18 @@ void handle_error( const char* str )
         }
 }
 
-// extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDebugText )
-// {
-// 	::OutputDebugStringA( pchDebugText );
+extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDebugText )
+{
+	// ::OutputDebugStringA( pchDebugText );
 
-// 	if ( nSeverity >= 1 )
-// 	{
-// 		int x = 3;
-// 		(void)x;
-// 	}
-// }
+    DEBUG_MESSAGE(pchDebugText, M_INFO);
+
+	if ( nSeverity >= 1 )
+	{
+		int x = 3;
+		(void)x;
+	}
+}
 
 namespace {
     void create_appid_file() {
@@ -96,7 +98,7 @@ namespace enigma {
         else {
             cout << "SteamAPI_Init completed successfully.\n" << endl;
 
-            // SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
+            SteamClient()->SetWarningMessageHook( &SteamAPIDebugTextHook );
         }
     }  // steam_initialised() function
 
