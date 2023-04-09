@@ -143,7 +143,7 @@ class ShortToJSONConverter {
   //   void skip_spaces(std::string &data);
 
  public:
-  ShortToJSONConverter() = default;
+  ShortToJSONConverter();
   ~ShortToJSONConverter();
 
   /*

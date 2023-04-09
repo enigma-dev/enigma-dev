@@ -17,7 +17,7 @@ LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lProtocols -lENIGMAShared 
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
-	SOURCES := $(call rwildcard, ../emake-tests,*.cpp)
+	SOURCES := $(call rwildcard, ../emake-tests,*.cpp) $(call rwildcard, ../emake-tests/Extensions/Json,*.cpp)
 	LDFLAGS += -lpthread -lgtest_main -lgtest
 else
 	TARGET = ../../emake

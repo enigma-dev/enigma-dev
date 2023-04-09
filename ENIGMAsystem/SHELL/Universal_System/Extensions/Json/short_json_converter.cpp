@@ -23,7 +23,8 @@
 #include "short_json_converter.h"
 
 namespace enigma {
-ShortToJSONConverter::~ShortToJSONConverter() {}  // ~ShortToJSONConverter
+ShortToJSONConverter::ShortToJSONConverter() = default;
+ShortToJSONConverter::~ShortToJSONConverter() = default;
 
 ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
   levels_accumulators_.push("");
