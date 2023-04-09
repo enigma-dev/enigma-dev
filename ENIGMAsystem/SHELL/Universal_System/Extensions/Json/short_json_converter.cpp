@@ -23,14 +23,185 @@
 #include "short_json_converter.h"
 
 namespace enigma {
-ShortToJSONConverter::resultState ShortToJSONConverter::parse(std::string &data) {
-  if (data.length() == 0) return errorState;
+ShortToJSONConverter::~ShortToJSONConverter() {}  // ~ShortToJSONConverter
+
+ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
+  levels_accumulators_.push("");
+  levels_states_.push(arrayOfObjectsState);  // We assume worst case which is "array of objects".
+
+  levels_entities_indices_.push(0);
+
+  /*
+    Push this new level start index.
+    Note that we have no idea where the end of the new level is so we push start index in both start and end indices.
+  */
+  levels_boundaries_pointers_.push({pointer_, pointer_});
+
+  std::queue<std::pair<size_t, size_t>> level_entities_boundaries_pointers_;
+  levels_entities_boundaries_pointers_.push(level_entities_boundaries_pointers_);
+
+  std::queue<size_t> level_entities_offsets_;
+  levels_entities_offsets_.push(level_entities_offsets_);
+
+  levels_cumulative_offsets_.push(0);
+
+  return successState;
+}  // push_level
+
+ShortToJSONConverter::resultState ShortToJSONConverter::pop_level() { return accumulate_level(); }  // pop_level
+
+ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_level() {
+  /*
+                We pop our accumulator level and stack level.
+            */
+  levels_accumulators_.pop();
+  levels_states_.pop();
+
+  /*
+                We pop current level, so that we add current level boundaries to previous level entities as well as offsets.
+
+                For example:
+
+                            1       5   7       11
+                            |       |   |       |
+                          [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  ---> this level entities boundaries should be {{1 , 5 } , { 7 , 11}}.
+            */
+  levels_entities_boundaries_pointers_.pop();
+  levels_entities_offsets_.pop();
+
+  /*
+                as long as it's an array we keep pushing because it maybe an object eventually
+                if it's object, then no need to continue pushing
+            */
+  if (!(levels_entities_boundaries_pointers_.empty()) && !(levels_states_.empty())) {
+    if (levels_states_.top() != objectState)
+      levels_entities_boundaries_pointers_.top().push({levels_boundaries_pointers_.top()});
+  }
+
+  levels_boundaries_pointers_.pop();
+
+  levels_entities_indices_.pop();
+
+  return successState;
+}  // accumulate_level
+
+void ShortToJSONConverter::accumulate_index() {
+  levels_accumulators_.top() += '"';
+  levels_accumulators_.top() += std::to_string(levels_entities_indices_.top());
+  levels_accumulators_.top() += '"';
+  levels_accumulators_.top() += ':';
+}  // accumulate_index
+
+ShortToJSONConverter::resultState ShortToJSONConverter::map_short_json_indices() {
+  size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
+  size_t shift_left_{levels_entities_boundaries_pointers_.top().front().first};
+
+  size_t offset_{0};
+
+  /*
+                This loop loops number of entities in current level times
+
+                levels_entities_indices_.top() + 1
+            */
+  for (size_t i{0}; i < number_of_entities_; i++) {
+    levels_entities_boundaries_pointers_.top().front().first -= shift_left_;
+    levels_entities_boundaries_pointers_.top().front().second -= shift_left_;
+
+    levels_entities_boundaries_pointers_.top().front().first += offset_;
+    levels_entities_boundaries_pointers_.top().front().second += offset_ + levels_entities_offsets_.top().front();
+
+    offset_ += levels_entities_offsets_.top().front();
+
+    levels_entities_offsets_.top().pop();
+
+    levels_entities_boundaries_pointers_.top().push(levels_entities_boundaries_pointers_.top().front());
+    levels_entities_boundaries_pointers_.top().pop();
+  }
+
+  return accumulate_missing_indices();
+}  // map_short_json_indices
+
+ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_missing_indices() {
+  size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
+  size_t next_entity_index{0};
+  std::string corrected_json_;
+
+  size_t breakdown_index_{levels_entities_boundaries_pointers_.top().front().second + 1};
+
+  /*
+                This loop loops number of entities in current level times
+
+                levels_entities_indices_.top() + 1
+            */
+  for (size_t i{0}; i < number_of_entities_; i++) {
+    corrected_json_ += '"';
+    corrected_json_ += std::to_string(next_entity_index);
+    corrected_json_ += '"';
+    corrected_json_ += ':';
+    corrected_json_ +=
+        levels_accumulators_.top().substr(levels_entities_boundaries_pointers_.top().front().first,
+                                          levels_entities_boundaries_pointers_.top().front().second -
+                                              levels_entities_boundaries_pointers_.top().front().first + 1);
+
+    levels_cumulative_offsets_.top() += 4;
+
+    levels_entities_boundaries_pointers_.top().pop();
+
+    next_entity_index++;
+
+    if (i != number_of_entities_ - 1) {
+      breakdown_index_ = levels_entities_boundaries_pointers_.top().front().second + 1;
+      corrected_json_ += ',';
+    }
+  }
+
+  // Rest of the string
+  corrected_json_ += levels_accumulators_.top().substr(breakdown_index_);
+
+  levels_accumulators_.top() = corrected_json_;
+
+  return successState;
+}  // accumulate_missing_indices
+
+ShortToJSONConverter::resultState ShortToJSONConverter::read_key_value_pair(std::string &data) {
+  size_t new_pointer_{pointer_};
 
   while (1) {
-    if (pointer_ >= data.length()) return successState;
+    if (new_pointer_ >= data.length()) return errorState;
+    switch (data.at(new_pointer_)) {
+      case ',':
+      case ']':
+        accumulate_index();
+        levels_accumulators_.top() += data.substr(pointer_, new_pointer_ - pointer_);
+        pointer_ += new_pointer_ - pointer_ - 1;
+        return successState;
+      default:
+        break;
+    }
+    new_pointer_++;
+  }
+}  // read_key_value_pair
+
+// void ShortToJSONConverter::skip_spaces(std::string &data) {
+//   while (pointer_ < data.length())
+//   {
+//     char c = data.at(pointer_);
+//     if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
+//       pointer_++;
+//     else
+//       break;
+//   }
+// }
+
+bool ShortToJSONConverter::parse_into_buffer(std::string &data, std::string *buffer) {
+  if (data.length() == 0) return false;
+
+  while (1) {
+    if (pointer_ >= data.length()) return true;
+    // skip_spaces(data);
     switch (data.at(pointer_)) {
       case '[': {
-        if (push_level() == errorState) return errorState;
+        if (push_level() == errorState) return false;
         break;
       }
       case ']': {
@@ -80,7 +251,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::parse(std::string &data)
         /*
                         If it's an array, wrap with array square brackets; else wrap with object parenthesis;
                     */
-        if (levels_states_.top() == arrayState) {
+        if (levels_states_.top() == arrayOfObjectsState) {
           level_json_ += '[';
           if (!(levels_accumulators_.empty())) level_json_ += levels_accumulators_.top();
           level_json_ += ']';
@@ -90,10 +261,10 @@ ShortToJSONConverter::resultState ShortToJSONConverter::parse(std::string &data)
           level_json_ += '}';
         }
 
-        if (pop_level() == errorState) return errorState;
+        if (pop_level() == errorState) return false;
 
         if (pointer_ == data.length() - 1) {
-          json_ = level_json_;
+          *buffer = level_json_;
         } else {
           if (levels_states_.top() != objectState)
             levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
@@ -128,7 +299,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::parse(std::string &data)
           levels_states_.top() = objectState;  // then it's object
         }
         levels_cumulative_offsets_.top() += 4;
-        if (read_key_value_pair(data) == errorState) return errorState;
+        if (read_key_value_pair(data) == errorState) return false;
         break;
       }
       case ',': {
@@ -137,175 +308,10 @@ ShortToJSONConverter::resultState ShortToJSONConverter::parse(std::string &data)
         break;
       }
       default:
-        return errorState;
+        return false;
     }
     pointer_++;
   }
-}  // parse()
+}  // parse_into_buffer
 
-ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
-  levels_accumulators_.push("");
-  levels_states_.push(arrayState);  // We assume worst case (array of objects) until otherwise (object)
-
-  levels_entities_indices_.push(0);
-
-  /*
-    Push this new level start index.
-    Note that we have no idea where the end of the new level is so we push start index in both start and end indices.
-  */
-  levels_boundaries_pointers_.push({pointer_, pointer_});
-
-  std::queue<std::pair<size_t, size_t>> level_entities_boundaries_pointers_;
-  levels_entities_boundaries_pointers_.push(level_entities_boundaries_pointers_);
-
-  std::queue<size_t> level_entities_offsets_;
-  levels_entities_offsets_.push(level_entities_offsets_);
-
-  levels_cumulative_offsets_.push(0);
-
-  return successState;
-}  // push_level()
-
-ShortToJSONConverter::resultState ShortToJSONConverter::pop_level() { return accumulate_level(); }  // pop_level()
-
-ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_level() {
-  /*
-                We pop our accumulator level and stack level.
-            */
-  levels_accumulators_.pop();
-  levels_states_.pop();
-
-  /*
-                We pop current level, so that we add current level boundaries to previous level entities as well as offsets.
-
-                For example:
-
-                            1       5   7       11
-                            |       |   |       |
-                          [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  ---> this level entities boundaries should be {{1 , 5 } , { 7 , 11}}.
-            */
-  levels_entities_boundaries_pointers_.pop();
-  levels_entities_offsets_.pop();
-
-  /*
-                as long as it's an array we keep pushing because it maybe an object eventually
-                if it's object, then no need to continue pushing
-            */
-  if (!(levels_entities_boundaries_pointers_.empty()) && !(levels_states_.empty())) {
-    if (levels_states_.top() != objectState)
-      levels_entities_boundaries_pointers_.top().push({levels_boundaries_pointers_.top()});
-  }
-
-  levels_boundaries_pointers_.pop();
-
-  levels_entities_indices_.pop();
-
-  return successState;
-}  // accumulate_level()
-
-void ShortToJSONConverter::accumulate_index() {
-  levels_accumulators_.top() += '"';
-  levels_accumulators_.top() += std::to_string(levels_entities_indices_.top());
-  levels_accumulators_.top() += '"';
-  levels_accumulators_.top() += ':';
-}  // accumulate_index()
-
-ShortToJSONConverter::resultState ShortToJSONConverter::map_short_json_indices() {
-  size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
-  size_t shift_left_{levels_entities_boundaries_pointers_.top().front().first};
-
-  size_t offset_{0};
-
-  /*
-                This loop loops number of entities in current level times
-
-                levels_entities_indices_.top() + 1
-            */
-  for (size_t i{0}; i < number_of_entities_; i++) {
-    levels_entities_boundaries_pointers_.top().front().first -= shift_left_;
-    levels_entities_boundaries_pointers_.top().front().second -= shift_left_;
-
-    levels_entities_boundaries_pointers_.top().front().first += offset_;
-    levels_entities_boundaries_pointers_.top().front().second += offset_ + levels_entities_offsets_.top().front();
-
-    offset_ += levels_entities_offsets_.top().front();
-
-    levels_entities_offsets_.top().pop();
-
-    levels_entities_boundaries_pointers_.top().push(levels_entities_boundaries_pointers_.top().front());
-    levels_entities_boundaries_pointers_.top().pop();
-  }
-
-  return accumulate_missing_indices();
-}  // map_short_json_indices()
-
-ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_missing_indices() {
-  size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
-  size_t next_entity_index{0};
-  std::string corrected_json_;
-
-  size_t breakdown_index_{levels_entities_boundaries_pointers_.top().front().second + 1};
-
-  /*
-                This loop loops number of entities in current level times
-
-                levels_entities_indices_.top() + 1
-            */
-  for (size_t i{0}; i < number_of_entities_; i++) {
-    corrected_json_ += '"';
-    corrected_json_ += std::to_string(next_entity_index);
-    corrected_json_ += '"';
-    corrected_json_ += ':';
-    corrected_json_ +=
-        levels_accumulators_.top().substr(levels_entities_boundaries_pointers_.top().front().first,
-                                          levels_entities_boundaries_pointers_.top().front().second -
-                                              levels_entities_boundaries_pointers_.top().front().first + 1);
-
-    levels_cumulative_offsets_.top() += 4;
-
-    levels_entities_boundaries_pointers_.top().pop();
-
-    next_entity_index++;
-
-    if (i != number_of_entities_ - 1) {
-      breakdown_index_ = levels_entities_boundaries_pointers_.top().front().second + 1;
-      corrected_json_ += ',';
-    }
-  }
-
-  // Rest of the string
-  corrected_json_ += levels_accumulators_.top().substr(breakdown_index_);
-
-  levels_accumulators_.top() = corrected_json_;
-
-  return successState;
-}  // accumulate_missing_indices()
-
-ShortToJSONConverter::resultState ShortToJSONConverter::read_key_value_pair(std::string &data) {
-  size_t new_pointer_{pointer_};
-
-  while (1) {
-    if (new_pointer_ >= data.length()) return errorState;
-    switch (data.at(new_pointer_)) {
-      case ',':
-      case ']':
-        accumulate_index();
-        levels_accumulators_.top() += data.substr(pointer_, new_pointer_ - pointer_);
-        pointer_ += new_pointer_ - pointer_ - 1;
-        return successState;
-      default:
-        break;
-    }
-    new_pointer_++;
-  }
-}  // read_key_value_pair()
-
-std::pair<bool, std::string> ShortToJSONConverter::read(std::string data) {
-  switch (parse(data)) {
-    case errorState:
-      return {false, ""};
-    default:
-      return {true, json_};
-  }
-}  // read()
 }  // namespace enigma

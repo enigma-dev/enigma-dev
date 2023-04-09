@@ -23,14 +23,7 @@
 #ifndef SHORT_JSON_H
 #define SHORT_JSON_H
 
-#include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
-
-#include <iostream>
-#include <queue>
-#include <stack>
-#include <string>
-#include <vector>
 
 namespace enigma_user {
 variant short_json_decode(std::string data);
