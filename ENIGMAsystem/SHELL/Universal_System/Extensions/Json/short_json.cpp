@@ -28,8 +28,8 @@ namespace enigma_user {
 
 variant short_json_decode(std::string data) {
   string *buffer = new string();
-  enigma::ShortToJSONConverter shortToJSONReader;
-  bool success = shortToJSONReader.parse_into_buffer(data, buffer);
+  enigma::ShortJSONConverter shortJSONConverter;
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
   if (!success) {
     DEBUG_MESSAGE("Failed to read configuration", MESSAGE_TYPE::M_ERROR);
     return -1;

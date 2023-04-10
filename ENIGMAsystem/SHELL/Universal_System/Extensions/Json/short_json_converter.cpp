@@ -23,10 +23,10 @@
 #include "short_json_converter.h"
 
 namespace enigma {
-ShortToJSONConverter::ShortToJSONConverter() = default;
-ShortToJSONConverter::~ShortToJSONConverter() = default;
+ShortJSONConverter::ShortJSONConverter() = default;
+ShortJSONConverter::~ShortJSONConverter() = default;
 
-ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
+ShortJSONConverter::resultState ShortJSONConverter::push_level() {
   levels_accumulators_.push("");
   levels_states_.push(arrayOfObjectsState);  // We assume worst case which is "array of objects".
 
@@ -49,9 +49,9 @@ ShortToJSONConverter::resultState ShortToJSONConverter::push_level() {
   return successState;
 }  // push_level
 
-ShortToJSONConverter::resultState ShortToJSONConverter::pop_level() { return accumulate_level(); }  // pop_level
+ShortJSONConverter::resultState ShortJSONConverter::pop_level() { return accumulate_level(); }  // pop_level
 
-ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_level() {
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_level() {
   /*
                 We pop our accumulator level and stack level.
             */
@@ -86,14 +86,14 @@ ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_level() {
   return successState;
 }  // accumulate_level
 
-void ShortToJSONConverter::accumulate_index() {
+void ShortJSONConverter::accumulate_index() {
   levels_accumulators_.top() += '"';
   levels_accumulators_.top() += std::to_string(levels_entities_indices_.top());
   levels_accumulators_.top() += '"';
   levels_accumulators_.top() += ':';
 }  // accumulate_index
 
-ShortToJSONConverter::resultState ShortToJSONConverter::map_short_json_indices() {
+ShortJSONConverter::resultState ShortJSONConverter::map_short_json_indices() {
   size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
   size_t shift_left_{levels_entities_boundaries_pointers_.top().front().first};
 
@@ -122,7 +122,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::map_short_json_indices()
   return accumulate_missing_indices();
 }  // map_short_json_indices
 
-ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_missing_indices() {
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_indices() {
   size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
   size_t next_entity_index{0};
   std::string corrected_json_;
@@ -164,7 +164,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::accumulate_missing_indic
   return successState;
 }  // accumulate_missing_indices
 
-ShortToJSONConverter::resultState ShortToJSONConverter::read_key_value_pair(std::string &data) {
+ShortJSONConverter::resultState ShortJSONConverter::read_key_value_pair(std::string &data) {
   size_t new_pointer_{pointer_};
 
   while (1) {
@@ -183,7 +183,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::read_key_value_pair(std:
   }
 }  // read_key_value_pair
 
-// void ShortToJSONConverter::skip_spaces(std::string &data) {
+// void ShortJSONConverter::skip_spaces(std::string &data) {
 //   while (pointer_ < data.length())
 //   {
 //     char c = data.at(pointer_);
@@ -194,7 +194,7 @@ ShortToJSONConverter::resultState ShortToJSONConverter::read_key_value_pair(std:
 //   }
 // }
 
-bool ShortToJSONConverter::parse_into_buffer(std::string &data, std::string *buffer) {
+bool ShortJSONConverter::parse_into_buffer(std::string &data, std::string *buffer) {
   if (data.length() == 0) return false;
 
   while (1) {

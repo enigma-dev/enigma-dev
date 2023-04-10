@@ -8,9 +8,9 @@
 
 TEST(ShortJSONTest, TestSuccess) {
   std::string *buffer = new std::string();
-  enigma::ShortToJSONConverter shortToJSONConverter;
+  enigma::ShortJSONConverter shortJSONConverter;
   std::string data {"[[[1,4],4],[1,4]]"};
-  bool success = shortToJSONConverter.parse_into_buffer(data, buffer);
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
 
   ASSERT_EQ(success, true);
 

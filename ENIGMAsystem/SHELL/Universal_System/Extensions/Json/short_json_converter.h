@@ -28,7 +28,7 @@
 #include <string>
 
 namespace enigma {
-class ShortToJSONConverter {
+class ShortJSONConverter {
  private:
   /*
     Theory:
@@ -143,8 +143,8 @@ class ShortToJSONConverter {
   //   void skip_spaces(std::string &data);
 
  public:
-  ShortToJSONConverter();
-  ~ShortToJSONConverter();
+  ShortJSONConverter();
+  ~ShortJSONConverter();
 
   /*
     Parse short JSON and put the output in the buffer.
