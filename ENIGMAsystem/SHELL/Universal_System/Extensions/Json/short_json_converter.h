@@ -84,8 +84,8 @@ class ShortJSONConverter {
                         |  |  |  |  |  |  |  |  |  |  |   |   |   |   |   |   |
                         |  |  |  |  |  |  |  |  |  |  |   |   |   |   |   |   |
                         [  [  [  1  ,  4  ]  ,  4  ]  ,   [   1   ,   4   ]   ]   --> this is short json example
-                            |                       |
-                            |-----------------------|    --> this level has boundaries [1,9].
+                           |                       |
+                           |-----------------------|    --> this level has boundaries [1,9].
 
               */
   std::stack<std::pair<size_t, size_t>> levels_boundaries_pointers_;
