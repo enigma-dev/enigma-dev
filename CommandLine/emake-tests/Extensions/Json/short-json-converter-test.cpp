@@ -5,6 +5,143 @@
 
 #include <string>
 
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+
+  std::string data {"[[\"str\",4],[true,-4]"};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[\"str\",4],[true,-4],false]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",4[,[true,-4],false]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "][[\"str\",4],[true,-4],false]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",4],[true,-4],false][]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",4],[true,-4],false],[";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  delete buffer;
+}
+
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInValues) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+
+  std::string data {"[[\"str\",4],[tyue,-4],false]"};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",4],[true,-4],facse]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",4],[true,-4],^]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[[\"str\",hsdj],[true,-4],false]";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  delete buffer;
+}
+
+TEST(ShortJSONTest, TestRandomInput) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+
+  std::string data {"57hsa2va"};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "hsa2va57";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "&hsa2va57";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = ",6hsa2va57";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "]6hsa2va57";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  data = "[6hsa2va57";
+  success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  json = *buffer;
+  ASSERT_EQ(json, "");
+
+  delete buffer;
+}
+
+TEST(ShortJSONTest, TestSpaces) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+
+  std::string data {" [ [ \" s tr \" , 8 ] , [ true , -4 ] , false ] "};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, true);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "{\"0\":{\"0\":\" s tr \",\"1\":8},\"1\":{\"0\":true,\"1\":-4},\"2\":false}");
+
+  delete buffer;
+}
+
+//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------
+
 TEST(ShortJSONTest, TestParameterArrayOfObjects) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
@@ -31,37 +168,6 @@ TEST(ShortJSONTest, TestParameterObject) {
   std::string json = *buffer;
 
   ASSERT_EQ(json, "{\"0\":{\"0\":{\"0\":1,\"1\":4},\"1\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}],\"2\":{\"0\":1,\"1\":4},\"3\":7,\"4\":{\"0\":1,\"1\":4},\"5\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}]},\"1\":{\"0\":1,\"1\":4},\"2\":5}");
-
-  delete buffer;
-}
-
-TEST(ShortJSONTest, TestWrongShortJSONSyntax) {
-  std::string *buffer = new std::string();
-  enigma::ShortJSONConverter shortJSONConverter;
-
-  std::string data {"57hsa2va"};
-  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
-  ASSERT_EQ(success, false);
-  std::string json = *buffer;
-  ASSERT_EQ(json, "");
-
-  data = "hsa2va57";
-  success = shortJSONConverter.parse_into_buffer(data, buffer);
-  ASSERT_EQ(success, false);
-  json = *buffer;
-  ASSERT_EQ(json, "");
-
-  data = ",6hsa2va57";
-  success = shortJSONConverter.parse_into_buffer(data, buffer);
-  ASSERT_EQ(success, false);
-  json = *buffer;
-  ASSERT_EQ(json, "");
-
-  data = "]6hsa2va57";
-  success = shortJSONConverter.parse_into_buffer(data, buffer);
-  ASSERT_EQ(success, false);
-  json = *buffer;
-  ASSERT_EQ(json, "");
 
   delete buffer;
 }

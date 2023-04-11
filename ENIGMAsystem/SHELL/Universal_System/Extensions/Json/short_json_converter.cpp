@@ -27,6 +27,181 @@ namespace enigma {
 ShortJSONConverter::ShortJSONConverter() = default;
 ShortJSONConverter::~ShortJSONConverter() = default;
 
+bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffer) {
+  data_ = data;  // save our data to be accessible by all functions.
+
+  if (data_.length() == 0) return false;
+
+  while (1) {
+    skip_spaces();
+
+    if (pointer_ >= data_.length()) return false;
+
+    switch (data_.at(pointer_)) {
+      case '[': {
+        /*
+                Return error if a new level exists when all levels are done.
+                For example: [1,[1,4]],[1,4]
+            */
+        if (next_token_[1] != invalid && levels_accumulators_.empty()) return false;
+
+        if (validate_next_token(leftSquareBracket) == errorState) return false;
+
+        if (push_level() == errorState) return false;
+        break;
+      }
+      case ']': {
+        if (levels_accumulators_.empty()) return false;
+
+        if (validate_next_token(rightSquareBracket) == errorState) return false;
+
+        /*
+                                          For each level we pushed 0 for its end but now we know the index of that end so we set it.
+                                      */
+        levels_boundaries_pointers_.top().second = virtual_pointer_;
+
+        /*
+                                          This snippet fixes current level if we found that it's an object.
+
+                                          Checks:
+
+                                           - Our code assumes that: current level is an array until we find key/value pair which means that:
+                                             current level is an object, so we start add indices to each key/value pair, objects, and arrays
+                                             when we find our first key/value pair in current level which means that we may have entities without indices before our
+                                             first key/value pair which also means that we need to fix them. Our first key/value pair maybe preceding objects or arrays so
+                                             if there's no objects/arrays before our first key/value pair, then nothing need to be fixed. Our "levels_entities_boundaries_pointers_"
+                                             contains boundaries of entities for each level so for current level we must make sure that it contains some entities to be fixed.
+
+                                           - When we get out of a specific level, we must make sure that this level contains entities inside its boundaries because this
+                                             level maybe considered an object inside level.
+
+                                             For example:
+
+                                                                    l       m       ---> we must make sure that ((x < l) && (m < y))
+                                                        |-------|   |-------|
+                                                        |       |   |       |
+                                                        |       |   |       |
+                                                      [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  --> this is short json example
+                                                      |                           |
+                                                      |---------------------------|  --> this is our specific level
+                                                      x                           y
+
+                                           - Array of objects doesn't need any kind of indices for its objects so we must make sure that our level is an object.
+
+                                      */
+        if (!(levels_entities_boundaries_pointers_.top().empty()) &&
+            ((levels_boundaries_pointers_.top().first < levels_entities_boundaries_pointers_.top().front().first) &&
+             (levels_boundaries_pointers_.top().second > levels_entities_boundaries_pointers_.top().front().second)) &&
+            (levels_states_.top() == objectState)) {
+          map_short_json_indices();
+        }
+
+        std::string current_level_json_;
+
+        /*
+                                        If it's an array, wrap with array square brackets; else wrap with object parenthesis;
+                                    */
+        switch (levels_states_.top()) {
+          case arrayOfObjectsState:
+            current_level_json_ += '[';
+            current_level_json_ += levels_accumulators_.top();
+            current_level_json_ += ']';
+            break;
+          case objectState:
+            current_level_json_ += '{';
+            current_level_json_ += levels_accumulators_.top();
+            current_level_json_ += '}';
+            break;
+          default:
+            return errorState;
+        }
+
+        if (pop_level() == errorState) return false;
+
+        if (pointer_ == data_.length() - 1) {
+          /*
+                        If it's end of the string and we have more levels, return syntax error, otherwise return success.
+                      */
+          if (!levels_accumulators_.empty()) return false;
+          *buffer = current_level_json_;
+          return true;
+        }
+
+        /*
+                    If it's not end of the string and we don't have more levels, don't accumulate, otherwise accumulate the saved json in `current_level_json_`.
+                  */
+        if (levels_accumulators_.empty()) break;
+
+        if (levels_states_.top() != objectState) levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
+        size_t current_level_offset_{levels_cumulative_offsets_.top()};
+        levels_cumulative_offsets_.pop();
+        levels_cumulative_offsets_.top() += current_level_offset_;
+
+        if (levels_states_.top() == objectState) {
+          levels_cumulative_offsets_.top() += 4;
+          accumulate_single_key();
+        }
+        levels_accumulators_.top() += current_level_json_;
+
+        break;
+      }
+      case '"':
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case '-':
+      case 't':
+      case 'f': {
+        if (levels_accumulators_.empty()) return false;  // all levels are done, what is this value?
+
+        if (validate_next_token(value) == errorState) return false;
+
+        if (levels_states_.top() != objectState) {
+          levels_states_.top() = objectState;  // then it's object
+        }
+
+        levels_cumulative_offsets_.top() += 4;
+        if (accumulate_value() == errorState) return false;
+        break;
+      }
+      case ',': {
+        if (levels_accumulators_.empty()) return false;  // all levels are done, what is this comma?
+
+        if (validate_next_token(comma) == errorState) return false;
+
+        levels_accumulators_.top() += ',';
+        levels_entities_keys_indices_.top()++;
+        break;
+      }
+      default:
+        return false;
+    }
+    pointer_++;
+    virtual_pointer_++;
+  }
+}  // parse_into_buffer
+
+/********************************************
+*
+*    Error reporting system.
+*
+*********************************************/
+
+std::string ShortJSONConverter::format_human_readable_error_message(std::string& message) { return ""; }
+
+/********************************************
+*
+*    Main system.
+*
+*********************************************/
+
 ShortJSONConverter::resultState ShortJSONConverter::push_level() {
   levels_accumulators_.push("");
   levels_states_.push(arrayOfObjectsState);  // We assume worst case which is "array of objects".
@@ -50,9 +225,7 @@ ShortJSONConverter::resultState ShortJSONConverter::push_level() {
   return successState;
 }  // push_level
 
-ShortJSONConverter::resultState ShortJSONConverter::pop_level() { return accumulate_current_level(); }  // pop_level
-
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_current_level() {
+ShortJSONConverter::resultState ShortJSONConverter::pop_level() {
   /*
                           We pop our accumulator level and stack level.
                       */
@@ -85,7 +258,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_current_level() {
   levels_entities_keys_indices_.pop();
 
   return successState;
-}  // accumulate_current_level
+}  // pop_level
 
 void ShortJSONConverter::accumulate_single_key() {
   levels_accumulators_.top() += '"';
@@ -93,6 +266,148 @@ void ShortJSONConverter::accumulate_single_key() {
   levels_accumulators_.top() += '"';
   levels_accumulators_.top() += ':';
 }  // accumulate_single_key
+
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_value() {
+  size_t second_pointer_{pointer_};
+
+  switch (data_.at(second_pointer_)) {
+    case '"': {
+      if (accumulate_string_value() == errorState) return errorState;
+      break;
+    }
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case '-': {
+      if (accumulate_number_value() == errorState) return errorState;
+      break;
+    }
+    case 't':
+    case 'f': {
+      if (accumulate_boolean_value() == errorState) return errorState;
+      break;
+    }
+    default:
+      return errorState;
+  }
+
+  return successState;
+}  // accumulate_value
+
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
+  size_t second_pointer_{pointer_};
+
+  second_pointer_++;
+  while (1) {
+    if (second_pointer_ >= data_.length()) break;
+    switch (data_.at(second_pointer_)) {
+      case '"': {
+        second_pointer_++;  // advance the pointer again.
+
+        if (second_pointer_ >= data_.length()) return errorState;
+
+        accumulate_single_key();
+        levels_accumulators_.top() += data_.substr(pointer_, second_pointer_ - pointer_);
+        virtual_pointer_ += second_pointer_ - pointer_ - 1;
+        pointer_ += second_pointer_ - pointer_ - 1;
+        return successState;
+      }
+      default:
+        break;
+    }
+    second_pointer_++;
+  }
+
+  return errorState;
+}  // accumulate_string_value
+
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_number_value() {
+  size_t second_pointer_{pointer_};
+
+  bool is_double_{false};
+
+  if (data_.at(second_pointer_) == '-') second_pointer_++;  // skip the negative sign if exists.
+
+  while (1) {
+    if (second_pointer_ >= data_.length()) break;
+    switch (data_.at(second_pointer_)) {
+      case ' ':
+      case '\r':
+      case '\t':
+      case '\n':
+      case ',':
+      case ']': {
+        accumulate_single_key();
+        levels_accumulators_.top() += data_.substr(pointer_, second_pointer_ - pointer_);
+        virtual_pointer_ += second_pointer_ - pointer_ - 1;
+        pointer_ += second_pointer_ - pointer_ - 1;
+        return successState;
+      }
+      case '.': {
+        if (is_double_)
+          return errorState;
+        else
+          is_double_ = true;
+        break;
+      }
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+        break;
+      default:
+        return errorState;
+    }
+    second_pointer_++;
+  }
+
+  return errorState;
+}  // accumulate_number_value
+
+ShortJSONConverter::resultState ShortJSONConverter::accumulate_boolean_value() {
+  size_t second_pointer_{pointer_};
+
+  switch (data_.at(second_pointer_)) {
+    case 't':
+      second_pointer_ += 4;  // true length is 4.
+      if (second_pointer_ >= data_.length()) return errorState;
+      if (data_.substr(pointer_, second_pointer_ - pointer_) != "true") return errorState;
+      break;
+    case 'f':
+      second_pointer_ += 5;  // false length is 5.
+      if (second_pointer_ >= data_.length()) return errorState;
+      if (data_.substr(pointer_, second_pointer_ - pointer_) != "false") return errorState;
+      break;
+    default:
+      return errorState;
+  }
+
+  accumulate_single_key();
+  levels_accumulators_.top() += data_.substr(pointer_, second_pointer_ - pointer_);
+  virtual_pointer_ += second_pointer_ - pointer_ - 1;
+  pointer_ += second_pointer_ - pointer_ - 1;
+
+  return successState;
+}  // accumulate_boolean_value
+
+/********************************************
+*
+*    The next part is for increasing effeciency of the algorithm.
+*
+*********************************************/
 
 ShortJSONConverter::resultState ShortJSONConverter::map_short_json_indices() {
   size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
@@ -165,311 +480,53 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_keys() {
   return successState;
 }  // accumulate_missing_keys
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_value(std::string& data) {
-  size_t second_pointer_{pointer_};
+/********************************************
+*
+*    Short JSON syntax validation system.
+*
+*********************************************/
 
-  switch (data.at(second_pointer_)) {
-    case '"': {
-      if (accumulate_string_value(data) == errorState) return errorState;
+ShortJSONConverter::resultState ShortJSONConverter::validate_next_token(shortJSONToken current_token) {
+  if (next_token_[0] != current_token && next_token_[1] != current_token) return errorState;
+
+  switch (current_token) {
+    case comma:
+      next_token_[0] = leftSquareBracket;
+      next_token_[1] = value;
       break;
-    }
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-    case '-': {
-      if (accumulate_number_value(data) == errorState) return errorState;
+    case value:
+      next_token_[0] = rightSquareBracket;
+      next_token_[1] = comma;
       break;
-    }
-    case 't':
-    case 'f': {
-      if (accumulate_boolean_value(data) == errorState) return errorState;
+    case rightSquareBracket:
+      next_token_[0] = rightSquareBracket;
+      next_token_[1] = comma;
       break;
-    }
+    case leftSquareBracket:
+      next_token_[0] = leftSquareBracket;
+      next_token_[1] = value;
+      break;
     default:
       return errorState;
   }
 
   return successState;
-}  // accumulate_value
+}  // validate_next_token
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value(std::string& data) {
-  size_t second_pointer_{pointer_};
+/********************************************
+*
+*    Spaces removal system.
+*
+*********************************************/
 
-  second_pointer_++;
-  while (1) {
-    if (second_pointer_ >= data.length()) break;
-    switch (data.at(second_pointer_)) {
-      case '"': {
-        second_pointer_++;  // advance the pointer again.
-
-        if (second_pointer_ >= data.length()) return errorState;
-
-        accumulate_single_key();
-        levels_accumulators_.top() += data.substr(pointer_, second_pointer_ - pointer_);
-        virtual_pointer_ += second_pointer_ - pointer_ - 1;
-        pointer_ += second_pointer_ - pointer_ - 1;
-        return successState;
-      }
-      default:
-        break;
-    }
-    second_pointer_++;
-  }
-
-  return errorState;
-}  // accumulate_string_value
-
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_number_value(std::string& data) {
-  size_t second_pointer_{pointer_};
-
-  bool is_double_{false};
-
-  if (data.at(second_pointer_) == '-') second_pointer_++;  // skip the negative sign if exists.
-
-  while (1) {
-    if (second_pointer_ >= data.length()) break;
-    switch (data.at(second_pointer_)) {
-      case ' ':
-      case '\r':
-      case '\t':
-      case '\n':
-      case ',':
-      case ']': {
-        accumulate_single_key();
-        levels_accumulators_.top() += data.substr(pointer_, second_pointer_ - pointer_);
-        virtual_pointer_ += second_pointer_ - pointer_ - 1;
-        pointer_ += second_pointer_ - pointer_ - 1;
-        return successState;
-      }
-      case '.': {
-        if (is_double_)
-          return errorState;
-        else
-          is_double_ = true;
-        break;
-      }
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        break;
-      default:
-        return errorState;
-    }
-    second_pointer_++;
-  }
-
-  return errorState;
-}  // accumulate_number_value
-
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_boolean_value(std::string& data) {
-  size_t second_pointer_{pointer_};
-
-  if (data.at(second_pointer_) == 't')
-    second_pointer_ += 4;  // true length is 4.
-  else
-    second_pointer_ += 5;  // false length is 5.
-
-  if (second_pointer_ >= data.length()) return errorState;
-
-  if (data.at(second_pointer_) == 't' && data.substr(pointer_, second_pointer_ - pointer_) != "true") return errorState;
-
-  if (data.at(second_pointer_) == 'f' && data.substr(pointer_, second_pointer_ - pointer_) != "false")
-    return errorState;
-
-  accumulate_single_key();
-  levels_accumulators_.top() += data.substr(pointer_, second_pointer_ - pointer_);
-  virtual_pointer_ += second_pointer_ - pointer_ - 1;
-  pointer_ += second_pointer_ - pointer_ - 1;
-
-  return successState;
-}  // accumulate_boolean_value
-
-/*
-  This function advances only `pointer_` variable.
-*/
-void ShortJSONConverter::skip_spaces(std::string& data) {
-  while (pointer_ < data.length()) {
-    char c = data.at(pointer_);
+void ShortJSONConverter::skip_spaces() {
+  while (pointer_ < data_.length()) {
+    char c = data_.at(pointer_);
     if (c == ' ' || c == '\t' || c == '\r' || c == '\n')
       pointer_++;
     else
       break;
   }
 }
-
-bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffer) {
-  if (data.length() == 0) return false;
-
-  while (1) {
-    if (pointer_ >= data.length()) return false;
-
-    skip_spaces(data);
-    switch (data.at(pointer_)) {
-      case '[': {
-        /*
-                Return error if a new level exists when all levels are done.
-                For example: [1,[1,4]],[1,4]
-            */
-        if (next_token_[1] != invalid && levels_accumulators_.empty()) return false;
-
-        if (next_token_[0] != leftSquareBracket && next_token_[1] != leftSquareBracket) return false;
-        next_token_[0] = leftSquareBracket;
-        next_token_[1] = value;
-        if (push_level() == errorState) return false;
-        break;
-      }
-      case ']': {
-        if ((next_token_[0] != rightSquareBracket && next_token_[1] != rightSquareBracket) ||
-            levels_accumulators_.empty())
-          return false;
-        next_token_[0] = rightSquareBracket;
-        next_token_[1] = comma;
-
-        /*
-                                          For each level we pushed 0 for its end but now we know the index of that end so we set it.
-                                      */
-        levels_boundaries_pointers_.top().second = virtual_pointer_;
-
-        /*
-                                          This snippet fixes current level if we found that it's an object.
-
-                                          Checks:
-
-                                           - Our code assumes that: current level is an array until we find key/value pair which means that:
-                                             current level is an object, so we start add indices to each key/value pair, objects, and arrays
-                                             when we find our first key/value pair in current level which means that we may have entities without indices before our
-                                             first key/value pair which also means that we need to fix them. Our first key/value pair maybe preceding objects or arrays so
-                                             if there's no objects/arrays before our first key/value pair, then nothing need to be fixed. Our "levels_entities_boundaries_pointers_"
-                                             contains boundaries of entities for each level so for current level we must make sure that it contains some entities to be fixed.
-
-                                           - When we get out of a specific level, we must make sure that this level contains entities inside its boundaries because this
-                                             level maybe considered an object inside level.
-
-                                             For example:
-
-                                                                    l       m       ---> we must make sure that ((x < l) && (m < y))
-                                                        |-------|   |-------|
-                                                        |       |   |       |
-                                                        |       |   |       |
-                                                      [ [ 1 , 4 ] , [ 1 , 4 ] , 4 ]  --> this is short json example
-                                                      |                           |
-                                                      |---------------------------|  --> this is our specific level
-                                                      x                           y
-
-                                           - Array of objects doesn't need any kind of indices for its objects so we must make sure that our level is an object.
-
-                                      */
-        if (!(levels_entities_boundaries_pointers_.top().empty()) &&
-            ((levels_boundaries_pointers_.top().first < levels_entities_boundaries_pointers_.top().front().first) &&
-             (levels_boundaries_pointers_.top().second > levels_entities_boundaries_pointers_.top().front().second)) &&
-            (levels_states_.top() == objectState)) {
-          map_short_json_indices();
-        }
-
-        std::string level_json_;
-
-        /*
-                                        If it's an array, wrap with array square brackets; else wrap with object parenthesis;
-                                    */
-        if (levels_states_.top() == arrayOfObjectsState) {
-          level_json_ += '[';
-          if (!(levels_accumulators_.empty())) level_json_ += levels_accumulators_.top();
-          level_json_ += ']';
-        } else {
-          level_json_ += '{';
-          if (!(levels_accumulators_.empty())) level_json_ += levels_accumulators_.top();
-          level_json_ += '}';
-        }
-
-        if (pop_level() == errorState) return false;
-
-        if (pointer_ == data.length() - 1) {
-          /*
-                        If it's end of the string and we have more levels, return syntax error, otherwise return success.
-                      */
-          if (!levels_accumulators_.empty()) return false;
-          *buffer = level_json_;
-          return true;
-        }
-
-        /*
-                TODO: fix here
-            */
-
-        /*
-                    If it's not end of the string and we don't have more levels, return syntax error, otherwise continue.
-                  */
-        if (levels_accumulators_.empty()) return false;
-
-        if (levels_states_.top() != objectState) levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
-        size_t current_level_offset_{levels_cumulative_offsets_.top()};
-        levels_cumulative_offsets_.pop();
-        levels_cumulative_offsets_.top() += current_level_offset_;
-
-        if (levels_states_.top() == objectState) {
-          levels_cumulative_offsets_.top() += 4;
-          accumulate_single_key();
-        }
-        levels_accumulators_.top() += level_json_;
-
-        break;
-      }
-      case '"':
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-      case '-':
-      case 't':
-      case 'f': {
-        if (next_token_[0] != value && next_token_[1] != value) return false;
-        next_token_[0] = rightSquareBracket;
-        next_token_[1] = comma;
-
-        if (levels_states_.top() != objectState) {
-          levels_states_.top() = objectState;  // then it's object
-        }
-        levels_cumulative_offsets_.top() += 4;
-        if (accumulate_value(data) == errorState) return false;
-        break;
-      }
-      case ',': {
-        if (levels_accumulators_.empty()) return false;  // all levels are done, what is this comma?
-
-        if (next_token_[0] != comma && next_token_[1] != comma) return false;
-        next_token_[0] = leftSquareBracket;
-        next_token_[1] = value;
-
-        levels_accumulators_.top() += ',';
-        levels_entities_keys_indices_.top()++;
-        break;
-      }
-      default:
-        return false;
-    }
-    pointer_++;
-    virtual_pointer_++;
-  }
-}  // parse_into_buffer
 
 }  // namespace enigma
