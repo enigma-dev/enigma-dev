@@ -31,7 +31,7 @@ variant short_json_decode(std::string data) {
   enigma::ShortJSONConverter shortJSONConverter;
   bool success = shortJSONConverter.parse_into_buffer(data, buffer);
   if (!success) {
-    DEBUG_MESSAGE("Failed to read configuration", MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Failed to read short configuration", MESSAGE_TYPE::M_ERROR);
     return -1;
   }
 

@@ -114,3 +114,16 @@ TEST(ShortJSONTest, TestWrongShortJSONSyntaxInLevels) {
 
   delete buffer;
 }
+
+TEST(ShortJSONTest, TestRandomValues) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+  std::string data {"[[true,\"dfsbu\"],[\"arywta\",false],[65.7,true],-89.10,4367,-4378]"};
+
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, true);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "{\"0\":{\"0\":true,\"1\":\"dfsbu\"},\"1\":{\"0\":\"arywta\",\"1\":false},\"2\":{\"0\":65.7,\"1\":true},\"3\":-89.10,\"4\":4367,\"5\":-4378}");
+
+  delete buffer;
+}
