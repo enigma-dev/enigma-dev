@@ -28,6 +28,7 @@
 #include <string>
 
 namespace enigma {
+
 class ShortJSONConverter {
  private:
   /*
@@ -49,6 +50,11 @@ class ShortJSONConverter {
                   This is our string data iterator.
               */
   size_t pointer_{0};
+
+  /*
+                  This pointer ignores spaces, new lines (\n), tabs (\t), and carriage returns (\r).
+              */
+  size_t virtual_pointer_{0};
 
   shortJSONToken next_token_[2] = {leftSquareBracket, invalid};
 
@@ -148,7 +154,7 @@ class ShortJSONConverter {
   resultState accumulate_number_value(std::string& data);
   resultState accumulate_boolean_value(std::string& data);
 
-  //   void skip_spaces(std::string &data);
+  void skip_spaces(std::string& data);
 
  public:
   ShortJSONConverter();
@@ -159,6 +165,7 @@ class ShortJSONConverter {
             */
   bool parse_into_buffer(std::string& data, std::string* buffer);
 };
+
 }  // namespace enigma
 
 #endif
