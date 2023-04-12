@@ -23,6 +23,7 @@
 #ifndef SHORT_JSON_CONVERTER_H
 #define SHORT_JSON_CONVERTER_H
 
+#include <iostream>
 #include <queue>
 #include <stack>
 #include <string>

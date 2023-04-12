@@ -308,7 +308,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
     if (second_pointer_ >= data_.length()) break;
     switch (data_.at(second_pointer_)) {
       case '"': {
-        second_pointer_++;  // advance the pointer again.
+        second_pointer_++;  // advance the pointer again to set it after the close double quote.
 
         if (second_pointer_ >= data_.length()) return errorState;
 
