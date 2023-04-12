@@ -17,6 +17,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_1) {
 
   delete buffer;
 }
+
 TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_2) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
@@ -29,6 +30,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_2) {
 
   delete buffer;
 }
+
 TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_3) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
@@ -41,6 +43,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_3) {
 
   delete buffer;
 }
+
 TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_4) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
@@ -53,6 +56,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_4) {
 
   delete buffer;
 }
+
 TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_5) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
@@ -65,11 +69,25 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_5) {
 
   delete buffer;
 }
+
 TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_6) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
 
   std::string data{"[[\"str\",4],[true,-4],false],["};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, false);
+  std::string json = *buffer;
+  ASSERT_EQ(json, "");
+
+  delete buffer;
+}
+
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_7) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+
+  std::string data{"[[\"str\",4],[true,-4],false]  ,  [1,4]"};
   bool success = shortJSONConverter.parse_into_buffer(data, buffer);
   ASSERT_EQ(success, false);
   std::string json = *buffer;
