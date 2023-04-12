@@ -28,6 +28,8 @@ ShortJSONConverter::ShortJSONConverter() = default;
 ShortJSONConverter::~ShortJSONConverter() = default;
 
 bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffer) {
+  std::string current_level_json_;  // holds the result of each level after each level.
+
   data_ = data;  // save our data to be accessible by all functions.
 
   if (data_.length() == 0) return false;
@@ -35,7 +37,14 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
   while (1) {
     skip_spaces();
 
-    if (pointer_ >= data_.length()) return false;
+    if (pointer_ >= data_.length()) {
+      /*
+                    If it's end of the string and we have more levels, return syntax error, otherwise return success.
+                  */
+      if (!levels_accumulators_.empty()) return false;
+      *buffer = current_level_json_;
+      return true;
+    }
 
     switch (data_.at(pointer_)) {
       case '[': {
@@ -96,8 +105,6 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
           map_short_json_indices();
         }
 
-        std::string current_level_json_;
-
         /*
                                         If it's an array, wrap with array square brackets; else wrap with object parenthesis;
                                     */
@@ -118,15 +125,6 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
 
         if (pop_level() == errorState) return false;
 
-        if (pointer_ == data_.length() - 1) {
-          /*
-                        If it's end of the string and we have more levels, return syntax error, otherwise return success.
-                      */
-          if (!levels_accumulators_.empty()) return false;
-          *buffer = current_level_json_;
-          return true;
-        }
-
         /*
                     If it's not end of the string and we don't have more levels, don't accumulate, otherwise accumulate the saved json in `current_level_json_`.
                   */
@@ -142,6 +140,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
           accumulate_single_key();
         }
         levels_accumulators_.top() += current_level_json_;
+        current_level_json_.clear();
 
         break;
       }
@@ -527,6 +526,6 @@ void ShortJSONConverter::skip_spaces() {
     else
       break;
   }
-}
+}  // skip_spaces
 
 }  // namespace enigma
