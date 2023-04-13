@@ -103,6 +103,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
              (levels_boundaries_pointers_.top().second > levels_entities_boundaries_pointers_.top().front().second)) &&
             (levels_states_.top() == objectState)) {
           map_short_json_indices();
+          accumulate_missing_keys();
         }
 
         /*
@@ -429,8 +430,6 @@ void ShortJSONConverter::map_short_json_indices() {
     levels_entities_boundaries_pointers_.top().push(levels_entities_boundaries_pointers_.top().front());
     levels_entities_boundaries_pointers_.top().pop();
   }
-
-  accumulate_missing_keys();
 }  // map_short_json_indices
 
 void ShortJSONConverter::accumulate_missing_keys() {
