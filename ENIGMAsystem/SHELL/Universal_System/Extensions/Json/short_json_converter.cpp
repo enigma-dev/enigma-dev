@@ -54,15 +54,15 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
             */
         if (next_token_[1] != invalid && levels_accumulators_.empty()) return false;
 
-        if (validate_next_token(leftSquareBracket) == errorState) return false;
+        if (!validate_next_token(leftSquareBracket)) return false;
 
-        if (push_level() == errorState) return false;
+        push_level();
         break;
       }
       case ']': {
         if (levels_accumulators_.empty()) return false;
 
-        if (validate_next_token(rightSquareBracket) == errorState) return false;
+        if (!validate_next_token(rightSquareBracket)) return false;
 
         /*
                                           For each level we pushed 0 for its end but now we know the index of that end so we set it.
@@ -120,10 +120,10 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
             current_level_json_ += '}';
             break;
           default:
-            return errorState;
+            return false;
         }
 
-        if (pop_level() == errorState) return false;
+        pop_level();
 
         /*
                     If it's not end of the string and we don't have more levels, don't accumulate, otherwise accumulate the saved json in `current_level_json_`.
@@ -160,20 +160,20 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
       case 'f': {
         if (levels_accumulators_.empty()) return false;  // all levels are done, what is this value?
 
-        if (validate_next_token(value) == errorState) return false;
+        if (!validate_next_token(value)) return false;
 
         if (levels_states_.top() != objectState) {
           levels_states_.top() = objectState;  // then it's object
         }
 
         levels_cumulative_offsets_.top() += 4;
-        if (accumulate_value() == errorState) return false;
+        if (!accumulate_value()) return false;
         break;
       }
       case ',': {
         if (levels_accumulators_.empty()) return false;  // all levels are done, what is this comma?
 
-        if (validate_next_token(comma) == errorState) return false;
+        if (!validate_next_token(comma)) return false;
 
         levels_accumulators_.top() += ',';
         levels_entities_keys_indices_.top()++;
@@ -201,7 +201,7 @@ std::string ShortJSONConverter::format_human_readable_error_message(std::string&
 *
 *********************************************/
 
-ShortJSONConverter::resultState ShortJSONConverter::push_level() {
+void ShortJSONConverter::push_level() {
   levels_accumulators_.push("");
   levels_states_.push(arrayOfObjectsState);  // We assume worst case which is "array of objects".
 
@@ -220,11 +220,9 @@ ShortJSONConverter::resultState ShortJSONConverter::push_level() {
   levels_entities_offsets_.push(level_entities_offsets_);
 
   levels_cumulative_offsets_.push(0);
-
-  return successState;
 }  // push_level
 
-ShortJSONConverter::resultState ShortJSONConverter::pop_level() {
+void ShortJSONConverter::pop_level() {
   /*
                           We pop our accumulator level and stack level.
                       */
@@ -255,8 +253,6 @@ ShortJSONConverter::resultState ShortJSONConverter::pop_level() {
   levels_boundaries_pointers_.pop();
 
   levels_entities_keys_indices_.pop();
-
-  return successState;
 }  // pop_level
 
 void ShortJSONConverter::accumulate_single_key() {
@@ -266,12 +262,12 @@ void ShortJSONConverter::accumulate_single_key() {
   levels_accumulators_.top() += ':';
 }  // accumulate_single_key
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_value() {
+bool ShortJSONConverter::accumulate_value() {
   size_t second_pointer_{pointer_};
 
   switch (data_.at(second_pointer_)) {
     case '\"': {
-      if (accumulate_string_value() == errorState) return errorState;
+      if (!accumulate_string_value()) return false;
       break;
     }
     case '0':
@@ -285,22 +281,22 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_value() {
     case '8':
     case '9':
     case '-': {
-      if (accumulate_number_value() == errorState) return errorState;
+      if (!accumulate_number_value()) return false;
       break;
     }
     case 't':
     case 'f': {
-      if (accumulate_boolean_value() == errorState) return errorState;
+      if (!accumulate_boolean_value()) return false;
       break;
     }
     default:
-      return errorState;
+      return false;
   }
 
-  return successState;
+  return true;
 }  // accumulate_value
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
+bool ShortJSONConverter::accumulate_string_value() {
   size_t second_pointer_{pointer_};
 
   second_pointer_++;
@@ -310,13 +306,13 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
       case '\"': {
         second_pointer_++;  // advance the pointer again to set it after the close double quote.
 
-        if (second_pointer_ >= data_.length()) return errorState;
+        if (second_pointer_ >= data_.length()) return false;
 
         accumulate_single_key();
         levels_accumulators_.top() += data_.substr(pointer_, second_pointer_ - pointer_);
         virtual_pointer_ += second_pointer_ - pointer_ - 1;
         pointer_ += second_pointer_ - pointer_ - 1;
-        return successState;
+        return true;
       }
       default:
         break;
@@ -324,10 +320,10 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
     second_pointer_++;
   }
 
-  return errorState;
+  return false;
 }  // accumulate_string_value
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_number_value() {
+bool ShortJSONConverter::accumulate_number_value() {
   size_t second_pointer_{pointer_};
 
   bool is_double_{false};
@@ -347,11 +343,11 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_number_value() {
         levels_accumulators_.top() += data_.substr(pointer_, second_pointer_ - pointer_);
         virtual_pointer_ += second_pointer_ - pointer_ - 1;
         pointer_ += second_pointer_ - pointer_ - 1;
-        return successState;
+        return true;
       }
       case '.': {
         if (is_double_)
-          return errorState;
+          return false;
         else
           is_double_ = true;
         break;
@@ -368,30 +364,30 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_number_value() {
       case '9':
         break;
       default:
-        return errorState;
+        return false;
     }
     second_pointer_++;
   }
 
-  return errorState;
+  return false;
 }  // accumulate_number_value
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_boolean_value() {
+bool ShortJSONConverter::accumulate_boolean_value() {
   size_t second_pointer_{pointer_};
 
   switch (data_.at(second_pointer_)) {
     case 't':
       second_pointer_ += 4;  // true length is 4.
-      if (second_pointer_ >= data_.length()) return errorState;
-      if (data_.substr(pointer_, second_pointer_ - pointer_) != "true") return errorState;
+      if (second_pointer_ >= data_.length()) return false;
+      if (data_.substr(pointer_, second_pointer_ - pointer_) != "true") return false;
       break;
     case 'f':
       second_pointer_ += 5;  // false length is 5.
-      if (second_pointer_ >= data_.length()) return errorState;
-      if (data_.substr(pointer_, second_pointer_ - pointer_) != "false") return errorState;
+      if (second_pointer_ >= data_.length()) return false;
+      if (data_.substr(pointer_, second_pointer_ - pointer_) != "false") return false;
       break;
     default:
-      return errorState;
+      return false;
   }
 
   accumulate_single_key();
@@ -399,7 +395,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_boolean_value() {
   virtual_pointer_ += second_pointer_ - pointer_ - 1;
   pointer_ += second_pointer_ - pointer_ - 1;
 
-  return successState;
+  return true;
 }  // accumulate_boolean_value
 
 /********************************************
@@ -408,7 +404,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_boolean_value() {
 *
 *********************************************/
 
-ShortJSONConverter::resultState ShortJSONConverter::map_short_json_indices() {
+void ShortJSONConverter::map_short_json_indices() {
   size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
   size_t shift_left_{levels_entities_boundaries_pointers_.top().front().first};
 
@@ -434,10 +430,10 @@ ShortJSONConverter::resultState ShortJSONConverter::map_short_json_indices() {
     levels_entities_boundaries_pointers_.top().pop();
   }
 
-  return accumulate_missing_keys();
+  accumulate_missing_keys();
 }  // map_short_json_indices
 
-ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_keys() {
+void ShortJSONConverter::accumulate_missing_keys() {
   size_t number_of_entities_{levels_entities_boundaries_pointers_.top().size()};
   size_t next_entity_index{0};
   std::string corrected_json_;
@@ -475,8 +471,6 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_keys() {
   corrected_json_ += levels_accumulators_.top().substr(breakdown_index_);
 
   levels_accumulators_.top() = corrected_json_;
-
-  return successState;
 }  // accumulate_missing_keys
 
 /********************************************
@@ -485,8 +479,8 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_keys() {
 *
 *********************************************/
 
-ShortJSONConverter::resultState ShortJSONConverter::validate_next_token(shortJSONToken current_token) {
-  if (next_token_[0] != current_token && next_token_[1] != current_token) return errorState;
+bool ShortJSONConverter::validate_next_token(shortJSONToken current_token) {
+  if (next_token_[0] != current_token && next_token_[1] != current_token) return false;
 
   switch (current_token) {
     case comma:
@@ -506,10 +500,10 @@ ShortJSONConverter::resultState ShortJSONConverter::validate_next_token(shortJSO
       next_token_[1] = value;
       break;
     default:
-      return errorState;
+      return false;
   }
 
-  return successState;
+  return true;
 }  // validate_next_token
 
 /********************************************

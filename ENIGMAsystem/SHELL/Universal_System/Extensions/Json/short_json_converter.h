@@ -37,7 +37,6 @@ class ShortJSONConverter {
     *    Error reporting system.
     *
     *********************************************/
-  enum resultState { successState, errorState };
 
   std::string format_human_readable_error_message(std::string& message);
 
@@ -82,17 +81,17 @@ class ShortJSONConverter {
               */
   std::stack<size_t> levels_entities_keys_indices_;
 
-  resultState push_level();
+  void push_level();
 
-  resultState pop_level();
+  void pop_level();
 
   void accumulate_single_key();
 
-  resultState accumulate_value();
+  bool accumulate_value();
 
-  resultState accumulate_string_value();
-  resultState accumulate_number_value();
-  resultState accumulate_boolean_value();
+  bool accumulate_string_value();
+  bool accumulate_number_value();
+  bool accumulate_boolean_value();
 
   /********************************************
     *
@@ -159,9 +158,9 @@ class ShortJSONConverter {
                 |           |        |                       |
                 [  1  ,  4  ]  --->  {  "0":  1  ,  "1":  4  }
     */
-  resultState map_short_json_indices();
+  void map_short_json_indices();
 
-  resultState accumulate_missing_keys();
+  void accumulate_missing_keys();
 
   /********************************************
     *
@@ -172,7 +171,7 @@ class ShortJSONConverter {
 
   shortJSONToken next_token_[2] = {leftSquareBracket, invalid};
 
-  resultState validate_next_token(shortJSONToken token);
+  bool validate_next_token(shortJSONToken token);
 
   /********************************************
     *
