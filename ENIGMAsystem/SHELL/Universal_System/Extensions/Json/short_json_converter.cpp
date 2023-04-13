@@ -144,7 +144,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
 
         break;
       }
-      case '"':
+      case '\"':
       case '0':
       case '1':
       case '2':
@@ -260,9 +260,9 @@ ShortJSONConverter::resultState ShortJSONConverter::pop_level() {
 }  // pop_level
 
 void ShortJSONConverter::accumulate_single_key() {
-  levels_accumulators_.top() += '"';
+  levels_accumulators_.top() += '\"';
   levels_accumulators_.top() += std::to_string(levels_entities_keys_indices_.top());
-  levels_accumulators_.top() += '"';
+  levels_accumulators_.top() += '\"';
   levels_accumulators_.top() += ':';
 }  // accumulate_single_key
 
@@ -270,7 +270,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_value() {
   size_t second_pointer_{pointer_};
 
   switch (data_.at(second_pointer_)) {
-    case '"': {
+    case '\"': {
       if (accumulate_string_value() == errorState) return errorState;
       break;
     }
@@ -307,7 +307,7 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_string_value() {
   while (1) {
     if (second_pointer_ >= data_.length()) break;
     switch (data_.at(second_pointer_)) {
-      case '"': {
+      case '\"': {
         second_pointer_++;  // advance the pointer again to set it after the close double quote.
 
         if (second_pointer_ >= data_.length()) return errorState;
@@ -450,9 +450,9 @@ ShortJSONConverter::resultState ShortJSONConverter::accumulate_missing_keys() {
                           levels_entities_keys_indices_.top() + 1
                       */
   for (size_t i{0}; i < number_of_entities_; i++) {
-    corrected_json_ += '"';
+    corrected_json_ += '\"';
     corrected_json_ += std::to_string(next_entity_index);
-    corrected_json_ += '"';
+    corrected_json_ += '\"';
     corrected_json_ += ':';
     corrected_json_ +=
         levels_accumulators_.top().substr(levels_entities_boundaries_pointers_.top().front().first,
