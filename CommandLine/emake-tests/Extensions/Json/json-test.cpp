@@ -1,12 +1,12 @@
 #if !defined(JSON_READER_TEST_CPP)
 #define JSON_READER_TEST_CPP
-#endif // JSON_READER_TEST_CPP
+#endif  // JSON_READER_TEST_CPP
 
 #include "Universal_System/Extensions/Json/json_reader.cpp"
 #include "Universal_System/Extensions/Json/json_value.cpp"
+#include "Universal_System/Extensions/Json/json_writer.cpp"
 #include "Universal_System/Extensions/Json/reader.h"
 #include "Universal_System/Extensions/Json/value.h"
-#include "Universal_System/Extensions/Json/json_writer.cpp"
 
 #include <gtest/gtest.h>
 

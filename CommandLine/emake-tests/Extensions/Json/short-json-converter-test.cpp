@@ -1,5 +1,5 @@
-#include "../../ENIGMAsystem/SHELL/Universal_System/Extensions/Json/short_json_converter.cpp"
-#include "../../ENIGMAsystem/SHELL/Universal_System/Extensions/Json/short_json_converter.h"
+#include "Universal_System/Extensions/Json/short_json_converter.cpp"
+#include "Universal_System/Extensions/Json/short_json_converter.h"
 
 #include <gtest/gtest.h>
 
@@ -226,7 +226,7 @@ TEST(ShortJSONConverterTest, TestRandomInput_6) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestSpaces) {
+TEST(ShortJSONConverterTest, TestSpaces) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
 
@@ -242,7 +242,7 @@ TEST(ShortJSONTest, TestSpaces) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestPassingArrayOfJSONObjects) {
+TEST(ShortJSONConverterTest, TestPassingArrayOfJSONObjects) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5],[1,4]]"};
@@ -260,7 +260,7 @@ TEST(ShortJSONTest, TestPassingArrayOfJSONObjects) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestPassingSingleJSONObject) {
+TEST(ShortJSONConverterTest, TestPassingSingleJSONObject) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]"};
@@ -278,7 +278,7 @@ TEST(ShortJSONTest, TestPassingSingleJSONObject) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestShortJSONSyntaxError_1) {
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_1) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5,]"};
@@ -293,7 +293,7 @@ TEST(ShortJSONTest, TestShortJSONSyntaxError_1) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestShortJSONSyntaxError_2) {
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_2) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4,],5]"};
@@ -308,7 +308,7 @@ TEST(ShortJSONTest, TestShortJSONSyntaxError_2) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestShortJSONSyntaxError_3) {
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_3) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]"};
@@ -321,7 +321,7 @@ TEST(ShortJSONTest, TestShortJSONSyntaxError_3) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestShortJSONSyntaxError_4) {
+TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_4) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]]]]]"};
@@ -334,71 +334,73 @@ TEST(ShortJSONTest, TestShortJSONSyntaxError_4) {
   delete buffer;
 }
 
-TEST(ShortJSONTest, TestPassingExtensiveGeneralInput) {
+TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
-  std::string data {"\r [[[\"]  ][dm895vmfv_,,\" , \t true],"
-                    "[[\r\n  false,-46.8] ,"
-                    "[\"dsjdjk\" ,\n65890.3]] ,"
-                    "[-77777777777,44444444], true ,"
-                    "[\"\", 4567.1],"
-                    "[[13,0  ],"
-                    "[\"ty  \" ,true],"
-                    "[133,  \"fghkll::\"]]],"
-                    "[\t  1.6678\r,4\n\n],"
-                    "5\r ] \n"};
+  std::string data{
+      "\r [[[\"]  ][dm895vmfv_,,\" , \t true],"
+      "[[\r\n  false,-46.8] ,"
+      "[\"dsjdjk\" ,\n65890.3]] ,"
+      "[-77777777777,44444444], true ,"
+      "[\"\", 4567.1],"
+      "[[13,0  ],"
+      "[\"ty  \" ,true],"
+      "[133,  \"fghkll::\"]]],"
+      "[\t  1.6678\r,4\n\n],"
+      "5\r ] \n"};
 
   bool success = shortJSONConverter.parse_into_buffer(data, buffer);
   ASSERT_EQ(success, true);
   std::string json = *buffer;
-  std::string expected {"{"
-  "\"0\":{"
-    "\"0\":{"
+  std::string expected{
+      "{"
+      "\"0\":{"
+      "\"0\":{"
       "\"0\":\"]  ][dm895vmfv_,,\","
       "\"1\":true"
-    "},"
-    "\"1\":["
+      "},"
+      "\"1\":["
       "{"
-        "\"0\":false,"
-        "\"1\":-46.8"
+      "\"0\":false,"
+      "\"1\":-46.8"
       "},"
       "{"
-        "\"0\":\"dsjdjk\","
-        "\"1\":65890.3"
+      "\"0\":\"dsjdjk\","
+      "\"1\":65890.3"
       "}"
-    "],"
-    "\"2\":{"
+      "],"
+      "\"2\":{"
       "\"0\":-77777777777,"
       "\"1\":44444444"
-    "},"
-    "\"3\":true,"
-    "\"4\":{"
+      "},"
+      "\"3\":true,"
+      "\"4\":{"
       "\"0\":\"\","
       "\"1\":4567.1"
-    "},"
-    "\"5\":["
+      "},"
+      "\"5\":["
       "{"
-        "\"0\":13,"
-        "\"1\":0"
+      "\"0\":13,"
+      "\"1\":0"
       "},"
       "{"
-        "\"0\":\"ty  \","
-        "\"1\":true"
+      "\"0\":\"ty  \","
+      "\"1\":true"
       "},"
       "{"
-        "\"0\":133,"
-        "\"1\":\"fghkll::\""
+      "\"0\":133,"
+      "\"1\":\"fghkll::\""
       "}"
-    "]"
-  "},"
-  "\"1\":{"
-    "\"0\":1.6678,"
-    "\"1\":4"
-  "},"
-  "\"2\":5"
-"}"};
+      "]"
+      "},"
+      "\"1\":{"
+      "\"0\":1.6678,"
+      "\"1\":4"
+      "},"
+      "\"2\":5"
+      "}"};
 
-  ASSERT_EQ(json,expected);
+  ASSERT_EQ(json, expected);
 
   delete buffer;
-  }
+}
