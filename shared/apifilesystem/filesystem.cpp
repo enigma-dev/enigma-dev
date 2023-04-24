@@ -563,128 +563,120 @@ namespace ngs::fs {
       }
     }
     #elif defined(__OpenBSD__)
-    auto is_exe = [](string exe, bool fallback) {
+    auto is_exe = [](string exe) {
+      int cntp = 0;
       string res;
+      kvm_t *kd = nullptr;
       kinfo_file *kif = nullptr;
-      static kvm_t *kd = nullptr;
+      bool error = false;
       kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
       if (!kd) return res;
-      int cntp = 0;
       if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
-        for (int i = 0; i < cntp; i++) {
+        for (int i = 0; i < cntp && kif[i].fd_fd < 0; i++) {
           if (kif[i].fd_fd == KERN_FILE_TEXT) {
-            struct stat st; 
+            struct stat st;
+            fallback:
             char buffer[PATH_MAX];
-            if (!fallback) {
-              if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
+            if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) &&
               (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
               st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                res = buffer;
-              }
-            } else {
-              string comm = kif[i].p_comm;
-              if (comm.empty()) break;
-              const char *cenv = getenv("PATH");
-              string penv = cenv ? cenv : "";
-              if (!penv.empty()) {
-                vector<string> env = string_split(penv, ':');
-                for (size_t i = 0; i < env.size(); i++) {
-                  exe = env[i] + "/" + comm;
-                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
-                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
-                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                    res = buffer;
-                  }
-                }
-              }
-              if (res.empty()) {
-                const char *cpwd = getenv("PWD");
-                string pwd = cpwd ? cpwd : "";
-                if (!pwd.empty()) {
-                  exe = pwd + "/" + comm;
-                  if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
-                  (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
-                  st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                    res = buffer;
-                  }
-                }
-                if (pwd.empty() || res.empty()) {
-                  char cwd[PATH_MAX];
-                  if (getcwd(cwd, sizeof(cwd))) {
-                    exe = string(cwd) + "/" + comm;
-                    if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) && 
-                    (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
-                    st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
-                      res = buffer;
-                    }
-                  }
-                }
+              res = buffer;
+            }
+            if (res.empty() && !error) {
+              error = true;
+              size_t last_slash_pos = exe.find_last_of("/");
+              if (last_slash_pos != string::npos) {
+                exe = exe.substr(0, last_slash_pos + 1) + kif[i].p_comm;
+                goto fallback;
               }
             }
+            break;
           }
         }
       }
-      if (kd) kvm_close(kd);
-      kd = nullptr;
+      kvm_close(kd);
       return res;
     };
     int mib[4];
     char **cmd = nullptr;
     size_t len = 0;
-    string buffer;
+    vector<string> buffer;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_ARGS;
     mib[2] = getpid();
     mib[3] = KERN_PROC_ARGV;
+    bool error = false, retried = false;
     if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
       if ((cmd = (char **)malloc(len))) {
         if (sysctl(mib, 4, cmd, &len, nullptr, 0) == 0) {
-          buffer = cmd[0];
+          buffer.push_back(cmd[0]);
         }
         free(cmd);
       }
     }
     if (!buffer.empty()) {
       string argv0;
-      if (!buffer.empty()) {
-        if (buffer[0] == '/') {
-          argv0 = buffer;
-          path = is_exe(argv0.c_str(), false);
-        } else if (buffer.find('/') == string::npos) {
-          const char *cenv = getenv("PATH");
-          string penv = cenv ? cenv : "";
+      if (!buffer[0].empty()) {
+        fallback:
+        size_t slash_pos = buffer[0].find('/');
+        size_t colon_pos = buffer[0].find(':');
+        if (slash_pos == 0) {
+          argv0 = buffer[0];
+          path = is_exe(argv0);
+        } else if (slash_pos == string::npos || slash_pos > colon_pos) { 
+          string penv = environment_get_variable("PATH");
           if (!penv.empty()) {
-            vector<string> env = string_split(penv, ':');
-            for (size_t i = 0; i < env.size(); i++) {
-              argv0 = env[i] + "/" + buffer;
-              path = is_exe(argv0.c_str(), false);
+            retry:
+            string tmp;
+            std::stringstream sstr(penv);
+            while (std::getline(sstr, tmp, ':')) {
+              argv0 = tmp + "/" + buffer[0];
+              path = is_exe(argv0);
               if (!path.empty()) break;
-              if (buffer[0] == '-') {
-                argv0 = env[i] + "/" + buffer.substr(1);
-                path = is_exe(argv0.c_str(), false);
+              if (slash_pos > colon_pos) {
+                argv0 = tmp + "/" + buffer[0].substr(0, colon_pos);
+                path = is_exe(argv0);
                 if (!path.empty()) break;
               }
             }
           }
-        } else {
-          const char *cpwd = getenv("PWD");
-          string pwd = cpwd ? cpwd : "";
-          if (!pwd.empty()) {
-            argv0 = pwd + "/" + buffer;
-            path = is_exe(argv0.c_str(), false);
+          if (path.empty() && !retried) {
+            retried = true;
+            penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
+            string home = environment_get_variable("HOME");
+            if (!home.empty()) {
+              penv = home + "/bin:" + penv;
+            }
+            goto retry;
           }
-          if (pwd.empty() || path.empty()) {
-            char cwd[PATH_MAX];
-            if (getcwd(cwd, sizeof(cwd))) {
-              argv0 = string(cwd) + "/" + buffer;
-              path = is_exe(argv0.c_str(), false);
+        }
+        if (path.empty() && slash_pos > 0) {
+          string pwd = environment_get_variable("PWD");
+          if (!pwd.empty()) {
+            argv0 = pwd + "/" + buffer[0];
+            path = is_exe(argv0);
+          }
+          if (path.empty()) {
+            string cwd = directory_get_current_working();
+            if (!cwd.empty()) {
+              argv0 = cwd + "/" + buffer[0];
+              path = is_exe(argv0);
             }
           }
         }
       }
-      if (path.empty()) {
-        path = is_exe(argv0.c_str(), true);
+      if (path.empty() && !error) {
+        error = true;
+        buffer.clear();
+        string underscore = environment_get_variable("_");
+        if (!underscore.empty()) {
+          buffer.push_back(underscore);
+          goto fallback;
+        }
       }
+    }
+    if (!path.empty()) {
+      errno = 0;
     }
     #elif defined(__sun)
     char exe[PATH_MAX];
