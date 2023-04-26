@@ -58,7 +58,7 @@ bool CompletionStatusFromExecutedProcess(PROCID procIndex) {
   return completion_status_from_executed_process(procIndex);
 }
 
-ssize_t ExecutedProcessWriteToStandardInput(PROCID procIndex, string input) {
+long long ExecutedProcessWriteToStandardInput(PROCID procIndex, string input) {
   return executed_process_write_to_standard_input(procIndex, input.c_str());
 }
 
