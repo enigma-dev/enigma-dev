@@ -1591,7 +1591,7 @@ namespace ngs::ps {
     return stdopt_map.find(proc_id)->second.c_str();
   }
 
-  ssize_t write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input) {
+  long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input) {
     if (stdipt_map.find(proc_id) == stdipt_map.end()) return -1;
     std::string s = input;
     std::vector<char> v(s.length());
@@ -1605,7 +1605,7 @@ namespace ngs::ps {
     DWORD dwwritten = -1;
     SetFilePointer((HANDLE)(void *)stdipt_map[proc_id], 0, nullptr, FILE_END);
     WriteFile((HANDLE)(void *)stdipt_map[proc_id], &v[0], (DWORD)v.size(), &dwwritten, nullptr);
-    return (ssize_t)dwwritten;
+    return (((long long)-1 != (long long)dwwritten) ? dwwritten : -1);
     #endif
   }
 

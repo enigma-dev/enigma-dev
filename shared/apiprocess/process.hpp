@@ -37,15 +37,6 @@ namespace ngs::ps {
   typedef unsigned long NGS_PROCID;
   #endif
 
-  #if defined(_WIN32)
-  #if defined(_MSC_VER)
-  #include <BaseTsd.h>
-  typedef SSIZE_T ssize_t;
-  #endif
-  #else
-  #include <sys/types.h>
-  #endif
-
   NGS_PROCID proc_id_from_self();
   std::vector<NGS_PROCID> proc_id_enum();
   bool proc_id_exists(NGS_PROCID proc_id);
@@ -65,7 +56,7 @@ namespace ngs::ps {
   bool envvar_exists_from_proc_id(NGS_PROCID proc_id, std::string name);
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait);
   std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id);
-  ssize_t write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);
+  long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);
   bool child_proc_id_is_complete(NGS_PROCID proc_id);
   std::string read_from_stdin_for_self();
   bool free_stdout_for_child_proc_id(NGS_PROCID proc_id);
