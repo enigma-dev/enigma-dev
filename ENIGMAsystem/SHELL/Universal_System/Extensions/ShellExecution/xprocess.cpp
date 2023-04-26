@@ -28,8 +28,6 @@
 
 #include <climits>
 
-#include "xprocess.hpp"
-
 #if defined(PROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
 #include <windows.h>
@@ -45,6 +43,8 @@
 #endif
 #endif
 #endif
+
+#include "xprocess.hpp"
 
 using namespace ngs::ps;
 
