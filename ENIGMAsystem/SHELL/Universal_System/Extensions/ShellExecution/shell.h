@@ -11,7 +11,7 @@ namespace enigma_user {
 PROCID ProcessExecute(std::string command);
 PROCID ProcessExecuteAsync(std::string command);
 bool CompletionStatusFromExecutedProcess(PROCID procIndex);
-ssize_t ExecutedProcessWriteToStandardInput(PROCID procIndex, std::string input);
+long long ExecutedProcessWriteToStandardInput(PROCID procIndex, std::string input);
 std::string CurrentProcessReadFromStandardInput();
 std::string ExecutedProcessReadFromStandardOutput(PROCID procIndex);
 bool FreeExecutedProcessStandardInput(PROCID procIndex);
