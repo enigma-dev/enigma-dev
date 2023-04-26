@@ -741,7 +741,7 @@ namespace xprocess {
     return ::spawn_child_proc_id(command, false);
   }
 
-  ssize_t executed_process_write_to_standard_input(NGS_PROCID proc_index, const char *input) {
+  long long executed_process_write_to_standard_input(NGS_PROCID proc_index, const char *input) {
     return ::write_to_stdin_for_child_proc_id(proc_index, input);
   }
 

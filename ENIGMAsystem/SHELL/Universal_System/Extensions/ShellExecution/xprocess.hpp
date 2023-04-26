@@ -128,7 +128,7 @@ namespace xprocess {
 
   PROCID process_execute(const char *command);
   PROCID process_execute_async(const char *command);
-  ssize_t executed_process_write_to_standard_input(PROCID proc_index, const char *input);
+  long long executed_process_write_to_standard_input(PROCID proc_index, const char *input);
   const char *executed_process_read_from_standard_output(PROCID proc_index);
   bool free_executed_process_standard_input(PROCID proc_index);
   bool free_executed_process_standard_output(PROCID proc_index);
