@@ -14,7 +14,7 @@
 
 TEST(JSONTest, TestSpaces) {
   std::string data{
-      " { \"0\":\t{ \"0\":\" s \ttr\n \", \"1\": \n8 } , \"1\"\r\n:{\"0\":true,\"1\" : -4 } ,\r\"2\":\nfalse}"};
+      " { \"0\":\t{ \"0\": \" s \ttr\n \", \"1\": \n8 } , \"1\"\r\n:{\"0\":true,\"1\" : -4 } ,\r\"2\":\nfalse}"};
   Json::Value root;
   Json::Reader reader;
   bool parsingSuccessful = reader.parse(std::string(data), root);

@@ -334,16 +334,33 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_4) {
   delete buffer;
 }
 
+TEST(ShortJSONConverterTest, TestNullValues) {
+  std::string *buffer = new std::string();
+  enigma::ShortJSONConverter shortJSONConverter;
+  std::string data{
+      " [ \n[ \" s \ttr\n \" ,\t 8\n,\tnull ] ,"
+      " \n [ \ntrue\t ,\r\r\n -4\r ] "
+      ", \r\nfalse\t, null, null ] "};
+  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  ASSERT_EQ(success, true);
+  std::string json = *buffer;
+  ASSERT_EQ(json,
+            "{\"0\":{\"0\":\" s \ttr\n "
+            "\",\"1\":8,\"2\":null},\"1\":{\"0\":true,\"1\":-4},\"2\":false,\"3\":null,\"4\":null}");
+
+  delete buffer;
+}
+
 TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
   std::string *buffer = new std::string();
   enigma::ShortJSONConverter shortJSONConverter;
   std::string data{
       "\r [[[\"]  ][dm895vmfv_,,\" , \t true],"
-      "[[\r\n  false,-46.8] ,"
+      "[[\r\n  false,-46.8,null] ,"
       "[\"dsjdjk\" ,\n65890.3]] ,"
       "[-77777777777,44444444], true ,"
       "[\"\", 4567.1],"
-      "[[13,0  ],"
+      "[[13,0  , null],"
       "[\"ty  \" ,true],"
       "[133,  \"fghkll::\"]]],"
       "[\t  1.6678\r,4\n\n],"
@@ -362,7 +379,8 @@ TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
       "\"1\":["
       "{"
       "\"0\":false,"
-      "\"1\":-46.8"
+      "\"1\":-46.8,"
+      "\"2\":null"
       "},"
       "{"
       "\"0\":\"dsjdjk\","
@@ -381,7 +399,8 @@ TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
       "\"5\":["
       "{"
       "\"0\":13,"
-      "\"1\":0"
+      "\"1\":0,"
+      "\"2\":null"
       "},"
       "{"
       "\"0\":\"ty  \","
