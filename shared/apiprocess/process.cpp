@@ -397,7 +397,7 @@ namespace ngs::ps {
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec.push_back(0);
     std::vector<NGS_PROCID> proc_info;
-    proc_info.resize(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0) / sizeof(NGS_PROCID));
+    proc_info.resize(proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0));
     int cntp = proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(NGS_PROCID) * proc_info.size());
     for (int i = cntp - 1; i >= 0; i--) {
       if (proc_info[i] <= 0) continue;
@@ -676,7 +676,7 @@ namespace ngs::ps {
     CloseHandle(hp);
     #elif (defined(__APPLE__) && defined(__MACH__))
     std::vector<NGS_PROCID> proc_info;
-    proc_info.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)parent_proc_id, nullptr, 0) / sizeof(NGS_PROCID));
+    proc_info.resize(proc_listpids(PROC_PPID_ONLY, (uint32_t)parent_proc_id, nullptr, 0));
     int cntp = proc_listpids(PROC_PPID_ONLY, (uint32_t)parent_proc_id, &proc_info[0], sizeof(NGS_PROCID) * proc_info.size());
     for (int i = cntp - 1; i >= 0; i--) {
       if (proc_info[i] <= 0) continue;
