@@ -260,7 +260,6 @@ namespace {
       ImGui_ImplSDLRenderer_NewFrame();
       ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame();
       ImGui::SetNextWindowPos(ImVec2(0, 0));
-      if (type <= selectFolder) SDL_SetWindowSize(window, 640, 360);
       ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
       else if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, fname.c_str(), dir.c_str());
@@ -347,6 +346,11 @@ namespace {
         goto finish;
       }
       if (dialog) {
+        if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty() &&
+          ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty() &&
+          (type == openFile || type == openFiles || type == saveFile || type == selectFolder)) {
+          SDL_SetWindowSize(window, 640, 360);
+        }
         #if defined(_WIN32)
         SDL_SysWMinfo system_info;
         SDL_VERSION(&system_info.version);
