@@ -104,9 +104,9 @@ namespace {
     if (icon == nullptr)
       icon = (HICON)GetClassLongPtrW(hWnd, GCLP_HICONSM);
     if (icon == nullptr)
-      icon = LoadIconW(GetWindowLongPtrW(hWnd, GWLP_HINSTANCE), MAKEINTRESOURCE(0));
+      icon = LoadIconW((HINSTANCE)GetWindowLongPtrW(hWnd, GWLP_HINSTANCE), MAKEINTRESOURCEW(0));
     if (icon == nullptr)
-      icon = LoadIconW(nullptr, IDI_APPLICATION);
+      icon = LoadIconA(nullptr, IDI_APPLICATION);
     return icon;
   }
   #endif
