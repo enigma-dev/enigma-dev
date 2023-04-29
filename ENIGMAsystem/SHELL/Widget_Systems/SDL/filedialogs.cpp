@@ -30,9 +30,8 @@
 #include <vector>
 #include <map>
 
-#include "SDL.h"
-#include "SDL_syswm.h"
 #include "filedialogs.hpp"
+#include "SDL_syswm.h"
 #include "imgui_impl_sdlrenderer.h"
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
@@ -71,6 +70,8 @@
 using std::string;
 using std::wstring;
 using std::vector;
+
+SDL_Window *window = nullptr;
 
 namespace {
 
@@ -190,7 +191,6 @@ namespace {
   SDL_Surface *surf = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
-    SDL_Window *window = nullptr;
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
@@ -199,10 +199,6 @@ namespace {
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
     std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
     std::to_string(1)) ? SDL_WINDOW_BORDERLESS : 0));
-    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty())
-    ngs::fs::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(640));
-    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty())
-    ngs::fs::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(360));
     window = SDL_CreateWindow(title.c_str(),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
@@ -348,13 +344,17 @@ namespace {
         }
       }
       ImGui_ImplSDLRenderer_NewFrame(); 
-      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame(); ImGui::SetNextWindowPos(ImVec2(0, 0)); 
+      ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame();
+      ImGui::SetNextWindowPos(ImVec2(0, 0));
+      if (type <= selectFolder) SDL_SetWindowSize(window, 640, 360);
+      SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
       ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
       if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
       else if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, fname.c_str(), dir.c_str());
       else if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, fname.c_str(), dir.c_str());
       else if (type == saveFile) ifd::FileDialog::Instance().Save("GetSaveFileName", "Save As", filterNew.c_str(), fname.c_str(), dir.c_str());
       else if (type == oneButton) {
+        if (message.empty()) goto finish;
         vector<string> buttons;
         buttons.push_back(IFD_OK); 
         ImGuiAl::MsgBox msgbox;
@@ -369,6 +369,7 @@ namespace {
         ImGui::PopID();
         if (result != "(null)") goto finish;
       } else if (type == twoButtons) {
+        if (message.empty()) goto finish;
         vector<string> buttons;
         buttons.push_back(IFD_YES);
         buttons.push_back(IFD_NO); 
@@ -385,6 +386,7 @@ namespace {
         ImGui::PopID();
         if (result != "(null)") goto finish;
       } else if (type == threeButtons) {
+        if (message.empty()) goto finish;
         vector<string> buttons;
         buttons.push_back(IFD_YES);
         buttons.push_back(IFD_NO); 
@@ -445,6 +447,7 @@ namespace {
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
     SDL_DestroyWindow(window);
+    window = nullptr;
     return result;
   }
 
