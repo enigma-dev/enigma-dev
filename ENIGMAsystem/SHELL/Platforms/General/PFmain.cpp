@@ -181,7 +181,6 @@ int enigma_main(int argc, char** argv) {
   }
   
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
-  enigma_user::environment_set_variable("IMGUI_DIALOG_RESIZE", "1");
 
   initTimer();
   initInput();
