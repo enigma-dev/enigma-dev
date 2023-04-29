@@ -26,7 +26,11 @@ SOFTWARE.
 
 #include "imguial_msgbox.h"
 #include "../filedialogs.hpp"
+#if defined(_MSC_VER)
+#include "../filesystem.hpp"
+#else
 #include "filesystem.hpp"
+#endif
 #include "../imgui.h"
 
 extern SDL_Window *dialog;
