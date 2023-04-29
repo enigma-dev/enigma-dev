@@ -29,7 +29,7 @@ SOFTWARE.
 #include "../filesystem.hpp"
 #include "../imgui.h"
 
-extern SDL_Window *window;
+extern SDL_Window *dialog;
 
 ImGuiAl::MsgBox::~MsgBox() {}
 
@@ -62,12 +62,11 @@ int ImGuiAl::MsgBox::Draw()
     int dw = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).x;
     if (dw < 320) dw = 320;
     int dh = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).y + (4.875f * ImGui::GetFontSize());
-    if (window) {
-      SDL_GetWindowSize(window, &sw, &sh);
-      if ((sw != dw || sh != dh) && ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE").empty()) {
-        SDL_SetWindowSize(window, dw, dh);
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-      }
+    if (dialog) {
+      SDL_GetWindowSize(dialog, &sw, &sh);
+      SDL_SetWindowSize(dialog, dw, dh);
+      if (ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty())
+        SDL_SetWindowPosition(dialog, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     }
       
     ImGui::Separator();
