@@ -97,6 +97,17 @@ namespace {
     vector<char> buf(nbytes);
     return string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   }
+
+  HICON GetIcon(HWND hWnd) {
+    HICON icon = (HICON)SendMessageW(hWnd, WM_GETICON, ICON_SMALL, 0);
+    if (icon == nullptr)
+      icon = (HICON)GetClassLongPtrW(hWnd, GCLP_HICONSM);
+    if (icon == nullptr)
+      icon = LoadIconW(GetWindowLongPtrW(hWnd, GWLP_HINSTANCE), MAKEINTRESOURCE(0));
+    if (icon == nullptr)
+      icon = LoadIconW(nullptr, IDI_APPLICATION);
+    return icon;
+  }
   #endif
 
   string string_replace_all(string str, string substr, string nstr) {
@@ -199,19 +210,6 @@ namespace {
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return "";
-    if (type == selectFolder) {
-      SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::folder_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-      SDL_SetWindowIcon(window, surface);
-      SDL_FreeSurface(surface);
-    } else if (type == openFile || type == openFiles || type == saveFile) {
-      SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::file_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-      SDL_SetWindowIcon(window, surface);
-      SDL_FreeSurface(surface);
-    } else {
-      SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void *)ifd::msgbox_icon, 32, 32, 32, 32 * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-      SDL_SetWindowIcon(window, surface);
-      SDL_FreeSurface(surface);
-    }
     #if defined(_WIN32)
     SDL_SysWMinfo system_info;
     SDL_VERSION(&system_info.version);
@@ -234,6 +232,8 @@ namespace {
       int childFrameHeight = childFrame.bottom - childFrame.top;
       MoveWindow(hWnd, (parentFrame.left + (parentFrameWidth / 2)) - (childFrameWidth / 2),
       (parentFrame.top + (parentFrameHeight / 2)) - (childFrameHeight / 2), childFrameWidth, childFrameHeight, TRUE);
+      PostMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)GetIcon((HWND)(void *)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)));
     }
     #elif defined(__APPLE__) && defined(__MACH__)
     SDL_SysWMinfo system_info;

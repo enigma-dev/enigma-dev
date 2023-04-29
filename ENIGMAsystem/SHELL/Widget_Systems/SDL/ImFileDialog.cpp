@@ -1790,11 +1790,3 @@ namespace ifd {
       m_isOpen = false;
   }
 }
-
-const char *ifd::GetDefaultFolderIcon() {
-  return (const char *)&folder_icon[0];
-}
-
-const char *ifd::GetDefaultFileIcon() {
-  return (const char *)&file_icon[0];
-}
