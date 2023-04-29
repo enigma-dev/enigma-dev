@@ -25,7 +25,11 @@ SOFTWARE.
 */
 
 #include "imguial_msgbox.h"
+#include "../filedialogs.hpp"
+#include "../filesystem.hpp"
 #include "../imgui.h"
+
+extern SDL_Window *window;
 
 ImGuiAl::MsgBox::~MsgBox() {}
 
@@ -52,7 +56,19 @@ int ImGuiAl::MsgBox::Draw()
   int index = 0;
   if ( ImGui::BeginPopupModal( m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove ) )
   {
-    ImGui::TextWrapped( "%s", m_Text );
+    ImGui::TextWrapped( m_Text );
+
+    int sw = 0, sh = 0;
+    int dw = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).x;
+    if (dw < 320) dw = 320;
+    int dh = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).y + (4.875f * ImGui::GetFontSize());
+    if (window) {
+      SDL_GetWindowSize(window, &sw, &sh);
+      if ((sw != dw || sh != dh) && ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE").empty()) {
+        SDL_SetWindowSize(window, dw, dh);
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+      }
+    }
       
     ImGui::Separator();
 
