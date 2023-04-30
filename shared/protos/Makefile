@@ -19,6 +19,6 @@ CXXFLAGS += -I$(OBJ_DIR) -fPIC
 LDFLAG += -shared
 
 GENERATED := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.cc) $(PROTO_SOURCES:.proto=.pb.h) $(SOURCES_GRPC:.proto=.grpc.pb.cc) $(SOURCES_GRPC:.proto=.grpc.pb.h))
-OBJECTS := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.o) $(SOURCES_GRPC:.proto=.grpc.pb.o)) -g -o $(LDFLAGS)
+OBJECTS := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.o) $(SOURCES_GRPC:.proto=.grpc.pb.o)) $(shell pkg-config --cflags --libs protobuf grpc grpc++)
 
 include ../../Default.mk
