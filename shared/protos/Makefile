@@ -3,8 +3,8 @@ include ../../Config.mk
 PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
 SOURCES_GRPC := server.proto
 
-CXXFLAGS += $(shell pkg-config --cflags protobuf grpc++) -I$(OBJ_DIR) -fPIC
-LDFLAG += $(shell pkg-config --libs protobuf grpc++) -shared -static
+CXXFLAGS += $(shell pkg-config --cflags protobuf grpc++) -I$(OBJ_DIR) -static -fPIC
+LDFLAG += $(shell pkg-config --libs protobuf grpc++) -shared
 
 ifeq ($(UNIX_BASED), true)
 	GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)
