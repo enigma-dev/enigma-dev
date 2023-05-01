@@ -9,7 +9,7 @@ ifeq ($(OS), Linux)
 	FS_LIBS=-lstdc++fs
 endif
 
-CXXFLAGS += -I../ $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) $(shell pkg-config --cflags protobuf) -fPIC
-LDFLAGS += -shared -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols$(SUFFIX) $(shell pkg-config --libs protobuf) -lENIGMAShared$(SUFFIX) -lpng $(FS_LIBS)
+CXXFLAGS += -I../ $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -fPIC
+LDFLAGS += -shared -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols$(SUFFIX) -lprotobuf -lENIGMAShared$(SUFFIX) -lpng $(FS_LIBS)
 
 include ../../Default.mk
