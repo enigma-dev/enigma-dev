@@ -250,7 +250,7 @@ namespace {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-      GLuint tex;
+      GLuint tex = 0;
       glGenTextures(1, &tex);
       glBindTexture(GL_TEXTURE_2D, tex);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -260,7 +260,7 @@ namespace {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
       glGenerateMipmap(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, 0);
-      return (void*)tex;
+      return (void *)(std::uintptr_t)tex;
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
       GLuint texID = (GLuint)((uintptr_t)tex);
