@@ -42,6 +42,7 @@
 #include "filesystem.hpp"
 
 #include <sys/stat.h>
+#include <GL/glew.h>
 #if defined(_WIN32) 
 #include <windows.h>
 #define STR_SLASH "\\"
@@ -63,7 +64,6 @@
 #if !defined(__APPLE__)
 #include <GL/gl.h>
 #endif
-#include <GL/glew.h>
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "opengl32.lib")
@@ -113,7 +113,7 @@ namespace {
     if (icon == nullptr)
       icon = LoadIconW((HINSTANCE)GetWindowLongPtrW(hWnd, GWLP_HINSTANCE), MAKEINTRESOURCEW(0));
     if (icon == nullptr)
-      icon = LoadIconA(nullptr, IDI_APPLICATION);
+      icon = LoadIconW(nullptr, IDI_APPLICATION);
     return icon;
   }
   #endif
