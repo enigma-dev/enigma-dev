@@ -18,8 +18,8 @@ ifeq ($(UNIX_BASED), true)
 	endif
 endif
 
-CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../$(LIB_PFX)EGM -I../$(LIB_PFX)EGM
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
+CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) $(shell pkg-config --cflags grpc++ protobuf) -I../$(LIB_PFX)EGM -I../$(LIB_PFX)EGM
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) $(shell pkg-config --libs grpc++ protobuf) -lyaml-cpp -lpng 
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests$(SUFFIX)
