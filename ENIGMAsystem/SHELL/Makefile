@@ -96,8 +96,8 @@ else ifeq ($(OS), OpenBSD)
 else
 	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2)
 	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lntdll $(shell pkg-config --libs sdl2)
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lntdll $(shell pkg-config --libs sdl2)
+	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
+	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
 endif
 
 ifeq ($(OS), Darwin)
