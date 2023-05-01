@@ -63,6 +63,7 @@
 #if !defined(__APPLE__)
 #include <GL/gl.h>
 #endif
+#include <GL/glew.h>
 
 #if defined(_MSC_VER)
 #pragma comment(lib, "opengl32.lib")
