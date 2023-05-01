@@ -104,8 +104,8 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
-  for (std::size_t i = 0; i < shaderprograms.size(); i++) shaderprograms[i] = nullptr;
-  for (std::size_t i = 0; i < shaders.size(); i++) shaders[i] = nullptr;
+  for (std::size_t i = 0; i < enigma::shaderprograms.size(); i++) enigma::shaderprograms[i] = nullptr;
+  for (std::size_t i = 0; i < enigma::shaders.size(); i++) enigma::shaders[i] = nullptr;
   SDL_GL_DeleteContext(enigma::sdl_gl_context);
   external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "show_message", dll_cdecl, ty_string, 1, ty_string), message);
   enigma::sdl_gl_context = SDL_GL_CreateContext(enigma::windowHandle);
