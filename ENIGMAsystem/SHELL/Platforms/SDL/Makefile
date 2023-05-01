@@ -3,7 +3,8 @@ ifndef PKG-CONFIG
 endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
-	SOURCES += $(wildcard Platforms/SDL/Win32/*.cpp) 
+	SOURCES += $(wildcard Platforms/SDL/Win32/*.cpp)
+	LDFLAGS += -lwinmm -luser32
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += $(wildcard Platforms/SDL/MacOSX/*.cpp) 
