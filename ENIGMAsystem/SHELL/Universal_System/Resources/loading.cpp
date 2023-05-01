@@ -35,6 +35,7 @@
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "apifilesystem/ghc/filesystem.hpp"
 
 #include <ctime>
 #include <cstdio>
