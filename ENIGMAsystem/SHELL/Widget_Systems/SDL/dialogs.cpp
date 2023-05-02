@@ -39,13 +39,9 @@
 #include "Universal_System/estring.h"
 #include "Universal_System/fileio.h"
 
-#include "Graphics_Systems/OpenGL-Common/shader.h"
-#include "Bridges/OpenGL/GLload.h"
 #include "Platforms/SDL/Window.h"
 
 #include "OpenGLHeaders.h"
-
-#include <GL/glew.h>
 
 #ifdef _WIN32
 #define DLLEXT ".dll"
@@ -104,12 +100,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
-  for (std::size_t i = 0; i < enigma::shaderprograms.size(); i++) enigma::shaderprograms[i] = nullptr;
-  for (std::size_t i = 0; i < enigma::shaders.size(); i++) enigma::shaders[i] = nullptr;
-  SDL_GL_DeleteContext(enigma::sdl_gl_context);
   external_call(external_define(filename_change_ext(program_pathname, DLLEXT), "show_message", dll_cdecl, ty_string, 1, ty_string), message);
-  enigma::sdl_gl_context = SDL_GL_CreateContext(enigma::windowHandle);
-  glewInit();
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
