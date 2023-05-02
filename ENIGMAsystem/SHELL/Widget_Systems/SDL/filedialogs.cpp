@@ -32,7 +32,7 @@
 
 #include "filedialogs.hpp"
 #include "SDL_syswm.h"
-#include "imgui_impl_opengl2.h"
+#include "imgui_impl_sdlrenderer.h"
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "ImFileDialog.h"
@@ -42,7 +42,6 @@
 #include "filesystem.hpp"
 
 #include <sys/stat.h>
-#include <GL/glew.h>
 #if defined(_WIN32) 
 #include <windows.h>
 #define STR_SLASH "\\"
@@ -50,8 +49,6 @@
 #define HOME_PATH "USERPROFILE"
 #else
 #if defined(__APPLE__) && defined(__MACH__)
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl.h>
 #include <AppKit/AppKit.h>
 #else
 #include <X11/Xlib.h>
@@ -61,12 +58,8 @@
 #define CHR_SLASH '/'
 #define HOME_PATH "HOME"
 #endif
-#if !defined(__APPLE__)
-#include <GL/gl.h>
-#endif
 
 #if defined(_MSC_VER)
-#pragma comment(lib, "opengl32.lib")
 #if defined(_WIN32) && !defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
 #elif defined(_WIN32) && defined(_WIN64)
@@ -194,18 +187,15 @@ namespace {
   }
 
   vector<string> fonts;
+  SDL_Renderer *renderer = nullptr;
+  SDL_Surface *surf = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
     SDL_Window *window = nullptr;
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
     SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
     std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") ==
@@ -213,11 +203,10 @@ namespace {
     window = SDL_CreateWindow(title.c_str(),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
-    SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-    SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(1);
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    if (renderer == nullptr) return "";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(); ngs::imgui::ifd_load_fonts();
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
@@ -243,24 +232,16 @@ namespace {
     } else if (theme == 1) {
       ImGui::StyleColorsLight();
     }
-    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL2_Init();
+    ImGui_ImplSDL2_InitForSDLRenderer(window);
+    ImGui_ImplSDLRenderer_Init(renderer); 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
-      GLuint tex = 0;
-      glGenTextures(1, &tex);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-      glGenerateMipmap(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, 0);
-      return (void *)(std::uintptr_t)tex;
+      if (surf) SDL_FreeSurface(surf);
+      surf = SDL_CreateRGBSurfaceFrom((void *)data, w, h, 32, w * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+      SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surf);
+      return (void *)tex;
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
-      GLuint texID = (GLuint)((uintptr_t)tex);
-      glDeleteTextures(1, &texID);
+      SDL_DestroyTexture((SDL_Texture *)tex);
     };
     dialog = window;
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
@@ -276,7 +257,7 @@ namespace {
           }
         }
       }
-      ImGui_ImplOpenGL2_NewFrame();
+      ImGui_ImplSDLRenderer_NewFrame();
       ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame();
       ImGui::SetNextWindowPos(ImVec2(0, 0));
       ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
@@ -393,7 +374,7 @@ namespace {
           int childFrameHeight = childFrame.bottom - childFrame.top;
           MoveWindow(hWnd, (parentFrame.left + (parentFrameWidth / 2)) - (childFrameWidth / 2),
           (parentFrame.top + (parentFrameHeight / 2)) - (childFrameHeight / 2), childFrameWidth, childFrameHeight, TRUE);
-          PostMessageW(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)GetIcon((HWND)(void *)(std::uintptr_t)strtoull(
+          PostMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)GetIcon((HWND)(void *)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)));
         }
         #elif defined(__APPLE__) && defined(__MACH__)
@@ -461,20 +442,18 @@ namespace {
         dialog = nullptr;
       }
       ImGui::Render();
-      glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-      glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-      glClear(GL_COLOR_BUFFER_BIT);
-      ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-      SDL_GL_SwapWindow(window);
+      SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
+      SDL_RenderClear(renderer);
+      ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+      SDL_RenderPresent(renderer);
       if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
         SDL_ShowWindow(window);
       }
     }
     finish:
-    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplSDLRenderer_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
-    SDL_GL_DeleteContext(gl_context);
     SDL_DestroyWindow(window);
     window = nullptr;
     dialog = nullptr;
