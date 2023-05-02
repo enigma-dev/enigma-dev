@@ -17,5 +17,7 @@ else
 	override LDFLAGS += -lshell32 -lole32 -luuid
 	override LDFLAGS += -lshell32 -lole32 -luuid
 endif
+override CFLAGS += -DIFD_SHARED_LIBRARY
+override CXXFLAGS += -DIFD_SHARED_LIBRARY
 SOURCES += Widget_Systems/SDL/dialogs.cpp
 IMGUIFD := $(shell Widget_Systems/SDL/imgui.sh)
