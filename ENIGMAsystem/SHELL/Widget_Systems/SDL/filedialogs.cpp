@@ -194,8 +194,6 @@ namespace {
   }
 
   vector<string> fonts;
-  SDL_Renderer *renderer = nullptr;
-  SDL_Surface *surf = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
     SDL_Window *window = nullptr;
@@ -220,8 +218,6 @@ namespace {
     SDL_GL_SetSwapInterval(1);
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr) return "";
     IMGUI_CHECKVERSION();
     ImGui::CreateContext(); ngs::imgui::ifd_load_fonts();
     if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
@@ -249,7 +245,7 @@ namespace {
     }
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
-    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
       GLuint tex = 0;
       glGenTextures(1, &tex);
       glBindTexture(GL_TEXTURE_2D, tex);
@@ -262,7 +258,7 @@ namespace {
       glBindTexture(GL_TEXTURE_2D, 0);
       return (void *)(std::uintptr_t)tex;
     };
-    ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
+    ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
       GLuint texID = (GLuint)((uintptr_t)tex);
       glDeleteTextures(1, &texID);
     };
