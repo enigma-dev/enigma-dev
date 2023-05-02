@@ -760,22 +760,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
   #else
   std::filesystem::path datares = "/tmp/stigma.res";
-  #if (defined(__APPLE__) || defined(__MACH__))
-  std::filesystem::path dllfile = "/tmp/stigma.dylib";
-  std::filesystem::path widgets = filename_change_ext(gameFname.u8string(), ".dylib");
-  #else
-  std::filesystem::path dllfile = "/tmp/stigma.so";
-  std::filesystem::path widgets = filename_change_ext(gameFname.u8string(), ".so");
-  #endif
   #endif
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
 
   std::error_code ec;
   std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
   std::filesystem::rename(datares, resFname, ec);
-  #ifndef _WIN32
-  std::filesystem::copy(dllfile, widgets, std::filesystem::copy_options::overwrite_existing, ec);
-  #endif
  
   auto resname = resFname.u8string();
   gameModule = fopen(resname.c_str(),"wb");
