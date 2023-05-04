@@ -1076,7 +1076,6 @@ namespace ngs::ps {
         if (realpath(str.c_str(), buffer)) {
           path = buffer;
         }
-        
       }
       fclose(fp);
     }
