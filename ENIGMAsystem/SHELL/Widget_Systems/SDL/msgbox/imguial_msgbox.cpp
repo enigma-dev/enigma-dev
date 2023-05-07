@@ -34,65 +34,80 @@ SOFTWARE.
 #include "../imgui.h"
 
 extern SDL_Window *dialog;
+ImGuiAl::MsgBox::~MsgBox() { }
 
-ImGuiAl::MsgBox::~MsgBox() {}
-
-void AlignForWidth(float width, float alignment = 0.5f)
-{
+void AlignForWidth(float width, float alignment = 0.5f) {
   ImGuiStyle& style = ImGui::GetStyle();
   float avail = ImGui::GetContentRegionAvail().x;
   float off = (avail - width) * alignment;
-  if (off > 0.0f)
+  if (off > 0.0f) {
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+  }
   ImGui::SetCursorPosY(ImGui::GetContentRegionMax().y - (ImGui::GetFontSize() + (ImGui::GetFontSize() / 2)));
 }
 
-bool ImGuiAl::MsgBox::Init( const char* title, const char* text, std::vector<std::string> captions )
-{
+bool ImGuiAl::MsgBox::Init(const char *title, const char *text, std::vector<std::string> captions, bool input, const char *def) {
   m_Title = title;
   m_Text = text;
   m_Captions = captions;
+  m_Input = input;
+  if (m_Input) strcpy(m_Default, def);
   return true;
 }
 
-int ImGuiAl::MsgBox::Draw()
-{
+int ImGuiAl::MsgBox::Draw() {
   int index = 0;
-  if ( ImGui::BeginPopupModal( m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove ) )
-  {
-    ImGui::TextWrapped( m_Text );
-
+  if (m_Input) InputBuffer[0] = 0;
+  if (ImGui::BeginPopupModal(m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+    ImGui::TextWrapped(m_Text );
     int sw = 0, sh = 0;
-    int dw = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).x;
+    int dw = ImGui::CalcTextSize(m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize())).x;
     if (dw < ImGui::GetWindowContentRegionMax().x * 0.75) dw = ImGui::GetWindowContentRegionMax().x * 0.75;
-    int dh = ImGui::CalcTextSize( m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize()) ).y + (4.875f * ImGui::GetFontSize());
+    int dh = ImGui::CalcTextSize(m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize())).y + (4.875f * ImGui::GetFontSize());
+    if (m_Input) dh += ((4.875f * ImGui::GetFontSize()) / 2);
     if (dialog) {
       SDL_GetWindowSize(dialog, &sw, &sh);
       SDL_SetWindowSize(dialog, dw, dh);
-      if (ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty())
+      if (ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         SDL_SetWindowPosition(dialog, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+      }
+      if (m_Input) {
+        strcpy(m_InputBuffer, m_Default);
+      }
     }
-      
     ImGui::Separator();
-
-    ImVec2 size = ImVec2( 4.875f * ImGui::GetFontSize(), 0.0f );
+    ImVec2 size = ImVec2(4.875f * ImGui::GetFontSize(), 0.0f);
     int count;
-
     ImGuiStyle& style = ImGui::GetStyle();
     float width = 0.0f;
-    for ( count = 0; count < m_Captions.size(); count++ )
-    {
+    for (count = 0; count < m_Captions.size(); count++) {
       width += size.x;
       width += style.ItemSpacing.x;
     }
     width -= style.ItemSpacing.x;
+    if (m_Input) {
+      ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+      ImGui::SetCursorPosY(ImGui::GetContentRegionMax().y - (2 * (ImGui::GetFontSize() + (ImGui::GetFontSize() / 2))));
+      if (!ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)) {
+        ImGui::SetKeyboardFocusHere(0);
+      }
+      if (ImGui::InputText("##inputBox", m_InputBuffer, 1024)) {
+        if (m_Input) {
+          InputBuffer[0] = 0;
+          strcpy(InputBuffer, m_InputBuffer);
+        }
+        ImGui::CloseCurrentPopup();
+      }
+    }
     AlignForWidth(width);
-    for ( count = 0; count < m_Captions.size(); count++ )
-    {
+    for (count = 0; count < m_Captions.size(); count++) {
       ImGui::PushID(count);
-      if ( ImGui::Button( m_Captions[ count ].c_str(), size ) )
-      {
+      if (ImGui::Button(m_Captions[ count ].c_str(), size)) {
         index = count + 1;
+        if (m_Input) {
+          InputBuffer[0] = 0;
+          strcpy(InputBuffer, m_InputBuffer);
+        }
         ImGui::CloseCurrentPopup();
         ImGui::PopID();
         break;
@@ -100,16 +115,13 @@ int ImGuiAl::MsgBox::Draw()
       ImGui::SameLine();
       ImGui::PopID();
     }
-      
-    size = ImVec2( ( 4 - count ) * 4.875f * ImGui::GetFontSize(), ImGui::GetFontSize() );
-    ImGui::Dummy( size );
-    
+    size = ImVec2((4 - count) * 4.875f * ImGui::GetFontSize(), ImGui::GetFontSize());
+    ImGui::Dummy(size);
     ImGui::EndPopup();
   }
   return index;
 }
 
-void ImGuiAl::MsgBox::Open()
-{
-  ImGui::OpenPopup( m_Title );
+void ImGuiAl::MsgBox::Open() {
+  ImGui::OpenPopup(m_Title);
 }
