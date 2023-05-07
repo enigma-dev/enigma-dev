@@ -495,8 +495,8 @@ namespace {
           }
         }
         #endif
-        dialog = nullptr;
       }
+      dialog = nullptr;
       ImGui::Render();
       SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
       SDL_RenderClear(renderer);
@@ -511,8 +511,8 @@ namespace {
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
     SDL_DestroyWindow(window);
-    window = nullptr;
     dialog = nullptr;
+    window = nullptr;
     return result;
   }
 
