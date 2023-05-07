@@ -37,6 +37,10 @@
 
 .DS_Store
 
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+
 ValgrindOut.xml
 output_log.txt
 hs_err_pid*.log
