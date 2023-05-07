@@ -115,7 +115,29 @@ int show_question_ext(string message) {
   string no = (environment_get_variable("IMGUI_No").empty() ? "No" : environment_get_variable("IMGUI_YES"));
   return ((result == yes) ? 1 : ((result == no) ? 0 : -1));
 }
-\
+
+std::string get_string(std::string message, std::string defstr) {
+  std::string result = ::get_string(message.c_str(), defstr.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  return result;
+}
+
+double get_number(std::string message, double defnum) {
+  double result = ::get_number(message.c_str(), defnum);
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  return result;
+}
+
+double get_integer(std::string message, double defint) {
+  return get_number(message, defint);
+}
+
 string get_open_filename(string filter, string fname) {
   string result = ::get_open_filename(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
