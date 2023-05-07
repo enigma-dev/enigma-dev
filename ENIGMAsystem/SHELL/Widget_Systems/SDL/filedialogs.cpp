@@ -257,14 +257,13 @@ namespace {
     dialog = window;
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder)); 
-    bool quit = false; SDL_Event e;
-    string result; while (!quit) {
+    SDL_Event e;
+    string result; while (true) {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
         if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE) {
           if (SDL_GetWindowID(window) == e.window.windowID) {
             result = "(null)";
-            quit = true;
           }
         }
       }
