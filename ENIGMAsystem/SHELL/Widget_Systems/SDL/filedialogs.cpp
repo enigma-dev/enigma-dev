@@ -58,6 +58,8 @@
 #define CHR_SLASH '/'
 #define HOME_PATH "HOME"
 #endif
+#define DIGITS_MIN -999999999999999
+#define DIGITS_MAX  999999999999999
 
 #if defined(_MSC_VER)
 #if defined(_WIN32) && !defined(_WIN64)
@@ -162,7 +164,9 @@ namespace {
     selectFolder,
     oneButton,
     twoButtons,
-    threeButtons
+    threeButtons,
+    stringInputBox,
+    numberInputBox
   };
 
   string expand_without_trailing_slash(string dname) {
@@ -186,11 +190,18 @@ namespace {
     return dname;
   }
 
+  string remove_trailing_zeros(double numb) {
+    string strnumb = std::to_string(numb);
+    while (!strnumb.empty() && strnumb.find('.') != string::npos && (strnumb.back() == '.' || strnumb.back() == '0'))
+      strnumb.pop_back();
+    return strnumb;
+  }
+
   vector<string> fonts;
   SDL_Renderer *renderer = nullptr;
   SDL_Surface *surf = nullptr;
 
-  string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "") {
+  string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "", string def = "") {
     SDL_Window *window = nullptr;
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
@@ -313,6 +324,46 @@ namespace {
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
           case 3: result = IFD_CANCEL; break;
+        }
+        ImGui::PopID();
+        if (result != "(null)") goto finish;
+      } else if (type == stringInputBox) {
+        if (message.empty()) goto finish;
+        vector<string> buttons;
+        buttons.push_back(IFD_OK);
+        buttons.push_back(IFD_CANCEL);
+        ImGuiAl::MsgBox msgbox;
+        ImGui::PushID("##msgbox");
+        char deftext[1024];
+        strcpy(deftext, def.substr(0, 1023).c_str());
+        msgbox.Init("##msgbox", message.c_str(), buttons, true, deftext);
+        msgbox.Open();
+        int selected = msgbox.Draw();
+        switch (selected) {
+          case 0: result = "(null)"; break;
+          case 1: result = msgbox.InputBuffer; break;
+          case 2: result = ""; break;
+        }
+        ImGui::PopID();
+        if (result != "(null)") goto finish;
+      } else if (type == numberInputBox) {
+        if (message.empty()) goto finish;
+        vector<string> buttons;
+        buttons.push_back(IFD_OK);
+        ImGuiAl::MsgBox msgbox;
+        ImGui::PushID("##msgbox");
+        double defnum = strtod(def.c_str(), nullptr);
+        if (defnum < DIGITS_MIN) defnum = DIGITS_MIN;
+        if (defnum > DIGITS_MAX) defnum = DIGITS_MAX;
+        char deftext[1024];
+        strcpy(deftext, remove_trailing_zeros(defnum).c_str());
+        msgbox.Init("##msgbox", message.c_str(), buttons, true, deftext);
+        msgbox.Open();
+        int selected = msgbox.Draw();
+        switch (selected) {
+          case 0: result = "(null)"; break;
+          case 1: result = remove_trailing_zeros(strtod(msgbox.InputBuffer, nullptr)); break;
+          case 2: result = ""; break;
         }
         ImGui::PopID();
         if (result != "(null)") goto finish;
@@ -535,6 +586,18 @@ namespace ngs::imgui {
     return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), threeButtons, message);
   }
 
+  string get_string(string message, string defstr) {
+    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), stringInputBox, message, defstr);
+  }
+
+  double get_number(string message, double defnum) {
+    double result = strtod(file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), numberInputBox,
+    message, remove_trailing_zeros(defnum)).c_str(), nullptr);
+    if (result < DIGITS_MIN) result = DIGITS_MIN;
+    if (result > DIGITS_MAX) result = DIGITS_MAX;
+    return result;
+  }
+
 } // namespace ngs::imgui
 
 #if defined(IFD_SHARED_LIBRARY)
@@ -608,4 +671,13 @@ const char *show_question_ext(const char *message) {
   return result.c_str();
 }
 
+const char *get_string(const char *message, const char *defstr) {
+  static string result;
+  result = ngs::imgui::get_string(message, defstr);
+  return result.c_str();
+}
+
+double get_number(const char *message, double defnum) {
+  return ngs::imgui::get_number(message, defnum);
+}
 #endif
