@@ -220,6 +220,7 @@ namespace {
     window = SDL_CreateWindow(title.c_str(),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
+    dialog = window;
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
@@ -260,7 +261,6 @@ namespace {
     ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
       SDL_DestroyTexture((SDL_Texture *)tex);
     };
-    dialog = window;
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder)); 
     SDL_Event e;
@@ -287,7 +287,7 @@ namespace {
         buttons.push_back(IFD_OK);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -303,7 +303,7 @@ namespace {
         buttons.push_back(IFD_NO);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -321,7 +321,7 @@ namespace {
         buttons.push_back(IFD_CANCEL);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -339,14 +339,14 @@ namespace {
         buttons.push_back(IFD_CANCEL);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        char deftext[1024];
-        strcpy(deftext, def.substr(0, 1023).c_str());
-        msgbox.Init("##msgbox", message.c_str(), buttons, true, deftext);
+        strcpy(msgbox.Default, def.substr(0, 1023).c_str());
+        strcpy(msgbox.Value, msgbox.Default);
+        msgbox.Init("##msgbox", message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
           case 0: result = "(null)"; break;
-          case 1: result = msgbox.InputBuffer; break;
+          case 1: result = msgbox.Result; break;
           case 2: result = ""; break;
         }
         ImGui::PopID();
@@ -360,14 +360,15 @@ namespace {
         double defnum = strtod(def.c_str(), nullptr);
         if (defnum < DIGITS_MIN) defnum = DIGITS_MIN;
         if (defnum > DIGITS_MAX) defnum = DIGITS_MAX;
-        char deftext[1024];
-        strcpy(deftext, remove_trailing_zeros(defnum).c_str());
-        msgbox.Init("##msgbox", message.c_str(), buttons, true, deftext);
+        def = remove_trailing_zeros(defnum); 
+        strcpy(msgbox.Default, def.substr(0, 1023).c_str());
+        strcpy(msgbox.Value, msgbox.Default);
+        msgbox.Init("##msgbox", message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
           case 0: result = "(null)"; break;
-          case 1: result = remove_trailing_zeros(strtod(msgbox.InputBuffer, nullptr)); break;
+          case 1: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
           case 2: result = ""; break;
         }
         ImGui::PopID();
@@ -495,8 +496,8 @@ namespace {
           }
         }
         #endif
+        dialog = nullptr;
       }
-      dialog = nullptr;
       ImGui::Render();
       SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
       SDL_RenderClear(renderer);
