@@ -1,5 +1,5 @@
 #!/bin/sh
-# build shared library
+# build static library
 export STIGMA_PATH=`pwd`;
 cd "/tmp"
 if [ `uname` = "Darwin" ]; then
