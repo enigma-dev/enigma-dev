@@ -1604,7 +1604,7 @@ namespace ngs::ps {
     DWORD dwwritten = -1;
     SetFilePointer((HANDLE)(void *)stdipt_map[proc_id], 0, nullptr, FILE_END);
     WriteFile((HANDLE)(void *)stdipt_map[proc_id], &v[0], (DWORD)v.size(), &dwwritten, nullptr);
-    return (((long long)-1 != (long long)dwwritten) ? dwwritten : -1);
+    return (((long long)(DWORD)-1 != (long long)dwwritten) ? dwwritten : -1);
     #endif
   }
 
