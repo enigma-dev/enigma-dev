@@ -35,17 +35,18 @@ namespace ImGuiAl {
     inline MsgBox() {}
     virtual ~MsgBox();
     
-    bool Init(const char *title, const char *text, std::vector<std::string> captions, bool input = false, const char *def = nullptr);
+    bool Init(const char *title, const char *text, std::vector<std::string> captions, bool input);
     int  Draw();
     void Open();
-    char InputBuffer[1024];
+    std::string Result;
+    char Default[1024];
+    char Value[1024];
     
   protected:
     const char *m_Title;
     const char *m_Text;
     std::vector<std::string> m_Captions;
     bool m_Input;
-    char m_InputBuffer[1024];
-    char m_Default[1024];
+    char m_Value[1024];
   };
 }
