@@ -263,15 +263,10 @@ namespace {
     };
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder)); 
-    SDL_Event e;
-    string result; while (true) {
+    SDL_Event e; string result = "(null)";
+    while (true) {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
-        if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE) {
-          if (SDL_GetWindowID(window) == e.window.windowID) {
-            result = "(null)";
-          }
-        }
       }
       ImGui_ImplSDLRenderer_NewFrame();
       ImGui_ImplSDL2_NewFrame(); ImGui::NewFrame();
@@ -291,7 +286,7 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = "(null)"; break;
+          case 0: result = IFD_OK; break;
           case 1: result = IFD_OK; break;
         }
         ImGui::PopID();
@@ -307,7 +302,7 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = "(null)"; break;
+          case 0: result = IFD_YES; break;
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
         }
@@ -325,7 +320,7 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = "(null)"; break;
+          case 0: result = IFD_YES; break;
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
           case 3: result = IFD_CANCEL; break;
@@ -345,7 +340,7 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = "(null)"; break;
+          case 0: result = msgbox.Result; break;
           case 1: result = msgbox.Result; break;
           case 2: result = ""; break;
         }
@@ -367,9 +362,8 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = "(null)"; break;
+          case 0: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
           case 1: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
-          case 2: result = ""; break;
         }
         ImGui::PopID();
         if (result != "(null)") goto finish;
