@@ -263,7 +263,7 @@ namespace {
     };
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder)); 
-    SDL_Event e; string result = "(null)";
+    SDL_Event e; string result;
     while (true) {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
@@ -286,11 +286,11 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = IFD_OK; break;
+          case 0: result = ""; break;
           case 1: result = IFD_OK; break;
         }
         ImGui::PopID();
-        if (result != "(null)") goto finish;
+        if (selected) goto finish;
       } else if (type == twoButtons) {
         if (message.empty()) goto finish;
         vector<string> buttons;
@@ -302,12 +302,12 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = IFD_YES; break;
+          case 0: result = ""; break;
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
         }
         ImGui::PopID();
-        if (result != "(null)") goto finish;
+        if (selected) goto finish;
       } else if (type == threeButtons) {
         if (message.empty()) goto finish;
         vector<string> buttons;
@@ -320,13 +320,13 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = IFD_YES; break;
+          case 0: result = ""; break;
           case 1: result = IFD_YES; break;
           case 2: result = IFD_NO; break;
           case 3: result = IFD_CANCEL; break;
         }
         ImGui::PopID();
-        if (result != "(null)") goto finish;
+        if (selected) goto finish;
       } else if (type == stringInputBox) {
         if (message.empty()) goto finish;
         vector<string> buttons;
@@ -340,12 +340,12 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = msgbox.Result; break;
+          case 0: result = ""; break;
           case 1: result = msgbox.Result; break;
           case 2: result = ""; break;
         }
         ImGui::PopID();
-        if (result != "(null)") goto finish;
+        if (selected) goto finish;
       } else if (type == numberInputBox) {
         if (message.empty()) goto finish;
         vector<string> buttons;
@@ -362,11 +362,11 @@ namespace {
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
+          case 0: result = remove_trailing_zeros(0); break;
           case 1: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
         }
         ImGui::PopID();
-        if (result != "(null)") goto finish;
+        if (selected) goto finish;
       }
       if (ifd::FileDialog::Instance().IsDone("GetOpenFileName")) {
         if (ifd::FileDialog::Instance().HasResult()) {
