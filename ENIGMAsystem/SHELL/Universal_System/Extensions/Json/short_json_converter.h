@@ -54,7 +54,7 @@ class ShortJSONConverter {
     *           "array of objects" ----> single JSON "object"
     *
     *********************************************/
-  enum levelState { arrayOfObjectsState, objectState };
+  enum class levelState { arrayOfObjectsState, objectState };
 
   /*
     This pointer iterate over the whole string and doesn't ignore spaces.
@@ -181,9 +181,9 @@ class ShortJSONConverter {
     *    Short JSON syntax validation system.
     *
     *********************************************/
-  enum shortJSONToken { leftSquareBracket, rightSquareBracket, comma, value, invalid };
+  enum class shortJSONToken { leftSquareBracket, rightSquareBracket, comma, value, invalid };
 
-  shortJSONToken next_token_[2] = {leftSquareBracket, invalid};
+  shortJSONToken next_token_[2] = {shortJSONToken::leftSquareBracket, shortJSONToken::invalid};
 
   bool validate_next_token(shortJSONToken token);
 
@@ -199,13 +199,13 @@ class ShortJSONConverter {
   void skip_spaces();
 
  public:
-  ShortJSONConverter();
-  ~ShortJSONConverter();
+  ShortJSONConverter() = default;
+  ~ShortJSONConverter() = default;
 
   /*
     Parse short JSON and put the output in the buffer.
   */
-  bool parse_into_buffer(std::string& data, std::string* buffer);
+  bool parse_into_buffer(const std::string& data, std::string* buffer);
 };
 
 }  // namespace enigma

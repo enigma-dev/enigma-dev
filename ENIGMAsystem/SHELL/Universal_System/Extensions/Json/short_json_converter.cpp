@@ -24,10 +24,7 @@
 
 namespace enigma {
 
-ShortJSONConverter::ShortJSONConverter() = default;
-ShortJSONConverter::~ShortJSONConverter() = default;
-
-bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffer) {
+bool ShortJSONConverter::parse_into_buffer(const std::string& data, std::string* buffer) {
   /*
     Holds the accumulated JSON of last popped level.
   */
@@ -55,9 +52,9 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
           Return error if a new level exists when all levels are done.
           For example: [1,[1,4]],[1,4]
         */
-        if (next_token_[1] != invalid && levels_accumulators_.empty()) return false;
+        if (next_token_[1] != shortJSONToken::invalid && levels_accumulators_.empty()) return false;
 
-        if (!validate_next_token(leftSquareBracket)) return false;
+        if (!validate_next_token(shortJSONToken::leftSquareBracket)) return false;
 
         push_level();
         break;
@@ -65,7 +62,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
       case ']': {
         if (levels_accumulators_.empty()) return false;
 
-        if (!validate_next_token(rightSquareBracket)) return false;
+        if (!validate_next_token(shortJSONToken::rightSquareBracket)) return false;
 
         /*
           Set the end boundary of current level.
@@ -100,7 +97,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
         if (!(levels_entities_boundaries_pointers_.top().empty()) &&
             ((levels_boundaries_pointers_.top().first < levels_entities_boundaries_pointers_.top().front().first) &&
              (levels_boundaries_pointers_.top().second > levels_entities_boundaries_pointers_.top().front().second)) &&
-            (levels_states_.top() == objectState)) {
+            (levels_states_.top() == levelState::objectState)) {
           map_short_json_indices();
           accumulate_missing_keys();
         }
@@ -109,12 +106,12 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
           If it's an array, wrap with array square brackets; else wrap with object parenthesis;
         */
         switch (levels_states_.top()) {
-          case arrayOfObjectsState:
+          case levelState::arrayOfObjectsState:
             current_level_json_ += '[';
             current_level_json_ += levels_accumulators_.top();
             current_level_json_ += ']';
             break;
-          case objectState:
+          case levelState::objectState:
             current_level_json_ += '{';
             current_level_json_ += levels_accumulators_.top();
             current_level_json_ += '}';
@@ -127,12 +124,12 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
 
         if (levels_accumulators_.empty()) break;
 
-        if (levels_states_.top() != objectState) levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
+        if (levels_states_.top() != levelState::objectState) levels_entities_offsets_.top().push(levels_cumulative_offsets_.top());
         size_t current_level_offset_{levels_cumulative_offsets_.top()};
         levels_cumulative_offsets_.pop();
         levels_cumulative_offsets_.top() += current_level_offset_;
 
-        if (levels_states_.top() == objectState) {
+        if (levels_states_.top() == levelState::objectState) {
           levels_cumulative_offsets_.top() += 4;
           accumulate_single_key();
         }
@@ -158,10 +155,10 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
       case 'n': {
         if (levels_accumulators_.empty()) return false;  // all levels are done, what is this value?
 
-        if (!validate_next_token(value)) return false;
+        if (!validate_next_token(shortJSONToken::value)) return false;
 
-        if (levels_states_.top() != objectState) {
-          levels_states_.top() = objectState;  // then it's object
+        if (levels_states_.top() != levelState::objectState) {
+          levels_states_.top() = levelState::objectState;  // then it's object
         }
 
         levels_cumulative_offsets_.top() += 4;
@@ -171,7 +168,7 @@ bool ShortJSONConverter::parse_into_buffer(std::string& data, std::string* buffe
       case ',': {
         if (levels_accumulators_.empty()) return false;  // all levels are done, what is this comma?
 
-        if (!validate_next_token(comma)) return false;
+        if (!validate_next_token(shortJSONToken::comma)) return false;
 
         levels_accumulators_.top() += ',';
         levels_entities_keys_indices_.top()++;
@@ -203,7 +200,7 @@ std::string ShortJSONConverter::format_human_readable_error_message(std::string&
 
 void ShortJSONConverter::push_level() {
   levels_accumulators_.push("");
-  levels_states_.push(arrayOfObjectsState);  // Assume worst case which is "array of objects".
+  levels_states_.push(levelState::arrayOfObjectsState);  // Assume worst case which is "array of objects".
 
   levels_entities_keys_indices_.push(0);
 
@@ -241,7 +238,7 @@ void ShortJSONConverter::pop_level() {
     If it's an "object", then no need to continue pushing.
   */
   if (!(levels_entities_boundaries_pointers_.empty()) && !(levels_states_.empty())) {
-    if (levels_states_.top() != objectState)
+    if (levels_states_.top() != levelState::objectState)
       levels_entities_boundaries_pointers_.top().push({levels_boundaries_pointers_.top()});
   }
 
@@ -310,7 +307,7 @@ bool ShortJSONConverter::accumulate_string_value() {
         accumulate_single_key();
         levels_accumulators_.top() += data_.substr(pointer_, temp_pointer_ - pointer_);
         virtual_pointer_ += temp_pointer_ - pointer_ - 1;
-        pointer_ += temp_pointer_ - pointer_ - 1;
+        pointer_ = temp_pointer_ - 1;
         return true;
       }
       default:
@@ -341,7 +338,7 @@ bool ShortJSONConverter::accumulate_number_value() {
         accumulate_single_key();
         levels_accumulators_.top() += data_.substr(pointer_, temp_pointer_ - pointer_);
         virtual_pointer_ += temp_pointer_ - pointer_ - 1;
-        pointer_ += temp_pointer_ - pointer_ - 1;
+        pointer_ = temp_pointer_ - 1;
         return true;
       }
       case '.': {
@@ -404,7 +401,7 @@ bool ShortJSONConverter::accumulate_boolean_value() {
   accumulate_single_key();
   levels_accumulators_.top() += data_.substr(pointer_, temp_pointer_ - pointer_);
   virtual_pointer_ += temp_pointer_ - pointer_ - 1;
-  pointer_ += temp_pointer_ - pointer_ - 1;
+  pointer_ = temp_pointer_ - 1;
 
   return true;
 }  // accumulate_boolean_value
@@ -424,7 +421,7 @@ bool ShortJSONConverter::accumulate_null_value() {
   accumulate_single_key();
   levels_accumulators_.top() += data_.substr(pointer_, temp_pointer_ - pointer_);
   virtual_pointer_ += temp_pointer_ - pointer_ - 1;
-  pointer_ += temp_pointer_ - pointer_ - 1;
+  pointer_ = temp_pointer_ - 1;
 
   return true;
 }  // accumulate_null_value
@@ -442,18 +439,19 @@ void ShortJSONConverter::map_short_json_indices() {
     4. Repeat steps 1 - 3.
   */
   for (size_t i{0}; i < number_of_entities_; i++) {
-    levels_entities_boundaries_pointers_.top().front().first -= shift_left_;
-    levels_entities_boundaries_pointers_.top().front().second -= shift_left_;
+    auto &top = levels_entities_boundaries_pointers_.top();
+    top.front().first -= shift_left_;
+    top.front().second -= shift_left_;
 
-    levels_entities_boundaries_pointers_.top().front().first += offset_;
-    levels_entities_boundaries_pointers_.top().front().second += offset_ + levels_entities_offsets_.top().front();
+    top.front().first += offset_;
+    top.front().second += offset_ + levels_entities_offsets_.top().front();
 
     offset_ += levels_entities_offsets_.top().front();
 
     levels_entities_offsets_.top().pop();
 
-    levels_entities_boundaries_pointers_.top().push(levels_entities_boundaries_pointers_.top().front());
-    levels_entities_boundaries_pointers_.top().pop();
+    top.push(levels_entities_boundaries_pointers_.top().front());
+    top.pop();
   }
 }  // map_short_json_indices
 
@@ -506,21 +504,21 @@ bool ShortJSONConverter::validate_next_token(shortJSONToken current_token) {
   if (next_token_[0] != current_token && next_token_[1] != current_token) return false;
 
   switch (current_token) {
-    case comma:
-      next_token_[0] = leftSquareBracket;
-      next_token_[1] = value;
+    case shortJSONToken::comma:
+      next_token_[0] = shortJSONToken::leftSquareBracket;
+      next_token_[1] = shortJSONToken::value;
       break;
-    case value:
-      next_token_[0] = rightSquareBracket;
-      next_token_[1] = comma;
+    case shortJSONToken::value:
+      next_token_[0] = shortJSONToken::rightSquareBracket;
+      next_token_[1] = shortJSONToken::comma;
       break;
-    case rightSquareBracket:
-      next_token_[0] = rightSquareBracket;
-      next_token_[1] = comma;
+    case shortJSONToken::rightSquareBracket:
+      next_token_[0] = shortJSONToken::rightSquareBracket;
+      next_token_[1] = shortJSONToken::comma;
       break;
-    case leftSquareBracket:
-      next_token_[0] = leftSquareBracket;
-      next_token_[1] = value;
+    case shortJSONToken::leftSquareBracket:
+      next_token_[0] = shortJSONToken::leftSquareBracket;
+      next_token_[1] = shortJSONToken::value;
       break;
     default:
       return false;

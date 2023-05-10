@@ -27,9 +27,9 @@
 namespace enigma_user {
 
 variant short_json_decode(std::string data) {
-  string *buffer = new string();
+  std::string buffer;
   enigma::ShortJSONConverter shortJSONConverter;
-  bool success = shortJSONConverter.parse_into_buffer(data, buffer);
+  bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
   if (!success) {
     DEBUG_MESSAGE("Failed to read configuration", MESSAGE_TYPE::M_ERROR);
     return -1;
@@ -37,11 +37,7 @@ variant short_json_decode(std::string data) {
 
   DEBUG_MESSAGE("Short JSON converted successfully.\n", MESSAGE_TYPE::M_INFO);
 
-  string json = *buffer;
-
-  delete buffer;
-
-  return enigma_user::json_decode(json);
+  return enigma_user::json_decode(buffer);
 }
 
 std::string short_json_encode(variant ds_map) {
