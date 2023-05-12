@@ -1,5 +1,5 @@
 override CFLAGS += -I/opt/local/include
 override CXXFLAGS += -I/opt/local/include
-override LDLIBS += -L/opt/local/lib
-override LDFLAGS += -L/opt/local/lib
+override LDLIBS += -L/opt/local/lib /opt/local/lib/libGLEW.a
+override LDFLAGS += -L/opt/local/lib /opt/local/lib/libGLEW.a
 SOURCES += $(wildcard Bridges/OpenGL/*.cpp)
