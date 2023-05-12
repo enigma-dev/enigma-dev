@@ -7,7 +7,7 @@ ifeq ($(TARGET-PLATFORM), Windows)
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += $(wildcard Platforms/SDL/MacOSX/*.cpp) 
-		override LDLIBS += -lobjc -lObjC++
+		override LDLIBS += -lobjc -ObjC++
 	else ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += $(wildcard Platforms/SDL/xlib/*.cpp) 
 	else ifeq ($(TARGET-PLATFORM), FreeBSD)
