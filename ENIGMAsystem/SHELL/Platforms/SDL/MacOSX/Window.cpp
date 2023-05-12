@@ -17,6 +17,7 @@
 
 #include "CocoaWindow.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/SDL/Window.h"
 #include "Platforms/SDL/MacOSX/CocoaWindow.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
