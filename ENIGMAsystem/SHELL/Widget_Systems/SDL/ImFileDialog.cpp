@@ -391,9 +391,15 @@ namespace ifd {
     if (IsDirectory) Size = (std::size_t)-1;
     else Size = (std::size_t)ghc::filesystem::file_size(path, ec);
 
+    #if !defined(_WIN32)
     struct stat attr;
     stat(path.string().c_str(), &attr);
     DateModified = attr.st_ctime;
+    #else
+    struct _stat attr;
+    _wstat(path.wstring().c_str(), &attr);
+    DateModified = attr.st_ctime;
+    #endif
 
     HasIconPreview = false;
     IconPreview = nullptr;
