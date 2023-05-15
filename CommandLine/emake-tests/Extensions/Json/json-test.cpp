@@ -18,6 +18,8 @@ TEST(JSONTest, TestSpaces) {
   Json::Value root;
   Json::Reader reader;
   bool parsingSuccessful = reader.parse(std::string(data), root);
+
+  EXPECT_TRUE(root.isObject());
   ASSERT_EQ(parsingSuccessful, true);
 }
 
@@ -29,6 +31,8 @@ TEST(JSONTest, TestPassingArrayOfJSONObjects) {
   Json::Value root;
   Json::Reader reader;
   bool parsingSuccessful = reader.parse(std::string(data), root);
+
+  EXPECT_TRUE(root.isArray());
   ASSERT_EQ(parsingSuccessful, true);
 }
 
@@ -40,6 +44,8 @@ TEST(JSONTest, TestPassingSingleJSONObject) {
   Json::Value root;
   Json::Reader reader;
   bool parsingSuccessful = reader.parse(std::string(data), root);
+
+  EXPECT_TRUE(root.isObject());
   ASSERT_EQ(parsingSuccessful, true);
 }
 
@@ -94,5 +100,7 @@ TEST(JSONTest, TestPassingExtensiveGeneralInput) {
   Json::Value root;
   Json::Reader reader;
   bool parsingSuccessful = reader.parse(std::string(data), root);
+  
+  EXPECT_TRUE(root.isObject());
   ASSERT_EQ(parsingSuccessful, true);
 }

@@ -11,7 +11,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_1) {
 
   std::string data{"[[\"str\",4],[true,-4]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -21,7 +22,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_2) {
 
   std::string data{"[\"str\",4],[true,-4],false]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -31,7 +33,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_3) {
 
   std::string data{"[[\"str\",4[,[true,-4],false]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -41,7 +44,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_4) {
 
   std::string data{"][[\"str\",4],[true,-4],false]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -51,7 +55,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_5) {
 
   std::string data{"[[\"str\",4],[true,-4],false][]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -61,7 +66,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_6) {
 
   std::string data{"[[\"str\",4],[true,-4],false],["};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -71,7 +77,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInLevels_7) {
 
   std::string data{"[[\"str\",4],[true,-4],false]  ,  [1,4]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -81,7 +88,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInValues_1) {
 
   std::string data{"[[\"str\",4],[tyue,-4],false]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+  
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -91,7 +99,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInValues_2) {
 
   std::string data{"[[\"str\",4],[true,-4],facse]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -101,7 +110,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInValues_3) {
 
   std::string data{"[[\"str\",4],[true,-4],^]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -111,7 +121,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxErrorInValues_4) {
 
   std::string data{"[[\"str\",hsdj],[true,-4],false]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -121,7 +132,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_1) {
 
   std::string data{"57hsa2va"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -131,7 +143,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_2) {
 
   std::string data{"hsa2va57"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -141,7 +154,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_3) {
 
   std::string data{"&hsa2va57"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -151,7 +165,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_4) {
 
   std::string data{",6hsa2va57"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -161,7 +176,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_5) {
 
   std::string data{"]6hsa2va57"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -171,7 +187,8 @@ TEST(ShortJSONConverterTest, TestRandomInput_6) {
 
   std::string data{"[6hsa2va57"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -184,7 +201,8 @@ TEST(ShortJSONConverterTest, TestSpaces) {
       " \n [ \ntrue\t ,\r\r\n -4\r ] "
       ", \r\nfalse\t ] "};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, true);
+
+  EXPECT_TRUE(success);
   ASSERT_EQ(buffer, "{\"0\":{\"0\":\" s \ttr\n \",\"1\":8},\"1\":{\"0\":true,\"1\":-4},\"2\":false}");
 }
 
@@ -194,8 +212,7 @@ TEST(ShortJSONConverterTest, TestPassingArrayOfJSONObjects) {
   std::string data{"[[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5],[1,4]]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
 
-  ASSERT_EQ(success, true);
-
+  EXPECT_TRUE(success);
   ASSERT_EQ(buffer,
             "[{\"0\":{\"0\":{\"0\":1,\"1\":4},\"1\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}],\"2\":{\"0\":1,\"1\":4},"
             "\"3\":7,\"4\":{\"0\":1,\"1\":4},\"5\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}]},\"1\":{"
@@ -208,8 +225,7 @@ TEST(ShortJSONConverterTest, TestPassingSingleJSONObject) {
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
 
-  ASSERT_EQ(success, true);
-
+  EXPECT_TRUE(success);
   ASSERT_EQ(buffer,
             "{\"0\":{\"0\":{\"0\":1,\"1\":4},\"1\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}],\"2\":{\"0\":1,\"1\":4},\"3\":"
             "7,\"4\":{\"0\":1,\"1\":4},\"5\":[{\"0\":1,\"1\":4},{\"0\":1,\"1\":4},{\"0\":1,\"1\":4}]},\"1\":{\"0\":1,"
@@ -222,8 +238,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_1) {
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5,]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
 
-  ASSERT_EQ(success, false);
-
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -233,8 +248,7 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_2) {
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4,],5]"};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
 
-  ASSERT_EQ(success, false);
-
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -244,7 +258,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_3) {
   std::string data{"[[[[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]"};
 
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -254,7 +269,8 @@ TEST(ShortJSONConverterTest, TestShortJSONSyntaxError_4) {
   std::string data{"[[[1,4],[[1,4],[1,4]],[1,4],7,[1,4],[[1,4],[1,4],[1,4]]],[1,4],5]]]]]"};
 
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, false);
+
+  EXPECT_FALSE(success);
   ASSERT_EQ(buffer, "");
 }
 
@@ -266,7 +282,8 @@ TEST(ShortJSONConverterTest, TestNullValues) {
       " \n [ \ntrue\t ,\r\r\n -4\r ] "
       ", \r\nfalse\t, null, null ] "};
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, true);
+
+  EXPECT_TRUE(success);
   ASSERT_EQ(buffer, "{\"0\":{\"0\":\" s \ttr\n \",\"1\":8,\"2\":null},\"1\":{\"0\":true,\"1\":-4},\"2\":false,\"3\":null,\"4\":null}");
 }
 
@@ -285,7 +302,6 @@ TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
                     "5\r ] \n"};
 
   bool success = shortJSONConverter.parse_into_buffer(std::string(data), &buffer);
-  ASSERT_EQ(success, true);
   std::string expected {"{"
   "\"0\":{"
     "\"0\":{"
@@ -335,5 +351,6 @@ TEST(ShortJSONConverterTest, TestPassingExtensiveGeneralInput) {
   "\"2\":5"
 "}"};
 
+  EXPECT_TRUE(success);
   ASSERT_EQ(buffer,expected);
   }
