@@ -1,4 +1,6 @@
-SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp)
+SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
+				$(wildcard Universal_System/Extensions/Steamworks/wrapper/*.cpp) \
+				$(wildcard Universal_System/Extensions/Steamworks/wrapper/general_api/*.cpp)
 
 # defining directory of steam header files
 override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks
