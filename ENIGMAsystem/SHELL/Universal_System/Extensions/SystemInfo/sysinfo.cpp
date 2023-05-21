@@ -165,9 +165,7 @@ std::string utsname_release() {
     int val = 0; 
     DWORD sz = sizeof(val);
     if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
+        result = std::to_string(buf);
     }
     std::string str;
     str = result ? result : "";
