@@ -65,7 +65,8 @@
 #pragma comment(lib, "ws2_32.lib")
 #endif
 #endif
-#include "sysinfo.h"
+
+#include "Universal_system/Extensions/SystemInfo/sysinfo.h"
 
 namespace enigma_user {
 
