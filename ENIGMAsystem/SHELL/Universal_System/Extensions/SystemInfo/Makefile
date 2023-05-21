@@ -1,4 +1,3 @@
-SHARED_SRC_DIR := ../../shared
 ifeq ($(UNIX_LIKE), false)
 	override LDFLAGS += -lws2_32 -lopengl32
 	override LDLIBS += -lws2_32 -lopengl32
