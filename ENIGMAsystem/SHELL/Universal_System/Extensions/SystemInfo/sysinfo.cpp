@@ -66,7 +66,7 @@
 #endif
 #endif
 
-#include "Universal_system/Extensions/SystemInfo/sysinfo.h"
+#include "Universal_System/Extensions/SystemInfo/sysinfo.h"
 
 namespace enigma_user {
 
