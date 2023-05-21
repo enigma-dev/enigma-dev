@@ -38,6 +38,7 @@
 #include <windows.h>
 #include <intrin.h>
 #include <GL/gl.h>
+#include <GL/glext.h>
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/types.h>
