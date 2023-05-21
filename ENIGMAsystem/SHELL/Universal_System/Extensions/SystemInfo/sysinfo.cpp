@@ -77,7 +77,7 @@ std::string utsname_sysname() {
     result = name.sysname;
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #else
   return "Windows_NT";
   #endif
@@ -91,7 +91,7 @@ std::string utsname_nodename() {
     result = name.nodename;
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #else
   const char *result = nullptr;
   char buf[1024];
@@ -106,7 +106,7 @@ std::string utsname_nodename() {
   }
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #endif
 }
 
@@ -118,7 +118,7 @@ std::string utsname_release() {
     result = name.release;
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #else
   auto GetOSMajorVersionNumber = []() {
     const char *result = nullptr;
@@ -132,7 +132,7 @@ std::string utsname_release() {
     }
     std::string str;
     str = result ? result : "";
-    return str.c_str();
+    return str;
   };
   auto GetOSMinorVersionNumber = []() {
     const char *result = nullptr;
@@ -146,7 +146,7 @@ std::string utsname_release() {
     }
     std::string str;
     str = result ? result : "";
-    return str.c_str();
+    return str;
   };
   auto GetOSBuildNumber = []() {
     const char *result = nullptr;
@@ -157,7 +157,7 @@ std::string utsname_release() {
     }
     std::string str;
     str = result ? result : "";
-    return str.c_str();
+    return str;
   };
   auto GetOSRevisionNumber = []() {
     char *result = nullptr;
@@ -169,9 +169,9 @@ std::string utsname_release() {
         result = buf;
       }
     }
-    static std::string str;
+    std::string str;
     str = strlen(result) ? result : "";
-    return str.c_str();
+    return str;
   };
   static const char *result = nullptr;
   char buf[1024];
@@ -182,7 +182,7 @@ std::string utsname_release() {
   }
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #endif
 }
 
@@ -194,7 +194,7 @@ std::string utsname_version() {
     result = name.version;
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #else
   const char *result = nullptr;
   char buf[2048];
@@ -202,8 +202,8 @@ std::string utsname_version() {
     result = buf;
   }
   std::string str;
-  str = result ? result : "";
-  return str.c_str();
+  str = strlen(result) ? result : "";
+  return str;
   #endif
 }
 
@@ -215,7 +215,7 @@ std::string utsname_machine() {
     result = name.machine;
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #else
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
@@ -417,28 +417,28 @@ std::string gpu_vendor() {
   const char *result = (char *)glGetString(GL_VENDOR);
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
 }
 
 std::string gpu_renderer() {
   const char *result = (char *)glGetString(GL_RENDERER);
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
 }
 
 std::string gpu_version() {
   const char *result = (char *)glGetString(GL_VERSION);
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
 }
 
 std::string gpu_shadervers() {
   const char *result = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
 }
 
 std::string cpu_vendor() {
@@ -457,7 +457,7 @@ std::string cpu_vendor() {
   if (pos != std::string::npos) {
     std::string str;
     str = untrimmed.substr(pos);
-    return str.c_str();
+    return str;
   }
   return "";
   #elif (defined(__APPLE__) && defined(__MACH__))
@@ -469,7 +469,7 @@ std::string cpu_vendor() {
   }
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
@@ -482,7 +482,7 @@ std::string cpu_vendor() {
     pclose(fp);
     std::string str;
     str = result ? result : "";
-    return str.c_str();
+    return str;
   }
   return "";
   #else
@@ -515,7 +515,7 @@ std::string cpu_brand() {
   if (pos != std::string::npos) {
     std::string str;
     str = untrimmed.substr(pos);
-    return str.c_str();
+    return str;
   }
   return "";
   #elif (defined(__APPLE__) && defined(__MACH__))
@@ -527,7 +527,7 @@ std::string cpu_brand() {
   }
   std::string str;
   str = result ? result : "";
-  return str.c_str();
+  return str;
   #elif defined(__linux__)
   const char *result = nullptr;
   char CPUBrandString[0x40];
@@ -552,7 +552,7 @@ std::string cpu_brand() {
   if (pos != std::string::npos) {
     std::string str;
     str = untrimmed.substr(pos);
-    return str.c_str();
+    return str;
   }
   return "";
   #else
