@@ -5,7 +5,6 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/directoryglobals.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
