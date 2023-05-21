@@ -5,6 +5,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/directoryglobals.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
@@ -181,6 +182,166 @@ int enigma_main(int argc, char** argv) {
   }
   
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  
+  enigma_user::environment_set_variable("IMGUI_FONT_FILES",
+    working_directory + "fonts/000-notosans-regular.ttf\n" +
+    working_directory + "fonts/001-notokufiarabic-regular.ttf\n" +
+    working_directory + "fonts/002-notomusic-regular.ttf\n" +
+    working_directory + "fonts/003-notonaskharabic-regular.ttf\n" +
+    working_directory + "fonts/004-notonaskharabicui-regular.ttf\n" +
+    working_directory + "fonts/005-notonastaliqurdu-regular.ttf\n" +
+    working_directory + "fonts/006-notosansadlam-regular.ttf\n" +
+    working_directory + "fonts/007-notosansadlamunjoined-regular.ttf\n" +
+    working_directory + "fonts/008-notosansanatolianhieroglyphs-regular.ttf\n" +
+    working_directory + "fonts/009-notosansarabic-regular.ttf\n" +
+    working_directory + "fonts/010-notosansarabicui-regular.ttf\n" +
+    working_directory + "fonts/011-notosansarmenian-regular.ttf\n" +
+    working_directory + "fonts/012-notosansavestan-regular.ttf\n" +
+    working_directory + "fonts/013-notosansbamum-regular.ttf\n" +
+    working_directory + "fonts/014-notosansbassavah-regular.ttf\n" +
+    working_directory + "fonts/015-notosansbatak-regular.ttf\n" +
+    working_directory + "fonts/016-notosansbengali-regular.ttf\n" +
+    working_directory + "fonts/017-notosansbengaliui-regular.ttf\n" +
+    working_directory + "fonts/018-notosansbhaiksuki-regular.ttf\n" +
+    working_directory + "fonts/019-notosansbrahmi-regular.ttf\n" +
+    working_directory + "fonts/020-notosansbuginese-regular.ttf\n" +
+    working_directory + "fonts/021-notosansbuhid-regular.ttf\n" +
+    working_directory + "fonts/022-notosanscanadianaboriginal-regular.ttf\n" +
+    working_directory + "fonts/023-notosanscarian-regular.ttf\n" +
+    working_directory + "fonts/024-notosanscaucasianalbanian-regular.ttf\n" +
+    working_directory + "fonts/025-notosanschakma-regular.ttf\n" +
+    working_directory + "fonts/026-notosanscham-regular.ttf\n" +
+    working_directory + "fonts/027-notosanscherokee-regular.ttf\n" +
+    working_directory + "fonts/028-notosanscoptic-regular.ttf\n" +
+    working_directory + "fonts/029-notosanscuneiform-regular.ttf\n" +
+    working_directory + "fonts/030-notosanscypriot-regular.ttf\n" +
+    working_directory + "fonts/031-notosansdeseret-regular.ttf\n" +
+    working_directory + "fonts/032-notosansdevanagari-regular.ttf\n" +
+    working_directory + "fonts/033-notosansdevanagariui-regular.ttf\n" +
+    working_directory + "fonts/034-notosansdisplay-regular.ttf\n" +
+    working_directory + "fonts/035-notosansduployan-regular.ttf\n" +
+    working_directory + "fonts/036-notosansegyptianhieroglyphs-regular.ttf\n" +
+    working_directory + "fonts/037-notosanselbasan-regular.ttf\n" +
+    working_directory + "fonts/038-notosansethiopic-regular.ttf\n" +
+    working_directory + "fonts/039-notosansgeorgian-regular.ttf\n" +
+    working_directory + "fonts/040-notosansglagolitic-regular.ttf\n" +
+    working_directory + "fonts/041-notosansgothic-regular.ttf\n" +
+    working_directory + "fonts/042-notosansgrantha-regular.ttf\n" +
+    working_directory + "fonts/043-notosansgujarati-regular.ttf\n" +
+    working_directory + "fonts/044-notosansgujaratiui-regular.ttf\n" +
+    working_directory + "fonts/045-notosansgurmukhi-regular.ttf\n" +
+    working_directory + "fonts/046-notosansgurmukhiui-regular.ttf\n" +
+    working_directory + "fonts/047-notosanshanifirohingya-regular.ttf\n" +
+    working_directory + "fonts/048-notosanshanunoo-regular.ttf\n" +
+    working_directory + "fonts/049-notosanshatran-regular.ttf\n" +
+    working_directory + "fonts/050-notosanshebrew-regular.ttf\n" +
+    working_directory + "fonts/051-notosansimperialaramaic-regular.ttf\n" +
+    working_directory + "fonts/052-notosansindicsiyaqnumbers-regular.ttf\n" +
+    working_directory + "fonts/053-notosansinscriptionalpahlavi-regular.ttf\n" +
+    working_directory + "fonts/054-notosansinscriptionalparthian-regular.ttf\n" +
+    working_directory + "fonts/055-notosansjavanese-regular.ttf\n" +
+    working_directory + "fonts/056-notosanskaithi-regular.ttf\n" +
+    working_directory + "fonts/057-notosanskannada-regular.ttf\n" +
+    working_directory + "fonts/058-notosanskannadaui-regular.ttf\n" +
+    working_directory + "fonts/059-notosanskayahli-regular.ttf\n" +
+    working_directory + "fonts/060-notosanskharoshthi-regular.ttf\n" +
+    working_directory + "fonts/061-notosanskhmer-regular.ttf\n" +
+    working_directory + "fonts/062-notosanskhmerui-regular.ttf\n" +
+    working_directory + "fonts/063-notosanskhojki-regular.ttf\n" +
+    working_directory + "fonts/064-notosanskhudawadi-regular.ttf\n" +
+    working_directory + "fonts/065-notosanslao-regular.ttf\n" +
+    working_directory + "fonts/066-notosanslaoui-regular.ttf\n" +
+    working_directory + "fonts/067-notosanslepcha-regular.ttf\n" +
+    working_directory + "fonts/068-notosanslimbu-regular.ttf\n" +
+    working_directory + "fonts/069-notosanslineara-regular.ttf\n" +
+    working_directory + "fonts/070-notosanslinearb-regular.ttf\n" +
+    working_directory + "fonts/071-notosanslisu-regular.ttf\n" +
+    working_directory + "fonts/072-notosanslycian-regular.ttf\n" +
+    working_directory + "fonts/073-notosanslydian-regular.ttf\n" +
+    working_directory + "fonts/074-notosansmahajani-regular.ttf\n" +
+    working_directory + "fonts/075-notosansmalayalam-regular.ttf\n" +
+    working_directory + "fonts/076-notosansmalayalamui-regular.ttf\n" +
+    working_directory + "fonts/077-notosansmandaic-regular.ttf\n" +
+    working_directory + "fonts/078-notosansmanichaean-regular.ttf\n" +
+    working_directory + "fonts/079-notosansmarchen-regular.ttf\n" +
+    working_directory + "fonts/080-notosansmath-regular.ttf\n" +
+    working_directory + "fonts/081-notosansmayannumerals-regular.ttf\n" +
+    working_directory + "fonts/082-notosansmeeteimayek-regular.ttf\n" +
+    working_directory + "fonts/083-notosansmendekikakui-regular.ttf\n" +
+    working_directory + "fonts/084-notosansmeroitic-regular.ttf\n" +
+    working_directory + "fonts/085-notosansmiao-regular.ttf\n" +
+    working_directory + "fonts/086-notosansmodi-regular.ttf\n" +
+    working_directory + "fonts/087-notosansmongolian-regular.ttf\n" +
+    working_directory + "fonts/088-notosansmono-regular.ttf\n" +
+    working_directory + "fonts/089-notosansmro-regular.ttf\n" +
+    working_directory + "fonts/090-notosansmultani-regular.ttf\n" +
+    working_directory + "fonts/091-notosansmyanmar-regular.ttf\n" +
+    working_directory + "fonts/092-notosansmyanmarui-regular.ttf\n" +
+    working_directory + "fonts/093-notosansnabataean-regular.ttf\n" +
+    working_directory + "fonts/094-notosansnewa-regular.ttf\n" +
+    working_directory + "fonts/095-notosansnewtailue-regular.ttf\n" +
+    working_directory + "fonts/096-notosansnko-regular.ttf\n" +
+    working_directory + "fonts/097-notosansogham-regular.ttf\n" +
+    working_directory + "fonts/098-notosansolchiki-regular.ttf\n" +
+    working_directory + "fonts/099-notosansoldhungarian-regular.ttf\n" +
+    working_directory + "fonts/100-notosansolditalic-regular.ttf\n" +
+    working_directory + "fonts/101-notosansoldnortharabian-regular.ttf\n" +
+    working_directory + "fonts/102-notosansoldpermic-regular.ttf\n" +
+    working_directory + "fonts/103-notosansoldpersian-regular.ttf\n" +
+    working_directory + "fonts/104-notosansoldsogdian-regular.ttf\n" +
+    working_directory + "fonts/105-notosansoldsoutharabian-regular.ttf\n" +
+    working_directory + "fonts/106-notosansoldturkic-regular.ttf\n" +
+    working_directory + "fonts/107-notosansoriya-regular.ttf\n" +
+    working_directory + "fonts/108-notosansoriyaui-regular.ttf\n" +
+    working_directory + "fonts/109-notosansosage-regular.ttf\n" +
+    working_directory + "fonts/110-notosansosmanya-regular.ttf\n" +
+    working_directory + "fonts/111-notosanspahawhhmong-regular.ttf\n" +
+    working_directory + "fonts/112-notosanspalmyrene-regular.ttf\n" +
+    working_directory + "fonts/113-notosanspaucinhau-regular.ttf\n" +
+    working_directory + "fonts/114-notosansphagspa-regular.ttf\n" +
+    working_directory + "fonts/115-notosansphoenician-regular.ttf\n" +
+    working_directory + "fonts/116-notosanspsalterpahlavi-regular.ttf\n" +
+    working_directory + "fonts/117-notosansrejang-regular.ttf\n" +
+    working_directory + "fonts/118-notosansrunic-regular.ttf\n" +
+    working_directory + "fonts/119-notosanssamaritan-regular.ttf\n" +
+    working_directory + "fonts/120-notosanssaurashtra-regular.ttf\n" +
+    working_directory + "fonts/121-notosanssharada-regular.ttf\n" +
+    working_directory + "fonts/122-notosansshavian-regular.ttf\n" +
+    working_directory + "fonts/123-notosanssiddham-regular.ttf\n" +
+    working_directory + "fonts/124-notosanssinhala-regular.ttf\n" +
+    working_directory + "fonts/125-notosanssinhalaui-regular.ttf\n" +
+    working_directory + "fonts/126-notosanssorasompeng-regular.ttf\n" +
+    working_directory + "fonts/127-notosanssundanese-regular.ttf\n" +
+    working_directory + "fonts/128-notosanssylotinagri-regular.ttf\n" +
+    working_directory + "fonts/129-notosanssymbols2-regular.ttf\n" +
+    working_directory + "fonts/130-notosanssymbols-regular.ttf\n" +
+    working_directory + "fonts/131-notosanssyriac-regular.ttf\n" +
+    working_directory + "fonts/132-notosanstagalog-regular.ttf\n" +
+    working_directory + "fonts/133-notosanstagbanwa-regular.ttf\n" +
+    working_directory + "fonts/134-notosanstaile-regular.ttf\n" +
+    working_directory + "fonts/135-notosanstaitham-regular.ttf\n" +
+    working_directory + "fonts/136-notosanstaiviet-regular.ttf\n" +
+    working_directory + "fonts/137-notosanstakri-regular.ttf\n" +
+    working_directory + "fonts/138-notosanstamil-regular.ttf\n" +
+    working_directory + "fonts/139-notosanstamilsupplement-regular.ttf\n" +
+    working_directory + "fonts/140-notosanstamilui-regular.ttf\n" +
+    working_directory + "fonts/141-notosanstelugu-regular.ttf\n" +
+    working_directory + "fonts/142-notosansteluguui-regular.ttf\n" +
+    working_directory + "fonts/143-notosansthaana-regular.ttf\n" +
+    working_directory + "fonts/144-notosansthai-regular.ttf\n" +
+    working_directory + "fonts/145-notosansthaiui-regular.ttf\n" +
+    working_directory + "fonts/146-notosanstibetan-regular.ttf\n" +
+    working_directory + "fonts/147-notosanstifinagh-regular.ttf\n" +
+    working_directory + "fonts/148-notosanstirhuta-regular.ttf\n" +
+    working_directory + "fonts/149-notosansugaritic-regular.ttf\n" +
+    working_directory + "fonts/150-notosansvai-regular.ttf\n" +
+    working_directory + "fonts/151-notosanswarangciti-regular.ttf\n" +
+    working_directory + "fonts/152-notosansyi-regular.ttf\n" +
+    working_directory + "fonts/153-notosanstc-regular.otf\n" +
+    working_directory + "fonts/154-notosansjp-regular.otf\n" +
+    working_directory + "fonts/155-notosanskr-regular.otf\n" +
+    working_directory + "fonts/156-notosanssc-regular.otf\n" +
+    working_directory + "fonts/157-notosanshk-regular.otf"));
 
   initTimer();
   initInput();
