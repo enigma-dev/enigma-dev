@@ -1,4 +1,4 @@
-ifeq ($(UNIX_LIKE), false)
+ifeq ($(UNIX_BASED), false)
 	override LDFLAGS += -lws2_32 -lopengl32
 	override LDLIBS += -lws2_32 -lopengl32
 else
