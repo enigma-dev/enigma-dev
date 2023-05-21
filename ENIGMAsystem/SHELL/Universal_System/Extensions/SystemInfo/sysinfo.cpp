@@ -175,8 +175,8 @@ std::string utsname_release() {
   };
   static const char *result = nullptr;
   char buf[1024];
-  if (strcmp(GetOSMajorVersionNumber(), "") && strcmp(GetOSMinorVersionNumber(), "") && strcmp(GetOSBuildNumber(), "") && strcmp(GetOSRevisionNumber(), "")) {
-    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber(), GetOSMinorVersionNumber(), GetOSBuildNumber(), GetOSRevisionNumber()) != -1) {
+  if (!GetOSMajorVersionNumber().empty() && !GetOSMinorVersionNumber().empty() && !GetOSBuildNumber().empty() && !GetOSRevisionNumber().empty()) {
+    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber().c_str(), GetOSMinorVersionNumber().c_str(), GetOSBuildNumber().c_str(), GetOSRevisionNumber().c_str()) != -1) {
       result = buf;
     }
   }
