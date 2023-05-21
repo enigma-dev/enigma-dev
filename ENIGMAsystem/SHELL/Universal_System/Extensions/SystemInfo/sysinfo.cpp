@@ -31,10 +31,8 @@
 #endif
 #include <string>
 #include <thread>
-#include <sstream>
 #include <cstring>
 #include <cstdio>
-#include <cmath>
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
@@ -53,7 +51,7 @@
 #else
 #include <GL/gl.h>
 #endif
-#elif defined(__linux__)
+#if defined(__linux__)
 #include <sys/sysinfo.h>
 #include <cpuid.h>
 #endif
