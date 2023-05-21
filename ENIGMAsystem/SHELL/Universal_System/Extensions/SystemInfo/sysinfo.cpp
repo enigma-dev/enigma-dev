@@ -197,7 +197,7 @@ std::string utsname_version() {
   #else
   const char *result = nullptr;
   char buf[2048];
-  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", release(), "]") != -1) {
+  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", utsname_release().c_str(), "]") != -1) {
     result = buf;
   }
   std::string str;
