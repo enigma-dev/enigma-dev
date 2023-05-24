@@ -13,3 +13,8 @@ gmon.out
 profiling/
 test/dump-win32.cpp
 test/dump-mymachine.cpp
+shellmain-pp.cc
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake

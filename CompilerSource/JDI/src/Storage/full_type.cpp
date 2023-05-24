@@ -11,9 +11,9 @@
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
  * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
@@ -26,7 +26,7 @@
 using namespace std;
 
 namespace jdi {
-  full_type::full_type(): def(NULL), flags(0) {}
+  full_type::full_type(): def(nullptr), flags(0) {}
   full_type::full_type(jdi::definition* d): def(d), flags(0) {}
   full_type::full_type(jdi::definition* d, int f): def(d), refs(), flags(f) {}
   full_type::full_type(jdi::definition* d, const jdi::ref_stack &r, int f): def(d), refs(r), flags(f) {}
@@ -44,7 +44,12 @@ namespace jdi {
     flags = ft.flags;
     refs.copy(ft.refs);
   }
-  
+
+  full_type &full_type::operator=(full_type &&other) {
+    swap(other);
+    return *this;
+  }
+
   bool full_type::operator==(const full_type& other) const {
     return def == other.def && refs == other.refs && flags == other.flags;
   }

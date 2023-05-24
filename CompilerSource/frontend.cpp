@@ -59,7 +59,7 @@ int m_prog_loop_cfp();
 
 namespace dll_ext_iteration {
   jdi::definition_scope::defiter rit;
-  jdi::definition_scope::defiter uit;
+  jdi::definition_scope::defrefiter uit;
   jdi::definition_scope* searching_in;
   jdi::definition* current_resource;
   string its_name;
@@ -96,7 +96,7 @@ DLLEXPORT int resource_overloadCount() {
 }
 /// Returns a simple string of parameters and defaults that would serve as the prototype of this function
 /// The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
-DLLEXPORT const char* resource_parameters(int /*i*/)  {
+DLLEXPORT const char* resource_parameters(int /*i*/) {
   static string res;
   res = current_resource->toString();
   return res.c_str();
@@ -120,7 +120,7 @@ DLLEXPORT const char* next_available_resource() {
     current_resource = uit->second;
     ++uit;
   } else {
-    current_resource = rit->second;
+    current_resource = rit->second.get();
     ++rit;
   }
   

@@ -1,33 +1,37 @@
 /**
  * @file  llreader.cpp
  * @brief Source implementing a general-purpose array-to-file adapter.
- * 
+ *
  * This implementation is meant to figure out what functions are available for
  * mapping a file in memory, and use them. Otherwise, it must simply read the
  * entire file into memory. The implementation must also provide a way to copy
  * and mirror std::string contents.
- * 
+ *
  * @section License
- * 
+ *
  * Copyright (C) 2011 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include "llreader.h"
+
 #include <cstdio>
 #include <cstring>
+#include <iostream>
+
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-  #include <windows.h>  
+  #include <windows.h>
 #else
   #include <sys/mman.h>
   #include <sys/types.h>
@@ -35,9 +39,6 @@
   #include <unistd.h>
   #include <fcntl.h>
 #endif
-
-#include "llreader.h"
-#include <iostream>
 
 /// Enumeration of open states for an \c llreader.
 enum {
@@ -49,16 +50,22 @@ enum {
 
 using namespace std;
 
-void llreader::encapsulate(string &contents) {
-  data = contents.c_str();
+void llreader::encapsulate(string_view contents) {
+  data = contents.data();
   length = contents.length();
   mode = FT_ALIAS;
+  pos = 0;
+  lpos = 0;
+  lnum = kFirstLine;
 }
-void llreader::copy(string contents) {
+void llreader::copy(string_view contents) {
   length = contents.length();
   char* buf = new char[length + 1];
-  memcpy(buf, contents.c_str(), length);
-  pos = buf[length] = 0;
+  memcpy(buf, contents.data(), length);
+  buf[length] = 0;
+  pos = 0;
+  lpos = 0;
+  lnum = kFirstLine;
   mode = FT_BUFFER;
   data = buf;
 }
@@ -77,37 +84,37 @@ inline string fn_path(const char *fn) {
   return last == fn? dot : string(fn, last);
 }
 
-llreader::llreader(): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(dot) {}
-llreader::llreader(const char* filename): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(fn_path(filename)) { open(filename); }
-llreader::llreader(std::string contents, bool cp): pos(0), length(0), data(NULL), mode(FT_CLOSED), path(dot) { cp? copy(contents) : encapsulate(contents); }
-
-llreader::llreader(const llreader& x): pos(x.pos), length(FT_BUFFER), data(NULL), mode(FT_BUFFER), path(x.path) {
-  cerr << "WARNING: COPY CALLED ON LLREADER" << endl;
-  if (x.mode == FT_CLOSED) mode = FT_CLOSED;
-  else {
-    char *buf = new char[x.length+1];
-    memcpy(buf, x.data, x.length);
-    buf[length = x.length] = 0;
-    data = buf;
-  }
+llreader::llreader(): pos(0), length(0), lpos(0), lnum(kFirstLine),
+                      data(nullptr), name(""), mode(FT_CLOSED) {}
+llreader::llreader(llreader &&other): llreader() { consume(other); }
+llreader::llreader(const std::filesystem::path &filename): llreader() {
+  open(filename);
+}
+llreader::llreader(std::string bname, std::string contents): pos(0), length(0),
+    lpos(0), lnum(kFirstLine), data(nullptr), name(bname), mode(FT_CLOSED) {
+  copy(contents);
+}
+llreader::llreader(std::string bname, std::string_view contents, bool copy_):
+    pos(0), length(0),  lpos(0), lnum(kFirstLine), data(nullptr), name(bname),
+    mode(FT_CLOSED) {
+  copy_ ? copy(contents) : encapsulate(contents);
 }
 llreader::~llreader() { close(); }
 
-void llreader::open(const char* filename) {
+void llreader::open(const std::filesystem::path &filename) {
   #ifdef DEBUG_MODE
     if (mode != FT_CLOSED and mode != FT_ALIAS)
       cerr << "ERROR! Leaked a file in open()." << endl;
   #endif
-#if defined(IO_FALLBACK)
-  #warning Compiling in fallback file mode. May lead to slowness.
-  dump_in(filename);
-#elif defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
   SECURITY_ATTRIBUTES sec;
-  sec.nLength = sizeof(sec), sec.lpSecurityDescriptor = NULL, sec.bInheritHandle = true;
-  HANDLE hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, &sec, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, NULL);
+  sec.nLength = sizeof(sec), sec.lpSecurityDescriptor = nullptr, sec.bInheritHandle = true;
+  HANDLE hFile = CreateFileW(filename.c_str(), GENERIC_READ, FILE_SHARE_READ,
+                             &sec, OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS,
+                             nullptr);
   if (hFile == INVALID_HANDLE_VALUE)
     return;
-  HANDLE mapping = CreateFileMapping(hFile, &sec, PAGE_READONLY, 0, 0, NULL);
+  HANDLE mapping = CreateFileMapping(hFile, &sec, PAGE_READONLY, 0, 0, nullptr);
   if (mapping == INVALID_HANDLE_VALUE) {
     CloseHandle(hFile);
     return;
@@ -115,21 +122,30 @@ void llreader::open(const char* filename) {
   data = (const char*)MapViewOfFile(mapping, FILE_MAP_READ, 0, 0, 0);
   if (data) {
     mode = FT_MMAP;
-    length = GetFileSize(hFile, NULL);
+    length = GetFileSize(hFile, nullptr);
   }
   CloseHandle(mapping);
   CloseHandle(hFile);
-  
 #else
-  int fd = ::open(filename, O_RDONLY);
+  int fd = ::open(filename.u8string().c_str(), O_RDONLY);
   if (fd == -1) return;
   struct stat statbuf;
   fstat(fd, &statbuf), length = statbuf.st_size;
-  data = (const char*)mmap(NULL, length, PROT_READ, MAP_SHARED, fd, 0);
+  data = (const char*)mmap(nullptr, length, PROT_READ, MAP_SHARED, fd, 0);
   mode = FT_MMAP;
   ::close(fd);
 #endif
-  path = fn_path(filename);
+  name = filename.u8string();
+
+  pos = 0;
+  lpos = 0;
+  lnum = kFirstLine;
+
+# ifndef NOVALIDATE_LINE_NUMBERS
+  validated_pos = 0;
+  validated_lpos = 0;
+  validated_lnum = kFirstLine;
+# endif
 }
 
 void llreader::alias(const char* buffer, size_t len) {
@@ -140,6 +156,13 @@ void llreader::alias(const char* buffer, size_t len) {
   mode = FT_ALIAS;
   pos = 0, length = len;
   data = buffer;
+  name = "<user buffer>";
+
+# ifndef NOVALIDATE_LINE_NUMBERS
+  validated_pos = 0;
+  validated_lpos = 0;
+  validated_lnum = kFirstLine;
+# endif
 }
 
 void llreader::alias(const llreader &llread) {
@@ -148,9 +171,18 @@ void llreader::alias(const llreader &llread) {
       cerr << "ERROR! Leaked a file in alias(llreader)." << endl;
   #endif
   mode = FT_ALIAS;
-  pos = llread.pos, length = llread.length;
+  length = llread.length;
+  pos = llread.pos;
   data = llread.data;
-  path = llread.path;
+  name = llread.name;
+  lpos = llread.lpos;
+  lnum = llread.lnum;
+
+# ifndef NOVALIDATE_LINE_NUMBERS
+  validated_pos = 0;
+  validated_lpos = 0;
+  validated_lnum = kFirstLine;
+# endif
 }
 
 void llreader::consume(char* buffer, size_t len) {
@@ -161,6 +193,18 @@ void llreader::consume(char* buffer, size_t len) {
   mode = FT_BUFFER;
   pos = 0, length = len;
   data = buffer;
+  name = "<copy of user buffer>";
+
+# ifndef NOVALIDATE_LINE_NUMBERS
+  validated_pos = 0;
+  validated_lpos = 0;
+  validated_lnum = kFirstLine;
+# endif
+}
+
+llreader &llreader::operator=(llreader &&other) {
+  consume(other);
+  return *this;
 }
 
 void llreader::consume(llreader& whom) {
@@ -170,12 +214,20 @@ void llreader::consume(llreader& whom) {
   #endif
   mode = whom.mode;
   pos = whom.pos;
+  lpos = whom.lpos;
+  lnum = whom.lnum;
   length = whom.length;
   data = whom.data;
   whom.mode = FT_CLOSED;
   whom.length = 0;
-  whom.data = NULL;
-  path = whom.path;
+  whom.data = nullptr;
+  name = whom.name;
+
+# ifndef NOVALIDATE_LINE_NUMBERS
+  validated_pos = 0;
+  validated_lpos = 0;
+  validated_lnum = kFirstLine;
+# endif
 }
 
 void llreader::close() {
@@ -193,11 +245,34 @@ void llreader::close() {
           #endif
         #endif
       break;
-    case FT_ALIAS: default: data = NULL; break;
+    case FT_ALIAS: default: data = nullptr; break;
   }
   mode = FT_CLOSED;
 }
 
-bool llreader::is_open() {
+bool llreader::is_open() const {
   return mode != FT_CLOSED;
+}
+
+void llreader::skip_whitespace() {
+  while (pos < length) switch (data[pos]) {
+    case '\r': {
+      if (++pos < length && data[pos] == '\n') ++pos;
+      ++lnum;
+      lpos = pos;
+      continue;
+    }
+    case '\n': {
+      ++lnum;
+      lpos = ++pos;
+      continue;
+    }
+    case ' ': case '\t': case '\v': case '\f': {
+      ++pos;
+      continue;
+    }
+    // XXX: There are about a hundred other cases to handle here,
+    // but unicode whitespace is currently forbidden in the standard.
+    default: return;
+  }
 }

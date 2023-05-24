@@ -35,7 +35,9 @@
 #include <vector>
 
 #include "darray.h"
+#include "parsing/ast.h"
 #include "event_reader/event_parser.h"
+#include "parsing/language_frontend.h"
 
 using namespace std;
 
@@ -45,22 +47,20 @@ typedef pair<string,string> initpair;
 //These parallel ism's structs, but offer additional properties we need to finish compile
 struct ParsedScope;
 struct ParsedCode {
-  string code;
-  string synt;
-  unsigned int strc;
-  varray<string> strs;
-  // Redirects this code to apply to another object (wraps in with()).
-  int otherObjId;
+  enigma::parsing::AST ast;
   // Allows us to add to locals when parsing the code.
   ParsedScope *my_scope;
 
-  ParsedCode(ParsedScope *scope): my_scope(scope) {}
+  ParsedCode(ParsedScope *scope, enigma::parsing::AST &&ast_)
+      : ast(std::move(ast_)), my_scope(scope) {
+    ast.ExtractDeclarations(scope);
+  }
 };
 struct ParsedEvent : ParsedCode {
   Event ev_id;
 
-  ParsedEvent(Event ev_id, ParsedScope *scope):
-    ParsedCode(scope), ev_id(ev_id) {}
+  ParsedEvent(Event ev_id, ParsedScope *scope, enigma::parsing::AST &&ast)
+      : ParsedCode(scope, std::move(ast)), ev_id(ev_id) {}
 };
 
 // Leverages EDL's direct use of C++ declaration syntax to represent type
@@ -332,7 +332,8 @@ struct ParsedScript {
   ParsedCode *global_code;
   int globargs; // The maximum number of arguments with which this was invoked from all contexts.
   // Automatically link our event to our object.
-  ParsedScript(): scope(), code(&scope), global_code(nullptr), globargs(0) {};
+  ParsedScript(enigma::parsing::AST &&ast)
+      : scope(), code(&scope, std::move(ast)), global_code(nullptr), globargs(0) {}
 };
 
 struct parsed_moment {
@@ -368,8 +369,6 @@ struct parsed_extension {
   string implements, init;
 };
 
-typedef set<string> NameSet;
-typedef set<string> SharedLocalSet;
 typedef map<string, dectrip> DotLocalMap;
 typedef vector<parsed_object*> ParsedObjectVec;
 typedef vector<ParsedScript*> ParsedScriptVec;
@@ -383,10 +382,9 @@ typedef ParsedObjectVec::iterator po_i;
 typedef map<int, ParsedEvent*>::iterator pe_i;
 typedef map<int, parsed_room*>::iterator pr_i;
 
-// Global because seriously everything uses it; will need to be moved in a new PR
-extern SharedLocalSet shared_object_locals;
 // This is global because it's cached between builds
 extern vector<string> requested_extensions_last_parse;
+// This is global because I CBF to move it right this second.
 extern ParsedExtensionVec parsed_extensions;
 
 struct CompileState {
@@ -401,11 +399,15 @@ struct CompileState {
   TimelineLookupMap timeline_lookup;
   
   ParsedScope global_object;
+  enigma::parsing::ParseContext parse_context;
 
   // Set of all events used in the game.
   std::set<EventGroupKey> used_events;
 
   void add_dot_accessed_local(string name);
+
+  CompileState(LanguageFrontend *lang, const NameSet &script_names):
+      parse_context(lang, script_names) {}
 };
 
 #endif

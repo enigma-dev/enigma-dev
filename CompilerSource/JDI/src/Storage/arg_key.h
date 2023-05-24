@@ -2,20 +2,20 @@
  * @file  arg_key.h
  * @brief System header declaring a structure for storing parameter types
  *        or template argument types/values.
- * 
+ *
  * @section License
- * 
+ *
  * Copyright (C) 2011-2013 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -28,23 +28,23 @@ namespace jdi { class arg_key; }
 #include <Storage/definition_forward.h>
 #include <Storage/full_type.h>
 #include <Storage/value.h>
-#include <API/error_context.h>
+#include <API/error_reporting.h>
 
 namespace jdi {
   /** Structure containing template arguments; can be used as the key in an std::map. **/
   class arg_key {
   public:
     enum ak_type { AKT_NONE, AKT_FULLTYPE, AKT_VALUE };
-    
+
     /** Means of storing a value and an AST, just in case. */
     struct aug_value: value {
-      AST *ast;
+      unique_ptr<AST> ast;
       aug_value();
       aug_value(const aug_value&);
-      aug_value(const value&, AST *ast = NULL);
-      ~aug_value();
+      aug_value(const value&, AST *ast = nullptr);
+      ~aug_value() = default;
     };
-    
+
     /** Improvised C++ Union of full_type and value. */
     struct node {
       struct antialias {
@@ -54,7 +54,7 @@ namespace jdi {
         ];
       } data;
       ak_type type;
-      
+
       bool is_abstract() const;
       inline const full_type& ft() const { return *(full_type*)&data; }
       inline const aug_value& av() const { return *(aug_value*)&data; }
@@ -64,17 +64,17 @@ namespace jdi {
       inline value& val() { return *(value*)(aug_value*)&data; }
       node &operator= (const node& other);
       bool operator!=(const node& x) const;
-      
+
       inline node(): type(AKT_NONE) {}
       ~node();
     };
-    
+
     private:
       /// An array of all our values
       node *values;
       /// A pointer past our value array
       node *endv;
-      
+
     public:
       static definition *abstract; ///< A sentinel pointer marking that this parameter is still abstract.
       /// A comparator to allow storage in a map.
@@ -82,7 +82,7 @@ namespace jdi {
       /// A method to prepare this instance for storage of parameter values for the given template.
       void mirror_types(definition_template* temp);
       /// Allocate a new definition for the parameter at the given index; this will be either a definition_typed or definition_valued.
-      definition *new_definition(size_t index, string name, definition_scope* parent) const;
+      unique_ptr<definition> make_definition(size_t index, string name, definition_scope* parent) const;
       /// A fast function to assign to our list at a given index, consuming the given type.
       void swap_final_type(size_t argnum, full_type &type);
       /// A less fast function to assign to our list at a given index, copying the given type.
@@ -110,9 +110,9 @@ namespace jdi {
       inline size_t size() const { return endv - values; }
       /// Check if empty
       inline bool empty() const { return !size(); }
-      
+
       /// Re-map all types and default values in this key
-      void remap(const remap_set &n, const error_context &errc);
+      void remap(const remap_set &n, const ErrorContext &errc);
       /// Return whether we contain any abstract arguments
       bool is_abstract() const;
       /// Return whether we contain any abstract arguments or dependent arguments
@@ -121,14 +121,14 @@ namespace jdi {
       int conflicts_with(const arg_key& k) const;
       /// Returns whether a key is matched by this key; that is, whether all non-abstract parameters of this key are equal in the given key.
       bool matches(const arg_key& k) const;
-      
+
       /// Return a string version of this key's argument list. You'll need to wrap in () or <> yourself.
       string toString() const;
-      
+
       /// Copy from another arg_key.
       arg_key& operator=(const arg_key& other);
-      
-      /// Default constructor; mark values NULL.
+
+      /// Default constructor; mark values nullptr.
       arg_key();
       /// Construct with a size, reserving sufficient memory.
        arg_key(size_t n);
