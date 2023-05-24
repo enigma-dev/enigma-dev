@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "SDL2/SDL.h"
+#include <SDL.h>
 #include "Joystick.h"
 #include "Platforms/General/PFjoystick.h"
 #include <string>

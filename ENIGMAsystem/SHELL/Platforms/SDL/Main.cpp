@@ -1,6 +1,6 @@
 #include "Platforms/General/PFmain.h"
 
-#include <SDL2/SDL.h> //sdl does a #define main SDL_main...
+#include <SDL.h> //sdl does a #define main SDL_main...
 
 namespace enigma {
     void initialize_directory_globals() {

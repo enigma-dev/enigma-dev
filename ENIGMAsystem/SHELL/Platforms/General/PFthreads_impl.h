@@ -21,7 +21,7 @@
 #include "Universal_System/var4.h"
 
 #ifdef ENIGMA_PLATFORM_SDL
-  #include <SDL2/SDL.h>
+  #include <SDL.h>
   using pltfrm_thread_t = SDL_Thread*;
 #elif ENIGMA_PLATFORM_WINDOWS
   #define byte __windows_byte_workaround

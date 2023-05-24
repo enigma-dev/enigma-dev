@@ -1,11 +1,16 @@
 SHARED_SRC_DIR := ../../shared
-override CXXFLAGS += -I$(SHARED_SRC_DIR)/libpng-util
-override LDLIBS += -lpng -lz
 
+override CXXFLAGS += -I$(SHARED_SRC_DIR)/libpng-util
 SOURCES += Universal_System/Extensions/libpng/libpng-ext.cpp Universal_System/Extensions/libpng/libpng-util.cpp
 
-ifeq ($(TARGET-PLATFORM), Android)
-	override CXXFLAGS += -I$(ENIGMA_ROOT)/android/external/libpng
-  override ANDROID_MAKEFILES += libpng.mk
-	override ANDROID_SHARED_LIBRARIES += libpng
+ifeq ($(TARGET-PLATFORM), Web)
+	override CXXFLAGS += -s USE_LIBPNG=1
+else
+	override LDLIBS += -lpng -lz
+
+	ifeq ($(TARGET-PLATFORM), Android)
+		override CXXFLAGS += -I$(ENIGMA_ROOT)/android/external/libpng
+	override ANDROID_MAKEFILES += libpng.mk
+		override ANDROID_SHARED_LIBRARIES += libpng
+	endif
 endif

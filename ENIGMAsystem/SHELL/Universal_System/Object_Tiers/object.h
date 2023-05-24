@@ -66,13 +66,13 @@ namespace enigma
       virtual void unlink();
       virtual void deactivate();
       virtual void activate();
-      virtual variant myevent_create();
-      virtual variant myevent_gamestart();
-      virtual variant myevent_gameend();
-      virtual variant myevent_closebutton();
-      virtual variant myevent_roomstart();
-      virtual variant myevent_roomend();
-      virtual variant myevent_destroy();
+      virtual ::variant myevent_create();
+      virtual ::variant myevent_gamestart();
+      virtual ::variant myevent_gameend();
+      virtual ::variant myevent_closebutton();
+      virtual ::variant myevent_roomstart();
+      virtual ::variant myevent_roomend();
+      virtual ::variant myevent_destroy();
 
       object_basic();
       object_basic(int uid, int uoid);
@@ -99,7 +99,7 @@ namespace enigma
 
 namespace enigma_user {
     bool object_exists(int objid);
-    
+
     void object_set_depth(int objid, int val);
     void object_set_mask(int objid, int val);
     void object_set_persistent(int objid, bool val);
@@ -107,7 +107,7 @@ namespace enigma_user {
     void object_set_sprite(int objid, int val);
     void object_set_polygon(int objid, int val);
     void object_set_visible(int objid, bool val);
-    
+
     int object_get_depth(int objid);
     int object_get_mask(int objid);
     int object_get_parent(int objid);
@@ -116,7 +116,7 @@ namespace enigma_user {
     int object_get_sprite(int objid);
     int object_get_polygon(int objid);
     bool object_get_visible(int objid);
-    
+
     bool object_is_ancestor(int objid, int acid);
 }
 

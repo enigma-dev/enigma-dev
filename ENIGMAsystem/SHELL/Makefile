@@ -66,8 +66,8 @@ SHARED_SRC_DIR := ../../shared/
 CXX := g++
 CC := gcc
 DEPENDENCIES :=
-override CXXFLAGS += -std=c++17
- 
+override CXXFLAGS += -std=c++17 -sWASM=0
+
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
 	override CFLAGS += -Wall -g -DDEBUG_MODE
@@ -158,7 +158,7 @@ android_game: write_src_files
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"
-	@$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
+	@$(CXX) -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_LIBPNG=1 -sUSE_ZLIB=1 -s LLD_REPORT_UNDEFINED -sWASM=0 -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY)
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
