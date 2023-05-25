@@ -43,6 +43,7 @@ std::string gpu_vendor();
 std::string gpu_renderer();
 std::string gpu_version();
 std::string gpu_shadervers();
+long long gpu_videomemory();
 std::string cpu_vendor();
 std::string cpu_brand();
 int cpu_numcpus();
