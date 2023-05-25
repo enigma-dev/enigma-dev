@@ -468,7 +468,7 @@ long long gpu_videomemory() {
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char buf[1024];
-  FILE *fp = popen("ioreg -r -d 1 -w 0 -c \"IOAccelerator\"  | grep '\"VRAM,totalMB\"' | uniq | awk -F '= ' '{print $2}'", "r");
+  FILE *fp = popen("ioreg -r -d 1 -w 0 -c \"IOAccelerator\" | grep '\"VRAM,totalMB\"' | uniq | awk -F '= ' '{print $2}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
