@@ -458,7 +458,7 @@ long long gpu_videomemory() {
       if (pDXGIDevice->GetAdapter(&pDXGIAdapter) == S_OK) {
         DXGI_ADAPTER_DESC adapterDesc;
         if (pDXGIAdapter->GetDesc(&adapterDesc) == S_OK) {
-          result = (double)adapterDesc.DedicatedVideoMemory;
+          result = (long long)adapterDesc.DedicatedVideoMemory;
         }
         pDXGIAdapter->Release();
       }
