@@ -481,7 +481,7 @@ long long gpu_videomemory() {
   #else
   char buf[1024];
   /* needs glxinfo installed via mesa-utils package */
-  FILE *fp = popen("glxinfo | grep -E -i 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
+  FILE *fp = popen("glxinfo | grep 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
