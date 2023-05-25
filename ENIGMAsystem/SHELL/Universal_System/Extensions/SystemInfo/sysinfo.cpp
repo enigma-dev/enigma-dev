@@ -39,6 +39,8 @@
 #include <intrin.h>
 #include <GL/gl.h>
 #include <GL/glext.h>
+#include <d3d11.h>
+#include <dxgi.h>
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/types.h>
@@ -60,8 +62,10 @@
 #endif
 #if defined(_WIN32)
 #if defined(_MSC_VER)
-#pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "opengl32.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
 #endif
 #endif
 
@@ -439,6 +443,56 @@ std::string gpu_shadervers() {
   std::string str;
   str = result ? result : "";
   return str;
+}
+
+long long gpu_videomemory() {
+  long long result = -1;
+  #if defined(_WIN32)
+  ID3D11Device *g_pd3dDevice = nullptr;
+  D3D_FEATURE_LEVEL featlvl[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0 };
+  if (D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, featlvl, 
+    ARRAYSIZE(featlvl), D3D11_SDK_VERSION, &g_pd3dDevice, nullptr, nullptr) == S_OK) {
+    IDXGIDevice *pDXGIDevice = nullptr;
+    if (g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void **)&pDXGIDevice) == S_OK) {
+      IDXGIAdapter *pDXGIAdapter = nullptr;
+      if (pDXGIDevice->GetAdapter(&pDXGIAdapter) == S_OK) {
+        DXGI_ADAPTER_DESC adapterDesc;
+        if (pDXGIAdapter->GetDesc(&adapterDesc) == S_OK) {
+          result = (double)adapterDesc.DedicatedVideoMemory;
+        }
+        pDXGIAdapter->Release();
+      }
+      pDXGIDevice->Release();
+    }
+    g_pd3dDevice->Release();
+  }
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  char buf[1024];
+  FILE *fp = popen("ioreg -r -d 1 -w 0 -c \"IOAccelerator\"  | grep '\"VRAM,totalMB\"' | uniq | awk -F '= ' '{print $2}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      if (strlen(buf)) {
+        result = strtoll(buf, nullptr, 10) * 1024 * 1024;
+      }
+    }
+    pclose(fp);
+  }
+  #else
+  char buf[1024];
+  /* needs glxinfo installed via mesa-utils package */
+  FILE *fp = popen("glxinfo | grep -E -i 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      if (strlen(buf)) {
+        result = strtoll(buf, nullptr, 10) * 1024 * 1024;
+      }
+    }
+    pclose(fp);
+  }
+  #endif
+  return result;
 }
 
 std::string cpu_vendor() {
