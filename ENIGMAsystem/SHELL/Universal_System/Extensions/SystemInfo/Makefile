@@ -1,6 +1,6 @@
 ifeq ($(UNIX_BASED), false)
-	override LDFLAGS += -lws2_32 -lopengl32
-	override LDLIBS += -lws2_32 -lopengl32
+	override LDFLAGS += -lws2_32 -lopengl32 -ld3d11 -ldxgi
+	override LDLIBS += -lws2_32 -lopengl32 -ld3d11 -ldxgi
 else
 	ifeq ($(OS), Darwin)
 		override LDFLAGS += -framework OpenGL
