@@ -6,6 +6,14 @@ else
 		override LDFLAGS += -framework OpenGL
 		override LDLIBS += -framework OpenGL
 	else
+		ifeq ($(OS), FreeBSD)
+			override LDFLAGS += -lsysinfo
+			override LDLIBS += -lsysinfo
+		endif
+		ifeq ($(OS), DragonFly)
+			override LDFLAGS += -lsysinfo	
+			override LDLIBS += -lsysinfo
+		endif
 		override LDFLAGS += -lGL	
 		override LDLIBS += -lGL
 	endif
