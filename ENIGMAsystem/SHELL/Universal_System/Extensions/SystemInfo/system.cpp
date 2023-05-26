@@ -290,6 +290,7 @@ long long memory_totalram() {
   if (!sysinfo(&info)) {
     return info.totalram;
   }
+  return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   struct sysinfo info;
   if (!sysinfo(&info)) {
