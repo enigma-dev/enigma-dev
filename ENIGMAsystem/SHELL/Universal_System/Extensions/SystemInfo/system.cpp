@@ -62,6 +62,9 @@
 #include <cpuid.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
 #include <sys/types.h>
+#if (defined(__NetBSD__) || defined(__OpenBSD__))
+#include <sys/param.h>
+#endif
 #include <sys/sysctl.h>
 #endif
 #endif
