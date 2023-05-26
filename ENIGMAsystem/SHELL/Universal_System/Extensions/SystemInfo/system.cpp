@@ -31,8 +31,10 @@
 #endif
 #include <string>
 #include <thread>
+#include <sstream>
 #include <cstring>
 #include <cstdio>
+#include <cmath>
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
@@ -53,25 +55,49 @@
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
-#endif
-#if defined(__linux__)
+#if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__))
 #include <sys/sysinfo.h>
+#endif
+#if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <cpuid.h>
+#if (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 #endif
 #include <sys/utsname.h>
 #endif
-#if defined(_WIN32)
-#if defined(_MSC_VER)
+#endif
+#if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #endif
-#endif
 
-#include "Universal_System/Extensions/SystemInfo/sysinfo.h"
+#include "system.hpp"
 
-namespace enigma_user {
+namespace ngs::sys {
+
+struct HumanReadable {
+  long double size{};
+  private: friend
+  std::ostream& operator<<(std::ostream& os, HumanReadable hr) {
+    int i{};
+    long double mantissa = hr.size;
+    for (; mantissa >= 1024; mantissa /= 1024, i++) { }
+    mantissa = std::ceil(mantissa * 100) / 100;
+    os << mantissa << " " << "BKMGTPE"[i];
+    return i == 0 ? os : os << "B";
+  }
+};
+
+std::string human_readable(long double nbytes) {
+  if (nbytes == -1) return "";
+  std::stringstream ss;
+  ss << HumanReadable{nbytes};
+  return ss.str();
+}
 
 std::string utsname_sysname() {
   #if !defined(_WIN32)
@@ -256,10 +282,15 @@ long long memory_totalram() {
     return physical_memory;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.totalram;
+  }
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return info.totalram * 1024;
   }
   return -1;
   #else
@@ -292,10 +323,16 @@ long long memory_availram() {
     return free_memory;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.freeram;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return info.freeram * 1024;
   }
   return -1;
   #else
@@ -328,10 +365,16 @@ long long memory_usedram() {
     return used_memory;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.totalram - info.freeram;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return (info.totalram - info.freeram) * 1024;
   }
   return -1;
   #else
@@ -354,10 +397,16 @@ long long memory_totalvmem() {
     return info.xsu_total;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.totalswap;
+  }
+  return -1;  
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return info.totalswap * 1024;
   }
   return -1;
   #else
@@ -380,10 +429,16 @@ long long memory_availvmem() {
     return info.xsu_avail;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.freeswap;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return info.freeswap * 1024;
   }
   return -1;
   #else
@@ -406,10 +461,16 @@ long long memory_usedvmem() {
     return info.xsu_used;
   }
   return -1;
-  #elif (defined(__linux__) || defined(__FreeBSD__))
+  #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.totalswap - info.freeswap;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  struct sysinfo info;
+  if (!sysinfo(&info)) {
+    return (info.totalswap - info.freeswap) * 1024;
   }
   return -1;
   #else
@@ -426,20 +487,6 @@ std::string gpu_vendor() {
 
 std::string gpu_renderer() {
   const char *result = (char *)glGetString(GL_RENDERER);
-  std::string str;
-  str = result ? result : "";
-  return str;
-}
-
-std::string gpu_version() {
-  const char *result = (char *)glGetString(GL_VERSION);
-  std::string str;
-  str = result ? result : "";
-  return str;
-}
-
-std::string gpu_shadervers() {
-  const char *result = (char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
   std::string str;
   str = result ? result : "";
   return str;
@@ -480,7 +527,7 @@ long long gpu_videomemory() {
   }
   #else
   char buf[1024];
-  /* needs glxinfo installed via mesa-utils package */
+  /* needs glxinfo installed via mesa-utils (linux) / glx-utils (bsd) package */
   FILE *fp = popen("glxinfo | grep 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
@@ -524,23 +571,14 @@ std::string cpu_vendor() {
   std::string str;
   str = result ? result : "";
   return str;
-  #elif defined(__linux__)
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("cat /proc/cpuinfo | grep 'vendor_id' | uniq | awk -F ' ' '{print $3}'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    std::string str;
-    str = result ? result : "";
-    return str;
-  }
-  return "";
-  #else
-  return "";
+  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  int a[4] { 0, 0, 0, 0 };
+  __asm__("mov $0x0, %eax\n\t");
+  __asm__("cpuid\n\t");
+  __asm__("mov %%ebx, %0\n\t":"=r" (a[0]));
+  __asm__("mov %%edx, %0\n\t":"=r" (a[1]));
+  __asm__("mov %%ecx, %0\n\t":"=r" (a[2]));
+  return std::string((const char *)&a);
   #endif
 }
 
@@ -582,7 +620,7 @@ std::string cpu_brand() {
   std::string str;
   str = result ? result : "";
   return str;
-  #elif defined(__linux__)
+  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   const char *result = nullptr;
   char CPUBrandString[0x40];
   unsigned CPUInfo[4] = { 0, 0, 0, 0 };
@@ -609,8 +647,6 @@ std::string cpu_brand() {
     return str;
   }
   return "";
-  #else
-  return "";
   #endif
 }
 
@@ -619,4 +655,4 @@ int cpu_numcpus() {
   return (int)(result ? result : -1);
 }
 
-} // namespace enigma_user
+} // namespace ngs::sys

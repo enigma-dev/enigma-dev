@@ -26,8 +26,9 @@
 
 #include <string>
 
-namespace enigma_user {
+namespace ngs::sys {
 
+std::string human_readable(long double nbytes);
 std::string utsname_sysname();
 std::string utsname_nodename();
 std::string utsname_release();
@@ -41,11 +42,9 @@ long long memory_availvmem();
 long long memory_usedvmem();
 std::string gpu_vendor();
 std::string gpu_renderer();
-std::string gpu_version();
-std::string gpu_shadervers();
 long long gpu_videomemory();
 std::string cpu_vendor();
 std::string cpu_brand();
 int cpu_numcpus();
 
-} // namespace enigma_user
+} // namespace ngs::sys
