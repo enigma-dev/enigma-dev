@@ -89,7 +89,7 @@ inline long long gpu_videomemory() {
 }
 
 inline std::string cpu_vendor() {
-  return return ngs::sys::cpu_vendor();
+  return ngs::sys::cpu_vendor();
 }
 
 inline std::string cpu_brand() {
