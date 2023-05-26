@@ -10,4 +10,4 @@ else
 		override LDLIBS += -lGL
 	endif
 endif
-SOURCES += Universal_System/Extensions/SystemInfo/sysinfo.cpp
+SOURCES += Universal_System/Extensions/SystemInfo/system.cpp
