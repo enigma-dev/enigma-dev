@@ -50,8 +50,9 @@
 #else
 #include <GL/gl.h>
 #endif
-#if ((defined(__APPLE__) && defined(__MACH__)) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+#if (!defined(__APPLE__) && !defined(__MACH__))
 #include <cpuid.h>
+#endif
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -60,7 +61,6 @@
 #include <kvm.h>
 #endif
 #include <sys/sysctl.h>
-#endif
 #endif
 #include <sys/utsname.h>
 #endif
@@ -272,7 +272,7 @@ long long memory_totalram() {
   int mib[2];
   long long physical_memory = 0;
   mib[0] = CTL_HW;
-  #if ((defined(__APPLE ) && defined__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__))
+  #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__))
   mib[1] = HW_PHYSMEM;
   #else
   mib[1] = HW_PHYSMEM64;
@@ -304,7 +304,7 @@ long long memory_availram() {
   int mib[2];
   long long user_memory = 0;
   mib[0] = CTL_HW;
-  #if ((defined(__APPLE ) && defined__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__))
+  #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__))
   mib[1] = HW_USERMEM;
   #else
   mib[1] = HW_USERMEM64;
@@ -538,7 +538,17 @@ std::string cpu_vendor() {
   memcpy(vendor + 4, &regs[3], 4);
   memcpy(vendor + 8, &regs[2], 4);
   vendor[12] = '\0';
-  return std::string(vendor);
+  return vendor;
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  char buf[1024];
+  const char *result = nullptr;
+  std::size_t len = sizeof(buf);
+  if (!sysctlbyname("machdep.cpu.vendor", &buf, &len, nullptr, 0)) {
+    result = buf;
+  }
+  std::string str;
+  str = result ? result : "";
+  return str;
   #else
   int regs[4] { 0, 0, 0, 0 };
   __asm__("mov $0x0, %eax\n\t");
@@ -570,6 +580,23 @@ std::string cpu_brand() {
   }
   std::string untrimmed;
   result = CPUBrandString;
+  untrimmed = result ? result : "";
+  std::size_t pos = untrimmed.find_first_not_of(" ");
+  if (pos != std::string::npos) {
+    std::string str;
+    str = untrimmed.substr(pos);
+    return str;
+  }
+  return "";
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  const char *result = nullptr;
+  char buf[1024];
+  std::size_t len = sizeof(buf);
+  if (!sysctlbyname("machdep.cpu.brand_string", &buf, &len, nullptr, 0)) {
+    result = buf;
+  }
+  std::string untrimmed;
+  result = result ? result : "";
   untrimmed = result ? result : "";
   std::size_t pos = untrimmed.find_first_not_of(" ");
   if (pos != std::string::npos) {
