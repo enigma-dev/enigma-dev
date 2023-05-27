@@ -5,6 +5,7 @@ Name: System Information
 Identifier: SystemInfo
 Author: Samuel Venable
 Description: Allows the developer to read various information from the system their games are running on, such as things relating to the GPU, CPU, RAM, Virtual Memory, and more.
+Default: false
 Icon: sysinfo.png
 
 Depends: None
