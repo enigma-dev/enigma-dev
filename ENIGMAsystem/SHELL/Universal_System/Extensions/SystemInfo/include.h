@@ -28,8 +28,8 @@
 
 namespace enigma_user {
 
-inline std::string human_readable(long double nbytes) {
-  return ngs::sys::human_readable(nbytes);
+inline std::string human_readable(long long nbytes) {
+  return ngs::sys::human_readable((long long)nbytes);
 }
 
 inline std::string utsname_sysname() {
