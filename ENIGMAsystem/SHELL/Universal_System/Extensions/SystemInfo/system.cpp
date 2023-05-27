@@ -272,7 +272,9 @@ long long memory_totalram() {
   int mib[2];
   long long physical_memory = 0;
   mib[0] = CTL_HW;
-  #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__))
+  #if (defined(__APPLE__) && defined(__MACH__))
+  mib[1] = HW_MEMSIZE;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   mib[1] = HW_PHYSMEM;
   #else
   mib[1] = HW_PHYSMEM64;
