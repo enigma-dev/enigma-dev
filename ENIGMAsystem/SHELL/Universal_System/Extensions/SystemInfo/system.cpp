@@ -45,6 +45,10 @@
 #include <dxgi.h>
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
+#include <mach/vm_statistics.h>
+#include <mach/mach_types.h>
+#include <mach/mach_init.h>
+#include <mach/mach_host.h>
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #else
@@ -302,11 +306,28 @@ long long memory_availram() {
     return (long long)statex.ullAvailPhys;
   }
   return -1;
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  vm_size_t page_size;
+  mach_port_t mach_port;
+  mach_msg_type_number_t count;
+  vm_statistics64_data_t vm_stats;
+  mach_port = mach_host_self();
+  count = sizeof(vm_stats) / sizeof(natural_t);
+  if (KERN_SUCCESS == host_page_size(mach_port, &page_size) &&
+    KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO,
+    (host_info64_t)&vm_stats, &count)) {
+    long long free_memory = (long long)vm_stats.free_count * (long long)page_size;
+    long long used_memory = ((long long)vm_stats.active_count +
+    (long long)vm_stats.inactive_count +
+    (long long)vm_stats.wire_count) *  (long long)page_size;
+    return free_memory;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   long long user_memory = 0;
   mib[0] = CTL_HW;
-  #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__))
+  #if (defined(__FreeBSD__) || defined(__DragonFly__))
   mib[1] = HW_USERMEM;
   #else
   mib[1] = HW_USERMEM64;
@@ -335,7 +356,24 @@ long long memory_usedram() {
     return (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
   }
   return -1;
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  vm_size_t page_size;
+  mach_port_t mach_port;
+  mach_msg_type_number_t count;
+  vm_statistics64_data_t vm_stats;
+  mach_port = mach_host_self();
+  count = sizeof(vm_stats) / sizeof(natural_t);
+  if (KERN_SUCCESS == host_page_size(mach_port, &page_size) &&
+    KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO,
+    (host_info64_t)&vm_stats, &count)) {
+    long long free_memory = (long long)vm_stats.free_count * (long long)page_size;
+    long long used_memory = ((long long)vm_stats.active_count +
+    (long long)vm_stats.inactive_count +
+    (long long)vm_stats.wire_count) *  (long long)page_size;
+    return used_memory;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   long long total = memory_totalram();
   long long avail = memory_availram();
   if (total != -1 && avail != -1) {
