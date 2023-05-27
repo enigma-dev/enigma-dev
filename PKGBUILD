@@ -1,9 +1,0 @@
-pkgname="stigma-dev"
-pkgver="1.0.0.0"
-pkgrel="1"
-pkgdesc="STIGMA Development Environment. A fork of the ENIGMA Development Environment that strives to go a different direction than that of the software it stemmed from, in hopes to provide a much more stable and appealing game dev software for desktop platorms."
-arch=("any")
-license=("GPL")
-depends=('alure' 'boost' 'box2d' 'cmake' 'curl' 'dumb' 'flac' 'fluidsynth' 'freetype2' 'gcc' 'gdb' 'git' 'glew' 'glfw' 'glib2' 'glm' 'glu' 'grpc' 'gtk3' 'java-runtime' 'kdialog' 'libepoxy' 'libffi' 'libmodplug' 'libogg' 'libpng' 'libvorbis' 'libvpx' 'libx11' 'libxinerama' 'libxrandr' 'libxtst' 'make' 'mesa' 'mpg123' 'openal' 'opus' 'opusfile' 'pkg-config' 'protobuf' 'protobuf-c' 'pugixml' 'pulseaudio' 'rapidjson' 'sdl2' 'sdl2_mixer' 'vorbis-tools' 'yaml-cpp' 'zenity' 'zlib')
-url="https://github.com/time-killer-games/stigma-dev"
-packager="Samuel Venable"
