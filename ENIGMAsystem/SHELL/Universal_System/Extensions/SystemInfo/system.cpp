@@ -45,28 +45,21 @@
 #include <dxgi.h>
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <mach/vm_statistics.h>
-#include <mach/mach_types.h>
-#include <mach/mach_init.h>
-#include <mach/mach_host.h>
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #else
 #include <GL/gl.h>
-#if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__))
-#include <sys/sysinfo.h>
 #endif
-#if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+#if ((defined(__APPLE__) && defined(__MACH__)) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <cpuid.h>
-#if (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
 #include <sys/types.h>
-#if (defined(__NetBSD__) || defined(__OpenBSD__))
-#include <sys/param.h>
+#if (defined(__FreeBSD__) || defined(__DragonFly__))
+#include <unistd.h>
+#include <fcntl.h>
+#include <kvm.h>
 #endif
 #include <sys/sysctl.h>
-#endif
 #endif
 #endif
 #include <sys/utsname.h>
@@ -275,11 +268,15 @@ long long memory_totalram() {
     return (long long)statex.ullTotalPhys;
   }
   return -1;
-  #elif (defined(__APPLE__) && defined(__MACH__))
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
-  long long physical_memory;
+  long long physical_memory = 0;
   mib[0] = CTL_HW;
-  mib[1] = HW_MEMSIZE;
+  #if ((defined(__APPLE ) && defined__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__))
+  mib[1] = HW_PHYSMEM;
+  #else
+  mib[1] = HW_PHYSMEM64;
+  #endif
   std::size_t len = sizeof(long long);
   if (!sysctl(mib, 2, &physical_memory, &len, nullptr, 0)) {
     return physical_memory;
@@ -290,13 +287,6 @@ long long memory_totalram() {
   if (!sysinfo(&info)) {
     return info.totalram;
   }
-  return -1;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return info.totalram * 1024;
-  }
-  return -1;
   #else
   return -1;
   #endif
@@ -310,33 +300,24 @@ long long memory_availram() {
     return (long long)statex.ullAvailPhys;
   }
   return -1;
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  vm_size_t page_size;
-  mach_port_t mach_port;
-  mach_msg_type_number_t count;
-  vm_statistics64_data_t vm_stats;
-  mach_port = mach_host_self();
-  count = sizeof(vm_stats) / sizeof(natural_t);
-  if (KERN_SUCCESS == host_page_size(mach_port, &page_size) &&
-    KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO,
-    (host_info64_t)&vm_stats, &count)) {
-    long long free_memory = (long long)vm_stats.free_count * (long long)page_size;
-    long long used_memory = ((long long)vm_stats.active_count +
-    (long long)vm_stats.inactive_count +
-    (long long)vm_stats.wire_count) *  (long long)page_size;
-    return free_memory;
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  int mib[2];
+  long long user_memory = 0;
+  mib[0] = CTL_HW;
+  #if ((defined(__APPLE ) && defined__MACH__) || defined(__FreeBSD__) || defined(__DragonFly__))
+  mib[1] = HW_USERMEM;
+  #else
+  mib[1] = HW_USERMEM64;
+  #endif
+  std::size_t len = sizeof(long long);
+  if (!sysctl(mib, 2, &user_memory, &len, nullptr, 0)) {
+    return user_memory;
   }
   return -1;
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.freeram;
-  }
-  return -1;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return info.freeram * 1024;
   }
   return -1;
   #else
@@ -352,33 +333,17 @@ long long memory_usedram() {
     return (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
   }
   return -1;
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  vm_size_t page_size;
-  mach_port_t mach_port;
-  mach_msg_type_number_t count;
-  vm_statistics64_data_t vm_stats;
-  mach_port = mach_host_self();
-  count = sizeof(vm_stats) / sizeof(natural_t);
-  if (KERN_SUCCESS == host_page_size(mach_port, &page_size) &&
-    KERN_SUCCESS == host_statistics64(mach_port, HOST_VM_INFO,
-    (host_info64_t)&vm_stats, &count)) {
-    long long free_memory = (long long)vm_stats.free_count * (long long)page_size;
-    long long used_memory = ((long long)vm_stats.active_count +
-    (long long)vm_stats.inactive_count +
-    (long long)vm_stats.wire_count) *  (long long)page_size;
-    return used_memory;
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  long long total = memory_totalram();
+  long long avail = memory_availram();
+  if (total != -1 && avail != -1) {
+    return total - avail;
   }
   return -1;
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
     return info.totalram - info.freeram;
-  }
-  return -1;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return (info.totalram - info.freeram) * 1024;
   }
   return -1;
   #else
@@ -408,10 +373,16 @@ long long memory_totalvmem() {
   }
   return -1;  
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return info.totalswap * 1024;
+  kvm_t *kvmh = nullptr;
+  int page_s = getpagesize();
+  kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
+  if (!kvmh) return -1;
+  struct kvm_swap k_swap;
+  if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
+    kvm_close(kvmh);
+    return k_swap.ksw_total * getpagesize();
   }
+  kvm_close(kvmh);
   return -1;
   #else
   return -1;
@@ -440,10 +411,16 @@ long long memory_availvmem() {
   }
   return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return info.freeswap * 1024;
+  kvm_t *kvmh = nullptr;
+  int page_s = getpagesize();
+  kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
+  if (!kvmh) return -1;
+  struct kvm_swap k_swap;
+  if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
+    kvm_close(kvmh);
+    return (k_swap.ksw_total - k_swap.ksw_used) * getpagesize();
   }
+  kvm_close(kvmh);
   return -1;
   #else
   return -1;
@@ -472,10 +449,16 @@ long long memory_usedvmem() {
   }
   return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  struct sysinfo info;
-  if (!sysinfo(&info)) {
-    return (info.totalswap - info.freeswap) * 1024;
+  kvm_t *kvmh = nullptr;
+  int page_s = getpagesize();
+  kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
+  if (!kvmh) return -1;
+  struct kvm_swap k_swap;
+  if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
+    kvm_close(kvmh);
+    return k_swap.ksw_used * getpagesize();
   }
+  kvm_close(kvmh);
   return -1;
   #else
   return -1;
@@ -548,7 +531,6 @@ long long gpu_videomemory() {
 
 std::string cpu_vendor() {
   #if defined(_WIN32)
-  const char *result = nullptr;
   int regs[4];
   char vendor[13];
   __cpuid(regs, 0);
@@ -556,33 +538,15 @@ std::string cpu_vendor() {
   memcpy(vendor + 4, &regs[3], 4);
   memcpy(vendor + 8, &regs[2], 4);
   vendor[12] = '\0';
-  std::string untrimmed;
-  untrimmed = vendor ? vendor : "";
-  std::size_t pos = untrimmed.find_first_not_of(" ");
-  if (pos != std::string::npos) {
-    std::string str;
-    str = untrimmed.substr(pos);
-    return str;
-  }
-  return "";
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  char buf[1024];
-  const char *result = nullptr;
-  std::size_t len = sizeof(buf);
-  if (!sysctlbyname("machdep.cpu.vendor", &buf, &len, nullptr, 0)) {
-    result = buf;
-  }
-  std::string str;
-  str = result ? result : "";
-  return str;
-  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-  int a[4] { 0, 0, 0, 0 };
+  return std::string(vendor);
+  #else
+  int regs[4] { 0, 0, 0, 0 };
   __asm__("mov $0x0, %eax\n\t");
   __asm__("cpuid\n\t");
-  __asm__("mov %%ebx, %0\n\t":"=r" (a[0]));
-  __asm__("mov %%edx, %0\n\t":"=r" (a[1]));
-  __asm__("mov %%ecx, %0\n\t":"=r" (a[2]));
-  return std::string((const char *)&a);
+  __asm__("mov %%ebx, %0\n\t":"=r" (regs[0]));
+  __asm__("mov %%edx, %0\n\t":"=r" (regs[1]));
+  __asm__("mov %%ecx, %0\n\t":"=r" (regs[2]));
+   return std::string((const char *)&regs);
   #endif
 }
 
@@ -614,17 +578,7 @@ std::string cpu_brand() {
     return str;
   }
   return "";
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  const char *result = nullptr;
-  char buf[1024];
-  std::size_t len = sizeof(buf);
-  if (!sysctlbyname("machdep.cpu.brand_string", &buf, &len, nullptr, 0)) {
-    result = buf;
-  }
-  std::string str;
-  str = result ? result : "";
-  return str;
-  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  #else
   const char *result = nullptr;
   char CPUBrandString[0x40];
   unsigned CPUInfo[4] = { 0, 0, 0, 0 };
