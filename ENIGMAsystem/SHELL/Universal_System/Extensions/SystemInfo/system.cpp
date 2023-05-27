@@ -316,6 +316,7 @@ long long memory_totalram() {
   if (!sysinfo(&info)) {
     return info.totalram;
   }
+  return -1;
   #else
   return -1;
   #endif
