@@ -48,8 +48,10 @@
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
 #define GL_SILENCE_DEPRECATION
+#include <OpenGL/CGLCurrent.h>
 #include <OpenGL/gl.h>
 #else
+#include <EGL/egl.h>
 #include <GL/gl.h>
 #endif
 #if defined(__linux__)
@@ -88,6 +90,19 @@ namespace ngs::sys {
 
 static GLFWwindow *window = nullptr;
 static void create_opengl_context() {
+  #if defined(_WIN32)
+  if (wglGetCurrentContext()) {
+    return;
+  }
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  if (CGLGetCurrentContext()) {
+    return;
+  }
+  #else
+  if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
+    return;
+  }
+  #endif
   if (!window) {
     glewExperimental = true;
     if (glfwInit()) {
