@@ -51,7 +51,7 @@
 #include <OpenGL/CGLCurrent.h>
 #include <OpenGL/gl.h>
 #else
-#include <EGL/egl.h>
+#include <GL/glx.h>
 #include <GL/gl.h>
 #endif
 #if defined(__linux__)
@@ -99,7 +99,7 @@ static void create_opengl_context() {
     return;
   }
   #else
-  if (eglGetCurrentContext() != EGL_NO_CONTEXT) {
+  if (glxGetCurrentContext()) {
     return;
   }
   #endif
