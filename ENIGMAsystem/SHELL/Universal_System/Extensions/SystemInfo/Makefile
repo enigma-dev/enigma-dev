@@ -14,8 +14,8 @@ else
 			override LDFLAGS += -lkvm
 			override LDLIBS += -lkvm
 		endif
-		override LDFLAGS += -lGL	
-		override LDLIBS += -lGL
+		override LDFLAGS += -lGL -lEGL
+		override LDLIBS += -lGL -lEGL
 	endif
 endif
 override CFLAGS += $(shell pkg-config --cflags glfw3)
