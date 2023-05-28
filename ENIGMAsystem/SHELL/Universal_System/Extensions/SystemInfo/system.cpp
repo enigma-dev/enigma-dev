@@ -53,9 +53,6 @@
 #else
 #include <GL/gl.h>
 #endif
-#if (!defined(__APPLE__) && !defined(__MACH__))
-#include <cpuid.h>
-#endif
 #if defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
