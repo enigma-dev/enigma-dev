@@ -99,7 +99,7 @@ static void create_opengl_context() {
     return;
   }
   #else
-  if (glxGetCurrentContext()) {
+  if (glXGetCurrentContext()) {
     return;
   }
   #endif
