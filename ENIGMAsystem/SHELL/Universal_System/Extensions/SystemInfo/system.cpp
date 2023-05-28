@@ -43,7 +43,6 @@
 #include <windows.h>
 #include <intrin.h>
 #include <GL/gl.h>
-#include <GL/glext.h>
 #include <d3d11.h>
 #include <dxgi.h>
 #else
@@ -69,8 +68,10 @@
 #endif
 #if defined(_MSC_VER)
 #if defined(_WIN32) && !defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x86\\glew32.lib")
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\glfw3.lib")
 #elif defined(_WIN32) && defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x64\\glew32.lib")
 #pragma comment(lib, __FILE__"\\..\\lib\\x64\\glfw3.lib")
 #endif
 #if defined(_WIN32)
