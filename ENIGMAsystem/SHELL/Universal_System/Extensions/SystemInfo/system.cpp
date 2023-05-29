@@ -32,7 +32,9 @@
 #include <algorithm>
 #include <string>
 #include <thread>
+#include <fstream>
 #include <sstream>
+#include <regex>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
@@ -195,6 +197,87 @@ std::string utsname_nodename() {
   #endif
 }
 
+#if defined(_WIN32)
+std::string windows_version(std::string *product_name) {
+  auto GetOSMajorVersionNumber = []() {
+    const char *result = nullptr;
+    char buf[10];
+    int val = 0;  
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSMinorVersionNumber = []() {
+    const char *result = nullptr;
+    char buf[10];
+    int val = 0; 
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSBuildNumber = []() {
+    const char *result = nullptr;
+    char buf[255]; 
+    DWORD sz = sizeof(buf);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentBuildNumber", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+      result = buf;
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSRevisionNumber = []() {
+    char *result = nullptr;
+    char buf[10];
+    int val = 0; 
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = strlen(result) ? result : "";
+    return str;
+  };
+  static const char *result = nullptr;
+  char buf[1024];
+  if (!GetOSMajorVersionNumber().empty() && !GetOSMinorVersionNumber().empty() && !GetOSBuildNumber().empty() && !GetOSRevisionNumber().empty()) {
+    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber().c_str(), GetOSMinorVersionNumber().c_str(), GetOSBuildNumber().c_str(), GetOSRevisionNumber().c_str()) != -1) {
+      result = buf;
+      char buf[255];
+      DWORD sz = sizeof(buf);
+	  if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "ProductName", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+	    if (strtoull(GetOSMajorVersionNumber().c_str(), nullptr, 10) == 10 && strtoull(GetOSBuildNumber().c_str(), nullptr, 10) >= 22000) {
+          std::string tmp = strlen(buf) ? buf : "";
+		  if (!tmp.empty()) {
+            tmp = std::regex_replace(tmp, std::regex("10"), "11");
+            *product_name = tmp;
+          }
+        } else {
+          *product_name = strlen(buf) ? buf : "";
+        }
+      }
+    }
+  }
+  std::string str;
+  str = result ? result : "";
+  return str;
+}
+#endif
+
 std::string utsname_release() {
   #if !defined(_WIN32)
   const char *result = nullptr;
@@ -281,14 +364,76 @@ std::string utsname_version() {
   str = result ? result : "";
   return str;
   #else
-  const char *result = nullptr;
   char buf[2048];
-  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", utsname_release().c_str(), "]") != -1) {
-    result = buf;
+  std::string product_name;
+  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", windows_version(&product_name).c_str(), "]") != -1) {
+    str = strlen(buf) ? buf : "";
   }
-  std::string str;
-  str = strlen(result) ? result : "";
   return str;
+  #endif
+}
+
+std::string utsname_codename() {
+  #if defined(_WIN32)
+  std::string product_name;
+  windows_version(&product_name);
+  return product_name;
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  std::string result;
+  FILE *fp = popen("echo $(sw_vers --productName && sw_vers --productVersion) |  tr '\n' ' '", "r");
+  if (fp) {
+    char buf[255];
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = strlen(buf) ? buf : "";
+      std::fstream doc;
+      doc.open("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", std::ios::in);
+      if (doc.is_open()){
+        std::string tmp1;
+        while(std::getline(doc, tmp1)) {
+          std::string tmp2 = tmp1;
+          std::transform(tmp1.begin(), tmp1.end(), tmp1.begin(), ::toupper);
+          std::size_t pos1 = tmp1.find("SOFTWARE LICENSE AGREEMENT FOR MAC OS X");
+          std::size_t pos2 = tmp1.find("SOFTWARE LICENSE AGREEMENT FOR MACOS");
+          std::size_t len1 = strlen("SOFTWARE LICENSE AGREEMENT FOR MAC OS X");
+          std::size_t len2 = strlen("SOFTWARE LICENSE AGREEMENT FOR MACOS");
+          if (pos1 != std::string::npos) {
+            result += tmp2.substr(pos1 + len1);
+            result = result.substr(0, result.length() - 1);
+            break;
+          } else if (pos2 != std::string::npos) {
+            result += tmp2.substr(pos2 + len2);
+            result = result.substr(0, result.length() - 1);
+            break;
+          }
+        }
+        doc.close();
+      }
+    }
+  }
+  static std::string str = result;
+  return str;
+  #elif defined(__linux__)
+  std::string result;
+  FILE *fp = popen("echo $(lsb_release --id && lsb_release --release && lsb_release --codename) |  tr '\n' ' '", "r");
+  if (fp) {
+    char buf[255];
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      std::string tmp = strlen(buf) ? buf : "";
+      if (!tmp.empty()) {
+        tmp = std::regex_replace(tmp, std::regex("Distributor ID: "), "");
+        tmp = std::regex_replace(tmp, std::regex("Release: "), "");
+        tmp = std::regex_replace(tmp, std::regex("Codename: "), "");
+      }
+      result = tmp;
+    }
+    pclose(fp);
+  }
+  static std::string str = result;
+  return str;
+  #else
+  return utsname_sysname() + " " + utsname_release();
   #endif
 }
 

@@ -32,6 +32,7 @@ std::string human_readable(long double nbytes);
 std::string utsname_sysname();
 std::string utsname_nodename();
 std::string utsname_release();
+std::string utsname_codename();
 std::string utsname_version();
 std::string utsname_machine();
 long long memory_totalram();
