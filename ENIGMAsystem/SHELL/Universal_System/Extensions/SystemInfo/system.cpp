@@ -288,69 +288,7 @@ std::string utsname_release() {
   str = result ? result : "";
   return str;
   #else
-  auto GetOSMajorVersionNumber = []() {
-    const char *result = nullptr;
-    char buf[10];
-    int val = 0;  
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSMinorVersionNumber = []() {
-    const char *result = nullptr;
-    char buf[10];
-    int val = 0; 
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSBuildNumber = []() {
-    const char *result = nullptr;
-    char buf[255]; 
-    DWORD sz = sizeof(buf);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentBuildNumber", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
-      result = buf;
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSRevisionNumber = []() {
-    char *result = nullptr;
-    char buf[10];
-    int val = 0; 
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = strlen(result) ? result : "";
-    return str;
-  };
-  static const char *result = nullptr;
-  char buf[1024];
-  if (!GetOSMajorVersionNumber().empty() && !GetOSMinorVersionNumber().empty() && !GetOSBuildNumber().empty() && !GetOSRevisionNumber().empty()) {
-    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber().c_str(), GetOSMinorVersionNumber().c_str(), GetOSBuildNumber().c_str(), GetOSRevisionNumber().c_str()) != -1) {
-      result = buf;
-    }
-  }
-  std::string str;
-  str = result ? result : "";
-  return str;
+  return windows_version(&product_name);	
   #endif
 }
 
@@ -365,8 +303,8 @@ std::string utsname_version() {
   return str;
   #else
   char buf[2048];
-  std::string product_name;
-  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", windows_version(&product_name).c_str(), "]") != -1) {
+  std::string str;
+  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", utsname_release().c_str(), "]") != -1) {
     str = strlen(buf) ? buf : "";
   }
   return str;
