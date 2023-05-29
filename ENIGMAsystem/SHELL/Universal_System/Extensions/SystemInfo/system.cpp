@@ -288,6 +288,7 @@ std::string utsname_release() {
   str = result ? result : "";
   return str;
   #else
+  std::string product_name;
   return windows_version(&product_name);	
   #endif
 }
