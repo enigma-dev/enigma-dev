@@ -48,6 +48,10 @@ inline std::string utsname_version() {
   return ngs::sys::utsname_version();
 }
 
+inline std::string utsname_codename() {
+  return ngs::sys::utsname_codename();
+}
+
 inline std::string utsname_machine() {
   return ngs::sys::utsname_machine();
 }
