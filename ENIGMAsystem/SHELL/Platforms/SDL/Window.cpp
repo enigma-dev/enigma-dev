@@ -303,7 +303,7 @@ void window_set_min_width(int w) {
 
 void window_set_min_height(int h) {
   if (window_min_width < 0) window_min_width = 0;
-  if (window_min_height < 0) windowmin_height = 0;
+  if (window_min_height < 0) window_min_height = 0;
   SDL_SetWindowMinimumSize(windowHandle, window_min_width, h);
 }
 
