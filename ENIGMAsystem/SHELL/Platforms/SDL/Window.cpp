@@ -311,6 +311,14 @@ void window_set_fullscreen(bool fullscreen) {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
     if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
+  if (fullscreen) {
+    enigma::windowX = window_get_x();
+    enigma::windowy = window_get_y();
+    enigma::windowWidth = display_get_width();
+    enigma::windowHeight = display_get_height();
+    enigma::compute_window_scaling();
+    enigma::compute_window_size();
+  }
 }
 
 int window_set_cursor(int cursorID) {
