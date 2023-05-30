@@ -19,6 +19,7 @@ int SDL_Event_Handler::processEvents() {
   SDL_Event e;
 
   while (SDL_PollEvent(&e)) {
+    enigma::compute_window_scaling();
     switch (e.type) {
       case SDL_WINDOWEVENT:
         windowEvent(&e);
