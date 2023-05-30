@@ -283,18 +283,49 @@ void window_set_rectangle(int x, int y, int w, int h) {
   window_set_size(w, h);
 }
 
+namespace {
+
+  int max_width = -1;
+  int max_height = -1;
+  int min_width = -1;
+  int min_height = -1;
+
+} // anonymous namespace
+
+void window_set_max_width(int w) {
+  if (max_width < 0) max_width = INT_MAX;
+  if (max_height < 0) max_height = INT_MAX;
+  SDL_SetWindowMinimumSize(windowHandle, w, max_height);
+}
+
+void window_set_max_height(int h) {
+  if (max_width < 0) max_width = INT_MAX;
+  if (max_height < 0) max_height = INT_MAX;
+  SDL_SetWindowMinimumSize(windowHandle, max_width, h);
+}
+
+void window_set_min_width(int w) {
+  if (min_width < 0) min_width = 0;
+  if (min_height < 0) min_height = 0;
+  SDL_SetWindowMinimumSize(windowHandle, w, min_height);
+}
+
+void window_set_max_height(int h) {
+  if (min_width < 0) min_width = 0;
+  if (min_height < 0) min_height = 0;
+  SDL_SetWindowMinimumSize(windowHandle, min_width, h);
+}
+
 int window_get_width() {
   int viewportWidth, viewportHeight;
   SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportWidth;
-
 }
 
 int window_get_height() {
   int viewportWidth, viewportHeight;
   SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportHeight;
-
 }
 
 bool window_get_fullscreen() {
