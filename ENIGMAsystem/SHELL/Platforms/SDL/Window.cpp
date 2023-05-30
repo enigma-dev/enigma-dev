@@ -4,6 +4,7 @@
 #include "Gamepad.h"
 #include "Icon.h"
 
+#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
