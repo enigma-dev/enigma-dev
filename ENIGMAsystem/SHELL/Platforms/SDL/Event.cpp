@@ -220,6 +220,7 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
   enigma::windowWidth = enigma_user::window_get_width();
   enigma::windowHeight = enigma_user::window_get_height();
   enigma::compute_window_scaling();
+  enigma::compute_window_size();
 }
 
 // map of joystick instance ids to device indexes
