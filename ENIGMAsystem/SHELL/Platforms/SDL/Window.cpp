@@ -287,24 +287,28 @@ void window_set_max_width(int w) {
   if (enigma::window_max_width < 0) enigma::window_max_width = INT_MAX;
   if (enigma::window_max_height < 0) enigma::window_max_height = INT_MAX;
   SDL_SetWindowMaximumSize(windowHandle, w, enigma::window_max_height);
+  enigma::window_max_width = w;
 }
 
 void window_set_max_height(int h) {
   if (enigma::window_max_width < 0) enigma::window_max_width = INT_MAX;
   if (enigma::window_max_height < 0) enigma::window_max_height = INT_MAX;
   SDL_SetWindowMaximumSize(windowHandle, enigma::window_max_width, h);
+  enigma::window_max_height = h;
 }
 
 void window_set_min_width(int w) {
   if (enigma::window_min_width < 0) enigma::window_min_width = 0;
   if (enigma::window_min_height < 0) enigma::window_min_height = 0;
   SDL_SetWindowMinimumSize(windowHandle, w, enigma::window_min_height);
+  enigma::window_min_width = min;
 }
 
 void window_set_min_height(int h) {
   if (enigma::window_min_width < 0) enigma::window_min_width = 0;
   if (enigma::window_min_height < 0) enigma::window_min_height = 0;
   SDL_SetWindowMinimumSize(windowHandle, enigma::window_min_width, h);
+  enigma::window_min_height = h;
 }
 
 int window_get_width() {
