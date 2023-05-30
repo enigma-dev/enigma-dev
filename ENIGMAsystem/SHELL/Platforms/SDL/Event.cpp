@@ -129,7 +129,6 @@ int SDL_Event_Handler::processEvents() {
         //dropEnd(&e);
         break;
 #endif
-      enigma::compute_window_size();
     }
   }
 
