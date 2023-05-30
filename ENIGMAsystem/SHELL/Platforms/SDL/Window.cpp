@@ -313,7 +313,7 @@ void window_set_fullscreen(bool fullscreen) {
   }
   if (fullscreen) {
     enigma::windowX = window_get_x();
-    enigma::windowy = window_get_y();
+    enigma::windowY = window_get_y();
     enigma::windowWidth = display_get_width();
     enigma::windowHeight = display_get_height();
     enigma::compute_window_scaling();
