@@ -301,7 +301,7 @@ void window_set_min_width(int w) {
   if (enigma::window_min_width < 0) enigma::window_min_width = 0;
   if (enigma::window_min_height < 0) enigma::window_min_height = 0;
   SDL_SetWindowMinimumSize(windowHandle, w, enigma::window_min_height);
-  enigma::window_min_width = min;
+  enigma::window_min_width = w;
 }
 
 void window_set_min_height(int h) {
