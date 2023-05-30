@@ -1,6 +1,10 @@
 ifeq ($(UNIX_BASED), false)
 	override LDFLAGS += -lws2_32 -lopengl32 -ld3d11 -ldxgi
 	override LDLIBS += -lws2_32 -lopengl32 -ld3d11 -ldxgi
+	override CFLAGS += $(shell pkg-config --cflags glfw3)
+	override CXXFLAGS += $(shell pkg-config --cflags glfw3)
+	override LDFLAGS += $(shell pkg-config --libs glfw3)
+	override LDLIBS += $(shell pkg-config --libs glfw3)
 else
 	ifeq ($(OS), Darwin)
 		override LDFLAGS += -framework OpenGL
@@ -16,10 +20,10 @@ else
 		endif
 		override LDFLAGS += -lGL
 		override LDLIBS += -lGL
+		override CFLAGS += $(shell pkg-config --cflags glfw3)
+		override CXXFLAGS += $(shell pkg-config --cflags glfw3)
+		override LDFLAGS += $(shell pkg-config --libs glfw3)
+		override LDLIBS += $(shell pkg-config --libs glfw3)
 	endif
 endif
-override CFLAGS += $(shell pkg-config --cflags glfw3)
-override CXXFLAGS += $(shell pkg-config --cflags glfw3)
-override LDFLAGS += $(shell pkg-config --libs glfw3)
-override LDLIBS += $(shell pkg-config --libs glfw3)
 SOURCES += Universal_System/Extensions/SystemInfo/system.cpp
