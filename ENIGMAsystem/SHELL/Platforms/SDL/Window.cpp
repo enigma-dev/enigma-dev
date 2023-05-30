@@ -269,14 +269,14 @@ void window_set_rectangle(int x, int y, int w, int h) {
 
 int window_get_width() {
   int viewportWidth, viewportHeight;
-  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportWidth;
 
 }
 
 int window_get_height() {
   int viewportWidth, viewportHeight;
-  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
+  SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportHeight;
 
 }
