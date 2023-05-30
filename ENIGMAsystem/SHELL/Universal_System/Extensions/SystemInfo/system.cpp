@@ -664,7 +664,8 @@ long long gpu_videomemory() {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
       if (strlen(buf)) {
-        result = strtoll(buf, nullptr, 10) * 1024 * 1024;
+	static std::string str = buf;
+        result = strtoll(str.c_str(), nullptr, 10) * 1024 * 1024;
       }
     }
     pclose(fp);
@@ -677,7 +678,8 @@ long long gpu_videomemory() {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
       if (strlen(buf)) {
-        result = strtoll(buf, nullptr, 10) * 1024 * 1024;
+	static std::string str = buf;
+        result = strtoll(str.c_str(), nullptr, 10) * 1024 * 1024;
       }
     }
     pclose(fp);
