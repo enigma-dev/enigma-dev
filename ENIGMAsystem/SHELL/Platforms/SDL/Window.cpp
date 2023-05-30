@@ -265,7 +265,7 @@ void window_set_position(int x, int y) { SDL_SetWindowPosition(windowHandle, x, 
 
 void window_set_size(int w, int h) {
   SDL_SetWindowSize(windowHandle, w, h);
-  enigma::windowWidh = w;
+  enigma::windowWidth = w;
   enigma::windowHeight = h;
   enigma::compute_window_scaling();
   enigma::compute_window_size();
