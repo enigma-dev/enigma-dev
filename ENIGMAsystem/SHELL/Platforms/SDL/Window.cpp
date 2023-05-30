@@ -261,13 +261,15 @@ int window_get_y() {
   return y;
 }
 
-void window_set_position(int x, int y) { 
+void window_set_position(int x, int y) {
+  if (window_get_fullscreen()) return;
   SDL_SetWindowPosition(windowHandle, x, y); 
   enigma::windowX = x;
   enigma::windowY = y;
 }
 
 void window_set_size(int w, int h) {
+  if (window_get_fullscreen()) return;
   window_set_position(window_get_x(), window_get_y());
   SDL_SetWindowSize(windowHandle, w, h);
   enigma::windowWidth = w;
