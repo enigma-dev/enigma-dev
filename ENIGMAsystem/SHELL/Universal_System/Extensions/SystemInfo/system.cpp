@@ -38,8 +38,10 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#if defined(CREATE_OPENGL_CONTEXT)
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#endif
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
@@ -71,12 +73,14 @@
 #include <sys/utsname.h>
 #endif
 #if defined(_MSC_VER)
+#if defined(CREATE_OPENGL_CONTEXT)
 #if defined(_WIN32) && !defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\glew32.lib")
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\glfw3.lib")
 #elif defined(_WIN32) && defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x64\\glew32.lib")
 #pragma comment(lib, __FILE__"\\..\\lib\\x64\\glfw3.lib")
+#endif
 #endif
 #if defined(_WIN32)
 #pragma comment(lib, "ws2_32.lib")
@@ -90,8 +94,12 @@
 
 namespace ngs::sys {
 
+#if defined(CREATE_OPENGL_CONTEXT)
 static GLFWwindow *window = nullptr;
+#endif
+
 static void create_opengl_context() {
+  #if defined(CREATE_OPENGL_CONTEXT)
   #if defined(_WIN32)
   if (wglGetCurrentContext()) {
     return;
@@ -134,6 +142,7 @@ static void create_opengl_context() {
     }
     #endif
   }
+  #endif
 }
 
 struct HumanReadable {
