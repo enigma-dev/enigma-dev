@@ -264,9 +264,11 @@ int window_get_y() {
 void window_set_position(int x, int y) { SDL_SetWindowPosition(windowHandle, x, y); }
 
 void window_set_size(int w, int h) {
+  SDL_SetWindowSize(windowHandle, w, h);
+  enigma::windowWidh = w;
+  enigma::windowHeight = h;
   enigma::compute_window_scaling();
   enigma::compute_window_size();
-  SDL_SetWindowSize(windowHandle, w, h);
 }
     
 void window_set_rectangle(int x, int y, int w, int h) {
