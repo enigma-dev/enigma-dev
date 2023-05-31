@@ -743,7 +743,7 @@ std::string cpu_vendor() {
     std::string brand = cpu_brand();
     std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
     if (!brand.empty()) {
-      if (arch.find("APPLE") != std::string::npos) {
+      if (brand.find("APPLE") != std::string::npos) {
         return "Apple";
       }
     }
@@ -765,7 +765,7 @@ std::string cpu_vendor() {
       std::string brand = cpu_brand();
       std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
       if (!brand.empty()) {
-        if (arch.find("APPLE") != std::string::npos) {
+        if (brand.find("APPLE") != std::string::npos) {
           return "Apple";
         }
       }
@@ -786,7 +786,7 @@ std::string cpu_vendor() {
     std::string brand = cpu_brand();
     std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
     if (!brand.empty()) {
-      if (arch.find("APPLE") != std::string::npos) {
+      if (brand.find("APPLE") != std::string::npos) {
         return "Apple";
       }
     }
