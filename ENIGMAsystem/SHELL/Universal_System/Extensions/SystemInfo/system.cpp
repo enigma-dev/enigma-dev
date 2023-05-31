@@ -616,6 +616,8 @@ std::string gpu_vendor() {
           result = "NVIDIA Corporation";
         } else if (str.find("MICROSOFT") != std::string::npos) {
           result = "Microsoft Corporation";
+        } else if (str.find("APPLE") != std::string::npos) {
+          result = "Apple";
         }
       }
       pAdapter->Release();
@@ -715,6 +717,8 @@ std::string cpu_vendor() {
     return "GenuineIntel";
   } else if (str.find("AMD") != std::string::npos) {
     return "AuthenticAMD";
+  } else if (str.find("APPLE") != std::string::npos) {
+    return "Apple";
   }
   #if !defined(__DragonFly__)
   std::string arch = utsname_machine();
@@ -735,7 +739,16 @@ std::string cpu_vendor() {
   }
   std::string str;
   str = result ? result : "";
-  return str;  
+  if (str.empty()) {
+    std::string brand = cpu_brand();
+    std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
+    if (!brand.empty()) {
+      if (arch.find("APPLE") != std::string::npos) {
+        return "Apple";
+      }
+    }
+  }
+  return str;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
@@ -748,7 +761,16 @@ std::string cpu_vendor() {
     pclose(fp);
     static std::string str;
     str = result ? result : "";
-    return str.c_str();
+    if (str.empty()) {
+      std::string brand = cpu_brand();
+      std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
+      if (!brand.empty()) {
+        if (arch.find("APPLE") != std::string::npos) {
+          return "Apple";
+        }
+      }
+    }
+    return str;
   }
   return "";
   #elif defined(__OpenBSD__)
@@ -759,6 +781,15 @@ std::string cpu_vendor() {
   std::size_t len = sizeof(buf);
   if (!sysctl(mib, 2, buf, &len, nullptr, 0)) {
     return strlen(buf) ? buf : "";
+  }
+  if (str.empty()) {
+    std::string brand = cpu_brand();
+    std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
+    if (!brand.empty()) {
+      if (arch.find("APPLE") != std::string::npos) {
+        return "Apple";
+      }
+    }
   }
   return "";
   #else
@@ -795,7 +826,7 @@ std::string cpu_brand() {
     pclose(fp);
     static std::string str;
     str = result ? result : "";
-    return str.c_str();
+    return str;
   }
   return "";
   #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
