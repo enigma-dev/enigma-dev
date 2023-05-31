@@ -605,12 +605,12 @@ std::string gpu_vendor() {
       DXGI_ADAPTER_DESC adapterDesc;
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
         std::string str = gpu_renderer();
-		std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
         if (str.find("INTEL") != std::string::npos || adapterDesc.VendorId == 0x163C || 
-		  adapterDesc.VendorId == 0x8086 || adapterDesc.VendorId == 0x8087) {
+          adapterDesc.VendorId == 0x8086 || adapterDesc.VendorId == 0x8087) {
           result = "Intel";
         } else if (str.find("AMD") != std::string::npos || adapterDesc.VendorId == 0x1002 || 
-		  adapterDesc.VendorId == 0x1022) {
+          adapterDesc.VendorId == 0x1022) {
           result = "AMD";
         } else if (str.find("NVIDIA") != std::string::npos || adapterDesc.VendorId == 0x10DE) {
           result = "NVIDIA Corporation";
@@ -618,9 +618,9 @@ std::string gpu_vendor() {
           result = "Microsoft Corporation";
         }
       }
-	  pAdapter->Release();
+      pAdapter->Release();
     }
-	pFactory->Release();
+    pFactory->Release();
   }
   return result;
   #endif
@@ -651,9 +651,9 @@ std::string gpu_renderer() {
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
         result = narrow(adapterDesc.Description);
       }
-	  pAdapter->Release();
+      pAdapter->Release();
     }
-	pFactory->Release();
+    pFactory->Release();
   }
   return result;
   #endif
@@ -672,9 +672,9 @@ long long gpu_videomemory() {
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
         result = (long long)adapterDesc.DedicatedVideoMemory;
       }
-	  pAdapter->Release();
+      pAdapter->Release();
     }
-	pFactory->Release();
+    pFactory->Release();
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char buf[1024];
