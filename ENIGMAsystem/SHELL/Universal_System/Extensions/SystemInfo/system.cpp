@@ -699,6 +699,15 @@ std::string cpu_vendor() {
   } else if (str.find("AMD") != std::string::npos) {
     return "AuthenticAMD";
   }
+  #if !defined(__DragonFly__)
+  std::string arch = utsname_machine();
+  std::transform(arch.begin(), arch.end(), arch.begin(), ::toupper);
+  if (!arch.empty()) {
+    if (arch.find("ARM") != std::string::npos || arch.find("AARCH64") != std::string::npos) {
+      return "ARM";
+    }
+  }
+  #endif
   return "";
   #elif (defined(__APPLE__) && defined(__MACH__))
   char buf[1024];
