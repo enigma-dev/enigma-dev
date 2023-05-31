@@ -782,13 +782,11 @@ std::string cpu_vendor() {
   if (!sysctl(mib, 2, buf, &len, nullptr, 0)) {
     return strlen(buf) ? buf : "";
   }
-  if (str.empty()) {
-    std::string brand = cpu_brand();
-    std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
-    if (!brand.empty()) {
-      if (brand.find("APPLE") != std::string::npos) {
-        return "Apple";
-      }
+  std::string brand = cpu_brand();
+  std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
+  if (!brand.empty()) {
+    if (brand.find("APPLE") != std::string::npos) {
+      return "Apple";
     }
   }
   return "";
