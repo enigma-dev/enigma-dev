@@ -235,10 +235,10 @@ std::string windows_version(std::string *product_name) {
       result = buf;
       char buf[255];
       DWORD sz = sizeof(buf);
-	  if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "ProductName", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
-	    if (strtoull(GetOSMajorVersionNumber().c_str(), nullptr, 10) == 10 && strtoull(GetOSBuildNumber().c_str(), nullptr, 10) >= 22000) {
+      if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "ProductName", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+        if (strtoull(GetOSMajorVersionNumber().c_str(), nullptr, 10) == 10 && strtoull(GetOSBuildNumber().c_str(), nullptr, 10) >= 22000) {
           std::string tmp = strlen(buf) ? buf : "";
-		  if (!tmp.empty()) {
+          if (!tmp.empty()) {
             tmp = std::regex_replace(tmp, std::regex("10"), "11");
             *product_name = tmp;
           }
@@ -265,7 +265,7 @@ std::string utsname_release() {
   return str;
   #else
   std::string product_name;
-  return windows_version(&product_name);	
+  return windows_version(&product_name);    
   #endif
 }
 
