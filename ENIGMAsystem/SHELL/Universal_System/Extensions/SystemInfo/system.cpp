@@ -38,7 +38,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
-#if defined(CREATE_OPENGL_CONTEXT)
+#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #endif
@@ -46,8 +46,6 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <intrin.h>
-#include <GL/gl.h>
-#include <d3d11.h>
 #include <dxgi.h>
 #else
 #if (defined(__APPLE__) && defined(__MACH__))
@@ -72,39 +70,22 @@
 #endif
 #include <sys/utsname.h>
 #endif
-#if defined(_MSC_VER)
-#if defined(CREATE_OPENGL_CONTEXT)
-#if defined(_WIN32) && !defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x86\\glew32.lib")
-#pragma comment(lib, __FILE__"\\..\\lib\\x86\\glfw3.lib")
-#elif defined(_WIN32) && defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x64\\glew32.lib")
-#pragma comment(lib, __FILE__"\\..\\lib\\x64\\glfw3.lib")
-#endif
-#endif
-#if defined(_WIN32)
+#if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
-#endif
 #endif
 
 #include "system.hpp"
 
 namespace ngs::sys {
 
-#if defined(CREATE_OPENGL_CONTEXT)
+#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
 static GLFWwindow *window = nullptr;
 #endif
 
+#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
 static void create_opengl_context() {
-  #if defined(CREATE_OPENGL_CONTEXT)
-  #if defined(_WIN32)
-  if (wglGetCurrentContext()) {
-    return;
-  }
-  #elif (defined(__APPLE__) && defined(__MACH__))
+  #if (defined(__APPLE__) && defined(__MACH__))
   if (CGLGetCurrentContext()) {
     return;
   }
@@ -127,23 +108,9 @@ static void create_opengl_context() {
         }
       }
     }
-    #if defined(_WIN32)
-    if (!window) {
-      GLuint PixelFormat;
-      static PIXELFORMATDESCRIPTOR pfd;
-      HDC hDC = GetDC(GetDesktopWindow());
-      PixelFormat = ChoosePixelFormat(hDC, &pfd);
-      SetPixelFormat(hDC, PixelFormat, &pfd);
-      HGLRC hRC = wglCreateContext(hDC);
-      wglMakeCurrent(hDC, hRC);
-      // just doing this so window != nullptr...
-      window = (GLFWwindow *)GetDesktopWindow();
-      ReleaseDC(GetDesktopWindow(), hDC);
-    }
-    #endif
   }
-  #endif
 }
+#endif
 
 struct HumanReadable {
   long double size{};
@@ -621,19 +588,75 @@ long long memory_usedvmem() {
 }
 
 std::string gpu_vendor() {
+  #if !defined(_WIN32)
+  #if defined(CREATE_OPENGL_CONTEXT)
   create_opengl_context();
+  #endif
   const char *result = (char *)glGetString(GL_VENDOR);
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  std::string result;
+  IDXGIFactory *pFactory = nullptr;
+  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
+    IDXGIAdapter *pAdapter = nullptr;
+    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
+      DXGI_ADAPTER_DESC adapterDesc;
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+        std::string str = gpu_renderer();
+		std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+        if (str.find("INTEL") != std::string::npos || adapterDesc.VendorId == 0x163C || 
+		  adapterDesc.VendorId == 0x8086 || adapterDesc.VendorId == 0x8087) {
+          result = "Intel";
+        } else if (str.find("AMD") != std::string::npos || adapterDesc.VendorId == 0x1002 || 
+		  adapterDesc.VendorId == 0x1022) {
+          result = "AMD";
+        } else if (str.find("NVIDIA") != std::string::npos || adapterDesc.VendorId == 0x10DE) {
+          result = "NVIDIA Corporation";
+        } else if (str.find("MICROSOFT") != std::string::npos) {
+          result = "Microsoft Corporation";
+        }
+      }
+	  pAdapter->Release();
+    }
+	pFactory->Release();
+  }
+  return result;
+  #endif
 }
 
 std::string gpu_renderer() {
+  #if !defined(_WIN32)
+  #if defined(CREATE_OPENGL_CONTEXT)
   create_opengl_context();
+  #endif
   const char *result = (char *)glGetString(GL_RENDERER);
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  auto narrow = [](std::wstring wstr) {
+    if (wstr.empty()) return std::string("");
+    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
+    std::vector<char> buf(nbytes);
+    return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
+  };
+  std::string result;
+  IDXGIFactory *pFactory = nullptr;
+  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
+    IDXGIAdapter *pAdapter = nullptr;
+    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
+      DXGI_ADAPTER_DESC adapterDesc;
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+        result = narrow(adapterDesc.Description);
+      }
+	  pAdapter->Release();
+    }
+	pFactory->Release();
+  }
+  return result;
+  #endif
 }
 
 static long long videomemory = -1;
@@ -641,23 +664,17 @@ long long gpu_videomemory() {
   if (videomemory != -1) return videomemory;
   long long result = -1;
   #if defined(_WIN32)
-  ID3D11Device *g_pd3dDevice = nullptr;
-  D3D_FEATURE_LEVEL featlvl[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0 };
-  if (D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, featlvl, 
-    ARRAYSIZE(featlvl), D3D11_SDK_VERSION, &g_pd3dDevice, nullptr, nullptr) == S_OK) {
-    IDXGIDevice *pDXGIDevice = nullptr;
-    if (g_pd3dDevice->QueryInterface(__uuidof(IDXGIDevice), (void **)&pDXGIDevice) == S_OK) {
-      IDXGIAdapter *pDXGIAdapter = nullptr;
-      if (pDXGIDevice->GetAdapter(&pDXGIAdapter) == S_OK) {
-        DXGI_ADAPTER_DESC adapterDesc;
-        if (pDXGIAdapter->GetDesc(&adapterDesc) == S_OK) {
-          result = (long long)adapterDesc.DedicatedVideoMemory;
-        }
-        pDXGIAdapter->Release();
+  IDXGIFactory *pFactory = nullptr;
+  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
+    IDXGIAdapter *pAdapter = nullptr;
+    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
+      DXGI_ADAPTER_DESC adapterDesc;
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+        result = (long long)adapterDesc.DedicatedVideoMemory;
       }
-      pDXGIDevice->Release();
+	  pAdapter->Release();
     }
-    g_pd3dDevice->Release();
+	pFactory->Release();
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char buf[1024];
