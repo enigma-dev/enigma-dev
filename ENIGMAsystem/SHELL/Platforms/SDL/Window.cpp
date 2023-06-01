@@ -14,6 +14,7 @@
 #include <array>
 #include <string>
 #include <algorithm>
+#include <climits>
 
 template<typename K, typename V>
 static std::unordered_map<V,K> inverse_map(std::unordered_map<K,V> &map) {
