@@ -574,7 +574,7 @@ long long memory_availvmem() {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          total += (swaps[i].se_nblks - saps[i].se_inuse) * page_s;
+          total += (swaps[i].se_nblks - swaps[i].se_inuse) * page_s;
         }
       }
       free(swaps);
@@ -629,7 +629,7 @@ long long memory_usedvmem() {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          total += saps[i].se_inuse * page_s;
+          total += swaps[i].se_inuse * page_s;
         }
       }
       free(swaps);
