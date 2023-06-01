@@ -35,6 +35,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
