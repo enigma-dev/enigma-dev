@@ -95,7 +95,7 @@ Section "STIGMA Sources"
 
   ;Create optional start menu shortcut for Uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA.lnk" "$INSTDIR\stigma-dev-Windows-i686\stigma-launch.bat"  0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA.lnk" "$INSTDIR\stigma-dev-Windows-i686\STIGMA.exe"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA-update.lnk" "$INSTDIR\stigma-dev-Windows-i686\stigma-update.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\msys2-shell.lnk" "$INSTDIR\stigma-dev-Windows-i686\msys2-shell.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}-Uninstaller-i686.exe" "" "$INSTDIR\${PRODUCT}-Uninstaller-i686.exe" 0
