@@ -76,14 +76,6 @@ Section "STIGMA Sources"
   SetOutPath $INSTDIR
   File /r C:\stigma-dev-Windows-i686
 
-  FileOpen $8 $INSTDIR\stigma-dev-Windows-i686\stigma-update.bat w
-  FileWrite $8 "$INSTDIR\msys64\msys2_shell.cmd -defterm -mingw32 -no-start -c $\"EDIR=$$(echo \$\"$INSTDIR\stigma-dev-Windows-i686\$\" | tr $\'\\$\' $\'/$\') && cd $$EDIR && pacman -Syuu --noconfirm && git pull && ./install.sh && make$\""
-  FileClose $8
-
-  FileOpen $9 $INSTDIR\stigma-dev-Windows-i686\msys2-shell.bat w
-  FileWrite $9 "$INSTDIR\msys64\msys2_shell.cmd -defterm -mingw32 -no-start -c $\"EDIR=$$(echo \$\"$INSTDIR\stigma-dev-Windows-i686\$\" | tr $\'\\$\' $\'/$\') && cd $$EDIR && bash$\""
-  FileClose $9
-
   ;Store installation folder in registry
   WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
 
@@ -96,8 +88,6 @@ Section "STIGMA Sources"
   ;Create optional start menu shortcut for Uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA.lnk" "$INSTDIR\stigma-dev-Windows-i686\STIGMA.exe"  0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA-update.lnk" "$INSTDIR\stigma-dev-Windows-i686\stigma-update.bat"  0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\msys2-shell.lnk" "$INSTDIR\stigma-dev-Windows-i686\msys2-shell.bat"  0
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}-Uninstaller-i686.exe" "" "$INSTDIR\${PRODUCT}-Uninstaller-i686.exe" 0
 
   ;Create Uninstaller
