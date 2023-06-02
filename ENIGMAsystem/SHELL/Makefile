@@ -112,15 +112,15 @@ else ifeq ($(OS), Linux)
 else ifeq ($(OS), FreeBSD)  
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lelf -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lelf -lkvm -lm -linotify -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), DragonFly)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lpng -lxcb -lXrandr -lXinerama -lXext
 else ifeq ($(OS), OpenBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 else
 	override LDFLAGS += -lpng
 endif
