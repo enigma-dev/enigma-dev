@@ -1,0 +1,8 @@
+%e-yaml
+---
+
+Name: None
+Identifier: None
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Description: No widgets
+Author: Samuel Venable
