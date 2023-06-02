@@ -76,10 +76,6 @@ Section "STIGMA Sources"
   SetOutPath $INSTDIR
   File /r C:\stigma-dev-Windows-x86_64
 
-  FileOpen $7 $INSTDIR\stigma-dev-Windows-x86_64\stigma-launch.bat w
-  FileWrite $7 "$INSTDIR\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -c $\"EDIR=$$(echo \$\"$INSTDIR\stigma-dev-Windows-x86_64\$\" | tr $\'\\$\' $\'/$\') && cd $$EDIR && ./LateralGM-Windows-x86_64.exe$\""
-  FileClose $7
-
   FileOpen $8 $INSTDIR\stigma-dev-Windows-x86_64\stigma-update.bat w
   FileWrite $8 "$INSTDIR\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -c $\"EDIR=$$(echo \$\"$INSTDIR\stigma-dev-Windows-x86_64\$\" | tr $\'\\$\' $\'/$\') && cd $$EDIR && pacman -Syuu --noconfirm && git pull && ./install.sh && make$\""
   FileClose $8
