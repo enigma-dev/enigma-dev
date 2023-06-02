@@ -510,10 +510,11 @@ long long memory_totalvmem() {
   }
   kvm_close(kvmh);
   return -1;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD___))
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   long long total = 0;
   long page_s = sysconf(_SC_PAGESIZE);
-  int nswap = swapctl(SWAP_STATS, nullptr, 0);
+  int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
+  if (!nswap) return 0;
   if (nswap > 0) {
     struct swapent *swaps = (struct swapent *)calloc(nswap, sizeof(struct swapent));
     if (swaps) {
@@ -565,21 +566,22 @@ long long memory_availvmem() {
   }
   kvm_close(kvmh);
   return -1;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD___))
-  long long total = 0;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  long long avail = 0;
   long page_s = sysconf(_SC_PAGESIZE);
-  int nswap = swapctl(SWAP_STATS, nullptr, 0);
+  int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
+  if (!nswap) return 0;
   if (nswap > 0) {
     struct swapent *swaps = (struct swapent *)calloc(nswap, sizeof(struct swapent));
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          total += (swaps[i].se_nblks - swaps[i].se_inuse) * page_s;
+          avail += (swaps[i].se_nblks - swaps[i].se_inuse) * page_s;
         }
       }
       free(swaps);
     }
-    return total;
+    return avail;
   }
   return -1;
   #else
@@ -620,21 +622,22 @@ long long memory_usedvmem() {
   }
   kvm_close(kvmh);
   return -1;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD___))
-  long long total = 0;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  long long used = 0;
   long page_s = sysconf(_SC_PAGESIZE);
-  int nswap = swapctl(SWAP_STATS, nullptr, 0);
+  int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
+  if (!nswap) return 0;
   if (nswap > 0) {
     struct swapent *swaps = (struct swapent *)calloc(nswap, sizeof(struct swapent));
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          total += swaps[i].se_inuse * page_s;
+          used += swaps[i].se_inuse * page_s;
         }
       }
       free(swaps);
     }
-    return total;
+    return used;
   }
   return -1;
   #else
@@ -764,7 +767,7 @@ long long gpu_videomemory() {
 }
 
 std::string cpu_vendor() {
-  #if (defined(_WIN32) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__))
+  #if (defined(_WIN32) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   std::string str = cpu_brand();
   if (str.empty()) return "";
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
@@ -826,23 +829,6 @@ std::string cpu_vendor() {
       }
     }
     return str;
-  }
-  return "";
-  #elif defined(__OpenBSD__)
-  int mib[2];
-  char buf[1024];
-  mib[0] = CTL_HW;
-  mib[1] = HW_VENDOR;
-  std::size_t len = sizeof(buf);
-  if (!sysctl(mib, 2, buf, &len, nullptr, 0)) {
-    return strlen(buf) ? buf : "";
-  }
-  std::string brand = cpu_brand();
-  std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
-  if (!brand.empty()) {
-    if (brand.find("APPLE") != std::string::npos) {
-      return "Apple";
-    }
   }
   return "";
   #else
