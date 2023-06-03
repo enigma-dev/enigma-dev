@@ -35,7 +35,10 @@ int main() {
   if (pid) {
     FILE *fp = fopen("C:\\Windows\\Temp\\stigma-output.log", "w");
     while (!ngs::ps::child_proc_id_is_complete(pid)) {
-      if (fp) fprintf(fp, "%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
+      if (fp) {
+        fseek(fp, 0, SEEK_SET);
+        fprintf(fp, "%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
+      }
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     if (fp) fclose(fp);
