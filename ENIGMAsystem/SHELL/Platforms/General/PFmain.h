@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#pragma once
 #ifndef ENIGMA_PLATFORM_MAIN
 #define ENIGMA_PLATFORM_MAIN
 
