@@ -276,7 +276,6 @@ void window_set_size(unsigned w, unsigned h) {
   enigma::windowWidth = w;
   enigma::windowHeight = h;
   enigma::compute_window_scaling();
-  enigma::compute_window_size();
 }
     
 void window_set_rectangle(int x, int y, int w, int h) {
