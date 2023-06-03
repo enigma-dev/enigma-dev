@@ -77,7 +77,7 @@ Section "STIGMA Sources"
   File /r C:\stigma-dev-Windows-i686
 
   ;Store installation folder in registry
-  WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\${PRODUCT}" "InstDir" $INSTDIR
 
   ;Registry information for add/remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "DisplayName" "${PRODUCT}"
