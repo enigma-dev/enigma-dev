@@ -33,23 +33,23 @@
 #include "Platforms/General/PFsystem.h"
 
 #if defined(_WIN32)
-#define os_type enigma_user::os_windows
+#define os_type os_windows
 #elif (defined(__APPLE__) && defined(__MACH__))
-#define os_type enigma_user::os_macosx
+#define os_type os_macosx
 #elif defined(__linux__)
-#define os_type enigma_user::os_linux
+#define os_type os_linux
 #elif defined(__FreeBSD__)
-#define os_type enigma_user::os_freebsd
+#define os_type os_freebsd
 #elif defined(__DragonFly__)
-#define os_type enigma_user::os_dragonfly
+#define os_type os_dragonfly
 #elif defined(__NetBSD__)
-#define os_type enigma_user::os_netbsd
+#define os_type os_netbsd
 #elif defined(__OpenBSD__)
-#define os_type enigma_user::os_openbsd
+#define os_type os_openbsd
 #elif defined(__sun)
-#define os_type enigma_user::os_sunos
+#define os_type os_sunos
 #else
-#define os_type enigma_user::os_unknown
+#define os_type os_unknown
 #endif
 
 #ifdef DEBUG_MODE
