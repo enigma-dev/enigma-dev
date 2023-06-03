@@ -10,7 +10,7 @@ RequestExecutionLevel admin
 ShowInstDetails "show"
 ShowUninstDetails "show"
 
-InstallDirRegKey HKLM "Software\${PRODUCT}" ""
+InstallDirRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\${PRODUCT}" "InstDir"
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "C:\stigma-dev-Windows-i686\Resources\icon.ico"
