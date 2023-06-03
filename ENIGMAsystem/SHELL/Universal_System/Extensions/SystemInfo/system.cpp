@@ -300,12 +300,14 @@ std::string utsname_codename() {
   return product_name;
   #elif (defined(__APPLE__) && defined(__MACH__))
   std::string result;
-  FILE *fp = popen("echo $(sw_vers -productName && sw_vers -productVersion) |  tr '\n' ' '", "r");
+  FILE *fp = popen("echo $(sw_vers  | grep 'ProductName:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1' && sw_vers  | grep 'ProductVersion:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1')' '", "r");
   if (fp) {
     char buf[255];
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
       result = strlen(buf) ? buf : "";
+      result = std::regex_replace(result, std::regex("ProductName: "), "");
+      result = std::regex_replace(result, std::regex("ProductVersion: "), "");
       std::fstream doc;
       doc.open("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", std::ios::in);
       if (doc.is_open()){
