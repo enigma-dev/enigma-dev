@@ -30,47 +30,6 @@
 
 #include <string>
 
-#if !defined(os_type)
-#define os_unknown  -1
-#define os_win32     0
-#define os_win64     1
-#define os_macosx    2
-#define os_linux     3
-#define os_freebsd   4
-#define os_dragonfly 5
-#define os_netbsd    6
-#define os_openbsd   7
-#define os_sunos     8
-#if (defined(_WIN32) && !defined(_WIN64))
-#define os_windows os_win32
-#elif (defined(_WIN32) && defined(_WIN64))
-#define os_windows os_win64
-#else
-#define os_windows os_unknown
-#endif
-#if (defined(_WIN32) && !defined(_WIN64))
-#define os_type os_win32
-#elif (defined(_WIN32) && defined(_WIN64))
-#define os_type os_win64
-#elif (defined(__APPLE__) && defined(__MACH__))
-#define os_type os_macosx
-#elif defined(__linux__)
-#define os_type os_linux
-#elif defined(__FreeBSD__)
-#define os_type os_freebsd
-#elif defined(__DragonFly__)
-#define os_type os_dragonfly
-#elif defined(__NetBSD__)
-#define os_type os_netbsd
-#elif defined(__OpenBSD__)
-#define os_type os_openbsd
-#elif defined(__sun)
-#define os_type os_sunos
-#else
-#define os_type os_unknown
-#endif
-#endif
-
 namespace enigma {
   extern bool game_isending;
   extern int game_return;
@@ -104,6 +63,47 @@ namespace enigma {
 }
   
 namespace enigma_user {
+
+#if !defined(os_type)
+int os_unknown   = -1
+int os_win32     =  0
+int os_win64     =  1
+int os_macosx    =  2
+int os_linux     =  3
+int os_freebsd   =  4
+int os_dragonfly =  5
+int os_netbsd    =  6
+int os_openbsd   =  7
+int os_sunos     =  8
+#if (defined(_WIN32) && !defined(_WIN64))
+int os_windows = os_win32;
+#elif (defined(_WIN32) && defined(_WIN64))
+int os_windows = os_win64;
+#else
+int os_windows = os_unknown;
+#endif
+#if (defined(_WIN32) && !defined(_WIN64))
+int os_type = os_win32;
+#elif (defined(_WIN32) && defined(_WIN64))
+int os_type = os_win64;
+#elif (defined(__APPLE__) && defined(__MACH__))
+int os_type = os_macosx;
+#elif defined(__linux__)
+int os_type = os_linux;
+#elif defined(__FreeBSD__)
+int os_type = os_freebsd;
+#elif defined(__DragonFly__)
+int os_type = os_dragonfly;
+#elif defined(__NetBSD__)
+int os_type = os_netbsd;
+#elif defined(__OpenBSD__)
+int os_type = os_openbsd;
+#elif defined(__sun)
+int os_type = os_sunos;
+#else
+int os_type = os_unknown;
+#endif
+#endif
 
 extern std::string keyboard_string;
 extern double fps;
