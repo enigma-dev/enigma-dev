@@ -380,7 +380,6 @@ int enigma_main(int argc, char** argv) {
 
 namespace enigma_user {
 
-const int os_browser = browser_not_a_browser;
 std::string game_save_id = "";
 std::string keyboard_string = "";
 double fps = 0;
