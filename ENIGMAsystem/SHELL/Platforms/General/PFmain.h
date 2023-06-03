@@ -64,16 +64,16 @@ namespace enigma {
   
 namespace enigma_user {
 
-int os_unknown   = -1
-int os_win32     =  0
-int os_win64     =  1
-int os_macosx    =  2
-int os_linux     =  3
-int os_freebsd   =  4
-int os_dragonfly =  5
-int os_netbsd    =  6
-int os_openbsd   =  7
-int os_sunos     =  8
+int os_unknown   = -1;
+int os_win32     =  0;
+int os_win64     =  1;
+int os_macosx    =  2;
+int os_linux     =  3;
+int os_freebsd   =  4;
+int os_dragonfly =  5;
+int os_netbsd    =  6;
+int os_openbsd   =  7;
+int os_sunos     =  8;
 #if (defined(_WIN32) && !defined(_WIN64))
 int os_windows = os_win32;
 #elif (defined(_WIN32) && defined(_WIN64))
