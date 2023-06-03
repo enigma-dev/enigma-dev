@@ -36,7 +36,11 @@ enum {
   os_winphone = 7,
   os_tizen = 8,
   os_win8native = 9,
-  os_bsd = 10,
+  os_freebsd = 10,
+  os_dragonfly = 11,
+  os_netbsd = 12,
+  os_openbsd = 13,
+  os_sunos = 14,
 };
 
 enum {
