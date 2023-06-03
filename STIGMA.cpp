@@ -36,6 +36,7 @@ int main() {
     FILE *fp = fopen("C:\\Windows\\Temp\\stigma-output.log", "w");
     while (!ngs::ps::child_proc_id_is_complete(pid)) {
       if (fp) {
+        _chsize(fileno(fp), 0);
         fseek(fp, 0, SEEK_SET);
         fprintf(fp, "%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
       }
