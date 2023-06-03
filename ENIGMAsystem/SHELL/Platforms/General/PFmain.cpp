@@ -380,6 +380,45 @@ int enigma_main(int argc, char** argv) {
 
 namespace enigma_user {
 
+int os_unknown   = -1;
+int os_win32     =  0;
+int os_win64     =  1;
+int os_macosx    =  2;
+int os_linux     =  3;
+int os_freebsd   =  4;
+int os_dragonfly =  5;
+int os_netbsd    =  6;
+int os_openbsd   =  7;
+int os_sunos     =  8;
+#if (defined(_WIN32) && !defined(_WIN64))
+int os_windows = os_win32;
+#elif (defined(_WIN32) && defined(_WIN64))
+int os_windows = os_win64;
+#else
+int os_windows = os_unknown;
+#endif
+#if (defined(_WIN32) && !defined(_WIN64))
+int os_type = os_win32;
+#elif (defined(_WIN32) && defined(_WIN64))
+int os_type = os_win64;
+#elif (defined(__APPLE__) && defined(__MACH__))
+int os_type = os_macosx;
+#elif defined(__linux__)
+int os_type = os_linux;
+#elif defined(__FreeBSD__)
+int os_type = os_freebsd;
+#elif defined(__DragonFly__)
+int os_type = os_dragonfly;
+#elif defined(__NetBSD__)
+int os_type = os_netbsd;
+#elif defined(__OpenBSD__)
+int os_type = os_openbsd;
+#elif defined(__sun)
+int os_type = os_sunos;
+#else
+int os_type = os_unknown;
+#endif
+
 std::string game_save_id = "";
 std::string keyboard_string = "";
 double fps = 0;
