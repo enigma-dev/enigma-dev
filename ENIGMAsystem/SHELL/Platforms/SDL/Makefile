@@ -19,7 +19,6 @@ else
 	endif
 endif
 SOURCES += $(wildcard Platforms/SDL/*.cpp) 
-SOURCES += Platforms/SDL/Desktop/Window.cpp
 SOURCES += Platforms/General/POSIX/Utility.cpp
 override CFLAGS += -DENIGMA_PLATFORM_SDL
 override CXXFLAGS += -DENIGMA_PLATFORM_SDL
