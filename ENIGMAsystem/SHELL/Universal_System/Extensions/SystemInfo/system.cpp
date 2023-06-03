@@ -300,7 +300,7 @@ std::string utsname_codename() {
   return product_name;
   #elif (defined(__APPLE__) && defined(__MACH__))
   std::string result;
-  FILE *fp = popen("echo $(sw_vers  | grep 'ProductName:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1' && sw_vers  | grep 'ProductVersion:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1')' '", "r");
+  FILE *fp = popen("echo $(sw_vers  | grep 'ProductName:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1' && sw_vers  | grep 'ProductVersion:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1')", "r");
   if (fp) {
     char buf[255];
     if (fgets(buf, sizeof(buf), fp)) {
