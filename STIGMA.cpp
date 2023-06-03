@@ -3,14 +3,10 @@
 #include <chrono>
 #include <string>
 
-#include <cstdlib>
-#include <cstdio>
-
 #include "shared/apifilesystem/filesystem.hpp"
 #include "shared/apiprocess/process.hpp"
 
 #include <windows.h>
-#include <io.h>
 
 int main() {
   auto InstDir = []() {
@@ -34,16 +30,8 @@ int main() {
     pid = ngs::ps::spawn_child_proc_id("\"" + InstDir() + "\\msys64\\mingw64.exe\" \"" + dir + "LateralGM-Windows-x86_64.exe\"", false);
   }
   if (pid) {
-    FILE *fp = fopen("C:\\Windows\\Temp\\stigma-output.log", "w");
-    while (!ngs::ps::child_proc_id_is_complete(pid)) {
-      if (fp) {
-        _chsize(fileno(fp), 0);
-        fseek(fp, 0, SEEK_SET);
-        fprintf(fp, "%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
-      }
+    while (!ngs::ps::child_proc_id_is_complete(pid))
       std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
-    if (fp) fclose(fp);
     ngs::ps::free_stdout_for_child_proc_id(pid);
     ngs::ps::free_stdin_for_child_proc_id(pid);
   }
