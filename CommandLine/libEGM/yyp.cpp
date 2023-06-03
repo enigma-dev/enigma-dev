@@ -285,7 +285,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         { "GMFont",       &TreeNode::mutable_font       },
         { "GMObject",     &TreeNode::mutable_object     },
         { "GMTimeline",   &TreeNode::mutable_timeline   },
-        { "GMRoom",       &TreeNode::mutable_room       },
+        { "EGMRoom",      &TreeNode::mutable_room       },
         { "GMPath",       &TreeNode::mutable_path       }
       });
 
@@ -323,7 +323,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(roots[0]);
-  
+
   LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
