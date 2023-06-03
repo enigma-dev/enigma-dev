@@ -1,6 +1,8 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFsystem.h"
 
+#include <SDL2/SDL.h> //sdl does a #define main SDL_main...
+
 #if defined(_WIN32)
 #define os_type enigma_user::os_windows
 #elif (defined(__APPLE__) && defined(__MACH__))
@@ -20,9 +22,6 @@
 #else
 #define os_type enigma_user::os_unknown
 #endif
-
-
-#include <SDL2/SDL.h> //sdl does a #define main SDL_main...
 
 int main(int argc, char** argv) {
   SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
