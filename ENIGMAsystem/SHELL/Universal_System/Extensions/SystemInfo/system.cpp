@@ -300,7 +300,7 @@ std::string utsname_codename() {
   return product_name;
   #elif (defined(__APPLE__) && defined(__MACH__))
   std::string result;
-  FILE *fp = popen("echo $(sw_vers --productName && sw_vers --productVersion) |  tr '\n' ' '", "r");
+  FILE *fp = popen("echo $(sw_vers -productName && sw_vers -productVersion) |  tr '\n' ' '", "r");
   if (fp) {
     char buf[255];
     if (fgets(buf, sizeof(buf), fp)) {
