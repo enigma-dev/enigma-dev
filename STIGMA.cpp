@@ -13,7 +13,7 @@ int main() {
   ngs::fs::directory_set_current_working(ngs::fs::executable_get_directory());
   std::string dir = ngs::fs::executable_get_directory();
   std::replace(dir.begin(), dir.end(), '\\', '/');
-  ngs::fs::environment_set_variable("PATH", "..\\msys64;..\\msys64\\mingw64\\bin;..\\msys64\\usr\\local\\bin;..\\msys64\\usr\\bin;%PATH%")
+  ngs::fs::environment_set_variable("PATH", "..\\msys64;..\\msys64\\mingw64\\bin;..\\msys64\\usr\\local\\bin;..\\msys64\\usr\\bin;%PATH%");
   if (ngs::fs::file_exists(ngs::fs::executable_get_directory() + "LateralGM-Windows-i686.exe")) {
     pid = ngs::ps::spawn_child_proc_id("\"" + dir + "LateralGM-Windows-i686.exe\"", false);
     ngs::ps::proc_id_kill(pid);
