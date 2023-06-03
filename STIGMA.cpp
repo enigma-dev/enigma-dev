@@ -22,7 +22,7 @@ int main() {
   if (pid) {
     while (!ngs::ps::child_proc_id_is_complete(pid)) {
       printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
-      std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       system("cls");
     }
     ngs::ps::free_stdout_for_child_proc_id(pid);
