@@ -64,7 +64,6 @@ namespace enigma {
   
 namespace enigma_user {
 
-#if !defined(os_type)
 int os_unknown   = -1
 int os_win32     =  0
 int os_win64     =  1
@@ -102,7 +101,6 @@ int os_type = os_openbsd;
 int os_type = os_sunos;
 #else
 int os_type = os_unknown;
-#endif
 #endif
 
 extern std::string keyboard_string;
