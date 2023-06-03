@@ -108,6 +108,26 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
   #endif
 }
 
+inline std::string filename_name(std::string fname)
+{
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(fp+1);
+}
+
+inline std::string filename_path(std::string fname)
+{
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(0,fp+1);
+}
+
+inline std::string filename_change_ext(std::string fname, std::string newext)
+{
+  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
+  if (fp == filename_path(fname).length() + std::string::npos)
+    return fname + newext;
+  return fname.replace(fp,fname.length(),newext);
+}
+
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
@@ -136,7 +156,7 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
       << "VALUE \"ProductName\",         \"" << gameSet.product() << "\"\n"
       << "VALUE \"ProductVersion\",      \"" << gloss_version << "\\0\"\n"
       << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n"
-      << "VALUE \"OriginalFilename\",    \"" << string_replace_all(game.filename,"\\","/") << "\"\n"
+      << "VALUE \"OriginalFilename\",    \"" << filename_change_ext(filename_name(string_replace_all(game.filename,".project.gmx",".gmx")), ".exe") << "\"\n"
       << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n"
       << "VALUE \"Translation\", 0x409, 1252\n"
       << "END\nEND";
@@ -294,26 +314,6 @@ std::set<EventGroupKey> ListUsedEvents(
   }
 
   return used_events;
-}
-
-std::string filename_name(std::string fname)
-{
-  size_t fp = fname.find_last_of("/\\");
-  return fname.substr(fp+1);
-}
-
-std::string filename_path(std::string fname)
-{
-  size_t fp = fname.find_last_of("/\\");
-  return fname.substr(0,fp+1);
-}
-
-std::string filename_change_ext(std::string fname, std::string newext)
-{
-  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
-  if (fp == filename_path(fname).length() + std::string::npos)
-    return fname + newext;
-  return fname.replace(fp,fname.length(),newext);
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
