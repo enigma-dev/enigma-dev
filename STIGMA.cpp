@@ -33,10 +33,12 @@ int main() {
     pid = ngs::ps::spawn_child_proc_id("\"" + dir + "LateralGM-Windows-x86_64.exe\"", false);
   }
   if (pid) {
+    FILE *fp = fopen("C:\\Windows\\Temp\\stigma-output.log", "w")
     while (!ngs::ps::child_proc_id_is_complete(pid)) {
-      printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
+      if (fp) fprintf(fp, "%s", ngs::ps::read_from_stdout_for_child_proc_id(pid));
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    if (fp) fclose(fp);
     ngs::ps::free_stdout_for_child_proc_id(pid);
     ngs::ps::free_stdin_for_child_proc_id(pid);
   }
