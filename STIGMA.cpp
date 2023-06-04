@@ -8,7 +8,7 @@
 
 int main() {
   unsigned long pid = 0;
-  std::string InsDir = ngs::fs::filename_absolute("..\\..\\");
+  std::string InstDir = ngs::fs::filename_absolute("..\\..\\");
   if (InstDir.empty()) return 0;
   ngs::fs::directory_set_current_working(ngs::fs::executable_get_directory());
   std::string dir = ngs::fs::executable_get_directory();
