@@ -10,7 +10,7 @@ RequestExecutionLevel admin
 ShowInstDetails "show"
 ShowUninstDetails "show"
 
-InstallDirRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\${PRODUCT}" "InstDir"
+InstallDirRegKey HKLM "Software\${PRODUCT}" ""
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "C:\stigma-dev-Windows-i686\Resources\icon.ico"
@@ -77,7 +77,7 @@ Section "STIGMA Sources"
   File /r C:\stigma-dev-Windows-i686
 
   ;Store installation folder in registry
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\${PRODUCT}" "InstDir" $INSTDIR
+  WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
 
   ;Registry information for add/remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "DisplayName" "${PRODUCT}"
