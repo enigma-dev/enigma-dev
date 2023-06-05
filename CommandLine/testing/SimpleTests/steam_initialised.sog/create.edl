@@ -1,4 +1,10 @@
 
 var is_initialized = steam_initialised();
 
+gtest_assert_eq(is_initialized,  false);
+
+steam_init();
+
+is_initialized = steam_initialised();
+
 gtest_assert_eq(is_initialized,  true);
