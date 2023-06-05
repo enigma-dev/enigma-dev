@@ -36,7 +36,7 @@
 // using std::cout;
 // using std::endl;
 
-#include "general_user.h"
+#include "general.h"
 
 // namespace enigma {
 //     void init();
