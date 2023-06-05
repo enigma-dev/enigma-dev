@@ -88,7 +88,7 @@ Section "STIGMA Sources"
   ;Create optional start menu shortcut for Uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA Development Environment (x64).lnk" "$INSTDIR\stigma-dev-Windows-x86_64\STIGMA.exe"  0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\STIGMA Development Environment (x64).lnk" "$INSTDIR\${PRODUCT}-Uninstaller-x86_64.exe" "" "$INSTDIR\${PRODUCT}-Uninstaller-x86_64.exe" 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall STIGMA Development Environment (x64).lnk" "$INSTDIR\${PRODUCT}-Uninstaller-x86_64.exe" "" "$INSTDIR\${PRODUCT}-Uninstaller-x86_64.exe" 0
 
   ;Create Uninstaller
   WriteUninstaller "${PRODUCT}-Uninstaller-x86_64.exe"
