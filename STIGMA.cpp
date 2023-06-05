@@ -8,9 +8,9 @@
 
 int main() {
   unsigned long pid = 0;
+  ngs::fs::directory_set_current_working(ngs::fs::executable_get_directory());
   std::string InstDir = ngs::fs::filename_absolute("..\\");
   if (InstDir.empty()) return 0;
-  ngs::fs::directory_set_current_working(ngs::fs::executable_get_directory());
   std::string dir = ngs::fs::executable_get_directory();
   std::replace(dir.begin(), dir.end(), '\\', '/');
   if (ngs::fs::file_exists(ngs::fs::executable_get_directory() + "LateralGM-Windows-i686.exe")) {
