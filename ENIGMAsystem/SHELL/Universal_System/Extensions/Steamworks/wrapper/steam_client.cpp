@@ -4,10 +4,10 @@ namespace steamworks {
 
 bool steam_client::initialised_{false};  // TODO: Why this line is nessesary?
 
-bool steam_client::init(unsigned int appid) {
+void steam_client::init(unsigned int appid) {
   if (steam_client::initialised_) {
     DEBUG_MESSAGE("Calling steam_client::init but is already initialized", M_ERROR);
-    return false;
+    return;
   }
 
   if (!steam_main::init()) {
@@ -15,25 +15,22 @@ bool steam_client::init(unsigned int appid) {
         "SteamApi_Init returned false. Steam isn't running, couldn't find Steam, App ID is ureleased, Don't own App "
         "ID.",
         M_ERROR);
-    return false;
+    return;
   }
 
   steam_client::initialised_ = true;
-  return true;
 }
 
-bool steam_client::shutdown() {
-  if (!is_valid) {
+void steam_client::shutdown() {
+  if (!steam_client::is_valid()) {
     DEBUG_MESSAGE("Calling steam_client::shutdown but not initialized, consider calling steam_client::init first",
                   M_ERROR);
-    return false;
+    return;
   }
 
   steam_client::initialised_ = false;
 
   steam_main::shutdown();
-
-  return true;
 }
 
 bool steam_client::is_valid() { return steam_client::initialised_; }

@@ -37,6 +37,7 @@
 // using std::endl;
 
 #include "general.h"
+#include "management.h"
 
 // namespace enigma {
 //     void init();

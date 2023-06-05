@@ -20,12 +20,12 @@ class steam_client {
   /// Initialize the steam client.
   /// If <paramref name="asyncCallbacks"/> is false you need to call <see cref="RunCallbacks"/> manually every frame.
   /// </summary>
-  static bool init(unsigned int appid);
+  static void init(unsigned int appid);
 
   /// <summary>
   /// Shuts down the steam client.
   /// </summary>
-  static bool shutdown();
+  static void shutdown();
 
   /// <summary>
   /// Check if Steam is loaded and accessible.

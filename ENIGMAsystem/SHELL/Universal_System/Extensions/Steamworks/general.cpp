@@ -2,8 +2,6 @@
 
 namespace enigma_user {
 
-bool steam_initialised() {
-  return steamworks::steam_client::init(k_uAppIdInvalid);  // Replace "k_uAppIdInvalid" with your app id
-}
+bool steam_initialised() { return steamworks::steam_client::is_valid(); }
 
 }  // namespace enigma_user
