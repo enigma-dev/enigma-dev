@@ -4,8 +4,8 @@
 #include "public/steam/steam_api_common.h"
 #include "public/steam/steam_api.h"
 
-namespace Steamworks {
-class SteamMain {
+namespace steamworks {
+class steam_main {
   public:
   static bool init();
 

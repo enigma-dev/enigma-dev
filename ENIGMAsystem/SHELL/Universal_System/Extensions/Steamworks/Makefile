@@ -3,7 +3,7 @@ SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
 				$(wildcard Universal_System/Extensions/Steamworks/wrapper/classes/*.cpp)
 
 # defining directory of steam header files
-override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks -fexceptions
+override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks
 
 # defining directory of 64-bit lib file
 override LDFLAGS += -L$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/redistributable_bin/win64

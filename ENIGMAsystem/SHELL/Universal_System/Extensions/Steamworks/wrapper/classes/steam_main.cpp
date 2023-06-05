@@ -1,11 +1,11 @@
 #include "steam_main.h"
 
-namespace Steamworks {
-bool SteamMain::init() { return SteamAPI_Init(); }
+namespace steamworks {
+bool steam_main::init() { return SteamAPI_Init(); }
 
-void SteamMain::shutdown() { SteamAPI_Shutdown(); }
+void steam_main::shutdown() { SteamAPI_Shutdown(); }
 
-HSteamPipe SteamMain::get_hSteam_pipe() { return SteamAPI_GetHSteamPipe(); }
+HSteamPipe steam_main::get_hSteam_pipe() { return SteamAPI_GetHSteamPipe(); }
 
-bool SteamMain::restart_app_if_necessary(unsigned int unOwnAppID) { return SteamAPI_RestartAppIfNecessary(unOwnAppID); }
+bool steam_main::restart_app_if_necessary(unsigned int unOwnAppID) { return SteamAPI_RestartAppIfNecessary(unOwnAppID); }
 }  // namespace Steamworks

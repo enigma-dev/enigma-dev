@@ -3,9 +3,9 @@
 
 Name: Steamworks
 Identifier: Steamworks
-Author: null
+Author: Saif Kandil (https://k0t0z.github.io)
 Description: Steamworks API allows your game to take full advantage of Steam by accessing all of the underlying systems provided through the API.
-Default: false
+Default: true # This must be false before release
 Icon: steamworks.svg
 
 Depends: None
