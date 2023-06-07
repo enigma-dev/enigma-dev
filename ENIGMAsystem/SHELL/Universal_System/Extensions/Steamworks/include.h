@@ -36,8 +36,9 @@
 // using std::cout;
 // using std::endl;
 
-#include "general.h"
 #include "management.h"
+#include "general.h"
+#include "overlay.h"
 
 // namespace enigma {
 //     void init();
