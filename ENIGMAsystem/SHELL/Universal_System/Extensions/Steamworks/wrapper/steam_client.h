@@ -60,6 +60,8 @@ class steam_client {
 	/// </summary>
 	static const char* name();
 
+  static const char* user_name(CSteamID user_persona_name);
+
   /// <summary>
 	/// Gets the status of the current user.
 	/// </summary>
@@ -76,6 +78,8 @@ class steam_client {
   ///  </para>
   /// </summary>
   static bool restart_app_if_necessary( unsigned int appid );
+
+  static void enable_warning_message_hook();
 };
 
 }  // namespace steamworks
