@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<assets>
+  <Configs name="configs">
+    <Config>Configs\Default</Config>
+  </Configs>
+  <objects name="objects">
+    <object>objects\Obj_Steam_GeneralInfo</object>
+    <object>objects\Obj_Steam</object>
+  </objects>
+  <rooms name="rooms">
+    <room>rooms\Room_Steam_Init</room>
+    <room>rooms\Room_Steam_Main</room>
+  </rooms>
+  <constants number="0"/>
+  <help>
+    <rtf>help.rtf</rtf>
+  </help>
+</assets>
