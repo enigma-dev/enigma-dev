@@ -207,8 +207,6 @@ namespace {
 
   void imgui_easy_theming(ImVec3 color_for_text, ImVec3 color_for_head, ImVec3 color_for_area, ImVec3 color_for_body, ImVec3 color_for_pops) {
     ImGuiStyle& style = ImGui::GetStyle();
-    style.FrameRounding = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FRAME_ROUNDING").c_str(), nullptr);
-    style.ScrollbarRounding = (float)strtod(ngs::fs::environment_get_variable("IMGUI_SCROLLBAR_ROUNDING").c_str(), nullptr);
     style.Colors[ImGuiCol_Text] = ImVec4(color_for_text.x, color_for_text.y, color_for_text.z, 1.00f);
     style.Colors[ImGuiCol_TextDisabled] = ImVec4(color_for_text.x, color_for_text.y, color_for_text.z, 0.58f);
     style.Colors[ImGuiCol_WindowBg] = ImVec4(color_for_body.x, color_for_body.y, color_for_body.z, 0.95f);
@@ -243,7 +241,6 @@ namespace {
     style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(color_for_head.x, color_for_head.y, color_for_head.z, 1.00f);
     style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(color_for_head.x, color_for_head.y, color_for_head.z, 0.43f);
     style.Colors[ImGuiCol_PopupBg] = ImVec4(color_for_pops.x, color_for_pops.y, color_for_pops.z, 0.92f);
-    style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(color_for_area.x, color_for_area.y, color_for_area.z, 0.73f);
   }
 
   void SetupImGuiStyle2() {
