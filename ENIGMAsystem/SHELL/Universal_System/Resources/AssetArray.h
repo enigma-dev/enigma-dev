@@ -209,7 +209,7 @@ class AssetArray {
     return len;
   }
 
-  std::vector<std::byte> serialize() {
+  std::vector<std::byte> serialize() const{
     static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
 

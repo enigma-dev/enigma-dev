@@ -147,7 +147,7 @@ inline std::array<std::byte, sizeof(T)> serialize_any(T value) {
 
 template <typename Base, typename T>
 inline T deserialize_any(std::byte *iter) {
-  Base result;
+  Base result{};
   for (std::size_t i = 0; i < sizeof(T); i++) {
     result = (result << 8) | static_cast<Base>(*(iter + i));
   }
