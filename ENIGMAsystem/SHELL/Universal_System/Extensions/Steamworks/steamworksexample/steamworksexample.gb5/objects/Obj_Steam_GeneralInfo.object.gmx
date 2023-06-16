@@ -26,7 +26,7 @@
           <argument>
             <kind>1</kind>
             <string>&#13;
-draw_set_font(Font_YoYo_20);&#13;
+draw_set_font(Font_ENIGMA_20);&#13;
 draw_set_halign(fa_left);&#13;
 draw_set_valign(fa_top); &#13;
 &#13;
@@ -36,6 +36,25 @@ var _i = 0;&#13;
 // You should check this before using any of the other functions.&#13;
 // NOTE: Your app will still work but functions will not return any values &#13;
 draw_text(50,100 + _i++ * 30,"steam_initialised: " + string(steam_initialised()));&#13;
+&#13;
+// General information functions&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_current_game_language: " + string(steam_current_game_language()));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_available_languages: " + string(steam_available_languages()));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_user_owns_dlc [447130]: " + string(steam_user_owns_dlc(447130)));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_user_installed_dlc [447130]: " + string(steam_user_installed_dlc(447130)));&#13;
+&#13;
+draw_text(50, 100 + _i++ * 30,"steam_is_user_logged_on: " + string(steam_is_user_logged_on()));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_get_user_steam_id: " + string(steam_get_user_steam_id()));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_get_user_account_id: " + string(steam_get_user_account_id()));&#13;
+draw_text(50, 100 + _i++ * 30,"steam_get_app_id: " + string(steam_get_app_id()));&#13;
+&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_is_screenshot_requested: " + string(steam_is_screenshot_requested()));&#13;
+&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_is_subscribed: " + string(steam_is_subscribed()));&#13;
+&#13;
+draw_text(50, 100 + _i++ * 30,"steam_get_persona_name: " + string(steam_get_persona_name()))&#13;
+&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_get_persona_name: " + string(steam_utils_is_steam_running_on_steam_deck()))&#13;
 </string>
           </argument>
         </arguments>

@@ -46,17 +46,15 @@ bool steam_client::is_valid() { return steam_client::initialised_; }
 
 bool steam_client::is_logged_on() { return SteamUser()->BLoggedOn(); }
 
-CSteamID steam_client::steam_id() { return SteamUser()->GetSteamID(); }
+std::string steam_client::name() { return SteamFriends()->GetPersonaName(); }
 
-const char* steam_client::name() { return SteamFriends()->GetPersonaName(); }
-
-const char* steam_client::user_name(CSteamID user_persona_name) {
+std::string steam_client::user_name(CSteamID user_persona_name) {
   return SteamFriends()->GetFriendPersonaName(user_persona_name);
 }
 
 EPersonaState steam_client::state() { return SteamFriends()->GetPersonaState(); }
 
-bool steam_client::restart_app_if_necessary(unsigned int appid) { return steam_main::restart_app_if_necessary(appid); }
+bool steam_client::restart_app_if_necessary(uint32 appid) { return steam_main::restart_app_if_necessary(appid); }
 
 void steam_client::enable_warning_message_hook() { SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
 

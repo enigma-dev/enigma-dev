@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<sprite>
+  <xorig>154</xorig>
+  <yorigin>225</yorigin>
+  <colkind>1</colkind>
+  <sepmasks>0</sepmasks>
+  <bbox_left>0</bbox_left>
+  <bbox_right>1365</bbox_right>
+  <bbox_top>0</bbox_top>
+  <bbox_bottom>767</bbox_bottom>
+  <bboxmode>0</bboxmode>
+  <coltolerance>0</coltolerance>
+  <HTile>0</HTile>
+  <VTile>0</VTile>
+  <For3D>0</For3D>
+  <width>1366</width>
+  <height>768</height>
+  <frames>
+    <frame index="0">images\Spr_ENIGMA_background_0.png</frame>
+  </frames>
+</sprite>

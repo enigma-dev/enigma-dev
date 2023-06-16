@@ -2,6 +2,9 @@
 #define GENERAL_H
 
 #include "wrapper/steam_client.h"
+#include "wrapper/steam_utils.h"
+#include "wrapper/steam_user.h"
+#include <iostream>
 
 namespace enigma_user {
 
@@ -11,9 +14,9 @@ bool steam_stats_ready();
 
 int steam_get_app_id();
 
-uint32 steam_get_user_account_id();
+int steam_get_user_account_id();
 
-uint64 steam_get_user_steam_id();
+int steam_get_user_steam_id();
 
 std::string steam_get_persona_name();
 
@@ -29,6 +32,6 @@ bool steam_is_subscribed();
 
 void steam_set_warning_message_hook();
 
-}
+}  // namespace enigma_user
 
 #endif  // !GENERAL_H
