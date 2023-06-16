@@ -1199,7 +1199,7 @@ namespace ifd {
           if (image == nullptr)
             continue;
 
-          #if (defined(__APPLE__) && defined(__MACH__))
+          #if (defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__)))
           if (image) {
             unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
             if (invData) {
