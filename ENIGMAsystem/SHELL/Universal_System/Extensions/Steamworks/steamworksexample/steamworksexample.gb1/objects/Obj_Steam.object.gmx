@@ -37,8 +37,7 @@ randomize();&#13;
 &#13;
 //#macro SteamLeaderboard "YYLeaderboard_10/29/21--"&#13;
 &#13;
-if (steam_initialised()) room_goto(Room_Steam_Main);&#13;
-</string>
+if (steam_initialised()) room_goto(Room_Steam_Main);</string>
           </argument>
         </arguments>
       </action>
@@ -68,7 +67,6 @@ if (steam_initialised()) room_goto(Room_Steam_Main);&#13;
 if (is_game_restarting == false) {&#13;
 	steam_shutdown();&#13;
 }&#13;
-&#13;
 </string>
           </argument>
         </arguments>
@@ -95,8 +93,7 @@ if (is_game_restarting == false) {&#13;
 // This needs to be called every frame so that the extension&#13;
 // gets updated you should place this call in a controller object&#13;
 // that is persistent through the entire duration of you game.&#13;
-steam_update();&#13;
-</string>
+steam_update();</string>
           </argument>
         </arguments>
       </action>
@@ -123,9 +120,7 @@ steam_update();&#13;
 // This prsents a game restart implementation example&#13;
 // We use a variable as a flag to tell the system we are 'restarting' the game&#13;
 is_game_restarting = true;&#13;
-game_restart();&#13;
-&#13;
-</string>
+game_restart();</string>
           </argument>
         </arguments>
       </action>
@@ -150,8 +145,7 @@ game_restart();&#13;
             <string>&#13;
 // This function call is purely for debugging purposes&#13;
 // It will log all the messages from the steam callbacks&#13;
-show_debug_message("Steam ASYNC: " + json_encode(async_load))&#13;
-</string>
+show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
           </argument>
         </arguments>
       </action>
@@ -176,12 +170,11 @@ show_debug_message("Steam ASYNC: " + json_encode(async_load))&#13;
             <string> /// @description Insert description here&#13;
 // You can write your code in this editor&#13;
 &#13;
-if (steam_initialised()) return;&#13;
+if (steam_initialised()) return 0;&#13;
 &#13;
 draw_set_halign(fa_center);&#13;
 draw_set_valign(fa_middle);&#13;
-draw_text_transformed(room_width/2, room_height/2, "You are not logged in to steam!!", 2, 2, 0);&#13;
-</string>
+draw_text_transformed(room_width/2, room_height/2, "You are not logged in to steam!!", 2, 2, 0);</string>
           </argument>
         </arguments>
       </action>

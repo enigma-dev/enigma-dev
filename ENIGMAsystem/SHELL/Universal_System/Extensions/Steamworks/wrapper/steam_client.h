@@ -1,5 +1,5 @@
-#if !defined(STEAM_CLIENT_H)
-#define STEAM_CLIENT_H
+#if !defined(WRAPPER_STEAM_CLIENT_H)
+#define WRAPPER_STEAM_CLIENT_H
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "wrapper/classes/steam_main.h"
@@ -46,21 +46,13 @@ class steam_client {
   /// </summary>
   static bool is_logged_on();
 
-  /// <summary>
-  /// Gets the Steam ID of the account currently logged into the Steam client. This is 
-  /// commonly called the 'current user', or 'local user'.
-  /// A Steam ID is a unique identifier for a Steam accounts, Steam groups, Lobbies and Chat 
-  /// rooms, and used to differentiate users in all parts of the Steamworks API.
-  /// </summary>
-  static CSteamID steam_id();
-
   // <summary>
 	/// returns the local players name - guaranteed to not be <see langword="null"/>.
 	/// This is the same name as on the user's community profile page.
 	/// </summary>
-	static const char* name();
+	static std::string name();
 
-  static const char* user_name(CSteamID user_persona_name);
+  static std::string user_name(CSteamID user_persona_name);
 
   /// <summary>
 	/// Gets the status of the current user.
@@ -77,11 +69,11 @@ class steam_client {
   ///  Note that during development, when not launching via Steam, this might always return true.
   ///  </para>
   /// </summary>
-  static bool restart_app_if_necessary( unsigned int appid );
+  static bool restart_app_if_necessary( uint32 appid );
 
   static void enable_warning_message_hook();
 };
 
 }  // namespace steamworks
 
-#endif  // !STEAM_CLIENT_H
+#endif  // !WRAPPER_STEAM_CLIENT_H

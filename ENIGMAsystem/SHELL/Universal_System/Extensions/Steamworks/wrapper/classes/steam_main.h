@@ -1,5 +1,5 @@
-#if !defined(STEAM_MAIN_H)
-#define STEAM_MAIN_H
+#if !defined(WRAPPER_STEAM_MAIN_H)
+#define WRAPPER_STEAM_MAIN_H
 
 #include "public/steam/steam_api_common.h"
 #include "public/steam/steam_api.h"
@@ -17,4 +17,4 @@ class steam_main {
 };
 }  // namespace Steamworks
 
-#endif  // !STEAM_MAIN_H
+#endif  // !WRAPPER_STEAM_MAIN_H
