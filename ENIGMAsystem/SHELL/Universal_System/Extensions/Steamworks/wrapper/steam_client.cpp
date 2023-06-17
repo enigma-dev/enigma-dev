@@ -13,7 +13,7 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
 
 bool steam_client::initialised_{false};  // TODO: Why this line is nessesary?
 
-void steam_client::init(unsigned int appid) {
+void steam_client::init(uint32 appid) {
   if (steam_client::initialised_) {
     DEBUG_MESSAGE("Calling steam_client::init but is already initialized", M_ERROR);
     return;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <room>
   <caption/>
-  <width>640</width>
-  <height>480</height>
+  <width>1280</width>
+  <height>720</height>
   <hsnap>16</hsnap>
   <vsnap>16</vsnap>
   <isometric>0</isometric>

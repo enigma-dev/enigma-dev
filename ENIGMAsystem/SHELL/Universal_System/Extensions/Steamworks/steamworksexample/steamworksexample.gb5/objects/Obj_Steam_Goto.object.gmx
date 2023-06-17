@@ -28,8 +28,7 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-targetRoom = noone&#13;
-</string>
+targetRoom = noone</string>
           </argument>
         </arguments>
       </action>
@@ -53,7 +52,6 @@ targetRoom = noone&#13;
             <kind>1</kind>
             <string>&#13;
 room_goto(targetRoom)&#13;
-&#13;
 </string>
           </argument>
         </arguments>
