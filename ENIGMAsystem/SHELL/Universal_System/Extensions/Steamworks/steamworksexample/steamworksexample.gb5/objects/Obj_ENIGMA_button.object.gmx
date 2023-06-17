@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>&lt;undefined&gt;</parentName>
+  <parentName>Obj_ENIGMA_text</parentName>
   <events>
     <event enumb="0" eventtype="0">
       <action>

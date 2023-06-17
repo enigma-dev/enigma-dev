@@ -16,7 +16,7 @@ int steam_get_app_id();
 
 int steam_get_user_account_id();
 
-int steam_get_user_steam_id();
+long long steam_get_user_steam_id();
 
 std::string steam_get_persona_name();
 

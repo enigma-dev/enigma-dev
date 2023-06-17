@@ -2,7 +2,7 @@
 #define WRAPPER_STEAM_UTILS_H
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "wrapper/classes/steam_main.h"
+#include "wrapper/steam_client.h"
 
 #include <stdexcept>
 // #include <exception>

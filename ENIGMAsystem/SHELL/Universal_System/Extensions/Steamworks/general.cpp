@@ -13,16 +13,20 @@ int steam_get_user_account_id() {
   // return steamworks::steam_client::steam_id().GetAccountID();
 }
 
-int steam_get_user_steam_id() {
-  // return -1;
-  std::cout << "steam_get_user_steam_id" << std::endl;
-  CSteamID steam_id = SteamUser()->GetSteamID();
-  std::cout << "steam_id" << std::endl;
-  uint64 steam_id_64 = steam_id.ConvertToUint64();
-  std::cout << "steam_id_64: " << steam_id_64 << std::endl;
-  int steam_id_32 = (int)steam_id_64;
-  std::cout << "steam_id_32: " << steam_id_32 << std::endl;
-  return steam_id_32;
+long long steam_get_user_steam_id() {
+  if (!steamworks::steam_client::is_valid()) {
+    DEBUG_MESSAGE("Calling steam_get_user_steam_id() but not initialized, consider calling steam_init() first",
+                  M_ERROR);
+    return -1;
+  }
+
+  if (!steamworks::steam_client::is_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_get_user_steam_id() but not logged in, please log into Steam first",
+                  M_ERROR);
+    return -1;
+  }
+
+  return (long long)steamworks::steam_user::get_steam_id().ConvertToUint64();
 }
 
 std::string steam_get_persona_name() { return steamworks::steam_client::name(); }
