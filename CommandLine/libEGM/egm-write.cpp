@@ -325,8 +325,8 @@ bool EGMFileFormat::WriteRes(buffers::TreeNode* res, const fs::path &dir,
     return WriteObject(egm_root, newDir + ".obj", res->object());
    case Type::kPath:
     return egm_internal::WriteYaml(egm_root, newDir + ".pth", res->mutable_path());
-   case Type::kRoom:
-    return egm_internal::WriteRoom(egm_root, newDir + ".rm", res->mutable_room());
+   case Type::kEgmRoom:
+    return egm_internal::WriteRoom(egm_root, newDir + ".rm", res->mutable_egm_room());
    case Type::kScript:
     return egm_internal::WriteScript(newDir + ".edl", res->script());
    case Type::kShader:
@@ -358,7 +358,7 @@ inline const std::string type2name(int type) {
     return "object";
    case Type::kPath:
     return "path";
-   case Type::kRoom:
+   case Type::kEgmRoom:
     return "room";
    case Type::kScript:
     return "script";
@@ -385,8 +385,8 @@ inline int getResID(buffers::TreeNode* res) {
     return res->object().id();
    case Type::kPath:
     return res->path().id();
-   case Type::kRoom:
-    return res->room().id();
+   case Type::kEgmRoom:
+    return res->egm_room().id();
    case Type::kScript:
     return res->script().id();
    case Type::kShader:

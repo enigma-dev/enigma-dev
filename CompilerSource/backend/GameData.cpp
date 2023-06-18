@@ -232,7 +232,7 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
   data.set_closed(path.closed);
   data.set_precision(path.precision);
 
-	// Discarded: backgroundRoomId;
+    // Discarded: backgroundRoomId;
   data.set_hsnap(path.snapX);
   data.set_vsnap(path.snapY);
 
@@ -316,9 +316,9 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
   }
 }
 
-EGMRoomData::EGMRoomData(const buffers::resources::EGMRoom &q, const std::string& name):
+GMRoomData::GMRoomData(const buffers::resources::GMRoom &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
-EGMRoomData::EGMRoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
+GMRoomData::GMRoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {
   cout << "Import room." << endl;
   data.set_id(room.id);
@@ -328,8 +328,8 @@ EGMRoomData::EGMRoomData(const deprecated::JavaStruct::Room &room, const ESLooku
   data.set_width(room.width);
   data.set_height(room.height);
 
-  data.set_tilewidth(room.snapX);
-  data.set_tileheight(room.snapY);
+  data.set_hsnap(room.snapX);
+  data.set_vsnap(room.snapY);
   data.set_isometric(room.isometric);
 
   data.set_speed(room.speed);
@@ -507,7 +507,7 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
     case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
     case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
     case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
-    case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
+    case TypeCase::kGmRoom:   gameData->rooms.emplace_back(root.gm_room(), root.name()); break;
     case TypeCase::kInclude:  /*gameData->includes.emplace_back(root.include());*/ break;
     case TypeCase::kSettings: /*gameData->settings.emplace_back(root.settings());*/ break;
     default: cout << "- Not transferring unknown " << root.name() << endl; break;
@@ -595,7 +595,7 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
   cout << "- Not transferring game info" << endl;
   buffers::resources::GameInformation gameInfo;
   ImportSettings(es->gameSettings, settings);
-  
+
   LegacyEventsToEGM(*this, events);
 
   cout << "Transfer complete." << endl << endl;

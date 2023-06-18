@@ -61,7 +61,7 @@ static const FactoryMap factoryMap({
   { "font",       { &TreeNode::mutable_font,       Type::kFont,       ".fnt"  } },
   { "timeline",   { &TreeNode::mutable_timeline,   Type::kTimeline,   ".tln", } },
   { "object",     { &TreeNode::mutable_object,     Type::kObject,     ".obj", } },
-  { "room",       { &TreeNode::mutable_room,       Type::kRoom,       ".rm",  } }
+  { "room",       { &TreeNode::mutable_egm_room,   Type::kEgmRoom,    ".rm",  } }
 });
 
 static const FactoryMap extFactoryMap({
@@ -74,7 +74,7 @@ static const FactoryMap extFactoryMap({
   { ".fnt",  { &TreeNode::mutable_font,       Type::kFont       } },
   { ".tln",  { &TreeNode::mutable_timeline,   Type::kTimeline   } },
   { ".obj",  { &TreeNode::mutable_object,     Type::kObject     } },
-  { ".rm",   { &TreeNode::mutable_room,       Type::kRoom       } }
+  { ".rm",   { &TreeNode::mutable_egm_room,   Type::kEgmRoom    } }
 });
 
 std::map<Type, int> maxID = {
@@ -82,7 +82,7 @@ std::map<Type, int> maxID = {
   { Type::kFont,       0 },
   { Type::kObject,     0 },
   { Type::kPath,       0 },
-  { Type::kRoom,       0 },
+  { Type::kEgmRoom,    0 },
   { Type::kScript,     0 },
   { Type::kShader,     0 },
   { Type::kSound,      0 },
@@ -551,8 +551,8 @@ void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<
       m = c->mutable_path();
       type = "path";
       break;
-     case Type::kRoom:
-      m = c->mutable_room();
+     case Type::kEgmRoom:
+      m = c->mutable_egm_room();
       type = "room";
       break;
      case Type::kScript:

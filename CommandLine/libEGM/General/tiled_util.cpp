@@ -9,18 +9,18 @@ void AddTiledResource(buffers::TreeNode *protoNode, std::string resType, const p
   using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
 
   static const FactoryMap factoryMap({
-    { "sprite", &TreeNode::mutable_sprite },
-    { "sound", &TreeNode::mutable_sound },
-    { "background", &TreeNode::mutable_background },
-    { "path", &TreeNode::mutable_path },
-    { "script", &TreeNode::mutable_script },
-    { "shader", &TreeNode::mutable_shader },
-    { "font", &TreeNode::mutable_font },
-    { "timeline", &TreeNode::mutable_timeline },
-    { "object", &TreeNode::mutable_object },
-    { "room", &TreeNode::mutable_room },
-    { "datafile", &TreeNode::mutable_include },
-    { "Config", &TreeNode::mutable_settings },
+    { "sprite",     &TreeNode::mutable_sprite       },
+    { "sound",      &TreeNode::mutable_sound        },
+    { "background", &TreeNode::mutable_background   },
+    { "path",       &TreeNode::mutable_path         },
+    { "script",     &TreeNode::mutable_script       },
+    { "shader",     &TreeNode::mutable_shader       },
+    { "font",       &TreeNode::mutable_font         },
+    { "timeline",   &TreeNode::mutable_timeline     },
+    { "object",     &TreeNode::mutable_object       },
+    { "room",       &TreeNode::mutable_egm_room     },
+    { "datafile",   &TreeNode::mutable_include      },
+    { "Config",     &TreeNode::mutable_settings     }
   });
 
   auto createFunc = factoryMap.find(resType);

@@ -234,7 +234,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& name)
   else
     sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
-  
+
   const std::filesystem::path fName = TempFileName(gmk_data)/(name + sound->file_extension());
 
   if (ver == 440) {
@@ -364,7 +364,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver, const std::str
   }
 
   const std::filesystem::path fName = TempFileName(gmk_data)/(name + ".png");
-  
+
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1) {
@@ -399,7 +399,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/, const std::string& /*n
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
+  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kGmRoom);
   path->set_hsnap(dec.read4());
   path->set_vsnap(dec.read4());
   int nopoints = dec.read4();
@@ -451,7 +451,7 @@ struct PostponedAction {
     std::vector<Action> actions;
     for (std::unique_ptr<Action>& action : _actions)
       actions.emplace_back(*action);
-    _field->append(Actions2Code(actions)); 
+    _field->append(Actions2Code(actions));
     _actions.clear();
   }
 };
@@ -521,7 +521,7 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
         { ArgumentKind::ARG_FONT,       {&Argument::mutable_font,        TypeCase::kFont       }},
         { ArgumentKind::ARG_OBJECT,     {&Argument::mutable_object,      TypeCase::kObject     }},
         { ArgumentKind::ARG_TIMELINE,   {&Argument::mutable_timeline,    TypeCase::kTimeline   }},
-        { ArgumentKind::ARG_ROOM,       {&Argument::mutable_room,        TypeCase::kRoom       }},
+        { ArgumentKind::ARG_ROOM,       {&Argument::mutable_room,        TypeCase::kGmRoom     }},
         { ArgumentKind::ARG_PATH,       {&Argument::mutable_path,        TypeCase::kPath       }}
       });
 
@@ -583,16 +583,16 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string&
   return object;
 }
 
-std::unique_ptr<EGMRoom> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
-  auto room = std::make_unique<EGMRoom>();
+std::unique_ptr<GMRoom> LoadRoom(Decoder &dec, int ver, const std::string& /*name*/) {
+  auto room = std::make_unique<GMRoom>();
 
   room->set_caption(dec.readStr());
   room->set_width(dec.read4());
   room->set_height(dec.read4());
+  room->set_vsnap(dec.read4());
+  room->set_hsnap(dec.read4());
 //  room->set_vsnap(dec.read4());
 //  room->set_hsnap(dec.read4());
-  room->set_tileheight(dec.read4());
-  room->set_tilewidth(dec.read4());
   room->set_isometric(dec.readBool());
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
@@ -843,7 +843,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
     }
   } else {
     static const TypeCase RESOURCE_KIND[] = { TypeCase::TYPE_NOT_SET,TypeCase::kObject,TypeCase::kSprite,TypeCase::kSound,
-      TypeCase::kRoom,TypeCase::TYPE_NOT_SET,TypeCase::kBackground,TypeCase::kScript,TypeCase::kPath,TypeCase::kFont,TypeCase::TYPE_NOT_SET,
+      TypeCase::kGmRoom,TypeCase::TYPE_NOT_SET,TypeCase::kBackground,TypeCase::kScript,TypeCase::kPath,TypeCase::kFont,TypeCase::TYPE_NOT_SET,
       TypeCase::TYPE_NOT_SET,TypeCase::kTimeline,TypeCase::TYPE_NOT_SET,TypeCase::kShader };
 
     const TypeCase type = RESOURCE_KIND[kind];
@@ -888,7 +888,7 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
     { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, gmk_internal::LoadFont       },
     { TypeCase::kTimeline,   { 500, 800      }, { 500                }, gmk_internal::LoadTimeline   },
     { TypeCase::kObject,     { 400, 800      }, { 430                }, gmk_internal::LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, gmk_internal::LoadRoom       }
+    { TypeCase::kGmRoom,     { 420, 800      }, { 520, 541           }, gmk_internal::LoadRoom       }
   });
 
   TypeMap typeMap;
@@ -978,7 +978,7 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   while (rootnodes-- > 0) {
     LoadTree(dec, typeMap, root.get());
   }
-  
+
   // Handle postponed DnD conversion
   for(auto&& a : postponedActions) a.Parse();
   postponedActions.clear();
@@ -988,7 +988,7 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();
-  
+
   LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
