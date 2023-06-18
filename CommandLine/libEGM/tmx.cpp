@@ -89,7 +89,7 @@ bool TMXMapLoader::LoadTilesets(pugi::xml_node& mapNode, buffers::TreeNode *resN
   pugi::xml_object_range<pugi::xml_named_node_iterator> tilesets = mapNode.children("tileset");
   for(pugi::xml_node &tileset : tilesets) {
     // Load tileset into EGMRoom.tilesets
-    buffers::resources::EGMRoom::Tileset* tilesetProto = resNode->mutable_room()->add_tilesets();
+    buffers::resources::EGMRoom::Tileset* tilesetProto = resNode->mutable_egm_room()->add_tilesets();
     PackTiledRes(tileset, tilesetProto, resourceTypeIdCountMap, tmxPath);
     // load internal
     if(tilesetProto->has_source()) {
@@ -195,14 +195,15 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
   AddTiledResource(resNode, resType, mapNode, resourceTypeIdCountMap, tmxPath);*/
 
   // correct width and height, convert from no. of tiles to no. of pixels
-  unsigned int nHoriTiles = resNode->room().width();
-  unsigned int nVertTiles = resNode->room().height();
-  unsigned int tileWidthPixels = resNode->room().tilewidth();
-  unsigned int tileHeightPixels = resNode->room().tileheight();
+  buffers::resources::EGMRoom* rm = resNode->mutable_egm_room();
+  unsigned int nHoriTiles = rm->width();
+  unsigned int nVertTiles = rm->height();
+  unsigned int tileWidthPixels = rm->tilewidth();
+  unsigned int tileHeightPixels = rm->tileheight();
 
   std::string orientation = "";
-  if(resNode->room().has_orientation())
-    orientation = resNode->mutable_room()->mutable_orientation()->data();
+  if(rm->has_orientation())
+    orientation = rm->mutable_orientation()->data();
 
   if(orientation == "orthogonal" || orientation == "isometric") {
     if(orientation == "orthogonal")
@@ -210,55 +211,55 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
     else if(orientation == "isometric")
       roomOrientation = RoomOrientation::isometric;
 
-    resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
-    resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+    rm->set_width(nHoriTiles * tileWidthPixels);
+    rm->set_height(nVertTiles * tileHeightPixels);
   }
   else if(orientation == "hexagonal") {
     roomOrientation = RoomOrientation::hexagonal;
 
-    hexMapInfo.hexSideLength = resNode->room().hexsidelength();
+    hexMapInfo.hexSideLength = rm->hexsidelength();
 
-    if(resNode->room().staggeraxis() == "x") {
+    if(rm->staggeraxis() == "x") {
       hexMapInfo.staggerAxis = StaggerAxis::x;
 
-      resNode->mutable_room()->set_width((3 * nHoriTiles + 1) * hexMapInfo.hexSideLength / 2);
-      resNode->mutable_room()->set_height((nVertTiles * tileHeightPixels) + hexMapInfo.hexSideLength);
+      rm->set_width((3 * nHoriTiles + 1) * hexMapInfo.hexSideLength / 2);
+      rm->set_height((nVertTiles * tileHeightPixels) + hexMapInfo.hexSideLength);
     }
-    else if(resNode->room().staggeraxis() == "y") {
+    else if(rm->staggeraxis() == "y") {
       hexMapInfo.staggerAxis = StaggerAxis::y;
 
-      resNode->mutable_room()->set_width((nHoriTiles * tileWidthPixels) + hexMapInfo.hexSideLength);
-      resNode->mutable_room()->set_height((3 * nVertTiles + 1) * hexMapInfo.hexSideLength / 2);
+      rm->set_width((nHoriTiles * tileWidthPixels) + hexMapInfo.hexSideLength);
+      rm->set_height((3 * nVertTiles + 1) * hexMapInfo.hexSideLength / 2);
     }
 
-    if(resNode->room().staggerindex() == "even")
+    if(rm->staggerindex() == "even")
       hexMapInfo.staggerIndex = StaggerIndex::even;
-    else if(resNode->room().staggerindex() == "odd")
+    else if(rm->staggerindex() == "odd")
       hexMapInfo.staggerIndex = StaggerIndex::odd;
   }
   else if(orientation == "staggered") {
     roomOrientation = RoomOrientation::staggered;
 
-    if(resNode->room().staggeraxis() == "x") {
+    if(rm->staggeraxis() == "x") {
       staggeredIsoMapInfo.staggerAxis = StaggerAxis::x;
 
-      resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels / 2);
-      resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels);
+      rm->set_width(nHoriTiles * tileWidthPixels / 2);
+      rm->set_height(nVertTiles * tileHeightPixels);
     }
-    else if(resNode->room().staggeraxis() == "y") {
+    else if(rm->staggeraxis() == "y") {
       staggeredIsoMapInfo.staggerAxis = StaggerAxis::y;
 
-      resNode->mutable_room()->set_width(nHoriTiles * tileWidthPixels);
-      resNode->mutable_room()->set_height(nVertTiles * tileHeightPixels / 2);
+      rm->set_width(nHoriTiles * tileWidthPixels);
+      rm->set_height(nVertTiles * tileHeightPixels / 2);
     }
 
-    if(resNode->room().staggerindex() == "even")
+    if(rm->staggerindex() == "even")
       staggeredIsoMapInfo.staggerIndex = StaggerIndex::even;
-    if(resNode->room().staggerindex() == "odd")
+    if(rm->staggerindex() == "odd")
       staggeredIsoMapInfo.staggerIndex = StaggerIndex::odd;
   }
   else {
-    errStream << "Error loading map, unsupported map orientation: " << resNode->mutable_room()->orientation() << std::endl;
+    errStream << "Error loading map, unsupported map orientation: " << rm->orientation() << std::endl;
     return false;
   }
 
@@ -271,8 +272,8 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
     std::stringstream strStream;
     strStream << std::hex << hexColorStr;
     strStream >> hexColorInt;
-    resNode->mutable_room()->set_color(hexColorInt);
-    resNode->mutable_room()->set_show_color(true);
+    rm->set_color(hexColorInt);
+    rm->set_show_color(true);
   }
 
   bool room_tilesFromObjectsOk = LoadObjects(mapNode, resNode);
@@ -281,7 +282,7 @@ bool TMXMapLoader::LoadMap(pugi::xml_node& mapNode, buffers::TreeNode* resNode) 
     return false;
   }
 
-  bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, resNode->room().tilewidth(), resNode->room().tileheight());
+  bool room_tiledFromLayerDataOk = LoadLayerData(mapNode, resNode, rm->tilewidth(), rm->tileheight());
   if(!room_tiledFromLayerDataOk) {
     errStream << "Something went wrong while laoding Room.Tiles from Layer Data." << std::endl;
     return false;
@@ -301,7 +302,7 @@ bool TMXMapLoader::LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNo
   // iterate over all objectGroups
   for(const pugi::xml_node &objectGroupChild : objectGroups) {
 
-    buffers::resources::EGMRoom::ObjectGroup* objectGroup = resNode->mutable_room()->add_objectgroups();
+    buffers::resources::EGMRoom::ObjectGroup* objectGroup = resNode->mutable_egm_room()->add_objectgroups();
     PackTiledRes(objectGroupChild, objectGroup, resourceTypeIdCountMap, tmxPath);
 
     pugi::xml_object_range<pugi::xml_named_node_iterator> objects = objectGroupChild.children("object");
@@ -360,7 +361,7 @@ bool TMXMapLoader::LoadObjects(pugi::xml_node& mapNode, buffers::TreeNode *resNo
 bool TMXMapLoader::LoadLayerData(pugi::xml_node& mapNode, buffers::TreeNode *resNode, int tileWidth, int tileHeight) {
   pugi::xml_object_range<pugi::xml_named_node_iterator> layers = mapNode.children("layer");
   for(const pugi::xml_node &layer : layers) {
-    buffers::resources::EGMRoom::TileLayer* layerProto = resNode->mutable_room()->add_tilelayers();
+    buffers::resources::EGMRoom::TileLayer* layerProto = resNode->mutable_egm_room()->add_tilelayers();
     PackTiledRes(layer, layerProto, resourceTypeIdCountMap, tmxPath);
 
     const pugi::xml_node &dataNode = layer.child("data");

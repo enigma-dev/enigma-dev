@@ -29,7 +29,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   }
 
   buffers::Game* game = proj->mutable_game();
-  
+
   // Add tree root
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
@@ -47,15 +47,15 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   obj->set_parent_name("");
   obj->set_sprite_name("");
   obj->set_mask_name("");
-  
+
   // Load it's events
   const google::protobuf::Descriptor* desc = obj->GetDescriptor();
   LoadObjectEvents(fName, obj, desc->FindFieldByName("egm_events"), _event_data);
-  
+
   // Add our room
   buffers::TreeNode* rm_node = game_root->mutable_folder()->add_children();
   rm_node->set_name("test_room");
-  buffers::resources::EGMRoom* rm = rm_node->mutable_room();
+  buffers::resources::EGMRoom* rm = rm_node->mutable_egm_room();
   rm->set_caption ("");
   rm->set_width(640);
   rm->set_height(480);
@@ -64,7 +64,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   rm->set_color(0xFFC040);
   rm->set_show_color(true);
   rm->set_creation_code("");
-  
+
   // Add obj to room
   buffers::resources::EGMRoom::Instance* inst = rm->add_instances();
   inst->set_id(100001);
@@ -79,9 +79,9 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
 bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const {
   if (!CreateDirectory(fName))
     return false;
-  
+
   bool foundObj = false;
-  
+
   if (project->has_game()) {
     const auto& game = project->game();
     if (game.has_root()) {
@@ -108,9 +108,9 @@ bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const 
     errStream << "Error: project is missing game" << std::endl;
     return false;
   }
-  
+
   if (!foundObj) errStream << "Error: unable to find any objects" << std::endl;
-  
+
   return foundObj;
 }
 

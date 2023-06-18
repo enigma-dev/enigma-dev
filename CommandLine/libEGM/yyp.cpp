@@ -285,7 +285,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         { "GMFont",       &TreeNode::mutable_font       },
         { "GMObject",     &TreeNode::mutable_object     },
         { "GMTimeline",   &TreeNode::mutable_timeline   },
-        { "EGMRoom",      &TreeNode::mutable_room       },
+        { "GMRoom",       &TreeNode::mutable_gm_room    },
         { "GMPath",       &TreeNode::mutable_path       }
       });
 

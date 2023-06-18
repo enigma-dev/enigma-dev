@@ -10,9 +10,10 @@ import "Shader.proto";
 import "Path.proto";
 import "Font.proto";
 import "Timeline.proto";
-import "EGMRoom.proto";
+import "GMRoom.proto";
 import "Include.proto";
 import "Settings.proto";
+import "EGMRoom.proto";
 
 message TreeNode {
   message Folder {
@@ -27,7 +28,9 @@ message TreeNode {
     resources.Object object = 1;
     resources.Sprite sprite = 2;
     resources.Sound sound = 3;
-    resources.EGMRoom room = 4;
+    // gm_room is only used while loading GameMaker formats, after loading its always
+    // translated to egm_room, and gm_room stays in memory for backward compatibility
+    resources.GMRoom gm_room = 4;
     resources.Background background = 5;
     resources.Path path = 6;
     resources.Script script = 7;
@@ -40,6 +43,8 @@ message TreeNode {
     resources.Settings settings = 13;
     //resources.Macros macros = 14;
     //resources.Help help = 15;
+    // emg_room is a newer Enigma Room definition, derived from Tiled's Room definition
+    resources.EGMRoom egm_room = 16;
   }
 
   optional string name = 101;
