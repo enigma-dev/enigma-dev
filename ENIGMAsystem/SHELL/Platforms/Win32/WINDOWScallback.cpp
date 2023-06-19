@@ -135,7 +135,7 @@ namespace enigma
       case WM_CHAR:
         keyboard_lastchar = string(1,wParam);
         if (keyboard_lastkey == enigma_user::vk_backspace) {
-          if (!keyboard_string.empty()) keyboard_string.pop_back();
+          if (!keyboard_string.empty()){ keyboard_string.pop_back();
         } else {
           keyboard_string += keyboard_lastchar;
         }
@@ -210,4 +210,5 @@ namespace enigma
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }
+}
 }
