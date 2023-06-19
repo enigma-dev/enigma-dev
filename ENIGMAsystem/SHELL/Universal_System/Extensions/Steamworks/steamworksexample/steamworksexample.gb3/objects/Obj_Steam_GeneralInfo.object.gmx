@@ -44,7 +44,7 @@ draw_text(50,100 + _i++ * 30,"steam_initialised: " + string(steam_initialised())
 //draw_text(50, 100 + _i++ * 30,"steam_user_installed_dlc [447130]: " + string(steam_user_installed_dlc(447130)));&#13;
 &#13;
 draw_text(50, 100 + _i++ * 30,"steam_is_user_logged_on: " + string(steam_is_user_logged_on()));&#13;
-draw_text(50, 100 + _i++ * 30,"steam_get_user_steam_id: " + string(steam_get_user_steam_id()));&#13;
+//draw_text(50, 100 + _i++ * 30,"steam_get_user_steam_id: " + string(steam_get_user_steam_id()));&#13;
 draw_text(50, 100 + _i++ * 30,"steam_get_user_account_id: " + string(steam_get_user_account_id()));&#13;
 draw_text(50, 100 + _i++ * 30,"steam_get_app_id: " + string(steam_get_app_id()));&#13;
 &#13;
