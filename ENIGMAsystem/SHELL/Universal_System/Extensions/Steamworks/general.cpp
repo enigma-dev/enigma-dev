@@ -9,8 +9,19 @@ bool steam_stats_ready() { return false; }
 int steam_get_app_id() { return (int)steamworks::steam_utils::get_app_id(); }
 
 int steam_get_user_account_id() {
-  return -1;
-  // return steamworks::steam_client::steam_id().GetAccountID();
+  if (!steamworks::steam_client::is_valid()) {
+    DEBUG_MESSAGE("Calling steam_get_user_account_id() but not initialized, consider calling steam_init() first",
+                  M_ERROR);
+    return -1;
+  }
+
+  if (!steamworks::steam_client::is_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_get_user_account_id() but not logged in, please log into Steam first",
+                  M_ERROR);
+    return -1;
+  }
+
+  return steamworks::steam_user::get_steam_id().GetAccountID();
 }
 
 long long steam_get_user_steam_id() {
