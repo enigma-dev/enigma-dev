@@ -1,0 +1,17 @@
+foobar = 6;
+barfoo = 8;
+var buf = buffer_create(1, buffer_grow, 1);
+game_save_buffer(buf);
+buffer_save(buf, "/tmp/test.bin");
+foobar = 0;
+barfoo = 0;
+
+show_debug_message("Loading the file");
+buffer_delete(buf);
+buf = buffer_load("/tmp/test.bin");
+game_load_buffer(buf);
+gtest_assert_eq(int(id.foobar), 6);
+gtest_assert_eq(int(id.barfoo), 8);
+show_debug_message("Loading successful");
+
+game_end();

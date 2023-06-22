@@ -22,9 +22,12 @@
  */
 
 #include "collisions_object.h"
+
+#include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include <cmath>
 #include <floatcomp.h>
@@ -139,4 +142,38 @@ namespace enigma
     }
 
     object_collisions::~object_collisions() {}
+
+    std::vector<std::byte> object_collisions::serialize() {
+      auto bytes = object_transform::serialize();
+      std::size_t len = 0;
+
+      enigma_internal_serialize<unsigned char>(object_collisions::objtype, len, bytes);
+      enigma_internal_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
+                                     polygon_yscale, polygon_angle);
+
+      bytes.shrink_to_fit();
+      return bytes;
+    }
+
+    std::size_t object_collisions::deserialize_self(std::byte* iter) {
+      auto len = object_transform::deserialize_self(iter);
+
+      unsigned char type;
+      enigma_internal_deserialize(type, iter, len);
+      if (type != object_collisions::objtype) {
+        DEBUG_MESSAGE("object_collisions::deserialize_self: Object type '" + std::to_string(type) +
+                          "' does not match expected: " + std::to_string(object_collisions::objtype),
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+      }
+      enigma_internal_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
+                                     polygon_yscale, polygon_angle);
+
+      return len;
+    }
+
+    std::pair<object_collisions, std::size_t> object_collisions::deserialize(std::byte* iter) {
+      object_collisions result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
+    }
 }

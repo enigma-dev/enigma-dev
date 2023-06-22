@@ -31,11 +31,11 @@ using std::string;
 static const std::vector<std::string> kTokenNames = [](){
   std::vector<std::string> res;
   res.resize(TT_ENDOFCODE + 1);
+  // Use a switch statement to enforce all values being defined.
   #define REGISTER(name) [[fallthrough]]; case name: res[name] = #name
-  switch (TT_ENDOFCODE) {
-    default:
-    REGISTER(TT_ENDOFCODE);
-    REGISTER(TT_ERROR);
+  switch (TT_ERROR) {
+    // Note that TT_ERROR must be named first as it is the switch value.
+    case TT_ERROR: res[TT_ERROR] = "<ERROR>";
 
     REGISTER(TT_IDENTIFIER);
     REGISTER(TT_SEMICOLON);
@@ -45,6 +45,9 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_ASSOP);
     REGISTER(TT_EQUALS);
     REGISTER(TT_DOT);
+    REGISTER(TT_ARROW);
+    REGISTER(TT_DOT_STAR);
+    REGISTER(TT_ARROW_STAR);
     REGISTER(TT_PLUS);
     REGISTER(TT_MINUS);
     REGISTER(TT_STAR);
@@ -69,6 +72,7 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_GREATER);
     REGISTER(TT_LESSEQUAL);
     REGISTER(TT_GREATEREQUAL);
+    REGISTER(TT_THREEWAY);
     REGISTER(TT_LSH);
     REGISTER(TT_RSH);
     REGISTER(TT_QMARK);
@@ -78,8 +82,6 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_ENDBRACKET);
     REGISTER(TT_BEGINBRACE);
     REGISTER(TT_ENDBRACE);
-    REGISTER(TT_BEGINTRIANGLE);
-    REGISTER(TT_ENDTRIANGLE);
     REGISTER(TT_DECLITERAL);
     REGISTER(TT_BINLITERAL);
     REGISTER(TT_OCTLITERAL);
@@ -116,6 +118,8 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TTM_WHITESPACE);
     REGISTER(TTM_CONCAT);
     REGISTER(TTM_STRINGIFY);
+
+    REGISTER(TT_ENDOFCODE);
   }
   return res;
 }();

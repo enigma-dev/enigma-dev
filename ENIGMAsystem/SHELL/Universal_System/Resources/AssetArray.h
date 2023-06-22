@@ -22,6 +22,9 @@
 #include <string>
 #include <utility>
 
+#include "Universal_System/Object_Tiers/serialization.h"
+#include "Universal_System/detect_serialization.h"
+
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
   #define CHECK_ID(id, ret) \
@@ -35,7 +38,13 @@
   #define CHECK_ID_V(id)
 #endif
 
+namespace enigma_user {
+int background_get_width(int backId);
+int background_get_height(int backId);
+}
+
 namespace enigma {
+struct Background;
 
 template<typename T, int LEFT> 
 class OffsetVector {
@@ -160,7 +169,11 @@ class AssetArray {
   // NOTE: absolutely no bounds checking!
   // only used in rare cases where you
   // already know the asset exists
-  T& operator[](int id) {
+  T& operator[](int id) noexcept {
+    return assets_[id];
+  }
+
+  const T& operator[](int id) const noexcept {
     return assets_[id];
   }
 
@@ -190,6 +203,51 @@ class AssetArray {
 
   void resize(size_t count) {
     assets_.resize(count);
+  }
+
+  std::size_t byte_size() const noexcept {
+    std::size_t len = sizeof(std::size_t);
+    for (std::size_t i = 0; i < size(); i++) {
+      len += assets_[i].byte_size();
+    }
+    return len;
+  }
+
+  std::vector<std::byte> serialize() const {
+    static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
+                  "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
+
+    std::vector<std::byte> result{};
+    std::size_t len = 0;
+    enigma::enigma_internal_serialize(assets_.size(), len, result);
+    for (std::size_t i = 0; i < assets_.size(); i++) {
+      enigma::enigma_internal_serialize(operator[](i), len, result);
+    }
+    result.shrink_to_fit();
+    return result;
+  }
+
+  std::size_t deserialize_self(std::byte *iter) {
+    static_assert(has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION(),
+                  "Given type is required to have at least one of `x.deserialize_self()` or `deserialize<T>()`");
+
+    std::size_t len = 0;
+    std::size_t elements = 0;
+    enigma::enigma_internal_deserialize(elements, iter, len);
+    resize(elements);
+    for (std::size_t i = 0; i < elements; i++) {
+      enigma::enigma_internal_deserialize(assets_[i], iter, len);
+    }
+    return len;
+  }
+
+  static std::pair<AssetArray<T, LEFT>, std::size_t> deserialize(std::byte *iter) {
+    if constexpr (has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION()) {
+      AssetArray<T, LEFT> result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
+    }
+    return {};
   }
 
  private:

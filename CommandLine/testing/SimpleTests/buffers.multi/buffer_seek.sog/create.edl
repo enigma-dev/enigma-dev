@@ -1,0 +1,101 @@
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+
+buffer_seek(buf, buffer_seek_start, 9);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_seek(buf, buffer_seek_end, -2);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_seek(buf, buffer_seek_end, 0);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_seek(buf, buffer_seek_relative, -2);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_seek(buf, buffer_seek_start, -5);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_end, -20);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_relative, 25);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_fast, buffer_sizeof(buffer_u8));
+
+buffer_seek(buf, buffer_seek_start, 9);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_seek(buf, buffer_seek_end, -2);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_seek(buf, buffer_seek_end, 0);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_seek(buf, buffer_seek_relative, -2);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_seek(buf, buffer_seek_start, -5);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_end, -20);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_relative, 25);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, buffer_sizeof(buffer_u8));
+
+buffer_seek(buf, buffer_seek_start, 9);
+gtest_assert_eq(buffer_tell(buf), 1);
+
+buffer_seek(buf, buffer_seek_end, 0);
+gtest_assert_eq(buffer_tell(buf), 7);
+
+buffer_seek(buf, buffer_seek_relative, -2);
+gtest_assert_eq(buffer_tell(buf), 5);
+
+buffer_seek(buf, buffer_seek_start, -5);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_end, -20);
+gtest_assert_eq(buffer_tell(buf), 0);
+
+buffer_seek(buf, buffer_seek_relative, 25);
+gtest_assert_eq(buffer_tell(buf), 1);
+
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_u8));
+
+buffer_seek(buf, buffer_seek_start, 9);
+gtest_assert_eq(buffer_tell(buf), 9);
+gtest_assert_eq(buffer_get_size(buf), 10);
+
+buffer_seek(buf, buffer_seek_end, 0);
+gtest_assert_eq(buffer_tell(buf), 9);
+gtest_assert_eq(buffer_get_size(buf), 10);
+
+buffer_seek(buf, buffer_seek_relative, -2);
+gtest_assert_eq(buffer_tell(buf), 7);
+gtest_assert_eq(buffer_get_size(buf), 10);
+
+buffer_seek(buf, buffer_seek_start, -5);
+gtest_assert_eq(buffer_tell(buf), 0);
+gtest_assert_eq(buffer_get_size(buf), 10);
+
+buffer_seek(buf, buffer_seek_end, -20);
+gtest_assert_eq(buffer_tell(buf), 0);
+gtest_assert_eq(buffer_get_size(buf), 10);
+
+buffer_seek(buf, buffer_seek_relative, 25);
+gtest_assert_eq(buffer_tell(buf), 25);
+gtest_assert_eq(buffer_get_size(buf), 26);
+
+buffer_delete(buf);
+
+game_end();

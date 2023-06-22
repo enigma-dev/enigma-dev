@@ -1,0 +1,37 @@
+var width = 8;
+var height = 8;
+var components = 4;
+
+var buf = buffer_create(width * height * components, buffer_fixed, 1);
+var surf = surface_create(width, height);
+
+for var i = 0; i < buffer_get_size(buf); i += 4 {
+    buffer_write(buf, buffer_u8, 0);
+    buffer_write(buf, buffer_u8, 0);
+    buffer_write(buf, buffer_u8, 255);
+    buffer_write(buf, buffer_u8, 255);
+}
+
+buffer_set_surface(buf, surf, 0);
+
+for var i = 0; i < width; i++ {
+    for var j = 0; j < height; j++ {
+        gtest_assert_eq(surface_get_pixel(surf, i, j), 0x0000ff);
+    }
+}
+
+surface_free(surf);
+
+surf = surface_create(width, height);
+buffer_set_surface(buf, surf, 12);
+
+for var i = 0; i < width; i++ {
+    for var j = 0; j < height; j++ {
+        gtest_assert_eq(surface_get_pixel(surf, i, j), 0);
+    }
+}
+
+buffer_delete(buf);
+surface_free(surf);
+
+game_end();

@@ -84,6 +84,12 @@ template <class T> struct lua_table {
   const dense_type &dense_part() const {
     return dense;
   }
+  const sparse_type &sparse_part() const {
+    return sparse;
+  }
+  const std::size_t &mx_size_part() const {
+    return mx_size;
+  }
 
   T& operator[] (size_t ind) {
     mx_size = my_max(ind+1, mx_size);
