@@ -169,7 +169,11 @@ class AssetArray {
   // NOTE: absolutely no bounds checking!
   // only used in rare cases where you
   // already know the asset exists
-  T& operator[](int id) {
+  T& operator[](int id) noexcept {
+    return assets_[id];
+  }
+
+  const T& operator[](int id) const noexcept {
     return assets_[id];
   }
 
@@ -209,7 +213,7 @@ class AssetArray {
     return len;
   }
 
-  std::vector<std::byte> serialize() {
+  std::vector<std::byte> serialize() const {
     static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
 

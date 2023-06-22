@@ -40,7 +40,7 @@ std::size_t Background::byte_size() const noexcept {
          sizeof(vOffset) + sizeof(hSep) + sizeof(vSep);
 }
 
-std::vector<std::byte> Background::serialize() {
+std::vector<std::byte> Background::serialize() const {
   std::vector<std::byte> result{};
   std::size_t len = 0;
 
