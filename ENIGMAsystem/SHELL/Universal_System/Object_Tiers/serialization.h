@@ -431,7 +431,7 @@ inline T deserialize(std::byte *iter) {
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;
     result.deserialize_self(iter);
-    return std::move(result);
+    return result;
   } else if (has_deserialize_function_v<std::decay_t<T>>) {
     return deserialize<T>(iter).second;
   } else {

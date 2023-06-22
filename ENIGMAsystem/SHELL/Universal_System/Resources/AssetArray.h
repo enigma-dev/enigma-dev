@@ -169,7 +169,11 @@ class AssetArray {
   // NOTE: absolutely no bounds checking!
   // only used in rare cases where you
   // already know the asset exists
-  T& operator[](int id) {
+  T& operator[](int id) noexcept {
+    return assets_[id];
+  }
+
+  const T& operator[](int id) const noexcept {
     return assets_[id];
   }
 

@@ -45,7 +45,7 @@
 
 HAS_MEMBER_FUNCTION(size, std::size_t (U::*)() const noexcept);
 HAS_MEMBER_FUNCTION(byte_size, std::size_t (U::*)() const noexcept);
-HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (U::*)());
+HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (U::*)() const);
 HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (U::*)(std::byte *iter));
 
 #undef HAS_MEMBER_FUNCTION
