@@ -1,10 +1,8 @@
 #if !defined(GENERAL_H)
 #define GENERAL_H
 
-#include "wrapper/steam_client.h"
-#include "wrapper/steam_utils.h"
-#include "wrapper/steam_user.h"
-#include <iostream>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "game_client/main.h"
 
 namespace enigma_user {
 
@@ -12,11 +10,11 @@ bool steam_initialised();
 
 bool steam_stats_ready();
 
-int steam_get_app_id();
+unsigned steam_get_app_id();
 
-int steam_get_user_account_id();
+unsigned steam_get_user_account_id();
 
-long long steam_get_user_steam_id();
+unsigned long long steam_get_user_steam_id();
 
 std::string steam_get_persona_name();
 
