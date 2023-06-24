@@ -28,7 +28,7 @@ struct Sound {
   
   void destroy() {
     if (!isDestroyed()) {
-      Mix_FreeChunk(mc);
+      //Mix_FreeChunk(mc);
     }
   }
   
