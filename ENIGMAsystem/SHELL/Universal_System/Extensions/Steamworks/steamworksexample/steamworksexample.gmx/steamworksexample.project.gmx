@@ -17,16 +17,37 @@
     <font>fonts\Font_ENIGMA_50</font>
   </fonts>
   <objects name="objects">
-    <object>objects\Obj_Steam_GeneralInfo</object>
     <object>objects\Obj_Steam</object>
-    <object>objects\Obj_ENIGMA_button</object>
-    <object>objects\Obj_ENIGMA_text</object>
-    <object>objects\Obj_ENIGMA_textbox</object>
-    <object>objects\Obj_Steam_Goto</object>
+    <objects name="Overlay">
+      <object>objects\Obj_Steam_Overlay_Achievements</object>
+      <object>objects\Obj_Steam_Overlay_Browser</object>
+      <object>objects\Obj_Steam_Overlay_Community</object>
+      <object>objects\Obj_Steam_Overlay_Friends</object>
+      <object>objects\Obj_Steam_Overlay_GameGroup</object>
+      <object>objects\Obj_Steam_Overlay_Players</object>
+      <object>objects\Obj_Steam_Overlay_Setting</object>
+      <object>objects\Obj_Steam_Overlay_Store</object>
+      <object>objects\Obj_Steam_Overlay_User</object>
+      <object>objects\Obj_Steam_OverlayInfo</object>
+    </objects>
+    <objects name="Main">
+      <object>objects\Obj_Steam_Goto</object>
+      <object>objects\Obj_Steam_GeneralInfo</object>
+    </objects>
+    <objects name="Assets">
+      <object>objects\Obj_ENIGMA_button</object>
+      <object>objects\Obj_ENIGMA_textbox</object>
+      <object>objects\Obj_ENIGMA_text</object>
+    </objects>
   </objects>
   <rooms name="rooms">
     <room>rooms\Room_Steam_Init</room>
-    <room>rooms\Room_Steam_Main</room>
+    <rooms name="Main">
+      <room>rooms\Room_Steam_Main</room>
+    </rooms>
+    <rooms name="Overlay">
+      <room>rooms\Room_Steam_Overlay</room>
+    </rooms>
   </rooms>
   <constants number="0"/>
   <help>

@@ -1,7 +1,7 @@
-#if !defined(GENERAL_H)
-#define GENERAL_H
+#if !defined(OVERLAY_H)
+#define OVERLAY_H
 
-#include "wrapper/steam_client.h"
+#include <string>
 
 namespace enigma_user {
 
@@ -15,12 +15,12 @@ void steam_activate_overlay_browser(std::string url);
 
 void steam_activate_overlay_store(int app_id);
 
-void steam_activate_overlay_user(std::string dialog_name, int64 steamid);
+void steam_activate_overlay_user(std::string dialog_name, unsigned long long steamid);
 
 bool steam_set_overlay_notification_inset(int hor_inset, int vert_inset);
 
 void steam_set_overlay_notification_position(int position);
 
-}
+}  // namespace enigma_user
 
-#endif  // !GENERAL_H
+#endif  // !OVERLAY_H
