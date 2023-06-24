@@ -19,8 +19,8 @@ int audiosystem_initialize() {
 void audiosystem_update(void) {}
 
 void audiosystem_cleanup() {
-  Mix_CloseAudio();
-  Mix_Quit();
+  //Mix_CloseAudio();
+  //Mix_Quit();
 }
 
 int sound_add_from_buffer(int id, void* buffer, size_t bufsize) {
