@@ -349,7 +349,12 @@ void window_set_fullscreen(bool fullscreen) {
   }
 }
 
+int window_get_cursor() {
+  return enigma::cursorInt;
+}
+
 int window_set_cursor(int cursorID) {
+  enigma::cursorInt = cursorID;
   if (cursorID == cr_none)
     SDL_ShowCursor(SDL_DISABLE);
   else
