@@ -26,8 +26,6 @@
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_restart_app_if_necessary(480); // replace 480 with your app id&#13;
-&#13;
 steam_init();&#13;
 &#13;
 steam_set_warning_message_hook();&#13;
@@ -41,8 +39,7 @@ randomize();&#13;
 &#13;
 //#macro SteamLeaderboard "YYLeaderboard_10/29/21--"&#13;
 &#13;
-if (steam_initialised()) room_goto(Room_Steam_Main);&#13;
-</string>
+if (steam_initialised()) room_goto(Room_Steam_Main);</string>
           </argument>
         </arguments>
       </action>
