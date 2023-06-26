@@ -4,7 +4,7 @@
   <solid>0</solid>
   <visible>-1</visible>
   <depth>0</depth>
-  <persistent>0</persistent>
+  <persistent>-1</persistent>
   <maskName>&lt;undefined&gt;</maskName>
   <parentName>&lt;undefined&gt;</parentName>
   <events>
@@ -29,7 +29,7 @@
 steam_init();&#13;
 &#13;
 steam_set_warning_message_hook();&#13;
-&#13;
+ &#13;
 // This variable is used for game_restart() purposes.&#13;
 is_game_restarting = false;&#13;
 &#13;
@@ -39,36 +39,7 @@ randomize();&#13;
 &#13;
 //#macro SteamLeaderboard "YYLeaderboard_10/29/21--"&#13;
 &#13;
-if (steam_initialised()) room_goto(Room_Steam_Main);</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event enumb="0" eventtype="1">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
-        <isquestion>0</isquestion>
-        <exetype>2</exetype>
-        <functionname/>
-        <codestring/>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>/// @description Game restart (part 2)&#13;
-&#13;
-// This prsents a game restart implementation example&#13;
-// When we reach the game end event we are either closing or restarting the game&#13;
-// we now check our flag variable and we call 'steam_shutdown' only if not restarting&#13;
-if (is_game_restarting == false) {&#13;
-	steam_shutdown();&#13;
-}&#13;
+if (steam_initialised()) room_goto(Room_Steam_Main);&#13;
 </string>
           </argument>
         </arguments>
@@ -122,7 +93,9 @@ steam_update();</string>
 // This prsents a game restart implementation example&#13;
 // We use a variable as a flag to tell the system we are 'restarting' the game&#13;
 is_game_restarting = true;&#13;
-game_restart();</string>
+game_restart();&#13;
+&#13;
+</string>
           </argument>
         </arguments>
       </action>
@@ -147,7 +120,39 @@ game_restart();</string>
             <string>&#13;
 // This function call is purely for debugging purposes&#13;
 // It will log all the messages from the steam callbacks&#13;
-show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
+show_debug_message("Steam ASYNC: " + json_encode(async_load))&#13;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="3" eventtype="7">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// @description Game restart (part 2)&#13;
+&#13;
+// This prsents a game restart implementation example&#13;
+// When we reach the game end event we are either closing or restarting the game&#13;
+// we now check our flag variable and we call 'steam_shutdown' only if not restarting&#13;
+if (is_game_restarting == false) {&#13;
+	steam_shutdown();&#13;
+}&#13;
+&#13;
+</string>
           </argument>
         </arguments>
       </action>
@@ -169,14 +174,15 @@ show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string> /// @description Insert description here&#13;
+            <string>/// @description Insert description here&#13;
 // You can write your code in this editor&#13;
 &#13;
-if (steam_initialised()) return 0;&#13;
+if (steam_initialised()) return;&#13;
 &#13;
 draw_set_halign(fa_center);&#13;
 draw_set_valign(fa_middle);&#13;
-draw_text_transformed(room_width/2, room_height/2, "You are not logged in to steam!!", 2, 2, 0);</string>
+draw_text_transformed(room_width/2, room_height/2, "You are not logged in to steam!!", 2, 2, 0);&#13;
+</string>
           </argument>
         </arguments>
       </action>

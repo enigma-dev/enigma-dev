@@ -1,7 +1,6 @@
 #if !defined(GENERAL_H)
 #define GENERAL_H
 
-#include "Widget_Systems/widgets_mandatory.h"
 #include "game_client/main.h"
 
 namespace enigma_user {

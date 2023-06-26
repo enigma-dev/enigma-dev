@@ -1,6 +1,5 @@
 #include "overlay.h"
 
-#include "Widget_Systems/widgets_mandatory.h"
 #include "game_client/main.h"
 #include "game_client/overlay.h"
 

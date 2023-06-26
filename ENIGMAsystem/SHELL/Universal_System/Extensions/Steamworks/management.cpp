@@ -18,7 +18,10 @@ void steam_init() {
 }
 
 void steam_update() {
-  DEBUG_MESSAGE("Calling steam_update", M_INFO);
+  if (!steamworks::cmain::is_initialised()) {
+    DEBUG_MESSAGE("Calling steam_update but not initialized, consider calling steam_init first", M_ERROR);
+    return;
+  }
   SteamAPI_RunCallbacks();
 }
 
