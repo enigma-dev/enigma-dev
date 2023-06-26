@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "public/steam/steam_api.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 namespace steamworks {
 
