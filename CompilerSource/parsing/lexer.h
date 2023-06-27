@@ -38,7 +38,7 @@ struct ParseContext {
   /// implements pretty-printing.
   const LanguageFrontend *language_fe;
   /// All macros built-in or declared in user's Definitions pages.
-  const MacroMap macro_map;
+  MacroMap macro_map;
   /// Variables that are inherited by all objects.
   const NameSet *shared_locals;
   /// Scripts that are available for execution.
@@ -46,8 +46,10 @@ struct ParseContext {
   /// Options controlling how code is interpreted.
   setting::CompatibilityOptions compatibility_opts;
 
-  static const ParseContext &ForTesting(bool use_cpp);
-  static const ParseContext &ForPreprocessorEvaluation();
+  static ParseContext ForTesting(bool use_cpp);
+  static const ParseContext &StaticForTesting(bool use_cpp);
+  static ParseContext ForPreprocessorEvaluation();
+  static const ParseContext &StaticForPreprocessorEvaluation();
 
   /// Disallow null construction.
   ParseContext(nullptr_t) = delete;
@@ -58,6 +60,8 @@ struct ParseContext {
       shared_locals(&lang->shared_object_locals()),
       script_names(std::move(script_names)),
       compatibility_opts(lang->compatibility_opts()) {}
+
+  void AddMacro(Macro macro);
 };
 
 class Lexer {
@@ -84,6 +88,8 @@ class Lexer {
       owned_code(code_), code(*owned_code), context(ctx), herr(herr_),
       options(ctx) {}
   Lexer(TokenVector tokens, const ParseContext *ctx, ErrorHandler *herr_);
+
+  void AddMacro(Macro macro);
 
  private:
   struct OpenMacro {

@@ -253,11 +253,29 @@ struct TestingContext : ParseContext {
 
 static ParseContext kEmptyContextCpp(&kNullLanguageCpp, kNoNames);
 static ParseContext kEmptyContextGml(&kNullLanguageGml, kNoNames);
-const ParseContext &ParseContext::ForTesting(bool use_cpp) {
+
+ParseContext ParseContext::ForTesting(bool use_cpp) {
+  return ParseContext{use_cpp ? &kNullLanguageCpp : &kNullLanguageGml, kNoNames};
+}
+const ParseContext &ParseContext::StaticForTesting(bool use_cpp) {
   return use_cpp ? kEmptyContextCpp : kEmptyContextGml;
 }
-const ParseContext &ParseContext::ForPreprocessorEvaluation() {
+
+ParseContext ParseContext::ForPreprocessorEvaluation() {
   return kEmptyContextCpp;
+}
+const ParseContext &ParseContext::StaticForPreprocessorEvaluation() {
+  return kEmptyContextCpp;
+}
+
+void ParseContext::AddMacro(Macro macro) {
+  macro_map.insert({macro.name, macro});
+}
+
+void Lexer::AddMacro(Macro macro) {
+  // TODO: This is a horrible, horrible, atrocious, despicable hack to get this to work, namely because everywhere
+  // context is passed as a const pointer so its easier to have one @c const_cast versus changing many call sites
+  const_cast<ParseContext *>(context)->AddMacro(macro);
 }
 
 bool Lexer::MacroRecurses(std::string_view name) const {

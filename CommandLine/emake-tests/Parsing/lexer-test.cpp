@@ -24,14 +24,14 @@ class TestFailureErrorHandler : public ErrorHandler {
 
 struct LexerTester {
   TestFailureErrorHandler herr;
-  const ParseContext *context;
+  ParseContext context;
   Lexer lexer;
 
   Lexer *operator->() { return &lexer; }
 
-  LexerTester(std::string code, bool use_cpp = false):
-      context(&ParseContext::ForTesting(use_cpp)),
-      lexer(std::move(code), context, &herr) {}
+  explicit LexerTester(std::string code, bool use_cpp = false):
+      context(ParseContext::ForTesting(use_cpp)),
+      lexer(std::move(code), &context, &herr) {}
 };
 
 TEST(LexerTest, GreedyTokenization) {
@@ -153,15 +153,9 @@ TEST(LexerTest, HexThenComment) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
-void AddMacro(LexerTester &lex, Macro macro) {
-  // FIXME: this is a horrible hack
-  const_cast<MacroMap&>(lex.context->macro_map)
-      .insert({macro.name, macro});
-}
-
 TEST(LexerTest, MacroFunctions) {
   LexerTester lex("MACRO_FUNC(ident);", true);
-  AddMacro(lex, Macro("MACRO_FUNC", {"arg"}, false, "(arg)", &lex.herr));
+  lex->AddMacro(Macro{"MACRO_FUNC", {"arg"}, false, "(arg)", &lex.herr});
   EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
@@ -171,7 +165,7 @@ TEST(LexerTest, MacroFunctions) {
 
 TEST(LexerTest, VariadicMacroFunctions) {
   LexerTester lex("VAR_FUNC(ident, 123);", true);
-  AddMacro(lex, Macro("VAR_FUNC", {"arg"}, true, "(arg)", &lex.herr));
+  lex->AddMacro(Macro{"VAR_FUNC", {"arg"}, true, "(arg)", &lex.herr});
   EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_COMMA);
