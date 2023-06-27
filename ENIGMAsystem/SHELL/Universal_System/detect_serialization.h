@@ -1,4 +1,5 @@
 /** Copyright (C) 2022 Dhruv Chawla
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,39 +15,56 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #ifndef ENIGMA_DETECT_SERIALIZATION_H
 #define ENIGMA_DETECT_SERIALIZATION_H
 
 #include <cstddef>
 #include <vector>
 
-#define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)         \
-  template <typename T>                                  \
-  class has_##NAME##_method {                            \
-    FUNC;                                                \
-    template <typename U>                                \
-    static char func(Check<U, &U::NAME> *);              \
-    template <typename U>                                \
-    static int func(...);                                \
-                                                         \
-   public:                                               \
-    typedef has_##NAME##_method type;                    \
-    enum { value = sizeof(func<T>(0)) == sizeof(char) }; \
-  };                                                     \
-                                                         \
-  template <typename T>                                  \
+#define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)                          \
+  template <typename T>                                                   \
+  class has_##NAME##_method {                                             \
+    FUNC;                                                                 \
+    template <typename U>                                                 \
+    static std::true_type func(Check<U, &U::NAME> *);                     \
+    template <typename U>                                                 \
+    static std::false_type func(...);                                     \
+                                                                          \
+   public:                                                                \
+    typedef has_##NAME##_method type;                                     \
+    enum { value = std::is_same_v<decltype(func<T>(0)),std::true_type> }; \
+  };                                                                      \
+                                                                          \
+  template <typename T>                                                   \
   constexpr static inline bool has_##NAME##_method_v = has_##NAME##_method<T>::value
 
-#define INTERNAL_FUNCTION_PREFIX template <typename U,
+#define INTERNAL_FUNCTION_PREFIX template <typename V,
 #define INTERNAL_FUNCTION_SUFFIX > struct Check
 
 #define HAS_MEMBER_FUNCTION(NAME, FUNCTION) \
   INTERNAL_HAS_MEMBER_FUNCTION(NAME, INTERNAL_FUNCTION_PREFIX FUNCTION INTERNAL_FUNCTION_SUFFIX)
 
-HAS_MEMBER_FUNCTION(size, std::size_t (U::*)() const noexcept);
-HAS_MEMBER_FUNCTION(byte_size, std::size_t (U::*)() const noexcept);
-HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (U::*)() const);
-HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (U::*)(std::byte *iter));
+HAS_MEMBER_FUNCTION(size, std::size_t (V::*)() const noexcept);
+HAS_MEMBER_FUNCTION(byte_size, std::size_t (V::*)() const noexcept);
+HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (V::*)() const);
+HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
+
+/**
+ * now we have 4 classes with the following names:
+ * has_size_method
+ * has_byte_size_method
+ * has_serialize_method
+ * has_deserialize_self_method
+ * 
+ * each one has 2 data members:
+ * type: This member is a typedef that refers to the class itself (has_size_method,
+ * has_byte_size_method, has_serialize_method, has_deserialize_self_method)
+ * 
+ * value: This member is a boolean value that indicates whether the corresponding class
+ * has a method with the specified NAME (size, byte_size, serialize, deserialize_self),
+ * it is true if the class has the method and false otherwise.
+ */
 
 #undef HAS_MEMBER_FUNCTION
 #undef INTERNAL_FUNCTION_SUFFIX
