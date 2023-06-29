@@ -33,7 +33,7 @@
                                                                           \
    public:                                                                \
     typedef has_##NAME##_method type;                                     \
-    enum { value = std::is_same_v<decltype(func<T>(0)),std::true_type> }; \
+    enum { value = decltype(func<T>(0))::value }; \
   };                                                                      \
                                                                           \
   template <typename T>                                                   \
@@ -51,13 +51,13 @@ HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (V::*)() const);
 HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
 
 /**
- * now we have 4 classes with the following names:
+ * Now we have 4 classes with the following names:
  * has_size_method
  * has_byte_size_method
  * has_serialize_method
  * has_deserialize_self_method
  * 
- * each one has 2 data members:
+ * Each one has 2 data members:
  * type: This member is a typedef that refers to the class itself (has_size_method,
  * has_byte_size_method, has_serialize_method, has_deserialize_self_method)
  * 
@@ -95,6 +95,16 @@ HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
   constexpr static inline bool has_##NAME##_function_v = has_##NAME##_function<T, __VA_ARGS__>::value
 
 HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
+
+/**
+ * Now we have 1 struct with the following name:
+ * has_deserialize_function
+ * 
+ * The struct has 1 data member:
+ * value: This member is a boolean value that indicates whether the corresponding class
+ * has a static function with the specified NAME (deserialize),
+ * it is true if the class has the function and false otherwise.
+ */
 
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
