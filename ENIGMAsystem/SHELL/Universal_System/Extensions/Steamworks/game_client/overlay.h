@@ -16,12 +16,14 @@ class coverlay {
   coverlay();
   ~coverlay() = default;
 
-  void activate_overlay(const std::string& dialog);
-
   STEAM_CALLBACK(coverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
 
-  bool is_overlay_enabled();
   bool is_overlay_activated();
+
+  static bool is_overlay_enabled();
+  static void activate_overlay(const std::string& dialog);
+
+  static void activate_overlay_browser(const std::string& url);
 };
 }  // namespace steamworks
 

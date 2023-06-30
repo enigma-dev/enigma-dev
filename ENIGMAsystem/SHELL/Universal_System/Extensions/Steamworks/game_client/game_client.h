@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <string>
-#include "public/steam/steam_api.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "public/steam/steam_api.h"
 
 namespace steamworks {
 
@@ -35,18 +35,16 @@ class cgame_client {
 
   coverlay* get_overlay();
 
-  bool is_user_logged_on();
-
   CSteamID get_steam_id_local_user();
   unsigned get_steam_app_id();
 
   std::string get_steam_persona_name();
 
-  static std::string get_steam_user_persona_name(CSteamID user_persona_name);
-
   std::string get_current_game_language();
   std::string get_available_languages();
 
+  static std::string get_steam_user_persona_name(CSteamID user_persona_name);
+  static bool is_user_logged_on();
   static bool is_subscribed();
 };
 }  // namespace steamworks

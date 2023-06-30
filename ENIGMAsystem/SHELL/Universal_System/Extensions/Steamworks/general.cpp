@@ -15,7 +15,7 @@ unsigned steam_get_app_id() {
     return -1;
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_get_app_id but not logged in, please log into Steam first", M_ERROR);
     return -1;
   }
@@ -29,7 +29,7 @@ unsigned steam_get_user_account_id() {
     return -1;
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_get_user_account_id but not logged in, please log into Steam first", M_ERROR);
     return -1;
   }
@@ -43,7 +43,7 @@ unsigned long long steam_get_user_steam_id() {
     return -1;
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_get_user_steam_id but not logged in, please log into Steam first", M_ERROR);
     return -1;
   }
@@ -57,7 +57,7 @@ std::string steam_get_persona_name() {
     return std::to_string(-1);
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_get_persona_name but not logged in, please log into Steam first", M_ERROR);
     return std::to_string(-1);
   }
@@ -72,7 +72,7 @@ std::string steam_get_user_persona_name(CSteamID user_persona_name) {
     return std::to_string(-1);
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_get_user_persona_name but not logged in, please log into Steam first", M_ERROR);
     return std::to_string(-1);
   }
@@ -86,7 +86,7 @@ bool steam_is_user_logged_on() {
     return false;
   }
 
-  return steamworks::cmain::get_game_client()->is_user_logged_on();
+  return steamworks::cgame_client::is_user_logged_on();
 }
 
 std::string steam_current_game_language() {
@@ -96,7 +96,7 @@ std::string steam_current_game_language() {
     return std::to_string(-1);
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_current_game_language but not logged in, please log into Steam first", M_ERROR);
     return std::to_string(-1);
   }
@@ -110,7 +110,7 @@ std::string steam_available_languages() {
     return std::to_string(-1);
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_available_languages but not logged in, please log into Steam first", M_ERROR);
     return std::to_string(-1);
   }
@@ -124,7 +124,7 @@ bool steam_is_subscribed() {
     return false;
   }
 
-  if (!steamworks::cmain::get_game_client()->is_user_logged_on()) {
+  if (!steamworks::cgame_client::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling steam_is_subscribed but not logged in, please log into Steam first", M_ERROR);
     return false;
   }
