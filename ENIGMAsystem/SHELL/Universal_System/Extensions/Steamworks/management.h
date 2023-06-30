@@ -2,6 +2,7 @@
 #define MANAGEMENT_H
 
 #include "game_client/main.h"
+#include "steamworks.h"
 
 namespace enigma_user {
 

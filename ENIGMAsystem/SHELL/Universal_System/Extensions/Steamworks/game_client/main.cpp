@@ -2,6 +2,15 @@
 
 namespace steamworks {
 
+extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
+  DEBUG_MESSAGE(pchDebugText, M_INFO);
+
+  if (nSeverity >= 1) {
+    int x = 3;
+    (void)x;
+  }
+}
+
 cgame_client* cmain::game_client_ = nullptr;
 
 bool cmain::is_initialised_ = false;
@@ -42,5 +51,9 @@ void cmain::shutdown() {
 bool cmain::is_initialised() { return cmain::is_initialised_; }
 
 cgame_client* cmain::get_game_client() { return cmain::game_client_; }
+
+void cmain::update() { SteamAPI_RunCallbacks(); }
+
+void cmain::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
 
 }  // namespace steamworks

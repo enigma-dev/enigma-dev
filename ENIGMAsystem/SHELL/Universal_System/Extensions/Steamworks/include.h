@@ -36,6 +36,7 @@
 // using std::cout;
 // using std::endl;
 
+#include "steamworks.h"
 #include "general.h"
 #include "management.h"
 #include "overlay.h"

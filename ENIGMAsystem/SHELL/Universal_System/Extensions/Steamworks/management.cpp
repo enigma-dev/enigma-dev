@@ -3,18 +3,7 @@
 namespace enigma_user {
 
 void steam_init() {
-  if (steamworks::cmain::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_init but is already initialized", M_ERROR);
-    return;
-  }
-
-  if (!steamworks::cmain::init()) {
-    DEBUG_MESSAGE(
-        "SteamApi_Init returned false. Steam isn't running, couldn't find Steam, App ID is ureleased, Don't own App "
-        "ID.",
-        M_ERROR);
-    return;
-  }
+  enigma::extension_steamworks_init();
 }
 
 void steam_update() {
@@ -22,7 +11,7 @@ void steam_update() {
     DEBUG_MESSAGE("Calling steam_update but not initialized, consider calling steam_init first", M_ERROR);
     return;
   }
-  SteamAPI_RunCallbacks();
+  steamworks::cmain::update();
 }
 
 void steam_shutdown() {

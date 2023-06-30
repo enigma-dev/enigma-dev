@@ -25,10 +25,7 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>&#13;
-steam_init();&#13;
-&#13;
-steam_set_warning_message_hook();&#13;
+            <string>steam_set_warning_message_hook();&#13;
  &#13;
 // This variable is used for game_restart() purposes.&#13;
 is_game_restarting = false;&#13;
@@ -39,8 +36,7 @@ randomize();&#13;
 &#13;
 //#macro SteamLeaderboard "YYLeaderboard_10/29/21--"&#13;
 &#13;
-if (steam_initialised()) room_goto(Room_Steam_Main);&#13;
-</string>
+if (steam_initialised()) room_goto(Room_Steam_Main);</string>
           </argument>
         </arguments>
       </action>

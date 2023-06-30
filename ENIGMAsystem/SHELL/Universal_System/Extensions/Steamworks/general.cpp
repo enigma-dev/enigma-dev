@@ -4,15 +4,6 @@
 
 namespace enigma_user {
 
-extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
-  DEBUG_MESSAGE(pchDebugText, M_INFO);
-
-  if (nSeverity >= 1) {
-    int x = 3;
-    (void)x;
-  }
-}
-
 bool steam_initialised() { return steamworks::cmain::is_initialised(); }
 
 // Not implemented
@@ -141,6 +132,13 @@ bool steam_is_subscribed() {
   return steamworks::cgame_client::is_subscribed();
 }
 
-void steam_set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
+void steam_set_warning_message_hook() {
+  if (!steamworks::cmain::is_initialised()) {
+    DEBUG_MESSAGE("Calling steam_is_subscribed but not initialized, consider calling steam_init first", M_ERROR);
+    return;
+  }
+
+  steamworks::cmain::set_warning_message_hook();
+}
 
 }  // namespace enigma_user
