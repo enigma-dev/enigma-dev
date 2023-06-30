@@ -21,6 +21,10 @@ class cmain {
   static bool is_initialised();
 
   static cgame_client* get_game_client();
+
+  static void update();
+
+  static void set_warning_message_hook();
 };
 }  // namespace steamworks
 
