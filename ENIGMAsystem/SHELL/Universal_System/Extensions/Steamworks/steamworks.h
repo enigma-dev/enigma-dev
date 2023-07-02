@@ -11,8 +11,6 @@ namespace fs = std::filesystem;
 
 namespace enigma {
 
-void write_appid_file();
-
 void extension_steamworks_init();
 
 }  // namespace enigma
