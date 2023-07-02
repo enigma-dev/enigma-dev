@@ -23,7 +23,7 @@ bool steam_is_overlay_activated() {
   return steamworks::cmain::get_game_client()->get_overlay()->is_overlay_activated();
 }
 
-void steam_activate_overlay(int overlay_type) {
+void steam_activate_overlay(const int overlay_type) {
   switch (overlay_type) {
     case ov_friends:
       steamworks::coverlay::activate_overlay("friends");
@@ -49,8 +49,14 @@ void steam_activate_overlay(int overlay_type) {
   }
 }
 
-void steam_activate_overlay_browser(std::string url) {
-  steamworks::cmain::get_game_client()->get_overlay()->activate_overlay_browser(url);
+void steam_activate_overlay_browser(const std::string& url) { steamworks::coverlay::activate_overlay_browser(url); }
+
+void steam_activate_overlay_store(const int app_id) {
+  steamworks::coverlay::activate_overlay_browser("https://store.steampowered.com/app/" + std::to_string(app_id));
+}
+
+void steam_activate_overlay_user(const std::string& dialog_name, unsigned long long steamid) {
+  steamworks::coverlay::activate_overlay_user(dialog_name, steamid);
 }
 
 }  // namespace enigma_user
