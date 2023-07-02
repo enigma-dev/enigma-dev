@@ -31,12 +31,12 @@ void write_appid_file() {
 void extension_steamworks_init() {
   write_appid_file();
 
-  if (steamworks::cmain::is_initialised()) {
+  if (steamworks::c_main::is_initialised()) {
     DEBUG_MESSAGE("Calling steam_init but is already initialized.", M_ERROR);
     return;
   }
 
-  if (!steamworks::cmain::init()) {
+  if (!steamworks::c_main::init()) {
     DEBUG_MESSAGE(
         "SteamApi_Init returned false. Steam isn't running, couldn't find Steam, App ID is ureleased, Don't own App "
         "ID.",

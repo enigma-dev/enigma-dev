@@ -9,6 +9,19 @@ Welcome to the Steamworks SDK.  For documentation please see our partner
 website at: http://partner.steamgames.com
 
 ----------------------------------------------------------------
+v1.57 28th April 2022
+----------------------------------------------------------------
+User
+* Updated ISteamUser::GetAuthTicketForWebApi(), To create a ticket for use by the AuthenticateUserTicket Web API
+* Updated ISteamUser::GetAuthSessionTicket(), No longer to be used to create a ticket for use by the AuthenticateUserTicket Web API
+
+----------------------------------------------------------------
+v1.56 30th March 2023
+----------------------------------------------------------------
+User
+* Updated ISteamUser::GetAuthSessionTicket(), Add parameter SteamNetworkingIdentity 
+
+----------------------------------------------------------------
 v1.55 29th July 2022
 ----------------------------------------------------------------
 

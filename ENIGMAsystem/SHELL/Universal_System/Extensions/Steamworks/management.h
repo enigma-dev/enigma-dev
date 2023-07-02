@@ -1,4 +1,4 @@
-#if !defined(MANAGEMENT_H)
+#ifndef MANAGEMENT_H
 #define MANAGEMENT_H
 
 #include "game_client/main.h"
@@ -12,4 +12,4 @@ void steam_shutdown();
 
 }  // namespace enigma_user
 
-#endif  // !MANAGEMENT_H
+#endif  // MANAGEMENT_H

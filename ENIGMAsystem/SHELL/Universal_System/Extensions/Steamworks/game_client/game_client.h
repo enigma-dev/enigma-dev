@@ -1,5 +1,5 @@
-#if !defined(GAME_CLIENT_H)
-#define GAME_CLIENT_H
+#ifndef GAMECLIENT_H
+#define GAMECLIENT_H
 
 #include <iostream>
 #include <string>
@@ -8,45 +8,45 @@
 
 namespace steamworks {
 
-class coverlay;
+class c_overlay;
 
-class cgame_client {
- private:
-  coverlay* overlay;
-
-  CSteamID steam_id_local_user_;
-  unsigned steam_app_id_;
-
-  std::string steam_persona_name_;
-
-  std::string current_game_language_;
-  std::string available_languages_;
-
-  // ISteamUser* steam_user_;
-  // ISteamFriends* steam_friends_;
-  // ISteamUtils* steam_utils_;
-
+class c_game_client {
  public:
-  // cgame_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils);
-  cgame_client();
-  ~cgame_client();
+  // c_game_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils);
+  c_game_client();
+  ~c_game_client();
 
   void init();
 
-  coverlay* get_overlay();
+  c_overlay* get_overlay();
 
-  CSteamID get_steam_id_local_user();
+  CSteamID get_c_steam_id_local_user();
   unsigned get_steam_app_id();
 
   std::string get_steam_persona_name();
 
   std::string get_current_game_language();
-  std::string get_available_languages();
+  std::string get_available_game_languages();
 
-  static std::string get_steam_user_persona_name(CSteamID user_persona_name);
+  static std::string get_steam_user_persona_name(CSteamID c_steam_id);
   static bool is_user_logged_on();
   static bool is_subscribed();
+
+ private:
+  c_overlay* overlay;
+
+  CSteamID c_steam_id_local_user_;
+  unsigned steam_app_id_;
+
+  std::string steam_persona_name_;
+
+  std::string current_game_language_;
+  std::string available_game_languages_;
+
+  // ISteamUser* steam_user_;
+  // ISteamFriends* steam_friends_;
+  // ISteamUtils* steam_utils_;
 };
 }  // namespace steamworks
 
-#endif  // !GAME_CLIENT_H
+#endif  // GAMECLIENT_H

@@ -1,4 +1,4 @@
-#if !defined(STEAMWORKS_H)
+#ifndef STEAMWORKS_H
 #define STEAMWORKS_H
 
 #include "game_client/main.h"
@@ -17,4 +17,4 @@ void extension_steamworks_init();
 
 }  // namespace enigma
 
-#endif  // !STEAMWORKS_H
+#endif  // STEAMWORKS_H
