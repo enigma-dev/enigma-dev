@@ -52,7 +52,7 @@ bool c_main::is_initialised() { return c_main::is_initialised_; }
 
 c_game_client* c_main::get_c_game_client() { return c_main::c_game_client_; }
 
-void c_main::update() { SteamAPI_RunCallbacks(); }
+void c_main::run_callbacks() { SteamAPI_RunCallbacks(); }
 
 void c_main::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
 

@@ -11,7 +11,7 @@ void steam_update() {
     DEBUG_MESSAGE("Calling steam_update but not initialized, consider calling steam_init first.", M_ERROR);
     return;
   }
-  steamworks::c_main::update();
+  steamworks::c_main::run_callbacks();
 }
 
 void steam_shutdown() {

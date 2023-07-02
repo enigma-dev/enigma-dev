@@ -62,7 +62,7 @@ std::string steam_get_persona_name() {
     return std::to_string(-1);
   }
 
-  return steamworks::c_main::get_c_game_client()->get_steam_persona_name();
+  return steamworks::c_game_client::get_steam_persona_name();
 }
 
 std::string steam_get_user_persona_name(CSteamID user_persona_name) {
