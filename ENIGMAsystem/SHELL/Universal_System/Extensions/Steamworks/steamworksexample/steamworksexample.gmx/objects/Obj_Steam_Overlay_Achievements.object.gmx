@@ -29,8 +29,7 @@
 event_inherited();&#13;
 &#13;
 targetRoom = noone&#13;
-text = "Achievements"&#13;
-</string>
+text = "Achievements"</string>
           </argument>
         </arguments>
       </action>
