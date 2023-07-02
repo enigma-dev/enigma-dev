@@ -1,2 +1,6 @@
 /.vs/*
 /.vscode/*
+
+!*.dll
+!*.so
+!*.dylib
