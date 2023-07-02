@@ -18,6 +18,7 @@
 #include "gmx.h"
 #include "action.h"
 #include "strings_util.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 #include <pugixml.hpp>
 
@@ -499,15 +500,6 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std:
   }
 }
 
-void TranslateGmRoomsToEgmRooms(buffers::TreeNode *root) {
-    for(const buffers::TreeNode& child : root->folder().children()) {
-        std::cout << child.type_case() << std::endl;
-        if (child.type_case() == buffers::TreeNode::TypeCase::kFolder) {
-            std::cout << child.name() << std::endl;
-        }
-    }
-}
-
 std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath,
                                                     bool replaceGmRoomWithEgmRoom) const {
   pugi::xml_document doc;
@@ -525,7 +517,11 @@ std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath,
 
   LegacyEventsToEGM(proj.get(), _event_data);
 
-  TranslateGmRoomsToEgmRooms(game->mutable_root());
+  if (replaceGmRoomWithEgmRoom) {
+    buffers::TreeNode *treenodeRoot = game->mutable_root();
+    GmRoomToEgmRoomTranslator translator(treenodeRoot);
+    translator.Translate();
+  }
 
   return proj;
 }

@@ -17,6 +17,7 @@
 
 #include "sog.h"
 #include "egm-events.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 namespace egm {
 
@@ -56,7 +57,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(
   // Add our room
   buffers::TreeNode* rm_node = game_root->mutable_folder()->add_children();
   rm_node->set_name("test_room");
-  buffers::resources::EGMRoom* rm = rm_node->mutable_egm_room();
+  buffers::resources::GMRoom* rm = rm_node->mutable_gm_room();
   rm->set_caption ("");
   rm->set_width(640);
   rm->set_height(480);
@@ -67,11 +68,16 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(
   rm->set_creation_code("");
 
   // Add obj to room
-  buffers::resources::EGMRoom::Instance* inst = rm->add_instances();
+  buffers::resources::GMRoom::Instance* inst = rm->add_instances();
   inst->set_id(100001);
   inst->set_x(0);
   inst->set_y(0);
   inst->set_object_type("test_object");
+
+  if (replaceGmRoomWithEgmRoom) {
+    GmRoomToEgmRoomTranslator translator(game_root);
+    translator.Translate();
+  }
 
   return proj;
 

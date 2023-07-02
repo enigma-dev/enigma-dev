@@ -17,6 +17,7 @@
 
 #include "yyp.h"
 #include "strings_util.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -326,6 +327,12 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(
   game->set_allocated_root(roots[0]);
 
   LegacyEventsToEGM(proj.get(), _event_data);
+
+  if (replaceGmRoomWithEgmRoom) {
+    buffers::TreeNode *treenodeRoot = game->mutable_root();
+    GmRoomToEgmRoomTranslator translator(treenodeRoot);
+    translator.Translate();
+  }
 
   return proj;
 }
