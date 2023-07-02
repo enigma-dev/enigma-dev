@@ -30,9 +30,10 @@ namespace egm {
 class EGMFileFormat : public FileFormat {
  public:
   EGMFileFormat(const EventData* event_data) : FileFormat(event_data) {}
-  
+
   // Read
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& fName, bool replaceGmRoomWithEgmRoom = false) const override;
 
   // Write
   virtual bool WriteProject(Project* project, const fs::path& fName) const override;

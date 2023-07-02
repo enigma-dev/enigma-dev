@@ -209,7 +209,8 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
   }
 }
 
-std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPath) const {
+std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(
+        const fs::path& fPath, bool replaceGmRoomWithEgmRoom) const {
   std::string fName = fPath.u8string();
 
   std::ifstream ifs(fName);

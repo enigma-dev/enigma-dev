@@ -24,7 +24,7 @@ void LibEGMInit(const EventData* event_data) {
   fileFormats[".tmx"] = std::make_unique<TMXFileFormat>(event_data);
 }
 
-std::unique_ptr<Project> LoadProject(const fs::path& fName) {
+std::unique_ptr<Project> LoadProject(const fs::path& fName, bool replaceGmRoomWithEgmRoom) {
   if (!fs::exists(fName)) {
     errStream << "File: " << fName.u8string() << " does not exists" << std::endl;
     return nullptr;
@@ -37,8 +37,8 @@ std::unique_ptr<Project> LoadProject(const fs::path& fName) {
   if (fs::is_directory(fName) && inputFile.back() == '/') {
     inputFile.pop_back();
   }
-  
-  // find last . 
+
+  // find last .
   size_t dot = inputFile.find_last_of('.');
   if (dot != std::string::npos) ext = ToLower(inputFile.substr(dot));
 
@@ -63,9 +63,9 @@ std::unique_ptr<Project> LoadProject(const fs::path& fName) {
   }
 
   if (fileFormats.count(ext) > 0) {
-    return fileFormats[ext]->LoadProject(inputFile);
+    return fileFormats[ext]->LoadProject(inputFile, replaceGmRoomWithEgmRoom);
   }
-   
+
   errStream << "Error: Unknown file type: \"" << ext << "\" cannot determine type of file" << std::endl;
   return nullptr;
 

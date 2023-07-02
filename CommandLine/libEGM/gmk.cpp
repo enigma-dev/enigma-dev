@@ -19,6 +19,7 @@
 #include "filesystem.h"
 #include "action.h"
 #include "General/zlib_util.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 #include "libpng-util/libpng-util.h"
 
@@ -878,7 +879,8 @@ namespace egm {
 
 using namespace gmk_internal;
 
-std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fName) const {
+std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(
+        const fs::path& fName, bool replaceGmRoomWithEgmRoom) const {
   static const vector<GroupFactory> groupFactories({
     { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, gmk_internal::LoadSound      },
     { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, gmk_internal::LoadSprite     },
@@ -990,6 +992,12 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   dec.processTempFileFutures();
 
   LegacyEventsToEGM(proj.get(), _event_data);
+
+  if (replaceGmRoomWithEgmRoom) {
+    buffers::TreeNode *treenodeRoot = game->mutable_root();
+    GmRoomToEgmRoomTranslator translator(treenodeRoot);
+    translator.Translate();
+  }
 
   return proj;
 }

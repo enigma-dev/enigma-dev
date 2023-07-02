@@ -37,8 +37,8 @@ int main(int argc, char* argv[])
     std::cout << "LibEGM parsing log at: " << fs::temp_directory_path().string() << "/enigma_libegm.log" << std::endl;
     std::cout << "ENIGMA compiler log at: " << fs::temp_directory_path().string() << "/enigma_compiler.log" << std::endl;
   }
-  
-  
+
+
   OptionsParser options;
   options.ReadArgs(argc, argv);
   int result = options.HandleArgs();
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
   plugin.Load();
   CallBack ecb;
   plugin.Init(&ecb, options.EnigmaRoot());
-  
+
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     plugin.LogMakeToConsole();
@@ -68,13 +68,13 @@ int main(int argc, char* argv[])
 
   std::streambuf* cout_rdbuf = std::cout.rdbuf();
   std::streambuf* cerr_rdbuf = std::cerr.rdbuf();
-    
+
   if (ENIGMA_DEBUG != "TRUE") {
     // Hijack cout/cerr from plugin to hide jdi startup crap that scares people
     std::cout.rdbuf(elog.rdbuf());
     std::cerr.rdbuf(elog.rdbuf());
   }
-  
+
   plugin.SetDefinitions(options.APIyaml().c_str());
   std::string output_file;
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     return OPTIONS_ERROR;
   }
   std::unique_ptr<buffers::Project> project;
-  
+
   if (input_file.empty()) {
     project = std::make_unique<buffers::Project>();
     std::cerr << "Warning: No game file specified. "
@@ -142,6 +142,6 @@ int main(int argc, char* argv[])
   egm::LibEGMInit(&event_data);
   if (!(project = egm::LoadProject(input_file))) return 1;
     return plugin.BuildGame(project->game(), mode, output_file.c_str());
-    
+
   return 1;
 }

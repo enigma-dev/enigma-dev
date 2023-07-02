@@ -508,7 +508,8 @@ void TranslateGmRoomsToEgmRooms(buffers::TreeNode *root) {
     }
 }
 
-std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const {
+std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath,
+                                                    bool replaceGmRoomWithEgmRoom) const {
   pugi::xml_document doc;
   if (!doc.load_file(fPath.u8string().c_str())) return nullptr;
 
