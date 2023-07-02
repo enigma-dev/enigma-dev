@@ -25,7 +25,8 @@ namespace egm {
 class GMXFileFormat : public FileFormat {
  public:
   GMXFileFormat(const EventData* event_data) : FileFormat(event_data) {}
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& fName, bool replaceGmRoomWithEgmRoom = false) const override;
 
 private:
   virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;

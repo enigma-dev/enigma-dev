@@ -71,4 +71,3 @@ TEST(TiledImporterTest, CheckMapWithObjects) {
     }
   }
 }
-

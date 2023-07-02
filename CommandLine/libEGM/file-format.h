@@ -39,15 +39,18 @@ class FileFormat {
 public:
   FileFormat(const EventData* event_data) : _event_data(event_data) {}
   // Read
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& /*fName*/) const { return {}; }
-  
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& /*fName*/, bool replaceGmRoomWithEgmRoom = false) const {
+      return {};
+  }
+
   template <class T>
   std::optional<T> LoadResource(const fs::path& fName) const {
     T res;
     if (!PackResource(fName, &res)) return {};
     return res;
   }
-  
+
   // Write
   virtual bool WriteProject(Project* /*project*/, const fs::path& /*fName*/) const { return false; }
   bool WriteResource(TreeNode* res, const fs::path& fName, bool mutate = false) const;
@@ -63,17 +66,18 @@ extern std::unordered_map<std::string, std::unique_ptr<FileFormat>> fileFormats;
 void LibEGMInit(const EventData* event_data);
 
 // Loaders
-std::unique_ptr<Project> LoadProject(const fs::path& fName);
+std::unique_ptr<Project> LoadProject(
+        const fs::path& fName, bool replaceGmRoomWithEgmRoom = false);
 
 template <class T>
-std::optional<T> LoadResource(const fs::path& fName) {  
-  std::string ext = ToLower(fName.extension().u8string()); 
+std::optional<T> LoadResource(const fs::path& fName) {
+  std::string ext = ToLower(fName.extension().u8string());
   if (ext == ".gmx") {
     return fileFormats[".gmx"]->LoadResource<T>(fName);
   }
   else if (ext == ".tsx") {
     return fileFormats[".tsx"]->LoadResource<T>(fName);
-  } 
+  }
   else return fileFormats[".egm"]->LoadResource<T>(fName);
 }
 

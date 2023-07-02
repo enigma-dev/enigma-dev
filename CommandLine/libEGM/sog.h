@@ -26,7 +26,8 @@ namespace egm {
 class SOGFileFormat : public FileFormat {
  public:
   SOGFileFormat(const EventData* event_data) : FileFormat(event_data) {}
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& fName, bool replaceGmRoomWithEgmRoom = false) const override;
   virtual bool WriteProject(Project* project, const fs::path& fName) const override;
 };
 

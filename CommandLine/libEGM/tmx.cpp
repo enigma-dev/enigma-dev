@@ -13,7 +13,8 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 
 namespace egm {
 
-std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(const fs::path& fPath) const {
+std::unique_ptr<buffers::Project> TMXFileFormat::LoadProject(
+        const fs::path& fPath, bool replaceGmRoomWithEgmRoom) const {
   pugi::xml_document doc;
   if(!doc.load_file(fPath.c_str())) return nullptr;
 

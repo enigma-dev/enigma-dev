@@ -20,7 +20,8 @@
 
 namespace egm {
 
-std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const {
+std::unique_ptr<Project> SOGFileFormat::LoadProject(
+        const fs::path& fName, bool replaceGmRoomWithEgmRoom) const {
   auto proj = std::make_unique<buffers::Project>();
 
   if (!FolderExists(fName)) {

@@ -25,7 +25,8 @@ public:
    * @param fPath .tmx file path
    * @return Pointer to EGM Project
    */
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& fPath) const override;
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& fPath, bool replaceGmRoomWithEgmRoom = false) const override;
 };
 
 

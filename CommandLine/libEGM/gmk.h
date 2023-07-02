@@ -25,7 +25,8 @@ namespace egm {
 class GMKFileFormat : public FileFormat {
 public:
   GMKFileFormat(const EventData* event_data) : FileFormat(event_data) {}
-  virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
+  virtual std::unique_ptr<Project> LoadProject(
+          const fs::path& fName, bool replaceGmRoomWithEgmRoom = false) const override;
 };
 
 }  //namespace egm

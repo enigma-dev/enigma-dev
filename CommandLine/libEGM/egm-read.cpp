@@ -632,7 +632,8 @@ bool EGMFileFormat::LoadEGM(const fs::path& yamlFile, buffers::Game* game) const
   }
 }
 
-std::unique_ptr<buffers::Project> EGMFileFormat::LoadProject(const fs::path& fName) const {
+std::unique_ptr<buffers::Project> EGMFileFormat::LoadProject(
+        const fs::path& fName, bool replaceGmRoomWithEgmRoom) const {
   auto proj = std::make_unique<buffers::Project>();
 
   if (!FileExists(fName)) {
