@@ -11,11 +11,11 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
   }
 }
 
-cgame_client* cmain::game_client_ = nullptr;
+c_game_client* c_main::c_game_client_ = nullptr;
 
-bool cmain::is_initialised_ = false;
+bool c_main::is_initialised_ = false;
 
-bool cmain::init() {
+bool c_main::init() {
   if (SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid)) {  // replace k_uAppIdInvalid with your AppID
     return false;
   }
@@ -32,28 +32,28 @@ bool cmain::init() {
   // ISteamFriends* steam_friends = SteamFriends();
   // ISteamUtils* steam_utils = SteamUtils();
 
-  // cmain::game_client_ = new cgame_client(steam_user, steam_friends, steam_utils);
-  cmain::game_client_ = new cgame_client();
+  // c_main::c_game_client_ = new c_game_client(steam_user, steam_friends, steam_utils);
+  c_main::c_game_client_ = new c_game_client();
 
-  cmain::is_initialised_ = true;
+  c_main::is_initialised_ = true;
 
   return true;
 }
 
-void cmain::shutdown() {
-  cmain::is_initialised_ = false;
+void c_main::shutdown() {
+  c_main::is_initialised_ = false;
 
-  delete cmain::game_client_;
+  delete c_main::c_game_client_;
 
   SteamAPI_Shutdown();
 }
 
-bool cmain::is_initialised() { return cmain::is_initialised_; }
+bool c_main::is_initialised() { return c_main::is_initialised_; }
 
-cgame_client* cmain::get_game_client() { return cmain::game_client_; }
+c_game_client* c_main::get_c_game_client() { return c_main::c_game_client_; }
 
-void cmain::update() { SteamAPI_RunCallbacks(); }
+void c_main::update() { SteamAPI_RunCallbacks(); }
 
-void cmain::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
+void c_main::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
 
 }  // namespace steamworks

@@ -1,4 +1,4 @@
-#if !defined(OVERLAY_H)
+#ifndef OVERLAY_H
 #define OVERLAY_H
 
 #include <string>
@@ -35,4 +35,4 @@ void steam_set_overlay_notification_position(const int position);
 
 }  // namespace enigma_user
 
-#endif  // !OVERLAY_H
+#endif  // OVERLAY_H

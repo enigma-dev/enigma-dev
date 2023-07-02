@@ -4,7 +4,7 @@
 
 namespace steamworks {
 
-// cgame_client::cgame_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils)
+// c_game_client::c_game_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils)
 //     : steam_user_(steam_user),
 //       steam_friends_(steam_friends),
 //       steam_utils_(steam_utils),
@@ -13,39 +13,39 @@ namespace steamworks {
 //   init();
 // }
 
-cgame_client::cgame_client()
-    : steam_id_local_user_(SteamUser()->GetSteamID()),
+c_game_client::c_game_client()
+    : c_steam_id_local_user_(SteamUser()->GetSteamID()),
       steam_app_id_(SteamUtils()->GetAppID()),
       steam_persona_name_(SteamFriends()->GetPersonaName()),
       current_game_language_(SteamApps()->GetCurrentGameLanguage()),
-      available_languages_(SteamApps()->GetAvailableGameLanguages()) {
+      available_game_languages_(SteamApps()->GetAvailableGameLanguages()) {
   init();
 }
 
-cgame_client::~cgame_client() {
-  if (cgame_client::overlay != nullptr) delete cgame_client::overlay;
+c_game_client::~c_game_client() {
+  if (c_game_client::overlay != nullptr) delete c_game_client::overlay;
 }
 
-void cgame_client::init() { cgame_client::overlay = new coverlay(); }
+void c_game_client::init() { c_game_client::overlay = new c_overlay(); }
 
-coverlay* cgame_client::get_overlay() { return cgame_client::overlay; }
+c_overlay* c_game_client::get_overlay() { return c_game_client::overlay; }
 
-bool cgame_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
+bool c_game_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
 
-CSteamID cgame_client::get_steam_id_local_user() { return cgame_client::steam_id_local_user_; }
+CSteamID c_game_client::get_c_steam_id_local_user() { return c_game_client::c_steam_id_local_user_; }
 
-unsigned cgame_client::get_steam_app_id() { return cgame_client::steam_app_id_; }
+unsigned c_game_client::get_steam_app_id() { return c_game_client::steam_app_id_; }
 
-std::string cgame_client::get_steam_persona_name() { return cgame_client::steam_persona_name_; }
+std::string c_game_client::get_steam_persona_name() { return c_game_client::steam_persona_name_; }
 
-std::string cgame_client::get_steam_user_persona_name(CSteamID user_persona_name) {
-  return SteamFriends()->GetFriendPersonaName(user_persona_name);
+std::string c_game_client::get_steam_user_persona_name(CSteamID c_steam_id) {
+  return SteamFriends()->GetFriendPersonaName(c_steam_id);
 }
 
-std::string cgame_client::get_current_game_language() { return cgame_client::current_game_language_; }
+std::string c_game_client::get_current_game_language() { return c_game_client::current_game_language_; }
 
-std::string cgame_client::get_available_languages() { return cgame_client::available_languages_; }
+std::string c_game_client::get_available_game_languages() { return c_game_client::available_game_languages_; }
 
-bool cgame_client::is_subscribed() { return SteamApps()->BIsSubscribed(); }
+bool c_game_client::is_subscribed() { return SteamApps()->BIsSubscribed(); }
 
 }  // namespace steamworks

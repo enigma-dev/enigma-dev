@@ -1,4 +1,4 @@
-#if !defined(GENERAL_H)
+#ifndef GENERAL_H
 #define GENERAL_H
 
 #include "game_client/main.h"
@@ -31,4 +31,4 @@ void steam_set_warning_message_hook();
 
 }  // namespace enigma_user
 
-#endif  // !GENERAL_H
+#endif  // GENERAL_H

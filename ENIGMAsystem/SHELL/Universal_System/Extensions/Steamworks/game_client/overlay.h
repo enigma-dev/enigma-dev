@@ -1,4 +1,3 @@
-
 #ifndef GAMECLIENTOVERLAY_H
 #define GAMECLIENTOVERLAY_H
 
@@ -6,17 +5,14 @@
 
 namespace steamworks {
 
-class cgame_client;
+class c_game_client;
 
-class coverlay {
- private:
-  bool is_overlay_activated_;
-
+class c_overlay {
  public:
-  coverlay();
-  ~coverlay() = default;
+  c_overlay();
+  ~c_overlay() = default;
 
-  STEAM_CALLBACK(coverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
+  STEAM_CALLBACK(c_overlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
 
   bool is_overlay_activated();
 
@@ -25,7 +21,10 @@ class coverlay {
 
   static void activate_overlay_browser(const std::string& url);
 
-  static void activate_overlay_user(const std::string& dialog_name, unsigned long long steamid);
+  static void activate_overlay_user(const std::string& dialog_name, unsigned long long steam_id);
+
+ private:
+  bool is_overlay_activated_;
 };
 }  // namespace steamworks
 
