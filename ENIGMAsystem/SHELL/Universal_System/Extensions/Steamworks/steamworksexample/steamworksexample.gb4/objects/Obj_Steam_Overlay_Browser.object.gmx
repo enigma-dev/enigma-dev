@@ -55,7 +55,7 @@ text = "Browser"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam browser overlay&#13;
-//steam_activate_overlay_browser("http://www.steamgames.com/")</string>
+steam_activate_overlay_browser("http://www.steamgames.com/")</string>
           </argument>
         </arguments>
       </action>

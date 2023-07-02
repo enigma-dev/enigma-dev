@@ -5,18 +5,6 @@
 
 namespace enigma_user {
 
-const int ov_friends = 0;
-const int ov_community = 1;
-const int ov_players = 2;
-const int ov_settings = 3;
-const int ov_gamegroup = 4;
-const int ov_achievements = 5;
-
-const int steam_overlay_notification_position_top_left = 0;
-const int steam_overlay_notification_position_top_right = 1;
-const int steam_overlay_notification_position_bottom_left = 2;
-const int steam_overlay_notification_position_bottom_right = 3;
-
 bool steam_is_overlay_enabled() { return steamworks::coverlay::is_overlay_enabled(); }
 
 bool steam_is_overlay_activated() {
@@ -25,22 +13,22 @@ bool steam_is_overlay_activated() {
 
 void steam_activate_overlay(const int overlay_type) {
   switch (overlay_type) {
-    case ov_friends:
+    case enigma_user::ov_friends:
       steamworks::coverlay::activate_overlay("friends");
       break;
-    case ov_community:
+    case enigma_user::ov_community:
       steamworks::coverlay::activate_overlay("community");
       break;
-    case ov_players:
+    case enigma_user::ov_players:
       steamworks::coverlay::activate_overlay("players");
       break;
-    case ov_settings:
+    case enigma_user::ov_settings:
       steamworks::coverlay::activate_overlay("settings");
       break;
-    case ov_gamegroup:
+    case enigma_user::ov_gamegroup:
       steamworks::coverlay::activate_overlay("gamegroup");
       break;
-    case ov_achievements:
+    case enigma_user::ov_achievements:
       steamworks::coverlay::activate_overlay("achievements");
       break;
     default:

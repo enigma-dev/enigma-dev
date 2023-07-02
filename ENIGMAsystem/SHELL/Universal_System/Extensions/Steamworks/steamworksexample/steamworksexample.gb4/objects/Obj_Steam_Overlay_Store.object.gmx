@@ -55,8 +55,7 @@ text = "Store"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam store overlay (it requires an app id)&#13;
-//steam_activate_overlay_store(steam_get_app_id())&#13;
-</string>
+steam_activate_overlay_store(steam_get_app_id())</string>
           </argument>
         </arguments>
       </action>
