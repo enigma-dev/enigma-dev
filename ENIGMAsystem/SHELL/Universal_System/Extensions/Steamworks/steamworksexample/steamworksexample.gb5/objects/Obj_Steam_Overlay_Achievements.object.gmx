@@ -53,6 +53,9 @@ text = "Achievements"</string>
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam achievements overlay&#13;
+&#13;
+show_debug_message("ov_achievements" + ov_achievements)&#13;
+&#13;
 steam_activate_overlay(ov_achievements)</string>
           </argument>
         </arguments>
