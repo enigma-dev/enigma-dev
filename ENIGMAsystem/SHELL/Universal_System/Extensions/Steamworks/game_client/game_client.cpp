@@ -16,35 +16,34 @@ namespace steamworks {
 c_game_client::c_game_client()
     : c_steam_id_local_user_(SteamUser()->GetSteamID()),
       steam_app_id_(SteamUtils()->GetAppID()),
-      steam_persona_name_(SteamFriends()->GetPersonaName()),
       current_game_language_(SteamApps()->GetCurrentGameLanguage()),
       available_game_languages_(SteamApps()->GetAvailableGameLanguages()) {
   init();
 }
 
 c_game_client::~c_game_client() {
-  if (c_game_client::overlay != nullptr) delete c_game_client::overlay;
+  if (c_game_client::c_overlay_ != nullptr) delete c_game_client::c_overlay_;
 }
 
-void c_game_client::init() { c_game_client::overlay = new c_overlay(); }
+void c_game_client::init() { c_game_client::c_overlay_ = new c_overlay(); }
 
-c_overlay* c_game_client::get_overlay() { return c_game_client::overlay; }
-
-bool c_game_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
+c_overlay* c_game_client::get_overlay() { return c_game_client::c_overlay_; }
 
 CSteamID c_game_client::get_c_steam_id_local_user() { return c_game_client::c_steam_id_local_user_; }
 
 unsigned c_game_client::get_steam_app_id() { return c_game_client::steam_app_id_; }
 
-std::string c_game_client::get_steam_persona_name() { return c_game_client::steam_persona_name_; }
+std::string c_game_client::get_current_game_language() { return c_game_client::current_game_language_; }
+
+std::string c_game_client::get_available_game_languages() { return c_game_client::available_game_languages_; }
+
+bool c_game_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
 
 std::string c_game_client::get_steam_user_persona_name(CSteamID c_steam_id) {
   return SteamFriends()->GetFriendPersonaName(c_steam_id);
 }
 
-std::string c_game_client::get_current_game_language() { return c_game_client::current_game_language_; }
-
-std::string c_game_client::get_available_game_languages() { return c_game_client::available_game_languages_; }
+std::string c_game_client::get_steam_persona_name() { return SteamFriends()->GetPersonaName(); }
 
 bool c_game_client::is_subscribed() { return SteamApps()->BIsSubscribed(); }
 

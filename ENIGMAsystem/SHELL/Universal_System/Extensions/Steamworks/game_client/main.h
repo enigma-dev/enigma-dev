@@ -17,7 +17,7 @@ class c_main {
 
   static c_game_client* get_c_game_client();
 
-  static void update();
+  static void run_callbacks();
 
   static void set_warning_message_hook();
 
