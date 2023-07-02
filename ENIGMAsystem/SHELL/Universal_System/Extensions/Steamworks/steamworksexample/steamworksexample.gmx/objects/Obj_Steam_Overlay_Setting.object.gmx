@@ -55,7 +55,7 @@ text = "Settings"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam settings overlay&#13;
-//steam_activate_overlay(ov_settings)</string>
+steam_activate_overlay(ov_settings)</string>
           </argument>
         </arguments>
       </action>
