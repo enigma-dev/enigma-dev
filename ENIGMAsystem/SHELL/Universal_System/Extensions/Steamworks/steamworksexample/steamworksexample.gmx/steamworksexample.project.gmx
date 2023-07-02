@@ -39,6 +39,23 @@
       <object>objects\Obj_ENIGMA_textbox</object>
       <object>objects\Obj_ENIGMA_text</object>
     </objects>
+    <objects name="Social">
+      <objects name="Achievement">
+        <object>objects\Obj_Steam_Achievement_Clear</object>
+        <object>objects\Obj_Steam_Achievement_ResetAll</object>
+        <object>objects\Obj_Steam_Achievement_Set</object>
+      </objects>
+      <objects name="Stats">
+        <objects name="Global">
+          <object>objects\Obj_Steam_Global_Stats</object>
+        </objects>
+        <object>objects\Obj_Steam_StatsInfo</object>
+        <object>objects\Obj_Steam_Stat_AverageSpeed</object>
+        <object>objects\Obj_Steam_Stat_FeetsTraveled</object>
+        <object>objects\Obj_Steam_Stat_Lose</object>
+        <object>objects\Obj_Steam_Stat_Win</object>
+      </objects>
+    </objects>
   </objects>
   <rooms name="rooms">
     <room>rooms\Room_Steam_Init</room>
@@ -47,6 +64,9 @@
     </rooms>
     <rooms name="Overlay">
       <room>rooms\Room_Steam_Overlay</room>
+    </rooms>
+    <rooms name="Social">
+      <room>rooms\Room_Steam_Social</room>
     </rooms>
   </rooms>
   <constants number="0"/>

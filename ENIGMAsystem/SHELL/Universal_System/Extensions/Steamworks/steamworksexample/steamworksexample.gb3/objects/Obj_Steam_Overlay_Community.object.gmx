@@ -55,7 +55,7 @@ text = "Community"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam community overlay&#13;
-//steam_activate_overlay(ov_community)</string>
+steam_activate_overlay(ov_community)</string>
           </argument>
         </arguments>
       </action>

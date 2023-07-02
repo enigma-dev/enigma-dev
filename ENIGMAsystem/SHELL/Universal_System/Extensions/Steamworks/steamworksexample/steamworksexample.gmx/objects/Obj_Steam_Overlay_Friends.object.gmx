@@ -55,8 +55,7 @@ text = "Friends"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam friends overlay&#13;
-steam_activate_overlay(ov_friends)&#13;
-</string>
+steam_activate_overlay(ov_friends)</string>
           </argument>
         </arguments>
       </action>
