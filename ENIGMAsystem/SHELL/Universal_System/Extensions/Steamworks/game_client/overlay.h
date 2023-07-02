@@ -1,6 +1,6 @@
 
-#if !defined(GAME_CLIENT_OVERLAY_H)
-#define GAME_CLIENT_OVERLAY_H
+#ifndef GAMECLIENTOVERLAY_H
+#define GAMECLIENTOVERLAY_H
 
 #include "game_client.h"
 
@@ -29,4 +29,4 @@ class coverlay {
 };
 }  // namespace steamworks
 
-#endif  // !GAME_CLIENT_OVERLAY_H
+#endif  // GAMECLIENTOVERLAY_H
