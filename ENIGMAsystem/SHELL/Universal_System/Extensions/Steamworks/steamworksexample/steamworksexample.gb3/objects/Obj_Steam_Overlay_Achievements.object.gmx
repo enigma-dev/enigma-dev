@@ -30,7 +30,6 @@ event_inherited();&#13;
 &#13;
 targetRoom = noone&#13;
 text = "Achievements"&#13;
-&#13;
 </string>
           </argument>
         </arguments>
@@ -55,7 +54,7 @@ text = "Achievements"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam achievements overlay&#13;
-//steam_activate_overlay(ov_achievements)</string>
+steam_activate_overlay(ov_achievements)</string>
           </argument>
         </arguments>
       </action>

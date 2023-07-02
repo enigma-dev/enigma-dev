@@ -24,6 +24,8 @@ class coverlay {
   static void activate_overlay(const std::string& dialog);
 
   static void activate_overlay_browser(const std::string& url);
+
+  static void activate_overlay_user(const std::string& dialog_name, unsigned long long steamid);
 };
 }  // namespace steamworks
 

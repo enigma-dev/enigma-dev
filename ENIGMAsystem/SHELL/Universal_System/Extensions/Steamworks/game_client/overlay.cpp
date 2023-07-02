@@ -25,4 +25,9 @@ void coverlay::activate_overlay_browser(const std::string& url) {
   SteamFriends()->ActivateGameOverlayToWebPage(url.c_str());
 }
 
+void coverlay::activate_overlay_user(const std::string& dialog_name, unsigned long long steamid) {
+  CSteamID steam_id(steamid);
+  SteamFriends()->ActivateGameOverlayToUser(dialog_name.c_str(), steam_id);
+}
+
 }  // namespace steamworks
