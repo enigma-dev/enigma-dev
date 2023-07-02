@@ -11,12 +11,12 @@ bool steam_stats_ready() { return false; }
 
 unsigned steam_get_app_id() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_get_app_id but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_app_id but not initialized, consider calling steam_init first.", M_ERROR);
     return -1;
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_get_app_id but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_app_id but not logged in, please log into Steam first.", M_ERROR);
     return -1;
   }
 
@@ -25,12 +25,12 @@ unsigned steam_get_app_id() {
 
 unsigned steam_get_user_account_id() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_get_user_account_id but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_user_account_id but not initialized, consider calling steam_init first.", M_ERROR);
     return -1;
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_get_user_account_id but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_user_account_id but not logged in, please log into Steam first.", M_ERROR);
     return -1;
   }
 
@@ -39,12 +39,12 @@ unsigned steam_get_user_account_id() {
 
 unsigned long long steam_get_user_steam_id() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_get_user_steam_id but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_user_steam_id but not initialized, consider calling steam_init first.", M_ERROR);
     return -1;
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_get_user_steam_id but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_user_steam_id but not logged in, please log into Steam first.", M_ERROR);
     return -1;
   }
 
@@ -53,12 +53,12 @@ unsigned long long steam_get_user_steam_id() {
 
 std::string steam_get_persona_name() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_get_persona_name but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_persona_name but not initialized, consider calling steam_init first.", M_ERROR);
     return std::to_string(-1);
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_get_persona_name but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_persona_name but not logged in, please log into Steam first.", M_ERROR);
     return std::to_string(-1);
   }
 
@@ -67,13 +67,13 @@ std::string steam_get_persona_name() {
 
 std::string steam_get_user_persona_name(CSteamID user_persona_name) {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_get_user_persona_name but not initialized, consider calling steam_init first",
+    DEBUG_MESSAGE("Calling steam_get_user_persona_name but not initialized, consider calling steam_init first.",
                   M_ERROR);
     return std::to_string(-1);
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_get_user_persona_name but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_get_user_persona_name but not logged in, please log into Steam first.", M_ERROR);
     return std::to_string(-1);
   }
 
@@ -82,7 +82,7 @@ std::string steam_get_user_persona_name(CSteamID user_persona_name) {
 
 bool steam_is_user_logged_on() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_is_user_logged_on but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_is_user_logged_on but not initialized, consider calling steam_init first.", M_ERROR);
     return false;
   }
 
@@ -91,13 +91,13 @@ bool steam_is_user_logged_on() {
 
 std::string steam_current_game_language() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_current_game_language but not initialized, consider calling steam_init first",
+    DEBUG_MESSAGE("Calling steam_current_game_language but not initialized, consider calling steam_init first.",
                   M_ERROR);
     return std::to_string(-1);
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_current_game_language but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_current_game_language but not logged in, please log into Steam first.", M_ERROR);
     return std::to_string(-1);
   }
 
@@ -106,12 +106,12 @@ std::string steam_current_game_language() {
 
 std::string steam_available_languages() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_available_languages but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_available_languages but not initialized, consider calling steam_init first.", M_ERROR);
     return std::to_string(-1);
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_available_languages but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_available_languages but not logged in, please log into Steam first.", M_ERROR);
     return std::to_string(-1);
   }
 
@@ -120,12 +120,12 @@ std::string steam_available_languages() {
 
 bool steam_is_subscribed() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_is_subscribed but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_is_subscribed but not initialized, consider calling steam_init first.", M_ERROR);
     return false;
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_is_subscribed but not logged in, please log into Steam first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_is_subscribed but not logged in, please log into Steam first.", M_ERROR);
     return false;
   }
 
@@ -134,7 +134,7 @@ bool steam_is_subscribed() {
 
 void steam_set_warning_message_hook() {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_is_subscribed but not initialized, consider calling steam_init first", M_ERROR);
+    DEBUG_MESSAGE("Calling steam_is_subscribed but not initialized, consider calling steam_init first.", M_ERROR);
     return;
   }
 
