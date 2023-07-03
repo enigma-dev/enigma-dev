@@ -1,7 +1,7 @@
 #include "overlay.h"
 
+#include "game_client/c_overlay.h"
 #include "game_client/main.h"
-#include "game_client/overlay.h"
 
 namespace enigma_user {
 
@@ -31,7 +31,7 @@ bool steam_is_overlay_activated() {
     return false;
   }
 
-  return steamworks::c_main::get_c_game_client()->get_overlay()->is_overlay_activated();
+  return steamworks::c_main::get_c_game_client()->get_c_overlay()->is_overlay_activated();
 }
 
 void steam_activate_overlay(const int overlay_type) {
@@ -47,27 +47,33 @@ void steam_activate_overlay(const int overlay_type) {
 
   switch (overlay_type) {
     case enigma_user::ov_friends:
-      steamworks::c_overlay::activate_overlay("friends");
+      steamworks::c_overlay::activate_overlay("Friends");
       break;
     case enigma_user::ov_community:
-      steamworks::c_overlay::activate_overlay("community");
+      steamworks::c_overlay::activate_overlay("Community");
       break;
     case enigma_user::ov_players:
-      steamworks::c_overlay::activate_overlay("players");
+      steamworks::c_overlay::activate_overlay("Players");
       break;
     case enigma_user::ov_settings:
-      steamworks::c_overlay::activate_overlay("settings");
+      steamworks::c_overlay::activate_overlay("Settings");
       break;
     case enigma_user::ov_gamegroup:
-      steamworks::c_overlay::activate_overlay("gamegroup");
+      steamworks::c_overlay::activate_overlay("OfficialGameGroup");
+      break;
+    case enigma_user::ov_stats:
+      steamworks::c_overlay::activate_overlay("Stats");
       break;
     case enigma_user::ov_achievements:
-      steamworks::c_overlay::activate_overlay("achievements");
+      steamworks::c_overlay::activate_overlay("Achievements");
+      break;
+    case enigma_user::ov_other:
+      steamworks::c_overlay::activate_overlay("chatroomgroup/nnnn");
       break;
     default:
       DEBUG_MESSAGE(
           "Invalid overlay type. The allowed options are: ov_friends, ov_community, ov_players, ov_settings, "
-          "ov_gamegroup, and ov_achievements.",
+          "ov_gamegroup, ov_stats, ov_achievements, and ov_other.",
           M_ERROR);
       break;
   }
@@ -103,7 +109,7 @@ void steam_activate_overlay_store(const int app_id) {
   steamworks::c_overlay::activate_overlay_browser("https://store.steampowered.com/app/" + std::to_string(app_id));
 }
 
-void steam_activate_overlay_user(const std::string& dialog_name, unsigned long long steamid) {
+void steam_activate_overlay_user(const unsigned dialog, const unsigned long long steamid) {
   if (!steamworks::c_main::is_initialised()) {
     DEBUG_MESSAGE("Calling steam_activate_overlay_user but not initialized, consider calling steam_init first.",
                   M_ERROR);
@@ -115,7 +121,96 @@ void steam_activate_overlay_user(const std::string& dialog_name, unsigned long l
     return;
   }
 
-  steamworks::c_overlay::activate_overlay_user(dialog_name, steamid);
+  switch (dialog) {
+    case enigma_user::user_ov_steamid:
+      steamworks::c_overlay::activate_overlay_user("steamid", steamid);
+      break;
+    case enigma_user::user_ov_chat:
+      steamworks::c_overlay::activate_overlay_user("chat", steamid);
+      break;
+    case enigma_user::user_ov_jointrade:
+      steamworks::c_overlay::activate_overlay_user("jointrade", steamid);
+      break;
+    case enigma_user::user_ov_stats:
+      steamworks::c_overlay::activate_overlay_user("stats", steamid);
+      break;
+    case enigma_user::user_ov_achievements:
+      steamworks::c_overlay::activate_overlay_user("achievements", steamid);
+      break;
+    case enigma_user::user_ov_friendadd:
+      steamworks::c_overlay::activate_overlay_user("friendadd", steamid);
+      break;
+    case enigma_user::user_ov_friendremove:
+      steamworks::c_overlay::activate_overlay_user("friendremove", steamid);
+      break;
+    case enigma_user::user_ov_friendrequestaccept:
+      steamworks::c_overlay::activate_overlay_user("friendrequestaccept", steamid);
+      break;
+    case enigma_user::user_ov_friendrequestignore:
+      steamworks::c_overlay::activate_overlay_user("friendrequestignore", steamid);
+      break;
+    default:
+      DEBUG_MESSAGE(
+          "Invalid overlay user dialog. The allowed options are: user_ov_steamid, user_ov_chat, user_ov_jointrade, "
+          "user_ov_stats, user_ov_achievements, user_ov_friendadd, user_ov_friendremove, user_ov_friendrequestaccept, "
+          "and user_ov_friendrequestignore.",
+          M_ERROR);
+      break;
+  }
+}
+
+void steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset) {
+  if (!steamworks::c_main::is_initialised()) {
+    DEBUG_MESSAGE(
+        "Calling steam_set_overlay_notification_inset but not initialized, consider calling steam_init first.",
+        M_ERROR);
+    return;
+  }
+
+  if (!steamworks::c_game_client::is_user_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_set_overlay_notification_inset but not logged in, please log into Steam first.",
+                  M_ERROR);
+    return;
+  }
+
+  steamworks::c_overlay::set_overlay_notification_inset(hor_inset, vert_inset);
+}
+
+void steam_set_overlay_notification_position(const int position) {
+  if (!steamworks::c_main::is_initialised()) {
+    DEBUG_MESSAGE(
+        "Calling steam_set_overlay_notification_position but not initialized, consider calling steam_init first.",
+        M_ERROR);
+    return;
+  }
+
+  if (!steamworks::c_game_client::is_user_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_set_overlay_notification_position but not logged in, please log into Steam first.",
+                  M_ERROR);
+    return;
+  }
+
+  switch (position) {
+    case enigma_user::steam_overlay_notification_position_top_left:
+      steamworks::c_overlay::set_overlay_notification_position(k_EPositionTopLeft);
+      break;
+    case enigma_user::steam_overlay_notification_position_top_right:
+      steamworks::c_overlay::set_overlay_notification_position(k_EPositionTopRight);
+      break;
+    case enigma_user::steam_overlay_notification_position_bottom_left:
+      steamworks::c_overlay::set_overlay_notification_position(k_EPositionBottomLeft);
+      break;
+    case enigma_user::steam_overlay_notification_position_bottom_right:
+      steamworks::c_overlay::set_overlay_notification_position(k_EPositionBottomRight);
+      break;
+    default:
+      DEBUG_MESSAGE(
+          "Invalid position. The allowed options are: steam_overlay_notification_position_top_left, "
+          "steam_overlay_notification_position_top_right, steam_overlay_notification_position_bottom_left, "
+          "and steam_overlay_notification_position_bottom_right.",
+          M_ERROR);
+      break;
+  }
 }
 
 }  // namespace enigma_user

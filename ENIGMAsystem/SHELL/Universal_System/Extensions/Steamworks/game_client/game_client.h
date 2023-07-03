@@ -5,11 +5,11 @@
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 #include "public/steam/steam_api.h"
-#include "stats_and_achievements.h"
 
 namespace steamworks {
 
 class c_overlay;
+class c_stats_and_achievements;
 //class c_leaderboards;
 
 class c_game_client {
@@ -20,7 +20,8 @@ class c_game_client {
 
   void init();
 
-  c_overlay* get_overlay();
+  c_overlay* get_c_overlay();
+  c_stats_and_achievements* get_c_stats_and_achievements();
 
   CSteamID get_c_steam_id_local_user();
   unsigned get_steam_app_id();
@@ -35,7 +36,7 @@ class c_game_client {
 
  private:
   c_overlay* c_overlay_;
-  //c_stats_and_achievements *c_stats_and_achievements_;
+  c_stats_and_achievements* c_stats_and_achievements_;
   //c_leaderboards* c_leaderboards_;
 
   CSteamID c_steam_id_local_user_;

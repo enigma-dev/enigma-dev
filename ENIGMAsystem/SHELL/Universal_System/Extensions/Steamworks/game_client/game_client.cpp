@@ -1,6 +1,7 @@
 #include "game_client.h"
 
-#include "overlay.h"
+#include "c_overlay.h"
+#include "c_stats_and_achievements.h"
 
 namespace steamworks {
 
@@ -23,11 +24,19 @@ c_game_client::c_game_client()
 
 c_game_client::~c_game_client() {
   if (c_game_client::c_overlay_ != nullptr) delete c_game_client::c_overlay_;
+  if (c_game_client::c_stats_and_achievements_ != nullptr) delete c_game_client::c_stats_and_achievements_;
 }
 
-void c_game_client::init() { c_game_client::c_overlay_ = new c_overlay(); }
+void c_game_client::init() {
+  c_game_client::c_overlay_ = new c_overlay();
+  c_game_client::c_stats_and_achievements_ = new c_stats_and_achievements();
+}
 
-c_overlay* c_game_client::get_overlay() { return c_game_client::c_overlay_; }
+c_overlay* c_game_client::get_c_overlay() { return c_game_client::c_overlay_; }
+
+c_stats_and_achievements* c_game_client::get_c_stats_and_achievements() {
+  return c_game_client::c_stats_and_achievements_;
+}
 
 CSteamID c_game_client::get_c_steam_id_local_user() { return c_game_client::c_steam_id_local_user_; }
 

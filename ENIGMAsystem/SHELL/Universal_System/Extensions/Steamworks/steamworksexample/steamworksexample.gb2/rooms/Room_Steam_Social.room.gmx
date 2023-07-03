@@ -64,6 +64,12 @@
     <instance code="&#13;&#10;text = &quot;Champion&quot;&#13;&#10;achievement = &quot;ACH_WIN_100_GAMES&quot;" colour="4294967295" id="100313" locked="0" name="inst_A3D8D9F4" objName="Obj_Steam_Achievement_Set" rotation="0.0" scaleX="3.493507" scaleY="1.0" x="832" y="288"/>
     <instance code="&#13;&#10;text = &quot;Interstellar&quot;&#13;&#10;achievement = &quot;ACH_TRAVEL_FAR_ACCUM&quot;" colour="4294967295" id="100314" locked="0" name="inst_A429AA8D" objName="Obj_Steam_Achievement_Set" rotation="0.0" scaleX="3.493507" scaleY="1.0" x="832" y="384"/>
     <instance code="&#13;&#10;text = &quot;Orbiter&quot;&#13;&#10;achievement = &quot;ACH_TRAVEL_FAR_SINGLE&quot;" colour="4294967295" id="100315" locked="0" name="inst_57CB1488" objName="Obj_Steam_Achievement_Set" rotation="0.0" scaleX="3.493507" scaleY="1.0" x="832" y="480"/>
+    <instance code="" colour="4294967295" id="100344" locked="0" name="inst_7E4FD795" objName="Obj_Steam_Stat_Win" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="192"/>
+    <instance code="" colour="4294967295" id="100345" locked="0" name="inst_192436F1" objName="Obj_Steam_Stat_Lose" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="288"/>
+    <instance code="" colour="4294967295" id="100346" locked="0" name="inst_51A77903" objName="Obj_Steam_Stat_FeetsTraveled" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="384"/>
+    <instance code="" colour="4294967295" id="100347" locked="0" name="inst_22206673" objName="Obj_Steam_Stat_AverageSpeed" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="480"/>
+    <instance code="" colour="4294967295" id="100348" locked="0" name="inst_9CAF3936" objName="Obj_Steam_Achievement_ResetAll" rotation="0.0" scaleX="3.584416" scaleY="1.0" x="656" y="576"/>
+    <instance code="" colour="4294967295" id="100349" locked="0" name="inst_EAFD841B" objName="Obj_Steam_Goto" rotation="0.0" scaleX="2.584415" scaleY="1.0" x="1040" y="608"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
