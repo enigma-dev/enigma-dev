@@ -965,7 +965,7 @@ int cpu_numcores() {
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Core(s) per socket:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  FILE *fp = popen("lscpu | grep 'Core(s) per socket:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
