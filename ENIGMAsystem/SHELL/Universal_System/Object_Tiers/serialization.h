@@ -1,4 +1,5 @@
 /** Copyright (C) 2022 Dhruv Chawla
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,6 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #ifndef ENIGMA_SERIALIZATION_H
 #define ENIGMA_SERIALIZATION_H
 
@@ -21,10 +23,9 @@
 #include <array>
 #include <cstddef>
 #include <cstring>
-#include <type_traits>
 
 #include "Universal_System/detect_serialization.h"
-#include "../var4.h"
+#include "detect_size.h"
 
 namespace enigma {
 namespace utility {
@@ -53,33 +54,6 @@ inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &
 
 inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len);
 
-inline std::size_t variant_size(const variant &value) {
-  if (value.type == variant::ty_real) {
-    return 9;
-  } else {
-    return 1 + sizeof(std::size_t) + value.sval().length();
-  }
-}
-
-template <typename T>
-inline std::size_t enigma_internal_sizeof_lua_table(const lua_table<T> &table) {
-  return (3 * sizeof(std::size_t)) + // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
-         table.sparse_part().size() * (sizeof(T)) + // The elements of `dense`
-         table.dense_part().size() * (sizeof(std::size_t) + sizeof(T)); // The elements of `sparse`
-}
-
-inline std::size_t var_size(const var &value) {
-  std::size_t len = variant_size(value) + enigma_internal_sizeof_lua_table(value.array1d);
-  len += (3 * sizeof(std::size_t));
-  for (auto &[key, elem] : value.array2d.sparse_part()) {
-    len += enigma_internal_sizeof_lua_table(elem);
-  }
-  for (auto &elem : value.array2d.dense_part()) {
-    len += enigma_internal_sizeof_lua_table(elem);
-  }
-  return len;
-}
-
 template <typename T, std::size_t N>
 struct has_nested_form : std::false_type {
   using inner_type = void;
@@ -99,29 +73,17 @@ template <typename T, std::size_t N>
 constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 
 template <typename T>
-struct is_lua_table : std::false_type {};
-
-template <typename U>
-struct is_lua_table<lua_table<U>> : std::true_type {
-  using inner_type = U;
-};
-
-template <typename T>
-constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
-
-template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (std::is_same_v<variant, std::decay_t<T>>) {
-    return variant_size(value);
-  } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    return var_size(value);
-  } else if constexpr (has_size_method_v<std::decay_t<T>>) {
+  if constexpr (has_free_size_function_v<T>){
+    return Size(value);
+  }
+  else if constexpr (has_size_method_v<std::decay_t<T>>){
     return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
-  } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
+  }
+  else if constexpr(has_byte_size_method_v<std::decay_t<T>>){
     return value.byte_size();
-  } else if constexpr (is_lua_table_v<std::decay_t<T>>) {
-    return enigma_internal_sizeof_lua_table(value);
-  } else {
+  }
+  else {
     return sizeof(T);
   }
 }
