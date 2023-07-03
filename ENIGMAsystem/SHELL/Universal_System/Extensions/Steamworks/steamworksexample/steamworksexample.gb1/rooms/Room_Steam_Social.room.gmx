@@ -69,7 +69,7 @@
     <instance code="" colour="4294967295" id="100346" locked="0" name="inst_51A77903" objName="Obj_Steam_Stat_FeetsTraveled" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="384"/>
     <instance code="" colour="4294967295" id="100347" locked="0" name="inst_22206673" objName="Obj_Steam_Stat_AverageSpeed" rotation="0.0" scaleX="4.0" scaleY="1.0" x="432" y="480"/>
     <instance code="" colour="4294967295" id="100348" locked="0" name="inst_9CAF3936" objName="Obj_Steam_Achievement_ResetAll" rotation="0.0" scaleX="3.584416" scaleY="1.0" x="656" y="576"/>
-    <instance code="" colour="4294967295" id="100349" locked="0" name="inst_EAFD841B" objName="Obj_Steam_Goto" rotation="0.0" scaleX="2.584415" scaleY="1.0" x="1040" y="608"/>
+    <instance code="&#13;&#10;text = &quot;Back&quot;&#13;&#10;targetRoom = Room_Steam_Main&#13;&#10;" colour="4294967295" id="100349" locked="0" name="inst_EAFD841B" objName="Obj_Steam_Goto" rotation="0.0" scaleX="2.584415" scaleY="1.0" x="1040" y="608"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

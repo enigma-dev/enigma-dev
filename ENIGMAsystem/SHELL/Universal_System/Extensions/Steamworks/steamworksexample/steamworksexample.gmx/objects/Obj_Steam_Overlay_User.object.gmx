@@ -55,7 +55,7 @@ text = "User"&#13;
             <kind>1</kind>
             <string>&#13;
 // This will bring up your steam chat overlay&#13;
-steam_activate_overlay_user("chat", steam_get_app_id())</string>
+steam_activate_overlay_user(user_ov_chat, steam_get_app_id())</string>
           </argument>
         </arguments>
       </action>

@@ -1,5 +1,5 @@
-#ifndef GAMECLIENTMAIN_H
-#define GAMECLIENTMAIN_H
+#ifndef GAMECLIENT_MAIN_H
+#define GAMECLIENT_MAIN_H
 
 #include "game_client.h"
 
@@ -28,4 +28,4 @@ class c_main {
 };
 }  // namespace steamworks
 
-#endif  // GAMECLIENTMAIN_H
+#endif  // GAMECLIENT_MAIN_H

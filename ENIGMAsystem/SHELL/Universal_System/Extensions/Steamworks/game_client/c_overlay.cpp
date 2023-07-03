@@ -1,4 +1,4 @@
-#include "overlay.h"
+#include "c_overlay.h"
 
 namespace steamworks {
 
@@ -25,9 +25,17 @@ void c_overlay::activate_overlay_browser(const std::string& url) {
   SteamFriends()->ActivateGameOverlayToWebPage(url.c_str());
 }
 
-void c_overlay::activate_overlay_user(const std::string& dialog_name, unsigned long long steam_id) {
+void c_overlay::activate_overlay_user(const std::string& dialog_name, const unsigned long long steam_id) {
   CSteamID c_steam_id(steam_id);
   SteamFriends()->ActivateGameOverlayToUser(dialog_name.c_str(), c_steam_id);
+}
+
+void c_overlay::set_overlay_notification_inset(const int horizontal_inset, const int vertical_inset) {
+  SteamUtils()->SetOverlayNotificationInset(horizontal_inset, vertical_inset);
+}
+
+void c_overlay::set_overlay_notification_position(const ENotificationPosition notification_position) {
+  SteamUtils()->SetOverlayNotificationPosition(notification_position);
 }
 
 }  // namespace steamworks

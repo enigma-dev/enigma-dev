@@ -55,7 +55,11 @@
     <instance code="" colour="4294967295" id="100283" locked="0" name="inst_ED87C779" objName="Obj_Steam_Global_Stats" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="416"/>
     <instance code="&#13;&#10;text = &quot;Leaderboards&quot;&#13;&#10;targetRoom = Room_Steam_Social_Leaderboard&#13;&#10;" colour="4294967295" id="100285" locked="0" name="inst_F9ACCB8A" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.12" scaleY="1.0" x="48" y="608"/>
     <instance code="text = &quot;Stats&quot;" colour="4294967295" id="100286" locked="0" name="inst_6C4BE53D" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="576" y="128"/>
-    <instance code="" colour="4294967295" id="100287" locked="0" name="inst_C6E0F4FD" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="976" y="128"/>
+    <instance code="text = &quot;Achievements&quot;" colour="4294967295" id="100287" locked="0" name="inst_C6E0F4FD" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="976" y="128"/>
+    <instance code="&#13;&#10;achievement = &quot;ACH_WIN_ONE_GAME&quot;" colour="4294967295" id="100288" locked="0" name="inst_EAA52CFA" objName="Obj_Steam_Achievement_Clear" rotation="0.0" scaleX="1.0" scaleY="1.0" x="1120" y="192"/>
+    <instance code="&#13;&#10;achievement = &quot;ACH_WIN_100_GAMES&quot;" colour="4294967295" id="100289" locked="0" name="inst_65C17824" objName="Obj_Steam_Achievement_Clear" rotation="0.0" scaleX="1.0" scaleY="1.0" x="1120" y="288"/>
+    <instance code="&#13;&#10;achievement = &quot;ACH_TRAVEL_FAR_ACCUM&quot;" colour="4294967295" id="100290" locked="0" name="inst_C242DFAC" objName="Obj_Steam_Achievement_Clear" rotation="0.0" scaleX="1.0" scaleY="1.0" x="1120" y="384"/>
+    <instance code="&#13;&#10;achievement = &quot;ACH_TRAVEL_FAR_SINGLE&quot;" colour="4294967295" id="100291" locked="0" name="inst_2F238936" objName="Obj_Steam_Achievement_Clear" rotation="0.0" scaleX="1.0" scaleY="1.0" x="1120" y="480"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>

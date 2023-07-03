@@ -18,4 +18,5 @@
 #include "general.h"
 #include "management.h"
 #include "overlay.h"
+#include "stats_and_achievements.h"
 #include "steamworks.h"

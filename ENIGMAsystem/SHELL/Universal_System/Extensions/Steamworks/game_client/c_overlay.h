@@ -1,5 +1,5 @@
-#ifndef GAMECLIENTOVERLAY_H
-#define GAMECLIENTOVERLAY_H
+#ifndef GAMECLIENT_OVERLAY_H
+#define GAMECLIENT_OVERLAY_H
 
 #include "game_client.h"
 
@@ -21,11 +21,15 @@ class c_overlay {
 
   static void activate_overlay_browser(const std::string& url);
 
-  static void activate_overlay_user(const std::string& dialog_name, unsigned long long steam_id);
+  static void activate_overlay_user(const std::string& dialog_name, const unsigned long long steam_id);
+
+  static void set_overlay_notification_inset(const int horizontal_inset, const int vertical_inset);
+
+  static void set_overlay_notification_position(const ENotificationPosition notification_position);
 
  private:
   bool is_overlay_activated_;
 };
 }  // namespace steamworks
 
-#endif  // GAMECLIENTOVERLAY_H
+#endif  // GAMECLIENT_OVERLAY_H
