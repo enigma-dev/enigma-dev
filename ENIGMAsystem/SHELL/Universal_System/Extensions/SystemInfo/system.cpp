@@ -760,7 +760,7 @@ long long gpu_videomemory() {
   #else
   char buf[1024];
   /* needs glxinfo installed via mesa-utils (linux) / glx-utils (bsd) package */
-  FILE *fp = popen("glxinfo | grep 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
+  FILE *fp = popen("glxinfo 2> /dev/null | grep 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -889,6 +889,96 @@ std::string cpu_brand() {
   return "";
   #else
   return "";
+  #endif
+}
+
+int cpu_numcores() {
+  #if defined(_WIN32)
+  std::string result;
+  bool proceed = true;
+  HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
+  HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
+  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
+  proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
+  if (!proceed) return -1;
+  SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
+  proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
+  if (!proceed) return -1;
+  STARTUPINFOW si;
+  ZeroMemory(&si, sizeof(si));
+  si.cb = sizeof(STARTUPINFOW);
+  si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdError = stdout_write;
+  si.hStdOutput = stdout_write;
+  si.hStdInput = stdin_read;
+  PROCESS_INFORMATION pi; 
+  ZeroMemory(&pi, sizeof(pi));
+  std::size_t len = wcslen(L"cmd /c wmic cpu get NumberOfCores 2>nul");
+  wchar_t *cwstr_command = new wchar_t[len]();
+  wcsncpy_s(cwstr_command, len, L"wmic cpu get NumberOfCores", len);
+  BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+  delete[] cwstr_command;
+  if (success) {
+    DWORD nRead = 0;
+    char buffer[BUFSIZ];
+    CloseHandle(stdout_write);
+    CloseHandle(stdin_read);
+    HANDLE wait_handles[] = { pi.hProcess, stdout_read };
+    while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      while (ReadFile(stdout_read, buffer, BUFSIZ, &nRead, nullptr) && nRead) {
+        buffer[nRead] = '\0';
+        result.append(buffer, nRead);
+      }
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    CloseHandle(stdout_read);
+    CloseHandle(stdin_write);
+  }
+  if (!result.empty()) {
+    result = std::regex_replace(result, std::regex("NumberOfCores"), "");
+    result = std::regex_replace(result, std::regex(" "), "");
+    result = std::regex_replace(result, std::regex("\r"), "");
+    result = std::regex_replace(result, std::regex("\n"), "");
+    static std::string res; 
+    res = result;
+    return (int)strtol(res.c_str(), nullptr, 10);
+  }
+  return -1;
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  int physical_cpus = 0;
+  std::size_t len = sizeof(int);
+  if (!sysctlbyname("hw.physicalcpu", &physical_cpus, &len, nullptr, 0)) {
+    return physical_cpus;
+  }
+  return -1;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  int mib[2];
+  int physical_cpus = 0;
+  mib[0] = CTL_HW;
+  mib[1] = HW_NCPU;
+  std::size_t len = sizeof(int);
+  if (!sysctl(mib, 2, &physical_cpus, &len, nullptr, 0)) {
+    return physical_cpus;
+  }
+  return -1;
+  #elif defined(__linux__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("lscpu | grep 'CPU(s):' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return -1;
+  #else
+  return -1;
   #endif
 }
 

@@ -47,5 +47,6 @@ long long gpu_videomemory();
 std::string cpu_vendor();
 std::string cpu_brand();
 int cpu_numcpus();
+int cpu_numcores();
 
 } // namespace ngs::sys
