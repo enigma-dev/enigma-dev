@@ -100,6 +100,10 @@ inline std::string cpu_brand() {
   return ngs::sys::cpu_brand();
 }
 
+inline int cpu_numcores() {
+  return ngs::sys::cpu_numcores();
+}
+
 inline int cpu_numcpus() {
   return ngs::sys::cpu_numcpus();
 }
