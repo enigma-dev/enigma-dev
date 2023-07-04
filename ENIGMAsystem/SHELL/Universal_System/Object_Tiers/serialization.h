@@ -74,7 +74,7 @@ constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (has_free_size_function_v<T>){
+  if constexpr (has_byte_size_free_function_v<T>){
     return Size(value);
   }
   else if constexpr (has_size_method_v<std::decay_t<T>>){

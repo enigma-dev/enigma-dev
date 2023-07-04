@@ -60,33 +60,17 @@ struct is_lua_table<lua_table<U>> : std::true_type {
 template <typename T>
 constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
-inline std::size_t Size(const variant& value) {
+inline std::size_t byte_size(const variant& value) {
   return variant_size(value);
 }
 
-inline std::size_t Size(const var& value) {
+inline std::size_t byte_size(const var& value) {
   return var_size(value);
 }
 
 template <typename T>
-inline std::size_t Size(const lua_table<T>& value) {
+inline std::size_t byte_size(const lua_table<T>& value) {
   return enigma_internal_sizeof_lua_table(value);
 }
-
-// This is a helper struct to check if there is a specialization for the `Size` function which is callable with this type
-template <typename U>
-struct CheckSizeFunction {
-  template <typename T>
-  static constexpr auto Check(T*) -> decltype(Size(std::declval<T>()), std::true_type{});
-
-  template <typename>
-  static constexpr std::false_type Check(...);
-
-  using type = decltype(Check<U>(nullptr));
-  static constexpr bool value = type::value;
-};
-
-template <typename T>
-constexpr static inline bool has_free_size_function_v = CheckSizeFunction<T>::value;
 
 #endif

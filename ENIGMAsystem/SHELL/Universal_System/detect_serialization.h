@@ -33,7 +33,7 @@
                                                                           \
    public:                                                                \
     typedef has_##NAME##_method type;                                     \
-    enum { value = decltype(func<T>(0))::value }; \
+    enum { value = decltype(func<T>(0))::value };                         \
   };                                                                      \
                                                                           \
   template <typename T>                                                   \
@@ -108,6 +108,35 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
+
+#define HAS_FREE_FUNCTION(NAME, SIG)                                                     \
+template <typename U>                                                                    \
+struct has_##NAME##_free_function {                                                      \
+  template <typename T>                                                                  \
+  static constexpr auto Check(T*) -> decltype(NAME(SIG), std::true_type{});              \
+                                                                                         \
+  template <typename>                                                                    \
+  static constexpr std::false_type Check(...);                                           \
+                                                                                         \
+  static constexpr bool value = decltype(Check<U>(nullptr))::value;                      \
+};                                                                                       \
+                                                                                         \
+template <typename T>                                                                    \
+constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
+
+HAS_FREE_FUNCTION(byte_size, std::declval<T>());
+
+/**
+ * Now we have 1 struct with the following name:
+ * has_byte_size_free_function
+ * 
+ * The struct has 1 data member:
+ * value: This member is a boolean value that indicates whether the corresponding class
+ * has a specialization which is callable with this type with the specified NAME (byte_size),
+ * it is true if the class has the function and false otherwise.
+ */
+
+#undef HAS_FREE_FUNCTION
 
 #define HAS_SERIALIZE_INTO_FUNCTION() std::is_invocable_r_v<void, decltype(enigma::serialize_into<T>), std::byte *, T>
 #define HAS_SERIALIZE_FUNCTION() std::is_invocable_r_v<std::vector<std::byte>, decltype(enigma::serialize<T>), T>
