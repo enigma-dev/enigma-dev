@@ -109,22 +109,22 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NAME, SIG)                                                     \
-template <typename U>                                                                    \
-struct has_##NAME##_free_function {                                                      \
-  template <typename T>                                                                  \
-  static constexpr auto Check(T*) -> decltype(NAME(SIG), std::true_type{});              \
-                                                                                         \
-  template <typename>                                                                    \
-  static constexpr std::false_type Check(...);                                           \
-                                                                                         \
-  static constexpr bool value = decltype(Check<U>(nullptr))::value;                      \
-};                                                                                       \
-                                                                                         \
-template <typename T>                                                                    \
+#define HAS_FREE_FUNCTION(NAME, SIG, RET)                                                                       \
+template <typename U>                                                                                           \
+struct has_##NAME##_free_function {                                                                             \
+  template <typename T>                                                                                         \
+  static constexpr auto Check(T*) -> std::enable_if_t<std::is_same_v<decltype(NAME SIG), RET>, std::true_type>; \
+                                                                                                                \
+  template <typename>                                                                                           \
+  static constexpr std::false_type Check(...);                                                                  \
+                                                                                                                \
+  static constexpr bool value = decltype(Check<U>(nullptr))::value;                                             \
+};                                                                                                              \
+                                                                                                                \
+template <typename T>                                                                                           \
 constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
 
-HAS_FREE_FUNCTION(byte_size, std::declval<T>());
+HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
 
 /**
  * Now we have 1 struct with the following name:
