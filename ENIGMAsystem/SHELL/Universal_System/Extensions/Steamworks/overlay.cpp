@@ -16,7 +16,7 @@ bool steam_is_overlay_enabled() {
     return false;
   }
 
-  return steamworks::c_overlay::is_overlay_enabled();
+  return steamworks::c_overlay::overlay_enabled();
 }
 
 bool steam_is_overlay_activated() {
@@ -31,7 +31,7 @@ bool steam_is_overlay_activated() {
     return false;
   }
 
-  return steamworks::c_main::get_c_game_client()->get_c_overlay()->is_overlay_activated();
+  return steamworks::c_main::get_c_game_client()->get_c_overlay()->overlay_activated();
 }
 
 void steam_activate_overlay(const int overlay_type) {

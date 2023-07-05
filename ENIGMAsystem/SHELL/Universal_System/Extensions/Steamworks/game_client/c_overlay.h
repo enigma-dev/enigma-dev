@@ -14,9 +14,9 @@ class c_overlay {
 
   STEAM_CALLBACK(c_overlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
 
-  bool is_overlay_activated();
+  bool overlay_activated();
 
-  static bool is_overlay_enabled();
+  static bool overlay_enabled();
   static void activate_overlay(const std::string& dialog);
 
   static void activate_overlay_browser(const std::string& url);
@@ -28,7 +28,7 @@ class c_overlay {
   static void set_overlay_notification_position(const ENotificationPosition notification_position);
 
  private:
-  bool is_overlay_activated_;
+  bool overlay_activated_;
 };
 }  // namespace steamworks
 
