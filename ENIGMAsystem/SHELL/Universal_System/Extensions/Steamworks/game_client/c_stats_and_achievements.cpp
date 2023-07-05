@@ -72,6 +72,7 @@ void c_stats_and_achievements::set_achievement(const std::string& achievement_na
   steam_user_stats_->SetAchievement(achievement_name.c_str());
 }
 
+// Review this function
 bool c_stats_and_achievements::get_achievement(const std::string& achievement_name) {
   bool achieved = false;
   return steam_user_stats_->GetAchievement(achievement_name.c_str(), &achieved);
