@@ -973,7 +973,20 @@ int cpu_numcores() {
     }
     pclose(fp);
     static std::string str;
-    str = result ? result : "";
+    str = (result && strlen(result)) ? result : "-1";
+    if (str == "-1") {
+      FILE *fp = popen("lscpu | grep 'Core(s) per cluster:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
+      if (fp) {
+        if (fgets(buf, sizeof(buf), fp)) {
+          buf[strlen(buf) - 1] = '\0';
+          result = buf;
+        }
+        pclose(fp);
+        static std::string str2;
+        str = (result && strlen(result)) ? result : "-1";
+        return (int)strtol(str.c_str(), nullptr, 10);
+      }
+    }
     return (int)strtol(str.c_str(), nullptr, 10);
   }
   return -1;
