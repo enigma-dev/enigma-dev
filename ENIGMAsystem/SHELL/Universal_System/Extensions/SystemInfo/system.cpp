@@ -730,9 +730,9 @@ std::string gpu_renderer() {
 
 static long long videomemory = -1;
 long long gpu_videomemory() {
+  if (videomemory != -1) return videomemory;
   long long result = -1;
   #if defined(_WIN32)
-  if (videomemory != -1) return videomemory;
   IDXGIFactory *pFactory = nullptr;
   if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
     IDXGIAdapter *pAdapter = nullptr;
@@ -746,12 +746,6 @@ long long gpu_videomemory() {
     pFactory->Release();
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
-  if (utsname_machine() == "arm64") {
-    /* arm64 macOS memory is "unified" meaning what would 
-    normally be free memory is used as video memory... */
-    return memory_availram();
-  }
-  if (videomemory != -1) return videomemory;
   char buf[1024];
   FILE *fp = popen("ioreg -r -d 1 -w 0 -c \"IOAccelerator\" | grep '\"VRAM,totalMB\"' | uniq | awk -F '= ' '{print $2}'", "r");
   if (fp) {
@@ -764,7 +758,6 @@ long long gpu_videomemory() {
     pclose(fp);
   }
   #else
-  if (videomemory != -1) return videomemory;
   char buf[1024];
   /* needs glxinfo installed via mesa-utils (Ubuntu), glx-utils (FreeBSD), or equivalent distro package */
   FILE *fp = popen("glxinfo 2> /dev/null | grep 'Video memory: ' | uniq | awk -F ': ' '{print $2}'", "r");
