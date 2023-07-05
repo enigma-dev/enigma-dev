@@ -11,7 +11,7 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
   }
 }
 
-c_game_client* c_main::c_game_client_ = nullptr;
+c_game_client* c_main::c_game_client_ = NULL;
 
 bool c_main::is_initialised_ = false;
 

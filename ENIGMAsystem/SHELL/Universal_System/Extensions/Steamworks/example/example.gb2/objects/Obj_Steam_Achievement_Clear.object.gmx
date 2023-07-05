@@ -55,8 +55,7 @@ achievement = "&lt;Unknown&gt;"</string>
           <argument>
             <kind>1</kind>
             <string>&#13;
-//steam_clear_achievement(achievement);&#13;
-</string>
+steam_clear_achievement(achievement);</string>
           </argument>
         </arguments>
       </action>

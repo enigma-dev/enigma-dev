@@ -55,8 +55,7 @@ achievement = "&lt;Unknown&gt;";</string>
             <string>&#13;
 event_inherited();&#13;
 &#13;
-//locked = steam_get_achievement(achievement)&#13;
-&#13;
+locked = steam_get_achievement(achievement)&#13;
 </string>
           </argument>
         </arguments>
@@ -80,29 +79,7 @@ event_inherited();&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-//steam_set_achievement(achievement)</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event enumb="0" eventtype="8">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
-        <isquestion>0</isquestion>
-        <exetype>2</exetype>
-        <functionname/>
-        <codestring/>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string/>
+steam_set_achievement(achievement)</string>
           </argument>
         </arguments>
       </action>

@@ -5,6 +5,9 @@
 
 namespace steamworks {
 
+c_game_client* game_client_ = NULL;
+c_game_client* game_client() { return game_client_; }
+
 // c_game_client::c_game_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils)
 //     : steam_user_(steam_user),
 //       steam_friends_(steam_friends),
@@ -15,7 +18,9 @@ namespace steamworks {
 // }
 
 c_game_client::c_game_client()
-    : c_steam_id_local_user_(SteamUser()->GetSteamID()),
+    : c_overlay_(NULL),
+      c_stats_and_achievements_(NULL),
+      c_steam_id_local_user_(SteamUser()->GetSteamID()),
       steam_app_id_(SteamUtils()->GetAppID()),
       current_game_language_(SteamApps()->GetCurrentGameLanguage()),
       available_game_languages_(SteamApps()->GetAvailableGameLanguages()) {
@@ -28,6 +33,8 @@ c_game_client::~c_game_client() {
 }
 
 void c_game_client::init() {
+  game_client_ = this;
+
   c_game_client::c_overlay_ = new c_overlay();
   c_game_client::c_stats_and_achievements_ = new c_stats_and_achievements();
 }

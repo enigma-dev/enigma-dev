@@ -73,8 +73,44 @@ float steam_get_stat_float(const std::string& stat_name) { return 0.0f; }
 
 float steam_get_stat_avg_rate(const std::string& stat_name) { return 0.0f; }
 
-void steam_reset_all_stats() {}
+void steam_reset_all_stats() {
+  if (!steamworks::c_main::is_initialised()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats but not initialized, consider calling steam_init first.", M_ERROR);
+    return;
+  }
 
-void steam_reset_all_stats_achievements() {}
+  if (!steamworks::c_game_client::is_user_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats but not logged in, please log into Steam first.", M_ERROR);
+    return;
+  }
+
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->stats_valid()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats but stats are not ready.", M_ERROR);
+    return;
+  }
+
+  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats();
+}
+
+void steam_reset_all_stats_achievements() {
+  if (!steamworks::c_main::is_initialised()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats_achievements but not initialized, consider calling steam_init first.",
+                  M_ERROR);
+    return;
+  }
+
+  if (!steamworks::c_game_client::is_user_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats_achievements but not logged in, please log into Steam first.",
+                  M_ERROR);
+    return;
+  }
+
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->stats_valid()) {
+    DEBUG_MESSAGE("Calling steam_reset_all_stats_achievements but stats are not ready.", M_ERROR);
+    return;
+  }
+
+  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats_achievements();
+}
 
 }  // namespace enigma_user

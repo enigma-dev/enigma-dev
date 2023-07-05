@@ -9,7 +9,7 @@
     <sprite>sprites\Spr_ENIGMA_textbox</sprite>
   </sprites>
   <backgrounds name="background">
-    <background>background\Compatibility_Colour</background>
+    <background>background\ENIGMA_background</background>
   </backgrounds>
   <fonts name="fonts">
     <font>fonts\Font_ENIGMA_20</font>

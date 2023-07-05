@@ -16,7 +16,7 @@
   <makerSettings>
     <isSet>-1</isSet>
     <w>1516</w>
-    <h>806</h>
+    <h>902</h>
     <showGrid>-1</showGrid>
     <showObjects>-1</showObjects>
     <showTiles>-1</showTiles>
@@ -30,7 +30,7 @@
     <yoffset>0</yoffset>
   </makerSettings>
   <backgrounds>
-    <background foreground="0" hspeed="0" htiled="-1" name="Compatibility_Colour" stretch="0" visible="-1" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="ENIGMA_background" stretch="0" visible="-1" vspeed="0" vtiled="-1" x="0" y="0"/>
     <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
     <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
     <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>

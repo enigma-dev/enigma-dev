@@ -17,11 +17,6 @@ c_stats_and_achievements::c_stats_and_achievements()
   request_current_stats();
 }
 
-c_stats_and_achievements::~c_stats_and_achievements() {
-  if (NULL != steam_user_) delete steam_user_;
-  if (NULL != steam_user_stats_) delete steam_user_stats_;
-}
-
 void c_stats_and_achievements::on_user_stats_received(UserStatsReceived_t* pCallback) {
   if (c_game_id_.ToUint64() != pCallback->m_nGameID) return;
 
@@ -81,5 +76,11 @@ bool c_stats_and_achievements::get_achievement(const std::string& achievement_na
 void c_stats_and_achievements::clear_achievement(const std::string& achievement_name) {
   steam_user_stats_->ClearAchievement(achievement_name.c_str());
 }
+
+void c_stats_and_achievements::reset_all_stats() { steam_user_stats_->ResetAllStats(false); }
+
+void c_stats_and_achievements::reset_all_stats_achievements() { steam_user_stats_->ResetAllStats(true); }
+
+void c_stats_and_achievements::store_stats() { steam_user_stats_->StoreStats(); }
 
 }  // namespace steamworks
