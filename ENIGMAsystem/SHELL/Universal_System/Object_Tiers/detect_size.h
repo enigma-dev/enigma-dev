@@ -19,7 +19,7 @@
 #ifndef ENIGMA_DETECT_SIZE_H
 #define ENIGMA_DETECT_SIZE_H
 
-#include<type_traits>
+#include <type_traits>
 #include "../var4.h"
 
 inline std::size_t variant_size(const variant &value) {
@@ -32,9 +32,9 @@ inline std::size_t variant_size(const variant &value) {
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof_lua_table(const lua_table<T> &table) {
-  return (3 * sizeof(std::size_t)) + // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
-         table.sparse_part().size() * (sizeof(T)) + // The elements of `dense`
-         table.dense_part().size() * (sizeof(std::size_t) + sizeof(T)); // The elements of `sparse`
+  return (3 * sizeof(std::size_t)) +  // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
+         table.sparse_part().size() * (sizeof(T)) +                      // The elements of `dense`
+         table.dense_part().size() * (sizeof(std::size_t) + sizeof(T));  // The elements of `sparse`
 }
 
 inline std::size_t var_size(const var &value) {
@@ -60,16 +60,12 @@ struct is_lua_table<lua_table<U>> : std::true_type {
 template <typename T>
 constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
-inline std::size_t byte_size(const variant& value) {
-  return variant_size(value);
-}
+inline std::size_t byte_size(const variant &value) { return variant_size(value); }
 
-inline std::size_t byte_size(const var& value) {
-  return var_size(value);
-}
+inline std::size_t byte_size(const var &value) { return var_size(value); }
 
 template <typename T>
-inline std::size_t byte_size(const lua_table<T>& value) {
+inline std::size_t byte_size(const lua_table<T> &value) {
   return enigma_internal_sizeof_lua_table(value);
 }
 

@@ -22,21 +22,21 @@
 #include <cstddef>
 #include <vector>
 
-#define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)                          \
-  template <typename T>                                                   \
-  class has_##NAME##_method {                                             \
-    FUNC;                                                                 \
-    template <typename U>                                                 \
-    static std::true_type func(Check<U, &U::NAME> *);                     \
-    template <typename U>                                                 \
-    static std::false_type func(...);                                     \
-                                                                          \
-   public:                                                                \
-    typedef has_##NAME##_method type;                                     \
-    enum { value = decltype(func<T>(0))::value };                         \
-  };                                                                      \
-                                                                          \
-  template <typename T>                                                   \
+#define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
+  template <typename T>                               \
+  class has_##NAME##_method {                         \
+    FUNC;                                             \
+    template <typename U>                             \
+    static std::true_type func(Check<U, &U::NAME> *); \
+    template <typename U>                             \
+    static std::false_type func(...);                 \
+                                                      \
+   public:                                            \
+    typedef has_##NAME##_method type;                 \
+    enum { value = decltype(func<T>(0))::value };     \
+  };                                                  \
+                                                      \
+  template <typename T>                               \
   constexpr static inline bool has_##NAME##_method_v = has_##NAME##_method<T>::value
 
 #define INTERNAL_FUNCTION_PREFIX template <typename V,
@@ -109,20 +109,20 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NAME, SIG, RET)                                                                       \
-template <typename U>                                                                                           \
-struct has_##NAME##_free_function {                                                                             \
-  template <typename T>                                                                                         \
-  static constexpr auto Check(T*) -> std::enable_if_t<std::is_same_v<decltype(NAME SIG), RET>, std::true_type>; \
-                                                                                                                \
-  template <typename>                                                                                           \
-  static constexpr std::false_type Check(...);                                                                  \
-                                                                                                                \
-  static constexpr bool value = decltype(Check<U>(nullptr))::value;                                             \
-};                                                                                                              \
-                                                                                                                \
-template <typename T>                                                                                           \
-constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
+#define HAS_FREE_FUNCTION(NAME, SIG, RET)                                                                          \
+  template <typename U>                                                                                            \
+  struct has_##NAME##_free_function {                                                                              \
+    template <typename T>                                                                                          \
+    static constexpr auto Check(T *) -> std::enable_if_t<std::is_same_v<decltype(NAME SIG), RET>, std::true_type>; \
+                                                                                                                   \
+    template <typename>                                                                                            \
+    static constexpr std::false_type Check(...);                                                                   \
+                                                                                                                   \
+    static constexpr bool value = decltype(Check<U>(nullptr))::value;                                              \
+  };                                                                                                               \
+                                                                                                                   \
+  template <typename T>                                                                                            \
+  constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
 
 HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
 
