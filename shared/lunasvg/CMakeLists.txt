@@ -5,6 +5,8 @@ project(lunasvg VERSION 2.3.8 LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 11)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 option(BUILD_SHARED_LIBS "Build as a shared library" OFF)
 option(LUNASVG_BUILD_EXAMPLES "Build example(s)" OFF)
 
