@@ -1,13 +1,25 @@
 #include "general.h"
 
+#include "game_client/c_stats_and_achievements.h"
 #include "game_client/game_client.h"
 
 namespace enigma_user {
 
 bool steam_initialised() { return steamworks::c_main::is_initialised(); }
 
-// Not implemented
-bool steam_stats_ready() { return false; }
+bool steam_stats_ready() {
+  if (!steamworks::c_main::is_initialised()) {
+    DEBUG_MESSAGE("Calling steam_stats_ready but not initialized, consider calling steam_init first.", M_ERROR);
+    return false;
+  }
+
+  if (!steamworks::c_game_client::is_user_logged_on()) {
+    DEBUG_MESSAGE("Calling steam_stats_ready but not logged in, please log into Steam first.", M_ERROR);
+    return false;
+  }
+
+  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->stats_valid();
+}
 
 unsigned steam_get_app_id() {
   if (!steamworks::c_main::is_initialised()) {

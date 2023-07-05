@@ -23,8 +23,8 @@ c_game_client::c_game_client()
 }
 
 c_game_client::~c_game_client() {
-  if (c_game_client::c_overlay_ != nullptr) delete c_game_client::c_overlay_;
-  if (c_game_client::c_stats_and_achievements_ != nullptr) delete c_game_client::c_stats_and_achievements_;
+  if (NULL != c_game_client::c_overlay_) delete c_game_client::c_overlay_;
+  if (NULL != c_game_client::c_stats_and_achievements_) delete c_game_client::c_stats_and_achievements_;
 }
 
 void c_game_client::init() {

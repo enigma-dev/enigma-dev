@@ -10,9 +10,25 @@ class c_game_client;
 class c_stats_and_achievements {
  public:
   c_stats_and_achievements();
-  ~c_stats_and_achievements() = default;
+  ~c_stats_and_achievements();
+
+  bool stats_valid();
+  void request_current_stats();
+  void set_achievement(const std::string& achievement_name);
+  bool get_achievement(const std::string& achievement_name);
+  void clear_achievement(const std::string& achievement_name);
+
+  STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
+  STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
+  STEAM_CALLBACK(c_stats_and_achievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
 
  private:
+  CGameID c_game_id_;
+
+  bool stats_valid_;
+
+  ISteamUser* steam_user_;
+  ISteamUserStats* steam_user_stats_;
 };
 }  // namespace steamworks
 
