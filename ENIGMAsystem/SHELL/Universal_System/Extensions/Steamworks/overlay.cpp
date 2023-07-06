@@ -3,47 +3,36 @@
 #include "game_client/c_overlay.h"
 #include "game_client/main.h"
 
-namespace enigma_user {
-
-bool steam_is_overlay_enabled() {
+bool overlay_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_is_overlay_enabled failed. Make sure that the API is initialized correctly.", M_ERROR);
+    DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
     return false;
   }
 
   if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_is_overlay_enabled failed. Make sure that the user is logged in.", M_ERROR);
+    DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the user is logged in.", M_ERROR);
     return false;
   }
+
+  return true;
+}
+
+namespace enigma_user {
+
+bool steam_is_overlay_enabled() {
+  if (!overlay_pre_checks("steam_is_overlay_enabled")) return false;
 
   return steamworks::c_overlay::overlay_enabled();
 }
 
 bool steam_is_overlay_activated() {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_is_overlay_activated failed. Make sure that the API is initialized correctly.",
-                  M_ERROR);
-    return false;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_is_overlay_activated failed. Make sure that the user is logged in.", M_ERROR);
-    return false;
-  }
+  if (!overlay_pre_checks("steam_is_overlay_activated")) return false;
 
   return steamworks::c_main::get_c_game_client()->get_c_overlay()->overlay_activated();
 }
 
 void steam_activate_overlay(const int overlay_type) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay failed. Make sure that the API is initialized correctly.", M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay failed. Make sure that the user is logged in.", M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_activate_overlay")) return;
 
   switch (overlay_type) {
     case enigma_user::ov_friends:
@@ -80,46 +69,19 @@ void steam_activate_overlay(const int overlay_type) {
 }
 
 void steam_activate_overlay_browser(const std::string& url) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_browser failed. Make sure that the API is initialized correctly.",
-                  M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_browser failed. Make sure that the user is logged in.", M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_activate_overlay_browser")) return;
 
   steamworks::c_overlay::activate_overlay_browser(url);
 }
 
 void steam_activate_overlay_store(const int app_id) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_store failed. Make sure that the API is initialized correctly.",
-                  M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_store failed. Make sure that the user is logged in.", M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_activate_overlay_store")) return;
 
   steamworks::c_overlay::activate_overlay_browser("https://store.steampowered.com/app/" + std::to_string(app_id));
 }
 
 void steam_activate_overlay_user(const unsigned dialog, const unsigned long long steamid) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_user failed. Make sure that the API is initialized correctly.",
-                  M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_activate_overlay_user failed. Make sure that the user is logged in.", M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_activate_overlay_user")) return;
 
   switch (dialog) {
     case enigma_user::usr_ov_steamid:
@@ -160,35 +122,13 @@ void steam_activate_overlay_user(const unsigned dialog, const unsigned long long
 }
 
 void steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE(
-        "Calling steam_set_overlay_notification_inset failed. Make sure that the API is initialized correctly.",
-        M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_set_overlay_notification_inset failed. Make sure that the user is logged in.",
-                  M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_set_overlay_notification_inset")) return;
 
   steamworks::c_overlay::set_overlay_notification_inset(hor_inset, vert_inset);
 }
 
 void steam_set_overlay_notification_position(const int position) {
-  if (!steamworks::c_main::is_initialised()) {
-    DEBUG_MESSAGE(
-        "Calling steam_set_overlay_notification_position failed. Make sure that the API is initialized correctly.",
-        M_ERROR);
-    return;
-  }
-
-  if (!steamworks::c_game_client::is_user_logged_on()) {
-    DEBUG_MESSAGE("Calling steam_set_overlay_notification_position failed. Make sure that the user is logged in.",
-                  M_ERROR);
-    return;
-  }
+  if (!overlay_pre_checks("steam_set_overlay_notification_position")) return;
 
   switch (position) {
     case enigma_user::steam_overlay_notification_position_top_left:

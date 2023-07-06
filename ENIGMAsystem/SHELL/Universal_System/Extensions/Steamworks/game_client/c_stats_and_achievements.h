@@ -19,6 +19,15 @@ class c_stats_and_achievements {
   void reset_all_stats();
   void reset_all_stats_achievements();
 
+  void set_stat_int(const std::string& stat_name, int value);
+  int get_stat_int(const std::string& stat_name);
+  
+  void set_stat_float(const std::string& stat_name, float value);
+  float get_stat_float(const std::string& stat_name);
+  
+  void set_stat_average_rate(const std::string& stat_name, float count_this_session, double session_length);
+  float get_stat_average_rate(const std::string& stat_name);
+
   STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
   STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
   STEAM_CALLBACK(c_stats_and_achievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
