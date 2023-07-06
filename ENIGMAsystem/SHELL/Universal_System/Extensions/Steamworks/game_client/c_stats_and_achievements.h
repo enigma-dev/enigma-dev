@@ -13,13 +13,11 @@ class c_stats_and_achievements {
   ~c_stats_and_achievements() = default;
 
   bool stats_valid();
-  void request_current_stats();
   void set_achievement(const std::string& achievement_name);
   bool get_achievement(const std::string& achievement_name);
   void clear_achievement(const std::string& achievement_name);
   void reset_all_stats();
   void reset_all_stats_achievements();
-  void store_stats();
 
   STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
   STEAM_CALLBACK(c_stats_and_achievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
@@ -32,6 +30,9 @@ class c_stats_and_achievements {
 
   ISteamUser* steam_user_;
   ISteamUserStats* steam_user_stats_;
+
+  void request_current_stats();
+  void store_stats();
 };
 }  // namespace steamworks
 

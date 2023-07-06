@@ -11,9 +11,9 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
   }
 }
 
-c_game_client* c_main::c_game_client_ = NULL;
+c_game_client* c_main::c_game_client_ {NULL};
 
-bool c_main::is_initialised_ = false;
+bool c_main::is_initialised_ {false};
 
 bool c_main::init() {
   if (SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid)) {  // replace k_uAppIdInvalid with your AppID

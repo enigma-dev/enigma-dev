@@ -175,7 +175,7 @@ if (is_game_restarting == false) {&#13;
 &#13;
 if (steam_initialised()) return 0;&#13;
 &#13;
-draw_background(Compatibility_Colour, 0, 0);&#13;
+draw_background(ENIGMA_background, 0, 0);&#13;
 &#13;
 draw_set_halign(fa_center);&#13;
 draw_set_valign(fa_middle);&#13;

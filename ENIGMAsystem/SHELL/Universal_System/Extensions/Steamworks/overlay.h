@@ -19,15 +19,15 @@ const unsigned steam_overlay_notification_position_top_right = 9;
 const unsigned steam_overlay_notification_position_bottom_left = 10;
 const unsigned steam_overlay_notification_position_bottom_right = 11;
 
-const unsigned user_ov_steamid = 12;
-const unsigned user_ov_chat = 13;
-const unsigned user_ov_jointrade = 14;
-const unsigned user_ov_stats = 15;
-const unsigned user_ov_achievements = 16;
-const unsigned user_ov_friendadd = 17;
-const unsigned user_ov_friendremove = 18;
-const unsigned user_ov_friendrequestaccept = 19;
-const unsigned user_ov_friendrequestignore = 20;
+const unsigned usr_ov_steamid = 12;
+const unsigned usr_ov_chat = 13;
+const unsigned usr_ov_jointrade = 14;
+const unsigned usr_ov_stats = 15;
+const unsigned usr_ov_achievements = 16;
+const unsigned usr_ov_friendadd = 17;
+const unsigned usr_ov_friendremove = 18;
+const unsigned usr_ov_friendrequestaccept = 19;
+const unsigned usr_ov_friendrequestignore = 20;
 
 bool steam_is_overlay_enabled();
 

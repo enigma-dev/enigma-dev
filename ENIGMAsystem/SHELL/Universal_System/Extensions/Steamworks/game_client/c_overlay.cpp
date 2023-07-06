@@ -8,10 +8,10 @@ c_overlay::c_overlay()
 void c_overlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
   if (pCallback->m_bActive) {
     c_overlay::overlay_activated_ = true;
-    DEBUG_MESSAGE("Overlay activated", M_INFO);
+    DEBUG_MESSAGE("Overlay activated successfully.", M_INFO);
   } else {
     c_overlay::overlay_activated_ = false;
-    DEBUG_MESSAGE("Overlay deactivated", M_INFO);
+    DEBUG_MESSAGE("Overlay deactivated successfully.", M_INFO);
   }
 }
 

@@ -5,7 +5,7 @@
 
 namespace steamworks {
 
-c_game_client* game_client_ = NULL;
+c_game_client* game_client_{NULL};
 c_game_client* game_client() { return game_client_; }
 
 // c_game_client::c_game_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils)
