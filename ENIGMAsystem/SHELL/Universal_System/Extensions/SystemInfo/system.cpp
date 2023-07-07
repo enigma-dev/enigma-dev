@@ -533,7 +533,7 @@ long long memory_totalvmem() {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          total += (long)dbtob((long long)(swaps[i].se_nblks)) / block_s;
+          total += ((swaps[i].se_nblks / (1024 / block_s)) * 1024);
         }
       }
       free(swaps);
@@ -591,7 +591,7 @@ long long memory_availvmem() {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          avail += (long)dbtob((long long)(swaps[i].se_nblks - swaps[i].se_inuse)) / block_s;
+          avail += (((swaps[i].se_nblks - swaps[i].se_inuse) / (1024 / block_s)) * 1024);
         }
       }
       free(swaps);
@@ -649,7 +649,7 @@ long long memory_usedvmem() {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          used += (long)dbtob((long long)(swaps[i].se_inuse)) / block_s;
+          used += ((swaps[i].se_inuse / (1024 / block_s)) * 1024);
         }
       }
       free(swaps);
