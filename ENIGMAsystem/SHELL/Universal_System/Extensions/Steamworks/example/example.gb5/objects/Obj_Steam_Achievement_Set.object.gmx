@@ -55,8 +55,7 @@ achievement = "&lt;Unknown&gt;";</string>
             <string>&#13;
 event_inherited();&#13;
 &#13;
-locked = steam_get_achievement(achievement)&#13;
-</string>
+locked = steam_get_achievement(achievement)</string>
           </argument>
         </arguments>
       </action>

@@ -4,7 +4,7 @@
 Name: Steamworks
 Identifier: Steamworks
 Author: Saif Kandil (https://k0t0z.github.io)
-Description: Steamworks API allows your game to take full advantage of Steam by accessing all of the underlying systems provided through the API.
+Description: Steamworks is a set of tools and services that help game developers and publishers build their games and get the most out of distributing on Steam.
 Default: true
 Icon: steamworks.svg
 

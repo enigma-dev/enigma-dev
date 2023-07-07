@@ -16,6 +16,7 @@
 **/
 
 #include "general.h"
+#include "leaderboards.h"
 #include "management.h"
 #include "overlay.h"
 #include "stats_and_achievements.h"

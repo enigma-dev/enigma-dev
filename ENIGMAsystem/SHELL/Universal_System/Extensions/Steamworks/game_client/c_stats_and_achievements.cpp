@@ -79,11 +79,12 @@ void c_stats_and_achievements::set_achievement(const std::string& achievement_na
   if (!c_stats_and_achievements::steam_user_stats_->SetAchievement(achievement_name.c_str())) {
     DEBUG_MESSAGE("Calling SetAchievement failed for '" + achievement_name +
                       "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the 'API Name' of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
                       "the changes are published.",
                   M_ERROR);
     return;
   }
+
   c_stats_and_achievements::store_stats();
 }
 
@@ -92,11 +93,12 @@ bool c_stats_and_achievements::get_achievement(const std::string& achievement_na
   if (!c_stats_and_achievements::steam_user_stats_->GetAchievement(achievement_name.c_str(), &achieved)) {
     DEBUG_MESSAGE("Calling GetAchievement failed for '" + achievement_name +
                       "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the 'API Name' of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
                       "the changes are published.",
                   M_ERROR);
     return false;
   }
+  
   return achieved;
 }
 
@@ -104,7 +106,7 @@ void c_stats_and_achievements::clear_achievement(const std::string& achievement_
   if (!c_stats_and_achievements::steam_user_stats_->ClearAchievement(achievement_name.c_str())) {
     DEBUG_MESSAGE("Calling ClearAchievement failed for '" + achievement_name +
                       "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the 'API Name' of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
                       "the changes are published.",
                   M_ERROR);
     return;
@@ -112,7 +114,7 @@ void c_stats_and_achievements::clear_achievement(const std::string& achievement_
   c_stats_and_achievements::store_stats();
 }
 
-void c_stats_and_achievements::set_stat_int(const std::string& stat_name, int value) {
+void c_stats_and_achievements::set_stat_int(const std::string& stat_name, const int value) {
   if (!c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value)) {
     DEBUG_MESSAGE(
         "Calling SetStat failed for '" + stat_name +
@@ -143,7 +145,7 @@ int c_stats_and_achievements::get_stat_int(const std::string& stat_name) {
   return value;
 }
 
-void c_stats_and_achievements::set_stat_float(const std::string& stat_name, float value) {
+void c_stats_and_achievements::set_stat_float(const std::string& stat_name, const float value) {
   if (!c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value)) {
     DEBUG_MESSAGE(
         "Calling SetStat failed for '" + stat_name +
@@ -174,13 +176,24 @@ float c_stats_and_achievements::get_stat_float(const std::string& stat_name) {
   return value;
 }
 
-void c_stats_and_achievements::set_stat_average_rate(const std::string& stat_name, float count_this_session,
-                                                     double session_length) {}
+void c_stats_and_achievements::set_stat_average_rate(const std::string& stat_name, const float count_this_session,
+                                                     const double session_length) {
+  if (!c_stats_and_achievements::steam_user_stats_->UpdateAvgRateStat(stat_name.c_str(), count_this_session,
+                                                                      session_length)) {
+    DEBUG_MESSAGE(
+        "Calling UpdateAvgRateStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type must be "
+            "AVGRATE in the Steamworks Partner backend.",
+        M_ERROR);
+    return;
+  }
+
+  c_stats_and_achievements::store_stats();
+}
 
 float c_stats_and_achievements::get_stat_average_rate(const std::string& stat_name) {
-  float value{-1.0f};
-
-  return value;
+  return c_stats_and_achievements::get_stat_float(stat_name);
 }
 
 void c_stats_and_achievements::reset_all_stats() {
