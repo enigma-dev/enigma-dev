@@ -411,22 +411,50 @@ inline auto serialize(T &&value) {
 }
 
 template <typename T>
+typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline deserialize_fn(std::byte *iter) {
+  return nullptr;
+}
+
+template <typename T>
+typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>, T>::type inline deserialize_fn(std::byte *iter) {
+  std::size_t len = deserialize_numeric<std::size_t>(iter);
+  std::size_t offset = sizeof(std::size_t);
+  std::string result{reinterpret_cast<char *>(iter + offset), reinterpret_cast<char *>(iter + offset + len)};
+  return result;
+}
+
+template <typename T>
+typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>, T>::type inline deserialize_fn(std::byte *iter) {
+  return static_cast<bool>(*iter);
+}
+
+template <typename T>
+typename std::enable_if<std::is_same_v<var, std::decay_t<T>>, T>::type inline deserialize_fn(std::byte *iter) {
+  return deserialize_var(iter);
+}
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>, T>::type inline deserialize_fn(std::byte *iter) {
+  return deserialize_variant(iter);
+}
+
+template <typename T>
+typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
+                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>,
+                        T>::type inline deserialize_fn(std::byte *iter) {
+  return deserialize_numeric<T>(iter);
+}
+
+template <typename T>
+constexpr static inline bool has_deserialize_free_function_v2 =
+    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
+    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
+    std::is_floating_point_v<std::decay_t<T>>;
+
+template <typename T>
 inline T deserialize(std::byte *iter) {
-  if constexpr (std::is_pointer_v<std::decay_t<T>>) {
-    return nullptr;
-  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    std::size_t len = deserialize_numeric<std::size_t>(iter);
-    std::size_t offset = sizeof(std::size_t);
-    std::string result{reinterpret_cast<char *>(iter + offset), reinterpret_cast<char *>(iter + offset + len)};
-    return result;
-  } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
-    return static_cast<bool>(*iter);
-  } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    return deserialize_var(iter);
-  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
-    return deserialize_variant(iter);
-  } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
-    return deserialize_numeric<T>(iter);
+  if constexpr (has_deserialize_free_function_v2<std::decay_t<T>>) {
+    deserialize_fn<T>(iter);
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;
     result.deserialize_self(iter);
