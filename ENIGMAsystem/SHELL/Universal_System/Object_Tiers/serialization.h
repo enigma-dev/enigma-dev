@@ -320,21 +320,43 @@ inline var deserialize_var(std::byte *iter) {
 }
 
 template <typename T>
+inline void serialize_into_fn(std::byte *iter, T *&&value) {
+  serialize_into<std::size_t>(iter, 0);
+}
+
+inline void serialize_into_fn(std::byte *iter, std::string &&value) {
+  serialize_into<std::size_t>(iter, value.size());
+  std::transform(value.begin(), value.end(), iter + sizeof(std::size_t),
+                 [](char c) { return static_cast<std::byte>(c); });
+}
+
+inline void serialize_into_fn(std::byte *iter, bool &&value) { *iter = static_cast<std::byte>(value); }
+
+inline void serialize_into_fn(std::byte *iter, var &&value) { serialize_var_into(iter, value); }
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
+                                                                                                    T &&value) {
+  serialize_variant_into(iter, value);
+}
+
+template <typename T>
+typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
+                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>>::
+    type inline serialize_into_fn(std::byte *iter, T &&value) {
+  serialize_numeric_into(iter, value);
+}
+
+template <typename T>
+constexpr static inline bool has_serialize_into_fn_free_function_v2 =
+    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
+    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
+    std::is_floating_point_v<std::decay_t<T>>;
+
+template <typename T>
 inline void serialize_into(std::byte *iter, T &&value) {
-  if constexpr (std::is_pointer_v<std::decay_t<T>>) {
-    serialize_into<std::size_t>(iter, 0);
-  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    serialize_into<std::size_t>(iter, value.size());
-    std::transform(value.begin(), value.end(), iter + sizeof(std::size_t),
-                   [](char c) { return static_cast<std::byte>(c); });
-  } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
-    *iter = static_cast<std::byte>(value);
-  } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    serialize_var_into(iter, value);
-  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
-    serialize_variant_into(iter, value);
-  } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
-    serialize_numeric_into(iter, value);
+  if constexpr (has_serialize_into_fn_free_function_v2<std::decay_t<T>>) {
+    serialize_into_fn(iter, value);
   } else {
     static_assert(always_false<T>,
                   "'serialize_into' takes 'variant', 'var', 'std::string', bool, integral or floating types");
@@ -503,10 +525,10 @@ inline void enigma_internal_deserialize_fn(std::string &value, std::byte *iter, 
   len += value.length() + sizeof(std::size_t);
 }
 
-template <typename t>
+template <typename T>
 constexpr static inline bool has_enigma_internal_deserialize_free_function_v2 =
-    std::is_same_v<t, std::string> || std::is_same_v<t, var> || std::is_base_of_v<variant, std::decay_t<t>> ||
-    is_lua_table_v<t>;
+    std::is_same_v<T, std::string> || std::is_same_v<T, var> || std::is_base_of_v<variant, std::decay_t<T>> ||
+    is_lua_table_v<T>;
 
 template <typename T>
 inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &len) {
