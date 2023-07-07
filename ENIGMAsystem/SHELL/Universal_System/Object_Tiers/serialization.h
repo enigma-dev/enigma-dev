@@ -75,7 +75,7 @@ constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
   if constexpr (has_byte_size_free_function_v<T>) {
-    return Size(value);
+    return byte_size(value);
   } else if constexpr (has_size_method_v<std::decay_t<T>>) {
     return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
@@ -124,9 +124,6 @@ template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 inline std::array<std::byte, sizeof(T)> serialize_integral(T value) {
   return serialize_any<std::make_unsigned_t<T>>(value);
 }
-
-template <typename T>
-constexpr static inline bool always_false = false;
 
 template <typename T>
 inline void serialize_floating_into(std::byte *iter, T value) {
@@ -484,19 +481,37 @@ inline void enigma_internal_serialize(const T &value, std::size_t &len, std::vec
   len = bytes.size();
 }
 
+inline void enigma_internal_deserialize_fn(var &value, std::byte *iter, std::size_t &len) {
+  value = deserialize_var(iter + len);
+  len += var_size(value);
+}
+
+template <typename T>
+inline void enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len) {
+  value = enigma_internal_deserialize_lua_table<T>(iter);
+  len += enigma_internal_sizeof_lua_table(value);
+}
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
+    T &value, std::byte *iter, std::size_t &len) {
+  enigma_internal_deserialize_variant(value, iter, len);
+}
+
+inline void enigma_internal_deserialize_fn(std::string &value, std::byte *iter, std::size_t &len) {
+  value = enigma::deserialize<std::string>(iter + len);
+  len += value.length() + sizeof(std::size_t);
+}
+
+template <typename t>
+constexpr static inline bool has_enigma_internal_deserialize_free_function_v2 =
+    std::is_same_v<t, std::string> || std::is_same_v<t, var> || std::is_base_of_v<variant, std::decay_t<t>> ||
+    is_lua_table_v<t>;
+
 template <typename T>
 inline void enigma_internal_deserialize(T &value, std::byte *iter, std::size_t &len) {
-  if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    value = deserialize_var(iter + len);
-    len += var_size(value);
-  } else if constexpr (is_lua_table_v<std::decay_t<T>>) {
-    value = enigma_internal_deserialize_lua_table<typename is_lua_table<T>::inner_type>(iter);
-    len += enigma_internal_sizeof_lua_table(value);
-  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
-    enigma_internal_deserialize_variant(value, iter, len);
-  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    value = enigma::deserialize<std::string>(iter + len);
-    len += value.length() + sizeof(std::size_t);
+  if constexpr (has_enigma_internal_deserialize_free_function_v2<T>) {
+    enigma_internal_deserialize_fn(value, iter, len);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     value = enigma::deserialize<T>(iter + len);
     len += value.byte_size();
