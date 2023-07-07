@@ -147,7 +147,15 @@ std::string utsname_sysname() {
   str = result ? result : "";
   return str;
   #else
-  return "Windows_NT";
+  const char *result = nullptr;
+  char buf[255]; 
+  DWORD sz = sizeof(buf);
+  if (RegGetValueA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\", "OS", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+    result = buf;
+  }
+  std::string str;
+  str = result ? result : "";
+  return str;
   #endif
 }
 
@@ -892,7 +900,11 @@ std::string cpu_brand() {
   #endif
 }
 
+static int numcores = -1;
 int cpu_numcores() {
+  if (numcores != -1) { 
+    return nResult;
+  }
   #if defined(_WIN32)
   std::string result;
   bool proceed = true;
@@ -952,26 +964,26 @@ int cpu_numcores() {
     result = std::regex_replace(result, std::regex("\n"), "");
     static std::string res; 
     res = result;
-    return (int)strtol(res.c_str(), nullptr, 10);
+    numcores = (int)strtol(res.c_str(), nullptr, 10);
   }
-  return -1;
+  return numcores;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  int physical_cpus = 0;
+  int physical_cpus = -1;
   std::size_t len = sizeof(int);
   if (!sysctlbyname("hw.physicalcpu", &physical_cpus, &len, nullptr, 0)) {
-    return physical_cpus;
+    numcores = physical_cpus;
   }
-  return -1;
+  return numcores;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
-  int physical_cpus = 0;
+  int physical_cpus = -1;
   mib[0] = CTL_HW;
   mib[1] = HW_NCPU;
   std::size_t len = sizeof(int);
   if (!sysctl(mib, 2, &physical_cpus, &len, nullptr, 0)) {
-    return physical_cpus;
+    numcores = physical_cpus;
   }
-  return -1;
+  return numcores;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
@@ -994,20 +1006,23 @@ int cpu_numcores() {
         pclose(fp);
         static std::string str2;
         str = (result && strlen(result)) ? result : "-1";
-        return (int)strtol(str.c_str(), nullptr, 10);
+        numcores = (int)strtol(str.c_str(), nullptr, 10);
       }
     }
-    return (int)strtol(str.c_str(), nullptr, 10);
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
-  return -1;
+  return numcores;
   #else
   return -1;
   #endif
 }
 
+static int numcpus = -1;
 int cpu_numcpus() {
+  if (numcpus != -1) return numcpus;
   auto result = std::thread::hardware_concurrency();
-  return (int)(result ? result : -1);
+  numcpus = (int)(result ? result : -1);
+  return numcpus;
 }
 
 } // namespace ngs::sys
