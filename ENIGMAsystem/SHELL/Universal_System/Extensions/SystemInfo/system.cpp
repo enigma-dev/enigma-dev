@@ -903,7 +903,7 @@ std::string cpu_brand() {
 static int numcores = -1;
 int cpu_numcores() {
   if (numcores != -1) { 
-    return nResult;
+    return numcores;
   }
   #if defined(_WIN32)
   std::string result;
