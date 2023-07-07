@@ -364,23 +364,44 @@ inline void serialize_into(std::byte *iter, T &&value) {
 }
 
 template <typename T>
+inline auto serialize_fn(T *&&value) {
+  return serialize_numeric<std::size_t>(0);
+}
+
+inline auto serialize_fn(std::string &&value) {
+  std::vector<std::byte> result;
+  result.resize(sizeof(std::size_t) + value.size());
+  serialize_into<std::size_t>(result.data(), 0);
+  std::transform(value.begin(), value.end(), result.data() + sizeof(std::size_t),
+                 [](char c) { return static_cast<std::byte>(c); });
+}
+
+inline auto serialize_fn(bool &&value) { return std::vector<std::byte>{static_cast<std::byte>(value)}; }
+
+inline auto serialize_fn(var &&value) { return serialize_var(value); }
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>, std::vector<std::byte>>::type inline serialize_fn(
+    T &&value) {
+  return serialize_variant(value);
+}
+
+template <typename T>
+typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>,
+                        std::array<std::byte, sizeof(T)>>::type inline serialize_fn(T &&value) {
+  return serialize_numeric(value);
+}
+
+template <typename T>
+constexpr static inline bool has_serialize_free_function_v2 =
+    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
+    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
+    std::is_floating_point_v<std::decay_t<T>>;
+
+template <typename T>
 inline auto serialize(T &&value) {
-  if constexpr (std::is_pointer_v<std::decay_t<T>>) {
-    return serialize_numeric<std::size_t>(0);
-  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    std::vector<std::byte> result;
-    result.resize(sizeof(std::size_t) + value.size());
-    serialize_into<std::size_t>(result.data(), 0);
-    std::transform(value.begin(), value.end(), result.data() + sizeof(std::size_t),
-                   [](char c) { return static_cast<std::byte>(c); });
-  } else if constexpr (std::is_same_v<bool, std::decay_t<T>>) {
-    return std::vector<std::byte>{static_cast<std::byte>(value)};
-  } else if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    return serialize_var(value);
-  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
-    return serialize_variant(value);
-  } else if constexpr (std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>) {
-    return serialize_numeric(value);
+  if constexpr (has_serialize_free_function_v2<std::decay_t<T>>) {
+    serialize_fn(value);
   } else if constexpr (has_serialize_method_v<std::decay_t<T>>) {
     return value.serialize();
   } else {
