@@ -489,14 +489,26 @@ inline void resize_buffer_using_byte_size(std::vector<std::byte> &buffer, const 
   buffer.resize(buffer.size() + value.byte_size());
 }
 
+inline void resize_buffer_for_fn(std::vector<std::byte> &buffer, var &&value) { resize_buffer_for_var(buffer, value); }
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value) {
+  resize_buffer_for_variant(buffer, value);
+}
+
+inline void resize_buffer_for_fn(std::vector<std::byte> &buffer, std::string &&value) {
+  resize_buffer_for_string(buffer, value);
+}
+
+template <typename T>
+constexpr static inline bool has_resize_buffer_for_free_function_v2 =
+    std::is_same_v<T, std::string> || std::is_base_of_v<variant, std::decay_t<T>> || std::is_same_v<T, var>;
+
 template <typename T>
 inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
-  if constexpr (std::is_same_v<var, std::decay_t<T>>) {
-    resize_buffer_for_var(buffer, value);
-  } else if constexpr (std::is_base_of_v<variant, std::decay_t<T>>) {
-    resize_buffer_for_variant(buffer, value);
-  } else if constexpr (std::is_same_v<std::string, std::decay_t<T>>) {
-    resize_buffer_for_string(buffer, value);
+  if constexpr (has_resize_buffer_for_free_function_v2<std::decay_t<T>>) {
+    resize_buffer_for_fn(buffer, value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     resize_buffer_using_byte_size(buffer, value);
   } else {
