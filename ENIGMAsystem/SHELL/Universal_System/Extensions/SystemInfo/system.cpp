@@ -40,8 +40,15 @@
 #include <cstdio>
 #include <cmath>
 #if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
+#if !defined(__sun)
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#else
+#include <SDL.h>
+#include <SDL_opengl.h>
+#include <sys/swap.h>
+#include <unistd.h>
+#endif
 #endif
 #if defined(_WIN32)
 #include <winsock2.h>
@@ -85,7 +92,11 @@
 namespace ngs::sys {
 
 #if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
+#if !defined(__sun)
 static GLFWwindow *window = nullptr;
+#else
+static SDL_Window *window = nullptr;
+#endif
 #endif
 
 #if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
@@ -99,6 +110,7 @@ static void create_opengl_context() {
     return;
   }
   #endif
+  #if !defined(__sun)
   if (!window) {
     glewExperimental = true;
     if (glfwInit()) {
@@ -114,6 +126,16 @@ static void create_opengl_context() {
       }
     }
   }
+  #else
+  if (!window) {
+    if (SDL_Init(SDL_INIT_VIDEO)) return;
+    window = SDL_CreateWindow("", 0, 0, 1, 1, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    if (!window) return;
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (!context) return;
+    SDL_GL_MakeCurrent(window, context);
+  }
+  #endif
 }
 #endif
 
@@ -308,7 +330,7 @@ std::string utsname_codename() {
   return product_name;
   #elif (defined(__APPLE__) && defined(__MACH__))
   std::string result;
-  FILE *fp = popen("echo $(sw_vers  | grep 'ProductName:' | uniq | awk '{$1=$1};1' && sw_vers  | grep 'ProductVersion:' | uniq | awk '{$1=$1};1')", "r");
+  FILE *fp = popen("echo $(sw_vers | grep 'ProductName:' | uniq | awk '{$1=$1};1' && sw_vers | grep 'ProductVersion:' | uniq | awk '{$1=$1};1')", "r");
   if (fp) {
     char buf[255];
     if (fgets(buf, sizeof(buf), fp)) {
@@ -541,6 +563,31 @@ long long memory_totalvmem() {
     return total;
   }
   return -1;
+  #elif defined(__sun)
+  long long total = 0;
+  long page_s = sysconf(_SC_PAGESIZE);
+  int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
+  if (nswap > 0) {
+    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    if (swaps) {
+      char *strtab = (char *)malloc((nswap + 1) * 80);
+      if (strtab) {
+        for (int i = 0; i < (nswap + 1); i++) {
+          swaps->swt_ent[i].ste_path = strtab + (i * 80);
+        }
+        if (swapctl(SC_LIST, swaps) > 0) {
+          for (int i = 0; i < nswap; i++) {
+            total += (swaps->swt_ent[i].ste_pages * page_s);
+          }
+        }
+        free(strtab);
+      }
+      free(swaps);
+    }
+    return total;
+  }
+  return -1;
   #else
   return -1;
   #endif
@@ -599,6 +646,31 @@ long long memory_availvmem() {
     return avail;
   }
   return -1;
+  #elif defined(__sun)
+  long long avail = 0;
+  long page_s = sysconf(_SC_PAGESIZE);
+  int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
+  if (nswap > 0) {
+    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    if (swaps) {
+      char *strtab = (char *)malloc((nswap + 1) * 80);
+      if (strtab) {
+        for (int i = 0; i < (nswap + 1); i++) {
+          swaps->swt_ent[i].ste_path = strtab + (i * 80);
+        }
+        if (swapctl(SC_LIST, swaps) > 0) {
+          for (int i = 0; i < nswap; i++) {
+            avail += (swaps->swt_ent[i].ste_free * page_s);
+          }
+        }
+        free(strtab);
+      }
+      free(swaps);
+    }
+    return avail;
+  }
+  return -1;
   #else
   return -1;
   #endif
@@ -651,6 +723,31 @@ long long memory_usedvmem() {
         for (int i = 0; i < nswap; i++) {
           used += ((swaps[i].se_inuse / (1024 / block_s)) * 1024);
         }
+      }
+      free(swaps);
+    }
+    return used;
+  }
+  return -1;
+  #elif defined(__sun)
+  long long used = 0;
+  long page_s = sysconf(_SC_PAGESIZE);
+  int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
+  if (nswap > 0) {
+    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    if (swaps) {
+      char *strtab = (char *)malloc((nswap + 1) * 80);
+      if (strtab) {
+        for (int i = 0; i < (nswap + 1); i++) {
+          swaps->swt_ent[i].ste_path = strtab + (i * 80);
+        }
+        if (swapctl(SC_LIST, swaps) > 0) {
+          for (int i = 0; i < nswap; i++) {
+            used += ((swaps->swt_ent[i].ste_pages - swaps->swt_ent[i].ste_free) * page_s);
+          }
+        }
+        free(strtab);
       }
       free(swaps);
     }
@@ -1009,6 +1106,21 @@ int cpu_numcores() {
         numcores = (int)strtol(str.c_str(), nullptr, 10);
       }
     }
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
+  #elif defined(__sun)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("psrinfo -p", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
