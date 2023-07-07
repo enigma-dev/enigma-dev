@@ -46,6 +46,7 @@
 #else
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <sys/systeminfo.h>
 #include <sys/swap.h>
 #include <unistd.h>
 #endif
@@ -80,7 +81,9 @@
 #endif
 #include <sys/sysctl.h>
 #endif
+#if !defined(__sun)
 #include <sys/utsname.h>
+#endif
 #endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ws2_32.lib")
@@ -161,6 +164,7 @@ std::string human_readable(long double nbytes) {
 
 std::string utsname_sysname() {
   #if !defined(_WIN32)
+  #if !defined(__sun)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -168,6 +172,20 @@ std::string utsname_sysname() {
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  std::string res;
+  long count = sysinfo(SI_SYSNAME, nullptr, 0);
+  if (count > 0) {
+    char *buf = (char *)calloc(count, sizeof(char));
+    if (buf) {
+      if (sysinfo(SI_SYSNAME, buf, count) > 0) {
+        res = buf;
+      }
+      free(buf);
+    }
+  }
+  return res;
+  #endif
   #else
   const char *result = nullptr;
   char buf[255]; 
@@ -183,6 +201,7 @@ std::string utsname_sysname() {
 
 std::string utsname_nodename() {
   #if !defined(_WIN32)
+  #if !defined(__sun)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -190,6 +209,20 @@ std::string utsname_nodename() {
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  std::string res;
+  long count = sysinfo(SI_HOSTNAME, nullptr, 0);
+  if (count > 0) {
+    char *buf = (char *)calloc(count, sizeof(char));
+    if (buf) {
+      if (sysinfo(SI_HOSTNAME, buf, count) > 0) {
+        res = buf;
+      }
+      free(buf);
+    }
+  }
+  return res;
+  #endif
   #else
   const char *result = nullptr;
   char buf[1024];
@@ -291,6 +324,7 @@ std::string windows_version(std::string *product_name) {
 
 std::string utsname_release() {
   #if !defined(_WIN32)
+  #if !defined(__sun)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -299,6 +333,20 @@ std::string utsname_release() {
   str = result ? result : "";
   return str;
   #else
+  std::string res;
+  long count = sysinfo(SI_RELEASE, nullptr, 0);
+  if (count > 0) {
+    char *buf = (char *)calloc(count, sizeof(char));
+    if (buf) {
+      if (sysinfo(SI_RELEASE, buf, count) > 0) {
+        res = buf;
+      }
+      free(buf);
+    }
+  }
+  return res;
+  #endif
+  #else
   std::string product_name;
   return windows_version(&product_name);    
   #endif
@@ -306,6 +354,7 @@ std::string utsname_release() {
 
 std::string utsname_version() {
   #if !defined(_WIN32)
+  #if !defined(__sun)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -313,6 +362,20 @@ std::string utsname_version() {
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  std::string res;
+  long count = sysinfo(SI_VERSION, nullptr, 0);
+  if (count > 0) {
+    char *buf = (char *)calloc(count, sizeof(char));
+    if (buf) {
+      if (sysinfo(SI_VERSION, buf, count) > 0) {
+        res = buf;
+      }
+      free(buf);
+    }
+  }
+  return res;
+  #endif
   #else
   char buf[2048];
   std::string str;
@@ -391,6 +454,7 @@ std::string utsname_codename() {
 
 std::string utsname_machine() {
   #if !defined(_WIN32)
+  #if !defined(__sun)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -398,6 +462,20 @@ std::string utsname_machine() {
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  std::string res;
+  long count = sysinfo(SI_MACHINE, nullptr, 0);
+  if (count > 0) {
+    char *buf = (char *)calloc(count, sizeof(char));
+    if (buf) {
+      if (sysinfo(SI_MACHINE, buf, count) > 0) {
+        res = buf;
+      }
+      free(buf);
+    }
+  }
+  return res;
+  #endif
   #else
   SYSTEM_INFO sysinfo;
   GetNativeSystemInfo(&sysinfo);
