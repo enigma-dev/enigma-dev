@@ -522,7 +522,7 @@ long long memory_totalram() {
   return -1;
   #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
-  long long physical_memory = 0;
+  long long physical_memory = -1;
   mib[0] = CTL_HW;
   #if (defined(__APPLE__) && defined(__MACH__))
   mib[1] = HW_MEMSIZE;
