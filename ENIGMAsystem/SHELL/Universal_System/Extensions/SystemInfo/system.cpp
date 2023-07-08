@@ -546,7 +546,7 @@ long long memory_totalram() {
   char buf[1024];
   long long total = -1;
   const char *result = nullptr;
-  FILE *fp = popen("vmstat 1 1 | tail -1 | awk '{print $4}'", "r");
+  FILE *fp = popen("prtconf | grep 'Memory size:' | uniq | cut -d' ' -f3- | awk '{print $1 * 1024};'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -592,21 +592,7 @@ long long memory_availram() {
   }
   return -1;
   #elif defined(__sun)
-  char buf[1024];
-  long long avail = -1;
-  const char *result = nullptr;
-  FILE *fp = popen("vmstat 1 1 | tail -1 | awk '{print $5}'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    avail = strtoll(str.c_str(), nullptr, 10) * 1024;
-  }
-  return avail;
+  return (sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGESIZE));
   #else
   return -1;  
   #endif
@@ -1073,6 +1059,20 @@ std::string cpu_vendor() {
     return str;
   }
   return "";
+  #elif defined(__sun)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("prtdiag -v | grep 'System Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+  }
+  static std::string str;
+  str = result ? result : "";
+  return str;
   #else
   return "";
   #endif
@@ -1120,6 +1120,20 @@ std::string cpu_brand() {
     return strlen(buf) ? buf : "";
   }
   return "";
+  #elif defined(__sun)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("prtdiag -v | grep 'BIOS Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+  }
+  static std::string str;
+  str = result ? result : "";
+  return str;
   #else
   return "";
   #endif
