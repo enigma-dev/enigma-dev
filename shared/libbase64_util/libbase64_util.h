@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Greg Williamson
+/** Copyright (C) 2008-2013 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -13,24 +13,15 @@
 ***
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
-*/
+**/
 
-#ifndef SOG_H
-#define SOG_H
+#ifndef LIBBASE64_UTIL_H
+#define LIBBASE64_UTIL_H
 
-#include "file-format.h"
+#include <string>
 
-namespace egm {
+bool is_base64(unsigned char byte);
+std::string base64_encode(std::string const& str);
+std::string base64_decode(std::string const& str);
 
-// Reads and writes SOG files
-class SOGFileFormat : public FileFormat {
- public:
-  SOGFileFormat(const EventData* event_data) : FileFormat(event_data) {}
-  virtual std::unique_ptr<Project> LoadProject(
-          const fs::path& fName, bool replaceGmRoomWithEgmRoom = false) const override;
-  virtual bool WriteProject(Project* project, const fs::path& fName) const override;
-};
-
-}
-
-#endif
+#endif // LIBBASE64_UTIL_H

@@ -23,4 +23,5 @@ extend google.protobuf.FieldOptions {
   optional string yyp_id = 50006;
   // When file_path is true, this is the type of file indicated.
   optional FileKind file_kind = 50007;
+  optional string tmx = 50008;
 }

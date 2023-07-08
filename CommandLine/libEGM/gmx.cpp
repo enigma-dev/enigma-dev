@@ -18,6 +18,7 @@
 #include "gmx.h"
 #include "action.h"
 #include "strings_util.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 #include <pugixml.hpp>
 
@@ -73,7 +74,7 @@ class gmx_root_walker {
         traverse(child, depth + 1);
       }
     }
-    
+
     if (firstRun) {
       treeParsed = true;
       traverse(node, depth);
@@ -105,7 +106,7 @@ class gmx_root_walker {
       { "font", &TreeNode::mutable_font },
       { "timeline", &TreeNode::mutable_timeline },
       { "object", &TreeNode::mutable_object },
-      { "room", &TreeNode::mutable_room },
+      { "room", &TreeNode::mutable_gm_room },
       { "datafile", &TreeNode::mutable_include },
       { "Config", &TreeNode::mutable_settings },
     });
@@ -137,7 +138,7 @@ class gmx_root_walker {
 
   virtual bool for_each(pugi::xml_node &node, int depth) {
     if (node.type() != pugi::node_pcdata && node.name() != std::string("datafile")) {
-      
+
       std::string name = node.attribute("name").value();
 
       // These nodes don't have name attributes but appear in tree
@@ -188,7 +189,7 @@ class gmx_root_walker {
       } else {
         resName = node.child_value("name");
       }
-      
+
       if (!treeParsed) {
         int count = idLookup[resType].size();
         count = idLookup[resType].size();
@@ -277,8 +278,8 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
 
       if (gmxName == "GMX_DEPRECATED")
         continue;
-        
-      // NOTE: GMX typically stores resource refs as strings 
+
+      // NOTE: GMX typically stores resource refs as strings
       // but path background rooms seem to be the exception
       if (gmxName == "backroom") {
         child = child.child("backroom");
@@ -292,8 +293,8 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
         refl->SetString(m, field, roomName);
         outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << roomName << std::endl;
         continue;
-      } 
-        
+      }
+
       if (string_ends_with(gmxName, "action")) {
         std::vector<Action> actions;
         for (pugi::xml_node n = child.first_element_by_path(gmxName.c_str()); n != nullptr; n = n.next_sibling()) {
@@ -499,7 +500,8 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std:
   }
 }
 
-std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const {
+std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath,
+                                                    bool replaceGmRoomWithEgmRoom) const {
   pugi::xml_document doc;
   if (!doc.load_file(fPath.u8string().c_str())) return nullptr;
 
@@ -512,8 +514,14 @@ std::unique_ptr<Project> GMXFileFormat::LoadProject(const fs::path& fPath) const
   // we use our own traverse(...) instead of the pugixml one
   // so that we can skip subtrees for datafiles and such
   walker.traverse(doc, -1, true);
-  
+
   LegacyEventsToEGM(proj.get(), _event_data);
+
+  if (replaceGmRoomWithEgmRoom) {
+    buffers::TreeNode *treenodeRoot = game->mutable_root();
+    GmRoomToEgmRoomTranslator translator(treenodeRoot);
+    translator.Translate();
+  }
 
   return proj;
 }
@@ -555,4 +563,4 @@ bool GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Messag
   return true;
 }
 
-} //namespace egm 
+} //namespace egm

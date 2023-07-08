@@ -3,14 +3,14 @@ package buffers.resources;
 
 import "options.proto";
 
-message Room {
+message GMRoom {
   optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
 
   optional string caption = 1;
   optional uint32 width = 2 [(yyp) = "roomSettings/Width"];
   optional uint32 height = 3 [(yyp) = "roomSettings/Height"];
-  optional uint32 hsnap = 4;
-  optional uint32 vsnap = 5;
+  optional uint32 hsnap = 4;//map to tilewidth
+  optional uint32 vsnap = 5;//map to tileheight
   optional bool isometric = 6;
   optional uint32 speed = 27;
   optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];

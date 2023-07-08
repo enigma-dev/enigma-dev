@@ -125,10 +125,10 @@ struct ObjectData : ProtoMessageInheritor<buffers::resources::Object> {
   ObjectData(const BaseProtoClass &q, const std::string& name);
   ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup);
 };
-struct RoomData : ProtoMessageInheritor<buffers::resources::Room> {
+struct GMRoomData : ProtoMessageInheritor<buffers::resources::GMRoom> {
   std::string name;
-  RoomData(const BaseProtoClass &q, const std::string& name);
-  RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup);
+  GMRoomData(const BaseProtoClass &q, const std::string& name);
+  GMRoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup);
 };
 // TODO(Nabeel): Add this when you have Proto for Polygons
 // struct PolygonData : ProtoMessageInheritor<buffers::resources::Polygon> {
@@ -151,7 +151,7 @@ struct GameData {
   std::vector<ShaderData>     shaders;
   std::vector<TimelineData>   timelines;
   std::vector<ObjectData>     objects;
-  std::vector<RoomData>       rooms;
+  std::vector<GMRoomData>     rooms;
   // TODO(Nabeel): Add this when you have Proto for Polygons
   // std::vector<PolygonData>    polygons;
 

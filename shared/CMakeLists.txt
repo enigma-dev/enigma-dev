@@ -12,6 +12,7 @@ set(SHARED_SOURCES
    "event_reader/egm_events.cpp"
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
+   "libbase64_util/libbase64_util.cpp"
    "ProtoYaml/proto-yaml.cpp"
 )
 

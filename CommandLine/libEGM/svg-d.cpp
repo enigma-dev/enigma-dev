@@ -30,7 +30,7 @@ using namespace egm::serialization;
 namespace protobuf = google::protobuf;
 
 using std::string;
-using buffers::resources::Room;
+using buffers::resources::EGMRoom;
 using protobuf::RepeatedPtrField;
 using protobuf::util::MessageDifferencer;
 using CppType = protobuf::FieldDescriptor::CppType;
@@ -47,7 +47,7 @@ struct InstSimple {
   string  name;
   int32_t id;
 
-  InstSimple(const Room::Instance &inst):
+  InstSimple(const EGMRoom::Instance &inst):
       object_name(inst.object_type()),
       xscale(inst.xscale()), yscale(inst.yscale()), zscale(inst.zscale()),
       rotation(inst.rotation()), zrotation(inst.zrotation()),
@@ -58,8 +58,8 @@ struct InstSimple {
   static const InstSimple DEFAULTS;
 
   // Removes fields of this structure from an instance proto, returning rest.
-  static Room::Instance Subtract(const Room::Instance &inst) {
-    Room::Instance res = inst;
+  static EGMRoom::Instance Subtract(const EGMRoom::Instance &inst) {
+    EGMRoom::Instance res = inst;
     res.clear_object_type();
     res.clear_xscale(), res.clear_yscale(), res.clear_zscale();
     res.clear_rotation(), res.clear_zrotation();
@@ -95,7 +95,7 @@ struct TileSimple {
   string  name;
   int32_t id;
 
-  TileSimple(const Room::Tile &tile):
+  TileSimple(const EGMRoom::Tile &tile):
       depth(tile.depth()),
       bg_name(tile.background_name()),
       xoffset(tile.xoffset()), yoffset(tile.yoffset()),
@@ -105,8 +105,8 @@ struct TileSimple {
   static const TileSimple DEFAULTS;
 
   // Removes fields of this structure from an instance proto, returning rest.
-  static Room::Tile Subtract(const Room::Tile &tile) {
-    Room::Tile res = tile;
+  static EGMRoom::Tile Subtract(const EGMRoom::Tile &tile) {
+    EGMRoom::Tile res = tile;
     res.clear_depth();
     res.clear_background_name();
     res.clear_xoffset(),  res.clear_yoffset();
@@ -136,8 +136,8 @@ struct TileSimple {
   }
 };
 
-const InstSimple InstSimple::DEFAULTS {Room::Instance::default_instance()};
-const TileSimple TileSimple::DEFAULTS {Room::Tile::default_instance()};
+const InstSimple InstSimple::DEFAULTS {EGMRoom::Instance::default_instance()};
+const TileSimple TileSimple::DEFAULTS {EGMRoom::Tile::default_instance()};
 
 string SVGDInstanceDescriptors(
     char ich, const InstSimple &inst, const InstSimple &prev) {
@@ -273,13 +273,13 @@ string SVGDMove(const Coords &coords, const Coords &prev) {
   return rcomp;
 }
 
-Room::Instance StripForLump(const Room::Instance &inst) {
-  Room::Instance res = InstSimple::Subtract(inst);
+EGMRoom::Instance StripForLump(const EGMRoom::Instance &inst) {
+  EGMRoom::Instance res = InstSimple::Subtract(inst);
   res.clear_name(), res.clear_id();
   res.clear_x(), res.clear_y(), res.clear_z();
   if (MessageDifferencer::Equivalent(
           inst.editor_settings(),
-          Room::Instance::EditorSettings::default_instance())) {
+          EGMRoom::Instance::EditorSettings::default_instance())) {
     res.clear_editor_settings();
   }
   res.clear_creation_code();
@@ -290,13 +290,13 @@ Room::Instance StripForLump(const Room::Instance &inst) {
   return res;
 }
 
-Room::Tile StripForLump(const Room::Tile &inst) {
-  Room::Tile res = TileSimple::Subtract(inst);
+EGMRoom::Tile StripForLump(const EGMRoom::Tile &inst) {
+  EGMRoom::Tile res = TileSimple::Subtract(inst);
   res.clear_name(), res.clear_id();
   res.clear_x(), res.clear_y();
   if (MessageDifferencer::Equivalent(
           inst.editor_settings(),
-          Room::Tile::EditorSettings::default_instance())) {
+          EGMRoom::Tile::EditorSettings::default_instance())) {
     res.clear_editor_settings();
   }
 
@@ -323,13 +323,13 @@ std::vector<Line> ExtractLines(std::multiset<Coords> *point_cloud) {
 }
 
 template<typename T> struct Simplifier {};
-template<> struct Simplifier<Room::Instance> { typedef InstSimple T; };
-template<> struct Simplifier<Room::Tile> { typedef TileSimple T; };
+template<> struct Simplifier<EGMRoom::Instance> { typedef InstSimple T; };
+template<> struct Simplifier<EGMRoom::Tile> { typedef TileSimple T; };
 template<typename T> using Simplify = typename Simplifier<T>::T;
 
 template<typename T> struct LayerT {};
-template<> struct LayerT<Room::Instance> { using T = egm::InstanceLayer; };
-template<> struct LayerT<Room::Tile> { using T = egm::TileLayer; };
+template<> struct LayerT<EGMRoom::Instance> { using T = egm::InstanceLayer; };
+template<> struct LayerT<EGMRoom::Tile> { using T = egm::TileLayer; };
 template<typename T> using Layer = typename LayerT<T>::T;
 
 
@@ -450,7 +450,7 @@ class RotationCommand : public Command {
                    "before end of input" << std::endl;
       return 0;
     }
-    SetProtoField(out, Room::Instance::kRotationFieldNumber, data[pos + 1]);
+    SetProtoField(out, EGMRoom::Instance::kRotationFieldNumber, data[pos + 1]);
     return 1;
   }
 
@@ -479,91 +479,91 @@ class ColorCommand : public Command {
 
 const std::map<char, Command*> kInstanceParameters = {
   { 'n', new StringAttributeCommand{
-      "name", Room::Instance::kNameFieldNumber                 }},
+      "name", EGMRoom::Instance::kNameFieldNumber                 }},
   { 'o', new StringAttributeCommand{
-      "object-type", Room::Instance::kObjectTypeFieldNumber    }},
+      "object-type", EGMRoom::Instance::kObjectTypeFieldNumber    }},
   { 'P', new CoordinateAttributeCommand{
-      "Position", Room::Instance::kXFieldNumber,
-                  Room::Instance::kYFieldNumber,
-                  Room::Instance::kZFieldNumber, false         }},
+      "Position", EGMRoom::Instance::kXFieldNumber,
+                  EGMRoom::Instance::kYFieldNumber,
+                  EGMRoom::Instance::kZFieldNumber, false         }},
   { 'X', new SingleAttributeCommand{
-      "X", Room::Instance::kXFieldNumber, false                }},
+      "X", EGMRoom::Instance::kXFieldNumber, false                }},
   { 'Y', new SingleAttributeCommand{
-      "Y", Room::Instance::kYFieldNumber, false                }},
+      "Y", EGMRoom::Instance::kYFieldNumber, false                }},
   { 'Z', new SingleAttributeCommand{
-      "Z", Room::Instance::kZFieldNumber, false                }},
+      "Z", EGMRoom::Instance::kZFieldNumber, false                }},
   { 'p', new CoordinateAttributeCommand{
-      "position", Room::Instance::kXFieldNumber,
-                  Room::Instance::kYFieldNumber,
-                  Room::Instance::kZFieldNumber, true          }},
+      "position", EGMRoom::Instance::kXFieldNumber,
+                  EGMRoom::Instance::kYFieldNumber,
+                  EGMRoom::Instance::kZFieldNumber, true          }},
   { 'x', new SingleAttributeCommand{
-      "x", Room::Instance::kXFieldNumber, true                 }},
+      "x", EGMRoom::Instance::kXFieldNumber, true                 }},
   { 'y', new SingleAttributeCommand{
-      "y", Room::Instance::kYFieldNumber, true                 }},
+      "y", EGMRoom::Instance::kYFieldNumber, true                 }},
   { 'z', new SingleAttributeCommand{
-      "z", Room::Instance::kZFieldNumber, true                 }},
+      "z", EGMRoom::Instance::kZFieldNumber, true                 }},
   { 'S', new CoordinateAttributeCommand{
-      "Scale", Room::Instance::kXscaleFieldNumber,
-               Room::Instance::kYscaleFieldNumber,
-               Room::Instance::kZscaleFieldNumber, false       }},
+      "Scale", EGMRoom::Instance::kXscaleFieldNumber,
+               EGMRoom::Instance::kYscaleFieldNumber,
+               EGMRoom::Instance::kZscaleFieldNumber, false       }},
   { 'W', new SingleAttributeCommand{
-      "x-scale (W)", Room::Instance::kXscaleFieldNumber, false }},
+      "x-scale (W)", EGMRoom::Instance::kXscaleFieldNumber, false }},
   { 'H', new SingleAttributeCommand{
-      "y-scale (H)", Room::Instance::kYscaleFieldNumber, false }},
+      "y-scale (H)", EGMRoom::Instance::kYscaleFieldNumber, false }},
   { 'D', new SingleAttributeCommand{
-      "z-scale (D)", Room::Instance::kZscaleFieldNumber, false }},
+      "z-scale (D)", EGMRoom::Instance::kZscaleFieldNumber, false }},
   { 'R', new RotationCommand{                                  }},
-  { 'c', new ColorCommand{ Room::Instance::kColorFieldNumber   }},
+  { 'c', new ColorCommand{ EGMRoom::Instance::kColorFieldNumber   }},
 };
 
 const std::map<char, Command*> kTileParameters = {
   { 'n', new StringAttributeCommand{
-      "name", Room::Tile::kNameFieldNumber                     }},
+      "name", EGMRoom::Tile::kNameFieldNumber                     }},
   { 'b', new StringAttributeCommand{
-      "background", Room::Tile::kBackgroundNameFieldNumber     }},
+      "background", EGMRoom::Tile::kBackgroundNameFieldNumber     }},
   { 'P', new CoordinateAttributeCommand{
-      "Position", Room::Tile::kXFieldNumber,
-                  Room::Tile::kYFieldNumber, 0, false          }},
+      "Position", EGMRoom::Tile::kXFieldNumber,
+                  EGMRoom::Tile::kYFieldNumber, 0, false          }},
   { 'X', new SingleAttributeCommand{
-      "X",        Room::Tile::kXFieldNumber, false             }},
+      "X",        EGMRoom::Tile::kXFieldNumber, false             }},
   { 'Y', new SingleAttributeCommand{
-      "Y",        Room::Tile::kYFieldNumber, false             }},
+      "Y",        EGMRoom::Tile::kYFieldNumber, false             }},
   { 'p', new CoordinateAttributeCommand{
-      "position", Room::Tile::kXFieldNumber,
-                  Room::Tile::kYFieldNumber, 0, true           }},
+      "position", EGMRoom::Tile::kXFieldNumber,
+                  EGMRoom::Tile::kYFieldNumber, 0, true           }},
   { 'x', new SingleAttributeCommand{
-      "x",        Room::Tile::kXFieldNumber, true              }},
+      "x",        EGMRoom::Tile::kXFieldNumber, true              }},
   { 'y', new SingleAttributeCommand{
-      "y",        Room::Tile::kYFieldNumber, true              }},
+      "y",        EGMRoom::Tile::kYFieldNumber, true              }},
   { 'O', new CoordinateAttributeCommand{
-      "Offset",   Room::Tile::kXoffsetFieldNumber,
-                  Room::Tile::kYoffsetFieldNumber, 0, false    }},
+      "Offset",   EGMRoom::Tile::kXoffsetFieldNumber,
+                  EGMRoom::Tile::kYoffsetFieldNumber, 0, false    }},
   { 'U', new SingleAttributeCommand{
-      "U-coord",  Room::Tile::kXoffsetFieldNumber, false       }},
+      "U-coord",  EGMRoom::Tile::kXoffsetFieldNumber, false       }},
   { 'V', new SingleAttributeCommand{
-      "V-coord",  Room::Tile::kYoffsetFieldNumber, false       }},
+      "V-coord",  EGMRoom::Tile::kYoffsetFieldNumber, false       }},
   { 'o', new CoordinateAttributeCommand{
-      "offset",   Room::Tile::kXoffsetFieldNumber,
-                  Room::Tile::kYoffsetFieldNumber, 0, true     }},
+      "offset",   EGMRoom::Tile::kXoffsetFieldNumber,
+                  EGMRoom::Tile::kYoffsetFieldNumber, 0, true     }},
   { 'u', new SingleAttributeCommand{
-      "u-coord",  Room::Tile::kXoffsetFieldNumber, true        }},
+      "u-coord",  EGMRoom::Tile::kXoffsetFieldNumber, true        }},
   { 'v', new SingleAttributeCommand{
-      "v-coord",  Room::Tile::kYoffsetFieldNumber, true        }},
+      "v-coord",  EGMRoom::Tile::kYoffsetFieldNumber, true        }},
   { 'D', new CoordinateAttributeCommand{
-      "Dimensions", Room::Tile::kWidthFieldNumber,
-                    Room::Tile::kHeightFieldNumber, 0, false   }},
+      "Dimensions", EGMRoom::Tile::kWidthFieldNumber,
+                    EGMRoom::Tile::kHeightFieldNumber, 0, false   }},
   { 'w', new SingleAttributeCommand{
-      "width",      Room::Tile::kWidthFieldNumber,  false      }},
+      "width",      EGMRoom::Tile::kWidthFieldNumber,  false      }},
   { 'h', new SingleAttributeCommand{
-      "height",     Room::Tile::kHeightFieldNumber, false      }},
+      "height",     EGMRoom::Tile::kHeightFieldNumber, false      }},
   { 'S', new CoordinateAttributeCommand{
-      "Scale",       Room::Tile::kWidthFieldNumber,
-                     Room::Tile::kHeightFieldNumber, 0, false  }},
+      "Scale",       EGMRoom::Tile::kWidthFieldNumber,
+                     EGMRoom::Tile::kHeightFieldNumber, 0, false  }},
   { 'W', new SingleAttributeCommand{
-      "x-scale (W)", Room::Tile::kXscaleFieldNumber, false     }},
+      "x-scale (W)", EGMRoom::Tile::kXscaleFieldNumber, false     }},
   { 'H', new SingleAttributeCommand{
-      "y-scale (H)", Room::Tile::kYscaleFieldNumber, false     }},
-  { 'c', new ColorCommand{ Room::Tile::kColorFieldNumber       }},
+      "y-scale (H)", EGMRoom::Tile::kYscaleFieldNumber, false     }},
+  { 'c', new ColorCommand{ EGMRoom::Tile::kColorFieldNumber       }},
 };
 
 vector<string> TokenizeSVGD(const string &data) {
@@ -814,15 +814,15 @@ void RepackLayer(string layer_data,
 namespace egm {
 namespace svg_d {
 
-InstanceLayer BuildLayer(const RepeatedPtrField<Room::Instance> &instances) {
+InstanceLayer BuildLayer(const RepeatedPtrField<EGMRoom::Instance> &instances) {
   return BuildSVGDLayer(instances);
 }
-TileLayer     BuildLayer(const RepeatedPtrField<Room::Tile> &tiles) {
+TileLayer     BuildLayer(const RepeatedPtrField<EGMRoom::Tile> &tiles) {
   return BuildSVGDLayer(tiles);
 }
 
 void ParseInstances(
-    const string &layer_data, Room *dest_message, const string &error_details) {
+    const string &layer_data, EGMRoom *dest_message, const string &error_details) {
   auto *instances = dest_message->GetDescriptor()->FindFieldByName("instances");
   if (!instances) {
     std::cerr << "Internal error: "
@@ -830,12 +830,12 @@ void ParseInstances(
     return;
   }
   return RepackLayer(layer_data, dest_message,
-                     instances, Room::Instance::default_instance(),
+                     instances, EGMRoom::Instance::default_instance(),
                      'I', kInstanceParameters, error_details);
 }
 
 void ParseTiles(
-    const string &layer_data, Room *dest_message, const string &error_details) {
+    const string &layer_data, EGMRoom *dest_message, const string &error_details) {
   auto *tiles = dest_message->GetDescriptor()->FindFieldByName("tiles");
   if (!tiles) {
     std::cerr << "Internal error: "
@@ -843,7 +843,7 @@ void ParseTiles(
     return;
   }
   return RepackLayer(layer_data, dest_message,
-                     tiles, Room::Tile::default_instance(),
+                     tiles, EGMRoom::Tile::default_instance(),
                      'T', kTileParameters, error_details);
 }
 

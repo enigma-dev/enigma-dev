@@ -17,6 +17,7 @@
 
 #include "yyp.h"
 #include "strings_util.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 
@@ -209,7 +210,8 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
   }
 }
 
-std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPath) const {
+std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(
+        const fs::path& fPath, bool replaceGmRoomWithEgmRoom) const {
   std::string fName = fPath.u8string();
 
   std::ifstream ifs(fName);
@@ -285,7 +287,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         { "GMFont",       &TreeNode::mutable_font       },
         { "GMObject",     &TreeNode::mutable_object     },
         { "GMTimeline",   &TreeNode::mutable_timeline   },
-        { "GMRoom",       &TreeNode::mutable_room       },
+        { "GMRoom",       &TreeNode::mutable_gm_room    },
         { "GMPath",       &TreeNode::mutable_path       }
       });
 
@@ -323,8 +325,14 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(roots[0]);
-  
+
   LegacyEventsToEGM(proj.get(), _event_data);
+
+  if (replaceGmRoomWithEgmRoom) {
+    buffers::TreeNode *treenodeRoot = game->mutable_root();
+    GmRoomToEgmRoomTranslator translator(treenodeRoot);
+    translator.Translate();
+  }
 
   return proj;
 }

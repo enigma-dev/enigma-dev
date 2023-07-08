@@ -17,10 +17,12 @@
 
 #include "sog.h"
 #include "egm-events.h"
+#include "General/gm_room_to_egm_room_translator.h"
 
 namespace egm {
 
-std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const {
+std::unique_ptr<Project> SOGFileFormat::LoadProject(
+        const fs::path& fName, bool replaceGmRoomWithEgmRoom) const {
   auto proj = std::make_unique<buffers::Project>();
 
   if (!FolderExists(fName)) {
@@ -29,7 +31,7 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   }
 
   buffers::Game* game = proj->mutable_game();
-  
+
   // Add tree root
   buffers::TreeNode* game_root = game->mutable_root();
   game_root->set_name("/");
@@ -47,15 +49,15 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   obj->set_parent_name("");
   obj->set_sprite_name("");
   obj->set_mask_name("");
-  
+
   // Load it's events
   const google::protobuf::Descriptor* desc = obj->GetDescriptor();
   LoadObjectEvents(fName, obj, desc->FindFieldByName("egm_events"), _event_data);
-  
+
   // Add our room
   buffers::TreeNode* rm_node = game_root->mutable_folder()->add_children();
   rm_node->set_name("test_room");
-  buffers::resources::Room* rm = rm_node->mutable_room();
+  buffers::resources::GMRoom* rm = rm_node->mutable_gm_room();
   rm->set_caption ("");
   rm->set_width(640);
   rm->set_height(480);
@@ -64,13 +66,18 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   rm->set_color(0xFFC040);
   rm->set_show_color(true);
   rm->set_creation_code("");
-  
+
   // Add obj to room
-  buffers::resources::Room::Instance* inst = rm->add_instances();
+  buffers::resources::GMRoom::Instance* inst = rm->add_instances();
   inst->set_id(100001);
   inst->set_x(0);
   inst->set_y(0);
   inst->set_object_type("test_object");
+
+  if (replaceGmRoomWithEgmRoom) {
+    GmRoomToEgmRoomTranslator translator(game_root);
+    translator.Translate();
+  }
 
   return proj;
 
@@ -79,9 +86,9 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
 bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const {
   if (!CreateDirectory(fName))
     return false;
-  
+
   bool foundObj = false;
-  
+
   if (project->has_game()) {
     const auto& game = project->game();
     if (game.has_root()) {
@@ -108,9 +115,9 @@ bool SOGFileFormat::WriteProject(Project* project, const fs::path& fName) const 
     errStream << "Error: project is missing game" << std::endl;
     return false;
   }
-  
+
   if (!foundObj) errStream << "Error: unable to find any objects" << std::endl;
-  
+
   return foundObj;
 }
 

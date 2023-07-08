@@ -1,0 +1,269 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+// Tiled based Room format of Enigma
+message EGMRoom {
+
+  optional string caption = 1;
+  optional uint32 width = 2 [(yyp) = "roomSettings/Width"];
+  optional uint32 height = 3 [(yyp) = "roomSettings/Height"];
+  optional uint32 tilewidth = 4 [(gmx) = "hsnap"];
+  optional uint32 tileheight = 5 [(gmx) = "vsnap"];
+  optional bool isometric = 6;
+  optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
+  optional int32 color = 8 [(gmx) = "colour"];
+  optional bool show_color = 9 [(gmx) = "showcolour"];
+  optional string creation_code = 10;
+  optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
+  optional bool clear_view_background = 12 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
+  optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
+  optional uint32 speed = 14;
+
+  message Background {
+    optional bool visible = 1;
+    optional bool foreground = 2;
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "name"];
+    optional int32 x = 4;
+    optional int32 y = 5;
+    optional bool htiled = 6;
+    optional bool vtiled = 7;
+    optional double hspeed = 8;
+    optional double vspeed = 9;
+    optional bool stretch = 10;
+    optional int32 color = 11 [default = 0xFFFFFF];
+    optional double alpha = 12 [default = 1.0];
+  }
+
+  repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
+
+  message View {
+    optional bool visible = 1;
+    optional int32 xview = 2;
+    optional int32 yview = 3;
+    optional uint32 wview = 4;
+    optional uint32 hview = 5;
+    optional int32 xport = 6;
+    optional int32 yport = 7;
+    optional uint32 wport = 8;
+    optional uint32 hport = 9;
+    optional int32 hborder = 10;
+    optional int32 vborder = 11;
+    optional double hspeed = 12;
+    optional double vspeed = 13;
+    optional string object_following = 14 [(resource_ref)="object", (gmx) = "objName"];
+  }
+
+  repeated View views = 16 [(gmx) = "views/view", (yyp) = "views"];
+
+  message Instance {
+    optional string name = 1;
+    optional int32 id = 2 [(id_start) = 100001];
+    optional string object_type = 3 [(resource_ref)="object", (gmx) = "objName"];
+    optional double x = 4;
+    optional double y = 5;
+    optional double z = 6;
+    optional string creation_code = 7;
+    optional string initialization_code = 14;
+    optional double xscale = 8 [default = 1, (gmx) = "scaleX"];
+    optional double yscale = 9 [default = 1, (gmx) = "scaleY"];
+    optional double zscale = 10 [default = 1, (gmx) = "scaleY"];
+    optional double rotation  = 11;
+    optional double zrotation = 12;
+    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+
+    message EditorSettings {
+      optional bool locked = 1;
+    }
+
+    optional EditorSettings editor_settings = 31;
+  }
+
+  repeated Instance instances = 17 [(gmx) = "instances/instance"];
+
+  message Tile {
+    optional string name = 1;
+    optional int32 id = 2 [(id_start) = 10000001];
+    optional string background_name = 3 [(resource_ref)="background", (gmx) = "bgName"];
+    optional double x = 4;
+    optional double y = 5;
+    optional int32 xoffset = 6 [(gmx) = "xo"];
+    optional int32 yoffset = 7 [(gmx) = "yo"];
+    optional uint32 width = 8 [(gmx) = "w"];
+    optional uint32 height = 9 [(gmx) = "h"];
+    optional int32 depth = 10;
+    optional double xscale = 11 [default = 1.0, (gmx) = "scaleX"];
+    optional double yscale = 12 [default = 1.0, (gmx) = "scaleY"];
+    optional int32 color = 13 [default = 0xFFFFFF, (gmx) = "colour"];
+    optional double alpha = 14 [default = 1.0];
+    optional double rotation = 15 [default = 0.0];
+    optional uint32 gid = 16; // stores Tiled tile gid
+
+    message EditorSettings {
+      optional bool locked = 1;
+    }
+
+    optional EditorSettings editor_settings = 31;
+  }
+
+  repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
+
+  message RoomPhysicsSettings {
+    optional bool use_physics = 1 [(gmx) = "PhysicsWorld"];
+    optional int32 phy_world_top = 2 [(gmx) = "PhysicsWorldTop"];
+    optional int32 phy_world_left = 3 [(gmx) = "PhysicsWorldLeft"];
+    optional int32 phy_world_right = 4 [(gmx) = "PhysicsWorldRight"];
+    optional int32 phy_world_bottom = 5 [(gmx) = "PhysicsWorldBottom"];
+    optional double phy_world_xgravity = 6 [(gmx) = "PhysicsWorldGravityX"];
+    optional double phy_world_ygravity = 7 [(gmx) = "PhysicsWorldGravityY"];
+    optional double phy_world_pixel_meters = 8 [(gmx) = "PhysicsWorldPixToMeters"];
+  }
+
+  optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
+
+  message Layer {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional int32 depth = 3;
+    optional bool visible = 4;
+
+    repeated Instance instances = 5;
+    repeated Tile tiles = 6;
+  }
+
+  repeated Layer layers = 20;
+
+  optional int32 id = 21 [(gmx) = "GMX_DEPRECATED"];
+
+  // -------------------------
+  // Tiled Specific properties
+
+  optional bool infinite = 22;
+  optional double parallaxoriginx = 23;
+  optional double parallaxoriginy = 24;
+  optional int32 nextlayerid = 25;
+  optional int32 nextobjectid = 26;
+  optional int32 firstgid = 27;
+  optional uint32 hexsidelength = 28;
+  optional string staggeraxis = 29; // can be "x" or "y"
+  optional string staggerindex = 30; // can be "even" or "odd"
+  optional string orientation = 31;
+  optional string renderorder = 32;
+
+  // optional string backgroundcolor = 10;
+  // optional string source = 13;
+  // optional uint32 width = 2 [(yyp) = "roomSettings/Width", (tmx) = "width"]; // tmx width unit is no. of tiles
+  // optional uint32 height = 3 [(yyp) = "roomSettings/Height", (tmx) = "height"]; // tmx height unit is no. of tiles
+  // optional uint32 hsnap = 4 [(tmx) = "tilewidth"]; // tmx tilewidth unit is in pixels
+  // optional uint32 vsnap = 5 [(tmx) = "tileheight"]; // tmx tileheight unit is in pixels
+
+  message Tileset {
+    message Image {
+      optional string source = 1;
+      optional int32 width = 2;
+      optional int32 height = 3;
+      optional string trans = 4;
+    }
+
+    optional int32 firstgid = 1;
+    optional string source = 2;
+    optional string name = 3;
+    optional uint32 tilewidth = 4;
+    optional uint32 tileheight = 5;
+    optional uint32 tilecount = 6;
+    optional uint32 columns = 7;
+
+    optional Image image = 8;
+  }
+
+  repeated Tileset tilesets = 33;
+
+  message ObjectGroup {
+
+    message Object {
+
+      message Properties {
+
+        message Property {
+          optional string name = 1;
+          optional string type = 2;
+          optional int32 value = 3;
+        }
+
+        repeated Property propertyTags = 1;
+      }
+
+      optional int32 id = 1;
+      optional uint32 gid = 2;
+      optional double x = 3;
+      optional double y = 4;
+      optional uint32 width = 5;
+      optional uint32 height = 6;
+      optional Properties propertiesTag = 7;
+      optional double rotation = 8;
+      optional string name = 16;
+      optional string class = 17;
+      /*optional bool has_horizontal_flip = 9 [default = false];
+      optional bool has_vertical_flip = 10 [default = false];
+      optional bool flipped_diagonally = 11 [default = false];
+      optional bool rotated_hex120 = 12 [default = false];*/
+      optional string background_name = 13;
+      optional double xscale = 14 [default = 1.0];
+      optional double yscale = 15 [default = 1.0];
+    }
+
+    optional int32 id = 1;
+    optional string name = 2;
+    optional double parallaxx = 3;
+    optional double parallaxy = 4;
+
+    repeated Object objects = 5;
+
+    optional double opacity = 6;
+    optional bool visible = 7;
+  }
+
+  repeated ObjectGroup objectGroups = 34;
+
+  // layer nodes of Tiled's TMX represent TileLayer
+  message TileLayer {
+    message Data {
+      message Chunk {
+        optional int32 x = 1;
+        optional int32 y = 2;
+        optional int32 width = 3;
+        optional int32 height = 4;
+
+        repeated Tile tiles = 5;
+      }
+
+      optional string encoding = 1;
+      optional string compression = 2;
+
+      // tiles in uncompressed form, does not directly maps to Tiled
+      repeated Tile tiles = 3;
+      repeated Chunk chunks = 4;
+    }
+
+    optional int32 id = 16;
+    optional string name = 1;
+    optional int32 width = 2;
+    optional int32 height = 3;
+    optional int32 x = 5;
+    optional int32 y = 6;
+    optional string class = 7;
+    optional double opacity = 8;
+    optional string tintcolor = 9;
+    optional int32 visible = 10;
+    optional int32 locked = 11;
+    optional double offsetx = 12;
+    optional double offsety = 13;
+    optional double parallaxx = 14;
+    optional double parallaxy = 15;
+
+    optional Data data = 4;
+  }
+
+  repeated TileLayer tileLayers = 35;
+}
