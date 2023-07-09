@@ -320,23 +320,34 @@ inline var deserialize_var(std::byte *iter) {
 }
 
 template <typename T>
-inline void serialize_into_fn(std::byte *iter, T *&&value) {
+typename std::enable_if<std::is_pointer_v<std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter, T &&value) {
   serialize_into<std::size_t>(iter, 0);
 }
 
-inline void serialize_into_fn(std::byte *iter, std::string &&value) {
+template <typename T>
+typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
+                                                                                                     T &&value) {
   serialize_into<std::size_t>(iter, value.size());
   std::transform(value.begin(), value.end(), iter + sizeof(std::size_t),
                  [](char c) { return static_cast<std::byte>(c); });
 }
 
-inline void serialize_into_fn(std::byte *iter, bool &&value) { *iter = static_cast<std::byte>(value); }
-
-inline void serialize_into_fn(std::byte *iter, var &&value) { serialize_var_into(iter, value); }
+template <typename T>
+typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
+                                                                                              T &&value) {
+  *iter = static_cast<std::byte>(value);
+}
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
-                                                                                                    T &&value) {
+typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
+                                                                                             T &&value) {
+  serialize_var_into(iter, value);
+}
+
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
+                        !std::is_same_v<var, std::decay_t<T>>>::type inline serialize_into_fn(std::byte *iter,
+                                                                                              T &&value) {
   serialize_variant_into(iter, value);
 }
 
@@ -349,9 +360,8 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 
 template <typename T>
 constexpr static inline bool has_serialize_into_fn_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
-    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
-    std::is_floating_point_v<std::decay_t<T>>;
+    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, T> ||
+    std::is_same_v<T, var> || std::is_pointer_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>;
 
 template <typename T>
 inline void serialize_into(std::byte *iter, T &&value) {
@@ -447,14 +457,13 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 
 template <typename T>
 constexpr static inline bool has_deserialize_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
-    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
-    std::is_floating_point_v<std::decay_t<T>>;
+    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, T> ||
+    std::is_same_v<T, var> || std::is_pointer_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>;
 
 template <typename T>
 inline T deserialize(std::byte *iter) {
   if constexpr (has_deserialize_free_function_v2<std::decay_t<T>>) {
-    deserialize_fn<T>(iter);
+    return deserialize_fn<T>(iter);
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;
     result.deserialize_self(iter);
@@ -489,21 +498,27 @@ inline void resize_buffer_using_byte_size(std::vector<std::byte> &buffer, const 
   buffer.resize(buffer.size() + value.byte_size());
 }
 
-inline void resize_buffer_for_fn(std::vector<std::byte> &buffer, var &&value) { resize_buffer_for_var(buffer, value); }
+template <typename T>
+typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value) {
+  resize_buffer_for_var(buffer, value);
+}
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
+    type inline resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   resize_buffer_for_variant(buffer, value);
 }
 
-inline void resize_buffer_for_fn(std::vector<std::byte> &buffer, std::string &&value) {
+template <typename T>
+typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value) {
   resize_buffer_for_string(buffer, value);
 }
 
 template <typename T>
 constexpr static inline bool has_resize_buffer_for_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_base_of_v<variant, std::decay_t<T>> || std::is_same_v<T, var>;
+    std::is_same_v<T, std::string> || std::is_base_of_v<variant, T> || std::is_same_v<T, var>;
 
 template <typename T>
 inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
