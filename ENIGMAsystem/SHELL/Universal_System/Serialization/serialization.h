@@ -360,13 +360,8 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-constexpr static inline bool has_serialize_into_fn_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, T> ||
-    std::is_same_v<T, var> || std::is_pointer_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>;
-
-template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
-  if constexpr (has_serialize_into_fn_free_function_v2<std::decay_t<T>>) {
+  if constexpr (HAS_INTERNAL_SERIALIZE_INTO_FUNCTION()) {
     internal_serialize_into_fn(iter, value);
   } else {
     static_assert(always_false<T>,
