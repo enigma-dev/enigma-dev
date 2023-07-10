@@ -406,7 +406,7 @@ constexpr static inline bool has_serialize_free_function_v2 =
 
 template <typename T>
 inline auto internal_serialize(T &&value) {
-  if constexpr (has_serialize_free_function_v2<std::decay_t<T>>) {
+  if constexpr (HAS_INTERNAL_SERIALIZE_FUNCTION()) {
     internal_serialize_fn(value);
   } else if constexpr (has_serialize_method_v<std::decay_t<T>>) {
     return value.serialize();

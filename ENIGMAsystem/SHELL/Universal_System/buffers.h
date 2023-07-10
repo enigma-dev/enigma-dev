@@ -622,7 +622,7 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *     std::vector<std::byte> serialized = assets_[i].serialize();
  *     // ...
  *   }
- * } else if constexpr (HAS_SERIALIZE_FUNCTION()) {
+ * } else if constexpr (HAS_INTERNAL_SERIALIZE_FUNCTION()) {
  *   for (std::size_t i = 0; i < assets_.size(); i++) {
  *     enigma::enigma_serialize(operator[](i), len, result);
  *     // ...
@@ -632,7 +632,7 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *
  * Both of the functions used in the <tt> if constexpr </tt> blocks are defined in @c detect_serialization.h . The first
  * one, <tt> has_serialize_method_v<T> </tt>, checks if the object has a method of the form <tt> object.serialize() </tt>
- * following the type given before. The second one, <tt> HAS_SERIALIZE_FUNCTION() </tt>, checks if the <tt> enigma::serialize </tt>
+ * following the type given before. The second one, <tt> HAS_INTERNAL_SERIALIZE_FUNCTION() </tt>, checks if the <tt> enigma::serialize </tt>
  * function is invocable with the object's type. Together, these allow handling both cases of <tt> object.serialize() </tt>
  * and <tt> serialize(object) </tt>.
  *
