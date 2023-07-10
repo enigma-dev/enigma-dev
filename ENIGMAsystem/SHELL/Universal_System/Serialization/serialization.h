@@ -399,12 +399,6 @@ typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_
 }
 
 template <typename T>
-constexpr static inline bool has_serialize_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, std::decay_t<T>> ||
-    std::is_same_v<T, var> || std::is_pointer_v<std::decay_t<T>> || std::is_integral_v<std::decay_t<T>> ||
-    std::is_floating_point_v<std::decay_t<T>>;
-
-template <typename T>
 inline auto internal_serialize(T &&value) {
   if constexpr (HAS_INTERNAL_SERIALIZE_FUNCTION()) {
     internal_serialize_fn(value);
@@ -520,7 +514,7 @@ constexpr static inline bool has_resize_buffer_for_free_function_v2 =
     std::is_same_v<T, std::string> || std::is_base_of_v<variant, T> || std::is_same_v<T, var>;
 
 template <typename T>
-inline void resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
+inline void internal_resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   if constexpr (has_resize_buffer_for_free_function_v2<std::decay_t<T>>) {
     internal_resize_buffer_for_fn(buffer, value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
@@ -568,7 +562,7 @@ T internal_deserialize_integral(std::byte *iter) {
 template <typename T>
 inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::byte> &bytes) {
   len = bytes.size();
-  resize_buffer_for(bytes, value);
+  internal_resize_buffer_for(bytes, value);
   if constexpr (has_serialize_method_v<std::decay_t<T>>) {
     std::vector<std::byte> serialized = value.serialize();
     std::copy(serialized.begin(), serialized.end(), bytes.begin() + len);

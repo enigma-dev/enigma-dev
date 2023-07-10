@@ -114,7 +114,7 @@ static inline void declare_object_locals_class(std::ostream &wto, const ParsedEx
          "      auto bytes = event_parent::serialize();\n"
          "      std::size_t len = 0;\n"
          "      if (vmap != nullptr) {\n"
-         "        resize_buffer_for(bytes, vmap->size());\n"
+         "        internal_resize_buffer_for(bytes, vmap->size());\n"
          "        for (auto &[key, value] : *vmap) {\n"
          "          enigma_serialize(key, len, bytes);\n"
          "          enigma_serialize(value, len, bytes);\n"

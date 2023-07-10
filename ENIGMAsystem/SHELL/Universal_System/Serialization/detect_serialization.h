@@ -127,8 +127,8 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
 // HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>), void);
 //HAS_FREE_FUNCTION(internal_deserialize_fn, (std::declval<std::byte *>()), T);
-// HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, (std::declval<T &>(),std::declval<std::byte *>(),std::declval<std::size_t &>()), void);
-
+HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, (std::declval<T &>(),std::declval<std::byte *>(),std::declval<std::size_t &>()), void);
+HAS_FREE_FUNCTION(internal_resize_buffer_for_fn, (std::declval<std::vector<std::byte> &>(),std::declval<T&>()), void);
 /**
  * Now we have 1 struct with the following name:
  * has_byte_size_free_function
@@ -147,6 +147,8 @@ HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
 #define HAS_INTERNAL_SERIALIZE_FUNCTION() \
   std::is_invocable_v<decltype(enigma::internal_serialize_fn<T>), T>
 #define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize<T>), std::byte *>
+#define HAS_INTERNAL_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize_fn<T>), std::byte *>
+#define HAS_RESIZE_BUFFER_FOR_FUNCTION() std::is_invocable_r_v<void, decltype(enigma::internal_resize_buffer_for_fn<T>), std::vector<std::byte>,T>
 // #define HAS_ENIGMA_INTERNAL_DESERIALIZE_FUNCTION() std::is_invocable_r_v<void, decltype(enigma::enigma_internal_deserialize_fn<T>), T,std::byte *,std::size_t>
 
 #endif
