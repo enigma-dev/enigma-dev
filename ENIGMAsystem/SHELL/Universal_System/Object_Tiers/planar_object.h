@@ -24,53 +24,51 @@
 #ifndef ENIGMA_PLANAR_OBJECT_H
 #define ENIGMA_PLANAR_OBJECT_H
 
-#include "object.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/scalar.h"
 #include "Universal_System/reflexive_types.h"
+#include "Universal_System/scalar.h"
+#include "Universal_System/var4.h"
+#include "object.h"
 
 #define ISLOCAL_persistent true
 
-namespace enigma
-{
-  struct object_planar: object_basic
-  {
-    static constexpr unsigned char objtype = 0xAB;
+namespace enigma {
+struct object_planar : object_basic {
+  static constexpr unsigned char objtype = 0xAB;
 
-    //Position
-      cs_scalar x, y;
-      cs_scalar  xprevious, yprevious;
-      cs_scalar  xstart, ystart;
+  //Position
+  cs_scalar x, y;
+  cs_scalar xprevious, yprevious;
+  cs_scalar xstart, ystart;
 
-    //Persistence
-    #ifdef ISLOCAL_persistent
-      bool  persistent;
-    #endif
+//Persistence
+#ifdef ISLOCAL_persistent
+  bool persistent;
+#endif
 
-    //Motion
-      directionv direction;
-      speedv     speed;
-      hspeedv    hspeed;
-      vspeedv    vspeed;
+  //Motion
+  directionv direction;
+  speedv speed;
+  hspeedv hspeed;
+  vspeedv vspeed;
 
-    //Accelerators
-      cs_scalar  gravity;
-      cs_scalar  gravity_direction;
-      cs_scalar  friction;
+  //Accelerators
+  cs_scalar gravity;
+  cs_scalar gravity_direction;
+  cs_scalar friction;
 
-    //Constructors
-      object_planar();
-      object_planar(unsigned, int);
-      virtual ~object_planar();
+  //Constructors
+  object_planar();
+  object_planar(unsigned, int);
+  virtual ~object_planar();
 
-    // Serialization and deserialization
-      std::vector<std::byte> serialize() override;
-      std::size_t deserialize_self(std::byte *iter) override;
-      static std::pair<object_planar, std::size_t> deserialize(std::byte *iter);
-  };
+  // Serialization and deserialization
+  std::vector<std::byte> serialize() override;
+  std::size_t deserialize_self(std::byte *iter) override;
+  static std::pair<object_planar, std::size_t> deserialize(std::byte *iter);
+};
 
-  void propagate_locals(object_planar*);
+void propagate_locals(object_planar *);
 
-} //namespace enigma
+}  //namespace enigma
 
-#endif //ENIGMA_PLANAR_OBJECT_H
+#endif  //ENIGMA_PLANAR_OBJECT_H

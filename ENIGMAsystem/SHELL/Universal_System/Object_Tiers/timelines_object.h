@@ -23,51 +23,51 @@
 
 //FIXME: this should be ifdef shellmain but enigmas in a sorry state
 #ifdef JUST_DEFINE_IT_RUN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
 #ifndef ENIGMA_TIMELINES_OBJECT_H
 #define ENIGMA_TIMELINES_OBJECT_H
 
-#include "planar_object.h"
-#include "Universal_System/var4.h"
 #include "Universal_System/scalar.h"
+#include "Universal_System/var4.h"
+#include "planar_object.h"
 
-#include <vector>
 #include <map>
+#include <vector>
 
-namespace enigma
-{
-  struct object_timelines : object_planar
-  {
-    static constexpr unsigned char objtype = 0xAC;
+namespace enigma {
+struct object_timelines : object_planar {
+  static constexpr unsigned char objtype = 0xAC;
 
-    //Used as a global lookup for timeline moments. Filled at runtime.
-    //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
-    static std::vector< std::map<int, int> > timeline_moments_maps;
+  //Used as a global lookup for timeline moments. Filled at runtime.
+  //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
+  static std::vector<std::map<int, int> > timeline_moments_maps;
 
-    //Timeline properties.
-    int timeline_index;    //-1 means "no timeline running"
-    bool timeline_running; //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
-    gs_scalar timeline_speed; //Can be set to fractions, negative, zero, etc. Defaults to 1.
-    gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
-    bool timeline_loop; //Allows looping from lastMoment->0 and vice versa.
+  //Timeline properties.
+  int timeline_index;  //-1 means "no timeline running"
+  bool
+      timeline_running;  //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
+  gs_scalar timeline_speed;     //Can be set to fractions, negative, zero, etc. Defaults to 1.
+  gs_scalar timeline_position;  //How far along "time" is in this timeline. Bounded by [0,lastMoment)
+  bool timeline_loop;           //Allows looping from lastMoment->0 and vice versa.
 
-    //Constructors
-    object_timelines();
-    object_timelines(unsigned x, int y);
-    virtual ~object_timelines();
+  //Constructors
+  object_timelines();
+  object_timelines(unsigned x, int y);
+  virtual ~object_timelines();
 
-    //Object-local timelines functionality.
-    void advance_curr_timeline();
-    void loop_curr_timeline();
-    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
+  //Object-local timelines functionality.
+  void advance_curr_timeline();
+  void loop_curr_timeline();
+  virtual void timeline_call_moment_script(int timeline_index, int moment_index) {
+  }  //This will be provided by the object_locals subclass in compiled code.
 
-    // Serialization and deserialization
-    std::vector<std::byte> serialize() override;
-    std::size_t deserialize_self(std::byte *iter) override;
-    static std::pair<object_timelines, std::size_t> deserialize(std::byte *iter);
-  };
-} //namespace enigma
+  // Serialization and deserialization
+  std::vector<std::byte> serialize() override;
+  std::size_t deserialize_self(std::byte *iter) override;
+  static std::pair<object_timelines, std::size_t> deserialize(std::byte *iter);
+};
+}  //namespace enigma
 
-#endif //ENIGMA_TIMELINES_OBJECT_H
+#endif  //ENIGMA_TIMELINES_OBJECT_H

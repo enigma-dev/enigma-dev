@@ -34,50 +34,48 @@
 #ifndef ENIGMA_COLLISIONS_OBJECT_H
 #define ENIGMA_COLLISIONS_OBJECT_H
 
+#include "Universal_System/Resources/sprites_internal.h"  //bbox_rect
 #include "transform_object.h"
-#include "Universal_System/Resources/sprites_internal.h" //bbox_rect
 
-namespace enigma
-{
-  struct object_collisions: object_transform
-  {
-    static constexpr unsigned char objtype = 0xAF;
+namespace enigma {
+struct object_collisions : object_transform {
+  static constexpr unsigned char objtype = 0xAF;
 
-    // Bit Mask
-      int mask_index;
-      bool solid;
+  // Bit Mask
+  int mask_index;
+  bool solid;
 
-    // Polygon related attributes
-    int polygon_index;
-    gs_scalar polygon_xscale, polygon_yscale;
-    gs_scalar polygon_angle;
+  // Polygon related attributes
+  int polygon_index;
+  gs_scalar polygon_xscale, polygon_yscale;
+  gs_scalar polygon_angle;
 
-    //Bounding box
-      #ifdef JUST_DEFINE_IT_RUN
-        int bbox_left, bbox_right, bbox_top, bbox_bottom;
-      #else
-        int $bbox_left()   const;
-        int $bbox_right()  const;
-        int $bbox_top()    const;
-        int $bbox_bottom() const;
-        const BoundingBox $bbox_relative() const;
-        const BoundingBox& $bbox() const;
-        #define bbox_left   $bbox_left()
-        #define bbox_right  $bbox_right()
-        #define bbox_top    $bbox_top()
-        #define bbox_bottom $bbox_bottom()
-      #endif
-      
-    //Constructors
-      object_collisions();
-      object_collisions(unsigned, int);
-      virtual ~object_collisions();
+  //Bounding box
+#ifdef JUST_DEFINE_IT_RUN
+  int bbox_left, bbox_right, bbox_top, bbox_bottom;
+#else
+  int $bbox_left() const;
+  int $bbox_right() const;
+  int $bbox_top() const;
+  int $bbox_bottom() const;
+  const BoundingBox $bbox_relative() const;
+  const BoundingBox &$bbox() const;
+#define bbox_left $bbox_left()
+#define bbox_right $bbox_right()
+#define bbox_top $bbox_top()
+#define bbox_bottom $bbox_bottom()
+#endif
 
-    // Serialization and deserialization
-      std::vector<std::byte> serialize() override;
-      std::size_t deserialize_self(std::byte *iter) override;
-      static std::pair<object_collisions, std::size_t> deserialize(std::byte *iter);
-  };
-} //namespace enigma
+  //Constructors
+  object_collisions();
+  object_collisions(unsigned, int);
+  virtual ~object_collisions();
 
-#endif //ENIGMA_COLLISIONS_OBJECT_H
+  // Serialization and deserialization
+  std::vector<std::byte> serialize() override;
+  std::size_t deserialize_self(std::byte *iter) override;
+  static std::pair<object_collisions, std::size_t> deserialize(std::byte *iter);
+};
+}  //namespace enigma
+
+#endif  //ENIGMA_COLLISIONS_OBJECT_H

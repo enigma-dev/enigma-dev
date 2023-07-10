@@ -26,162 +26,149 @@
 
 #include <floatcomp.h>
 
-#include "Universal_System/var4.h"
-#include "object.h"
-#include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
+#include "Universal_System/var4.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "object.h"
+#include "serialization.h"
 
 #include "planar_object.h"
 
 #ifdef PATH_EXT_SET
-#  include "Universal_System/Extensions/Paths/path_functions.h"
+#include "Universal_System/Extensions/Paths/path_functions.h"
 #endif
 
-namespace enigma
-{
-  object_planar::object_planar()
-  {
-    hspeed.vspd  = &vspeed.rval.d;
-      hspeed.dir = &direction.rval.d;
-      hspeed.spd = &speed.rval.d;
-    vspeed.hspd  = &hspeed.rval.d;
-      vspeed.dir = &direction.rval.d;
-      vspeed.spd = &speed.rval.d;
-    direction.spd    = &speed.rval.d;
-      direction.hspd = &hspeed.rval.d;
-      direction.vspd = &vspeed.rval.d;
-    speed.dir    = &direction.rval.d;
-      speed.hspd = &hspeed.rval.d;
-      speed.vspd = &vspeed.rval.d;
-  }
-  object_planar::object_planar(unsigned _id, int objid): object_basic(_id,objid)
-  {
-    hspeed.vspd  = &vspeed.rval.d;
-      hspeed.dir = &direction.rval.d;
-      hspeed.spd = &speed.rval.d;
-    vspeed.hspd  = &hspeed.rval.d;
-      vspeed.dir = &direction.rval.d;
-      vspeed.spd = &speed.rval.d;
-    direction.spd    = &speed.rval.d;
-      direction.hspd = &hspeed.rval.d;
-      direction.vspd = &vspeed.rval.d;
-    speed.dir    = &direction.rval.d;
-      speed.hspd = &hspeed.rval.d;
-      speed.vspd = &vspeed.rval.d;
-  }
+namespace enigma {
+object_planar::object_planar() {
+  hspeed.vspd = &vspeed.rval.d;
+  hspeed.dir = &direction.rval.d;
+  hspeed.spd = &speed.rval.d;
+  vspeed.hspd = &hspeed.rval.d;
+  vspeed.dir = &direction.rval.d;
+  vspeed.spd = &speed.rval.d;
+  direction.spd = &speed.rval.d;
+  direction.hspd = &hspeed.rval.d;
+  direction.vspd = &vspeed.rval.d;
+  speed.dir = &direction.rval.d;
+  speed.hspd = &hspeed.rval.d;
+  speed.vspd = &vspeed.rval.d;
+}
+object_planar::object_planar(unsigned _id, int objid) : object_basic(_id, objid) {
+  hspeed.vspd = &vspeed.rval.d;
+  hspeed.dir = &direction.rval.d;
+  hspeed.spd = &speed.rval.d;
+  vspeed.hspd = &hspeed.rval.d;
+  vspeed.dir = &direction.rval.d;
+  vspeed.spd = &speed.rval.d;
+  direction.spd = &speed.rval.d;
+  direction.hspd = &hspeed.rval.d;
+  direction.vspd = &vspeed.rval.d;
+  speed.dir = &direction.rval.d;
+  speed.hspd = &hspeed.rval.d;
+  speed.vspd = &vspeed.rval.d;
+}
 
-  //This just needs implemented virtually so instance_destroy works.
-  object_planar::~object_planar() {}
+//This just needs implemented virtually so instance_destroy works.
+object_planar::~object_planar() {}
 
-  std::vector<std::byte> object_planar::serialize() {
-    std::vector<std::byte> bytes = object_basic::serialize();
-    std::size_t len = 0;
+std::vector<std::byte> object_planar::serialize() {
+  std::vector<std::byte> bytes = object_basic::serialize();
+  std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_planar::objtype, len, bytes);
-    enigma_internal_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
+  enigma_serialize<unsigned char>(object_planar::objtype, len, bytes);
+  enigma_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
 #ifdef ISLOCAL_persistent
-    enigma_internal_serialize(persistent, len, bytes);
+  enigma_serialize(persistent, len, bytes);
 #endif
-    enigma_internal_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+  enigma_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
-    bytes.shrink_to_fit();
-    return bytes;
+  bytes.shrink_to_fit();
+  return bytes;
+}
+
+std::size_t object_planar::deserialize_self(std::byte *iter) {
+  auto len = object_basic::deserialize_self(iter);
+
+  unsigned char type;
+  enigma_deserialize(type, iter, len);
+  if (type != object_planar::objtype) {
+    DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
+                      "' does not match expected: " + std::to_string(object_planar::objtype),
+                  MESSAGE_TYPE::M_FATAL_ERROR);
   }
+  enigma_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
+#ifdef ISLOCAL_persistent
+  enigma_deserialize(persistent, iter, len);
+#endif
+  enigma_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
-  std::size_t object_planar::deserialize_self(std::byte *iter) {
-    auto len = object_basic::deserialize_self(iter);
+  hspeed.vspd = &vspeed.rval.d;
+  hspeed.dir = &direction.rval.d;
+  hspeed.spd = &speed.rval.d;
 
-    unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
-    if (type != object_planar::objtype) {
-      DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
-                        "' does not match expected: " + std::to_string(object_planar::objtype),
-                    MESSAGE_TYPE::M_FATAL_ERROR);
+  vspeed.hspd = &hspeed.rval.d;
+  vspeed.dir = &direction.rval.d;
+  vspeed.spd = &speed.rval.d;
+
+  direction.spd = &speed.rval.d;
+  direction.hspd = &hspeed.rval.d;
+  direction.vspd = &vspeed.rval.d;
+
+  speed.dir = &direction.rval.d;
+  speed.hspd = &hspeed.rval.d;
+  speed.vspd = &vspeed.rval.d;
+
+  return len;
+}
+
+std::pair<object_planar, std::size_t> object_planar::deserialize(std::byte *iter) {
+  object_planar result;
+  auto len = result.deserialize_self(iter);
+  return {std::move(result), len};
+}
+
+void propagate_locals(object_planar *instance) {
+#ifdef PATH_EXT_SET  // TODO(#997): this does not belong here...
+  if (enigma_user::path_update()) {
+    instance->speed = 0;
+    return;
+  }
+#endif
+
+  if (fnzero(instance->gravity) || fnzero(instance->friction)) {
+    double hb4 = instance->hspeed.rval.d, vb4 = instance->vspeed.rval.d;
+    int sign = (instance->speed > 0) - (instance->speed < 0);
+
+    if (instance->hspeed != 0) {
+      instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI / 180);
     }
-    enigma_internal_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
-#ifdef ISLOCAL_persistent
-    enigma_internal_deserialize(persistent, iter, len);
-#endif
-    enigma_internal_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+    if ((hb4 > 0 && instance->hspeed.rval.d < 0) || (hb4 < 0 && instance->hspeed.rval.d > 0)) {
+      instance->hspeed.rval.d = 0;
+    }
+    if (instance->vspeed != 0) {
+      instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI / 180);
+    }
+    if ((vb4 > 0 && instance->vspeed.rval.d < 0) || (vb4 < 0 && instance->vspeed.rval.d > 0)) {
+      instance->vspeed.rval.d = 0;
+    }
 
-    hspeed.vspd    = &vspeed.rval.d;
-    hspeed.dir     = &direction.rval.d;
-    hspeed.spd     = &speed.rval.d;
+    // XXX: The likely_if here is the == 270 case; the rest might not be worth
+    // checking, as they're mostly just prolonging the inevitable
+    if (fequal(instance->gravity_direction, 270)) {
+      instance->vspeed.rval.d += (instance->gravity);
+    } else if (fequal(instance->gravity_direction, 180)) {
+      instance->hspeed.rval.d -= (instance->gravity);
+    } else if (fequal(instance->gravity_direction, 90)) {
+      instance->vspeed.rval.d -= (instance->gravity);
+    } else if (fequal(instance->gravity_direction, 0)) {
+      instance->hspeed.rval.d += (instance->gravity);
+    } else {
+      instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI / 180);
+      instance->vspeed.rval.d += (instance->gravity) * -sin(instance->gravity_direction * M_PI / 180);
+    }
 
-    vspeed.hspd    = &hspeed.rval.d;
-    vspeed.dir     = &direction.rval.d;
-    vspeed.spd     = &speed.rval.d;
-
-    direction.spd  = &speed.rval.d;
-    direction.hspd = &hspeed.rval.d;
-    direction.vspd = &vspeed.rval.d;
-
-    speed.dir      = &direction.rval.d;
-    speed.hspd     = &hspeed.rval.d;
-    speed.vspd     = &vspeed.rval.d;
-
-    return len;
-  }
-
-  std::pair<object_planar, std::size_t> object_planar::deserialize(std::byte *iter) {
-    object_planar result;
-    auto len = result.deserialize_self(iter);
-    return {std::move(result), len};
-  }
-
-  void propagate_locals(object_planar* instance)
-  {
-    #ifdef PATH_EXT_SET // TODO(#997): this does not belong here...
-      if (enigma_user::path_update()) {
-        instance->speed = 0;
-        return;
-      }
-    #endif
-
-    if (fnzero(instance->gravity) || fnzero(instance->friction))
-    {
-      double
-        hb4 = instance->hspeed.rval.d,
-        vb4 = instance->vspeed.rval.d;
-      int sign = (instance->speed > 0) - (instance->speed < 0);
-
-      if (instance->hspeed != 0) {
-        instance->hspeed.rval.d -= (sign * instance->friction)
-            * cos(instance->direction.rval.d * M_PI/180);
-      }
-      if ((hb4 > 0 && instance->hspeed.rval.d < 0)
-      ||  (hb4 < 0 && instance->hspeed.rval.d > 0)) {
-        instance->hspeed.rval.d = 0;
-      }
-      if (instance->vspeed != 0) {
-        instance->vspeed.rval.d -= (sign * instance->friction)
-            * -sin(instance->direction.rval.d * M_PI/180);
-      }
-      if ((vb4 > 0 && instance->vspeed.rval.d < 0)
-      ||  (vb4 < 0 && instance->vspeed.rval.d > 0)) {
-        instance->vspeed.rval.d=0;
-      }
-
-      // XXX: The likely_if here is the == 270 case; the rest might not be worth
-      // checking, as they're mostly just prolonging the inevitable
-      if (fequal(instance->gravity_direction, 270)) {
-        instance->vspeed.rval.d += (instance->gravity);
-      } else if (fequal(instance->gravity_direction, 180)) {
-        instance->hspeed.rval.d -= (instance->gravity);
-      } else if (fequal(instance->gravity_direction, 90)) {
-        instance->vspeed.rval.d -= (instance->gravity);
-      } else if (fequal(instance->gravity_direction, 0)) {
-        instance->hspeed.rval.d += (instance->gravity);
-      } else {
-        instance->hspeed.rval.d +=
-            (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
-        instance->vspeed.rval.d +=
-            (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
-      }
-
-      /*
+    /*
       if(instance->speed.rval.d<0)
         //instance->direction.rval.d = fmod(instance->direction.rval.d + 180, 360),
         instance->speed.    rval.d = -hypotf(instance->hspeed.rval.d, instance->vspeed.rval.d);
@@ -191,14 +178,15 @@ namespace enigma
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;*/
 
-      instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) :
-      hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
-      if (fabs(instance->speed.rval.d) > 1e-12) {
-        instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
-        + (instance->speed.rval.d < 0?  180 : 360), 360);
-      }
+    instance->speed.rval.d = instance->speed.rval.d < 0 ? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d)
+                                                        : hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
+    if (fabs(instance->speed.rval.d) > 1e-12) {
+      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180 / M_PI)) +
+                                            (instance->speed.rval.d < 0 ? 180 : 360),
+                                        360);
     }
-    instance->x += instance->hspeed.rval.d;
-    instance->y += instance->vspeed.rval.d;
   }
+  instance->x += instance->hspeed.rval.d;
+  instance->y += instance->vspeed.rval.d;
 }
+}  // namespace enigma

@@ -21,20 +21,20 @@
 #include "buffers.h"
 #include "buffers_internal.h"
 
-#include "md5.h"
-#include "sha1.h"
-#include "Resources/AssetArray.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
-#include "sha1.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Resources/AssetArray.h"
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance_system_frontend.h"
 #include "Universal_System/Object_Tiers/serialization.h"
-#include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/backgrounds_internal.h"
+#include "Universal_System/roomsystem.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "md5.h"
+#include "sha1.h"
 
+#include <zlib.h>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
@@ -42,7 +42,6 @@
 #include <fstream>
 #include <iterator>
 #include <memory>
-#include <zlib.h>
 
 #define ZLIB_CHUNK_SIZE 16384
 
@@ -65,7 +64,9 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
   // If a positive value is too large for `intXX_t`, it'll be chopped in half because the conversion from double
   // to signed integer will truncate the highest sign bit and replace it with its own sign bit (which will be 0).
   switch (type) {
-    case buffer_u8: case buffer_s8: case buffer_bool: {
+    case buffer_u8:
+    case buffer_s8:
+    case buffer_bool: {
       if (value.type != ty_real) {
         DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -79,7 +80,8 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
       return {BYTE(as_int)};
     }
 
-    case buffer_u16: case buffer_s16: {
+    case buffer_u16:
+    case buffer_s16: {
       if (value.type != ty_real) {
         DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -90,10 +92,11 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
       } else {
         as_int = static_cast<std::int16_t>(value.rval.d);
       }
-      return {BYTE((as_int >> 8) & 0xff), BYTE((as_int) & 0xff)};
+      return {BYTE((as_int >> 8) & 0xff), BYTE((as_int)&0xff)};
     }
 
-    case buffer_u32: case buffer_s32: {
+    case buffer_u32:
+    case buffer_s32: {
       if (value.type != ty_real) {
         DEBUG_MESSAGE("serialize_to_type: Expected numeric value to be passed in", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -105,8 +108,8 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
         as_int = static_cast<std::int32_t>(value.rval.d);
       }
 
-      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
-              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff), BYTE((as_int >> 8) & 0xff),
+              BYTE(as_int & 0xff)};
     }
 
     case buffer_u64: {
@@ -115,10 +118,9 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
       }
 
       std::uint64_t as_int = static_cast<std::int64_t>(value.rval.d);
-      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
-              BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
-              BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
-              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff), BYTE((as_int >> 40) & 0xff),
+              BYTE((as_int >> 32) & 0xff), BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff),  BYTE(as_int & 0xff)};
     }
 
     case buffer_f16:
@@ -132,8 +134,8 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
       }
 
       std::uint32_t as_int = bit_cast<std::uint32_t>(static_cast<float>(value.rval.d));
-      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
-              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+      return {BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff), BYTE((as_int >> 8) & 0xff),
+              BYTE(as_int & 0xff)};
     }
 
     case buffer_f64: {
@@ -143,13 +145,13 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
       }
 
       std::uint64_t as_int = bit_cast<std::uint64_t>(static_cast<double>(value.rval.d));
-      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff),
-              BYTE((as_int >> 40) & 0xff), BYTE((as_int >> 32) & 0xff),
-              BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
-              BYTE((as_int >> 8) & 0xff), BYTE(as_int & 0xff)};
+      return {BYTE((as_int >> 56) & 0xff), BYTE((as_int >> 48) & 0xff), BYTE((as_int >> 40) & 0xff),
+              BYTE((as_int >> 32) & 0xff), BYTE((as_int >> 24) & 0xff), BYTE((as_int >> 16) & 0xff),
+              BYTE((as_int >> 8) & 0xff),  BYTE(as_int & 0xff)};
     }
 
-    case buffer_string: case buffer_text: {
+    case buffer_string:
+    case buffer_text: {
       std::string &val = value.sval();
       std::vector<std::byte> result;
       result.reserve(val.size() + 1);
@@ -165,10 +167,13 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type) {
 #undef BYTE
 }
 
-variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, buffer_data_t type) {
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last,
+                              buffer_data_t type) {
 #define DOUBLE(x) static_cast<double>(x)
   switch (type) {
-    case buffer_u8: case buffer_s8: case buffer_bool: {
+    case buffer_u8:
+    case buffer_s8:
+    case buffer_bool: {
       if (std::distance(first, last) != 1) {
         DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -179,7 +184,8 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
       return {type == buffer_s8 ? DOUBLE(static_cast<int8_t>(value)) : value};
     }
 
-    case buffer_u16: case buffer_s16: {
+    case buffer_u16:
+    case buffer_s16: {
       if (std::distance(first, last) != 2) {
         DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -191,7 +197,8 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
       return {type == buffer_s16 ? DOUBLE(static_cast<int16_t>(value)) : value};
     }
 
-    case buffer_u32: case buffer_s32: {
+    case buffer_u32:
+    case buffer_s32: {
       if (std::distance(first, last) != 4) {
         DEBUG_MESSAGE("deserialize_from_type: Expected span to be of correct size", MESSAGE_TYPE::M_FATAL_ERROR);
       }
@@ -258,11 +265,11 @@ variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vecto
       return {bit_cast<double>(as_int)};
     }
 
-    case buffer_string: case buffer_text: {
+    case buffer_string:
+    case buffer_text: {
       std::string result;
       result.reserve(std::distance(first, last));
-      std::transform(first, last, std::back_inserter(result),
-                     [](std::byte b) { return static_cast<char>(b); });
+      std::transform(first, last, std::back_inserter(result), [](std::byte b) { return static_cast<char>(b); });
 
       return {std::move(result)};
     }
@@ -308,10 +315,12 @@ void write_to_buffer(enigma::BinaryBuffer *binbuff, const std::vector<std::byte>
     case buffer_fast: {
       std::size_t over = 0;
       if (offset >= binbuff->data.size()) {
-        DEBUG_MESSAGE("write_to_buffer: Offset beyond end of fixed/fast buffer, aborting write", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("write_to_buffer: Offset beyond end of fixed/fast buffer, aborting write",
+                      MESSAGE_TYPE::M_USER_ERROR);
         return;
       } else if (data.size() + offset > binbuff->data.size()) {
-        DEBUG_MESSAGE("write_to_buffer: Data being read cannot fit into fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
+        DEBUG_MESSAGE("write_to_buffer: Data being read cannot fit into fixed/fast buffer, truncating",
+                      MESSAGE_TYPE::M_WARNING);
         over = (data.size() + offset) - binbuff->data.size();
       }
       std::copy(data.begin(), data.end() - over, binbuff->data.begin() + offset);
@@ -374,13 +383,12 @@ std::string internal_buffer_base64_encode(std::vector<std::byte>::iterator bytes
   std::size_t remainder = size % 3;
   std::size_t i = 0;
   for (; i < size - remainder; i += 3) {
-    std::uint32_t triplet = static_cast<std::uint32_t>(bytes[i]) << 16 |
-                            static_cast<std::uint32_t>(bytes[i + 1]) << 8 |
+    std::uint32_t triplet = static_cast<std::uint32_t>(bytes[i]) << 16 | static_cast<std::uint32_t>(bytes[i + 1]) << 8 |
                             static_cast<std::uint32_t>(bytes[i + 2]);
 
-    std::uint8_t first  = (triplet & (0b111111 << 18)) >> 18;
+    std::uint8_t first = (triplet & (0b111111 << 18)) >> 18;
     std::uint8_t second = (triplet & (0b111111 << 12)) >> 12;
-    std::uint8_t third  = (triplet & (0b111111 << 6)) >> 6;
+    std::uint8_t third = (triplet & (0b111111 << 6)) >> 6;
     std::uint8_t fourth = triplet & 0b111111;
     result += to_base64_char(first);
     result += to_base64_char(second);
@@ -392,18 +400,18 @@ std::string internal_buffer_base64_encode(std::vector<std::byte>::iterator bytes
   if (remainder != 0) {
     if (remainder == 1) {
       std::uint8_t singlet = static_cast<std::uint8_t>(bytes[size - 1]);
-      std::uint8_t first  = (singlet & (0b111111 << 2)) >> 2;
+      std::uint8_t first = (singlet & (0b111111 << 2)) >> 2;
       std::uint8_t second = (singlet & 0b11) << 4;
 
       result += to_base64_char(first);
       result += to_base64_char(second);
       result += "==";
     } else if (remainder == 2) {
-      std::uint16_t doublet = static_cast<std::uint8_t>(bytes[size - 2]) << 8 |
-                             static_cast<std::uint8_t>(bytes[size - 1]);
-      std::uint8_t first  = (doublet & (0b111111 << 10)) >> 10;
+      std::uint16_t doublet =
+          static_cast<std::uint8_t>(bytes[size - 2]) << 8 | static_cast<std::uint8_t>(bytes[size - 1]);
+      std::uint8_t first = (doublet & (0b111111 << 10)) >> 10;
       std::uint8_t second = (doublet & (0b111111 << 4)) >> 4;
-      std::uint8_t third  = (doublet & 0b11111) << 2;
+      std::uint8_t third = (doublet & 0b11111) << 2;
 
       result += to_base64_char(first);
       result += to_base64_char(second);
@@ -426,10 +434,8 @@ std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
   std::size_t remainder = str.length() % 4;
   std::size_t i = 0;
   for (; i < str.length() - remainder; i += 4) {
-    std::uint32_t value = from_base64_char(str[i]) << 18 |
-                          from_base64_char(str[i + 1]) << 12 |
-                          from_base64_char(str[i + 2]) << 6 |
-                          from_base64_char(str[i + 3]);
+    std::uint32_t value = from_base64_char(str[i]) << 18 | from_base64_char(str[i + 1]) << 12 |
+                          from_base64_char(str[i + 2]) << 6 | from_base64_char(str[i + 3]);
 
     result.push_back(static_cast<std::byte>(value >> 16));
     if (str[i + 2] != '=') {
@@ -443,14 +449,12 @@ std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
   // We have unpadded data :(
   if (remainder != 0) {
     if (remainder == 2) {
-      std::uint8_t value = from_base64_char(str[str.length() - 2]) << 2 |
-                           from_base64_char(str[str.length() - 1]) >> 4;
+      std::uint8_t value = from_base64_char(str[str.length() - 2]) << 2 | from_base64_char(str[str.length() - 1]) >> 4;
 
       result.push_back(std::byte{value});
     } else if (remainder == 3) {
       std::uint16_t value = from_base64_char(str[str.length() - 3]) << 10 |
-                            from_base64_char(str[str.length() - 2]) << 4 |
-                            from_base64_char(str[str.length() - 1]) >> 2;
+                            from_base64_char(str[str.length() - 2]) << 4 | from_base64_char(str[str.length() - 1]) >> 2;
 
       result.push_back(static_cast<std::byte>(value >> 8));
       result.push_back(static_cast<std::byte>(value & 0b11111111));
@@ -462,9 +466,7 @@ std::vector<std::byte> internal_buffer_base64_decode(std::string_view str) {
 
 extern char to_base16_char(std::uint8_t index);
 
-std::string internal_md5(const std::string &str) {
-  return md5_string_utf8(str);
-}
+std::string internal_md5(const std::string &str) { return md5_string_utf8(str); }
 
 std::string internal_md5(std::vector<std::byte>::iterator bytes, std::size_t size) {
   MD5_CTX ctx;
@@ -484,9 +486,7 @@ std::string internal_md5(std::vector<std::byte>::iterator bytes, std::size_t siz
   return result;
 }
 
-std::string internal_sha1(const std::string &str) {
-  return sha1_string_utf8(str);
-}
+std::string internal_sha1(const std::string &str) { return sha1_string_utf8(str); }
 
 std::string internal_sha1(std::vector<std::byte>::iterator bytes, std::size_t size) {
   SHA1Context ctx;
@@ -533,16 +533,15 @@ buffer_t buffer_create(std::size_t size, buffer_type_t type, std::size_t alignme
   return make_new_buffer(size, type, alignment);
 }
 
-void buffer_delete(buffer_t buffer) {
-  enigma::buffers.destroy(buffer);
-}
+void buffer_delete(buffer_t buffer) { enigma::buffers.destroy(buffer); }
 
 bool buffer_exists(buffer_t buffer) {
   return (buffer >= 0 && static_cast<std::size_t>(buffer) < enigma::buffers.size() &&
           enigma::buffers[buffer].get() != nullptr);
 }
 
-void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer, std::size_t dest_offset) {
+void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer,
+                 std::size_t dest_offset) {
   GET_BUFFER(srcbuff, src_buffer);
   GET_BUFFER(dstbuff, dest_buffer);
 
@@ -559,7 +558,8 @@ void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, 
     if (dstbuff->type == buffer_wrap) {
       dest_offset = dest_offset % dstbuff->GetSize();
     } else {
-      DEBUG_MESSAGE("buffer_copy: destination offset greater than destination size, aborting write", MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE("buffer_copy: destination offset greater than destination size, aborting write",
+                    MESSAGE_TYPE::M_ERROR);
       return;
     }
   }
@@ -574,7 +574,8 @@ void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, 
 
   if (dstbuff->type == buffer_fixed || dstbuff->type == buffer_fast) {
     if (dest_offset + written_bytes > dstbuff->GetSize()) {
-      DEBUG_MESSAGE("buffer_copy: bytes written out of range for fixed/fast buffer, truncating", MESSAGE_TYPE::M_WARNING);
+      DEBUG_MESSAGE("buffer_copy: bytes written out of range for fixed/fast buffer, truncating",
+                    MESSAGE_TYPE::M_WARNING);
       written_bytes = dstbuff->GetSize() - dest_offset;
     }
   }
@@ -655,7 +656,8 @@ void buffer_save_ext(buffer_t buffer, string filename, std::size_t offset, std::
 
   if (offset + size >= binbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_save_ext: offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
-                  ") greater than buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating to buffer end",
+                      ") greater than buffer size (" + std::to_string(binbuff->GetSize()) +
+                      "), truncating to buffer end",
                   MESSAGE_TYPE::M_WARNING);
     size = binbuff->GetSize() - offset;
   }
@@ -697,7 +699,8 @@ void buffer_load_ext(buffer_t buffer, string filename, std::size_t offset) {
   myfile.close();
 }
 
-void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len, std::size_t dest_offset) {
+void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len,
+                         std::size_t dest_offset) {
   GET_BUFFER(dstbuff, buffer);
 
   std::ifstream myfile(filename.c_str());
@@ -709,14 +712,16 @@ void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_
   std::size_t file_size = std::filesystem::file_size(filename.c_str());
   if (src_offset >= file_size) {
     DEBUG_MESSAGE("buffer_load_partial: source offset (" + std::to_string(src_offset) + ") greater than file size (" +
-                  std::to_string(file_size) + "), aborting read", MESSAGE_TYPE::M_ERROR);
+                      std::to_string(file_size) + "), aborting read",
+                  MESSAGE_TYPE::M_ERROR);
     myfile.close();
     return;
   }
 
   if (src_offset + src_len > file_size) {
     DEBUG_MESSAGE("buffer_load_partial: file size (" + std::to_string(file_size) + ") lesser than source offset (" +
-                  std::to_string(src_offset) + ") + source length (" + std::to_string(src_len) + "), truncating read",
+                      std::to_string(src_offset) + ") + source length (" + std::to_string(src_len) +
+                      "), truncating read",
                   MESSAGE_TYPE::M_WARNING);
     src_len = file_size - src_offset;
   }
@@ -732,8 +737,9 @@ void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_
       case buffer_fixed:
       case buffer_fast:
         DEBUG_MESSAGE("buffer_load_partial: destination offset (" + std::to_string(dest_offset) +
-                      ") greater than fixed/fast buffer size (" + std::to_string(dstbuff->GetSize()) +
-                      "), aborting write", MESSAGE_TYPE::M_ERROR);
+                          ") greater than fixed/fast buffer size (" + std::to_string(dstbuff->GetSize()) +
+                          "), aborting write",
+                      MESSAGE_TYPE::M_ERROR);
         myfile.close();
         return;
     }
@@ -749,8 +755,9 @@ void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_
       case buffer_fixed:
       case buffer_fast:
         DEBUG_MESSAGE("buffer_load_partial: destination offset (" + std::to_string(dest_offset) +
-                      ") + source length (" + std::to_string(src_len) + ") greater than fixed/fast buffer size (" +
-                      std::to_string(dstbuff->GetSize()) + "), aborting write", MESSAGE_TYPE::M_ERROR);
+                          ") + source length (" + std::to_string(src_len) + ") greater than fixed/fast buffer size (" +
+                          std::to_string(dstbuff->GetSize()) + "), aborting write",
+                      MESSAGE_TYPE::M_ERROR);
         myfile.close();
         return;
     }
@@ -806,14 +813,14 @@ buffer_t buffer_compress(buffer_t buffer, std::size_t offset, std::size_t size) 
 
   if (offset > srcbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_compress: offset (" + std::to_string(offset) + ") > buffer size (" +
-                  std::to_string(srcbuff->GetSize()) + "), making empty stream",
+                      std::to_string(srcbuff->GetSize()) + "), making empty stream",
                   MESSAGE_TYPE::M_ERROR);
     offset = srcbuff->GetSize();
   }
 
   if (offset + size > srcbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_compress:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
-                  ") >= buffer size (" + std::to_string(srcbuff->GetSize()) + "), truncating",
+                      ") >= buffer size (" + std::to_string(srcbuff->GetSize()) + "), truncating",
                   MESSAGE_TYPE::M_ERROR);
     size = srcbuff->GetSize() - offset;
   }
@@ -986,7 +993,9 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   }
 
   if (offset + size > binbuff->GetSize()) {
-    DEBUG_MESSAGE("buffer_fill: size too large; clamping to buffer end (max: " + std::to_string(binbuff->GetSize()) + ", got offset: " + std::to_string(orig_off) + " size: " + std::to_string(size) + ")", MESSAGE_TYPE::M_WARNING);
+    DEBUG_MESSAGE("buffer_fill: size too large; clamping to buffer end (max: " + std::to_string(binbuff->GetSize()) +
+                      ", got offset: " + std::to_string(orig_off) + " size: " + std::to_string(size) + ")",
+                  MESSAGE_TYPE::M_WARNING);
     size = binbuff->GetSize() - offset;
   }
   std::vector<std::byte> bytes = enigma_user::serialize_to_type(value, type);
@@ -1003,22 +1012,19 @@ void buffer_fill(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
   std::size_t remainder = size % element_size;
 
   for (std::size_t i = 0; i < times; i++) {
-    std::copy(bytes.begin(), bytes.end(),
-              binbuff->data.begin() + offset + i * element_size);
+    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + offset + i * element_size);
     std::copy(padding_bytes.begin(), padding_bytes.end(),
               binbuff->data.begin() + offset + i * element_size + bytes.size());
   }
   if (remainder != 0 && remainder >= bytes.size()) {
-    std::copy(bytes.begin(), bytes.end(),
-              binbuff->data.begin() + offset + times * element_size);
+    std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + offset + times * element_size);
     if (remainder - bytes.size() >= padding_bytes.size()) {
-      std::copy(bytes.begin(), bytes.end(),
-                binbuff->data.begin() + offset + times * element_size + bytes.size());
+      std::copy(bytes.begin(), bytes.end(), binbuff->data.begin() + offset + times * element_size + bytes.size());
     }
   }
   binbuff->Seek(0);
 }
-  
+
 void *buffer_get_address(buffer_t buffer) {
   GET_BUFFER_R(binbuff, buffer, nullptr);
   return reinterpret_cast<void *>(binbuff->data.data());
@@ -1048,7 +1054,8 @@ void buffer_get_surface(buffer_t buffer, int surface, std::size_t offset) {
 
   if (offset >= binbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_get_surface: offset (" + std::to_string(offset) + ") greater than buffer size (" +
-                  std::to_string(binbuff->GetSize()) + "), aborting", MESSAGE_TYPE::M_ERROR);
+                      std::to_string(binbuff->GetSize()) + "), aborting",
+                  MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -1063,8 +1070,9 @@ void buffer_get_surface(buffer_t buffer, int surface, std::size_t offset) {
       binbuff->Resize(offset + (width * height * 4));
     } else {
       DEBUG_MESSAGE("buffer_get_surface: buffer not big enough; offset (" + std::to_string(offset) + ") + size (" +
-                    std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
-                    std::to_string(height) + ") * 4, aborting", MESSAGE_TYPE::M_ERROR);
+                        std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
+                        std::to_string(height) + ") * 4, aborting",
+                    MESSAGE_TYPE::M_ERROR);
       delete[] pixels;
       return;
     }
@@ -1079,7 +1087,8 @@ void buffer_set_surface(buffer_t buffer, int surface, std::size_t offset) {
 
   if (offset >= binbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_set_surface: offset (" + std::to_string(offset) + ") greater than buffer size (" +
-                  std::to_string(binbuff->GetSize()) + "), aborting", MESSAGE_TYPE::M_ERROR);
+                      std::to_string(binbuff->GetSize()) + "), aborting",
+                  MESSAGE_TYPE::M_ERROR);
     return;
   }
 
@@ -1092,13 +1101,15 @@ void buffer_set_surface(buffer_t buffer, int surface, std::size_t offset) {
       binbuff->Resize(offset + (width * height * 4));
     } else {
       DEBUG_MESSAGE("buffer_set_surface: buffer not big enough; offset (" + std::to_string(offset) + ") + size (" +
-                    std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
-                    std::to_string(height) + ") * 4, aborting", MESSAGE_TYPE::M_ERROR);
+                        std::to_string(binbuff->GetSize()) + ") < width (" + std::to_string(width) + ") * height (" +
+                        std::to_string(height) + ") * 4, aborting",
+                    MESSAGE_TYPE::M_ERROR);
       return;
     }
   }
 
-  enigma::graphics_push_texture_pixels(texture, width, height, reinterpret_cast<std::uint8_t *>(binbuff->data.data() + offset));
+  enigma::graphics_push_texture_pixels(texture, width, height,
+                                       reinterpret_cast<std::uint8_t *>(binbuff->data.data() + offset));
 }
 
 void buffer_resize(buffer_t buffer, std::size_t size) {
@@ -1123,15 +1134,24 @@ void buffer_seek(buffer_t buffer, buffer_seek_t base, long long offset) {
 
 std::size_t buffer_sizeof(buffer_data_t type) {
   switch (type) {
-    case buffer_u8: case buffer_s8: case buffer_bool:
+    case buffer_u8:
+    case buffer_s8:
+    case buffer_bool:
       return 1;
-    case buffer_u16: case buffer_s16: case buffer_f16:
+    case buffer_u16:
+    case buffer_s16:
+    case buffer_f16:
       return 2;
-    case buffer_u32: case buffer_s32: case buffer_f32:
+    case buffer_u32:
+    case buffer_s32:
+    case buffer_f32:
       return 4;
-    case buffer_u64: case buffer_f64:
+    case buffer_u64:
+    case buffer_f64:
       return 8;
-    case buffer_string: case buffer_text: default:
+    case buffer_string:
+    case buffer_text:
+    default:
       break;
   }
   return 0;
@@ -1166,7 +1186,8 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
   GET_BUFFER_R(binbuff, buffer, -1);
   while (binbuff->position % binbuff->alignment != 0) {
     if (binbuff->ReadByte() != std::byte{0}) {
-      DEBUG_MESSAGE("buffer_peek: internal error: buffer not padded with zeroes, probably read something incorrect", MESSAGE_TYPE::M_FATAL_ERROR);
+      DEBUG_MESSAGE("buffer_peek: internal error: buffer not padded with zeroes, probably read something incorrect",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
     }
   }
 
@@ -1176,9 +1197,9 @@ variant buffer_read(buffer_t buffer, buffer_data_t type) {
     binbuff->Seek(binbuff->position + buffer_sizeof(type));
   } else {
     while (binbuff->position < binbuff->GetSize() && binbuff->data[binbuff->position] != std::byte{0}) {
-      binbuff->ReadByte(); // read the string, because we do not know its length
+      binbuff->ReadByte();  // read the string, because we do not know its length
     }
-    binbuff->ReadByte(); // skip the null terminator
+    binbuff->ReadByte();  // skip the null terminator
   }
   return result;
 }
@@ -1192,8 +1213,8 @@ void buffer_poke(buffer_t buffer, std::size_t offset, buffer_data_t type, varian
 
   std::vector<std::byte> data = serialize_to_type(value, type);
 
-  if ((data.size() + offset) > binbuff->GetSize() && ((!resize && binbuff->type == buffer_grow) ||
-      binbuff->type == buffer_fixed || binbuff->type == buffer_fast)) {
+  if ((data.size() + offset) > binbuff->GetSize() &&
+      ((!resize && binbuff->type == buffer_grow) || binbuff->type == buffer_fixed || binbuff->type == buffer_fast)) {
     DEBUG_MESSAGE("buffer_poke: Write would go off end of buffer, aborting", MESSAGE_TYPE::M_ERROR);
     return;
   }
@@ -1277,7 +1298,7 @@ variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
       offset = offset % binbuff->GetSize();
     } else {
       DEBUG_MESSAGE("buffer_crc32: offset (" + std::to_string(offset) + ") > buffer size (" +
-                    std::to_string(binbuff->GetSize()) + "), aborting",
+                        std::to_string(binbuff->GetSize()) + "), aborting",
                     MESSAGE_TYPE::M_ERROR);
       return crc32(0, nullptr, 0);
     }
@@ -1285,7 +1306,7 @@ variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size) {
 
   if (offset + size >= binbuff->GetSize()) {
     DEBUG_MESSAGE("buffer_crc32:  offset (" + std::to_string(offset) + ") + size (" + std::to_string(size) +
-                  ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
+                      ") >= buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating",
                   MESSAGE_TYPE::M_ERROR);
     size = binbuff->GetSize() - offset;
   }
@@ -1309,7 +1330,7 @@ void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
 
   std::vector<std::byte> decoded = internal_buffer_base64_decode(str);
 
-  switch(binbuff->type) {
+  switch (binbuff->type) {
     case buffer_grow: {
       if (offset + decoded.size() >= binbuff->GetSize()) {
         binbuff->Resize(offset + decoded.size() + 1);
@@ -1334,8 +1355,8 @@ void buffer_base64_decode_ext(buffer_t buffer, string str, std::size_t offset) {
       std::size_t written = decoded.size();
       if (offset + decoded.size() >= binbuff->GetSize()) {
         DEBUG_MESSAGE("buffer_base64_decode_ext: offset (" + std::to_string(offset) + ") + decoded string size (" +
-                      std::to_string(decoded.size()) + ") greater than fixed/fast buffer size (" +
-                      std::to_string(binbuff->GetSize()) + "), truncating data",
+                          std::to_string(decoded.size()) + ") greater than fixed/fast buffer size (" +
+                          std::to_string(binbuff->GetSize()) + "), truncating data",
                       MESSAGE_TYPE::M_WARNING);
         written = binbuff->GetSize() - offset;
       }
@@ -1355,8 +1376,9 @@ std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_
   }
 
   if (offset + size > binbuff->GetSize()) {
-    DEBUG_MESSAGE("buffer_base64_encode: given offset (" + std::to_string(offset) + ") + size (" + std::to_string(size)
-                  + ") greater than buffer size (" + std::to_string(binbuff->GetSize()) + "), truncating encode",
+    DEBUG_MESSAGE("buffer_base64_encode: given offset (" + std::to_string(offset) + ") + size (" +
+                      std::to_string(size) + ") greater than buffer size (" + std::to_string(binbuff->GetSize()) +
+                      "), truncating encode",
                   MESSAGE_TYPE::M_WARNING);
     size = std::min(binbuff->GetSize() - offset, size);
   }
@@ -1365,7 +1387,8 @@ std::string buffer_base64_encode(buffer_t buffer, std::size_t offset, std::size_
 }
 
 namespace {
-std::array<std::uint8_t, SHA1HashSize> internal_sha1_checksum(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last) {
+std::array<std::uint8_t, SHA1HashSize> internal_sha1_checksum(std::vector<std::byte>::iterator first,
+                                                              std::vector<std::byte>::iterator last) {
   SHA1Context ctx;
   int err = SHA1Reset(&ctx);
   if (err != 0) {
@@ -1394,8 +1417,7 @@ std::array<std::uint8_t, SHA1HashSize> calculate_checksum(std::vector<std::byte>
 }
 
 void store_checksum(std::vector<std::byte> &buffer, std::array<uint8_t, SHA1HashSize> digest) {
-  std::transform(digest.begin(), digest.end(), std::back_inserter(buffer),
-                 [](std::uint8_t v) { return std::byte{v}; });
+  std::transform(digest.begin(), digest.end(), std::back_inserter(buffer), [](std::uint8_t v) { return std::byte{v}; });
   buffer.shrink_to_fit();
 }
 
@@ -1418,14 +1440,14 @@ bool verify_checksum(std::vector<std::byte> &buffer) {
   }
   return true;
 }
-}
+}  // namespace
 
 void game_save_buffer(buffer_t buffer) {
   GET_BUFFER(binbuff, buffer)
   std::size_t ptr = 0;
 
   binbuff->data.resize(sizeof(std::size_t));
-  enigma::serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
+  enigma::internal_serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
   for (auto &[id, obj] : enigma::instance_list) {
     auto buf = obj->inst->serialize();
     ptr = binbuff->data.size();
@@ -1435,8 +1457,7 @@ void game_save_buffer(buffer_t buffer) {
 
   ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + sizeof(std::size_t));
-  enigma::serialize_into<std::size_t>(&binbuff->data[ptr],
-                                      enigma::instance_deactivated_list.size());
+  enigma::internal_serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_deactivated_list.size());
   for (auto &[id, obj] : enigma::instance_deactivated_list) {
     auto buf = obj->serialize();
     ptr = binbuff->data.size();
@@ -1459,7 +1480,7 @@ void game_save_buffer(buffer_t buffer) {
 
   ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + sizeof(int));
-  enigma::serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
+  enigma::internal_serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
 
   store_checksum(binbuff->data, calculate_checksum(binbuff->data));
 }
@@ -1478,34 +1499,34 @@ void game_load_buffer(buffer_t buffer) {
     instance_destroy(id);
   }
   std::vector<int> inactive_ids{};
-  std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
-                 [](auto &value) { return value.first; });
+  std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(),
+                 std::back_inserter(inactive_ids), [](auto &value) { return value.first; });
   for (int id : inactive_ids) {
     instance_destroy(id);
   }
 
   std::byte *ptr = &binbuff->data[0];
-  std::size_t active_size = enigma::deserialize<std::size_t>(ptr);
+  std::size_t active_size = enigma::internal_deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
   for (std::size_t i = 0; i < active_size; i++) {
     // This should be an object, where `id` is serialized first and `object_id` second
-    auto obj_id = enigma::deserialize<int>(ptr + 1);
-    auto obj_ind = enigma::deserialize<int>(ptr + 1 + sizeof(unsigned int));
+    auto obj_id = enigma::internal_deserialize<int>(ptr + 1);
+    auto obj_ind = enigma::internal_deserialize<int>(ptr + 1 + sizeof(unsigned int));
     auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
     ptr += obj->deserialize_self(ptr);
     obj->activate();
   }
 
-  std::size_t inactive_size = enigma::deserialize<std::size_t>(ptr);
+  std::size_t inactive_size = enigma::internal_deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
   for (std::size_t i = 0; i < inactive_size; i++) {
-    auto obj_ind = enigma::deserialize<int>(ptr + sizeof(unsigned int));
+    auto obj_ind = enigma::internal_deserialize<int>(ptr + sizeof(unsigned int));
     auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
     ptr += obj->deserialize_self(ptr);
     obj->deactivate();
   }
 
-  auto type = enigma::deserialize<unsigned char>(ptr);
+  auto type = enigma::internal_deserialize<unsigned char>(ptr);
   if (type != 0xee) {
     DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
   }
@@ -1513,13 +1534,13 @@ void game_load_buffer(buffer_t buffer) {
 
   ptr += enigma::backgrounds.deserialize_self(ptr);
 
-  type = enigma::deserialize<unsigned char>(ptr);
+  type = enigma::internal_deserialize<unsigned char>(ptr);
   if (type != 0xef) {
     DEBUG_MESSAGE("Invalid enigma::backgrounds footer", MESSAGE_TYPE::M_FATAL_ERROR);
   }
   ptr += 1;
 
-  auto room_index = enigma::deserialize<int>(ptr);
+  auto room_index = enigma::internal_deserialize<int>(ptr);
   enigma_user::room_goto(room_index);
   ptr += sizeof(int);
 }

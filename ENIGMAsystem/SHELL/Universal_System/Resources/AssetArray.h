@@ -18,62 +18,65 @@
 #ifndef E_ASSET_ARRAY
 #define E_ASSET_ARRAY
 
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "Universal_System/Object_Tiers/serialization.h"
 #include "Universal_System/detect_serialization.h"
 
 #ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
-  #define CHECK_ID(id, ret) \
-    if (!exists(id)) { \
-      DEBUG_MESSAGE("Requested " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " does not exist.", MESSAGE_TYPE::M_USER_ERROR); \
-      return ret; \
-    }
-  #define CHECK_ID_V(id) CHECK_ID(id,)
+#include "Widget_Systems/widgets_mandatory.h"  // for DEBUG_MESSAGE
+#define CHECK_ID(id, ret)                                                                                        \
+  if (!exists(id)) {                                                                                             \
+    DEBUG_MESSAGE(                                                                                               \
+        "Requested " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " does not exist.", \
+        MESSAGE_TYPE::M_USER_ERROR);                                                                             \
+    return ret;                                                                                                  \
+  }
+#define CHECK_ID_V(id) CHECK_ID(id, )
 #else
-  #define CHECK_ID(id, ret)
-  #define CHECK_ID_V(id)
+#define CHECK_ID(id, ret)
+#define CHECK_ID_V(id)
 #endif
 
 namespace enigma_user {
 int background_get_width(int backId);
 int background_get_height(int backId);
-}
+}  // namespace enigma_user
 
 namespace enigma {
 struct Background;
 
-template<typename T, int LEFT> 
+template <typename T, int LEFT>
 class OffsetVector {
   std::vector<T> data_owner_;
   T* data_;
 
  public:
-  OffsetVector(): data_(nullptr) {}
-  OffsetVector(const OffsetVector<T, LEFT> &other):
-    data_owner_(other.data_owner_), data_(data_owner_.data() - LEFT) {}
-  size_t size() const {
-    return data_owner_.size() + LEFT;
-  }
-  T *data() { return data_; }
-  const T *data() const { return data_; }
-  template<typename... U> size_t push_back(U... args) {
+  OffsetVector() : data_(nullptr) {}
+  OffsetVector(const OffsetVector<T, LEFT>& other) : data_owner_(other.data_owner_), data_(data_owner_.data() - LEFT) {}
+  size_t size() const { return data_owner_.size() + LEFT; }
+  T* data() { return data_; }
+  const T* data() const { return data_; }
+  template <typename... U>
+  size_t push_back(U... args) {
     data_owner_.push_back(args...);
     data_ = data_owner_.data() - LEFT;
     return size() - 1;
   }
-  template<typename... U> size_t emplace_back(U... args) {
+  template <typename... U>
+  size_t emplace_back(U... args) {
     data_owner_.emplace_back(std::move(args)...);
     data_ = data_owner_.data() - LEFT;
     return size() - 1;
   }
-  template<typename ind_t> T& operator[](ind_t index) {
+  template <typename ind_t>
+  T& operator[](ind_t index) {
     return data()[index];
   }
-  template<typename ind_t> const T& operator[](ind_t index) const {
+  template <typename ind_t>
+  const T& operator[](ind_t index) const {
     return data()[index];
   }
   void resize(size_t count) {
@@ -82,47 +85,51 @@ class OffsetVector {
   }
 };
 
-template<typename T> class OffsetVector<T, 0> {
+template <typename T>
+class OffsetVector<T, 0> {
   std::vector<T> data_owner_;
+
  public:
-  size_t size() const {
-    return data_owner_.size();
-  }
-  T *data() { return data_owner_.data(); }
-  const T *data() const { return data_owner_.data(); }
-  template<typename... U> size_t push_back(U... args) {
+  size_t size() const { return data_owner_.size(); }
+  T* data() { return data_owner_.data(); }
+  const T* data() const { return data_owner_.data(); }
+  template <typename... U>
+  size_t push_back(U... args) {
     data_owner_.push_back(args...);
     return data_owner_.size() - 1;
   }
-  template<typename... U> size_t emplace_back(U... args) {
+  template <typename... U>
+  size_t emplace_back(U... args) {
     data_owner_.emplace_back(std::move(args)...);
     return size() - 1;
   }
-  template<typename ind_t> T& operator[](ind_t index) {
+  template <typename ind_t>
+  T& operator[](ind_t index) {
     return data()[index];
   }
-  template<typename ind_t> const T& operator[](ind_t index) const {
+  template <typename ind_t>
+  const T& operator[](ind_t index) const {
     return data()[index];
   }
-  void resize(size_t count) {
-    data_owner_.resize(count);
-  }
+  void resize(size_t count) { data_owner_.resize(count); }
 };
 
 // Asset storage container designed for dense cache-efficient resource processing.
-template<typename T, int LEFT = 0>
+template <typename T, int LEFT = 0>
 class AssetArray {
  public:
   // Custom iterator for looping over only the existing assets in the array.
   class iterator {
    public:
-    iterator(AssetArray& assets, int ind): assets(assets), ind(ind) {}
+    iterator(AssetArray& assets, int ind) : assets(assets), ind(ind) {}
     iterator operator++() {
-      while (!assets.exists(++ind) && size_t(ind) < assets.size());
+      while (!assets.exists(++ind) && size_t(ind) < assets.size())
+        ;
       return *this;
     }
     bool operator!=(const iterator& other) const { return ind != other.ind; }
     std::pair<int, T&> operator*() const { return {ind, assets[ind]}; }
+
    private:
     AssetArray& assets;
     int ind;
@@ -140,14 +147,17 @@ class AssetArray {
   }
 
   int assign(int id, T&& asset) {
-    if (exists(id)) assets_[id].destroy();
+    if (exists(id))
+      assets_[id].destroy();
     else {
-      #ifdef DEBUG_MODE
+#ifdef DEBUG_MODE
       if (id < 0) {
-        DEBUG_MESSAGE("Attempting to assign " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) + " to negative index.", MESSAGE_TYPE::M_USER_ERROR);
+        DEBUG_MESSAGE("Attempting to assign " + (std::string)T::getAssetTypeName() + " asset " + std::to_string(id) +
+                          " to negative index.",
+                      MESSAGE_TYPE::M_USER_ERROR);
         return id;
       }
-      #endif
+#endif
       if (size_t(id) >= size()) assets_.resize(size_t(id) + 1);
     }
     assets_[id] = std::move(asset);
@@ -156,26 +166,22 @@ class AssetArray {
 
   T& get(int id) {
     static T sentinel;
-    CHECK_ID(id,sentinel);
+    CHECK_ID(id, sentinel);
     return assets_[id];
   }
-  
+
   const T& get(int id) const {
     static T sentinel;
-    CHECK_ID(id,sentinel);
+    CHECK_ID(id, sentinel);
     return assets_[id];
   }
 
   // NOTE: absolutely no bounds checking!
   // only used in rare cases where you
   // already know the asset exists
-  T& operator[](int id) noexcept {
-    return assets_[id];
-  }
+  T& operator[](int id) noexcept { return assets_[id]; }
 
-  const T& operator[](int id) const noexcept {
-    return assets_[id];
-  }
+  const T& operator[](int id) const noexcept { return assets_[id]; }
 
   int replace(int id, T&& asset) {
     CHECK_ID(id, -1);
@@ -201,9 +207,7 @@ class AssetArray {
 
   T* data() { return assets_.data(); }
 
-  void resize(size_t count) {
-    assets_.resize(count);
-  }
+  void resize(size_t count) { assets_.resize(count); }
 
   std::size_t byte_size() const noexcept {
     std::size_t len = sizeof(std::size_t);
@@ -213,35 +217,35 @@ class AssetArray {
     return len;
   }
 
-  std::vector<std::byte> serialize() const{
+  std::vector<std::byte> serialize() const {
     static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
 
     std::vector<std::byte> result{};
     std::size_t len = 0;
-    enigma::enigma_internal_serialize(assets_.size(), len, result);
+    enigma::enigma_serialize(assets_.size(), len, result);
     for (std::size_t i = 0; i < assets_.size(); i++) {
-      enigma::enigma_internal_serialize(operator[](i), len, result);
+      enigma::enigma_serialize(operator[](i), len, result);
     }
     result.shrink_to_fit();
     return result;
   }
 
-  std::size_t deserialize_self(std::byte *iter) {
+  std::size_t deserialize_self(std::byte* iter) {
     static_assert(has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.deserialize_self()` or `deserialize<T>()`");
 
     std::size_t len = 0;
     std::size_t elements = 0;
-    enigma::enigma_internal_deserialize(elements, iter, len);
+    enigma::enigma_deserialize(elements, iter, len);
     resize(elements);
     for (std::size_t i = 0; i < elements; i++) {
-      enigma::enigma_internal_deserialize(assets_[i], iter, len);
+      enigma::enigma_deserialize(assets_[i], iter, len);
     }
     return len;
   }
 
-  static std::pair<AssetArray<T, LEFT>, std::size_t> deserialize(std::byte *iter) {
+  static std::pair<AssetArray<T, LEFT>, std::size_t> deserialize(std::byte* iter) {
     if constexpr (has_deserialize_self_method_v<T> || has_deserialize_function_v<T> || HAS_DESERIALIZE_FUNCTION()) {
       AssetArray<T, LEFT> result;
       auto len = result.deserialize_self(iter);
@@ -254,6 +258,6 @@ class AssetArray {
   OffsetVector<T, LEFT> assets_;
 };
 
-} // namespace enigma
+}  // namespace enigma
 
-#endif // E_ASSET_ARRAY
+#endif  // E_ASSET_ARRAY

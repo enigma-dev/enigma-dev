@@ -125,7 +125,7 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
   constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
 
 HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
-// HAS_FREE_FUNCTION(serialize_into_fn, (std::declval<std::byte *>(),std::declval<>), void);
+// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<>), void);
 // HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, (std::declval<T &>(),std::declval<std::byte *>(),std::declval<std::size_t &>()), void);
 
 /**
@@ -141,9 +141,11 @@ HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
 #undef HAS_FREE_FUNCTION
 
 // #define HAS_BYTE_SIZE_FUNCTION(T) std::is_invocable_r_v<std::size_t, decltype(byte_size<T>), T>
-#define HAS_SERIALIZE_INTO_FUNCTION() std::is_invocable_r_v<void, decltype(enigma::serialize_into<T>), std::byte *, T>
-#define HAS_SERIALIZE_FUNCTION() std::is_invocable_r_v<std::vector<std::byte>, decltype(enigma::serialize<T>), T>
-#define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::deserialize<T>), std::byte *>
+#define HAS_SERIALIZE_INTO_FUNCTION() \
+  std::is_invocable_r_v<void, decltype(enigma::internal_serialize_into<T>), std::byte *, T>
+#define HAS_SERIALIZE_FUNCTION() \
+  std::is_invocable_r_v<std::vector<std::byte>, decltype(enigma::internal_serialize<T>), T>
+#define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize<T>), std::byte *>
 // #define HAS_ENIGMA_INTERNAL_DESERIALIZE_FUNCTION() std::is_invocable_r_v<void, decltype(enigma::enigma_internal_deserialize_fn<T>), T,std::byte *,std::size_t>
 
 #endif

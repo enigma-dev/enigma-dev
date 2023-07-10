@@ -25,25 +25,23 @@
 
 #include "graphics_object.h"
 
-namespace enigma
-{
-  struct object_transform: object_graphics
-  {
-    static constexpr unsigned char objtype = 0xAE;
+namespace enigma {
+struct object_transform : object_graphics {
+  static constexpr unsigned char objtype = 0xAE;
 
-    //Other attributes that logically don't belong here
-        double image_alpha;
-        int    image_blend;
-    //Constructors
-      object_transform();
-      object_transform(unsigned x, int y);
-      virtual ~object_transform();
+  //Other attributes that logically don't belong here
+  double image_alpha;
+  int image_blend;
+  //Constructors
+  object_transform();
+  object_transform(unsigned x, int y);
+  virtual ~object_transform();
 
-    // Serialization and deserialization
-      std::vector<std::byte> serialize() override;
-      std::size_t deserialize_self(std::byte *iter) override;
-      static std::pair<object_transform, std::size_t> deserialize(std::byte *iter);
-  };
-} //namespace ennigma
+  // Serialization and deserialization
+  std::vector<std::byte> serialize() override;
+  std::size_t deserialize_self(std::byte *iter) override;
+  static std::pair<object_transform, std::size_t> deserialize(std::byte *iter);
+};
+}  // namespace enigma
 
-#endif //ENIGMA_TRANSFORM_OBJECT_H
+#endif  //ENIGMA_TRANSFORM_OBJECT_H
