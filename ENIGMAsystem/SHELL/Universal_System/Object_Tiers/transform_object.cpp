@@ -23,7 +23,7 @@
 #include "transform_object.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 
 namespace enigma {
 object_transform::object_transform() : object_graphics() {}

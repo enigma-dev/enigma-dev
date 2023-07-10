@@ -27,7 +27,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/math_consts.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 
 #include <floatcomp.h>
 #include <cmath>

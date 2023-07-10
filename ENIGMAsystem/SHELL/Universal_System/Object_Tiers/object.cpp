@@ -21,7 +21,7 @@
 #include "Universal_System/var4.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 
 #ifdef DEBUG_MODE
 #include "Universal_System/Instances/instance_system.h"

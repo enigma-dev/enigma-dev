@@ -24,7 +24,7 @@
 #include "graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 
 #include <floatcomp.h>
 #include <math.h>

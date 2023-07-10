@@ -22,8 +22,8 @@
 #include <utility>
 #include <vector>
 
-#include "Universal_System/Object_Tiers/serialization.h"
-#include "Universal_System/detect_serialization.h"
+#include "Universal_System/Serialization/serialization.h"
+#include "Universal_System/Serialization/detect_serialization.h"
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"  // for DEBUG_MESSAGE

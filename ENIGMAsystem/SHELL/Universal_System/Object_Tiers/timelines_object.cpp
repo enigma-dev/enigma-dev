@@ -26,7 +26,7 @@
 #include "timelines_object.h"
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 
 namespace enigma {
 std::vector<std::map<int, int> > object_timelines::timeline_moments_maps;

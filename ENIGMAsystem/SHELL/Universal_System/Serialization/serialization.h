@@ -24,7 +24,7 @@
 #include <cstddef>
 #include <cstring>
 
-#include "Universal_System/detect_serialization.h"
+#include "detect_serialization.h"
 #include "detect_size.h"
 
 namespace enigma {

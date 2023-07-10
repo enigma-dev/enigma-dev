@@ -41,7 +41,7 @@ int lang_CPP::compile_writeDefraggedEvents(const GameData &game, const std::set<
 
   wto << "#include <vector>\n";
   wto << "#include <cstddef>\n";
-  wto << "#include \"Universal_System/Object_Tiers/serialization.h\"\n";
+  wto << "#include \"Universal_System/Serialization/serialization.h\"\n";
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
   for (size_t i = 0; i < game.timelines.size(); i++) {

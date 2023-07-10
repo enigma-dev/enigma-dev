@@ -125,7 +125,8 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
   constexpr static inline bool has_##NAME##_free_function_v = has_##NAME##_free_function<T>::value
 
 HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
-// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<>), void);
+// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>), void);
+//HAS_FREE_FUNCTION(internal_deserialize_fn, (std::declval<std::byte *>()), T);
 // HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, (std::declval<T &>(),std::declval<std::byte *>(),std::declval<std::size_t &>()), void);
 
 /**
