@@ -96,7 +96,7 @@ static SDL_Window *window = nullptr;
 #if defined(CREATE_CONTEXT)
 static bool create_context() {
   if (!window) {
-    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
     setenv("SDL_VIDEODRIVER", "x11", 1);
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     #endif
