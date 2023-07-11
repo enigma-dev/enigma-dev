@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <object>
-  <spriteName>Spr_ENIGMA_button</spriteName>
+  <spriteName>&lt;undefined&gt;</spriteName>
   <solid>0</solid>
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>Obj_Steam_Leaderboard_Download</parentName>
+  <parentName>&lt;undefined&gt;</parentName>
   <events>
     <event enumb="0" eventtype="0">
       <action>
@@ -25,16 +25,16 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>&#13;
-event_inherited();&#13;
-&#13;
-text = "Friends"&#13;
-</string>
+            <string>rank = noone&#13;
+score_ = noone&#13;
+name = ""&#13;
+userID = noone&#13;
+data = ""</string>
           </argument>
         </arguments>
       </action>
     </event>
-    <event enumb="7" eventtype="6">
+    <event enumb="0" eventtype="8">
       <action>
         <libid>1</libid>
         <id>603</id>
@@ -52,12 +52,13 @@ text = "Friends"&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+draw_set_valign(fa_top);&#13;
+draw_set_halign(fa_left);&#13;
+draw_set_font(Font_ENIGMA_20);&#13;
 &#13;
-request = steam_download_friends_scores(SteamLeaderboard)&#13;
+draw_text(x, y, string(rank) + ") " + name + "\n score: " + string(score_) + "\n data: " + data)&#13;
 &#13;
-with(Obj_Steam_Leaderboard_Entry)&#13;
-	instance_destroy()</string>
+</string>
           </argument>
         </arguments>
       </action>

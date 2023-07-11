@@ -28,8 +28,7 @@
             <string>&#13;
 &#13;
 //steam_request_global_stats(60)&#13;
-//steam_request_global_achievement_percentages()&#13;
-</string>
+//steam_request_global_achievement_percentages()</string>
           </argument>
         </arguments>
       </action>
@@ -56,7 +55,6 @@
 //steam_get_global_stat_history("NumWins")&#13;
 &#13;
 //show_debug_message(steam_get_achievement_achieved_percent("Winner"))&#13;
-&#13;
 </string>
           </argument>
         </arguments>

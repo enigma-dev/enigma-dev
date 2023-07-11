@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>Obj_Steam_Leaderboard_Download</parentName>
+  <parentName>Obj_ENIGMA_button</parentName>
   <events>
     <event enumb="0" eventtype="0">
       <action>
@@ -28,7 +28,8 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-text = "Friends"&#13;
+text = "Score"&#13;
+upload_ID = noone&#13;
 </string>
           </argument>
         </arguments>
@@ -52,12 +53,12 @@ text = "Friends"&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+show_debug_message("POST steam_create_leaderboard")&#13;
 &#13;
-request = steam_download_friends_scores(SteamLeaderboard)&#13;
+//upload_ID = steam_upload_score_ext(SteamLeaderboard, irandom(1000), true);&#13;
 &#13;
-with(Obj_Steam_Leaderboard_Entry)&#13;
-	instance_destroy()</string>
+show_debug_message("upload_ID: " + string(upload_ID))&#13;
+</string>
           </argument>
         </arguments>
       </action>

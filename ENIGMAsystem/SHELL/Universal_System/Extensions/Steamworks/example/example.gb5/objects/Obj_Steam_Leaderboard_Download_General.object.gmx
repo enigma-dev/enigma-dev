@@ -28,7 +28,7 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-text = "Friends"&#13;
+text = "General"&#13;
 </string>
           </argument>
         </arguments>
@@ -52,12 +52,13 @@ text = "Friends"&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+//steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
 &#13;
-request = steam_download_friends_scores(SteamLeaderboard)&#13;
+//request = steam_download_scores(SteamLeaderboard, 1, 10)&#13;
 &#13;
-with(Obj_Steam_Leaderboard_Entry)&#13;
-	instance_destroy()</string>
+//with(Obj_Steam_Leaderboard_Entry)&#13;
+//	instance_destroy()&#13;
+</string>
           </argument>
         </arguments>
       </action>

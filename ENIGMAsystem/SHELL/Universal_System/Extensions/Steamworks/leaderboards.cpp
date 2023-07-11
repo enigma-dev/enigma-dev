@@ -19,7 +19,7 @@ bool leaderboards_pre_checks(const std::string& script_name) {
 namespace enigma_user {
 
 int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_order, const unsigned display_type) {
-  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
+  if (!leaderboards_pre_checks("steam_create_leaderboard")) return -1;
 
   ELeaderboardSortMethod leaderboard_sort_method;
 
@@ -69,6 +69,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 
   return 0;
 }
+
 int steam_upload_score(const std::string& lb_name, const int score) {
   if (!leaderboards_pre_checks("steam_upload_score")) return -1;
 
@@ -77,8 +78,9 @@ int steam_upload_score(const std::string& lb_name, const int score) {
 
   return 0;
 }
+
 int steam_upload_score_ext(const std::string& lb_name, const unsigned score, const bool force_update) {
-  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
+  if (!leaderboards_pre_checks("steam_upload_score_ext")) return -1;
 
   if (force_update) {
     steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(
@@ -89,16 +91,39 @@ int steam_upload_score_ext(const std::string& lb_name, const unsigned score, con
 
   return 0;
 }
+
 int steam_upload_score_buffer(const std::string& lb_name, const unsigned score, const unsigned buffer) { return -1; }
+
 int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned score, const unsigned buffer,
                                   const bool force_update) {
   return -1;
 }
-int steam_download_scores(const std::string& lb_name, const unsigned start_idx, const unsigned end_idx) { return -1; }
-int steam_download_scores_around_user(const std::string& lb_name, const unsigned range_start,
-                                      const unsigned range_end) {
-  return -1;
+
+int steam_download_scores(const std::string& lb_name, const int start_idx, const int end_idx) {
+  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
+
+  steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
+      lb_name, k_ELeaderboardDataRequestGlobal, start_idx, end_idx);
+
+  return 0;
 }
-int steam_download_friends_scores(const std::string& lb_name) { return -1; }
+
+int steam_download_scores_around_user(const std::string& lb_name, const int range_start, const int range_end) {
+  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
+
+  steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
+      lb_name, k_ELeaderboardDataRequestGlobalAroundUser, range_start, range_end);
+
+  return 0;
+}
+
+int steam_download_friends_scores(const std::string& lb_name) { 
+  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
+
+  steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
+      lb_name, k_ELeaderboardDataRequestFriends);
+
+  return 0;
+}
 
 }  // namespace enigma_user

@@ -54,4 +54,30 @@ void c_leaderboards::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedR
   }
 }
 
+void c_leaderboards::download_scores(const std::string& leaderboard_name,
+                                     const ELeaderboardDataRequest leaderboard_data_request, const int range_start,
+                                     const int range_end) {
+  SteamAPICall_t steam_api_call{0};
+
+  steam_api_call = SteamUserStats()->FindLeaderboard(leaderboard_name.c_str());
+
+  if (steam_api_call != 0) {
+    c_leaderboards::m_SteamCallResultCreateLeaderboard.Set(steam_api_call, this, &c_leaderboards::on_find_leaderboard);
+    loading_ = true;
+  }
+
+  steam_api_call =
+      SteamUserStats()->DownloadLeaderboardEntries(steam_api_call, leaderboard_data_request, range_start, range_end);
+  c_leaderboards::m_SteamCallResultDownloadScores.Set(steam_api_call, this, &c_leaderboards::on_download_scores);
+}
+
+void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
+  if (bIOFailure) {
+    DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
+    return;
+  }
+
+  DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
+}
+
 }  // namespace steamworks
