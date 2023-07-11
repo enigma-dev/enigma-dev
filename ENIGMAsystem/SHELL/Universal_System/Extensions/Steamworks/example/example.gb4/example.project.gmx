@@ -55,6 +55,11 @@
         <object>objects\Obj_Steam_Stat_Lose</object>
         <object>objects\Obj_Steam_Stat_Win</object>
       </objects>
+      <objects name="Leaderboard">
+        <object>objects\Obj_Steam_Leaderboard_Download</object>
+        <object>objects\Obj_Steam_Leaderboard_Download_AroundUser</object>
+        <object>objects\Obj_Steam_Leaderboard_Download_Friends</object>
+      </objects>
     </objects>
   </objects>
   <rooms name="rooms">

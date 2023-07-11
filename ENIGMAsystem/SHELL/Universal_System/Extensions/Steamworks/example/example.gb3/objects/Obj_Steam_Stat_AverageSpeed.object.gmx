@@ -29,8 +29,7 @@
 event_inherited();&#13;
 &#13;
 text = "Average Speed";&#13;
-stat = "AverageSpeed"&#13;
-</string>
+stat = "AverageSpeed"</string>
           </argument>
         </arguments>
       </action>
@@ -55,7 +54,7 @@ stat = "AverageSpeed"&#13;
             <string>&#13;
 var sessionCount = random(1000);&#13;
 var sessionLength = random(2000);&#13;
-//steam_set_stat_avg_rate(stat, sessionCount, sessionLength);</string>
+steam_set_stat_avg_rate(stat, sessionCount, sessionLength);</string>
           </argument>
         </arguments>
       </action>

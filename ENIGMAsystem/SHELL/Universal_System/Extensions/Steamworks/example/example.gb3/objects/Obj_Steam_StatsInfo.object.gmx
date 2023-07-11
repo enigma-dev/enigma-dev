@@ -34,12 +34,11 @@ var _i = 0;&#13;
 &#13;
 draw_text(50, 100 + _i++ * 30,"steam_stats_ready: " + string(steam_stats_ready()))&#13;
 &#13;
-//draw_text(50, 100 + _i++ * 30,"NumGames: " + string(steam_get_stat_int("NumGames")))&#13;
-//draw_text(50, 100 + _i++ * 30,"NumWins: " + string(steam_get_stat_int("NumWins")))&#13;
-//draw_text(50, 100 + _i++ * 30,"NumLosses: " + string(steam_get_stat_int("NumLosses")))&#13;
-//draw_text(50, 100 + _i++ * 30,"FeetTraveled: " + string(steam_get_stat_float("FeetTraveled")))&#13;
-//draw_text(50, 100 + _i++ * 30,"AverageSpeed: " + string(steam_get_stat_float("AverageSpeed")))&#13;
-</string>
+draw_text(50, 100 + _i++ * 30,"NumGames: " + string(steam_get_stat_int("NumGames")))&#13;
+draw_text(50, 100 + _i++ * 30,"NumWins: " + string(steam_get_stat_int("NumWins")))&#13;
+draw_text(50, 100 + _i++ * 30,"NumLosses: " + string(steam_get_stat_int("NumLosses")))&#13;
+draw_text(50, 100 + _i++ * 30,"FeetTraveled: " + string(steam_get_stat_float("FeetTraveled")))&#13;
+draw_text(50, 100 + _i++ * 30,"AverageSpeed: " + string(steam_get_stat_float("AverageSpeed")))</string>
           </argument>
         </arguments>
       </action>

@@ -1,7 +1,7 @@
 #ifndef GENERAL_H
 #define GENERAL_H
 
-#include "game_client/main.h"
+#include "game_client/c_main.h"
 
 namespace enigma_user {
 

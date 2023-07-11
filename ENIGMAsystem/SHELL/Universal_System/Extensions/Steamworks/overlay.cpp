@@ -1,7 +1,7 @@
 #include "overlay.h"
 
 #include "game_client/c_overlay.h"
-#include "game_client/main.h"
+#include "game_client/c_main.h"
 
 bool overlay_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
@@ -84,31 +84,31 @@ void steam_activate_overlay_user(const unsigned dialog, const unsigned long long
   if (!overlay_pre_checks("steam_activate_overlay_user")) return;
 
   switch (dialog) {
-    case enigma_user::usr_ov_steamid:
+    case enigma_user::user_ov_steamid:
       steamworks::c_overlay::activate_overlay_user("steamid", steamid);
       break;
-    case enigma_user::usr_ov_chat:
+    case enigma_user::user_ov_chat:
       steamworks::c_overlay::activate_overlay_user("chat", steamid);
       break;
-    case enigma_user::usr_ov_jointrade:
+    case enigma_user::user_ov_jointrade:
       steamworks::c_overlay::activate_overlay_user("jointrade", steamid);
       break;
-    case enigma_user::usr_ov_stats:
+    case enigma_user::user_ov_stats:
       steamworks::c_overlay::activate_overlay_user("stats", steamid);
       break;
-    case enigma_user::usr_ov_achievements:
+    case enigma_user::user_ov_achievements:
       steamworks::c_overlay::activate_overlay_user("achievements", steamid);
       break;
-    case enigma_user::usr_ov_friendadd:
+    case enigma_user::user_ov_friendadd:
       steamworks::c_overlay::activate_overlay_user("friendadd", steamid);
       break;
-    case enigma_user::usr_ov_friendremove:
+    case enigma_user::user_ov_friendremove:
       steamworks::c_overlay::activate_overlay_user("friendremove", steamid);
       break;
-    case enigma_user::usr_ov_friendrequestaccept:
+    case enigma_user::user_ov_friendrequestaccept:
       steamworks::c_overlay::activate_overlay_user("friendrequestaccept", steamid);
       break;
-    case enigma_user::usr_ov_friendrequestignore:
+    case enigma_user::user_ov_friendrequestignore:
       steamworks::c_overlay::activate_overlay_user("friendrequestignore", steamid);
       break;
     default:

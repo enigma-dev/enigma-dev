@@ -1,7 +1,7 @@
 #ifndef STATS_AND_ACHIEVEMENTS_H
 #define STATS_AND_ACHIEVEMENTS_H
 
-#include "game_client/main.h"
+#include "game_client/c_main.h"
 
 namespace enigma_user {
 

@@ -1,6 +1,4 @@
-#include "main.h"
-
-namespace steamworks {
+#include "c_main.h"
 
 extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
   DEBUG_MESSAGE(pchDebugText, M_INFO);
@@ -11,9 +9,11 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
   }
 }
 
-c_game_client* c_main::c_game_client_ {NULL};
+namespace steamworks {
 
-bool c_main::is_initialised_ {false};
+c_game_client* c_main::c_game_client_{NULL};
+
+bool c_main::is_initialised_{false};
 
 bool c_main::init() {
   if (SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid)) {  // replace k_uAppIdInvalid with your AppID
