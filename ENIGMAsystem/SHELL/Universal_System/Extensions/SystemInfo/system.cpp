@@ -30,7 +30,9 @@
 #endif
 #endif
 #if (defined(__APPLE__) && defined(__MACH__))
+#ifndef GL_SILENCE_DEPRECATION
 #define GL_SILENCE_DEPRECATION
+#endif
 #endif
 #include <algorithm>
 #include <string>
