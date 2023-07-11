@@ -29,6 +29,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
+#if (defined(__APPLE__) && defined(__MACH__))
+#define GL_SILENCE_DEPRECATION
+#endif
 #include <algorithm>
 #include <string>
 #include <thread>
@@ -39,36 +42,19 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
-#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
-#if !defined(__sun)
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#else
+#if defined(CREATE_CONTEXT)
 #include <SDL.h>
 #include <SDL_opengl.h>
-#include <sys/systeminfo.h>
-#include <sys/swap.h>
-#include <unistd.h>
-#endif
 #endif
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
-#include <intrin.h>
 #include <dxgi.h>
 #else
-#if (defined(__APPLE__) && defined(__MACH__))
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/CGLCurrent.h>
-#include <OpenGL/gl.h>
-#else
-#include <GL/glx.h>
-#include <GL/gl.h>
-#endif
 #if defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
-#if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+#if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <unistd.h>
@@ -83,62 +69,52 @@
 #endif
 #if !defined(__sun)
 #include <sys/utsname.h>
+#else
+#include <sys/systeminfo.h>
+#include <sys/swap.h>
+#include <unistd.h>
 #endif
 #endif
-#if (defined(_WIN32) && defined(_MSC_VER))
-#pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "dxgi.lib")
+#if defined(_MSC_VER)
+#if defined(_WIN32) && !defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
+#elif defined(_WIN32) && defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
+#endif
 #endif
 
 #include "system.hpp"
 
 namespace ngs::sys {
 
-#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
-#if !defined(__sun)
-static GLFWwindow *window = nullptr;
-#else
+#if defined(CREATE_CONTEXT)
 static SDL_Window *window = nullptr;
 #endif
-#endif
 
-#if (!defined(_WIN32) && defined(CREATE_OPENGL_CONTEXT))
-static void create_opengl_context() {
-  #if (defined(__APPLE__) && defined(__MACH__))
-  if (CGLGetCurrentContext()) {
-    return;
-  }
-  #else
-  if (glXGetCurrentContext()) {
-    return;
-  }
-  #endif
-  #if !defined(__sun)
+#if defined(CREATE_CONTEXT)
+static bool create_context() {
   if (!window) {
-    glewExperimental = true;
-    if (glfwInit()) {
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 1);
-      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-      glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-      window = glfwCreateWindow(1, 1, "", nullptr, nullptr);
-      if (window) {
-        glfwMakeContextCurrent(window);
-        if (window) {
-          glewInit();
-        }
-      }
-    }
-  }
-  #else
-  if (!window) {
-    if (SDL_Init(SDL_INIT_VIDEO)) return;
+    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+    setenv("SDL_VIDEODRIVER", "x11", 1);
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+    #endif
+    if (SDL_Init(SDL_INIT_VIDEO)) return false;
+    #if (defined(__APPLE__) && defined(__MACH__))
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    #endif
     window = SDL_CreateWindow("", 0, 0, 1, 1, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
-    if (!window) return;
+    if (!window) return false;
     SDL_GLContext context = SDL_GL_CreateContext(window);
-    if (!context) return;
-    SDL_GL_MakeCurrent(window, context);
+    if (!context) return false;
+    int err = SDL_GL_MakeCurrent(window, context);
+    if (err) return false;
   }
-  #endif
+  return true;
 }
 #endif
 
@@ -874,77 +850,23 @@ long long memory_usedvmem() {
 }
 
 std::string gpu_vendor() {
-  #if !defined(_WIN32)
-  #if defined(CREATE_OPENGL_CONTEXT)
-  create_opengl_context();
+  #if defined(CREATE_CONTEXT)
+  if (!create_context()) return "";
   #endif
   const char *result = (char *)glGetString(GL_VENDOR);
   std::string str;
   str = result ? result : "";
   return str;
-  #else
-  std::string result;
-  IDXGIFactory *pFactory = nullptr;
-  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
-    IDXGIAdapter *pAdapter = nullptr;
-    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
-      DXGI_ADAPTER_DESC adapterDesc;
-      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
-        std::string str = gpu_renderer();
-        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-        if (str.find("INTEL") != std::string::npos || adapterDesc.VendorId == 0x163C || 
-          adapterDesc.VendorId == 0x8086 || adapterDesc.VendorId == 0x8087) {
-          result = "Intel";
-        } else if (str.find("AMD") != std::string::npos || adapterDesc.VendorId == 0x1002 || 
-          adapterDesc.VendorId == 0x1022) {
-          result = "AMD";
-        } else if (str.find("NVIDIA") != std::string::npos || adapterDesc.VendorId == 0x10DE) {
-          result = "NVIDIA Corporation";
-        } else if (str.find("MICROSOFT") != std::string::npos) {
-          result = "Microsoft Corporation";
-        } else if (str.find("APPLE") != std::string::npos) {
-          result = "Apple";
-        }
-      }
-      pAdapter->Release();
-    }
-    pFactory->Release();
-  }
-  return result;
-  #endif
 }
 
 std::string gpu_renderer() {
-  #if !defined(_WIN32)
-  #if defined(CREATE_OPENGL_CONTEXT)
-  create_opengl_context();
+  #if defined(CREATE_CONTEXT)
+  if (!create_context()) return "";
   #endif
   const char *result = (char *)glGetString(GL_RENDERER);
   std::string str;
   str = result ? result : "";
   return str;
-  #else
-  auto narrow = [](std::wstring wstr) {
-    if (wstr.empty()) return std::string("");
-    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
-    std::vector<char> buf(nbytes);
-    return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
-  };
-  std::string result;
-  IDXGIFactory *pFactory = nullptr;
-  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
-    IDXGIAdapter *pAdapter = nullptr;
-    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
-      DXGI_ADAPTER_DESC adapterDesc;
-      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
-        result = narrow(adapterDesc.Description);
-      }
-      pAdapter->Release();
-    }
-    pFactory->Release();
-  }
-  return result;
-  #endif
 }
 
 static long long videomemory = -1;
