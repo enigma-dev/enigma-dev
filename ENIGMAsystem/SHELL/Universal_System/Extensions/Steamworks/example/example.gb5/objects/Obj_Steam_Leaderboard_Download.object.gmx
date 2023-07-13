@@ -28,8 +28,7 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-request = noone&#13;
-</string>
+request = noone</string>
           </argument>
         </arguments>
       </action>
@@ -52,13 +51,12 @@ request = noone&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-//steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
 &#13;
-//request = steam_download_scores_around_user(SteamLeaderboard,-4,4)&#13;
+request = steam_download_scores_around_user(SteamLeaderboard,-4,4)&#13;
 &#13;
-//with(Obj_Steam_Leaderboard_Entry)&#13;
-//	instance_destroy()&#13;
-</string>
+with(Obj_Steam_Leaderboard_Entry)&#13;
+	instance_destroy()</string>
           </argument>
         </arguments>
       </action>
@@ -119,8 +117,7 @@ request = noone&#13;
 //       }&#13;
 //    }&#13;
 //    ds_map_destroy(map)&#13;
-//}&#13;
-</string>
+//}</string>
           </argument>
         </arguments>
       </action>

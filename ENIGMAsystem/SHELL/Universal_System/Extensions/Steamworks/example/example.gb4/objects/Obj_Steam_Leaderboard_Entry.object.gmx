@@ -56,9 +56,7 @@ draw_set_valign(fa_top);&#13;
 draw_set_halign(fa_left);&#13;
 draw_set_font(Font_ENIGMA_20);&#13;
 &#13;
-draw_text(x, y, string(rank) + ") " + name + "\n score: " + string(score_) + "\n data: " + data)&#13;
-&#13;
-</string>
+draw_text(x, y, string(rank) + ") " + name + "\n score: " + string(score_) + "\n data: " + data)</string>
           </argument>
         </arguments>
       </action>

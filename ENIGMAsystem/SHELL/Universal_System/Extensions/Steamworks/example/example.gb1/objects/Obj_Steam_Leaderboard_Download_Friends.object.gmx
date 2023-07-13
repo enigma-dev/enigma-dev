@@ -52,7 +52,7 @@ text = "Friends"&#13;
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+//steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
 &#13;
 request = steam_download_friends_scores(SteamLeaderboard)&#13;
 &#13;

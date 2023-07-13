@@ -10,4 +10,5 @@ Icon: steamworks.svg
 
 Depends: None
 Dependencies: None
+Implement: extension_steamworks
 Init: extension_steamworks_init

@@ -1,5 +1,28 @@
 #include "steamworks.h"
 
+#include "Universal_System/Instances/instance.h"
+
+#include "implement.h"
+
+namespace enigma {
+namespace extension_cast {
+extension_steamworks* as_extension_steamworks(object_basic*);
+}
+}  // namespace enigma
+
+namespace {
+
+static void fireSteamworksEvent() {
+  enigma::instance_event_iterator = &enigma::dummy_event_iterator;
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+    enigma::object_basic* const inst = ((enigma::object_basic*)*it);
+    enigma::extension_steamworks* const inst_steamworks = enigma::extension_cast::as_extension_steamworks(inst);
+    inst_steamworks->myevent_asyncsteam();
+  }
+}
+
+}  // namespace
+
 namespace enigma {
 
 void write_appid_file() {
