@@ -75,6 +75,10 @@
 #include <unistd.h>
 #endif
 #endif
+#if (defined(_WIN32) && defined(_MSC_VER))
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "dxgi.lib")
+#endif
 #if defined(_MSC_VER)
 #if defined(_WIN32) && !defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
