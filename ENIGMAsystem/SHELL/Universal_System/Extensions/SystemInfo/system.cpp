@@ -1049,11 +1049,11 @@ int cpu_numcores() {
   si.hStdInput = stdin_read;
   PROCESS_INFORMATION pi; 
   ZeroMemory(&pi, sizeof(pi));
-  std::size_t len = wcslen(L"wmic cpu get NumberOfCores\0");
-  wchar_t *cwstr_command = new wchar_t[len + 1]();
-  wcsncpy_s(cwstr_command, len + 1, L"wmic cpu get NumberOfCores\0", len + 1);
-  BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
-  delete[] cwstr_command;
+  std::vector<wchar_t> cwstr_command;
+  std::wstring wstr_command = L"wmic cpu get NumberOfCores";
+  cwstr_command.resize(wstr_command.length() + 1, '\0');
+  wcsncpy_s(&cwstr_command[0], wstr_command.length() + 1, wstr_command.c_str(), wstr_command.length() + 1);
+  BOOL success = CreateProcessW(nullptr, &cwstr_command[0], nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
   if (success) {
     DWORD nRead = 0;
     char buffer[BUFSIZ];
