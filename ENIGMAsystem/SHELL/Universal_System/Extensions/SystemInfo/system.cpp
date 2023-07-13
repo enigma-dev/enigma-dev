@@ -44,10 +44,6 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
-#if defined(CREATE_CONTEXT)
-#include <SDL.h>
-#include <SDL_opengl.h>
-#endif
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
@@ -88,29 +84,6 @@
 #include "system.hpp"
 
 namespace ngs::sys {
-
-#if defined(CREATE_CONTEXT)
-static SDL_Window *window = nullptr;
-#endif
-
-#if defined(CREATE_CONTEXT)
-static bool create_context() {
-  if (!window) {
-    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-    setenv("SDL_VIDEODRIVER", "x11", 1);
-    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    #endif
-    if (SDL_Init(SDL_INIT_VIDEO)) return false;
-    window = SDL_CreateWindow("", 0, 0, 1, 1, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
-    if (!window) return false;
-    SDL_GLContext context = SDL_GL_CreateContext(window);
-    if (!context) return false;
-    int err = SDL_GL_MakeCurrent(window, context);
-    if (err) return false;
-  }
-  return true;
-}
-#endif
 
 struct HumanReadable {
   long double size{};
@@ -844,9 +817,6 @@ long long memory_usedvmem() {
 }
 
 std::string gpu_vendor() {
-  #if defined(CREATE_CONTEXT)
-  if (!create_context()) return "";
-  #endif
   const char *result = (char *)glGetString(GL_VENDOR);
   std::string str;
   str = result ? result : "";
@@ -854,9 +824,6 @@ std::string gpu_vendor() {
 }
 
 std::string gpu_renderer() {
-  #if defined(CREATE_CONTEXT)
-  if (!create_context()) return "";
-  #endif
   const char *result = (char *)glGetString(GL_RENDERER);
   std::string str;
   str = result ? result : "";
