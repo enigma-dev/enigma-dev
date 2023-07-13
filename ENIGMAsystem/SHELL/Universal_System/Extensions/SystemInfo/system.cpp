@@ -1051,7 +1051,7 @@ int cpu_numcores() {
   ZeroMemory(&pi, sizeof(pi));
   std::size_t len = wcslen(L"cmd /c wmic cpu get NumberOfCores 2>nul");
   wchar_t *cwstr_command = new wchar_t[len]();
-  wcsncpy_s(cwstr_command, len, L"wmic cpu get NumberOfCores", len);
+  wcsncpy_s(cwstr_command, len, L"cmd /c wmic cpu get NumberOfCores 2>nul", len);
   BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
   delete[] cwstr_command;
   if (success) {
