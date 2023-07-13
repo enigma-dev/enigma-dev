@@ -44,6 +44,8 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <SDL.h>
+#include <SDL_opengl.h>
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
