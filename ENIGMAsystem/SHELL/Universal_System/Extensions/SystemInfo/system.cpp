@@ -65,9 +65,9 @@
 #include <sys/swap.h>
 #include <unistd.h>
 #endif
-#include <sys/sysctl.h>
 #endif
 #if !defined(__sun)
+#include <sys/sysctl.h>
 #include <sys/utsname.h>
 #else
 #include <sys/systeminfo.h>
