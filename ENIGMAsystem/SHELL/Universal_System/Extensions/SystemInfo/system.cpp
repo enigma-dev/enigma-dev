@@ -1132,7 +1132,6 @@ int cpu_numcores() {
           result = buf;
         }
         pclose(fp);
-        static std::string str2;
         str = (result && strlen(result)) ? result : "-1";
         numcores = (int)strtol(str.c_str(), nullptr, 10);
       }
