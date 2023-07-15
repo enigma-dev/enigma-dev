@@ -449,24 +449,22 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-constexpr static inline bool has_deserialize_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, T> ||
-    std::is_same_v<T, var> || std::is_pointer_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>;
+struct has_internal_deserialize_fn {
+  template <typename U>
+  static constexpr auto test(U *) -> std::is_same<decltype(internal_deserialize_fn<U>(std::declval<std::byte *>())), T>;
 
-// template <typename T>
-// struct has_internal_deserialize_fn {
-//   template <typename U>
-//   static constexpr auto test(U*) -> std::is_same<decltype(internal_deserialize_fn<U>(std::declval<std::byte*>())), T>;
+  template <typename>
+  static constexpr std::false_type test(...);
 
-//   template <typename>
-//   static constexpr std::false_type test(...);
+  static constexpr bool value = decltype(test<T>(nullptr))::value;
+};
 
-//   static constexpr bool value = decltype(test<T>(nullptr))::value;
-// };
+template <typename T>
+constexpr static inline bool HAS_internal_deserialize_FUNCTION = has_internal_deserialize_fn<T>::value;
 
 template <typename T>
 inline T internal_deserialize(std::byte *iter) {
-  if constexpr (has_deserialize_free_function_v2<std::decay_t<T>>) {
+  if constexpr (HAS_internal_deserialize_FUNCTION<std::decay_t<T>>) {
     return internal_deserialize_fn<T>(iter);
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;

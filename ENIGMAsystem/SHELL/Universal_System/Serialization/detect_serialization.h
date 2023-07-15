@@ -144,9 +144,5 @@ HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
   std::is_invocable_r_v<void, decltype(enigma::internal_serialize_into_fn<T>), std::byte *, T>
 #define HAS_INTERNAL_SERIALIZE_FUNCTION() std::is_invocable_v<decltype(enigma::internal_serialize_fn<T>), T>
 #define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize<T>), std::byte *>
-#define HAS_INTERNAL_DESERIALIZE_FUNCTION() \
-  std::is_invocable_r_v<T, decltype(enigma::internal_deserialize_fn<T>), std::byte *>
-#define HAS_RESIZE_BUFFER_FOR_FUNCTION() \
-  std::is_invocable_r_v<void, decltype(enigma::internal_resize_buffer_for_fn<T>), std::vector<std::byte>, T>
 
 #endif
