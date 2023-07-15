@@ -55,16 +55,17 @@ upload_ID = noone;&#13;
             <string>&#13;
 show_debug_message("POST steam_create_leaderboard")&#13;
 &#13;
-//var buff = buffer_create(256, buffer_fixed, 1);&#13;
+var buff = buffer_create(256, buffer_fixed, 1);&#13;
 &#13;
-//buffer_write(buff, buffer_u8, irandom(100));&#13;
-//buffer_write(buff, buffer_string,steam_get_persona_name() + " was here :)");&#13;
+buffer_write(buff, buffer_u8, irandom(100));&#13;
+buffer_write(buff, buffer_string,steam_get_persona_name() + " was here :)");&#13;
 &#13;
-//upload_ID = steam_upload_score_buffer_ext(SteamLeaderboard, irandom(1000), buff, true);&#13;
+upload_ID = steam_upload_score_buffer_ext(SteamLeaderboard, irandom(1000), buff, true);&#13;
 &#13;
-//buffer_delete(buff);&#13;
+buffer_delete(buff);&#13;
 &#13;
-show_debug_message("upload_ID: " + string(upload_ID))</string>
+show_debug_message("upload_ID: " + string(upload_ID))&#13;
+</string>
           </argument>
         </arguments>
       </action>

@@ -56,7 +56,8 @@ text = "Around User"</string>
 request = steam_download_scores_around_user(SteamLeaderboard,-4,4)&#13;
 &#13;
 with(Obj_Steam_Leaderboard_Entry)&#13;
-	instance_destroy()</string>
+	instance_destroy()&#13;
+</string>
           </argument>
         </arguments>
       </action>

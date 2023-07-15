@@ -51,7 +51,7 @@ request = noone</string>
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+//steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
 &#13;
 request = steam_download_scores_around_user(SteamLeaderboard,-4,4)&#13;
 &#13;
@@ -78,10 +78,12 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>&#13;
-//if(async_load[?"event_type"] == "leaderboard_download")&#13;
-//if(async_load[?"id"] == request)&#13;
-//if(async_load[?"num_entries"])&#13;
+            <string>var type = ds_map_find_value(async_load, "event_type");&#13;
+show_debug_message(string(type))&#13;
+&#13;
+//if(async_load["event_type"] == "leaderboard_download")&#13;
+//if(async_load["id"] == request)&#13;
+//if(async_load["num_entries"])&#13;
 //{&#13;
 //	var entries = ds_map_find_value(async_load, "entries");&#13;
 //    var map = json_decode(entries);&#13;
@@ -93,20 +95,20 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
 //    else&#13;
 //    {&#13;
 //        var list = ds_map_find_value(map, "entries");&#13;
-//       var len = ds_list_size(list);&#13;
+//        var len = ds_list_size(list);&#13;
 //        var entry;&#13;
 //        for(var i = 0; i &lt; len; i++;)&#13;
 //        {&#13;
-//           entry = list[| i];			&#13;
+//           entry = list[i];			&#13;
 //			with(instance_create_depth(800, 110 + i*120, 0, Obj_Steam_Leaderboard_Entry))&#13;
 //			{&#13;
-//				rank = entry[? "rank"];&#13;
-//				score_ = entry[? "score"];&#13;
-//				name = entry[? "name"];&#13;
-//				userID = entry[? "userID"];&#13;
+//				rank = entry["rank"];&#13;
+//				score_ = entry["score"];&#13;
+//				name = entry["name"];&#13;
+//				userID = entry["userID"];&#13;
 //			&#13;
-//				if (!is_undefined(entry[? "data"])) {&#13;
-//					var buff = buffer_base64_decode(entry[?"data"]);&#13;
+//				if (!is_undefined(entry["data"])) {&#13;
+//					var buff = buffer_base64_decode(entry["data"]);&#13;
 //					var level = buffer_read(buff, buffer_u8);&#13;
 //					var str = buffer_read(buff, buffer_string);&#13;
 //			&#13;
@@ -114,7 +116,7 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
 //				}&#13;
 //				else data = "";&#13;
 //			}&#13;
-//       }&#13;
+//        }&#13;
 //    }&#13;
 //    ds_map_destroy(map)&#13;
 //}</string>

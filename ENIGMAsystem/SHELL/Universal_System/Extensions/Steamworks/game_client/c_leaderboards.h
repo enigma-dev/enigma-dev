@@ -9,24 +9,27 @@ class c_game_client;
 
 class c_leaderboards {
  public:
+  unsigned number_of_leaderboard_entries_;
+  std::vector<LeaderboardEntry_t> leaderboard_entries_;
+
   c_leaderboards();
   ~c_leaderboards() = default;
 
-  void create_leaderboard(const std::string& leaderboard_name, const ELeaderboardSortMethod leaderboard_sort_method,
+  void find_leaderboard(const std::string& leaderboard_name, const ELeaderboardSortMethod leaderboard_sort_method,
                           const ELeaderboardDisplayType leaderboard_display_type);
-  void upload_score(
-      const std::string& leaderboard_name, const int score,
-      const ELeaderboardUploadScoreMethod leaderboard_upload_score_method = k_ELeaderboardUploadScoreMethodNone);
+  bool upload_score(const int score, const ELeaderboardUploadScoreMethod leaderboard_upload_score_method =
+                                         k_ELeaderboardUploadScoreMethodNone);
 
-  void download_scores(const std::string& leaderboard_name, const ELeaderboardDataRequest leaderboard_data_request,
+  bool download_scores(const ELeaderboardDataRequest leaderboard_data_request,
                        const int range_start = -1, const int range_end = -1);
 
  private:
+  SteamLeaderboard_t current_leaderboard_;
   bool loading_;
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);
-  CCallResult<c_leaderboards, LeaderboardFindResult_t> m_SteamCallResultCreateLeaderboard;
+  CCallResult<c_leaderboards, LeaderboardFindResult_t> m_callResultFindLeaderboard;
 
   // Called when SteamUserStats()->UploadLeaderboardScore() returns asynchronously
   void on_upload_score(LeaderboardScoreUploaded_t* pFindLearderboardResult, bool bIOFailure);

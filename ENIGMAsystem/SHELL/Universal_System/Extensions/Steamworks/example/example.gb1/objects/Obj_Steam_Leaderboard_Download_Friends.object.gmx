@@ -28,8 +28,7 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-text = "Friends"&#13;
-</string>
+text = "Friends"</string>
           </argument>
         </arguments>
       </action>

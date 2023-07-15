@@ -1,18 +1,22 @@
 #include "PFmain.h"
 
-#include "PFwindow.h"
 #include "PFsystem.h"
+#include "PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/mathnc.h"  // enigma_user::clamp
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/mathnc.h" // enigma_user::clamp
+#include "Widget_Systems/widgets_mandatory.h"
 
-#include <chrono> // std::chrono::microseconds
-#include <thread> // sleep_for
+#include "Universal_System/Extensions/DataStructures/include.h"
+
+#include <chrono>  // std::chrono::microseconds
+#include <thread>  // sleep_for
 
 namespace enigma {
 
-std::vector<std::function<void()> > extension_update_hooks;
+//std::queue<std::map<std::string, variant>> posted_async_events;
+
+std::vector<std::function<void()>> extension_update_hooks;
 
 bool game_isending = false;
 int game_return = 0;
@@ -42,7 +46,7 @@ void platform_focus_lost() {
     last_keybdstatus[i] = keybdstatus[i];
     keybdstatus[i] = 0;
   }
-  for (int i=0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     last_mousestatus[i] = mousestatus[i];
     mousestatus[i] = 0;
   }
@@ -78,9 +82,7 @@ void initTimer() {
   timer_current = timer_start;
 }
 
-void update_current_time() {
-  timer_current = std::chrono::steady_clock::now();
-}
+void update_current_time() { timer_current = std::chrono::steady_clock::now(); }
 
 long get_current_offset_difference_mcs() {
   auto delta = std::chrono::duration_cast<std::chrono::microseconds>(timer_current - timer_offset).count();
@@ -92,9 +94,7 @@ long get_current_offset_slowing_difference_mcs() {
   return enigma_user::clamp(delta, 0, 1000000);
 }
 
-void increase_offset_slowing(long increase_mcs) {
-  timer_offset_slowing += std::chrono::microseconds(increase_mcs);
-}
+void increase_offset_slowing(long increase_mcs) { timer_offset_slowing += std::chrono::microseconds(increase_mcs); }
 
 void offset_modulus_one_second() {
   long passed_mcs = get_current_offset_difference_mcs();
@@ -169,7 +169,7 @@ int updateTimer() {
 int enigma_main(int argc, char** argv) {
   // Initialize directory globals
   initialize_directory_globals();
-  
+
   // Copy our parameters
   set_program_args(argc, argv);
 
@@ -187,9 +187,7 @@ int enigma_main(int argc, char** argv) {
   initialize_everything();
 
   while (!game_isending) {
-
-    if (!((std::string)enigma_user::room_caption).empty())
-      enigma_user::window_set_caption(enigma_user::room_caption);
+    if (!((std::string)enigma_user::room_caption).empty()) enigma_user::window_set_caption(enigma_user::room_caption);
     update_mouse_variables();
 
     if (updateTimer() != 0) continue;
@@ -198,8 +196,7 @@ int enigma_main(int argc, char** argv) {
 
     // if any extensions need updated, update them now
     // just before we fire off user events like step
-    for (auto update_hook : extension_update_hooks)
-      update_hook();
+    for (auto update_hook : extension_update_hooks) update_hook();
 
     ENIGMA_events();
     handleInput();
@@ -214,6 +211,8 @@ int enigma_main(int argc, char** argv) {
 }  //namespace enigma
 
 namespace enigma_user {
+
+//int async_load = enigma_user::ds_map_create();
 
 const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
@@ -243,9 +242,7 @@ void game_end(int ret) {
   enigma::game_return = ret;
 }
 
-void game_end() {
-  enigma::game_isending = true;
-}
+void game_end() { enigma::game_isending = true; }
 
 void action_end_game() { return game_end(); }
 

@@ -1,3 +1,8 @@
+############################################################################
+# Note that this file isn't tested yet as ENIGMA's engine still works with
+# the old build system.
+############################################################################
+
 cmake_minimum_required(VERSION 3.5)
 
 project(steamworks VERSION 0.1 LANGUAGES CXX)

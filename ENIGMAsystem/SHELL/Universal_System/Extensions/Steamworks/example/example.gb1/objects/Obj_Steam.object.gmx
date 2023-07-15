@@ -67,30 +67,6 @@ steam_update();</string>
         </arguments>
       </action>
     </event>
-    <event enumb="90" eventtype="5">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <useapplyto>-1</useapplyto>
-        <isquestion>0</isquestion>
-        <exetype>2</exetype>
-        <functionname/>
-        <codestring/>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>show_message_async("hey from another thread!!")&#13;
-var type = ds_map_find_value(async_load, "event_type")&#13;
-show_debug_message(string(type))</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
     <event enumb="82" eventtype="5">
       <action>
         <libid>1</libid>

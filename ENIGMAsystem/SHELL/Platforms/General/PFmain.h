@@ -20,6 +20,10 @@
 #define ENIGMA_PLATFORM_MAIN
 
 #include <string>
+#include <queue>
+#include <map>
+
+#include "Universal_System/var4.h"
 
 namespace enigma {
   extern bool game_isending;
@@ -31,6 +35,8 @@ namespace enigma {
   extern int frames_count;
   extern unsigned long current_time_mcs;
   extern bool game_window_focused;
+
+  //extern std::queue<std::map<std::string, variant>> posted_async_events;
 
   int enigma_main(int argc, char** argv);
   int game_ending();
@@ -57,6 +63,8 @@ extern std::string keyboard_string;
 extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
+
+//extern int async_load;
 
 void sleep(int ms);
 unsigned long get_timer(); // number of microseconds since the game started

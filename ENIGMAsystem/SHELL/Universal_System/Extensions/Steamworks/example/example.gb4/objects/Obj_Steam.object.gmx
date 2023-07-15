@@ -116,8 +116,7 @@ game_restart();&#13;
             <string>&#13;
 // This function call is purely for debugging purposes&#13;
 // It will log all the messages from the steam callbacks&#13;
-show_debug_message("Steam ASYNC: " + json_encode(async_load))&#13;
-</string>
+show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
           </argument>
         </arguments>
       </action>
