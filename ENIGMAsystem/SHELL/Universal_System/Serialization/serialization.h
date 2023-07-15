@@ -74,7 +74,7 @@ constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (has_byte_size_free_function_v<T>) {
+  if constexpr (HAS_byte_size_FUNCTION<T>) {
     return byte_size(value);
   } else if constexpr (has_size_method_v<std::decay_t<T>>) {
     return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
@@ -452,6 +452,17 @@ template <typename T>
 constexpr static inline bool has_deserialize_free_function_v2 =
     std::is_same_v<T, std::string> || std::is_same_v<T, bool> || std::is_base_of_v<variant, T> ||
     std::is_same_v<T, var> || std::is_pointer_v<T> || std::is_integral_v<T> || std::is_floating_point_v<T>;
+
+// template <typename T>
+// struct has_internal_deserialize_fn {
+//   template <typename U>
+//   static constexpr auto test(U*) -> std::is_same<decltype(internal_deserialize_fn<U>(std::declval<std::byte*>())), T>;
+
+//   template <typename>
+//   static constexpr std::false_type test(...);
+
+//   static constexpr bool value = decltype(test<T>(nullptr))::value;
+// };
 
 template <typename T>
 inline T internal_deserialize(std::byte *iter) {
