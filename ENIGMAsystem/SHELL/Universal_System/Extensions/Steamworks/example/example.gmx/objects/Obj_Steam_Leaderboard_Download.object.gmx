@@ -78,8 +78,8 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>show_debug_message(string(async_load))&#13;
-var type = ds_map_find_value(async_load, "event_type");&#13;
+            <string>show_debug_message(string(temp_async_load))&#13;
+var type = ds_map_find_value(temp_async_load, "event_type");&#13;
 show_debug_message(string(type))&#13;
 &#13;
 //if(async_load["event_type"] == "leaderboard_download")&#13;

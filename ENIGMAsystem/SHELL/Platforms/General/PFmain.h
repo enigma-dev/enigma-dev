@@ -36,7 +36,7 @@ namespace enigma {
   extern unsigned long current_time_mcs;
   extern bool game_window_focused;
 
-  //extern std::queue<std::map<std::string, variant>> posted_async_events;
+  extern std::queue<std::map<std::string, variant>> posted_async_events;
 
   int enigma_main(int argc, char** argv);
   int game_ending();
@@ -64,7 +64,7 @@ extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
 
-//extern int async_load;
+extern int async_load;
 
 void sleep(int ms);
 unsigned long get_timer(); // number of microseconds since the game started

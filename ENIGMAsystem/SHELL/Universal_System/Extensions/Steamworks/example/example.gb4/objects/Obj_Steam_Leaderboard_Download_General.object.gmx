@@ -56,9 +56,10 @@ text = "General"&#13;
 &#13;
 request = steam_download_scores(SteamLeaderboard, 1, 10)&#13;
 &#13;
+show_debug_message(string(request))&#13;
+&#13;
 with(Obj_Steam_Leaderboard_Entry)&#13;
-	instance_destroy()&#13;
-</string>
+	instance_destroy()</string>
           </argument>
         </arguments>
       </action>
