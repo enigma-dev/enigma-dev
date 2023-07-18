@@ -8,6 +8,8 @@
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
 #include "Universal_System/Extensions/DataStructures/include.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
@@ -15,6 +17,8 @@
 namespace enigma {
 
 std::queue<std::map<std::string, variant>> posted_async_events;
+
+int asyncsteamworks_mutex {1};
 
 std::vector<std::function<void()> > extension_update_hooks;
 
@@ -170,8 +174,18 @@ int updateTimer() {
   return 0;
 }
 
-void fireEventsFromQueue() {
-  for (unsigned i = 0; i < posted_async_events.size(); i++) {
+void wait(int* mutex) {
+  while (*mutex <= 0);
+  (*mutex)--;
+}
+
+void signal(int* mutex) {
+  (*mutex)++;
+}
+
+void fireEventsFromQueue(int* mutex) {
+  // wait(mutex);
+  while (!posted_async_events.empty()) {
     enigma_user::ds_map_clear(enigma_user::async_load);
 
     std::map<std::string, variant> event = posted_async_events.front();
@@ -180,6 +194,11 @@ void fireEventsFromQueue() {
 
     for (auto& [key, value] : event) {
       enigma_user::ds_map_add(enigma_user::async_load, key, value);
+    }
+
+    instance_event_iterator = &dummy_event_iterator;
+    for (iterator it = instance_list_first(); it; ++it) {
+      // it->myevent_asyncsteam();
     }
   }
 }
@@ -204,6 +223,8 @@ int enigma_main(int argc, char** argv) {
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
 
+  
+
   while (!game_isending) {
 
     if (!((std::string)enigma_user::room_caption).empty())
@@ -219,7 +240,7 @@ int enigma_main(int argc, char** argv) {
     for (auto update_hook : extension_update_hooks)
       update_hook();
 
-    fireEventsFromQueue();
+    fireEventsFromQueue(&asyncsteamworks_mutex);
 
     ENIGMA_events();
     handleInput();

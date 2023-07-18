@@ -38,6 +38,10 @@ namespace enigma {
 
   extern std::queue<std::map<std::string, variant>> posted_async_events;
 
+  extern int asyncsteamworks_mutex; // mutex to protect the async queue from race conditions when the Steamworks extension is writing into it.
+  void wait(int* mutex);
+  void signal(int* mutex);
+
   int enigma_main(int argc, char** argv);
   int game_ending();
   void Sleep(int ms);

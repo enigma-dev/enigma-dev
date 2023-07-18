@@ -1,5 +1,7 @@
 #include "c_leaderboards.h"
 
+#include "Universal_System/../Platforms/General/PFmain.h"
+
 namespace steamworks {
 
 c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {
@@ -38,6 +40,9 @@ void c_leaderboards::on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboa
 
 bool c_leaderboards::upload_score(const int score,
                                   const ELeaderboardUploadScoreMethod leaderboard_upload_score_method) {
+  // while (c_leaderboards::loading_)
+  //   ;  // Wait for the callback of FindOrCreateLeaderboard to be invoked
+
   if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
@@ -55,6 +60,9 @@ void c_leaderboards::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedR
 
 bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start,
                                      const int range_end) {
+  // while (c_leaderboards::loading_)
+  //   ;  // Wait for the callback of FindOrCreateLeaderboard to be invoked
+
   if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
@@ -71,6 +79,11 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
   }
 
   DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
+
+  // enigma::signal(&enigma::asyncsteamworks_mutex);
+
+  enigma::posted_async_events.push(std::map<std::string, variant>{
+      {"type", "leaderboard_downloaded_scores"}, {"leaderboard", c_leaderboards::current_leaderboard_}});
 }
 
 }  // namespace steamworks

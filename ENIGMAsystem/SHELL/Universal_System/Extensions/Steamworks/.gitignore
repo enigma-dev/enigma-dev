@@ -2,6 +2,8 @@
 /.vscode/*
 /public/steam/.vs/*
 
+*.gb*/*
+
 !*.dll
 !*.so
 !*.dylib
