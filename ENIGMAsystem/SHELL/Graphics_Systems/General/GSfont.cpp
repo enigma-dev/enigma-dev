@@ -36,16 +36,7 @@
 using namespace std;
 
 namespace enigma {
-  class CurrentFont {
-    int _id;
-  public:
-    CurrentFont(int id=-1): _id(id) {} // << handle currentfont init
-    void operator=(const int& other) { _id = other; } // << handle currentfont assign
-    operator int() { // << cast back to int when passing it to function
-      if (sprite_fonts.exists(_id)) return _id;
-      return -1; // << use default left font when currentfont not exist
-    }
-  } currentfont;
+  int currentfont = -1;
   extern size_t font_idmax;
 }
 
