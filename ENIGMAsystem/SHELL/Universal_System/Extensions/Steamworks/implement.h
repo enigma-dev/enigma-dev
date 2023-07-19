@@ -19,9 +19,9 @@
 #define STEAMWORKS_EXT_SET
 
 namespace enigma {
-struct extension_steamworks {
-  virtual variant myevent_asyncsteam() { return 0; }
-};
+// struct extension_steamworks {
+//   virtual variant myevent_asyncsteam() { return 0; }
+// };
 }  // namespace enigma
 
 #endif  // STEAMWORKS_EXT_SET

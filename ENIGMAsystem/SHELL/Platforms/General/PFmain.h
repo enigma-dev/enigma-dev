@@ -26,6 +26,13 @@
 #include "Universal_System/var4.h"
 
 namespace enigma {
+  struct extension_steamworks
+  {
+    virtual variant myevent_asyncsteam() { return 0; }
+  };
+}
+
+namespace enigma {
   extern bool game_isending;
   extern int game_return;
   extern int parameterc;

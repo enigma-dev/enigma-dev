@@ -15,6 +15,12 @@
 #include <thread> // sleep_for
 
 namespace enigma {
+  namespace extension_cast {
+    extension_steamworks *as_extension_steamworks(object_basic*);
+  }
+}
+
+namespace enigma {
 
 std::queue<std::map<std::string, variant>> posted_async_events;
 
@@ -198,12 +204,16 @@ void fireEventsFromQueue(int* mutex) {
 
     instance_event_iterator = &dummy_event_iterator;
     for (iterator it = instance_list_first(); it; ++it) {
-      // it->myevent_asyncsteam();
+      object_basic* const inst = ((object_basic*)*it);
+      extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
+      inst_steamworks->myevent_asyncsteam();
     }
   }
 }
 
 int enigma_main(int argc, char** argv) {
+  enigma_user::async_load = enigma_user::ds_map_create();
+
   // Initialize directory globals
   initialize_directory_globals();
   
@@ -222,8 +232,6 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
-
-  
 
   while (!game_isending) {
 
