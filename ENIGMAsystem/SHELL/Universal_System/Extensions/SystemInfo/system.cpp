@@ -29,23 +29,24 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
-#if (defined(__APPLE__) && defined(__MACH__))
-#ifndef GL_SILENCE_DEPRECATION
-#define GL_SILENCE_DEPRECATION
-#endif
-#endif
 #include <algorithm>
-#include <string>
-#include <thread>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include <string>
+#include <thread>
 #include <regex>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#if defined(_WIN32)
+#include <unordered_map>
+#endif
+#if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
 #include <SDL.h>
 #include <SDL_opengl.h>
+#endif
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
@@ -90,6 +91,30 @@
 #include "system.hpp"
 
 namespace ngs::sys {
+
+/* Define CREATE_CONTEXT in your build scripts or Makefiles if
+the calling process hasn't already done this on its own ... */
+#if (defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
+#if defined(CREATE_CONTEXT)
+static SDL_Window *window = nullptr;
+static bool create_context() {
+  if (!window) {
+    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+    setenv("SDL_VIDEODRIVER", "x11", 1);
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+    #endif
+    if (SDL_Init(SDL_INIT_VIDEO)) return false;
+    window = SDL_CreateWindow("", 0, 0, 1, 1, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
+    if (!window) return false;
+    SDL_GLContext context = SDL_GL_CreateContext(window);
+    if (!context) return false;
+    int err = SDL_GL_MakeCurrent(window, context);
+    if (err) return false;
+  }
+  return true;
+}
+#endif
+#endif
 
 struct HumanReadable {
   long double size{};
@@ -822,17 +847,116 @@ long long memory_usedvmem() {
   #endif
 }
 
+static std::string gpuvendor;
 std::string gpu_vendor() {
-  const char *result = (char *)glGetString(GL_VENDOR);
+  if (!gpuvendor.empty()) return gpuvendor;
+  const char *result = nullptr;
+  #if defined(_WIN32)
+  std::unordered_map<unsigned int, const char *> VendorNameById;
+  VendorNameById[0x1002] = "AMD";
+  VendorNameById[0x13B5] = "ARM";
+  VendorNameById[0x14E4] = "Broadcom";
+  VendorNameById[0x1AE0] = "Google Inc.";
+  VendorNameById[0x1010] = "ImgTec";
+  VendorNameById[0x8086] = "Intel";
+  VendorNameById[0x10DE] = "NVIDIA Corporation";
+  VendorNameById[0x5143] = "Qualcomm";
+  VendorNameById[0x144D] = "Samsung";
+  VendorNameById[0x15ad] = "VMWare";
+  VendorNameById[0x106B] = "Apple";
+  VendorNameById[0x1414] = "Microsoft Corporation";
+  VendorNameById[0x1AF4] = "VirtIO";
+  VendorNameById[0x10001] = "Vivante";
+  VendorNameById[0x10002] = "VeriSilicon";
+  VendorNameById[0x10003] = "Kazan";
+  VendorNameById[0x10004] = "CodePlay";
+  VendorNameById[0x10005] = "Mesa";
+  VendorNameById[0x10006] = "PoCL";
+  IDXGIFactory *pFactory = nullptr;
+  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
+    IDXGIAdapter *pAdapter = nullptr;
+    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
+      DXGI_ADAPTER_DESC adapterDesc;
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+        if (VendorNameById.find(adapterDesc.VendorId) != VendorNameById.end()) {
+          result = VendorNameById[adapterDesc.VendorId];
+        }
+      }
+      pAdapter->Release();
+    }
+    pFactory->Release();
+  }
+  #elif (!defined(__APPLE__) && !defined(__MACH__))
+  #if defined(CREATE_CONTEXT)
+  if (!create_context()) return "";
+  #endif
+  result = (char *)glGetString(GL_VENDOR);
+  #else
+  char buf[1024];
+  FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      if (strcmp(buf, "Intel") == 0) {
+        // Mimick return value of glGetString(GL_VENDOR) on macOS
+        // by appending "Inc." to the string if it equals "Intel"
+        static std::string res;
+        res = buf + std::string(" Inc.");
+        result = res.c_str();
+      }
+    }
+    pclose(fp);
+  }
+  #endif
   std::string str;
   str = result ? result : "";
+  gpuvendor = str;
   return str;
 }
 
+static std::string gpurenderer;
 std::string gpu_renderer() {
-  const char *result = (char *)glGetString(GL_RENDERER);
+  if (!gpurenderer.empty()) return gpurenderer;
+  const char *result = nullptr;
+  #if defined(_WIN32)
+  auto narrow = [](std::wstring wstr) {
+    if (wstr.empty()) return std::string("");
+    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
+    std::vector<char> buf(nbytes);
+    return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
+  };
+  IDXGIFactory *pFactory = nullptr;
+  if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
+    IDXGIAdapter *pAdapter = nullptr;
+    if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
+      DXGI_ADAPTER_DESC adapterDesc;
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+        result = narrow(adapterDesc.Description);
+      }
+    }
+    pAdapter->Release();
+    }
+    pFactory->Release();
+  }
+  #elif (!defined(__APPLE__) && !defined(__MACH__))
+  #if defined(CREATE_CONTEXT)
+  if (!create_context()) return "";
+  #endif
+  result = (char *)glGetString(GL_RENDERER);
+  #else
+  char buf[1024];
+  FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Chipset Model: ' | uniq | awk -F 'Chipset Model: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+  }
+  #endif
   std::string str;
   str = result ? result : "";
+  gpurenderer = str;
   return str;
 }
 
@@ -1096,20 +1220,26 @@ int cpu_numcores() {
   }
   return numcores;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  int physical_cpus = -1;
+  int logical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctlbyname("hw.physicalcpu", &physical_cpus, &len, nullptr, 0)) {
-    numcores = physical_cpus;
+  if (!sysctlbyname("hw.logicalcpu", &logical_cpus, &len, nullptr, 0)) {
+    numcores = logical_cpus;
   }
   return numcores;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
-  int mib[2];
-  int physical_cpus = -1;
-  mib[0] = CTL_HW;
-  mib[1] = HW_NCPU;
-  std::size_t len = sizeof(int);
-  if (!sysctl(mib, 2, &physical_cpus, &len, nullptr, 0)) {
-    numcores = physical_cpus;
+  // TODO: See if this code works on DragonFly, NetBSD, and OpenBSD; if not, correct code as needed.
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
   #elif defined(__linux__)
