@@ -94,7 +94,7 @@ namespace ngs::sys {
 
 /* Define CREATE_CONTEXT in your build scripts or Makefiles if
 the calling process hasn't already done this on its own ... */
-#if (defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
+#if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
 #if defined(CREATE_CONTEXT)
 static SDL_Window *window = nullptr;
 static bool create_context() {
