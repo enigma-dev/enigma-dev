@@ -531,6 +531,24 @@ enum
     ev_step_end     = 2
 };
 
+enum
+{
+    ev_async_web_image_load = 60,
+    ev_async_web = 62,
+    ev_async_dialog = 63,
+    ev_async_web_iap = 66,
+    ev_async_web_cloud = 67,
+    ev_async_web_networking = 68,
+    ev_async_web_steam = 69,
+    ev_async_social = 70,
+    ev_async_push_notification = 71,
+    ev_async_save_load = 72,
+    ev_async_audio_recording = 73,
+    ev_async_audio_playback = 74,
+    ev_async_audio_playback_ended = 80,
+    ev_async_system_event = 75
+};
+
 inline variant event_perform(int type, int numb) {
     return enigma::ev_perf(type, numb);
 }
