@@ -922,6 +922,11 @@ std::string gpu_vendor() {
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
   queryInteger(GLX_RENDERER_VENDOR_ID_MESA, &v);
   result = v ? GetVendorOrDeviceNameById(v, 0) : "";
+  if (result.empty()) {
+    PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
+    queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
+    result = queryString(GLX_RENDERER_VENDOR_ID_MESA);
+  }
   #else
   char buf[1024];
   FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
