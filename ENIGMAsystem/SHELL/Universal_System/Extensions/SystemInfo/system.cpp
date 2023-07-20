@@ -60,7 +60,6 @@
 #include <sys/sysinfo.h>
 #endif
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-#endif
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <unistd.h>
@@ -122,7 +121,7 @@ static bool create_context() {
 #endif
 
 struct HumanReadable {
-  long double size - 0;
+  long double size = 0;
   private: friend
   std::ostream& operator<<(std::ostream& os, HumanReadable hr) {
     int i = 0;
@@ -167,7 +166,7 @@ std::string utsname_sysname() {
   #endif
   #else
   const char *result = nullptr;
-  char buf[255]; 
+  char buf[255];
   DWORD sz = sizeof(buf);
   if (RegGetValueA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\", "OS", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
     result = buf;
@@ -210,7 +209,7 @@ std::string utsname_nodename() {
   wVersionRequested = MAKEWORD(2, 2);
   if (!WSAStartup(wVersionRequested, &data)) {
     if (!gethostname(buf, sizeof(buf))) {
-      result = buf;    
+      result = buf;
     }
     WSACleanup();
   }
@@ -225,7 +224,7 @@ std::string windows_version(std::string *product_name) {
   auto GetOSMajorVersionNumber = []() {
     const char *result = nullptr;
     char buf[10];
-    int val = 0;  
+    int val = 0;
     DWORD sz = sizeof(val);
     if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
       if (sprintf(buf, "%d", val) != -1) {
@@ -239,7 +238,7 @@ std::string windows_version(std::string *product_name) {
   auto GetOSMinorVersionNumber = []() {
     const char *result = nullptr;
     char buf[10];
-    int val = 0; 
+    int val = 0;
     DWORD sz = sizeof(val);
     if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
       if (sprintf(buf, "%d", val) != -1) {
@@ -252,7 +251,7 @@ std::string windows_version(std::string *product_name) {
   };
   auto GetOSBuildNumber = []() {
     const char *result = nullptr;
-    char buf[255]; 
+    char buf[255];
     DWORD sz = sizeof(buf);
     if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentBuildNumber", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
       result = buf;
@@ -264,7 +263,7 @@ std::string windows_version(std::string *product_name) {
   auto GetOSRevisionNumber = []() {
     char *result = nullptr;
     char buf[10];
-    int val = 0; 
+    int val = 0;
     DWORD sz = sizeof(val);
     if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
       if (sprintf(buf, "%d", val) != -1) {
@@ -327,7 +326,7 @@ std::string utsname_release() {
   #endif
   #else
   std::string product_name;
-  return windows_version(&product_name);    
+  return windows_version(&product_name);
   #endif
 }
 
@@ -477,15 +476,15 @@ std::string utsname_machine() {
   SYSTEM_INFO sysinfo;
   GetNativeSystemInfo(&sysinfo);
   if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {
-    return "AMD64";  
+    return "AMD64";
   } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM) {
     return "ARM";
   } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64) {
-    return "ARM64"; 
+    return "ARM64";
   } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64) {
-    return "IA64"; 
+    return "IA64";
   } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL) {
-    return "x86"; 
+    return "x86";
   }
   return "";
   #endif
@@ -573,7 +572,7 @@ long long memory_availram() {
   #elif defined(__sun)
   return (sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGESIZE));
   #else
-  return -1;  
+  return -1;
   #endif
 }
 
@@ -599,7 +598,7 @@ long long memory_usedram() {
   }
   return -1;
   #else
-  return -1;  
+  return -1;
   #endif
 }
 
@@ -623,7 +622,7 @@ long long memory_totalvmem() {
   if (!sysinfo(&info)) {
     return info.totalswap;
   }
-  return -1;  
+  return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
@@ -1094,7 +1093,7 @@ std::string cpu_vendor() {
 std::string cpu_brand() {
   #if defined(_WIN32)
   const char *result = nullptr;
-  char buf[255]; 
+  char buf[255];
   DWORD sz = sizeof(buf);
   if (RegGetValueA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\", "ProcessorNameString", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
     result = buf;
@@ -1154,7 +1153,7 @@ std::string cpu_brand() {
 
 static int numcores = -1;
 int cpu_numcores() {
-  if (numcores != -1) { 
+  if (numcores != -1) {
     return numcores;
   }
   #if defined(_WIN32)
@@ -1175,7 +1174,7 @@ int cpu_numcores() {
   si.hStdError = stdout_write;
   si.hStdOutput = stdout_write;
   si.hStdInput = stdin_read;
-  PROCESS_INFORMATION pi; 
+  PROCESS_INFORMATION pi;
   ZeroMemory(&pi, sizeof(pi));
   std::vector<wchar_t> cwstr_command;
   std::wstring wstr_command = L"wmic cpu get NumberOfCores";
@@ -1214,7 +1213,7 @@ int cpu_numcores() {
     result = std::regex_replace(result, std::regex(" "), "");
     result = std::regex_replace(result, std::regex("\r"), "");
     result = std::regex_replace(result, std::regex("\n"), "");
-    static std::string res; 
+    static std::string res;
     res = result;
     numcores = (int)strtol(res.c_str(), nullptr, 10);
   }
