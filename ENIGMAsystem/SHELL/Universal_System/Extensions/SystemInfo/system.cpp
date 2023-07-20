@@ -912,6 +912,25 @@ std::string gpu_vendor() {
   #if defined(CREATE_CONTEXT)
   if (!create_context()) return "";
   #endif
+  #if defined(__sun)
+  char buf[1024];
+  FILE *fp = popen("prtconf | awk '/display/{p++;if(p==1){next}}p' | awk -F'pci' 'FNR==2{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      if (strlen(buf)) {
+        unsigned int Id = 0;
+        std::istringstream converter(buf);
+        converter >> std::hex >> Id;
+        result = strlen(buf) ? GetVendorOrDeviceNameById(Id, 0) : "";
+      }
+    }
+    pclose(fp);
+  }
+  if (!result.empty()) {
+    return result;
+  }
+  #endif
   unsigned int v = 0;
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
@@ -982,6 +1001,25 @@ std::string gpu_renderer() {
   #elif (!defined(__APPLE__) && !defined(__MACH__))
   #if defined(CREATE_CONTEXT)
   if (!create_context()) return "";
+  #endif
+  #if defined(__sun)
+  char buf[1024];
+  FILE *fp = popen("prtconf | awk '/display/{p++;if(p==1){next}}p' | awk -F'pci' 'FNR==2{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $2}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      if (strlen(buf)) {
+        unsigned int Id = 0;
+        std::istringstream converter(buf);
+        converter >> std::hex >> Id;
+        result = strlen(buf) ? GetVendorOrDeviceNameById(Id, 1) : "";
+      }
+    }
+    pclose(fp);
+  }
+  if (!result.empty()) {
+    return result;
+  }
   #endif
   unsigned int v = 0;
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
