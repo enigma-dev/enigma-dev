@@ -1134,7 +1134,7 @@ std::string cpu_vendor() {
   #elif defined(__sun)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("prtdiag -v | grep 'System Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  FILE *fp = popen("prtconf | head -1 | cut -d' ' -f4,5", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1195,7 +1195,7 @@ std::string cpu_brand() {
   #elif defined(__sun)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("prtdiag -v | grep 'BIOS Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  FILE *fp = popen("prtdiag -v | grep 'System Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1''", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
