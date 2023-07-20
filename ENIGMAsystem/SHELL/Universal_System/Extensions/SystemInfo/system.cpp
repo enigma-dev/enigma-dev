@@ -475,20 +475,15 @@ std::string utsname_machine() {
   return res;
   #endif
   #else
-  SYSTEM_INFO sysinfo;
-  GetNativeSystemInfo(&sysinfo);
-  if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64) {
-    return "AMD64";
-  } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM) {
-    return "ARM";
-  } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM64) {
-    return "ARM64";
-  } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64) {
-    return "IA64";
-  } else if (sysinfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL) {
-    return "x86";
+  const char *result = nullptr;
+  char buf[255];
+  DWORD sz = sizeof(buf);
+  if (RegGetValueA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\", "PROCESSOR_ARCHITECTURE", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+    result = buf;
   }
-  return "";
+  std::string str;
+  str = result ? result : "";
+  return str;
   #endif
 }
 
