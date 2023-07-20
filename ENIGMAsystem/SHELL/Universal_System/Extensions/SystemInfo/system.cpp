@@ -862,7 +862,6 @@ std::vector<std::string> string_split(std::string str, char delimiter) {
 
 unsigned int DeviceId = 0;
 unsigned int VendorId = 0;
-unsigned int PrevDeviceId = 0;
 std::map<unsigned int, std::string> VendorNameById;
 std::map<unsigned int, std::string> DeviceNameById;
 std::string GetVendorOrDeviceNameById(unsigned int Id, int VendorOrDevice) {
@@ -872,34 +871,25 @@ std::string GetVendorOrDeviceNameById(unsigned int Id, int VendorOrDevice) {
   str = std::regex_replace(str, std::regex("\r"), "");
   std::vector<std::string> vec = string_split(str, '\n');
   for (std::size_t i = 0; i < vec.size(); i++) {
-    if (vec[i].empty() || (!vec[i].empty() && (vec[i][0] == '\t' || vec[i][0] == '#'))) {
-      if (!vec[i].empty() && vec[i][0] != '#')  {
-        std::size_t pos1 = vec[i].find("\t\t");
-        if (pos1 == std::string::npos) {
-          std::size_t pos2 = vec[i].find(" ");
-          if (pos2 != std::string::npos) {
-            PrevDeviceId = DeviceId;
-            std::string tmp = vec[i].substr(1, 4);
-            std::istringstream converter1(tmp);
-            converter1 >> std::hex >> DeviceId;
-            tmp = &vec[i].substr(pos2)[2];
-            DeviceNameById[DeviceId] = tmp;
-          }
-        }
-      }
+    if (vec[i].empty() || (!vec[i].empty() && vec[i][0] == '#')) {
       continue;
     }
-    if (!vec[i].empty() && vec[i][0] != '#') {
+    std::size_t pos1 = vec[i].find(" ");
+    if (pos1 != std::string::npos && vec[i][0] != '\t') {
+      std::istringstream converter1(vec[i].substr(0, pos1));
+      converter1 >> std::hex >> VendorId;
+      VendorNameById[VendorId] = vec[i].substr(pos1 + 2);
+    }
+    if (VendorNameById[VendorId] != VendorNameById[Id]) {
+      continue;
+    }
+    std::size_t pos2 = vec[i].find("\t\t");
+    if (pos2 == std::string::npos && vec[i][0] == '\t') {
       std::size_t pos3 = vec[i].find(" ");
       if (pos3 != std::string::npos) {
-        std::istringstream converter2(vec[i].substr(0, pos3));
-        converter2 >> std::hex >> VendorId;
-        VendorNameById[VendorId] = vec[i].substr(pos3 + 2);
-        if (VendorNameById[VendorId] == VendorNameById[Id]) {
-          auto prev = DeviceNameById.find(PrevDeviceId);
-          DeviceNameById[DeviceId] = prev->second;
-          break;
-        }
+        std::istringstream converter2(vec[i].substr(1, 4));
+        converter2 >> std::hex >> DeviceId;
+        DeviceNameById[DeviceId] = &vec[i].substr(pos3)[2];
       }
     }
   }
