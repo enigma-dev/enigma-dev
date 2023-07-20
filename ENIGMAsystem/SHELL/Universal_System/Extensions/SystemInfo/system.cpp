@@ -929,13 +929,29 @@ std::string gpu_vendor() {
   }
   #else
   char buf[1024];
-  FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+  FILE *fp = popen("ioreg -bls | grep -n2 '    | |   | |   \"model\" = <\"' | awk -F',\"pci' 'FNR==5{print $2}' | rev | cut -c 2- | rev | awk -F',' '{print $1}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
-      result = buf;
+      if (strlen(buf)) {
+        unsigned int Id = 0;
+        std::istringstream converter(buf);
+        converter >> std::hex >> Id;
+        result = strlen(buf) ? GetVendorOrDeviceNameById(Id, 0) : "";
+      }
     }
     pclose(fp);
+  }
+  if (result.empty()) {
+    char buf[1024];
+    FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+    if (fp) {
+      if (fgets(buf, sizeof(buf), fp)) {
+        buf[strlen(buf) - 1] = '\0';
+        result = buf;
+      }
+      pclose(fp);
+    }
   }
   #endif
   gpuvendor = result;
@@ -976,7 +992,7 @@ std::string gpu_renderer() {
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
   queryInteger(GLX_RENDERER_DEVICE_ID_MESA, &v);
-  result = v ? GetVendorOrDeviceNameById(0x15d8, 1) : "";
+  result = v ? GetVendorOrDeviceNameById(v, 1) : "";
   if (result.empty()) {
     PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
     queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
@@ -984,13 +1000,29 @@ std::string gpu_renderer() {
   }
   #else
   char buf[1024];
-  FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Chipset Model: ' | uniq | awk -F 'Chipset Model: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+  FILE *fp = popen("ioreg -bls | grep -n2 '    | |   | |   \"model\" = <\"' | awk -F',\"pci' 'FNR==5{print $2}' | rev | cut -c 2- | rev | awk -F',' '{print $2}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
-      result = buf;
+      if (strlen(buf)) {
+        unsigned int Id = 0;
+        std::istringstream converter(buf);
+        converter >> std::hex >> Id;
+        result = strlen(buf) ? GetVendorOrDeviceNameById(Id, 1) : "";
+      }
     }
     pclose(fp);
+  }
+  if (result.empty()) {
+    char buf[1024];
+    FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Chipset Model: ' | uniq | awk -F 'Chipset Model: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
+    if (fp) {
+      if (fgets(buf, sizeof(buf), fp)) {
+        buf[strlen(buf) - 1] = '\0';
+        result = buf;
+      }
+      pclose(fp);
+    }
   }
   #endif
   gpurenderer = result;
