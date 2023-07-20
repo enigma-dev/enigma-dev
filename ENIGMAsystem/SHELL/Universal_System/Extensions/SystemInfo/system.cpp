@@ -43,7 +43,7 @@
 #if defined(_WIN32)
 #include <unordered_map>
 #endif
-#if (defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
+#if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <X11/Xlib.h>
@@ -98,7 +98,7 @@ namespace ngs::sys {
 
 /* Define CREATE_CONTEXT in your build scripts or Makefiles if
 the calling process hasn't already done this on its own ... */
-#if (defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
+#if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
 #if defined(CREATE_CONTEXT)
 static SDL_Window *window = nullptr;
 static bool create_context() {
@@ -939,8 +939,7 @@ std::string gpu_renderer() {
         res = narrow(adapterDesc.Description);
         result = res.c_str();
       }
-    }
-    pAdapter->Release();
+      pAdapter->Release();
     }
     pFactory->Release();
   }
