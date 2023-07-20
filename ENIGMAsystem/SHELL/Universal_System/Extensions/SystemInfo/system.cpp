@@ -29,7 +29,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 #include <iomanip>
 #include <fstream>
@@ -857,8 +857,8 @@ std::vector<std::string> string_split(std::string str, char delimiter) {
 
 unsigned int DeviceId = 0;
 unsigned int VendorId = 0;
-std::map<unsigned int, std::string> VendorNameById;
-std::map<unsigned int, std::string> DeviceNameById;
+std::unordered_map<unsigned int, std::string> VendorNameById;
+std::unordered_map<unsigned int, std::string> DeviceNameById;
 std::string GetVendorOrDeviceNameById(unsigned int Id, int VendorOrDevice) {
   if (VendorNameById.find(Id) != VendorNameById.end() && VendorOrDevice == 0) return VendorNameById[Id];
   if (DeviceNameById.find(Id) != DeviceNameById.end() && VendorOrDevice != 0) return DeviceNameById[Id];
