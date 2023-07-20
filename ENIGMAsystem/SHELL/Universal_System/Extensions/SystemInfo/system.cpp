@@ -29,7 +29,9 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
+#include <map>
 #include <algorithm>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -40,9 +42,6 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
-#if defined(_WIN32)
-#include <unordered_map>
-#endif
 #if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -94,6 +93,7 @@
 #endif
 #endif
 
+#include "pci.ids.hpp"
 #include "system.hpp"
 
 namespace ngs::sys {
@@ -850,40 +850,74 @@ long long memory_usedvmem() {
   #endif
 }
 
+std::vector<std::string> string_split(std::string str, char delimiter) {
+  std::vector<std::string> vec;
+  std::stringstream sstr(str);
+  std::string tmp;
+  while (std::getline(sstr, tmp, delimiter)) {
+    vec.push_back(tmp);
+  }
+  return vec;
+}
+
+unsigned int DeviceId = 0;
+unsigned int VendorId = 0;
+unsigned int PrevDeviceId = 0;
+std::map<unsigned int, std::string> VendorNameById;
+std::map<unsigned int, std::string> DeviceNameById;
+std::string GetVendorOrDeviceNameById(unsigned int Id, int VendorOrDevice) {
+  if (VendorNameById.find(Id) != VendorNameById.end() && VendorOrDevice == 0) return VendorNameById[Id];
+  if (DeviceNameById.find(Id) != DeviceNameById.end() && VendorOrDevice != 0) return DeviceNameById[Id];
+  std::string str(pci_ids, pci_ids + sizeof(pci_ids) / sizeof(pci_ids[0]));
+  str = std::regex_replace(str, std::regex("\r"), "");
+  std::vector<std::string> vec = string_split(str, '\n');
+  for (std::size_t i = 0; i < vec.size(); i++) {
+    if (vec[i].empty() || (!vec[i].empty() && (vec[i][0] == '\t' || vec[i][0] == '#'))) {
+      if (!vec[i].empty() && vec[i][0] != '#')  {
+        std::size_t pos1 = vec[i].find("\t\t");
+        if (pos1 == std::string::npos) {
+          std::size_t pos2 = vec[i].find(" ");
+          if (pos2 != std::string::npos) {
+            PrevDeviceId = DeviceId;
+            std::string tmp = vec[i].substr(1, 4);
+            std::istringstream converter1(tmp);
+            converter1 >> std::hex >> DeviceId;
+            tmp = &vec[i].substr(pos2)[2];
+            DeviceNameById[DeviceId] = tmp;
+          }
+        }
+      }
+      continue;
+    }
+    if (!vec[i].empty() && vec[i][0] != '#') {
+      std::size_t pos3 = vec[i].find(" ");
+      if (pos3 != std::string::npos) {
+        std::istringstream converter2(vec[i].substr(0, pos3));
+        converter2 >> std::hex >> VendorId;
+        VendorNameById[VendorId] = vec[i].substr(pos3 + 2);
+        if (VendorNameById[VendorId] == VendorNameById[Id]) {
+          auto prev = DeviceNameById.find(PrevDeviceId);
+          DeviceNameById[DeviceId] = prev->second;
+          break;
+        }
+      }
+    }
+  }
+  return VendorOrDevice ? DeviceNameById[Id] : VendorNameById[Id];
+}
+
 static std::string gpuvendor;
 std::string gpu_vendor() {
   if (!gpuvendor.empty()) return gpuvendor;
-  const char *result = nullptr;
+  std::string result;
   #if defined(_WIN32)
-  std::unordered_map<unsigned int, const char *> VendorNameById;
-  VendorNameById[0x1002] = "AMD";
-  VendorNameById[0x13B5] = "ARM";
-  VendorNameById[0x14E4] = "Broadcom";
-  VendorNameById[0x1AE0] = "Google Inc.";
-  VendorNameById[0x1010] = "ImgTec";
-  VendorNameById[0x8086] = "Intel";
-  VendorNameById[0x10DE] = "NVIDIA Corporation";
-  VendorNameById[0x5143] = "Qualcomm";
-  VendorNameById[0x144D] = "Samsung";
-  VendorNameById[0x15ad] = "VMWare";
-  VendorNameById[0x106B] = "Apple";
-  VendorNameById[0x1414] = "Microsoft Corporation";
-  VendorNameById[0x1AF4] = "VirtIO";
-  VendorNameById[0x10001] = "Vivante";
-  VendorNameById[0x10002] = "VeriSilicon";
-  VendorNameById[0x10003] = "Kazan";
-  VendorNameById[0x10004] = "CodePlay";
-  VendorNameById[0x10005] = "Mesa";
-  VendorNameById[0x10006] = "PoCL";
   IDXGIFactory *pFactory = nullptr;
   if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
     IDXGIAdapter *pAdapter = nullptr;
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
-        if (VendorNameById.find(adapterDesc.VendorId) != VendorNameById.end()) {
-          result = VendorNameById[adapterDesc.VendorId];
-        }
+        result = GetVendorOrDeviceNameById(adapterDesc.VendorId, 0);
       }
       pAdapter->Release();
     }
@@ -893,34 +927,30 @@ std::string gpu_vendor() {
   #if defined(CREATE_CONTEXT)
   if (!create_context()) return "";
   #endif
-  result = (char *)glGetString(GL_VENDOR);
+  unsigned int v = 0;
+  PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
+  queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
+  queryInteger(GLX_RENDERER_VENDOR_ID_MESA, &v);
+  result = v ? GetVendorOrDeviceNameById(v, 0) : "";
   #else
   char buf[1024];
   FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
-      if (strcmp(buf, "Intel") == 0) {
-        // Mimick return value of glGetString(GL_VENDOR) on macOS
-        // by appending "Inc." to the string if it equals "Intel"
-        static std::string res;
-        res = buf + std::string(" Inc.");
-        result = res.c_str();
-      }
+      result = buf;
     }
     pclose(fp);
   }
   #endif
-  std::string str;
-  str = result ? result : "";
-  gpuvendor = str;
-  return str;
+  gpuvendor = result;
+  return result;
 }
 
 static std::string gpurenderer;
 std::string gpu_renderer() {
   if (!gpurenderer.empty()) return gpurenderer;
-  const char *result = nullptr;
+  std::string result;
   #if defined(_WIN32)
   auto narrow = [](std::wstring wstr) {
     if (wstr.empty()) return std::string("");
@@ -934,9 +964,10 @@ std::string gpu_renderer() {
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
-        static std::string res;
-        res = narrow(adapterDesc.Description);
-        result = res.c_str();
+        result = GetVendorOrDeviceNameById(adapterDesc.DeviceId, 1);
+        if (result.empty()) {
+          result = narrow(adapterDesc.Description);
+        }
       }
       pAdapter->Release();
     }
@@ -946,7 +977,16 @@ std::string gpu_renderer() {
   #if defined(CREATE_CONTEXT)
   if (!create_context()) return "";
   #endif
-  result = (char *)glGetString(GL_RENDERER);
+  unsigned int v = 0;
+  PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
+  queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
+  queryInteger(GLX_RENDERER_DEVICE_ID_MESA, &v);
+  result = v ? GetVendorOrDeviceNameById(0x15d8, 1) : "";
+  if (result.empty()) {
+    PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
+    queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
+    result = queryString(GLX_RENDERER_DEVICE_ID_MESA);
+  }
   #else
   char buf[1024];
   FILE *fp = popen("system_profiler SPDisplaysDataType | grep -i 'Chipset Model: ' | uniq | awk -F 'Chipset Model: ' '{$1=$1};1' | awk '{$1=$1};1'", "r");
@@ -958,10 +998,8 @@ std::string gpu_renderer() {
     pclose(fp);
   }
   #endif
-  std::string str;
-  str = result ? result : "";
-  gpurenderer = str;
-  return str;
+  gpurenderer = result;
+  return result;
 }
 
 static long long videomemory = -1;
