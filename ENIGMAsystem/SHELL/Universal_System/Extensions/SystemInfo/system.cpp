@@ -72,7 +72,9 @@
 #endif
 #endif
 #if !defined(__sun)
+#if !defined(__linux__)
 #include <sys/sysctl.h>
+#endif
 #include <sys/utsname.h>
 #else
 #include <sys/systeminfo.h>
@@ -998,8 +1000,8 @@ long long gpu_videomemory() {
   unsigned int v = 0;
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
-  queryInteger(GLX_RENDERER_VIDEO_MEMORY_MESA, v);
-  return *v * 1024 * 1024;;
+  queryInteger(GLX_RENDERER_VIDEO_MEMORY_MESA, &v);
+  return v * 1024 * 1024;;
   #endif
   videomemory = result;
   return result;
