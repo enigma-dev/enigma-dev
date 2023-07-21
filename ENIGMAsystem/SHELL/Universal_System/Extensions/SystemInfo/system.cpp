@@ -1099,7 +1099,6 @@ long long gpu_videomemory() {
 }
 
 std::string cpu_vendor() {
-  #if !defined(__sun)
   std::string str = cpu_brand();
   if (str.empty()) return "";
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
@@ -1118,21 +1117,6 @@ std::string cpu_vendor() {
     }
   }
   return "";
-  #else
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("prtconf | head -1 | cut -d' ' -f4,5", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-  }
-  static std::string str;
-  str = result ? result : "";
-  return str;
-  #endif
 }
 
 std::string cpu_brand() {
@@ -1180,7 +1164,7 @@ std::string cpu_brand() {
   #elif defined(__sun)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("prtdiag -v | grep 'System Configuration:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1''", "r");
+  FILE *fp = popen("psrinfo -v -p | awk 'FNR==3{print}' | awk '{$1=$1};1''", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1323,7 +1307,20 @@ int cpu_numcores() {
   }
   return numcores;
   #elif defined(__sun)
-  numcores = (int)sysconf(_SC_NPROCESSORS_ONLN);
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("psrinfo -p", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
   #else
   return -1;
   #endif
@@ -1376,7 +1373,20 @@ int cpu_numcpus() {
   }
   return numcpus;
   #elif defined(__sun)
-  numcpus = (int)sysconf(_SC_NPROCESSORS_CONF);
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("psrinfo -v -p | grep 'The physical processor has ' | awk '{print $5}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcpus = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcpus;
   #else
   return -1;
   #endif
