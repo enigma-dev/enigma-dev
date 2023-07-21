@@ -113,16 +113,159 @@ static bool create_context() {
 #endif
 #endif
 
+#if defined(_WIN32)
+static std::string read_output(std::wstring cmd) {
+  std::string result;
+  bool proceed = true;
+  HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
+  HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
+  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
+  proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
+  if (!proceed) return "";
+  SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
+  proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
+  if (!proceed) return "";
+  STARTUPINFOW si;
+  ZeroMemory(&si, sizeof(si));
+  si.cb = sizeof(STARTUPINFOW);
+  si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdError = stdout_write;
+  si.hStdOutput = stdout_write;
+  si.hStdInput = stdin_read;
+  PROCESS_INFORMATION pi;
+  ZeroMemory(&pi, sizeof(pi));
+  std::vector<wchar_t> ccmd;
+  ccmd.resize(cmd.length() + 1, L'\0');
+  wcsncpy_s(&ccmd[0], cmd.length() + 1, cmd.c_str(), cmd.length() + 1);
+  BOOL success = CreateProcessW(nullptr, &ccmd[0], nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+  if (success) {
+    DWORD nRead = 0;
+    char buffer[BUFSIZ];
+    CloseHandle(stdout_write);
+    CloseHandle(stdin_read);
+    HANDLE wait_handles[] = { pi.hProcess, stdout_read };
+    while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      MSG msg;
+      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+      while (ReadFile(stdout_read, buffer, BUFSIZ, &nRead, nullptr) && nRead) {
+        MSG msg;
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
+        }
+        buffer[nRead] = '\0';
+        result.append(buffer, nRead);
+      }
+    }
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    CloseHandle(stdout_read);
+    CloseHandle(stdin_write);
+  }
+  return result;
+}
+
+static std::string windows_version(std::string *product_name) {
+  auto GetOSMajorVersionNumber = []() {
+    const char *result = nullptr;
+    char buf[1024];
+    int val = 0;
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSMinorVersionNumber = []() {
+    const char *result = nullptr;
+    char buf[1024];
+    int val = 0;
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSBuildNumber = []() {
+    const char *result = nullptr;
+    char buf[1024];
+    DWORD sz = sizeof(buf);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentBuildNumber", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+      result = buf;
+    }
+    std::string str;
+    str = result ? result : "";
+    return str;
+  };
+  auto GetOSRevisionNumber = []() {
+    char *result = nullptr;
+    char buf[1924];
+    int val = 0;
+    DWORD sz = sizeof(val);
+    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
+      if (sprintf(buf, "%d", val) != -1) {
+        result = buf;
+      }
+    }
+    std::string str;
+    str = strlen(result) ? result : "";
+    return str;
+  };
+  static const char *result = nullptr;
+  char buf[1024];
+  if (!GetOSMajorVersionNumber().empty() && !GetOSMinorVersionNumber().empty() && !GetOSBuildNumber().empty() && !GetOSRevisionNumber().empty()) {
+    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber().c_str(), GetOSMinorVersionNumber().c_str(), GetOSBuildNumber().c_str(), GetOSRevisionNumber().c_str()) != -1) {
+      result = buf;
+      char buf[1024];
+      DWORD sz = sizeof(buf);
+      if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "ProductName", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+        if (strtoull(GetOSMajorVersionNumber().c_str(), nullptr, 10) == 10 && strtoull(GetOSBuildNumber().c_str(), nullptr, 10) >= 22000) {
+          std::string tmp = strlen(buf) ? buf : "";
+          if (!tmp.empty()) {
+            tmp = std::regex_replace(tmp, std::regex("10"), "11");
+            *product_name = tmp;
+          }
+        } else {
+          *product_name = strlen(buf) ? buf : "";
+        }
+      }
+    }
+  }
+  std::string str;
+  str = result ? result : "";
+  return str;
+}
+#endif
+
 struct HumanReadable {
   long double size = 0;
   private: friend
   std::ostream& operator<<(std::ostream& os, HumanReadable hr) {
     int i = 0;
     long double mantissa = hr.size;
-    for (; mantissa >= 1024; mantissa /= 1024, i++) { }
+    for (; mantissa >= 1024; mantissa /= 1024, i++) {
+      #if defined(_WIN32)
+      MSG msg;
+      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+      #endif
+    }
     mantissa = std::ceil(mantissa * 100) / 100;
     os << mantissa << " " << "BKMGTPE"[i];
-    return i == 0 ? os : os << "B";
+    return !i ? os : os << "B";
   }
 };
 
@@ -159,7 +302,7 @@ std::string utsname_sysname() {
   #endif
   #else
   const char *result = nullptr;
-  char buf[255];
+  char buf[1024];
   DWORD sz = sizeof(buf);
   if (RegGetValueA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\", "OS", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
     result = buf;
@@ -212,87 +355,6 @@ std::string utsname_nodename() {
   #endif
 }
 
-#if defined(_WIN32)
-std::string windows_version(std::string *product_name) {
-  auto GetOSMajorVersionNumber = []() {
-    const char *result = nullptr;
-    char buf[10];
-    int val = 0;
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMajorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSMinorVersionNumber = []() {
-    const char *result = nullptr;
-    char buf[10];
-    int val = 0;
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentMinorVersionNumber", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSBuildNumber = []() {
-    const char *result = nullptr;
-    char buf[255];
-    DWORD sz = sizeof(buf);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "CurrentBuildNumber", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
-      result = buf;
-    }
-    std::string str;
-    str = result ? result : "";
-    return str;
-  };
-  auto GetOSRevisionNumber = []() {
-    char *result = nullptr;
-    char buf[10];
-    int val = 0;
-    DWORD sz = sizeof(val);
-    if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "UBR", RRF_RT_REG_DWORD, nullptr, &val, &sz) == ERROR_SUCCESS) {
-      if (sprintf(buf, "%d", val) != -1) {
-        result = buf;
-      }
-    }
-    std::string str;
-    str = strlen(result) ? result : "";
-    return str;
-  };
-  static const char *result = nullptr;
-  char buf[1024];
-  if (!GetOSMajorVersionNumber().empty() && !GetOSMinorVersionNumber().empty() && !GetOSBuildNumber().empty() && !GetOSRevisionNumber().empty()) {
-    if (sprintf(buf, "%s.%s.%s.%s", GetOSMajorVersionNumber().c_str(), GetOSMinorVersionNumber().c_str(), GetOSBuildNumber().c_str(), GetOSRevisionNumber().c_str()) != -1) {
-      result = buf;
-      char buf[255];
-      DWORD sz = sizeof(buf);
-      if (RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\", "ProductName", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
-        if (strtoull(GetOSMajorVersionNumber().c_str(), nullptr, 10) == 10 && strtoull(GetOSBuildNumber().c_str(), nullptr, 10) >= 22000) {
-          std::string tmp = strlen(buf) ? buf : "";
-          if (!tmp.empty()) {
-            tmp = std::regex_replace(tmp, std::regex("10"), "11");
-            *product_name = tmp;
-          }
-        } else {
-          *product_name = strlen(buf) ? buf : "";
-        }
-      }
-    }
-  }
-  std::string str;
-  str = result ? result : "";
-  return str;
-}
-#endif
-
 std::string utsname_release() {
   #if !defined(_WIN32)
   #if !defined(__sun)
@@ -326,6 +388,7 @@ std::string utsname_release() {
 std::string utsname_version() {
   #if !defined(_WIN32)
   #if !defined(__sun)
+  #if !defined(__DragonFly__)
   const char *result = nullptr;
   struct utsname name;
   if (!uname(&name))
@@ -333,6 +396,22 @@ std::string utsname_version() {
   std::string str;
   str = result ? result : "";
   return str;
+  #else
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("uname -v", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #endif
   #else
   std::string res;
   long count = sysinfo(SI_VERSION, nullptr, 0);
@@ -348,12 +427,15 @@ std::string utsname_version() {
   return res;
   #endif
   #else
-  char buf[2048];
-  std::string str;
-  if (sprintf(buf, "%s%s%s", "Microsoft Windows [Version ", utsname_release().c_str(), "]") != -1) {
-    str = strlen(buf) ? buf : "";
+  std::string result = read_output(L"cmd /c ver");
+  if (!result.empty()) {
+    result = std::regex_replace(result, std::regex("\r"), "");
+    result = std::regex_replace(result, std::regex("\n"), "");
+    static std::string res;
+    res = result;
+	return res;
   }
-  return str;
+  return "";
   #endif
 }
 
@@ -366,7 +448,7 @@ std::string utsname_codename() {
   std::string result;
   FILE *fp = popen("echo $(sw_vers | grep 'ProductName:' | uniq | awk '{$1=$1};1' && sw_vers | grep 'ProductVersion:' | uniq | awk '{$1=$1};1')", "r");
   if (fp) {
-    char buf[255];
+    char buf[1024];
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
       result = strlen(buf) ? buf : "";
@@ -403,7 +485,7 @@ std::string utsname_codename() {
   std::string result;
   FILE *fp = popen("echo $(lsb_release --id && lsb_release --release && lsb_release --codename) |  tr '\n' ' '", "r");
   if (fp) {
-    char buf[255];
+    char buf[1024];
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
       std::string tmp = strlen(buf) ? buf : "";
@@ -467,7 +549,7 @@ std::string utsname_machine() {
   #endif
   #else
   const char *result = nullptr;
-  char buf[255];
+  char buf[1024];
   DWORD sz = sizeof(buf);
   if (RegGetValueA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\\", "PROCESSOR_ARCHITECTURE", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
     result = buf;
@@ -625,6 +707,9 @@ long long memory_totalvmem() {
   return -1;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   long long total = 0;
+  long block_s = 0;
+  int header_len = 0;
+  getbsize(&header_len, &block_s);
   int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
   if (!nswap) return 0;
   if (nswap > 0) {
@@ -633,7 +718,7 @@ long long memory_totalvmem() {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
           if (swaps[i].se_flags & SWF_ENABLE) {
-            total += ((swaps[i].se_nblks / (1024 / DEV_BSIZE)) * 1024);
+            total += ((swaps[i].se_nblks / (1024 / block_s)) * 1024);
           }
         }
       }
@@ -707,6 +792,9 @@ long long memory_availvmem() {
   return -1;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   long long avail = 0;
+  long block_s = 0;
+  int header_len = 0;
+  getbsize(&header_len, &block_s);
   int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
   if (!nswap) return 0;
   if (nswap > 0) {
@@ -715,7 +803,7 @@ long long memory_availvmem() {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
           if (swaps[i].se_flags & SWF_ENABLE) {
-            avail += (((swaps[i].se_nblks - swaps[i].se_inuse) / (1024 / DEV_BSIZE)) * 1024);
+            avail += (((swaps[i].se_nblks - swaps[i].se_inuse) / (1024 / block_s)) * 1024);
           }
         }
       }
@@ -789,6 +877,9 @@ long long memory_usedvmem() {
   return -1;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   long long used = 0;
+  long block_s = 0;
+  int header_len = 0;
+  getbsize(&header_len, &block_s);
   int nswap = swapctl(SWAP_NSWAP, nullptr, 0);
   if (!nswap) return 0;
   if (nswap > 0) {
@@ -797,7 +888,7 @@ long long memory_usedvmem() {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
           if (swaps[i].se_flags & SWF_ENABLE) {
-            used += ((swaps[i].se_inuse / (1024 / DEV_BSIZE)) * 1024);
+            used += ((swaps[i].se_inuse / (1024 / block_s)) * 1024);
           }
         }
       }
@@ -841,6 +932,13 @@ std::vector<std::string> string_split(std::string str, char delimiter) {
   std::stringstream sstr(str);
   std::string tmp;
   while (std::getline(sstr, tmp, delimiter)) {
+    #if defined(_WIN32)
+    MSG msg;
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    #endif
     vec.push_back(tmp);
   }
   return vec;
@@ -851,12 +949,19 @@ unsigned int VendorId = 0;
 std::unordered_map<unsigned int, std::string> VendorNameById;
 std::unordered_map<unsigned int, std::string> DeviceNameById;
 std::string GetVendorOrDeviceNameById(unsigned int Id, int VendorOrDevice) {
-  if (VendorNameById.find(Id) != VendorNameById.end() && VendorOrDevice == 0) return VendorNameById[Id];
-  if (DeviceNameById.find(Id) != DeviceNameById.end() && VendorOrDevice != 0) return DeviceNameById[Id];
+  if (VendorNameById.find(Id) != VendorNameById.end() && !VendorOrDevice) return VendorNameById[Id];
+  if (DeviceNameById.find(Id) != DeviceNameById.end() && VendorOrDevice) return DeviceNameById[Id];
   std::string str(pci_ids, pci_ids + sizeof(pci_ids) / sizeof(pci_ids[0]));
   str = std::regex_replace(str, std::regex("\r"), "");
   std::vector<std::string> vec = string_split(str, '\n');
   for (std::size_t i = 0; i < vec.size(); i++) {
+    #if defined(_WIN32)
+    MSG msg;
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
+    }
+    #endif
     if (vec[i].empty() || (!vec[i].empty() && vec[i][0] == '#')) {
       continue;
     }
@@ -1099,30 +1204,121 @@ long long gpu_videomemory() {
 }
 
 std::string cpu_vendor() {
-  std::string str = cpu_brand();
-  if (str.empty()) return "";
-  std::transform(str.begin(), str.end(), str.begin(), ::toupper);
-  if (str.find("INTEL") != std::string::npos) {
-    return "GenuineIntel";
-  } else if (str.find("AMD") != std::string::npos) {
-    return "AuthenticAMD";
-  } else if (str.find("APPLE") != std::string::npos) {
-    return "Apple";
+  #if defined(_WIN32)
+  const char *result = nullptr;
+  char buf[1024];
+  DWORD sz = sizeof(buf);
+  if (RegGetValueA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\", "VendorIdentifier", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
+    result = buf;
   }
-  std::string arch = utsname_machine();
-  std::transform(arch.begin(), arch.end(), arch.begin(), ::toupper);
-  if (!arch.empty()) {
-    if (arch.find("ARM") != std::string::npos || arch.find("AARCH64") != std::string::npos) {
-      return "ARM";
+  return result ? result : "";
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  const char *result = nullptr;
+  char buf[1024];
+  std::size_t len = sizeof(buf);
+  if (!sysctlbyname("machdep.cpu.vendor", &buf, &len, nullptr, 0)) {
+    result = buf;
+  }
+  return result ? result : "";
+  #elif defined(__linux__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("lscpu | grep 'Vendor ID:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
     }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
   }
   return "";
+  #elif defined(__FreeBSD__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("dmesg | awk '/CPU: /{p++;if(p==0){next}}p' | awk -F'Origin=\"' 'FNR==2{print $0}' | sed 's/.*Origin=\"//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}' | awk '{print substr($0, 1, length($0) - 1)}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #elif defined(__DragonFly__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("dmesg | awk '/CPU: /{p++;if(p==0){next}}p' | awk -F'Origin = \"' 'FNR==2{print $0}' | sed 's/.*Origin = \"//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}' | awk '{print substr($0, 1, length($0) - 1)}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #elif defined(__NetBSD__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("cat /proc/cpuinfo | grep 'vendor_id' | awk 'FNR==1{print $3}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #elif defined(__OpenBSD__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("sysctl -n machdep.cpuvendor", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #elif defined(__sun)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("psrinfo -v -p | awk 'FNR==2{print substr($2, 2)}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = result ? result : "";
+    return str;
+  }
+  return "";
+  #else
+  return "";
+  #endif
 }
 
 std::string cpu_brand() {
   #if defined(_WIN32)
   const char *result = nullptr;
-  char buf[255];
+  char buf[1024];
   DWORD sz = sizeof(buf);
   if (RegGetValueA(HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\\", "ProcessorNameString", RRF_RT_REG_SZ, nullptr, &buf, &sz) == ERROR_SUCCESS) {
     result = buf;
@@ -1186,57 +1382,7 @@ int cpu_numcores() {
     return numcores;
   }
   #if defined(_WIN32)
-  std::string result;
-  bool proceed = true;
-  HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
-  HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
-  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
-  proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
-  if (!proceed) return -1;
-  SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
-  proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
-  if (!proceed) return -1;
-  STARTUPINFOW si;
-  ZeroMemory(&si, sizeof(si));
-  si.cb = sizeof(STARTUPINFOW);
-  si.dwFlags = STARTF_USESTDHANDLES;
-  si.hStdError = stdout_write;
-  si.hStdOutput = stdout_write;
-  si.hStdInput = stdin_read;
-  PROCESS_INFORMATION pi;
-  ZeroMemory(&pi, sizeof(pi));
-  std::vector<wchar_t> cwstr_command;
-  std::wstring wstr_command = L"wmic cpu get NumberOfCores";
-  cwstr_command.resize(wstr_command.length() + 1, '\0');
-  wcsncpy_s(&cwstr_command[0], wstr_command.length() + 1, wstr_command.c_str(), wstr_command.length() + 1);
-  BOOL success = CreateProcessW(nullptr, &cwstr_command[0], nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
-  if (success) {
-    DWORD nRead = 0;
-    char buffer[BUFSIZ];
-    CloseHandle(stdout_write);
-    CloseHandle(stdin_read);
-    HANDLE wait_handles[] = { pi.hProcess, stdout_read };
-    while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
-      MSG msg;
-      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-      while (ReadFile(stdout_read, buffer, BUFSIZ, &nRead, nullptr) && nRead) {
-        MSG msg;
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-          TranslateMessage(&msg);
-          DispatchMessage(&msg);
-        }
-        buffer[nRead] = '\0';
-        result.append(buffer, nRead);
-      }
-    }
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    CloseHandle(stdout_read);
-    CloseHandle(stdin_write);
-  }
+  std::string result = read_output(L"wmic cpu get NumberOfCores");
   if (!result.empty()) {
     result = std::regex_replace(result, std::regex("NumberOfCores"), "");
     result = std::regex_replace(result, std::regex(" "), "");
@@ -1281,7 +1427,7 @@ int cpu_numcores() {
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  #elif defined(__FreeBSD__)
   char buf[1024];
   const char *result = nullptr;
   FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
@@ -1296,7 +1442,37 @@ int cpu_numcores() {
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  #elif defined(__DragonFly__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("dmesg | grep 'threads_per_core: ' | awk '{print substr($6, 0, length($6) - 1)}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
+  #elif defined(__NetBSD__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("/sbin/dmesg | grep ', core ' | tail -1 | awk '{print substr($7, 0, length($7) - 1)}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)(cpu_numcpus() / (strtol(str.c_str(), nullptr, 10) + 1));
+  }
+  return numcores;
+  #elif defined(__OpenBSD__)
   int mib[2];
   mib[0] = CTL_HW;
   mib[1] = HW_NCPUONLINE;
