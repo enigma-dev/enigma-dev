@@ -1267,24 +1267,6 @@ int cpu_numcores() {
     numcores = logical_cpus;
   }
   return numcores;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
-  }
-  return numcores;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
-  numcores = (int)sysconf(_SC_NPROCESSORS_ONLN);
-  return numcores;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
@@ -1312,6 +1294,33 @@ int cpu_numcores() {
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  int mib[2];
+  mib[0] = CTL_HW;
+  mib[1] = HW_NCPUONLINE;
+  int logical_cpus = -1;
+  std::size_t len = sizeof(int);
+  if (!sysctl(mib, 2, &logical_cpus, &len, nullptr, 0)) {
+    numcores = logical_cpus;
+  }
+  return numcores;
+  #elif defined(__sun)
+  numcores = (int)sysconf(_SC_NPROCESSORS_ONLN);
   #else
   return -1;
   #endif
@@ -1324,9 +1333,49 @@ int cpu_numcpus() {
   GetSystemInfo(&sysinfo);
   numcpus = sysinfo.dwNumberOfProcessors;
   return numcpus;
-  #else
-  numcpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  int physical_cpus = -1;
+  std::size_t len = sizeof(int);
+  if (!sysctlbyname("hw.physicalcpu", &physical_cpus, &len, nullptr, 0)) {
+    numcpus = physical_cpus;
+  }
   return numcpus;
+  #elif defined(__linux__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("lscpu | grep 'CPU(s):' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcpus = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcpus;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  int physical_cpus = -1;
+  std::size_t len = sizeof(int);
+  if (!sysctlbyname("hw.ncpu", &physical_cpus, &len, nullptr, 0)) {
+    numcpus = physical_cpus;
+  }
+  return numcpus;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  int mib[2];
+  mib[0] = CTL_HW;
+  mib[1] = HW_NCPU;
+  int physical_cpus = -1;
+  std::size_t len = sizeof(int);
+  if (!sysctl(mib, 2, &physical_cpus, &len, nullptr, 0)) {
+    numcpus = physical_cpus;
+  }
+  return numcpus;
+  #elif defined(__sun)
+  numcpus = (int)sysconf(_SC_NPROCESSORS_CONF);
+  #else
+  return -1;
   #endif
 }
 
