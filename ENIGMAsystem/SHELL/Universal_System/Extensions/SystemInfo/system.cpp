@@ -1260,9 +1260,60 @@ int cpu_numcores() {
     numcores = (int)strtol(res.c_str(), nullptr, 10);
   }
   return numcores;
-  #else
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  int logical_cpus = -1;
+  std::size_t len = sizeof(int);
+  if (!sysctlbyname("hw.logicalcpu", &logical_cpus, &len, nullptr, 0)) {
+    numcores = logical_cpus;
+  }
+  return numcores;
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   numcores = (int)sysconf(_SC_NPROCESSORS_ONLN);
   return numcores;
+  #elif defined(__linux__)
+  char buf[1024];
+  const char *result = nullptr;
+  FILE *fp = popen("lscpu | grep 'Core(s) per socket:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
+  if (fp) {
+    if (fgets(buf, sizeof(buf), fp)) {
+      buf[strlen(buf) - 1] = '\0';
+      result = buf;
+    }
+    pclose(fp);
+    static std::string str;
+    str = (result && strlen(result)) ? result : "-1";
+    if (str == "-1") {
+      FILE *fp = popen("lscpu | grep 'Core(s) per cluster:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
+      if (fp) {
+        if (fgets(buf, sizeof(buf), fp)) {
+          buf[strlen(buf) - 1] = '\0';
+          result = buf;
+        }
+        pclose(fp);
+        str = (result && strlen(result)) ? result : "-1";
+        numcores = (int)strtol(str.c_str(), nullptr, 10);
+      }
+    }
+    numcores = (int)strtol(str.c_str(), nullptr, 10);
+  }
+  return numcores;
+  #else
+  return -1;
   #endif
 }
 
@@ -1272,10 +1323,11 @@ int cpu_numcpus() {
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
   numcpus = sysinfo.dwNumberOfProcessors;
-  #else
-  numcpus = sysconf(_SC_NPROCESSORS_CONF);
-  #endif
   return numcpus;
+  #else
+  numcpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
+  return numcpus;
+  #endif
 }
 
 } // namespace ngs::sys
