@@ -61,13 +61,11 @@
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
-#include <unistd.h>
 #include <fcntl.h>
 #include <kvm.h>
 #elif (defined(__NetBSD__) || defined(__OpenBSD__))
 #include <sys/param.h>
 #include <sys/swap.h>
-#include <unistd.h>
 #endif
 #endif
 #if !defined(__sun)
@@ -78,19 +76,12 @@
 #else
 #include <sys/systeminfo.h>
 #include <sys/swap.h>
-#include <unistd.h>
 #endif
+#include <unistd.h>
 #endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dxgi.lib")
-#endif
-#if defined(_MSC_VER)
-#if defined(_WIN32) && !defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
-#elif defined(_WIN32) && defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
-#endif
 #endif
 
 #include "pci.ids.hpp"
@@ -1105,7 +1096,7 @@ long long gpu_videomemory() {
 }
 
 std::string cpu_vendor() {
-  #if (defined(_WIN32) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #if !defined(__sun)
   std::string str = cpu_brand();
   if (str.empty()) return "";
   std::transform(str.begin(), str.end(), str.begin(), ::toupper);
@@ -1116,7 +1107,6 @@ std::string cpu_vendor() {
   } else if (str.find("APPLE") != std::string::npos) {
     return "Apple";
   }
-  #if !defined(__DragonFly__)
   std::string arch = utsname_machine();
   std::transform(arch.begin(), arch.end(), arch.begin(), ::toupper);
   if (!arch.empty()) {
@@ -1124,52 +1114,8 @@ std::string cpu_vendor() {
       return "ARM";
     }
   }
-  #endif
   return "";
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  char buf[1024];
-  const char *result = nullptr;
-  std::size_t len = sizeof(buf);
-  if (!sysctlbyname("machdep.cpu.vendor", &buf, &len, nullptr, 0)) {
-    result = buf;
-  }
-  std::string str;
-  str = result ? result : "";
-  if (str.empty()) {
-    std::string brand = cpu_brand();
-    std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
-    if (!brand.empty()) {
-      if (brand.find("APPLE") != std::string::npos) {
-        return "Apple";
-      }
-    }
-  }
-  return str;
-  #elif defined(__linux__)
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Vendor ID:' | uniq | cut -d' ' -f3- | awk '{$1=$1};1'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = result ? result : "";
-    if (str.empty()) {
-      std::string brand = cpu_brand();
-      std::transform(brand.begin(), brand.end(), brand.begin(), ::toupper);
-      if (!brand.empty()) {
-        if (brand.find("APPLE") != std::string::npos) {
-          return "Apple";
-        }
-      }
-    }
-    return str;
-  }
-  return "";
-  #elif defined(__sun)
+  #else
   char buf[1024];
   const char *result = nullptr;
   FILE *fp = popen("prtconf | head -1 | cut -d' ' -f4,5", "r");
@@ -1183,8 +1129,6 @@ std::string cpu_vendor() {
   static std::string str;
   str = result ? result : "";
   return str;
-  #else
-  return "";
   #endif
 }
 
@@ -1316,81 +1260,21 @@ int cpu_numcores() {
     numcores = (int)strtol(res.c_str(), nullptr, 10);
   }
   return numcores;
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  int logical_cpus = -1;
-  std::size_t len = sizeof(int);
-  if (!sysctlbyname("hw.logicalcpu", &logical_cpus, &len, nullptr, 0)) {
-    numcores = logical_cpus;
-  }
-  return numcores;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
-  // TODO: See if this code works on DragonFly, NetBSD, and OpenBSD; if not, correct code as needed.
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'FNR==1{print $1}'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
-  }
-  return numcores;
-  #elif defined(__linux__)
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Core(s) per socket:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    if (str == "-1") {
-      FILE *fp = popen("lscpu | grep 'Core(s) per cluster:' | uniq | cut -d' ' -f4- | awk '{$1=$1};1'", "r");
-      if (fp) {
-        if (fgets(buf, sizeof(buf), fp)) {
-          buf[strlen(buf) - 1] = '\0';
-          result = buf;
-        }
-        pclose(fp);
-        str = (result && strlen(result)) ? result : "-1";
-        numcores = (int)strtol(str.c_str(), nullptr, 10);
-      }
-    }
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
-  }
-  return numcores;
-  #elif defined(__sun)
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("psrinfo -p", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
-    }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
-  }
-  return numcores;
   #else
-  return -1;
+  numcores = (int)sysconf(_SC_NPROCESSORS_ONLN);
+  return numcores;
   #endif
 }
 
 static int numcpus = -1;
 int cpu_numcpus() {
-  if (numcpus != -1) return numcpus;
-  auto result = std::thread::hardware_concurrency();
-  numcpus = (int)(result ? result : -1);
+  #if defined(_WIN32)
+  SYSTEM_INFO sysinfo;
+  GetSystemInfo(&sysinfo);
+  numcpus = sysinfo.dwNumberOfProcessors;
+  #else
+  numcpus = sysconf(_SC_NPROCESSORS_CONF);
+  #endif
   return numcpus;
 }
 
