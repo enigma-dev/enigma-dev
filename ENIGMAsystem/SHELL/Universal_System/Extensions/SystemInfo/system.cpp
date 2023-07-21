@@ -453,11 +453,11 @@ std::string utsname_machine() {
   return str;
   #else
   std::string res;
-  long count = sysinfo(SI_MACHINE, nullptr, 0);
+  long count = sysinfo(SI_ARCHITECTURE_NATIVE, nullptr, 0);
   if (count > 0) {
     char *buf = (char *)calloc(count, sizeof(char));
     if (buf) {
-      if (sysinfo(SI_MACHINE, buf, count) > 0) {
+      if (sysinfo(SI_ARCHITECTURE_NATIVE, buf, count) > 0) {
         res = buf;
       }
       free(buf);
