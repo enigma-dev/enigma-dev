@@ -8,11 +8,16 @@
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
 #include "Universal_System/Extensions/DataStructures/include.h"
-#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
 
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
+
+namespace enigma {
+namespace extension_cast {
+extension_steamworks* as_extension_steamworks(object_basic*);
+}
+}  // namespace enigma
 
 namespace enigma {
 
@@ -196,7 +201,12 @@ void fireEventsFromQueue(int* mutex) {
       enigma_user::ds_map_add(enigma_user::async_load, key, value);
     }
 
-    // TODO: fire the events here
+    instance_event_iterator = &dummy_event_iterator;
+    for (iterator it = instance_list_first(); it; ++it) {
+      object_basic* const inst = ((object_basic*)*it);
+      extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
+      inst_steamworks->myevent_steam();
+    }
   }
 }
 

@@ -28,7 +28,10 @@
             <string>&#13;
 event_inherited();&#13;
 &#13;
-request = noone</string>
+request = noone&#13;
+&#13;
+async_load = ds_map_create();&#13;
+</string>
           </argument>
         </arguments>
       </action>
@@ -78,7 +81,9 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>show_debug_message(string(async_load))&#13;
+            <string>show_debug_message("yaaaaaaaaaaaaaaaaaaay!!!!!!!!!!!!!!!!!!!!")&#13;
+&#13;
+show_debug_message(string(async_load))&#13;
 var type = ds_map_find_value(async_load, "event_type");&#13;
 show_debug_message(string(type))&#13;
 &#13;

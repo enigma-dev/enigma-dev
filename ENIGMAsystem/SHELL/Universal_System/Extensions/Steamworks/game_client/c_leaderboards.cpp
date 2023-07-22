@@ -3,6 +3,8 @@
 #include "Universal_System/../Platforms/General/PFmain.h"
 #include "Universal_System/Extensions/DataStructures/include.h"
 
+// #include "Universal_System/Extensions/Steamworks/steamworks.h"
+
 namespace steamworks {
 
 c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {
@@ -84,12 +86,14 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
   // enigma::signal(&enigma::asyncsteamworks_mutex);
 
   // int map = enigma_user::ds_map_create();
-
-  // enigma_user::ds_map_add(map, "event_type", "leaderboard_downloaded_scores");
-  // enigma_user::ds_map_add(map, "leaderboard", c_leaderboards::current_leaderboard_);
+  
+  enigma_user::ds_map_add(enigma_user::async_load, "event_type", "leaderboard_download");
 
   enigma::posted_async_events.push(std::map<std::string, variant>{
       {"event_type", "leaderboard_downloaded_scores"}, {"leaderboard", c_leaderboards::current_leaderboard_}});
+
+
+  // enigma_user::fireSteamworksEvent();
 }
 
 }  // namespace steamworks

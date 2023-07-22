@@ -1,25 +1,28 @@
 #include "steamworks.h"
 
-#include "Universal_System/Instances/instance.h"
+// #include "Universal_System/Instances/instance.h"
 
-#include "implement.h"
+// #include "implement.h"
 
 namespace enigma {
-namespace extension_cast {
-extension_steamworks* as_extension_steamworks(object_basic*);
-}
+// namespace extension_cast {
+// extension_steamworks* as_extension_steamworks(object_basic*);
+// }
 }  // namespace enigma
 
 namespace enigma_user {
 
-static void fireSteamworksEvent() {
-  enigma::instance_event_iterator = &enigma::dummy_event_iterator;
-  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-    enigma::object_basic* const inst = ((enigma::object_basic*)*it);
-    enigma::extension_steamworks* const inst_steamworks = enigma::extension_cast::as_extension_steamworks(inst);
-    inst_steamworks->myevent_steam();
-  }
-}
+// unsigned async_load = -1;
+
+// TODO: is this the right place to put this? won't this make more sense in the enigma namespace?
+// void fireSteamworksEvent() {
+  // enigma::instance_event_iterator = &enigma::dummy_event_iterator;
+  // for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+  //   enigma::object_basic* const inst = ((enigma::object_basic*)*it);
+  //   enigma::extension_steamworks* const inst_steamworks = enigma::extension_cast::as_extension_steamworks(inst);
+  //   inst_steamworks->myevent_steam();
+  // }
+// }
 
 }  // namespace enigma_user
 
@@ -69,7 +72,10 @@ void extension_steamworks_init() {
         "directory. If you are running your executable from a different directory you may need to relocate the "
         "steam_appid.txt file.",
         M_ERROR);
+    // return;
   }
+
+  // enigma_user::async_load = enigma_user::ds_map_create();
 }
 
 }  // namespace enigma
