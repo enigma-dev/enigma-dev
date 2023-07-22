@@ -1343,13 +1343,13 @@ int cpu_numcores() {
   int logical_cpus = -1;
   std::size_t len = sizeof(int);
   if (!sysctlbyname("machdep.cpu.thread_count", &logical_cpus, &len, nullptr, 0)) {
-    numcores = logical_cpus;
+    numcores = (logical_cpus / cpu_numcpus());
   }
   return numcores;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Core(s) per socket:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
+  FILE *fp = popen("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1358,18 +1358,6 @@ int cpu_numcores() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    if (str == "-1") {
-      FILE *fp = popen("lscpu | grep 'Core(s) per cluster:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
-      if (fp) {
-        if (fgets(buf, sizeof(buf), fp)) {
-          buf[strlen(buf) - 1] = '\0';
-          result = buf;
-        }
-        pclose(fp);
-        str = (result && strlen(result)) ? result : "-1";
-        numcores = (int)strtol(str.c_str(), nullptr, 10);
-      }
-    }
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
@@ -1415,7 +1403,7 @@ int cpu_numcores() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)(cpu_numcpus() / (strtol(str.c_str(), nullptr, 10) + 1));
+    numcores = (int)((strtol(str.c_str(), nullptr, 10) + 1) / cpu_numcpus());
   }
   return numcores;
   #elif defined(__OpenBSD__)
