@@ -26,13 +26,6 @@
 #include "Universal_System/var4.h"
 
 namespace enigma {
-  struct extension_steamworks
-  {
-    virtual variant myevent_asyncsteam() { return 0; }
-  };
-}
-
-namespace enigma {
   extern bool game_isending;
   extern int game_return;
   extern int parameterc;
@@ -45,7 +38,10 @@ namespace enigma {
 
   extern std::queue<std::map<std::string, variant>> posted_async_events;
 
-  extern int asyncsteamworks_mutex; // mutex to protect the async queue from race conditions when the Steamworks extension is writing into it.
+  // The following semaphore code is for the new Async system to protect the posted_async_events queue
+  // from reading and writing at the same time. Steamworks extension writes to the queue.
+  // mutex to protect the async queue from race conditions when the Steamworks extension is writing into it.
+  extern int asyncsteamworks_mutex;
   void wait(int* mutex);
   void signal(int* mutex);
 

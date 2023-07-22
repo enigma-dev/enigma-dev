@@ -15,12 +15,6 @@
 #include <thread> // sleep_for
 
 namespace enigma {
-  namespace extension_cast {
-    extension_steamworks *as_extension_steamworks(object_basic*);
-  }
-}
-
-namespace enigma {
 
 std::queue<std::map<std::string, variant>> posted_async_events;
 
@@ -202,12 +196,7 @@ void fireEventsFromQueue(int* mutex) {
       enigma_user::ds_map_add(enigma_user::async_load, key, value);
     }
 
-    instance_event_iterator = &dummy_event_iterator;
-    for (iterator it = instance_list_first(); it; ++it) {
-      object_basic* const inst = ((object_basic*)*it);
-      extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
-      inst_steamworks->myevent_asyncsteam();
-    }
+    // TODO: fire the events here
   }
 }
 
