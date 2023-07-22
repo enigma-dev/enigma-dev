@@ -1342,7 +1342,7 @@ int cpu_numcores() {
   #elif (defined(__APPLE__) && defined(__MACH__))
   int logical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctlbyname("hw.logicalcpu", &logical_cpus, &len, nullptr, 0)) {
+  if (!sysctlbyname("machdep.cpu.thread_count", &logical_cpus, &len, nullptr, 0)) {
     numcores = logical_cpus;
   }
   return numcores;
@@ -1458,7 +1458,7 @@ int cpu_numcpus() {
   #elif (defined(__APPLE__) && defined(__MACH__))
   int physical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctlbyname("hw.physicalcpu", &physical_cpus, &len, nullptr, 0)) {
+  if (!sysctlbyname("machdep.cpu.core_count", &physical_cpus, &len, nullptr, 0)) {
     numcpus = physical_cpus;
   }
   return numcpus;
