@@ -506,7 +506,7 @@ std::string utsname_codename() {
   char *buf = nullptr;
   std::size_t len = 0;
   std::string buffer;
-  FILE *file = popen("cat /etc/release | awk 'NR==1{$1=$1;print}'", "r");
+  FILE *file = popen("awk 'NR==1{print $1,$2,$3}' /etc/release", "r");
   if (file) {
     if (getline(&buf, &len, file) != -1) {
       buffer = buf;
