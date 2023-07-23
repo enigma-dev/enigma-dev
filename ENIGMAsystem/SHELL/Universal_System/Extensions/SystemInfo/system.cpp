@@ -1428,7 +1428,6 @@ int cpu_numcores() {
         }
       }
       mNumCores = mNumLogCpus / mNumSMT;
-      mIsHTT = mNumSMT > 1;
     } else {
       if (HFS >= 1) {
         mNumLogCpus = (cpuID1.EBX() >> 16) & 0xFF;
