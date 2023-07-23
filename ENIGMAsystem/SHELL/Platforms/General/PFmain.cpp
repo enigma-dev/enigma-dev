@@ -10,20 +10,24 @@
 #include "Universal_System/Extensions/DataStructures/include.h"
 #include "Universal_System/Instances/instance.h"
 
+#include "Universal_System/Extensions/Steamworks/implement.h" // The implement.h file is responsible for implementing extension_steamworks struct.
+
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
 namespace enigma {
+
 namespace extension_cast {
 extension_steamworks* as_extension_steamworks(object_basic*);
 }
+
 }  // namespace enigma
 
 namespace enigma {
 
 std::queue<std::map<std::string, variant>> posted_async_events;
 
-int asyncsteamworks_mutex {1};
+int extension_steamworks_mutex {1}; // Must be initialized to 1.
 
 std::vector<std::function<void()> > extension_update_hooks;
 
@@ -247,7 +251,7 @@ int enigma_main(int argc, char** argv) {
     for (auto update_hook : extension_update_hooks)
       update_hook();
 
-    fireEventsFromQueue(&asyncsteamworks_mutex);
+    fireEventsFromQueue(&extension_steamworks_mutex);
 
     ENIGMA_events();
     handleInput();

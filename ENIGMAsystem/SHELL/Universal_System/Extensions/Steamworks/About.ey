@@ -8,8 +8,8 @@ Description: Steamworks is a set of tools and services that help game developers
 Default: true
 Icon: steam.svg
 
-Depends: None
-	#Extensions: DataStructures
+Depends:
+	Extensions: DataStructures
 Dependencies: None
-#Implement: extension_steamworks # This doesn't work
+Implement: extension_steamworks
 Init: extension_steamworks_init

@@ -26,12 +26,6 @@
 #include "Universal_System/var4.h"
 
 namespace enigma {
-struct extension_steamworks {
-  virtual variant myevent_steam() { return 0; }
-};
-}  // namespace enigma
-
-namespace enigma {
   extern bool game_isending;
   extern int game_return;
   extern int parameterc;
@@ -42,12 +36,13 @@ namespace enigma {
   extern unsigned long current_time_mcs;
   extern bool game_window_focused;
 
+  // This queue will contain any event that will be fired inside the main loop.
   extern std::queue<std::map<std::string, variant>> posted_async_events;
 
   // The following semaphore code is for the new Async system to protect the posted_async_events queue
   // from reading and writing at the same time. Steamworks extension writes to the queue.
   // mutex to protect the async queue from race conditions when the Steamworks extension is writing into it.
-  extern int asyncsteamworks_mutex;
+  extern int extension_steamworks_mutex;
   void wait(int* mutex);
   void signal(int* mutex);
 
@@ -77,6 +72,7 @@ extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
 
+// When firing any event inside posted_async_events queue, this variable will contain the data that will be sent to the game.
 extern int async_load;
 
 void sleep(int ms);
