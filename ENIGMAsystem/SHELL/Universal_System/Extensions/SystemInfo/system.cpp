@@ -1340,16 +1340,16 @@ int cpu_numcores() {
   }
   return numcores;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  int logical_cpus = -1;
+  int physical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctlbyname("machdep.cpu.thread_count", &logical_cpus, &len, nullptr, 0)) {
-    numcores = (logical_cpus / cpu_numcpus());
+  if (!sysctlbyname("machdep.cpu.core_count", &physical_cpus, &len, nullptr, 0)) {
+    numcores = physical_cpus;
   }
   return numcores;
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
+  FILE *fp = popen("cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1391,29 +1391,82 @@ int cpu_numcores() {
     numcores = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcores;
-  #elif defined(__NetBSD__)
-  char buf[1024];
-  const char *result = nullptr;
-  FILE *fp = popen("/sbin/dmesg | grep ', core ' | tail -1 | awk '{print substr($7, 0, length($7) - 1)}'", "r");
-  if (fp) {
-    if (fgets(buf, sizeof(buf), fp)) {
-      buf[strlen(buf) - 1] = '\0';
-      result = buf;
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  #define MAX_INTEL_TOP_LVL 4
+  class CPUID {
+    std::uint32_t regs[4];
+    public:
+    explicit CPUID(unsigned funcId, unsigned subFuncId) {
+      asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (funcId), "c" (subFuncId));
     }
-    pclose(fp);
-    static std::string str;
-    str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)((strtol(str.c_str(), nullptr, 10) + 1) / cpu_numcpus());
+    const std::uint32_t &EAX() const { return regs[0]; }
+    const std::uint32_t &EBX() const { return regs[1]; }
+    const std::uint32_t &ECX() const { return regs[2]; }
+    const std::uint32_t &EDX() const { return regs[3]; }
+  };
+  static const std::uint32_t AVX_POS = 0x10000000;
+  static const std::uint32_t LVL_NUM = 0x000000FF;
+  static const std::uint32_t LVL_TYPE = 0x0000FF00;
+  static const std::uint32_t LVL_CORES = 0x0000FFFF;
+  CPUID cpuID0(0, 0);
+  std::uint32_t HFS = cpuID0.EAX();
+  CPUID cpuID1(1, 0);
+  int mNumSMT = 0;
+  int mNumCores = 0;
+  int mNumLogCpus = 0;
+  bool mIsHTT = cpuID1.EDX() & AVX_POS;
+  std::string cpuvendor = cpu_vendor();
+  if (cpuvendor == "GenuineIntel") {
+    if(HFS >= 11) {
+      for (int lvl = 0; lvl < MAX_INTEL_TOP_LVL; lvl++) {
+        CPUID cpuID4(0x0B, lvl);
+        std::uint32_t currLevel = (LVL_TYPE & cpuID4.ECX()) >> 8;
+        switch (currLevel) {
+          case 0x01: mNumSMT = LVL_CORES & cpuID4.EBX(); break;
+          case 0x02: mNumLogCpus = LVL_CORES & cpuID4.EBX(); break;
+          default: break;
+        }
+      }
+      mNumCores = mNumLogCpus / mNumSMT;
+      mIsHTT = mNumSMT > 1;
+    } else {
+      if (HFS >= 1) {
+        mNumLogCpus = (cpuID1.EBX() >> 16) & 0xFF;
+        if (HFS >= 4) {
+          mNumCores = 1 + (CPUID(4, 0).EAX() >> 26) & 0x3F;
+        }
+      }
+      if (mIsHTT) {
+        if (!(mNumCores > 1)) {
+          mNumCores = 1;
+          mNumLogCpus = (mNumLogCpus >= 2 ? mNumLogCpus : 2);
+        }
+      } else {
+        mNumCores = mNumLogCpus = 1;
+      }
+    }
+  } else if (cpuvendor == "AuthenticAMD" || cpuvendor == "AMDisbetter!") {
+    int numcpus = cpu_numcpus();
+    std::uint32_t numsiblings = 1 + ((CPUID(0x8000001e, 0).EBX() >> 8) & 0xff);
+    if (numcpus > 0 && numsiblings > 0) {
+      mNumCores = numcpus / numsiblings;
+    } else {
+      if (HFS >= 1) {
+        if (CPUID(0x80000000, 0).EAX() >= 8) {
+          mNumCores = 1 + (CPUID(0x80000008, 0).ECX() & 0xFF);
+        }
+      }
+      if (mIsHTT) {
+        if (mNumCores < 1) {
+          mNumCores = 1;
+        }
+      } else {
+        mNumCores = 1;
+      }
+    }
   }
-  return numcores;
-  #elif defined(__OpenBSD__)
-  int mib[2];
-  mib[0] = CTL_HW;
-  mib[1] = HW_NCPUONLINE;
-  int logical_cpus = -1;
-  std::size_t len = sizeof(int);
-  if (!sysctl(mib, 2, &logical_cpus, &len, nullptr, 0)) {
-    numcores = logical_cpus;
+  if (mNumCores > 0) {
+    numcores = mNumCores;
   }
   return numcores;
   #elif defined(__sun)
@@ -1436,24 +1489,26 @@ int cpu_numcores() {
   #endif
 }
 
-static int numcpus = -1;
 int cpu_numcpus() {
   #if defined(_WIN32)
+  int numcpus = -1;
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
   numcpus = sysinfo.dwNumberOfProcessors;
   return numcpus;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  int physical_cpus = -1;
+  int numcpus = -1;
+  int logical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctlbyname("machdep.cpu.core_count", &physical_cpus, &len, nullptr, 0)) {
-    numcpus = physical_cpus;
+  if (!sysctlbyname("machdep.cpu.thread_count", &logical_cpus, &len, nullptr, 0)) {
+    numcpus = logical_cpus;
   }
   return numcpus;
   #elif defined(__linux__)
+  int numcpus = -1;
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'CPU(s):' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
+  FILE *fp = popen("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1462,27 +1517,22 @@ int cpu_numcpus() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    numcpus = (int)strtol(str.c_str(), nullptr, 10);
+    numcpus = ((int)strtol(str.c_str(), nullptr, 10) * cpu_numcores());
   }
   return numcpus;
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  int physical_cpus = -1;
-  std::size_t len = sizeof(int);
-  if (!sysctlbyname("hw.ncpu", &physical_cpus, &len, nullptr, 0)) {
-    numcpus = physical_cpus;
-  }
-  return numcpus;
-  #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  int numcpus = -1;
   int mib[2];
   mib[0] = CTL_HW;
   mib[1] = HW_NCPU;
-  int physical_cpus = -1;
+  int logical_cpus = -1;
   std::size_t len = sizeof(int);
-  if (!sysctl(mib, 2, &physical_cpus, &len, nullptr, 0)) {
-    numcpus = physical_cpus;
+  if (!sysctl(mib, 2, &logical_cpus, &len, nullptr, 0)) {
+    numcpus = logical_cpus;
   }
   return numcpus;
   #elif defined(__sun)
+  int numcpus = -1;
   char buf[1024];
   const char *result = nullptr;
   FILE *fp = popen("psrinfo -v -p | grep 'The physical processor has ' | awk '{print $5}'", "r");
