@@ -1349,7 +1349,7 @@ int cpu_numcores() {
   #elif defined(__linux__)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("cat /proc/cpuinfo | grep 'physical id' | sort | uniq | wc -l", "r");
+  FILE *fp = popen("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1358,13 +1358,13 @@ int cpu_numcores() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
+    numcores = (int)(cpu_numcpus() / strtol(str.c_str(), nullptr, 10));
   }
   return numcores;
   #elif defined(__FreeBSD__)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("sysctl -a | grep -i -o '[^ ]* core(s)' | awk 'NR==1{print $1}'", "r");
+  FILE *fp = popen("sysctl -n kern.sched.topology_spec | grep -c 'THREAD group'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1374,6 +1374,7 @@ int cpu_numcores() {
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
     numcores = (int)strtol(str.c_str(), nullptr, 10);
+    numcores = ((!numcores) ? cpu_numcpus() : numcores);
   }
   return numcores;
   #elif defined(__DragonFly__)
@@ -1388,67 +1389,55 @@ int cpu_numcores() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    numcores = (int)strtol(str.c_str(), nullptr, 10);
+    numcores = (int)(cpu_numcpus() / strtol(str.c_str(), nullptr, 10));
   }
   return numcores;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
-  #define MAX_INTEL_TOP_LVL 4
   class CPUID {
-    std::uint32_t regs[4];
+    unsigned regs[4];
     public:
     explicit CPUID(unsigned funcId, unsigned subFuncId) {
       asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (funcId), "c" (subFuncId));
     }
-    const std::uint32_t &EAX() const { return regs[0]; }
-    const std::uint32_t &EBX() const { return regs[1]; }
-    const std::uint32_t &ECX() const { return regs[2]; }
-    const std::uint32_t &EDX() const { return regs[3]; }
+    const unsigned &EAX() const { return regs[0]; }
+    const unsigned &EBX() const { return regs[1]; }
+    const unsigned &ECX() const { return regs[2]; }
+    const unsigned &EDX() const { return regs[3]; }
   };
-  static const std::uint32_t AVX_POS = 0x10000000;
-  static const std::uint32_t LVL_NUM = 0x000000FF;
-  static const std::uint32_t LVL_TYPE = 0x0000FF00;
-  static const std::uint32_t LVL_CORES = 0x0000FFFF;
+  static const unsigned AVX_POS = 0x10000000;
+  static const unsigned LVL_NUM = 0x000000FF;
+  static const unsigned LVL_CORES = 0x0000FFFF;
   CPUID cpuID0(0, 0);
-  std::uint32_t HFS = cpuID0.EAX();
+  unsigned HFS = cpuID0.EAX();
   CPUID cpuID1(1, 0);
   int mNumSMT = 0;
   int mNumCores = 0;
-  int mNumLogCpus = 0;
   bool mIsHTT = cpuID1.EDX() & AVX_POS;
   std::string cpuvendor = cpu_vendor();
+  int numcpus = cpu_numcpus();
   if (cpuvendor == "GenuineIntel") {
     if(HFS >= 11) {
-      for (int lvl = 0; lvl < MAX_INTEL_TOP_LVL; lvl++) {
-        CPUID cpuID4(0x0B, lvl);
-        std::uint32_t currLevel = (LVL_TYPE & cpuID4.ECX()) >> 8;
-        switch (currLevel) {
-          case 0x01: mNumSMT = LVL_CORES & cpuID4.EBX(); break;
-          case 0x02: mNumLogCpus = LVL_CORES & cpuID4.EBX(); break;
-          default: break;
-        }
-      }
-      mNumCores = mNumLogCpus / mNumSMT;
+      CPUID cpuID4(0x0B, 0);
+      mNumSMT = LVL_CORES & cpuID4.EBX();
+      mNumCores = numcpus / mNumSMT;
     } else {
       if (HFS >= 1) {
-        mNumLogCpus = (cpuID1.EBX() >> 16) & 0xFF;
         if (HFS >= 4) {
           mNumCores = 1 + (CPUID(4, 0).EAX() >> 26) & 0x3F;
         }
       }
       if (mIsHTT) {
-        if (!(mNumCores > 1)) {
+        if (mNumCores < 1) {
           mNumCores = 1;
-          mNumLogCpus = (mNumLogCpus >= 2 ? mNumLogCpus : 2);
         }
       } else {
-        mNumCores = mNumLogCpus = 1;
+        mNumCores = 1;
       }
     }
   } else if (cpuvendor == "AuthenticAMD" || cpuvendor == "AMDisbetter!") {
-    int numcpus = cpu_numcpus();
-    std::uint32_t numsiblings = 1 + ((CPUID(0x8000001e, 0).EBX() >> 8) & 0xff);
-    if (numcpus > 0 && numsiblings > 0) {
-      mNumCores = numcpus / numsiblings;
+    mNumSMT = 1 + ((CPUID(0x8000001e, 0).EBX() >> 8) & 0xff);
+    if (numcpus > 0 && mNumSMT > 0) {
+      mNumCores = numcpus / mNumSMT;
     } else {
       if (HFS >= 1) {
         if (CPUID(0x80000000, 0).EAX() >= 8) {
@@ -1471,7 +1460,7 @@ int cpu_numcores() {
   #elif defined(__sun)
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("psrinfo -p", "r");
+  FILE *fp = popen("echo `expr $(kstat cpu_info | grep 'pkg_core_id' | uniq | wc -l | awk '{print $1}') / $(psrinfo -p)`", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1507,7 +1496,7 @@ int cpu_numcpus() {
   int numcpus = -1;
   char buf[1024];
   const char *result = nullptr;
-  FILE *fp = popen("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
+  FILE *fp = popen("lscpu | grep 'CPU(s):' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
   if (fp) {
     if (fgets(buf, sizeof(buf), fp)) {
       buf[strlen(buf) - 1] = '\0';
@@ -1516,7 +1505,7 @@ int cpu_numcpus() {
     pclose(fp);
     static std::string str;
     str = (result && strlen(result)) ? result : "-1";
-    numcpus = ((int)strtol(str.c_str(), nullptr, 10) * cpu_numcores());
+    numcpus = (int)strtol(str.c_str(), nullptr, 10);
   }
   return numcpus;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
