@@ -1405,7 +1405,6 @@ int cpu_numcores() {
     const unsigned &EDX() const { return regs[3]; }
   };
   static const unsigned AVX_POS = 0x10000000;
-  static const unsigned LVL_NUM = 0x000000FF;
   static const unsigned LVL_CORES = 0x0000FFFF;
   CPUID cpuID0(0, 0);
   unsigned HFS = cpuID0.EAX();
