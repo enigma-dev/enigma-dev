@@ -22,7 +22,8 @@
 #include <cstddef>
 #include <vector>
 
-#include "detect_size.h"
+// #include "detect_size.h"
+#include "serialization_fwd_decl.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
   template <typename T>                               \
@@ -111,22 +112,21 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NAME, SIG, RET)                                        \
-  template <typename U>                                                          \
-  struct has_##NAME##_free_function {                                            \
-    template <typename T>                                                        \
-    static constexpr auto Test(T *) -> std::is_same<decltype(NAME<U> SIG), RET>; \
-                                                                                 \
-    template <typename>                                                          \
-    static constexpr std::false_type Test(...);                                  \
-                                                                                 \
-    static constexpr bool value = decltype(Test<U>(nullptr))::value;             \
-  };                                                                             \
-                                                                                 \
-  template <typename T>                                                          \
-  constexpr static inline bool HAS_##NAME##_FUNCTION = has_##NAME##_free_function<T>::value
+#define HAS_FREE_FUNCTION(NAME, SIG)                                                    \
+  template <typename T, typename = void>                                                \
+  struct is_##NAME##_available : std::false_type {};                                    \
+                                                                                        \
+  template <typename T>                                                                 \
+  struct is_##NAME##_available<T, std::void_t<decltype(NAME SIG)>> : std::true_type {}; \
+                                                                                        \
+  template <typename T>                                                                 \
+  constexpr static inline bool HAS_##NAME##_ = is_##NAME##_available<T>::value
 
-HAS_FREE_FUNCTION(byte_size, (std::declval<T>()), std::size_t);
+HAS_FREE_FUNCTION(byte_size, (std::declval<const T &>()));
+HAS_FREE_FUNCTION(enigma_internal_deserialize_fn,
+                  (std::declval<T &>(), std::declval<std::byte *>(), std::declval<std::size_t &>()));
+// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
+// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
 
 /**
  * Now we have 1 struct with the following name:

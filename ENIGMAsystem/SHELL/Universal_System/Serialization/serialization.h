@@ -26,6 +26,7 @@
 
 #include "detect_serialization.h"
 #include "detect_size.h"
+#include "serialization_fwd_decl.h"
 
 namespace enigma {
 namespace utility {
@@ -37,22 +38,22 @@ inline T bit_cast(const U &value) {
 }
 }  // namespace utility
 
-template <typename T>
-inline void internal_serialize_into(std::byte *iter, T &&value);
+// template <typename T>
+// inline void internal_serialize_into(std::byte *iter, T &&value);
 
-template <typename T>
-inline auto internal_serialize(T &&value);
+// template <typename T>
+// inline auto internal_serialize(T &&value);
 
-template <typename T>
-inline T internal_deserialize(std::byte *iter);
+// template <typename T>
+// inline T internal_deserialize(std::byte *iter);
 
-template <typename T>
-inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::byte> &bytes);
+// template <typename T>
+// inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::byte> &bytes);
 
-template <typename T>
-inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
+// template <typename T>
+// inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
 
-inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len);
+// inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len);
 
 template <typename T, std::size_t N>
 struct has_nested_form : std::false_type {
@@ -72,9 +73,20 @@ struct has_nested_form<T<U>, N> : has_nested_form<U, N - 1> {
 template <typename T, std::size_t N>
 constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 
+// template <typename T, typename = void>
+// struct is_available : std::false_type {};
+
+// template <typename T>
+// struct is_available<T, std::void_t<decltype(byte_size( std::declval<const T &>()))>> : std::true_type {};
+
+// template <typename T>
+// constexpr static inline bool HAS_ = is_available<T>::value;
+
+// HAS_FREE_FUNCTION(byte_size, (std::declval<const T &>()));
+
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (HAS_byte_size_FUNCTION<T>) {
+  if constexpr (HAS_byte_size_<T>) {
     return byte_size(value);
   } else if constexpr (has_size_method_v<std::decay_t<T>>) {
     return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
@@ -351,6 +363,8 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
                                                                                                        T &&value) {
   internal_serialize_variant_into(iter, value);
 }
+// template <typename T>
+// inline void internal_serialize_into_fn(std::byte *iter,T &&value) ;
 
 template <typename T>
 typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
@@ -359,9 +373,20 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
   internal_serialize_numeric_into(iter, value);
 }
 
+template <typename T, typename = void>
+struct is_foo_available1 : std::false_type {};
+
+template <typename T>
+struct is_foo_available1<
+    T, std::void_t<decltype(enigma::internal_serialize_into_fn<T>(std::declval<std::byte *>(), std::declval<T &&>()))>>
+    : std::true_type {};
+
+template <typename T>
+constexpr static bool callable1 = is_foo_available1<T>::value;
+
 template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
-  if constexpr (HAS_INTERNAL_SERIALIZE_INTO_FUNCTION()) {
+  if constexpr (callable1<T>) {
     internal_serialize_into_fn(iter, value);
   } else {
     static_assert(always_false<T>,
@@ -500,6 +525,9 @@ inline void internal_resize_buffer_using_byte_size(std::vector<std::byte> &buffe
   buffer.resize(buffer.size() + value.byte_size());
 }
 
+// template <typename T>
+// inline void internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, const T &value) = delete;
+
 template <typename T>
 typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value) {
@@ -522,9 +550,20 @@ template <typename T>
 constexpr static inline bool has_resize_buffer_for_free_function_v2 =
     std::is_same_v<T, std::string> || std::is_base_of_v<variant, T> || std::is_same_v<T, var>;
 
+template <typename T, typename = void>
+struct is_foo_available2 : std::false_type {};
+
+template <typename T>
+struct is_foo_available2<T, std::void_t<decltype(enigma::internal_resize_buffer_for_fn(
+                                std::declval<std::vector<std::byte> &>(), std::declval<const T &>()))>>
+    : std::true_type {};
+
+template <typename T>
+constexpr static bool callable2 = is_foo_available2<T>::value;
+
 template <typename T>
 inline void internal_resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
-  if constexpr (has_resize_buffer_for_free_function_v2<std::decay_t<T>>) {
+  if constexpr (callable2<std::decay_t<T>>) {
     internal_resize_buffer_for_fn(buffer, value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     internal_resize_buffer_using_byte_size(buffer, value);
@@ -539,7 +578,6 @@ template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 std::vector<std::byte> internal_serialize_integral(T value) {
   std::vector<std::byte> result{};
   result.reserve(sizeof(T));
-
 std::size_t as_unsigned = utility::bit_cast<std::make_unsigned_t<T>>(value);
 while (as_unsigned > 0) {
   result.push_back(static_cast<std::byte>(as_unsigned & 0x7f));
@@ -550,20 +588,16 @@ while (as_unsigned > 0) {
     result.back() &= std::byte{0x7f};
   }
 }
-
 return result;
 }
-
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 T internal_deserialize_integral(std::byte *iter) {
   T result{};
   std::size_t i = 0;
-
   while ((*iter & std::byte{0x80}) != std::byte{0}) {
     result |= static_cast<T>(*iter++ & std::byte{0x7f}) << (i++ * 7);
   }
   result |= static_cast<T>(*iter & std::byte{0x7f}) << (i * 7);
-
   return result;
 }
 */
@@ -581,6 +615,9 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
   len = bytes.size();
 }
 
+// template <typename T>
+// inline void enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) = delete;
+
 inline void enigma_internal_deserialize_fn(var &value, std::byte *iter, std::size_t &len) {
   value = internal_deserialize_var(iter + len);
   len += var_size(value);
@@ -588,13 +625,11 @@ inline void enigma_internal_deserialize_fn(var &value, std::byte *iter, std::siz
 
 template <typename T>
 inline void enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len) {
-  value = enigma_internal_deserialize_lua_table<T>(iter);
+  value = enigma_internal_deserialize_lua_table<std::decay_t<T>>(iter);
   len += enigma_internal_sizeof_lua_table(value);
 }
 
-template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+inline void enigma_internal_deserialize_fn(variant &value, std::byte *iter, std::size_t &len) {
   enigma_internal_deserialize_variant(value, iter, len);
 }
 
@@ -603,14 +638,20 @@ inline void enigma_internal_deserialize_fn(std::string &value, std::byte *iter, 
   len += value.length() + sizeof(std::size_t);
 }
 
+template <typename T, typename = void>
+struct is_foo_available3 : std::false_type {};
+
 template <typename T>
-constexpr static inline bool has_enigma_internal_deserialize_free_function_v2 =
-    std::is_same_v<T, std::string> || std::is_same_v<T, var> || std::is_base_of_v<variant, std::decay_t<T>> ||
-    is_lua_table_v<T>;
+struct is_foo_available3<T, std::void_t<decltype(enigma::enigma_internal_deserialize_fn(
+                                std::declval<T &>(), std::declval<std::byte *>(), std::declval<std::size_t &>()))>>
+    : std::true_type {};
+
+template <typename T>
+constexpr static bool callable3 = is_foo_available3<T>::value;
 
 template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len) {
-  if constexpr (has_enigma_internal_deserialize_free_function_v2<T>) {
+  if constexpr (callable3<std::decay_t<T>>) {
     enigma_internal_deserialize_fn(value, iter, len);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     value = enigma::internal_deserialize<T>(iter + len);

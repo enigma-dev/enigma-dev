@@ -63,11 +63,8 @@ constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 template <typename T>
 constexpr static inline bool always_false = false;
 
-template <typename T>
-inline std::size_t byte_size(const T &value) {
-  static_assert(always_false<T>, "'byte_size' only accepts 'var', 'variant' or 'lua_table'");
-  return 0;
-}
+// template <typename T>
+// inline std::size_t byte_size(const T &value) =delete;
 
 inline std::size_t byte_size(const variant &value) { return variant_size(value); }
 
