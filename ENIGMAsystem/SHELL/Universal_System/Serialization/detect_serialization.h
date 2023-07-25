@@ -22,7 +22,6 @@
 #include <cstddef>
 #include <vector>
 
-// #include "detect_size.h"
 #include "serialization_fwd_decl.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
@@ -120,17 +119,17 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
   struct is_##NAME##_available<T, std::void_t<decltype(NAME SIG)>> : std::true_type {}; \
                                                                                         \
   template <typename T>                                                                 \
-  constexpr static inline bool HAS_##NAME##_ = is_##NAME##_available<T>::value
+  constexpr static inline bool has_##NAME##_free_function = is_##NAME##_available<T>::value
 
 HAS_FREE_FUNCTION(byte_size, (std::declval<const T &>()));
-HAS_FREE_FUNCTION(enigma_internal_deserialize_fn,
-                  (std::declval<T &>(), std::declval<std::byte *>(), std::declval<std::size_t &>()));
+// HAS_FREE_FUNCTION(enigma_internal_deserialize_fn,
+//                   (std::declval<T &>(), std::declval<std::byte *>(), std::declval<std::size_t &>()));
 // HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
 // HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
 
 /**
  * Now we have 1 struct with the following name:
- * has_byte_size_free_function
+ * is_byte_size_available
  * 
  * The struct has 1 data member:
  * value: This member is a boolean value that indicates whether the corresponding class

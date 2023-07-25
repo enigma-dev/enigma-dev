@@ -23,13 +23,6 @@
 template <typename T>
 inline std::size_t byte_size(const T &value) = delete;
 
-// inline std::size_t byte_size(const variant &value);
-
-// inline std::size_t byte_size(const var &value);
-
-// template <typename T>
-// inline std::size_t byte_size(const lua_table<T> &value);
-
 namespace enigma {
 template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value);
@@ -47,21 +40,6 @@ template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
 
 inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len);
-
-// template <typename T>
-// inline void enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) = delete;
-
-// template<typename T>
-// inline void enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) ;
-
-// inline void enigma_internal_deserialize_fn(var &value, std::byte *iter, std::size_t &len);
-
-// template <typename T>
-// inline void enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len);
-
-// inline void enigma_internal_deserialize_fn(variant &value, std::byte *iter, std::size_t &len);
-
-// inline void enigma_internal_deserialize_fn(std::string &value, std::byte *iter, std::size_t &len);
 
 }  // namespace enigma
 
