@@ -1,13 +1,16 @@
 #include "c_leaderboards.h"
 
+#include <algorithm>
+
 #include "Universal_System/../Platforms/General/PFmain.h"
 #include "Universal_System/Extensions/DataStructures/include.h"
 
+#include "../leaderboards.h"
+#include "game_client.h"
+
 namespace steamworks {
 
-c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {
-  leaderboard_entries_ = std::vector<LeaderboardEntry_t>();
-}
+c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {}
 
 void c_leaderboards::find_leaderboard(const std::string& leaderboard_name,
                                       const ELeaderboardSortMethod leaderboard_sort_method,
@@ -66,6 +69,8 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
 
   if (NULL == c_leaderboards::current_leaderboard_) return false;
 
+  c_leaderboards::loading_ = true;
+
   SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
       c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
   c_leaderboards::m_SteamCallResultDownloadScores.Set(steam_api_call, this, &c_leaderboards::on_download_scores);
@@ -73,7 +78,44 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
   return true;
 }
 
+std::string& get_leaderboard_entries_string(LeaderboardEntry_t leaderboard_entries[],
+                                            unsigned leaderboard_entries_size) {
+  std::string entries_accumulator{""};
+  entries_accumulator += "{";
+  entries_accumulator += "\"entries\":";
+  entries_accumulator += "[";
+
+  for (unsigned i{0}; i < leaderboard_entries_size; i++) {
+    entries_accumulator += "{";
+    entries_accumulator += "\"name\":";
+    entries_accumulator += "\"";
+    entries_accumulator += c_game_client::get_steam_user_persona_name(leaderboard_entries[i].m_steamIDUser);
+    entries_accumulator += "\"";
+    entries_accumulator += ",";
+    entries_accumulator += "\"score\":";
+    entries_accumulator += std::to_string(leaderboard_entries[i].m_nScore);
+    entries_accumulator += ",";
+    entries_accumulator += "\"rank\":";
+    entries_accumulator += std::to_string(leaderboard_entries[i].m_nGlobalRank);
+    entries_accumulator += ",";
+    entries_accumulator += "\"userID\":";
+    entries_accumulator += "\"";
+    entries_accumulator += std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64());
+    entries_accumulator += "\"";
+    entries_accumulator += "}";
+
+    if (i < leaderboard_entries_size - 1) entries_accumulator += ",";
+  }
+
+  entries_accumulator += "]";
+  entries_accumulator += "}";
+
+  return entries_accumulator;
+}
+
 void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
+  c_leaderboards::loading_ = false;
+
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
     return;
@@ -81,9 +123,120 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
 
   DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
 
-  enigma::posted_async_events.push(std::map<std::string, variant>{{"event_type", "leaderboard_download"}});
+  LeaderboardEntry_t leaderboard_entries[enigma_user::lb_max_entries];
 
-  // enigma_user::fireSteamworksEvent();
+  // leaderboard entries handle will be invalid once we return from this function. Copy all data now.
+  c_leaderboards::number_of_leaderboard_entries_ =
+      std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
+  for (unsigned index = 0; index < c_leaderboards::number_of_leaderboard_entries_; index++) {
+    SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
+                                                    &leaderboard_entries[index], NULL, 0);
+  }
+
+  std::string& leaderboard_entries_string =
+      get_leaderboard_entries_string(leaderboard_entries, c_leaderboards::number_of_leaderboard_entries_);
+
+  std::map<std::string, variant> temp_map = {
+      {"entries", leaderboard_entries_string},
+      {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
+      {"event_type", "leaderboard_download"},
+      {"id", std::to_string(enigma::lb_entries_download_id)},
+      {"num_entries", std::to_string(c_leaderboards::number_of_leaderboard_entries_)},
+      {"status", 0}};  // TODO: the status must not be constant value
+
+  enigma::posted_async_events.push(temp_map);
 }
+
+/*
+{
+  "entries":
+  "{\n    
+    \"entries\": 
+    [\n
+      { \"name\"  : \"TomasJPereyra\", 
+      \"score\" : 1, 
+      \"rank\"  : 1, 
+      \"userID\": \"@i64@110000108ae8556$i64$\" 
+      },\n     
+    
+      { 
+        \"name\"  : \"Scott-ish\", 
+        \"score\" : 10, 
+        \"rank\"  : 2, 
+        \"userID\": \"@i64@11000010241f4ea$i64$\" 
+      },\n
+      
+      { 
+        \"name\"  : \"Loyal RaveN\", 
+        \"score\" : 63, 
+        \"rank\"  : 3, 
+        \"userID\": \"@i64@11000015c558396$i64$\" 
+      },\n
+      
+      { 
+        \"name\"  : \"simon\", 
+        \"score\" : 113, 
+        \"rank\"  : 4, 
+        \"userID\": \"@i64@1100001040447b6$i64$\" 
+      },\n
+      
+      { 
+        \"name\"  : \"meFroggy\", 
+        \"score\" : 138, 
+        \"rank\"  : 5, 
+        \"userID\": 
+        \"@i64@110000117c9d62b$i64$\", 
+        \"data\"  : \"HG1lRnJvZ2d5IHdhcyBoZXJlIDopAAAA\" 
+      },\n
+      { 
+        \"name\"  : \"падонак fashion\", 
+        \"score\" : 155, 
+        \"rank\"  : 6, 
+        \"userID\": \"@i64@11000010be342ce$i64$\", 
+        \"data\"  : \"FEZlZWxpbmcgU2lja25lenogd2FzIGhlcmUgOikAAAA=\" 
+      },\n
+      
+      { 
+        \"name\"  : \"hermitpal\", 
+        \"score\" : 196, 
+        \"rank\"  : 7, 
+        \"userID\": \"@i64@110000106401474$i64$\", 
+        \"data\"  : \"R2hlcm1pdCB3YXMgaGVyZSA6KQA=\" 
+      },\n
+      
+      { 
+        \"name\"  : \"Joeyman98\", 
+        \"score\" : 239, 
+        \"rank\"  : 8, 
+        \"userID\": \"@i64@11000010624f1e3$i64$\", 
+        \"data\"  : \"I0pvZXltYW45OCB3YXMgaGVyZSA6KQAA\" 
+      },\n                
+      
+      { 
+        \"name\"  : \"tdlsoftware\", 
+        \"score\" : 246, 
+        \"rank\"  : 9, 
+        \"userID\": \"@i64@1100001434a5930$i64$\", 
+        \"data\"  : \"KnRkbHNvZnR3YXJlIHdhcyBoZXJlIDopAAAAAA==\" 
+      },\n                
+      
+      { 
+        \"name\"  : \"Benal\", 
+        \"score\" : 254, 
+        \"rank\"  : 10, 
+        \"userID\": \"@i64@1100001053f418a$i64$\", 
+        \"data\"  : \"SEJlbmFsIHdhcyBoZXJlIDopAAA=\" 
+      }\n   \n    
+    ]\n
+  }\n",
+
+  "lb_name":"YYLeaderboard_10\/29\/21--",
+  "event_type":"leaderboard_download",
+  "id":5.0,
+  "num_entries":10.0,
+  "status":1.0
+  }
+
+*/
 
 }  // namespace steamworks

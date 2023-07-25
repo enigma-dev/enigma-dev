@@ -16,7 +16,23 @@ bool leaderboards_pre_checks(const std::string& script_name) {
   return true;
 }
 
+namespace enigma {
+unsigned lb_entries_download_id{0};
+}  // namespace enigma
+
 namespace enigma_user {
+
+unsigned lb_max_entries{10};
+
+// Continue after overlay constants to prevent overlapping
+const unsigned lb_disp_none{21};
+const unsigned lb_disp_numeric{22};
+const unsigned lb_disp_time_sec{23};
+const unsigned lb_disp_time_ms{24};
+
+const unsigned lb_sort_none{25};
+const unsigned lb_sort_ascending{26};
+const unsigned lb_sort_descending{27};
 
 int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_order, const unsigned display_type) {
   if (!leaderboards_pre_checks("steam_create_leaderboard")) return -1;
@@ -126,7 +142,7 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
     return -1;
   }
 
-  return 0;
+  return enigma::lb_entries_download_id++;
 }
 
 int steam_download_scores_around_user(const std::string& lb_name, const int range_start, const int range_end) {
@@ -141,7 +157,7 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
     return -1;
   }
 
-  return 0;
+  return enigma::lb_entries_download_id++;
 }
 
 int steam_download_friends_scores(const std::string& lb_name) {
@@ -156,7 +172,7 @@ int steam_download_friends_scores(const std::string& lb_name) {
     return -1;
   }
 
-  return 0;
+  return enigma::lb_entries_download_id++;
 }
 
 }  // namespace enigma_user

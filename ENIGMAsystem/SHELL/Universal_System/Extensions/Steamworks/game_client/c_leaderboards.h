@@ -9,23 +9,21 @@ class c_game_client;
 
 class c_leaderboards {
  public:
-  unsigned number_of_leaderboard_entries_;
-  std::vector<LeaderboardEntry_t> leaderboard_entries_;
-
   c_leaderboards();
   ~c_leaderboards() = default;
 
   void find_leaderboard(const std::string& leaderboard_name, const ELeaderboardSortMethod leaderboard_sort_method,
-                          const ELeaderboardDisplayType leaderboard_display_type);
+                        const ELeaderboardDisplayType leaderboard_display_type);
   bool upload_score(const int score, const ELeaderboardUploadScoreMethod leaderboard_upload_score_method =
                                          k_ELeaderboardUploadScoreMethodNone);
 
-  bool download_scores(const ELeaderboardDataRequest leaderboard_data_request,
-                       const int range_start = -1, const int range_end = -1);
+  bool download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
+                       const int range_end = -1);
 
  private:
   SteamLeaderboard_t current_leaderboard_;
   bool loading_;
+  unsigned number_of_leaderboard_entries_;
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);

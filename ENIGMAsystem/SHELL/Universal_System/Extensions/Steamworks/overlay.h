@@ -5,29 +5,29 @@
 
 namespace enigma_user {
 
-const unsigned ov_friends = 0;
-const unsigned ov_community = 1;
-const unsigned ov_players = 2;
-const unsigned ov_settings = 3;
-const unsigned ov_gamegroup = 4;
-const unsigned ov_stats = 5;
-const unsigned ov_achievements = 6;
-const unsigned ov_other = 7;
+extern const unsigned ov_friends;
+extern const unsigned ov_community;
+extern const unsigned ov_players;
+extern const unsigned ov_settings;
+extern const unsigned ov_gamegroup;
+extern const unsigned ov_stats;
+extern const unsigned ov_achievements;
+extern const unsigned ov_other;
 
-const unsigned steam_overlay_notification_position_top_left = 8;
-const unsigned steam_overlay_notification_position_top_right = 9;
-const unsigned steam_overlay_notification_position_bottom_left = 10;
-const unsigned steam_overlay_notification_position_bottom_right = 11;
+extern const unsigned steam_overlay_notification_position_top_left;
+extern const unsigned steam_overlay_notification_position_top_right;
+extern const unsigned steam_overlay_notification_position_bottom_left;
+extern const unsigned steam_overlay_notification_position_bottom_right;
 
-const unsigned user_ov_steamid = 12;
-const unsigned user_ov_chat = 13;
-const unsigned user_ov_jointrade = 14;
-const unsigned user_ov_stats = 15;
-const unsigned user_ov_achievements = 16;
-const unsigned user_ov_friendadd = 17;
-const unsigned user_ov_friendremove = 18;
-const unsigned user_ov_friendrequestaccept = 19;
-const unsigned user_ov_friendrequestignore = 20;
+extern const unsigned user_ov_steamid;
+extern const unsigned user_ov_chat;
+extern const unsigned user_ov_jointrade;
+extern const unsigned user_ov_stats;
+extern const unsigned user_ov_achievements;
+extern const unsigned user_ov_friendadd;
+extern const unsigned user_ov_friendremove;
+extern const unsigned user_ov_friendrequestaccept;
+extern const unsigned user_ov_friendrequestignore;
 
 bool steam_is_overlay_enabled();
 
