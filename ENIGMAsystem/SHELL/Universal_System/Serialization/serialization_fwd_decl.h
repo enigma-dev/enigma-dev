@@ -48,6 +48,9 @@ inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
 
 inline void enigma_internal_deserialize_variant(variant &value, std::byte *iter, std::size_t &len);
 
+// template <typename T>
+// inline void enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) = delete;
+
 // template<typename T>
 // inline void enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) ;
 

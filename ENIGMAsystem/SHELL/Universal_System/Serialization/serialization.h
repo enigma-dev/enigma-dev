@@ -463,7 +463,7 @@ typename std::enable_if<std::is_same_v<var, std::decay_t<T>>, T>::type inline in
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
     std::byte *iter) {
-  return internal_deserialize_variant(iter);
+  return (internal_deserialize_variant(iter));
 }
 
 template <typename T>
@@ -625,11 +625,13 @@ inline void enigma_internal_deserialize_fn(var &value, std::byte *iter, std::siz
 
 template <typename T>
 inline void enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len) {
-  value = enigma_internal_deserialize_lua_table<std::decay_t<T>>(iter);
+  value = enigma_internal_deserialize_lua_table<T>(iter);
   len += enigma_internal_sizeof_lua_table(value);
 }
 
-inline void enigma_internal_deserialize_fn(variant &value, std::byte *iter, std::size_t &len) {
+template <typename T>
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
+    T &value, std::byte *iter, std::size_t &len) {
   enigma_internal_deserialize_variant(value, iter, len);
 }
 
