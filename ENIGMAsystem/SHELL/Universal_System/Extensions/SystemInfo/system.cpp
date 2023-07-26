@@ -587,7 +587,7 @@ long long memory_totalram() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.totalram;
+    return (info.totalram * info.mem_unit);
   }
   return -1;
   #elif defined(__sun)
@@ -636,7 +636,7 @@ long long memory_availram() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.freeram;
+    return (info.freeram * info.mem_unit);
   }
   return -1;
   #elif defined(__sun)
@@ -664,7 +664,7 @@ long long memory_usedram() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.totalram - info.freeram;
+    return ((info.totalram - info.freeram) * info.mem_unit);
   }
   return -1;
   #else
@@ -690,7 +690,7 @@ long long memory_totalvmem() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.totalswap;
+    return (info.totalswap * info.mem_unit);
   }
   return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -757,7 +757,7 @@ long long memory_availvmem() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.freeswap;
+    return (info.freeswap * info.mem_unit);
   }
   return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -824,7 +824,7 @@ long long memory_usedvmem() {
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info)) {
-    return info.totalswap - info.freeswap;
+    return ((info.totalswap - info.freeswap) * info.mem_unit);
   }
   return -1;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
