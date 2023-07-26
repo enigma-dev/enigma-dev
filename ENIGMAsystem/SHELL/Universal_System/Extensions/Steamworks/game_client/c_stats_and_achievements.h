@@ -1,3 +1,28 @@
+/** Copyright (C) 2023-2024 Saif Kandil
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+/*
+  Steam Stats and Achievements provides an easy way for your game to provide persistent, roaming 
+  achievement and statistics tracking for your users. The user's data is associated with their 
+  Steam account, and each user's achievements and statistics can be formatted and displayed in 
+  their Steam Community Profile.
+  Check https://partner.steamgames.com/doc/features/achievements for more information.
+*/
+
 #ifndef GAMECLIENT_STATS_AND_ACHIEVEMENTS_H
 #define GAMECLIENT_STATS_AND_ACHIEVEMENTS_H
 
@@ -158,6 +183,8 @@ class c_stats_and_achievements {
   STEAM_CALLBACK(c_stats_and_achievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
 
   /*
+    NOTE:   This is primarily only ever used for testing.
+
     Resets the current users stats and, optionally achievements. This automatically calls 
     c_stats_and_achievements::store_stats() to persist the changes to the server. This should 
     typically only be used for testing purposes during development. Ensure that you sync up 
@@ -168,6 +195,8 @@ class c_stats_and_achievements {
   void reset_all_stats();
 
   /*
+    NOTE:   This is primarily only ever used for testing.
+
     See c_stats_and_achievements::reset_all_stats() above for more information.
   */
   void reset_all_stats_achievements();

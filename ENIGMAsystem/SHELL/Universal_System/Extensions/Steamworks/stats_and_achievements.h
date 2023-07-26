@@ -42,6 +42,8 @@ void steam_set_achievement(const std::string& ach_name);
 bool steam_get_achievement(const std::string& ach_name);
 
 /*
+    NOTE:   This is primarily only ever used for testing.
+
     This function is used to tell the Steam API to clear (reset) a specific achievement. The achievement 
     should have been previously defined on the Steamworks control panel accounts page for your game and 
     the string that is passed to the function should match that used as the API Name on the control panel.
@@ -52,15 +54,85 @@ bool steam_get_achievement(const std::string& ach_name);
 void steam_clear_achievement(const std::string& ach_name);
 
 /*
-    
+    This function is used to set a specific statistic to a new, signed integer, value. The statistic should 
+    have been previously defined on the Steamworks control panel accounts page for your game and the string 
+    that is passed to the function should match that used as the API Name on the control panel. Calls
+    c_stats_and_achievements::set_stat_int().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_set_stat_int
+    for more information.
 */
 void steam_set_stat_int(const std::string& stat_name, int value);
+
+/*
+    This function is used to set a specific statistic to a new, floating point, value. The statistic should 
+    have been previously defined on the Steamworks control panel accounts page for your game and the string 
+    that is passed to the function should match that used as the API Name on the control panel. Calls
+    c_stats_and_achievements::set_stat_float().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_set_stat_float
+    for more information.
+*/
 void steam_set_stat_float(const std::string& stat_name, float value);
+
+/*
+    This function permits you to set an average statistic type with a "sliding window" effect on the average. 
+    The "session_count" value is the current value that you wish to average out, while the "session_length" is 
+    the amount of game time since the last call to the function. Calls c_stats_and_achievements::set_stat_average_rate().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_set_stat_avg_rate
+    for more information.
+*/
 void steam_set_stat_avg_rate(const std::string& stat_name, float session_count, float session_length);
+
+/*
+    This function is used to get the value of a specific signed integer statistic. The statistic should have 
+    been previously defined on the Steamworks control panel accounts page for your game and the string that 
+    is passed to the function should match that used as the API Name on the control panel. Calls
+    c_stats_and_achievements::get_stat_int().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_get_stat_int
+    for more information.
+*/
 int steam_get_stat_int(const std::string& stat_name);
+
+/*
+    This function is used to get the value of a specific floating point statistic. The statistic should have 
+    been previously defined on the Steamworks control panel accounts page for your game and the string that 
+    is passed to the function should match that used as the API Name on the control panel. Calls
+    c_stats_and_achievements::get_stat_float().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_get_stat_float
+    for more information.
+*/
 float steam_get_stat_float(const std::string& stat_name);
+
+/*
+    This function is used to get the value of a specific average statistic. The statistic should have been 
+    previously defined on the Steamworks control panel accounts page for your game and the string that is 
+    passed to the function should match that used as the API Name on the control panel. Calls
+    c_stats_and_achievements::get_stat_average_rate().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_get_stat_avg_rate
+    for more information.
+*/
 float steam_get_stat_avg_rate(const std::string& stat_name);
+
+/*
+    TIP:   It is recommended that you only use this function as a debug tool when developing your game.
+
+    This function is used to reset all the statistics for the current user to their default values (as 
+    defined in the Steamworks control panel for your game). If need to also reset the achievement to their 
+    default values use the steam_reset_all_stats_achievements() instead. Calls 
+    c_stats_and_achievements::reset_all_stats().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_reset_all_stats
+    for more information.
+*/
 void steam_reset_all_stats();
+
+/*
+    TIP:   It is recommended that you only use this function as a debug tool when developing your game.
+
+    This function is used to reset all the statistics and achievements for the current user to their default 
+    values (as defined in the Steamworks control panel for your game). If you only need to reset the stats to 
+    their default values use the steam_reset_all_stats() instead. Calls c_stats_and_achievements::reset_all_stats().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Stats-and-Achievements#steam_reset_all_stats_achievements
+    for more information.
+*/
 void steam_reset_all_stats_achievements();
 
 }  // namespace enigma_user

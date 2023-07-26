@@ -1,3 +1,31 @@
+/** Copyright (C) 2023-2024 Saif Kandil
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+/*
+  The Steam API supports persistent leaderboards with automatically ordered entries. 
+  These leaderboards can be used to display global and friend leaderboards in your game 
+  and on the community web page for your game. Each game can have up to 10,000 leaderboards, 
+  and each leaderboard can be retrieved immediately after a player's score has been inserted 
+  into it, but note that for each leaderboard, a player can have only one entry, although 
+  there is no limit on the number of players per leaderboard.
+  Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#leaderboards
+  for more information.
+*/
+
 #ifndef LEADERBOARDS_H
 #define LEADERBOARDS_H
 
