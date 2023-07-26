@@ -28,11 +28,6 @@ const unsigned ov_stats{5};
 const unsigned ov_achievements{6};
 const unsigned ov_other{7};
 
-const unsigned steam_overlay_notification_position_top_left{8};
-const unsigned steam_overlay_notification_position_top_right{9};
-const unsigned steam_overlay_notification_position_bottom_left{10};
-const unsigned steam_overlay_notification_position_bottom_right{11};
-
 const unsigned user_ov_steamid{12};
 const unsigned user_ov_chat{13};
 const unsigned user_ov_jointrade{14};
@@ -42,6 +37,11 @@ const unsigned user_ov_friendadd{17};
 const unsigned user_ov_friendremove{18};
 const unsigned user_ov_friendrequestaccept{19};
 const unsigned user_ov_friendrequestignore{20};
+
+const unsigned steam_overlay_notification_position_top_left{8};
+const unsigned steam_overlay_notification_position_top_right{9};
+const unsigned steam_overlay_notification_position_bottom_left{10};
+const unsigned steam_overlay_notification_position_bottom_right{11};
 
 bool steam_is_overlay_enabled() {
   if (!overlay_pre_checks("steam_is_overlay_enabled")) return false;
@@ -151,7 +151,7 @@ void steam_set_overlay_notification_inset(const int hor_inset, const int vert_in
   steamworks::c_overlay::set_overlay_notification_inset(hor_inset, vert_inset);
 }
 
-void steam_set_overlay_notification_position(const int position) {
+void steam_set_overlay_notification_position(const unsigned position) {
   if (!overlay_pre_checks("steam_set_overlay_notification_position")) return;
 
   switch (position) {

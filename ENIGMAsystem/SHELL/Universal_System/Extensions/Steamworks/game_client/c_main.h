@@ -12,16 +12,21 @@ class c_game_client;
 class c_main {
  public:
   /*
-    This function performs the following steps:
-      1.  Calls SteamAPI_RestartAppIfNecessary(). Checks if your executable was launched through Steam and relaunches
-          it through Steam if it wasn't. init() will fail if you are running your game from the executable or 
-          debugger directly and don't have steam_appid.txt in your game directory so make sure to remove the steam_appid.txt 
-          file when uploading the game to your Steam depot!. Calling this function optional but highly recommended as the 
-          Steam context associated with your application (including your App ID) will not be set up if the user launches the 
-          executable directly. If this occurs then SteamAPI_Init will fail and you will be unable to use the Steamworks API.
-          If you choose to use this then it should be the first Steamworks function call you make, right before SteamAPI_Init.
-          Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RestartAppIfNecessary for more information.
+    Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
+    if you are running your game from the executable or debugger directly and don't have steam_appid.txt in your game 
+    directory so make sure to remove the steam_appid.txt file when uploading the game to your Steam depot!. Calling this 
+    function optional but highly recommended as the Steam context associated with your application (including your App ID) 
+    will not be set up if the user launches the executable directly. If this occurs then SteamAPI_Init will fail and you 
+    will be unable to use the Steamworks API. If you choose to use this then it should be the first Steamworks function 
+    call you make, right before SteamAPI_Init. Calls SteamAPI_RestartAppIfNecessary(). 
+    Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RestartAppIfNecessary for more information.
+  */
+  static bool restart_app_if_necessary();
 
+  /*
+    This function performs the following steps:
+      1.  Calls c_main::restart_app_if_necessary().
+      
       2.  Calls SteamAPI_Init(). Initializes the Steamworks API. A Steam client must be running in order for init() to pass.
           If you are running If you're running your application from the executable or debugger directly then you must have 
           a steam_appid.txt in your game directory next to the executable, with your app ID in it and nothing else.
@@ -56,11 +61,6 @@ class c_main {
   static bool is_initialised();
 
   /*
-    This function returns a pointer to the Game Client. This pointer can be used to access the Game Client's object pointers.
-  */
-  static c_game_client* get_c_game_client();
-
-  /*
     This function calls SteamAPI_RunCallbacks(). Dispatches callbacks and call results to all of the registered listeners. As
     ENIGMA is single-threaded, no need to call SteamAPI_ReleaseCurrentThreadMemory().
     Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RunCallbacks for more information.
@@ -75,6 +75,11 @@ class c_main {
   */
   // TODO: Maybe need to be refactored to help game developers unhook the warning message hook.
   static void set_warning_message_hook();
+
+  /*
+    This function returns a pointer to the Game Client. This pointer can be used to access the Game Client's object pointers.
+  */
+  static c_game_client* get_c_game_client();
 
  private:
   /*

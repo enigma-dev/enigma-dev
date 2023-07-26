@@ -21,8 +21,12 @@ namespace steamworks {
 // Static fields & functions
 ////////////////////////////////////////////////////////
 
+bool c_main::restart_app_if_necessary() {
+  return SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
+}
+
 bool c_main::init() {
-  if (SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid)) {  // replace k_uAppIdInvalid with your AppID
+  if (c_main::restart_app_if_necessary()) {
     return false;
   }
 
@@ -51,11 +55,11 @@ void c_main::shutdown() {
 
 bool c_main::is_initialised() { return c_main::is_initialised_; }
 
-c_game_client* c_main::get_c_game_client() { return c_main::c_game_client_; }
-
 void c_main::run_callbacks() { SteamAPI_RunCallbacks(); }
 
 void c_main::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
+
+c_game_client* c_main::get_c_game_client() { return c_main::c_game_client_; }
 
 ////////////////////////////////////////////////////////
 // Private fields & functions

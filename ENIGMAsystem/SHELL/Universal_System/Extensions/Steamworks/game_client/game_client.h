@@ -113,7 +113,7 @@ class c_game_client {
 
   /*
     Checks if the active user is subscribed to the current App ID. This will always 
-    return true if you're using Steam DRM or calling SteamAPI_RestartAppIfNecessary.
+    return true if you're using Steam DRM or calling c_main::restart_app_if_necessary().
     Check https://partner.steamgames.com/doc/api/ISteamApps#BIsSubscribed for more 
     information.
   */

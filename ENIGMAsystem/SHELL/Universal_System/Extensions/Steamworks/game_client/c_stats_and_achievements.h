@@ -47,7 +47,7 @@ class c_stats_and_achievements {
   bool get_achievement(const std::string& achievement_name);
 
   /*
-    NOTE: This is primarily only ever used for testing.
+    NOTE:   This is primarily only ever used for testing.
 
     Resets the unlock status of an achievement. You must have called 
     c_stats_and_achievements::request_current_stats() and it needs to return successfully via its 
@@ -59,7 +59,7 @@ class c_stats_and_achievements {
   void clear_achievement(const std::string& achievement_name);
 
   /*
-    NOTE: This is the int overload.
+    NOTE:   This is the int overload.
 
     This function has two important steps:
       1.  Calls SetStat() function. Sets / updates the value of a given stat for the current user. 
@@ -75,7 +75,7 @@ class c_stats_and_achievements {
   void set_stat_int(const std::string& stat_name, const int value);
 
   /*
-    NOTE: This is the int overload.
+    NOTE:   This is the int overload.
 
     Gets the current value of the a stat for the current user. You must have called 
     c_stats_and_achievements::request_current_stats() and it needs to return successfully via its 
@@ -85,7 +85,7 @@ class c_stats_and_achievements {
   int get_stat_int(const std::string& stat_name);
 
   /*
-    NOTE: This is the float overload.
+    NOTE:   This is the float overload.
 
     This function has two important steps:
       1.  Calls SetStat() function. Sets / updates the value of a given stat for the current user. 
@@ -101,7 +101,7 @@ class c_stats_and_achievements {
   void set_stat_float(const std::string& stat_name, const float value);
 
   /*
-    NOTE: This is the float overload.
+    NOTE:   This is the float overload.
 
     Gets the current value of the a stat for the current user. You must have called 
     c_stats_and_achievements::request_current_stats() and it needs to return successfully via its 

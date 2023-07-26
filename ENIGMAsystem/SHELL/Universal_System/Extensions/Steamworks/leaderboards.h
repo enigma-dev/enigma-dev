@@ -1,6 +1,8 @@
 #ifndef LEADERBOARDS_H
 #define LEADERBOARDS_H
 
+// TODO: This documentation need to be improved when uploading a game to Steam Store.
+
 #include "game_client/c_main.h"
 
 namespace enigma {
