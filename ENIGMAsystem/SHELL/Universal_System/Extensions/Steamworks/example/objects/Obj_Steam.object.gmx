@@ -146,7 +146,6 @@ show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
 if (is_game_restarting == false) {&#13;
 	steam_shutdown();&#13;
 }&#13;
-&#13;
 </string>
           </argument>
         </arguments>

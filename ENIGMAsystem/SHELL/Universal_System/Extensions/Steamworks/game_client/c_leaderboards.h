@@ -1,6 +1,8 @@
 #ifndef GAMECLIENT_LEADERBOARDS_H
 #define GAMECLIENT_LEADERBOARDS_H
 
+// TODO: This documentation need to be improved when uploading a game to Steam Store.
+
 #include "game_client.h"
 
 namespace steamworks {

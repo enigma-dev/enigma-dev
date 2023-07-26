@@ -9,22 +9,18 @@ namespace steamworks {
 c_game_client* game_client_{NULL};
 c_game_client* game_client() { return game_client_; }
 
-// c_game_client::c_game_client(ISteamUser* steam_user, ISteamFriends* steam_friends, ISteamUtils* steam_utils)
-//     : steam_user_(steam_user),
-//       steam_friends_(steam_friends),
-//       steam_utils_(steam_utils),
-//       steam_id_local_user_(steam_user->GetSteamID()),
-//       steam_app_id_(steam_utils->GetAppID()) {
-//   init();
-// }
+////////////////////////////////////////////////////////
+// Public fields & functions
+////////////////////////////////////////////////////////
 
 c_game_client::c_game_client()
     : c_overlay_(NULL),
       c_stats_and_achievements_(NULL),
+      c_leaderboards_(NULL),
       c_steam_id_local_user_(SteamUser()->GetSteamID()),
       steam_app_id_(SteamUtils()->GetAppID()),
-      current_game_language_(SteamApps()->GetCurrentGameLanguage()),
-      available_game_languages_(SteamApps()->GetAvailableGameLanguages()) {
+      current_game_language_(std::string(SteamApps()->GetCurrentGameLanguage())),
+      available_game_languages_(std::string(SteamApps()->GetAvailableGameLanguages())) {
   init();
 }
 
@@ -58,13 +54,17 @@ std::string c_game_client::get_current_game_language() { return c_game_client::c
 
 std::string c_game_client::get_available_game_languages() { return c_game_client::available_game_languages_; }
 
+////////////////////////////////////////////////////////
+// Static fields & functions
+////////////////////////////////////////////////////////
+
 bool c_game_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
 
-std::string c_game_client::get_steam_user_persona_name(CSteamID c_steam_id) {
-  return SteamFriends()->GetFriendPersonaName(c_steam_id);
-}
+std::string c_game_client::get_steam_persona_name() { return std::string(SteamFriends()->GetPersonaName()); }
 
-std::string c_game_client::get_steam_persona_name() { return SteamFriends()->GetPersonaName(); }
+std::string c_game_client::get_steam_user_persona_name(CSteamID c_steam_id) {
+  return std::string(SteamFriends()->GetFriendPersonaName(c_steam_id));
+}
 
 bool c_game_client::is_subscribed() { return SteamApps()->BIsSubscribed(); }
 

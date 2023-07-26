@@ -10,6 +10,10 @@
 
 namespace steamworks {
 
+////////////////////////////////////////////////////////
+// Public functions
+////////////////////////////////////////////////////////
+
 c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {}
 
 void c_leaderboards::find_leaderboard(const std::string& leaderboard_name,

@@ -2,6 +2,10 @@
 
 namespace steamworks {
 
+////////////////////////////////////////////////////////
+// Public fields & functions
+////////////////////////////////////////////////////////
+
 c_overlay::c_overlay()
     : overlay_activated_(false), m_CallbackGameOverlayActivated(this, &c_overlay::on_game_overlay_activated) {}
 

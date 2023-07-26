@@ -1,5 +1,7 @@
 #include "c_main.h"
 
+// TODO: this should be in namespace enigma? will check later.
+// TODO: Is this the right place for this function?
 extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
   DEBUG_MESSAGE(pchDebugText, M_INFO);
 
@@ -11,9 +13,13 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
 
 namespace steamworks {
 
-c_game_client* c_main::c_game_client_{NULL};
+////////////////////////////////////////////////////////
+// Public fields & functions
+////////////////////////////////////////////////////////
 
-bool c_main::is_initialised_{false};
+////////////////////////////////////////////////////////
+// Static fields & functions
+////////////////////////////////////////////////////////
 
 bool c_main::init() {
   if (SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid)) {  // replace k_uAppIdInvalid with your AppID
@@ -24,15 +30,10 @@ bool c_main::init() {
     return false;
   }
 
-  if (!SteamUser()->BLoggedOn()) {
+  if (!c_game_client::is_user_logged_on()) {
     return false;
   }
 
-  // ISteamUser* steam_user = SteamUser();
-  // ISteamFriends* steam_friends = SteamFriends();
-  // ISteamUtils* steam_utils = SteamUtils();
-
-  // c_main::c_game_client_ = new c_game_client(steam_user, steam_friends, steam_utils);
   c_main::c_game_client_ = new c_game_client();
 
   c_main::is_initialised_ = true;
@@ -55,5 +56,17 @@ c_game_client* c_main::get_c_game_client() { return c_main::c_game_client_; }
 void c_main::run_callbacks() { SteamAPI_RunCallbacks(); }
 
 void c_main::set_warning_message_hook() { SteamClient()->SetWarningMessageHook(&SteamAPIDebugTextHook); }
+
+////////////////////////////////////////////////////////
+// Private fields & functions
+////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////
+// Static fields & functions
+////////////////////////////////////////////////////////
+
+c_game_client* c_main::c_game_client_{NULL};
+
+bool c_main::is_initialised_{false};
 
 }  // namespace steamworks
