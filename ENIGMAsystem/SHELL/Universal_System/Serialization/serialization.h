@@ -524,7 +524,7 @@ struct is_resize_buffer_available : std::false_type {};
 
 template <typename T>
 struct is_resize_buffer_available<T, std::void_t<decltype(enigma::internal_resize_buffer_for_fn(
-                                         std::declval<std::vector<std::byte> &>(), std::declval<const T &>()))>>
+                                         std::declval<std::vector<std::byte> &>(), std::declval<T &&>()))>>
     : std::true_type {};
 
 template <typename T>

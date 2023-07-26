@@ -122,10 +122,6 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
   constexpr static inline bool has_##NAME##_free_function = is_##NAME##_available<T>::value
 
 HAS_FREE_FUNCTION(byte_size, (std::declval<const T &>()));
-// HAS_FREE_FUNCTION(enigma_internal_deserialize_fn,
-//                   (std::declval<T &>(), std::declval<std::byte *>(), std::declval<std::size_t &>()));
-// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
-// HAS_FREE_FUNCTION(internal_serialize_into_fn, (std::declval<std::byte *>(),std::declval<T &&>()));
 
 /**
  * Now we have 1 struct with the following name:

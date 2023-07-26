@@ -20,7 +20,6 @@
 #define ENIGMA_DETECT_SIZE_H
 
 #include <type_traits>
-#include "../var4.h"
 
 inline std::size_t variant_size(const variant &value) {
   if (value.type == variant::ty_real) {
@@ -62,9 +61,6 @@ constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
 template <typename T>
 constexpr static inline bool always_false = false;
-
-// template <typename T>
-// inline std::size_t byte_size(const T &value) =delete;
 
 inline std::size_t byte_size(const variant &value) { return variant_size(value); }
 
