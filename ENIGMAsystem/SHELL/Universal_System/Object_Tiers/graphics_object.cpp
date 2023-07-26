@@ -21,119 +21,109 @@
   @brief Adds a graphics-related tier following the planar tier.
 */
 
-#include "graphics_object.h"
 #include "Universal_System/depth_draw.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "graphics_object.h"
 #include "../Serialization/serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
-#include <floatcomp.h>
 #include <math.h>
+#include <floatcomp.h>
 
-namespace enigma {
-object_graphics::object_graphics() {
-  image_single.image_index = &image_index;
-  image_single.image_speed = &image_speed;
-}
-object_graphics::object_graphics(unsigned _x, int _y) : object_timelines(_x, _y) {
-  image_single.image_index = &image_index;
-  image_single.image_speed = &image_speed;
-}
-object_graphics::~object_graphics() {}
+namespace enigma
+{
+  object_graphics::object_graphics() {
+    image_single.image_index = &image_index;
+    image_single.image_speed = &image_speed;
+  }
+  object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {
+    image_single.image_index = &image_index;
+    image_single.image_speed = &image_speed;
+  }
+  object_graphics::~object_graphics() {}
 
-variant object_graphics::myevent_draw() { return 0; }
-bool object_graphics::myevent_draw_subcheck() { return 0; }
-variant object_graphics::myevent_drawgui() { return 0; }
-bool object_graphics::myevent_drawgui_subcheck() { return 0; }
-variant object_graphics::myevent_drawresize() { return 0; }
+  variant object_graphics::myevent_draw()      { return 0; }
+  bool object_graphics::myevent_draw_subcheck() { return 0; }
+  variant object_graphics::myevent_drawgui()   { return 0; }
+  bool object_graphics::myevent_drawgui_subcheck() { return 0; }
+  variant object_graphics::myevent_drawresize()   { return 0; }
 
-void depthv::function(const variant &oldval) {
-  if (!myiter) {
-    return;
+  void depthv::function(const variant &oldval) {
+    if (!myiter) { return; }
+
+    rval.d = floor(rval.d);
+    if (fequal(oldval.rval.d, rval.d)) return;
+
+    std::map<int,std::pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
+      id_to_currentnextdepth.insert(std::pair<int,std::pair<double,double> >(myiter->inst->id, std::pair<double,double>(oldval.rval.d,rval.d)));
+    }
+    else { // Update the request to change in depth.
+      (*it).second.second = rval.d;
+    }
+  }
+  void depthv::init(gs_scalar d,object_basic* who) {
+    myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
+  }
+  void depthv::remove() {
+    std::map<int,std::pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    if (it == id_to_currentnextdepth.end()) { // Local value is valid, use it.
+      drawing_depths[rval.d].draw_events->unlink(myiter);
+    }
+    else { // Local value is invalid, use the one in the map.
+      drawing_depths[(*it).second.first].draw_events->unlink(myiter);
+    }
+    myiter = NULL;
   }
 
-  rval.d = floor(rval.d);
-  if (fequal(oldval.rval.d, rval.d)) return;
+  depthv::depthv() : multifunction_variant<depthv>(0), myiter(0) {}
+  depthv::~depthv() {}
 
-  std::map<int, std::pair<double, double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
-  if (it == id_to_currentnextdepth.end()) {  // Insert a request to change in depth.
-    id_to_currentnextdepth.insert(
-        std::pair<int, std::pair<double, double> >(myiter->inst->id, std::pair<double, double>(oldval.rval.d, rval.d)));
-  } else {  // Update the request to change in depth.
-    (*it).second.second = rval.d;
+  void image_singlev::function(const variant&) {
+    if (rval.d == -1) {
+      *image_speed = 1;
+    } else {
+      *image_index = rval.d;
+      *image_speed = 0;
+    }
+  }
+
+  int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
+  int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : enigma_user::sprite_get_height(sprite_index)*image_yscale; }
+  int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_xoffset(sprite_index)*image_xscale; }
+  int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index)*image_yscale; }
+  int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
+
+  std::vector<std::byte> object_graphics::serialize() {
+    auto bytes = object_timelines::serialize();
+    std::size_t len = 0;
+
+    enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
+    enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_graphics::deserialize_self(std::byte *iter) {
+    auto len = object_timelines::deserialize_self(iter);
+
+    unsigned char type;
+    enigma_deserialize(type, iter, len);
+    if (type != object_graphics::objtype) {
+      DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_graphics::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+                                   visible, image_xscale, image_yscale, image_angle);
+
+    return len;
+  }
+
+  std::pair<object_graphics, std::size_t> object_graphics::deserialize(std::byte *iter) {
+    object_graphics result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
   }
 }
-void depthv::init(gs_scalar d, object_basic *who) {
-  myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
-}
-void depthv::remove() {
-  std::map<int, std::pair<double, double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
-  if (it == id_to_currentnextdepth.end()) {  // Local value is valid, use it.
-    drawing_depths[rval.d].draw_events->unlink(myiter);
-  } else {  // Local value is invalid, use the one in the map.
-    drawing_depths[(*it).second.first].draw_events->unlink(myiter);
-  }
-  myiter = NULL;
-}
-
-depthv::depthv() : multifunction_variant<depthv>(0), myiter(0) {}
-depthv::~depthv() {}
-
-void image_singlev::function(const variant &) {
-  if (rval.d == -1) {
-    *image_speed = 1;
-  } else {
-    *image_index = rval.d;
-    *image_speed = 0;
-  }
-}
-
-int object_graphics::$sprite_width() const {
-  return sprite_index == -1 ? 0 : enigma_user::sprite_get_width(sprite_index) * image_xscale;
-}
-int object_graphics::$sprite_height() const {
-  return sprite_index == -1 ? 0 : enigma_user::sprite_get_height(sprite_index) * image_yscale;
-}
-int object_graphics::$sprite_xoffset() const {
-  return sprite_index == -1 ? 0 : enigma_user::sprite_get_xoffset(sprite_index) * image_xscale;
-}
-int object_graphics::$sprite_yoffset() const {
-  return sprite_index == -1 ? 0 : enigma_user::sprite_get_yoffset(sprite_index) * image_yscale;
-}
-int object_graphics::$image_number() const {
-  return sprite_index == -1 ? 0 : enigma_user::sprite_get_number(sprite_index);
-}
-
-std::vector<std::byte> object_graphics::serialize() {
-  auto bytes = object_timelines::serialize();
-  std::size_t len = 0;
-
-  enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
-  enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth, visible, image_xscale,
-                        image_yscale, image_angle);
-
-  bytes.shrink_to_fit();
-  return bytes;
-}
-
-std::size_t object_graphics::deserialize_self(std::byte *iter) {
-  auto len = object_timelines::deserialize_self(iter);
-
-  unsigned char type;
-  enigma_deserialize(type, iter, len);
-  if (type != object_graphics::objtype) {
-    DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
-                      "' does not match expected: " + std::to_string(object_graphics::objtype),
-                  MESSAGE_TYPE::M_FATAL_ERROR);
-  }
-  enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth, visible, image_xscale,
-                          image_yscale, image_angle);
-
-  return len;
-}
-
-std::pair<object_graphics, std::size_t> object_graphics::deserialize(std::byte *iter) {
-  object_graphics result;
-  auto len = result.deserialize_self(iter);
-  return {std::move(result), len};
-}
-}  // namespace enigma

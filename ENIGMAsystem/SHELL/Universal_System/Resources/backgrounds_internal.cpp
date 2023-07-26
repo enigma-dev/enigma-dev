@@ -8,13 +8,13 @@ AssetArray<Background> backgrounds;
 Background::Background(const Background& b, bool duplicateTexture) {
   width = b.width;
   height = b.height;
-
+  
   if (duplicateTexture && b.textureID != -1) {
     textureID = enigma::graphics_duplicate_texture(b.textureID);
   } else {
     textureID = b.textureID;
   }
-
+  
   textureBounds = b.textureBounds;
   isTileset = b.isTileset;
   tileWidth = b.tileWidth;
@@ -51,10 +51,10 @@ std::vector<std::byte> Background::serialize() const {
   enigma_serialize_many(len, result, texture_width, texture_height);
   result.resize(result.size() + (texture_width * texture_height * 4));
   std::copy(texture, texture + (texture_width * texture_height * 4),
-            reinterpret_cast<unsigned char*>(result.data() + len));
+            reinterpret_cast<unsigned char *>(result.data() + len));
   len += texture_width * texture_height;
-  enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
-                        tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+  enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w,
+                                 isTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
 
   result.shrink_to_fit();
   return result;
@@ -68,11 +68,11 @@ std::size_t Background::deserialize_self(std::byte* iter) {
   unsigned texture_height = 0;
   enigma_deserialize_many(iter, len, texture_width, texture_height);
   RawImage img{new unsigned char[texture_width * texture_height * 4], texture_width, texture_height};
-  std::copy(iter + len, iter + len + (texture_width * texture_height * 4), reinterpret_cast<std::byte*>(img.pxdata));
+  std::copy(iter + len, iter + len + (texture_width * texture_height * 4), reinterpret_cast<std::byte *>(img.pxdata));
   textureID = graphics_create_texture(img, false);
   len += texture_width * texture_height * 4;
-  enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
-                          tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+  enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w,
+                                 isTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
   _destroyed = false;
 
   return len;
@@ -84,4 +84,4 @@ std::pair<Background, std::size_t> Background::deserialize(std::byte* iter) {
   return {std::move(result), len};
 }
 
-}  // namespace enigma
+}
