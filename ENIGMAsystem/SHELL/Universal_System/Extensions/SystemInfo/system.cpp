@@ -1208,7 +1208,7 @@ long long gpu_videomemory() {
   }
   #else
   #if defined(CREATE_CONTEXT)
-  if (!create_context()) return "";
+  if (!create_context()) return -1;
   #endif
   unsigned int v = 0;
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
