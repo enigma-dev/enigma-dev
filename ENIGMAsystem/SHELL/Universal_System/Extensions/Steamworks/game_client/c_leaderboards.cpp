@@ -23,7 +23,6 @@
 #include "Universal_System/Extensions/DataStructures/include.h"
 
 #include "../leaderboards.h"
-#include "game_client.h"
 
 namespace steamworks {
 
@@ -188,44 +187,6 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
       },\n
       
       { 
-        \"name\"  : \"Loyal RaveN\", 
-        \"score\" : 63, 
-        \"rank\"  : 3, 
-        \"userID\": \"@i64@11000015c558396$i64$\" 
-      },\n
-      
-      { 
-        \"name\"  : \"simon\", 
-        \"score\" : 113, 
-        \"rank\"  : 4, 
-        \"userID\": \"@i64@1100001040447b6$i64$\" 
-      },\n
-      
-      { 
-        \"name\"  : \"meFroggy\", 
-        \"score\" : 138, 
-        \"rank\"  : 5, 
-        \"userID\": 
-        \"@i64@110000117c9d62b$i64$\", 
-        \"data\"  : \"HG1lRnJvZ2d5IHdhcyBoZXJlIDopAAAA\" 
-      },\n
-      { 
-        \"name\"  : \"падонак fashion\", 
-        \"score\" : 155, 
-        \"rank\"  : 6, 
-        \"userID\": \"@i64@11000010be342ce$i64$\", 
-        \"data\"  : \"FEZlZWxpbmcgU2lja25lenogd2FzIGhlcmUgOikAAAA=\" 
-      },\n
-      
-      { 
-        \"name\"  : \"hermitpal\", 
-        \"score\" : 196, 
-        \"rank\"  : 7, 
-        \"userID\": \"@i64@110000106401474$i64$\", 
-        \"data\"  : \"R2hlcm1pdCB3YXMgaGVyZSA6KQA=\" 
-      },\n
-      
-      { 
         \"name\"  : \"Joeyman98\", 
         \"score\" : 239, 
         \"rank\"  : 8, 
@@ -254,7 +215,7 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
   "lb_name":"YYLeaderboard_10\/29\/21--",
   "event_type":"leaderboard_download",
   "id":5.0,
-  "num_entries":10.0,
+  "num_entries":5.0,
   "status":1.0
   }
 
