@@ -254,15 +254,7 @@ struct HumanReadable {
   std::ostream& operator<<(std::ostream& os, HumanReadable hr) {
     int i = 0;
     long double mantissa = hr.size;
-    for (; mantissa >= 1024; mantissa /= 1024, i++) {
-      #if defined(_WIN32)
-      MSG msg;
-      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-      #endif
-    }
+    for (; mantissa >= 1024; mantissa /= 1024, i++) { }
     mantissa = std::ceil(mantissa * 100) / 100;
     os << mantissa << " " << "BKMGTPE"[i];
     return !i ? os : os << "B";
