@@ -1207,6 +1207,9 @@ long long gpu_videomemory() {
     pclose(fp);
   }
   #else
+  #if defined(CREATE_CONTEXT)
+  if (!create_context()) return "";
+  #endif
   unsigned int v = 0;
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
@@ -1392,6 +1395,7 @@ std::string cpu_brand() {
   #endif
 }
 
+static int numcpus = -1;
 static int numcores = -1;
 int cpu_numcores() {
   if (numcores != -1) {
@@ -1483,7 +1487,7 @@ int cpu_numcores() {
   int mNumCores = 0;
   bool mIsHTT = cpuID1.EDX() & AVX_POS;
   std::string cpuvendor = cpu_vendor();
-  int numcpus = cpu_numcpus();
+  numcpus = cpu_numcpus();
   if (cpuvendor == "GenuineIntel") {
     if(HFS >= 11) {
       CPUID cpuID4(0x0B, 0);
@@ -1547,14 +1551,15 @@ int cpu_numcores() {
 }
 
 int cpu_numcpus() {
+  if (numcpus != -1) {
+    return numcpus;
+  }
   #if defined(_WIN32)
-  int numcpus = -1;
   SYSTEM_INFO sysinfo;
   GetSystemInfo(&sysinfo);
   numcpus = sysinfo.dwNumberOfProcessors;
   return numcpus;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  int numcpus = -1;
   int logical_cpus = -1;
   std::size_t len = sizeof(int);
   if (!sysctlbyname("machdep.cpu.thread_count", &logical_cpus, &len, nullptr, 0)) {
@@ -1562,7 +1567,6 @@ int cpu_numcpus() {
   }
   return numcpus;
   #elif defined(__linux__)
-  int numcpus = -1;
   char buf[1024];
   const char *result = nullptr;
   FILE *fp = popen("lscpu | grep 'CPU(s):' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'", "r");
@@ -1578,7 +1582,6 @@ int cpu_numcpus() {
   }
   return numcpus;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
-  int numcpus = -1;
   int mib[2];
   mib[0] = CTL_HW;
   mib[1] = HW_NCPU;
@@ -1589,7 +1592,6 @@ int cpu_numcpus() {
   }
   return numcpus;
   #elif defined(__sun)
-  int numcpus = -1;
   char buf[1024];
   const char *result = nullptr;
   FILE *fp = popen("psrinfo -v -p | grep 'The physical processor has ' | awk '{print $5}'", "r");
