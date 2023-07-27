@@ -720,19 +720,28 @@ long long memory_totalvmem() {
   }
   return -1;
   #elif defined(__sun)
+  int i = 0, n = 0;
   long long total = 0;
   long page_s = sysconf(_SC_PAGESIZE);
+again:
   int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
   if (nswap > 0) {
-    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    swaptbl_t *swaps = (swaptbl_t *)malloc((nswap * sizeof(swapent_t)) + sizeof(struct swaptable));
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
         for (int i = 0; i < (nswap + 1); i++) {
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
         }
-        if (swapctl(SC_LIST, swaps) > 0) {
-          for (int i = 0; i < nswap; i++) {
+        swaps->swt_n = nswap + 1;
+        if ((n = swapctl(SC_LIST, swaps)) > 0) {
+          if (n > nswap) {
+            free(strtab);
+            free(swaps);
+            goto again;
+          }
+          for (int i = 0; i < n; i++) {
             total += (swaps->swt_ent[i].ste_pages * page_s);
           }
         }
@@ -741,10 +750,6 @@ long long memory_totalvmem() {
       free(swaps);
     }
     return total;
-  }
-  struct anoninfo ai;
-  if (swapctl(SC_AINFO, &ai) != -1) {
-    return (ai.ani_max * page_s);
   }
   return -1;
   #else
@@ -808,19 +813,28 @@ long long memory_availvmem() {
   }
   return -1;
   #elif defined(__sun)
+  int i = 0, n = 0;
   long long avail = 0;
   long page_s = sysconf(_SC_PAGESIZE);
+again:
   int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
   if (nswap > 0) {
-    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    swaptbl_t *swaps = (swaptbl_t *)malloc((nswap * sizeof(swapent_t)) + sizeof(struct swaptable));
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
         for (int i = 0; i < (nswap + 1); i++) {
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
         }
-        if (swapctl(SC_LIST, swaps) > 0) {
-          for (int i = 0; i < nswap; i++) {
+        swaps->swt_n = nswap + 1;
+        if ((n = swapctl(SC_LIST, swaps)) > 0) {
+          if (n > nswap) {
+            free(strtab);
+            free(swaps);
+            goto again;
+          }
+          for (i = 0; i < n; i++) {
             avail += (swaps->swt_ent[i].ste_free * page_s);
           }
         }
@@ -829,10 +843,6 @@ long long memory_availvmem() {
       free(swaps);
     }
     return avail;
-  }
-  struct anoninfo ai;
-  if (swapctl(SC_AINFO, &ai) != -1) {
-    return (ai.ani_free * page_s);
   }
   return -1;
   #else
@@ -896,19 +906,28 @@ long long memory_usedvmem() {
   }
   return -1;
   #elif defined(__sun)
+  int i = 0, n = 0;
   long long used = 0;
   long page_s = sysconf(_SC_PAGESIZE);
+again:
   int nswap = swapctl(SC_GETNSWP, nullptr);
+  if (!nswap) return 0;
   if (nswap > 0) {
-    swaptbl_t *swaps = (swaptbl_t *)malloc(nswap * sizeof(swapent_t));
+    swaptbl_t *swaps = (swaptbl_t *)malloc((nswap * sizeof(swapent_t)) + sizeof(struct swaptable));
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
         for (int i = 0; i < (nswap + 1); i++) {
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
         }
-        if (swapctl(SC_LIST, swaps) > 0) {
-          for (int i = 0; i < nswap; i++) {
+        swaps->swt_n = nswap + 1;
+        if ((n = swapctl(SC_LIST, swaps)) > 0) {
+          if (n > nswap) {
+            free(strtab);
+            free(swaps);
+            goto again;
+          }
+          for (i = 0; i < n; i++) {
             used += ((swaps->swt_ent[i].ste_pages - swaps->swt_ent[i].ste_free) * page_s);
           }
         }
@@ -917,10 +936,6 @@ long long memory_usedvmem() {
       free(swaps);
     }
     return used;
-  }
-  struct anoninfo ai;
-  if (swapctl(SC_AINFO, &ai) != -1) {
-    return ((ai.ani_max * page_s) - (ai.ani_free * page_s));
   }
   return -1;
   #else
