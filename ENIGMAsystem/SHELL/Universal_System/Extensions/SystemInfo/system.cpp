@@ -181,17 +181,19 @@ the calling process hasn't already done this on its own ... */
 #if defined(CREATE_CONTEXT)
 bool create_context() {
   if (!window) {
-    #if (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-    setenv("SDL_VIDEODRIVER", "x11", 1);
+    SDL_setenv("SDL_VIDEODRIVER", "x11", 1);
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    #endif
-    if (SDL_Init(SDL_INIT_VIDEO)) return false;
+    if (SDL_Init(SDL_INIT_VIDEO)) 
+      return false;
     window = SDL_CreateWindow("", 0, 0, 1, 1, SDL_WINDOW_OPENGL | SDL_WINDOW_HIDDEN);
-    if (!window) return false;
+    if (!window) 
+      return false;
     SDL_GLContext context = SDL_GL_CreateContext(window);
-    if (!context) return false;
+    if (!context) 
+      return false;
     int err = SDL_GL_MakeCurrent(window, context);
-    if (err) return false;
+    if (err) 
+      return false;
   }
   return true;
 }
@@ -216,10 +218,12 @@ static std::string read_output(std::string cmd) {
   HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
   SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
   proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
-  if (!proceed) return "";
+  if (!proceed)
+    return "";
   SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
   proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
-  if (!proceed) return "";
+  if (!proceed)
+    return "";
   STARTUPINFO si;
   ZeroMemory(&si, sizeof(si));
   si.cb = sizeof(STARTUPINFO);
@@ -249,6 +253,7 @@ static std::string read_output(std::string cmd) {
       // remove trailing whitespace and newlines we do not need in return strings
       while (!result.empty() && (result.back() == ' ' || result.back() == '\t' ||
         result.back() == '\r' || result.back() == '\n')) {
+        message_pump();
         result.pop_back();
       }
     }
@@ -560,7 +565,7 @@ std::string os_product_name() {
     doc.open("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", std::ios::in);
     if (doc.is_open()) {
       std::string tmp2;
-      while(std::getline(doc, tmp2)) {
+      while (std::getline(doc, tmp2)) {
         std::string tmp3 = tmp2;
         std::transform(tmp2.begin(), tmp2.end(), tmp2.begin(), ::toupper);
         std::size_t pos1 = tmp2.find("SOFTWARE LICENSE AGREEMENT FOR MAC OS X");
