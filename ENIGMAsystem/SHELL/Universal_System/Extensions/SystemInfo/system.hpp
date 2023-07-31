@@ -29,25 +29,24 @@
 
 namespace ngs::sys {
 
-std::string human_readable(long double nbytes);
-std::string utsname_sysname();
-std::string utsname_nodename();
-std::string utsname_release();
-std::string utsname_codename();
-std::string utsname_version();
-std::string utsname_machine();
-long long memory_totalram();
-long long memory_availram();
-long long memory_usedram();
-long long memory_totalvmem();
-long long memory_availvmem();
-long long memory_usedvmem();
-std::string gpu_vendor();
+std::string os_kernel_name();
+std::string os_device_name();
+std::string os_kernel_release();
+std::string os_product_name();
+std::string os_kernel_version();
+std::string os_architecture();
+std::string memory_totalram(bool human_readable);
+std::string memory_freeram(bool human_readable);
+std::string memory_usedram(bool human_readable);
+std::string memory_totalswap(bool human_readable);
+std::string memory_freeswap(bool human_readable);
+std::string memory_usedswap(bool human_readable);
+std::string memory_totalvram(bool human_readable);
+std::string gpu_manufacturer();
 std::string gpu_renderer();
-long long gpu_videomemory();
 std::string cpu_vendor();
-std::string cpu_brand();
-int cpu_numcpus();
-int cpu_numcores();
+std::string cpu_processor();
+std::string cpu_processor_count();
+std::string cpu_core_count();
 
 } // namespace ngs::sys
