@@ -273,9 +273,8 @@ static std::string read_output(std::string cmd) {
     }
     // remove trailing whitespace and newlines we do not need in return strings
     while (!result.empty() && (result.back() == ' ' || result.back() == '\t' ||
-      result.back() == '\r' || result.back() == '\n')) {
+      result.back() == '\r' || result.back() == '\n'))
       result.pop_back();
-    }
     pclose(fp);
   }
   #endif
