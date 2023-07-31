@@ -24,7 +24,6 @@
  
 */
 
-#pragma once
 #include "Universal_System/Extensions/SystemInfo/pci.ids.hpp"
 #include "Universal_System/Extensions/SystemInfo/system.hpp"
 
