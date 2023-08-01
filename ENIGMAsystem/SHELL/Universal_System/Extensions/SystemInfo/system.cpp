@@ -43,8 +43,10 @@
 #include <cstdio>
 #include <cmath>
 #if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
+#if defined(CREATE_CONTEXT)
 #include <SDL.h>
 #include <SDL_opengl.h>
+#endif
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/gl.h>
@@ -150,6 +152,8 @@ bool numcpuserror = false;
 long long totalram = -1;
 bool totalramerror = false;
 
+std::string wine_version;
+
 struct hreadable {
   long double size = 0;
   private: friend
@@ -208,15 +212,34 @@ void message_pump() {
     DispatchMessage(&msg);
   }
 }
+
+std::string wine_get_version() {
+  if (!wine_version.empty())
+    return wine_version;
+  static const char *(CDECL *pwine_get_version)(void);
+  HMODULE hntdll = GetModuleHandle("ntdll.dll");
+  if (!hntdll)
+    return pointer_null();
+  pwine_get_version = (const char* (*)())GetProcAddress(hntdll, "wine_get_version");
+  if (!pwine_get_version)
+    return pointer_null();
+  return pwine_get_version();
+}
 #endif
 
 static std::string read_output(std::string cmd) {
   std::string result;
   #if defined(_WIN32)
   bool proceed = true;
-  HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
-  HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
-  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
+  HANDLE stdin_read = nullptr;
+  HANDLE stdin_write = nullptr;
+  HANDLE stdout_read = nullptr; 
+  HANDLE stdout_write = nullptr;
+  SECURITY_ATTRIBUTES sa = { 
+    sizeof(SECURITY_ATTRIBUTES), 
+    nullptr, 
+    true 
+  };
   proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
   if (!proceed)
     return "";
@@ -242,7 +265,10 @@ static std::string read_output(std::string cmd) {
     char buffer[1024];
     CloseHandle(stdout_write);
     CloseHandle(stdin_read);
-    HANDLE wait_handles[] = { pi.hProcess, stdout_read };
+    HANDLE wait_handles[] = { 
+      pi.hProcess,
+      stdout_read
+    };
     while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
       message_pump();
       while (ReadFile(stdout_read, buffer, 1024, &nRead, nullptr) && nRead) {
@@ -403,8 +429,10 @@ std::string get_vendor_or_device_name_by_id(unsigned identifier, bool vendor_or_
 } // anonymous namespace
 
 std::string os_kernel_name() {
-  if (!kernelname.empty() || kernelnameerror)
+  if (!kernelname.empty())
     return kernelname;
+  if (kernelnameerror)
+    return pointer_null();
   #if !defined(_WIN32)
   #if !defined(__sun)
   struct utsname name;
@@ -434,8 +462,10 @@ std::string os_kernel_name() {
 }
 
 std::string os_device_name() {
-  if (!devicename.empty() || devicenameerror)
+  if (!devicename.empty())
     return devicename;
+  if (devicenameerror)
+    return pointer_null();
   #if !defined(_WIN32)
   #if !defined(__sun)
   struct utsname name;
@@ -471,8 +501,10 @@ std::string os_device_name() {
 }
 
 std::string os_kernel_release() {
-  if (!kernelrelease.empty() || kernelreleaseerror)
+  if (!kernelrelease.empty())
     return kernelrelease;
+  if (kernelreleaseerror)
+    return pointer_null();
   #if !defined(_WIN32)
   #if !defined(__sun)
   struct utsname name;
@@ -496,6 +528,18 @@ std::string os_kernel_release() {
   }
   allocate_windows_version_number_and_product_name();
   kernelrelease = windows_version_number;
+  wine_version = wine_get_version();
+  if (wine_version != pointer_null()) {
+    std::string tmp = os_kernel_version();
+    if (!tmp.empty()) {
+      tmp = std::regex_replace(tmp, std::regex("Microsoft Windows "), "");
+      tmp = std::regex_replace(tmp, std::regex("v"), "");
+      tmp = std::regex_replace(tmp, std::regex("V"), "");
+      tmp = std::regex_replace(tmp, std::regex("\\["), "");
+      tmp = std::regex_replace(tmp, std::regex("\\]"), "");
+      kernelrelease = tmp;
+    }
+  }
   #endif
   if (!kernelrelease.empty())
     return kernelrelease;
@@ -504,8 +548,10 @@ std::string os_kernel_release() {
 }
 
 std::string os_kernel_version() {
-  if (!kernelversion.empty() || kernelversionerror)
+  if (!kernelversion.empty())
     return kernelversion;
+  if (kernelversionerror)
+    return pointer_null();
   #if !defined(_WIN32)
   #if !defined(__sun)
   #if !defined(__DragonFly__)
@@ -546,8 +592,10 @@ std::string os_kernel_version() {
 }
 
 std::string os_product_name() {
-  if (!productname.empty() || productnameerror)
+  if (!productname.empty())
     return productname;
+  if (productnameerror)
+    return pointer_null();
   #if defined(_WIN32)
   if (!windows_product_name.empty()) {
     productname = windows_product_name;
@@ -555,6 +603,10 @@ std::string os_product_name() {
   }
   allocate_windows_version_number_and_product_name();
   productname = windows_product_name;
+  wine_version = wine_get_version();
+  if (wine_version != pointer_null()) {
+    productname = "wine-" + wine_version;
+  }
   #elif (defined(__APPLE__) && defined(__MACH__))
   std::string tmp1 = read_output("echo $(sw_vers | grep 'ProductName:' | uniq | awk 'NR==1{$1=$1;print}' && sw_vers | grep 'ProductVersion:' | uniq | awk 'NR==1{$1=$1;print}')");
   if (!tmp1.empty()) {
@@ -610,8 +662,10 @@ std::string os_product_name() {
 }
 
 std::string os_architecture() {
-  if (!architecture.empty() || architectureerror)
+  if (!architecture.empty())
     return architecture;
+  if (architectureerror)
+    return pointer_null();
   #if !defined(_WIN32)
   #if !defined(__sun)
   struct utsname name;
@@ -641,8 +695,10 @@ std::string os_architecture() {
 }
 
 std::string memory_totalram(bool human_readable) {
-  if (totalram != -1 || totalramerror)
+  if (totalram != -1)
     return human_readable ? make_hreadable(totalram) : std::to_string(totalram);
+  if (totalramerror)
+    return pointer_null();
   #if defined(_WIN32)
   MEMORYSTATUSEX statex;
   statex.dwLength = sizeof(statex);
@@ -669,7 +725,9 @@ std::string memory_totalram(bool human_readable) {
   #elif defined(__sun)
   totalram = strtoll(read_output("prtconf | grep 'Memory size:' | uniq | cut -d' ' -f3- | awk '{print $1 * 1024};'").c_str(), nullptr, 10) * 1024;
   #endif
-  if (totalram > 0)
+  if (!totalram)
+    totalram = -1;
+  if (totalram != -1)
     return human_readable ? make_hreadable(totalram) : std::to_string(totalram);
   totalramerror = true;
   return pointer_null();
@@ -701,7 +759,9 @@ std::string memory_freeram(bool human_readable) {
   #elif defined(__sun)
   freeram = (sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGESIZE));
   #endif
-  return human_readable ? make_hreadable(freeram) : std::to_string(freeram);
+  if (freeram != -1)
+    return human_readable ? make_hreadable(freeram) : std::to_string(freeram);
+  return pointer_null();
 }
 
 std::string memory_usedram(bool human_readable) {
@@ -711,7 +771,7 @@ std::string memory_usedram(bool human_readable) {
   statex.dwLength = sizeof(statex);
   if (GlobalMemoryStatusEx(&statex))
     usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
-  #elif ((defined(__APPLE__) && defined(__MACH__)) ||defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   long long total = strtoull(memory_totalram(false).c_str(), nullptr, 10);
   long long avail = strtoull(memory_freeram(false).c_str(), nullptr, 10);
   if (total != -1 && avail != -1)
@@ -721,7 +781,9 @@ std::string memory_usedram(bool human_readable) {
   if (!sysinfo(&info))
     usedram = ((info.totalram - info.freeram) * info.mem_unit);
   #endif
-  return human_readable ? make_hreadable(usedram) : std::to_string(usedram);
+  if (usedram != -1)
+    return human_readable ? make_hreadable(usedram) : std::to_string(usedram);
+  return pointer_null();
 }
 
 std::string memory_totalswap(bool human_readable) {
@@ -805,7 +867,9 @@ again:
     totalswap = total;
   }
   #endif
-  return human_readable ? make_hreadable(totalswap) : std::to_string(totalswap);
+  if (totalswap != -1)
+    return human_readable ? make_hreadable(totalswap) : std::to_string(totalswap);
+  return pointer_null();
 }
 
 std::string memory_freeswap(bool human_readable) {
@@ -889,7 +953,9 @@ again:
     freeswap = avail;
   }
   #endif
-  return human_readable ? make_hreadable(freeswap) : std::to_string(freeswap);
+  if (freeswap != -1)
+    return human_readable ? make_hreadable(freeswap) : std::to_string(freeswap);
+  return pointer_null();
 }
 
 std::string memory_usedswap(bool human_readable) {
@@ -973,12 +1039,16 @@ again:
     usedswap = used;
   }
   #endif
-  return human_readable ? make_hreadable(usedswap) : std::to_string(usedswap);
+  if (usedswap != -1)
+    return human_readable ? make_hreadable(usedswap) : std::to_string(usedswap);
+  return pointer_null();
 }
 
 std::string gpu_manufacturer() {
-  if (!gpuvendor.empty() || gpuvendorerror)
+  if (!gpuvendor.empty())
     return gpuvendor;
+  if (gpuvendorerror)
+    return pointer_null();
   #if defined(_WIN32)
   IDXGIFactory *pFactory = nullptr;
   if (CreateDXGIFactory(__uuidof(IDXGIFactory), (void **)&pFactory) == S_OK) {
@@ -1037,8 +1107,10 @@ std::string gpu_manufacturer() {
 }
 
 std::string gpu_renderer() {
-  if (!gpurenderer.empty() || gpurenderererror) 
+  if (!gpurenderer.empty())
     return gpurenderer;
+  if (gpurenderererror)
+    return pointer_null();
   std::string result;
   #if defined(_WIN32)
   auto narrow = [](std::wstring wstr) {
@@ -1129,6 +1201,7 @@ std::string memory_totalvram(bool human_readable) {
   #else
   #if defined(CREATE_CONTEXT)
   if (!create_context()) {
+    videomemory = -1;
     videomemoryerror = true;
     return pointer_null();
   }
@@ -1139,15 +1212,19 @@ std::string memory_totalvram(bool human_readable) {
   queryInteger(GLX_RENDERER_VIDEO_MEMORY_MESA, &v);
   videomemory = v * 1024 * 1024;
   #endif
-  if (videomemory > 0) 
+  if (!videomemory)
+    videomemory = -1;
+  if (videomemory != -1) 
     return human_readable ? make_hreadable(videomemory) : std::to_string(videomemory);
   videomemoryerror = true;
   return pointer_null();
 }
 
 std::string cpu_vendor() {
-  if (!cpuvendor.empty() || cpuvendorerror)
+  if (!cpuvendor.empty())
     return cpuvendor;
+  if (cpuvendorerror)
+    return pointer_null();
   #if defined(_WIN32)
   char buf[1024];
   DWORD sz = sizeof(buf);
@@ -1183,8 +1260,10 @@ std::string cpu_vendor() {
 }
 
 std::string cpu_processor() {
-  if (!cpubrand.empty() && cpubranderror)
+  if (!cpubrand.empty())
     return cpubrand;
+  if (cpubranderror)
+    return pointer_null();
   #if defined(_WIN32)
   char buf[1024];
   DWORD sz = sizeof(buf);
@@ -1244,7 +1323,8 @@ std::string cpu_core_count() {
   #elif defined(__DragonFly__)
   int threads_per_core = (int)strtol(read_output("dmesg | grep 'threads_per_core: ' | awk '{print substr($6, 0, length($6) - 1)}'").c_str(), nullptr, 10);
   numcores = (int)(strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10) / ((threads_per_core) ? threads_per_core : 1));
-  #elif (defined(_WIN32) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #endif
+  #if (defined(_WIN32) || defined(__NetBSD__) || defined(__OpenBSD__))
   #if defined(_WIN32)
   /* use x86-specific inline assembly as the fallback; 
   for windows programs run under WINE (no wmic cli) */
@@ -1292,8 +1372,10 @@ std::string cpu_core_count() {
   int numsmt = 0;
   bool ishtt = cpuid1.edx() & avx_pos;
   numcpus = (int)strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10);
-  if (!numcpus)
-    numcpus = -1;
+  if (!numcpus) {
+    numcoreserror = true;
+    return pointer_null();
+  }
   if (tmp2.find("INTEL") != std::string::npos) {
     if(hfs >= 11) {
       cpuid cpuid4(0x0B, 0);
@@ -1301,38 +1383,33 @@ std::string cpu_core_count() {
       numcores = numcpus / numsmt;
     } else {
       if (hfs >= 1) {
-        if (hfs >= 4) {
+        if (hfs >= 4)
           numcores = 1 + (cpuid(4, 0).eax() >> 26) & 0x3F;
-        }
       }
       if (ishtt) {
-        if (numcores < 1) {
+        if (numcores < 1)
           numcores = 1;
-        }
-      } else {
+      } else
         numcores = 1;
-      }
     }
   } else if (tmp2.find("AMD") != std::string::npos) {
     numsmt = 1 + ((cpuid(0x8000001E, 0).ebx() >> 8) & 0xFF);
-    if (numcpus > 0 && numsmt > 0) {
+    if (numcpus > 0 && numsmt > 0)
       numcores = numcpus / numsmt;
-    } else {
+    else {
       if (hfs >= 1) {
-        if (cpuid(0x80000000, 0).eax() >= 8) {
+        if (cpuid(0x80000000, 0).eax() >= 8)
           numcores = 1 + (cpuid(0x80000008, 0).ecx() & 0xFF);
-        }
       }
       if (ishtt) {
-        if (numcores < 1) {
+        if (numcores < 1)
           numcores = 1;
-        }
-      } else {
+      } else
         numcores = 1;
-      }
     }
   }
-  #elif defined(__sun)
+  #endif
+  #if defined(__sun)
   numcores = (int)strtol(read_output("echo `expr $(kstat cpu_info | grep 'pkg_core_id' | uniq | wc -l | awk '{print $1}') / $(psrinfo -p)`").c_str(), nullptr, 10);
   #endif
   if (!numcores)
