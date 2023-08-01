@@ -220,7 +220,7 @@ std::string wine_get_version() {
   HMODULE hntdll = GetModuleHandle("ntdll.dll");
   if (!hntdll)
     return pointer_null();
-  pwine_get_version = (const char* (*)())GetProcAddress(hntdll, "wine_get_version");
+  pwine_get_version = (const char *(*)())GetProcAddress(hntdll, "wine_get_version");
   if (!pwine_get_version)
     return pointer_null();
   return pwine_get_version();
