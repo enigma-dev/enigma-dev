@@ -55,6 +55,7 @@
 #if defined(_WIN32)
 #include <winsock2.h>
 #include <windows.h>
+#include <psapi.h>
 #include <dxgi.h>
 #else
 #if defined(__linux__)
