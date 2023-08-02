@@ -403,18 +403,16 @@ std::string get_vendor_or_device_name_by_id(unsigned identifier, bool vendor_or_
     #if defined(_WIN32)
     message_pump();
     #endif
-    if (vec[i].empty() || (!vec[i].empty() && vec[i][0] == '#')) {
+    if (vec[i].empty() || (!vec[i].empty() && vec[i][0] == '#'))
       continue;
-    }
     std::size_t pos1 = vec[i].find(" ");
     if (pos1 != std::string::npos && vec[i][0] != '\t') {
       std::istringstream converter1(vec[i].substr(0, pos1));
       converter1 >> std::hex >> vendor_id;
       vendor_name_by_id[vendor_id] = vec[i].substr(pos1 + 2);
     }
-    if (vendor_name_by_id[vendor_id] != vendor_name_by_id[identifier]) {
+    if (vendor_name_by_id[vendor_id] != vendor_name_by_id[identifier])
       continue;
-    }
     std::size_t pos2 = vec[i].find("\t\t");
     if (pos2 == std::string::npos && vec[i][0] == '\t') {
       std::size_t pos3 = vec[i].find(" ");
@@ -791,10 +789,11 @@ std::string memory_usedram(bool human_readable) {
 std::string memory_totalswap(bool human_readable) {
   long long totalswap = -1;
   #if defined(_WIN32)
-  MEMORYSTATUSEX statex;
-  statex.dwLength = sizeof(statex);
-  if (GlobalMemoryStatusEx(&statex))
-    totalswap = (long long)statex.ullTotalPageFile;
+  PERFORMANCE_INFORMATION pi;
+  memset(&pi, 0, sizeof(pi));
+  pi.cb = sizeof(pi);
+  if (GetPerformanceInfo(&pi, sizeof(pi)))
+    totalswap = (long long)(pi.CommitLimit * pi.PageSize);
   #elif (defined(__APPLE__) && defined(__MACH__))
   struct xsw_usage info;
   std::size_t sz = sizeof(info);
@@ -827,9 +826,8 @@ std::string memory_totalswap(bool human_readable) {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          if (swaps[i].se_flags & SWF_ENABLE) {
+          if (swaps[i].se_flags & SWF_ENABLE)
             total += ((swaps[i].se_nblks / (1024 / block_s)) * 1024);
-          }
         }
       }
       free(swaps);
@@ -848,9 +846,8 @@ again:
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
-        for (int i = 0; i < (nswap + 1); i++) {
+        for (int i = 0; i < (nswap + 1); i++)
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
-        }
         swaps->swt_n = nswap + 1;
         if ((n = swapctl(SC_LIST, swaps)) > 0) {
           if (n > nswap) {
@@ -858,9 +855,8 @@ again:
             free(swaps);
             goto again;
           }
-          for (int i = 0; i < n; i++) {
+          for (int i = 0; i < n; i++)
             total += (swaps->swt_ent[i].ste_pages * page_s);
-          }
         }
         free(strtab);
       }
@@ -877,10 +873,11 @@ again:
 std::string memory_freeswap(bool human_readable) {
   long long freeswap = -1;
   #if defined(_WIN32)
-  MEMORYSTATUSEX statex;
-  statex.dwLength = sizeof(statex);
-  if (GlobalMemoryStatusEx(&statex))
-    freeswap = (long long)statex.ullAvailPageFile;
+  PERFORMANCE_INFORMATION pi;
+  memset(&pi, 0, sizeof(pi));
+  pi.cb = sizeof(pi);
+  if (GetPerformanceInfo(&pi, sizeof(pi)))
+    freeswap = (long long)((pi.CommitLimit - pi.CommitTotal) * pi.PageSize);
   #elif (defined(__APPLE__) && defined(__MACH__))
   struct xsw_usage info;
   std::size_t sz = sizeof(info);
@@ -913,9 +910,8 @@ std::string memory_freeswap(bool human_readable) {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          if (swaps[i].se_flags & SWF_ENABLE) {
+          if (swaps[i].se_flags & SWF_ENABLE)
             avail += (((swaps[i].se_nblks - swaps[i].se_inuse) / (1024 / block_s)) * 1024);
-          }
         }
       }
       free(swaps);
@@ -934,9 +930,8 @@ again:
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
-        for (int i = 0; i < (nswap + 1); i++) {
+        for (int i = 0; i < (nswap + 1); i++)
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
-        }
         swaps->swt_n = nswap + 1;
         if ((n = swapctl(SC_LIST, swaps)) > 0) {
           if (n > nswap) {
@@ -944,9 +939,8 @@ again:
             free(swaps);
             goto again;
           }
-          for (i = 0; i < n; i++) {
+          for (i = 0; i < n; i++)
             avail += (swaps->swt_ent[i].ste_free * page_s);
-          }
         }
         free(strtab);
       }
@@ -963,10 +957,14 @@ again:
 std::string memory_usedswap(bool human_readable) {
   long long usedswap = -1;
   #if defined(_WIN32)
-  MEMORYSTATUSEX statex;
-  statex.dwLength = sizeof(statex);
-  if (GlobalMemoryStatusEx(&statex))
-    usedswap = (long long)(statex.ullTotalPageFile - statex.ullAvailPageFile);
+  PERFORMANCE_INFORMATION pi;
+  memset(&pi, 0, sizeof(pi));
+  pi.cb = sizeof(pi);
+  if (GetPerformanceInfo(&pi, sizeof(pi))) {
+    long long totalswap = (long long)(pi.CommitLimit * pi.PageSize);
+    long long freeswap = (long long)((pi.CommitLimit - pi.CommitTotal) * pi.PageSize);
+    usedswap = totalswap - freeswap;
+  }
   #elif (defined(__APPLE__) && defined(__MACH__))
   struct xsw_usage info;
   std::size_t sz = sizeof(info);
@@ -999,9 +997,8 @@ std::string memory_usedswap(bool human_readable) {
     if (swaps) {
       if (swapctl(SWAP_STATS, swaps, nswap) > 0) {
         for (int i = 0; i < nswap; i++) {
-          if (swaps[i].se_flags & SWF_ENABLE) {
+          if (swaps[i].se_flags & SWF_ENABLE)
             used += ((swaps[i].se_inuse / (1024 / block_s)) * 1024);
-          }
         }
       }
       free(swaps);
@@ -1020,9 +1017,8 @@ again:
     if (swaps) {
       char *strtab = (char *)malloc((nswap + 1) * 80);
       if (strtab) {
-        for (int i = 0; i < (nswap + 1); i++) {
+        for (int i = 0; i < (nswap + 1); i++)
           swaps->swt_ent[i].ste_path = strtab + (i * 80);
-        }
         swaps->swt_n = nswap + 1;
         if ((n = swapctl(SC_LIST, swaps)) > 0) {
           if (n > nswap) {
@@ -1030,9 +1026,8 @@ again:
             free(swaps);
             goto again;
           }
-          for (i = 0; i < n; i++) {
+          for (i = 0; i < n; i++)
             used += ((swaps->swt_ent[i].ste_pages - swaps->swt_ent[i].ste_free) * page_s);
-          }
         }
         free(strtab);
       }
@@ -1057,9 +1052,8 @@ std::string gpu_manufacturer() {
     IDXGIAdapter *pAdapter = nullptr;
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
-      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK)
         gpuvendor = get_vendor_or_device_name_by_id(adapterDesc.VendorId, 0);
-      }
       pAdapter->Release();
     }
     pFactory->Release();
@@ -1191,9 +1185,8 @@ std::string memory_totalvram(bool human_readable) {
     IDXGIAdapter *pAdapter = nullptr;
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
-      if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
+      if (pAdapter->GetDesc(&adapterDesc) == S_OK)
         videomemory = (long long)adapterDesc.DedicatedVideoMemory;
-      }
       pAdapter->Release();
     }
     pFactory->Release();
