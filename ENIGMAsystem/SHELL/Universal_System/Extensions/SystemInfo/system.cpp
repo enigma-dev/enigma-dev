@@ -152,11 +152,13 @@ bool numcpuserror = false;
 long long totalram = -1;
 bool totalramerror = false;
 
+#if defined(_WIN32)
 std::string wine_version;
+#endif
 
 struct hreadable {
   long double size = 0;
-  private: friend
+private: friend
   std::ostream& operator<<(std::ostream& os, hreadable hr) {
     int i = 0;
     long double mantissa = hr.size;
@@ -227,7 +229,7 @@ std::string wine_get_version() {
 }
 #endif
 
-static std::string read_output(std::string cmd) {
+std::string read_output(std::string cmd) {
   std::string result;
   #if defined(_WIN32)
   bool proceed = true;
