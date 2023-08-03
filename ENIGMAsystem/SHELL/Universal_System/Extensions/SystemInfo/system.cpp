@@ -51,6 +51,7 @@
 #include <X11/Xutil.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
+#include <GL/glext.h>
 #endif
 #if defined(_WIN32)
 #include <winsock2.h>
