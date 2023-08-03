@@ -1158,7 +1158,7 @@ std::string gpu_renderer() {
     return gpurenderer;
   PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
   queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
-  const GLubyte *renderer =  (GLubyte *)queryString(GLX_RENDERER_DEVICE_ID_MESA);
+  const GLubyte *renderer = (GLubyte *)queryString(GLX_RENDERER_DEVICE_ID_MESA);
   gpurenderer = renderer ? (char *)renderer : "";
   if (!gpurenderer.empty())
     return gpurenderer;
