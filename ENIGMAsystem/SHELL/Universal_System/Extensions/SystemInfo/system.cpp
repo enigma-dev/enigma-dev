@@ -43,15 +43,12 @@
 #include <cstdio>
 #include <cmath>
 #if (!defined(_WIN32) && (!defined(__APPLE__) && !defined(__MACH__)))
-#if defined(CREATE_CONTEXT)
 #include <SDL.h>
 #include <SDL_opengl.h>
-#endif
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
-#include <GL/glext.h>
 #endif
 #if defined(_WIN32)
 #include <winsock2.h>
