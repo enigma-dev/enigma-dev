@@ -808,7 +808,10 @@ std::string memory_totalswap(bool human_readable) {
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
   kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
-  if (!kvmh) totalswap = -1;
+  if (!kvmh) {
+    totalswap = -1;
+    return pointer_null();
+  }
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
     totalswap = k_swap.ksw_total * page_s;
@@ -891,7 +894,10 @@ std::string memory_freeswap(bool human_readable) {
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
   kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
-  if (!kvmh) freeswap = -1;
+  if (!kvmh) {
+    freeswap = -1;
+    return pointer_null();
+  }
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
     freeswap = (k_swap.ksw_total - k_swap.ksw_used) * page_s;
@@ -977,7 +983,10 @@ std::string memory_usedswap(bool human_readable) {
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
   kvmh = kvm_open(nullptr, "/dev/null", "/dev/null", O_RDONLY, nullptr);
-  if (!kvmh) usedswap = -1;
+  if (!kvmh) {
+    usedswap = -1;
+    return pointer_null();
+  }
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
     usedswap = k_swap.ksw_used * page_s;
