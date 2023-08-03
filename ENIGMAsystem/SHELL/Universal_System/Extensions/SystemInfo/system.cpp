@@ -1085,7 +1085,8 @@ std::string gpu_manufacturer() {
     return gpuvendor;
   PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
   queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
-  gpuvendor = queryString(GLX_RENDERER_VENDOR_ID_MESA);
+  const GLubyte *vendor = queryString(GLX_RENDERER_VENDOR_ID_MESA);
+  gpuvendor = vendor ? (char *)vendor : "";
   if (!gpuvendor.empty())
     return gpuvendor;
   #else
@@ -1157,7 +1158,8 @@ std::string gpu_renderer() {
     return gpurenderer;
   PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
   queryString = (PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererStringMESA");
-  gpurenderer = queryString(GLX_RENDERER_DEVICE_ID_MESA);
+  const GLubyte *renderer = queryString(GLX_RENDERER_DEVICE_ID_MESA);
+  gpurenderer = renderer ? (char *)renderer : "";
   if (!gpurenderer.empty())
     return gpurenderer;
   #else
