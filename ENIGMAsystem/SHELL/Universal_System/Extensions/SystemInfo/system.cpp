@@ -1406,7 +1406,7 @@ std::string cpu_core_count() {
   }
   #endif
   #if defined(__sun)
-  numcores = (int)strtol(read_output("echo `expr $(kstat cpu_info | grep 'pkg_core_id' | uniq | wc -l | awk '{print $1}') / $(psrinfo -p)`").c_str(), nullptr, 10);
+  numcores = (int)strtol(read_output("kstat -m cpu_info | grep -w core_id | uniq | wc -l | awk '{print $1}'").c_str(), nullptr, 10);
   #endif
   if (!numcores)
     numcores = -1;
@@ -1441,7 +1441,7 @@ std::string cpu_processor_count() {
   if (!sysctl(mib, 2, &buf, &sz, nullptr, 0))
     numcpus = buf;
   #elif defined(__sun)
-  numcpus = (int)strtol(read_output("psrinfo -v -p | grep 'The physical processor has ' | awk '{print $5}'").c_str(), nullptr, 10);
+  numcpus = (int)strtol(read_output("psrinfo | wc -l | awk '{print $1}'").c_str(), nullptr, 10);
   #endif
   if (!numcpus)
     numcpus = -1;
