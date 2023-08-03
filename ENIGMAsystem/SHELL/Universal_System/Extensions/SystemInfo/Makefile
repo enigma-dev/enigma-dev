@@ -18,6 +18,4 @@ else
 		override LDLIBS += -lGL
 	endif
 endif
-override CFLAGS += -DCREATE_CONTEXT
-override CXXFLAGS += -DCREATE_CONTEXT
 SOURCES += Universal_System/Extensions/SystemInfo/system.cpp
