@@ -811,7 +811,6 @@ std::string memory_totalswap(bool human_readable) {
   if (!kvmh) totalswap = -1;
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
-    kvm_close(kvmh);
     totalswap = k_swap.ksw_total * page_s;
   }
   kvm_close(kvmh);
@@ -895,7 +894,6 @@ std::string memory_freeswap(bool human_readable) {
   if (!kvmh) freeswap = -1;
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
-    kvm_close(kvmh);
     freeswap = (k_swap.ksw_total - k_swap.ksw_used) * page_s;
   }
   kvm_close(kvmh);
@@ -982,7 +980,6 @@ std::string memory_usedswap(bool human_readable) {
   if (!kvmh) usedswap = -1;
   struct kvm_swap k_swap;
   if (kvm_getswapinfo(kvmh, &k_swap, 1, 0) != -1) {
-    kvm_close(kvmh);
     usedswap = k_swap.ksw_used * page_s;
   }
   kvm_close(kvmh);
