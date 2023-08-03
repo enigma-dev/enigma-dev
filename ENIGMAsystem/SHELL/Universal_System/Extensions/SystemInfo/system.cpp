@@ -1054,7 +1054,7 @@ std::string gpu_manufacturer() {
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
       if (pAdapter->GetDesc(&adapterDesc) == S_OK)
-        gpuvendor = get_vendor_or_device_name_by_id(adapterDesc.VendorId, 0);
+        gpuvendor = get_vendor_or_device_name_by_id(adapterDesc.VendorId, false);
       pAdapter->Release();
     }
     pFactory->Release();
@@ -1072,7 +1072,7 @@ std::string gpu_manufacturer() {
   unsigned identifier = 0;
   std::istringstream converter(read_output("prtconf |  awk '/display/{p=3} p > 0 {print $0; p--}'| awk -F'pci' 'NR==3{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}'"));
   converter >> std::hex >> identifier;
-  gpuvendor = get_vendor_or_device_name_by_id(identifier, 0);
+  gpuvendor = get_vendor_or_device_name_by_id(identifier, false);
   if (!gpuvendor.empty())
     return gpuvendor;
   #endif
@@ -1080,7 +1080,7 @@ std::string gpu_manufacturer() {
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
   queryInteger(GLX_RENDERER_VENDOR_ID_MESA, &v);
-  gpuvendor = v ? get_vendor_or_device_name_by_id(v, 0) : "";
+  gpuvendor = v ? get_vendor_or_device_name_by_id(v, false) : "";
   if (!gpuvendor.empty())
     return gpuvendor;
   PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
@@ -1093,7 +1093,7 @@ std::string gpu_manufacturer() {
   unsigned identifier = 0;
   std::istringstream converter(read_output("ioreg -bls | grep -n2 '    | |   | |   \"model\" = <\"' | awk -F',\"pci' 'NR==5{print $2}' | rev | cut -c 2- | rev | awk -F',' '{print $1}'"));
   converter >> std::hex >> identifier;
-  gpuvendor = get_vendor_or_device_name_by_id(identifier, 0);
+  gpuvendor = get_vendor_or_device_name_by_id(identifier, false);
   if (!gpuvendor.empty()) 
     return gpuvendor;
   gpuvendor = read_output("system_profiler SPDisplaysDataType | grep -i 'Vendor: ' | uniq | awk -F 'Vendor: ' 'NR==1{$1=$1;print}' | awk 'NR==1{$1=$1;print}'");
@@ -1123,7 +1123,7 @@ std::string gpu_renderer() {
     if (pFactory->EnumAdapters(0, &pAdapter) == S_OK) {
       DXGI_ADAPTER_DESC adapterDesc;
       if (pAdapter->GetDesc(&adapterDesc) == S_OK) {
-        gpurenderer = get_vendor_or_device_name_by_id(adapterDesc.DeviceId, 1);
+        gpurenderer = get_vendor_or_device_name_by_id(adapterDesc.DeviceId, true);
         if (!gpurenderer.empty()) 
           return gpurenderer;
         gpurenderer = narrow(adapterDesc.Description);
@@ -1145,7 +1145,7 @@ std::string gpu_renderer() {
   unsigned identifier = 0;
   std::istringstream converter(read_output("prtconf | awk '/display/{p=3} p > 0 {print $0; p--}' | awk -F'pci' 'NR==3{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $2}'"));
   converter >> std::hex >> identifier;
-  gpurenderer = get_vendor_or_device_name_by_id(identifier, 1);
+  gpurenderer = get_vendor_or_device_name_by_id(identifier, true);
   if (!gpurenderer.empty())
     return gpurenderer;
   #endif
@@ -1153,7 +1153,7 @@ std::string gpu_renderer() {
   PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC queryInteger;
   queryInteger = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)glXGetProcAddressARB((const GLubyte *)"glXQueryCurrentRendererIntegerMESA");
   queryInteger(GLX_RENDERER_DEVICE_ID_MESA, &v);
-  gpurenderer = v ? get_vendor_or_device_name_by_id(v, 1) : "";
+  gpurenderer = v ? get_vendor_or_device_name_by_id(v, true) : "";
   if (!gpurenderer.empty())
     return gpurenderer;
   PFNGLXQUERYCURRENTRENDERERSTRINGMESAPROC queryString;
@@ -1166,7 +1166,7 @@ std::string gpu_renderer() {
   unsigned identifier = 0;
   std::istringstream converter(read_output("ioreg -bls | grep -n2 '    | |   | |   \"model\" = <\"' | awk -F',\"pci' 'NR==5{print $2}' | rev | cut -c 2- | rev | awk -F',' '{print $2}'"));
   converter >> std::hex >> identifier;
-  gpurenderer = get_vendor_or_device_name_by_id(identifier, 1);
+  gpurenderer = get_vendor_or_device_name_by_id(identifier, true);
   if (!gpurenderer.empty()) 
     return gpurenderer;
   gpurenderer = read_output("system_profiler SPDisplaysDataType | grep -i 'Chipset Model: ' | uniq | awk -F 'Chipset Model: ' 'NR==1{$1=$1;print}' | awk 'NR==1{$1=$1;print}'");
