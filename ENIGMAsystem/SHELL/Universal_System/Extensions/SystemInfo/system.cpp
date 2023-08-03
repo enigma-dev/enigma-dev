@@ -794,7 +794,7 @@ std::string memory_totalswap(bool human_readable) {
   memset(&pi, 0, sizeof(pi));
   pi.cb = sizeof(pi);
   if (GetPerformanceInfo(&pi, sizeof(pi)))
-    totalswap = (long long)(pi.CommitLimit * pi.PageSize);
+    totalswap = (long long)((pi.CommitLimit - pi.PhysicalTotal) * pi.PageSize);
   #elif (defined(__APPLE__) && defined(__MACH__))
   struct xsw_usage info;
   std::size_t sz = sizeof(info);
@@ -878,7 +878,7 @@ std::string memory_freeswap(bool human_readable) {
   memset(&pi, 0, sizeof(pi));
   pi.cb = sizeof(pi);
   if (GetPerformanceInfo(&pi, sizeof(pi)))
-    freeswap = (long long)((pi.CommitLimit - pi.CommitTotal) * pi.PageSize);
+    freeswap = (long long)(((pi.CommitLimit - pi.CommitTotal) - pi.PhysicalAvailable) * pi.PageSize);
   #elif (defined(__APPLE__) && defined(__MACH__))
   struct xsw_usage info;
   std::size_t sz = sizeof(info);
@@ -962,8 +962,8 @@ std::string memory_usedswap(bool human_readable) {
   memset(&pi, 0, sizeof(pi));
   pi.cb = sizeof(pi);
   if (GetPerformanceInfo(&pi, sizeof(pi))) {
-    long long totalswap = (long long)(pi.CommitLimit * pi.PageSize);
-    long long freeswap = (long long)((pi.CommitLimit - pi.CommitTotal) * pi.PageSize);
+    long long totalswap = (long long)((pi.CommitLimit - pi.PhysicalTotal) * pi.PageSize);
+    long long freeswap = (long long)(((pi.CommitLimit - pi.CommitTotal) - pi.PhysicalAvailable) * pi.PageSize);
     usedswap = totalswap - freeswap;
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
