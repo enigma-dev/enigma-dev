@@ -562,9 +562,7 @@ std::string os_kernel_version() {
   #else
   /* dragonfly bsd truncates utsname.version;
   get the value from the uname cmd instead */
-  static std::string str;
-  str = read_output("uname -v");
-  return str;
+  kernelversion = read_output("uname -v");
   #endif
   #else
   long count = sysinfo(SI_VERSION, nullptr, 0);
@@ -671,9 +669,7 @@ std::string os_architecture() {
   #if !defined(__sun)
   /* utsname.machine equals the achitecture of the 
   current executable - not the current platform */
-  static std::string str;
-  str = read_output("uname -m");
-  return str;
+  architecture = read_output("uname -m");
   #else
   long count = sysinfo(SI_ARCHITECTURE_K, nullptr, 0);
   if (count > 0) {
