@@ -64,7 +64,7 @@ HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
  * has_byte_size_method, has_serialize_method, has_deserialize_self_method)
  * 
  * value: This member is a boolean value that indicates whether the corresponding class
- * has a method with the specified NAME (size, byte_size, serialize, deserialize_self),
+ * has a method with the specified NAME (size, byte_size, serialize and deserialize_self),
  * it is true if the class has the method and false otherwise.
  */
 
@@ -111,25 +111,38 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NAME, SIG)                                                    \
-  template <typename T, typename = void>                                                \
-  struct is_##NAME##_available : std::false_type {};                                    \
-                                                                                        \
-  template <typename T>                                                                 \
-  struct is_##NAME##_available<T, std::void_t<decltype(NAME SIG)>> : std::true_type {}; \
-                                                                                        \
-  template <typename T>                                                                 \
+#define HAS_FREE_FUNCTION(NAME, Parameters...)                                                             \
+  template <typename T, typename = void>                                                                   \
+  struct is_##NAME##_available : std::false_type {};                                                       \
+                                                                                                           \
+  template <typename T>                                                                                    \
+  struct is_##NAME##_available<T, std::void_t<decltype(enigma::NAME<T>(Parameters))>> : std::true_type {}; \
+                                                                                                           \
+  template <typename T>                                                                                    \
   constexpr static inline bool has_##NAME##_free_function = is_##NAME##_available<T>::value
 
-HAS_FREE_FUNCTION(byte_size, (std::declval<const T &>()));
+HAS_FREE_FUNCTION(byte_size, std::declval<const T &>());
+HAS_FREE_FUNCTION(internal_serialize_into_fn, std::declval<std::byte *>(), std::declval<T &&>());
+HAS_FREE_FUNCTION(internal_serialize_fn, std::declval<T &&>());
+HAS_FREE_FUNCTION(internal_deserialize_fn, std::declval<std::byte *>());
+HAS_FREE_FUNCTION(internal_resize_buffer_for_fn, std::declval<std::vector<std::byte> &>(), std::declval<T &&>());
+HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, std::declval<T &>(), std::declval<std::byte *>(),
+                  std::declval<std::size_t &>());
 
 /**
- * Now we have 1 struct with the following name:
+ * Now we have 6 struct with the following name:
  * is_byte_size_available
+ * is_internal_serialize_into_fn_available
+ * is_internal_serialize_fn_available
+ * is_internal_deserialize_fn_available
+ * is_internal_resize_buffer_for_fn_available
+ * is_enigma_internal_deserialize_fn_available
  * 
  * The struct has 1 data member:
  * value: This member is a boolean value that indicates whether the corresponding class
- * has a specialization which is callable with this type with the specified NAME (byte_size),
+ * has a specialization which is callable with this type with the specified NAME (byte_size,
+ * internal_serialize_into_fn, internal_serialize_fn, internal_deserialize_fn,
+ * internal_resize_buffer_for_fn and enigma_internal_deserialize_fn),
  * it is true if the class has the function and false otherwise.
  */
 

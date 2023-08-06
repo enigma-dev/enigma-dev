@@ -21,6 +21,8 @@
 
 #include <type_traits>
 
+namespace enigma {
+
 inline std::size_t variant_size(const variant &value) {
   if (value.type == variant::ty_real) {
     return 9;
@@ -48,16 +50,16 @@ inline std::size_t var_size(const var &value) {
   return len;
 }
 
-template <typename T>
-struct is_lua_table : std::false_type {};
+// template <typename T>
+// struct is_lua_table : std::false_type {};
 
-template <typename U>
-struct is_lua_table<lua_table<U>> : std::true_type {
-  using inner_type = U;
-};
+// template <typename U>
+// struct is_lua_table<lua_table<U>> : std::true_type {
+//   using inner_type = U;
+// };
 
-template <typename T>
-constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
+// template <typename T>
+// constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
 template <typename T>
 constexpr static inline bool always_false = false;
@@ -71,4 +73,5 @@ inline std::size_t byte_size(const lua_table<T> &value) {
   return enigma_internal_sizeof_lua_table(value);
 }
 
+}  // namespace enigma
 #endif
