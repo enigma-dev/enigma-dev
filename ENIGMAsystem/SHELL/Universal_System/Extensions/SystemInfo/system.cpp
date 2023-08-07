@@ -1270,6 +1270,8 @@ std::string cpu_vendor() {
   if (cpuvendor.empty() && (tmp.find("ARM") != std::string::npos || 
     tmp.find("AARCH64") != std::string::npos))
     cpuvendor = "ARM";
+  while (!cpuvendor.empty() && cpuvendor.back() == ' ')
+    cpuvendor.pop_back();
   if (!cpuvendor.empty())
     return cpuvendor;
   cpuvendorerror = true;
@@ -1304,6 +1306,8 @@ std::string cpu_processor() {
   #elif defined(__sun)
   cpubrand = read_output("psrinfo -v -p | awk 'NR==3{print}' | awk 'NR==1{$1=$1;print}''");
   #endif
+  while (!cpubrand.empty() && cpubrand.back() == ' ')
+    cpubrand.pop_back();
   if (!cpubrand.empty())
     return cpubrand;
   cpubranderror = true;
