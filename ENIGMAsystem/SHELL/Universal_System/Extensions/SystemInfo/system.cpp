@@ -1401,7 +1401,7 @@ std::string cpu_core_count() {
     } else {
       if (hfs >= 1) {
         if (hfs >= 4)
-          numcores = 1 + (cpuid(4, 0).eax() >> 26) & 0x3F;
+          numcores = 1 + ((cpuid(4, 0).eax() >> 26) & 0x3F);
       }
       if (ishtt) {
         if (numcores < 1)
