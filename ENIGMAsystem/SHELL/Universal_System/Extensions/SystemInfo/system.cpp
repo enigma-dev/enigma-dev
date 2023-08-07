@@ -792,8 +792,8 @@ std::string memory_usedram(bool human_readable) {
   if (!sysinfo(&info))
     usedram = ((info.totalram - info.freeram) * info.mem_unit);
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  usedram = strtoll(read_output("echo $(($(($(sysctl -n vm.stats.vm.v_wire_count) + \
-  $(sysctl -n vm.stats.vm.v_active_count))) * $(sysctl -n vm.stats.vm.v_page_size)))").c_str(), nullptr, 10);
+  usedram = strtoll(read_output("echo $(($(sysctl -n vm.stats.vm.v_wire_count) + \
+  $(sysctl -n vm.stats.vm.v_active_count)))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
   #endif
   if (usedram != -1)
     return human_readable ? make_hreadable(usedram) : std::to_string(usedram);
