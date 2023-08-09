@@ -752,6 +752,10 @@ std::string memory_freeram(bool human_readable) {
   long long used = ((strused != pointer_null()) ? strtoull(strused.c_str(), nullptr, 10) : -1);
   if (total != -1 && used != -1)
     freeram = total - used;
+  #elif defined(__linux__)
+  struct sysinfo info;
+  if (!sysinfo(&info))
+    freeram = (info.freeram * info.mem_unit);
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   mib[0] = CTL_VM;
@@ -760,10 +764,6 @@ std::string memory_freeram(bool human_readable) {
   std::size_t sz = sizeof(buf);
   if (!sysctl(mib, 2, &buf, &sz, nullptr, 0))
     freeram = buf.free * sysconf(_SC_PAGESIZE);
-  #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    freeram = (info.freeram * info.mem_unit);
   #elif defined(__sun)
   freeram = (sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGESIZE));
   #endif
@@ -782,13 +782,6 @@ std::string memory_usedram(bool human_readable) {
   #elif (defined(__APPLE__) && defined(__MACH__))
   usedram = strtoll(read_output("echo $(($(vm_stat | grep -o 'Pages wired down:.*'  | cut -d' ' -f4- | awk '{print substr($1, 1, length($1)-1)}') + \
   $(vm_stat | grep -o 'Pages active:.*'  | cut -d' ' -f3- | awk '{print substr($1, 1, length($1)-1)}')))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
-  #elif (defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-  std::string strtotal = memory_totalram(false);
-  std::string stravail = memory_freeram(false);
-  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
-  long long avail = ((stravail != pointer_null()) ? strtoull(stravail.c_str(), nullptr, 10) : -1);
-  if (total != -1 && avail != -1)
-    usedram = total - avail;
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info))
@@ -796,6 +789,13 @@ std::string memory_usedram(bool human_readable) {
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   usedram = strtoll(read_output("echo $(($(sysctl -n vm.stats.vm.v_wire_count) + \
   $(sysctl -n vm.stats.vm.v_active_count)))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
+  #elif (defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  std::string strtotal = memory_totalram(false);
+  std::string stravail = memory_freeram(false);
+  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
+  long long avail = ((stravail != pointer_null()) ? strtoull(stravail.c_str(), nullptr, 10) : -1);
+  if (total != -1 && avail != -1)
+    usedram = total - avail;
   #endif
   if (usedram != -1)
     return human_readable ? make_hreadable(usedram) : std::to_string(usedram);
