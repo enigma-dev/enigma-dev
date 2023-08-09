@@ -395,8 +395,10 @@ std::vector<std::string> string_split(std::string str, char delimiter) {
 }
 
 std::string get_vendor_or_device_name_by_id(unsigned identifier, bool vendor_or_device) {
-  if (vendor_name_by_id.find(identifier) != vendor_name_by_id.end() && !vendor_or_device) return vendor_name_by_id[identifier];
-  if (device_name_by_id.find(identifier) != device_name_by_id.end() && vendor_or_device) return device_name_by_id[identifier];
+  if (vendor_name_by_id.find(identifier) != vendor_name_by_id.end() && !vendor_or_device)
+    return vendor_name_by_id[identifier];
+  if (device_name_by_id.find(identifier) != device_name_by_id.end() && vendor_or_device)
+    return device_name_by_id[identifier];
   std::string str(pci_ids, pci_ids + sizeof(pci_ids) / sizeof(pci_ids[0]));
   str = std::regex_replace(str, std::regex("\r"), "");
   std::vector<std::string> vec = string_split(str, '\n');
