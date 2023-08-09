@@ -168,14 +168,14 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
 
   // DEBUG_MESSAGE("step 3", M_INFO);
 
-  std::map<std::string, variant> leaderboard_download_event;
-
-  leaderboard_download_event["entries"] = leaderboard_entries_string;
-  leaderboard_download_event["lb_name"] = std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_));
-  leaderboard_download_event["event_type"] = "leaderboard_download";
-  leaderboard_download_event["id"] = enigma::lb_entries_download_id;
-  leaderboard_download_event["num_entries"] = c_leaderboards::number_of_leaderboard_entries_;
-  leaderboard_download_event["status"] = 0; // TODO: the status must not be constant value
+  std::map<std::string, variant> leaderboard_download_event = {
+      {"entries", leaderboard_entries_string},
+      {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
+      {"event_type", std::string("leaderboard_download")},
+      {"id", std::to_string(enigma::lb_entries_download_id)},
+      {"num_entries", std::to_string(c_leaderboards::number_of_leaderboard_entries_)},
+      {"status", std::to_string(0)} // TODO: the status must not be constant value
+  };
 
   // DEBUG_MESSAGE("hereeeeeeeeeeeee:  "+leaderboard_download_event["entries"], M_INFO);
 
