@@ -1,0 +1,13 @@
+var async_load = ds_map_create();
+
+ds_map_add(async_load, "test_key1", "test_value1");
+ds_map_add(async_load, "test_key2", "test_value2");
+ds_map_add(async_load, "random_key1", "random_value1");
+
+var data = json_encode(async_load);
+
+var expected_output = '{"test_key1":test_value1,"test_key2":test_value2,"random_key1":random_value1}';
+
+gtest_assert_eq(data.length(), expected_output.length());
+
+
