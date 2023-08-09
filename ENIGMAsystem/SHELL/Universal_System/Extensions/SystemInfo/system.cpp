@@ -639,11 +639,11 @@ std::string os_product_name() {
     productname = tmp1;
   }
   #elif defined(__linux__)
-  std::string tmp = read_output("echo $(lsb_release --description 2> /dev/null && lsb_release --release 2> /dev/null && lsb_release --codename 2> /dev/null)");
+  std::string tmp = read_output("echo $(lsb_release --id 2> /dev/null && lsb_release --release 2> /dev/null && lsb_release --codename 2> /dev/null)");
   if (!tmp.empty()) {
     tmp = std::regex_replace(tmp, std::regex("\r"), "");
     tmp = std::regex_replace(tmp, std::regex("\n"), "");
-    tmp = std::regex_replace(tmp, std::regex("Description: "), "");
+    tmp = std::regex_replace(tmp, std::regex("Distributor ID: "), "");
     tmp = std::regex_replace(tmp, std::regex("Release: "), "");
     tmp = std::regex_replace(tmp, std::regex("Codename: "), "");
     productname = tmp;
