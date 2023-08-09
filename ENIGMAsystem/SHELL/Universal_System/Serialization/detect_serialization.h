@@ -130,7 +130,7 @@ HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, std::declval<T &>(), std::decl
                   std::declval<std::size_t &>());
 
 /**
- * Now we have 6 struct with the following name:
+ * Now we have 6 structs with the following name:
  * is_byte_size_available
  * is_internal_serialize_into_fn_available
  * is_internal_serialize_fn_available
@@ -138,7 +138,7 @@ HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, std::declval<T &>(), std::decl
  * is_internal_resize_buffer_for_fn_available
  * is_enigma_internal_deserialize_fn_available
  * 
- * The struct has 1 data member:
+ * Each struct has 1 data member:
  * value: This member is a boolean value that indicates whether the corresponding class
  * has a specialization which is callable with this type with the specified NAME (byte_size,
  * internal_serialize_into_fn, internal_serialize_fn, internal_deserialize_fn,
