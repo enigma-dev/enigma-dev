@@ -1204,8 +1204,8 @@ Value::isMember( const CppTL::ConstString &key ) const
 
 Value::Members Value::getMemberNames() const
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
-   if ( type_ == nullValue )
+   JSON_ASSERT( type_ == nullValue  || type_ == arrayValue ||  type_ == objectValue );
+   if ( type_ == nullValue || type_ == arrayValue )
        return Value::Members();
    Members members;
    members.reserve( value_.map_->size() );
