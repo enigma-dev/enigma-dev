@@ -98,12 +98,14 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
   return true;
 }
 
-std::string& get_leaderboard_entries_string(LeaderboardEntry_t leaderboard_entries[],
+std::string get_leaderboard_entries_string(LeaderboardEntry_t leaderboard_entries[],
                                             unsigned leaderboard_entries_size) {
   std::string entries_accumulator{""};
-  entries_accumulator += "{";
+  // entries_accumulator += "{"; // Outer most object open bracket
+  // entries_accumulator += "\"entries\":";
+  entries_accumulator += "{"; // Entries object open bracket
   entries_accumulator += "\"entries\":";
-  entries_accumulator += "[";
+  entries_accumulator += "["; // Entries array open bracket
 
   for (unsigned i{0}; i < leaderboard_entries_size; i++) {
     entries_accumulator += "{";
@@ -127,8 +129,11 @@ std::string& get_leaderboard_entries_string(LeaderboardEntry_t leaderboard_entri
     if (i < leaderboard_entries_size - 1) entries_accumulator += ",";
   }
 
-  entries_accumulator += "]";
-  entries_accumulator += "}";
+  entries_accumulator += "]"; // Entries array close bracket
+  entries_accumulator += "}"; // Entries object close bracket
+  // entries_accumulator += "}"; // Outer most object close bracket
+
+  // DEBUG_MESSAGE(entries_accumulator, M_INFO);
 
   return entries_accumulator;
 }
@@ -145,6 +150,8 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
 
   LeaderboardEntry_t leaderboard_entries[enigma_user::lb_max_entries];
 
+  // DEBUG_MESSAGE("step 1", M_INFO);
+
   // leaderboard entries handle will be invalid once we return from this function. Copy all data now.
   c_leaderboards::number_of_leaderboard_entries_ =
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
@@ -153,18 +160,26 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
                                                     &leaderboard_entries[index], NULL, 0);
   }
 
-  std::string& leaderboard_entries_string =
+  // DEBUG_MESSAGE("step 2", M_INFO);
+
+  // TODO: Why is std::string& is not working here?
+  const std::string leaderboard_entries_string =
       get_leaderboard_entries_string(leaderboard_entries, c_leaderboards::number_of_leaderboard_entries_);
 
-  std::map<std::string, variant> temp_map = {
-      {"entries", leaderboard_entries_string},
-      {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
-      {"event_type", "leaderboard_download"},
-      {"id", std::to_string(enigma::lb_entries_download_id)},
-      {"num_entries", std::to_string(c_leaderboards::number_of_leaderboard_entries_)},
-      {"status", 0}};  // TODO: the status must not be constant value
+  // DEBUG_MESSAGE("step 3", M_INFO);
 
-  enigma::posted_async_events.push(temp_map);
+  std::map<std::string, variant> leaderboard_download_event;
+
+  leaderboard_download_event["entries"] = leaderboard_entries_string;
+  leaderboard_download_event["lb_name"] = std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_));
+  leaderboard_download_event["event_type"] = "leaderboard_download";
+  leaderboard_download_event["id"] = enigma::lb_entries_download_id;
+  leaderboard_download_event["num_entries"] = c_leaderboards::number_of_leaderboard_entries_;
+  leaderboard_download_event["status"] = 0; // TODO: the status must not be constant value
+
+  // DEBUG_MESSAGE("hereeeeeeeeeeeee:  "+leaderboard_download_event["entries"], M_INFO);
+
+  enigma::posted_async_events.push(leaderboard_download_event);
 }
 
 /*

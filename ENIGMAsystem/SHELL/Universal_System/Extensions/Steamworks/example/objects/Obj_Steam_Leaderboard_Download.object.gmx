@@ -30,7 +30,7 @@ event_inherited();&#13;
 &#13;
 request = noone&#13;
 &#13;
-async_load = ds_map_create();</string>
+//async_load = ds_map_create();</string>
           </argument>
         </arguments>
       </action>
@@ -80,11 +80,11 @@ with(Obj_Steam_Leaderboard_Entry)&#13;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>show_debug_message("yaaaaaaaaaaaaaaaaaaay!!!!!!!!!!!!!!!!!!!!")&#13;
+            <string>//show_debug_message("yaaaaaaaaaaaaaaaaaaay!!!!!!!!!!!!!!!!!!!!")&#13;
 &#13;
-show_debug_message(string(async_load))&#13;
-var type = ds_map_find_value(async_load, "event_type");&#13;
-show_debug_message(string(type))&#13;
+//show_debug_message(string(async_load))&#13;
+//var type = ds_map_find_value(async_load, "event_type");&#13;
+//show_debug_message(string(type))&#13;
 &#13;
 &#13;
 if(ds_map_find_value(async_load, "event_type") == "leaderboard_download")&#13;
@@ -94,39 +94,28 @@ if(ds_map_find_value(async_load, "num_entries"))&#13;
 	var entries = ds_map_find_value(async_load, "entries");&#13;
     var map = json_decode(entries);&#13;
     if ds_map_exists(map, "default")&#13;
-    {&#13;
-        ds_map_destroy(map);&#13;
-        exit;&#13;
+	{&#13;
+		ds_map_destroy(map);&#13;
+       	exit;&#13;
     }&#13;
-    else&#13;
-    {&#13;
-        var list = ds_map_find_value(map, "entries");&#13;
+   	else&#13;
+	{&#13;
+    	var list = ds_map_find_value(map, "entries");&#13;
         var len = ds_list_size(list);&#13;
         var entry;&#13;
         for (var i = 0; i &lt; len; i+=1)&#13;
-        {&#13;
-       entry = ds_list_find_value(list, i);&#13;
+		{&#13;
+			entry = ds_list_find_value(list, i);&#13;
             show_debug_message(i + "th entry: " + string(entry));&#13;
 			&#13;
 			rank = ds_map_find_value(entry, "rank");&#13;
 			score_ = ds_map_find_value(entry, "score");&#13;
 			name = ds_map_find_value(entry, "name");&#13;
 			userID = ds_map_find_value(entry, "userID");&#13;
-		&#13;
-			if (!is_undefined(ds_map_find_value(entry, "data"))) {&#13;
-				var buff = buffer_base64_decode(ds_map_find_value(entry, "data"));&#13;
-				var level = buffer_read(buff, buffer_u8);&#13;
-				var str = buffer_read(buff, buffer_string);&#13;
-		&#13;
-				data = str + " (" + string(level) + ")";&#13;
-			}&#13;
-			else data = "";&#13;
 			&#13;
-			draw_set_valign(fa_top);&#13;
-			draw_set_halign(fa_left);&#13;
-			draw_set_font(Font_ENIGMA_20);&#13;
-			&#13;
-			draw_text(800, 110 + i*120, string(rank) + ") " + name + "\n score: " + string(score_) + "\n data: " + data);&#13;
+			show_debug_message(string(score_));&#13;
+			show_debug_message(string(name));&#13;
+			show_debug_message(string(userID));&#13;
             &#13;
 			//with(instance_create_depth(800, 110 + i*120, 0, Obj_Steam_Leaderboard_Entry))&#13;
 			//{&#13;
@@ -144,8 +133,8 @@ if(ds_map_find_value(async_load, "num_entries"))&#13;
 			//	}&#13;
 			//	else data = "";&#13;
 			//}&#13;
-        }&#13;
-    }&#13;
+  		}&#13;
+	}&#13;
     ds_map_destroy(map)&#13;
 }</string>
           </argument>

@@ -9,7 +9,7 @@ Default: true
 Icon: steam.svg
 
 Depends:
-	Extensions: DataStructures
+	Extensions: DataStructures, Json
 Dependencies: None
 Implement: extension_steamworks
 Init: extension_steamworks_init

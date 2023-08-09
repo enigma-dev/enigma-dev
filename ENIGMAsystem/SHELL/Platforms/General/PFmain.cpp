@@ -195,15 +195,25 @@ void signal(int* mutex) {
 void fireEventsFromQueue(int* mutex) {
   // wait(mutex);
   while (!posted_async_events.empty()) {
+    // DEBUG_MESSAGE("Queue size: "+std::to_string(posted_async_events.size()), MESSAGE_TYPE::M_INFO);
+
     enigma_user::ds_map_clear(enigma_user::async_load);
+
+    // DEBUG_MESSAGE("async_load size: "+std::to_string(enigma_user::ds_map_size(enigma_user::async_load)), MESSAGE_TYPE::M_INFO);
 
     std::map<std::string, variant> event = posted_async_events.front();
 
+    // DEBUG_MESSAGE("event size: "+std::to_string(event.size()), MESSAGE_TYPE::M_INFO);
+
     posted_async_events.pop();
+
+    // DEBUG_MESSAGE("Queue size: "+std::to_string(posted_async_events.size()), MESSAGE_TYPE::M_INFO);
 
     for (auto& [key, value] : event) {
       enigma_user::ds_map_add(enigma_user::async_load, key, value);
     }
+
+    // DEBUG_MESSAGE("async_load size: "+std::to_string(enigma_user::ds_map_size(enigma_user::async_load)), MESSAGE_TYPE::M_INFO);
 
     instance_event_iterator = &dummy_event_iterator;
     for (iterator it = instance_list_first(); it; ++it) {
