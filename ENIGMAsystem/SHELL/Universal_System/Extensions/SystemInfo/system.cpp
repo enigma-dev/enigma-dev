@@ -67,6 +67,9 @@
 #include <fcntl.h>
 #include <kvm.h>
 #elif (defined(__NetBSD__) || defined(__OpenBSD__))
+#if defined(__NetBSD__)
+#include <uvm/uvm_extern.h>
+#endif
 #include <sys/param.h>
 #include <sys/swap.h>
 #endif
@@ -1347,6 +1350,7 @@ std::string cpu_core_count() {
   int threads_per_core = (int)strtol(read_output("dmesg | grep 'threads_per_core: ' | awk '{print substr($6, 0, length($6) - 1)}'").c_str(), nullptr, 10);
   numcores = (int)(strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10) / ((threads_per_core) ? threads_per_core : 1));
   #endif
+  #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
   #if (defined(_WIN32) || defined(__NetBSD__) || defined(__OpenBSD__))
   #if defined(_WIN32)
   /* use x86-specific inline assembly as the fallback; 
@@ -1431,6 +1435,7 @@ std::string cpu_core_count() {
         numcores = 1;
     }
   }
+  #endif
   #endif
   #if defined(__sun)
   numcores = (int)strtol(read_output("kstat -m cpu_info | grep -w core_id | uniq | wc -l | awk '{print $1}'").c_str(), nullptr, 10);
