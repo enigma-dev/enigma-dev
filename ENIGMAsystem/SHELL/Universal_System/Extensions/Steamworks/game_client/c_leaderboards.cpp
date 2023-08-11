@@ -103,26 +103,26 @@ std::string get_leaderboard_entries_string(LeaderboardEntry_t leaderboard_entrie
                                            unsigned leaderboard_entries_size) {
   std::string entries_accumulator{""};
 
-  entries_accumulator += "{";  // Entries object open bracket
-  entries_accumulator += "\\\"entries\\\"" + ':';
-  entries_accumulator += "[";  // Entries array open bracket
+  entries_accumulator += '{';  // Entries object open bracket
+  entries_accumulator += '\"' + "entries" + '\"' + ':';
+  entries_accumulator += '[';  // Entries array open bracket
 
   for (unsigned i{0}; i < leaderboard_entries_size; i++) {
-    entries_accumulator += '{' + "\\\"name\\\"" + ':' + '\\\"';
+    entries_accumulator += '{' + '\"' + "name" + '\"' + ':' + '\"';
     entries_accumulator += c_game_client::get_steam_user_persona_name(leaderboard_entries[i].m_steamIDUser);
-    entries_accumulator += '\\\"' + ',' + "\\\"score\\\"" + ':';
+    entries_accumulator += '\"' + ',' + '\"' + "score" + '\"' + ':';
     entries_accumulator += std::to_string(leaderboard_entries[i].m_nScore);
-    entries_accumulator += ',' + "\\\"rank\\\"" + ':';
+    entries_accumulator += ',' + '\"' + "rank" + '\"' + ':';
     entries_accumulator += std::to_string(leaderboard_entries[i].m_nGlobalRank);
-    entries_accumulator += ',' + "\\\"userID\\\"" + ':' + '\\\"';
+    entries_accumulator += ',' + '\"' + "userID" + '\"' + ':' + '\"';
     entries_accumulator += std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64());
-    entries_accumulator += '\\\"' + '}';
+    entries_accumulator += '\"' + '}';
 
-    if (i < leaderboard_entries_size - 1) entries_accumulator += ",";
+    if (i < leaderboard_entries_size - 1) entries_accumulator += ',';
   }
 
-  entries_accumulator += "]";  // Entries array close bracket
-  entries_accumulator += "}";  // Entries object close bracket
+  entries_accumulator += ']';  // Entries array close bracket
+  entries_accumulator += '}';  // Entries object close bracket
 
   // DEBUG_MESSAGE(entries_accumulator, M_INFO);
 
