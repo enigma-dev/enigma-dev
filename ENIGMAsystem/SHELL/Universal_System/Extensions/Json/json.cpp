@@ -221,11 +221,6 @@ namespace enigma_user
 			return string("{  }");
 		}
 
-		if (enigma_user::ds_map_empty(ds_map)) {
-			DEBUG_MESSAGE("DS map is empty", MESSAGE_TYPE::M_ERROR);
-			return string("{  }");
-		}
-
 		string value {""};
 
 		value += '{';
