@@ -240,12 +240,12 @@ namespace enigma_user
 			// Add comma if not last element
 			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator += ',';
 
-			DEBUG_MESSAGE(value, MESSAGE_TYPE::M_INFO);
+			// DEBUG_MESSAGE(value, MESSAGE_TYPE::M_INFO);
 		}
 
 		encoding_accumulator += '}';
 
-		DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
+		// DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
 
 		return encoding_accumulator;
 	}
