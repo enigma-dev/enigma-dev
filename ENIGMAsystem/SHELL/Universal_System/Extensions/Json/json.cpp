@@ -243,6 +243,8 @@ namespace enigma_user
 
 		encoding_accumulator += '}';
 
+		DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
+
 		return encoding_accumulator;
 	}
 }

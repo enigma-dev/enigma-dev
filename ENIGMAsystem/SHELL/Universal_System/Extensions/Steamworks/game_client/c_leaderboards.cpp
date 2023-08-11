@@ -163,9 +163,9 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
       {"entries", leaderboard_entries_string},
       {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
       {"event_type", std::string("leaderboard_download")},
-      {"id", std::to_string(enigma::lb_entries_download_id)},
-      {"num_entries", std::to_string(c_leaderboards::number_of_leaderboard_entries_)},
-      {"status", std::to_string(0)}  // TODO: the status must not be constant value
+      {"id", enigma::lb_entries_download_id},
+      {"num_entries", c_leaderboards::number_of_leaderboard_entries_},
+      {"status", 0}  // TODO: the status must not be constant value
   };
 
   // DEBUG_MESSAGE("hereeeeeeeeeeeee:  "+leaderboard_download_event["entries"], M_INFO);
