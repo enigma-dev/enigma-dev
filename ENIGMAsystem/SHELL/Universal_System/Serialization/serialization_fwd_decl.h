@@ -59,6 +59,18 @@ inline T internal_deserialize_floating(std::byte *iter);
 template <typename T>
 inline T internal_deserialize_numeric(std::byte *iter);
 
+inline void internal_serialize_var_into(std::byte *iter, const var &value);
+
+inline std::vector<std::byte> internal_serialize_var(const var &var);
+
+inline var internal_deserialize_var(std::byte *iter);
+
+template <typename T>
+inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
+
+template <typename T>
+inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter);
+
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value);
 
