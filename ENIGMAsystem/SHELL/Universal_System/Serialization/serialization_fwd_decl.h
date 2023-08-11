@@ -18,6 +18,7 @@
 #ifndef ENIGMA_SERIALIZE_FWD_DECL_H
 #define ENIGMA_SERIALIZE_FWD_DECL_H
 
+#include <complex>
 #include "../var4.h"
 
 namespace enigma {
@@ -85,6 +86,26 @@ struct is_std_map<std::map<Key, T, Compare, Allocator>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_std_map_v = is_std_map<T>::value;
+
+template <typename T>
+struct is_std_complex : std::false_type {};
+
+template <typename T>
+struct is_std_complex<std::complex<T>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_complex_v = is_std_complex<T>::value;
+
+template <typename T>
+struct complex_inner_type;
+
+template <typename T>
+struct complex_inner_type<std::complex<T>> {
+  using type = T;
+};
+
+template <typename T>
+using complex_inner_type_t = typename complex_inner_type<T>::type;
 //
 
 template <typename T>
@@ -94,6 +115,10 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
                                                                                                T &&value);
+
+template <typename T>
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
+                                                                                                   T &&value);
 
 template <typename T>
 inline auto internal_serialize_fn(T *&&value);
@@ -118,6 +143,10 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>>, std::vector<std::byte>
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
+    T &&value);
+
+template <typename T>
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
     T &&value);
 
 template <typename T>
@@ -149,6 +178,9 @@ template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+
+template <typename T>
 typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value);
 
@@ -166,6 +198,10 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value);
+
+template <typename T>
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
@@ -207,6 +243,10 @@ template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
                                                                                                    std::byte *iter,
                                                                                                    std::size_t &len);
+
+template <typename T>
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
+    T &value, std::byte *iter, std::size_t &len);
 
 }  // namespace enigma
 #endif

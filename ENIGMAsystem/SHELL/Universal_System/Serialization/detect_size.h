@@ -19,6 +19,7 @@
 #ifndef ENIGMA_DETECT_SIZE_H
 #define ENIGMA_DETECT_SIZE_H
 
+#include <complex>
 #include <type_traits>
 
 namespace enigma {
@@ -65,6 +66,11 @@ inline std::size_t byte_size(const std::vector<T> &value) {
 template <typename T, typename U>
 inline std::size_t byte_size(const std::map<T, U> &value) {
   return value.size() * (sizeof(T) + sizeof(U));
+}
+
+template <typename T>
+inline std::size_t byte_size(const std::complex<T> &value) {
+  return sizeof(T) * 2;
 }
 
 template <typename T>
