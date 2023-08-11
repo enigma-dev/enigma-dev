@@ -213,34 +213,36 @@ namespace enigma_user
 		return RecursiveDSMap(root);
 	}
 
-	// TODO: Check if the string value needs double quotes?
-	string json_encode(variant ds_map)
-	{
+	string json_encode(variant ds_map) {
 		if (!enigma_user::ds_map_exists(ds_map)) {
-			DEBUG_MESSAGE("DS map does not exist", MESSAGE_TYPE::M_ERROR);
-			return string("{  }");
+				DEBUG_MESSAGE("DS map does not exist", MESSAGE_TYPE::M_ERROR);
+				return string("{}");
 		}
 
-		if (enigma_user::ds_map_empty(ds_map)) {
-			DEBUG_MESSAGE("DS map is empty", MESSAGE_TYPE::M_ERROR);
-			return string("{  }");
-		}
+		string encoding_accumulator{""};
 
-		string value {""};
+		encoding_accumulator += '{';
 
-		value += '{';
+		variant key{enigma_user::ds_map_find_first(ds_map)};
 
-		variant key {enigma_user::ds_map_find_first(ds_map)};
+		for (int i = 0; i < enigma_user::ds_map_size(ds_map); i++) {
+			encoding_accumulator += '"' + string(key) + '"' + ':';
 
-		for (int i = 0 ; i < enigma_user::ds_map_size(ds_map) ; i++) {
-			value += '"'+string(key)+'"'+':';
-			value += string(enigma_user::ds_map_find_value(ds_map, key));
+			variant value {enigma_user::ds_map_find_value(ds_map, key)};
+
+			if (enigma_user::is_string(value))
+				encoding_accumulator += '"' + enigma_user::toString(value) + '"';
+			else 
+				encoding_accumulator += enigma_user::toString(value);
+
 			key = enigma_user::ds_map_find_next(ds_map, key);
-			if (i != enigma_user::ds_map_size(ds_map)-1) value += ',';
+			
+			// Add comma if not last element
+			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator += ',';
 		}
 
-		value += '}';
-		
-		return value;
+		encoding_accumulator += '}';
+
+		return encoding_accumulator;
 	}
 }
