@@ -27,6 +27,9 @@ template <typename T>
 inline std::size_t byte_size(const T &value) = delete;
 
 template <typename T>
+inline T internal_deserialize_numeric(std::byte *iter);
+
+template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value);
 
 template <typename T>
