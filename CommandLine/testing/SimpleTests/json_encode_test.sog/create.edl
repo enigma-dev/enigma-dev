@@ -8,9 +8,9 @@ ds_map_add(async_load, "id", 5.0);
 ds_map_add(async_load, "num_entries", 2.0);
 ds_map_add(async_load, "status", 1.0);
 
-var data = json_encode(async_load);
+var decoded_string = json_encode(async_load);
 
-var ds_map = json_decode(data);
+var ds_map = json_decode(decoded_string);
 
 gtest_assert_eq(ds_map_size(ds_map), 6);
 
