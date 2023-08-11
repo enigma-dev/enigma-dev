@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstring>
 
+#include "complex_serialization_functions.h"
 #include "detect_serialization.h"
 #include "detect_size.h"
 #include "map_serialization_functions.h"
@@ -344,15 +345,6 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                   T &&value) {
-  internal_serialize_into(iter, value.real());
-  iter += enigma_internal_sizeof(value.real());
-  internal_serialize_into(iter, value.imag());
-  iter += enigma_internal_sizeof(value.imag());
-}
-
-template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
   if constexpr (has_internal_serialize_into_fn_free_function<std::decay_t<T>>) {
     enigma::internal_serialize_into_fn(iter, value);
@@ -391,18 +383,6 @@ template <typename T>
 typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>,
                         std::array<std::byte, sizeof(T)>>::type inline internal_serialize_fn(T &&value) {
   return internal_serialize_numeric(value);
-}
-
-template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
-    T &&value) {
-  std::vector<std::byte> result;
-  result.resize(2 * enigma_internal_sizeof(value.real()));
-
-  auto dataPtr = result.data();
-  internal_serialize_into(dataPtr, value.real());
-  internal_serialize_into(dataPtr, value.imag());
-  return result;
 }
 
 template <typename T>
@@ -457,19 +437,6 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter) {
-  std::size_t offset = 0;
-  using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
-
-  InnerType Real = internal_deserialize<InnerType>(iter + offset);
-  offset += enigma_internal_sizeof(Real);
-  InnerType Imag = internal_deserialize<InnerType>(iter + offset);
-  offset += enigma_internal_sizeof(Imag);
-  std::complex<InnerType> result(Real, Imag);
-  return result;
-}
-
-template <typename T>
 inline T internal_deserialize(std::byte *iter) {
   if constexpr (has_internal_deserialize_fn_free_function<std::decay_t<T>>) {
     return internal_deserialize_fn<T>(iter);
@@ -512,14 +479,6 @@ template <typename T>
 typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
-}
-
-template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(
-      buffer.size() +
-      2 * enigma_internal_sizeof(value.real()));  // we don't need to store the size of the complex, it is always 1
 }
 
 template <typename T>
@@ -569,18 +528,6 @@ typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inli
     T &value, std::byte *iter, std::size_t &len) {
   value = enigma::internal_deserialize<std::string>(iter + len);
   len += value.length() + sizeof(std::size_t);
-}
-
-template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
-  using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
-
-  InnerType Real = enigma::internal_deserialize<InnerType>(iter + len);
-  len += enigma_internal_sizeof(Real);
-  InnerType Imag = enigma::internal_deserialize<InnerType>(iter + len);
-  len += enigma_internal_sizeof(Imag);
-  value = std::complex<InnerType>(Real, Imag);
 }
 
 template <typename T>
