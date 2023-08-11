@@ -62,6 +62,11 @@ inline std::size_t byte_size(const std::vector<T> &value) {
   return value.size() * sizeof(T);
 }
 
+template <typename T, typename U>
+inline std::size_t byte_size(const std::map<T, U> &value) {
+  return value.size() * (sizeof(T) + sizeof(U));
+}
+
 template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {
   return enigma_internal_sizeof_lua_table(value);

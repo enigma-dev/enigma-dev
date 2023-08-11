@@ -76,11 +76,24 @@ struct is_std_vector<std::vector<T, Alloc>> : std::true_type {};
 
 template <typename T>
 constexpr static inline bool is_std_vector_v = is_std_vector<T>::value;
+
+template <typename T>
+struct is_std_map : std::false_type {};
+
+template <typename Key, typename T, typename Compare, typename Allocator>
+struct is_std_map<std::map<Key, T, Compare, Allocator>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_map_v = is_std_map<T>::value;
 //
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type
-inline internal_serialize_into_fn(std::byte *iter,  T &&value) ;
+typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
+                                                                                                  T &&value);
+
+template <typename T>
+typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
+                                                                                               T &&value);
 
 template <typename T>
 inline auto internal_serialize_fn(T *&&value);
@@ -101,8 +114,11 @@ typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_
 
 template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
-    std::vector<T> &&value) ;
+    std::vector<T> &&value);
 
+template <typename T>
+typename std::enable_if<is_std_map_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
+    T &&value);
 
 template <typename T>
 typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
@@ -130,6 +146,9 @@ template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
+typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+
+template <typename T>
 typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value);
 
@@ -143,6 +162,10 @@ typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inli
 
 template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value);
+
+template <typename T>
+typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
@@ -175,9 +198,15 @@ template <typename T>
 typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
     T &value, std::byte *iter, std::size_t &len);
 
+template <typename T>
+typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
+                                                                                                      std::byte *iter,
+                                                                                                      std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) ;
+typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
+                                                                                                   std::byte *iter,
+                                                                                                   std::size_t &len);
+
 }  // namespace enigma
 #endif
