@@ -29,6 +29,7 @@
 #include "lua_table_serialization_functions.h"
 #include "map_serialization_functions.h"
 #include "numeric_serialization_functions.h"
+#include "pointer_serialization_functions.h"
 #include "string_serialization_functions.h"
 #include "var_serialization_functions.h"
 #include "variant_serialization_functions.h"
@@ -85,11 +86,6 @@ inline T internal_deserialize_any(std::byte *iter) {
 }
 
 template <typename T>
-inline auto internal_serialize_into_fn(std::byte *iter, T *value) {
-  internal_serialize_into<std::size_t>(iter, 0);
-}
-
-template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
   if constexpr (has_internal_serialize_into_fn_free_function<std::decay_t<T>>) {
     enigma::internal_serialize_into_fn(iter, value);
@@ -98,11 +94,6 @@ inline void internal_serialize_into(std::byte *iter, T &&value) {
                   "'internal_serialize_into' takes 'variant', 'var', 'std::string', bool, integral, floating types, "
                   "std::vector, std::map, std::complex or std::set");
   }
-}
-
-template <typename T>
-inline auto internal_serialize_fn(T *&&value) {
-  return internal_serialize_numeric<std::size_t>(0);
 }
 
 template <typename T>
@@ -116,11 +107,6 @@ inline auto internal_serialize(T &&value) {
                   "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
                   "std::map, std::complex or std::set");
   }
-}
-
-template <typename T>
-typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter) {
-  return nullptr;
 }
 
 template <typename T>
