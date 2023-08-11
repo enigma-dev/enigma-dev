@@ -74,6 +74,11 @@ inline std::size_t byte_size(const std::complex<T> &value) {
 }
 
 template <typename T>
+inline std::size_t byte_size(const std::set<T> &value) {
+  return value.size() * sizeof(T);
+}
+
+template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {
   return enigma_internal_sizeof_lua_table(value);
 }

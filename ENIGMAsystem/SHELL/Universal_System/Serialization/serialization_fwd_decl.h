@@ -19,6 +19,8 @@
 #define ENIGMA_SERIALIZE_FWD_DECL_H
 
 #include <complex>
+#include <set>
+
 #include "../var4.h"
 
 namespace enigma {
@@ -97,6 +99,15 @@ template <typename T>
 constexpr bool is_std_complex_v = is_std_complex<T>::value;
 
 template <typename T>
+struct is_std_set : std::false_type {};
+
+template <typename Key, typename Compare, typename Allocator>
+struct is_std_set<std::set<Key, Compare, Allocator>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_set_v = is_std_set<T>::value;
+
+template <typename T>
 struct complex_inner_type;
 
 template <typename T>
@@ -109,8 +120,9 @@ using complex_inner_type_t = typename complex_inner_type<T>::type;
 //
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                  T &&value);
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> ||
+                        is_std_set_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
+                                                                                               T &&value);
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
@@ -138,8 +150,8 @@ typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_
                         std::array<std::byte, sizeof(T)>>::type inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
-    std::vector<T> &&value);
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
+                        std::vector<std::byte>>::type inline internal_serialize_fn(T &&value);
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
@@ -172,7 +184,8 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
                         T>::type inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
+                        T>::type inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
@@ -193,8 +206,8 @@ typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inli
     std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value);
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>>::
+    type inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
@@ -235,9 +248,10 @@ typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inli
     T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
-                                                                                                      std::byte *iter,
-                                                                                                      std::size_t &len);
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> ||
+                        is_std_set_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
+                                                                                                   std::byte *iter,
+                                                                                                   std::size_t &len);
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,

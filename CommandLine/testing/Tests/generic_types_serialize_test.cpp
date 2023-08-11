@@ -464,3 +464,171 @@ TEST(serialize_deserialize_functions, Test_complex7) {
   enigma::enigma_deserialize(outputMap, iter, len1);
   ASSERT_EQ(outputMap, inputMap);
 }
+
+TEST(serialize_deserialize_functions, Test_set1) {
+  std::set<int> inputSet = {12, 123, 12};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 16);
+
+  std::byte* iter = bytes.data();
+  std::set<int> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+
+  ASSERT_EQ(outputSet, inputSet);
+}
+
+TEST(serialize_deserialize_functions, Test_set2) {
+  std::set<double> inputSet = {12.1232, 123.22, 342432.22, 12312312.2442, 12323.222, 23232.896, 323232.785875, 233.123};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 72);
+
+  std::byte* iter = bytes.data();
+  std::set<double> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+
+  ASSERT_EQ(outputSet, inputSet);
+}
+
+TEST(serialize_deserialize_functions, Test_set3) {
+  std::set<char> inputSet = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 16);
+
+  std::byte* iter = bytes.data();
+  std::set<char> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+
+  ASSERT_EQ(outputSet, inputSet);
+}
+
+TEST(serialize_deserialize_functions, Test_set4) {
+  std::set<bool> inputSet = {true, false};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 10);
+
+  std::byte* iter = bytes.data();
+  std::set<bool> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+
+  ASSERT_EQ(outputSet, inputSet);
+}
+
+TEST(serialize_deserialize_functions, Test_set5) {
+  std::set<bool> inputSet = {};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 8);
+
+  std::byte* iter = bytes.data();
+  std::set<bool> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+
+  ASSERT_EQ(outputSet, inputSet);
+}
+
+TEST(serialize_deserialize_functions, Test_set6) {
+  std::set<int> inputSet = {1, 2};
+  int input_int = 123;
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 16);
+
+  enigma::enigma_serialize(input_int, len, bytes);
+  ASSERT_EQ(bytes.size(), 20);
+
+  std::byte* iter = bytes.data();
+
+  std::set<int> outputSet;
+  len = 0;
+  enigma::enigma_deserialize(outputSet, iter, len);
+  ASSERT_EQ(outputSet, inputSet);
+
+  int output_int;
+  enigma::enigma_deserialize(output_int, iter, len);
+  ASSERT_EQ(output_int, input_int);
+}
+
+TEST(serialize_deserialize_functions, Test_set7) {
+  std::vector<int> inputSet1 = {1, 2};
+  std::vector<char> inputSet2 = {'a', 'b'};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputSet1, len, bytes);
+  ASSERT_EQ(bytes.size(), 16);
+
+  enigma::enigma_serialize(inputSet2, len, bytes);
+  ASSERT_EQ(bytes.size(), 26);
+
+  std::byte* iter = bytes.data();
+
+  std::vector<int> outputSet1;
+  std::size_t len1 = 0;
+  enigma::enigma_deserialize(outputSet1, iter, len1);
+  ASSERT_EQ(outputSet1, inputSet1);
+
+  std::vector<char> outputSet2;
+  enigma::enigma_deserialize(outputSet2, iter, len1);
+  ASSERT_EQ(outputSet2, inputSet2);
+}
+
+TEST(serialize_deserialize_functions, Test_set8) {
+  std::complex<int> inputComplex = {1, 2};
+  std::vector<double> inputVector = {74.6798986, 87567.9679, 98669.09708};
+  std::map<bool, char> inputMap = {{true, 'a'}, {false, 'b'}};
+  std::set<int> inputSet = {12, 123};
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputComplex, len, bytes);
+  ASSERT_EQ(bytes.size(), 8);
+
+  enigma::enigma_serialize(inputVector, len, bytes);
+  ASSERT_EQ(bytes.size(), 40);
+
+  enigma::enigma_serialize(inputMap, len, bytes);
+  ASSERT_EQ(bytes.size(), 52);
+
+  enigma::enigma_serialize(inputSet, len, bytes);
+  ASSERT_EQ(bytes.size(), 68);
+
+  std::byte* iter = bytes.data();
+
+  std::complex<int> outputComplex;
+  std::size_t len1 = 0;
+  enigma::enigma_deserialize(outputComplex, iter, len1);
+  ASSERT_EQ(outputComplex, inputComplex);
+
+  std::vector<double> outputVector;
+  enigma::enigma_deserialize(outputVector, iter, len1);
+  ASSERT_EQ(outputVector, inputVector);
+
+  std::map<bool, char> outputMap;
+  enigma::enigma_deserialize(outputMap, iter, len1);
+  ASSERT_EQ(outputMap, inputMap);
+
+  std::set<int> outputSet;
+  enigma::enigma_deserialize(outputSet, iter, len1);
+  ASSERT_EQ(outputSet, inputSet);
+}
