@@ -21,6 +21,7 @@
 
 #include <complex>
 #include <type_traits>
+#include "serialization_fwd_decl.h"
 
 namespace enigma {
 
@@ -32,21 +33,14 @@ inline std::size_t variant_size(const variant &value) {
   }
 }
 
-template <typename T>
-inline std::size_t enigma_internal_sizeof_lua_table(const lua_table<T> &table) {
-  return (3 * sizeof(std::size_t)) +  // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
-         table.sparse_part().size() * (sizeof(T)) +                      // The elements of `dense`
-         table.dense_part().size() * (sizeof(std::size_t) + sizeof(T));  // The elements of `sparse`
-}
-
 inline std::size_t var_size(const var &value) {
-  std::size_t len = variant_size(value) + enigma_internal_sizeof_lua_table(value.array1d);
+  std::size_t len = variant_size(value) + enigma_internal_sizeof(value.array1d);
   len += (3 * sizeof(std::size_t));
   for (auto &[key, elem] : value.array2d.sparse_part()) {
-    len += enigma_internal_sizeof_lua_table(elem);
+    len += enigma_internal_sizeof(elem);
   }
   for (auto &elem : value.array2d.dense_part()) {
-    len += enigma_internal_sizeof_lua_table(elem);
+    len += enigma_internal_sizeof(elem);
   }
   return len;
 }
@@ -59,13 +53,25 @@ inline std::size_t byte_size(const variant &value) { return variant_size(value);
 inline std::size_t byte_size(const var &value) { return var_size(value); }
 
 template <typename T>
-inline std::size_t byte_size(const std::vector<T> &value) {
-  return value.size() * sizeof(T);
+std::size_t byte_size(const std::vector<T> &value) {
+  std::size_t totalSize = sizeof(std::size_t);
+
+  for (const auto &element : value) {
+    totalSize += enigma_internal_sizeof(element);
+  }
+
+  return totalSize;
 }
 
 template <typename T, typename U>
 inline std::size_t byte_size(const std::map<T, U> &value) {
-  return value.size() * (sizeof(T) + sizeof(U));
+  std::size_t totalSize = sizeof(std::size_t);
+
+  for (const auto &element : value) {
+    totalSize += enigma_internal_sizeof(element.first) + enigma_internal_sizeof(element.second);
+  }
+
+  return totalSize;
 }
 
 template <typename T>
@@ -75,12 +81,20 @@ inline std::size_t byte_size(const std::complex<T> &value) {
 
 template <typename T>
 inline std::size_t byte_size(const std::set<T> &value) {
-  return value.size() * sizeof(T);
+  std::size_t totalSize = sizeof(std::size_t);
+
+  for (const auto &element : value) {
+    totalSize += enigma_internal_sizeof(element);
+  }
+
+  return totalSize;
 }
 
 template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {
-  return enigma_internal_sizeof_lua_table(value);
+  return (3 * sizeof(std::size_t)) +  // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
+         value.sparse_part().size() * (sizeof(T)) +                      // The elements of `dense`
+         value.dense_part().size() * (sizeof(std::size_t) + sizeof(T));  // The elements of `sparse`
 }
 
 }  // namespace enigma
