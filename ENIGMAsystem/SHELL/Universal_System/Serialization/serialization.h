@@ -512,20 +512,6 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
   return internal_deserialize_numeric<T>(iter);
 }
 
-// needs a better place
-template <typename Container, typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
-                                                                                           const T &val) {
-  container.push_back(std::move(val));
-}
-
-template <typename Container, typename T>
-typename std::enable_if<is_std_set_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
-                                                                                        const T &val) {
-  container.insert(std::move(val));
-}
-//
-
 template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
                         T>::type inline internal_deserialize_fn(std::byte *iter) {

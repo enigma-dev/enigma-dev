@@ -20,7 +20,6 @@
 #define ENIGMA_DETECT_SERIALIZATION_H
 
 #include <cstddef>
-#include <vector>
 
 #include "serialization_fwd_decl.h"
 

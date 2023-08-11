@@ -19,7 +19,6 @@
 #ifndef ENIGMA_DETECT_SIZE_H
 #define ENIGMA_DETECT_SIZE_H
 
-#include <complex>
 #include <type_traits>
 #include "serialization_fwd_decl.h"
 
