@@ -75,7 +75,9 @@
         "valarray": "cpp",
         "variant": "cpp",
         "*.ipp": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "buffer": "cpp",
+        "netfwd": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

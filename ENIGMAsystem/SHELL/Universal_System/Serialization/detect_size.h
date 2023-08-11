@@ -50,23 +50,17 @@ inline std::size_t var_size(const var &value) {
   return len;
 }
 
-// template <typename T>
-// struct is_lua_table : std::false_type {};
-
-// template <typename U>
-// struct is_lua_table<lua_table<U>> : std::true_type {
-//   using inner_type = U;
-// };
-
-// template <typename T>
-// constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
-
 template <typename T>
 constexpr static inline bool always_false = false;
 
 inline std::size_t byte_size(const variant &value) { return variant_size(value); }
 
 inline std::size_t byte_size(const var &value) { return var_size(value); }
+
+template <typename T>
+inline std::size_t byte_size(const std::vector<T> &value) {
+  return value.size() * sizeof(T);
+}
 
 template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {

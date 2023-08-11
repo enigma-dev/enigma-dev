@@ -61,3 +61,5 @@ hs_err_pid*.log
 *.layout
 *.epackage
 *~
+.vscode/settings.json
+CommandLine/testing/Tests/exec
