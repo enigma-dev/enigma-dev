@@ -67,3 +67,36 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
                         T>::type inline enigma::internal_deserialize_fn(std::byte *iter) {
   return internal_deserialize_numeric<T>(iter);
 }
+
+template <typename T>
+inline void enigma::internal_serialize_numeric_into(std::byte *iter, T value) {
+  if constexpr (std::is_integral_v<T>) {
+    internal_serialize_integral_into(iter, value);
+  } else if constexpr (std::is_floating_point_v<T>) {
+    internal_serialize_floating_into(iter, value);
+  } else {
+    static_assert(always_false<T>, "'internal_serialize_numeric_into' takes either integral or floating types");
+  }
+}
+
+template <typename T>
+inline std::array<std::byte, sizeof(T)> enigma::internal_serialize_numeric(T value) {
+  if constexpr (std::is_integral_v<T>) {
+    return internal_serialize_integral(value);
+  } else if constexpr (std::is_floating_point_v<T>) {
+    return internal_serialize_floating(value);
+  } else {
+    static_assert(always_false<T>, "'internal_serialize_numeric' takes either integral or floating types");
+  }
+}
+
+template <typename T>
+inline T enigma::internal_deserialize_numeric(std::byte *iter) {
+  if constexpr (std::is_integral_v<T>) {
+    return internal_deserialize_integral<T>(iter);
+  } else if constexpr (std::is_floating_point_v<T>) {
+    return internal_deserialize_floating<T>(iter);
+  } else {
+    static_assert(always_false<T>, "'internal_deserialize_numeric' takes either integral or floating types");
+  }
+}

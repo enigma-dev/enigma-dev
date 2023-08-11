@@ -41,6 +41,12 @@ inline std::array<std::byte, sizeof(T)> internal_serialize_floating(T value);
 template <typename T>
 inline void internal_serialize_numeric_into(std::byte *iter, T value);
 
+template <typename T>
+inline std::array<std::byte, sizeof(T)> internal_serialize_numeric(T value);
+
+template <typename T>
+inline T internal_deserialize_numeric(std::byte *iter);
+
 template <typename Base, typename T>
 inline void internal_serialize_any_into(std::byte *iter, T value);
 

@@ -30,6 +30,7 @@
 #include "string_serialization_functions.h"
 #include "var_serialization_functions.h"
 #include "variant_serialization_functions.h"
+#include "lua_table_serialization_functions.h"
 #include "vector_set_serialization_functions.h"
 
 namespace enigma {
@@ -80,95 +81,6 @@ inline T internal_deserialize_any(std::byte *iter) {
     result = (result << 8) | static_cast<Base>(*(iter + i));
   }
   return utility::bit_cast<T>(result);
-}
-
-template <typename T>
-inline void internal_serialize_numeric_into(std::byte *iter, T value) {
-  if constexpr (std::is_integral_v<T>) {
-    internal_serialize_integral_into(iter, value);
-  } else if constexpr (std::is_floating_point_v<T>) {
-    internal_serialize_floating_into(iter, value);
-  } else {
-    static_assert(always_false<T>, "'internal_serialize_numeric_into' takes either integral or floating types");
-  }
-}
-
-template <typename T>
-inline std::array<std::byte, sizeof(T)> internal_serialize_numeric(T value) {
-  if constexpr (std::is_integral_v<T>) {
-    return internal_serialize_integral(value);
-  } else if constexpr (std::is_floating_point_v<T>) {
-    return internal_serialize_floating(value);
-  } else {
-    static_assert(always_false<T>, "'internal_serialize_numeric' takes either integral or floating types");
-  }
-}
-
-template <typename T>
-inline T internal_deserialize_numeric(std::byte *iter) {
-  if constexpr (std::is_integral_v<T>) {
-    return internal_deserialize_integral<T>(iter);
-  } else if constexpr (std::is_floating_point_v<T>) {
-    return internal_deserialize_floating<T>(iter);
-  } else {
-    static_assert(always_false<T>, "'internal_deserialize_numeric' takes either integral or floating types");
-  }
-}
-
-template <typename T>
-inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {
-  std::size_t pos = 0;
-  internal_serialize_into(iter, table.mx_size_part());
-  pos += sizeof(std::size_t);
-  internal_serialize_into(iter + pos, table.dense_part().size());
-  pos += sizeof(std::size_t);
-  for (auto &elem : table.dense_part()) {
-    if constexpr (is_lua_table_v<std::decay_t<T>>) {
-      enigma_internal_serialize_lua_table(iter + pos, elem);
-      pos += enigma_internal_sizeof(elem);
-    } else {
-      internal_serialize_into(iter + pos, elem);
-      pos += enigma_internal_sizeof(elem);
-    }
-  }
-  internal_serialize_into(iter + pos, table.sparse_part().size());
-  pos += sizeof(std::size_t);
-  for (auto &[key, value] : table.sparse_part()) {
-    internal_serialize_into(iter + pos, key);
-    pos += enigma_internal_sizeof(key);
-    if constexpr (is_lua_table_v<std::decay_t<T>>) {
-      enigma_internal_serialize_lua_table(iter + pos, value);
-      pos += enigma_internal_sizeof(value);
-    } else {
-      internal_serialize_into(iter + pos, value);
-      pos += enigma_internal_sizeof(value);
-    }
-  }
-}
-
-template <typename T>
-inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter) {
-  lua_table<T> table;
-  auto &mx_size = const_cast<std::size_t &>(table.mx_size_part());
-  auto &dense = const_cast<typename lua_table<T>::dense_type &>(table.dense_part());
-  auto &sparse = const_cast<typename lua_table<T>::sparse_type &>(table.sparse_part());
-
-  std::size_t pos = 0;
-  enigma_deserialize(mx_size, iter, pos);
-  std::size_t dense_size = 0;
-  enigma_deserialize(dense_size, iter, pos);
-  dense.resize(dense_size);
-  for (std::size_t i = 0; i < dense_size; i++) {
-    enigma_deserialize(dense[i], iter, pos);
-  }
-  std::size_t sparse_size = 0;
-  enigma_deserialize(sparse_size, iter, pos);
-  for (std::size_t i = 0; i < sparse_size; i++) {
-    std::size_t key = 0;
-    enigma_deserialize(key, iter, pos);
-    enigma_deserialize(sparse[key], iter, pos);
-  }
-  return table;
 }
 
 template <typename T>
@@ -273,12 +185,6 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
     internal_serialize_into(bytes.data() + len, value);
   }
   len = bytes.size();
-}
-
-template <typename T>
-inline void enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len) {
-  value = enigma_internal_deserialize_lua_table<T>(iter);
-  len += enigma_internal_sizeof(value);
 }
 
 template <typename T>
