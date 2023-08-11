@@ -26,6 +26,36 @@ namespace enigma {
 template <typename T>
 inline std::size_t byte_size(const T &value) = delete;
 
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+inline void internal_serialize_integral_into(std::byte *iter, T value);
+
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+inline std::array<std::byte, sizeof(T)> internal_serialize_integral(T value);
+
+template <typename T>
+inline void internal_serialize_floating_into(std::byte *iter, T value);
+
+template <typename T>
+inline std::array<std::byte, sizeof(T)> internal_serialize_floating(T value);
+
+template <typename T>
+inline void internal_serialize_numeric_into(std::byte *iter, T value);
+
+template <typename Base, typename T>
+inline void internal_serialize_any_into(std::byte *iter, T value);
+
+template <typename Base, typename T>
+inline std::array<std::byte, sizeof(T)> serialize_any(T value);
+
+template <typename Base, typename T>
+inline T internal_deserialize_any(std::byte *iter);
+
+template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+inline T internal_deserialize_integral(std::byte *iter);
+
+template <typename T>
+inline T internal_deserialize_floating(std::byte *iter);
+
 template <typename T>
 inline T internal_deserialize_numeric(std::byte *iter);
 

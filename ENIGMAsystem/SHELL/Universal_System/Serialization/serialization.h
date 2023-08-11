@@ -26,6 +26,7 @@
 #include "detect_serialization.h"
 #include "detect_size.h"
 #include "map_serialization_functions.h"
+#include "numeric_serialization_functions.h"
 #include "string_serialization_functions.h"
 #include "vector_set_serialization_functions.h"
 
@@ -38,24 +39,6 @@ inline T bit_cast(const U &value) {
   return result;
 }
 }  // namespace utility
-
-template <typename T, std::size_t N>
-struct has_nested_form : std::false_type {
-  using inner_type = void;
-};
-
-template <typename T>
-struct has_nested_form<T, 0> : std::true_type {
-  using inner_type = T;
-};
-
-template <template <typename> typename T, typename U, std::size_t N>
-struct has_nested_form<T<U>, N> : has_nested_form<U, N - 1> {
-  using inner_type = U;
-};
-
-template <typename T, std::size_t N>
-constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
@@ -70,7 +53,6 @@ inline std::size_t enigma_internal_sizeof(T &&value) {
   }
 }
 
-namespace {
 template <typename Base, typename T>
 inline void internal_serialize_any_into(std::byte *iter, T value) {
   std::size_t i = sizeof(Base) - 1;
@@ -98,40 +80,6 @@ inline T internal_deserialize_any(std::byte *iter) {
   return utility::bit_cast<T>(result);
 }
 
-}  // namespace
-
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-inline void internal_serialize_integral_into(std::byte *iter, T value) {
-  internal_serialize_any_into<std::make_unsigned_t<T>>(iter, value);
-}
-
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-inline std::array<std::byte, sizeof(T)> internal_serialize_integral(T value) {
-  return serialize_any<std::make_unsigned_t<T>>(value);
-}
-
-template <typename T>
-inline void internal_serialize_floating_into(std::byte *iter, T value) {
-  if constexpr (std::is_same_v<T, float>) {
-    internal_serialize_any_into<std::uint32_t>(iter, value);
-  } else if constexpr (std::is_same_v<T, double>) {
-    internal_serialize_any_into<std::uint64_t>(iter, value);
-  } else {
-    static_assert(always_false<T>, "'internal_serialize_floating_into' only accepts 'float' or 'double' types");
-  }
-}
-
-template <typename T>
-inline std::array<std::byte, sizeof(T)> internal_serialize_floating(T value) {
-  if constexpr (std::is_same_v<T, float>) {
-    return serialize_any<std::uint32_t>(value);
-  } else if constexpr (std::is_same_v<T, double>) {
-    return serialize_any<std::uint64_t>(value);
-  } else {
-    static_assert(always_false<T>, "'internal_serialize_floating' only accepts 'float' or 'double' types");
-  }
-}
-
 template <typename T>
 inline void internal_serialize_numeric_into(std::byte *iter, T value) {
   if constexpr (std::is_integral_v<T>) {
@@ -151,22 +99,6 @@ inline std::array<std::byte, sizeof(T)> internal_serialize_numeric(T value) {
     return internal_serialize_floating(value);
   } else {
     static_assert(always_false<T>, "'internal_serialize_numeric' takes either integral or floating types");
-  }
-}
-
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-inline T internal_deserialize_integral(std::byte *iter) {
-  return internal_deserialize_any<std::make_unsigned_t<T>, T>(iter);
-}
-
-template <typename T>
-inline T internal_deserialize_floating(std::byte *iter) {
-  if constexpr (std::is_same_v<T, float>) {
-    return internal_deserialize_any<std::uint32_t, T>(iter);
-  } else if constexpr (std::is_same_v<T, double>) {
-    return internal_deserialize_any<std::size_t, T>(iter);
-  } else {
-    static_assert(always_false<T>, "'internal_deserialize_floating' only accepts 'float' or 'double' types");
   }
 }
 
@@ -329,13 +261,6 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
 }
 
 template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>>::
-    type inline internal_serialize_into_fn(std::byte *iter, T &&value) {
-  internal_serialize_numeric_into(iter, value);
-}
-
-template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
   if constexpr (has_internal_serialize_into_fn_free_function<std::decay_t<T>>) {
     enigma::internal_serialize_into_fn(iter, value);
@@ -359,12 +284,6 @@ template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>,
                         std::vector<std::byte>>::type inline internal_serialize_fn(T &&value) {
   return internal_serialize_variant(value);
-}
-
-template <typename T>
-typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>,
-                        std::array<std::byte, sizeof(T)>>::type inline internal_serialize_fn(T &&value) {
-  return internal_serialize_numeric(value);
 }
 
 template <typename T>
@@ -400,13 +319,6 @@ template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
     std::byte *iter) {
   return (internal_deserialize_variant(iter));
-}
-
-template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>,
-                        T>::type inline internal_deserialize_fn(std::byte *iter) {
-  return internal_deserialize_numeric<T>(iter);
 }
 
 template <typename T>

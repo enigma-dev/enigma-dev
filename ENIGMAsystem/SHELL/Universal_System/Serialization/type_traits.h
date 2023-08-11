@@ -71,3 +71,21 @@ typename std::enable_if<is_std_set_v<std::decay_t<Container>>>::type inline inse
                                                                                         const T &val) {
   container.insert(std::move(val));
 }
+
+template <typename T, std::size_t N>
+struct has_nested_form : std::false_type {
+  using inner_type = void;
+};
+
+template <typename T>
+struct has_nested_form<T, 0> : std::true_type {
+  using inner_type = T;
+};
+
+template <template <typename> typename T, typename U, std::size_t N>
+struct has_nested_form<T<U>, N> : has_nested_form<U, N - 1> {
+  using inner_type = U;
+};
+
+template <typename T, std::size_t N>
+constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
