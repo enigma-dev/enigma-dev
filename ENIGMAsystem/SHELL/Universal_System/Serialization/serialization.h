@@ -19,15 +19,14 @@
 #ifndef ENIGMA_SERIALIZATION_H
 #define ENIGMA_SERIALIZATION_H
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <cstring>
 
 #include "complex_serialization_functions.h"
 #include "detect_serialization.h"
 #include "detect_size.h"
 #include "map_serialization_functions.h"
+#include "string_serialization_functions.h"
 #include "vector_set_serialization_functions.h"
 
 namespace enigma {
@@ -311,14 +310,6 @@ inline auto internal_serialize_into_fn(std::byte *iter, T *value) {
 }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline internal_serialize_into_fn(
-    std::byte *iter, T &&value) {
-  internal_serialize_into<std::size_t>(iter, value.size());
-  std::transform(value.begin(), value.end(), iter + sizeof(std::size_t),
-                 [](char c) { return static_cast<std::byte>(c); });
-}
-
-template <typename T>
 typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
                                                                                                        T &&value) {
   *iter = static_cast<std::byte>(value);
@@ -360,15 +351,6 @@ inline auto internal_serialize_fn(T *&&value) {
   return internal_serialize_numeric<std::size_t>(0);
 }
 
-inline auto internal_serialize_fn(std::string &&value) {
-  std::vector<std::byte> result;
-  result.resize(sizeof(std::size_t) + value.size());
-  internal_serialize_into<std::size_t>(result.data(), value.size());
-  std::transform(value.begin(), value.end(), result.data() + sizeof(std::size_t),
-                 [](char c) { return static_cast<std::byte>(c); });
-  return result;
-}
-
 inline auto internal_serialize_fn(bool &&value) { return std::vector<std::byte>{static_cast<std::byte>(value)}; }
 
 inline auto internal_serialize_fn(var &&value) { return internal_serialize_var(value); }
@@ -401,15 +383,6 @@ inline auto internal_serialize(T &&value) {
 template <typename T>
 typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter) {
   return nullptr;
-}
-
-template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
-    std::byte *iter) {
-  std::size_t len = internal_deserialize_numeric<std::size_t>(iter);
-  std::size_t offset = sizeof(std::size_t);
-  std::string result{reinterpret_cast<char *>(iter + offset), reinterpret_cast<char *>(iter + offset + len)};
-  return result;
 }
 
 template <typename T>
@@ -476,12 +449,6 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
 }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(buffer.size() + value.size() + sizeof(std::size_t));
-}
-
-template <typename T>
 inline void internal_resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
   if constexpr (has_internal_resize_buffer_for_fn_free_function<std::decay_t<T>>) {
     internal_resize_buffer_for_fn(buffer, value);
@@ -521,13 +488,6 @@ template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
     type inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   enigma_internal_deserialize_variant(value, iter, len);
-}
-
-template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
-  value = enigma::internal_deserialize<std::string>(iter + len);
-  len += value.length() + sizeof(std::size_t);
 }
 
 template <typename T>
