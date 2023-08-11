@@ -65,6 +65,12 @@ inline std::vector<std::byte> internal_serialize_var(const var &var);
 
 inline var internal_deserialize_var(std::byte *iter);
 
+inline void internal_serialize_variant_into(std::byte *iter, const variant &value);
+
+inline std::vector<std::byte> internal_serialize_variant(const variant &value);
+
+inline variant internal_deserialize_variant(std::byte *iter);
+
 template <typename T>
 inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
 
