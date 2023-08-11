@@ -22,15 +22,16 @@
 #include <array>
 #include <cstddef>
 
+#include "bool_serialization_functions.h"
 #include "complex_serialization_functions.h"
 #include "detect_serialization.h"
 #include "detect_size.h"
+#include "lua_table_serialization_functions.h"
 #include "map_serialization_functions.h"
 #include "numeric_serialization_functions.h"
 #include "string_serialization_functions.h"
 #include "var_serialization_functions.h"
 #include "variant_serialization_functions.h"
-#include "lua_table_serialization_functions.h"
 #include "vector_set_serialization_functions.h"
 
 namespace enigma {
@@ -89,12 +90,6 @@ inline auto internal_serialize_into_fn(std::byte *iter, T *value) {
 }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                       T &&value) {
-  *iter = static_cast<std::byte>(value);
-}
-
-template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
   if constexpr (has_internal_serialize_into_fn_free_function<std::decay_t<T>>) {
     enigma::internal_serialize_into_fn(iter, value);
@@ -109,8 +104,6 @@ template <typename T>
 inline auto internal_serialize_fn(T *&&value) {
   return internal_serialize_numeric<std::size_t>(0);
 }
-
-inline auto internal_serialize_fn(bool &&value) { return std::vector<std::byte>{static_cast<std::byte>(value)}; }
 
 template <typename T>
 inline auto internal_serialize(T &&value) {
@@ -128,12 +121,6 @@ inline auto internal_serialize(T &&value) {
 template <typename T>
 typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter) {
   return nullptr;
-}
-
-template <typename T>
-typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
-    std::byte *iter) {
-  return static_cast<bool>(*iter);
 }
 
 template <typename T>
