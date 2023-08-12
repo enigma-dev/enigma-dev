@@ -17,6 +17,7 @@
 **/
 
 #include <complex>
+#include <queue>
 #include <set>
 #include "../var4.h"
 
@@ -48,6 +49,15 @@ struct is_std_set<std::set<Key, Compare, Allocator>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_std_set_v = is_std_set<T>::value;
+
+template <typename T>
+struct is_std_queue : std::false_type {};
+
+template <typename T, typename Container>
+struct is_std_queue<std::queue<T, Container>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_queue_v = is_std_queue<T>::value;
 
 template <typename T>
 struct is_std_map : std::false_type {};
@@ -95,6 +105,11 @@ inline void insert_back(std::vector<T> &container, const U &val) {
 template <typename T, typename U>
 inline void insert_back(std::set<T> &container, const U &val) {
   container.insert(std::move(val));
+}
+
+template <typename T, typename U>
+inline void insert_back(std::queue<T> &container, const U &val) {
+  container.push(std::move(val));
 }
 
 template <typename... Types>

@@ -3,7 +3,7 @@
 
 TEST(byte_size_function, Test_vector) {
   std::vector<int> vec1 = {1, 2, 3, 4, 5};
-  ASSERT_EQ(enigma::enigma_internal_sizeof(vec1), 28);
+  ASSERT_EQ(enigma::byte_size(vec1), 28);
 
   std::vector<double> vec2 = {12.2, 13.3, 1233213212.2, 1232312322.123, 232322, 2};
   ASSERT_EQ(enigma::byte_size(vec2), 56);

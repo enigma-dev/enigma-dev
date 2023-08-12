@@ -52,11 +52,25 @@ inline std::size_t byte_size(const variant &value) { return variant_size(value);
 inline std::size_t byte_size(const var &value) { return var_size(value); }
 
 template <typename T>
-std::size_t byte_size(const std::vector<T> &value) {
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
+                        std::size_t>::type inline byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   for (const auto &element : value) {
     totalSize += enigma_internal_sizeof(element);
+  }
+  return totalSize;
+}
+
+template <typename T>
+typename std::enable_if<is_std_queue_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value) {
+  std::size_t totalSize = sizeof(std::size_t);
+  using InnerType = typename std::decay_t<T>::value_type;
+  std::queue<InnerType> tempQueue = value;
+
+  while (!tempQueue.empty()) {
+    totalSize += enigma_internal_sizeof(tempQueue.front());
+    tempQueue.pop();
   }
 
   return totalSize;
@@ -82,17 +96,6 @@ template <typename T, typename U, typename V>
 inline std::size_t byte_size(const std::tuple<T, U, V> &value) {
   return enigma_internal_sizeof(std::get<0>(value)) + enigma_internal_sizeof(std::get<1>(value)) +
          enigma_internal_sizeof(std::get<2>(value));
-}
-
-template <typename T>
-inline std::size_t byte_size(const std::set<T> &value) {
-  std::size_t totalSize = sizeof(std::size_t);
-
-  for (const auto &element : value) {
-    totalSize += enigma_internal_sizeof(element);
-  }
-
-  return totalSize;
 }
 
 template <typename T>
