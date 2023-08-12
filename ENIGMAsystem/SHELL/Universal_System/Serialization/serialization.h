@@ -22,20 +22,7 @@
 #include <array>
 #include <cstddef>
 
-#include "bool_serialization_functions.h"
-#include "complex_serialization_functions.h"
-#include "container_serialization_functions.h"
-#include "detect_serialization.h"
-#include "detect_size.h"
-#include "lua_table_serialization_functions.h"
-#include "map_serialization_functions.h"
-#include "numeric_serialization_functions.h"
-#include "pointer_serialization_functions.h"
-#include "queue_serialization_functions.h"
-#include "string_serialization_functions.h"
-#include "tuple_serialization_functions.h"
-#include "var_serialization_functions.h"
-#include "variant_serialization_functions.h"
+#include "types_serialization_functions.h"
 
 namespace enigma {
 namespace utility {

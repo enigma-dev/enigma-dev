@@ -19,6 +19,7 @@
 #include <complex>
 #include <queue>
 #include <set>
+#include <stack>
 #include "../var4.h"
 
 template <typename T>
@@ -60,6 +61,15 @@ template <typename T>
 constexpr bool is_std_queue_v = is_std_queue<T>::value;
 
 template <typename T>
+struct is_std_stack : std::false_type {};
+
+template <typename T, typename Container>
+struct is_std_stack<std::stack<T, Container>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_stack_v = is_std_stack<T>::value;
+
+template <typename T>
 struct is_std_map : std::false_type {};
 
 template <typename Key, typename T, typename Compare, typename Allocator>
@@ -97,19 +107,31 @@ struct complex_inner_type<std::complex<T>> {
 template <typename T>
 using complex_inner_type_t = typename complex_inner_type<T>::type;
 
-template <typename T, typename U>
-inline void insert_back(std::vector<T> &container, const U &val) {
+template <typename T>
+inline void insert_back(std::vector<T> &container, const T &val) {
   container.push_back(std::move(val));
 }
 
-template <typename T, typename U>
-inline void insert_back(std::set<T> &container, const U &val) {
+template <typename T>
+inline void insert_back(std::set<T> &container, const T &val) {
   container.insert(std::move(val));
 }
 
-template <typename T, typename U>
-inline void insert_back(std::queue<T> &container, const U &val) {
+template <typename Container, typename U>
+typename std::enable_if<is_std_queue_v<std::decay_t<Container>> ||
+                        is_std_stack_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
+                                                                                          const U &val) {
   container.push(std::move(val));
+}
+
+template <typename T>
+inline T get_top(std::queue<T> &container) {
+  return container.front();
+}
+
+template <typename T>
+inline T get_top(std::stack<T> &container) {
+  return container.top();
 }
 
 template <typename... Types>

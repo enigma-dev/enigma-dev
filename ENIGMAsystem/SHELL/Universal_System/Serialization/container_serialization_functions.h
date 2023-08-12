@@ -23,7 +23,7 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> ||
                                                                                                        T &&value) {
   internal_serialize_into<std::size_t>(iter, value.size());
   iter += sizeof(std::size_t);
-  
+
   for (const auto &element : value) {
     internal_serialize_into(iter, element);
     iter += enigma_internal_sizeof(element);
@@ -31,8 +31,7 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> ||
-                            is_std_queue_v<std::decay_t<T>>,
+typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
                         std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
@@ -48,7 +47,7 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::de
 
 template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> ||
-                            is_std_queue_v<std::decay_t<T>>,
+                            is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
                         T>::type inline enigma::internal_deserialize_fn(std::byte *iter) {
   std::size_t size = internal_deserialize_numeric<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
@@ -67,8 +66,8 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::de
 
 template <typename T>
 typename std::enable_if<
-    is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> ||
-    is_std_queue_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
+    is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> || is_std_queue_v<std::decay_t<T>> ||
+    is_std_stack_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
                                                                                         T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }

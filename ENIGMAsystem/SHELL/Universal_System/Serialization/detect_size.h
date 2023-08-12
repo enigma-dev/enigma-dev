@@ -63,14 +63,14 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::de
 }
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value) {
+typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
+                        std::size_t>::type inline byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
-  using InnerType = typename std::decay_t<T>::value_type;
-  std::queue<InnerType> tempQueue = value;
+  std::decay_t<T> tempContainer = value;
 
-  while (!tempQueue.empty()) {
-    totalSize += enigma_internal_sizeof(tempQueue.front());
-    tempQueue.pop();
+  while (!tempContainer.empty()) {
+    totalSize += enigma_internal_sizeof(get_top(tempContainer));
+    tempContainer.pop();
   }
 
   return totalSize;
