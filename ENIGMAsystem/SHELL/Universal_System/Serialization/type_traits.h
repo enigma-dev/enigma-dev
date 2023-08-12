@@ -41,6 +41,15 @@ template <typename T>
 constexpr static inline bool is_std_vector_v = is_std_vector<T>::value;
 
 template <typename T>
+struct is_std_set : std::false_type {};
+
+template <typename Key, typename Compare, typename Allocator>
+struct is_std_set<std::set<Key, Compare, Allocator>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_set_v = is_std_set<T>::value;
+
+template <typename T>
 struct is_std_map : std::false_type {};
 
 template <typename Key, typename T, typename Compare, typename Allocator>
@@ -59,13 +68,13 @@ template <typename T>
 constexpr bool is_std_complex_v = is_std_complex<T>::value;
 
 template <typename T>
-struct is_std_set : std::false_type {};
+struct is_std_tuple : std::false_type {};
 
-template <typename Key, typename Compare, typename Allocator>
-struct is_std_set<std::set<Key, Compare, Allocator>> : std::true_type {};
+template <typename... Ts>
+struct is_std_tuple<std::tuple<Ts...>> : std::true_type {};
 
 template <typename T>
-constexpr bool is_std_set_v = is_std_set<T>::value;
+constexpr bool is_std_tuple_v = is_std_tuple<T>::value;
 
 template <typename T>
 struct complex_inner_type;
@@ -78,17 +87,25 @@ struct complex_inner_type<std::complex<T>> {
 template <typename T>
 using complex_inner_type_t = typename complex_inner_type<T>::type;
 
-template <typename Container, typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
-                                                                                           const T &val) {
+template <typename T, typename U>
+inline void insert_back(std::vector<T> &container, const U &val) {
   container.push_back(std::move(val));
 }
 
-template <typename Container, typename T>
-typename std::enable_if<is_std_set_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
-                                                                                        const T &val) {
+template <typename T, typename U>
+inline void insert_back(std::set<T> &container, const U &val) {
   container.insert(std::move(val));
 }
+
+template <typename... Types>
+struct TupleTypeExtractor;
+
+template <typename First, typename Second, typename Third>
+struct TupleTypeExtractor<std::tuple<First, Second, Third>> {
+  using FirstType = First;
+  using SecondType = Second;
+  using ThirdType = Third;
+};
 
 template <typename T, std::size_t N>
 struct has_nested_form : std::false_type {

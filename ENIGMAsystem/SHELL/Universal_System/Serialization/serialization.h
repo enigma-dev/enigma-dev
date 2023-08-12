@@ -31,6 +31,7 @@
 #include "numeric_serialization_functions.h"
 #include "pointer_serialization_functions.h"
 #include "string_serialization_functions.h"
+#include "tuple_serialization_functions.h"
 #include "var_serialization_functions.h"
 #include "variant_serialization_functions.h"
 #include "vector_set_serialization_functions.h"

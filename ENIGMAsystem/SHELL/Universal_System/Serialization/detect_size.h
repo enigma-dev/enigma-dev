@@ -75,7 +75,13 @@ inline std::size_t byte_size(const std::map<T, U> &value) {
 
 template <typename T>
 inline std::size_t byte_size(const std::complex<T> &value) {
-  return sizeof(T) * 2;
+  return sizeof(T) * 2;  // we don't need enigma_internal_sizeof
+}
+
+template <typename T, typename U, typename V>
+inline std::size_t byte_size(const std::tuple<T, U, V> &value) {
+  return enigma_internal_sizeof(std::get<0>(value)) + enigma_internal_sizeof(std::get<1>(value)) +
+         enigma_internal_sizeof(std::get<2>(value));
 }
 
 template <typename T>

@@ -30,7 +30,7 @@ template <typename T>
 typename std::enable_if<is_std_complex_v<std::decay_t<T>>,
                         std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
-  result.resize(2 * enigma_internal_sizeof(value.real()));
+  result.resize(enigma_internal_sizeof(value));
 
   auto dataPtr = result.data();
   internal_serialize_into(dataPtr, value.real());
@@ -55,9 +55,7 @@ typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline enigm
 template <typename T>
 typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(
-      buffer.size() +
-      2 * enigma_internal_sizeof(value.real()));  // we don't need to store the size of the complex, it is always 1
+  buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>

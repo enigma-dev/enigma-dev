@@ -33,7 +33,7 @@ template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
                         std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
-  result.resize(sizeof(std::size_t) + value.size() * ((value.size()) ? enigma_internal_sizeof(*value.begin()) : 0));
+  result.resize(enigma_internal_sizeof(value));
   internal_serialize_into<std::size_t>(result.data(), value.size());
 
   auto dataPtr = result.data() + sizeof(std::size_t);
@@ -65,8 +65,7 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::de
 template <typename T>
 typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>>::type inline enigma::
     internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(buffer.size() + value.size() * ((value.size()) ? enigma_internal_sizeof(*value.begin()) : 0) +
-                sizeof(std::size_t));
+  buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
