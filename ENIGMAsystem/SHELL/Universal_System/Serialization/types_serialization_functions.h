@@ -6,6 +6,7 @@
 #include "lua_table_serialization_functions.h"
 #include "map_serialization_functions.h"
 #include "numeric_serialization_functions.h"
+#include "pair_serialization_functions.h"
 #include "pointer_serialization_functions.h"
 #include "queue_stack_serialization_functions.h"
 #include "string_serialization_functions.h"

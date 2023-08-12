@@ -88,6 +88,15 @@ template <typename T>
 constexpr bool is_std_complex_v = is_std_complex<T>::value;
 
 template <typename T>
+struct is_std_pair : std::false_type {};
+
+template <typename T, typename U>
+struct is_std_pair<std::pair<T, U>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_std_pair_v = is_std_pair<T>::value;
+
+template <typename T>
 struct is_std_tuple : std::false_type {};
 
 template <typename... Ts>
@@ -125,12 +134,12 @@ typename std::enable_if<is_std_queue_v<std::decay_t<Container>> ||
 }
 
 template <typename T>
-inline T get_top(std::queue<T> &container) {
+inline T get_top(const std::queue<T> &container) {
   return container.front();
 }
 
 template <typename T>
-inline T get_top(std::stack<T> &container) {
+inline T get_top(const std::stack<T> &container) {
   return container.top();
 }
 
@@ -142,6 +151,15 @@ struct TupleTypeExtractor<std::tuple<First, Second, Third>> {
   using FirstType = First;
   using SecondType = Second;
   using ThirdType = Third;
+};
+
+template <typename... Types>
+struct PairTypeExtractor;
+
+template <typename First, typename Second>
+struct PairTypeExtractor<std::pair<First, Second>> {
+  using FirstType = First;
+  using SecondType = Second;
 };
 
 template <typename T, std::size_t N>
