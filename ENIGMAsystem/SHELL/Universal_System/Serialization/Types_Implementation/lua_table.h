@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 template <typename T>
 inline void enigma::enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 template <typename T>
 typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(std::byte *iter,

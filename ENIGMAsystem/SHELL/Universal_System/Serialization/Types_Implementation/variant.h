@@ -16,8 +16,7 @@
 **/
 
 #include <algorithm>
-#include "detect_size.h"
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 inline void enigma::internal_serialize_variant_into(std::byte *iter, const variant &value) {
   if (value.type == variant::ty_real) {

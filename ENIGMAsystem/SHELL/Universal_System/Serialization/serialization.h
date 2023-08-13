@@ -21,7 +21,6 @@
 
 #include <array>
 #include <cstddef>
-
 #include "types_serialization_functions.h"
 
 namespace enigma {

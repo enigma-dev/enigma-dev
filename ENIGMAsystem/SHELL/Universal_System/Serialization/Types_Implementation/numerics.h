@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 inline void enigma::internal_serialize_integral_into(std::byte *iter, T value) {

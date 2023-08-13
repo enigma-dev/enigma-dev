@@ -44,9 +44,6 @@ inline std::size_t var_size(const var &value) {
   return len;
 }
 
-template <typename T>
-constexpr static inline bool always_false = false;
-
 inline std::size_t byte_size(const variant &value) { return variant_size(value); }
 
 inline std::size_t byte_size(const var &value) { return var_size(value); }

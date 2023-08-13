@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 inline void enigma::internal_serialize_var_into(std::byte *iter, const var &value) {
   std::size_t pos = 0;

@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "serialization_fwd_decl.h"
+#include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(std::byte *iter,
-                                                                                                        T &&value) {
+typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
+    std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.real());
   iter += enigma_internal_sizeof(value.real());
   internal_serialize_into(iter, value.imag());
@@ -53,7 +53,7 @@ typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline enigm
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>|| is_std_pair_v<std::decay_t<T>>>::type inline enigma::
+typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::decay_t<T>>>::type inline enigma::
     internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
