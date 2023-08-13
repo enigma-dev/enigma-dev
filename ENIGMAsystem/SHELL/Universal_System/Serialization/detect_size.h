@@ -102,9 +102,12 @@ inline std::size_t byte_size(const std::tuple<T, U, V> &value) {
 
 template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {
-  return (3 * sizeof(std::size_t)) +  // The three different lengths (`mx_size`, `sparse.size()`, `dense.size()`)
-         value.sparse_part().size() * (sizeof(T)) +                      // The elements of `dense`
-         value.dense_part().size() * (sizeof(std::size_t) + sizeof(T));  // The elements of `sparse`
+  std::size_t totalSize = sizeof(std::size_t);
+
+  totalSize += byte_size(value.dense_part());   // The elements of `dense`
+  totalSize += byte_size(value.sparse_part());  // The elements of `sparse`
+
+  return totalSize;
 }
 
 }  // namespace enigma

@@ -12,6 +12,35 @@ TEST(byte_size_function, Test_pair) {
   ASSERT_EQ(enigma::enigma_internal_sizeof(pair3), 2);
 }
 
+TEST(byte_size_function, Test_lua_table) {
+  lua_table<int> lua_table1;
+  lua_table1.fill(0, 10);
+
+  lua_table1[2] = 42;
+  lua_table1[5] = 17;
+
+  ASSERT_EQ(enigma::enigma_internal_sizeof(lua_table1), 64);  // 8+ 8+ 10*4+ 8
+
+  lua_table<char> lua_table2;
+  lua_table2.fill('.', 15);
+
+  lua_table2[2] = 'f';
+  lua_table2[3] = 'a';
+  lua_table2[4] = 'r';
+  lua_table2[5] = 'e';
+  lua_table2[6] = 's';
+
+  ASSERT_EQ(enigma::enigma_internal_sizeof(lua_table2), 39);  // 8+ 8+ 15+ 8
+
+  lua_table<long> lua_table3;
+  lua_table3.fill(376433, 20);
+
+  lua_table3[2] = 4283754;
+  lua_table3[5] = 87587588;
+
+  ASSERT_EQ(enigma::enigma_internal_sizeof(lua_table3), 184);  // 8+ 8+ 20*8+ 8
+}
+
 TEST(serialize_deserialize_functions, Test_pair1) {
   std::pair<int, int> inputPair = {12, 123};
   std::vector<std::byte> bytes;
