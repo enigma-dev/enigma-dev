@@ -28,7 +28,6 @@ inline auto enigma::internal_serialize_fn(T *&&value) {
 }
 
 template <typename T>
-typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+matches_t<T, T, std::is_pointer> inline enigma::internal_deserialize_fn(std::byte *iter) {
   return nullptr;
 }

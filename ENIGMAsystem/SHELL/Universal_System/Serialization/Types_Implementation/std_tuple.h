@@ -18,8 +18,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value) {
+matches_t<T, void, is_std_tuple> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, std::get<0>(value));
   iter += enigma_internal_sizeof(std::get<0>(value));
   internal_serialize_into(iter, std::get<1>(value));
@@ -29,8 +28,7 @@ typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::in
 }
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
+matches_t<T, std::vector<std::byte>, is_std_tuple> inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
 
@@ -42,8 +40,7 @@ typename std::enable_if<is_std_tuple_v<std::decay_t<T>>,
 }
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+matches_t<T, T, is_std_tuple> inline enigma::internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using firsttype = typename TupleTypeExtractor<T>::FirstType;
   using secondtype = typename TupleTypeExtractor<T>::SecondType;
@@ -60,14 +57,14 @@ typename std::enable_if<is_std_tuple_v<std::decay_t<T>>, T>::type inline enigma:
 }
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
+matches_t<T, void, is_std_tuple> inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
+                                                                              T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+matches_t<T, void, is_std_tuple> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                               std::size_t &len) {
   using firsttype = typename TupleTypeExtractor<T>::FirstType;
   using secondtype = typename TupleTypeExtractor<T>::SecondType;
   using thirdtype = typename TupleTypeExtractor<T>::ThirdType;

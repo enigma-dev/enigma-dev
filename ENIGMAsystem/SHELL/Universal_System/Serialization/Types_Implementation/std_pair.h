@@ -18,8 +18,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(std::byte *iter,
-                                                                                                        T &&value) {
+matches_t<T, void, is_std_pair> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.first);
   iter += enigma_internal_sizeof(value.first);
   internal_serialize_into(iter, value.second);
@@ -27,8 +26,7 @@ typename std::enable_if<is_std_pair_v<std::decay_t<T>>>::type inline enigma::int
 }
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+matches_t<T, T, is_std_pair> inline enigma::internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using firsttype = typename PairTypeExtractor<T>::FirstType;
   using secondtype = typename PairTypeExtractor<T>::SecondType;
@@ -42,8 +40,8 @@ typename std::enable_if<is_std_pair_v<std::decay_t<T>>, T>::type inline enigma::
 }
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+matches_t<T, void, is_std_pair> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                              std::size_t &len) {
   using firsttype = typename PairTypeExtractor<T>::FirstType;
   using secondtype = typename PairTypeExtractor<T>::SecondType;
 

@@ -24,33 +24,31 @@
 namespace enigma {
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::decay_t<T>, variant>, std::size_t>::type inline byte_size(const T &value);
+is_t<T, variant, std::size_t> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::decay_t<T>, var>, std::size_t>::type inline byte_size(const T &value);
+is_t<T, var, std::size_t> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
-                        std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_vector, is_std_set> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
-                        std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_queue, is_std_stack> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_map> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_complex> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_pair> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_std_tuple> inline byte_size(const T &value);
 
 template <typename T>
-typename std::enable_if<is_lua_table_v<std::decay_t<T>>, std::size_t>::type inline byte_size(const T &value);
+matches_t<T, std::size_t, is_lua_table> inline byte_size(const T &value);
 
 template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 inline void internal_serialize_integral_into(std::byte *iter, T value);
@@ -133,16 +131,13 @@ template <typename T>
 inline auto internal_serialize_into_fn(std::byte *iter, T *value);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline internal_serialize_into_fn(
-    std::byte *iter, T &&value);
+is_t<T, std::string> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                       T &&value);
+is_t<T, bool> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                      T &&value);
+is_t<T, var> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
@@ -155,38 +150,31 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
     type inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> ||
-                        is_std_set_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(std::byte *iter,
-                                                                                                       T &&value);
+matches_t<T, void, is_std_vector, is_std_set> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>>::type inline enigma::
-    internal_serialize_into_fn(std::byte *iter, T &&value);
+matches_t<T, void, is_std_queue, is_std_stack> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                               T &&value);
+matches_t<T, void, is_std_map> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value);
+matches_t<T, void, is_std_complex> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value);
+matches_t<T, void, is_std_pair> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value);
+matches_t<T, void, is_std_tuple> inline internal_serialize_into_fn(std::byte *iter, T &&value);
 
 template <typename T>
 inline auto internal_serialize_fn(T *&&value);
 
-inline auto internal_serialize_fn(std::string &&value);
+inline auto internal_serialize_fn(const std::string &value);
 
-inline auto internal_serialize_fn(bool &&value);
+inline auto internal_serialize_fn(const bool &value);
 
-inline auto internal_serialize_fn(var &&value);
+inline auto internal_serialize_fn(const var &value);
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>,
@@ -197,37 +185,31 @@ typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_
                         std::array<std::byte, sizeof(T)>>::type inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value);
+matches_t<T, std::vector<std::byte>, is_std_vector, is_std_set> inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value);
+matches_t<T, std::vector<std::byte>, is_std_queue, is_std_stack> inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>, std::vector<std::byte>>::type inline internal_serialize_fn(
-    T &&value);
+matches_t<T, std::vector<std::byte>, is_std_map> inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value);
+matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value);
+matches_t<T, std::vector<std::byte>, is_std_tuple> inline internal_serialize_fn(T &&value);
 
 template <typename T>
-typename std::enable_if<std::is_pointer_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+matches_t<T, T, std::is_pointer> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
-    std::byte *iter);
+is_t<T, std::string, T> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<bool, std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+is_t<T, bool, T> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+is_t<T, var, T> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>, T>::type inline internal_deserialize_fn(
@@ -239,97 +221,76 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
                         T>::type inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> ||
-                            is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
-                        T>::type inline enigma::internal_deserialize_fn(std::byte *iter);
+matches_t<T, T, is_std_vector, is_std_set, is_std_queue, is_std_stack> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+matches_t<T, T, is_std_map> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline internal_deserialize_fn(std::byte *iter);
+matches_t<T, T, is_std_complex> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter);
+matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter);
+matches_t<T, T, is_std_tuple> inline internal_deserialize_fn(std::byte *iter);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value);
+is_t<T, var> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
     type inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
+is_t<T, std::string> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
+
+template <typename T>
+matches_t<T, void, is_std_vector, is_std_set, is_std_queue, is_std_stack> inline internal_resize_buffer_for_fn(
     std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
-typename std::enable_if<
-    is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> || is_std_queue_v<std::decay_t<T>> ||
-    is_std_stack_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
-                                                                                        T &&value);
+matches_t<T, void, is_std_map> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value);
+matches_t<T, void, is_std_complex, is_std_pair> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
+                                                                                     T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::decay_t<T>>>::type inline enigma::
-    internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
+matches_t<T, void, is_std_tuple> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value);
+is_t<T, var> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
-
-template <typename T>
-typename std::enable_if<is_lua_table_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
-                                                                                                     std::byte *iter,
-                                                                                                     std::size_t &len);
+matches_t<T, void, is_lua_table> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
     type inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<std::is_same_v<std::string, std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
+is_t<T, std::string> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<
-    is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>> ||
-    is_std_queue_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
-                                                                                         std::size_t &len);
+matches_t<T, void, is_std_vector, is_std_set, is_std_queue> inline enigma_internal_deserialize_fn(T &value,
+                                                                                                  std::byte *iter,
+                                                                                                  std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_stack_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
+matches_t<T, void, is_std_stack> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(T &value,
-                                                                                                   std::byte *iter,
-                                                                                                   std::size_t &len);
+matches_t<T, void, is_std_map> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
+matches_t<T, void, is_std_complex> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_pair_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
+matches_t<T, void, is_std_pair> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-typename std::enable_if<is_std_tuple_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len);
+matches_t<T, void, is_std_tuple> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
 
 }  // namespace enigma
 #endif

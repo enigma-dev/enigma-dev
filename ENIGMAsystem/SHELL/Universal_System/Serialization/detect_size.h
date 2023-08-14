@@ -49,8 +49,7 @@ inline std::size_t byte_size(const variant &value) { return variant_size(value);
 inline std::size_t byte_size(const var &value) { return var_size(value); }
 
 template <typename T>
-typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::decay_t<T>>,
-                        std::size_t>::type inline byte_size(const T &value) {
+matches_t<T, std::size_t, is_std_vector, is_std_set> inline byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   for (const auto &element : value) {
@@ -60,8 +59,7 @@ typename std::enable_if<is_std_vector_v<std::decay_t<T>> || is_std_set_v<std::de
 }
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
-                        std::size_t>::type inline byte_size(const T &value) {
+matches_t<T, std::size_t, is_std_queue, is_std_stack> inline byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
   std::decay_t<T> tempContainer = value;
 
@@ -104,8 +102,8 @@ template <typename T>
 inline std::size_t byte_size(const lua_table<T> &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
-  totalSize += byte_size(value.dense_part());   // The elements of `dense`
-  totalSize += byte_size(value.sparse_part());  // The elements of `sparse`
+  totalSize += byte_size(value.dense_part());   // The elements of `dense`, we can use `byte_size` directly
+  totalSize += byte_size(value.sparse_part());  // The elements of `sparse`, we can use `byte_size` directly
 
   return totalSize;
 }

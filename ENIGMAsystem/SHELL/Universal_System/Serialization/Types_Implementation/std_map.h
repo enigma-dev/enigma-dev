@@ -18,8 +18,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(std::byte *iter,
-                                                                                                       T &&value) {
+matches_t<T, void, is_std_map> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into<std::size_t>(iter, value.size());
   iter += sizeof(std::size_t);
   for (const auto &element : value) {
@@ -31,8 +30,7 @@ typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma::inte
 }
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
+matches_t<T, std::vector<std::byte>, is_std_map> inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into<std::size_t>(result.data(), value.size());
@@ -47,8 +45,7 @@ typename std::enable_if<is_std_map_v<std::decay_t<T>>,
 }
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+matches_t<T, T, is_std_map> inline enigma::internal_deserialize_fn(std::byte *iter) {
   std::size_t size = internal_deserialize_numeric<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
 
@@ -68,14 +65,13 @@ typename std::enable_if<is_std_map_v<std::decay_t<T>>, T>::type inline enigma::i
 }
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
+matches_t<T, void, is_std_map> inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-typename std::enable_if<is_std_map_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+matches_t<T, void, is_std_map> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                             std::size_t &len) {
   std::size_t size = enigma::internal_deserialize_numeric<std::size_t>(iter + len);
   len += sizeof(std::size_t);
   value.clear();

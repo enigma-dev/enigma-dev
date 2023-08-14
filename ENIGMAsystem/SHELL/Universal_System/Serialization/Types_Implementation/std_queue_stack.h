@@ -18,8 +18,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>>::type inline enigma::
-    internal_serialize_into_fn(std::byte *iter, T &&value) {
+matches_t<T, void, is_std_queue, is_std_stack> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::decay_t<T> tempContainer = value;
 
   internal_serialize_into<std::size_t>(iter, tempContainer.size());
@@ -33,8 +32,7 @@ typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::d
 }
 
 template <typename T>
-typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
+matches_t<T, std::vector<std::byte>, is_std_queue, is_std_stack> inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into<std::size_t>(result.data(), value.size());
@@ -51,8 +49,8 @@ typename std::enable_if<is_std_queue_v<std::decay_t<T>> || is_std_stack_v<std::d
 }
 
 template <typename T>
-typename std::enable_if<is_std_stack_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+matches_t<T, void, is_std_stack> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                               std::size_t &len) {
   std::size_t size = enigma::internal_deserialize_numeric<std::size_t>(iter + len);
   len += sizeof(std::size_t);
 

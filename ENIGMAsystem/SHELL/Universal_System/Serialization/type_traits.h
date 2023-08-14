@@ -156,6 +156,21 @@ constexpr static inline bool has_nested_form_v = has_nested_form<T, N>::value;
 template <typename T>
 constexpr static inline bool always_false = false;
 
+template <typename T, typename ExpectedType, typename ReturnType = void>
+using is_t = std::enable_if_t<std::is_same_v<ExpectedType, std::decay_t<T>>, ReturnType>;
+
+template <typename... Conds>
+struct logical_or : std::false_type {};
+
+template <typename Cond, typename... Rest>
+struct logical_or<Cond, Rest...> : std::conditional_t<Cond::value, std::true_type, logical_or<Rest...>> {};
+
+template <typename... Conds>
+constexpr static inline bool logical_or_v = logical_or<Conds...>::value;
+
+template <typename T, typename ReturnType, template <typename> typename... Classes>
+using matches_t = std::enable_if_t<logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
+
 template <typename T>
 inline void insert_back(std::vector<T> &container, const T &val) {
   container.push_back(std::move(val));
@@ -167,9 +182,7 @@ inline void insert_back(std::set<T> &container, const T &val) {
 }
 
 template <typename Container, typename U>
-typename std::enable_if<is_std_queue_v<std::decay_t<Container>> ||
-                        is_std_stack_v<std::decay_t<Container>>>::type inline insert_back(Container &container,
-                                                                                          const U &val) {
+matches_t<Container, void, is_std_queue, is_std_stack> inline insert_back(Container &container, const U &val) {
   container.push(std::move(val));
 }
 

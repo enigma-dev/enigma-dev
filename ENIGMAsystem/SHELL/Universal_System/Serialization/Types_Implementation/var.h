@@ -45,22 +45,19 @@ inline var enigma::internal_deserialize_var(std::byte *iter) {
 }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value) {
+is_t<T, var> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_var_into(iter, value);
 }
 
-inline auto enigma::internal_serialize_fn(var &&value) { return internal_serialize_var(value); }
+inline auto enigma::internal_serialize_fn(const var &value) { return internal_serialize_var(value); }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+is_t<T, var, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
   return internal_deserialize_var(iter);
 }
 
 template <typename T>
-typename std::enable_if<std::is_same_v<var, std::decay_t<T>>>::type inline enigma::internal_resize_buffer_for_fn(
-    std::vector<std::byte> &buffer, T &&value) {
+is_t<T, var> inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + var_size(value));
 }
 

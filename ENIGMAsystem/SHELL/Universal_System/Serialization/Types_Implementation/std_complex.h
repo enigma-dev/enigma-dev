@@ -18,8 +18,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::internal_serialize_into_fn(
-    std::byte *iter, T &&value) {
+matches_t<T, void, is_std_complex> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.real());
   iter += enigma_internal_sizeof(value.real());
   internal_serialize_into(iter, value.imag());
@@ -27,8 +26,7 @@ typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
+matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
 
@@ -39,8 +37,7 @@ typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline enigma::internal_deserialize_fn(
-    std::byte *iter) {
+matches_t<T, T, is_std_complex> inline enigma::internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
 
@@ -53,14 +50,14 @@ typename std::enable_if<is_std_complex_v<std::decay_t<T>>, T>::type inline enigm
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>> || is_std_pair_v<std::decay_t<T>>>::type inline enigma::
-    internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+matches_t<T, void, is_std_complex, is_std_pair> inline enigma::internal_resize_buffer_for_fn(
+    std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-typename std::enable_if<is_std_complex_v<std::decay_t<T>>>::type inline enigma::enigma_internal_deserialize_fn(
-    T &value, std::byte *iter, std::size_t &len) {
+matches_t<T, void, is_std_complex> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                                 std::size_t &len) {
   using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
 
   InnerType Real = enigma::internal_deserialize<InnerType>(iter + len);
