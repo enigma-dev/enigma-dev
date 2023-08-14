@@ -24,6 +24,7 @@
 #include "json.h"
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 #include "../DataStructures/include.h"
 #include "libjson.h"
 
@@ -219,34 +220,34 @@ namespace enigma_user
 				return string("{}");
 		}
 
-		string encoding_accumulator{""};
+		std::stringstream encoding_accumulator;
 
-		encoding_accumulator += '{';
+		encoding_accumulator << '{';
 
 		variant key{enigma_user::ds_map_find_first(ds_map)};
 
 		for (int i = 0; i < enigma_user::ds_map_size(ds_map); i++) {
-			encoding_accumulator += '\"' + string(key) + '\"' + ':';
+			encoding_accumulator << '\"' << string(key) << '\"' << ':';
 
 			variant value {enigma_user::ds_map_find_value(ds_map, key)};
 
 			if (enigma_user::is_string(value))
-				encoding_accumulator += '\"' + enigma_user::toString(value) + '\"';
+				encoding_accumulator << '\"' << enigma_user::toString(value) << '\"';
 			else 
-				encoding_accumulator += enigma_user::toString(value);
+				encoding_accumulator << enigma_user::toString(value);
 
 			key = enigma_user::ds_map_find_next(ds_map, key);
 			
 			// Add comma if not last element
-			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator += ',';
+			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator << ',';
 
 			// DEBUG_MESSAGE(value, MESSAGE_TYPE::M_INFO);
 		}
 
-		encoding_accumulator += '}';
+		encoding_accumulator << '}';
 
 		// DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
 
-		return encoding_accumulator;
+		return encoding_accumulator.str();
 	}
 }
