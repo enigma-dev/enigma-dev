@@ -18,6 +18,7 @@
 #include "c_leaderboards.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include "Universal_System/../Platforms/General/PFmain.h"
 #include "Universal_System/Extensions/DataStructures/include.h"
@@ -99,31 +100,31 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
 }
 
 // TODO: Add data key/value pair.
+// TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
+// because if something I don't understand.
 void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned leaderboard_entries_size,
-                                    std::string* leaderboard_entries_buffer) {
-  *leaderboard_entries_buffer += '{';  // Entries object open bracket
-  *leaderboard_entries_buffer += '\"' + "entries" + '\"' + ':';
-  *leaderboard_entries_buffer += '[';  // Entries array open bracket
+                                    std::stringstream* leaderboard_entries_buffer) {
+  (*leaderboard_entries_buffer) << '{';  // Entries object open bracket
+  (*leaderboard_entries_buffer) << '\"' << "entries" << '\"' << ':';
+  (*leaderboard_entries_buffer) << '[';  // Entries array open bracket
 
   for (unsigned i{0}; i < leaderboard_entries_size; i++) {
-    *leaderboard_entries_buffer += '{' + '\"' + "name" + '\"' + ':' + '\"';
-    *leaderboard_entries_buffer += c_game_client::get_steam_user_persona_name(leaderboard_entries[i].m_steamIDUser);
-    *leaderboard_entries_buffer += '\"' + ',' + '\"' + "score" + '\"' + ':';
-    *leaderboard_entries_buffer += std::to_string(leaderboard_entries[i].m_nScore);
-    *leaderboard_entries_buffer += ',' + '\"' + "rank" + '\"' + ':';
-    *leaderboard_entries_buffer += std::to_string(leaderboard_entries[i].m_nGlobalRank);
-    *leaderboard_entries_buffer += ',' + '\"' + "userID" + '\"' + ':' + '\"';
-    *leaderboard_entries_buffer += std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64());
-    *leaderboard_entries_buffer += '\"' + '}';
+    (*leaderboard_entries_buffer) << '{' << '\"' << "name" << '\"' << ':' << '\"';
+    (*leaderboard_entries_buffer) << c_game_client::get_steam_user_persona_name(leaderboard_entries[i].m_steamIDUser);
+    (*leaderboard_entries_buffer) << '\"' << ',' << '\"' << "score" << '\"' << ':';
+    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nScore);
+    (*leaderboard_entries_buffer) << ',' << '\"' << "rank" << '\"' << ':';
+    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nGlobalRank);
+    (*leaderboard_entries_buffer) << ',' << '\"' << "userID" << '\"' << ':' << '\"';
+    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64());
+    (*leaderboard_entries_buffer) << '\"' << '}';
 
     // Add comma if not last entry
-    if (i < leaderboard_entries_size - 1) *leaderboard_entries_buffer += ',';
+    if (i < leaderboard_entries_size - 1) (*leaderboard_entries_buffer) << ',';
   }
 
-  *leaderboard_entries_buffer += ']';  // Entries array close bracket
-  *leaderboard_entries_buffer += '}';  // Entries object close bracket
-
-  // DEBUG_MESSAGE(*leaderboard_entries_buffer, M_INFO);
+  (*leaderboard_entries_buffer) << ']';  // Entries array close bracket
+  (*leaderboard_entries_buffer) << '}';  // Entries object close bracket
 }
 
 void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
@@ -146,14 +147,13 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
                                                     &leaderboard_entries[index], NULL, 0);
   }
 
-  // TODO: Why is std::string& is not working here?
-  std::string leaderboard_entries_buffer;
+  std::stringstream leaderboard_entries_buffer;
 
   get_leaderboard_entries(leaderboard_entries, c_leaderboards::number_of_leaderboard_entries_,
                                  &leaderboard_entries_buffer);
 
   const std::map<std::string, variant> leaderboard_download_event = {
-      {"entries", leaderboard_entries_buffer},
+      {"entries", leaderboard_entries_buffer.str()},
       {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
       {"event_type", "leaderboard_download"},
       {"id", enigma::lb_entries_download_id},
