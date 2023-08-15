@@ -119,9 +119,7 @@ namespace enigma_user
 	
 	int RecursiveDSList(Json::Value root)
 	{
-		int jsonObject=ds_map_create();
 		int jsonArray=ds_list_create();
-		ds_map_add(jsonObject,"default",jsonArray);
 
 		for (int i=0; i<root.size(); ++i)
 		{
@@ -198,7 +196,7 @@ namespace enigma_user
 				return -1;
 			}
 		}
-		return jsonObject;
+		return jsonArray;
 	}
 	
 	variant json_decode(string data)
