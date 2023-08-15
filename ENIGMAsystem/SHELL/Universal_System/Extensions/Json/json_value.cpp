@@ -1202,7 +1202,6 @@ Value::isMember( const CppTL::ConstString &key ) const
 }
 #endif
 
-// Here
 Value::Members Value::getMemberNames() const
 {
    JSON_ASSERT( type_ == nullValue  || type_ == arrayValue ||  type_ == objectValue );
