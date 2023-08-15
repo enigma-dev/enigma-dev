@@ -119,7 +119,7 @@ else&#13;
         //with(instance_create_depth(800, 110 + i*120, 0, Obj_Steam_Leaderboard_Entry))		&#13;
 		with(instance_create(800, 110 + i*120, Obj_Steam_Leaderboard_Entry))&#13;
 		{&#13;
-			depth = 0;&#13;
+			object_set_depth(Obj_Steam_Leaderboard_Entry, 0);&#13;
 			rank = ds_map_find_value(entry, "rank");&#13;
 			show_debug_message(string(rank));&#13;
 			&#13;
