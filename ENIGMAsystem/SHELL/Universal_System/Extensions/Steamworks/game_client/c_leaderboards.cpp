@@ -31,7 +31,7 @@ namespace steamworks {
 // Public functions
 ////////////////////////////////////////////////////////
 
-c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {}
+c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false), last_score_downloaded_id_(-1) {}
 
 void c_leaderboards::find_leaderboard(const std::string& leaderboard_name,
                                       const ELeaderboardSortMethod leaderboard_sort_method,
@@ -83,12 +83,13 @@ void c_leaderboards::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedR
   }
 }
 
-bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start,
+// TODO: Check if it requires to successfully download the scores to add an id.
+int c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start,
                                      const int range_end) {
   // while (c_leaderboards::loading_)
   //   ;  // Wait for the callback of FindOrCreateLeaderboard to be invoked
 
-  if (NULL == c_leaderboards::current_leaderboard_) return false;
+  if (NULL == c_leaderboards::current_leaderboard_ || loading_) return -1;
 
   c_leaderboards::loading_ = true;
 
@@ -96,7 +97,10 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
       c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
   c_leaderboards::m_SteamCallResultDownloadScores.Set(steam_api_call, this, &c_leaderboards::on_download_scores);
 
-  return true;
+  // Store the id for the callback to use when arrived.
+  c_leaderboards::last_score_downloaded_id_ = enigma::entries_array.add(NULL);
+
+  return c_leaderboards::last_score_downloaded_id_;
 }
 
 // TODO: Add data key/value pair.
@@ -128,10 +132,9 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
 }
 
 void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
-  c_leaderboards::loading_ = false;
-
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
+    c_leaderboards::loading_ = false;
     return;
   }
 
@@ -147,6 +150,12 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
                                                     &leaderboard_entries[index], NULL, 0);
   }
 
+  // Now our entries is here, let's save it.
+  enigma::entries_array.get(c_leaderboards::last_score_downloaded_id_) = leaderboard_entries;
+
+  // Entries are saved? We are ready to accept new requests.
+  c_leaderboards::loading_ = false;
+
   std::stringstream leaderboard_entries_buffer;
 
   get_leaderboard_entries(leaderboard_entries, c_leaderboards::number_of_leaderboard_entries_,
@@ -156,7 +165,7 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
       {"entries", leaderboard_entries_buffer.str()},
       {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
       {"event_type", "leaderboard_download"},
-      {"id", enigma::lb_entries_download_id},
+      {"id", c_leaderboards::last_score_downloaded_id_},
       {"num_entries", c_leaderboards::number_of_leaderboard_entries_},
       {"status", 0}  // TODO: the status must not be constant value
   };

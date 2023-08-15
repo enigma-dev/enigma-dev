@@ -31,10 +31,12 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
+#include "Universal_System/Resources/AssetArray.h"
 #include "game_client/c_main.h"
 
 namespace enigma {
-extern unsigned lb_entries_download_id;
+// extern unsigned lb_entries_download_id;
+extern AssetArray<LeaderboardEntry_t*> entries_array; // This will be used for returning the id for each leaderboard we download.
 }  // namespace enigma
 
 namespace enigma_user {
