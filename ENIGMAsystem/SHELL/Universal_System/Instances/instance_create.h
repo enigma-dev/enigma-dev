@@ -106,6 +106,24 @@ namespace enigma_user
     return idn;
   }
 
+  enigma::instance_t instance_create_depth(int x, int y, int object, int depth) {
+    int idn = enigma::maxid++;
+    enigma::object_basic* ob;
+    switch((int)object) {
+      #define NEW_OBJ_PREFIX ob =
+      #include "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h"
+      default:
+          #ifdef DEBUG_MODE
+          DEBUG_MESSAGE("Object doesn't exist", MESSAGE_TYPE::M_USER_ERROR);
+          #endif
+        return -1;
+    }
+    enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
+    newinst->depth = depth;
+    ob->myevent_create();
+    return idn;
+  }
+
   inline void action_change_object(int obj, bool perf) {instance_change(obj,perf);}
 
   void instance_change(int obj, bool perf) {
