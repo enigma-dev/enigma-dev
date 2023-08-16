@@ -162,6 +162,11 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
   get_leaderboard_entries(leaderboard_entries, c_leaderboards::number_of_leaderboard_entries_,
                                  &leaderboard_entries_buffer);
 
+  // GMS's output: 
+  /*
+    Steam ASYNC: {"entries":"{\n    "entries": [\n                { "name"  : "TomasJPereyra", "score" : 1, "rank"  : 1, "userID": "@i64@110000108ae8556$i64$" },\n                { "name"  : "Scott-ish", "score" : 10, "rank"  : 2, "userID": "@i64@11000010241f4ea$i64$" },\n                { "name"  : "Loyal RaveN", "score" : 63, "rank"  : 3, "userID": "@i64@11000015c558396$i64$" },\n                { "name"  : "luca.muehlbauer", "score" : 100, "rank"  : 4, "userID": "@i64@11000015d44ce04$i64$", "data"  : "UWx1Y2EubXVlaGxiYXVlciB3YXMgaGVyZSA6KQAAAAA=" },\n                { "name"  : "simon", "score" : 113, "rank"  : 5, "userID": "@i64@1100001040447b6$i64$" },\n                { "name"  : "meFroggy", "score" : 138, "rank"  : 6, "userID": "@i64@110000117c9d62b$i64$", "data"  : "HG1lRnJvZ2d5IHdhcyBoZXJlIDopAAAA" },\n                { "name"  : "12349184732146127845127895", "score" : 155, "rank"  : 7, "userID": "@i64@11000010be
+    342ce$i64$", "data"  : "FEZlZWxpbmcgU2lja25lenogd2FzIGhlcmUgOikAAAA=" },\n                { "name"  : "hermitpal", "score" : 196, "rank"  : 8, "userID": "@i64@110000106401474$i64$", "data"  : "R2hlcm1pdCB3YXMgaGVyZSA6KQA=" },\n                { "name"  : "Shermanica", "score" : 199, "rank"  : 9, "userID": "@i64@1100001009bb750$i64$" },\n                { "name"  : "Joeyman98", "score" : 239, "rank"  : 10, "userID": "@i64@11000010624f1e3$i64$", "data"  : "I0pvZXltYW45OCB3YXMgaGVyZSA6KQAA" }\n        \n    ]\n}\n","lb_name":"YYLeaderboard_10/29/21--","event_type":"leaderboard_download","id":3.0,"num_entries":10.0,"status":1.0}
+  */
   const std::map<std::string, variant> leaderboard_download_event = {
       {"entries", leaderboard_entries_buffer.str()},
       {"lb_name", std::string(SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_))},
@@ -175,56 +180,7 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
 }
 
 /*
-{
-  "entries":
-  "{\n    
-    \"entries\": 
-    [\n
-      { \"name\"  : \"TomasJPereyra\", 
-      \"score\" : 1, 
-      \"rank\"  : 1, 
-      \"userID\": \"@i64@110000108ae8556$i64$\" 
-      },\n     
-    
-      { 
-        \"name\"  : \"Scott-ish\", 
-        \"score\" : 10, 
-        \"rank\"  : 2, 
-        \"userID\": \"@i64@11000010241f4ea$i64$\" 
-      },\n
-      
-      { 
-        \"name\"  : \"Joeyman98\", 
-        \"score\" : 239, 
-        \"rank\"  : 8, 
-        \"userID\": \"@i64@11000010624f1e3$i64$\", 
-        \"data\"  : \"I0pvZXltYW45OCB3YXMgaGVyZSA6KQAA\" 
-      },\n                
-      
-      { 
-        \"name\"  : \"tdlsoftware\", 
-        \"score\" : 246, 
-        \"rank\"  : 9, 
-        \"userID\": \"@i64@1100001434a5930$i64$\", 
-        \"data\"  : \"KnRkbHNvZnR3YXJlIHdhcyBoZXJlIDopAAAAAA==\" 
-      },\n                
-      
-      { 
-        \"name\"  : \"Benal\", 
-        \"score\" : 254, 
-        \"rank\"  : 10, 
-        \"userID\": \"@i64@1100001053f418a$i64$\", 
-        \"data\"  : \"SEJlbmFsIHdhcyBoZXJlIDopAAA=\" 
-      }\n   \n    
-    ]\n
-  }\n",
 
-  "lb_name":"YYLeaderboard_10\/29\/21--",
-  "event_type":"leaderboard_download",
-  "id":5.0,
-  "num_entries":5.0,
-  "status":1.0
-  }
 
 */
 
