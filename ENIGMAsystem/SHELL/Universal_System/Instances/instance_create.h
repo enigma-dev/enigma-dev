@@ -106,7 +106,7 @@ namespace enigma_user
     return idn;
   }
 
-  enigma::instance_t instance_create_depth(int x, int y, int object, int depth) {
+  enigma::instance_t instance_create_depth(int x, int y, int depth, int object) {
     int idn = enigma::maxid++;
     enigma::object_basic* ob;
     switch((int)object) {
