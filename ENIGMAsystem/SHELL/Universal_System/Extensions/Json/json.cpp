@@ -161,10 +161,6 @@ namespace enigma_user
 				return -1;
 			}
 		}
-		// for(int i=0; i<ds_list_size(jsonArray); ++i)
-		// {
-		// 	DEBUG_MESSAGE(i +" "+ds_map_find_value(ds_list_find_value(jsonArray,i), "name"), MESSAGE_TYPE::M_INFO);
-		// }
 		return jsonArray;
 	}
 	
@@ -207,13 +203,9 @@ namespace enigma_user
 			
 			// Add comma if not last element
 			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator << ',';
-
-			// DEBUG_MESSAGE(value, MESSAGE_TYPE::M_INFO);
 		}
 
 		encoding_accumulator << '}';
-
-		// DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
 
 		return encoding_accumulator.str();
 	}
