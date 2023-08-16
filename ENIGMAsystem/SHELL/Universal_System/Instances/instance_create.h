@@ -153,12 +153,12 @@ namespace enigma_user
     (void)ob;
 
     enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
-    if (perf) newinst->myevent_create();
     newinst->yprevious=inst->yprevious; newinst->xprevious=inst->xprevious;
     newinst->xstart=inst->xstart; newinst->ystart=inst->ystart;
     newinst->image_index=inst->image_index; newinst->image_speed=inst->image_speed;
     newinst->visible=inst->visible; newinst->image_xscale=inst->image_xscale; newinst->image_yscale=inst->image_yscale; newinst->image_angle=inst->image_angle;
     newinst->hspeed=inst->hspeed; newinst->vspeed=inst->vspeed;
+    if (perf) newinst->myevent_create();
   }
 } //namespace enigma_user
 
