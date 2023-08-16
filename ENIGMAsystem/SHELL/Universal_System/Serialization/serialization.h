@@ -80,7 +80,7 @@ inline void internal_serialize_into(std::byte *iter, T &&value) {
   } else {
     static_assert(always_false<T>,
                   "'internal_serialize_into' takes 'variant', 'var', 'std::string', bool, integral, floating types, "
-                  "std::vector, std::map, std::complex or std::set");
+                  "std::vector, std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
   }
 }
 
@@ -93,7 +93,7 @@ inline auto internal_serialize(T &&value) {
   } else {
     static_assert(always_false<T>,
                   "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex or std::set");
+                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
   }
 }
 
@@ -110,7 +110,7 @@ inline T internal_deserialize(std::byte *iter) {
   } else {
     static_assert(always_false<T>,
                   "'deserialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex or std::set");
+                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
   }
 }
 
