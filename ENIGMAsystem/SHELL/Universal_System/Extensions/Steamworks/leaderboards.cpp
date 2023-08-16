@@ -161,13 +161,12 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
   int id{steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(k_ELeaderboardDataRequestGlobal,
                                                                                         start_idx, end_idx)};
 
-  if (id == -1) {
-    DEBUG_MESSAGE("Calling steam_download_scores_around_user failed. Make sure that the leaderboard exists "
+  if (id < 0) {
+    DEBUG_MESSAGE("Calling steam_download_scores failed. Make sure that the leaderboard exists "
     "or wait until the current request is done.", M_ERROR);
-    return -1;
+    return id;
   }
 
-  // return enigma::lb_entries_download_id++;
   return id;
 }
 
@@ -180,13 +179,12 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
   int id{steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
       k_ELeaderboardDataRequestGlobalAroundUser, range_start, range_end)};
 
-  if (id == -1) {
+  if (id < 0) {
     DEBUG_MESSAGE("Calling steam_download_scores_around_user failed. Make sure that the leaderboard exists "
     "or wait until the current request is done.", M_ERROR);
-    return -1;
+    return id;
   }
 
-  // return enigma::lb_entries_download_id++;
   return id;
 }
 
@@ -199,13 +197,12 @@ int steam_download_friends_scores(const std::string& lb_name) {
   int id {steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
           k_ELeaderboardDataRequestFriends)};
 
-  if (id == -1) {
-    DEBUG_MESSAGE("Calling steam_download_scores_around_user failed. Make sure that the leaderboard exists "
+  if (id < 0) {
+    DEBUG_MESSAGE("Calling steam_download_friends_scores failed. Make sure that the leaderboard exists "
     "or wait until the current request is done.", M_ERROR);
-    return -1;
+    return id;
   }
 
-  // return enigma::lb_entries_download_id++;
   return id;
 }
 

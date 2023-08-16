@@ -179,33 +179,4 @@ void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderbo
   enigma::posted_async_events.push(leaderboard_download_event);
 }
 
-/*
-
-
-*/
-
-/*
-
-(*leaderboard_entries_buffer) << '{';  // Entries object open bracket
-  (*leaderboard_entries_buffer) << '\\' << '\"' << "entries" << '\\' << '\"' << ':';
-  (*leaderboard_entries_buffer) << '[';  // Entries array open bracket
-
-  for (unsigned i{0}; i < leaderboard_entries_size; i++) {
-    (*leaderboard_entries_buffer) << '{';
-    (*leaderboard_entries_buffer) << '\\' << '\"' << "name" << '\\' << '\"' << ':';
-    (*leaderboard_entries_buffer) << '\\' << '\"' << c_game_client::get_steam_user_persona_name(leaderboard_entries[i].m_steamIDUser) << '\\' << '\"' << ',';
-    (*leaderboard_entries_buffer) << '\\' << '\"' << "score" << '\\' << '\"' << ':';
-    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nScore) << ',' ;
-    (*leaderboard_entries_buffer) << '\\' << '\"' << "rank" << '\\' << '\"' << ':';
-    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',' ;
-    (*leaderboard_entries_buffer) << '\\' << '\"' << "userID" << '\\' << '\"' << ':';
-    (*leaderboard_entries_buffer) << '\\' << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64()) << '\\' << '\"';
-    (*leaderboard_entries_buffer) << '}';
-
-    // Add comma if not last entry
-    if (i < leaderboard_entries_size - 1) (*leaderboard_entries_buffer) << ',';
-  }
-
-*/
-
 }  // namespace steamworks
