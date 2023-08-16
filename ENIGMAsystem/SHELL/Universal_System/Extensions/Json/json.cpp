@@ -3,6 +3,7 @@
  *  @section License
  *
  *      Copyright (C) 2013 Ssss
+ *      Copyright (C) 2023 Saif Kandil
  *
  *      This file is a part of the ENIGMA Development Environment.
  *
@@ -43,56 +44,38 @@ namespace enigma_user
 		{
 			if (root[*it].isNull())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",0);
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,0);
 			}
 			else if (root[*it].isBool())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asInt());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asInt());
 			}
 			else if (root[*it].isInt())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asInt());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asInt());
 			}
 			else if (root[*it].isUInt())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asUInt());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asUInt());
 			}
 			else if (root[*it].isIntegral())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asInt());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asInt());
 			}
 			else if (root[*it].isDouble())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asDouble());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asDouble());
 			}
 			else if (root[*it].isNumeric())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asDouble());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asDouble());
 			}
 			else if (root[*it].isString())
 			{
-				//ds_map with key "default" and value
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[*it].asString());
-				ds_map_add(jsonObject,*it,dsmap);
+				ds_map_add(jsonObject,*it,root[*it].asString());
 			}
 			else if (root[*it].isArray())
 			{
-				//ds_map with key "default" and ds_list of the objects or values
 				int dsmap=RecursiveDSList(root[*it]);
 				if (dsmap==-1)
 				{
@@ -125,56 +108,38 @@ namespace enigma_user
 		{
 			if (root[i].isNull())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",0);
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), 0));
 			}
 			else if (root[i].isBool())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asInt()));
 			}
 			else if (root[i].isInt())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asInt()));
 			}
 			else if (root[i].isUInt())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asUInt());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asUInt()));
 			}
 			else if (root[i].isIntegral())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asInt()));
 			}
 			else if (root[i].isDouble())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asDouble());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asDouble()));
 			}
 			else if (root[i].isNumeric())
 			{
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asDouble());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asDouble()));
 			}
 			else if (root[i].isString())
 			{
-				//ds_map with key "default" and value
-				int dsmap=ds_map_create();
-				ds_map_add(dsmap,"default",root[i].asString());
-				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
+				ds_list_add(jsonArray,(enigma::varargs(), root[i].asString()));
 			}
 			else if (root[i].isArray())
 			{
-				//ds_map with key "default" and ds_list of the objects or values
 				int dsmap=RecursiveDSList(root[i]);
 				if (dsmap==-1)
 				{
@@ -238,13 +203,9 @@ namespace enigma_user
 			
 			// Add comma if not last element
 			if (i != enigma_user::ds_map_size(ds_map) - 1) encoding_accumulator << ',';
-
-			// DEBUG_MESSAGE(value, MESSAGE_TYPE::M_INFO);
 		}
 
 		encoding_accumulator << '}';
-
-		// DEBUG_MESSAGE(encoding_accumulator, MESSAGE_TYPE::M_INFO);
 
 		return encoding_accumulator.str();
 	}
