@@ -21,6 +21,8 @@
 
 #include <array>
 #include <cstddef>
+// #include "detect_serialization.h"
+// #include "detect_size.h"
 #include "types_serialization_includes.h"
 
 namespace enigma {
@@ -37,8 +39,6 @@ template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
   if constexpr (has_byte_size_free_function<T>) {
     return byte_size(value);
-  } else if constexpr (has_size_method_v<std::decay_t<T>>) {
-    return value.size() * enigma_internal_sizeof(has_nested_form<T, 1>::inner_type);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     return value.byte_size();
   } else {

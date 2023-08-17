@@ -26,7 +26,8 @@ is_t<T, std::string> inline enigma::internal_serialize_into_fn(std::byte *iter, 
                  [](char c) { return static_cast<std::byte>(c); });
 }
 
-inline auto enigma::internal_serialize_fn(const std::string &value) {
+template <typename T>
+is_t<T, std::string, std::vector<std::byte>> inline enigma::internal_serialize_fn(const T &value) {
   std::vector<std::byte> result;
   result.resize(sizeof(std::size_t) + value.size());
   internal_serialize_into<std::size_t>(result.data(), value.size());
@@ -37,7 +38,7 @@ inline auto enigma::internal_serialize_fn(const std::string &value) {
 
 template <typename T>
 is_t<T, std::string, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
-  std::size_t len = internal_deserialize_numeric<std::size_t>(iter);
+  std::size_t len = internal_deserialize<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
   std::string result{reinterpret_cast<char *>(iter + offset), reinterpret_cast<char *>(iter + offset + len)};
   return result;

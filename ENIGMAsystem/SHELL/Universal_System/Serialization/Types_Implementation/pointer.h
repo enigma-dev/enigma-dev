@@ -24,7 +24,7 @@ inline auto enigma::internal_serialize_into_fn(std::byte *iter, T *value) {
 
 template <typename T>
 inline auto enigma::internal_serialize_fn(T *&&value) {
-  return internal_serialize_numeric<std::size_t>(0);
+  return internal_serialize<std::size_t>(0);
 }
 
 template <typename T>

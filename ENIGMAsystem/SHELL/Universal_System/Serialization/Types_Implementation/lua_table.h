@@ -18,6 +18,18 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
+inline std::size_t byte_size(const lua_table<T> &value) {
+  std::size_t totalSize = sizeof(std::size_t);
+
+  totalSize +=
+      enigma::enigma_internal_sizeof(value.dense_part());  // The elements of `dense`, we can use `byte_size` directly
+  totalSize +=
+      enigma::enigma_internal_sizeof(value.sparse_part());  // The elements of `sparse`, we can use `byte_size` directly
+
+  return totalSize;
+}
+
+template <typename T>
 inline void enigma::enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {
   std::size_t pos = 0;
   internal_serialize_into(iter, table.mx_size_part());

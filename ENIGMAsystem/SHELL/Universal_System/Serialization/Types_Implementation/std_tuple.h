@@ -18,6 +18,12 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
+matches_t<T, std::size_t, is_std_tuple> inline enigma::byte_size(const T &value) {
+  return enigma_internal_sizeof(std::get<0>(value)) + enigma_internal_sizeof(std::get<1>(value)) +
+         enigma_internal_sizeof(std::get<2>(value));
+}
+
+template <typename T>
 matches_t<T, void, is_std_tuple> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, std::get<0>(value));
   iter += enigma_internal_sizeof(std::get<0>(value));

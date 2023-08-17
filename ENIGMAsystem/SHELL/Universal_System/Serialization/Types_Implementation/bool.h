@@ -22,7 +22,8 @@ is_t<T, bool> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&val
   *iter = static_cast<std::byte>(value);
 }
 
-inline auto enigma::internal_serialize_fn(const bool &value) {
+template <typename T>
+is_t<T, bool, std::vector<std::byte>> inline enigma::internal_serialize_fn(const bool &value) {
   return std::vector<std::byte>{static_cast<std::byte>(value)};
 }
 

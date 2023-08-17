@@ -18,6 +18,16 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
+matches_t<T, std::size_t, is_std_vector, is_std_set> inline enigma::byte_size(const T &value) {
+  std::size_t totalSize = sizeof(std::size_t);
+
+  for (const auto &element : value) {
+    totalSize += enigma_internal_sizeof(element);
+  }
+  return totalSize;
+}
+
+template <typename T>
 matches_t<T, void, is_std_vector, is_std_set> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into<std::size_t>(iter, value.size());
   iter += sizeof(std::size_t);
@@ -45,7 +55,7 @@ matches_t<T, std::vector<std::byte>, is_std_vector, is_std_set> inline enigma::i
 template <typename T>
 matches_t<T, T, is_std_vector, is_std_set, is_std_queue, is_std_stack> inline enigma::internal_deserialize_fn(
     std::byte *iter) {
-  std::size_t size = internal_deserialize_numeric<std::size_t>(iter);
+  std::size_t size = internal_deserialize<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
 
   using InnerType = typename T::value_type;
@@ -69,7 +79,7 @@ matches_t<T, void, is_std_vector, is_std_set, is_std_queue, is_std_stack> inline
 template <typename T>
 matches_t<T, void, is_std_vector, is_std_set, is_std_queue> inline enigma::enigma_internal_deserialize_fn(
     T &value, std::byte *iter, std::size_t &len) {
-  std::size_t size = enigma::internal_deserialize_numeric<std::size_t>(iter + len);
+  std::size_t size = enigma::internal_deserialize<std::size_t>(iter + len);
   len += sizeof(std::size_t);
   using InnerType = typename T::value_type;
 

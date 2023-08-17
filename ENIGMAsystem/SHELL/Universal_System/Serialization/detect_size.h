@@ -44,68 +44,24 @@ inline std::size_t var_size(const var &value) {
   return len;
 }
 
-inline std::size_t byte_size(const variant &value) { return variant_size(value); }
-
-inline std::size_t byte_size(const var &value) { return var_size(value); }
-
-template <typename T>
-matches_t<T, std::size_t, is_std_vector, is_std_set> inline byte_size(const T &value) {
-  std::size_t totalSize = sizeof(std::size_t);
-
-  for (const auto &element : value) {
-    totalSize += enigma_internal_sizeof(element);
+inline std::size_t byte_size(const variant &value) {
+  if (value.type == variant::ty_real) {
+    return 9;
+  } else {
+    return 1 + sizeof(std::size_t) + value.sval().length();
   }
-  return totalSize;
 }
 
-template <typename T>
-matches_t<T, std::size_t, is_std_queue, is_std_stack> inline byte_size(const T &value) {
-  std::size_t totalSize = sizeof(std::size_t);
-  std::decay_t<T> tempContainer = value;
-
-  while (!tempContainer.empty()) {
-    totalSize += enigma_internal_sizeof(get_top(tempContainer));
-    tempContainer.pop();
+inline std::size_t byte_size(const var &value) {
+  std::size_t len = variant_size(value) + enigma_internal_sizeof(value.array1d);
+  len += (3 * sizeof(std::size_t));
+  for (auto &[key, elem] : value.array2d.sparse_part()) {
+    len += enigma_internal_sizeof(elem);
   }
-
-  return totalSize;
-}
-
-template <typename T, typename U>
-inline std::size_t byte_size(const std::map<T, U> &value) {
-  std::size_t totalSize = sizeof(std::size_t);
-
-  for (const auto &element : value) {
-    totalSize += enigma_internal_sizeof(element.first) + enigma_internal_sizeof(element.second);
+  for (auto &elem : value.array2d.dense_part()) {
+    len += enigma_internal_sizeof(elem);
   }
-
-  return totalSize;
-}
-
-template <typename T>
-inline std::size_t byte_size(const std::complex<T> &value) {
-  return sizeof(T) * 2;  // we don't need enigma_internal_sizeof
-}
-
-template <typename T, typename U>
-inline std::size_t byte_size(const std::pair<T, U> &value) {
-  return enigma_internal_sizeof(value.first) + enigma_internal_sizeof(value.second);
-}
-
-template <typename T, typename U, typename V>
-inline std::size_t byte_size(const std::tuple<T, U, V> &value) {
-  return enigma_internal_sizeof(std::get<0>(value)) + enigma_internal_sizeof(std::get<1>(value)) +
-         enigma_internal_sizeof(std::get<2>(value));
-}
-
-template <typename T>
-inline std::size_t byte_size(const lua_table<T> &value) {
-  std::size_t totalSize = sizeof(std::size_t);
-
-  totalSize += byte_size(value.dense_part());   // The elements of `dense`, we can use `byte_size` directly
-  totalSize += byte_size(value.sparse_part());  // The elements of `sparse`, we can use `byte_size` directly
-
-  return totalSize;
+  return len;
 }
 
 }  // namespace enigma

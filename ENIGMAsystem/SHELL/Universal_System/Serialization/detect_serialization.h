@@ -22,6 +22,21 @@
 #include <cstddef>
 
 #include "serialization_fwd_decl.h"
+// #include"detect_size.h"
+#include "Types_Implementation/bool.h"
+#include "Types_Implementation/containers.h"
+#include "Types_Implementation/pointer.h"
+#include "Types_Implementation/std_complex.h"
+#include "Types_Implementation/std_map.h"
+#include "Types_Implementation/std_pair.h"
+#include "Types_Implementation/std_queue_stack.h"
+#include "Types_Implementation/std_string.h"
+#include "Types_Implementation/std_tuple.h"
+// #include "Types_Implementation/numerics.h"
+// #include "Types_Implementation/var.h"
+// #include "Types_Implementation/variant.h"
+// #include "Types_Implementation/lua_table.h"
+// #include "types_serialization_includes.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
   template <typename T>                               \

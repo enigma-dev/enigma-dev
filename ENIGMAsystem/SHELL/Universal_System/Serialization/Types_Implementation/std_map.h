@@ -18,6 +18,17 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
+matches_t<T, std::size_t, is_std_map> inline enigma::byte_size(const T &value) {
+  std::size_t totalSize = sizeof(std::size_t);
+
+  for (const auto &element : value) {
+    totalSize += enigma_internal_sizeof(element.first) + enigma_internal_sizeof(element.second);
+  }
+
+  return totalSize;
+}
+
+template <typename T>
 matches_t<T, void, is_std_map> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into<std::size_t>(iter, value.size());
   iter += sizeof(std::size_t);
@@ -46,7 +57,7 @@ matches_t<T, std::vector<std::byte>, is_std_map> inline enigma::internal_seriali
 
 template <typename T>
 matches_t<T, T, is_std_map> inline enigma::internal_deserialize_fn(std::byte *iter) {
-  std::size_t size = internal_deserialize_numeric<std::size_t>(iter);
+  std::size_t size = internal_deserialize<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
 
   using KeyType = typename std::decay_t<T>::key_type;
@@ -72,7 +83,7 @@ matches_t<T, void, is_std_map> inline enigma::internal_resize_buffer_for_fn(std:
 template <typename T>
 matches_t<T, void, is_std_map> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
                                                                              std::size_t &len) {
-  std::size_t size = enigma::internal_deserialize_numeric<std::size_t>(iter + len);
+  std::size_t size = enigma::internal_deserialize<std::size_t>(iter + len);
   len += sizeof(std::size_t);
   value.clear();
   using KeyType = typename std::decay_t<T>::key_type;

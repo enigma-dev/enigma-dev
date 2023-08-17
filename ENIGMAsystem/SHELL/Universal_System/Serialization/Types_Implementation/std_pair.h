@@ -18,6 +18,11 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
+matches_t<T, std::size_t, is_std_pair> inline enigma::byte_size(const T &value) {
+  return enigma_internal_sizeof(value.first) + enigma_internal_sizeof(value.second);
+}
+
+template <typename T>
 matches_t<T, void, is_std_pair> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.first);
   iter += enigma_internal_sizeof(value.first);
