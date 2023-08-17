@@ -17,6 +17,9 @@
 
 #include "management.h"
 
+#include "game_client/c_main.h"
+#include "steamworks.h"
+
 bool managements_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);

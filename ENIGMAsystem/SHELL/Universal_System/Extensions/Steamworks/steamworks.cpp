@@ -17,6 +17,8 @@
 
 #include "steamworks.h"
 
+#include "game_client/c_main.h"
+
 namespace enigma {
 
 void write_appid_file() {

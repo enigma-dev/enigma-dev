@@ -29,7 +29,7 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
-#include <string>
+#include "game_client/c_main.h"
 
 namespace enigma_user {
 

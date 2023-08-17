@@ -65,9 +65,9 @@ bool c_main::init() {
 void c_main::shutdown() {
   c_main::is_initialised_ = false;
 
-  if (NULL != c_main::c_game_client_) delete c_main::c_game_client_;
-
   SteamAPI_Shutdown();
+
+  if (NULL != c_main::c_game_client_) delete c_main::c_game_client_;
 }
 
 bool c_main::is_initialised() { return c_main::is_initialised_; }

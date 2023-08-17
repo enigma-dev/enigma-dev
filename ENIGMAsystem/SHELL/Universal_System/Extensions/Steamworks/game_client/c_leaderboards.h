@@ -44,15 +44,19 @@ class c_leaderboards {
   bool upload_score(const int score, const ELeaderboardUploadScoreMethod leaderboard_upload_score_method =
                                          k_ELeaderboardUploadScoreMethodNone);
 
-  int download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
+  bool download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
                        const int range_end = -1);
+
+  static std::string get_leaderboard_name(const SteamLeaderboard_t leaderboard);
 
  private:
   SteamLeaderboard_t current_leaderboard_;
   bool loading_;
   unsigned number_of_leaderboard_entries_;
   
-  int last_score_downloaded_id_;
+  // int last_leaderboard_found_id_;
+  // int last_score_downloaded_id_;
+  // int last_score_uploaded_id_;
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);

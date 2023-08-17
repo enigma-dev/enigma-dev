@@ -56,8 +56,7 @@ show_debug_message("POST steam_create_leaderboard")&#13;
 &#13;
 upload_ID = steam_upload_score_ext(SteamLeaderboard, irandom(1000), true);&#13;
 &#13;
-show_debug_message("upload_ID: " + string(upload_ID))&#13;
-</string>
+show_debug_message("upload_ID: " + string(upload_ID))</string>
           </argument>
         </arguments>
       </action>

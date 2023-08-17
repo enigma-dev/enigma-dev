@@ -20,9 +20,6 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
-#include "game_client/c_main.h"
-#include "steamworks.h"
-
 namespace enigma_user {
 
 /*

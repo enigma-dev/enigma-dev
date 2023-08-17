@@ -18,7 +18,6 @@
 #include "overlay.h"
 
 #include "game_client/c_overlay.h"
-#include "game_client/c_main.h"
 
 bool overlay_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {

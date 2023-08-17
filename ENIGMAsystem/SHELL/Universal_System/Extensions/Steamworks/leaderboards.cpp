@@ -15,9 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+// TODO: Use the find_leaderboard() function return id inside upload and download functions.
+
 #include "leaderboards.h"
 
+#include "Universal_System/../Platforms/General/PFmain.h"
 #include "game_client/c_leaderboards.h"
+// #include "Universal_System/Extensions/DataStructures/include.h"
+
+#include <algorithm>
+#include <sstream>
 
 bool leaderboards_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
@@ -34,12 +41,115 @@ bool leaderboards_pre_checks(const std::string& script_name) {
 }
 
 namespace enigma {
-// unsigned lb_entries_download_id{0};
-
 // struct Leaderboard {
 //   // stuff here
 // }
+AssetArray<SteamLeaderboard_t> leaderboards_array;
 AssetArray<LeaderboardEntry_t*> entries_array;
+AssetArray<bool> scores_array;
+
+void push_create_leaderboard_steam_async_event(LeaderboardFindResult_t* pFindLeaderboardResult) {
+  const std::map<std::string, variant> leaderboard_find_event = {
+      {"id", 0},
+      {"event_type", "create_leaderboard"},
+      {"status", pFindLeaderboardResult->m_bLeaderboardFound},
+      {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pFindLeaderboardResult->m_hSteamLeaderboard)}};
+
+  enigma::posted_async_events.push(leaderboard_find_event);
+}
+
+void push_leaderboard_upload_steam_async_event(LeaderboardScoreUploaded_t* pScoreUploadedResult) {
+  // GMS's output:
+  /*
+      Steam ASYNC: {"updated":1.0,"lb_name":"YYLeaderboard_10/29/21--","success":1.0,"event_type":"leaderboard_upload","score":325.0,"post_id":6.0}
+  */
+  const std::map<std::string, variant> leaderboard_upload_event = {
+      {"event_type", "leaderboard_upload"},
+      {"post_id", 0},
+      {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pScoreUploadedResult->m_hSteamLeaderboard)},
+      {"success", pScoreUploadedResult->m_bSuccess},
+      {"updated", pScoreUploadedResult->m_bScoreChanged},
+      {"score", pScoreUploadedResult->m_nScore}};
+
+  enigma::posted_async_events.push(leaderboard_upload_event);
+}
+
+// TODO: Add data key/value pair (if existed).
+// TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
+// because if something I don't understand.
+void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned leaderboard_entries_size,
+                             std::stringstream* leaderboard_entries_buffer) {
+  (*leaderboard_entries_buffer) << '{';  // Entries object open bracket
+  (*leaderboard_entries_buffer) << '\"' << "entries" << '\"' << ':';
+  (*leaderboard_entries_buffer) << '[';  // Entries array open bracket
+
+  for (unsigned i{0}; i < leaderboard_entries_size; i++) {
+    (*leaderboard_entries_buffer) << '{';
+    (*leaderboard_entries_buffer) << '\"' << "name" << '\"' << ':';
+    (*leaderboard_entries_buffer) << '\"'
+                                  << steamworks::c_game_client::get_steam_user_persona_name(
+                                         leaderboard_entries[i].m_steamIDUser)
+                                  << '\"' << ',';
+    (*leaderboard_entries_buffer) << '\"' << "score" << '\"' << ':';
+    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nScore) << ',';
+    (*leaderboard_entries_buffer) << '\"' << "rank" << '\"' << ':';
+    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',';
+    (*leaderboard_entries_buffer) << '\"' << "userID" << '\"' << ':';
+    (*leaderboard_entries_buffer) << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
+                                  << '\"';
+    (*leaderboard_entries_buffer) << '}';
+
+    // Add comma if not last entry
+    if (i < leaderboard_entries_size - 1) (*leaderboard_entries_buffer) << ',';
+  }
+
+  (*leaderboard_entries_buffer) << ']';  // Entries array close bracket
+  (*leaderboard_entries_buffer) << '}';  // Entries object close bracket
+}
+
+void push_leaderboard_download_steam_async_event(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded) {
+  LeaderboardEntry_t leaderboard_entries[enigma_user::lb_max_entries];
+
+  // Leaderboard entries handle will be invalid once we return from this function. Copy all data now.
+  const int number_of_leaderboard_entries =
+      std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
+  for (unsigned index = 0; index < number_of_leaderboard_entries; index++) {
+    SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
+                                                    &leaderboard_entries[index], NULL, 0);
+  }
+
+  // Now our entries is here, let's save it.
+  // enigma::entries_array.get() = leaderboard_entries;
+
+  std::stringstream leaderboard_entries_buffer;
+
+  get_leaderboard_entries(leaderboard_entries, number_of_leaderboard_entries, &leaderboard_entries_buffer);
+
+  // GMS's output:
+  /*
+      Steam ASYNC: {"entries":"{\n    "entries": [\n                { "name"  : "TomasJPereyra", "score" : 1, "rank"  : 1, "userID": "@i64@110000108ae8556$i64$" }
+      ,\n                { "name"  : "Scott-ish", "score" : 10, "rank"  : 2, "userID": "@i64@11000010241f4ea$i64$" },\n                { "name"  : "Loyal RaveN", 
+      "score" : 63, "rank"  : 3, "userID": "@i64@11000015c558396$i64$" },\n                { "name"  : "luca.muehlbauer", "score" : 100, "rank"  : 4, "userID": 
+      "@i64@11000015d44ce04$i64$", "data"  : "UWx1Y2EubXVlaGxiYXVlciB3YXMgaGVyZSA6KQAAAAA=" },\n                { "name"  : "simon", "score" : 113, "rank"  : 5, 
+      "userID": "@i64@1100001040447b6$i64$" },\n                { "name"  : "meFroggy", "score" : 138, "rank"  : 6, "userID": "@i64@110000117c9d62b$i64$", "data"
+        : "HG1lRnJvZ2d5IHdhcyBoZXJlIDopAAAA" },\n                { "name"  : "12349184732146127845127895", "score" : 155, "rank"  : 7, "userID": "@i64@11000010be
+      342ce$i64$", "data"  : "FEZlZWxpbmcgU2lja25lenogd2FzIGhlcmUgOikAAAA=" },\n                { "name"  : "hermitpal", "score" : 196, "rank"  : 8, "userID": 
+      "@i64@110000106401474$i64$", "data"  : "R2hlcm1pdCB3YXMgaGVyZSA6KQA=" },\n                { "name"  : "Shermanica", "score" : 199, "rank"  : 9, "userID": 
+      "@i64@1100001009bb750$i64$" },\n                { "name"  : "Joeyman98", "score" : 239, "rank"  : 10, "userID": "@i64@11000010624f1e3$i64$", "data"  : 
+      "I0pvZXltYW45OCB3YXMgaGVyZSA6KQAA" }\n        \n    ]\n}\n","lb_name":"YYLeaderboard_10/29/21--","event_type":"leaderboard_download","id":3.0,
+      "num_entries":10.0,"status":1.0}
+  */
+  const std::map<std::string, variant> leaderboard_download_event = {
+      {"entries", leaderboard_entries_buffer.str()},
+      {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pLeaderboardScoresDownloaded->m_hSteamLeaderboard)},
+      {"event_type", "leaderboard_download"},
+      {"id", 0},
+      {"num_entries", pLeaderboardScoresDownloaded->m_cEntryCount},
+      {"status", 0}  // TODO: The status must not be constant value
+  };
+
+  enigma::posted_async_events.push(leaderboard_download_event);
+}
 }  // namespace enigma
 
 namespace enigma_user {
@@ -102,10 +212,12 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
       return -1;
   }
 
+  int id{enigma::leaderboards_array.add(NULL)};
+
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, leaderboard_sort_method,
                                                                                   leaderboard_display_type);
 
-  return 0;
+  return id;
 }
 
 int steam_upload_score(const std::string& lb_name, const int score) {
@@ -114,13 +226,18 @@ int steam_upload_score(const std::string& lb_name, const int score) {
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, k_ELeaderboardSortMethodNone,
                                                                                   k_ELeaderboardDisplayTypeNone);
 
+  int id{enigma::scores_array.add(false)};
+
   if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(
           score, k_ELeaderboardUploadScoreMethodKeepBest)) {
-    DEBUG_MESSAGE("Calling steam_upload_score failed. Make sure that the leaderboard exists.", M_ERROR);
+    DEBUG_MESSAGE(
+        "Calling steam_upload_score failed. Make sure that the leaderboard exists "
+        "or wait until the current request is done.",
+        M_ERROR);
     return -1;
   }
 
-  return 0;
+  return id;
 }
 
 int steam_upload_score_ext(const std::string& lb_name, const unsigned score, const bool force_update) {
@@ -129,20 +246,25 @@ int steam_upload_score_ext(const std::string& lb_name, const unsigned score, con
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, k_ELeaderboardSortMethodNone,
                                                                                   k_ELeaderboardDisplayTypeNone);
 
+  int id{enigma::scores_array.add(false)};
+  bool success{false};
+
   if (force_update) {
-    if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(
-            score, k_ELeaderboardUploadScoreMethodForceUpdate)) {
-      DEBUG_MESSAGE("Calling steam_upload_score_ext failed. Make sure that the leaderboard exists.", M_ERROR);
-      return -1;
-    }
+    success = steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(
+        score, k_ELeaderboardUploadScoreMethodForceUpdate);
   } else {
-    if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(score)) {
-      DEBUG_MESSAGE("Calling steam_upload_score_ext failed. Make sure that the leaderboard exists.", M_ERROR);
-      return -1;
-    }
+    success = steamworks::c_main::get_c_game_client()->get_c_leaderboards()->upload_score(score);
   }
 
-  return 0;
+  if (!success) {
+    DEBUG_MESSAGE(
+        "Calling steam_upload_score_ext failed. Make sure that the leaderboard exists "
+        "or wait until the current request is done.",
+        M_ERROR);
+    return -1;
+  }
+
+  return id;
 }
 
 int steam_upload_score_buffer(const std::string& lb_name, const unsigned score, const unsigned buffer) { return -1; }
@@ -158,13 +280,15 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, k_ELeaderboardSortMethodNone,
                                                                                   k_ELeaderboardDisplayTypeNone);
 
-  int id{steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(k_ELeaderboardDataRequestGlobal,
-                                                                                        start_idx, end_idx)};
+  int id{enigma::entries_array.add(NULL)};
 
-  if (id < 0) {
-    DEBUG_MESSAGE("Calling steam_download_scores failed. Make sure that the leaderboard exists "
-    "or wait until the current request is done.", M_ERROR);
-    return id;
+  if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(k_ELeaderboardDataRequestGlobal,
+                                                                                      start_idx, end_idx)) {
+    DEBUG_MESSAGE(
+        "Calling steam_download_scores failed. Make sure that the leaderboard exists "
+        "or wait until the current request is done.",
+        M_ERROR);
+    return -1;
   }
 
   return id;
@@ -175,14 +299,16 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, k_ELeaderboardSortMethodNone,
                                                                                   k_ELeaderboardDisplayTypeNone);
+  
+  int id{enigma::entries_array.add(NULL)};
 
-  int id{steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
-      k_ELeaderboardDataRequestGlobalAroundUser, range_start, range_end)};
-
-  if (id < 0) {
-    DEBUG_MESSAGE("Calling steam_download_scores_around_user failed. Make sure that the leaderboard exists "
-    "or wait until the current request is done.", M_ERROR);
-    return id;
+  if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
+          k_ELeaderboardDataRequestGlobalAroundUser, range_start, range_end)) {
+    DEBUG_MESSAGE(
+        "Calling steam_download_scores_around_user failed. Make sure that the leaderboard exists "
+        "or wait until the current request is done.",
+        M_ERROR);
+    return -1;
   }
 
   return id;
@@ -193,14 +319,16 @@ int steam_download_friends_scores(const std::string& lb_name) {
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(lb_name, k_ELeaderboardSortMethodNone,
                                                                                   k_ELeaderboardDisplayTypeNone);
+  
+  int id{enigma::entries_array.add(NULL)};
 
-  int id {steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
-          k_ELeaderboardDataRequestFriends)};
-
-  if (id < 0) {
-    DEBUG_MESSAGE("Calling steam_download_friends_scores failed. Make sure that the leaderboard exists "
-    "or wait until the current request is done.", M_ERROR);
-    return id;
+  if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->download_scores(
+          k_ELeaderboardDataRequestFriends)) {
+    DEBUG_MESSAGE(
+        "Calling steam_download_friends_scores failed. Make sure that the leaderboard exists "
+        "or wait until the current request is done.",
+        M_ERROR);
+    return -1;
   }
 
   return id;

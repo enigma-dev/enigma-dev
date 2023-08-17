@@ -15,9 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "cloud.h"
 #include "general.h"
 #include "leaderboards.h"
 #include "management.h"
 #include "overlay.h"
+#include "social.h"
 #include "stats_and_achievements.h"
 #include "steamworks.h"

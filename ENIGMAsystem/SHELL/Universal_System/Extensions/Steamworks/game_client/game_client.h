@@ -22,7 +22,16 @@
 
 #include <iostream>
 #include <string>
+
+/*
+    This include the only special include that game_client layer uses. DON'T include any
+    other includes in game_client layer that are outside Steamworks extension.
+*/
 #include "Widget_Systems/widgets_mandatory.h"
+
+/*
+    This is the lowest layer that game_client layer mainly depends on.
+*/
 #include "steam/steam_api.h"
 
 namespace steamworks {

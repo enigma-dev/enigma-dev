@@ -23,8 +23,8 @@
 
 namespace steamworks {
 
-c_game_client* game_client_{NULL};
-c_game_client* game_client() { return game_client_; }
+// c_game_client* game_client_{NULL};
+// c_game_client* game_client() { return game_client_; }
 
 ////////////////////////////////////////////////////////
 // Public fields & functions
@@ -48,7 +48,7 @@ c_game_client::~c_game_client() {
 }
 
 void c_game_client::init() {
-  game_client_ = this;
+  // game_client_ = this;
 
   c_game_client::c_overlay_ = new c_overlay();
   c_game_client::c_stats_and_achievements_ = new c_stats_and_achievements();
