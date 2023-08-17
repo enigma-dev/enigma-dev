@@ -17,7 +17,8 @@
 ############################################################################
 
 SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
-				$(wildcard Universal_System/Extensions/Steamworks/game_client/*.cpp)
+				$(wildcard Universal_System/Extensions/Steamworks/game_client/*.cpp) \
+                    $(wildcard Universal_System/Extensions/Steamworks/game_client/utils/*.cpp)
 
 # defining directory of steam header files
 override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/game_client/Steamv157/sdk/public/

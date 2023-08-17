@@ -18,25 +18,39 @@
 #include "c_leaderboards.h"
 
 #include "../leaderboards.h"
+#include "utils/c_leaderboard_find_result_cookies.h"
+#include "utils/c_leaderboard_score_downloaded_cookies.h"
+#include "utils/c_leaderboard_score_uploaded_cookies.h"
+
+// TODO: Test the cleaning algorithm here.
 
 namespace steamworks {
+
+std::vector<c_leaderboards_find_result_cookies *> c_leaderboards_find_result_cookies_instances_tracker;
+std::vector<c_leaderboards_score_uploaded_cookies *> c_leaderboards_score_uploaded_cookies_instances_tracker;
+std::vector<c_leaderboards_score_downloaded_cookies *> c_leaderboards_score_downloaded_cookies_instances_tracker;
 
 ////////////////////////////////////////////////////////
 // Public functions
 ////////////////////////////////////////////////////////
 
-c_leaderboards::c_leaderboards()
-    : current_leaderboard_(NULL),
-      number_of_leaderboard_entries_(0),
-      loading_(false)
-// last_leaderboard_found_id_(-1),
-// last_score_downloaded_id_(-1),
-// last_score_uploaded_id_(-1)
-{}
+c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {}
 
-void c_leaderboards::find_leaderboard(const std::string& leaderboard_name,
+bool c_leaderboards_find_result_remove_if_lambda(const c_leaderboards_find_result_cookies *c_leaderboards_find_result) {
+  bool is_done{c_leaderboards_find_result->is_done()};
+  if (is_done) delete c_leaderboards_find_result;
+  return is_done;
+}
+
+void c_leaderboards::find_leaderboard(const int id, const std::string &leaderboard_name,
                                       const ELeaderboardSortMethod leaderboard_sort_method,
                                       const ELeaderboardDisplayType leaderboard_display_type) {
+  c_leaderboards_find_result_cookies_instances_tracker.erase(
+      std::remove_if(c_leaderboards_find_result_cookies_instances_tracker.begin(),
+                     c_leaderboards_find_result_cookies_instances_tracker.end(),
+                     c_leaderboards_find_result_remove_if_lambda),
+      c_leaderboards_find_result_cookies_instances_tracker.end());
+
   if (c_leaderboards::loading_) return;
 
   if (c_leaderboards::current_leaderboard_ != NULL) {
@@ -45,67 +59,60 @@ void c_leaderboards::find_leaderboard(const std::string& leaderboard_name,
 
   c_leaderboards::current_leaderboard_ = NULL;
 
-  SteamAPICall_t steam_api_call = SteamUserStats()->FindOrCreateLeaderboard(
-      leaderboard_name.c_str(), leaderboard_sort_method, leaderboard_display_type);
+  SteamAPICall_t steam_api_call{0};
+
+  steam_api_call = SteamUserStats()->FindOrCreateLeaderboard(leaderboard_name.c_str(), leaderboard_sort_method,
+                                                             leaderboard_display_type);
 
   if (steam_api_call != 0) {
-    c_leaderboards::m_callResultFindLeaderboard.Set(steam_api_call, this, &c_leaderboards::on_find_leaderboard);
+    c_leaderboards_find_result_cookies *c_leaderboards_find_result =
+        new c_leaderboards_find_result_cookies(id, this, steam_api_call);
+    c_leaderboards_find_result_cookies_instances_tracker.push_back(c_leaderboards_find_result);
     c_leaderboards::loading_ = true;
   }
 }
 
-void c_leaderboards::on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult, bool bIOFailure) {
-  if (!pFindLeaderboardResult->m_bLeaderboardFound || bIOFailure) {
-    DEBUG_MESSAGE("Failed to find or create leaderboard.", M_ERROR);
-    return;
-  }
-
-  c_leaderboards::current_leaderboard_ = pFindLeaderboardResult->m_hSteamLeaderboard;
-
-  DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
-
-  // Success? Let's save it.
-  // enigma::leaderboard_found_array.get() = pFindLeaderboardResult->m_hSteamLeaderboard;
-
-  // Done? We are ready to accept new requests.
-  c_leaderboards::loading_ = false;
-
-  enigma::push_create_leaderboard_steam_async_event(pFindLeaderboardResult);
+bool c_leaderboards_score_uploaded_remove_if_lambda(
+    const c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded) {
+  bool is_done{c_leaderboards_score_uploaded->is_done()};
+  if (is_done) delete c_leaderboards_score_uploaded;
+  return is_done;
 }
 
-bool c_leaderboards::upload_score(const int score,
+bool c_leaderboards::upload_score(const int id, const int score,
                                   const ELeaderboardUploadScoreMethod leaderboard_upload_score_method) {
-  // while (c_leaderboards::loading_)
-  //   ;  // Wait for the callback of FindOrCreateLeaderboard to be invoked
+  c_leaderboards_score_uploaded_cookies_instances_tracker.erase(
+      std::remove_if(c_leaderboards_score_uploaded_cookies_instances_tracker.begin(),
+                     c_leaderboards_score_uploaded_cookies_instances_tracker.end(),
+                     c_leaderboards_score_uploaded_remove_if_lambda),
+      c_leaderboards_score_uploaded_cookies_instances_tracker.end());
 
-  if (NULL == c_leaderboards::current_leaderboard_ || loading_) return -false;
+  if (NULL == c_leaderboards::current_leaderboard_ || loading_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
       c_leaderboards::current_leaderboard_, leaderboard_upload_score_method, score, NULL, 0);
-  c_leaderboards::m_SteamCallResultUploadScore.Set(steam_api_call, this, &c_leaderboards::on_upload_score);
+
+  c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded =
+      new c_leaderboards_score_uploaded_cookies(id, this, steam_api_call);
+  c_leaderboards_score_uploaded_cookies_instances_tracker.push_back(c_leaderboards_score_uploaded);
 
   return true;
 }
 
-void c_leaderboards::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult, bool bIOFailure) {
-  if (!pScoreUploadedResult->m_bSuccess || bIOFailure) {
-    DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
-    return;
-  }
-
-  // Success? Let's save it.
-  // enigma::scores_array.get() = true;
-
-  // Done? We are ready to accept new requests.
-  c_leaderboards::loading_ = false;
-
-  enigma::push_leaderboard_upload_steam_async_event(pScoreUploadedResult);
+bool c_leaderboards_score_downloaded_remove_if_lambda(
+    const c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded) {
+  bool is_done{c_leaderboards_score_downloaded->is_done()};
+  if (is_done) delete c_leaderboards_score_downloaded;
+  return is_done;
 }
 
-bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start,
-                                     const int range_end) {
-  // while (c_leaderboards::loading_)
-  //   ;  // Wait for the callback of FindOrCreateLeaderboard to be invoked
+bool c_leaderboards::download_scores(const int id, const ELeaderboardDataRequest leaderboard_data_request,
+                                     const int range_start, const int range_end) {
+  c_leaderboards_score_downloaded_cookies_instances_tracker.erase(
+      std::remove_if(c_leaderboards_score_downloaded_cookies_instances_tracker.begin(),
+                     c_leaderboards_score_downloaded_cookies_instances_tracker.end(),
+                     c_leaderboards_score_downloaded_remove_if_lambda),
+      c_leaderboards_score_downloaded_cookies_instances_tracker.end());
 
   if (NULL == c_leaderboards::current_leaderboard_ || loading_) return false;
 
@@ -113,24 +120,12 @@ bool c_leaderboards::download_scores(const ELeaderboardDataRequest leaderboard_d
 
   SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
       c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
-  c_leaderboards::m_SteamCallResultDownloadScores.Set(steam_api_call, this, &c_leaderboards::on_download_scores);
+
+  c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded =
+      new c_leaderboards_score_downloaded_cookies(id, this, steam_api_call);
+  c_leaderboards_score_downloaded_cookies_instances_tracker.push_back(c_leaderboards_score_downloaded);
 
   return true;
-}
-
-void c_leaderboards::on_download_scores(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
-  if (bIOFailure) {
-    DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
-    c_leaderboards::loading_ = false;
-    return;
-  }
-
-  DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
-
-  enigma::push_leaderboard_download_steam_async_event(pLeaderboardScoresDownloaded);
-  
-  // Entries are saved? We are ready to accept new requests.
-  c_leaderboards::loading_ = false;
 }
 
 std::string c_leaderboards::get_leaderboard_name(const SteamLeaderboard_t leaderboard) {
@@ -141,5 +136,11 @@ std::string c_leaderboards::get_leaderboard_name(const SteamLeaderboard_t leader
 
   return std::string(SteamUserStats()->GetLeaderboardName(leaderboard));
 }
+
+void c_leaderboards::set_current_leaderboard(const SteamLeaderboard_t leaderboard) {
+  c_leaderboards::current_leaderboard_ = leaderboard;
+}
+
+void c_leaderboards::set_loading(const bool loading) { c_leaderboards::loading_ = loading; }
 
 }  // namespace steamworks

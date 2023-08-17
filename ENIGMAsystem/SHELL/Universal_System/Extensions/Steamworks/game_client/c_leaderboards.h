@@ -32,6 +32,28 @@
 
 namespace steamworks {
 
+class c_leaderboards_find_result_cookies;
+class c_leaderboards_score_uploaded_cookies;
+class c_leaderboards_score_downloaded_cookies;
+
+/*
+    This vector is used to track all instances of c_leaderboards_find_result_cookies so that we can
+    destroy them when they are done.
+*/
+extern std::vector<c_leaderboards_find_result_cookies*> c_leaderboards_find_result_cookies_instances_tracker;
+
+/*
+    This vector is used to track all instances of c_leaderboards_score_uploaded_cookies so that we can
+    destroy them when they are done.
+*/
+extern std::vector<c_leaderboards_score_uploaded_cookies*> c_leaderboards_score_uploaded_cookies_instances_tracker;
+
+/*
+    This vector is used to track all instances of c_leaderboards_score_downloaded_cookies so that we can
+    destroy them when they are done.
+*/
+extern std::vector<c_leaderboards_score_downloaded_cookies*> c_leaderboards_score_downloaded_cookies_instances_tracker;
+
 class c_game_client;
 
 class c_leaderboards {
@@ -39,36 +61,25 @@ class c_leaderboards {
   c_leaderboards();
   ~c_leaderboards() = default;
 
-  void find_leaderboard(const std::string& leaderboard_name, const ELeaderboardSortMethod leaderboard_sort_method,
+  void find_leaderboard(const int id, const std::string& leaderboard_name,
+                        const ELeaderboardSortMethod leaderboard_sort_method,
                         const ELeaderboardDisplayType leaderboard_display_type);
-  bool upload_score(const int score, const ELeaderboardUploadScoreMethod leaderboard_upload_score_method =
-                                         k_ELeaderboardUploadScoreMethodNone);
+  bool upload_score(
+      const int id, const int score,
+      const ELeaderboardUploadScoreMethod leaderboard_upload_score_method = k_ELeaderboardUploadScoreMethodNone);
 
-  bool download_scores(const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
+  bool download_scores(const int id, const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
                        const int range_end = -1);
 
   static std::string get_leaderboard_name(const SteamLeaderboard_t leaderboard);
+
+  void set_current_leaderboard(const SteamLeaderboard_t leaderboard);
+  void set_loading(const bool loading);
 
  private:
   SteamLeaderboard_t current_leaderboard_;
   bool loading_;
   unsigned number_of_leaderboard_entries_;
-  
-  // int last_leaderboard_found_id_;
-  // int last_score_downloaded_id_;
-  // int last_score_uploaded_id_;
-
-  // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
-  void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);
-  CCallResult<c_leaderboards, LeaderboardFindResult_t> m_callResultFindLeaderboard;
-
-  // Called when SteamUserStats()->UploadLeaderboardScore() returns asynchronously
-  void on_upload_score(LeaderboardScoreUploaded_t* pFindLearderboardResult, bool bIOFailure);
-  CCallResult<c_leaderboards, LeaderboardScoreUploaded_t> m_SteamCallResultUploadScore;
-
-  // Called when SteamUserStats()->DownloadLeaderboardEntries() returns asynchronously
-  void on_download_scores(LeaderboardScoresDownloaded_t* pFindLearderboardResult, bool bIOFailure);
-  CCallResult<c_leaderboards, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
 };
 }  // namespace steamworks
 

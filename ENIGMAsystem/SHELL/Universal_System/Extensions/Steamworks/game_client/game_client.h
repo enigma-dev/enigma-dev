@@ -20,19 +20,21 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
-#include <iostream>
-#include <string>
-
-/*
-    This include the only special include that game_client layer uses. DON'T include any
-    other includes in game_client layer that are outside Steamworks extension.
-*/
-#include "Widget_Systems/widgets_mandatory.h"
-
 /*
     This is the lowest layer that game_client layer mainly depends on.
 */
 #include "steam/steam_api.h"
+
+/*
+    This include is the only special include that game_client layer uses. DON'T include any
+    other includes in game_client layer that are outside Steamworks extension.
+*/
+/*
+    This include has the <string> include in it so no need to include it again.
+*/
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <algorithm>
 
 namespace steamworks {
 

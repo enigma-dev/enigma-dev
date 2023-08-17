@@ -34,14 +34,19 @@
 #include "Universal_System/Resources/AssetArray.h"
 #include "game_client/c_main.h"
 
-namespace enigma {
-extern AssetArray<SteamLeaderboard_t> leaderboard_array; // This will be used for returning the id for each leaderboard we find.
-extern AssetArray<LeaderboardEntry_t*> entries_array; // This will be used for returning the id for each leaderboard we download.
-extern AssetArray<bool> scores_array; // This will be used for returning the id for each score we upload.
+#include <sstream>
 
-void push_create_leaderboard_steam_async_event(LeaderboardFindResult_t* pFindLeaderboardResult);
-void push_leaderboard_upload_steam_async_event(LeaderboardScoreUploaded_t* pScoreUploadedResult);
-void push_leaderboard_download_steam_async_event(LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded);
+namespace enigma {
+extern AssetArray<SteamLeaderboard_t*>
+    leaderboards_array;  // This will be used for returning the id for each leaderboard we find.
+extern AssetArray<LeaderboardEntry_t*>
+    entries_array;                     // This will be used for returning the id for each leaderboard we download.
+extern AssetArray<bool> scores_array;  // This will be used for returning the id for each score we upload.
+
+void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* pFindLeaderboardResult);
+void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult);
+void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
+                                                 std::stringstream* leaderboard_entries_buffer);
 }  // namespace enigma
 
 namespace enigma_user {
@@ -49,7 +54,7 @@ namespace enigma_user {
 /*
     NOTE:   These constant is not existing in GMS's.
 
-    This constant specifies the maximum number of entries that can be downloaded from a leaderboard.
+    This constant specifies the maximum number of leaderboard entries we can display.
 */
 extern unsigned lb_max_entries;
 
