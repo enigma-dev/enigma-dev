@@ -31,6 +31,14 @@ struct is_lua_table<lua_table<U>> : std::true_type {
 };
 
 template <typename T>
+struct lua_inner_type;
+
+template <typename T>
+struct lua_inner_type<lua_table<T>> {
+  using type = T;
+};
+
+template <typename T>
 constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
 
 template <typename T>

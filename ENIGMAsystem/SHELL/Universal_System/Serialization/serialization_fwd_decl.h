@@ -24,34 +24,16 @@
 namespace enigma {
 
 template <typename T>
-is_t<T, variant, std::size_t> inline byte_size(const T &value);
-
-template <typename T>
-is_t<T, var, std::size_t> inline byte_size(const T &value);
-
-template <typename T>
-matches_t<T, std::size_t, is_lua_table> inline byte_size(const T &value);
-
-template <typename T>
-inline void internal_serialize_numeric_into(std::byte *iter, T value);
-
-template <typename T>
-inline std::array<std::byte, sizeof(T)> internal_serialize_numeric(T value);
-
-template <typename T>
-inline T internal_deserialize_numeric(std::byte *iter);
+typename std::enable_if_t<always_false<T>> inline byte_size(const T &value) = delete;
 
 template <typename Base, typename T>
-inline void internal_serialize_any_into(std::byte *iter, T value);
+inline void internal_serialize_primitive_into(std::byte *iter, T value);
 
 template <typename Base, typename T>
-inline std::array<std::byte, sizeof(T)> serialize_any(T value);
+inline std::array<std::byte, sizeof(T)> serialize_primitive(T value);
 
 template <typename Base, typename T>
-inline T internal_deserialize_any(std::byte *iter);
-
-template <typename T>
-inline T internal_deserialize_numeric(std::byte *iter);
+inline T internal_deserialize_primitive(std::byte *iter);
 
 template <typename T>
 inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
@@ -78,59 +60,22 @@ template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
 
 template <typename T>
-is_t<T, var> inline internal_serialize_into_fn(std::byte *iter, T &&value);
+typename std::enable_if_t<always_false<T>> inline internal_serialize_into_fn(std::byte *iter, T &&value) = delete;
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
-                        !std::is_same_v<var, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
-                                                                                                       T &&value);
+typename std::enable_if_t<always_false<T>, std::vector<std::byte>> inline internal_serialize_fn(const T &value) =
+    delete;
 
 template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>>::
-    type inline internal_serialize_into_fn(std::byte *iter, T &&value);
+typename std::enable_if_t<always_false<T>, T> inline internal_deserialize_fn(std::byte *iter) = delete;
 
 template <typename T>
-inline auto internal_serialize_fn(T *&&value);
-
-inline auto internal_serialize_fn(const var &value);
-
-template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline internal_serialize_fn(T &&value);
+typename std::enable_if_t<always_false<T>> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
+                                                                                T &&value) = delete;
 
 template <typename T>
-typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>,
-                        std::array<std::byte, sizeof(T)>>::type inline internal_serialize_fn(T &&value);
-
-template <typename T>
-is_t<T, var, T> inline internal_deserialize_fn(std::byte *iter);
-
-template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
-                        T>::type inline internal_deserialize_fn(std::byte *iter);
-
-template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>,
-                        T>::type inline internal_deserialize_fn(std::byte *iter);
-
-template <typename T>
-is_t<T, var> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
-
-template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
-    type inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value);
-
-template <typename T>
-is_t<T, var> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
-
-template <typename T>
-matches_t<T, void, is_lua_table> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
-
-template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
-    type inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len);
+typename std::enable_if_t<always_false<T>> inline enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                                 std::size_t &len) = delete;
 
 }  // namespace enigma
 #endif

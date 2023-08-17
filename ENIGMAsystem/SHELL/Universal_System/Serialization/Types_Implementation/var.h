@@ -17,6 +17,27 @@
 
 #include "../serialization_fwd_decl.h"
 
+inline std::size_t variant_size(const variant &value) {
+  if (value.type == variant::ty_real) {
+    return 9;
+  } else {
+    return 1 + sizeof(std::size_t) + value.sval().length();
+  }
+}
+
+template <typename T>
+is_t<T, var, std::size_t> inline enigma::byte_size(const T &value) {
+  std::size_t len = variant_size(value) + enigma_internal_sizeof(value.array1d);
+  len += (3 * sizeof(std::size_t));
+  for (auto &[key, elem] : value.array2d.sparse_part()) {
+    len += enigma_internal_sizeof(elem);
+  }
+  for (auto &elem : value.array2d.dense_part()) {
+    len += enigma_internal_sizeof(elem);
+  }
+  return len;
+}
+
 template <typename T>
 is_t<T, var> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::size_t pos = 0;
@@ -27,7 +48,8 @@ is_t<T, var> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&valu
   enigma_internal_serialize_lua_table(iter + pos, value.array2d);
 }
 
-inline auto enigma::internal_serialize_fn(const var &value) {
+template <typename T>
+is_t<T, var, std::vector<std::byte>> inline enigma::internal_serialize_fn(const T &value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into(result.data(), value);
@@ -48,11 +70,11 @@ is_t<T, var, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
 
 template <typename T>
 is_t<T, var> inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(buffer.size() + var_size(value));
+  buffer.resize(buffer.size() + enigma::enigma_internal_sizeof(value));
 }
 
-template <>
-inline void enigma::enigma_internal_deserialize_fn(var &value, std::byte *iter, std::size_t &len) {
+template <typename T>
+is_t<T, var> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   value = internal_deserialize<var>(iter + len);
-  len += var_size(value);
+  len += enigma::enigma_internal_sizeof(value);
 }

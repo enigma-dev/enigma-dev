@@ -1,4 +1,5 @@
 /** Copyright (C) 2022 Dhruv Chawla
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,7 +19,7 @@
 #include "../serialization_fwd_decl.h"
 
 template <typename T>
-inline std::size_t byte_size(const lua_table<T> &value) {
+matches_t<T, std::size_t, is_lua_table> inline enigma::byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   totalSize +=
@@ -86,7 +87,9 @@ inline lua_table<T> enigma::enigma_internal_deserialize_lua_table(std::byte *ite
 }
 
 template <typename T>
-inline void enigma::enigma_internal_deserialize_fn(lua_table<T> &value, std::byte *iter, std::size_t &len) {
-  value = enigma_internal_deserialize_lua_table<T>(iter);
+matches_t<T, void, is_lua_table> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
+                                                                               std::size_t &len) {
+  using Type = typename lua_inner_type<T>::type;
+  value = enigma_internal_deserialize_lua_table<Type>(iter);
   len += enigma_internal_sizeof(value);
 }

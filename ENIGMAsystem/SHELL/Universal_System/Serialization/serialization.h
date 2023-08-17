@@ -20,10 +20,7 @@
 #define ENIGMA_SERIALIZATION_H
 
 #include <array>
-#include <cstddef>
-// #include "detect_serialization.h"
-// #include "detect_size.h"
-#include "types_serialization_includes.h"
+#include "detect_serialization.h"
 
 namespace enigma {
 namespace utility {
@@ -47,7 +44,7 @@ inline std::size_t enigma_internal_sizeof(T &&value) {
 }
 
 template <typename Base, typename T>
-inline void internal_serialize_any_into(std::byte *iter, T value) {
+inline void internal_serialize_primitive_into(std::byte *iter, T value) {
   std::size_t i = sizeof(Base) - 1;
   std::size_t as_unsigned = utility::bit_cast<Base>(value);
 
@@ -58,14 +55,14 @@ inline void internal_serialize_any_into(std::byte *iter, T value) {
 }
 
 template <typename Base, typename T>
-inline std::array<std::byte, sizeof(T)> serialize_any(T value) {
+inline std::array<std::byte, sizeof(T)> serialize_primitive(T value) {
   std::array<std::byte, sizeof(T)> result{};
-  internal_serialize_any_into<Base, T>(result.data(), value);
+  internal_serialize_primitive_into<Base, T>(result.data(), value);
   return result;
 }
 
 template <typename Base, typename T>
-inline T internal_deserialize_any(std::byte *iter) {
+inline T internal_deserialize_primitive(std::byte *iter) {
   Base result{};
   for (std::size_t i = 0; i < sizeof(T); i++) {
     result = (result << 8) | static_cast<Base>(*(iter + i));
