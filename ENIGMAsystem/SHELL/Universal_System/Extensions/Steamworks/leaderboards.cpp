@@ -71,7 +71,7 @@ void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_
 }
 
 void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
-                                                 std::stringstream* leaderboard_entries_buffer) {
+                                                 std::stringstream& leaderboard_entries_buffer) {
   // GMS's output:
   /*
       Steam ASYNC: {"entries":"{\n    "entries": [\n                { "name"  : "TomasJPereyra", "score" : 1, "rank"  : 1, "userID": "@i64@110000108ae8556$i64$" }
@@ -87,7 +87,7 @@ void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownlo
       "num_entries":10.0,"status":1.0}
   */
   const std::map<std::string, variant> leaderboard_download_event = {
-      {"entries", leaderboard_entries_buffer->str()},
+      {"entries", leaderboard_entries_buffer.str()},
       {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pLeaderboardScoresDownloaded->m_hSteamLeaderboard)},
       {"event_type", "leaderboard_download"},
       {"id", id},

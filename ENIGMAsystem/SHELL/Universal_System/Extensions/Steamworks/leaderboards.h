@@ -48,7 +48,7 @@ extern AssetArray<bool> scores_array;  // This will be used for returning the id
 void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* pFindLeaderboardResult);
 void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult);
 void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
-                                                 std::stringstream* leaderboard_entries_buffer);
+                                                 std::stringstream& leaderboard_entries_buffer);
 }  // namespace enigma
 
 namespace enigma_user {

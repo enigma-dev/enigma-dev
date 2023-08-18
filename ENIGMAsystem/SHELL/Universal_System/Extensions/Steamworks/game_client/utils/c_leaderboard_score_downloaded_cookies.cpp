@@ -30,33 +30,33 @@ namespace steamworks {
 // TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
 // because if something I don't understand.
 void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned leaderboard_entries_size,
-                             std::stringstream* leaderboard_entries_buffer) {
-  (*leaderboard_entries_buffer) << '{';  // Entries object open bracket
-  (*leaderboard_entries_buffer) << '\"' << "entries" << '\"' << ':';
-  (*leaderboard_entries_buffer) << '[';  // Entries array open bracket
+                             std::stringstream& leaderboard_entries_buffer) {
+  leaderboard_entries_buffer << '{';  // Entries object open bracket
+  leaderboard_entries_buffer << '\"' << "entries" << '\"' << ':';
+  leaderboard_entries_buffer << '[';  // Entries array open bracket
 
   for (unsigned i{0}; i < leaderboard_entries_size; i++) {
-    (*leaderboard_entries_buffer) << '{';
-    (*leaderboard_entries_buffer) << '\"' << "name" << '\"' << ':';
-    (*leaderboard_entries_buffer) << '\"'
+    leaderboard_entries_buffer << '{';
+    leaderboard_entries_buffer << '\"' << "name" << '\"' << ':';
+    leaderboard_entries_buffer << '\"'
                                   << steamworks::c_game_client::get_steam_user_persona_name(
                                          leaderboard_entries[i].m_steamIDUser)
                                   << '\"' << ',';
-    (*leaderboard_entries_buffer) << '\"' << "score" << '\"' << ':';
-    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nScore) << ',';
-    (*leaderboard_entries_buffer) << '\"' << "rank" << '\"' << ':';
-    (*leaderboard_entries_buffer) << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',';
-    (*leaderboard_entries_buffer) << '\"' << "userID" << '\"' << ':';
-    (*leaderboard_entries_buffer) << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
+    leaderboard_entries_buffer << '\"' << "score" << '\"' << ':';
+    leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nScore) << ',';
+    leaderboard_entries_buffer << '\"' << "rank" << '\"' << ':';
+    leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',';
+    leaderboard_entries_buffer << '\"' << "userID" << '\"' << ':';
+    leaderboard_entries_buffer << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
                                   << '\"';
-    (*leaderboard_entries_buffer) << '}';
+    leaderboard_entries_buffer << '}';
 
     // Add comma if not last entry
-    if (i < leaderboard_entries_size - 1) (*leaderboard_entries_buffer) << ',';
+    if (i < leaderboard_entries_size - 1) leaderboard_entries_buffer << ',';
   }
 
-  (*leaderboard_entries_buffer) << ']';  // Entries array close bracket
-  (*leaderboard_entries_buffer) << '}';  // Entries object close bracket
+  leaderboard_entries_buffer << ']';  // Entries array close bracket
+  leaderboard_entries_buffer << '}';  // Entries object close bracket
 }
 
 ////////////////////////////////////////////////////////
@@ -110,10 +110,10 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
 
   std::stringstream leaderboard_entries_buffer;
 
-  get_leaderboard_entries(leaderboard_entries, number_of_leaderboard_entries, &leaderboard_entries_buffer);
+  get_leaderboard_entries(leaderboard_entries, number_of_leaderboard_entries, leaderboard_entries_buffer);
 
   enigma::push_leaderboard_download_steam_async_event(c_leaderboards_score_downloaded_cookies::id_,
-                                                      pLeaderboardScoresDownloaded, &leaderboard_entries_buffer);
+                                                      pLeaderboardScoresDownloaded, leaderboard_entries_buffer);
 
   c_leaderboards_score_downloaded_cookies::is_done_ = true;
 }
