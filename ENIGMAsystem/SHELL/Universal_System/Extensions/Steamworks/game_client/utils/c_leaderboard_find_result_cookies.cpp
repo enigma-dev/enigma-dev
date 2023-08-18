@@ -32,6 +32,8 @@ c_leaderboards_find_result_cookies::c_leaderboards_find_result_cookies(int id, c
   c_leaderboards_find_result_cookies::set_call_result(steam_api_call);
 }
 
+bool c_leaderboards_find_result_cookies::is_done() const { return c_leaderboards_find_result_cookies::is_done_; }
+
 ////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////
@@ -43,8 +45,6 @@ void c_leaderboards_find_result_cookies::set_call_result(SteamAPICall_t steam_ap
 
 void c_leaderboards_find_result_cookies::on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult,
                                                              bool bIOFailure) {
-  c_leaderboards_find_result_cookies::is_done_ = true;
-
   if (!pFindLeaderboardResult->m_bLeaderboardFound || bIOFailure) {
     DEBUG_MESSAGE("Failed to find or create leaderboard.", M_ERROR);
     c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
@@ -57,12 +57,15 @@ void c_leaderboards_find_result_cookies::on_find_leaderboard(LeaderboardFindResu
   DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
 
   // Success? Let's save it.
-  //   enigma::leaderboards_array.get(c_leaderboards_find_result_cookies::id_) = pFindLeaderboardResult->m_hSteamLeaderboard;
+  // enigma::leaderboards_array.get(c_leaderboards_find_result_cookies::id_) =
+  //     &pFindLeaderboardResult->m_hSteamLeaderboard;
 
   // Done? We are ready to accept new requests.
-  c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
+  // c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
 
   enigma::push_create_leaderboard_steam_async_event(c_leaderboards_find_result_cookies::id_, pFindLeaderboardResult);
+
+  c_leaderboards_find_result_cookies::is_done_ = true;
 }
 
 }  // namespace steamworks

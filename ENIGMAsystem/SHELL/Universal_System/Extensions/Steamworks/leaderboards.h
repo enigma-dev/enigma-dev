@@ -37,6 +37,8 @@
 #include <sstream>
 
 namespace enigma {
+
+// TODO: See if you can improve the type of these arrays.
 extern AssetArray<SteamLeaderboard_t*>
     leaderboards_array;  // This will be used for returning the id for each leaderboard we find.
 extern AssetArray<LeaderboardEntry_t*>
@@ -83,7 +85,7 @@ extern const unsigned lb_sort_descending;
     Async DS map key/value pairs:
         - "id" - The asynchronous request ID.
         - "event_type" - The string value "create_leaderboard".
-        - "status" - The status code, 0 if the leaderboard was create and 1 if it already existed.
+        - "status" - The status code, 0 if the leaderboard was created and 1 if it already existed.
         - "lb_name" - The name of the leaderboard.
 */
 int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_order, const unsigned display_type);
@@ -151,7 +153,7 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
     Async DS map key/value pairs:
         - "event_type" - This key will hold the value "leaderboard_download".
         - "id" - This key should match the ID value returned by the download calling function.
-        - "status" - The status of the callback, where -1 equals a failure or that no results were returned, and 0 equals a success.
+        - "status" - The status of the callback, where 0 equals a failure or that no results were returned, and 1 equals a success.
         - "lb_name" - This key holds the name of the leaderboard which was posted to.
         - "num_entries" - The number of "rows" of leaderboard data that is being returned.
         - "entries" - A JSON object string that contains another DS map, which will either contain the key "default" (signifying 

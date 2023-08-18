@@ -17,7 +17,6 @@
 
 #include "c_leaderboards.h"
 
-#include "../leaderboards.h"
 #include "utils/c_leaderboard_find_result_cookies.h"
 #include "utils/c_leaderboard_score_downloaded_cookies.h"
 #include "utils/c_leaderboard_score_uploaded_cookies.h"
@@ -26,9 +25,48 @@
 
 namespace steamworks {
 
-std::vector<c_leaderboards_find_result_cookies *> c_leaderboards_find_result_cookies_instances_tracker;
-std::vector<c_leaderboards_score_uploaded_cookies *> c_leaderboards_score_uploaded_cookies_instances_tracker;
-std::vector<c_leaderboards_score_downloaded_cookies *> c_leaderboards_score_downloaded_cookies_instances_tracker;
+////////////////////////////////////////////////////////
+// Helper functions
+////////////////////////////////////////////////////////
+
+bool c_leaderboards_find_result_remove_all_lambda(
+    const c_leaderboards_find_result_cookies *c_leaderboards_find_result) {
+  delete c_leaderboards_find_result;
+  return true;
+}
+
+bool c_leaderboards_score_uploaded_remove_all_lambda(
+    const c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded) {
+  delete c_leaderboards_score_uploaded;
+  return true;
+}
+
+bool c_leaderboards_score_downloaded_remove_all_lambda(
+    const c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded) {
+  delete c_leaderboards_score_downloaded;
+  return true;
+}
+
+bool c_leaderboards_find_result_remove_if_done_lambda(
+    const c_leaderboards_find_result_cookies *c_leaderboards_find_result) {
+  bool is_done{c_leaderboards_find_result->is_done()};
+  if (is_done) delete c_leaderboards_find_result;
+  return is_done;
+}
+
+bool c_leaderboards_score_uploaded_remove_if_done_lambda(
+    const c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded) {
+  bool is_done{c_leaderboards_score_uploaded->is_done()};
+  if (is_done) delete c_leaderboards_score_uploaded;
+  return is_done;
+}
+
+bool c_leaderboards_score_downloaded_remove_if_done_lambda(
+    const c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded) {
+  bool is_done{c_leaderboards_score_downloaded->is_done()};
+  if (is_done) delete c_leaderboards_score_downloaded;
+  return is_done;
+}
 
 ////////////////////////////////////////////////////////
 // Public functions
@@ -36,22 +74,16 @@ std::vector<c_leaderboards_score_downloaded_cookies *> c_leaderboards_score_down
 
 c_leaderboards::c_leaderboards() : current_leaderboard_(NULL), number_of_leaderboard_entries_(0), loading_(false) {}
 
-bool c_leaderboards_find_result_remove_if_lambda(const c_leaderboards_find_result_cookies *c_leaderboards_find_result) {
-  bool is_done{c_leaderboards_find_result->is_done()};
-  if (is_done) delete c_leaderboards_find_result;
-  return is_done;
+c_leaderboards::~c_leaderboards() {
+  c_leaderboards::deallocate_all_c_leaderboards_find_result_cookies();
+  c_leaderboards::deallocate_all_c_leaderboards_score_uploaded_cookies();
+  c_leaderboards::deallocate_all_c_leaderboards_score_downloaded_cookies();
 }
 
 void c_leaderboards::find_leaderboard(const int id, const std::string &leaderboard_name,
                                       const ELeaderboardSortMethod leaderboard_sort_method,
                                       const ELeaderboardDisplayType leaderboard_display_type) {
-  c_leaderboards_find_result_cookies_instances_tracker.erase(
-      std::remove_if(c_leaderboards_find_result_cookies_instances_tracker.begin(),
-                     c_leaderboards_find_result_cookies_instances_tracker.end(),
-                     c_leaderboards_find_result_remove_if_lambda),
-      c_leaderboards_find_result_cookies_instances_tracker.end());
-
-  if (c_leaderboards::loading_) return;
+  deallocate_c_leaderboards_find_result_cookies_if_done();
 
   if (c_leaderboards::current_leaderboard_ != NULL) {
     if (SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_) == leaderboard_name) return;
@@ -67,63 +99,41 @@ void c_leaderboards::find_leaderboard(const int id, const std::string &leaderboa
   if (steam_api_call != 0) {
     c_leaderboards_find_result_cookies *c_leaderboards_find_result =
         new c_leaderboards_find_result_cookies(id, this, steam_api_call);
-    c_leaderboards_find_result_cookies_instances_tracker.push_back(c_leaderboards_find_result);
-    c_leaderboards::loading_ = true;
+    c_leaderboards_find_result_cookies_.push_back(c_leaderboards_find_result);
+  } else {
+    // TODO: Write more descriptive error message.
+    DEBUG_MESSAGE("Calling FindOrCreateLeaderboard() failed for some reason.", M_ERROR);
   }
-}
-
-bool c_leaderboards_score_uploaded_remove_if_lambda(
-    const c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded) {
-  bool is_done{c_leaderboards_score_uploaded->is_done()};
-  if (is_done) delete c_leaderboards_score_uploaded;
-  return is_done;
 }
 
 bool c_leaderboards::upload_score(const int id, const int score,
                                   const ELeaderboardUploadScoreMethod leaderboard_upload_score_method) {
-  c_leaderboards_score_uploaded_cookies_instances_tracker.erase(
-      std::remove_if(c_leaderboards_score_uploaded_cookies_instances_tracker.begin(),
-                     c_leaderboards_score_uploaded_cookies_instances_tracker.end(),
-                     c_leaderboards_score_uploaded_remove_if_lambda),
-      c_leaderboards_score_uploaded_cookies_instances_tracker.end());
+  deallocate_c_leaderboards_score_uploaded_cookies_if_done();
 
-  if (NULL == c_leaderboards::current_leaderboard_ || loading_) return false;
+  if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
       c_leaderboards::current_leaderboard_, leaderboard_upload_score_method, score, NULL, 0);
 
   c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded =
       new c_leaderboards_score_uploaded_cookies(id, this, steam_api_call);
-  c_leaderboards_score_uploaded_cookies_instances_tracker.push_back(c_leaderboards_score_uploaded);
+  c_leaderboards_score_uploaded_cookies_.push_back(c_leaderboards_score_uploaded);
 
   return true;
 }
 
-bool c_leaderboards_score_downloaded_remove_if_lambda(
-    const c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded) {
-  bool is_done{c_leaderboards_score_downloaded->is_done()};
-  if (is_done) delete c_leaderboards_score_downloaded;
-  return is_done;
-}
-
 bool c_leaderboards::download_scores(const int id, const ELeaderboardDataRequest leaderboard_data_request,
                                      const int range_start, const int range_end) {
-  c_leaderboards_score_downloaded_cookies_instances_tracker.erase(
-      std::remove_if(c_leaderboards_score_downloaded_cookies_instances_tracker.begin(),
-                     c_leaderboards_score_downloaded_cookies_instances_tracker.end(),
-                     c_leaderboards_score_downloaded_remove_if_lambda),
-      c_leaderboards_score_downloaded_cookies_instances_tracker.end());
+  deallocate_c_leaderboards_score_downloaded_cookies_if_done();
 
-  if (NULL == c_leaderboards::current_leaderboard_ || loading_) return false;
-
-  c_leaderboards::loading_ = true;
+  if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
       c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
 
   c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded =
       new c_leaderboards_score_downloaded_cookies(id, this, steam_api_call);
-  c_leaderboards_score_downloaded_cookies_instances_tracker.push_back(c_leaderboards_score_downloaded);
+  c_leaderboards_score_downloaded_cookies_.push_back(c_leaderboards_score_downloaded);
 
   return true;
 }
@@ -142,5 +152,57 @@ void c_leaderboards::set_current_leaderboard(const SteamLeaderboard_t leaderboar
 }
 
 void c_leaderboards::set_loading(const bool loading) { c_leaderboards::loading_ = loading; }
+
+////////////////////////////////////////////////////////
+// Private functions
+////////////////////////////////////////////////////////
+
+void c_leaderboards::deallocate_all_c_leaderboards_find_result_cookies() {
+  c_leaderboards::c_leaderboards_find_result_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_find_result_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_find_result_cookies_.end(),
+                     c_leaderboards_find_result_remove_all_lambda),
+      c_leaderboards::c_leaderboards_find_result_cookies_.end());
+}
+
+void c_leaderboards::deallocate_all_c_leaderboards_score_uploaded_cookies() {
+  c_leaderboards::c_leaderboards_score_uploaded_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_score_uploaded_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_score_uploaded_cookies_.end(),
+                     c_leaderboards_score_uploaded_remove_all_lambda),
+      c_leaderboards::c_leaderboards_score_uploaded_cookies_.end());
+}
+
+void c_leaderboards::deallocate_all_c_leaderboards_score_downloaded_cookies() {
+  c_leaderboards::c_leaderboards_score_downloaded_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_score_downloaded_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_score_downloaded_cookies_.end(),
+                     c_leaderboards_score_downloaded_remove_all_lambda),
+      c_leaderboards::c_leaderboards_score_downloaded_cookies_.end());
+}
+
+void c_leaderboards::deallocate_c_leaderboards_find_result_cookies_if_done() {
+  c_leaderboards::c_leaderboards_find_result_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_find_result_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_find_result_cookies_.end(),
+                     c_leaderboards_find_result_remove_if_done_lambda),
+      c_leaderboards::c_leaderboards_find_result_cookies_.end());
+}
+
+void c_leaderboards::deallocate_c_leaderboards_score_uploaded_cookies_if_done() {
+  c_leaderboards::c_leaderboards_score_uploaded_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_score_uploaded_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_score_uploaded_cookies_.end(),
+                     c_leaderboards_score_uploaded_remove_if_done_lambda),
+      c_leaderboards::c_leaderboards_score_uploaded_cookies_.end());
+}
+
+void c_leaderboards::deallocate_c_leaderboards_score_downloaded_cookies_if_done() {
+  c_leaderboards::c_leaderboards_score_downloaded_cookies_.erase(
+      std::remove_if(c_leaderboards::c_leaderboards_score_downloaded_cookies_.begin(),
+                     c_leaderboards::c_leaderboards_score_downloaded_cookies_.end(),
+                     c_leaderboards_score_downloaded_remove_if_done_lambda),
+      c_leaderboards::c_leaderboards_score_downloaded_cookies_.end());
+}
 
 }  // namespace steamworks

@@ -36,7 +36,7 @@ class c_leaderboards_score_uploaded_cookies {
   c_leaderboards_score_uploaded_cookies(int id_, c_leaderboards* c_leaderboards, SteamAPICall_t steam_api_call);
   ~c_leaderboards_score_uploaded_cookies() = default;
 
-  bool is_done() const { return c_leaderboards_score_uploaded_cookies::is_done_; }
+  bool is_done() const;
 
  private:
   c_leaderboards* c_leaderboards_;

@@ -36,30 +36,12 @@ class c_leaderboards_find_result_cookies;
 class c_leaderboards_score_uploaded_cookies;
 class c_leaderboards_score_downloaded_cookies;
 
-/*
-    This vector is used to track all instances of c_leaderboards_find_result_cookies so that we can
-    destroy them when they are done.
-*/
-extern std::vector<c_leaderboards_find_result_cookies*> c_leaderboards_find_result_cookies_instances_tracker;
-
-/*
-    This vector is used to track all instances of c_leaderboards_score_uploaded_cookies so that we can
-    destroy them when they are done.
-*/
-extern std::vector<c_leaderboards_score_uploaded_cookies*> c_leaderboards_score_uploaded_cookies_instances_tracker;
-
-/*
-    This vector is used to track all instances of c_leaderboards_score_downloaded_cookies so that we can
-    destroy them when they are done.
-*/
-extern std::vector<c_leaderboards_score_downloaded_cookies*> c_leaderboards_score_downloaded_cookies_instances_tracker;
-
 class c_game_client;
 
 class c_leaderboards {
  public:
   c_leaderboards();
-  ~c_leaderboards() = default;
+  ~c_leaderboards();
 
   void find_leaderboard(const int id, const std::string& leaderboard_name,
                         const ELeaderboardSortMethod leaderboard_sort_method,
@@ -80,6 +62,32 @@ class c_leaderboards {
   SteamLeaderboard_t current_leaderboard_;
   bool loading_;
   unsigned number_of_leaderboard_entries_;
+
+  /*
+    This vector is used to track all instances of c_leaderboards_find_result_cookies so that we can
+    destroy them when they are done.
+*/
+  std::vector<c_leaderboards_find_result_cookies*> c_leaderboards_find_result_cookies_;
+
+  /*
+    This vector is used to track all instances of c_leaderboards_score_uploaded_cookies so that we can
+    destroy them when they are done.
+*/
+  std::vector<c_leaderboards_score_uploaded_cookies*> c_leaderboards_score_uploaded_cookies_;
+
+  /*
+    This vector is used to track all instances of c_leaderboards_score_downloaded_cookies so that we can
+    destroy them when they are done.
+*/
+  std::vector<c_leaderboards_score_downloaded_cookies*> c_leaderboards_score_downloaded_cookies_;
+
+  void deallocate_all_c_leaderboards_find_result_cookies();
+  void deallocate_all_c_leaderboards_score_uploaded_cookies();
+  void deallocate_all_c_leaderboards_score_downloaded_cookies();
+
+  void deallocate_c_leaderboards_find_result_cookies_if_done();
+  void deallocate_c_leaderboards_score_uploaded_cookies_if_done();
+  void deallocate_c_leaderboards_score_downloaded_cookies_if_done();
 };
 }  // namespace steamworks
 

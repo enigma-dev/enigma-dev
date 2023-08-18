@@ -18,7 +18,7 @@
 
 ############################################################################
 # Note that this file isn't tested yet as ENIGMA's engine still works with
-# the old build system.
+# the old build system. Ignore this file for now.
 ############################################################################
 
 cmake_minimum_required(VERSION 3.5)

@@ -32,6 +32,8 @@ c_leaderboards_score_uploaded_cookies::c_leaderboards_score_uploaded_cookies(int
   c_leaderboards_score_uploaded_cookies::set_call_result(steam_api_call);
 }
 
+bool c_leaderboards_score_uploaded_cookies::is_done() const { return c_leaderboards_score_uploaded_cookies::is_done_; }
+
 ////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////
@@ -43,8 +45,6 @@ void c_leaderboards_score_uploaded_cookies::set_call_result(SteamAPICall_t steam
 
 void c_leaderboards_score_uploaded_cookies::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult,
                                                             bool bIOFailure) {
-  c_leaderboards_score_uploaded_cookies::is_done_ = true;
-
   if (!pScoreUploadedResult->m_bSuccess || bIOFailure) {
     DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
     c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
@@ -52,12 +52,14 @@ void c_leaderboards_score_uploaded_cookies::on_upload_score(LeaderboardScoreUplo
   }
 
   // Success? Let's save it.
-  // enigma::scores_array.get() = true;
+  // enigma::scores_array.get(c_leaderboards_score_uploaded_cookies::id_) = true;
 
   // Done? We are ready to accept new requests.
-  c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
+  // c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
 
   enigma::push_leaderboard_upload_steam_async_event(c_leaderboards_score_uploaded_cookies::id_, pScoreUploadedResult);
+
+  c_leaderboards_score_uploaded_cookies::is_done_ = true;
 }
 
 }  // namespace steamworks

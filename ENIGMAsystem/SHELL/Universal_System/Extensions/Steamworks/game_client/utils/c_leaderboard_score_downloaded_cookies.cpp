@@ -23,23 +23,8 @@
 namespace steamworks {
 
 ////////////////////////////////////////////////////////
-// Public functions
+// Helper functions
 ////////////////////////////////////////////////////////
-
-c_leaderboards_score_downloaded_cookies::c_leaderboards_score_downloaded_cookies(int id, c_leaderboards* c_leaderboards,
-                                                                                 SteamAPICall_t steam_api_call)
-    : id_(id), c_leaderboards_(c_leaderboards), is_done_(false) {
-  c_leaderboards_score_downloaded_cookies::set_call_result(steam_api_call);
-}
-
-////////////////////////////////////////////////////////
-// Private functions
-////////////////////////////////////////////////////////
-
-void c_leaderboards_score_downloaded_cookies::set_call_result(SteamAPICall_t steam_api_call) {
-  c_leaderboards_score_downloaded_cookies::m_SteamCallResultDownloadScores.Set(
-      steam_api_call, this, &c_leaderboards_score_downloaded_cookies::on_download_scores);
-}
 
 // TODO: Add data key/value pair (if existed).
 // TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
@@ -74,10 +59,31 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
   (*leaderboard_entries_buffer) << '}';  // Entries object close bracket
 }
 
+////////////////////////////////////////////////////////
+// Public functions
+////////////////////////////////////////////////////////
+
+c_leaderboards_score_downloaded_cookies::c_leaderboards_score_downloaded_cookies(int id, c_leaderboards* c_leaderboards,
+                                                                                 SteamAPICall_t steam_api_call)
+    : id_(id), c_leaderboards_(c_leaderboards), is_done_(false) {
+  c_leaderboards_score_downloaded_cookies::set_call_result(steam_api_call);
+}
+
+bool c_leaderboards_score_downloaded_cookies::is_done() const {
+  return c_leaderboards_score_downloaded_cookies::is_done_;
+}
+
+////////////////////////////////////////////////////////
+// Private functions
+////////////////////////////////////////////////////////
+
+void c_leaderboards_score_downloaded_cookies::set_call_result(SteamAPICall_t steam_api_call) {
+  c_leaderboards_score_downloaded_cookies::m_SteamCallResultDownloadScores.Set(
+      steam_api_call, this, &c_leaderboards_score_downloaded_cookies::on_download_scores);
+}
+
 void c_leaderboards_score_downloaded_cookies::on_download_scores(
     LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
-  c_leaderboards_score_downloaded_cookies::is_done_ = true;
-
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
     c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);
@@ -97,10 +103,10 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
   }
 
   // Now our entries is here, let's save it.
-  // enigma::entries_array.get() = leaderboard_entries;
+  // enigma::entries_array.get(c_leaderboards_score_downloaded_cookies::id_) = leaderboard_entries;
 
   // Entries are saved? We are ready to accept new requests.
-  c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);
+  // c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);
 
   std::stringstream leaderboard_entries_buffer;
 
@@ -108,6 +114,8 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
 
   enigma::push_leaderboard_download_steam_async_event(c_leaderboards_score_downloaded_cookies::id_,
                                                       pLeaderboardScoresDownloaded, &leaderboard_entries_buffer);
+
+  c_leaderboards_score_downloaded_cookies::is_done_ = true;
 }
 
 }  // namespace steamworks

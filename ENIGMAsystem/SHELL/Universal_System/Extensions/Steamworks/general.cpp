@@ -18,7 +18,6 @@
 #include "general.h"
 
 #include "game_client/c_stats_and_achievements.h"
-#include "game_client/game_client.h"
 
 bool general_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
