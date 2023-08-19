@@ -16,8 +16,12 @@
 **/
 
 /*
-  This class will help attach a cookie (payload) to a leaderboard call results. This class is mainly for
-  integrating with ENIGMA's AssetArray class and not directly related to Steamworks API.
+  This class will help attach a cookie (payload) to leaderboard call results. This class is mainly for
+  integrating with ENIGMA's AssetArray class and not directly related to Steamworks API. Whenever a
+  c_leaderboards::upload_score() is called, a new object from this class will be instantiated with a unique
+  id. This id will be used when the call result arrive. The call result setting operation is moved to this
+  class from c_leaderboards class, which means in order to setuo a call result, you need to instantiate
+  an onject from this class.
 */
 
 #ifndef LEADERBOARDS_SCORE_UPLOADED_COOKIES_H
