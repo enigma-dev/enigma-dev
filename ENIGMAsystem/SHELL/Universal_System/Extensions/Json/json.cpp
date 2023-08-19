@@ -282,6 +282,10 @@ namespace enigma_user
 		}
 	}
 
+	/*
+		We are missing a DS accessors here. json_encode() can't be implemented before add DS accessors to
+		DataStructures extension.
+	*/
 	std::string json_encode(variant ds) {
 		if (enigma_user::ds_map_exists(ds)) {
 			DEBUG_MESSAGE("DS is an object", MESSAGE_TYPE::M_INFO);
