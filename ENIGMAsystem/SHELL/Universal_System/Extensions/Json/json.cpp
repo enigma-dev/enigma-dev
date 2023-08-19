@@ -248,7 +248,7 @@ namespace enigma {
 		}
 
 		encoding_accumulator << ']';
-
+    
 		return encoding_accumulator.str();
 	}
 }
