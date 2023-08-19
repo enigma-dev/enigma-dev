@@ -3,6 +3,7 @@
  *  @section License
  *
  *      Copyright (C) 2013 Daniel Hrabovcak
+ *      Copyright (C) 2023 Saif Kandil
  *
  *      This file is a part of the ENIGMA Development Environment.
  *
@@ -22,13 +23,23 @@
 #pragma once
 #ifndef ENIGMA_INIFILESYSTEM_HPP
 #define ENIGMA_INIFILESYSTEM_HPP
+
 #include "Universal_System/estring.h"
+#include "libjson.h"
 
 #include <string>
 
 #ifndef ENIGMA_INI_BUFFER_SIZE
 #define ENIGMA_INI_BUFFER_SIZE 512
 #endif
+
+namespace enigma {
+	int RecursiveDSMap(Json::Value root);
+	int RecursiveDSList(Json::Value root);
+
+	std::string InverseRecursiveDSMap(int ds_map);
+	std::string InverseRecursiveDSList(int ds_list);
+}
 
 namespace enigma_user
 {
