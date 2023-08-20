@@ -17,9 +17,9 @@
 
 #include "c_leaderboards.h"
 
-#include "utils/c_leaderboard_find_result_cookies.h"
-#include "utils/c_leaderboard_score_downloaded_cookies.h"
-#include "utils/c_leaderboard_score_uploaded_cookies.h"
+#include "utils/c_leaderboards_find_result_cookies.h"
+#include "utils/c_leaderboards_score_downloaded_cookies.h"
+#include "utils/c_leaderboards_score_uploaded_cookies.h"
 
 // TODO: Test the cleaning algorithm here.
 

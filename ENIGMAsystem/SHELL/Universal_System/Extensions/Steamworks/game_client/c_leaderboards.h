@@ -64,6 +64,10 @@ class c_leaderboards {
   unsigned number_of_leaderboard_entries_;
 
   /*
+    These vectors can't have a race condition because they are only accessed from the main thread as
+    ENIGMA single-threaded.
+  */
+  /*
     This vector is used to track all instances of c_leaderboards_find_result_cookies so that we can
     destroy them when they are done.
 */

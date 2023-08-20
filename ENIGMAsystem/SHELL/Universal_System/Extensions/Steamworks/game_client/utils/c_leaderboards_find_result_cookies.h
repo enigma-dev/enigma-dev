@@ -16,12 +16,10 @@
 **/
 
 /*
-  This class will help attach a cookie (payload) to leaderboard call results. This class is mainly for
-  integrating with ENIGMA's AssetArray class and not directly related to Steamworks API. Whenever a
-  c_leaderboards::find_leaderboard() is called, a new object from this class will be instantiated with a unique
-  id. This id will be used when the call result arrive. The call result setting operation is moved to this
-  class from c_leaderboards class, which means in order to setuo a call result, you need to instantiate
-  an onject from this class.
+  Whenever a c_leaderboards::find_leaderboard() is called, a new object from this class will be instantiated 
+  with a unique id. This id will be used when the call result arrive. The call result setting operation is 
+  moved to this class from c_leaderboards class, which means in order to setup a call result, you need to 
+  instantiate an onject from this class.
 */
 
 #ifndef LEADERBOARDS_FIND_RESULT_COOKIES_H
@@ -29,18 +27,18 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
-#include "../game_client.h"
+#include "c_leaderboards_cookies.h"
 
 namespace steamworks {
 
 class c_leaderboards;
 
-class c_leaderboards_find_result_cookies {
+class c_leaderboards_find_result_cookies : public c_leaderboards_cookies {
  public:
   c_leaderboards_find_result_cookies(int id_, c_leaderboards* c_leaderboards, SteamAPICall_t steam_api_call);
   ~c_leaderboards_find_result_cookies() = default;
 
-  bool is_done() const;
+  bool is_done() const override;
 
  private:
   c_leaderboards* c_leaderboards_;
@@ -57,7 +55,7 @@ class c_leaderboards_find_result_cookies {
 */
   bool is_done_;
 
-  void set_call_result(SteamAPICall_t steam_api_call);
+  void set_call_result(SteamAPICall_t steam_api_call) override;
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);

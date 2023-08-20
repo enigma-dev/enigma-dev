@@ -51,7 +51,9 @@ void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* 
       {"status", pFindLeaderboardResult->m_bLeaderboardFound},
       {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pFindLeaderboardResult->m_hSteamLeaderboard)}};
 
+  // wait(&enigma::mutex);
   enigma::posted_async_events.push(leaderboard_find_event);
+  // signal(&enigma::mutex);
 }
 
 void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult) {
@@ -67,7 +69,9 @@ void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_
       {"updated", pScoreUploadedResult->m_bScoreChanged},
       {"score", pScoreUploadedResult->m_nScore}};
 
+  // wait(&enigma::mutex);
   enigma::posted_async_events.push(leaderboard_upload_event);
+  // signal(&enigma::mutex);
 }
 
 void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
@@ -95,7 +99,9 @@ void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownlo
       {"status", (pLeaderboardScoresDownloaded->m_cEntryCount == 0)? 0 : 1}
   };
 
+  // wait(&enigma::mutex);
   enigma::posted_async_events.push(leaderboard_download_event);
+  // signal(&enigma::mutex);
 }
 }  // namespace enigma
 

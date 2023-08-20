@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "c_leaderboard_score_downloaded_cookies.h"
+#include "c_leaderboards_score_downloaded_cookies.h"
 
 #include "../../leaderboards.h"
 #include "../c_leaderboards.h"

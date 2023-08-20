@@ -25,7 +25,7 @@ namespace enigma {
 
 std::queue<std::map<std::string, variant>> posted_async_events;
 
-int extension_steamworks_mutex {1}; // Must be initialized to 1.
+int mutex {1}; // Must be initialized to 1.
 
 std::vector<std::function<void()> > extension_update_hooks;
 
@@ -190,13 +190,18 @@ void signal(int* mutex) {
   (*mutex)++;
 }
 
-void fireEventsFromQueue(int* mutex) {
-  // wait(mutex);
-  while (!posted_async_events.empty()) {
+void fireEventsFromQueue() {
+  // wait(&enigma::mutex);
+  // bool is_empty = posted_async_events.empty();
+  // signal(&enigma::mutex);
 
+  // while (!is_empty) {
+  while (!posted_async_events.empty()) {
     enigma_user::ds_map_clear(enigma_user::async_load);
 
+    // wait(&enigma::mutex);
     std::map<std::string, variant> event = posted_async_events.front();
+    // signal(&enigma::mutex);
 
     posted_async_events.pop();
 
@@ -250,7 +255,7 @@ int enigma_main(int argc, char** argv) {
     for (auto update_hook : extension_update_hooks)
       update_hook();
 
-    fireEventsFromQueue(&extension_steamworks_mutex);
+    fireEventsFromQueue();
 
     ENIGMA_events();
     handleInput();

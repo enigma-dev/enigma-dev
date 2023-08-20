@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "c_leaderboard_find_result_cookies.h"
+#include "c_leaderboards_find_result_cookies.h"
 
 #include "../../leaderboards.h"
 #include "../c_leaderboards.h"
@@ -62,7 +62,7 @@ void c_leaderboards_find_result_cookies::on_find_leaderboard(LeaderboardFindResu
 
   // Done? We are ready to accept new requests.
   // c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
-
+  
   enigma::push_create_leaderboard_steam_async_event(c_leaderboards_find_result_cookies::id_, pFindLeaderboardResult);
 
   c_leaderboards_find_result_cookies::is_done_ = true;
