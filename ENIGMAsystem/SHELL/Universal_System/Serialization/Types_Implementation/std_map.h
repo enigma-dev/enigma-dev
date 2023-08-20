@@ -49,8 +49,9 @@ matches_t<T, std::vector<std::byte>, is_std_map> inline enigma::internal_seriali
   auto dataPtr = result.data() + sizeof(std::size_t);
   for (const auto &element : value) {
     internal_serialize_into(dataPtr, element.first);
+    dataPtr+=enigma_internal_sizeof(element.first);
     internal_serialize_into(dataPtr, element.second);
-    dataPtr += enigma_internal_sizeof(element.first) + enigma_internal_sizeof(element.second);
+    dataPtr += enigma_internal_sizeof(element.second);
   }
   return result;
 }

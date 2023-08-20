@@ -124,15 +124,71 @@ struct complex_inner_type<std::complex<T>> {
 template <typename T>
 using complex_inner_type_t = typename complex_inner_type<T>::type;
 
-template <typename... Types>
-struct TupleTypeExtractor;
+template <typename T, typename = void>
+struct TupleTypeExtractor {};
 
-template <typename First, typename Second, typename Third>
-struct TupleTypeExtractor<std::tuple<First, Second, Third>> {
-  using FirstType = First;
-  using SecondType = Second;
-  using ThirdType = Third;
+template <typename... Ts>
+struct TupleTypeExtractor<std::tuple<Ts...>> {
+  using TupleTypes = std::tuple<Ts...>;
+  using ResultType = std::tuple<Ts...>;
 };
+
+template <typename T, std::size_t I = 0, typename = void>
+struct TupleTypeExtractorHelper {};
+
+template <typename T, std::size_t I>
+struct TupleTypeExtractorHelper<T, I,
+                                std::enable_if_t<I == std::tuple_size_v<typename TupleTypeExtractor<T>::TupleTypes>>> {
+  using TupleTypes = std::tuple<>;
+  using ResultType = std::tuple<>;
+};
+
+template <typename T, std::size_t I>
+    struct TupleTypeExtractorHelper < T,
+    I, std::enable_if_t<I<std::tuple_size_v<typename TupleTypeExtractor<T>::TupleTypes>>> {
+  using ValueType = std::tuple_element_t<I, typename TupleTypeExtractor<T>::TupleTypes>;
+  using RemainingTypes = TupleTypeExtractorHelper<T, I + 1>;
+  using TupleTypes = std::tuple<ValueType, typename RemainingTypes::TupleTypes>;
+  using ResultType = std::tuple<ValueType, typename RemainingTypes::ResultType>;
+};
+
+template <typename... Args>
+struct TupleSize;
+
+template <typename... Args>
+struct TupleSize<std::tuple<Args...>> {
+  static const std::size_t value;
+};
+
+template <typename... Args>
+const std::size_t TupleSize<std::tuple<Args...>>::value = sizeof...(Args);
+
+template <typename... Args>
+struct TupleSize<const std::tuple<Args...>&> {
+  static const std::size_t value;
+};
+
+template <typename... Args>
+const std::size_t TupleSize<const std::tuple<Args...>&>::value = sizeof...(Args);
+
+template <std::size_t Index, typename Tuple, typename Function, typename ExtraParam>
+struct TupleLooper {
+  static void loop(const Tuple& tuple, Function&& func, ExtraParam& extraParam) {
+    TupleLooper<Index - 1, Tuple, Function, ExtraParam>::loop(tuple, std::forward<Function>(func), extraParam);
+    func(std::get<Index - 1>(tuple), extraParam);
+  }
+};
+
+template <typename Tuple, typename Function, typename ExtraParam>
+struct TupleLooper<0, Tuple, Function, ExtraParam> {
+  static void loop(const Tuple& tuple, Function&& func, const ExtraParam& extraParam) {}
+};
+
+template <typename... Args, typename Function, typename ExtraParam>
+void LoopTuple(const std::tuple<Args...>& tuple, Function&& func, ExtraParam& extraParam) {
+  TupleLooper<sizeof...(Args), std::tuple<Args...>, Function, ExtraParam>::loop(tuple, std::forward<Function>(func),
+                                                                                extraParam);
+}
 
 template <typename... Types>
 struct PairTypeExtractor;
@@ -180,26 +236,26 @@ template <typename T, typename ReturnType, template <typename> typename... Class
 using matches_t = std::enable_if_t<logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
 
 template <typename T>
-inline void insert_back(std::vector<T> &container, const T &val) {
+inline void insert_back(std::vector<T>& container, const T& val) {
   container.push_back(std::move(val));
 }
 
 template <typename T>
-inline void insert_back(std::set<T> &container, const T &val) {
+inline void insert_back(std::set<T>& container, const T& val) {
   container.insert(std::move(val));
 }
 
 template <typename Container, typename U>
-matches_t<Container, void, is_std_queue, is_std_stack> inline insert_back(Container &container, const U &val) {
+matches_t<Container, void, is_std_queue, is_std_stack> inline insert_back(Container& container, const U& val) {
   container.push(std::move(val));
 }
 
 template <typename T>
-inline T get_top(const std::queue<T> &container) {
+inline T get_top(const std::queue<T>& container) {
   return container.front();
 }
 
 template <typename T>
-inline T get_top(const std::stack<T> &container) {
+inline T get_top(const std::stack<T>& container) {
   return container.top();
 }

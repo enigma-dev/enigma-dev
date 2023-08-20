@@ -37,7 +37,9 @@ matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> inline enigma:
 
   auto dataPtr = result.data();
   internal_serialize_into(dataPtr, value.real());
+  dataPtr+=enigma_internal_sizeof(value.real());
   internal_serialize_into(dataPtr, value.imag());
+  dataPtr+=enigma_internal_sizeof(value.imag());
   return result;
 }
 

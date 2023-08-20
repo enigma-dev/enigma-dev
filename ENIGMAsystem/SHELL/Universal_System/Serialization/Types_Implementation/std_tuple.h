@@ -19,18 +19,41 @@
 
 template <typename T>
 matches_t<T, std::size_t, is_std_tuple> inline enigma::byte_size(const T &value) {
-  return enigma_internal_sizeof(std::get<0>(value)) + enigma_internal_sizeof(std::get<1>(value)) +
-         enigma_internal_sizeof(std::get<2>(value));
+  std::size_t totalSize = sizeof(std::size_t);
+
+  auto size_process_element = [](std::size_t &totalSize, const auto &element) {
+    totalSize += enigma::enigma_internal_sizeof(element);
+  };
+
+  LoopTuple(
+      value,
+      [&totalSize, &size_process_element](const auto &element, auto &extraParam) {
+        size_process_element(extraParam, element);
+      },
+      totalSize);
+
+  return totalSize;
 }
 
 template <typename T>
 matches_t<T, void, is_std_tuple> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
-  internal_serialize_into(iter, std::get<0>(value));
-  iter += enigma_internal_sizeof(std::get<0>(value));
-  internal_serialize_into(iter, std::get<1>(value));
-  iter += enigma_internal_sizeof(std::get<1>(value));
-  internal_serialize_into(iter, std::get<2>(value));
-  iter += enigma_internal_sizeof(std::get<2>(value));
+  std::size_t tupleSize = std::tuple_size<std::remove_reference_t<T>>::value;
+
+  auto serialize_process_element = [&iter](std::byte *&elementIter, const auto &element) {
+    enigma::internal_serialize_into(elementIter, element);
+    elementIter += enigma::enigma_internal_sizeof(element);
+  };
+
+  enigma::internal_serialize_primitive_into<std::size_t>(iter, tupleSize);
+  iter += sizeof(std::size_t);
+
+  auto LoopTuple = [&iter, &serialize_process_element](const auto &tuple, auto &extraParam) {
+    std::apply([&serialize_process_element,
+                &extraParam](const auto &...elements) { (serialize_process_element(extraParam, elements), ...); },
+               tuple);
+  };
+
+  LoopTuple(value, iter);
 }
 
 template <typename T>
@@ -39,26 +62,40 @@ matches_t<T, std::vector<std::byte>, is_std_tuple> inline enigma::internal_seria
   result.resize(enigma_internal_sizeof(value));
 
   auto dataPtr = result.data();
-  internal_serialize_into(dataPtr, std::get<0>(value));
-  internal_serialize_into(dataPtr, std::get<1>(value));
-  internal_serialize_into(dataPtr, std::get<2>(value));
+
+  auto LoopTuple = [&dataPtr](const auto &tuple, auto &extraParam) {
+    auto serialize_process_element = [&extraParam](const auto &element, auto &innerParam) {
+      enigma::internal_serialize_into(innerParam, element);
+      innerParam += enigma::enigma_internal_sizeof(element);
+    };
+
+    std::apply([&serialize_process_element,
+                &extraParam](const auto &...elements) { (serialize_process_element(elements, extraParam), ...); },
+               tuple);
+  };
+
+  LoopTuple(value, dataPtr);
   return result;
 }
 
 template <typename T>
 matches_t<T, T, is_std_tuple> inline enigma::internal_deserialize_fn(std::byte *iter) {
-  std::size_t offset = 0;
-  using firsttype = typename TupleTypeExtractor<T>::FirstType;
-  using secondtype = typename TupleTypeExtractor<T>::SecondType;
-  using thirdtype = typename TupleTypeExtractor<T>::ThirdType;
+  std::size_t tupleSize = internal_deserialize<std::size_t>(iter);
+  std::size_t offset = sizeof(std::size_t);
 
-  firsttype val1 = internal_deserialize<firsttype>(iter + offset);
-  offset += enigma_internal_sizeof(val1);
-  secondtype val2 = internal_deserialize<secondtype>(iter + offset);
-  offset += enigma_internal_sizeof(val2);
-  thirdtype val3 = internal_deserialize<thirdtype>(iter + offset);
-  offset += enigma_internal_sizeof(val3);
-  std::tuple<firsttype, secondtype, thirdtype> result(val1, val2, val3);
+  using ResultTuple = typename TupleTypeExtractor<T>::ResultType;
+  ResultTuple result;
+
+  auto internal_deserialize_loop = [](std::byte *iter, ResultTuple &result) {
+    auto apply_tuple_element = [&iter](auto &element) {
+      using ElementType = std::decay_t<decltype(element)>;
+      element = enigma::internal_deserialize<ElementType>(iter);
+    };
+
+    std::apply([&](auto &...elements) { (apply_tuple_element(elements), ...); }, result);
+  };
+
+  internal_deserialize_loop(iter + offset, result);
   return result;
 }
 
@@ -71,15 +108,21 @@ matches_t<T, void, is_std_tuple> inline enigma::internal_resize_buffer_for_fn(st
 template <typename T>
 matches_t<T, void, is_std_tuple> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
                                                                                std::size_t &len) {
-  using firsttype = typename TupleTypeExtractor<T>::FirstType;
-  using secondtype = typename TupleTypeExtractor<T>::SecondType;
-  using thirdtype = typename TupleTypeExtractor<T>::ThirdType;
+  std::size_t tupleSize = enigma::internal_deserialize<std::size_t>(iter + len);
+  len += sizeof(std::size_t);
+  using ResultTuple = typename TupleTypeExtractor<T>::ResultType;
+  ResultTuple result;
 
-  firsttype val1 = enigma::internal_deserialize<firsttype>(iter + len);
-  len += enigma_internal_sizeof(val1);
-  secondtype val2 = enigma::internal_deserialize<secondtype>(iter + len);
-  len += enigma_internal_sizeof(val2);
-  thirdtype val3 = enigma::internal_deserialize<thirdtype>(iter + len);
-  len += enigma_internal_sizeof(val3);
-  value = std::tuple<firsttype, secondtype, thirdtype>(val1, val2, val3);
+  auto internal_deserialize_loop = [&len](std::byte *iter, ResultTuple &result) {
+    auto apply_tuple_element = [&iter, &len](auto &element) {
+      using ElementType = std::decay_t<decltype(element)>;
+      element = enigma::internal_deserialize<ElementType>(iter + len);
+      len += enigma::enigma_internal_sizeof(element);
+    };
+
+    std::apply([&](auto &...elements) { (apply_tuple_element(elements), ...); }, result);
+  };
+
+  internal_deserialize_loop(iter, result);
+  value = result;
 }

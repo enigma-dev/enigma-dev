@@ -171,16 +171,16 @@ TEST(serialize_deserialize_functions, Test_pair6) {
   ASSERT_EQ(bytes.size(), 68);
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 74);
+  ASSERT_EQ(bytes.size(), 82);
 
   enigma::enigma_serialize(inputQueue, len, bytes);
-  ASSERT_EQ(bytes.size(), 106);
+  ASSERT_EQ(bytes.size(), 114);
 
   enigma::enigma_serialize(inputStack, len, bytes);
-  ASSERT_EQ(bytes.size(), 138);
+  ASSERT_EQ(bytes.size(), 146);
 
   enigma::enigma_serialize(inputPair, len, bytes);
-  ASSERT_EQ(bytes.size(), 140);
+  ASSERT_EQ(bytes.size(), 148);
 
   std::byte* iter = bytes.data();
 

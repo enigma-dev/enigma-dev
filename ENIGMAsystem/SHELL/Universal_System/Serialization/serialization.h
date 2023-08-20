@@ -44,7 +44,7 @@ inline std::size_t enigma_internal_sizeof(T &&value) {
 }
 
 template <typename Base, typename T>
-inline void internal_serialize_primitive_into(std::byte *iter, T value) {
+inline void internal_serialize_primitive_into(std::byte *iter, const T &value) {
   std::size_t i = sizeof(Base) - 1;
   std::size_t as_unsigned = utility::bit_cast<Base>(value);
 

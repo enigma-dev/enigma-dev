@@ -3,10 +3,19 @@
 
 TEST(byte_size_function, Test_tuple) {
   std::tuple<int, double, long> tuple1 = {1233, 22334.24243234, 1241413};
-  ASSERT_EQ(enigma::byte_size(tuple1), 20);
+  ASSERT_EQ(enigma::byte_size(tuple1), 28);
 
   std::tuple<char, bool, int> tuple2 = {'a', true, 123};
-  ASSERT_EQ(enigma::byte_size(tuple2), 6);
+  ASSERT_EQ(enigma::byte_size(tuple2), 14);
+
+  std::tuple<long, char> tuple3 = {12424, 'f'};
+  ASSERT_EQ(enigma::byte_size(tuple3), 17);
+
+  std::tuple<double> tuple4 = {12424.78557};
+  ASSERT_EQ(enigma::byte_size(tuple4), 16);
+
+  std::tuple<> tuple5;
+  ASSERT_EQ(enigma::byte_size(tuple5), 8);
 }
 
 TEST(byte_size_function, Test_queue) {
@@ -71,7 +80,7 @@ TEST(serialize_deserialize_functions, Test_tuple1) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 6);
+  ASSERT_EQ(bytes.size(), 14);
 
   std::byte* iter = bytes.data();
   std::tuple<int, char, bool> outputTuple;
@@ -87,7 +96,7 @@ TEST(serialize_deserialize_functions, Test_tuple2) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 20);
+  ASSERT_EQ(bytes.size(), 28);
 
   std::byte* iter = bytes.data();
   std::tuple<double, int, double> outputTuple;
@@ -103,7 +112,7 @@ TEST(serialize_deserialize_functions, Test_tuple3) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 3);
+  ASSERT_EQ(bytes.size(), 11);
 
   std::byte* iter = bytes.data();
   std::tuple<char, char, char> outputTuple;
@@ -119,7 +128,7 @@ TEST(serialize_deserialize_functions, Test_tuple4) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 3);
+  ASSERT_EQ(bytes.size(), 11);
 
   std::byte* iter = bytes.data();
   std::tuple<bool, char, bool> outputTuple;
@@ -135,7 +144,7 @@ TEST(serialize_deserialize_functions, Test_tuple5) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 9);
+  ASSERT_EQ(bytes.size(), 17);
 
   std::byte* iter = bytes.data();
   std::tuple<bool, int, float> outputTuple;
@@ -152,10 +161,10 @@ TEST(serialize_deserialize_functions, Test_tuple6) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 6);
+  ASSERT_EQ(bytes.size(), 14);
 
   enigma::enigma_serialize(input_int, len, bytes);
-  ASSERT_EQ(bytes.size(), 10);
+  ASSERT_EQ(bytes.size(), 18);
 
   std::byte* iter = bytes.data();
 
@@ -176,10 +185,10 @@ TEST(serialize_deserialize_functions, Test_tuple7) {
   std::size_t len = 0;
 
   enigma::enigma_serialize(inputTuple1, len, bytes);
-  ASSERT_EQ(bytes.size(), 6);
+  ASSERT_EQ(bytes.size(), 14);
 
   enigma::enigma_serialize(inputTuple2, len, bytes);
-  ASSERT_EQ(bytes.size(), 12);
+  ASSERT_EQ(bytes.size(), 28);
 
   std::byte* iter = bytes.data();
 
@@ -215,7 +224,7 @@ TEST(serialize_deserialize_functions, Test_tuple8) {
   ASSERT_EQ(bytes.size(), 68);
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 74);
+  ASSERT_EQ(bytes.size(), 82);
 
   std::byte* iter = bytes.data();
 
@@ -239,6 +248,47 @@ TEST(serialize_deserialize_functions, Test_tuple8) {
   std::tuple<int, bool, char> outputTuple;
   enigma::enigma_deserialize(outputTuple, iter, len1);
   ASSERT_EQ(outputTuple, inputTuple);
+}
+
+TEST(serialize_deserialize_functions, Test_tuple9) {
+  std::tuple<int, bool> inputTuple1 = {1285765, false};
+  std::tuple<int> inputTuple2 = {12857};
+  std::tuple<int, bool, char> inputTuple3 = {1285765, false, 'f'};
+  std::tuple<int, bool, long, double, char, bool> inputTuple4 = {1285765, false, 87575, 98656.75, 'g', true};
+
+  std::vector<std::byte> bytes;
+  std::size_t len = 0;
+
+  enigma::enigma_serialize(inputTuple1, len, bytes);
+  ASSERT_EQ(bytes.size(), 13);
+
+  enigma::enigma_serialize(inputTuple2, len, bytes);
+  ASSERT_EQ(bytes.size(), 25);
+
+  enigma::enigma_serialize(inputTuple3, len, bytes);
+  ASSERT_EQ(bytes.size(), 39);
+
+  enigma::enigma_serialize(inputTuple4, len, bytes);
+  ASSERT_EQ(bytes.size(), 70);
+
+  std::size_t len1 = 0;
+  std::byte* iter = bytes.data();
+
+  std::tuple<int, bool> outputTuple1;
+  enigma::enigma_deserialize(outputTuple1, iter, len1);
+  ASSERT_EQ(outputTuple1, inputTuple1);
+
+  std::tuple<int> outputTuple2;
+  enigma::enigma_deserialize(outputTuple2, iter, len1);
+  ASSERT_EQ(outputTuple2, inputTuple2);
+
+  std::tuple<int, bool, char> outputTuple3;
+  enigma::enigma_deserialize(outputTuple3, iter, len1);
+  ASSERT_EQ(outputTuple3, inputTuple3);
+
+  std::tuple<int, bool, long, double, char, bool> outputTuple4;
+  enigma::enigma_deserialize(outputTuple4, iter, len1);
+  ASSERT_EQ(outputTuple4, inputTuple4);
 }
 
 TEST(serialize_deserialize_functions, Test_queue1) {
@@ -425,10 +475,10 @@ TEST(serialize_deserialize_functions, Test_queue8) {
   ASSERT_EQ(bytes.size(), 68);
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 74);
+  ASSERT_EQ(bytes.size(), 82);
 
   enigma::enigma_serialize(inputQueue, len, bytes);
-  ASSERT_EQ(bytes.size(), 106);
+  ASSERT_EQ(bytes.size(), 114);
 
   std::byte* iter = bytes.data();
 
@@ -647,13 +697,13 @@ TEST(serialize_deserialize_functions, Test_stack8) {
   ASSERT_EQ(bytes.size(), 68);
 
   enigma::enigma_serialize(inputTuple, len, bytes);
-  ASSERT_EQ(bytes.size(), 74);
+  ASSERT_EQ(bytes.size(), 82);
 
   enigma::enigma_serialize(inputQueue, len, bytes);
-  ASSERT_EQ(bytes.size(), 106);
+  ASSERT_EQ(bytes.size(), 114);
 
   enigma::enigma_serialize(inputStack, len, bytes);
-  ASSERT_EQ(bytes.size(), 138);
+  ASSERT_EQ(bytes.size(), 146);
 
   std::byte* iter = bytes.data();
 

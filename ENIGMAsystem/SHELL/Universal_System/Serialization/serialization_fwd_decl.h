@@ -27,7 +27,7 @@ template <typename T>
 typename std::enable_if_t<always_false<T>> inline byte_size(const T &value) = delete;
 
 template <typename Base, typename T>
-inline void internal_serialize_primitive_into(std::byte *iter, T value);
+inline void internal_serialize_primitive_into(std::byte *iter, const T &value);
 
 template <typename Base, typename T>
 inline std::array<std::byte, sizeof(T)> serialize_primitive(T value);
