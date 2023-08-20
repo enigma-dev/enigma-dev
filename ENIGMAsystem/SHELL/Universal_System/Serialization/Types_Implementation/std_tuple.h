@@ -21,15 +21,9 @@ template <typename T>
 matches_t<T, std::size_t, is_std_tuple> inline enigma::byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
-  auto size_process_element = [](std::size_t &totalSize, const auto &element) {
-    totalSize += enigma::enigma_internal_sizeof(element);
-  };
-
   LoopTuple(
       value,
-      [&totalSize, &size_process_element](const auto &element, auto &extraParam) {
-        size_process_element(extraParam, element);
-      },
+      [&totalSize](const auto &element, auto &extraParam) { totalSize += enigma::enigma_internal_sizeof(element); },
       totalSize);
 
   return totalSize;
