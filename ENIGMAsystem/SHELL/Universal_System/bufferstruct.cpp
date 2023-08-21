@@ -1420,7 +1420,7 @@ bool verify_checksum(std::vector<std::byte> &buffer) {
 }
 }
 
-void game_save_buffer(buffer_t buffer) {
+void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
   GET_BUFFER(binbuff, buffer)
   std::size_t ptr = 0;
 

@@ -58,7 +58,8 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type);
  * @param type The type to be deserialized to
  * @return variant The deserialized form of the bytes contained between the iterators represented as @c type
  */
-variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, buffer_data_t type);
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last,
+                              buffer_data_t type);
 
 /**
  * @brief Creates a new buffer
@@ -123,7 +124,8 @@ void buffer_delete(buffer_t buffer);
  * @param dest_buffer The handle to the buffer into which the copied data has to be written
  * @param dest_offset The offset into the destination buffer where writing begins from
  */
-void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer, std::size_t dest_offset);
+void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer,
+                 std::size_t dest_offset);
 
 /**
  * @brief Write a buffer's bytes to a file
@@ -222,7 +224,8 @@ void buffer_load_ext(buffer_t buffer, std::string filename, std::size_t offset);
  * @param src_len The number of bytes to read from the file
  * @param dest_offset The offset into the buffer where the write will being from
  */
-void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len, std::size_t dest_offset);
+void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len,
+                         std::size_t dest_offset);
 
 /**
  * @brief Compress the contents of a buffer using the zlib library
@@ -353,7 +356,6 @@ std::string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size);
  * @return An integer containing the crc32 checksum of the buffer
  */
 variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size);
-
 
 /**
  * @brief Get the address of a buffer
@@ -487,7 +489,6 @@ std::size_t buffer_sizeof(buffer_data_t type);
  * @return The seek position of the buffer
  */
 std::size_t buffer_tell(buffer_t buffer);
-
 
 /**
  * @brief Get the data element at a offset in a buffer
@@ -671,7 +672,9 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *
  * @param buffer The buffer to store the game state into
  */
-void game_save_buffer(buffer_t buffer);
+enum class SerializationBackend { JSON, Binary };
+
+void game_save_buffer(buffer_t buffer, enum SerializationBackend backend = SerializationBackend::JSON);
 
 /**
  * @brief Load previously saved state from a buffer
