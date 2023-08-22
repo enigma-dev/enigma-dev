@@ -172,3 +172,8 @@ TEST(serialize_into_function, Test_Variant) {
   variant variant3 = "fares";
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant3), "{\"1\":\"fares\"}");
 }
+
+TEST(serialize_into_function, Test_Pointer) {
+  int* pointer1 = nullptr;
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(pointer1), "0");
+}

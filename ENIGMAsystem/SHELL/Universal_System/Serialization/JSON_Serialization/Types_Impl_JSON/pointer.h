@@ -23,7 +23,7 @@ namespace JSON_serialization {
 
 template <typename T>
 inline auto internal_serialize_into_fn(T*& value) {
-  return "[0]";
+  return "0";
 }
 
 }  // namespace JSON_serialization
