@@ -15,7 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_COMPLEX_BYTES_H
+#define ENIGMA_SERIALIZE_COMPLEX_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 matches_t<T, std::size_t, is_std_complex> inline enigma::byte_size(const T &value) {
@@ -73,3 +76,5 @@ matches_t<T, void, is_std_complex> inline enigma::enigma_internal_deserialize_fn
   len += enigma_internal_sizeof(Imag);
   value = std::complex<InnerType>(Real, Imag);
 }
+
+#endif

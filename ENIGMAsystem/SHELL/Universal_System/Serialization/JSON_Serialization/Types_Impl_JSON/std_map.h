@@ -1,4 +1,4 @@
-/** Copyright (C) 2022 Dhruv Chawla
+/** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,19 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_MAP_JSON_H
+#define ENIGMA_SERIALIZE_MAP_JSON_H
 
-template <typename T>
-inline auto enigma::internal_serialize_into_fn(std::byte *iter, T *value) {
-  internal_serialize_into<std::size_t>(iter, 0);
-}
-
-template <typename T>
-inline auto enigma::internal_serialize_fn(T *&&value) {
-  return internal_serialize<std::size_t>(0);
-}
-
-template <typename T>
-matches_t<T, T, std::is_pointer> inline enigma::internal_deserialize_fn(std::byte *iter) {
-  return nullptr;
-}
+#endif

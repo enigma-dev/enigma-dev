@@ -15,7 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_MAP_BYTES_H
+#define ENIGMA_SERIALIZE_MAP_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 matches_t<T, std::size_t, is_std_map> inline enigma::byte_size(const T &value) {
@@ -49,7 +52,7 @@ matches_t<T, std::vector<std::byte>, is_std_map> inline enigma::internal_seriali
   auto dataPtr = result.data() + sizeof(std::size_t);
   for (const auto &element : value) {
     internal_serialize_into(dataPtr, element.first);
-    dataPtr+=enigma_internal_sizeof(element.first);
+    dataPtr += enigma_internal_sizeof(element.first);
     internal_serialize_into(dataPtr, element.second);
     dataPtr += enigma_internal_sizeof(element.second);
   }
@@ -98,3 +101,5 @@ matches_t<T, void, is_std_map> inline enigma::enigma_internal_deserialize_fn(T &
     value.insert(std::move(std::pair<KeyType, ValueType>{key, val}));
   }
 }
+
+#endif

@@ -15,12 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_NUMERICS_BYTES_H
+#define ENIGMA_SERIALIZE_NUMERICS_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>>::
-    type inline enigma::internal_serialize_into_fn(std::byte *iter, const T &value) {
+enables_if_numeric_t<T> inline enigma::internal_serialize_into_fn(std::byte *iter, const T &value) {
   if constexpr (std::is_integral_v<T>) {
     internal_serialize_primitive_into<std::make_unsigned_t<T>>(iter, value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -37,8 +38,7 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
 }
 
 template <typename T>
-typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_point_v<std::decay_t<T>>,
-                        std::array<std::byte, sizeof(T)>>::type inline enigma::internal_serialize_fn(const T &value) {
+enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline enigma::internal_serialize_fn(const T &value) {
   if constexpr (std::is_integral_v<T>) {
     return enigma::serialize_primitive<std::make_unsigned_t<T>>(value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -55,9 +55,7 @@ typename std::enable_if<std::is_integral_v<std::decay_t<T>> || std::is_floating_
 }
 
 template <typename T>
-typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
-                         std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>,
-                        T>::type inline enigma::internal_deserialize_fn(std::byte *iter) {
+enables_if_numeric_t<T, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
   if constexpr (std::is_integral_v<T>) {
     return enigma::internal_deserialize_primitive<std::make_unsigned_t<T>, T>(iter);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -72,3 +70,5 @@ typename std::enable_if<(std::is_integral_v<std::decay_t<T>> ||
     static_assert(always_false<T>, "'internal_deserialize_numeric' takes either integral or floating types");
   }
 }
+
+#endif

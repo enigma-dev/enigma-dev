@@ -15,7 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_VAR_BYTES_H
+#define ENIGMA_SERIALIZE_VAR_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 inline std::size_t variant_size(const variant &value) {
   if (value.type == variant::ty_real) {
@@ -78,3 +81,5 @@ is_t<T, var> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *
   value = internal_deserialize<var>(iter + len);
   len += enigma::enigma_internal_sizeof(value);
 }
+
+#endif

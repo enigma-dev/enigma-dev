@@ -15,9 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_SERIALIZE_STRING_BYTES_H
+#define ENIGMA_SERIALIZE_STRING_BYTES_H
+
 #include <algorithm>
 #include <cstring>
-#include "../serialization_fwd_decl.h"
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 is_t<T, std::string> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
@@ -54,3 +57,5 @@ is_t<T, std::string> inline enigma::enigma_internal_deserialize_fn(T &value, std
   value = enigma::internal_deserialize<std::string>(iter + len);
   len += value.length() + sizeof(std::size_t);
 }
+
+#endif

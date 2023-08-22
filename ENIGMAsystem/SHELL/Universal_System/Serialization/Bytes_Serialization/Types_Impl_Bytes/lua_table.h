@@ -16,7 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_LUA_TABLE_BYTES_H
+#define ENIGMA_SERIALIZE_LUA_TABLE_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 matches_t<T, std::size_t, is_lua_table> inline enigma::byte_size(const T &value) {
@@ -93,3 +96,5 @@ matches_t<T, void, is_lua_table> inline enigma::enigma_internal_deserialize_fn(T
   value = enigma_internal_deserialize_lua_table<Type>(iter);
   len += enigma_internal_sizeof(value);
 }
+
+#endif

@@ -16,6 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_TYPE_TRAITS_H
+#define ENIGMA_TYPE_TRAITS_H
+
 #include <complex>
 #include <queue>
 #include <set>
@@ -235,6 +238,12 @@ constexpr static inline bool logical_or_v = logical_or<Conds...>::value;
 template <typename T, typename ReturnType, template <typename> typename... Classes>
 using matches_t = std::enable_if_t<logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
 
+template <typename T, typename ReturnType = void>
+using enables_if_numeric_t =
+    std::enable_if_t<(std::is_integral_v<std::decay_t<T>> ||
+                      std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool>,
+                     ReturnType>;
+
 template <typename T>
 inline void insert_back(std::vector<T>& container, const T& val) {
   container.push_back(std::move(val));
@@ -259,3 +268,5 @@ template <typename T>
 inline T get_top(const std::stack<T>& container) {
   return container.top();
 }
+
+#endif

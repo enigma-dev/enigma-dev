@@ -78,4 +78,5 @@ typename std::enable_if_t<always_false<T>> inline enigma_internal_deserialize_fn
                                                                                  std::size_t &len) = delete;
 
 }  // namespace enigma
+
 #endif

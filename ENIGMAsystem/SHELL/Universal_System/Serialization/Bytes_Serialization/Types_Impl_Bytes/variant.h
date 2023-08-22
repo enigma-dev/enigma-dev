@@ -15,8 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_SERIALIZE_VARIANT_BYTES_H
+#define ENIGMA_SERIALIZE_VARIANT_BYTES_H
+
 #include <algorithm>
-#include "../serialization_fwd_decl.h"
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
@@ -44,17 +47,11 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
 }
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>,
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>&& !std::is_same_v<var, std::decay_t<T>>,
                         std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
   std::vector<std::byte> result{};
-  if (value.type == variant::ty_real) {
-    result.resize(9);
-    internal_serialize_into(result.data(), value);
-  } else if (value.type == variant::ty_string) {
-    result.resize(1 + sizeof(std::size_t) + value.sval().length());
-    internal_serialize_into(result.data(), value);
-  }
-
+  result.resize(enigma_internal_sizeof(value));
+  internal_serialize_into(result.data(), value);
   return result;
 }
 
@@ -87,3 +84,5 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
   value = enigma::internal_deserialize<variant>(iter + len);
   len += enigma::enigma_internal_sizeof(value);
 }
+
+#endif

@@ -15,7 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../serialization_fwd_decl.h"
+#ifndef ENIGMA_SERIALIZE_PAIR_BYTES_H
+#define ENIGMA_SERIALIZE_PAIR_BYTES_H
+
+#include "../../serialization_fwd_decl.h"
 
 template <typename T>
 matches_t<T, std::size_t, is_std_pair> inline enigma::byte_size(const T &value) {
@@ -56,3 +59,5 @@ matches_t<T, void, is_std_pair> inline enigma::enigma_internal_deserialize_fn(T 
   len += enigma_internal_sizeof(second);
   value = std::pair<firsttype, secondtype>(first, second);
 }
+
+#endif

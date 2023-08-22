@@ -20,7 +20,7 @@
 #define ENIGMA_DETECT_SERIALIZATION_H
 
 #include "serialization_fwd_decl.h"
-#include "types_serialization_includes.h"
+#include "Bytes_Serialization/bytes_types_serialization_includes.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
   template <typename T>                               \
