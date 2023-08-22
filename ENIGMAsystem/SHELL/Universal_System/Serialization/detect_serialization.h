@@ -19,8 +19,8 @@
 #ifndef ENIGMA_DETECT_SERIALIZATION_H
 #define ENIGMA_DETECT_SERIALIZATION_H
 
-#include "serialization_fwd_decl.h"
 #include "Bytes_Serialization/bytes_types_serialization_includes.h"
+#include "serialization_fwd_decl.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \
   template <typename T>                               \
@@ -114,7 +114,8 @@ HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
   struct is_##NAME##_available : std::false_type {};                                                       \
                                                                                                            \
   template <typename T>                                                                                    \
-  struct is_##NAME##_available<T, std::void_t<decltype(enigma::NAME<T>(Parameters))>> : std::true_type {}; \
+  struct is_##NAME##_available<T, std::void_t<decltype(enigma::bytes_serialization::NAME<T>(Parameters))>> \
+      : std::true_type {};                                                                                 \
                                                                                                            \
   template <typename T>                                                                                    \
   constexpr static inline bool has_##NAME##_free_function = is_##NAME##_available<T>::value
@@ -147,8 +148,9 @@ HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, std::declval<T &>(), std::decl
 #undef HAS_FREE_FUNCTION
 
 #define HAS_INTERNAL_SERIALIZE_INTO_FUNCTION() \
-  std::is_invocable_r_v<void, decltype(enigma::internal_serialize_into_fn<T>), std::byte *, T>
-#define HAS_INTERNAL_SERIALIZE_FUNCTION() std::is_invocable_v<decltype(enigma::internal_serialize_fn<T>), T>
+  std::is_invocable_r_v<void, decltype(enigma::bytes_serialization::internal_serialize_into_fn<T>), std::byte *, T>
+#define HAS_INTERNAL_SERIALIZE_FUNCTION() \
+  std::is_invocable_v<decltype(enigma::bytes_serialization::internal_serialize_fn<T>), T>
 #define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize<T>), std::byte *>
 
 #endif

@@ -20,13 +20,16 @@
 
 #include "../../serialization_fwd_decl.h"
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
-matches_t<T, std::size_t, is_std_pair> inline enigma::byte_size(const T &value) {
+matches_t<T, std::size_t, is_std_pair> inline byte_size(const T &value) {
   return enigma_internal_sizeof(value.first) + enigma_internal_sizeof(value.second);
 }
 
 template <typename T>
-matches_t<T, void, is_std_pair> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
+matches_t<T, void, is_std_pair> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.first);
   iter += enigma_internal_sizeof(value.first);
   internal_serialize_into(iter, value.second);
@@ -34,7 +37,7 @@ matches_t<T, void, is_std_pair> inline enigma::internal_serialize_into_fn(std::b
 }
 
 template <typename T>
-matches_t<T, T, is_std_pair> inline enigma::internal_deserialize_fn(std::byte *iter) {
+matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using firsttype = typename PairTypeExtractor<T>::FirstType;
   using secondtype = typename PairTypeExtractor<T>::SecondType;
@@ -48,16 +51,18 @@ matches_t<T, T, is_std_pair> inline enigma::internal_deserialize_fn(std::byte *i
 }
 
 template <typename T>
-matches_t<T, void, is_std_pair> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
-                                                                              std::size_t &len) {
+matches_t<T, void, is_std_pair> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   using firsttype = typename PairTypeExtractor<T>::FirstType;
   using secondtype = typename PairTypeExtractor<T>::SecondType;
 
-  firsttype first = enigma::internal_deserialize<firsttype>(iter + len);
+  firsttype first = internal_deserialize<firsttype>(iter + len);
   len += enigma_internal_sizeof(first);
-  secondtype second = enigma::internal_deserialize<secondtype>(iter + len);
+  secondtype second = internal_deserialize<secondtype>(iter + len);
   len += enigma_internal_sizeof(second);
   value = std::pair<firsttype, secondtype>(first, second);
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

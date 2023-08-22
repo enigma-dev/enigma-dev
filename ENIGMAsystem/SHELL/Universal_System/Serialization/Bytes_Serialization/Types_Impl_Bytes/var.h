@@ -28,8 +28,11 @@ inline std::size_t variant_size(const variant &value) {
   }
 }
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
-is_t<T, var, std::size_t> inline enigma::byte_size(const T &value) {
+is_t<T, var, std::size_t> inline byte_size(const T &value) {
   std::size_t len = variant_size(value) + enigma_internal_sizeof(value.array1d);
   len += (3 * sizeof(std::size_t));
   for (auto &[key, elem] : value.array2d.sparse_part()) {
@@ -42,17 +45,17 @@ is_t<T, var, std::size_t> inline enigma::byte_size(const T &value) {
 }
 
 template <typename T>
-is_t<T, var> inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
+is_t<T, var> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::size_t pos = 0;
   internal_serialize_into<const variant &>(iter, value);
   pos += variant_size(value);
-  enigma_internal_serialize_lua_table(iter + pos, value.array1d);
+  enigma::bytes_serialization::enigma_internal_serialize_lua_table(iter + pos, value.array1d);
   pos += enigma_internal_sizeof(value.array1d);
-  enigma_internal_serialize_lua_table(iter + pos, value.array2d);
+  enigma::bytes_serialization::enigma_internal_serialize_lua_table(iter + pos, value.array2d);
 }
 
 template <typename T>
-is_t<T, var, std::vector<std::byte>> inline enigma::internal_serialize_fn(const T &value) {
+is_t<T, var, std::vector<std::byte>> inline internal_serialize_fn(const T &value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into(result.data(), value);
@@ -60,26 +63,29 @@ is_t<T, var, std::vector<std::byte>> inline enigma::internal_serialize_fn(const 
 }
 
 template <typename T>
-is_t<T, var, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
+is_t<T, var, T> inline internal_deserialize_fn(std::byte *iter) {
   std::size_t pos = 0;
   variant inner = internal_deserialize<variant>(iter);
   pos += variant_size(inner);
   var result{std::move(inner)};
-  result.array1d = enigma_internal_deserialize_lua_table<variant>(iter + pos);
+  result.array1d = enigma::bytes_serialization::enigma_internal_deserialize_lua_table<variant>(iter + pos);
   pos += enigma_internal_sizeof(result.array1d);
-  result.array2d = enigma_internal_deserialize_lua_table<lua_table<variant>>(iter + pos);
+  result.array2d = enigma::bytes_serialization::enigma_internal_deserialize_lua_table<lua_table<variant>>(iter + pos);
   return result;
 }
 
 template <typename T>
-is_t<T, var> inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(buffer.size() + enigma::enigma_internal_sizeof(value));
+is_t<T, var> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+  buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-is_t<T, var> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+is_t<T, var> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   value = internal_deserialize<var>(iter + len);
-  len += enigma::enigma_internal_sizeof(value);
+  len += enigma_internal_sizeof(value);
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

@@ -21,14 +21,14 @@
 #include "../../type_traits.h"
 
 namespace enigma {
-namespace JSONserialization {
+namespace JSON_serialization {
 
 template <typename T>
-matches_t<T, std::string, is_std_vector> inline JSON_serialize_into(const T& value) {
+matches_t<T, std::string, is_std_vector, is_std_set> inline internal_serialize_into_fn(const T& value) {
   std::string json = "[";
 
   for (auto it = value.begin(); it != value.end(); ++it) {
-    json += enigma::JSONserialization::JSON_serialize_into(*it);
+    json += internal_serialize_into_fn(*it);
 
     if (std::next(it) != value.end()) {
       json += ",";
@@ -39,7 +39,8 @@ matches_t<T, std::string, is_std_vector> inline JSON_serialize_into(const T& val
 
   return json;
 }
-}  // namespace JSONserialization
+
+}  // namespace JSON_serialization
 }  // namespace enigma
 
 #endif

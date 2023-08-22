@@ -18,4 +18,15 @@
 #ifndef ENIGMA_SERIALIZE_POINTER_JSON_H
 #define ENIGMA_SERIALIZE_POINTER_JSON_H
 
+namespace enigma {
+namespace JSON_serialization {
+
+template <typename T>
+inline auto internal_serialize_into_fn(T*& value) {
+  return "[0]";
+}
+
+}  // namespace JSON_serialization
+}  // namespace enigma
+
 #endif

@@ -21,13 +21,13 @@
 #include "../../type_traits.h"
 
 namespace enigma {
-namespace JSONserialization {
+namespace JSON_serialization {
 
 template <typename T>
-is_t<T, std::string, std::string> inline JSON_serialize_into(const T& value) {
+is_t<T, std::string, std::string> inline internal_serialize_into_fn(const T& value) {
   return "\"" + value + "\"";
 }
-}  // namespace JSONserialization
+}  // namespace JSON_serialization
 }  // namespace enigma
 
 #endif

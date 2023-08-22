@@ -3,19 +3,19 @@
 
 TEST(byte_size_function, Test_tuple) {
   std::tuple<int, double, long> tuple1 = {1233, 22334.24243234, 1241413};
-  ASSERT_EQ(enigma::byte_size(tuple1), 28);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(tuple1), 28);
 
   std::tuple<char, bool, int> tuple2 = {'a', true, 123};
-  ASSERT_EQ(enigma::byte_size(tuple2), 14);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(tuple2), 14);
 
   std::tuple<long, char> tuple3 = {12424, 'f'};
-  ASSERT_EQ(enigma::byte_size(tuple3), 17);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(tuple3), 17);
 
   std::tuple<double> tuple4 = {12424.78557};
-  ASSERT_EQ(enigma::byte_size(tuple4), 16);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(tuple4), 16);
 
   std::tuple<> tuple5;
-  ASSERT_EQ(enigma::byte_size(tuple5), 8);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(tuple5), 8);
 }
 
 TEST(byte_size_function, Test_queue) {
@@ -23,7 +23,7 @@ TEST(byte_size_function, Test_queue) {
   queue1.push(123123);
   queue1.push(1231223);
   queue1.push(13341223);
-  ASSERT_EQ(enigma::byte_size(queue1), 20);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(queue1), 20);
 
   std::queue<char> queue2;
   queue2.push('a');
@@ -31,19 +31,19 @@ TEST(byte_size_function, Test_queue) {
   queue2.push('c');
   queue2.push('d');
   queue2.push('e');
-  ASSERT_EQ(enigma::byte_size(queue2), 13);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(queue2), 13);
 
   std::queue<bool> queue3;
   queue3.push(true);
   queue3.push(false);
   queue3.push(true);
-  ASSERT_EQ(enigma::byte_size(queue3), 11);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(queue3), 11);
 
   std::queue<long> queue4;
   queue4.push(123123);
   queue4.push(1231223);
   queue4.push(13341223);
-  ASSERT_EQ(enigma::byte_size(queue4), 32);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(queue4), 32);
 }
 
 TEST(byte_size_function, Test_stack) {
@@ -51,7 +51,7 @@ TEST(byte_size_function, Test_stack) {
   stack1.push(123123);
   stack1.push(1231223);
   stack1.push(13341223);
-  ASSERT_EQ(enigma::byte_size(stack1), 20);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(stack1), 20);
 
   std::stack<char> stack2;
   stack2.push('a');
@@ -59,19 +59,19 @@ TEST(byte_size_function, Test_stack) {
   stack2.push('c');
   stack2.push('d');
   stack2.push('e');
-  ASSERT_EQ(enigma::byte_size(stack2), 13);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(stack2), 13);
 
   std::stack<bool> stack3;
   stack3.push(true);
   stack3.push(false);
   stack3.push(true);
-  ASSERT_EQ(enigma::byte_size(stack3), 11);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(stack3), 11);
 
   std::stack<long> stack4;
   stack4.push(123123);
   stack4.push(1231223);
   stack4.push(13341223);
-  ASSERT_EQ(enigma::byte_size(stack4), 32);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(stack4), 32);
 }
 
 TEST(serialize_deserialize_functions, Test_tuple1) {

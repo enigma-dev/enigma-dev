@@ -21,10 +21,13 @@
 #include <algorithm>
 #include "../../serialization_fwd_decl.h"
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
                         std::size_t>::type
-enigma::byte_size(const T &value) {
+byte_size(const T &value) {
   if (value.type == variant::ty_real) {
     return 9;
   } else {
@@ -33,8 +36,9 @@ enigma::byte_size(const T &value) {
 }
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
-    type inline enigma::internal_serialize_into_fn(std::byte *iter, T &&value) {
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> &&
+                        !std::is_same_v<var, std::decay_t<T>>>::type inline internal_serialize_into_fn(std::byte *iter,
+                                                                                                       T &&value) {
   if (value.type == variant::ty_real) {
     *(iter++) = static_cast<std::byte>(variant::ty_real);
     internal_serialize_into(iter, value.rval.d);
@@ -47,8 +51,8 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
 }
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>&& !std::is_same_v<var, std::decay_t<T>>,
-                        std::vector<std::byte>>::type inline enigma::internal_serialize_fn(T &&value) {
+typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
+                        std::vector<std::byte>>::type inline internal_serialize_fn(T &&value) {
   std::vector<std::byte> result{};
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into(result.data(), value);
@@ -57,7 +61,7 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>>&& !std::is_s
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
-                        T>::type inline enigma::internal_deserialize_fn(std::byte *iter) {
+                        T>::type inline internal_deserialize_fn(std::byte *iter) {
   variant result;
   if (static_cast<int>(*iter) == variant::ty_real) {
     result.rval.d = internal_deserialize<double>(iter + 1);
@@ -74,15 +78,18 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
-    type inline enigma::internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
-  buffer.resize(buffer.size() + enigma::enigma_internal_sizeof(value));
+    type inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+  buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
 typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>>::
-    type inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
-  value = enigma::internal_deserialize<variant>(iter + len);
-  len += enigma::enigma_internal_sizeof(value);
+    type inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+  value = internal_deserialize<variant>(iter + len);
+  len += enigma_internal_sizeof(value);
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

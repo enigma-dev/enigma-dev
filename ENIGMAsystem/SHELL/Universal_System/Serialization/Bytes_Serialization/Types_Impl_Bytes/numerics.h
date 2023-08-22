@@ -20,8 +20,11 @@
 
 #include "../../serialization_fwd_decl.h"
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
-enables_if_numeric_t<T> inline enigma::internal_serialize_into_fn(std::byte *iter, const T &value) {
+enables_if_numeric_t<T> inline internal_serialize_into_fn(std::byte *iter, const T &value) {
   if constexpr (std::is_integral_v<T>) {
     internal_serialize_primitive_into<std::make_unsigned_t<T>>(iter, value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -38,14 +41,14 @@ enables_if_numeric_t<T> inline enigma::internal_serialize_into_fn(std::byte *ite
 }
 
 template <typename T>
-enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline enigma::internal_serialize_fn(const T &value) {
+enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline internal_serialize_fn(const T &value) {
   if constexpr (std::is_integral_v<T>) {
-    return enigma::serialize_primitive<std::make_unsigned_t<T>>(value);
+    return serialize_primitive<std::make_unsigned_t<T>>(value);
   } else if constexpr (std::is_floating_point_v<T>) {
     if constexpr (std::is_same_v<T, float>) {
-      return enigma::serialize_primitive<std::uint32_t>(value);
+      return serialize_primitive<std::uint32_t>(value);
     } else if constexpr (std::is_same_v<T, double>) {
-      return enigma::serialize_primitive<std::uint64_t>(value);
+      return serialize_primitive<std::uint64_t>(value);
     } else {
       static_assert(always_false<T>, "'internal_serialize_floating' only accepts 'float' or 'double' types");
     }
@@ -55,14 +58,14 @@ enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline enigma::interna
 }
 
 template <typename T>
-enables_if_numeric_t<T, T> inline enigma::internal_deserialize_fn(std::byte *iter) {
+enables_if_numeric_t<T, T> inline internal_deserialize_fn(std::byte *iter) {
   if constexpr (std::is_integral_v<T>) {
-    return enigma::internal_deserialize_primitive<std::make_unsigned_t<T>, T>(iter);
+    return internal_deserialize_primitive<std::make_unsigned_t<T>, T>(iter);
   } else if constexpr (std::is_floating_point_v<T>) {
     if constexpr (std::is_same_v<T, float>) {
-      return enigma::internal_deserialize_primitive<std::uint32_t, T>(iter);
+      return internal_deserialize_primitive<std::uint32_t, T>(iter);
     } else if constexpr (std::is_same_v<T, double>) {
-      return enigma::internal_deserialize_primitive<std::size_t, T>(iter);
+      return internal_deserialize_primitive<std::size_t, T>(iter);
     } else {
       static_assert(always_false<T>, "'internal_deserialize_floating' only accepts 'float' or 'double' types");
     }
@@ -70,5 +73,8 @@ enables_if_numeric_t<T, T> inline enigma::internal_deserialize_fn(std::byte *ite
     static_assert(always_false<T>, "'internal_deserialize_numeric' takes either integral or floating types");
   }
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

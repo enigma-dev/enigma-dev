@@ -20,19 +20,25 @@
 
 #include "../../serialization_fwd_decl.h"
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
-inline auto enigma::internal_serialize_into_fn(std::byte *iter, T *value) {
+inline auto internal_serialize_into_fn(std::byte *iter, T *value) {
   internal_serialize_into<std::size_t>(iter, 0);
 }
 
 template <typename T>
-inline auto enigma::internal_serialize_fn(T *&&value) {
+inline auto internal_serialize_fn(T *&&value) {
   return internal_serialize<std::size_t>(0);
 }
 
 template <typename T>
-matches_t<T, T, std::is_pointer> inline enigma::internal_deserialize_fn(std::byte *iter) {
+matches_t<T, T, std::is_pointer> inline internal_deserialize_fn(std::byte *iter) {
   return nullptr;
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

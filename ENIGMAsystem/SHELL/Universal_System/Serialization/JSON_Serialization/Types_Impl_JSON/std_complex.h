@@ -18,4 +18,25 @@
 #ifndef ENIGMA_SERIALIZE_COMPLEX_JSON_H
 #define ENIGMA_SERIALIZE_COMPLEX_JSON_H
 
+#include "../../type_traits.h"
+
+namespace enigma {
+namespace JSON_serialization {
+
+template <typename T>
+matches_t<T, std::string, is_std_complex> inline internal_serialize_into_fn(const T& value) {
+  std::string json = "[";
+
+  json += internal_serialize_into_fn(value.real());
+  json += ",";
+  json += internal_serialize_into_fn(value.imag());
+
+  json += "]";
+
+  return json;
+}
+
+}  // namespace JSON_serialization
+}  // namespace enigma
+
 #endif

@@ -18,4 +18,28 @@
 #ifndef ENIGMA_SERIALIZE_QUEUE_STACK_JSON_H
 #define ENIGMA_SERIALIZE_QUEUE_STACK_JSON_H
 
+#include "../../type_traits.h"
+
+namespace enigma {
+namespace JSON_serialization {
+
+template <typename T>
+matches_t<T, std::string, is_std_queue, is_std_stack> inline internal_serialize_into_fn(const T& value) {
+  std::string json = "[";
+
+  std::decay_t<T> tempContainer = value;
+  while (!tempContainer.empty()) {
+    json += internal_serialize_into_fn(get_top(tempContainer));
+    if (tempContainer.size() > 1) json += ",";
+    tempContainer.pop();
+  }
+
+  json += "]";
+
+  return json;
+}
+
+}  // namespace JSON_serialization
+}  // namespace enigma
+
 #endif

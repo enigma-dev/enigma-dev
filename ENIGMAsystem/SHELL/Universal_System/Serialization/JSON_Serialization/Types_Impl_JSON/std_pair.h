@@ -18,4 +18,25 @@
 #ifndef ENIGMA_SERIALIZE_PAIR_JSON_H
 #define ENIGMA_SERIALIZE_PAIR_JSON_H
 
+#include "../../type_traits.h"
+
+namespace enigma {
+namespace JSON_serialization {
+
+template <typename T>
+matches_t<T, std::string, is_std_pair> inline internal_serialize_into_fn(const T& value) {
+  std::string json = "[";
+
+  json += internal_serialize_into_fn(value.first);
+  json += ",";
+  json += internal_serialize_into_fn(value.second);
+
+  json += "]";
+
+  return json;
+}
+
+}  // namespace JSON_serialization
+}  // namespace enigma
+
 #endif

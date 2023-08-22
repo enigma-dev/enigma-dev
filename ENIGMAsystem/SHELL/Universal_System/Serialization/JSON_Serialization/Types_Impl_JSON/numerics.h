@@ -21,13 +21,13 @@
 #include "../../type_traits.h"
 
 namespace enigma {
-namespace JSONserialization {
+namespace JSON_serialization {
 
 template <typename T>
-enables_if_numeric_t<T, std::string> inline JSON_serialize_into(const T& value) {
+enables_if_numeric_t<T, std::string> inline internal_serialize_into_fn(const T& value) {
   std::string json = std::to_string(value);
 
-  if constexpr (std::is_same_v<T, float>) {
+  if constexpr (std::is_floating_point_v<std::decay_t<T>>) {
     size_t decimalPos = json.find('.');
     if (decimalPos != std::string::npos) {
       if (decimalPos == json.length() - 1) {
@@ -43,11 +43,12 @@ enables_if_numeric_t<T, std::string> inline JSON_serialize_into(const T& value) 
     }
   }
 
-  if constexpr (std::is_same_v<T, char>) return "'" + std::string(1, value) + "'";
+  if constexpr (std::is_same_v<T, char>) return "\"" + std::string(1, value) + "\"";
 
   return json;
 }
-}  // namespace JSONserialization
+
+}  // namespace JSON_serialization
 }  // namespace enigma
 
 #endif

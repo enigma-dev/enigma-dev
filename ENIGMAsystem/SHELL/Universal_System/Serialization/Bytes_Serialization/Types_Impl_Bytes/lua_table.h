@@ -21,20 +21,22 @@
 
 #include "../../serialization_fwd_decl.h"
 
+namespace enigma {
+namespace bytes_serialization {
+
 template <typename T>
-matches_t<T, std::size_t, is_lua_table> inline enigma::byte_size(const T &value) {
+matches_t<T, std::size_t, is_lua_table> inline byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
+  totalSize += enigma_internal_sizeof(value.dense_part());  // The elements of `dense`, we can use `byte_size` directly
   totalSize +=
-      enigma::enigma_internal_sizeof(value.dense_part());  // The elements of `dense`, we can use `byte_size` directly
-  totalSize +=
-      enigma::enigma_internal_sizeof(value.sparse_part());  // The elements of `sparse`, we can use `byte_size` directly
+      enigma_internal_sizeof(value.sparse_part());  // The elements of `sparse`, we can use `byte_size` directly
 
   return totalSize;
 }
 
 template <typename T>
-inline void enigma::enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {
+inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table) {
   std::size_t pos = 0;
   internal_serialize_into(iter, table.mx_size_part());
   pos += sizeof(std::size_t);
@@ -65,7 +67,7 @@ inline void enigma::enigma_internal_serialize_lua_table(std::byte *iter, const l
 }
 
 template <typename T>
-inline lua_table<T> enigma::enigma_internal_deserialize_lua_table(std::byte *iter) {
+inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter) {
   lua_table<T> table;
   auto &mx_size = const_cast<std::size_t &>(table.mx_size_part());
   auto &dense = const_cast<typename lua_table<T>::dense_type &>(table.dense_part());
@@ -90,11 +92,13 @@ inline lua_table<T> enigma::enigma_internal_deserialize_lua_table(std::byte *ite
 }
 
 template <typename T>
-matches_t<T, void, is_lua_table> inline enigma::enigma_internal_deserialize_fn(T &value, std::byte *iter,
-                                                                               std::size_t &len) {
+matches_t<T, void, is_lua_table> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   using Type = typename lua_inner_type<T>::type;
   value = enigma_internal_deserialize_lua_table<Type>(iter);
   len += enigma_internal_sizeof(value);
 }
+
+}  // namespace bytes_serialization
+}  // namespace enigma
 
 #endif

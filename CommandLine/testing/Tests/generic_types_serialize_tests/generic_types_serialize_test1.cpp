@@ -3,41 +3,41 @@
 
 TEST(byte_size_function, Test_vector) {
   std::vector<int> vec1 = {1, 2, 3, 4, 5};
-  ASSERT_EQ(enigma::byte_size(vec1), 28);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(vec1), 28);
 
   std::vector<double> vec2 = {12.2, 13.3, 1233213212.2, 1232312322.123, 232322, 2};
-  ASSERT_EQ(enigma::byte_size(vec2), 56);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(vec2), 56);
 
   std::vector<char> vec3 = {'a', 'b', 'c', 'd', 'e'};
-  ASSERT_EQ(enigma::byte_size(vec3), 13);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(vec3), 13);
 
   std::vector<bool> vec4 = {true, false};
-  ASSERT_EQ(enigma::byte_size(vec4), 10);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(vec4), 10);
 }
 
 TEST(byte_size_function, Test_map) {
   std::map<int, int> map1 = {{1, 2}, {3, 4}};
-  ASSERT_EQ(enigma::byte_size(map1), 24);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(map1), 24);
 
   std::map<int, double> map2 = {{12, 13.3}, {1233213212, 1232312322.123}, {232322, 2.233}};
-  ASSERT_EQ(enigma::byte_size(map2), 44);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(map2), 44);
 
   std::map<char, int> map3 = {{'a', 12}, {'b', 22}, {'c', 223}, {'d', 298}, {'e', 7869}};
-  ASSERT_EQ(enigma::byte_size(map3), 33);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(map3), 33);
 
   std::map<bool, char> map4 = {{true, 'f'}, {false, 'g'}};
-  ASSERT_EQ(enigma::byte_size(map4), 12);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(map4), 12);
 }
 
 TEST(byte_size_function, Test_complex) {
   std::complex<int> comp1 = {1, 2};
-  ASSERT_EQ(enigma::byte_size(comp1), 8);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(comp1), 8);
 
   std::complex<double> comp2 = {12.222, 13.3};
-  ASSERT_EQ(enigma::byte_size(comp2), 16);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(comp2), 16);
 
   std::complex<long> comp3 = {123132, 87687};
-  ASSERT_EQ(enigma::byte_size(comp3), 16);
+  ASSERT_EQ(enigma::bytes_serialization::byte_size(comp3), 16);
 }
 
 TEST(serialize_deserialize_functions, Test_vector1) {

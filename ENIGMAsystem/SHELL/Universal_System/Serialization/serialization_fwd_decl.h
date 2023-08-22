@@ -23,9 +23,6 @@
 
 namespace enigma {
 
-template <typename T>
-typename std::enable_if_t<always_false<T>> inline byte_size(const T &value) = delete;
-
 template <typename Base, typename T>
 inline void internal_serialize_primitive_into(std::byte *iter, const T &value);
 
@@ -34,12 +31,6 @@ inline std::array<std::byte, sizeof(T)> serialize_primitive(T value);
 
 template <typename Base, typename T>
 inline T internal_deserialize_primitive(std::byte *iter);
-
-template <typename T>
-inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
-
-template <typename T>
-inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter);
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value);
@@ -59,24 +50,15 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
 template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
 
-template <typename T>
-typename std::enable_if_t<always_false<T>> inline internal_serialize_into_fn(std::byte *iter, T &&value) = delete;
+namespace bytes_serialization {
 
 template <typename T>
-typename std::enable_if_t<always_false<T>, std::vector<std::byte>> inline internal_serialize_fn(const T &value) =
-    delete;
+inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);
 
 template <typename T>
-typename std::enable_if_t<always_false<T>, T> inline internal_deserialize_fn(std::byte *iter) = delete;
+inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter);
 
-template <typename T>
-typename std::enable_if_t<always_false<T>> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
-                                                                                T &&value) = delete;
-
-template <typename T>
-typename std::enable_if_t<always_false<T>> inline enigma_internal_deserialize_fn(T &value, std::byte *iter,
-                                                                                 std::size_t &len) = delete;
-
+}  // namespace bytes_serialization
 }  // namespace enigma
 
 #endif

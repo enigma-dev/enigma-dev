@@ -245,6 +245,11 @@ using enables_if_numeric_t =
                      ReturnType>;
 
 template <typename T>
+constexpr bool is_numeric_v = (std::is_integral_v<std::decay_t<T>> ||
+                               std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool> &&
+                              !std::is_same_v<std::decay_t<T>, char>;
+
+template <typename T>
 inline void insert_back(std::vector<T>& container, const T& val) {
   container.push_back(std::move(val));
 }
