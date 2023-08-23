@@ -39,8 +39,8 @@ matches_t<T, void, is_std_pair> inline internal_serialize_into_fn(std::byte *ite
 template <typename T>
 matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
-  using firsttype = typename PairTypeExtractor<T>::FirstType;
-  using secondtype = typename PairTypeExtractor<T>::SecondType;
+  using firsttype = typename T::first_type;
+  using secondtype = typename T::second_type;
 
   firsttype first = internal_deserialize<firsttype>(iter + offset);
   offset += enigma_internal_sizeof(first);
@@ -52,8 +52,8 @@ matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter) {
 
 template <typename T>
 matches_t<T, void, is_std_pair> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
-  using firsttype = typename PairTypeExtractor<T>::FirstType;
-  using secondtype = typename PairTypeExtractor<T>::SecondType;
+  using firsttype = typename T::first_type;
+  using secondtype = typename T::second_type;
 
   firsttype first = internal_deserialize<firsttype>(iter + len);
   len += enigma_internal_sizeof(first);

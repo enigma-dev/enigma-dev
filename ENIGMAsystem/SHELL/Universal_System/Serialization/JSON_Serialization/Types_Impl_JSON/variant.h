@@ -1,4 +1,4 @@
-/** Copyright (C) 2022 Dhruv Chawla
+/** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,8 +24,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>,
-                        std::string>::type inline internal_serialize_into_fn(const T& value) {
+enables_if_base_of_variant_t<T, std::string> inline internal_serialize_into_fn(const T& value) {
   std::string json = "{";
 
   if (value.type == variant::ty_real)
@@ -36,6 +35,15 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
   json += "}";
 
   return json;
+}
+
+template <typename T>
+enables_if_base_of_variant_t<T, T> inline internal_deserialize_fn(const std::string& json) {
+  std::string type = json.substr(9, json.find(',') - 10);
+  std::string value = json.substr(json.find("value") + 7, json.length() - json.find("value") - 8);
+
+  if (type == "real") return T(internal_deserialize_fn<double>(value));
+  return T(internal_deserialize_fn<std::string>(value));
 }
 
 }  // namespace JSON_serialization

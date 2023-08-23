@@ -39,6 +39,30 @@ matches_t<T, std::string, is_std_queue, is_std_stack> inline internal_serialize_
   return json;
 }
 
+template <typename T>
+matches_t<T, T, is_std_stack> inline internal_deserialize_fn(const std::string& json) {
+  std::string tempJson = json.substr(1, json.length() - 2);
+
+  T tempContainer;
+
+  size_t commaPos = tempJson.find(',');
+  while (commaPos != std::string::npos) {
+    tempContainer.push(internal_deserialize_fn<typename T::value_type>(tempJson.substr(0, commaPos)));
+    tempJson.erase(0, commaPos + 1);
+    commaPos = tempJson.find(',');
+  }
+
+  tempContainer.push(internal_deserialize_fn<typename T::value_type>(tempJson));
+
+  T result;
+  while (!tempContainer.empty()) {
+    result.push(tempContainer.top());
+    tempContainer.pop();
+  }
+
+  return result;
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

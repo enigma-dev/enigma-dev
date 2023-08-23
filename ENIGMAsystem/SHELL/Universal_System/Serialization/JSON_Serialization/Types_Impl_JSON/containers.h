@@ -40,6 +40,26 @@ matches_t<T, std::string, is_std_vector, is_std_set> inline internal_serialize_i
   return json;
 }
 
+template <typename T>
+matches_t<T, T, is_std_vector, is_std_set, is_std_queue> inline internal_deserialize_fn(const std::string& json) {
+  T result;
+
+  if (json.length() > 2) {
+    std::string jsonCopy = json.substr(1, json.length() - 2);
+    std::string::size_type pos = 0;
+    std::string::size_type lastPos = 0;
+
+    while ((pos = jsonCopy.find(',', lastPos)) != std::string::npos) {
+      insert_back(result, internal_deserialize_fn<typename T::value_type>(jsonCopy.substr(lastPos, pos - lastPos)));
+      lastPos = pos + 1;
+    }
+
+    insert_back(result, internal_deserialize_fn<typename T::value_type>(jsonCopy.substr(lastPos)));
+  }
+
+  return result;
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

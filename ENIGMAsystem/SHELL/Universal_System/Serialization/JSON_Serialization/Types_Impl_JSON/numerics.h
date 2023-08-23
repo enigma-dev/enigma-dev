@@ -48,6 +48,16 @@ enables_if_numeric_t<T, std::string> inline internal_serialize_into_fn(const T& 
   return json;
 }
 
+template <typename T>
+enables_if_numeric_t<T, T> inline internal_deserialize_fn(const std::string& json) {
+  if constexpr (std::is_same_v<T, char>)
+    return json[1];
+  else if constexpr (std::is_integral_v<T>)
+    return static_cast<T>(std::stoll(json));
+  else
+    return static_cast<T>(std::stold(json));
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

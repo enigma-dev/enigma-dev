@@ -36,6 +36,15 @@ matches_t<T, std::string, is_std_complex> inline internal_serialize_into_fn(cons
   return json;
 }
 
+template <typename T>
+matches_t<T, T, is_std_complex> inline internal_deserialize_fn(const std::string& json) {
+  std::string realStr = json.substr(1, json.find(',') - 1);
+  std::string imagStr = json.substr(json.find(',') + 1, json.length() - 2);
+
+  return T(internal_deserialize_fn<typename T::value_type>(realStr),
+           internal_deserialize_fn<typename T::value_type>(imagStr));  
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

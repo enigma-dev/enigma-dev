@@ -193,15 +193,6 @@ void LoopTuple(const std::tuple<Args...>& tuple, Function&& func, ExtraParam& ex
                                                                                 extraParam);
 }
 
-template <typename... Types>
-struct PairTypeExtractor;
-
-template <typename First, typename Second>
-struct PairTypeExtractor<std::pair<First, Second>> {
-  using FirstType = First;
-  using SecondType = Second;
-};
-
 template <typename T, std::size_t N>
 struct has_nested_form : std::false_type {
   using inner_type = void;
@@ -248,6 +239,10 @@ template <typename T>
 constexpr bool is_numeric_v = (std::is_integral_v<std::decay_t<T>> ||
                                std::is_floating_point_v<std::decay_t<T>>)&&!std::is_same_v<std::decay_t<T>, bool> &&
                               !std::is_same_v<std::decay_t<T>, char>;
+
+template <typename T, typename ReturnType = void>
+using enables_if_base_of_variant_t =
+    std::enable_if_t<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>, ReturnType>;
 
 template <typename T>
 inline void insert_back(std::vector<T>& container, const T& val) {

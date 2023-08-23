@@ -46,6 +46,35 @@ matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T&
   return json;
 }
 
+template <typename T>
+matches_t<T, T, is_std_map> inline internal_deserialize_fn(const std::string& json) {
+  using KeyType = typename std::decay_t<T>::key_type;
+  using ValueType = typename std::decay_t<T>::mapped_type;
+
+  T result;
+
+  std::string jsonCopy = json.substr(1, json.length() - 2);
+
+  while (!jsonCopy.empty()) {
+    std::string keyStr = jsonCopy.substr(0, jsonCopy.find(':'));
+    std::string valueStr = jsonCopy.substr(jsonCopy.find(':') + 1, jsonCopy.find(',') - jsonCopy.find(':') - 1);
+
+    if constexpr (is_numeric_v<KeyType>) keyStr = keyStr.substr(1, keyStr.length() - 2);
+
+    KeyType key = internal_deserialize_fn<KeyType>(keyStr);
+    ValueType value = internal_deserialize_fn<ValueType>(valueStr);
+
+    result[key] = value;
+
+    if (jsonCopy.find(',') != std::string::npos)
+      jsonCopy = jsonCopy.substr(jsonCopy.find(',') + 1);
+    else
+      jsonCopy = "";
+  }
+
+  return result;
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

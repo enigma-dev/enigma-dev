@@ -28,6 +28,11 @@ is_t<T, bool, std::string> inline internal_serialize_into_fn(const T& value) {
   return value ? "\"true\"" : "\"false\"";
 }
 
+template <typename T>
+is_t<T, bool, T> inline internal_deserialize_fn(const std::string& json) {
+  return (json == "\"true\"") ? true : false;
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

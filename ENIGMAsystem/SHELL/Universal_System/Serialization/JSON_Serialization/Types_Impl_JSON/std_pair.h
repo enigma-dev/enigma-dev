@@ -36,6 +36,15 @@ matches_t<T, std::string, is_std_pair> inline internal_serialize_into_fn(const T
   return json;
 }
 
+template <typename T>
+matches_t<T, T, is_std_pair> inline internal_deserialize_fn(const std::string& json) {
+  std::string firstStr = json.substr(1, json.find(',') - 1);
+  std::string secondStr = json.substr(json.find(',') + 1, json.length() - firstStr.length() - 3);
+
+  return T(internal_deserialize_fn<typename T::first_type>(firstStr),
+           internal_deserialize_fn<typename T::second_type>(secondStr));
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

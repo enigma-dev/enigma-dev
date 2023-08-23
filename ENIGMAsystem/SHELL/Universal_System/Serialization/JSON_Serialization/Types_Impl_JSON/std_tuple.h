@@ -45,6 +45,29 @@ matches_t<T, std::string, is_std_tuple> inline internal_serialize_into_fn(const 
   return json;
 }
 
+template <typename Tuple, std::size_t Index>
+void tuple_deserialize_helper(std::string tupleStr, Tuple &tuple) {
+  if constexpr (Index < std::tuple_size<Tuple>::value) {
+    std::string elementStr = tupleStr.substr(0, tupleStr.find(','));
+    tupleStr = tupleStr.substr(tupleStr.find(',') + 1);
+
+    using TypeAtIndex = typename std::tuple_element<Index, Tuple>::type;
+    std::get<Index>(tuple) = internal_deserialize_fn<TypeAtIndex>(elementStr);
+
+    tuple_deserialize_helper<Tuple, Index + 1>(tupleStr, tuple);
+  }
+}
+
+template <typename T>
+matches_t<T, T, is_std_tuple> inline internal_deserialize_fn(const std::string &json) {
+  std::string tupleStr = json.substr(1, json.length() - 2);
+
+  typename std::decay_t<T> resultTuple;
+  tuple_deserialize_helper<T, 0>(tupleStr, resultTuple);
+
+  return resultTuple;
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 
