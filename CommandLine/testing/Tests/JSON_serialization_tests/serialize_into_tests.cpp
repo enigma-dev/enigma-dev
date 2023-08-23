@@ -20,8 +20,11 @@ TEST(serialize_into_function, Test_Basics) {
   std::string val6 = "hello";
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(val6), "\"hello\"");
 
-  char val7 = 'f';
-  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(val7), "\"f\"");
+  std::string val7 = "wor\"ld";
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(val7), "\"wor\\\"ld\"");
+
+  char val8 = 'f';
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(val8), "\"f\"");
 }
 
 TEST(serialize_into_function, Test_Vector) {
@@ -61,11 +64,11 @@ TEST(serialize_into_function, Test_Map) {
 
   std::map<bool, double> map2 = {{true, 98610.58768}, {false, 76920.59869}};
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(map2),
-            "{\"false\":\"76920.59869\",\"true\":\"98610.58768\"}");  // map is sorted
+            "{\"false\":76920.59869,\"true\":98610.58768}");  // map is sorted
 
   std::map<std::string, long> map3 = {{"fares", 10757957966}, {"atef", 10757959686}};
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(map3),
-            "{\"atef\":\"10757959686\",\"fares\":\"10757957966\"}");  // map is sorted
+            "{\"atef\":10757959686,\"fares\":10757957966}");  // map is sorted
 }
 
 TEST(serialize_into_function, Test_Tuple) {
@@ -164,13 +167,14 @@ TEST(serialize_into_function, Test_Stack) {
 
 TEST(serialize_into_function, Test_Variant) {
   variant variant1 = 10;
-  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant1), "{\"0\":\"10\"}");
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant1), "{\"type\":\"real\",\"value\":10}");
 
   variant variant2 = 10.5968;
-  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant2), "{\"0\":\"10.5968\"}");
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant2), "{\"type\":\"real\",\"value\":10.5968}");
 
   variant variant3 = "fares";
-  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant3), "{\"1\":\"fares\"}");
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(variant3),
+            "{\"type\":\"string\",\"value\":\"fares\"}");
 }
 
 TEST(serialize_into_function, Test_Pointer) {

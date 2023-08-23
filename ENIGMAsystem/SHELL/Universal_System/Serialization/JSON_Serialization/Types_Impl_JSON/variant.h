@@ -29,9 +29,9 @@ typename std::enable_if<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_
   std::string json = "{";
 
   if (value.type == variant::ty_real)
-    json += "\"0\":\"" + internal_serialize_into_fn(value.rval.d) + "\"";
+    json += "\"type\":\"real\",\"value\":" + internal_serialize_into_fn(value.rval.d);
   else if (value.type == variant::ty_string)
-    json += "\"1\":" + internal_serialize_into_fn(value.sval());
+    json += "\"type\":\"string\",\"value\":" + internal_serialize_into_fn(value.sval());
 
   json += "}";
 

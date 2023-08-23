@@ -35,11 +35,7 @@ matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T&
       json += "\"" + internal_serialize_into_fn(it->first) + "\"";
     else
       json += internal_serialize_into_fn(it->first);
-    json += ":";
-    if (is_numeric_v<ValueType>)
-      json += "\"" + internal_serialize_into_fn(it->second) + "\"";
-    else
-      json += internal_serialize_into_fn(it->second);
+    json += ":" + internal_serialize_into_fn(it->second);
     if (std::next(it) != value.end()) {
       json += ",";
     }

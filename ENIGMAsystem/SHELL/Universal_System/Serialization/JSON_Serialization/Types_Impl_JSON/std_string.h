@@ -25,7 +25,37 @@ namespace JSON_serialization {
 
 template <typename T>
 is_t<T, std::string, std::string> inline internal_serialize_into_fn(const T& value) {
-  return "\"" + value + "\"";
+  std::string json = "\"";
+  for (char c : value) {
+    switch (c) {
+      case '"':
+        json += "\\\"";
+        break;
+      case '\\':
+        json += "\\\\";
+        break;
+      case '\b':
+        json += "\\b";
+        break;
+      case '\f':
+        json += "\\f";
+        break;
+      case '\n':
+        json += "\\n";
+        break;
+      case '\r':
+        json += "\\r";
+        break;
+      case '\t':
+        json += "\\t";
+        break;
+      default:
+        json += c;
+        break;
+    }
+  }
+  json += "\"";
+  return json;
 }
 }  // namespace JSON_serialization
 }  // namespace enigma
