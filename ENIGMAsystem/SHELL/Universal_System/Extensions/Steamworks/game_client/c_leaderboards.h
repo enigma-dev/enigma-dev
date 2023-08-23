@@ -44,8 +44,14 @@ class c_leaderboards {
   ~c_leaderboards();
 
   void find_leaderboard(const int id, const std::string& leaderboard_name,
-                        const ELeaderboardSortMethod leaderboard_sort_method,
-                        const ELeaderboardDisplayType leaderboard_display_type);
+                        const ELeaderboardSortMethod leaderboard_sort_method = k_ELeaderboardSortMethodNone,
+                        const ELeaderboardDisplayType leaderboard_display_type = k_ELeaderboardDisplayTypeNone);
+  
+  /*
+    Uploads a user score to a specified leaderboard. Uploading scores to Steam is rate limited to 10 uploads 
+    per 10 minutes and you may only have one outstanding call to this function at a time. Calls UploadLeaderboardScore.
+    Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for more information.
+  */
   bool upload_score(
       const int id, const int score,
       const ELeaderboardUploadScoreMethod leaderboard_upload_score_method = k_ELeaderboardUploadScoreMethodNone);
@@ -59,7 +65,7 @@ class c_leaderboards {
   void set_loading(const bool loading);
 
  private:
-  SteamLeaderboard_t current_leaderboard_;
+  SteamLeaderboard_t* current_leaderboard_;
   bool loading_;
   unsigned number_of_leaderboard_entries_;
 

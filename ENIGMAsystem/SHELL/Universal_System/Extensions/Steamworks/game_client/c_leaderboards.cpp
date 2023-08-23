@@ -86,7 +86,8 @@ void c_leaderboards::find_leaderboard(const int id, const std::string &leaderboa
   deallocate_c_leaderboards_find_result_cookies_if_done();
 
   if (c_leaderboards::current_leaderboard_ != NULL) {
-    if (SteamUserStats()->GetLeaderboardName(c_leaderboards::current_leaderboard_) == leaderboard_name) return;
+    if (std::string(SteamUserStats()->GetLeaderboardName(*c_leaderboards::current_leaderboard_)) == leaderboard_name)
+      return;
   }
 
   c_leaderboards::current_leaderboard_ = NULL;
@@ -113,7 +114,7 @@ bool c_leaderboards::upload_score(const int id, const int score,
   if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
-      c_leaderboards::current_leaderboard_, leaderboard_upload_score_method, score, NULL, 0);
+      *c_leaderboards::current_leaderboard_, leaderboard_upload_score_method, score, NULL, 0);
 
   c_leaderboards_score_uploaded_cookies *c_leaderboards_score_uploaded =
       new c_leaderboards_score_uploaded_cookies(id, this, steam_api_call);
@@ -129,7 +130,7 @@ bool c_leaderboards::download_scores(const int id, const ELeaderboardDataRequest
   if (NULL == c_leaderboards::current_leaderboard_) return false;
 
   SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
-      c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
+      *c_leaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
 
   c_leaderboards_score_downloaded_cookies *c_leaderboards_score_downloaded =
       new c_leaderboards_score_downloaded_cookies(id, this, steam_api_call);
@@ -140,7 +141,7 @@ bool c_leaderboards::download_scores(const int id, const ELeaderboardDataRequest
 
 std::string c_leaderboards::get_leaderboard_name(const SteamLeaderboard_t leaderboard) {
   if (NULL == leaderboard) {
-    DEBUG_MESSAGE("Calling get_leaderboard_name() failed. Make to pass a valid leaderboard handle.", M_ERROR);
+    DEBUG_MESSAGE("Calling get_leaderboard_name() failed. Make sure to pass a valid leaderboard handle.", M_ERROR);
     return "";
   };
 
@@ -148,7 +149,7 @@ std::string c_leaderboards::get_leaderboard_name(const SteamLeaderboard_t leader
 }
 
 void c_leaderboards::set_current_leaderboard(const SteamLeaderboard_t leaderboard) {
-  c_leaderboards::current_leaderboard_ = leaderboard;
+  c_leaderboards::current_leaderboard_ = const_cast<SteamLeaderboard_t *>(&leaderboard);
 }
 
 void c_leaderboards::set_loading(const bool loading) { c_leaderboards::loading_ = loading; }

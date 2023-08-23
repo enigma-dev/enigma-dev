@@ -69,13 +69,13 @@ c_leaderboards_score_downloaded_cookies::c_leaderboards_score_downloaded_cookies
   c_leaderboards_score_downloaded_cookies::set_call_result(steam_api_call);
 }
 
-bool c_leaderboards_score_downloaded_cookies::is_done() const {
-  return c_leaderboards_score_downloaded_cookies::is_done_;
-}
-
 ////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////
+
+bool c_leaderboards_score_downloaded_cookies::is_done() const {
+  return c_leaderboards_score_downloaded_cookies::is_done_;
+}
 
 void c_leaderboards_score_downloaded_cookies::set_call_result(SteamAPICall_t steam_api_call) {
   c_leaderboards_score_downloaded_cookies::m_SteamCallResultDownloadScores.Set(
@@ -86,7 +86,8 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
     LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
-    c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);
+    // c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);
+    c_leaderboards_score_downloaded_cookies::is_done_ = true;
     return;
   }
 

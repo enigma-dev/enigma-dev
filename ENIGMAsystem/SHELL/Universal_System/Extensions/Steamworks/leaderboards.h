@@ -38,6 +38,18 @@
 
 namespace enigma {
 
+/*
+    Stores number of successful upload requests. This variable related to ENIGMA as it help displaying
+    a message to the user when the upload rate is exceeded.
+*/
+extern unsigned number_of_successful_upload_requests;
+
+/*
+    Whether we exceeeded the rate limit or not. This variable works with number_of_successful_upload_requests
+    variable as it will be true if the user already got an error message.
+*/
+extern bool upload_rate_limit_exceeded;
+
 // TODO: See if you can improve the type of these arrays.
 extern AssetArray<SteamLeaderboard_t*>
     leaderboards_array;  // This will be used for returning the id for each leaderboard we find.

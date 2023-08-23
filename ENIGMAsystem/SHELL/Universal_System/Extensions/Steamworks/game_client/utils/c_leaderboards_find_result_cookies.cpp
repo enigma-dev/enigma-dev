@@ -32,11 +32,11 @@ c_leaderboards_find_result_cookies::c_leaderboards_find_result_cookies(int id, c
   c_leaderboards_find_result_cookies::set_call_result(steam_api_call);
 }
 
-bool c_leaderboards_find_result_cookies::is_done() const { return c_leaderboards_find_result_cookies::is_done_; }
-
 ////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////
+
+bool c_leaderboards_find_result_cookies::is_done() const { return c_leaderboards_find_result_cookies::is_done_; }
 
 void c_leaderboards_find_result_cookies::set_call_result(SteamAPICall_t steam_api_call) {
   c_leaderboards_find_result_cookies::m_callResultFindLeaderboard.Set(
@@ -47,7 +47,8 @@ void c_leaderboards_find_result_cookies::on_find_leaderboard(LeaderboardFindResu
                                                              bool bIOFailure) {
   if (!pFindLeaderboardResult->m_bLeaderboardFound || bIOFailure) {
     DEBUG_MESSAGE("Failed to find or create leaderboard.", M_ERROR);
-    c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
+    // c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
+    c_leaderboards_find_result_cookies::is_done_ = true;
     return;
   }
 

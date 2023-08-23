@@ -32,11 +32,11 @@ c_leaderboards_score_uploaded_cookies::c_leaderboards_score_uploaded_cookies(int
   c_leaderboards_score_uploaded_cookies::set_call_result(steam_api_call);
 }
 
-bool c_leaderboards_score_uploaded_cookies::is_done() const { return c_leaderboards_score_uploaded_cookies::is_done_; }
-
 ////////////////////////////////////////////////////////
 // Private functions
 ////////////////////////////////////////////////////////
+
+bool c_leaderboards_score_uploaded_cookies::is_done() const { return c_leaderboards_score_uploaded_cookies::is_done_; }
 
 void c_leaderboards_score_uploaded_cookies::set_call_result(SteamAPICall_t steam_api_call) {
   c_leaderboards_score_uploaded_cookies::m_SteamCallResultUploadScore.Set(
@@ -46,8 +46,16 @@ void c_leaderboards_score_uploaded_cookies::set_call_result(SteamAPICall_t steam
 void c_leaderboards_score_uploaded_cookies::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult,
                                                             bool bIOFailure) {
   if (!pScoreUploadedResult->m_bSuccess || bIOFailure) {
-    DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
-    c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
+    if ((enigma::number_of_successful_upload_requests + 1) % 10 == 0) {
+      DEBUG_MESSAGE(
+          "Did you create 10 upload requests in less than 10 minutes? Well, the upload rate is limited to "
+          "10 upload requests per 10 minutes so you may want to wait before another request.",
+          M_ERROR);
+      enigma::upload_rate_limit_exceeded = true;
+    }
+    else DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
+    // c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
+    c_leaderboards_score_uploaded_cookies::is_done_ = true;
     return;
   }
 

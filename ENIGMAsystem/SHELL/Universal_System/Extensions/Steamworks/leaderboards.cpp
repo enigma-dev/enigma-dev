@@ -37,9 +37,11 @@ bool leaderboards_pre_checks(const std::string& script_name) {
 }
 
 namespace enigma {
-// struct Leaderboard {
-//   // stuff here
-// }
+
+unsigned number_of_successful_upload_requests{0};
+
+bool upload_rate_limit_exceeded{false};
+
 AssetArray<SteamLeaderboard_t*> leaderboards_array;
 AssetArray<LeaderboardEntry_t*> entries_array;
 AssetArray<bool> scores_array;
@@ -57,6 +59,15 @@ void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* 
 }
 
 void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult) {
+  /*
+    We have a successful upload request after a failed one. Let's reset the number of successful upload requests.
+  */
+  if (enigma::upload_rate_limit_exceeded) {
+    enigma::upload_rate_limit_exceeded = false;
+    enigma::number_of_successful_upload_requests = 0;
+  }
+  enigma::number_of_successful_upload_requests++; // Increase the number of successful upload requests.
+
   // GMS's output:
   /*
       Steam ASYNC: {"updated":1.0,"lb_name":"YYLeaderboard_10/29/21--","success":1.0,"event_type":"leaderboard_upload","score":325.0,"post_id":6.0}
