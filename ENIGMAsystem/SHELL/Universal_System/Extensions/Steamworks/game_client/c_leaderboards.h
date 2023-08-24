@@ -30,6 +30,8 @@
 
 #include "game_client.h"
 
+#define NO_LEADERBOARD 0
+
 namespace steamworks {
 
 class c_leaderboards_find_result_cookies;
@@ -43,10 +45,12 @@ class c_leaderboards {
   c_leaderboards();
   ~c_leaderboards();
 
-  void find_leaderboard(const int id, const std::string& leaderboard_name,
-                        const ELeaderboardSortMethod leaderboard_sort_method = k_ELeaderboardSortMethodNone,
-                        const ELeaderboardDisplayType leaderboard_display_type = k_ELeaderboardDisplayTypeNone);
-  
+  bool create_leaderboard(const int id, const std::string& leaderboard_name,
+                          const ELeaderboardSortMethod leaderboard_sort_method = k_ELeaderboardSortMethodNone,
+                          const ELeaderboardDisplayType leaderboard_display_type = k_ELeaderboardDisplayTypeNone);
+
+  void find_leaderboard(const int id, const std::string& leaderboard_name);
+
   /*
     Uploads a user score to a specified leaderboard. Uploading scores to Steam is rate limited to 10 uploads 
     per 10 minutes and you may only have one outstanding call to this function at a time. Calls UploadLeaderboardScore.
@@ -59,13 +63,13 @@ class c_leaderboards {
   bool download_scores(const int id, const ELeaderboardDataRequest leaderboard_data_request, const int range_start = -1,
                        const int range_end = -1);
 
-  static std::string get_leaderboard_name(const SteamLeaderboard_t leaderboard);
-
   void set_current_leaderboard(const SteamLeaderboard_t leaderboard);
   void set_loading(const bool loading);
 
+  static std::string get_leaderboard_name(const SteamLeaderboard_t leaderboard);
+
  private:
-  SteamLeaderboard_t* current_leaderboard_;
+  SteamLeaderboard_t current_leaderboard_;
   bool loading_;
   unsigned number_of_leaderboard_entries_;
 

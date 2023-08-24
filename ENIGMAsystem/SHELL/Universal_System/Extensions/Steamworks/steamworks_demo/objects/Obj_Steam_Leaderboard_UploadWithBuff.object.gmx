@@ -64,8 +64,7 @@ upload_ID = steam_upload_score_buffer_ext(SteamLeaderboard, irandom(1000), buff,
 &#13;
 buffer_delete(buff);&#13;
 &#13;
-show_debug_message("upload_ID: " + string(upload_ID))&#13;
-</string>
+show_debug_message("upload_ID: " + string(upload_ID))</string>
           </argument>
         </arguments>
       </action>

@@ -50,7 +50,7 @@ void c_leaderboards_score_uploaded_cookies::on_upload_score(LeaderboardScoreUplo
       DEBUG_MESSAGE(
           "Did you create 10 upload requests in less than 10 minutes? Well, the upload rate is limited to "
           "10 upload requests per 10 minutes so you may want to wait before another request.",
-          M_ERROR);
+          M_WARNING);
       enigma::upload_rate_limit_exceeded = true;
     }
     else DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
