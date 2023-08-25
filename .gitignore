@@ -65,3 +65,4 @@ hs_err_pid*.log
 CommandLine/testing/Tests/exec
 CommandLine/testing/Tests/generic_types_serialize_tests/exec
 CommandLine/testing/Tests/JSON_serialization_tests/exec
+CommandLine/testing/Tests/JSON_serialization_tests/exec

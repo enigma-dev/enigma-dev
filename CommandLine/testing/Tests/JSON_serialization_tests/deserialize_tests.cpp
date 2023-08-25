@@ -285,3 +285,69 @@ TEST(deserialize_function, Test_Variant) {
   std::string json3 = enigma::JSON_serialization::internal_serialize_into_fn(variant3);
   ASSERT_EQ(enigma::JSON_serialization::internal_deserialize_fn<variant>(json3), variant3);
 }
+
+TEST(deserialize_function, Test_Lua_Table) {
+  lua_table<int> table1;
+  table1[1] = 1;
+  table1[2] = 2;
+  table1[3] = 3;
+  std::string json1 = enigma::JSON_serialization::internal_serialize_into_fn(table1);
+  lua_table<int> out1 = enigma::JSON_serialization::internal_deserialize_fn<lua_table<int>>(json1);
+  ASSERT_EQ(out1[1], table1[1]);
+  ASSERT_EQ(out1[2], table1[2]);
+  ASSERT_EQ(out1[3], table1[3]);
+  ASSERT_EQ(out1.mx_size_part(), table1.mx_size_part());
+
+  lua_table<int> table2;
+  table2.fill(4, 3);
+  table2[1] = 1;
+  table2[2] = 2;
+  table2[12] = 3;
+  std::string json2 = enigma::JSON_serialization::internal_serialize_into_fn(table2);
+  lua_table<int> out2 = enigma::JSON_serialization::internal_deserialize_fn<lua_table<int>>(json2);
+  ASSERT_EQ(out2[0], table2[0]);
+  ASSERT_EQ(out2[1], table2[1]);
+  ASSERT_EQ(out2[2], table2[2]);
+  ASSERT_EQ(out2[12], table2[12]);
+  ASSERT_EQ(out2.mx_size_part(), table2.mx_size_part());
+
+  lua_table<char> table3;
+  table3.fill('s', 3);
+  table3[1] = 'a';
+  table3[2] = 's';
+  table3[10] = 'f';
+  std::string json3 = enigma::JSON_serialization::internal_serialize_into_fn(table3);
+  lua_table<char> out3 = enigma::JSON_serialization::internal_deserialize_fn<lua_table<char>>(json3);
+  ASSERT_EQ(out3[1], table3[1]);
+  ASSERT_EQ(out3[2], table3[2]);
+  ASSERT_EQ(out3[3], table3[3]);
+  ASSERT_EQ(out3.mx_size_part(), table3.mx_size_part());
+
+  lua_table<std::string> table4;
+  table4.fill("ss", 5);
+  table4[1] = "fares";
+  table4[2] = "atef";
+  table4[20] = "he\"llo";
+  table4[21] = "wo\trld";
+  std::string json4 = enigma::JSON_serialization::internal_serialize_into_fn(table4);
+  lua_table<std::string> out4 = enigma::JSON_serialization::internal_deserialize_fn<lua_table<std::string>>(json4);
+  ASSERT_EQ(out4[0], table4[0]);
+  ASSERT_EQ(out4[1], table4[1]);
+  ASSERT_EQ(out4[2], table4[2]);
+  ASSERT_EQ(out4[20], table4[20]);
+  ASSERT_EQ(out4[21], table4[21]);
+  ASSERT_EQ(out4.mx_size_part(), table4.mx_size_part());
+
+  lua_table<double> table5;
+  table5.fill(4.5, 3);
+  table5[1] = 1.5;
+  table5[2] = 2.5;
+  table5[12] = 3.5;
+  std::string json5 = enigma::JSON_serialization::internal_serialize_into_fn(table5);
+  lua_table<double> out5 = enigma::JSON_serialization::internal_deserialize_fn<lua_table<double>>(json5);
+  ASSERT_EQ(out5[0], table5[0]);
+  ASSERT_EQ(out5[1], table5[1]);
+  ASSERT_EQ(out5[2], table5[2]);
+  ASSERT_EQ(out5[12], table5[12]);
+  ASSERT_EQ(out5.mx_size_part(), table5.mx_size_part());
+}

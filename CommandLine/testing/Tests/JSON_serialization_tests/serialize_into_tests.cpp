@@ -181,3 +181,42 @@ TEST(serialize_into_function, Test_Pointer) {
   int* pointer1 = nullptr;
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(pointer1), "0");
 }
+
+TEST(serialize_into_function, Test_Lua_Table) {
+  lua_table<int> table1;
+  table1.fill(4, 3);
+  table1[1] = 10;   // dense part
+  table1[2] = 20;   // dense part
+  table1[10] = 30;  // sparse part
+  table1[11] = 40;  // sparse part
+  table1[12] = 50;  // sparse part
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(table1),
+            "{\"mx_size_part\":13,\"dense_part\":[4,10,20],\"sparse_part\":{\"10\":30,\"11\":40,\"12\":50}}");
+
+  lua_table<std::string> table2;
+  table2.fill("ss", 4);
+  table2[1] = "fares";
+  table2[2] = "atef";
+  table2[11] = "hello";
+  table2[12] = "world";
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(table2),
+            "{\"mx_size_part\":13,\"dense_part\":[\"ss\",\"fares\",\"atef\",\"ss\"],\"sparse_part\":{\"11\":\"hello\","
+            "\"12\":\"world\"}}");
+
+  lua_table<char> table3;
+  table3.fill('s', 3);
+  table3[1] = 'a';
+  table3[2] = 's';
+  table3[10] = 'f';
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(table3),
+            "{\"mx_size_part\":11,\"dense_part\":[\"s\",\"a\",\"s\"],\"sparse_part\":{\"10\":\"f\"}}");
+
+  lua_table<double> table4;
+  table4[1] = 1293876.2836;
+  table4[2] = 12364.9128;
+  table4[3] = 9218736.22;
+  table4[4] = 1982364.337;
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(table4),
+            "{\"mx_size_part\":5,\"dense_part\":[],\"sparse_part\":{\"1\":1293876.2836,\"2\":12364.9128,\"3\":9218736."
+            "22,\"4\":1982364.337}}");
+}
