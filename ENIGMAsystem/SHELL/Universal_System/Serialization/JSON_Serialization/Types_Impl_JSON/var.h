@@ -22,6 +22,7 @@
 #include "../../type_traits.h"
 #include "lua_table.h"
 #include "variant.h"
+
 namespace enigma {
 namespace JSON_serialization {
 
@@ -40,7 +41,30 @@ is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
 }
 
 template <typename T>
-is_t<T, var, T> inline internal_deserialize_fn(const std::string &json) {}
+is_t<T, var, T> inline internal_deserialize_fn(const std::string &json) {
+  std::string variantStart = "\"variant\":";
+  std::string array1dStart = "\"array1d\":";
+  std::string array2dStart = "\"array2d\":";
+
+  std::size_t variantPos = json.find(variantStart);
+  std::size_t array1dPos = json.find(array1dStart);
+  std::size_t array2dPos = json.find(array2dStart);
+
+  std::string variantStr =
+      json.substr(variantPos + variantStart.length(), array1dPos - variantPos - variantStart.length() - 1);
+  std::string array1dStr =
+      json.substr(array1dPos + array1dStart.length(), array2dPos - array1dPos - array1dStart.length() - 1);
+  std::string array2dStr =
+      json.substr(array2dPos + array2dStart.length(), json.length() - array2dPos - array2dStart.length() - 1);
+
+  variant inner = internal_deserialize_fn<variant>(variantStr);
+  var result{std::move(inner)};
+
+  result.array1d = internal_deserialize_fn<lua_table<variant>>(array1dStr);
+  result.array2d = internal_deserialize_fn<lua_table<lua_table<variant>>>(array2dStr);
+
+  return result;
+}
 
 }  // namespace JSON_serialization
 }  // namespace enigma

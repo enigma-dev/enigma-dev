@@ -82,17 +82,36 @@ matches_t<T, T, is_lua_table> inline internal_deserialize_fn(const std::string &
   auto split = [](const std::string &s, char delimiter) {
     std::vector<std::string> parts;
     size_t start = 0;
-    size_t end = s.find(delimiter);
-    while (end != std::string::npos) {
-      if (end != start) {
-        parts.push_back(s.substr(start, end - start));
+    size_t end = 0;
+    bool within_quotes = false;
+    bool within_array = false;
+    size_t num_open_braces = 0;
+    size_t len = s.length();
+
+    while (end < len) {
+      if (s[end] == '"' && (end == 0 || s[end - 1] != '\\')) {
+        within_quotes = !within_quotes;
+      } else if (s[end] == '[' && !within_quotes) {
+        within_array = true;
+      } else if (s[end] == ']' && !within_quotes) {
+        within_array = false;
+      } else if (s[end] == '{' && !within_quotes) {
+        num_open_braces++;
+      } else if (s[end] == '}' && !within_quotes) {
+        num_open_braces--;
+      } else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
+        if (end != start) {
+          parts.push_back(s.substr(start, end - start));
+        }
+        start = end + 1;
       }
-      start = end + 1;
-      end = s.find(delimiter, start);
+      end++;
     }
-    if (start != s.length()) {
+
+    if (start != len) {
       parts.push_back(s.substr(start));
     }
+
     return parts;
   };
 
