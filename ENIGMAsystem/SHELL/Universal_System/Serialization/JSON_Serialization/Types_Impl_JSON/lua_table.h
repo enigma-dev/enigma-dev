@@ -19,6 +19,7 @@
 #define ENIGMA_SERIALIZE_LUA_TABLE_JSON_H
 
 #include "../../type_traits.h"
+#include "variant.h"
 
 namespace enigma {
 namespace JSON_serialization {
@@ -30,7 +31,11 @@ inline std::string internal_serialize_into_fn(const lua_table<T> &table) {
   json += "\"mx_size_part\":" + internal_serialize_into_fn(table.mx_size_part()) + ",\"dense_part\":[";
 
   for (int i = 0; i < table.dense_part().size(); i++) {
-    json += internal_serialize_into_fn(table.dense_part()[i]);
+    if constexpr (is_lua_table_v<std::decay_t<T>>) {
+      lua_table<variant> table1 = table.dense_part()[i];
+      json += internal_serialize_into_fn(table1);
+    } else
+      json += internal_serialize_into_fn(table.dense_part()[i]);
     if (i != table.dense_part().size() - 1) json += ",";
   }
 
@@ -42,7 +47,11 @@ inline std::string internal_serialize_into_fn(const lua_table<T> &table) {
     else
       json += internal_serialize_into_fn(key);
     json += ":";
-    json += internal_serialize_into_fn(value);
+    if constexpr (is_lua_table_v<std::decay_t<T>>) {
+      lua_table<variant> table1 = value;
+      json += internal_serialize_into_fn(table1);
+    } else
+      json += internal_serialize_into_fn(value);
 
     if (&value != &table.sparse_part().rbegin()->second) json += ",";
   }

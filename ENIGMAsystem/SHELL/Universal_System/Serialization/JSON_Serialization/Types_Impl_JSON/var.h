@@ -18,4 +18,31 @@
 #ifndef ENIGMA_SERIALIZE_VAR_JSON_H
 #define ENIGMA_SERIALIZE_VAR_JSON_H
 
+#include "../../../var4.h"
+#include "../../type_traits.h"
+#include "lua_table.h"
+#include "variant.h"
+namespace enigma {
+namespace JSON_serialization {
+
+template <typename T>
+is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
+  std::string json = "{\"variant\":";
+
+  json += internal_serialize_into_fn<variant>(value);
+  json += ",\"array1d\":";
+  json += internal_serialize_into_fn(value.array1d);
+  json += ",\"array2d\":";
+  json += internal_serialize_into_fn(value.array2d);
+
+  json += "}";
+  return json;
+}
+
+template <typename T>
+is_t<T, var, T> inline internal_deserialize_fn(const std::string &json) {}
+
+}  // namespace JSON_serialization
+}  // namespace enigma
+
 #endif
