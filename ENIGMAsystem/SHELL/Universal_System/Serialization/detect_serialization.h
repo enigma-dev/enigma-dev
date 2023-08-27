@@ -20,6 +20,7 @@
 #define ENIGMA_DETECT_SERIALIZATION_H
 
 #include "Bytes_Serialization/bytes_types_serialization_includes.h"
+#include "JSON_Serialization/JSON_types_serialization_includes.h"
 #include "serialization_fwd_decl.h"
 
 #define INTERNAL_HAS_MEMBER_FUNCTION(NAME, FUNC)      \

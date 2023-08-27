@@ -28,7 +28,6 @@ matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T&
   std::string json = "{";
 
   using KeyType = typename std::decay_t<T>::key_type;
-  using ValueType = typename std::decay_t<T>::mapped_type;
 
   for (auto it = value.begin(); it != value.end(); ++it) {
     if (is_numeric_v<KeyType>)

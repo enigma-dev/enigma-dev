@@ -33,6 +33,43 @@ TEST(deserialize_function, Test_Basics) {
   char val8 = 'f';
   std::string json8 = enigma::JSON_serialization::internal_serialize_into_fn(val8);
   ASSERT_EQ(enigma::JSON_serialization::internal_deserialize_fn<char>(json8), val8);
+
+  const int val9Size = 5;
+  unsigned char* val9 = new unsigned char[val9Size];
+  val9[0] = 0x0;
+  val9[1] = 0x34;
+  val9[2] = 0x56;
+  val9[3] = 0x78;
+  val9[4] = 0x9a;
+
+  std::vector<std::string> hexStream;
+  for (int i = 0; i < 5; ++i) {
+    std::stringstream hexStreamItem;
+    hexStreamItem << std::hex << static_cast<int>(val9[i]);
+    hexStream.push_back(hexStreamItem.str());
+  }
+
+  std::string json9 = enigma::JSON_serialization::internal_serialize_into_fn(hexStream);
+
+  std::vector<std::string> out = enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::string>>(json9);
+  unsigned char* val9Out = new unsigned char[val9Size];
+
+  for (int i = 0; i < val9Size; ++i) {
+    std::istringstream hexStreamItem(out[i]);
+    int value;
+    hexStreamItem >> std::hex >> value;
+    val9Out[i] = static_cast<unsigned char>(value);
+  }
+
+  ASSERT_EQ(val9Out[0], val9[0]);
+  ASSERT_EQ(val9Out[1], val9[1]);
+  ASSERT_EQ(val9Out[2], val9[2]);
+  ASSERT_EQ(val9Out[3], val9[3]);
+  ASSERT_EQ(val9Out[4], val9[4]);
+
+  unsigned int val10 = 12;
+  std::string json10 = enigma::JSON_serialization::internal_serialize_into_fn(val10);
+  ASSERT_EQ(enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(json10), val10);
 }
 
 TEST(deserialize_function, Test_Vector) {

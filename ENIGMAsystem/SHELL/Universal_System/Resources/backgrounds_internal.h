@@ -26,50 +26,55 @@
 #include <string>
 
 namespace enigma {
-  
+
 struct Background {
-  Background(unsigned w = 1, unsigned h = 1, unsigned fw = 1, unsigned fh = 1, int tex = -1, bool ts = false, 
-    unsigned tw = 0, unsigned th = 0, int ho = 0, int vo = 0, int hs = 0, int vs = 0) : 
-    width(w), 
-    height(h), 
-    textureID(tex),
-    textureBounds({0, 0, (gs_scalar)w/fw, (gs_scalar)h/fh}), 
-    isTileset(ts), 
-    tileWidth(tw),
-    tileHeight(th),
-    hOffset(ho),
-    vOffset(vo),
-    hSep(hs),
-    vSep(vs) {}
+  Background(unsigned w = 1, unsigned h = 1, unsigned fw = 1, unsigned fh = 1, int tex = -1, bool ts = false,
+             unsigned tw = 0, unsigned th = 0, int ho = 0, int vo = 0, int hs = 0, int vs = 0)
+      : width(w),
+        height(h),
+        textureID(tex),
+        textureBounds({0, 0, (gs_scalar)w / fw, (gs_scalar)h / fh}),
+        isTileset(ts),
+        tileWidth(tw),
+        tileHeight(th),
+        hOffset(ho),
+        vOffset(vo),
+        hSep(hs),
+        vSep(vs) {}
   Background(const Background& b, bool duplicateTexture = true);
   void FreeTexture();
-  
+
   unsigned width, height;
   int textureID;
   TexRect textureBounds;
   bool isTileset;
-  
+
   unsigned tileWidth, tileHeight;
   int hOffset, vOffset;
   int hSep, vSep;
 
+  // Bytes (de)serialization
   std::size_t byte_size() const noexcept;
   std::vector<std::byte> serialize() const;
-  std::size_t deserialize_self(std::byte *iter);
-  static std::pair<Background, std::size_t> deserialize(std::byte *iter);
+  std::size_t deserialize_self(std::byte* iter);
+  static std::pair<Background, std::size_t> deserialize(std::byte* iter);
+
+  // JSON (de)serialization
+  std::string json_serialize() const;
+  void json_deserialize_self(const std::string& json);
+  static Background json_deserialize(const std::string& json);
 
   // AssArray mandatory
   static const char* getAssetTypeName() { return "Background"; }
   bool isDestroyed() const { return _destroyed; }
   void destroy() { _destroyed = true; }
-  
-protected:
+
+ protected:
   bool _destroyed = false;
 };
 
 extern AssetArray<Background> backgrounds;
 
-} //namespace enigma
+}  //namespace enigma
 
-
-#endif //ENIGMA_BACKGROUND_INTERNAL_H
+#endif  //ENIGMA_BACKGROUND_INTERNAL_H

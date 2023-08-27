@@ -43,8 +43,10 @@ enables_if_numeric_t<T, std::string> inline internal_serialize_into_fn(const T& 
     }
   }
 
-  if constexpr (std::is_same_v<T, char>) return "\"" + std::string(1, value) + "\"";
-
+  if constexpr (std::is_same_v<T, char>) {
+    std::string Char(1, value);
+    return "\"" + Char + "\"";
+  }
   return json;
 }
 

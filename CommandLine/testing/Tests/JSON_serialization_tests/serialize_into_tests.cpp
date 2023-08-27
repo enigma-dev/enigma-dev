@@ -25,6 +25,23 @@ TEST(serialize_into_function, Test_Basics) {
 
   char val8 = 'f';
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(val8), "\"f\"");
+
+  const int val9Size = 5;
+  unsigned char* val9 = new unsigned char[val9Size];
+  val9[0] = 0x12;
+  val9[1] = 0x34;
+  val9[2] = 0x56;
+  val9[3] = 0x78;
+  val9[4] = 0x9a;
+
+  std::vector<std::string> hexStream;
+  for (int i = 0; i < val9Size; ++i) {
+    std::stringstream hexStreamItem;
+    hexStreamItem << std::hex << static_cast<int>(val9[i]);
+    hexStream.push_back(hexStreamItem.str());
+  }
+
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(hexStream), "[\"12\",\"34\",\"56\",\"78\",\"9a\"]");
 }
 
 TEST(serialize_into_function, Test_Vector) {

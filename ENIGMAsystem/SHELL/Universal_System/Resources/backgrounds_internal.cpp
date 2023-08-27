@@ -8,13 +8,13 @@ AssetArray<Background> backgrounds;
 Background::Background(const Background& b, bool duplicateTexture) {
   width = b.width;
   height = b.height;
-  
+
   if (duplicateTexture && b.textureID != -1) {
     textureID = enigma::graphics_duplicate_texture(b.textureID);
   } else {
     textureID = b.textureID;
   }
-  
+
   textureBounds = b.textureBounds;
   isTileset = b.isTileset;
   tileWidth = b.tileWidth;
@@ -51,10 +51,10 @@ std::vector<std::byte> Background::serialize() const {
   enigma_serialize_many(len, result, texture_width, texture_height);
   result.resize(result.size() + (texture_width * texture_height * 4));
   std::copy(texture, texture + (texture_width * texture_height * 4),
-            reinterpret_cast<unsigned char *>(result.data() + len));
+            reinterpret_cast<unsigned char*>(result.data() + len));
   len += texture_width * texture_height;
-  enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w,
-                                 isTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+  enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
+                        tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
 
   result.shrink_to_fit();
   return result;
@@ -68,11 +68,11 @@ std::size_t Background::deserialize_self(std::byte* iter) {
   unsigned texture_height = 0;
   enigma_deserialize_many(iter, len, texture_width, texture_height);
   RawImage img{new unsigned char[texture_width * texture_height * 4], texture_width, texture_height};
-  std::copy(iter + len, iter + len + (texture_width * texture_height * 4), reinterpret_cast<std::byte *>(img.pxdata));
+  std::copy(iter + len, iter + len + (texture_width * texture_height * 4), reinterpret_cast<std::byte*>(img.pxdata));
   textureID = graphics_create_texture(img, false);
   len += texture_width * texture_height * 4;
-  enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w,
-                                 isTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
+  enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
+                          tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
   _destroyed = false;
 
   return len;
@@ -84,4 +84,126 @@ std::pair<Background, std::size_t> Background::deserialize(std::byte* iter) {
   return {std::move(result), len};
 }
 
+std::string Background::json_serialize() const {
+  std::string json = "{\"width\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(width);
+
+  json += ",\"height\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(height);
+
+  unsigned texture_width = 0;
+  unsigned texture_height = 0;
+
+  auto texture = graphics_copy_texture_pixels(textureID, &texture_width, &texture_height);
+  json += ",\"texture_width\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(texture_width);
+
+  json += ",\"texture_height\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(texture_height);
+
+  json += ",\"texture\":";
+
+  std::vector<std::string> hexStream(texture_width * texture_height * 4);
+  for (unsigned int i = 0; i < texture_width * texture_height * 4; ++i) {
+    std::stringstream hexStreamItem;
+    hexStreamItem << std::hex << static_cast<int>(texture[i]);
+    hexStream[i] = hexStreamItem.str();
+  }
+
+  json += enigma::JSON_serialization::internal_serialize_into_fn(hexStream);
+
+  json += ",\"textureBounds.x\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(textureBounds.x);
+
+  json += ",\"textureBounds.y\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(textureBounds.y);
+
+  json += ",\"textureBounds.h\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(textureBounds.h);
+
+  json += ",\"textureBounds.w\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(textureBounds.w);
+
+  json += ",\"isTileset\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(isTileset);
+
+  json += ",\"tileWidth\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(tileWidth);
+
+  json += ",\"tileHeight\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(tileHeight);
+
+  json += ",\"hOffset\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(hOffset);
+
+  json += ",\"vOffset\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(vOffset);
+
+  json += ",\"hSep\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(hSep);
+
+  json += ",\"vSep\":";
+  json += enigma::JSON_serialization::internal_serialize_into_fn(vSep);
+
+  json += "}";
+
+  return json;
 }
+
+void Background::json_deserialize_self(const std::string& json) {
+  auto find_value = [&](const std::string& field) {
+    size_t startPos = json.find("\"" + field + "\":");
+    if (startPos != std::string::npos) {
+      startPos += field.length() + 3;  // Add 3 to account for field name and quotes and colon
+      size_t endPos = json.find_first_of(",}", startPos);
+      if (endPos != std::string::npos) {
+        return json.substr(startPos, endPos - startPos);
+      }
+    }
+    return std::string();
+  };
+
+  width = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("width"));
+  height = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("height"));
+
+  unsigned texture_width =
+      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("texture_width"));
+  unsigned texture_height =
+      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("texture_height"));
+  RawImage img{new unsigned char[texture_width * texture_height * 4], texture_width, texture_height};
+
+  std::vector<std::string> hexStream =
+      enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::string>>(find_value("texture"));
+
+  for (unsigned int i = 0; i < texture_width * texture_height * 4; ++i) {
+    std::istringstream hexStreamItem(hexStream[i]);
+    int value;
+    hexStreamItem >> std::hex >> value;
+    img.pxdata[i] = static_cast<unsigned char>(value);
+  }
+
+  textureID = graphics_create_texture(img, false);
+
+  textureBounds.x = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.x"));
+  textureBounds.y = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.y"));
+  textureBounds.h = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.h"));
+  textureBounds.w = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.w"));
+
+  isTileset = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("isTileset"));
+  tileWidth = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("tileWidth"));
+  tileHeight = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("tileHeight"));
+  hOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("hOffset"));
+  vOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("vOffset"));
+  hSep = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("hSep"));
+  vSep = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("vSep"));
+
+  _destroyed = false;
+}
+
+Background Background::json_deserialize(const std::string& json) {
+  Background result;
+  result.json_deserialize_self(json);
+  return result;
+}
+
+}  // namespace enigma
