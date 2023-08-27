@@ -174,7 +174,20 @@ namespace enigma_user
 			DEBUG_MESSAGE("Failed to parse configuration" + reader.getFormattedErrorMessages(), MESSAGE_TYPE::M_ERROR);
 			return -1;
 		}
-		return RecursiveDSMap(root);
+
+		if (root.isObject())
+		{
+			return RecursiveDSMap(root);
+		}
+		else if (root.isArray())
+		{
+			return RecursiveDSList(root);
+		}
+		else
+		{
+			DEBUG_MESSAGE("Invalid JSON. The root is not as array of objects or an object.", MESSAGE_TYPE::M_ERROR);
+			return -1;
+		}
 	}
 
 	string json_encode(variant ds_map) {
