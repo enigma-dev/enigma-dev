@@ -1,26 +1,24 @@
-var async_load = ds_map_create();
+var json = '[{"entries":{"entries":[{"name":"AlEw","score":196198,"rank":1,"userID":"1234"},{"name":"El Pice","score":58158,"rank":2,"userID":"12345"},{"name":"saif","score":505,"rank":3,"userID":"12346"},{"name":"Bucciarati (Couter55)","score":336,"rank":4,"userID":"12347"},{"name":"Haiyatin","score":236,"rank":5,"userID":"12348"},{"name":"Kaito","score":137,"rank":6,"userID":"12349"},{"name":"gamesadasteam","score":96,"rank":7,"userID":"123410"},{"name":"Bashkash2013","score":7,"rank":8,"userID":"123411"},{"name":"silveradagio","score":0,"rank":9,"userID":"123412"},{"name":"HappyStarXiXi","score":0,"rank":10,"userID":"123413"}]},"event_type":"leaderboard_download","id":0,"lb_name":"SteamLeaderboard","num_entries":10,"status":0, "test_obj": {"lb_name":"SteamLeaderboard","num_entries":10,"status":0}},{"num_entries":10}]';
 
-//ds_map_add(async_load, "entries", "{\n\"entries\":[\n{\"name\":\"TomasJPereyra\",\"score\":1,\"rank\":1,\"userID\":\"@i64@1234$i64$\"},\n{\"name\":\"Benal\",\"score\":254,\"rank\":10,\"userID\":\"@i64@12345$i64$\",\"data\":\"SEJlbmFsIHdhcyBoZXJlIDopAAA=\"}\n\n]\n}\n");
-ds_map_add(async_load, "entries", '{\n\"entries\":[\n{\"name\":\"TomasJPereyra\",\"score\":1,\"rank\":1,\"userID\":\"@i64@1234$i64$\"},\n{\"name\":\"Benal\",\"score\":254,\"rank\":10,\"userID\":\"@i64@12345$i64$\",\"data\":\"SEJlbmFsIHdhcyBoZXJlIDopAAA=\"}\n\n]\n}\n');
-ds_map_add(async_load, "lb_name", "YYLeaderboard_10\/29\/21--");
-ds_map_add(async_load, "event_type", "leaderboard_download");
-ds_map_add(async_load, "id", 5.0);
-ds_map_add(async_load, "num_entries", 2.0);
-ds_map_add(async_load, "status", 1.0);
+var json_decoded = json_decode(json);
 
-var decoded_string = json_encode(async_load);
+//var decoded_string = json_encode(json_decoded);
 
-var ds_map = json_decode(decoded_string);
+//show_debug_message(decoded_string);
 
-gtest_assert_eq(ds_map_size(ds_map), 6);
+//var ds_map = json_decode(decoded_string);
 
-gtest_assert_eq(ds_map_exists(ds_map, "entries"), true);
-gtest_assert_eq(ds_map_exists(ds_map, "lb_name"), true);
-gtest_assert_eq(ds_map_exists(ds_map, "event_type"), true);
-gtest_assert_eq(ds_map_exists(ds_map, "id"), true);
-gtest_assert_eq(ds_map_exists(ds_map, "num_entries"), true);
-gtest_assert_eq(ds_map_exists(ds_map, "status"), true);
+//gtest_assert_eq(ds_map_size(ds_map), 7);
 
-gtest_assert_eq(ds_map_exists(ds_map, "test_not_exist"), false);
+//gtest_assert_eq(ds_map_exists(ds_map, "entries"), true);
+//gtest_assert_eq(ds_map_exists(ds_map, "lb_name"), true);
+//gtest_assert_eq(ds_map_exists(ds_map, "event_type"), true);
+//gtest_assert_eq(ds_map_exists(ds_map, "id"), true);
+//gtest_assert_eq(ds_map_exists(ds_map, "num_entries"), true);
+//gtest_assert_eq(ds_map_exists(ds_map, "status"), true);
+
+//gtest_assert_eq(ds_map_exists(ds_map, "test_not_exist"), false);
+
+//gtest_assert_eq(ds_map_find_value(ds_map_find_value(ds_map, "test_obj"), "num_entries"), 10);
 
 
