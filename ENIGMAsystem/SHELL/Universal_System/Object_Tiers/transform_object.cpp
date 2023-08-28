@@ -1,4 +1,5 @@
 /** Copyright (C) 2010-2011 Josh Ventura
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -63,5 +64,50 @@ namespace enigma
     object_transform result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_transform::json_serialize() {
+    std::string json = "{";
+
+    json += "\"object_type\":\"object_transform\",";
+    json += "\"object_graphics\":" + object_graphics::json_serialize() + ",";
+    json += "\"image_alpha\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_alpha) + ",";
+    json += "\"image_blend\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_blend);
+
+    json += "}";
+
+    return json;  
+  }
+
+  void object_transform::json_deserialize_self(const std::string& json) {
+    auto find_value = [&](const std::string &field) {
+      size_t startPos = json.find("\"" + field + "\":");
+      if (startPos != std::string::npos) {
+        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
+        size_t endPos = json.find_first_of(",}", startPos);
+        if (endPos != std::string::npos) {
+          return json.substr(startPos, endPos - startPos);
+        }
+      }
+      return std::string();
+    };
+
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    if (type != "object_transform") {
+      DEBUG_MESSAGE("object_transform::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_transform",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    object_graphics::json_deserialize_self(find_value("object_graphics"));
+
+    image_alpha = enigma::JSON_serialization::internal_deserialize_fn<double>(find_value("image_alpha"));
+    image_blend = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("image_blend"));
+  }
+
+  object_transform object_transform::josn_deserialize(const std::string& json){
+    object_transform result;
+    result.json_deserialize_self(json);
+    return result;
   }
 }
