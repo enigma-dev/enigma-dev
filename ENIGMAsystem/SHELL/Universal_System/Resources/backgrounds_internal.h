@@ -1,6 +1,7 @@
 /** Copyright (C) 2008 Josh Ventura
 *** Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
 *** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

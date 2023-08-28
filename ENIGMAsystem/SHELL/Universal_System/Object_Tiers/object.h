@@ -3,6 +3,7 @@
 **  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **  Copyright (C) 2021 Nabeel Danish                                            **
+**  Copyright (C) 2023 Fares Atef                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -36,94 +37,90 @@
 #define ENIGMA_OBJECT_H
 
 namespace enigma_user {
-  enum {
-    self =   -1,
-    other =  -2,
-    all =    -3,
-    noone =  -4,
-    global = -5,
-    local =  -7
-  };
+enum { self = -1, other = -2, all = -3, noone = -4, global = -5, local = -7 };
 }
 
-#include "Universal_System/var4.h"
 #include "Universal_System/scalar.h"
+#include "Universal_System/var4.h"
 
-namespace enigma
-{
-    extern int maxid;
-    extern int id_current;
-    extern int objectcount;
+namespace enigma {
+extern int maxid;
+extern int id_current;
+extern int objectcount;
 
-    extern double newinst_x, newinst_y;
-    extern int newinst_obj, newinst_id;
+extern double newinst_x, newinst_y;
+extern int newinst_obj, newinst_id;
 
-    struct object_basic
-    {
-      static constexpr unsigned char objtype = 0xAA;
+struct object_basic {
+  static constexpr unsigned char objtype = 0xAA;
 
-      const unsigned id;
-      const int object_index;
+  const unsigned id;
+  const int object_index;
 
-      virtual void unlink();
-      virtual void deactivate();
-      virtual void activate();
-      virtual variant myevent_create();
-      virtual variant myevent_gamestart();
-      virtual variant myevent_gameend();
-      virtual variant myevent_closebutton();
-      virtual variant myevent_roomstart();
-      virtual variant myevent_roomend();
-      virtual variant myevent_destroy();
+  virtual void unlink();
+  virtual void deactivate();
+  virtual void activate();
+  virtual variant myevent_create();
+  virtual variant myevent_gamestart();
+  virtual variant myevent_gameend();
+  virtual variant myevent_closebutton();
+  virtual variant myevent_roomstart();
+  virtual variant myevent_roomend();
+  virtual variant myevent_destroy();
 
-      virtual std::vector<std::byte> serialize();
-      virtual std::size_t deserialize_self(std::byte *iter);
-      static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
+  // Bytes (de)serialization
+  virtual std::vector<std::byte> serialize();
+  virtual std::size_t deserialize_self(std::byte *iter);
+  static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
 
-      object_basic();
-      object_basic(int uid, int uoid);
-      virtual ~object_basic();
+  // JSON (de)serialization
+  virtual std::string json_serialize();
+  virtual void json_deserialize_self(const std::string &json);
+  static object_basic json_deserialize(const std::string &json);
 
-      //Can we cast this instance to an object of type "obj". (NOTE: This only checks parents; you can never can_cast(this->id).)
-      virtual bool can_cast(int obj) const;
-    };
+  object_basic();
+  object_basic(int uid, int uoid);
+  virtual ~object_basic();
 
-    struct objectstruct
-    {
-        int sprite;
-        int polygon;
-        bool solid, visible;
-        double depth;
-        bool persistent;
-        double mask;
-        double parent;
-        int id;
-    };
-    void objectdata_load();
-    void constructor(object_basic* instance);
-}
+  //Can we cast this instance to an object of type "obj". (NOTE: This only checks parents; you can never can_cast(this->id).)
+  virtual bool can_cast(int obj) const;
+};
+
+struct objectstruct {
+  int sprite;
+  int polygon;
+  bool solid, visible;
+  double depth;
+  bool persistent;
+  double mask;
+  double parent;
+  int id;
+};
+void objectdata_load();
+void constructor(object_basic *instance);
+}  // namespace enigma
 
 namespace enigma_user {
-    bool object_exists(int objid);
-    
-    void object_set_depth(int objid, int val);
-    void object_set_mask(int objid, int val);
-    void object_set_persistent(int objid, bool val);
-    void object_set_solid(int objid, bool val);
-    void object_set_sprite(int objid, int val);
-    void object_set_polygon(int objid, int val);
-    void object_set_visible(int objid, bool val);
-    
-    int object_get_depth(int objid);
-    int object_get_mask(int objid);
-    int object_get_parent(int objid);
-    bool object_get_persistent(int objid);
-    bool object_get_solid(int objid);
-    int object_get_sprite(int objid);
-    int object_get_polygon(int objid);
-    bool object_get_visible(int objid);
-    
-    bool object_is_ancestor(int objid, int acid);
-}
+bool object_exists(int objid);
 
-#endif // ENIGMA_OBJECT_H
+void object_set_depth(int objid, int val);
+void object_set_mask(int objid, int val);
+void object_set_persistent(int objid, bool val);
+void object_set_solid(int objid, bool val);
+void object_set_sprite(int objid, int val);
+void object_set_polygon(int objid, int val);
+void object_set_visible(int objid, bool val);
+
+int object_get_depth(int objid);
+int object_get_mask(int objid);
+int object_get_parent(int objid);
+bool object_get_persistent(int objid);
+bool object_get_solid(int objid);
+int object_get_sprite(int objid);
+int object_get_polygon(int objid);
+bool object_get_visible(int objid);
+
+bool object_is_ancestor(int objid, int acid);
+}  // namespace enigma_user
+
+#endif  // ENIGMA_OBJECT_H
