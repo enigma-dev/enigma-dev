@@ -135,25 +135,24 @@ namespace enigma
   std::string object_planar::json_serialize() {
     std::string json = "{";
 
-    json+= "\"object_basic\":";
-    json+= object_basic::json_serialize()+",";
-    json+= "\"object_type\":" + enigma::JSON_serialization::internal_serialize_into_fn(object_planar::objtype) + ",";
-    json+= "\"x\":" + enigma::JSON_serialization::internal_serialize_into_fn(x) + ",";
-    json+= "\"y\":" + enigma::JSON_serialization::internal_serialize_into_fn(y) + ",";
-    json+= "\"xprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(xprevious) + ",";
-    json+= "\"yprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(yprevious) + ",";
-    json+= "\"xstart\":" + enigma::JSON_serialization::internal_serialize_into_fn(xstart) + ",";
-    json+= "\"ystart\":" + enigma::JSON_serialization::internal_serialize_into_fn(ystart) + ",";
+    json += "\"object_type\":\"object_planar\",";
+    json += "\"object_basic\":" + object_basic::json_serialize()+ ",";
+    json += "\"x\":" + enigma::JSON_serialization::internal_serialize_into_fn(x) + ",";
+    json += "\"y\":" + enigma::JSON_serialization::internal_serialize_into_fn(y) + ",";
+    json += "\"xprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(xprevious) + ",";
+    json += "\"yprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(yprevious) + ",";
+    json += "\"xstart\":" + enigma::JSON_serialization::internal_serialize_into_fn(xstart) + ",";
+    json += "\"ystart\":" + enigma::JSON_serialization::internal_serialize_into_fn(ystart) + ",";
 #ifdef ISLOCAL_persistent
-    json+= "\"persistent\":" + enigma::JSON_serialization::internal_serialize_into_fn(persistent) + ",";
+    json += "\"persistent\":" + enigma::JSON_serialization::internal_serialize_into_fn(persistent) + ",";
 #endif
-    json+= "\"direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(direction) + ",";
-    json+= "\"speed\":" + enigma::JSON_serialization::internal_serialize_into_fn(speed) + ",";
-    json+= "\"hspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(hspeed) + ",";
-    json+= "\"vspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(vspeed) + ",";
-    json+= "\"gravity\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity) + ",";
-    json+= "\"gravity_direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity_direction) + ",";
-    json+= "\"friction\":" + enigma::JSON_serialization::internal_serialize_into_fn(friction);
+    json += "\"direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(direction) + ",";
+    json += "\"speed\":" + enigma::JSON_serialization::internal_serialize_into_fn(speed) + ",";
+    json += "\"hspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(hspeed) + ",";
+    json += "\"vspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(vspeed) + ",";
+    json += "\"gravity\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity) + ",";
+    json += "\"gravity_direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity_direction) + ",";
+    json += "\"friction\":" + enigma::JSON_serialization::internal_serialize_into_fn(friction);
 
     json += "}";
 
@@ -164,7 +163,7 @@ namespace enigma
     auto find_value = [&](const std::string &field) {
     size_t startPos = json.find("\"" + field + "\":");
     if (startPos != std::string::npos) {
-      startPos += field.length() + 3;  // Add 3 to account for field name and quotes and colon
+      startPos += field.length() + 3;  // Add 3 to account for quotes and colon
       size_t endPos = json.find_first_of(",}", startPos);
       if (endPos != std::string::npos) {
         return json.substr(startPos, endPos - startPos);
@@ -173,13 +172,14 @@ namespace enigma
     return std::string();
   };
 
-    object_basic::json_deserialize_self(find_value("object_basic"));
-    unsigned char type=enigma::JSON_serialization::internal_deserialize_fn<unsigned char>(find_value("object_type"));
-    if (type != object_planar::objtype) {
-      DEBUG_MESSAGE("object_planar::json_deserialize_self: Object type '" + std::to_string(type) +
-                        "' does not match expected: " + std::to_string(object_planar::objtype),
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    if (type != "object_planar") {
+      DEBUG_MESSAGE("object_planar::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_planar",
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
+
+    object_basic::json_deserialize_self(find_value("object_basic"));
 
     x = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(find_value("x"));
     y = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(find_value("y"));

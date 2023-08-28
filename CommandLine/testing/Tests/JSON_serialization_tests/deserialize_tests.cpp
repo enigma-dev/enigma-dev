@@ -96,6 +96,11 @@ TEST(deserialize_function, Test_Vector) {
   std::vector<char> vector6 = {'h', 'e', 'l', 'l', 'o'};
   std::string json6 = enigma::JSON_serialization::internal_serialize_into_fn(vector6);
   ASSERT_EQ(enigma::JSON_serialization::internal_deserialize_fn<std::vector<char>>(json6), vector6);
+
+  std::vector<std::map<int,int>> vector7 = {{{1,2},{3,4}},{{5,6},{7,8}}};
+  std::string json7 = enigma::JSON_serialization::internal_serialize_into_fn(vector7);
+  std::vector<std::map<int,int>> out7 = enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::map<int,int>>>(json7);
+  ASSERT_EQ(out7, vector7);
 }
 
 TEST(deserialize_function, Test_Set) {

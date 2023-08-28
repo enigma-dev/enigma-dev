@@ -68,12 +68,12 @@ struct object_basic {
   virtual variant myevent_roomend();
   virtual variant myevent_destroy();
 
-  // Bytes (de)serialization
+  // Bytes (de)Serialization
   virtual std::vector<std::byte> serialize();
   virtual std::size_t deserialize_self(std::byte *iter);
   static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
 
-  // JSON (de)serialization
+  // JSON (de)Serialization
   virtual std::string json_serialize();
   virtual void json_deserialize_self(const std::string &json);
   static object_basic json_deserialize(const std::string &json);

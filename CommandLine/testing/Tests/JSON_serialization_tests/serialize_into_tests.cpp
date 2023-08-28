@@ -57,6 +57,10 @@ TEST(serialize_into_function, Test_Vector) {
 
   std::vector<bool> vector4 = {true, false, true, false};
   ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(vector4), "[\"true\",\"false\",\"true\",\"false\"]");
+
+  std::vector<std::map<int,int>> vector5 = {{{1,2},{3,4}},{{5,6},{7,8}}};
+  ASSERT_EQ(enigma::JSON_serialization::internal_serialize_into_fn(vector5),
+            "[{\"1\":2,\"3\":4},{\"5\":6,\"7\":8}]");
 }
 
 TEST(serialize_into_function, Test_Set) {

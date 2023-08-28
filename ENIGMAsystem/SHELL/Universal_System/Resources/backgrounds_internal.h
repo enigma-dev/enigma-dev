@@ -54,13 +54,13 @@ struct Background {
   int hOffset, vOffset;
   int hSep, vSep;
 
-  // Bytes (de)serialization
+  // Bytes (de)Serialization
   std::size_t byte_size() const noexcept;
   std::vector<std::byte> serialize() const;
   std::size_t deserialize_self(std::byte* iter);
   static std::pair<Background, std::size_t> deserialize(std::byte* iter);
 
-  // JSON (de)serialization
+  // JSON (de)Serialization
   std::string json_serialize() const;
   void json_deserialize_self(const std::string& json);
   static Background json_deserialize(const std::string& json);

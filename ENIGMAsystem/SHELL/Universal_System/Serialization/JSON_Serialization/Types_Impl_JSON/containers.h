@@ -44,17 +44,44 @@ template <typename T>
 matches_t<T, T, is_std_vector, is_std_set, is_std_queue> inline internal_deserialize_fn(const std::string& json) {
   T result;
 
-  if (json.length() > 2) {
+  if (json.length() > 2) {  // Empty array
     std::string jsonCopy = json.substr(1, json.length() - 2);
-    std::string::size_type pos = 0;
-    std::string::size_type lastPos = 0;
 
-    while ((pos = jsonCopy.find(',', lastPos)) != std::string::npos) {
-      insert_back(result, internal_deserialize_fn<typename T::value_type>(jsonCopy.substr(lastPos, pos - lastPos)));
-      lastPos = pos + 1;
-    }
+    auto split = [](const std::string& s, char delimiter) {
+      std::vector<std::string> parts;
+      size_t start = 0;
+      size_t end = 0;
+      bool within_quotes = false;
+      bool within_array = false;
+      size_t num_open_braces = 0;
+      size_t len = s.length();
 
-    insert_back(result, internal_deserialize_fn<typename T::value_type>(jsonCopy.substr(lastPos)));
+      while (end < len) {
+        if (s[end] == '"' && (end == 0 || s[end - 1] != '\\')) {
+          within_quotes = !within_quotes;
+        } else if (s[end] == '[' && !within_quotes) {
+          within_array = true;
+        } else if (s[end] == ']' && !within_quotes) {
+          within_array = false;
+        } else if (s[end] == '{' && !within_quotes) {
+          num_open_braces++;
+        } else if (s[end] == '}' && !within_quotes) {
+          num_open_braces--;
+        } else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
+          if (end != start) {
+            parts.push_back(s.substr(start, end - start));
+          }
+          start = end + 1;
+        }
+        end++;
+      }
+      if (start != len) parts.push_back(s.substr(start));
+      return parts;
+    };
+
+    std::vector<std::string> parts = split(jsonCopy, ',');
+    for (auto it = parts.begin(); it != parts.end(); ++it)
+      insert_back(result, internal_deserialize_fn<typename T::value_type>(*it));
   }
 
   return result;

@@ -154,7 +154,7 @@ void Background::json_deserialize_self(const std::string& json) {
   auto find_value = [&](const std::string& field) {
     size_t startPos = json.find("\"" + field + "\":");
     if (startPos != std::string::npos) {
-      startPos += field.length() + 3;  // Add 3 to account for field name and quotes and colon
+      startPos += field.length() + 3;  // Add 3 to account for quotes and colon
       size_t endPos = json.find_first_of(",}", startPos);
       if (endPos != std::string::npos) {
         return json.substr(startPos, endPos - startPos);
