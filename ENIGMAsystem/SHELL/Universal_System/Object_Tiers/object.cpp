@@ -146,7 +146,7 @@ void object_basic::json_deserialize_self(const std::string &json) {
 
   auto type = enigma::JSON_serialization::internal_deserialize_fn<unsigned char>(find_value("object_type"));
   if (type != object_basic::objtype) {
-    DEBUG_MESSAGE("object_basic::deserialize_self: Object type '" + std::to_string(type) +
+    DEBUG_MESSAGE("object_basic::json_deserialize_self: Object type '" + std::to_string(type) +
                       "' does not match expected: " + std::to_string(object_basic::objtype),
                   MESSAGE_TYPE::M_FATAL_ERROR);
   } else {
