@@ -268,7 +268,6 @@ namespace enigma_user
 
 		if (root.isObject())
 		{
-			DEBUG_MESSAGE("JSON is an object", MESSAGE_TYPE::M_INFO);
 			return enigma::RecursiveDSMap(root);
 		}
 		else if (root.isArray())
@@ -277,7 +276,7 @@ namespace enigma_user
 		}
 		else
 		{
-			DEBUG_MESSAGE("JSON is not an array or object", MESSAGE_TYPE::M_ERROR);
+			DEBUG_MESSAGE("Invalid JSON. The root is not as array of objects or an object.", MESSAGE_TYPE::M_ERROR);
 			return -1;
 		}
 	}
