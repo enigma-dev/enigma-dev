@@ -1,5 +1,6 @@
 /** Copyright (C) 2010-2011 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -99,10 +100,15 @@ namespace enigma
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
 
-    // Serialization and deserialization
+    // Bytes (de)Serialization
       std::vector<std::byte> serialize() override;
       std::size_t deserialize_self(std::byte *iter) override;
       static std::pair<object_graphics, std::size_t> deserialize(std::byte *iter);
+  
+    // JSON (de)Serialization
+      std::string json_serialize() override;
+      void json_deserialize_self(const std::string &json) override;
+      static object_graphics json_deserialize(const std::string& json);
   };
 } //namespace enigma
 

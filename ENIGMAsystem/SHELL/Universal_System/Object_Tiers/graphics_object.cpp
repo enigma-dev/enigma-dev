@@ -1,5 +1,6 @@
 /** Copyright (C) 2008 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -125,5 +126,64 @@ namespace enigma
     object_graphics result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_graphics::json_serialize(){
+    std::string json = "{";
+
+    json += "\"object_type\":\"object_graphics\",";
+    json += "\"object_timelines\":" + object_timelines::json_serialize() + ",";
+    json += "\"sprite_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(sprite_index) + ",";
+    json += "\"image_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_index) + ",";
+    json += "\"image_speed\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_speed) + ",";
+    json += "\"image_single\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_single) + ",";
+    json += "\"depth\":" + enigma::JSON_serialization::internal_serialize_into_fn(depth) + ",";
+    json += "\"visible\":" + enigma::JSON_serialization::internal_serialize_into_fn(visible) + ",";
+    json += "\"image_xscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_xscale) + ",";
+    json += "\"image_yscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_yscale) + ",";
+    json += "\"image_angle\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_angle);
+
+    json += "}";
+
+    return json;
+  }
+
+  void object_graphics::json_deserialize_self(const std::string &json) {
+    auto find_value = [&](const std::string &field) {
+      size_t startPos = json.find("\"" + field + "\":");
+      if (startPos != std::string::npos) {
+        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
+        size_t endPos = json.find_first_of(",}", startPos);
+        if (endPos != std::string::npos) {
+          return json.substr(startPos, endPos - startPos);
+        }
+      }
+      return std::string();
+    };
+
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    if (type != "object_graphics") {
+      DEBUG_MESSAGE("object_graphics::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_graphics",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    object_timelines::json_deserialize_self(find_value("object_timelines"));
+
+    sprite_index = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("sprite_index"));
+    image_index = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_index"));
+    image_speed = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_speed"));
+    image_single = enigma::JSON_serialization::internal_deserialize_fn<variant>(find_value("image_single"));
+    depth = enigma::JSON_serialization::internal_deserialize_fn<variant>(find_value("depth"));
+    visible = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("visible"));
+    image_xscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_xscale"));  
+    image_yscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_yscale"));
+    image_angle = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_angle"));
+  }
+
+  object_graphics object_graphics::json_deserialize(const std::string& json) {
+    object_graphics result;
+    result.json_deserialize_self(json);
+    return result;
   }
 }
