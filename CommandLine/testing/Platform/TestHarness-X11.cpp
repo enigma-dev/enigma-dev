@@ -200,11 +200,13 @@ constexpr const char *kDefaultExtensions =
     "ParticleSystems";
 
 int build_game(const string &game, const TestConfig &tc, const string &out) {
+  TestHarness::configpool += TestHarness::configpool == "" ? tc.stringify() : "," + tc.stringify();
   if (pid_t emake = fork()) {
     int status = 0;
     if (emake == -1) return -1;
     int ret = (waitpid(emake, &status, 0) == -1);
-    system("./share_logs.sh");
+    const string slogs_arg = "./share_logs.sh " + game.substr(game.find_last_of("\\/")+1)+tc.stringify();
+    system(slogs_arg.c_str());
     if (ret) return -1;
     if (WIFEXITED(status)) return WEXITSTATUS(status);
     return -1;

@@ -27,6 +27,10 @@ elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
   JOBS[1]='COMPILER=clang PLATFORM=None'
   JOB_COUNT=2
   TRAVIS_WORKERS=1
+elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
+  JOBS[0]='COMPILER=MinGW64 PLATFORM=None'
+  JOB_COUNT=1
+  TRAVIS_WORKERS=1
 else
   echo "Error: Unsupported OS"
   exit 1
@@ -57,6 +61,8 @@ if [ "$1" == "install" ]; then
       if [[ "${JOBS[$job]}" =~ "MinGW" ]]; then
         MINGW_DEPS="TRUE"
       fi
+    elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
+      WINDOWS_DEPS=$(bash -c "${JOBS[$job]} WINDOWS_DEPS=\"$WINDOWS_DEPS\" ./CI/solve_engine_deps.sh")
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       OSX_DEPS=$(bash -c "${JOBS[$job]} OSX_DEPS=\"$OSX_DEPS\" ./CI/solve_engine_deps.sh")
     fi
@@ -76,6 +82,9 @@ if [ "$1" == "install" ]; then
     
   elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
     brew install $OSX_DEPS
+  elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
+    pacman -S --noconfirm --needed $WINDOWS_DEPS
+    cp $MINGW_PREFIX/bin/opengl32.dll $TEMP/ && cp $MINGW_PREFIX/bin/libgallium_wgl.dll $TEMP/
   fi
   
 elif [ "$1" == "run" ]; then

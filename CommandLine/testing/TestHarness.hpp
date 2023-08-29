@@ -27,7 +27,7 @@ struct TestConfig {
     return mine.empty() ? alt : mine;
   }
   
-  std::string stringify() {
+  std::string stringify() const {
     std::string str;
     
     str += "[" + platform + "]";
@@ -88,6 +88,8 @@ class TestHarness {
   /// Launch a game's executable file and let it run to completion.
   /// Return its exit code.
   static int run_to_completion(const std::string &game, const TestConfig &tc);
+  
+  inline static std::string configpool;
 
   enum ErrorCodes {
     BUILD_FAILED = -1,      ///< Used if the game failed to build.
@@ -97,7 +99,6 @@ class TestHarness {
     TIMED_OUT = -5,     ///< Used if the game is killed for not exiting in time.
   };
 };
-
 /// Construct a test harness attached to the SOG with the same name as the
 /// calling source file.
 #define LAUNCH_HARNESS_FOR_GAME(config, ext)                           \

@@ -5,8 +5,12 @@ set -e
 export LIBGL_ALWAYS_SOFTWARE=1
 
 if [ "$TEST_HARNESS" == true ]; then
-  export ASAN_OPTIONS=detect_leaks=0;
-  ./CI/ephemeral-x.sh -w openbox-session ./ci-regression.sh "/tmp/enigma-master" 4
+  if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    export ASAN_OPTIONS=detect_leaks=0;
+    ./CI/ephemeral-x.sh -w openbox-session ./ci-regression.sh "/tmp/enigma-master" 4
+  elif [ "$TRAVIS_OS_NAME" == "windows" ]; then
+    ./ci-regression.sh "/tmp/enigma-master" 4
+  fi
 else
   for mode in "Debug" "Run"; 
   do
