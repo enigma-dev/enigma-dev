@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2021 Nabeel Danish
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -175,5 +176,58 @@ namespace enigma
       object_collisions result;
       auto len = result.deserialize_self(iter);
       return {std::move(result), len};
+    }
+
+    std::string object_collisions::json_serialize(){
+      std::string json = "{";
+
+      json += "\"object_type\":\"object_collisions\",";
+      json += "\"object_transform\":" + object_transform::json_serialize() + ",";
+      json += "\"mask_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(mask_index) + ",";
+      json += "\"solid\":" + enigma::JSON_serialization::internal_serialize_into_fn(solid) + ",";
+      json += "\"polygon_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_index) + ","; 
+      json += "\"polygon_xscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_xscale) + ",";
+      json += "\"polygon_yscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_yscale) + ",";
+      json += "\"polygon_angle\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_angle);
+
+      json += "}";
+
+      return json;
+    }
+
+    void object_collisions::json_deserialize_self(const std::string &json){
+      auto find_value = [&](const std::string &field) {
+      size_t startPos = json.find("\"" + field + "\":");
+      if (startPos != std::string::npos) {
+        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
+        size_t endPos = json.find_first_of(",}", startPos);
+        if (endPos != std::string::npos) {
+          return json.substr(startPos, endPos - startPos);
+        }
+      }
+      return std::string();
+      };
+
+      std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+      if (type != "object_collisions") {
+        DEBUG_MESSAGE("object_collisions::json_deserialize_self: Object type '" + type +
+                          "' does not match expected: object_collisions",
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+        }
+      
+      object_transform::json_deserialize_self(find_value("object_transform"));
+
+      mask_index = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("mask_index"));
+      solid = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("solid"));
+      polygon_index = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("polygon_index"));
+      polygon_xscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("polygon_xscale"));
+      polygon_yscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("polygon_yscale"));
+      polygon_angle = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("polygon_angle"));
+    }
+
+    object_collisions object_collisions::json_deserialize(const std::string &json){
+      object_collisions result;
+      result.json_deserialize_self(json);
+      return result;
     }
 }
