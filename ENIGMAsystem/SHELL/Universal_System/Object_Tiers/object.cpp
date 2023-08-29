@@ -132,28 +132,16 @@ std::string object_basic::json_serialize() {
 }
 
 void object_basic::json_deserialize_self(const std::string &json) {
-  auto find_value = [&](const std::string &field) {
-    size_t startPos = json.find("\"" + field + "\":");
-    if (startPos != std::string::npos) {
-      startPos += field.length() + 3;  // Add 3 to account for quotes and colon
-      size_t endPos = json.find_first_of(",}", startPos);
-      if (endPos != std::string::npos) {
-        return json.substr(startPos, endPos - startPos);
-      }
-    }
-    return std::string();
-  };
-
-  std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+  std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
   if (type != "object_basic") {
     DEBUG_MESSAGE(
         "object_basic::json_deserialize_self: Object type '" + type + "' does not match expected: object_basic",
         MESSAGE_TYPE::M_FATAL_ERROR);
   } else {
     *const_cast<unsigned int *>(&id) =
-        enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("id"));
+        enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"id"));
     *const_cast<int *>(&object_index) =
-        enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("object_index"));
+        enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"object_index"));
   }
 }
 

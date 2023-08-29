@@ -179,33 +179,21 @@ namespace enigma
   }
 
   void object_timelines::json_deserialize_self(const std::string &json) {
-    auto find_value = [&](const std::string &field) {
-      size_t startPos = json.find("\"" + field + "\":");
-      if (startPos != std::string::npos) {
-        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
-        size_t endPos = json.find_first_of(",}", startPos);
-        if (endPos != std::string::npos) {
-          return json.substr(startPos, endPos - startPos);
-        }
-      }
-      return std::string();
-    };
-
-    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
     if (type != "object_timelines") {
       DEBUG_MESSAGE(
           "object_timelines::json_deserialize_self: Object type '" + type + "' does not match expected: object_timelines",
           MESSAGE_TYPE::M_FATAL_ERROR);
     } 
 
-      object_planar::json_deserialize_self(find_value("object_planar"));
+      object_planar::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_planar"));
     
-      timeline_moments_maps = enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::map<int, int>>>(find_value("timeline_moments_maps"));
-      timeline_index = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("timeline_index"));
-      timeline_running = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("timeline_running"));
-      timeline_speed = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("timeline_speed"));
-      timeline_position = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("timeline_position"));
-      timeline_loop = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("timeline_loop"));
+      timeline_moments_maps = enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::map<int, int>>>(enigma::JSON_serialization::json_find_value(json,"timeline_moments_maps"));
+      timeline_index = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"timeline_index"));
+      timeline_running = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"timeline_running"));
+      timeline_speed = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"timeline_speed"));
+      timeline_position = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"timeline_position"));
+      timeline_loop = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"timeline_loop"));
   }
 
   object_timelines object_timelines::json_deserialize(const std::string &json){

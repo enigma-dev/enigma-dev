@@ -149,36 +149,24 @@ namespace enigma
   }
 
   void object_graphics::json_deserialize_self(const std::string &json) {
-    auto find_value = [&](const std::string &field) {
-      size_t startPos = json.find("\"" + field + "\":");
-      if (startPos != std::string::npos) {
-        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
-        size_t endPos = json.find_first_of(",}", startPos);
-        if (endPos != std::string::npos) {
-          return json.substr(startPos, endPos - startPos);
-        }
-      }
-      return std::string();
-    };
-
-    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
     if (type != "object_graphics") {
       DEBUG_MESSAGE("object_graphics::json_deserialize_self: Object type '" + type +
                         "' does not match expected: object_graphics",
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
 
-    object_timelines::json_deserialize_self(find_value("object_timelines"));
+    object_timelines::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_timelines"));
 
-    sprite_index = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("sprite_index"));
-    image_index = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_index"));
-    image_speed = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_speed"));
-    image_single = enigma::JSON_serialization::internal_deserialize_fn<variant>(find_value("image_single"));
-    depth = enigma::JSON_serialization::internal_deserialize_fn<variant>(find_value("depth"));
-    visible = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("visible"));
-    image_xscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_xscale"));  
-    image_yscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_yscale"));
-    image_angle = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("image_angle"));
+    sprite_index = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"sprite_index"));
+    image_index = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_index"));
+    image_speed = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_speed"));
+    image_single = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"image_single"));
+    depth = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"depth"));
+    visible = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"visible"));
+    image_xscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_xscale"));  
+    image_yscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_yscale"));
+    image_angle = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_angle"));
   }
 
   object_graphics object_graphics::json_deserialize(const std::string& json) {

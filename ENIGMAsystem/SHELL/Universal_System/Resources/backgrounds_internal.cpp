@@ -151,29 +151,17 @@ std::string Background::json_serialize() const {
 }
 
 void Background::json_deserialize_self(const std::string& json) {
-  auto find_value = [&](const std::string& field) {
-    size_t startPos = json.find("\"" + field + "\":");
-    if (startPos != std::string::npos) {
-      startPos += field.length() + 3;  // Add 3 to account for quotes and colon
-      size_t endPos = json.find_first_of(",}", startPos);
-      if (endPos != std::string::npos) {
-        return json.substr(startPos, endPos - startPos);
-      }
-    }
-    return std::string();
-  };
-
-  width = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("width"));
-  height = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("height"));
+  width = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"width"));
+  height = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"height"));
 
   unsigned texture_width =
-      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("texture_width"));
+      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"texture_width"));
   unsigned texture_height =
-      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("texture_height"));
+      enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"texture_height"));
   RawImage img{new unsigned char[texture_width * texture_height * 4], texture_width, texture_height};
 
   std::vector<std::string> hexStream =
-      enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::string>>(find_value("texture"));
+      enigma::JSON_serialization::internal_deserialize_fn<std::vector<std::string>>(enigma::JSON_serialization::json_find_value(json,"texture"));
 
   for (unsigned int i = 0; i < texture_width * texture_height * 4; ++i) {
     std::istringstream hexStreamItem(hexStream[i]);
@@ -184,18 +172,18 @@ void Background::json_deserialize_self(const std::string& json) {
 
   textureID = graphics_create_texture(img, false);
 
-  textureBounds.x = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.x"));
-  textureBounds.y = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.y"));
-  textureBounds.h = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.h"));
-  textureBounds.w = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(find_value("textureBounds.w"));
+  textureBounds.x = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"textureBounds.x"));
+  textureBounds.y = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"textureBounds.y"));
+  textureBounds.h = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"textureBounds.h"));
+  textureBounds.w = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"textureBounds.w"));
 
-  isTileset = enigma::JSON_serialization::internal_deserialize_fn<bool>(find_value("isTileset"));
-  tileWidth = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("tileWidth"));
-  tileHeight = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(find_value("tileHeight"));
-  hOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("hOffset"));
-  vOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("vOffset"));
-  hSep = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("hSep"));
-  vSep = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("vSep"));
+  isTileset = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"isTileset"));
+  tileWidth = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"tileWidth"));
+  tileHeight = enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"tileHeight"));
+  hOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"hOffset"));
+  vOffset = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"vOffset"));
+  hSep = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"hSep"));
+  vSep = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"vSep"));
 
   _destroyed = false;
 }

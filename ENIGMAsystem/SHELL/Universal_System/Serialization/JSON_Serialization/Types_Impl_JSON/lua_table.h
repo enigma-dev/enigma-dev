@@ -19,6 +19,7 @@
 #define ENIGMA_SERIALIZE_LUA_TABLE_JSON_H
 
 #include "../../type_traits.h"
+#include "../JSON_parsing_utilities.h"
 #include "variant.h"
 
 namespace enigma {
@@ -79,47 +80,11 @@ matches_t<T, T, is_lua_table> inline internal_deserialize_fn(const std::string &
   std::string dense_part1 = dense_part.substr(1, dense_part.length() - 2);
   std::string sparse_part1 = sparse_part.substr(1, sparse_part.length() - 2);
 
-  auto split = [](const std::string &s, char delimiter) {
-    std::vector<std::string> parts;
-    size_t start = 0;
-    size_t end = 0;
-    bool within_quotes = false;
-    bool within_array = false;
-    size_t num_open_braces = 0;
-    size_t len = s.length();
-
-    while (end < len) {
-      if (s[end] == '"' && (end == 0 || s[end - 1] != '\\')) {
-        within_quotes = !within_quotes;
-      } else if (s[end] == '[' && !within_quotes) {
-        within_array = true;
-      } else if (s[end] == ']' && !within_quotes) {
-        within_array = false;
-      } else if (s[end] == '{' && !within_quotes) {
-        num_open_braces++;
-      } else if (s[end] == '}' && !within_quotes) {
-        num_open_braces--;
-      } else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
-        if (end != start) {
-          parts.push_back(s.substr(start, end - start));
-        }
-        start = end + 1;
-      }
-      end++;
-    }
-
-    if (start != len) {
-      parts.push_back(s.substr(start));
-    }
-
-    return parts;
-  };
-
-  std::vector<std::string> dense_part2 = split(dense_part1, ',');
+  std::vector<std::string> dense_part2 = json_split(dense_part1, ',');
   dense.resize(dense_part2.size());
   for (std::size_t i = 0; i < dense_part2.size(); i++) dense[i] = internal_deserialize_fn<Type>(dense_part2[i]);
 
-  std::vector<std::string> sparse_part2 = split(sparse_part1, ',');
+  std::vector<std::string> sparse_part2 = json_split(sparse_part1, ',');
   for (auto &elem : sparse_part2) {
     std::size_t key = internal_deserialize_fn<std::size_t>(elem.substr(1, elem.find(":") - 1));
     sparse[key] = internal_deserialize_fn<Type>(elem.substr(elem.find(":") + 1, elem.length() - elem.find(":") - 1));

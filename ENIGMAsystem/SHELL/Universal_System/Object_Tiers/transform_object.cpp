@@ -80,29 +80,17 @@ namespace enigma
   }
 
   void object_transform::json_deserialize_self(const std::string& json) {
-    auto find_value = [&](const std::string &field) {
-      size_t startPos = json.find("\"" + field + "\":");
-      if (startPos != std::string::npos) {
-        startPos += field.length() + 3;  // Add 3 to account for quotes and colon
-        size_t endPos = json.find_first_of(",}", startPos);
-        if (endPos != std::string::npos) {
-          return json.substr(startPos, endPos - startPos);
-        }
-      }
-      return std::string();
-    };
-
-    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(find_value("object_type"));
+    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
     if (type != "object_transform") {
       DEBUG_MESSAGE("object_transform::json_deserialize_self: Object type '" + type +
                         "' does not match expected: object_transform",
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
 
-    object_graphics::json_deserialize_self(find_value("object_graphics"));
+    object_graphics::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_graphics"));
 
-    image_alpha = enigma::JSON_serialization::internal_deserialize_fn<double>(find_value("image_alpha"));
-    image_blend = enigma::JSON_serialization::internal_deserialize_fn<int>(find_value("image_blend"));
+    image_alpha = enigma::JSON_serialization::internal_deserialize_fn<double>(enigma::JSON_serialization::json_find_value(json,"image_alpha"));
+    image_blend = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"image_blend"));
   }
 
   object_transform object_transform::josn_deserialize(const std::string& json){

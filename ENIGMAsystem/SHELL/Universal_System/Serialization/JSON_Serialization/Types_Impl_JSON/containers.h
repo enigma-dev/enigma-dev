@@ -19,6 +19,7 @@
 #define ENIGMA_SERIALIZE_CONTAINERS_JSON_H
 
 #include "../../type_traits.h"
+#include "../JSON_parsing_utilities.h"
 
 namespace enigma {
 namespace JSON_serialization {
@@ -46,40 +47,7 @@ matches_t<T, T, is_std_vector, is_std_set, is_std_queue> inline internal_deseria
 
   if (json.length() > 2) {  // Empty array
     std::string jsonCopy = json.substr(1, json.length() - 2);
-
-    auto split = [](const std::string& s, char delimiter) {
-      std::vector<std::string> parts;
-      size_t start = 0;
-      size_t end = 0;
-      bool within_quotes = false;
-      bool within_array = false;
-      size_t num_open_braces = 0;
-      size_t len = s.length();
-
-      while (end < len) {
-        if (s[end] == '"' && (end == 0 || s[end - 1] != '\\')) {
-          within_quotes = !within_quotes;
-        } else if (s[end] == '[' && !within_quotes) {
-          within_array = true;
-        } else if (s[end] == ']' && !within_quotes) {
-          within_array = false;
-        } else if (s[end] == '{' && !within_quotes) {
-          num_open_braces++;
-        } else if (s[end] == '}' && !within_quotes) {
-          num_open_braces--;
-        } else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
-          if (end != start) {
-            parts.push_back(s.substr(start, end - start));
-          }
-          start = end + 1;
-        }
-        end++;
-      }
-      if (start != len) parts.push_back(s.substr(start));
-      return parts;
-    };
-
-    std::vector<std::string> parts = split(jsonCopy, ',');
+    std::vector<std::string> parts = json_split(jsonCopy, ',');
     for (auto it = parts.begin(); it != parts.end(); ++it)
       insert_back(result, internal_deserialize_fn<typename T::value_type>(*it));
   }
