@@ -171,6 +171,6 @@ HAS_FREE_FUNCTION(JSON_serialization, internal_deserialize_fn, std::declval<cons
   std::is_invocable_r_v<void, decltype(enigma::bytes_serialization::internal_serialize_into_fn<T>), std::byte *, T>
 #define HAS_INTERNAL_SERIALIZE_FUNCTION() \
   std::is_invocable_v<decltype(enigma::bytes_serialization::internal_serialize_fn<T>), T>
-#define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::internal_deserialize<T>), std::byte *>
+#define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::bytes_serialization::internal_deserialize<T>), std::byte *>
 
 #endif

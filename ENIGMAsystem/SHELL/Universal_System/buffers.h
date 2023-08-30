@@ -624,7 +624,7 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *   }
  * } else if constexpr (HAS_INTERNAL_SERIALIZE_FUNCTION()) {
  *   for (std::size_t i = 0; i < assets_.size(); i++) {
- *     enigma::enigma_serialize(operator[](i), len, result);
+ *     enigma::bytes_serialization::enigma_serialize(operator[](i), len, result);
  *     // ...
  *   }
  * }

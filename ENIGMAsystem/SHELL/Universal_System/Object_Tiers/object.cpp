@@ -92,23 +92,23 @@ std::vector<std::byte> object_basic::serialize() {
   std::vector<std::byte> bytes{};
   std::size_t len = 0;
 
-  enigma_serialize<unsigned char>(object_basic::objtype, len, bytes);
-  enigma_serialize(id, len, bytes);
-  enigma_serialize(object_index, len, bytes);
+  enigma::bytes_serialization::enigma_serialize<unsigned char>(object_basic::objtype, len, bytes);
+  enigma::bytes_serialization::enigma_serialize(id, len, bytes);
+  enigma::bytes_serialization::enigma_serialize(object_index, len, bytes);
 
   bytes.shrink_to_fit();
   return bytes;
 }
 
 std::size_t object_basic::deserialize_self(std::byte *iter) {
-  auto type = enigma::internal_deserialize<unsigned char>(iter);
+  auto type = enigma::bytes_serialization::internal_deserialize<unsigned char>(iter);
   if (type != object_basic::objtype) {
     DEBUG_MESSAGE("object_basic::deserialize_self: Object type '" + std::to_string(type) +
                       "' does not match expected: " + std::to_string(object_basic::objtype),
                   MESSAGE_TYPE::M_FATAL_ERROR);
   } else {
-    *const_cast<unsigned int *>(&id) = enigma::internal_deserialize<unsigned int>(iter + 1);
-    *const_cast<int *>(&object_index) = enigma::internal_deserialize<int>(iter + 1 + sizeof(id));
+    *const_cast<unsigned int *>(&id) = enigma::bytes_serialization::internal_deserialize<unsigned int>(iter + 1);
+    *const_cast<int *>(&object_index) = enigma::bytes_serialization::internal_deserialize<int>(iter + 1 + sizeof(id));
   }
   return sizeof(id) + sizeof(object_index) + 1;
 }

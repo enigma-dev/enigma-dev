@@ -107,17 +107,17 @@ namespace enigma
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
-    enigma_serialize<unsigned char>(object_timelines::objtype, len, bytes);
-    enigma_serialize(timeline_moments_maps.size(), len, bytes);
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_timelines::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
-      enigma_serialize(map.size(), len, bytes);
+      enigma::bytes_serialization::enigma_serialize(map.size(), len, bytes);
       for (auto &[key, value]: map) {
-        enigma_serialize(key, len, bytes);
-        enigma_serialize(value, len, bytes);
+        enigma::bytes_serialization::enigma_serialize(key, len, bytes);
+        enigma::bytes_serialization::enigma_serialize(value, len, bytes);
       }
     }
 
-    enigma_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
                                    timeline_position, timeline_loop);
 
     bytes.shrink_to_fit();
@@ -128,28 +128,28 @@ namespace enigma
     auto len = object_planar::deserialize_self(iter);
 
     unsigned char type;
-    enigma_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_timelines::objtype) {
       DEBUG_MESSAGE("object_timelines::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_timelines::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
     std::size_t timeline_maps_len{};
-    enigma_deserialize(timeline_maps_len, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);
     for (auto &map: timeline_moments_maps) {
       std::size_t map_len{};
-      enigma_deserialize(map_len, iter, len);
+      enigma::bytes_serialization::enigma_deserialize(map_len, iter, len);
       for (std::size_t i = 0; i < map_len; i++) {
         int key{};
         int value{};
-        enigma_deserialize(key, iter, len);
-        enigma_deserialize(value, iter, len);
+        enigma::bytes_serialization::enigma_deserialize(key, iter, len);
+        enigma::bytes_serialization::enigma_deserialize(value, iter, len);
         map[key] = value;
       }
     }
 
-    enigma_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
                                      timeline_loop);
 
     return len;

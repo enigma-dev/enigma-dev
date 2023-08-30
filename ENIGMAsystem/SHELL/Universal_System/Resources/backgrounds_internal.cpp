@@ -44,16 +44,16 @@ std::vector<std::byte> Background::serialize() const {
   std::vector<std::byte> result{};
   std::size_t len = 0;
 
-  enigma_serialize_many(len, result, width, height);
+  enigma::bytes_serialization::enigma_serialize_many(len, result, width, height);
   unsigned texture_width = 0;
   unsigned texture_height = 0;
   auto texture = graphics_copy_texture_pixels(textureID, &texture_width, &texture_height);
-  enigma_serialize_many(len, result, texture_width, texture_height);
+  enigma::bytes_serialization::enigma_serialize_many(len, result, texture_width, texture_height);
   result.resize(result.size() + (texture_width * texture_height * 4));
   std::copy(texture, texture + (texture_width * texture_height * 4),
             reinterpret_cast<unsigned char*>(result.data() + len));
   len += texture_width * texture_height;
-  enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
+  enigma::bytes_serialization::enigma_serialize_many(len, result, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
                         tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
 
   result.shrink_to_fit();
@@ -63,15 +63,15 @@ std::vector<std::byte> Background::serialize() const {
 std::size_t Background::deserialize_self(std::byte* iter) {
   std::size_t len = 0;
 
-  enigma_deserialize_many(iter, len, width, height);
+  enigma::bytes_serialization::enigma_deserialize_many(iter, len, width, height);
   unsigned texture_width = 0;
   unsigned texture_height = 0;
-  enigma_deserialize_many(iter, len, texture_width, texture_height);
+  enigma::bytes_serialization::enigma_deserialize_many(iter, len, texture_width, texture_height);
   RawImage img{new unsigned char[texture_width * texture_height * 4], texture_width, texture_height};
   std::copy(iter + len, iter + len + (texture_width * texture_height * 4), reinterpret_cast<std::byte*>(img.pxdata));
   textureID = graphics_create_texture(img, false);
   len += texture_width * texture_height * 4;
-  enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
+  enigma::bytes_serialization::enigma_deserialize_many(iter, len, textureBounds.x, textureBounds.y, textureBounds.h, textureBounds.w, isTileset,
                           tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
   _destroyed = false;
 

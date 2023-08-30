@@ -148,8 +148,8 @@ namespace enigma
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
-      enigma_serialize<unsigned char>(object_collisions::objtype, len, bytes);
-      enigma_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
+      enigma::bytes_serialization::enigma_serialize<unsigned char>(object_collisions::objtype, len, bytes);
+      enigma::bytes_serialization::enigma_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       bytes.shrink_to_fit();
@@ -160,13 +160,13 @@ namespace enigma
       auto len = object_transform::deserialize_self(iter);
 
       unsigned char type;
-      enigma_deserialize(type, iter, len);
+      enigma::bytes_serialization::enigma_deserialize(type, iter, len);
       if (type != object_collisions::objtype) {
         DEBUG_MESSAGE("object_collisions::deserialize_self: Object type '" + std::to_string(type) +
                           "' does not match expected: " + std::to_string(object_collisions::objtype),
                       MESSAGE_TYPE::M_FATAL_ERROR);
       }
-      enigma_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
+      enigma::bytes_serialization::enigma_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       return len;

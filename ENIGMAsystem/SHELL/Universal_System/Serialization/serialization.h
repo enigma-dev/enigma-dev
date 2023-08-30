@@ -18,7 +18,7 @@
 
 /**
   @file serialization.h
-  @brief This file contains the main serialization functions.
+  @brief This file contains the main serialization functions for bytes and JSON.
 */
 
 #ifndef ENIGMA_SERIALIZATION_H
@@ -37,6 +37,8 @@ inline T bit_cast(const U &value) {
   return result;
 }
 }  // namespace utility
+
+namespace bytes_serialization {
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
@@ -79,7 +81,7 @@ inline T internal_deserialize_primitive(std::byte *iter) {
 template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
   if constexpr (_bytes_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
-    enigma::bytes_serialization::internal_serialize_into_fn(iter, value);  // will be changed
+    enigma::bytes_serialization::internal_serialize_into_fn(iter, value);
   } else {
     static_assert(always_false<T>,
                   "'internal_serialize_into' takes 'variant', 'var', 'std::string', bool, integral, floating types, "
@@ -156,10 +158,10 @@ inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len) {
   if constexpr (_bytes_serialization_has_enigma_internal_deserialize_fn_<std::decay_t<T>>) {
     enigma::bytes_serialization::enigma_internal_deserialize_fn(value, iter, len);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
-    value = enigma::internal_deserialize<T>(iter + len);
+    value = enigma::bytes_serialization::internal_deserialize<T>(iter + len);
     len += value.byte_size();
   } else {
-    value = enigma::internal_deserialize<T>(iter + len);
+    value = enigma::bytes_serialization::internal_deserialize<T>(iter + len);
     len += enigma_internal_sizeof(value);
   }
 }
@@ -174,6 +176,38 @@ inline void enigma_deserialize_many(std::byte *iter, std::size_t &len, Ts &&...v
   (enigma_deserialize(std::forward<Ts>(values), iter, len), ...);
 }
 
+}  // namespace bytes_serialization
+
+namespace JSON_serialization {
+
+template <typename T>
+inline std::string enigma_serialize(const T &value) {
+  if constexpr (_JSON_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
+    return enigma::JSON_serialization::internal_serialize_into_fn(value);
+  } else if constexpr (has_json_serialize_method_v<std::decay_t<T>>) {
+    return value.serialize();
+  } else {
+    static_assert(always_false<T>,
+                  "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
+                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+  }
+}
+
+template <typename T>
+inline T enigma_deserialize(std::string json) {
+  json_remove_whitespace(json);
+  if constexpr (_JSON_serialization_has_internal_deserialize_fn_<std::decay_t<T>>) {
+    return enigma::JSON_serialization::internal_deserialize_fn<std::decay_t<T>>(json);
+  } else if constexpr (has_json_deserialize_function_v<std::decay_t<T>>) {
+    return T::json_deserialize(json);
+  } else {
+    static_assert(always_false<T>,
+                  "'deserialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
+                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+  }
+}
+
+}  // namespace JSON_serialization
 }  // namespace enigma
 
 #endif

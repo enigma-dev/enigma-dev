@@ -27,6 +27,7 @@
 #include "type_traits.h"
 
 namespace enigma {
+namespace bytes_serialization {
 
 template <typename Base, typename T>
 inline void internal_serialize_primitive_into(std::byte *iter, const T &value);
@@ -54,8 +55,6 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
 
 template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len);
-
-namespace bytes_serialization {
 
 template <typename T>
 inline void enigma_internal_serialize_lua_table(std::byte *iter, const lua_table<T> &table);

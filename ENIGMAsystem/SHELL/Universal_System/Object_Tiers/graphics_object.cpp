@@ -98,8 +98,8 @@ namespace enigma
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
-    enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
-    enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     bytes.shrink_to_fit();
@@ -110,13 +110,13 @@ namespace enigma
     auto len = object_timelines::deserialize_self(iter);
 
     unsigned char type;
-    enigma_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_graphics::objtype) {
       DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_graphics::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     return len;

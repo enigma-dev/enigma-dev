@@ -219,9 +219,9 @@ class AssetArray {
 
     std::vector<std::byte> result{};
     std::size_t len = 0;
-    enigma::enigma_serialize(assets_.size(), len, result);
+    enigma::bytes_serialization::enigma_serialize(assets_.size(), len, result);
     for (std::size_t i = 0; i < assets_.size(); i++) {
-      enigma::enigma_serialize(operator[](i), len, result);
+      enigma::bytes_serialization::enigma_serialize(operator[](i), len, result);
     }
     result.shrink_to_fit();
     return result;
@@ -233,10 +233,10 @@ class AssetArray {
 
     std::size_t len = 0;
     std::size_t elements = 0;
-    enigma::enigma_deserialize(elements, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(elements, iter, len);
     resize(elements);
     for (std::size_t i = 0; i < elements; i++) {
-      enigma::enigma_deserialize(assets_[i], iter, len);
+      enigma::bytes_serialization::enigma_deserialize(assets_[i], iter, len);
     }
     return len;
   }

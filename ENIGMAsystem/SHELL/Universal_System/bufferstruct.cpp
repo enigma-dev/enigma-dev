@@ -1425,7 +1425,7 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
   std::size_t ptr = 0;
 
   binbuff->data.resize(sizeof(std::size_t));
-  enigma::internal_serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
+  enigma::bytes_serialization::internal_serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
   for (auto &[id, obj] : enigma::instance_list) {
     auto buf = obj->inst->serialize();
     ptr = binbuff->data.size();
@@ -1435,7 +1435,7 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
 
   ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + sizeof(std::size_t));
-  enigma::internal_serialize_into<std::size_t>(&binbuff->data[ptr],
+  enigma::bytes_serialization::internal_serialize_into<std::size_t>(&binbuff->data[ptr],
                                       enigma::instance_deactivated_list.size());
   for (auto &[id, obj] : enigma::instance_deactivated_list) {
     auto buf = obj->serialize();
@@ -1459,7 +1459,7 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
 
   ptr = binbuff->data.size();
   binbuff->data.resize(binbuff->data.size() + sizeof(int));
-  enigma::internal_serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
+  enigma::bytes_serialization::internal_serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
 
   store_checksum(binbuff->data, calculate_checksum(binbuff->data));
 }
@@ -1485,27 +1485,27 @@ void game_load_buffer(buffer_t buffer) {
   }
 
   std::byte *ptr = &binbuff->data[0];
-  std::size_t active_size = enigma::internal_deserialize<std::size_t>(ptr);
+  std::size_t active_size = enigma::bytes_serialization::internal_deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
   for (std::size_t i = 0; i < active_size; i++) {
     // This should be an object, where `id` is serialized first and `object_id` second
-    auto obj_id = enigma::internal_deserialize<int>(ptr + 1);
-    auto obj_ind = enigma::internal_deserialize<int>(ptr + 1 + sizeof(unsigned int));
+    auto obj_id = enigma::bytes_serialization::internal_deserialize<int>(ptr + 1);
+    auto obj_ind = enigma::bytes_serialization::internal_deserialize<int>(ptr + 1 + sizeof(unsigned int));
     auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
     ptr += obj->deserialize_self(ptr);
     obj->activate();
   }
 
-  std::size_t inactive_size = enigma::internal_deserialize<std::size_t>(ptr);
+  std::size_t inactive_size = enigma::bytes_serialization::internal_deserialize<std::size_t>(ptr);
   ptr += sizeof(std::size_t);
   for (std::size_t i = 0; i < inactive_size; i++) {
-    auto obj_ind = enigma::internal_deserialize<int>(ptr + sizeof(unsigned int));
+    auto obj_ind = enigma::bytes_serialization::internal_deserialize<int>(ptr + sizeof(unsigned int));
     auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
     ptr += obj->deserialize_self(ptr);
     obj->deactivate();
   }
 
-  auto type = enigma::internal_deserialize<unsigned char>(ptr);
+  auto type = enigma::bytes_serialization::internal_deserialize<unsigned char>(ptr);
   if (type != 0xee) {
     DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
   }
@@ -1513,13 +1513,13 @@ void game_load_buffer(buffer_t buffer) {
 
   ptr += enigma::backgrounds.deserialize_self(ptr);
 
-  type = enigma::internal_deserialize<unsigned char>(ptr);
+  type = enigma::bytes_serialization::internal_deserialize<unsigned char>(ptr);
   if (type != 0xef) {
     DEBUG_MESSAGE("Invalid enigma::backgrounds footer", MESSAGE_TYPE::M_FATAL_ERROR);
   }
   ptr += 1;
 
-  auto room_index = enigma::internal_deserialize<int>(ptr);
+  auto room_index = enigma::bytes_serialization::internal_deserialize<int>(ptr);
   enigma_user::room_goto(room_index);
   ptr += sizeof(int);
 }
