@@ -15,6 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file containers.h
+  @brief This file contains the implementation of JSON serialization function for std::vector
+  and std::set, and JSON deserialization function for std::vector, std::set and std::queue. 
+*/
+
 #ifndef ENIGMA_SERIALIZE_CONTAINERS_JSON_H
 #define ENIGMA_SERIALIZE_CONTAINERS_JSON_H
 

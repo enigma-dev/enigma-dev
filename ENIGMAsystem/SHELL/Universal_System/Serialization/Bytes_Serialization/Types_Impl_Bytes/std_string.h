@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file std_string.h
+  @brief This file contains the implementation of bytes (de)serialization functions for std::string.
+*/
+
 #ifndef ENIGMA_SERIALIZE_STRING_BYTES_H
 #define ENIGMA_SERIALIZE_STRING_BYTES_H
 

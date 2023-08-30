@@ -16,6 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file type_traits.h
+  @brief This file contains type traits which are used with the (de)serialization functions.
+*/
+
 #ifndef ENIGMA_TYPE_TRAITS_H
 #define ENIGMA_TYPE_TRAITS_H
 

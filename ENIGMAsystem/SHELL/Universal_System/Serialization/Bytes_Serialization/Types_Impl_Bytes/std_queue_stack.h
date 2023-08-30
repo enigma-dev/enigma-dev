@@ -15,6 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file std_queue_stack.h
+  @brief This file contains the implementation of bytes serialization function for std::queue
+  and std::stack, and bytes deserialization function for std::stack. 
+*/
+
 #ifndef ENIGMA_SERIALIZE_QUEUE_STACK_BYTES_H
 #define ENIGMA_SERIALIZE_QUEUE_STACK_BYTES_H
 

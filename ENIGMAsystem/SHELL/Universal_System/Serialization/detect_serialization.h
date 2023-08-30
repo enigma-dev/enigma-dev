@@ -16,6 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file detect_serialization.h
+  @brief This file contains macros that are used to detect whether a class has a specific method or not
+  (INTERNAL_HAS_MEMBER_FUNCTION), whether a class has a specific static function or not(HAS_STATIC_FUNCTION),
+  and whether a class has a specific free function or not(HAS_FREE_FUNCTION).
+*/
+
 #ifndef ENIGMA_DETECT_SERIALIZATION_H
 #define ENIGMA_DETECT_SERIALIZATION_H
 

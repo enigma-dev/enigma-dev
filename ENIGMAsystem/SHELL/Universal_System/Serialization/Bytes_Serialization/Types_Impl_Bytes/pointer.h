@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file pointer.h
+  @brief This file contains the implementation of bytes (de)serialization functions for pointer.
+*/
+
 #ifndef ENIGMA_SERIALIZE_POINTER_BYTES_H
 #define ENIGMA_SERIALIZE_POINTER_BYTES_H
 

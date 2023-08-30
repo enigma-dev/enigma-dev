@@ -15,6 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file variant.h
+  @brief This file contains the implementation of bytes (de)serialization functions for variant based
+  types (variant, enigma::depthv, enigma::image_singlev, enigma::speedv, enigma::directionv, etc.).  
+*/
+
 #ifndef ENIGMA_SERIALIZE_VARIANT_BYTES_H
 #define ENIGMA_SERIALIZE_VARIANT_BYTES_H
 

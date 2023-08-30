@@ -15,6 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file numerics.h
+  @brief This file contains the implementation of bytes (de)serialization functions for numeric
+  types (int, float, double, char, etc.).
+*/
+
 #ifndef ENIGMA_SERIALIZE_NUMERICS_BYTES_H
 #define ENIGMA_SERIALIZE_NUMERICS_BYTES_H
 

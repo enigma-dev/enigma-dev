@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file std_tuple.h
+  @brief This file contains the implementation of JSON (de)serialization functions for std::tuple.
+*/
+
 #ifndef ENIGMA_SERIALIZE_TUPLE_JSON_H
 #define ENIGMA_SERIALIZE_TUPLE_JSON_H
 

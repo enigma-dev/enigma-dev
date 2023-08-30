@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file serialization_fwd_decl.h
+  @brief This file contains forward declarations for the main serialization functions.
+*/
+
 #ifndef ENIGMA_SERIALIZE_FWD_DECL_H
 #define ENIGMA_SERIALIZE_FWD_DECL_H
 

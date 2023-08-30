@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file std_pair.h
+  @brief This file contains the implementation of bytes (de)serialization functions for std::pair.
+*/
+
 #ifndef ENIGMA_SERIALIZE_PAIR_BYTES_H
 #define ENIGMA_SERIALIZE_PAIR_BYTES_H
 

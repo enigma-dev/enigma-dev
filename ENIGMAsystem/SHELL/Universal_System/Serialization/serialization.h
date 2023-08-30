@@ -16,6 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+  @file serialization.h
+  @brief This file contains the main serialization functions.
+*/
+
 #ifndef ENIGMA_SERIALIZATION_H
 #define ENIGMA_SERIALIZATION_H
 
