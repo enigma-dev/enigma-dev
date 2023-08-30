@@ -57,21 +57,26 @@ HAS_MEMBER_FUNCTION(size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(byte_size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (V::*)() const);
 HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
+HAS_MEMBER_FUNCTION(json_serialize, void (V::*)() const);
+HAS_MEMBER_FUNCTION(json_deserialize_self, void (V::*)(const std::string &json));
 
 /**
- * Now we have 4 classes with the following names:
+ * Now we have 6 classes with the following names:
  * has_size_method
  * has_byte_size_method
  * has_serialize_method
  * has_deserialize_self_method
+ * has_json_serialize_method
+ * has_json_deserialize_self_method
  * 
  * Each one has 2 data members:
  * type: This member is a typedef that refers to the class itself (has_size_method,
- * has_byte_size_method, has_serialize_method, has_deserialize_self_method)
+ * has_byte_size_method, has_serialize_method, has_deserialize_self_method, has_json_serialize_method
+ * and has_json_deserialize_self_method).
  * 
  * value: This member is a boolean value that indicates whether the corresponding class
- * has a method with the specified NAME (size, byte_size, serialize and deserialize_self),
- * it is true if the class has the method and false otherwise.
+ * has a method with the specified NAME (size, byte_size, serialize, deserialize_self,
+ * json_serialize and json_deserialize_self), it is true if the class has the method and false otherwise.
  */
 
 #undef HAS_MEMBER_FUNCTION
@@ -103,47 +108,54 @@ HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
   constexpr static inline bool has_##NAME##_function_v = has_##NAME##_function<T, __VA_ARGS__>::value
 
 HAS_STATIC_FUNCTION_V(deserialize, std::pair<std::size_t, T>(std::byte *iter));
+HAS_STATIC_FUNCTION_V(json_deserialize, T(const std::string &json));
 
 /**
- * Now we have 1 struct with the following name:
+ * Now we have 2 struct with the following name:
  * has_deserialize_function
+ * has_json_deserialize_function
  * 
  * The struct has 1 data member:
  * value: This member is a boolean value that indicates whether the corresponding class
- * has a static function with the specified NAME (deserialize),
+ * has a static function with the specified NAME (deserialize and json_deserialize),
  * it is true if the class has the function and false otherwise.
  */
 
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NAME, Parameters...)                                                             \
-  template <typename T, typename = void>                                                                   \
-  struct is_##NAME##_available : std::false_type {};                                                       \
-                                                                                                           \
-  template <typename T>                                                                                    \
-  struct is_##NAME##_available<T, std::void_t<decltype(enigma::bytes_serialization::NAME<T>(Parameters))>> \
-      : std::true_type {};                                                                                 \
-                                                                                                           \
-  template <typename T>                                                                                    \
-  constexpr static inline bool has_##NAME##_free_function = is_##NAME##_available<T>::value
+#define HAS_FREE_FUNCTION(NameSpace, NAME, Parameters...)                                                      \
+  template <typename T, typename = void>                                                                       \
+  struct is_##NameSpace##_##NAME##_available : std::false_type {};                                             \
+                                                                                                               \
+  template <typename T>                                                                                        \
+  struct is_##NameSpace##_##NAME##_available<T, std::void_t<decltype(enigma::NameSpace::NAME<T>(Parameters))>> \
+      : std::true_type {};                                                                                     \
+                                                                                                               \
+  template <typename T>                                                                                        \
+  constexpr static inline bool _##NameSpace##_has_##NAME##_ = is_##NameSpace##_##NAME##_available<T>::value
 
-HAS_FREE_FUNCTION(byte_size, std::declval<const T &>());
-HAS_FREE_FUNCTION(internal_serialize_into_fn, std::declval<std::byte *>(), std::declval<T &&>());
-HAS_FREE_FUNCTION(internal_serialize_fn, std::declval<T &&>());
-HAS_FREE_FUNCTION(internal_deserialize_fn, std::declval<std::byte *>());
-HAS_FREE_FUNCTION(internal_resize_buffer_for_fn, std::declval<std::vector<std::byte> &>(), std::declval<T &&>());
-HAS_FREE_FUNCTION(enigma_internal_deserialize_fn, std::declval<T &>(), std::declval<std::byte *>(),
+HAS_FREE_FUNCTION(bytes_serialization, byte_size, std::declval<const T &>());
+HAS_FREE_FUNCTION(bytes_serialization, internal_serialize_into_fn, std::declval<std::byte *>(), std::declval<T &&>());
+HAS_FREE_FUNCTION(bytes_serialization, internal_serialize_fn, std::declval<T &&>());
+HAS_FREE_FUNCTION(bytes_serialization, internal_deserialize_fn, std::declval<std::byte *>());
+HAS_FREE_FUNCTION(bytes_serialization, internal_resize_buffer_for_fn, std::declval<std::vector<std::byte> &>(),
+                  std::declval<T &&>());
+HAS_FREE_FUNCTION(bytes_serialization, enigma_internal_deserialize_fn, std::declval<T &>(), std::declval<std::byte *>(),
                   std::declval<std::size_t &>());
+HAS_FREE_FUNCTION(JSON_serialization, internal_serialize_into_fn, std::declval<const T &>());
+HAS_FREE_FUNCTION(JSON_serialization, internal_deserialize_fn, std::declval<const std::string &>());
 
 /**
- * Now we have 6 structs with the following name:
- * is_byte_size_available
- * is_internal_serialize_into_fn_available
- * is_internal_serialize_fn_available
- * is_internal_deserialize_fn_available
- * is_internal_resize_buffer_for_fn_available
- * is_enigma_internal_deserialize_fn_available
+ * Now we have 8 structs with the following name:
+ * is_bytes_serialization_byte_size_available
+ * is_bytes_serialization_internal_serialize_into_fn_available
+ * is_bytes_serialization_internal_serialize_fn_available
+ * is_bytes_serialization_internal_deserialize_fn_available
+ * is_bytes_serialization_internal_resize_buffer_for_fn_available
+ * is_bytes_serialization_enigma_internal_deserialize_fn_available
+ * is_JSON_serialization_internal_serialize_into_fn_available
+ * is_JSON_serialization_internal_deserialize_fn_available  
  * 
  * Each struct has 1 data member:
  * value: This member is a boolean value that indicates whether the corresponding class

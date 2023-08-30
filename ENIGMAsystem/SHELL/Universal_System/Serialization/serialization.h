@@ -40,7 +40,7 @@ inline T bit_cast(const U &value) {
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (has_byte_size_free_function<T>) {
+  if constexpr (_bytes_serialization_has_byte_size_<T>) {
     return enigma::bytes_serialization::byte_size(value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     return value.byte_size();
@@ -78,7 +78,7 @@ inline T internal_deserialize_primitive(std::byte *iter) {
 
 template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
-  if constexpr (has_internal_serialize_into_fn_free_function<std::decay_t<T>>) {
+  if constexpr (_bytes_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
     enigma::bytes_serialization::internal_serialize_into_fn(iter, value);  // will be changed
   } else {
     static_assert(always_false<T>,
@@ -89,7 +89,7 @@ inline void internal_serialize_into(std::byte *iter, T &&value) {
 
 template <typename T>
 inline auto internal_serialize(T &&value) {
-  if constexpr (has_internal_serialize_fn_free_function<std::decay_t<T>>) {
+  if constexpr (_bytes_serialization_has_internal_serialize_fn_<std::decay_t<T>>) {
     return enigma::bytes_serialization::internal_serialize_fn(value);
   } else if constexpr (has_serialize_method_v<std::decay_t<T>>) {
     return value.serialize();
@@ -102,7 +102,7 @@ inline auto internal_serialize(T &&value) {
 
 template <typename T>
 inline T internal_deserialize(std::byte *iter) {
-  if constexpr (has_internal_deserialize_fn_free_function<std::decay_t<T>>) {
+  if constexpr (_bytes_serialization_has_internal_deserialize_fn_<std::decay_t<T>>) {
     return enigma::bytes_serialization::internal_deserialize_fn<T>(iter);
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;
@@ -129,7 +129,7 @@ inline void internal_resize_buffer_using_byte_size(std::vector<std::byte> &buffe
 
 template <typename T>
 inline void internal_resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
-  if constexpr (has_internal_resize_buffer_for_fn_free_function<std::decay_t<T>>) {
+  if constexpr (_bytes_serialization_has_internal_resize_buffer_for_fn_<std::decay_t<T>>) {
     enigma::bytes_serialization::internal_resize_buffer_for_fn(buffer, value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     internal_resize_buffer_using_byte_size(buffer, value);
@@ -153,7 +153,7 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
 
 template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len) {
-  if constexpr (has_enigma_internal_deserialize_fn_free_function<std::decay_t<T>>) {
+  if constexpr (_bytes_serialization_has_enigma_internal_deserialize_fn_<std::decay_t<T>>) {
     enigma::bytes_serialization::enigma_internal_deserialize_fn(value, iter, len);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     value = enigma::internal_deserialize<T>(iter + len);
