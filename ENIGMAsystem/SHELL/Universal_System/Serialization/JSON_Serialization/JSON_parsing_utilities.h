@@ -55,7 +55,7 @@ std::vector<std::string> inline json_split(const std::string &s, char delimiter)
     }
     end++;
   }
-  
+
   if (start != len) parts.push_back(s.substr(start));
   return parts;
 }
@@ -70,6 +70,16 @@ std::string inline json_find_value(const std::string &json, const std::string &k
     }
   }
   return "";
+}
+
+void inline json_remove_whitespace(std::string &json) {
+    std::string result;
+    for (char c : json) {
+        if (!std::isspace(c)) {
+            result += c;
+        }
+    }
+    json = result;
 }
 
 }  // namespace JSON_serialization
