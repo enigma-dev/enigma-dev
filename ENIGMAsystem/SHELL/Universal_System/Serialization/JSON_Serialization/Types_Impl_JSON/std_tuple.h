@@ -32,7 +32,7 @@ void tuple_deserialize_helper(std::string tupleStr, Tuple &tuple) {
     tupleStr = tupleStr.substr(tupleStr.find(',') + 1);
 
     using TypeAtIndex = typename std::tuple_element<Index, Tuple>::type;
-    std::get<Index>(tuple) = enigma::JSON_serialization::internal_deserialize_fn<TypeAtIndex>(elementStr);
+    std::get<Index>(tuple) = enigma::JSON_serialization::enigma_deserialize<TypeAtIndex>(elementStr);
 
     tuple_deserialize_helper<Tuple, Index + 1>(tupleStr, tuple);
   }
@@ -48,7 +48,7 @@ matches_t<T, std::string, is_std_tuple> inline internal_serialize_into_fn(const 
   std::size_t tupleSize = std::tuple_size<std::decay_t<T>>::value;
   std::size_t i = 0;
   auto serialize_process_element = [&json, &i, tupleSize](const auto &element) {
-    json += internal_serialize_into_fn(element);
+    json += enigma::JSON_serialization::enigma_serialize(element);
     if (i++ < tupleSize - 1) json += ",";
   };
 

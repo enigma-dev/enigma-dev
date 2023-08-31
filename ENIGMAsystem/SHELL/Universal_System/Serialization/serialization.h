@@ -185,7 +185,7 @@ inline std::string enigma_serialize(const T &value) {
   if constexpr (_JSON_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
     return enigma::JSON_serialization::internal_serialize_into_fn(value);
   } else if constexpr (has_json_serialize_method_v<std::decay_t<T>>) {
-    return value.serialize();
+    return value.json_serialize();
   } else {
     static_assert(always_false<T>,
                   "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "

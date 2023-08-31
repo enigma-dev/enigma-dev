@@ -63,6 +63,16 @@ template <typename T>
 inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter);
 
 }  // namespace bytes_serialization
+
+namespace JSON_serialization {
+
+template <typename T>
+inline std::string enigma_serialize(const T &value);
+
+template <typename T>
+inline T enigma_deserialize(std::string json);
+
+}  // namespace JSON_serialization
 }  // namespace enigma
 
 #endif

@@ -35,7 +35,7 @@ matches_t<T, std::string, is_std_vector, is_std_set> inline internal_serialize_i
   std::string json = "[";
 
   for (auto it = value.begin(); it != value.end(); ++it) {
-    json += internal_serialize_into_fn(*it);
+    json += enigma::JSON_serialization::enigma_serialize(*it);
 
     if (std::next(it) != value.end()) {
       json += ",";
@@ -55,7 +55,7 @@ matches_t<T, T, is_std_vector, is_std_set, is_std_queue> inline internal_deseria
     std::string jsonCopy = json.substr(1, json.length() - 2);
     std::vector<std::string> parts = json_split(jsonCopy, ',');
     for (auto it = parts.begin(); it != parts.end(); ++it)
-      insert_back(result, internal_deserialize_fn<typename T::value_type>(*it));
+      insert_back(result, enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(*it));
   }
 
   return result;

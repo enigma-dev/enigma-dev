@@ -32,9 +32,9 @@ template <typename T>
 matches_t<T, std::string, is_std_complex> inline internal_serialize_into_fn(const T& value) {
   std::string json = "[";
 
-  json += internal_serialize_into_fn(value.real());
+  json += enigma::JSON_serialization::enigma_serialize(value.real());
   json += ",";
-  json += internal_serialize_into_fn(value.imag());
+  json += enigma::JSON_serialization::enigma_serialize(value.imag());
 
   json += "]";
 
@@ -46,8 +46,8 @@ matches_t<T, T, is_std_complex> inline internal_deserialize_fn(const std::string
   std::string realStr = json.substr(1, json.find(',') - 1);
   std::string imagStr = json.substr(json.find(',') + 1, json.length() - 2);
 
-  return T(internal_deserialize_fn<typename T::value_type>(realStr),
-           internal_deserialize_fn<typename T::value_type>(imagStr));  
+  return T(enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(realStr),
+           enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(imagStr));  
 }
 
 }  // namespace JSON_serialization

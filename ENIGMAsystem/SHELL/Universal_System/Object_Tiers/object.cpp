@@ -119,12 +119,12 @@ std::pair<object_basic, std::size_t> object_basic::deserialize(std::byte *iter) 
   return {std::move(result), len};
 }
 
-std::string object_basic::json_serialize() {
+std::string object_basic::json_serialize() const {
   std::string json = "{";
 
   json += "\"object_type\":\"object_basic\",";
-  json += "\"id\":" + enigma::JSON_serialization::internal_serialize_into_fn(id) + ",";
-  json += "\"object_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(object_index);
+  json += "\"id\":" + enigma::JSON_serialization::enigma_serialize(id) + ",";
+  json += "\"object_index\":" + enigma::JSON_serialization::enigma_serialize(object_index);
 
   json += "}";
 
@@ -132,16 +132,16 @@ std::string object_basic::json_serialize() {
 }
 
 void object_basic::json_deserialize_self(const std::string &json) {
-  std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+  std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
   if (type != "object_basic") {
     DEBUG_MESSAGE(
         "object_basic::json_deserialize_self: Object type '" + type + "' does not match expected: object_basic",
         MESSAGE_TYPE::M_FATAL_ERROR);
   } else {
     *const_cast<unsigned int *>(&id) =
-        enigma::JSON_serialization::internal_deserialize_fn<unsigned int>(enigma::JSON_serialization::json_find_value(json,"id"));
+        enigma::JSON_serialization::enigma_deserialize<unsigned int>(enigma::JSON_serialization::json_find_value(json,"id"));
     *const_cast<int *>(&object_index) =
-        enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"object_index"));
+        enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"object_index"));
   }
 }
 

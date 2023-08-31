@@ -36,10 +36,10 @@ matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T&
 
   for (auto it = value.begin(); it != value.end(); ++it) {
     if (is_numeric_v<KeyType>)
-      json += "\"" + internal_serialize_into_fn(it->first) + "\"";
+      json += "\"" + enigma::JSON_serialization::enigma_serialize(it->first) + "\"";
     else
-      json += internal_serialize_into_fn(it->first);
-    json += ":" + internal_serialize_into_fn(it->second);
+      json += enigma::JSON_serialization::enigma_serialize(it->first);
+    json += ":" + enigma::JSON_serialization::enigma_serialize(it->second);
     if (std::next(it) != value.end()) {
       json += ",";
     }
@@ -65,8 +65,8 @@ matches_t<T, T, is_std_map> inline internal_deserialize_fn(const std::string& js
 
     if constexpr (is_numeric_v<KeyType>) keyStr = keyStr.substr(1, keyStr.length() - 2);
 
-    KeyType key = internal_deserialize_fn<KeyType>(keyStr);
-    ValueType value = internal_deserialize_fn<ValueType>(valueStr);
+    KeyType key = enigma::JSON_serialization::enigma_deserialize<KeyType>(keyStr);
+    ValueType value = enigma::JSON_serialization::enigma_deserialize<ValueType>(valueStr);
 
     result[key] = value;
 

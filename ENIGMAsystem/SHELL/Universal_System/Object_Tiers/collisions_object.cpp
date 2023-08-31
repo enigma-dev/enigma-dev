@@ -178,17 +178,17 @@ namespace enigma
       return {std::move(result), len};
     }
 
-    std::string object_collisions::json_serialize(){
+    std::string object_collisions::json_serialize() const {
       std::string json = "{";
 
       json += "\"object_type\":\"object_collisions\",";
       json += "\"object_transform\":" + object_transform::json_serialize() + ",";
-      json += "\"mask_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(mask_index) + ",";
-      json += "\"solid\":" + enigma::JSON_serialization::internal_serialize_into_fn(solid) + ",";
-      json += "\"polygon_index\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_index) + ","; 
-      json += "\"polygon_xscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_xscale) + ",";
-      json += "\"polygon_yscale\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_yscale) + ",";
-      json += "\"polygon_angle\":" + enigma::JSON_serialization::internal_serialize_into_fn(polygon_angle);
+      json += "\"mask_index\":" + enigma::JSON_serialization::enigma_serialize(mask_index) + ",";
+      json += "\"solid\":" + enigma::JSON_serialization::enigma_serialize(solid) + ",";
+      json += "\"polygon_index\":" + enigma::JSON_serialization::enigma_serialize(polygon_index) + ","; 
+      json += "\"polygon_xscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_xscale) + ",";
+      json += "\"polygon_yscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_yscale) + ",";
+      json += "\"polygon_angle\":" + enigma::JSON_serialization::enigma_serialize(polygon_angle);
 
       json += "}";
 
@@ -196,7 +196,7 @@ namespace enigma
     }
 
     void object_collisions::json_deserialize_self(const std::string &json){
-      std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+      std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
       if (type != "object_collisions") {
         DEBUG_MESSAGE("object_collisions::json_deserialize_self: Object type '" + type +
                           "' does not match expected: object_collisions",
@@ -205,12 +205,12 @@ namespace enigma
       
       object_transform::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_transform"));
 
-      mask_index = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"mask_index"));
-      solid = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"solid"));
-      polygon_index = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"polygon_index"));
-      polygon_xscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_xscale"));
-      polygon_yscale = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_yscale"));
-      polygon_angle = enigma::JSON_serialization::internal_deserialize_fn<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_angle"));
+      mask_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"mask_index"));
+      solid = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"solid"));
+      polygon_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"polygon_index"));
+      polygon_xscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_xscale"));
+      polygon_yscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_yscale"));
+      polygon_angle = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_angle"));
     }
 
     object_collisions object_collisions::json_deserialize(const std::string &json){

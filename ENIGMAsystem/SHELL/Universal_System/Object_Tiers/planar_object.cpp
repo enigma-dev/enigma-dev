@@ -132,27 +132,27 @@ namespace enigma
     return {std::move(result), len};
   }
 
-  std::string object_planar::json_serialize() {
+  std::string object_planar::json_serialize() const {
     std::string json = "{";
 
     json += "\"object_type\":\"object_planar\",";
     json += "\"object_basic\":" + object_basic::json_serialize()+ ",";
-    json += "\"x\":" + enigma::JSON_serialization::internal_serialize_into_fn(x) + ",";
-    json += "\"y\":" + enigma::JSON_serialization::internal_serialize_into_fn(y) + ",";
-    json += "\"xprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(xprevious) + ",";
-    json += "\"yprevious\":" + enigma::JSON_serialization::internal_serialize_into_fn(yprevious) + ",";
-    json += "\"xstart\":" + enigma::JSON_serialization::internal_serialize_into_fn(xstart) + ",";
-    json += "\"ystart\":" + enigma::JSON_serialization::internal_serialize_into_fn(ystart) + ",";
+    json += "\"x\":" + enigma::JSON_serialization::enigma_serialize(x) + ",";
+    json += "\"y\":" + enigma::JSON_serialization::enigma_serialize(y) + ",";
+    json += "\"xprevious\":" + enigma::JSON_serialization::enigma_serialize(xprevious) + ",";
+    json += "\"yprevious\":" + enigma::JSON_serialization::enigma_serialize(yprevious) + ",";
+    json += "\"xstart\":" + enigma::JSON_serialization::enigma_serialize(xstart) + ",";
+    json += "\"ystart\":" + enigma::JSON_serialization::enigma_serialize(ystart) + ",";
 #ifdef ISLOCAL_persistent
-    json += "\"persistent\":" + enigma::JSON_serialization::internal_serialize_into_fn(persistent) + ",";
+    json += "\"persistent\":" + enigma::JSON_serialization::enigma_serialize(persistent) + ",";
 #endif
-    json += "\"direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(direction) + ",";
-    json += "\"speed\":" + enigma::JSON_serialization::internal_serialize_into_fn(speed) + ",";
-    json += "\"hspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(hspeed) + ",";
-    json += "\"vspeed\":" + enigma::JSON_serialization::internal_serialize_into_fn(vspeed) + ",";
-    json += "\"gravity\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity) + ",";
-    json += "\"gravity_direction\":" + enigma::JSON_serialization::internal_serialize_into_fn(gravity_direction) + ",";
-    json += "\"friction\":" + enigma::JSON_serialization::internal_serialize_into_fn(friction);
+    json += "\"direction\":" + enigma::JSON_serialization::enigma_serialize(direction) + ",";
+    json += "\"speed\":" + enigma::JSON_serialization::enigma_serialize(speed) + ",";
+    json += "\"hspeed\":" + enigma::JSON_serialization::enigma_serialize(hspeed) + ",";
+    json += "\"vspeed\":" + enigma::JSON_serialization::enigma_serialize(vspeed) + ",";
+    json += "\"gravity\":" + enigma::JSON_serialization::enigma_serialize(gravity) + ",";
+    json += "\"gravity_direction\":" + enigma::JSON_serialization::enigma_serialize(gravity_direction) + ",";
+    json += "\"friction\":" + enigma::JSON_serialization::enigma_serialize(friction);
 
     json += "}";
 
@@ -160,7 +160,7 @@ namespace enigma
   }
 
   void object_planar::json_deserialize_self(const std::string &json) {
-    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
     if (type != "object_planar") {
       DEBUG_MESSAGE("object_planar::json_deserialize_self: Object type '" + type +
                         "' does not match expected: object_planar",
@@ -169,22 +169,22 @@ namespace enigma
 
     object_basic::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_basic"));
 
-    x = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"x"));
-    y = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"y"));
-    xprevious = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xprevious"));
-    yprevious = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"yprevious"));
-    xstart = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xstart"));
-    ystart = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"ystart"));
+    x = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"x"));
+    y = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"y"));
+    xprevious = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xprevious"));
+    yprevious = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"yprevious"));
+    xstart = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xstart"));
+    ystart = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"ystart"));
 #ifdef ISLOCAL_persistent
-    persistent = enigma::JSON_serialization::internal_deserialize_fn<bool>(enigma::JSON_serialization::json_find_value(json,"persistent"));
+    persistent = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"persistent"));
 #endif
-    direction = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"direction"));
-    speed = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"speed"));
-    hspeed = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"hspeed"));
-    vspeed = enigma::JSON_serialization::internal_deserialize_fn<variant>(enigma::JSON_serialization::json_find_value(json,"vspeed"));
-    gravity = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity"));
-    gravity_direction = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity_direction"));
-    friction = enigma::JSON_serialization::internal_deserialize_fn<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"friction"));
+    direction = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"direction"));
+    speed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"speed"));
+    hspeed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"hspeed"));
+    vspeed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"vspeed"));
+    gravity = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity"));
+    gravity_direction = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity_direction"));
+    friction = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"friction"));
 
     hspeed.vspd    = &vspeed.rval.d;
     hspeed.dir     = &direction.rval.d;

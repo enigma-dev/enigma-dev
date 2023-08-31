@@ -31,17 +31,18 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-inline std::string internal_serialize_into_fn(const lua_table<T> &table) {
+matches_t<T, std::string, is_lua_table> inline internal_serialize_into_fn(const T &table) {
   std::string json = "{";
+  using inner_type = typename lua_inner_type<std::decay_t<T>>::type;
 
-  json += "\"mx_size_part\":" + internal_serialize_into_fn(table.mx_size_part()) + ",\"dense_part\":[";
+  json += "\"mx_size_part\":" + enigma::JSON_serialization::enigma_serialize(table.mx_size_part()) + ",\"dense_part\":[";
 
   for (int i = 0; i < table.dense_part().size(); i++) {
-    if constexpr (is_lua_table_v<std::decay_t<T>>) {
+    if constexpr (is_lua_table_v<inner_type>) {
       lua_table<variant> table1 = table.dense_part()[i];
-      json += internal_serialize_into_fn(table1);
+      json += enigma::JSON_serialization::enigma_serialize(table1);
     } else
-      json += internal_serialize_into_fn(table.dense_part()[i]);
+      json += enigma::JSON_serialization::enigma_serialize(table.dense_part()[i]);
     if (i != table.dense_part().size() - 1) json += ",";
   }
 
@@ -49,15 +50,15 @@ inline std::string internal_serialize_into_fn(const lua_table<T> &table) {
   for (auto &[key, value] : table.sparse_part()) {
     using key_type = std::decay_t<decltype(key)>;
     if (is_numeric_v<key_type>)
-      json += "\"" + internal_serialize_into_fn(key) + "\"";
+      json += "\"" + enigma::JSON_serialization::enigma_serialize(key) + "\"";
     else
-      json += internal_serialize_into_fn(key);
+      json += enigma::JSON_serialization::enigma_serialize(key);
     json += ":";
-    if constexpr (is_lua_table_v<std::decay_t<T>>) {
+    if constexpr (is_lua_table_v<inner_type>) {
       lua_table<variant> table1 = value;
-      json += internal_serialize_into_fn(table1);
+      json += enigma::JSON_serialization::enigma_serialize(table1);
     } else
-      json += internal_serialize_into_fn(value);
+      json += enigma::JSON_serialization::enigma_serialize(value);
 
     if (&value != &table.sparse_part().rbegin()->second) json += ",";
   }
@@ -69,30 +70,30 @@ inline std::string internal_serialize_into_fn(const lua_table<T> &table) {
 
 template <typename T>
 matches_t<T, T, is_lua_table> inline internal_deserialize_fn(const std::string &json) {
-  using Type = typename lua_inner_type<std::decay_t<T>>::type;
-  lua_table<Type> table;
+  using inner_type = typename lua_inner_type<std::decay_t<T>>::type;
+  lua_table<inner_type> table;
   auto &mx_size = const_cast<std::size_t &>(table.mx_size_part());
-  auto &dense = const_cast<typename lua_table<Type>::dense_type &>(table.dense_part());
-  auto &sparse = const_cast<typename lua_table<Type>::sparse_type &>(table.sparse_part());
+  auto &dense = const_cast<typename lua_table<inner_type>::dense_type &>(table.dense_part());
+  auto &sparse = const_cast<typename lua_table<inner_type>::sparse_type &>(table.sparse_part());
 
   std::string mx_size_part = json.substr(16, json.find(',') - 16);
   std::string dense_part =
       json.substr(json.find("dense_part") + 12, json.find("sparse_part") - json.find("dense_part") - 14);
   std::string sparse_part = json.substr(json.find("sparse_part") + 13, json.length() - json.find("sparse_part") - 14);
 
-  mx_size = internal_deserialize_fn<std::size_t>(mx_size_part);
+  mx_size = enigma::JSON_serialization::enigma_deserialize<std::size_t>(mx_size_part);
 
   std::string dense_part1 = dense_part.substr(1, dense_part.length() - 2);
   std::string sparse_part1 = sparse_part.substr(1, sparse_part.length() - 2);
 
   std::vector<std::string> dense_part2 = json_split(dense_part1, ',');
   dense.resize(dense_part2.size());
-  for (std::size_t i = 0; i < dense_part2.size(); i++) dense[i] = internal_deserialize_fn<Type>(dense_part2[i]);
+  for (std::size_t i = 0; i < dense_part2.size(); i++) dense[i] = enigma::JSON_serialization::enigma_deserialize<inner_type>(dense_part2[i]);
 
   std::vector<std::string> sparse_part2 = json_split(sparse_part1, ',');
   for (auto &elem : sparse_part2) {
-    std::size_t key = internal_deserialize_fn<std::size_t>(elem.substr(1, elem.find(":") - 1));
-    sparse[key] = internal_deserialize_fn<Type>(elem.substr(elem.find(":") + 1, elem.length() - elem.find(":") - 1));
+    std::size_t key = enigma::JSON_serialization::enigma_deserialize<std::size_t>(elem.substr(1, elem.find(":") - 1));
+    sparse[key] = enigma::JSON_serialization::enigma_deserialize<inner_type>(elem.substr(elem.find(":") + 1, elem.length() - elem.find(":") - 1));
   }
 
   return table;

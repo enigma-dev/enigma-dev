@@ -34,9 +34,9 @@ enables_if_base_of_variant_t<T, std::string> inline internal_serialize_into_fn(c
   std::string json = "{";
 
   if (value.type == variant::ty_real)
-    json += "\"type\":\"real\",\"value\":" + internal_serialize_into_fn(value.rval.d);
+    json += "\"type\":\"real\",\"value\":" + enigma::JSON_serialization::enigma_serialize(value.rval.d);
   else if (value.type == variant::ty_string)
-    json += "\"type\":\"string\",\"value\":" + internal_serialize_into_fn(value.sval());
+    json += "\"type\":\"string\",\"value\":" + enigma::JSON_serialization::enigma_serialize(value.sval());
 
   json += "}";
 
@@ -48,8 +48,8 @@ enables_if_base_of_variant_t<T, T> inline internal_deserialize_fn(const std::str
   std::string type = json.substr(9, json.find(',') - 10);
   std::string value = json.substr(json.find("value") + 7, json.length() - json.find("value") - 8);
 
-  if (type == "real") return T(internal_deserialize_fn<double>(value));
-  return T(internal_deserialize_fn<std::string>(value));
+  if (type == "real") return T(enigma::JSON_serialization::enigma_deserialize<double>(value));
+  return T(enigma::JSON_serialization::enigma_deserialize<std::string>(value));
 }
 
 }  // namespace JSON_serialization

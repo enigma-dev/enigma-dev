@@ -26,6 +26,11 @@
 #ifndef ENIGMA_DETECT_SERIALIZATION_H
 #define ENIGMA_DETECT_SERIALIZATION_H
 
+// It is defined in var4.h, and has conflicts with the std::string.
+#ifdef string
+#undef string
+#endif
+
 #include "Bytes_Serialization/bytes_types_serialization_includes.h"
 #include "JSON_Serialization/JSON_types_serialization_includes.h"
 #include "serialization_fwd_decl.h"
@@ -57,8 +62,13 @@ HAS_MEMBER_FUNCTION(size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(byte_size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (V::*)() const);
 HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
-HAS_MEMBER_FUNCTION(json_serialize, void (V::*)() const);
+HAS_MEMBER_FUNCTION(json_serialize, std::string (V::*)()const);
 HAS_MEMBER_FUNCTION(json_deserialize_self, void (V::*)(const std::string &json));
+
+// Now define string again.
+#if defined(INCLUDED_FROM_SHELLMAIN) && !defined(JUST_DEFINE_IT_RUN)
+#define string(...) toString(__VA_ARGS__)
+#endif
 
 /**
  * Now we have 6 classes with the following names:
@@ -124,16 +134,16 @@ HAS_STATIC_FUNCTION_V(json_deserialize, T(const std::string &json));
 #undef HAS_STATIC_FUNCTION_V
 #undef HAS_STATIC_FUNCTION
 
-#define HAS_FREE_FUNCTION(NameSpace, NAME, Parameters...)                                                      \
+#define HAS_FREE_FUNCTION(NAMESPACE, NAME, PARAMETERS...)                                                      \
   template <typename T, typename = void>                                                                       \
-  struct is_##NameSpace##_##NAME##_available : std::false_type {};                                             \
+  struct is_##NAMESPACE##_##NAME##_available : std::false_type {};                                             \
                                                                                                                \
   template <typename T>                                                                                        \
-  struct is_##NameSpace##_##NAME##_available<T, std::void_t<decltype(enigma::NameSpace::NAME<T>(Parameters))>> \
+  struct is_##NAMESPACE##_##NAME##_available<T, std::void_t<decltype(enigma::NAMESPACE::NAME<T>(PARAMETERS))>> \
       : std::true_type {};                                                                                     \
                                                                                                                \
   template <typename T>                                                                                        \
-  constexpr static inline bool _##NameSpace##_has_##NAME##_ = is_##NameSpace##_##NAME##_available<T>::value
+  constexpr static inline bool _##NAMESPACE##_has_##NAME##_ = is_##NAMESPACE##_##NAME##_available<T>::value
 
 HAS_FREE_FUNCTION(bytes_serialization, byte_size, std::declval<const T &>());
 HAS_FREE_FUNCTION(bytes_serialization, internal_serialize_into_fn, std::declval<std::byte *>(), std::declval<T &&>());
@@ -171,6 +181,7 @@ HAS_FREE_FUNCTION(JSON_serialization, internal_deserialize_fn, std::declval<cons
   std::is_invocable_r_v<void, decltype(enigma::bytes_serialization::internal_serialize_into_fn<T>), std::byte *, T>
 #define HAS_INTERNAL_SERIALIZE_FUNCTION() \
   std::is_invocable_v<decltype(enigma::bytes_serialization::internal_serialize_fn<T>), T>
-#define HAS_DESERIALIZE_FUNCTION() std::is_invocable_r_v<T, decltype(enigma::bytes_serialization::internal_deserialize<T>), std::byte *>
+#define HAS_DESERIALIZE_FUNCTION() \
+  std::is_invocable_r_v<T, decltype(enigma::bytes_serialization::internal_deserialize<T>), std::byte *>
 
 #endif

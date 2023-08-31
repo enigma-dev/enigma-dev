@@ -35,11 +35,11 @@ template <typename T>
 is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
   std::string json = "{\"variant\":";
 
-  json += internal_serialize_into_fn<variant>(value);
+  json += enigma::JSON_serialization::enigma_serialize<variant>(value);
   json += ",\"array1d\":";
-  json += internal_serialize_into_fn(value.array1d);
+  json += enigma::JSON_serialization::enigma_serialize(value.array1d);
   json += ",\"array2d\":";
-  json += internal_serialize_into_fn(value.array2d);
+  json += enigma::JSON_serialization::enigma_serialize(value.array2d);
 
   json += "}";
   return json;
@@ -62,11 +62,11 @@ is_t<T, var, T> inline internal_deserialize_fn(const std::string &json) {
   std::string array2dStr =
       json.substr(array2dPos + array2dStart.length(), json.length() - array2dPos - array2dStart.length() - 1);
 
-  variant inner = internal_deserialize_fn<variant>(variantStr);
+  variant inner = enigma::JSON_serialization::enigma_deserialize<variant>(variantStr);
   var result{std::move(inner)};
 
-  result.array1d = internal_deserialize_fn<lua_table<variant>>(array1dStr);
-  result.array2d = internal_deserialize_fn<lua_table<lua_table<variant>>>(array2dStr);
+  result.array1d = enigma::JSON_serialization::enigma_deserialize<lua_table<variant>>(array1dStr);
+  result.array2d = enigma::JSON_serialization::enigma_deserialize<lua_table<lua_table<variant>>>(array2dStr);
 
   return result;
 }

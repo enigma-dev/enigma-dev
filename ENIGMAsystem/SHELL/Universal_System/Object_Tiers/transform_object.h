@@ -46,7 +46,7 @@ namespace enigma
       static std::pair<object_transform, std::size_t> deserialize(std::byte *iter);
 
     // JSON (de)Serialization
-      std::string json_serialize() override;
+      std::string json_serialize() const override;
       void json_deserialize_self(const std::string& json) override;
       static object_transform josn_deserialize(const std::string& json);
   };

@@ -35,7 +35,7 @@ matches_t<T, std::string, is_std_queue, is_std_stack> inline internal_serialize_
 
   std::decay_t<T> tempContainer = value;
   while (!tempContainer.empty()) {
-    json += internal_serialize_into_fn(get_top(tempContainer));
+    json += enigma::JSON_serialization::enigma_serialize(get_top(tempContainer));
     if (tempContainer.size() > 1) json += ",";
     tempContainer.pop();
   }
@@ -53,12 +53,12 @@ matches_t<T, T, is_std_stack> inline internal_deserialize_fn(const std::string& 
 
   size_t commaPos = tempJson.find(',');
   while (commaPos != std::string::npos) {
-    tempContainer.push(internal_deserialize_fn<typename T::value_type>(tempJson.substr(0, commaPos)));
+    tempContainer.push(enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(tempJson.substr(0, commaPos)));
     tempJson.erase(0, commaPos + 1);
     commaPos = tempJson.find(',');
   }
 
-  tempContainer.push(internal_deserialize_fn<typename T::value_type>(tempJson));
+  tempContainer.push(enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(tempJson));
 
   T result;
   while (!tempContainer.empty()) {

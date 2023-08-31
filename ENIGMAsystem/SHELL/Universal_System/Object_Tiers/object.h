@@ -74,7 +74,7 @@ struct object_basic {
   static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
 
   // JSON (de)Serialization
-  virtual std::string json_serialize();
+  virtual std::string json_serialize() const;
   virtual void json_deserialize_self(const std::string &json);
   static object_basic json_deserialize(const std::string &json);
 

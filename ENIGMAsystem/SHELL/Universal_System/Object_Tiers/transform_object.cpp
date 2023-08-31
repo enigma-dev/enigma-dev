@@ -66,13 +66,13 @@ namespace enigma
     return {std::move(result), len};
   }
 
-  std::string object_transform::json_serialize() {
+  std::string object_transform::json_serialize() const {
     std::string json = "{";
 
     json += "\"object_type\":\"object_transform\",";
     json += "\"object_graphics\":" + object_graphics::json_serialize() + ",";
-    json += "\"image_alpha\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_alpha) + ",";
-    json += "\"image_blend\":" + enigma::JSON_serialization::internal_serialize_into_fn(image_blend);
+    json += "\"image_alpha\":" + enigma::JSON_serialization::enigma_serialize(image_alpha) + ",";
+    json += "\"image_blend\":" + enigma::JSON_serialization::enigma_serialize(image_blend);
 
     json += "}";
 
@@ -80,7 +80,7 @@ namespace enigma
   }
 
   void object_transform::json_deserialize_self(const std::string& json) {
-    std::string type = enigma::JSON_serialization::internal_deserialize_fn<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
     if (type != "object_transform") {
       DEBUG_MESSAGE("object_transform::json_deserialize_self: Object type '" + type +
                         "' does not match expected: object_transform",
@@ -89,8 +89,8 @@ namespace enigma
 
     object_graphics::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_graphics"));
 
-    image_alpha = enigma::JSON_serialization::internal_deserialize_fn<double>(enigma::JSON_serialization::json_find_value(json,"image_alpha"));
-    image_blend = enigma::JSON_serialization::internal_deserialize_fn<int>(enigma::JSON_serialization::json_find_value(json,"image_blend"));
+    image_alpha = enigma::JSON_serialization::enigma_deserialize<double>(enigma::JSON_serialization::json_find_value(json,"image_alpha"));
+    image_blend = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"image_blend"));
   }
 
   object_transform object_transform::josn_deserialize(const std::string& json){
