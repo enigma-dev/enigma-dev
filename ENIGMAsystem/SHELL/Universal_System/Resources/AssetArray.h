@@ -213,6 +213,7 @@ class AssetArray {
     return len;
   }
 
+  // Bytes (de)Serialization
   std::vector<std::byte> serialize() const {
     static_assert(has_serialize_method_v<T> || HAS_INTERNAL_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
@@ -250,6 +251,7 @@ class AssetArray {
     return {};
   }
 
+  // JSON (de)Serialization
   std::string json_serialize() const {
     static_assert(has_json_serialize_method_v<T> || _JSON_serialization_has_internal_serialize_into_fn_<T>,
                   "Given type is required to have at least one of `x.json_serialize()` or `internal_serialize_into_fn(x)`.");

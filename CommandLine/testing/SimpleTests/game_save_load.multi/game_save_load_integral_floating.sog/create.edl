@@ -12,7 +12,7 @@ mydouble= 1.234567890123456789012345678901234567890123456789012345678901234;
 
 show_debug_message("Starting the saving");
 var buf = buffer_create(1, buffer_grow, 1);
-game_save_buffer(buf);
+game_save_buffer(buf, SerializationBackend::Binary);
 buffer_save(buf, "/tmp/test.bin");
 
 myint8_t = -128;
@@ -28,7 +28,7 @@ mydouble= -1.234567890123456789012345678901234567890123456789012345678901234;
 show_debug_message("Loading the file");
 buffer_delete(buf);
 buf = buffer_load("/tmp/test.bin");
-game_load_buffer(buf);
+game_load_buffer(buf, SerializationBackend::Binary);
 
 gtest_assert_eq(int8_t(id.myint8_t), 127);
 gtest_assert_eq(int16_t(id.myint16_t), 32767);

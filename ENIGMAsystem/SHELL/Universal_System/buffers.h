@@ -691,7 +691,7 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend = Seria
  *
  * @param buffer The buffer to load the game state from
  */
-void game_load_buffer(buffer_t buffer);
+void game_load_buffer(buffer_t buffer, enum SerializationBackend backend = SerializationBackend::JSON);
 
 }  //namespace enigma_user
 

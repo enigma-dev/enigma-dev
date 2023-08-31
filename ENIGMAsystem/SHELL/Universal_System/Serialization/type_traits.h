@@ -223,16 +223,16 @@ template <typename T, typename ExpectedType, typename ReturnType = void>
 using is_t = std::enable_if_t<std::is_same_v<ExpectedType, std::decay_t<T>>, ReturnType>;
 
 template <typename... Conds>
-struct logical_or : std::false_type {};
+struct _logical_or_ : std::false_type {};
 
 template <typename Cond, typename... Rest>
-struct logical_or<Cond, Rest...> : std::conditional_t<Cond::value, std::true_type, logical_or<Rest...>> {};
+struct _logical_or_<Cond, Rest...> : std::conditional_t<Cond::value, std::true_type, _logical_or_<Rest...>> {};
 
 template <typename... Conds>
-constexpr static inline bool logical_or_v = logical_or<Conds...>::value;
+constexpr static inline bool _logical_or_v = _logical_or_<Conds...>::value;
 
 template <typename T, typename ReturnType, template <typename> typename... Classes>
-using matches_t = std::enable_if_t<logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
+using matches_t = std::enable_if_t<_logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
 
 template <typename T, typename ReturnType = void>
 using enables_if_numeric_t =

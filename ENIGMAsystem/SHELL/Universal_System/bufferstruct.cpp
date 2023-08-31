@@ -1422,6 +1422,7 @@ bool verify_checksum(std::vector<std::byte> &buffer) {
 
 void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
   GET_BUFFER(binbuff, buffer)
+  if(backend == SerializationBackend::Binary) {
   std::size_t ptr = 0;
 
   binbuff->data.resize(sizeof(std::size_t));
@@ -1462,10 +1463,12 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
   enigma::bytes_serialization::internal_serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
 
   store_checksum(binbuff->data, calculate_checksum(binbuff->data));
+  }
 }
 
-void game_load_buffer(buffer_t buffer) {
+void game_load_buffer(buffer_t buffer, enum SerializationBackend backend) {
   GET_BUFFER(binbuff, buffer)
+  if(backend == SerializationBackend::Binary) {
   if (!verify_checksum(binbuff->data)) {
     DEBUG_MESSAGE("game_load_buffer: Checksum is not correct, aborting", MESSAGE_TYPE::M_FATAL_ERROR);
     return;
@@ -1522,6 +1525,7 @@ void game_load_buffer(buffer_t buffer) {
   auto room_index = enigma::bytes_serialization::internal_deserialize<int>(ptr);
   enigma_user::room_goto(room_index);
   ptr += sizeof(int);
+  }
 }
 
 }  // namespace enigma_user
