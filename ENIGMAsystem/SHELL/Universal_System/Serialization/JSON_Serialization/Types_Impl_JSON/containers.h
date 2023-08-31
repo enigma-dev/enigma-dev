@@ -51,7 +51,7 @@ template <typename T>
 matches_t<T, T, is_std_vector, is_std_set, is_std_queue> inline internal_deserialize_fn(const std::string& json) {
   T result;
 
-  if (json.length() > 2) {  // Empty array
+  if (json.length() > 2) {  // Not empty 
     std::string jsonCopy = json.substr(1, json.length() - 2);
     std::vector<std::string> parts = json_split(jsonCopy, ',');
     for (auto it = parts.begin(); it != parts.end(); ++it)

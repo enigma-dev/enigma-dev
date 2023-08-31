@@ -250,6 +250,42 @@ class AssetArray {
     return {};
   }
 
+  std::string json_serialize() const {
+    static_assert(has_json_serialize_method_v<T> || _JSON_serialization_has_internal_serialize_into_fn_<T>,
+                  "Given type is required to have at least one of `x.json_serialize()` or `internal_serialize_into_fn(x)`.");
+
+    std::string result = "[";
+    for (std::size_t i = 0; i < assets_.size(); i++) {
+      result += enigma::JSON_serialization::enigma_serialize(operator[](i));
+      if (i != assets_.size() - 1) {
+        result += ",";
+      }
+    }
+    result += "]";
+    return result;
+  }
+
+  void json_deserialize_self(const std::string & json) {
+    static_assert(has_json_deserialize_function_v<T> || _JSON_serialization_has_internal_deserialize_fn_<T> ||has_json_deserialize_self_method_v<T>,
+                  "Given type is required to have at least one of `x::json_deserialize()`, `internal_deserialize_fn<T>() or x.json_deserialize_self()`");
+
+    if (json.length() > 2) { 
+    std::string jsonCopy = json.substr(1, json.length() - 2);
+    std::vector<std::string> parts = enigma::JSON_serialization::json_split(jsonCopy, ',');
+    for (auto it = parts.begin(); it != parts.end(); ++it)
+      assets_.add(enigma::JSON_serialization::enigma_deserialize<T>(*it));
+  }
+  }
+
+  static AssetArray<T, LEFT> json_deserialize(const std::string & json) {
+    if constexpr (has_json_deserialize_function_v<T> || _JSON_serialization_has_internal_deserialize_fn_<T>||has_json_deserialize_self_method_v<T>) {
+      AssetArray<T, LEFT> result;
+      result.json_deserialize_self(json);
+      return result;
+    }
+    return {};
+  }
+
  private:
   OffsetVector<T, LEFT> assets_;
 };
