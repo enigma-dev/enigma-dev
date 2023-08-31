@@ -38,8 +38,6 @@ class c_leaderboards_find_result_cookies : public c_leaderboards_cookies {
   c_leaderboards_find_result_cookies(int id_, c_leaderboards* c_leaderboards, SteamAPICall_t steam_api_call);
   ~c_leaderboards_find_result_cookies() = default;
 
-  bool is_done() const override;
-
  private:
   c_leaderboards* c_leaderboards_;
 
@@ -54,6 +52,8 @@ class c_leaderboards_find_result_cookies : public c_leaderboards_cookies {
     determine if we can destroy this object or not.
 */
   bool is_done_;
+
+  bool is_done() const override;
 
   void set_call_result(SteamAPICall_t steam_api_call) override;
 

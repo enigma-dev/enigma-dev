@@ -104,7 +104,7 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
   }
 
   // Now our entries is here, let's save it.
-  // enigma::entries_array.get(c_leaderboards_score_downloaded_cookies::id_) = leaderboard_entries;
+  enigma::entries_array.get(c_leaderboards_score_downloaded_cookies::id_) = leaderboard_entries;
 
   // Entries are saved? We are ready to accept new requests.
   // c_leaderboards_score_downloaded_cookies::c_leaderboards_->set_loading(false);

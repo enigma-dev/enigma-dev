@@ -149,4 +149,8 @@ flowchart BT
    layer3 --> |1| childLayer2
 ```
 
+## Steamworks Extension's Shared Resources Handling
+
+TODO: Add details about handling Critical Sections here.
+
 

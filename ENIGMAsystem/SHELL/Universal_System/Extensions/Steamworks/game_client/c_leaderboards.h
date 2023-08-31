@@ -34,9 +34,7 @@
 
 namespace steamworks {
 
-class c_leaderboards_find_result_cookies;
-class c_leaderboards_score_uploaded_cookies;
-class c_leaderboards_score_downloaded_cookies;
+class c_leaderboards_cookies;
 
 class c_game_client;
 
@@ -73,35 +71,15 @@ class c_leaderboards {
   bool loading_;
   unsigned number_of_leaderboard_entries_;
 
+  // TODO: Make sure that this vector doesn't cause race conditions.
   /*
-    These vectors can't have a race condition because they are only accessed from the main thread as
-    ENIGMA single-threaded.
+    This vector is used to track all instances of cookies so that we can destroy them when they are done.
   */
-  /*
-    This vector is used to track all instances of c_leaderboards_find_result_cookies so that we can
-    destroy them when they are done.
-*/
-  std::vector<c_leaderboards_find_result_cookies*> c_leaderboards_find_result_cookies_;
+  std::vector<c_leaderboards_cookies*> c_leaderboards_cookies_;
 
-  /*
-    This vector is used to track all instances of c_leaderboards_score_uploaded_cookies so that we can
-    destroy them when they are done.
-*/
-  std::vector<c_leaderboards_score_uploaded_cookies*> c_leaderboards_score_uploaded_cookies_;
+  void deallocate_all_c_leaderboards_cookies();
 
-  /*
-    This vector is used to track all instances of c_leaderboards_score_downloaded_cookies so that we can
-    destroy them when they are done.
-*/
-  std::vector<c_leaderboards_score_downloaded_cookies*> c_leaderboards_score_downloaded_cookies_;
-
-  void deallocate_all_c_leaderboards_find_result_cookies();
-  void deallocate_all_c_leaderboards_score_uploaded_cookies();
-  void deallocate_all_c_leaderboards_score_downloaded_cookies();
-
-  void deallocate_c_leaderboards_find_result_cookies_if_done();
-  void deallocate_c_leaderboards_score_uploaded_cookies_if_done();
-  void deallocate_c_leaderboards_score_downloaded_cookies_if_done();
+  void deallocate_c_leaderboards_cookies_if_done();
 };
 }  // namespace steamworks
 

@@ -51,7 +51,7 @@ extern unsigned number_of_successful_upload_requests;
 extern bool upload_rate_limit_exceeded;
 
 // TODO: See if you can improve the type of these arrays.
-extern AssetArray<SteamLeaderboard_t*>
+extern AssetArray<SteamLeaderboard_t>
     leaderboards_array;  // This will be used for returning the id for each leaderboard we find.
 extern AssetArray<LeaderboardEntry_t*>
     entries_array;                     // This will be used for returning the id for each leaderboard we download.
@@ -95,10 +95,10 @@ extern const unsigned lb_sort_descending;
 */
 /*
     Async DS map key/value pairs:
-        - "id" - The asynchronous request ID.
-        - "event_type" - The string value "create_leaderboard".
-        - "status" - The status code, 0 if the leaderboard was created and 1 if it already existed.
-        - "lb_name" - The name of the leaderboard.
+        - "id" -> The asynchronous request ID.
+        - "event_type" -> The string value "create_leaderboard".
+        - "status" -> The status code, 0 if the leaderboard was created and 1 if it already existed.
+        - "lb_name" -> The name of the leaderboard.
 */
 int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_order, const unsigned display_type);
 
@@ -109,12 +109,12 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 */
 /*
     Async DS map key/value pairs:
-        - "event_type" - This key will hold the value "leaderboard_upload".
-        - "post_id" - This key should match the ID value returned by the upload calling function.
-        - "lb_name" - This key holds the name of the leaderboard which was posted to.
-        - "success" - Will be 1 if the post succeeded, 0 failed.
-        - "updated" - Will be 1 if the leaderboard score was actually updated (ie: the new score was better) or 0 otherwise.
-        - "score" - This key holds the score which was posted.
+        - "event_type" -> This key will hold the value "leaderboard_upload".
+        - "post_id" -> This key should match the ID value returned by the upload calling function.
+        - "lb_name" -> This key holds the name of the leaderboard which was posted to.
+        - "success" -> Will be 1 if the post succeeded, 0 failed.
+        - "updated" -> Will be 1 if the leaderboard score was actually updated (ie: the new score was better) or 0 otherwise.
+        - "score" -> This key holds the score which was posted.
 */
 int steam_upload_score(const std::string& lb_name, const int score);
 
@@ -163,12 +163,12 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
 */
 /*
     Async DS map key/value pairs:
-        - "event_type" - This key will hold the value "leaderboard_download".
-        - "id" - This key should match the ID value returned by the download calling function.
-        - "status" - The status of the callback, where 0 equals a failure or that no results were returned, and 1 equals a success.
-        - "lb_name" - This key holds the name of the leaderboard which was posted to.
-        - "num_entries" - The number of "rows" of leaderboard data that is being returned.
-        - "entries" - A JSON object string that contains another DS map, which will either contain the key "default" (signifying 
+        - "event_type" > This key will hold the value "leaderboard_download".
+        - "id" -> This key should match the ID value returned by the download calling function.
+        - "status" -> The status of the callback, where 0 equals a failure or that no results were returned, and 1 equals a success.
+        - "lb_name" -> This key holds the name of the leaderboard which was posted to.
+        - "num_entries" -> The number of "rows" of leaderboard data that is being returned.
+        - "entries" -> A JSON object string that contains another DS map, which will either contain the key "default" (signifying 
           that no results are contained within) or the key " entries", which you can then get the value of. This returned value for 
           "entries" will be a DS list containing each of the ranks from the leaderboard, where each entry in the list will itself 
           reference another DS Map which will contain the keys "name", "score" and " rank", and it may also contain a "data" key 

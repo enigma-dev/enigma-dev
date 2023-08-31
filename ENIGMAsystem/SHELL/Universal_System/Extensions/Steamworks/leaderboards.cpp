@@ -42,7 +42,7 @@ unsigned number_of_successful_upload_requests{0};
 
 bool upload_rate_limit_exceeded{false};
 
-AssetArray<SteamLeaderboard_t*> leaderboards_array;
+AssetArray<SteamLeaderboard_t> leaderboards_array;
 AssetArray<LeaderboardEntry_t*> entries_array;
 AssetArray<bool> scores_array;
 
@@ -59,7 +59,6 @@ void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* 
 }
 
 void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult) {
-  // TODO: This is not working.
   /*
     We have a successful upload request after a failed one. Let's reset the number of successful upload requests.
   */
@@ -176,7 +175,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
       return -1;
   }
 
-  const int id{enigma::leaderboards_array.add(NULL)};
+  const int id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->create_leaderboard(
           id, lb_name, leaderboard_sort_method, leaderboard_display_type)) {
@@ -190,7 +189,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 int steam_upload_score(const std::string& lb_name, const int score) {
   if (!leaderboards_pre_checks("steam_upload_score")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NULL)};
+  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -208,7 +207,7 @@ int steam_upload_score(const std::string& lb_name, const int score) {
 int steam_upload_score_ext(const std::string& lb_name, const unsigned score, const bool force_update) {
   if (!leaderboards_pre_checks("steam_upload_score_ext")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NULL)};
+  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   /*
     Resets the c_leaderboards::current_leaderboard_ attribute and sets up a new call back.
@@ -246,7 +245,7 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
 int steam_download_scores(const std::string& lb_name, const int start_idx, const int end_idx) {
   if (!leaderboards_pre_checks("steam_download_scores")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NULL)};
+  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -264,7 +263,7 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
 int steam_download_scores_around_user(const std::string& lb_name, const int range_start, const int range_end) {
   if (!leaderboards_pre_checks("steam_download_scores_around_user")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NULL)};
+  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -282,7 +281,7 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
 int steam_download_friends_scores(const std::string& lb_name) {
   if (!leaderboards_pre_checks("steam_download_friends_scores")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NULL)};
+  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 

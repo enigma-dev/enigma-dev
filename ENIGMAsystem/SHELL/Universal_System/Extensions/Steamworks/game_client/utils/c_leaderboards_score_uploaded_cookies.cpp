@@ -46,19 +46,21 @@ void c_leaderboards_score_uploaded_cookies::set_call_result(SteamAPICall_t steam
 void c_leaderboards_score_uploaded_cookies::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult,
                                                             bool bIOFailure) {
   if (!pScoreUploadedResult->m_bSuccess || bIOFailure) {
-    if ((enigma::number_of_successful_upload_requests + 1) % 10 == 0) {
+    if (enigma::number_of_successful_upload_requests % 10 == 0 && enigma::number_of_successful_upload_requests != 0) {
       DEBUG_MESSAGE(
           "Did you create 10 upload requests in less than 10 minutes? Well, the upload rate is limited to "
           "10 upload requests per 10 minutes so you may want to wait before another request.",
           M_WARNING);
       enigma::upload_rate_limit_exceeded = true;
-    }
-    else DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
+    } else
+      DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
     // c_leaderboards_score_uploaded_cookies::c_leaderboards_->set_loading(false);
     c_leaderboards_score_uploaded_cookies::is_done_ = true;
     return;
   }
 
+  // TODO: Build failure when uncommenting this line.
+  // TODO: Create a struct for this.
   // Success? Let's save it.
   // enigma::scores_array.get(c_leaderboards_score_uploaded_cookies::id_) = true;
 

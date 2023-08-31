@@ -58,12 +58,11 @@ void c_leaderboards_find_result_cookies::on_find_leaderboard(LeaderboardFindResu
   DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
 
   // Success? Let's save it.
-  // enigma::leaderboards_array.get(c_leaderboards_find_result_cookies::id_) =
-  //     &pFindLeaderboardResult->m_hSteamLeaderboard;
+  enigma::leaderboards_array.get(c_leaderboards_find_result_cookies::id_) = pFindLeaderboardResult->m_hSteamLeaderboard;
 
   // Done? We are ready to accept new requests.
   // c_leaderboards_find_result_cookies::c_leaderboards_->set_loading(false);
-  
+
   enigma::push_create_leaderboard_steam_async_event(c_leaderboards_find_result_cookies::id_, pFindLeaderboardResult);
 
   c_leaderboards_find_result_cookies::is_done_ = true;

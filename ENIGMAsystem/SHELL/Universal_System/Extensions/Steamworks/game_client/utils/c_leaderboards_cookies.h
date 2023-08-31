@@ -30,9 +30,11 @@
 namespace steamworks {
 
 class c_leaderboards_cookies {
- private: 
-    virtual bool is_done() const = 0;
-    virtual void set_call_result(SteamAPICall_t steam_api_call) = 0;
+ public:
+  virtual bool is_done() const = 0;
+
+ private:
+  virtual void set_call_result(SteamAPICall_t steam_api_call) = 0;
 };
 
 }  // namespace steamworks
