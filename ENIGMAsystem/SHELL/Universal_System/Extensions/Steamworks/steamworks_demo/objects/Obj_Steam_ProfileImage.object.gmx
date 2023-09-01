@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<object>
+  <spriteName>&lt;undefined&gt;</spriteName>
+  <solid>0</solid>
+  <visible>-1</visible>
+  <depth>0</depth>
+  <persistent>0</persistent>
+  <maskName>&lt;undefined&gt;</maskName>
+  <parentName>&lt;undefined&gt;</parentName>
+  <events>
+    <event enumb="0" eventtype="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string> &#13;
+/// @returns {Asset.GMSprite}&#13;
+function steam_image_create_sprite(l_img)&#13;
+{&#13;
+	var l_dims = steam_image_get_size(l_img);&#13;
+	if (l_dims == undefined) &#13;
+		return -1;&#13;
+	&#13;
+	var buff_size = l_dims[0] * l_dims[1] * 4&#13;
+	var l_cols = buffer_create(buff_size, buffer_fixed, 1);&#13;
+	var l_sprite, l_ok;&#13;
+	&#13;
+	l_ok = steam_image_get_rgba(l_img, l_cols, buff_size);&#13;
+&#13;
+	if (l_ok) &#13;
+	{&#13;
+		var l_surf = surface_create(l_dims[0], l_dims[1]);&#13;
+		buffer_set_surface(l_cols, l_surf, 0);&#13;
+		l_sprite = sprite_create_from_surface(l_surf, 0, 0, l_dims[0], l_dims[1], false, false, 0, 0);&#13;
+		surface_free(l_surf);&#13;
+	} &#13;
+	else &#13;
+		l_sprite = -1;&#13;
+		&#13;
+	buffer_delete(l_cols);&#13;
+	return l_sprite;&#13;
+}&#13;
+&#13;
+&#13;
+var av = steam_get_user_avatar(steam_get_user_steam_id(), steam_user_avatar_size_large);&#13;
+if (av != -1) &#13;
+	avatar_sprite = steam_image_create_sprite(av);&#13;
+else &#13;
+	avatar_sprite = -1;&#13;
+&#13;
+&#13;
+&#13;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="1">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>  &#13;
+&#13;
+if (sprite_exists(avatar_sprite)) &#13;
+{&#13;
+	sprite_delete(avatar_sprite);&#13;
+	avatar_sprite = -1;&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="69" eventtype="7">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string> /// @description Insert description here&#13;
+// You can write your code in this editor&#13;
+&#13;
+// Early exit if event type doesn't match&#13;
+if (async_load[?"event_type"] != "avatar_image_loaded") exit&#13;
+&#13;
+// Validate status&#13;
+var success = async_load[?"success"];&#13;
+if (success == 1) {&#13;
+    &#13;
+    // Create a new sprite from Steam image&#13;
+	avatar_sprite = steam_image_create_sprite(async_load[?"image"]);&#13;
+}&#13;
+else {&#13;
+    // Failure&#13;
+    show_debug_message("Failed to get user avatar");&#13;
+}</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string> &#13;
+if(sprite_exists(avatar_sprite))&#13;
+	draw_sprite(avatar_sprite, 0, x, y);&#13;
+&#13;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+  </events>
+  <PhysicsObject>0</PhysicsObject>
+  <PhysicsObjectSensor>0</PhysicsObjectSensor>
+  <PhysicsObjectShape>0</PhysicsObjectShape>
+  <PhysicsObjectDensity>0.5</PhysicsObjectDensity>
+  <PhysicsObjectRestitution>0.1</PhysicsObjectRestitution>
+  <PhysicsObjectGroup>0</PhysicsObjectGroup>
+  <PhysicsObjectLinearDamping>0.1</PhysicsObjectLinearDamping>
+  <PhysicsObjectAngularDamping>0.1</PhysicsObjectAngularDamping>
+  <PhysicsObjectFriction>0.2</PhysicsObjectFriction>
+  <PhysicsObjectAwake>-1</PhysicsObjectAwake>
+  <PhysicsObjectKinematic>0</PhysicsObjectKinematic>
+  <PhysicsShapePoints/>
+</object>
