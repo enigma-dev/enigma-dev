@@ -69,7 +69,7 @@ struct object_basic {
   virtual variant myevent_destroy();
 
   // Bytes (de)Serialization
-  virtual std::vector<std::byte> serialize();
+  virtual std::vector<std::byte> serialize() const;
   virtual std::size_t deserialize_self(std::byte *iter);
   static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
 

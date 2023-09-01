@@ -103,7 +103,7 @@ namespace enigma
     }
   }
 
-  std::vector<std::byte> object_timelines::serialize() {
+  std::vector<std::byte> object_timelines::serialize() const {
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
@@ -165,7 +165,7 @@ namespace enigma
     std::string json = "{";
     
     json += "\"object_type\":\"object_timelines\",";
-    json += "\"object_planar\":" + object_planar::json_serialize() + ",";;
+    json += "\"parent\":" + object_planar::json_serialize() + ",";;
     json += "\"timeline_moments_maps\":" + enigma::JSON_serialization::enigma_serialize(timeline_moments_maps) + ","; 
     json += "\"timeline_index\":" + enigma::JSON_serialization::enigma_serialize(timeline_index) + ",";
     json += "\"timeline_running\":" + enigma::JSON_serialization::enigma_serialize(timeline_running) + ",";
@@ -186,7 +186,7 @@ namespace enigma
           MESSAGE_TYPE::M_FATAL_ERROR);
     } 
 
-      object_planar::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_planar"));
+      object_planar::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
     
       timeline_moments_maps = enigma::JSON_serialization::enigma_deserialize<std::vector<std::map<int, int>>>(enigma::JSON_serialization::json_find_value(json,"timeline_moments_maps"));
       timeline_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"timeline_index"));

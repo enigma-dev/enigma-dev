@@ -65,7 +65,7 @@ namespace enigma
       virtual ~object_planar();
 
     // Bytes (de)Serialization
-      std::vector<std::byte> serialize() override;
+      std::vector<std::byte> serialize() const override;
       std::size_t deserialize_self(std::byte *iter) override;
       static std::pair<object_planar, std::size_t> deserialize(std::byte *iter);
 

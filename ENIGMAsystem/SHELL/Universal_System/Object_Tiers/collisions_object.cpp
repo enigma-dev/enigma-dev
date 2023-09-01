@@ -144,7 +144,7 @@ namespace enigma
 
     object_collisions::~object_collisions() {}
 
-    std::vector<std::byte> object_collisions::serialize() {
+    std::vector<std::byte> object_collisions::serialize() const {
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
@@ -182,7 +182,7 @@ namespace enigma
       std::string json = "{";
 
       json += "\"object_type\":\"object_collisions\",";
-      json += "\"object_transform\":" + object_transform::json_serialize() + ",";
+      json += "\"parent\":" + object_transform::json_serialize() + ",";
       json += "\"mask_index\":" + enigma::JSON_serialization::enigma_serialize(mask_index) + ",";
       json += "\"solid\":" + enigma::JSON_serialization::enigma_serialize(solid) + ",";
       json += "\"polygon_index\":" + enigma::JSON_serialization::enigma_serialize(polygon_index) + ","; 
@@ -203,7 +203,7 @@ namespace enigma
                       MESSAGE_TYPE::M_FATAL_ERROR);
         }
       
-      object_transform::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_transform"));
+      object_transform::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
 
       mask_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"mask_index"));
       solid = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"solid"));

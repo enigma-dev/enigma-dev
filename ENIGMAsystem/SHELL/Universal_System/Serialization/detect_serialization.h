@@ -26,7 +26,7 @@
 #ifndef ENIGMA_DETECT_SERIALIZATION_H
 #define ENIGMA_DETECT_SERIALIZATION_H
 
-// It is defined in var4.h, and has conflicts with the std::string.
+// It is defined in var4.h, and has conflicts with the std::string()
 #ifdef string
 #undef string
 #endif
@@ -62,10 +62,10 @@ HAS_MEMBER_FUNCTION(size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(byte_size, std::size_t (V::*)() const noexcept);
 HAS_MEMBER_FUNCTION(serialize, std::vector<std::byte> (V::*)() const);
 HAS_MEMBER_FUNCTION(deserialize_self, std::size_t (V::*)(std::byte *iter));
-HAS_MEMBER_FUNCTION(json_serialize, std::string (V::*)()const);
+HAS_MEMBER_FUNCTION(json_serialize, std::string (V::*)() const);
 HAS_MEMBER_FUNCTION(json_deserialize_self, void (V::*)(const std::string &json));
 
-// Now define string again.
+// Now define string again
 #if defined(INCLUDED_FROM_SHELLMAIN) && !defined(JUST_DEFINE_IT_RUN)
 #define string(...) toString(__VA_ARGS__)
 #endif

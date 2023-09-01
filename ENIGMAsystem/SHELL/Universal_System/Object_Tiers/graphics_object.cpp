@@ -94,7 +94,7 @@ namespace enigma
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index)*image_yscale; }
   int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
 
-  std::vector<std::byte> object_graphics::serialize() {
+  std::vector<std::byte> object_graphics::serialize() const {
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
@@ -132,7 +132,7 @@ namespace enigma
     std::string json = "{";
 
     json += "\"object_type\":\"object_graphics\",";
-    json += "\"object_timelines\":" + object_timelines::json_serialize() + ",";
+    json += "\"parent\":" + object_timelines::json_serialize() + ",";
     json += "\"sprite_index\":" + enigma::JSON_serialization::enigma_serialize(sprite_index) + ",";
     json += "\"image_index\":" + enigma::JSON_serialization::enigma_serialize(image_index) + ",";
     json += "\"image_speed\":" + enigma::JSON_serialization::enigma_serialize(image_speed) + ",";
@@ -156,7 +156,7 @@ namespace enigma
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
 
-    object_timelines::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_timelines"));
+    object_timelines::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
 
     sprite_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"sprite_index"));
     image_index = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_index"));

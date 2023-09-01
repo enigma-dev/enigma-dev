@@ -275,7 +275,7 @@ class AssetArray {
     std::string jsonCopy = json.substr(1, json.length() - 2);
     std::vector<std::string> parts = enigma::JSON_serialization::json_split(jsonCopy, ',');
     for (auto it = parts.begin(); it != parts.end(); ++it)
-      assets_.add(enigma::JSON_serialization::enigma_deserialize<T>(*it));
+      assets_.emplace_back(enigma::JSON_serialization::enigma_deserialize<T>(*it));
   }
   }
 

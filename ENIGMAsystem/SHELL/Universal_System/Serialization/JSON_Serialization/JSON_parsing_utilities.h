@@ -18,7 +18,8 @@
 /**
   @file JSON_parsing_utilities.h
   @brief This file contains the implementation of some utilities used in parsing JSON, 
-  such as splitting a string into parts and finding a value in a JSON string.
+  such as splitting a string into part, finding a value in a JSON string and removing
+  whitespaces from JSONs.
 */
 
 #ifndef ENIGMA_JSON_PARSING_UTILITIES_H
@@ -31,32 +32,34 @@ namespace JSON_serialization {
 
 std::vector<std::string> inline json_split(const std::string &s, char delimiter) {
   std::vector<std::string> parts;
-  size_t start = 0;
-  size_t end = 0;
-  bool within_quotes = false;
-  bool within_array = false;
-  size_t num_open_braces = 0;
-  size_t len = s.length();
+  if (s.size() > 2) {
+    size_t start = 0;
+    size_t end = 0;
+    bool within_quotes = false;
+    bool within_array = false;
+    size_t num_open_braces = 0;
+    size_t len = s.length();
 
-  while (end < len) {
-    if (s[end] == '"' && (end == 0 || s[end - 1] != '\\'))
-      within_quotes = !within_quotes;
-    else if (s[end] == '[' && !within_quotes)
-      within_array = true;
-    else if (s[end] == ']' && !within_quotes)
-      within_array = false;
-    else if (s[end] == '{' && !within_quotes)
-      num_open_braces++;
-    else if (s[end] == '}' && !within_quotes)
-      num_open_braces--;
-    else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
-      if (end != start) parts.push_back(s.substr(start, end - start));
-      start = end + 1;
+    while (end < len) {
+      if (s[end] == '"' && (end == 0 || s[end - 1] != '\\'))
+        within_quotes = !within_quotes;
+      else if (s[end] == '[' && !within_quotes)
+        within_array = true;
+      else if (s[end] == ']' && !within_quotes)
+        within_array = false;
+      else if (s[end] == '{' && !within_quotes)
+        num_open_braces++;
+      else if (s[end] == '}' && !within_quotes)
+        num_open_braces--;
+      else if (s[end] == delimiter && !within_quotes && !within_array && num_open_braces == 0) {
+        if (end != start) parts.push_back(s.substr(start, end - start));
+        start = end + 1;
+      }
+      end++;
     }
-    end++;
-  }
 
-  if (start != len) parts.push_back(s.substr(start));
+    if (start != len) parts.push_back(s.substr(start));
+  }
   return parts;
 }
 
@@ -64,22 +67,40 @@ std::string inline json_find_value(const std::string &json, const std::string &k
   size_t startPos = json.find("\"" + key + "\":");
   if (startPos != std::string::npos) {
     startPos += key.length() + 3;  // Add 3 to account for quotes and colon
-    size_t endPos = json.find_first_of(",}", startPos);
-    if (endPos != std::string::npos) {
-      return json.substr(startPos, endPos - startPos);
+
+    int openingBrackets = 0;
+    int openingBraces = 0;
+    size_t currentPos = startPos;
+
+    while (currentPos < json.length()) {
+      if (json[currentPos] == '[')
+        openingBrackets++;
+      else if (json[currentPos] == '{')
+        openingBraces++;
+      else if (json[currentPos] == ']')
+        openingBrackets--;
+      else if (json[currentPos] == '}')
+        openingBraces--;
+      currentPos++;
+
+      if (openingBrackets == 0 && openingBraces == 0) {
+        size_t endPos = json.find_first_of(",}", currentPos);
+        if (endPos != std::string::npos) return json.substr(startPos, endPos - startPos);
+      }
     }
   }
+
   return "";
 }
 
 void inline json_remove_whitespace(std::string &json) {
-    std::string result;
-    for (char c : json) {
-        if (!std::isspace(c)) {
-            result += c;
-        }
+  std::string result;
+  for (char c : json) {
+    if (!std::isspace(c)) {
+      result += c;
     }
-    json = result;
+  }
+  json = result;
 }
 
 }  // namespace JSON_serialization

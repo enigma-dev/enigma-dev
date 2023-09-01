@@ -76,7 +76,7 @@ namespace enigma
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
 
-  std::vector<std::byte> object_planar::serialize() {
+  std::vector<std::byte> object_planar::serialize() const {
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
@@ -136,7 +136,7 @@ namespace enigma
     std::string json = "{";
 
     json += "\"object_type\":\"object_planar\",";
-    json += "\"object_basic\":" + object_basic::json_serialize()+ ",";
+    json += "\"parent\":" + object_basic::json_serialize()+ ",";
     json += "\"x\":" + enigma::JSON_serialization::enigma_serialize(x) + ",";
     json += "\"y\":" + enigma::JSON_serialization::enigma_serialize(y) + ",";
     json += "\"xprevious\":" + enigma::JSON_serialization::enigma_serialize(xprevious) + ",";
@@ -167,7 +167,7 @@ namespace enigma
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
 
-    object_basic::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_basic"));
+    object_basic::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
 
     x = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"x"));
     y = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"y"));

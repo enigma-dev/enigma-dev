@@ -1464,22 +1464,50 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
 
   store_checksum(binbuff->data, calculate_checksum(binbuff->data));
   }
+  else {
+  std::string json="{\"instance_list\":["; 
+  for (auto &[id, obj] : enigma::instance_list) {
+    json+= obj->inst->json_serialize();
+    if(id!=enigma::instance_list.rbegin()->first)
+      json+=",";
+  }
+  
+  json+="],\"instance_deactivated_list\":[";  
+  for (auto &[id, obj] : enigma::instance_deactivated_list) {
+    json+=obj->json_serialize();
+    if(id!=enigma::instance_deactivated_list.rbegin()->first)
+      json+=",";
+  }
+
+  json+="],\"backgrounds\":";
+  json+=enigma::backgrounds.json_serialize();
+
+  json+=",\"room_index\":"+enigma::JSON_serialization::enigma_serialize(enigma_user::room.rval.d)+"}";
+
+  for (size_t i = 0; i < json.size(); ++i) {
+        binbuff->data.push_back(static_cast<std::byte>(json[i]));
+    }
+  
+  store_checksum(binbuff->data, calculate_checksum(binbuff->data));
+  }
 }
 
 void game_load_buffer(buffer_t buffer, enum SerializationBackend backend) {
   GET_BUFFER(binbuff, buffer)
-  if(backend == SerializationBackend::Binary) {
+
   if (!verify_checksum(binbuff->data)) {
     DEBUG_MESSAGE("game_load_buffer: Checksum is not correct, aborting", MESSAGE_TYPE::M_FATAL_ERROR);
     return;
   }
 
+  if(backend == SerializationBackend::Binary) {
   std::vector<int> active_ids{};
   std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
                  [](auto &value) { return value.first; });
   for (int id : active_ids) {
     instance_destroy(id);
   }
+  
   std::vector<int> inactive_ids{};
   std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
                  [](auto &value) { return value.first; });
@@ -1525,6 +1553,55 @@ void game_load_buffer(buffer_t buffer, enum SerializationBackend backend) {
   auto room_index = enigma::bytes_serialization::internal_deserialize<int>(ptr);
   enigma_user::room_goto(room_index);
   ptr += sizeof(int);
+  }
+  else {
+  std::vector<int> active_ids{};
+  std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
+                 [](auto &value) { return value.first; });
+  for (int id : active_ids) {
+    instance_destroy(id);
+  }
+  
+  std::vector<int> inactive_ids{};
+  std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
+                 [](auto &value) { return value.first; });
+  for (int id : inactive_ids) {
+    instance_destroy(id);
+  }
+
+  std::string json;
+  for (std::size_t i=1; i< binbuff->data.size();i++) {
+    json += static_cast<char>(binbuff->data[i]);
+  }
+
+  std::string active_list_part= enigma::JSON_serialization::json_find_value(json,"instance_list");
+  std::vector<std::string> active_list= enigma::JSON_serialization::json_split(active_list_part,',');
+  for (std::size_t i = 0; i < active_list.size(); i++) {
+    int obj_ind = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(active_list[i],"object_index"));
+    int obj_id = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(active_list[i],"id"));
+    auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
+    obj->json_deserialize_self(active_list[i]);
+    obj->activate();
+  }
+
+  std::string inactive_list_part= enigma::JSON_serialization::json_find_value(json,"instance_deactivated_list");
+  std::vector<std::string> inactive_list= enigma::JSON_serialization::json_split(inactive_list_part,',');
+  for(std::size_t i=0;i<inactive_list.size();i++) {
+    int obj_ind = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(inactive_list[i],"object_index"));
+    auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+    obj->json_deserialize_self(inactive_list[i]);
+    obj->deactivate();
+  }
+
+  std::string backgrounds_list = enigma::JSON_serialization::json_find_value(json,"backgrounds");
+  if(backgrounds_list=="") {
+    DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
+  }
+
+  enigma::backgrounds.json_deserialize_self(backgrounds_list);
+
+  int room_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"room_index"));  
+  enigma_user::room_goto(room_index);
   }
 }
 

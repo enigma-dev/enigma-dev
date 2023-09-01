@@ -32,7 +32,7 @@ namespace enigma
   object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
   object_transform::~object_transform() {}
 
-  std::vector<std::byte> object_transform::serialize() {
+  std::vector<std::byte> object_transform::serialize() const {
     auto bytes = object_graphics::serialize();
     std::size_t len = 0;
 
@@ -70,7 +70,7 @@ namespace enigma
     std::string json = "{";
 
     json += "\"object_type\":\"object_transform\",";
-    json += "\"object_graphics\":" + object_graphics::json_serialize() + ",";
+    json += "\"parent\":" + object_graphics::json_serialize() + ",";
     json += "\"image_alpha\":" + enigma::JSON_serialization::enigma_serialize(image_alpha) + ",";
     json += "\"image_blend\":" + enigma::JSON_serialization::enigma_serialize(image_blend);
 
@@ -87,7 +87,7 @@ namespace enigma
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
 
-    object_graphics::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"object_graphics"));
+    object_graphics::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
 
     image_alpha = enigma::JSON_serialization::enigma_deserialize<double>(enigma::JSON_serialization::json_find_value(json,"image_alpha"));
     image_blend = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"image_blend"));

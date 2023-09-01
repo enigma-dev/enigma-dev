@@ -65,7 +65,7 @@ namespace enigma
     virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
 
     // Bytes (de)Serialization
-    std::vector<std::byte> serialize() override;
+    std::vector<std::byte> serialize() const override;
     std::size_t deserialize_self(std::byte *iter) override;
     static std::pair<object_timelines, std::size_t> deserialize(std::byte *iter);
 

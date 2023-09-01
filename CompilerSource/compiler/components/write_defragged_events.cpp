@@ -61,7 +61,7 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-  wto << "    std::vector<std::byte> serialize() override { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
+  wto << "    std::vector<std::byte> serialize() const override { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
   wto << "    std::size_t deserialize_self(std::byte *iter) override { return " << system_get_uppermost_tier() << "::deserialize_self(iter); }\n\n";
   wto << "    std::pair<event_parent, std::size_t> deserialize(std::byte *iter) {\n"
          "      event_parent result;\n"

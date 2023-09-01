@@ -1,0 +1,27 @@
+ show_debug_message("Starting the test");
+
+myInteger = 5;
+myfloat = 3.14;
+myBoolean = true;
+
+show_debug_message("Starting the saving");
+var buf = buffer_create(1, buffer_grow, 1);
+game_save_buffer(buf,SerializationBackend::JSON);
+buffer_save(buf, "/tmp/test.bin");
+
+myInteger = 0;
+myfloat = 1.2;
+myBoolean = false;
+
+show_debug_message("Loading the file");
+buffer_delete(buf);
+buf = buffer_load("/tmp/test.bin");
+game_load_buffer(buf,SerializationBackend::JSON);
+
+//gtest_assert_eq(int(id.myInteger), 5);
+//gtest_assert_eq(double(id.myfloat), 3.14);
+//gtest_assert_eq(bool(id.myBoolean), true);
+
+show_debug_message("Loading successful");
+
+game_end();

@@ -113,7 +113,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::map<string, var> *vmap;\n";
   wto << "    object_locals() {vmap = NULL;}\n";
   wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
-  wto << "\n    std::vector<std::byte> serialize() override {\n"
+  wto << "\n    std::vector<std::byte> serialize() const override {\n"
          "      auto bytes = event_parent::serialize();\n"
          "      std::size_t len = 0;\n"
          "      if (vmap != nullptr) {\n"
@@ -308,7 +308,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
     wto << "    const static std::unordered_map<std::string_view, Deserializer> deserializers;\n";
   }
 
-  wto << "\n    std::vector<std::byte> serialize() override {\n"
+  wto << "\n    std::vector<std::byte> serialize() const override{\n"
          "      auto bytes = " << (object->parent ? object->parent->name : "object_locals") << "::serialize();\n";
   wto << "      std::size_t len = 0;\n\n";
   if (!locals.empty()) {

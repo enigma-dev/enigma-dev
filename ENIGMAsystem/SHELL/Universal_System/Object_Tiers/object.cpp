@@ -88,7 +88,7 @@ void objectdata_load() {
   for (int i = 0; i < objectcount; i++) objectdata[objs[i].id] = &objs[i];
 }
 
-std::vector<std::byte> object_basic::serialize() {
+std::vector<std::byte> object_basic::serialize() const {
   std::vector<std::byte> bytes{};
   std::size_t len = 0;
 
