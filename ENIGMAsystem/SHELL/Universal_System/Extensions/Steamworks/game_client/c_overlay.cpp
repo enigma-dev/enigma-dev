@@ -46,7 +46,7 @@ void c_overlay::activate_overlay_browser(const std::string& url) {
   SteamFriends()->ActivateGameOverlayToWebPage(url.c_str());
 }
 
-void c_overlay::activate_overlay_user(const std::string& dialog_name, const unsigned long long steam_id) {
+void c_overlay::activate_overlay_user(const std::string& dialog_name, const uint64 steam_id) {
   CSteamID c_steam_id(steam_id);
   SteamFriends()->ActivateGameOverlayToUser(dialog_name.c_str(), c_steam_id);
 }

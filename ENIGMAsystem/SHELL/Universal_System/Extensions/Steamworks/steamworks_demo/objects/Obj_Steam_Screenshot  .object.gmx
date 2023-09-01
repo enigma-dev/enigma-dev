@@ -73,13 +73,11 @@ text = "Screenshot"</string>
           <argument>
             <kind>1</kind>
             <string>&#13;
-var file = "Screenshot.png"&#13;
-screen_save(file)&#13;
+//var file = "Screenshot.png"&#13;
+//screen_save(file)&#13;
 &#13;
 // This will send a previously saved screenshot image to your steam account&#13;
-show_debug_message(steam_send_screenshot(file, window_get_width(), window_get_height()));&#13;
-&#13;
-</string>
+//show_debug_message(steam_send_screenshot(file, window_get_width(), window_get_height()));</string>
           </argument>
         </arguments>
       </action>

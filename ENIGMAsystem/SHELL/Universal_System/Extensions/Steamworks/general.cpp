@@ -62,15 +62,15 @@ unsigned long long steam_get_user_steam_id() {
 }
 
 std::string steam_get_persona_name() {
-  if (!general_pre_checks("steam_get_persona_name")) return "-1";
+  if (!general_pre_checks("steam_get_persona_name")) return "";
 
   return steamworks::c_game_client::get_steam_persona_name();
 }
 
-std::string steam_get_user_persona_name(CSteamID user_persona_name) {
-  if (!general_pre_checks("steam_get_user_persona_name")) return "-1";
+std::string steam_get_user_persona_name(const unsigned long long steamID) {
+  if (!general_pre_checks("steam_get_user_persona_name")) return "";
 
-  return steamworks::c_game_client::get_steam_user_persona_name(user_persona_name);
+  return steamworks::c_game_client::get_steam_user_persona_name(steamID);
 }
 
 bool steam_is_user_logged_on() {
@@ -83,13 +83,13 @@ bool steam_is_user_logged_on() {
 }
 
 std::string steam_current_game_language() {
-  if (!general_pre_checks("steam_current_game_language")) return "-1";
+  if (!general_pre_checks("steam_current_game_language")) return "";
 
   return steamworks::c_main::get_c_game_client()->get_current_game_language();
 }
 
 std::string steam_available_languages() {
-  if (!general_pre_checks("steam_available_languages")) return "-1";
+  if (!general_pre_checks("steam_available_languages")) return "";
 
   return steamworks::c_main::get_c_game_client()->get_available_game_languages();
 }

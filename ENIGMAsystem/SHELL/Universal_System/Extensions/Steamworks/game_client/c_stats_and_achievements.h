@@ -97,7 +97,7 @@ class c_stats_and_achievements {
 
       2.  Calls c_stats_and_achievements::store_stats() function to store the stats.
   */
-  void set_stat_int(const std::string& stat_name, const int value);
+  void set_stat_int(const std::string& stat_name, const int32 value);
 
   /*
     NOTE:   This is the int overload.
@@ -107,7 +107,7 @@ class c_stats_and_achievements {
     callback prior to calling this. Calls GetStat() function. 
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#GetStat for more information.
   */
-  int get_stat_int(const std::string& stat_name);
+  int32 get_stat_int(const std::string& stat_name);
 
   /*
     NOTE:   This is the float overload.

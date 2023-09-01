@@ -115,7 +115,7 @@ class c_overlay {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#ActivateGameOverlayToUser
     for more information.
   */
-  static void activate_overlay_user(const std::string& dialog_name, const unsigned long long steam_id);
+  static void activate_overlay_user(const std::string& dialog_name, const uint64 steam_id);
 
   /*
     Sets the inset of the overlay notification from the corner specified by 

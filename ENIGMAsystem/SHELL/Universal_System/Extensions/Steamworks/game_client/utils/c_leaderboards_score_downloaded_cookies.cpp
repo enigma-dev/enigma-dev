@@ -27,8 +27,12 @@ namespace steamworks {
 ////////////////////////////////////////////////////////
 
 // TODO: Add data key/value pair (if existed).
-// TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
-// because if something I don't understand.
+/*
+  TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
+  because if something I don't understand.
+*/
+// TODO: The userID is not the same as the steamID.
+// TODO: This function should be modified with https://github.com/enigma-dev/enigma-dev/pull/2358.
 void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned leaderboard_entries_size,
                              std::stringstream& leaderboard_entries_buffer) {
   leaderboard_entries_buffer << '{';  // Entries object open bracket
@@ -39,16 +43,16 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
     leaderboard_entries_buffer << '{';
     leaderboard_entries_buffer << '\"' << "name" << '\"' << ':';
     leaderboard_entries_buffer << '\"'
-                                  << steamworks::c_game_client::get_steam_user_persona_name(
-                                         leaderboard_entries[i].m_steamIDUser)
-                                  << '\"' << ',';
+                               << steamworks::c_game_client::get_steam_user_persona_name(
+                                      leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
+                               << '\"' << ',';
     leaderboard_entries_buffer << '\"' << "score" << '\"' << ':';
     leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nScore) << ',';
     leaderboard_entries_buffer << '\"' << "rank" << '\"' << ':';
     leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',';
     leaderboard_entries_buffer << '\"' << "userID" << '\"' << ':';
     leaderboard_entries_buffer << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
-                                  << '\"';
+                               << '\"';
     leaderboard_entries_buffer << '}';
 
     // Add comma if not last entry

@@ -16,7 +16,7 @@
   <makerSettings>
     <isSet>-1</isSet>
     <w>1024</w>
-    <h>640</h>
+    <h>654</h>
     <showGrid>-1</showGrid>
     <showObjects>-1</showObjects>
     <showTiles>-1</showTiles>
@@ -50,7 +50,7 @@
     <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
   </views>
   <instances>
-    <instance code="" colour="4294967295" id="100406" locked="0" name="inst_7CB9935B" objName="Obj_Steam_Goto" rotation="0.0" scaleX="3.0" scaleY="1.0" x="1008" y="608"/>
+    <instance code="&#13;&#10;text = &quot;Back&quot;&#13;&#10;targetRoom = Room_Steam_Main" colour="4294967295" id="100406" locked="0" name="inst_7CB9935B" objName="Obj_Steam_Goto" rotation="0.0" scaleX="3.0" scaleY="1.0" x="1008" y="608"/>
     <instance code="&#13;&#10;text = &quot;Steamworks Extension&quot;;&#13;&#10;font = Font_ENIGMA_50;" colour="4294967295" id="100409" locked="0" name="inst_043DAB43" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="768" y="48"/>
   </instances>
   <tiles/>

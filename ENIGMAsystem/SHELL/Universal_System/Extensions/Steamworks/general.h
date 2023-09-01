@@ -88,7 +88,7 @@ std::string steam_get_persona_name();
     for more information.
 */
 // TODO: Trigger the Steam Async Event when the task is finished.
-std::string steam_get_user_persona_name(CSteamID user_persona_name);
+std::string steam_get_user_persona_name(const unsigned long long steamID);
 
 /*
     This function will return true if the Steam client currently has a live connection to the 

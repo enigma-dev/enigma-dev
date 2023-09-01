@@ -90,7 +90,6 @@ steam_update();</string>
 // We use a variable as a flag to tell the system we are 'restarting' the game&#13;
 is_game_restarting = true;&#13;
 game_restart();&#13;
-&#13;
 </string>
           </argument>
         </arguments>

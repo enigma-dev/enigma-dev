@@ -29,10 +29,36 @@
 
 namespace enigma_user {
 
-void steam_set_rich_presence(const std::string& key, const std::string& value);
+extern const unsigned steam_user_avatar_size_small;
+extern const unsigned steam_user_avatar_size_medium;
+extern const unsigned steam_user_avatar_size_large;
+
+/*
+    NOTE:   This function is different from GMS's as it returns bool instead of void.
+
+    Sets a Rich Presence key/value for the current user that is automatically shared to 
+    all friends playing the same game. Calls steamworks::c_game_client::set_rich_presence().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_set_rich_presence
+    for more information.
+*/
+bool steam_set_rich_presence(const std::string& key, const std::string& value);
+
+/*
+    Clears all of the current user's Rich Presence key/values. Calls 
+    steamworks::c_game_client::clear_rich_presence().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_clear_rich_presence
+    for more information.
+*/
 void steam_clear_rich_presence();
 
-bool steam_user_set_played_with(long long steam_id);
+/*
+    Adds the given user to the "recently played with" list (accessed via "Players" - "Recent games") 
+    menu in Steam overlay. This is usually something to do on session start for all remote users.
+    Calls steamworks::c_game_client::set_played_with().
+    Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_user_set_played_with
+    for more information.
+*/
+bool steam_user_set_played_with(const unsigned long long steam_id);
 
 /*
     Returns an array of information about what the current user's Steam friends 
@@ -53,9 +79,9 @@ void steam_get_friends_game_info();
     Fetches an avatar for the specified user ID. Returns 0 if no avatar is set for the user; 
     Returns -1 if the request is pending, in which case an Steam Async Event will be triggered. 
     Returns positive IDs if the avatar is ready, this id is to be used with the following function:
-        - steam_image_get_bgra
-        - steam_image_get_rgba
-        - steam_image_get_size
+        - enigma_user::steam_image_get_bgra()
+        - enigma_user::steam_image_get_rgba()
+        - enigma_user::steam_image_get_size()
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_get_user_avatar for
     more information.
 */
@@ -68,7 +94,7 @@ void steam_get_friends_game_info();
         "width" -> The image width, in pixels
         "height" -> The image height, in pixels ****
 */
-int steam_get_user_avatar(long long userID, int avatar_size);
+int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar_size);
 
 /*
     Fetches dimensions for the said Steam image ID. If the call succeeds, the return value 
@@ -76,10 +102,10 @@ int steam_get_user_avatar(long long userID, int avatar_size);
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_image_get_size
     for more information.
 */
-void steam_image_get_size(long long steam_image_id);
+unsigned* steam_image_get_size(const long long steam_image_id);
 
-bool steam_image_get_rgba(long long steam_image_id, int buffer, int size);
-bool steam_image_get_bgra(long long steam_image_id, int buffer, int size);
+bool steam_image_get_rgba(const long long steam_image_id, int buffer, int size);
+bool steam_image_get_bgra(const long long steam_image_id, int buffer, int size);
 
 }  // namespace enigma_user
 

@@ -67,24 +67,59 @@ c_leaderboards* c_game_client::get_c_leaderboards() { return c_game_client::c_le
 
 CSteamID c_game_client::get_c_steam_id_local_user() { return c_game_client::c_steam_id_local_user_; }
 
-unsigned c_game_client::get_steam_app_id() { return c_game_client::steam_app_id_; }
+uint32 c_game_client::get_steam_app_id() { return c_game_client::steam_app_id_; }
 
 std::string c_game_client::get_current_game_language() { return c_game_client::current_game_language_; }
 
 std::string c_game_client::get_available_game_languages() { return c_game_client::available_game_languages_; }
 
 ////////////////////////////////////////////////////////
-// Static fields & functions
+// Static fields & functions (AKA Wrapper functions)
 ////////////////////////////////////////////////////////
 
 bool c_game_client::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
 
 std::string c_game_client::get_steam_persona_name() { return std::string(SteamFriends()->GetPersonaName()); }
 
-std::string c_game_client::get_steam_user_persona_name(CSteamID c_steam_id) {
+std::string c_game_client::get_steam_user_persona_name(const uint64 steam_id) {
+  CSteamID c_steam_id(steam_id);
   return std::string(SteamFriends()->GetFriendPersonaName(c_steam_id));
 }
 
 bool c_game_client::is_subscribed() { return SteamApps()->BIsSubscribed(); }
+
+bool c_game_client::set_rich_presence(const std::string& key, const std::string& value) {
+  return SteamFriends()->SetRichPresence(key.c_str(), value.c_str());
+}
+
+void c_game_client::clear_rich_presence() { SteamFriends()->ClearRichPresence(); }
+
+void c_game_client::set_played_with(const uint64 steam_id) {
+  CSteamID c_steam_id(steam_id);
+  SteamFriends()->SetPlayedWith(c_steam_id);
+}
+
+bool c_game_client::get_image_size(const int32 image, uint32* width, uint32* height) {
+  return SteamUtils()->GetImageSize(image, width, height);
+}
+
+bool c_game_client::get_image_rgba(const int32 image, uint8* buffer, const int buffer_size) {
+  return SteamUtils()->GetImageRGBA(image, buffer, buffer_size);
+}
+
+int32 c_game_client::get_small_friend_avatar(const uint64 steam_id_friend) {
+  CSteamID c_steam_id(steam_id_friend);
+  return SteamFriends()->GetSmallFriendAvatar(c_steam_id);
+}
+
+int32 c_game_client::get_medium_friend_avatar(const uint64 steam_id_friend) {
+  CSteamID c_steam_id(steam_id_friend);
+  return SteamFriends()->GetMediumFriendAvatar(c_steam_id);
+}
+
+int32 c_game_client::get_large_friend_avatar(const uint64 steam_id_friend) {
+  CSteamID c_steam_id(steam_id_friend);
+  return SteamFriends()->GetLargeFriendAvatar(c_steam_id);
+}
 
 }  // namespace steamworks

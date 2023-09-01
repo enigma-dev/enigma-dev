@@ -31,8 +31,6 @@ event_inherited();&#13;
 text = "App Ticket";&#13;
 &#13;
 &#13;
-&#13;
-&#13;
 </string>
           </argument>
         </arguments>
@@ -56,13 +54,12 @@ text = "App Ticket";&#13;
           <argument>
             <kind>1</kind>
             <string> &#13;
-var buff = buffer_create(0,buffer_fixed,1)&#13;
-steam_user_request_encrypted_app_ticket(buff)&#13;
-buffer_delete(buff)&#13;
+//var buff = buffer_create(0,buffer_fixed,1)&#13;
+//steam_user_request_encrypted_app_ticket(buff)&#13;
+//buffer_delete(buff)&#13;
 &#13;
-var appId = extension_get_option_value("Steamworks", "AppID")&#13;
-show_debug_message("steam_get_app_ownership_ticket_data: " + string(steam_get_app_ownership_ticket_data(appId)))&#13;
-</string>
+//var appId = extension_get_option_value("Steamworks", "AppID")&#13;
+//show_debug_message("steam_get_app_ownership_ticket_data: " + string(steam_get_app_ownership_ticket_data(appId)))</string>
           </argument>
         </arguments>
       </action>
@@ -85,14 +82,12 @@ show_debug_message("steam_get_app_ownership_ticket_data: " + string(steam_get_ap
           <argument>
             <kind>1</kind>
             <string>&#13;
-if(async_load[?"event_type"] == "user_encrypted_app_ticket_response_received")&#13;
-if(async_load[?"result"])&#13;
-{&#13;
-	var ticket_data = async_load[?"ticket_data"]&#13;
-	show_debug_message("ticket_data: " + ticket_data)&#13;
-}&#13;
-&#13;
-</string>
+//if(async_load[?"event_type"] == "user_encrypted_app_ticket_response_received")&#13;
+//if(async_load[?"result"])&#13;
+//{&#13;
+//	var ticket_data = async_load[?"ticket_data"]&#13;
+//	show_debug_message("ticket_data: " + ticket_data)&#13;
+//}</string>
           </argument>
         </arguments>
       </action>

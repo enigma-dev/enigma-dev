@@ -19,6 +19,8 @@
 #define GAMECLIENT_H
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
+// TODO: Move the pre-checks here.
+// TODO: Separate the wrapper functions from the main architecture.
 
 /*
     This is the lowest layer that game_client layer mainly depends on.
@@ -29,9 +31,7 @@
     This include is the only special include that game_client layer uses. DON'T include any
     other includes in game_client layer that are outside Steamworks extension.
 */
-/*
-    This include has the <string> include in it so no need to include it again.
-*/
+//  This include has the <string> include in it so no need to include it again.
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <algorithm>
@@ -92,7 +92,7 @@ class c_game_client {
     check https://partner.steamgames.com/doc/api/ISteamUtils#GetAppID for more 
     information.
   */
-  unsigned get_steam_app_id();
+  uint32 get_steam_app_id();
 
   /*
     Returns the current language that the user has set. This falls back to the Steam 
@@ -137,7 +137,7 @@ class c_game_client {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetFriendPersonaName for 
     more information.
   */
-  static std::string get_steam_user_persona_name(CSteamID c_steam_id);
+  static std::string get_steam_user_persona_name(const uint64 steam_id);
 
   /*
     Checks if the active user is subscribed to the current App ID. This will always 
@@ -146,6 +146,80 @@ class c_game_client {
     information.
   */
   static bool is_subscribed();
+
+  /*
+    Sets a Rich Presence key/value for the current user that is automatically shared to 
+    all friends playing the same game. Each user can have up to 20 keys set as defined 
+    by `k_cchMaxRichPresenceKeys`. Calls SteamFriends()->SetRichPresence().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#SetRichPresence for more 
+    information.
+  */
+  static bool set_rich_presence(const std::string& key, const std::string& value);
+
+  /*
+    Clears all of the current user's Rich Presence key/values. Calls 
+    SteamFriends()->ClearRichPresence().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#ClearRichPresence for more 
+    information.
+  */
+  static void clear_rich_presence();
+
+  /*
+    NOTE: The current user must be in game with the other player for the association to work.
+
+    Marks a target user as 'played with'. Calls SteamFriends()->SetPlayedWith().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#SetPlayedWith for more
+    information.
+  */
+  static void set_played_with(const uint64 steam_id);
+
+  /*
+    Gets the size of a Steam image handle. This must be called before calling 
+    steamworks::c_game_client::get_image_rgba() to create an appropriately sized buffer 
+    that will be filled with the raw image data. Calls SteamUtils()->GetImageSize(). 
+    Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageSize for more
+    information.
+  */
+  static bool get_image_size(const int32 image, uint32 *width, uint32 *height);
+
+  /*
+    Gets the image bytes from an image handle. Prior to calling this you must get the 
+    size of the image by calling GetImageSize so that you can create your buffer with 
+    an appropriate size. You can then allocate your buffer with the width and height as: 
+    width * height * 4. The image is provided in RGBA format. This call can be somewhat 
+    expensive as it converts from the compressed type (JPG, PNG, TGA) and provides no 
+    internal caching of returned buffer, thus it is highly recommended to only call this 
+    once per image handle and cache the result. This function is only used for Steam Avatars 
+    and Achievement images and those are not expected to change mid game. Calls
+    SteamUtils()->GetImageRGBA().
+    Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageRGBA for more
+    information.
+  */
+  static bool get_image_rgba(const int32 image, uint8 *buffer, int buffer_size);
+
+  /*
+    Gets a handle to the small (32*32px) avatar for the specified user. You can pass in 
+    ISteamUser::GetSteamID to get the current user's avatar. Calls SteamFriends()->GetSmallFriendAvatar().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#GetSmallFriendAvatar for more
+    information.
+  */
+  static int32 get_small_friend_avatar(const uint64 steam_id_friend);
+
+  /*
+    Gets a handle to the medium (64*64px) avatar for the specified user. You can pass in 
+    ISteamUser::GetSteamID to get the current user's avatar. Calls SteamFriends()->GetMediumFriendAvatar().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#GetMediumFriendAvatar for more
+    information.
+  */
+  static int32 get_medium_friend_avatar(const uint64 steam_id_friend);
+
+  /*
+    Gets a handle to the large (128*128px) avatar for the specified user. You can pass in 
+    ISteamUser::GetSteamID to get the current user's avatar. Calls SteamFriends()->GetLargeFriendAvatar().
+    Check https://partner.steamgames.com/doc/api/ISteamFriends#GetLargeFriendAvatar for more
+    information.
+  */
+  static int32 get_large_friend_avatar(const uint64 steam_id_friend);
 
  private:
   /*
@@ -173,7 +247,7 @@ class c_game_client {
     App ID of the current process. This can be accessed using get_steam_app_id() 
     function.
   */
-  unsigned steam_app_id_;
+  uint32 steam_app_id_;
 
   /*
     Current language that the user has set. This can be accessed using 

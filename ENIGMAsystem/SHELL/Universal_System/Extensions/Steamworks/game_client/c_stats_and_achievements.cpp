@@ -79,7 +79,7 @@ void c_stats_and_achievements::clear_achievement(const std::string& achievement_
   c_stats_and_achievements::store_stats();
 }
 
-void c_stats_and_achievements::set_stat_int(const std::string& stat_name, const int value) {
+void c_stats_and_achievements::set_stat_int(const std::string& stat_name, const int32 value) {
   if (!c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value)) {
     DEBUG_MESSAGE(
         "Calling SetStat failed for '" + stat_name +
@@ -93,8 +93,8 @@ void c_stats_and_achievements::set_stat_int(const std::string& stat_name, const 
   c_stats_and_achievements::store_stats();
 }
 
-int c_stats_and_achievements::get_stat_int(const std::string& stat_name) {
-  int value{-1};
+int32 c_stats_and_achievements::get_stat_int(const std::string& stat_name) {
+  int32 value{-1};
 
   if (!c_stats_and_achievements::steam_user_stats_->GetStat(stat_name.c_str(), &value)) {
     DEBUG_MESSAGE(
