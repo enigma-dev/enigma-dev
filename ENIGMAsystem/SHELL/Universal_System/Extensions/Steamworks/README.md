@@ -155,7 +155,11 @@ TODO: Add details about handling Critical Sections here.
 
 ## Integrating New Version of Steamworks SDK
 
- 1. Modify `Steamworks/Makefile` to point to the newer Steamworks SDK.
- 2. Add the new libraries to git inside `Steamworks/game_client/.gitignore` Leaving the old ones there.
+ 1. Create a new version directory inside `Steamworks/game_client/`,
+ 2. Download the new version of Steamworks SDK and extract it.
+ 3. Copy only the `sdk` directory to `Steamworks/game_client/SteamvXXX/`.
+ 4. Modify `Steamworks/Makefile` to point to the newer Steamworks SDK.
+ 5. Add the new libraries to git inside `Steamworks/game_client/.gitignore` Leaving the old ones there.
+ 6. Run the demo to make sure everything is working fine.
 
 
