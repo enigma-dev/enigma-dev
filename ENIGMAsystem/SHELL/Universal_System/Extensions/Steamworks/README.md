@@ -9,7 +9,7 @@ me on the official Discord server for ENIGMA.
 ```bash
 Steamworks
 ├── game_client
-│   ├── Steamv157
+│   ├── SteamvXXX
 │   │   └── sdk
 │   │       ├── public
 │   │       │   └── *
@@ -38,9 +38,9 @@ Steamworks
 └── *.h
 ```
 
-   - `Steamv157` is the 1rd layer of the extension. It is the Steamworks SDK.
-   - `game_client` is the 2nd layer of the extension. It contains the code that is directly calls the Steamworks API functions.
-   - `Steamworks` is the 3rd layer of the extension. It is the extension itself.
+   - `Steamworks/game_client/SteamvXXX/` is the 1rd layer of the extension. It is the Steamworks SDK.
+   - `Steamworks/game_client/` is the 2nd layer of the extension. It contains the code that is directly calls the Steamworks API functions.
+   - `Steamworks/` is the 3rd layer of the extension. It is the extension itself.
    - Anything outside of `Steamworks` is considered part of the 4th layer that depends on Steamworks' extension.
 
 
@@ -159,7 +159,12 @@ TODO: Add details about handling Critical Sections here.
  2. Download the new version of Steamworks SDK and extract it.
  3. Copy only the `sdk` directory to `Steamworks/game_client/SteamvXXX/`.
  4. Modify `Steamworks/Makefile` to point to the newer Steamworks SDK.
- 5. Add the new libraries to git inside `Steamworks/game_client/.gitignore` Leaving the old ones there.
- 6. Run the demo to make sure everything is working fine.
+ 5. [Skip this step] Modify `Steamworks/CMakelists.txt` to point to the newer Steamworks SDK.
+ 6. Add the new libraries to git inside `Steamworks/game_client/.gitignore` Leaving the old ones there.
+ 7. Run the demo to make sure everything is working fine.
+
+## TODO
+
+TODO: Fill here the work that is left to be done.
 
 
