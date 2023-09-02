@@ -153,4 +153,9 @@ flowchart BT
 
 TODO: Add details about handling Critical Sections here.
 
+## Integrating New Version of Steamworks SDK
+
+ 1. Modify `Steamworks/Makefile` to point to the newer Steamworks SDK.
+ 2. Add the new libraries to git inside `Steamworks/game_client/.gitignore` Leaving the old ones there.
+
 

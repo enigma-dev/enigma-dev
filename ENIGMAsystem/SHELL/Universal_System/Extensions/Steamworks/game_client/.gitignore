@@ -16,16 +16,22 @@
 # with this code. If not, see <http://www.gnu.org/licenses/>
 ############################################################################
 
+/Steamv157/sdk/*
+
+!/Steamv157/sdk/Readme.txt
+
 /Steamv157/sdk/public/steam/.vs/*
 
 # public/ & redistributable_bin/ directories contains the necessary headers & libraries for interfacing with 
 # Steamworks API and we need to keep any file inside it because we need to test any new release before letting 
 # game developers use it and by definition we need to keep the old tested libraries which means game developers 
 # don't have to download Steamworks SDK.
+!/Steamv157/sdk/public/*
 !/Steamv157/sdk/public/**/*.dll
 !/Steamv157/sdk/public/**/*.so
 !/Steamv157/sdk/public/**/*.dylib
 
+!/Steamv157/sdk/redistributable_bin/*
 !/Steamv157/sdk/redistributable_bin/**/*.dll
 !/Steamv157/sdk/redistributable_bin/**/*.so
 !/Steamv157/sdk/redistributable_bin/**/*.dylib
