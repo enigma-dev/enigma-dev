@@ -20,8 +20,6 @@
 
 !/Steamv157/sdk/Readme.txt
 
-/Steamv157/sdk/public/steam/.vs/**/*
-
 # public/ & redistributable_bin/ directories contains the necessary headers & libraries for interfacing with 
 # Steamworks API and we need to keep any file inside it because we need to test any new release before letting 
 # game developers use it and by definition we need to keep the old tested libraries which means game developers 
