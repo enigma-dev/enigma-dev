@@ -160,6 +160,32 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "      return {std::move(result), len};\n"
          "    }\n\n";
 
+  wto << "    std::string json_serialize() const override {\n"
+         "      std::string json = \"{\\\"event_parent\\\":\" + event_parent::json_serialize() + \",\\\"vmap\\\":{\";\n"
+         "      if (vmap != nullptr) {\n"
+         "        json += enigma::JSON_serialization::enigma_serialize(*vmap);\n"
+         "      }\n"
+         "      json += \"}}\";\n"
+         "      return json;\n"
+         "    }\n\n";
+
+  wto << "    void json_deserialize_self(const std::string & json) override {\n"
+         "      event_parent::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,\"event_parent\"));\n"
+         "      std::string vmap_part = enigma::JSON_serialization::json_find_value(json,\"vmap\");\n"
+         "\n"
+         "      if (vmap_part != \"{}\") {\n"
+         "        if (vmap == nullptr) {\n"
+         "          vmap = new std::map<string, var>;\n"
+         "        }\n"
+         "        *vmap = enigma::JSON_serialization::enigma_deserialize<std::map<string, var>>(vmap_part);\n"
+         "      }\n"
+         "    }\n\n";
+
+  wto << "    object_locals json_deserialize(const std::string &json) {\n"
+         "      object_locals result;\n"
+         "      result.json_deserialize_self(json);\n"
+         "      return result;\n"
+         "    }\n\n";
   wto << "  };\n";
 }
 
@@ -340,22 +366,6 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "      return bytes;\n"
          "    }\n";
 
-  wto << "\n    std::string json_serialize() const override {\n"
-         "      std::string json = \"{\\\"obj\\\":\"+" << (object->parent ? object->parent->name : "object_locals") << "::json_serialize()+\",\";\n";
-  if (!locals.empty()) {
-    wto << "      json += \"\\\"locals\\\":[\";\n";
-  }
-  for (auto &[name, type]: locals) {
-    wto << "      json += \"{\\\"name\\\":\";\n"; 
-    wto << "      json += \"\\\"" << name << "\\\"\";\n"; 
-    wto << "      json += \",\\\"data\\\":\" + " << "enigma::JSON_serialization::enigma_serialize("<<name<<")" << " + \"}\";\n";
-    if (name!=locals.back().first) wto<<"      json += \",\";\n";
-  }
-  if (!locals.empty()) {
-    wto << "      json += \"]}\";\n";
-  }
-  wto << "      return json;\n     }\n";
-
   wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
   wto << "      unsigned char type;\n";
@@ -387,6 +397,28 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "      return len;\n"
          "    }\n";
   
+  wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
+         "      OBJ_" << object->name << " result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n";
+  
+  wto << "\n    std::string json_serialize() const override {\n"
+         "      std::string json = \"{\\\"obj\\\":\"+" << (object->parent ? object->parent->name : "object_locals") << "::json_serialize()+\",\";\n";
+  if (!locals.empty()) {
+    wto << "      json += \"\\\"locals\\\":[\";\n";
+  }
+  for (auto &[name, type]: locals) {
+    wto << "      json += \"{\\\"name\\\":\";\n"; 
+    wto << "      json += \"\\\"" << name << "\\\"\";\n"; 
+    wto << "      json += \",\\\"data\\\":\" + " << "enigma::JSON_serialization::enigma_serialize("<<name<<")" << " + \"}\";\n";
+    if (name!=locals.back().first) wto<<"      json += \",\";\n";
+  }
+  if (!locals.empty()) {
+    wto << "      json += \"]}\";\n";
+  }
+  wto << "      return json;\n     }\n";
+  
   wto << "\n    void json_deserialize_self(const std::string& json) override {\n"
       << "      " << (object->parent ? object->parent->name : "object_locals") << "::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,\"obj\"));\n";
  
@@ -403,16 +435,16 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   if (!locals.empty()) {
     wto << "      for(auto& local : names_data) {\n";
     wto << "        if (auto it = json_deserializers.find(local.first); it != json_deserializers.end()) {\n"
-           "          (this->*(it->second))(local.second);\n"
+           "          std::invoke(it->second, this, local.second);\n"
            "        }\n"
            "      }\n"; 
   }
   wto <<        "    }\n";
 
-  wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
+  wto << "\n    OBJ_" << object->name << " json_deserialize(const std::string &json) {\n"
          "      OBJ_" << object->name << " result;\n"
-         "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
+         "      result.json_deserialize_self(json);\n"
+         "      return result;\n"
          "    }\n";
 
   return locals;
