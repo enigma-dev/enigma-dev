@@ -302,10 +302,16 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
       wto << "\n    void deserialize_" << name << "(std::byte *iter, std::size_t len) {\n"
           << "      enigma::bytes_serialization::enigma_deserialize(" << name << ", iter, len);\n"
              "    }\n";
+
+      wto << "\n    void json_deserialize_" << name << "(const std::string& json) {\n"
+          << "      enigma::JSON_serialization::enigma_deserialize_val(" << name << ", json);\n"
+             "    }\n";
     }
 
     wto << "\n    using Deserializer = void(OBJ_" << object->name << "::*)(std::byte *iter, std::size_t len);\n";
+    wto << "\n    using JSONDeserializer = void(OBJ_" << object->name << "::*)(const std::string& json);\n";
     wto << "    const static std::unordered_map<std::string_view, Deserializer> deserializers;\n";
+    wto << "    const static std::unordered_map<std::string_view, JSONDeserializer> json_deserializers;\n";
   }
 
   wto << "\n    std::vector<std::byte> serialize() const override{\n"
@@ -333,6 +339,22 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   }
   wto << "      return bytes;\n"
          "    }\n";
+
+  wto << "\n    std::string json_serialize() const override {\n"
+         "      std::string json = \"{\\\"obj\\\":\"+" << (object->parent ? object->parent->name : "object_locals") << "::json_serialize()+\",\";\n";
+  if (!locals.empty()) {
+    wto << "      json += \"\\\"locals\\\":[\";\n";
+  }
+  for (auto &[name, type]: locals) {
+    wto << "      json += \"{\\\"name\\\":\";\n"; 
+    wto << "      json += \"\\\"" << name << "\\\"\";\n"; 
+    wto << "      json += \",\\\"data\\\":\" + " << "enigma::JSON_serialization::enigma_serialize("<<name<<")" << " + \"}\";\n";
+    if (name!=locals.back().first) wto<<"      json += \",\";\n";
+  }
+  if (!locals.empty()) {
+    wto << "      json += \"]}\";\n";
+  }
+  wto << "      return json;\n     }\n";
 
   wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
@@ -364,6 +386,28 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   }
   wto << "      return len;\n"
          "    }\n";
+  
+  wto << "\n    void json_deserialize_self(const std::string& json) override {\n"
+      << "      " << (object->parent ? object->parent->name : "object_locals") << "::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,\"obj\"));\n";
+ 
+  wto << "      std::string locals_part = enigma::JSON_serialization::json_find_value(json,\"locals\");\n";
+  wto << "      std::vector<std::string> locals = enigma::JSON_serialization::json_split(locals_part,',');\n";
+ 
+  wto << "      std::map<std::string,std::string> names_data;\n";
+  wto << "      for (auto& local : locals) {\n";
+  wto << "        std::string name = enigma::JSON_serialization::json_find_value(local,\"name\");\n";
+  wto << "        std::string data = enigma::JSON_serialization::json_find_value(local,\"data\");\n";
+  wto << "        names_data.insert({name.substr(1,name.length()-2),data});\n";
+  wto << "      }\n";
+  
+  if (!locals.empty()) {
+    wto << "      for(auto& local : names_data) {\n";
+    wto << "        if (auto it = json_deserializers.find(local.first); it != json_deserializers.end()) {\n"
+           "          (this->*(it->second))(local.second);\n"
+           "        }\n"
+           "      }\n"; 
+  }
+  wto <<        "    }\n";
 
   wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
          "      OBJ_" << object->name << " result;\n"
@@ -752,6 +796,12 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
     wto << "\n  const std::unordered_map<std::string_view, OBJ_" << object->name << "::Deserializer> OBJ_" << object->name << "::deserializers{\n";
     for (auto &[name, type] : locals) {
       wto << "    std::pair{\"" << name << "\", &OBJ_" << object->name << "::deserialize_" << name << "},\n";
+    }
+    wto << "  };\n";
+
+    wto << "\n  const std::unordered_map<std::string_view, OBJ_" << object->name << "::JSONDeserializer> OBJ_" << object->name << "::json_deserializers{\n";
+    for (auto &[name, type] : locals) {
+      wto << "    std::pair{\"" << name << "\", &OBJ_" << object->name << "::json_deserialize_" << name << "},\n";
     }
     wto << "  };\n";
   }

@@ -95,11 +95,10 @@ std::string inline json_find_value(const std::string &json, const std::string &k
 
 void inline json_remove_whitespace(std::string &json) {
   std::string result;
-  for (char c : json) {
-    if (!std::isspace(c)) {
-      result += c;
-    }
-  }
+
+  for (char c : json)
+    if (!std::isspace(c)) result += c;
+
   json = result;
 }
 

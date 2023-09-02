@@ -207,6 +207,11 @@ inline T enigma_deserialize(std::string json) {
   }
 }
 
+template <typename T>
+inline void enigma_deserialize_val(T &val, std::string json) {
+  val = enigma::JSON_serialization::enigma_deserialize<T>(json);
+}
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

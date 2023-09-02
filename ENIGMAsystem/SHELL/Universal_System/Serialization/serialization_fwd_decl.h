@@ -72,6 +72,9 @@ inline std::string enigma_serialize(const T &value);
 template <typename T>
 inline T enigma_deserialize(std::string json);
 
+template <typename T>
+inline void enigma_deserialize_val(T &val, std::string json);
+
 }  // namespace JSON_serialization
 }  // namespace enigma
 

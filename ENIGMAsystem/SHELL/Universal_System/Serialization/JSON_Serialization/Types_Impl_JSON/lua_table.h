@@ -37,7 +37,7 @@ matches_t<T, std::string, is_lua_table> inline internal_serialize_into_fn(const 
 
   json += "\"mx_size_part\":" + enigma::JSON_serialization::enigma_serialize(table.mx_size_part()) + ",\"dense_part\":[";
 
-  for (int i = 0; i < table.dense_part().size(); i++) {
+  for (std::size_t i = 0; i < table.dense_part().size(); i++) {
     if constexpr (is_lua_table_v<inner_type>) {
       lua_table<variant> table1 = table.dense_part()[i];
       json += enigma::JSON_serialization::enigma_serialize(table1);

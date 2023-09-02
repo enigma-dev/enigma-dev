@@ -18,9 +18,9 @@ buffer_delete(buf);
 buf = buffer_load("/tmp/test.bin");
 game_load_buffer(buf,SerializationBackend::JSON);
 
-//gtest_assert_eq(int(id.myInteger), 5);
-//gtest_assert_eq(double(id.myfloat), 3.14);
-//gtest_assert_eq(bool(id.myBoolean), true);
+gtest_assert_eq(int(id.myInteger), 5);
+gtest_assert_eq(double(id.myfloat), 3.14);
+gtest_assert_eq(bool(id.myBoolean), true);
 
 show_debug_message("Loading successful");
 

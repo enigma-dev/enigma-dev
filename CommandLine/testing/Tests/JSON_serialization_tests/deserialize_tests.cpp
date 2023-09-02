@@ -392,3 +392,17 @@ TEST(deserialize_function, Test_Lua_Table) {
   ASSERT_EQ(out5[12], table5[12]);
   ASSERT_EQ(out5.mx_size_part(), table5.mx_size_part());
 }
+
+TEST(deserialize_val_function, Test_Variant) {
+  variant variant1 = 10;
+  std::string json1 = enigma::JSON_serialization::enigma_serialize(variant1);
+  variant out1 = 1;
+  enigma::JSON_serialization::enigma_deserialize_val(out1, json1);
+  ASSERT_EQ(out1, variant1);
+
+  variant variant2 = "fares";
+  std::string json2 = enigma::JSON_serialization::enigma_serialize(variant2);
+  variant out2 = "ss";
+  enigma::JSON_serialization::enigma_deserialize_val(out2, json2);
+  ASSERT_EQ(out2, variant2);
+}
