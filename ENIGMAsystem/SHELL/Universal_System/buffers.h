@@ -570,7 +570,9 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
 /**
  * @brief Serialize the game state (objects, backgrounds and room index) into a buffer
  *
- * This function serializes (in the following order):
+ * This function has two options of serialization formats: a binary format and a JSON format, the JSON format is the default
+ *
+ * If you choose the binary format, the function will serialize (in the following order):
  * - The number of active objects
  * - The active objects themselves
  * - The number of inactive objects
@@ -668,9 +670,71 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  * │000001c0│ 85 c7 7f c5 91 0c       ┊                         │××•××_  ┊        │
  * └────────┴─────────────────────────┴─────────────────────────┴────────┴────────┘
  *
+ * If you choose the JSON format, the function will serialize (in the following order):
+ * - The active objects
+ * - The inactive objects
+ * - @c enigma::backgrounds
+ * - The current room index
+ * - A SHA1-checksum
+ * 
+ * The serialization for objects works in the following manner: for each class in the object hierarchy, a leading key-value pair
+ * is emitted to identify the object and verify that the data following it is valid. The key is "object_type" and the values are:
+ * - @c object_basic : @c "object_basic"
+ * - @c object_planar : @c "object_planar"
+ * - @c object_timelines : @c "object_timelines"
+ * - @c object_graphics : @c "object_graphics"
+ * - @c object_transform : @c "object_transform"
+ * - @c object_collisions : @c "object_collisions"
+ * - Any user defined object : @c "locals", but this one is the key for the object's local variables 
+ * 
+ * These leading key-value pairs are then followed by the data of each class.
+ * 
+ * An example of the serialized state may look like the following:
+ * 
+ * @code{.json}
+ * {"instance_list":[{"obj":{"event_parent":{"object_type":"object_collisions",
+ * "parent":{"object_type":"object_transform","parent":{"object_type":"object_graphics",
+ * "parent":{"object_type":"object_timelines","parent":{"object_type":"object_planar",
+ * "parent":{"object_type":"object_basic","id":100001,"object_index":0},"x":0,"y":0,
+ * "xprevious":0,"yprevious":0,"xstart":0,"ystart":0,"persistent":"false",
+ * "direction":{"type":"real","value":0},"speed":{"type":"real","value":0},
+ * "hspeed":{"type":"real","value":0},"vspeed":{"type":"real","value":0},
+ * "gravity":0,"gravity_direction":270,"friction":0},"timeline_moments_maps":[],
+ * "timeline_index":-1,"timeline_running":"false","timeline_speed":1,
+ * "timeline_position":0,"timeline_loop":"false"},"sprite_index":-1,"image_index":0,
+ * "image_speed":1,"image_single":{"type":"real","value":-1},
+ * "depth":{"type":"real","value":0},"visible":"true","image_xscale":1,
+ * "image_yscale":1,"image_angle":0},"image_alpha":1,"image_blend":16777215},
+ * "mask_index":-1,"solid":"false","polygon_index":-1,"polygon_xscale":1,"polygon_yscale":1,
+ * "polygon_angle":0},"vmap":{}},"locals":[{"name":"mydouble",
+ * "data":{"variant":{"type":"real","value":1.2345},"array1d":{"mx_size_part":0,
+ * "dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],
+ * "sparse_part":{}}}},{"name":"myint16_t","data":{"variant":{"type":"real","value":32767},
+ * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
+ * "dense_part":[],"sparse_part":{}}}},{"name":"myint32_t","data":{"variant":{"type":"real",
+ * "value":2147483647},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},
+ * "array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},{"name":"myint64_t",
+ * "data":{"variant":{"type":"real","value":2147483647},"array1d":{"mx_size_part":0,
+ * "dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],
+ * "sparse_part":{}}}},{"name":"myint8_t","data":{"variant":{"type":"real","value":127},
+ * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
+ * "dense_part":[],"sparse_part":{}}}},{"name":"myuint16_t","data":{"variant":{"type":"real",
+ * "value":65535},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},
+ * "array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},{"name":"myuint32_t",
+ * "data":{"variant":{"type":"real","value":4294967295},"array1d":{"mx_size_part":0,"dense_part":[],
+ * "sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},
+ * {"name":"myuint64_t","data":{"variant":{"type":"real","value":4294967295},
+ * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
+ * "dense_part":[],"sparse_part":{}}}},{"name":"myuint8_t","data":{"variant":{"type":"real",
+ * "value":255},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":
+ * {"mx_size_part":0,"dense_part":[],"sparse_part":{}}}}]}],"instance_deactivated_list":[],
+ * "backgrounds":[],"room_index":0} 
+ * @endcode
+ * 
  * @see game_load_buffer
  *
  * @param buffer The buffer to store the game state into
+ * @param backend The format to store the game state with
  */
 enum class SerializationBackend { JSON, Binary };
 
@@ -682,14 +746,15 @@ void game_save_buffer(buffer_t buffer, enum SerializationBackend backend = Seria
  * This function firstly checks the checksum of the buffer's data. If it matches the checksum written at the end of the
  * buffer, it proceeds with deserializing the state written in the buffer. Before deserializing anything, however,
  * it clears the active and inactive instance lists to avoid issues with clashing object IDs. It then deserializes each
- * object by reading its object index (a unique identifier for each type), and calling the virtual @c deserialize_self()
- * function of the object after using <tt> enigma::instance_create_id </tt> to create the specific object type. After
- * checking the header of the <tt> enigma::backgrounds </tt> data, it reads that as well and verifies the footer. Finally,
- * it reads the room index and calls <tt> enigma::room_goto </tt> with the index.
+ * object by reading its object index (a unique identifier for each type), and calling the virtual @c deserialize_self()/
+ * @c json_deserialize_self() function of the object after using <tt> enigma::instance_create_id </tt> to create the specific
+ * object type. After checking the header of the <tt> enigma::backgrounds </tt> data, it reads that as well and verifies the
+ * footer. Finally, it reads the room index and calls <tt> enigma::room_goto </tt> with the index.
  *
  * @see game_save_buffer
  *
  * @param buffer The buffer to load the game state from
+ * @param backend The format to load the game state from
  */
 void game_load_buffer(buffer_t buffer, enum SerializationBackend backend = SerializationBackend::JSON);
 
