@@ -38,9 +38,13 @@ void c_overlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
 
 bool c_overlay::overlay_activated() { return c_overlay::overlay_activated_; }
 
-void c_overlay::activate_overlay(const std::string& dialog) { SteamFriends()->ActivateGameOverlay(dialog.c_str()); }
+////////////////////////////////////////////////////////
+// Static fields & functions (AKA Wrapper functions)
+////////////////////////////////////////////////////////
 
 bool c_overlay::overlay_enabled() { return SteamUtils()->IsOverlayEnabled(); }
+
+void c_overlay::activate_overlay(const std::string& dialog) { SteamFriends()->ActivateGameOverlay(dialog.c_str()); }
 
 void c_overlay::activate_overlay_browser(const std::string& url) {
   SteamFriends()->ActivateGameOverlayToWebPage(url.c_str());

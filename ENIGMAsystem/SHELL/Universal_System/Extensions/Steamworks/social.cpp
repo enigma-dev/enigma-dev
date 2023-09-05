@@ -17,6 +17,8 @@
 
 #include "social.h"
 
+#include "Universal_System/var4.h"
+
 bool social_pre_checks(const std::string& script_name) {
   if (!steamworks::c_main::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
@@ -91,18 +93,25 @@ int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar
 }
 
 // TODO: Check how ENIGMA compiler handles null values.
-unsigned* steam_image_get_size(const long long steam_image_id) {
-  unsigned image_size[2] = {0};
+var steam_image_get_size(const long long steam_image_id) {
+  var image_size;
+
+  image_size(2) = -1;
+
+  unsigned width{0}, height{0};
 
   if (!social_pre_checks("steam_image_get_size")) return image_size;
 
-  if (!steamworks::c_game_client::get_image_size(steam_image_id, &image_size[0], &image_size[1])) {
+  if (!steamworks::c_game_client::get_image_size(steam_image_id, &width, &height)) {
     DEBUG_MESSAGE(
         "Calling steam_image_get_size failed. This happens if the image handle is not "
         "valid or the sizes weren't filled out",
         M_ERROR);
     return image_size;
   }
+
+  image_size(0) = width;
+  image_size(1) = height;
 
   return image_size;
 }

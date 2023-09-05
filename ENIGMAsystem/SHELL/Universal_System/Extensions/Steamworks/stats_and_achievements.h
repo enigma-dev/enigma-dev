@@ -34,6 +34,13 @@
 
 #include "game_client/c_main.h"
 
+namespace enigma {
+
+void steam_store_stats();
+void steam_request_current_stats();
+
+}  // namespace enigma
+
 namespace enigma_user {
 
 /*

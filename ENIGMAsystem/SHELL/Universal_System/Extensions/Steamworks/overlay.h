@@ -128,14 +128,12 @@ void steam_activate_overlay_store(const int app_id);
 void steam_activate_overlay_user(const unsigned dialog, const unsigned long long steamid);
 
 /*
-    NOTE:   This function is different from GMS's as it returns void instead of bool.
-
     This function sets the inset of the overlay notification from the corner specified by 
     steam_set_overlay_notification_position(). Calls c_overlay::set_overlay_notification_inset().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Overlay#steam_set_overlay_notification_inset
     for more information.
 */
-void steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset);
+bool steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset);
 
 /*
     This function changes the corner in which the overlay notifications will appear. Check above

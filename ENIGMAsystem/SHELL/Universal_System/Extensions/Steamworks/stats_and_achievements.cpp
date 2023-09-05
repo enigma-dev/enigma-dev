@@ -41,73 +41,192 @@ bool stats_and_achievements_pre_checks(const std::string& script_name) {
   return true;
 }
 
+namespace enigma {
+
+void steam_store_stats() {
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->store_stats()) {
+    DEBUG_MESSAGE(
+        "Calling StoreStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
+        "callback and the current game has stats associated with it in the Steamworks Partner backend, and those stats "
+        "are published.",
+        M_WARNING);
+  }
+}
+
+void steam_request_current_stats() {
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->request_current_stats()) {
+    DEBUG_MESSAGE(
+        "Calling RequestCurrentStats failed. Only returns false if there is no user logged in; otherwise, true.",
+        M_WARNING);
+  }
+}
+
+}  // namespace enigma
+
 namespace enigma_user {
 
 void steam_set_achievement(const std::string& ach_name) {
   if (!stats_and_achievements_pre_checks("steam_set_achievement")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_achievement(ach_name);
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_achievement(ach_name)) {
+    DEBUG_MESSAGE("Calling SetAchievement failed for '" + ach_name +
+                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the changes are published.",
+                  M_ERROR);
+    return;
+  }
+
+  enigma::steam_store_stats();
 }
 
 bool steam_get_achievement(const std::string& ach_name) {
   if (!stats_and_achievements_pre_checks("steam_get_achievement")) return false;
 
-  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_achievement(ach_name);
+  bool achieved{false};
+
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_achievement(ach_name, &achieved)) {
+    DEBUG_MESSAGE("Calling GetAchievement failed for '" + ach_name +
+                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the changes are published.",
+                  M_ERROR);
+    return false;
+  }
+
+  return achieved;
 }
 
 void steam_clear_achievement(const std::string& ach_name) {
   if (!stats_and_achievements_pre_checks("steam_clear_achievement")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->clear_achievement(ach_name);
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->clear_achievement(ach_name)) {
+    DEBUG_MESSAGE("Calling ClearAchievement failed for '" + ach_name +
+                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
+                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
+                      "the changes are published.",
+                  M_ERROR);
+    return;
+  }
+
+  enigma::steam_store_stats();
 }
 
 void steam_set_stat_int(const std::string& stat_name, int value) {
   if (!stats_and_achievements_pre_checks("steam_set_stat_int")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_int(stat_name, value);
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_int(stat_name, value)) {
+    DEBUG_MESSAGE(
+        "Calling SetStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
+            "this function must match the type listed in the App Admin panel of the Steamworks website.",
+        M_ERROR);
+    return;
+  }
+
+  enigma::steam_store_stats();
 }
 
 void steam_set_stat_float(const std::string& stat_name, float value) {
   if (!stats_and_achievements_pre_checks("steam_set_stat_float")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_float(stat_name, value);
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_float(stat_name, value)) {
+    DEBUG_MESSAGE(
+        "Calling SetStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
+            "this function must match the type listed in the App Admin panel of the Steamworks website.",
+        M_ERROR);
+    return;
+  }
 }
 
 void steam_set_stat_avg_rate(const std::string& stat_name, float session_count, float session_length) {
   if (!stats_and_achievements_pre_checks("steam_set_stat_avg_rate")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_average_rate(
-      stat_name, session_count, session_length);
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->set_stat_average_rate(
+          stat_name, session_count, session_length)) {
+    DEBUG_MESSAGE(
+        "Calling UpdateAvgRateStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type must be "
+            "AVGRATE in the Steamworks Partner backend.",
+        M_ERROR);
+    return;
+  }
+
+  enigma::steam_store_stats();
 }
 
 int steam_get_stat_int(const std::string& stat_name) {
   if (!stats_and_achievements_pre_checks("steam_get_stat_int")) return -1;
 
-  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_stat_int(stat_name);
+  int32 value{-1};
+
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_stat_int(stat_name, &value)) {
+    DEBUG_MESSAGE(
+        "Calling GetStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
+            "this function must match the type listed in the App Admin panel of the Steamworks website.",
+        M_ERROR);
+    return -1;
+  }
+
+  return value;
 }
 
 float steam_get_stat_float(const std::string& stat_name) {
   if (!stats_and_achievements_pre_checks("steam_get_stat_float")) return -1.0f;
 
-  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_stat_float(stat_name);
+  float value{-1.0f};
+
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_stat_float(stat_name, &value)) {
+    DEBUG_MESSAGE(
+        "Calling GetStat failed for '" + stat_name +
+            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
+            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
+            "this function must match the type listed in the App Admin panel of the Steamworks website.",
+        M_ERROR);
+    return -1;
+  }
+
+  return value;
 }
 
 float steam_get_stat_avg_rate(const std::string& stat_name) {
   if (!stats_and_achievements_pre_checks("steam_get_stat_avg_rate")) return -1.0f;
 
-  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->get_stat_average_rate(stat_name);
+  return enigma_user::steam_get_stat_float(stat_name);
 }
 
 void steam_reset_all_stats() {
   if (!stats_and_achievements_pre_checks("steam_reset_all_stats")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats();
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats()) {
+    DEBUG_MESSAGE(
+        "Calling ResetAllStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
+        "callback.",
+        M_ERROR);
+    return;
+  }
+
+  enigma::steam_request_current_stats();
 }
 
 void steam_reset_all_stats_achievements() {
   if (!stats_and_achievements_pre_checks("steam_reset_all_stats_achievements")) return;
 
-  steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats_achievements();
+  if (!steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->reset_all_stats_achievements()) {
+    DEBUG_MESSAGE(
+        "Calling ResetAllStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
+        "callback.",
+        M_ERROR);
+    return;
+  }
+
+  enigma::steam_request_current_stats();
 }
 
 }  // namespace enigma_user

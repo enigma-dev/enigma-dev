@@ -31,10 +31,10 @@
     This include is the only special include that game_client layer uses. DON'T include any
     other includes in game_client layer that are outside Steamworks extension.
 */
-//  This include has the <string> include in it so no need to include it again.
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <algorithm>
+#include <string>
 
 namespace steamworks {
 
@@ -180,7 +180,7 @@ class c_game_client {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageSize for more
     information.
   */
-  static bool get_image_size(const int32 image, uint32 *width, uint32 *height);
+  static bool get_image_size(const int image, uint32* width, uint32* height);
 
   /*
     Gets the image bytes from an image handle. Prior to calling this you must get the 
@@ -195,7 +195,7 @@ class c_game_client {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageRGBA for more
     information.
   */
-  static bool get_image_rgba(const int32 image, uint8 *buffer, int buffer_size);
+  static bool get_image_rgba(const int image, uint8* buffer, int buffer_size);
 
   /*
     Gets a handle to the small (32*32px) avatar for the specified user. You can pass in 

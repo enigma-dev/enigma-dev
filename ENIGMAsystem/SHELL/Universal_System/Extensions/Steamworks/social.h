@@ -97,12 +97,14 @@ void steam_get_friends_game_info();
 int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar_size);
 
 /*
+    NOTE:  This function has a special return type.
+
     Fetches dimensions for the said Steam image ID. If the call succeeds, the return value 
     is a two-element array containing width and height in pixels.
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_image_get_size
     for more information.
 */
-unsigned* steam_image_get_size(const long long steam_image_id);
+var steam_image_get_size(const long long steam_image_id);
 
 bool steam_image_get_rgba(const long long steam_image_id, int buffer, int size);
 bool steam_image_get_bgra(const long long steam_image_id, int buffer, int size);

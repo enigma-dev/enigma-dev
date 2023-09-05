@@ -161,10 +161,12 @@ void steam_activate_overlay_user(const unsigned dialog, const unsigned long long
   }
 }
 
-void steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset) {
-  if (!overlay_pre_checks("steam_set_overlay_notification_inset")) return;
+bool steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset) {
+  if (!overlay_pre_checks("steam_set_overlay_notification_inset")) return false;
 
   steamworks::c_overlay::set_overlay_notification_inset(hor_inset, vert_inset);
+
+  return true;
 }
 
 void steam_set_overlay_notification_position(const unsigned position) {

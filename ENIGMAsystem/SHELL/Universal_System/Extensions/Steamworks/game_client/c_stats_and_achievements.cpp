@@ -39,125 +39,43 @@ c_stats_and_achievements::c_stats_and_achievements()
 
 bool c_stats_and_achievements::stats_valid() { return c_stats_and_achievements::stats_valid_; }
 
-void c_stats_and_achievements::set_achievement(const std::string& achievement_name) {
-  if (!c_stats_and_achievements::steam_user_stats_->SetAchievement(achievement_name.c_str())) {
-    DEBUG_MESSAGE("Calling SetAchievement failed for '" + achievement_name +
-                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
-                      "the changes are published.",
-                  M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::store_stats();
+bool c_stats_and_achievements::set_achievement(const std::string& achievement_name) {
+  return c_stats_and_achievements::steam_user_stats_->SetAchievement(achievement_name.c_str());
 }
 
-bool c_stats_and_achievements::get_achievement(const std::string& achievement_name) {
-  bool achieved{false};
-  if (!c_stats_and_achievements::steam_user_stats_->GetAchievement(achievement_name.c_str(), &achieved)) {
-    DEBUG_MESSAGE("Calling GetAchievement failed for '" + achievement_name +
-                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
-                      "the changes are published.",
-                  M_ERROR);
-    return false;
-  }
-
-  return achieved;
+bool c_stats_and_achievements::get_achievement(const std::string& achievement_name, bool* achieved) {
+  return c_stats_and_achievements::steam_user_stats_->GetAchievement(achievement_name.c_str(), achieved);
 }
 
-void c_stats_and_achievements::clear_achievement(const std::string& achievement_name) {
-  if (!c_stats_and_achievements::steam_user_stats_->ClearAchievement(achievement_name.c_str())) {
-    DEBUG_MESSAGE("Calling ClearAchievement failed for '" + achievement_name +
-                      "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
-                      "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
-                      "the changes are published.",
-                  M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::store_stats();
+bool c_stats_and_achievements::clear_achievement(const std::string& achievement_name) {
+  return c_stats_and_achievements::steam_user_stats_->ClearAchievement(achievement_name.c_str());
 }
 
-void c_stats_and_achievements::set_stat_int(const std::string& stat_name, const int32 value) {
-  if (!c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value)) {
-    DEBUG_MESSAGE(
-        "Calling SetStat failed for '" + stat_name +
-            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
-            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
-            "this function must match the type listed in the App Admin panel of the Steamworks website.",
-        M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::store_stats();
+bool c_stats_and_achievements::set_stat_int(const std::string& stat_name, const int32 value) {
+  return c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value);
 }
 
-int32 c_stats_and_achievements::get_stat_int(const std::string& stat_name) {
-  int32 value{-1};
-
-  if (!c_stats_and_achievements::steam_user_stats_->GetStat(stat_name.c_str(), &value)) {
-    DEBUG_MESSAGE(
-        "Calling GetStat failed for '" + stat_name +
-            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
-            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
-            "this function must match the type listed in the App Admin panel of the Steamworks website.",
-        M_ERROR);
-    return value;
-  }
-
-  return value;
+bool c_stats_and_achievements::get_stat_int(const std::string& stat_name, int32* value) {
+  return c_stats_and_achievements::steam_user_stats_->GetStat(stat_name.c_str(), value);
 }
 
-void c_stats_and_achievements::set_stat_float(const std::string& stat_name, const float value) {
-  if (!c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value)) {
-    DEBUG_MESSAGE(
-        "Calling SetStat failed for '" + stat_name +
-            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
-            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
-            "this function must match the type listed in the App Admin panel of the Steamworks website.",
-        M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::store_stats();
+bool c_stats_and_achievements::set_stat_float(const std::string& stat_name, const float value) {
+  return c_stats_and_achievements::steam_user_stats_->SetStat(stat_name.c_str(), value);
 }
 
-float c_stats_and_achievements::get_stat_float(const std::string& stat_name) {
-  float value{-1.0f};
-
-  if (!c_stats_and_achievements::steam_user_stats_->GetStat(stat_name.c_str(), &value)) {
-    DEBUG_MESSAGE(
-        "Calling GetStat failed for '" + stat_name +
-            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
-            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type passed to "
-            "this function must match the type listed in the App Admin panel of the Steamworks website.",
-        M_ERROR);
-    return value;
-  }
-
-  return value;
+bool c_stats_and_achievements::get_stat_float(const std::string& stat_name, float* value) {
+  return c_stats_and_achievements::steam_user_stats_->GetStat(stat_name.c_str(), value);
 }
 
-void c_stats_and_achievements::set_stat_average_rate(const std::string& stat_name, const float count_this_session,
+bool c_stats_and_achievements::set_stat_average_rate(const std::string& stat_name, const float count_this_session,
                                                      const double session_length) {
-  if (!c_stats_and_achievements::steam_user_stats_->UpdateAvgRateStat(stat_name.c_str(), count_this_session,
-                                                                      session_length)) {
-    DEBUG_MESSAGE(
-        "Calling UpdateAvgRateStat failed for '" + stat_name +
-            "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
-            "stat exists in App Admin on the Steamworks website, and the changes are published, and the type must be "
-            "AVGRATE in the Steamworks Partner backend.",
-        M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::store_stats();
+  return c_stats_and_achievements::steam_user_stats_->UpdateAvgRateStat(stat_name.c_str(), count_this_session,
+                                                                        session_length);
 }
 
-float c_stats_and_achievements::get_stat_average_rate(const std::string& stat_name) {
-  return c_stats_and_achievements::get_stat_float(stat_name);
-}
+// float c_stats_and_achievements::get_stat_average_rate(const std::string& stat_name) {
+//   return c_stats_and_achievements::get_stat_float(stat_name);
+// }
 
 void c_stats_and_achievements::on_user_stats_received(UserStatsReceived_t* pCallback) {
   if (c_stats_and_achievements::c_game_id_.ToUint64() != pCallback->m_nGameID) return;
@@ -208,50 +126,20 @@ void c_stats_and_achievements::on_achievement_stored(UserAchievementStored_t* pC
   }
 }
 
-void c_stats_and_achievements::reset_all_stats() {
-  if (!c_stats_and_achievements::steam_user_stats_->ResetAllStats(false)) {
-    DEBUG_MESSAGE(
-        "Calling ResetAllStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
-        "callback.",
-        M_ERROR);
-    return;
-  }
-
-  c_stats_and_achievements::request_current_stats();
+bool c_stats_and_achievements::store_stats() {
+  return c_stats_and_achievements::steam_user_stats_->StoreStats();
 }
 
-void c_stats_and_achievements::reset_all_stats_achievements() {
-  if (!c_stats_and_achievements::steam_user_stats_->ResetAllStats(true)) {
-    DEBUG_MESSAGE(
-        "Calling ResetAllStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
-        "callback.",
-        M_ERROR);
-    return;
-  }
-  
-  c_stats_and_achievements::request_current_stats();
+bool c_stats_and_achievements::reset_all_stats() {
+  return c_stats_and_achievements::steam_user_stats_->ResetAllStats(false);
 }
 
-////////////////////////////////////////////////////////
-// Private fields & functions
-////////////////////////////////////////////////////////
-
-void c_stats_and_achievements::request_current_stats() {
-  if (!c_stats_and_achievements::steam_user_stats_->RequestCurrentStats()) {
-    DEBUG_MESSAGE(
-        "Calling RequestCurrentStats failed. Only returns false if there is no user logged in; otherwise, true.",
-        M_ERROR);
-  }
+bool c_stats_and_achievements::reset_all_stats_achievements() {
+  return c_stats_and_achievements::steam_user_stats_->ResetAllStats(true);
 }
 
-void c_stats_and_achievements::store_stats() {
-  if (!c_stats_and_achievements::steam_user_stats_->StoreStats()) {
-    DEBUG_MESSAGE(
-        "Calling StoreStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
-        "callback and the current game has stats associated with it in the Steamworks Partner backend, and those stats "
-        "are published.",
-        M_ERROR);
-  }
+bool c_stats_and_achievements::request_current_stats() {
+  return c_stats_and_achievements::steam_user_stats_->RequestCurrentStats();
 }
 
 }  // namespace steamworks

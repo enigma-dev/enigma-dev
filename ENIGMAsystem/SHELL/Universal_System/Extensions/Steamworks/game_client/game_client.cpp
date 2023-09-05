@@ -99,11 +99,11 @@ void c_game_client::set_played_with(const uint64 steam_id) {
   SteamFriends()->SetPlayedWith(c_steam_id);
 }
 
-bool c_game_client::get_image_size(const int32 image, uint32* width, uint32* height) {
+bool c_game_client::get_image_size(const int image, uint32* width, uint32* height) {
   return SteamUtils()->GetImageSize(image, width, height);
 }
 
-bool c_game_client::get_image_rgba(const int32 image, uint8* buffer, const int buffer_size) {
+bool c_game_client::get_image_rgba(const int image, uint8* buffer, const int buffer_size) {
   return SteamUtils()->GetImageRGBA(image, buffer, buffer_size);
 }
 

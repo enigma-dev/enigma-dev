@@ -2,7 +2,15 @@
 
 Steamworks is a set of tools and services that help game developers and publishers build their games and get the most out of distributing on Steam.
 This extension was part of [Google Summer of Code 2023 project](https://summerofcode.withgoogle.com/programs/2023/projects/kHDskccO). Reach out to
-me on the official Discord server for ENIGMA.
+me on ENIGMA's official Discord server.
+
+## Supported Platforms
+
+ - Ubuntu Linux.
+
+## Building Steamworks Extension for Ubuntu Linux
+
+
 
 ## Steamworks Extension's Structure
 

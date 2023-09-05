@@ -21,6 +21,7 @@
 #include "game_client.h"
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
+// TODO: Move the pre-checks here.
 
 namespace steamworks {
 
