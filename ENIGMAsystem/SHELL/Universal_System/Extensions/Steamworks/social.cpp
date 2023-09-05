@@ -93,14 +93,14 @@ int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar
 }
 
 // TODO: Check how ENIGMA compiler handles null values.
-var steam_image_get_size(const long long steam_image_id) {
+var steam_image_get_size(const int steam_image_id) {
   var image_size;
 
   image_size(2) = -1;
 
-  unsigned width{0}, height{0};
-
   if (!social_pre_checks("steam_image_get_size")) return image_size;
+
+  unsigned width{0}, height{0};
 
   if (!steamworks::c_game_client::get_image_size(steam_image_id, &width, &height)) {
     DEBUG_MESSAGE(
@@ -116,8 +116,19 @@ var steam_image_get_size(const long long steam_image_id) {
   return image_size;
 }
 
-bool steam_image_get_rgba(const long long steam_image_id, int buffer, int size) { return false; }
+bool steam_image_get_rgba(const int steam_image_id, unsigned char buffer, int size) {
+  if (!social_pre_checks("steam_image_get_rgba")) return false;
 
-bool steam_image_get_bgra(const long long steam_image_id, int buffer, int size) { return false; }
+  if (!steamworks::c_game_client::get_image_rgba(steam_image_id, &buffer, size)) {
+    DEBUG_MESSAGE("Calling steam_image_get_rgba failed.", M_ERROR);
+    return false;
+  }
+
+  // Now what?
+
+  return true;
+}
+
+bool steam_image_get_bgra(const int steam_image_id, unsigned char buffer, int size) { return false; }
 
 }  // namespace enigma_user

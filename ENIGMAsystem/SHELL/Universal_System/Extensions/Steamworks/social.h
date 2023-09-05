@@ -104,10 +104,10 @@ int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_image_get_size
     for more information.
 */
-var steam_image_get_size(const long long steam_image_id);
+var steam_image_get_size(const int steam_image_id);
 
-bool steam_image_get_rgba(const long long steam_image_id, int buffer, int size);
-bool steam_image_get_bgra(const long long steam_image_id, int buffer, int size);
+bool steam_image_get_rgba(const int steam_image_id, unsigned char buffer, int size);
+bool steam_image_get_bgra(const int steam_image_id, unsigned char buffer, int size);
 
 }  // namespace enigma_user
 
