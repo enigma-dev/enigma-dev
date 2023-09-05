@@ -15,15 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <parsing/ast.h>
-
-#include <ctime>
+#include <time.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <cstdlib>
-#include <cstdio>
+#include <stdio.h>
 #include <map>
 
 using namespace std;
@@ -33,6 +31,7 @@ using namespace std;
 #include "darray.h"
 #include "settings.h"
 
+#include "syntax/syncheck.h"
 #include "parser/parser.h"
 #include "OS_Switchboard.h"
 
@@ -70,7 +69,7 @@ extern const char* establish_bearings(const char *compiler);
 #include "general/bettersystem.h"
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
-#include <API/context.h>
+#include <API/jdi.h>
 
 #include <cstdlib>
 
@@ -98,10 +97,10 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
 
   cout << "Implementing JDI basics" << endl;
-  auto &builtin = jdi::builtin_context();
-  builtin.output_types();
-  builtin.add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
-  builtin.add_macro("false","0"); // Added because polygone is a bitch
+  jdi::initialize();
+  jdi::builtin->output_types();
+  jdi::builtin->add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
+  jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
 
   cout << "Choosing language: C++" << endl;
@@ -109,7 +108,7 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   current_language = languages[current_language_name] = new lang_CPP();
 
   cout << "Creating parse context" << endl;
-  main_context = new jdi::Context;
+  main_context = new jdi::context;
 
   return 0;
 }
@@ -149,24 +148,19 @@ DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names,
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
 
   cout << "Checkpoint." << endl;
-  NameSet script_name_set;
-  for (int i = 0; i < script_count; i++) {
-    std::string name = script_names[i];
-    current_language->quickmember_script(&globals_scope, name);
-    script_name_set.insert(std::move(name));
-  }
-
-  enigma::parsing::ParseContext ctex(current_language, std::move(script_name_set));
+  for (int i = 0; i < script_count; i++)
+    current_language->quickmember_script(&globals_scope,script_names[i]);
 
   cout << "Starting syntax check." << endl;
-  using enigma::parsing::AST;
-  AST ast = AST::Parse(code, &ctex);
+  std::string newcode;
+  ide_passback_error.absolute_index = syncheck::syntaxcheck(code, newcode);
   cout << "Syntax checking complete." << endl;
+  error_sstring = syncheck::syerr;
 
-  static std::string static_error_text;
+
+
   cout << "Copying error pointer." << endl;
-  static_error_text = ast.ErrorString();
-  ide_passback_error.err_str = static_error_text.c_str();
+  ide_passback_error.err_str = error_sstring.c_str();
 
   cout << "Computing position." << endl;
   if (ide_passback_error.absolute_index != -1)

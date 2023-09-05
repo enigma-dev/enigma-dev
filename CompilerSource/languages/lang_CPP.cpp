@@ -1,7 +1,7 @@
 /**
   @file  lang_CPP.cpp
   @brief Implements much of the C++ languages adapter class.
-
+  
   @section License
     Copyright (C) 2008-2012 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
@@ -10,7 +10,7 @@
     terms of the GNU General Public License as published by the Free Software
     Foundation, version 3 of the license or any later version.
 
-    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY;
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
     PURPOSE. See the GNU General Public License for more details.
 
@@ -33,9 +33,9 @@ void lang_CPP::load_extension_locals() {
   {
     if (parsed_extensions[i].implements == "")
       continue;
-
+    
     jdi::definition* implements = namespace_enigma->look_up(parsed_extensions[i].implements);
-
+    
     if (!implements or !(implements->flags & jdi::DEF_SCOPE)) {
       cout << "ERROR! Extension implements " << parsed_extensions[i].implements << " without defining it!" << endl;
       continue;
@@ -46,7 +46,7 @@ void lang_CPP::load_extension_locals() {
     jdi::definition_scope *const iscope = (jdi::definition_scope*) implements;
     for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it) {
       if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
-        shared_object_locals_.insert(it->second->name);
+        shared_object_locals.insert(it->second->name);
     }
   }
 }
@@ -76,61 +76,35 @@ void lang_CPP::load_extension_locals() {
 
 void parser_init();
 
-namespace {
-
-std::string TranscribeTokens(const jdi::token_vector &tokens) {
-  std::string result;
-  for (const jdi::token_t &token : tokens) {
-    if (result.length()) result.push_back(' ');
-    result += token.content.toString();
-  }
-  return result;
-}
-
-enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
-                                      enigma::parsing::ErrorHandler *herr) {
-  using namespace enigma::parsing;
-  if (macro.is_function) {
-    auto copy = macro.params;
-    return enigma::parsing::Macro(
-        macro.name, std::move(copy), macro.is_variadic,
-        TranscribeTokens(macro.raw_value), herr);
-  }
-  return enigma::parsing::Macro(
-      macro.name, TranscribeTokens(macro.raw_value), herr);
-}
-
-}  // namespace
-
-syntax_error *lang_CPP::definitionsModified(const char* wscode,
-                                            const char* targetYaml) {
+syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
+{
   cout << "Parsing settings..." << endl;
-  parse_ide_settings(targetYaml, &compatibility_opts_);
-
+    parse_ide_settings(targetYaml);
+  
   cout << targetYaml << endl;
-
+  
   cout << "Creating swap." << endl;
   delete main_context;
-  main_context = new jdi::Context();
-
+  main_context = new jdi::context();
+  
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
-
+  
   cout << "Opening ENIGMA for parse..." << endl;
-
+  
   llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
     CURRENT_TIME(ts);
-    res = main_context->parse_stream(f);
+    res = main_context->parse_C_stream(f, "SHELLmain.cpp");
     CURRENT_TIME(te);
   }
-
+  
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
-    enigma_type__variant = d;
+    enigma_type__variant = d;   
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
     else
@@ -161,55 +135,38 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
       namespace_enigma_user = (jdi::definition_scope*) d;
     } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
-  if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
-    if (dstd->flags & jdi::DEF_NAMESPACE) {
-      jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
-      jdi::definition *j_string = j_std->look_up("string");
-      if (!j_string) cerr << "Error! std::string was not detected! The parse output probably sucks.";
-      else if (!(j_string->flags & jdi::DEF_TYPENAME))
-        cerr << "Error! std::string is not a type! The parse output probably sucks.";
-      else
-        cout << "Successfully parsed std::string, so data is probably good.";
-    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
-  } else cerr << "ERROR! Namespace std not found!" << endl;
-
+  
   if (res) {
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
-
+    
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
-  } else {
+  } else {    
     cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME(ts,te) << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   }
-
+  
   cout << "Creating dummy primitives for old ENIGMA" << endl;
-  for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
-    main_context->get_global()->members[it->first] = std::make_unique<jdi::definition>(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+  for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
+    main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
-
-  enigma::parsing::StdErrorHandler hack;  // TODO: FIXME: This should be using a central error handler...
-  cout << "Translating macros to EDL...\n";
-  for (const auto &macro_pair : main_context->get_macros())
-    builtin_macros_.insert({macro_pair.first,
-                            TranslateMacro(*macro_pair.second, &hack)});
-
+  
   cout << "Initializing EDL Parser...\n";
-
+  
   parser_init();
-
+  
   cout << "Grabbing locals...\n";
-
+  
   load_shared_locals();  // Extensions were separated above
-
+  
   cout << "Determining build target...\n";
-
+  
   extensions::determine_target();
-
+  
   cout << " Done.\n";
-
+  
   return &ide_passback_error;
 }
 
@@ -240,25 +197,23 @@ int lang_CPP::load_shared_locals() {
   // Find the parent object
   cout << "Found parent scope" << endl;
 
-  shared_object_locals_.clear();
+  shared_object_locals.clear();
 
   //Iterate the tiers of the parent object
   for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
     for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
-      shared_object_locals_.insert(mem->first);
+      shared_object_locals.insert(mem->first);
   }
 
   load_extension_locals();
   return 0;
 }
 
-jdi::definition* lang_CPP::look_up(std::string_view n) const {
-  // TODO: FIXME: slow-ass conversion still exists...
-  std::string name(n);
-  auto builtin = jdi::builtin_declarators.find(name);
-  if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
+jdi::definition* lang_CPP::look_up(const string &name) {
+  auto builtin = jdip::builtin_declarators.find(name);
+  if (builtin != jdip::builtin_declarators.end()) return builtin->second->def;
   return namespace_enigma_user->find_local(name);
 }
 

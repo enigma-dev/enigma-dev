@@ -31,6 +31,10 @@
 
 using namespace std;
 
+
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
+
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"

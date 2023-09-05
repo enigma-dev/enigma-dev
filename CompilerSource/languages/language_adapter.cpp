@@ -27,4 +27,4 @@ map<string,language_adapter*> languages;
 language_adapter *current_language;
 string current_language_name;
 
-jdi::Context *main_context = nullptr;
+jdi::context *main_context = NULL;

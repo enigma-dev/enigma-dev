@@ -33,6 +33,7 @@
 
 using namespace std;
 
+#include "syntax/syncheck.h"
 #include "general/estring.h"
 #include "parser/parser.h"
 

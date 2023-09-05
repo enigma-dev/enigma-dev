@@ -32,7 +32,8 @@
 #include "object_storage.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast,
-                       ParsedScope *parsed_scope, const NameSet &script_names);
+void collect_variables(language_adapter *lang, ParsedCode *code,
+                       const std::set<std::string> &script_names = {},
+                       bool trackGotos = false);
 
 #endif

@@ -25,6 +25,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -107,37 +108,47 @@ bool codegen_only = false;
 std::filesystem::path enigma_root;
 std::filesystem::path eobjs_directory;
 std::filesystem::path codegen_directory;
+std::string num_make_jobs;
 
-void parse_ide_settings(const char* eyaml, setting::CompatibilityOptions *out)
+void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
   eyit it;
   
   // Read settings info
-  out->use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  out->use_cpp_literals  = settree.get("inherit-literals-from").toInt();
-  out->use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
-  out->use_incrementals  = settree.get("inherit-increment-from").toInt();
-  out->use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
-  out->inherit_objects   = settree.get("inherit-objects").toBool();
+  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
+  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
+  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
+  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
+  setting::inherit_objects   = settree.get("inherit-objects").toBool();
   switch (settree.get("compliance-mode").toInt()) {
     case 4:
-      out->compliance_mode = setting::COMPL_GM8;
+      setting::compliance_mode = setting::COMPL_GM8;
       break;
     case 3:
-      out->compliance_mode = setting::COMPL_GM7;
+      setting::compliance_mode = setting::COMPL_GM7;
       break;
     case 2:
-      out->compliance_mode = setting::COMPL_GM6;
+      setting::compliance_mode = setting::COMPL_GM6;
       break;
     case 1:
-      out->compliance_mode = setting::COMPL_GM5;
+      setting::compliance_mode = setting::COMPL_GM5;
       break;
     default:
-      out->compliance_mode = setting::COMPL_STANDARD;
+      setting::compliance_mode = setting::COMPL_STANDARD;
   }
-  out->strict_syntax =    !settree.get("automatic-semicolons").toBool();
-  out->keyword_blacklist = settree.get("keyword-blacklist").toString();
+  setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
+  setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
+
+  // The number of compile jobs
+  num_make_jobs = "1";
+  if (settree.exists("jobs")) {
+    const std::string &jobs = settree.get("jobs");
+    if (std::all_of(jobs.begin(), jobs.end(), [](char c) { return std::isdigit(c); })) {
+      num_make_jobs = settree.get("jobs").toString();
+    }
+  }
 
   // Path to enigma sources
   enigma_root = settree.get("enigma-root").toString();

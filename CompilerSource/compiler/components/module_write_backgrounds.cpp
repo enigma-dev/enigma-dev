@@ -31,6 +31,9 @@
 
 using namespace std;
 
+#include "syntax/syncheck.h"
+#include "parser/parser.h"
+
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 

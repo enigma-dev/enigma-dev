@@ -149,23 +149,41 @@ void parser_init()
   edl_tokens["operator"] = 'o';
 }
 
-void parser_main(enigma::parsing::AST *ast, const enigma::parsing::ParseContext &ctex) {
+
+
+void parser_main(ParsedCode* pev, const std::set<std::string>& script_names, bool isObject)
+{
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
 
   //For the sake of efficiency, however, we will reduce the number of passes by replacing multiple things at once.
 
-  string &code = ast->junkshit.code = ast->code;
-  string &synt = ast->junkshit.synt;
+  string &code = pev->code;
+  string &synt = pev->synt;
+
+  //Reset things
+    //Nothing to reset :trollface:
 
   //Initialize us a spot in the global scope
   initscope("script scope");
 
-  ast->junkshit.strc = 0; //Number of strings in this code
-  parser_ready_input(code,synt,ast->junkshit.strc,ast->junkshit.strs,ctex);
-  parser_reinterpret(code, synt);
-  if (!ctex.compatibility_opts.strict_syntax) {
+  if (pev) {
+    pev->strc = 0; //Number of strings in this code
+    parser_ready_input(code,synt,pev->strc,pev->strs);
+  }
+  else
+  {
+    varray<string> strst;
+    unsigned int strct = 0;
+    parser_ready_input(code,synt,strct,strst);
+  }
+  parser_reinterpret(code,synt);
+  if (setting::automatic_semicolons) {
     parser_add_semicolons(code,synt);
+  }
+
+  if (pev) { cout << "collecting variables..."; fflush(stdout);
+    collect_variables(current_language, pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
 }
 
@@ -262,7 +280,7 @@ int make_hash(const lexpair& lp, ParsedCode* pev) {
   // Now we assume it's a string and apply a simple hash
   int r = 0;
   for (int i = 0; i < lp.strc; i++) {
-    string a = pev->ast.junkshit.strs[lp.stri + i];
+    string a = pev->strs[lp.stri + i];
     if (a.length() > 1) {
       if (a[0] == '"' and a[a.length() - 1] == '"') a = a.substr(1,a.length()-2);
       else if (a[0] == '\'' and a[a.length() - 1] == '\'') a = a.substr(1,a.length()-2);
@@ -309,9 +327,8 @@ bool skip_paren(string& res, pt& pos, const string& code, const string& synt, ch
 }  // namespace
 
 int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
-  string &code = parsed_code->ast.junkshit.code;
-  string &synt = parsed_code->ast.junkshit.synt;
-  auto &compat_opts = state.parse_context.compatibility_opts;
+  string &code = parsed_code->code;
+  string &synt = parsed_code->synt;
 
   // We'll have to again keep track of temporaries
   // Fortunately, this time, there are no context-dependent tokens to resolve
@@ -380,7 +397,8 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
             expsynt = "nnnn";
           }
         }
-        if (state.parse_context.language_fe->is_shared_local(member)) {
+        if (shared_object_locals.find(member) != shared_object_locals.end())
+        {
           repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
           repsyn = "nnnnnnnnnnnnnnnn(ccc(" + expsynt + "))->" + string(member.length(),'n');
         }
@@ -615,16 +633,12 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
 
 
       case ';':
-        if (level and !infor) {
-          cout << code << endl;
-          cout << synt << endl;
-          cout << std::string(pos, ' ') << '^' << endl;
+        if (level and !infor)
           cout << "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! ERROR! "
                   "ERROR! ERROR! ERROR! THIS SHOULD NOT HAVE FUCKING HAPPENED! DAMN IT! SOMETHING IS REALLY WRONG WITH THE FOUNDATION OF "
                   "THIS SYSTEM! Or, I mean, maybe I just skipped a small block of text; point is, let me know this happened, please. Level = " << level << endl;
-        }
         if (infor) infor--;
         rhs = indecl = false;
       case ',':
@@ -638,7 +652,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
         break;
       case '=':
         deceq |= indecl;
-        if (compat_opts.use_gml_equals and (level or rhs))
+        if (setting::use_gml_equals and (level or rhs))
         {
           if (infor != 3 and infor != 1 and synt[pos-1] != '=' and synt[pos+1] != '=') {
             pos++;
@@ -865,7 +879,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
           const int lower_bound = cases[0].stri, upper_bound = cases[cases.size()-1].stri + cases[cases.size()-1].strc - 1;
           map<int,string> reorder;
           for (int i = lower_bound; i <= upper_bound; i++)
-            reorder[i] = parsed_code->ast.junkshit.strs[i];
+            reorder[i] = parsed_code->strs[i];
 
           int overwrite_at = lower_bound;
           for (map<int,vector<int> >::iterator i = hashes.begin(); i != hashes.end(); i++)
@@ -890,7 +904,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
               for (int iii = 0; iii < cases[casenum].strc; iii++)
               {
                 int indx = cases[casenum].stri + iii;
-                parsed_code->ast.junkshit.strs[overwrite_at++] = reorder[indx];
+                parsed_code->strs[overwrite_at++] = reorder[indx];
                 reorder.erase(indx);
               }
             }
@@ -905,7 +919,7 @@ int parser_secondary(CompileState &state, ParsedCode *parsed_code) {
           }
 
           for (map<int,string>::iterator i = reorder.begin(); i != reorder.end(); i++)
-            parsed_code->ast.junkshit.strs[overwrite_at++] = i->second;
+            parsed_code->strs[overwrite_at++] = i->second;
         }
         icode += deflcode + deflsufcode;
         isynt += deflsynt + deflsufsynt;

@@ -32,6 +32,7 @@
 
 using namespace std;
 
+#include "syntax/syncheck.h"
 #include "parser/parser.h"
 
 #include "backend/GameData.h"
