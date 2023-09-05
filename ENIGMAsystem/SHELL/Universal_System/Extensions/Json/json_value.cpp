@@ -1,4 +1,5 @@
 // Copyright 2007-2010 Baptiste Lepilleur
+// Copyright 2023 Saif Kandil
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
@@ -1204,8 +1205,8 @@ Value::isMember( const CppTL::ConstString &key ) const
 
 Value::Members Value::getMemberNames() const
 {
-   JSON_ASSERT( type_ == nullValue  ||  type_ == objectValue );
-   if ( type_ == nullValue )
+   JSON_ASSERT( type_ == nullValue  || type_ == arrayValue ||  type_ == objectValue );
+   if ( type_ == nullValue || type_ == arrayValue )
        return Value::Members();
    Members members;
    members.reserve( value_.map_->size() );

@@ -131,6 +131,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("enigma-root", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("codegen-only", opt::bool_switch()->default_value(false), "Only generate code and exit")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
+    ("jobs,j", opt::value<int>()->default_value(1), "The number of compile jobs to run simultaneously")
   ;
 
   _positional.add("input", 1);
@@ -245,6 +246,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   std::string widgets = _rawArgs["widgets"].as<std::string>();
   std::string collision = _rawArgs["collision"].as<std::string>();
   std::string network = _rawArgs["network"].as<std::string>();
+  std::string jobs = std::to_string(_rawArgs["jobs"].as<int>());
   
   std::string eobjs_directory = fs::absolute(_rawArgs["workdir"].as<std::string>()).string();
   std::string codegen_directory = fs::absolute(_rawArgs["codegen"].as<std::string>()).string(); 
@@ -306,6 +308,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "extensions: " + _extensions + "\n";
   yaml += std::string("codegen-only: ") + (_rawArgs["codegen-only"].as<bool>() ? "true" : "false") + "\n";
   yaml += "enigma-root: " + _enigmaRoot + "\n";
+  yaml += "jobs: " + jobs + "\n";
 
   return yaml;
 }

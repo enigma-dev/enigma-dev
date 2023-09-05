@@ -1,5 +1,5 @@
 /**
- *  @file include.h
+ *  @file short_json.h
  *  @section License
  *
  *      Copyright (C) 2023 Saif Kandil
@@ -20,5 +20,15 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include "json.h"
-#include "short_json.h"
+#ifndef SHORT_JSON_H
+#define SHORT_JSON_H
+
+#include "Widget_Systems/widgets_mandatory.h"
+
+namespace enigma_user {
+variant short_json_decode(std::string data);
+
+std::string short_json_encode(variant ds_map);
+}  // namespace enigma_user
+
+#endif

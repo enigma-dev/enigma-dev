@@ -307,7 +307,7 @@ unique_ptr<TestHarness>
 TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
-    if (retcode != -1) {
+    if (retcode == -1) {
       std::cerr << "Failed to run emake." << std::endl;
     } else {
       std::cerr << "emake returned " << retcode << "; abort" << std::endl;
@@ -343,7 +343,7 @@ constexpr int operator"" _million(unsigned long long x) {
 int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
-    if (retcode != -1) {
+    if (retcode == -1) {
       std::cerr << "Failed to run emake." << std::endl;
     } else {
       std::cerr << "emake returned " << retcode << "; abort" << std::endl;
