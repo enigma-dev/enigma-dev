@@ -19,6 +19,7 @@
 
 #include "c_leaderboards.h"
 #include "c_overlay.h"
+#include "c_remote_storage.h"
 #include "c_stats_and_achievements.h"
 
 // TODO: Test the cleaning algorithm here.
@@ -36,6 +37,7 @@ c_game_client::c_game_client()
     : c_overlay_(NULL),
       c_stats_and_achievements_(NULL),
       c_leaderboards_(NULL),
+      c_remote_storage_(NULL),
       c_steam_id_local_user_(SteamUser()->GetSteamID()),
       steam_app_id_(SteamUtils()->GetAppID()),
       current_game_language_(std::string(SteamApps()->GetCurrentGameLanguage())),
@@ -47,6 +49,7 @@ c_game_client::~c_game_client() {
   if (NULL != c_game_client::c_overlay_) delete c_game_client::c_overlay_;
   if (NULL != c_game_client::c_stats_and_achievements_) delete c_game_client::c_stats_and_achievements_;
   if (NULL != c_game_client::c_leaderboards_) delete c_game_client::c_leaderboards_;
+  if (NULL != c_game_client::c_remote_storage_) delete c_game_client::c_remote_storage_;
 }
 
 void c_game_client::init() {
@@ -55,6 +58,7 @@ void c_game_client::init() {
   c_game_client::c_overlay_ = new c_overlay();
   c_game_client::c_stats_and_achievements_ = new c_stats_and_achievements();
   c_game_client::c_leaderboards_ = new c_leaderboards();
+  c_game_client::c_remote_storage_ = new c_remote_storage();
 }
 
 c_overlay* c_game_client::get_c_overlay() { return c_game_client::c_overlay_; }
@@ -64,6 +68,8 @@ c_stats_and_achievements* c_game_client::get_c_stats_and_achievements() {
 }
 
 c_leaderboards* c_game_client::get_c_leaderboards() { return c_game_client::c_leaderboards_; }
+
+c_remote_storage* c_game_client::get_c_remote_storage() { return c_game_client::c_remote_storage_; }
 
 CSteamID c_game_client::get_c_steam_id_local_user() { return c_game_client::c_steam_id_local_user_; }
 

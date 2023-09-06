@@ -41,6 +41,7 @@ namespace steamworks {
 class c_overlay;
 class c_stats_and_achievements;
 class c_leaderboards;
+class c_remote_storage;
 
 class c_game_client {
  public:
@@ -74,6 +75,11 @@ class c_game_client {
     Returns the pointer to the Leaderboards object.
   */
   c_leaderboards* get_c_leaderboards();
+
+  /*
+    Returns the pointer to the Remote Storage object.
+  */
+  c_remote_storage* get_c_remote_storage();
 
   /*
     Returns the Steam ID of the account currently logged into the Steam client. This 
@@ -236,6 +242,11 @@ class c_game_client {
     Pointer to the Leaderboards object.
   */
   c_leaderboards* c_leaderboards_;
+
+  /*
+    Pointer to the Remote Storage object.
+  */
+  c_remote_storage* c_remote_storage_;
 
   /*
     Steam ID of the account currently logged into the Steam client. This can be

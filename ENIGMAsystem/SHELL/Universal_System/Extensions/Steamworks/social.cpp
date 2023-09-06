@@ -116,10 +116,12 @@ var steam_image_get_size(const int steam_image_id) {
   return image_size;
 }
 
-bool steam_image_get_rgba(const int steam_image_id, unsigned char buffer, int size) {
+bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int size) {
   if (!social_pre_checks("steam_image_get_rgba")) return false;
 
-  if (!steamworks::c_game_client::get_image_rgba(steam_image_id, &buffer, size)) {
+  unsigned char *flattened_image = new unsigned char[size];
+
+  if (!steamworks::c_game_client::get_image_rgba(steam_image_id, flattened_image, size)) {
     DEBUG_MESSAGE("Calling steam_image_get_rgba failed.", M_ERROR);
     return false;
   }
@@ -129,6 +131,6 @@ bool steam_image_get_rgba(const int steam_image_id, unsigned char buffer, int si
   return true;
 }
 
-bool steam_image_get_bgra(const int steam_image_id, unsigned char buffer, int size) { return false; }
+bool steam_image_get_bgra(const int steam_image_id, const int buffer, const int size) { return false; }
 
 }  // namespace enigma_user
