@@ -31,6 +31,7 @@ namespace steamworks {
 
 class c_leaderboards_cookies {
  public:
+  virtual ~c_leaderboards_cookies() = default;
   virtual bool is_done() const = 0;
 
  private:

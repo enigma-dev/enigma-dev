@@ -39,13 +39,13 @@ class c_leaderboards_score_uploaded_cookies : public c_leaderboards_cookies {
   ~c_leaderboards_score_uploaded_cookies() = default;
 
  private:
-  c_leaderboards* c_leaderboards_;
-
   /*
       This id is part of the payload that will be attached to the leaderboard find results. This
       id must be returned from AssetArray add() function.
  */
   int id_;
+
+  c_leaderboards* c_leaderboards_;
 
   /*
     This flag will be set to true when the call result is received. This flag will be used to

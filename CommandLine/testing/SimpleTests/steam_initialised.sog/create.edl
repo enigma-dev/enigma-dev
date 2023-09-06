@@ -1,4 +1,11 @@
-
 is_initialized = steam_initialised();
+gtest_assert_eq(is_initialized,  true);
 
+steam_shutdown();
+is_initialized = steam_initialised();
+gtest_assert_eq(is_initialized,  false);
+
+// You don't have to call this anymore as it's called automatically by the extension.
+steam_init();
+is_initialized = steam_initialised();
 gtest_assert_eq(is_initialized,  true);

@@ -53,9 +53,9 @@ void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* 
       {"status", pFindLeaderboardResult->m_bLeaderboardFound},
       {"lb_name", steamworks::c_leaderboards::get_leaderboard_name(pFindLeaderboardResult->m_hSteamLeaderboard)}};
 
-  // wait(&enigma::mutex);
+  posted_async_events_mutex.lock();
   enigma::posted_async_events.push(leaderboard_find_event);
-  // signal(&enigma::mutex);
+  posted_async_events_mutex.unlock();
 }
 
 void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult) {
@@ -80,9 +80,9 @@ void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_
       {"updated", pScoreUploadedResult->m_bScoreChanged},
       {"score", pScoreUploadedResult->m_nScore}};
 
-  // wait(&enigma::mutex);
+  posted_async_events_mutex.lock();
   enigma::posted_async_events.push(leaderboard_upload_event);
-  // signal(&enigma::mutex);
+  posted_async_events_mutex.unlock();
 }
 
 void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
@@ -109,9 +109,9 @@ void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownlo
       {"num_entries", pLeaderboardScoresDownloaded->m_cEntryCount},
       {"status", (pLeaderboardScoresDownloaded->m_cEntryCount == 0) ? 0 : 1}};
 
-  // wait(&enigma::mutex);
+  posted_async_events_mutex.lock();
   enigma::posted_async_events.push(leaderboard_download_event);
-  // signal(&enigma::mutex);
+  posted_async_events_mutex.unlock();
 }
 }  // namespace enigma
 
@@ -175,7 +175,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
       return -1;
   }
 
-  const int id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   if (!steamworks::c_main::get_c_game_client()->get_c_leaderboards()->create_leaderboard(
           id, lb_name, leaderboard_sort_method, leaderboard_display_type)) {
@@ -189,7 +189,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 int steam_upload_score(const std::string& lb_name, const int score) {
   if (!leaderboards_pre_checks("steam_upload_score")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int find_id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -207,7 +207,7 @@ int steam_upload_score(const std::string& lb_name, const int score) {
 int steam_upload_score_ext(const std::string& lb_name, const unsigned score, const bool force_update) {
   if (!leaderboards_pre_checks("steam_upload_score_ext")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int find_id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   /*
     Resets the c_leaderboards::current_leaderboard_ attribute and sets up a new call back.
@@ -245,7 +245,7 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
 int steam_download_scores(const std::string& lb_name, const int start_idx, const int end_idx) {
   if (!leaderboards_pre_checks("steam_download_scores")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int find_id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -263,7 +263,7 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
 int steam_download_scores_around_user(const std::string& lb_name, const int range_start, const int range_end) {
   if (!leaderboards_pre_checks("steam_download_scores_around_user")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int find_id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 
@@ -281,7 +281,7 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
 int steam_download_friends_scores(const std::string& lb_name) {
   if (!leaderboards_pre_checks("steam_download_friends_scores")) return -1;
 
-  const int find_id{enigma::leaderboards_array.add(NO_LEADERBOARD)};
+  const int find_id{enigma::leaderboards_array.add(INVALID_LEADERBOARD)};
 
   steamworks::c_main::get_c_game_client()->get_c_leaderboards()->find_leaderboard(find_id, lb_name);
 

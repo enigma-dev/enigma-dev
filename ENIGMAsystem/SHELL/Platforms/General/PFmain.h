@@ -1,5 +1,6 @@
 /** Copyright (C) 2011 Josh Ventura
 *** Copyright (C) 2013-2014 Robert B. Colton
+*** Copyright (C) 2023-2024 Saif Kandil
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -22,6 +23,7 @@
 #include <string>
 #include <queue>
 #include <map>
+#include <mutex>
 
 #include "Universal_System/var4.h"
 
@@ -36,16 +38,17 @@ namespace enigma {
   extern unsigned long current_time_mcs;
   extern bool game_window_focused;
 
-  // This queue will contain any event that will be fired inside the main loop.
+  /**
+   * @brief This queue is used to store the events that are fired from the async event system.
+   * 
+   */
   extern std::queue<std::map<std::string, variant>> posted_async_events;
 
-  /*
-    The following semaphore code is for the new Async system to protect the posted_async_events queue from
-    extensions that writes multiple maps at once.
-  */
-  extern int mutex;
-  void wait(int* mutex);
-  void signal(int* mutex);
+  /**
+   * @brief This mutex is used to lock the posted_async_events queue.
+   * 
+   */
+  extern std::mutex posted_async_events_mutex;
 
   int enigma_main(int argc, char** argv);
   int game_ending();
@@ -61,6 +64,12 @@ namespace enigma {
   int updateTimer();
   int gameWait();
   void set_room_speed(int rs);
+
+  /**
+   * @brief This function is used to fire all the events that are stored in the posted_async_events queue.
+   * 
+   */
+  void fireEventsFromQueue();
 }
   
 namespace enigma_user {
@@ -73,7 +82,10 @@ extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
 
-// When firing any event inside posted_async_events queue, this variable will contain the data that will be sent to the game.
+/**
+ * @brief When firing any event inside posted_async_events queue, this variable will contain the data that will be sent to the game.
+ * 
+ */
 extern int async_load;
 
 void sleep(int ms);

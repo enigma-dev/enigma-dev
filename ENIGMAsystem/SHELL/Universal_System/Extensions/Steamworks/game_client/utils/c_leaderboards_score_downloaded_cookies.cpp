@@ -102,7 +102,7 @@ void c_leaderboards_score_downloaded_cookies::on_download_scores(
   // Leaderboard entries handle will be invalid once we return from this function. Copy all data now.
   const int number_of_leaderboard_entries =
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
-  for (unsigned index = 0; index < number_of_leaderboard_entries; index++) {
+  for (unsigned index = 0; index < (unsigned)number_of_leaderboard_entries; index++) {
     SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
                                                     &leaderboard_entries[index], NULL, 0);
   }

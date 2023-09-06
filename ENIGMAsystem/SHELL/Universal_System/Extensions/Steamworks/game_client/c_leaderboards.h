@@ -30,12 +30,11 @@
 
 #include "game_client.h"
 
-#define NO_LEADERBOARD 0
+#define INVALID_LEADERBOARD 0
 
 namespace steamworks {
 
 class c_leaderboards_cookies;
-
 class c_game_client;
 
 class c_leaderboards {
@@ -68,8 +67,10 @@ class c_leaderboards {
 
  private:
   SteamLeaderboard_t current_leaderboard_;
-  bool loading_;
+
   unsigned number_of_leaderboard_entries_;
+
+  bool loading_;
 
   // TODO: Make sure that this vector doesn't cause race conditions.
   /*
