@@ -28,7 +28,7 @@
 
 #include "Universal_System/var4.h"
 #include "object.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -79,12 +79,12 @@ namespace enigma
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_planar::objtype, len, bytes);
-    enigma_internal_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
+    enigma_serialize<unsigned char>(object_planar::objtype, len, bytes);
+    enigma_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
 #ifdef ISLOCAL_persistent
-    enigma_internal_serialize(persistent, len, bytes);
+    enigma_serialize(persistent, len, bytes);
 #endif
-    enigma_internal_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+    enigma_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -94,17 +94,17 @@ namespace enigma
     auto len = object_basic::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma_deserialize(type, iter, len);
     if (type != object_planar::objtype) {
       DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_planar::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
+    enigma_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
 #ifdef ISLOCAL_persistent
-    enigma_internal_deserialize(persistent, iter, len);
+    enigma_deserialize(persistent, iter, len);
 #endif
-    enigma_internal_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+    enigma_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
     hspeed.vspd    = &vspeed.rval.d;
     hspeed.dir     = &direction.rval.d;

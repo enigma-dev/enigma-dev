@@ -22,8 +22,8 @@
 #include <string>
 #include <utility>
 
-#include "Universal_System/Object_Tiers/serialization.h"
-#include "Universal_System/detect_serialization.h"
+#include "Universal_System/Serialization/serialization.h"
+#include "Universal_System/Serialization/detect_serialization.h"
 
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
@@ -214,14 +214,14 @@ class AssetArray {
   }
 
   std::vector<std::byte> serialize() const {
-    static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
+    static_assert(has_serialize_method_v<T> || HAS_INTERNAL_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
 
     std::vector<std::byte> result{};
     std::size_t len = 0;
-    enigma::enigma_internal_serialize(assets_.size(), len, result);
+    enigma::enigma_serialize(assets_.size(), len, result);
     for (std::size_t i = 0; i < assets_.size(); i++) {
-      enigma::enigma_internal_serialize(operator[](i), len, result);
+      enigma::enigma_serialize(operator[](i), len, result);
     }
     result.shrink_to_fit();
     return result;
@@ -233,10 +233,10 @@ class AssetArray {
 
     std::size_t len = 0;
     std::size_t elements = 0;
-    enigma::enigma_internal_deserialize(elements, iter, len);
+    enigma::enigma_deserialize(elements, iter, len);
     resize(elements);
     for (std::size_t i = 0; i < elements; i++) {
-      enigma::enigma_internal_deserialize(assets_[i], iter, len);
+      enigma::enigma_deserialize(assets_[i], iter, len);
     }
     return len;
   }

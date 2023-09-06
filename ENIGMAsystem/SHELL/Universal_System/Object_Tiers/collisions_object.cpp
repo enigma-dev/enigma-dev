@@ -23,7 +23,7 @@
 
 #include "collisions_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
@@ -147,8 +147,8 @@ namespace enigma
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
-      enigma_internal_serialize<unsigned char>(object_collisions::objtype, len, bytes);
-      enigma_internal_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
+      enigma_serialize<unsigned char>(object_collisions::objtype, len, bytes);
+      enigma_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       bytes.shrink_to_fit();
@@ -159,13 +159,13 @@ namespace enigma
       auto len = object_transform::deserialize_self(iter);
 
       unsigned char type;
-      enigma_internal_deserialize(type, iter, len);
+      enigma_deserialize(type, iter, len);
       if (type != object_collisions::objtype) {
         DEBUG_MESSAGE("object_collisions::deserialize_self: Object type '" + std::to_string(type) +
                           "' does not match expected: " + std::to_string(object_collisions::objtype),
                       MESSAGE_TYPE::M_FATAL_ERROR);
       }
-      enigma_internal_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
+      enigma_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       return len;

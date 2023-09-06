@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #ifndef ENIGMA_H_LUA_TABLE
 #define ENIGMA_H_LUA_TABLE
 
@@ -30,7 +29,7 @@
   be replaced with a sparse hash map container when it's a "good time" to do so.
 
   By ENIGMA-defined standard, this table class takes up sizeof(void*) bytes. The class
-  itself contains a single pointer to a dense part (dynamic array). This ctually points
+  itself contains a single pointer to a dense part (dynamic array). This actually points
   to a fixed-length position from the beginning of an allocated block. At the beginning
   of this block is precisely enough room for the table's map component. The implication
   is that the dense segment can be dereferenced without additional arithmetic (by unary

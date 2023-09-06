@@ -22,7 +22,7 @@
 
 #include "transform_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
@@ -35,9 +35,9 @@ namespace enigma
     auto bytes = object_graphics::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_transform::objtype, len, bytes);
-    enigma_internal_serialize(image_alpha, len, bytes);
-    enigma_internal_serialize(image_blend, len, bytes);
+    enigma_serialize<unsigned char>(object_transform::objtype, len, bytes);
+    enigma_serialize(image_alpha, len, bytes);
+    enigma_serialize(image_blend, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -47,14 +47,14 @@ namespace enigma
     auto len = object_graphics::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma_deserialize(type, iter, len);
     if (type != object_transform::objtype) {
       DEBUG_MESSAGE("object_transform::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_transform::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize(image_alpha, iter, len);
-    enigma_internal_deserialize(image_blend, iter, len);
+    enigma_deserialize(image_alpha, iter, len);
+    enigma_deserialize(image_blend, iter, len);
 
     return len;
   }
