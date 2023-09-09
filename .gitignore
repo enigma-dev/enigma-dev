@@ -61,6 +61,3 @@ hs_err_pid*.log
 *.layout
 *.epackage
 *~
-.vscode/settings.json
-CommandLine/testing/Tests/exec
-CommandLine/testing/Tests/generic_types_serialize_tests/exec
