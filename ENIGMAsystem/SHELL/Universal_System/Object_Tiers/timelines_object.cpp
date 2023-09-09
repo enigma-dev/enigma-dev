@@ -25,7 +25,7 @@
 
 #include "timelines_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
@@ -106,17 +106,17 @@ namespace enigma
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_timelines::objtype, len, bytes);
-    enigma_internal_serialize(timeline_moments_maps.size(), len, bytes);
+    enigma_serialize<unsigned char>(object_timelines::objtype, len, bytes);
+    enigma_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
-      enigma_internal_serialize(map.size(), len, bytes);
+      enigma_serialize(map.size(), len, bytes);
       for (auto &[key, value]: map) {
-        enigma_internal_serialize(key, len, bytes);
-        enigma_internal_serialize(value, len, bytes);
+        enigma_serialize(key, len, bytes);
+        enigma_serialize(value, len, bytes);
       }
     }
 
-    enigma_internal_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
+    enigma_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
                                    timeline_position, timeline_loop);
 
     bytes.shrink_to_fit();
@@ -127,28 +127,28 @@ namespace enigma
     auto len = object_planar::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma_deserialize(type, iter, len);
     if (type != object_timelines::objtype) {
       DEBUG_MESSAGE("object_timelines::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_timelines::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
     std::size_t timeline_maps_len{};
-    enigma_internal_deserialize(timeline_maps_len, iter, len);
+    enigma_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);
     for (auto &map: timeline_moments_maps) {
       std::size_t map_len{};
-      enigma_internal_deserialize(map_len, iter, len);
+      enigma_deserialize(map_len, iter, len);
       for (std::size_t i = 0; i < map_len; i++) {
         int key{};
         int value{};
-        enigma_internal_deserialize(key, iter, len);
-        enigma_internal_deserialize(value, iter, len);
+        enigma_deserialize(key, iter, len);
+        enigma_deserialize(value, iter, len);
         map[key] = value;
       }
     }
 
-    enigma_internal_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
+    enigma_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
                                      timeline_loop);
 
     return len;

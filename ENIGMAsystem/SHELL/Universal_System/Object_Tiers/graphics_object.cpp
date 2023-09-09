@@ -23,7 +23,7 @@
 
 #include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <math.h>
@@ -97,8 +97,8 @@ namespace enigma
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_graphics::objtype, len, bytes);
-    enigma_internal_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+    enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
+    enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     bytes.shrink_to_fit();
@@ -109,13 +109,13 @@ namespace enigma
     auto len = object_timelines::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma_deserialize(type, iter, len);
     if (type != object_graphics::objtype) {
       DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_graphics::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+    enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     return len;
