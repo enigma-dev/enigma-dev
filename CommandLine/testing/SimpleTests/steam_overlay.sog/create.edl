@@ -1,20 +1,18 @@
-steam_api = false;
+var steam_api = 0;
 
 if (steam_initialised())
 {
-    // if (steam_stats_ready() && steam_is_overlay_enabled())
-    // if (steam_is_overlay_enabled())
-    // {
-    //     steam_api = true;
-    // }
-    steam_api = true;
+    if (steam_stats_ready() && steam_is_overlay_enabled())
+    {
+        steam_api = 1;
+    }
 }
 
-gtest_assert_eq(steam_api,  true);
+gtest_assert_true(steam_api);
 
 var is_enabled = steam_is_overlay_enabled();
-gtest_assert_eq(is_enabled,  true);
+gtest_assert_true(is_enabled);
 
 steam_shutdown();
 steam_api = steam_initialised();
-gtest_assert_eq(steam_api,  false);
+gtest_assert_false(steam_api);
