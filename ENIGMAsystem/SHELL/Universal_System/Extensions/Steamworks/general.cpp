@@ -17,15 +17,15 @@
 
 #include "general.h"
 
-#include "game_client/c_stats_and_achievements.h"
+#include "gameclient/gc_statsandachievements.h"
 
 bool general_pre_checks(const std::string& script_name) {
-  if (!steamworks::c_main::is_initialised()) {
+  if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
     return false;
   }
 
-  if (!steamworks::c_game_client::is_user_logged_on()) {
+  if (!steamworks_gc::GameClient::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the user is logged in.", M_ERROR);
     return false;
   }
@@ -35,79 +35,79 @@ bool general_pre_checks(const std::string& script_name) {
 
 namespace enigma_user {
 
-bool steam_initialised() { return steamworks::c_main::is_initialised(); }
+bool steam_initialised() { return steamworks_gc::GCMain::is_initialised(); }
 
 bool steam_stats_ready() {
   if (!general_pre_checks("steam_stats_ready")) return false;
 
-  return steamworks::c_main::get_c_game_client()->get_c_stats_and_achievements()->stats_valid();
+  return steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->stats_valid();
 }
 
 unsigned steam_get_app_id() {
   if (!general_pre_checks("steam_get_app_id")) return 0;
 
-  return steamworks::c_main::get_c_game_client()->get_steam_app_id();
+  return steamworks_gc::GCMain::get_gameclient()->get_steam_app_id();
 }
 
 unsigned steam_get_user_account_id() {
   if (!general_pre_checks("steam_get_user_account_id")) return 0;
 
-  return steamworks::c_main::get_c_game_client()->get_c_steam_id_local_user().GetAccountID();
+  return steamworks_gc::GCMain::get_gameclient()->get_steam_id_local_user().GetAccountID();
 }
 
 unsigned long long steam_get_user_steam_id() {
   if (!general_pre_checks("steam_get_user_steam_id")) return 0;
 
-  return steamworks::c_main::get_c_game_client()->get_c_steam_id_local_user().ConvertToUint64();
+  return steamworks_gc::GCMain::get_gameclient()->get_steam_id_local_user().ConvertToUint64();
 }
 
 std::string steam_get_persona_name() {
   if (!general_pre_checks("steam_get_persona_name")) return "";
 
-  return steamworks::c_game_client::get_steam_persona_name();
+  return steamworks_gc::GameClient::get_steam_persona_name();
 }
 
 std::string steam_get_user_persona_name(const unsigned long long steamID) {
   if (!general_pre_checks("steam_get_user_persona_name")) return "";
 
-  return steamworks::c_game_client::get_steam_user_persona_name(steamID);
+  return steamworks_gc::GameClient::get_steam_user_persona_name(steamID);
 }
 
 bool steam_is_user_logged_on() {
-  if (!steamworks::c_main::is_initialised()) {
+  if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling steam_is_user_logged_on failed. Make sure that the API is initialized correctly.", M_ERROR);
     return false;
   }
 
-  return steamworks::c_game_client::is_user_logged_on();
+  return steamworks_gc::GameClient::is_user_logged_on();
 }
 
 std::string steam_current_game_language() {
   if (!general_pre_checks("steam_current_game_language")) return "";
 
-  return steamworks::c_main::get_c_game_client()->get_current_game_language();
+  return steamworks_gc::GCMain::get_gameclient()->get_current_game_language();
 }
 
 std::string steam_available_languages() {
   if (!general_pre_checks("steam_available_languages")) return "";
 
-  return steamworks::c_main::get_c_game_client()->get_available_game_languages();
+  return steamworks_gc::GCMain::get_gameclient()->get_available_game_languages();
 }
 
 bool steam_is_subscribed() {
   if (!general_pre_checks("steam_is_subscribed")) return false;
 
-  return steamworks::c_game_client::is_subscribed();
+  return steamworks_gc::GameClient::is_subscribed();
 }
 
 void steam_set_warning_message_hook() {
-  if (!steamworks::c_main::is_initialised()) {
+  if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling steam_set_warning_message_hook failed. Make sure that the API is initialized correctly.",
                   M_ERROR);
     return;
   }
 
-  steamworks::c_main::set_warning_message_hook();
+  steamworks_gc::GCMain::set_warning_message_hook();
 }
 
 }  // namespace enigma_user

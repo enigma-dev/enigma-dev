@@ -15,13 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#ifndef ENIGMA_STEAMWORKS_API_MOCK
+#define ENIGMA_STEAMWORKS_API_MOCK
+#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+#ifndef MOCK_STEAM_API_H
+#define MOCK_STEAM_API_H
+
+#include "mock_steam_api_common.h"
+
+#include "mock_steamappsaccessor.h"
+#include "mock_steamfriendsaccessor.h"
+#include "mock_steamuseraccessor.h"
+#include "mock_steamuserstatsaccessor.h"
+#include "mock_steamutilsaccessor.h"
+
+bool SteamAPI_Init();
+
+void SteamAPI_Shutdown();
+
+bool SteamAPI_RestartAppIfNecessary(uint32 unOwnAppID);
+
+#endif  // MOCK_STEAM_API_H

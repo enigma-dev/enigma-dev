@@ -1,0 +1,21 @@
+steam_api = false;
+
+if (steam_initialised())
+{
+    if (steam_stats_ready() && steam_is_overlay_enabled())
+    {
+        steam_api = true;
+    }
+}
+
+gtest_assert_eq(steam_api,  true);
+
+var app_id = steam_get_app_id();
+gtest_assert_eq(app_id,  480);
+
+var logged_in = steam_is_user_logged_on();
+gtest_assert_eq(logged_in,  true);
+
+steam_shutdown();
+steam_api = steam_initialised();
+gtest_assert_eq(steam_api,  false);

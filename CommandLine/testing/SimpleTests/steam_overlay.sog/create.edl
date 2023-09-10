@@ -1,0 +1,20 @@
+steam_api = false;
+
+if (steam_initialised())
+{
+    // if (steam_stats_ready() && steam_is_overlay_enabled())
+    // if (steam_is_overlay_enabled())
+    // {
+    //     steam_api = true;
+    // }
+    steam_api = true;
+}
+
+gtest_assert_eq(steam_api,  true);
+
+var is_enabled = steam_is_overlay_enabled();
+gtest_assert_eq(is_enabled,  true);
+
+steam_shutdown();
+steam_api = steam_initialised();
+gtest_assert_eq(steam_api,  false);

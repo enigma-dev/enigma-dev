@@ -15,34 +15,27 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "management.h"
+#include "mock_steamutilsaccessor.h"
 
-#include "gameclient/gc_main.h"
-#include "steamworks.h"
-
-bool managements_pre_checks(const std::string& script_name) {
-  if (!steamworks_gc::GCMain::is_initialised()) {
-    DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
-    return false;
-  }
-
+bool SteamUtilsAccessor::GetImageSize(int iImage, uint32 *pnWidth, uint32 *pnHeight) {
+  *pnWidth = 184;
+  *pnHeight = 184;
   return true;
 }
 
-namespace enigma_user {
-
-void steam_init() { enigma::extension_steamworks_init(); }
-
-void steam_update() {
-  if (!managements_pre_checks("steam_update")) return;
-
-  steamworks_gc::GCMain::run_callbacks();
+bool SteamUtilsAccessor::GetImageRGBA(int iImage, uint8 *pubDest, int nDestBufferSize) {
+  for (unsigned i{0}; i < (unsigned)nDestBufferSize; i++) pubDest[i] = 0;
+  return true;
 }
 
-void steam_shutdown() {
-  if (!managements_pre_checks("steam_shutdown")) return;
-
-  steamworks_gc::GCMain::shutdown();
+uint32 SteamUtilsAccessor::GetAppID() {
+  return 480;  // Spacewar's AppID
 }
 
-}  // namespace enigma_user
+void SteamUtilsAccessor::SetOverlayNotificationPosition(ENotificationPosition eNotificationPosition) {}
+
+void SteamUtilsAccessor::SetWarningMessageHook() {}
+
+bool SteamUtilsAccessor::IsOverlayEnabled() { return true; }
+
+void SteamUtilsAccessor::SetOverlayNotificationInset(int nHorizontalInset, int nVerticalInset) {}

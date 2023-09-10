@@ -162,7 +162,7 @@ flowchart BT
 Steamworks extension writes to `posted_async_events` queue inside `Platforms/General/PFmain.h` using Async callbacks
 while the main game loop is reading the same shared queue.
 
-These are the places we are locking:
+These are my critical sections:
  - `Steamworks/leaderboards.cpp` inside `enigma::push_create_leaderboard_steam_async_event()` function.
  - `Steamworks/leaderboards.cpp` inside `enigma::push_leaderboard_upload_steam_async_event()` function.
  - `Steamworks/leaderboards.cpp` inside `enigma::push_leaderboard_download_steam_async_event()` function.

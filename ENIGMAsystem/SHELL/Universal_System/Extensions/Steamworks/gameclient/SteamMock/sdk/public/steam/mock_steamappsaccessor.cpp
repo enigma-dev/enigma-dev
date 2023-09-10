@@ -15,13 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#include "mock_steamappsaccessor.h"
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+bool SteamAppsAccessor::BIsSubscribed() { return true; }
+
+const char *SteamAppsAccessor::GetCurrentGameLanguage() { return "MockLanguage"; }
+
+const char *SteamAppsAccessor::GetAvailableGameLanguages() { return "MockLanguages"; }

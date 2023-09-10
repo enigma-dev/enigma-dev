@@ -32,9 +32,8 @@
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
 #include "Universal_System/Resources/AssetArray.h"
-#include "game_client/c_main.h"
-
-#include <sstream>
+#include "gameclient/gc_leaderboards.h"
+#include "gameclient/gc_main.h"
 
 namespace enigma {
 
@@ -51,16 +50,57 @@ extern unsigned number_of_successful_upload_requests;
 extern bool upload_rate_limit_exceeded;
 
 // TODO: See if you can improve the type of these arrays.
-extern AssetArray<SteamLeaderboard_t>
-    leaderboards_array;  // This will be used for returning the id for each leaderboard we find.
-extern AssetArray<LeaderboardEntry_t*>
-    entries_array;                     // This will be used for returning the id for each leaderboard we download.
-extern AssetArray<bool> scores_array;  // This will be used for returning the id for each score we upload.
 
-void push_create_leaderboard_steam_async_event(int id, LeaderboardFindResult_t* pFindLeaderboardResult);
-void push_leaderboard_upload_steam_async_event(int id, LeaderboardScoreUploaded_t* pScoreUploadedResult);
-void push_leaderboard_download_steam_async_event(int id, LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded,
-                                                 std::stringstream& leaderboard_entries_buffer);
+/**
+ * @brief 
+ * 
+ * @note This will be used for returning the id for each leaderboard we find.
+ * 
+ */
+extern AssetArray<steamworks_gc::GCLeaderboardFindResult*> leaderboards_array;
+
+/**
+ * @brief 
+ * 
+ * @note This will be used for returning the id for each leaderboard we upload.
+ * 
+ */
+extern AssetArray<steamworks_gc::GCLeaderboardScoresDownloadedResult*> entries_array;
+
+/**
+ * @brief 
+ * 
+ * @note This will be used for returning the id for each score we upload.
+ * 
+ */
+extern AssetArray<steamworks_gc::GCLeaderboardScoreUploadedResult*> scores_array;
+
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param pFindLeaderboardResult 
+ */
+void push_create_leaderboard_steam_async_event(int id,
+                                               const steamworks_gc::GCLeaderboardFindResult& pFindLeaderboardResult);
+
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param pScoreUploadedResult 
+ */
+void push_leaderboard_upload_steam_async_event(
+    int id, const steamworks_gc::GCLeaderboardScoreUploadedResult& pScoreUploadedResult);
+
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param pLeaderboardScoresDownloaded 
+ */
+void push_leaderboard_download_steam_async_event(
+    int id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& pLeaderboardScoresDownloaded);
 }  // namespace enigma
 
 namespace enigma_user {
@@ -90,7 +130,7 @@ extern const unsigned lb_sort_ascending;
 extern const unsigned lb_sort_descending;
 
 /*
-    This function used to create a new leaderboard for your game. Calls c_leaderboards::find_leaderboard().
+    This function used to create a new leaderboard for your game. Calls gc_leaderboards::find_leaderboard().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_create_leaderboard for more information.
 */
 /*
@@ -104,7 +144,7 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 
 /*
     This function will send a score to the given leaderboard. If the function call fails for any reason it will return -1 
-    and the Async event will not be triggered. Calls c_leaderboards::upload_score().
+    and the Async event will not be triggered. Calls gc_leaderboards::upload_score().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_upload_score for more information.
 */
 /*
@@ -122,7 +162,7 @@ int steam_upload_score(const std::string& lb_name, const int score);
     This function will send a score to the given leaderboard. It is similar to the function steam_upload_scorebut has 
     an extra argument that will allow you to force the update of the score, as by default Steam only updates the score 
     if it is better than the previous one. If the function call fails for any reason it will return -1 and the Async event 
-    will not be triggered. Calls c_leaderboards::upload_score().
+    will not be triggered. Calls gc_leaderboards::upload_score().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_upload_score_ext for more information.
 */
 /*
@@ -134,7 +174,7 @@ int steam_upload_score_ext(const std::string& lb_name, const unsigned score, con
     This function will send a score to the given leaderboard along with a data package created from a buffer. The buffer 
     should be no more than 256 bytes in size - anything beyond that will be chopped off - and can contain any data you require.
     If the function call fails for any reason it will return -1 and the Async event will not be triggered. Calls
-    c_leaderboards::
+    gc_leaderboards::
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_upload_score_buffer for more information.
 */
 /*
@@ -147,7 +187,7 @@ int steam_upload_score_buffer(const std::string& lb_name, const unsigned score, 
     should be no more than 256 bytes in size - anything beyond that will be chopped off - and can contain any data you require. 
     This function is similar to steam_upload_score_buffer but has an extra argument that will allow you to force the update of 
     the score, as by default Steam only updates the score if it is better than the previous one. If the function call fails for
-    any reason it will return -1 and the Async event will not be triggered. Calls c_leaderboards::
+    any reason it will return -1 and the Async event will not be triggered. Calls gc_leaderboards::
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_upload_score_buffer_ext for more information.
 */
 /*
@@ -158,7 +198,7 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
 
 /*
     This function is used retrieve a sequential range of leaderboard entries by leaderboard ranking. If the function call fails 
-    for any reason it will return -1 and the async event will not be triggered. Calls c_leaderboards::download_scores().
+    for any reason it will return -1 and the async event will not be triggered. Calls gc_leaderboards::download_scores().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_download_scores for more information.
 */
 /*
@@ -178,7 +218,7 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
 
 /*
     This function is used retrieve a sequential range of leaderboard entries by leaderboard ranking. If the function call fails 
-    for any reason it will return -1 and the async event will not be triggered. Calls c_leaderboards::download_scores().
+    for any reason it will return -1 and the async event will not be triggered. Calls gc_leaderboards::download_scores().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_download_scores_around_user for more information.
 */
 /*
@@ -188,7 +228,7 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
 
 /*
     This function is used retrieve a sequential range of leaderboard entries by leaderboard ranking. If the function call fails 
-    for any reason it will return -1 and the async event will not be triggered. Calls c_leaderboards::download_scores().
+    for any reason it will return -1 and the async event will not be triggered. Calls gc_leaderboards::download_scores().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Leaderboards#steam_download_friends_scores for more information.
 */
 /*

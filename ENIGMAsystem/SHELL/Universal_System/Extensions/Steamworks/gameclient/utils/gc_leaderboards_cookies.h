@@ -15,13 +15,29 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+/*
+  This class will help attach a cookie (payload) to leaderboard call results. This class is mainly for
+  integrating with ENIGMA's AssetArray class and not directly related to Steamworks API.
+*/
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+#ifndef GC_LEADERBOARDS_COOKIES_H
+#define GC_LEADERBOARDS_COOKIES_H
+
+// TODO: This documentation need to be improved when uploading a game to Steam Store.
+
+#include "../gameclient.h"
+
+namespace steamworks_gc {
+
+class GCLeaderboardsCookies {
+ public:
+  virtual ~GCLeaderboardsCookies() = default;
+  virtual bool is_done() const = 0;
+
+ private:
+  virtual void set_call_result(SteamAPICall_t steam_api_call) = 0;
+};
+
+}  // namespace steamworks_gc
+
+#endif  // GC_LEADERBOARDS_COOKIES_H

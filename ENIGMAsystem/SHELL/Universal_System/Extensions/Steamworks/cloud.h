@@ -32,7 +32,7 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 
-#include "game_client/c_main.h"
+#include "gameclient/gc_main.h"
 
 namespace enigma_user {
 

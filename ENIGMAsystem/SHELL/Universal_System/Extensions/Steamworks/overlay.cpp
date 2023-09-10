@@ -17,15 +17,15 @@
 
 #include "overlay.h"
 
-#include "game_client/c_overlay.h"
+#include "gameclient/gc_overlay.h"
 
 bool overlay_pre_checks(const std::string& script_name) {
-  if (!steamworks::c_main::is_initialised()) {
+  if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
     return false;
   }
 
-  if (!steamworks::c_game_client::is_user_logged_on()) {
+  if (!steamworks_gc::GameClient::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the user is logged in.", M_ERROR);
     return false;
   }
@@ -54,21 +54,22 @@ const unsigned user_ov_friendremove{14};
 const unsigned user_ov_friendrequestaccept{15};
 const unsigned user_ov_friendrequestignore{16};
 
-const unsigned steam_overlay_notification_position_top_left{17};
-const unsigned steam_overlay_notification_position_top_right{18};
-const unsigned steam_overlay_notification_position_bottom_left{19};
-const unsigned steam_overlay_notification_position_bottom_right{20};
+const unsigned steam_overlay_notification_position_invalid{17};
+const unsigned steam_overlay_notification_position_top_left{18};
+const unsigned steam_overlay_notification_position_top_right{19};
+const unsigned steam_overlay_notification_position_bottom_left{20};
+const unsigned steam_overlay_notification_position_bottom_right{21};
 
 bool steam_is_overlay_enabled() {
   if (!overlay_pre_checks("steam_is_overlay_enabled")) return false;
 
-  return steamworks::c_overlay::overlay_enabled();
+  return steamworks_gc::GCOverlay::overlay_enabled();
 }
 
 bool steam_is_overlay_activated() {
   if (!overlay_pre_checks("steam_is_overlay_activated")) return false;
 
-  return steamworks::c_main::get_c_game_client()->get_c_overlay()->overlay_activated();
+  return steamworks_gc::GCMain::get_gameclient()->get_gc_overlay()->overlay_activated();
 }
 
 void steam_activate_overlay(const int overlay_type) {
@@ -76,28 +77,28 @@ void steam_activate_overlay(const int overlay_type) {
 
   switch (overlay_type) {
     case enigma_user::ov_friends:
-      steamworks::c_overlay::activate_overlay("Friends");
+      steamworks_gc::GCOverlay::activate_overlay("Friends");
       break;
     case enigma_user::ov_community:
-      steamworks::c_overlay::activate_overlay("Community");
+      steamworks_gc::GCOverlay::activate_overlay("Community");
       break;
     case enigma_user::ov_players:
-      steamworks::c_overlay::activate_overlay("Players");
+      steamworks_gc::GCOverlay::activate_overlay("Players");
       break;
     case enigma_user::ov_settings:
-      steamworks::c_overlay::activate_overlay("Settings");
+      steamworks_gc::GCOverlay::activate_overlay("Settings");
       break;
     case enigma_user::ov_gamegroup:
-      steamworks::c_overlay::activate_overlay("OfficialGameGroup");
+      steamworks_gc::GCOverlay::activate_overlay("OfficialGameGroup");
       break;
     case enigma_user::ov_stats:
-      steamworks::c_overlay::activate_overlay("Stats");
+      steamworks_gc::GCOverlay::activate_overlay("Stats");
       break;
     case enigma_user::ov_achievements:
-      steamworks::c_overlay::activate_overlay("Achievements");
+      steamworks_gc::GCOverlay::activate_overlay("Achievements");
       break;
     case enigma_user::ov_other:
-      steamworks::c_overlay::activate_overlay("chatroomgroup/nnnn");
+      steamworks_gc::GCOverlay::activate_overlay("chatroomgroup/nnnn");
       break;
     default:
       DEBUG_MESSAGE(
@@ -111,13 +112,13 @@ void steam_activate_overlay(const int overlay_type) {
 void steam_activate_overlay_browser(const std::string& url) {
   if (!overlay_pre_checks("steam_activate_overlay_browser")) return;
 
-  steamworks::c_overlay::activate_overlay_browser(url);
+  steamworks_gc::GCOverlay::activate_overlay_browser(url);
 }
 
 void steam_activate_overlay_store(const int app_id) {
   if (!overlay_pre_checks("steam_activate_overlay_store")) return;
 
-  steamworks::c_overlay::activate_overlay_browser("https://store.steampowered.com/app/" + std::to_string(app_id));
+  steamworks_gc::GCOverlay::activate_overlay_browser("https://store.steampowered.com/app/" + std::to_string(app_id));
 }
 
 void steam_activate_overlay_user(const unsigned dialog, const unsigned long long steamid) {
@@ -125,31 +126,31 @@ void steam_activate_overlay_user(const unsigned dialog, const unsigned long long
 
   switch (dialog) {
     case enigma_user::user_ov_steamid:
-      steamworks::c_overlay::activate_overlay_user("steamid", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("steamid", steamid);
       break;
     case enigma_user::user_ov_chat:
-      steamworks::c_overlay::activate_overlay_user("chat", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("chat", steamid);
       break;
     case enigma_user::user_ov_jointrade:
-      steamworks::c_overlay::activate_overlay_user("jointrade", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("jointrade", steamid);
       break;
     case enigma_user::user_ov_stats:
-      steamworks::c_overlay::activate_overlay_user("stats", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("stats", steamid);
       break;
     case enigma_user::user_ov_achievements:
-      steamworks::c_overlay::activate_overlay_user("achievements", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("achievements", steamid);
       break;
     case enigma_user::user_ov_friendadd:
-      steamworks::c_overlay::activate_overlay_user("friendadd", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("friendadd", steamid);
       break;
     case enigma_user::user_ov_friendremove:
-      steamworks::c_overlay::activate_overlay_user("friendremove", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("friendremove", steamid);
       break;
     case enigma_user::user_ov_friendrequestaccept:
-      steamworks::c_overlay::activate_overlay_user("friendrequestaccept", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("friendrequestaccept", steamid);
       break;
     case enigma_user::user_ov_friendrequestignore:
-      steamworks::c_overlay::activate_overlay_user("friendrequestignore", steamid);
+      steamworks_gc::GCOverlay::activate_overlay_user("friendrequestignore", steamid);
       break;
     default:
       DEBUG_MESSAGE(
@@ -164,7 +165,7 @@ void steam_activate_overlay_user(const unsigned dialog, const unsigned long long
 bool steam_set_overlay_notification_inset(const int hor_inset, const int vert_inset) {
   if (!overlay_pre_checks("steam_set_overlay_notification_inset")) return false;
 
-  steamworks::c_overlay::set_overlay_notification_inset(hor_inset, vert_inset);
+  steamworks_gc::GCOverlay::set_overlay_notification_inset(hor_inset, vert_inset);
 
   return true;
 }
@@ -174,22 +175,31 @@ void steam_set_overlay_notification_position(const unsigned position) {
 
   switch (position) {
     case enigma_user::steam_overlay_notification_position_top_left:
-      steamworks::c_overlay::set_overlay_notification_position(k_EPositionTopLeft);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(
+          steamworks_gc::GCNotificationPosition::k_GCPosition_TopLeft);
       break;
     case enigma_user::steam_overlay_notification_position_top_right:
-      steamworks::c_overlay::set_overlay_notification_position(k_EPositionTopRight);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(
+          steamworks_gc::GCNotificationPosition::k_GCPosition_TopRight);
       break;
     case enigma_user::steam_overlay_notification_position_bottom_left:
-      steamworks::c_overlay::set_overlay_notification_position(k_EPositionBottomLeft);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(
+          steamworks_gc::GCNotificationPosition::k_GCPosition_BottomLeft);
       break;
     case enigma_user::steam_overlay_notification_position_bottom_right:
-      steamworks::c_overlay::set_overlay_notification_position(k_EPositionBottomRight);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(
+          steamworks_gc::GCNotificationPosition::k_GCPosition_BottomRight);
+      break;
+    case enigma_user::steam_overlay_notification_position_invalid:
+    steamworks_gc::GCOverlay::set_overlay_notification_position(
+          steamworks_gc::GCNotificationPosition::k_GCPosition_Invalid);
       break;
     default:
       DEBUG_MESSAGE(
           "Calling steam_set_overlay_notification_position failed. Invalid position. The allowed options are: "
           "steam_overlay_notification_position_top_left, steam_overlay_notification_position_top_right, "
-          "steam_overlay_notification_position_bottom_left, and steam_overlay_notification_position_bottom_right.",
+          "steam_overlay_notification_position_bottom_left, steam_overlay_notification_position_bottom_right, and "
+          "steam_overlay_notification_position_invalid.",
           M_ERROR);
       break;
   }

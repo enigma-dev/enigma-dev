@@ -15,13 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#include "mock_steam_api_common.h"
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+void SteamAPI_RunCallbacks() {}

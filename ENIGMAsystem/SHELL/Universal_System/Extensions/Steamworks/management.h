@@ -33,7 +33,7 @@ namespace enigma_user {
 void steam_init();
 
 /*
-    This function updates the steam APIs. Calls c_main::run_callbacks(). This function 
+    This function updates the steam APIs. Calls gc_main::run_callbacks(). This function 
     is required to be called in order for the Steamworks extension to work. We recommend 
     you place this function in a persistent controller object that calls it inside its 
     Step Event.
@@ -46,7 +46,7 @@ void steam_update();
     This function shuts down the Steamworks API, releases pointers and frees memory.
     This function is required to be called in order for the Steamworks extension to 
     work. We recommend you place this function in the GameEnd Event of a controller 
-    object. You need to check if this is not a game_restart(). Calls c_main::shutdown().
+    object. You need to check if this is not a game_restart(). Calls gc_main::shutdown().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Management#steam_shutdown
     for more information.
 */

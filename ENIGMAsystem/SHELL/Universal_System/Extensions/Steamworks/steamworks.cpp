@@ -17,7 +17,7 @@
 
 #include "steamworks.h"
 
-#include "game_client/c_main.h"
+#include "gameclient/gc_main.h"
 
 namespace enigma {
 
@@ -50,12 +50,12 @@ void write_appid_file() {
 void extension_steamworks_init() {
   write_appid_file();
 
-  if (steamworks::c_main::is_initialised()) {
+  if (steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling steam_init while the API is already initialized. Ignoring ...", M_WARNING);
     return;
   }
 
-  if (!steamworks::c_main::init()) {
+  if (!steamworks_gc::GCMain::init()) {
     DEBUG_MESSAGE(
         "Calling steam_init failed. Make sure that the Steam client is running. A running Steam client is required "
         "to provide implementations of the various Steamworks interfaces and the Steam client can determine the App "

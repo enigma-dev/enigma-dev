@@ -15,13 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#include "steam_api.h"
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+bool SteamAPI_Init() { return true; }
+
+void SteamAPI_Shutdown() {}
+
+bool SteamAPI_RestartAppIfNecessary(uint32 unOwnAppID) { return false; }

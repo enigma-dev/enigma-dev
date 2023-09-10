@@ -15,13 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#ifndef GAMECLIENT_REMOTE_STORAGE_H
+#define GAMECLIENT_REMOTE_STORAGE_H
+#pragma once
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+#include "gameclient.h"
+
+namespace steamworks_gc {
+
+class GameClient;
+
+class GCRemoteStorage {
+ public:
+  GCRemoteStorage() = default;
+  ~GCRemoteStorage() = default;
+};
+}  // namespace steamworks_gc
+
+#endif  // GAMECLIENT_REMOTE_STORAGE_H

@@ -31,7 +31,7 @@ namespace enigma {
 /*
     NOTE:   This function is automatically called by the extension system.
     
-    This function initialises the steam APIs. Calls c_main::init().
+    This function initialises the steam APIs. Calls gc_main::init().
 */
 void extension_steamworks_init();
 

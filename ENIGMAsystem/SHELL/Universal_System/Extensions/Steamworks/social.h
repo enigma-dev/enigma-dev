@@ -25,7 +25,7 @@
 #ifndef SOCIAL_H
 #define SOCIAL_H
 
-#include "game_client/c_main.h"
+#include "gameclient/gc_main.h"
 
 // TODO: Social API will be postponed until this merged https://github.com/enigma-dev/enigma-dev/pull/2361.
 
@@ -39,7 +39,7 @@ extern const unsigned steam_user_avatar_size_large;
     NOTE:   This function is different from GMS's as it returns bool instead of void.
 
     Sets a Rich Presence key/value for the current user that is automatically shared to 
-    all friends playing the same game. Calls steamworks::c_game_client::set_rich_presence().
+    all friends playing the same game. Calls steamworks::gameclient::set_rich_presence().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_set_rich_presence
     for more information.
 */
@@ -47,7 +47,7 @@ bool steam_set_rich_presence(const std::string& key, const std::string& value);
 
 /*
     Clears all of the current user's Rich Presence key/values. Calls 
-    steamworks::c_game_client::clear_rich_presence().
+    steamworks::gameclient::clear_rich_presence().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_clear_rich_presence
     for more information.
 */
@@ -56,7 +56,7 @@ void steam_clear_rich_presence();
 /*
     Adds the given user to the "recently played with" list (accessed via "Players" - "Recent games") 
     menu in Steam overlay. This is usually something to do on session start for all remote users.
-    Calls steamworks::c_game_client::set_played_with().
+    Calls steamworks::gameclient::set_played_with().
     Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Social#steam_user_set_played_with
     for more information.
 */

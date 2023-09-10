@@ -15,13 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
+#include "mock_steamuseraccessor.h"
 
-#include "cloud.h"
-#include "general.h"
-#include "leaderboards.h"
-#include "management.h"
-#include "overlay.h"
-#include "social.h"
-#include "statsandachievements.h"
-#include "steamworks.h"
+bool SteamUserAccessor::BLoggedOn() { return true; }
+
+CSteamID SteamUserAccessor::GetSteamID() { return 0; }

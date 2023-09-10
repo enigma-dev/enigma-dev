@@ -18,12 +18,12 @@
 #include "cloud.h"
 
 bool cloud_pre_checks(const std::string& script_name) {
-  if (!steamworks::c_main::is_initialised()) {
+  if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
     return false;
   }
 
-  if (!steamworks::c_game_client::is_user_logged_on()) {
+  if (!steamworks_gc::GameClient::is_user_logged_on()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the user is logged in.", M_ERROR);
     return false;
   }
