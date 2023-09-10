@@ -222,17 +222,8 @@ constexpr static inline bool always_false = false;
 template <typename T, typename ExpectedType, typename ReturnType = void>
 using is_t = std::enable_if_t<std::is_same_v<ExpectedType, std::decay_t<T>>, ReturnType>;
 
-template <typename... Conds>
-struct _logical_or_ : std::false_type {};
-
-template <typename Cond, typename... Rest>
-struct _logical_or_<Cond, Rest...> : std::conditional_t<Cond::value, std::true_type, _logical_or_<Rest...>> {};
-
-template <typename... Conds>
-constexpr static inline bool _logical_or_v = _logical_or_<Conds...>::value;
-
 template <typename T, typename ReturnType, template <typename> typename... Classes>
-using matches_t = std::enable_if_t<_logical_or_v<Classes<std::decay_t<T>>...>, ReturnType>;
+using matches_t = std::enable_if_t<std::disjunction<Classes<std::decay_t<T>>...>::value, ReturnType>;
 
 template <typename T, typename ReturnType = void>
 using enables_if_numeric_t =
@@ -246,7 +237,7 @@ constexpr bool is_numeric_v = (std::is_integral_v<std::decay_t<T>> ||
                               !std::is_same_v<std::decay_t<T>, char>;
 
 template <typename T, typename ReturnType = void>
-using enables_if_base_of_variant_t =
+using enable_if_inherits_variant_t =
     std::enable_if_t<std::is_base_of_v<variant, std::decay_t<T>> && !std::is_same_v<var, std::decay_t<T>>, ReturnType>;
 
 template <typename T>

@@ -143,7 +143,7 @@ HAS_STATIC_FUNCTION_V(json_deserialize, T(const std::string &json));
       : std::true_type {};                                                                                     \
                                                                                                                \
   template <typename T>                                                                                        \
-  constexpr static inline bool _##NAMESPACE##_has_##NAME##_ = is_##NAMESPACE##_##NAME##_available<T>::value
+  constexpr static inline bool NAMESPACE##_has_##NAME = is_##NAMESPACE##_##NAME##_available<T>::value
 
 HAS_FREE_FUNCTION(bytes_serialization, byte_size, std::declval<const T &>());
 HAS_FREE_FUNCTION(bytes_serialization, internal_serialize_into_fn, std::declval<std::byte *>(), std::declval<T &&>());

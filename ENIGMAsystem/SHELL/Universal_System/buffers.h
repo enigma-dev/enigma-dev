@@ -692,43 +692,133 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  * An example of the serialized state may look like the following:
  * 
  * @code{.json}
- * {"instance_list":[{"obj":{"event_parent":{"object_type":"object_collisions",
- * "parent":{"object_type":"object_transform","parent":{"object_type":"object_graphics",
- * "parent":{"object_type":"object_timelines","parent":{"object_type":"object_planar",
- * "parent":{"object_type":"object_basic","id":100001,"object_index":0},"x":0,"y":0,
- * "xprevious":0,"yprevious":0,"xstart":0,"ystart":0,"persistent":"false",
- * "direction":{"type":"real","value":0},"speed":{"type":"real","value":0},
- * "hspeed":{"type":"real","value":0},"vspeed":{"type":"real","value":0},
- * "gravity":0,"gravity_direction":270,"friction":0},"timeline_moments_maps":[],
- * "timeline_index":-1,"timeline_running":"false","timeline_speed":1,
- * "timeline_position":0,"timeline_loop":"false"},"sprite_index":-1,"image_index":0,
- * "image_speed":1,"image_single":{"type":"real","value":-1},
- * "depth":{"type":"real","value":0},"visible":"true","image_xscale":1,
- * "image_yscale":1,"image_angle":0},"image_alpha":1,"image_blend":16777215},
- * "mask_index":-1,"solid":"false","polygon_index":-1,"polygon_xscale":1,"polygon_yscale":1,
- * "polygon_angle":0},"vmap":{}},"locals":[{"name":"mydouble",
- * "data":{"variant":{"type":"real","value":1.2345},"array1d":{"mx_size_part":0,
- * "dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],
- * "sparse_part":{}}}},{"name":"myint16_t","data":{"variant":{"type":"real","value":32767},
- * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
- * "dense_part":[],"sparse_part":{}}}},{"name":"myint32_t","data":{"variant":{"type":"real",
- * "value":2147483647},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},
- * "array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},{"name":"myint64_t",
- * "data":{"variant":{"type":"real","value":2147483647},"array1d":{"mx_size_part":0,
- * "dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],
- * "sparse_part":{}}}},{"name":"myint8_t","data":{"variant":{"type":"real","value":127},
- * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
- * "dense_part":[],"sparse_part":{}}}},{"name":"myuint16_t","data":{"variant":{"type":"real",
- * "value":65535},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},
- * "array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},{"name":"myuint32_t",
- * "data":{"variant":{"type":"real","value":4294967295},"array1d":{"mx_size_part":0,"dense_part":[],
- * "sparse_part":{}},"array2d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}}}},
- * {"name":"myuint64_t","data":{"variant":{"type":"real","value":4294967295},
- * "array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":{"mx_size_part":0,
- * "dense_part":[],"sparse_part":{}}}},{"name":"myuint8_t","data":{"variant":{"type":"real",
- * "value":255},"array1d":{"mx_size_part":0,"dense_part":[],"sparse_part":{}},"array2d":
- * {"mx_size_part":0,"dense_part":[],"sparse_part":{}}}}]}],"instance_deactivated_list":[],
- * "backgrounds":[],"room_index":0} 
+ * {
+ * "instance_list": [
+ *   {
+ *     "obj": {
+ *       "event_parent": {
+ *         "object_type": "object_collisions",
+ *         "parent": {
+ *           "object_type": "object_transform",
+ *           "parent": {
+ *             "object_type": "object_graphics",
+ *             "parent": {
+ *               "object_type": "object_timelines",
+ *               "parent": {
+ *                 "object_type": "object_planar",
+ *                 "parent": {
+ *                   "object_type": "object_basic",
+ *                   "id": 100001,
+ *                   "object_index": 0
+ *                 },
+ *                 "x": 0,
+ *                 "y": 0,
+ *                 "xprevious": 0,
+ *                 "yprevious": 0,
+ *                 "xstart": 0,
+ *                 "ystart": 0,
+ *                 "persistent": "false",
+ *                 "direction": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "speed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "hspeed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "vspeed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "gravity": 0,
+ *                 "gravity_direction": 270,
+ *                 "friction": 0
+ *               },
+ *               "timeline_moments_maps": [],
+ *               "timeline_index": -1,
+ *               "timeline_running": "false",
+ *               "timeline_speed": 1,
+ *               "timeline_position": 0,
+ *               "timeline_loop": "false"
+ *             },
+ *             "sprite_index": -1,
+ *             "image_index": 0,
+ *             "image_speed": 1,
+ *             "image_single": {
+ *               "type": "real",
+ *               "value": -1
+ *             },
+ *             "depth": {
+ *               "type": "real",
+ *               "value": 0
+ *             },
+ *             "visible": "true",
+ *             "image_xscale": 1,
+ *             "image_yscale": 1,
+ *             "image_angle": 0
+ *           },
+ *           "image_alpha": 1,
+ *           "image_blend": 16777215
+ *         },
+ *         "mask_index": -1,
+ *         "solid": "false",
+ *         "polygon_index": -1,
+ *         "polygon_xscale": 1,
+ *         "polygon_yscale": 1,
+ *         "polygon_angle": 0
+ *       },
+ *       "vmap": {}
+ *     },
+ *     "locals": [
+ *       {
+ *         "name": "mydouble",
+ *         "data": {
+ *           "variant": {
+ *             "type": "real",
+ *             "value": 1.2345
+ *           },
+ *           "array1d": {
+ *             "mx_size_part": 0,
+ *             "dense_part": [],
+ *             "sparse_part": {}
+ *           },
+ *           "array2d": {
+ *             "mx_size_part": 0,
+ *             "dense_part": [],
+ *             "sparse_part": {}
+ *           }
+ *         }
+ *       },
+ *       {
+ *         "name": "myuint8_t",
+ *         "data": {
+ *           "variant": {
+ *             "type": "real",
+ *             "value": 255
+ *           },
+ *           "array1d": {
+ *             "mx_size_part": 0,
+ *             "dense_part": [],
+ *             "sparse_part": {}
+ *           },
+ *           "array2d": {
+ *             "mx_size_part": 0,
+ *             "dense_part": [],
+ *             "sparse_part": {}
+ *           }
+ *         }
+ *       }
+ *     ]
+ *   }
+ * ],
+ * "instance_deactivated_list": [],
+ * "backgrounds": [],
+ * "room_index": 0
+ * }
  * @endcode
  * 
  * @see game_load_buffer

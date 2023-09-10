@@ -42,7 +42,7 @@ namespace bytes_serialization {
 
 template <typename T>
 inline std::size_t enigma_internal_sizeof(T &&value) {
-  if constexpr (_bytes_serialization_has_byte_size_<T>) {
+  if constexpr (bytes_serialization_has_byte_size<T>) {
     return enigma::bytes_serialization::byte_size(value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     return value.byte_size();
@@ -80,31 +80,28 @@ inline T internal_deserialize_primitive(std::byte *iter) {
 
 template <typename T>
 inline void internal_serialize_into(std::byte *iter, T &&value) {
-  if constexpr (_bytes_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
+  if constexpr (bytes_serialization_has_internal_serialize_into_fn<std::decay_t<T>>) {
     enigma::bytes_serialization::internal_serialize_into_fn(iter, value);
   } else {
-    static_assert(always_false<T>,
-                  "'internal_serialize_into' takes 'variant', 'var', 'std::string', bool, integral, floating types, "
-                  "std::vector, std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+    static_assert(always_false<T>, "Type to be serialized has to implement 'internal_serialize_into_fn'!");
   }
 }
 
 template <typename T>
 inline auto internal_serialize(T &&value) {
-  if constexpr (_bytes_serialization_has_internal_serialize_fn_<std::decay_t<T>>) {
+  if constexpr (bytes_serialization_has_internal_serialize_fn<std::decay_t<T>>) {
     return enigma::bytes_serialization::internal_serialize_fn(value);
   } else if constexpr (has_serialize_method_v<std::decay_t<T>>) {
     return value.serialize();
   } else {
     static_assert(always_false<T>,
-                  "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+                  "Type to be serialized has to implement one of 'serialize' or 'internal_serialize_fn'!");
   }
 }
 
 template <typename T>
 inline T internal_deserialize(std::byte *iter) {
-  if constexpr (_bytes_serialization_has_internal_deserialize_fn_<std::decay_t<T>>) {
+  if constexpr (bytes_serialization_has_internal_deserialize_fn<std::decay_t<T>>) {
     return enigma::bytes_serialization::internal_deserialize_fn<T>(iter);
   } else if constexpr (has_deserialize_self_method_v<std::decay_t<T>>) {
     T result;
@@ -114,8 +111,8 @@ inline T internal_deserialize(std::byte *iter) {
     return internal_deserialize<T>(iter).second;
   } else {
     static_assert(always_false<T>,
-                  "'deserialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+                  "Type to be deserialized has to implement one of 'internal_deserialize', 'deserialize_self' or "
+                  "'internal_deserialize_fn'!");
   }
 }
 
@@ -131,7 +128,7 @@ inline void internal_resize_buffer_using_byte_size(std::vector<std::byte> &buffe
 
 template <typename T>
 inline void internal_resize_buffer_for(std::vector<std::byte> &buffer, T &&value) {
-  if constexpr (_bytes_serialization_has_internal_resize_buffer_for_fn_<std::decay_t<T>>) {
+  if constexpr (bytes_serialization_has_internal_resize_buffer_for_fn<std::decay_t<T>>) {
     enigma::bytes_serialization::internal_resize_buffer_for_fn(buffer, value);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     internal_resize_buffer_using_byte_size(buffer, value);
@@ -155,7 +152,7 @@ inline void enigma_serialize(const T &value, std::size_t &len, std::vector<std::
 
 template <typename T>
 inline void enigma_deserialize(T &value, std::byte *iter, std::size_t &len) {
-  if constexpr (_bytes_serialization_has_enigma_internal_deserialize_fn_<std::decay_t<T>>) {
+  if constexpr (bytes_serialization_has_enigma_internal_deserialize_fn<std::decay_t<T>>) {
     enigma::bytes_serialization::enigma_internal_deserialize_fn(value, iter, len);
   } else if constexpr (has_byte_size_method_v<std::decay_t<T>>) {
     value = enigma::bytes_serialization::internal_deserialize<T>(iter + len);
@@ -182,28 +179,26 @@ namespace JSON_serialization {
 
 template <typename T>
 inline std::string enigma_serialize(const T &value) {
-  if constexpr (_JSON_serialization_has_internal_serialize_into_fn_<std::decay_t<T>>) {
+  if constexpr (JSON_serialization_has_internal_serialize_into_fn<std::decay_t<T>>) {
     return enigma::JSON_serialization::internal_serialize_into_fn(value);
   } else if constexpr (has_json_serialize_method_v<std::decay_t<T>>) {
     return value.json_serialize();
   } else {
     static_assert(always_false<T>,
-                  "'serialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+                  "Type to be serialized has to implement one of 'json_serialize' or 'internal_serialize_into_fn'!");
   }
 }
 
 template <typename T>
 inline T enigma_deserialize(std::string json) {
   json_remove_whitespace(json);
-  if constexpr (_JSON_serialization_has_internal_deserialize_fn_<std::decay_t<T>>) {
+  if constexpr (JSON_serialization_has_internal_deserialize_fn<std::decay_t<T>>) {
     return enigma::JSON_serialization::internal_deserialize_fn<std::decay_t<T>>(json);
   } else if constexpr (has_json_deserialize_function_v<std::decay_t<T>>) {
     return T::json_deserialize(json);
   } else {
     static_assert(always_false<T>,
-                  "'deserialize' takes 'variant', 'var', 'std::string', bool, integral, floating types, std::vector, "
-                  "std::map, std::complex, std::set, std::tuple, std::queue, std::stack and std::pair");
+                  "Type to be deserialized has to implement one of 'json_deserialize' or 'internal_deserialize_fn'!");
   }
 }
 

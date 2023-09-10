@@ -39,10 +39,10 @@ enables_if_numeric_t<T> inline internal_serialize_into_fn(std::byte *iter, const
     } else if constexpr (std::is_same_v<T, double>) {
       internal_serialize_primitive_into<std::uint64_t>(iter, value);
     } else {
-      static_assert(always_false<T>, "'internal_serialize_floating_into' only accepts 'float' or 'double' types");
+      static_assert(always_false<T>, "'internal_serialize_into' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
-    static_assert(always_false<T>, "'internal_serialize_numeric_into' takes either integral or floating types");
+    static_assert(always_false<T>, "'internal_serialize_into' takes either integral or floating types");
   }
 }
 
@@ -56,10 +56,10 @@ enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline internal_serial
     } else if constexpr (std::is_same_v<T, double>) {
       return serialize_primitive<std::uint64_t>(value);
     } else {
-      static_assert(always_false<T>, "'internal_serialize_floating' only accepts 'float' or 'double' types");
+      static_assert(always_false<T>, "'internal_serialize' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
-    static_assert(always_false<T>, "'internal_serialize_numeric' takes either integral or floating types");
+    static_assert(always_false<T>, "'internal_serialize' takes either integral or floating types");
   }
 }
 
@@ -73,10 +73,10 @@ enables_if_numeric_t<T, T> inline internal_deserialize_fn(std::byte *iter) {
     } else if constexpr (std::is_same_v<T, double>) {
       return internal_deserialize_primitive<std::size_t, T>(iter);
     } else {
-      static_assert(always_false<T>, "'internal_deserialize_floating' only accepts 'float' or 'double' types");
+      static_assert(always_false<T>, "'internal_deserialize' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
-    static_assert(always_false<T>, "'internal_deserialize_numeric' takes either integral or floating types");
+    static_assert(always_false<T>, "'internal_deserialize' takes either integral or floating types");
   }
 }
 

@@ -253,7 +253,7 @@ class AssetArray {
 
   // JSON (de)Serialization
   std::string json_serialize() const {
-    static_assert(has_json_serialize_method_v<T> || _JSON_serialization_has_internal_serialize_into_fn_<T>,
+    static_assert(has_json_serialize_method_v<T> || JSON_serialization_has_internal_serialize_into_fn<T>,
                   "Given type is required to have at least one of `x.json_serialize()` or `internal_serialize_into_fn(x)`.");
 
     std::string result = "[";
@@ -268,7 +268,7 @@ class AssetArray {
   }
 
   void json_deserialize_self(const std::string & json) {
-    static_assert(has_json_deserialize_function_v<T> || _JSON_serialization_has_internal_deserialize_fn_<T> ||has_json_deserialize_self_method_v<T>,
+    static_assert(has_json_deserialize_function_v<T> || JSON_serialization_has_internal_deserialize_fn<T> ||has_json_deserialize_self_method_v<T>,
                   "Given type is required to have at least one of `x::json_deserialize()`, `internal_deserialize_fn<T>() or x.json_deserialize_self()`");
 
     if (json.length() > 2) { 
@@ -280,7 +280,7 @@ class AssetArray {
   }
 
   static AssetArray<T, LEFT> json_deserialize(const std::string & json) {
-    if constexpr (has_json_deserialize_function_v<T> || _JSON_serialization_has_internal_deserialize_fn_<T>||has_json_deserialize_self_method_v<T>) {
+    if constexpr (has_json_deserialize_function_v<T> || JSON_serialization_has_internal_deserialize_fn<T>||has_json_deserialize_self_method_v<T>) {
       AssetArray<T, LEFT> result;
       result.json_deserialize_self(json);
       return result;

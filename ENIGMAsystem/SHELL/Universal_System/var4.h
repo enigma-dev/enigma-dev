@@ -832,9 +832,9 @@ static inline bool is_ptr      (const variant &val) {
 namespace std {
 
 template<> class numeric_limits<var>: numeric_limits<double> {};
-// template<> class numeric_limits<variant>: numeric_limits<double> {};
+template<> class numeric_limits<enigma_user::variant>: numeric_limits<double> {};
 template<> class numeric_limits<const var&>: numeric_limits<double> {};
-// template<> class numeric_limits<const variant&>: numeric_limits<double> {};
+template<> class numeric_limits<const enigma_user::variant&>: numeric_limits<double> {};
 
 }  // namespace std
 

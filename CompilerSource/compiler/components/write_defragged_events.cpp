@@ -68,6 +68,13 @@ int lang_CPP::compile_writeDefraggedEvents(
          "      auto len = result.deserialize_self(iter);\n"
          "      return {std::move(result), len};\n"
          "    }\n\n";
+  wto << "    std::string json_serialize() const override { return " << system_get_uppermost_tier() << "::json_serialize(); }\n\n";
+  wto << "    void json_deserialize_self(const std::string &json) override { return " << system_get_uppermost_tier() << "::json_deserialize_self(json); }\n\n";
+  wto << "    event_parent json_deserialize(const std::string json) {\n"
+         "      event_parent result;\n"
+         "      result.json_deserialize_self(json);\n"
+         "      return result;\n"
+         "    }\n\n";
 
   for (const auto &event : used_events) {
     const string fname = event.FunctionName();
