@@ -54,13 +54,13 @@ class ISteamUserStats {
 
   virtual const char *GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard) = 0;
 
-  virtual ELeaderboardSortMethod GetLeaderboardSortMethod(SteamLeaderboard_t hSteamLeaderboard) = 0;
-
-  virtual ELeaderboardDisplayType GetLeaderboardDisplayType(SteamLeaderboard_t hSteamLeaderboard) = 0;
-
   virtual SteamAPICall_t DownloadLeaderboardEntries(SteamLeaderboard_t hSteamLeaderboard,
                                                     ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart,
                                                     int nRangeEnd) = 0;
+
+  virtual bool GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index,
+                                             LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails,
+                                             int cDetailsMax) = 0;
 
   virtual SteamAPICall_t UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard,
                                                 ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod,

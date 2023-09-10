@@ -28,7 +28,6 @@ namespace steamworks_gc {
 // Helper functions
 ////////////////////////////////////////////////////////
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
 // TODO: Add data key/value pair (if existed).
 /*
   TODO: When using the concatenation operator '+' to concatenate strings instead of '<<', the string content blowed up
@@ -65,7 +64,6 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
   leaderboard_entries_buffer << ']';  // Entries array close bracket
   leaderboard_entries_buffer << '}';  // Entries object close bracket
 }
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
 ////////////////////////////////////////////////////////
 // Public functions
@@ -108,7 +106,6 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
 
   DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   LeaderboardEntry_t leaderboard_entries[enigma_user::lb_max_entries];
 
   // Leaderboard entries handle will be invalid once we return from this function. Copy all data now.
@@ -118,7 +115,6 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
     SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
                                                     &leaderboard_entries[index], nullptr, 0);
   }
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
   // Now our entries is here, let's save it.
   // SOGs are failing because of this line but LGM is not.
@@ -129,27 +125,7 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
 
   std::stringstream leaderboard_entries_buffer;
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   get_leaderboard_entries(leaderboard_entries, number_of_leaderboard_entries, leaderboard_entries_buffer);
-#else
-  leaderboard_entries_buffer << '{';
-  leaderboard_entries_buffer << '\"' << "entries" << '\"' << ':';
-  leaderboard_entries_buffer << '[';
-
-  leaderboard_entries_buffer << '{';
-  leaderboard_entries_buffer << '\"' << "name" << '\"' << ':';
-  leaderboard_entries_buffer << '\"' << "MockName" << '\"' << ',';
-  leaderboard_entries_buffer << '\"' << "score" << '\"' << ':';
-  leaderboard_entries_buffer << "MockScore" << ',';
-  leaderboard_entries_buffer << '\"' << "rank" << '\"' << ':';
-  leaderboard_entries_buffer << "MockRank" << ',';
-  leaderboard_entries_buffer << '\"' << "userID" << '\"' << ':';
-  leaderboard_entries_buffer << '\"' << "MockID" << '\"';
-  leaderboard_entries_buffer << '}';
-
-  leaderboard_entries_buffer << ']';
-  leaderboard_entries_buffer << '}';
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
   GCLeaderboardScoresDownloadedResult leaderboard_scores_downloaded_result;
   leaderboard_scores_downloaded_result.leaderboard = pLeaderboardScoresDownloaded->m_hSteamLeaderboard;

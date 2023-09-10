@@ -43,6 +43,27 @@ class CSteamID {
   } steam_id_mock;
 };
 
+/**
+ * @brief 
+ * 
+ * @note Is this the right place for this struct?
+ * 
+ */
+struct LeaderboardEntryMock {
+  CSteamID m_steamIDUser;
+  int32 m_nGlobalRank;
+  int32 m_nScore;
+  int32 m_cDetails;
+};
+
+/**
+ * @brief 
+ * 
+ * @note Is this the right place for this typedef?
+ * 
+ */
+typedef LeaderboardEntryMock LeaderboardEntry_t;
+
 class CGameID {
  public:
   explicit CGameID(uint64 game_id) { CGameID::game_id = game_id; }

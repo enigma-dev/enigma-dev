@@ -45,8 +45,8 @@ const char *SteamUserStatsAccessor::GetAchievementName(uint32 iAchievement) { re
 bool SteamUserStatsAccessor::ResetAllStats(bool bAchievementsToo) { return true; }
 
 SteamAPICall_t SteamUserStatsAccessor::FindOrCreateLeaderboard(const char *pchLeaderboardName,
-                                                       ELeaderboardSortMethod eLeaderboardSortMethod,
-                                                       ELeaderboardDisplayType eLeaderboardDisplayType) {
+                                                               ELeaderboardSortMethod eLeaderboardSortMethod,
+                                                               ELeaderboardDisplayType eLeaderboardDisplayType) {
   return 1;  // Return a valid SteamAPICall_t
 }
 
@@ -54,24 +54,28 @@ SteamAPICall_t SteamUserStatsAccessor::FindLeaderboard(const char *pchLeaderboar
   return 1;  // // Return a valid SteamAPICall_t
 }
 
-const char *SteamUserStatsAccessor::GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard) { return "MockLeaderboard"; }
-
-ELeaderboardSortMethod SteamUserStatsAccessor::GetLeaderboardSortMethod(SteamLeaderboard_t hSteamLeaderboard) {
-  return 0;  // ELeaderboardSortMethod::k_ELeaderboardSortMethodNone
-}
-
-ELeaderboardDisplayType SteamUserStatsAccessor::GetLeaderboardDisplayType(SteamLeaderboard_t hSteamLeaderboard) {
-  return 0;  // ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNone
+const char *SteamUserStatsAccessor::GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard) {
+  return "MockLeaderboard";
 }
 
 SteamAPICall_t SteamUserStatsAccessor::DownloadLeaderboardEntries(SteamLeaderboard_t hSteamLeaderboard,
-                                          ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart,
-                                          int nRangeEnd) {
+                                                                  ELeaderboardDataRequest eLeaderboardDataRequest,
+                                                                  int nRangeStart, int nRangeEnd) {
   return 1;  // Return a valid SteamAPICall_t
 }
 
-SteamAPICall_t SteamUserStatsAccessor::UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard,
-                                      ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore,
-                                      const int32 *pScoreDetails, int cScoreDetailsCount) {
+bool SteamUserStatsAccessor::GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries,
+                                                           int index, LeaderboardEntry_t *pLeaderboardEntry,
+                                                           int32 *pDetails, int cDetailsMax) {
+  pLeaderboardEntry->m_steamIDUser = 0;
+  pLeaderboardEntry->m_nGlobalRank = 0;
+  pLeaderboardEntry->m_nScore = 0;
+  pLeaderboardEntry->m_cDetails = 0;
+  return true;
+};
+
+SteamAPICall_t SteamUserStatsAccessor::UploadLeaderboardScore(
+    SteamLeaderboard_t hSteamLeaderboard, ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore,
+    const int32 *pScoreDetails, int cScoreDetailsCount) {
   return 1;  // Return a valid SteamAPICall_t
 }

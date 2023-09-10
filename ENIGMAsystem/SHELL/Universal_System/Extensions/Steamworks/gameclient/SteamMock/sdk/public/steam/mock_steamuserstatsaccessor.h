@@ -27,8 +27,8 @@ class SteamUserStatsAccessor : public ISteamUserStats {
     return instance;
   }
 
-//   SteamUserStatsAccessor(SteamUserStatsAccessor const &) = delete;
-//   void operator=(SteamUserStatsAccessor const &) = delete;
+  //   SteamUserStatsAccessor(SteamUserStatsAccessor const &) = delete;
+  //   void operator=(SteamUserStatsAccessor const &) = delete;
 
   bool RequestCurrentStats() override;
 
@@ -59,28 +59,25 @@ class SteamUserStatsAccessor : public ISteamUserStats {
 
   const char *GetLeaderboardName(SteamLeaderboard_t hSteamLeaderboard) override;
 
-  ELeaderboardSortMethod GetLeaderboardSortMethod(SteamLeaderboard_t hSteamLeaderboard) override;
-
-  ELeaderboardDisplayType GetLeaderboardDisplayType(SteamLeaderboard_t hSteamLeaderboard) override;
-
   SteamAPICall_t DownloadLeaderboardEntries(SteamLeaderboard_t hSteamLeaderboard,
                                             ELeaderboardDataRequest eLeaderboardDataRequest, int nRangeStart,
                                             int nRangeEnd) override;
 
+  bool GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index,
+                                     LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails, int cDetailsMax) override;
+
   SteamAPICall_t UploadLeaderboardScore(SteamLeaderboard_t hSteamLeaderboard,
                                         ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod, int32 nScore,
                                         const int32 *pScoreDetails, int cScoreDetailsCount) override;
-                    
-private:
-  SteamUserStatsAccessor(){}
+
+ private:
+  SteamUserStatsAccessor() {}
   ~SteamUserStatsAccessor() = default;
 
   SteamUserStatsAccessor(SteamUserStatsAccessor const &);
   void operator=(SteamUserStatsAccessor const &);
 };
 
-inline ISteamUserStats *SteamUserStats() {
-  return &SteamUserStatsAccessor::getInstance();
-}
+inline ISteamUserStats *SteamUserStats() { return &SteamUserStatsAccessor::getInstance(); }
 
 #endif  // MOCK_STEAMUSERSTATS_H

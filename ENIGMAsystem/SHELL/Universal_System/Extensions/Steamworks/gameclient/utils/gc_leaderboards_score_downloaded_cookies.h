@@ -67,6 +67,7 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
   CCallResult<GCLeaderboardsScoreDownloadedCookies, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
 #endif  // ENIGMA_STEAMWORKS_API_MOCK
 };
+
 }  // namespace steamworks_gc
 
 #endif  // GC_LEADERBOARDS_SCORE_DOWNLOADED_COOKIES_H
