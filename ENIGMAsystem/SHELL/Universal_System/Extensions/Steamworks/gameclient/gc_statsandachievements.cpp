@@ -108,6 +108,8 @@ void GCStatsAndAchievements::on_user_stats_received(UserStatsReceived_t* pCallba
   }
 #else
   DEBUG_MESSAGE("Calling RequestCurrentStats succeeded.", M_INFO);
+
+  GCStatsAndAchievements::stats_valid_ = true;
 #endif  // ENIGMA_STEAMWORKS_API_MOCK
 }
 
