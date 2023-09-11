@@ -18,6 +18,9 @@
 #include "social.h"
 
 #include "Universal_System/var4.h"
+#include "Universal_System/buffers.h"
+
+#include <iostream>
 
 bool social_pre_checks(const std::string& script_name) {
   if (!steamworks_gc::GCMain::is_initialised()) {
@@ -71,15 +74,19 @@ bool steam_user_set_played_with(const unsigned long long steam_id) {
 void steam_get_friends_game_info() {}
 
 int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar_size) {
+  if (!social_pre_checks("steam_get_user_avatar")) return -1;
+
+  int avatar_id{-1};
+
   switch (avatar_size) {
     case enigma_user::steam_user_avatar_size_small:
-      return steamworks_gc::GameClient::get_small_friend_avatar(userID);
+      avatar_id = steamworks_gc::GameClient::get_small_friend_avatar(userID);
       break;
     case enigma_user::steam_user_avatar_size_medium:
-      return steamworks_gc::GameClient::get_medium_friend_avatar(userID);
+      avatar_id = steamworks_gc::GameClient::get_medium_friend_avatar(userID);
       break;
     case enigma_user::steam_user_avatar_size_large:
-      return steamworks_gc::GameClient::get_large_friend_avatar(userID);
+      avatar_id = steamworks_gc::GameClient::get_large_friend_avatar(userID);
       break;
     default:
       DEBUG_MESSAGE(
@@ -89,7 +96,7 @@ int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar
       break;
   }
 
-  return -1;
+  return avatar_id;
 }
 
 // TODO: Check how ENIGMA compiler handles null values.
@@ -126,7 +133,11 @@ bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int 
     return false;
   }
 
-  // Now what?
+  for (unsigned i {0}; i < (unsigned)size; i++) {
+    enigma_user::buffer_write(buffer, enigma_user::buffer_u8, flattened_image[i]);
+  }
+
+  delete[] flattened_image;
 
   return true;
 }
