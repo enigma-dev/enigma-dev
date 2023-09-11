@@ -103,7 +103,7 @@ bool GCLeaderboards::create_leaderboard(const int id, const std::string &leaderb
 #endif  // ENIGMA_STEAMWORKS_API_MOCK
 
   if (steam_api_call != 0) {
-    GCLeaderboardsCookies *gc_leaderboards_find_result = new GCLeaderboardsFindResultCookies(id, this, steam_api_call);
+    GCLeaderboardsCookies *gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
 
     gc_leaderboards_cookies_.push_back(gc_leaderboards_find_result);
   } else {
@@ -130,7 +130,7 @@ void GCLeaderboards::find_leaderboard(const int id, const std::string &leaderboa
   steam_api_call = SteamUserStats()->FindLeaderboard(leaderboard_name.c_str());
 
   if (steam_api_call != 0) {
-    GCLeaderboardsCookies *gc_leaderboards_find_result = new GCLeaderboardsFindResultCookies(id, this, steam_api_call);
+    GCLeaderboardsCookies *gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
 
     gc_leaderboards_cookies_.push_back(gc_leaderboards_find_result);
   } else {
@@ -161,15 +161,15 @@ bool GCLeaderboards::upload_score(const int id, const int score,
       break;
   }
 
-  SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
-      GCLeaderboards::current_leaderboard_, leaderboard_upload_score_method, score, nullptr, 0);
+  SteamAPICall_t steam_api_call{SteamUserStats()->UploadLeaderboardScore(
+      GCLeaderboards::current_leaderboard_, leaderboard_upload_score_method, score, nullptr, 0)};
 #else
-  SteamAPICall_t steam_api_call = SteamUserStats()->UploadLeaderboardScore(
-      GCLeaderboards::current_leaderboard_, (unsigned)gc_leaderboard_upload_score_method, score, nullptr, 0);
+  SteamAPICall_t steam_api_call{SteamUserStats()->UploadLeaderboardScore(
+      GCLeaderboards::current_leaderboard_, (unsigned)gc_leaderboard_upload_score_method, score, nullptr, 0)};
 #endif  // ENIGMA_STEAMWORKS_API_MOCK
 
-  GCLeaderboardsCookies *gc_leaderboards_score_uploaded =
-      new GCLeaderboardsScoreUploadedCookies(id, this, steam_api_call);
+  GCLeaderboardsCookies *gc_leaderboards_score_uploaded{
+      new GCLeaderboardsScoreUploadedCookies(id, this, steam_api_call)};
 
   gc_leaderboards_cookies_.push_back(gc_leaderboards_score_uploaded);
 
@@ -200,15 +200,15 @@ bool GCLeaderboards::download_scores(const int id, const GCLeaderboardDataReques
       break;
   }
 
-  SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
-      GCLeaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end);
+  SteamAPICall_t steam_api_call{SteamUserStats()->DownloadLeaderboardEntries(
+      GCLeaderboards::current_leaderboard_, leaderboard_data_request, range_start, range_end)};
 #else
-  SteamAPICall_t steam_api_call = SteamUserStats()->DownloadLeaderboardEntries(
-      GCLeaderboards::current_leaderboard_, (unsigned)gc_leaderboard_data_request, range_start, range_end);
+  SteamAPICall_t steam_api_call{SteamUserStats()->DownloadLeaderboardEntries(
+      GCLeaderboards::current_leaderboard_, (unsigned)gc_leaderboard_data_request, range_start, range_end)};
 #endif  // ENIGMA_STEAMWORKS_API_MOCK
 
-  GCLeaderboardsCookies *gc_leaderboards_score_downloaded =
-      new GCLeaderboardsScoreDownloadedCookies(id, this, steam_api_call);
+  GCLeaderboardsCookies *gc_leaderboards_score_downloaded{
+      new GCLeaderboardsScoreDownloadedCookies(id, this, steam_api_call)};
 
   gc_leaderboards_cookies_.push_back(gc_leaderboards_score_downloaded);
 

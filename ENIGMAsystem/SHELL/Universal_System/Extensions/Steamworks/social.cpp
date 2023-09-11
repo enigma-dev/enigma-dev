@@ -17,8 +17,9 @@
 
 #include "social.h"
 
-#include "Universal_System/var4.h"
+#include "Graphics_Systems/General/GSsurface.h"
 #include "Universal_System/buffers.h"
+#include "Universal_System/var4.h"
 
 #include <iostream>
 
@@ -35,6 +36,18 @@ bool social_pre_checks(const std::string& script_name) {
 
   return true;
 }
+
+namespace enigma {
+unsigned char RGBAtoARGB(unsigned char rgba) {
+  unsigned char argb {0b00000000};
+  return argb;
+}
+
+unsigned char RGBAtoBGRA(unsigned char rgba) {
+  unsigned char bgra {0b00000000};
+  return bgra;
+}
+}  // namespace enigma
 
 namespace enigma_user {
 
@@ -126,14 +139,14 @@ var steam_image_get_size(const int steam_image_id) {
 bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int size) {
   if (!social_pre_checks("steam_image_get_rgba")) return false;
 
-  unsigned char* flattened_image = new unsigned char[size];
+  unsigned char* flattened_image{new unsigned char[size]};
 
   if (!steamworks_gc::GameClient::get_image_rgba(steam_image_id, flattened_image, size)) {
     DEBUG_MESSAGE("Calling steam_image_get_rgba failed.", M_ERROR);
     return false;
   }
 
-  for (unsigned i {0}; i < (unsigned)size; i++) {
+  for (unsigned i{0}; i < (unsigned)size; i++) {
     enigma_user::buffer_write(buffer, enigma_user::buffer_u8, flattened_image[i]);
   }
 
@@ -142,6 +155,86 @@ bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int 
   return true;
 }
 
-bool steam_image_get_bgra(const int steam_image_id, const int buffer, const int size) { return false; }
+bool steam_image_get_bgra(const int steam_image_id, const int buffer, const int size) {
+  if (!social_pre_checks("steam_image_get_bgra")) return false;
+
+  unsigned char* flattened_image{new unsigned char[size]};
+
+  if (!steamworks_gc::GameClient::get_image_rgba(steam_image_id, flattened_image, size)) {
+    DEBUG_MESSAGE("Calling steam_image_get_bgra failed.", M_ERROR);
+    return false;
+  }
+
+  // for (unsigned i{0}; i < (unsigned)size; i++) {
+  //   flattened_image[i] = enigma::RGBAtoBGRA(flattened_image[i]);
+  // }
+
+  for (unsigned i{0}; i < (unsigned)size; i++) {
+    enigma_user::buffer_write(buffer, enigma_user::buffer_u8, flattened_image[i]);
+  }
+
+  delete[] flattened_image;
+
+  return true;
+}
+
+bool steam_image_get_argb(const int steam_image_id, const int buffer, const int size) {
+  if (!social_pre_checks("steam_image_get_argb")) return false;
+
+  unsigned char* flattened_image{new unsigned char[size]};
+
+  if (!steamworks_gc::GameClient::get_image_rgba(steam_image_id, flattened_image, size)) {
+    DEBUG_MESSAGE("Calling steam_image_get_argb failed.", M_ERROR);
+    return false;
+  }
+
+  // for (unsigned i{0}; i < (unsigned)size; i++) {
+  //   flattened_image[i] = enigma::RGBAtoARGB(flattened_image[i]);
+  // }
+
+  for (unsigned i{0}; i < (unsigned)size; i++) {
+    enigma_user::buffer_write(buffer, enigma_user::buffer_u8, flattened_image[i]);
+  }
+
+  delete[] flattened_image;
+
+  return true;
+}
+
+int steam_image_create_sprite(const int steam_image_id) {
+  if (!social_pre_checks("steam_image_create_sprite")) return -1;
+
+  if (steam_image_id < 0) {
+    return -1;
+  }
+
+  var image_size{enigma_user::steam_image_get_size(steam_image_id)};
+
+  if (image_size.type == enigma_user::ty_undefined) return -1;
+
+  unsigned buff_size{(unsigned)image_size[0] * (unsigned)image_size[1] * 4};
+
+  if (buff_size < 0) return -1;
+
+  // This should be enigma_user::buffer_t, but this type is only inside AST-Generation branch.
+  std::int64_t buffer{enigma_user::buffer_create(buff_size, buffer_fixed, 1)};
+
+  bool success{enigma_user::steam_image_get_argb(steam_image_id, buffer, buff_size)};
+
+  if (!success) return -1;
+
+  int surface{enigma_user::surface_create(image_size[0], image_size[1])};
+
+  enigma_user::buffer_set_surface(buffer, surface, 0);
+
+  int sprite_id{
+      enigma_user::sprite_create_from_surface(surface, 0, 0, image_size[0], image_size[1], false, false, 0, 0)};
+
+  enigma_user::surface_free(surface);
+
+  enigma_user::buffer_delete(buffer);
+
+  return sprite_id;
+}
 
 }  // namespace enigma_user

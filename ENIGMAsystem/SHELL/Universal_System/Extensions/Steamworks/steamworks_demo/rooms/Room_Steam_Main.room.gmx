@@ -60,7 +60,7 @@
     <instance code="&#13;&#10;text = &quot;Steam Input&quot;&#13;&#10;targetRoom = Room_Steam_Input&#13;&#10;&#13;&#10;&#13;&#10;" colour="4294967295" id="100139" locked="0" name="inst_F37B0E83" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="544" y="512"/>
     <instance code="&#13;&#10;text = &quot;Networking&quot;&#13;&#10;targetRoom = Room_Steam_Networking_Matchmaking&#13;&#10;&#13;&#10;&#13;&#10;" colour="4294967295" id="100140" locked="0" name="inst_6514BC81" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="512"/>
     <instance code="" colour="4294967295" id="100141" locked="0" name="inst_A27A1037" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="608"/>
-    <instance code="" colour="4294967295" id="100429" locked="0" name="inst_BAD41837" objName="Obj_Steam_ProfileImage" rotation="0.0" scaleX="1.0" scaleY="1.0" x="176" y="528"/>
+    <instance code="" colour="4294967295" id="100429" locked="0" name="inst_BAD41837" objName="Obj_Steam_ProfileImage" rotation="0.0" scaleX="1.0" scaleY="1.0" x="32" y="480"/>
   </instances>
   <tiles/>
   <PhysicsWorld>0</PhysicsWorld>
