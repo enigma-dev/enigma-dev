@@ -42,8 +42,4 @@ else ifeq ($(TARGET-PLATFORM), Linux)
     # adding 64-bit lib file
     override LDLIBS += -lsteam_api
 
-    # Mock
-    # SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/SteamMock/sdk/public/steam/*.cpp)
-    # override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/SteamMock/sdk/public/
-
 endif

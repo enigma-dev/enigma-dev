@@ -7,19 +7,14 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
-#include "Universal_System/Extensions/DataStructures/include.h"
-#include "Universal_System/Instances/instance.h"
-
-#include "Universal_System/Extensions/Steamworks/implement.h" // The implement.h file is responsible for implementing extension_steamworks struct.
+#ifndef ENIGMA_STEAMWORKS_API_MOCK
+#include "Universal_System/Extensions/Steamworks/steamworks.h"
+#else
+#include "Universal_System/Extensions/stubs/Steamworks/stubs.h"
+#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
-
-namespace enigma {
-namespace extension_cast {
-extension_steamworks* as_extension_steamworks(object_basic*);
-}
-}  // namespace enigma
 
 namespace enigma {
 
@@ -194,12 +189,7 @@ void fireEventsFromQueue() {
       enigma_user::ds_map_add(enigma_user::async_load, key, value);
     }
 
-    instance_event_iterator = &dummy_event_iterator;
-    for (iterator it = instance_list_first(); it; ++it) {
-      object_basic* const inst = ((object_basic*)*it);
-      extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
-      inst_steamworks->myevent_steam();
-    }
+    enigma::fireSteamworksEvent();
   }
 }
 

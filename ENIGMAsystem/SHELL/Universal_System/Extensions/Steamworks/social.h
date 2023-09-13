@@ -30,6 +30,7 @@
 // TODO: Social API will be postponed until this merged https://github.com/enigma-dev/enigma-dev/pull/2361.
 
 namespace enigma {
+// TODO: Move these functions to the gameclient layer.
 /**
  * @brief 
  * 
@@ -130,13 +131,41 @@ int steam_get_user_avatar(const unsigned long long userID, const unsigned avatar
 */
 var steam_image_get_size(const int steam_image_id);
 
+/**
+ * @brief 
+ * 
+ * @note This function requires the buffer work from GSoC 2022 projects which is merged into
+ *     AST-Generation branch.
+ * 
+ * @param steam_image_id 
+ * @param buffer 
+ * @param size 
+ * @return true 
+ * @return false 
+ */
 bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int size);
+
+/**
+ * @brief 
+ * 
+ * @note This function requires the buffer work from GSoC 2022 projects which is merged into
+ *      AST-Generation branch.
+ * 
+ * @param steam_image_id 
+ * @param buffer 
+ * @param size 
+ * @return true 
+ * @return false 
+ */
 bool steam_image_get_bgra(const int steam_image_id, const int buffer, const int size);
 
 /**
  * @brief 
  * 
  * @note This function is not available in GMS.
+ * 
+ * @note This function requires the buffer work from GSoC 2022 projects which is merged into
+ *      AST-Generation branch.
  * 
  * @param steam_image_id 
  * @param buffer 
@@ -150,6 +179,9 @@ bool steam_image_get_argb(const int steam_image_id, const int buffer, const int 
  * @brief 
  * 
  * @note This function is not available in GMS.
+ * 
+ * @note This function requires the buffer work from GSoC 2022 projects which is merged into
+ *     AST-Generation branch.
  * 
  * @param steam_image_id 
  * @return int 

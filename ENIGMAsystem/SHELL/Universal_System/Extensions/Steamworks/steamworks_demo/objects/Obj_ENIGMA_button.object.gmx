@@ -85,8 +85,7 @@ else&#13;
 draw_self();&#13;
 &#13;
 // Inherit the parent event&#13;
-event_inherited();&#13;
-</string>
+event_inherited();</string>
           </argument>
         </arguments>
       </action>

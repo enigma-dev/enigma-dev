@@ -15,6 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+/**
+ * @brief This MACRO is already defined in `ENIGMAsystem/SHELL/Makefile`.
+ * 
+ */
 #ifndef ENIGMA_STEAMWORKS_API_MOCK
 #define ENIGMA_STEAMWORKS_API_MOCK
 #endif  // ENIGMA_STEAMWORKS_API_MOCK

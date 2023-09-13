@@ -52,8 +52,7 @@ text = "Reset All"</string>
           <argument>
             <kind>1</kind>
             <string>&#13;
-steam_reset_all_stats_achievements()&#13;
-</string>
+steam_reset_all_stats_achievements()</string>
           </argument>
         </arguments>
       </action>

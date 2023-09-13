@@ -60,7 +60,6 @@ draw_set_font(font);&#13;
 draw_set_color(color);&#13;
 &#13;
 draw_text(x, y, text);&#13;
-&#13;
 </string>
           </argument>
         </arguments>

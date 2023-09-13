@@ -15,28 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef STEAMWORKS_H
-#define STEAMWORKS_H
-
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
-
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-
-namespace fs = std::filesystem;
+#ifndef ENIGMA_STEAMWORKS_EXTENTION_STUBS
+#define ENIGMA_STEAMWORKS_EXTENTION_STUBS
 
 namespace enigma {
 
-/*
-    NOTE:   This function is automatically called by the extension system.
-    
-    This function initialises the steam APIs. Calls gc_main::init().
-*/
-void extension_steamworks_init();
-
-void fireSteamworksEvent();
+void fireSteamworksEvent() {}
 
 }  // namespace enigma
 
-#endif  // STEAMWORKS_H
+#endif  // ENIGMA_STEAMWORKS_EXTENTION_STUBS

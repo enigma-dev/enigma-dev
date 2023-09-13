@@ -51,8 +51,7 @@ targetRoom = noone</string>
           <argument>
             <kind>1</kind>
             <string>&#13;
-room_goto(targetRoom)&#13;
-</string>
+room_goto(targetRoom)</string>
           </argument>
         </arguments>
       </action>
