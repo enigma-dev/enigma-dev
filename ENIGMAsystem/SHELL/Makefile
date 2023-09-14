@@ -117,19 +117,27 @@ clean:
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
 
-##############################################################################
-#
-# Enable Steamworks API Mock if Steamworks is not enabled.
-# Note that this must be done before linking PFmain.cpp which is done in line 126.
-#
-##############################################################################
-ifeq (,$(findstring Universal_System/Extensions/Steamworks ,$(EXTENSIONS)))
-override CXXFLAGS += -DENIGMA_STEAMWORKS_API_MOCK
-endif
-
 SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
+
+##############################################################################
+#
+# Enable Steamworks stub if the real one is not enabled.
+#
+##############################################################################
+ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
+include Universal_System/StubExtensions/Steamworks/Makefile
+endif
+
+##############################################################################
+#
+# Enable DataStructures stub if the real one is not enabled.
+#
+##############################################################################
+ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
+include Universal_System/StubExtensions/DataStructures/Makefile
+endif
 
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))

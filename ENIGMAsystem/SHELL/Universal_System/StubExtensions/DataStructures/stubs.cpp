@@ -1,4 +1,4 @@
-/** Copyright (C) 2023-2024 Saif Kandil
+/** Copyright (C) 2023-2024 Saif Kandil (k0T0z)
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,13 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_STEAMWORKS_EXTENTION_STUBS
-#define ENIGMA_STEAMWORKS_EXTENTION_STUBS
+#include "Universal_System/Extensions/DataStructures/include.h"
 
-namespace enigma {
+namespace enigma_user {
 
-void fireSteamworksEvent() {}
+unsigned int ds_map_create() { return 0; }
+void ds_map_clear(const unsigned int id) {}
+void ds_map_add(const unsigned int id, const variant key, const variant val) {}
 
-}  // namespace enigma
-
-#endif  // ENIGMA_STEAMWORKS_EXTENTION_STUBS
+}  // namespace enigma_user

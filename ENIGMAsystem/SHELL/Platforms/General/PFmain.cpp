@@ -7,11 +7,7 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
 #include "Universal_System/Extensions/Steamworks/steamworks.h"
-#else
-#include "Universal_System/Extensions/stubs/Steamworks/stubs.h"
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for

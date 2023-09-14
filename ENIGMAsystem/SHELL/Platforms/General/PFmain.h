@@ -1,6 +1,6 @@
 /** Copyright (C) 2011 Josh Ventura
 *** Copyright (C) 2013-2014 Robert B. Colton
-*** Copyright (C) 2023-2024 Saif Kandil
+*** Copyright (C) 2023-2024 Saif Kandil (k0T0z)
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

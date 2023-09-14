@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "steam_api.h"
+#include "Universal_System/Extensions/Steamworks/steamworks.h"
 
-bool SteamAPI_Init() { return true; }
+namespace enigma {
 
-void SteamAPI_Shutdown() {}
+void fireSteamworksEvent() {}
 
-bool SteamAPI_RestartAppIfNecessary(uint32 unOwnAppID) { return false; }
+}  // namespace enigma
