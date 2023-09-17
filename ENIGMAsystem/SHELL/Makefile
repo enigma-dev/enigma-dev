@@ -121,20 +121,12 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
-##############################################################################
-#
 # Enable Steamworks stub if the real one is not enabled.
-#
-##############################################################################
 ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
 endif
 
-##############################################################################
-#
 # Enable DataStructures stub if the real one is not enabled.
-#
-##############################################################################
 ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
 include Universal_System/StubExtensions/DataStructures/Makefile
 endif

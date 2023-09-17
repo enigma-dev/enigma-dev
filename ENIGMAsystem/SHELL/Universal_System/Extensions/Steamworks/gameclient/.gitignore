@@ -16,6 +16,8 @@
 # with this code. If not, see <http://www.gnu.org/licenses/>
 ############################################################################
 
+# TODO: Ignore all libs.
+
 /Steamv157/sdk/**/*
 
 !/Steamv157/sdk/Readme.txt
