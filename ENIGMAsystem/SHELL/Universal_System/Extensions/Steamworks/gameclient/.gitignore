@@ -16,18 +16,18 @@
 # with this code. If not, see <http://www.gnu.org/licenses/>
 ############################################################################
 
-# TODO: Ignore all libs.
-
+# Ignore everything.
 /Steamv157/sdk/**/*
 
+# Don't ignore Readme.txt file.
 !/Steamv157/sdk/Readme.txt
 
-# public/ & redistributable_bin/ directories contains the necessary headers & libraries for interfacing with 
-# Steamworks API and we need to keep any file inside it because we need to test any new release before letting 
-# game developers use it and by definition we need to keep the old tested libraries which means game developers 
-# don't have to download Steamworks SDK.
+# Don't ignore files inside the SteamvXXX/sdk/public/steam folder.
+# Note that this code ignore directories inside the SteamvXXX/sdk/public/steam folder.
 !/Steamv157/sdk/public/
-!/Steamv157/sdk/public/**/*
+!/Steamv157/sdk/public/steam/
+!/Steamv157/sdk/public/steam/*
 
-!/Steamv157/sdk/redistributable_bin/
-!/Steamv157/sdk/redistributable_bin/**/*
+# Dont ignore everything inside the SteamvXXX/sdk/redistributable_bin folder.
+# !/Steamv157/sdk/redistributable_bin/
+# !/Steamv157/sdk/redistributable_bin/**/*
