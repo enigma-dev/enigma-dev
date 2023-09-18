@@ -23,11 +23,11 @@
 !/Steamv157/sdk/Readme.txt
 
 # Don't ignore files inside the SteamvXXX/sdk/public/steam/ folder.
-# Note that this code ignore directories inside the SteamvXXX/sdk/public/steam/ folder.
+# Note that this code ignores directories inside the SteamvXXX/sdk/public/steam/ folder.
 !/Steamv157/sdk/public/
 !/Steamv157/sdk/public/steam/
 !/Steamv157/sdk/public/steam/*
 
-# Dont ignore everything inside the SteamvXXX/sdk/redistributable_bin/ folder.
+# Don't ignore everything inside the SteamvXXX/sdk/redistributable_bin/ folder.
 # !/Steamv157/sdk/redistributable_bin/
 # !/Steamv157/sdk/redistributable_bin/**/*

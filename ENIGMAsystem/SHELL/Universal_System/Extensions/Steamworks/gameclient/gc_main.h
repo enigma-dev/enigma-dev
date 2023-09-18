@@ -21,6 +21,12 @@
 
 #include "gameclient.h"
 
+#include <dlfcn.h>
+#include <filesystem>
+
+typedef bool (*restart_app_if_necessary_d)(AppId_t);
+typedef bool (*steam_api_init)();
+
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 // TODO: Move the pre-checks here.
 
@@ -30,7 +36,7 @@ class GameClient;
 
 class GCMain {
  public:
-  /*
+ /*
     Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
     if you are running your game from the executable or debugger directly and don't have steam_appid.txt in your game 
     directory so make sure to remove the steam_appid.txt file when uploading the game to your Steam depot!. Calling this 
@@ -40,7 +46,23 @@ class GCMain {
     call you make, right before SteamAPI_Init. Calls SteamAPI_RestartAppIfNecessary(). 
     Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RestartAppIfNecessary for more information.
   */
+  /**
+   * @brief 
+   * 
+   * @return false when success
+   * @return true when fails
+   */
   inline static bool restart_app_if_necessary() {
+    if (GCMain::dynamic_path_exists_ && GCMain::dynamic_handle_ != nullptr) {
+      restart_app_if_necessary_d f = reinterpret_cast<restart_app_if_necessary_d>(
+          dlsym(GCMain::dynamic_handle_, "SteamAPI_RestartAppIfNecessary"));
+      if (f != nullptr)
+        return f(k_uAppIdInvalid);
+      else {
+        return true;
+      }
+    }
+
     return SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
   }
 
@@ -61,13 +83,31 @@ class GCMain {
       5.  Sets is_initialised_ to true if all the above steps succeed. This variable can be accessed by calling is_initialised().
   */
   // TODO: Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn
+  // TODO: The path here need to be inside an env variable called `STEAM_SDK_PATH`.
   inline static bool init() {
+    std::filesystem::path dynamic_path_("Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
+
+    GCMain::dynamic_path_exists_ = std::filesystem::exists(dynamic_path_);
+
+    GCMain::dynamic_handle_ = dlopen(dynamic_path_.c_str(), RTLD_LAZY);
+
     if (GCMain::restart_app_if_necessary()) {
       return false;
     }
 
-    if (!SteamAPI_Init()) {
-      return false;
+    if (GCMain::dynamic_path_exists_ && GCMain::dynamic_handle_ != nullptr) {
+      steam_api_init f = reinterpret_cast<steam_api_init>(dlsym(GCMain::dynamic_handle_, "SteamAPI_Init"));
+      if (f != nullptr) {
+        if (!f()) {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      if (!SteamAPI_Init()) {
+        return false;
+      }
     }
 
     if (!GameClient::is_user_logged_on()) {
@@ -127,6 +167,18 @@ class GCMain {
   static GameClient* get_gameclient() { return GCMain::gameclient_; }
 
  private:
+  /**
+  * @brief A hnadle to a dynamic loading library.
+  * 
+  */
+  inline static void* dynamic_handle_{nullptr};
+
+  /**
+   * @brief 
+   * 
+   */
+  inline static bool dynamic_path_exists_{false};
+
   /*
     This variable is used to store a pointer to the Game Client.
   */

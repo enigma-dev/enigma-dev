@@ -17,7 +17,3 @@
 ############################################################################
 
 SOURCES += $(wildcard Universal_System/StubExtensions/Steamworks/*.cpp)
-
-# Add Steamworks mock API.
-# SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/SteamMock/sdk/public/steam/*.cpp)
-# override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/SteamMock/sdk/public/

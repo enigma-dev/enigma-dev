@@ -22,9 +22,19 @@
 #include "implement.h"
 
 namespace enigma {
+
 namespace extension_cast {
 extension_steamworks* as_extension_steamworks(object_basic*);
 }  // namespace extension_cast
+
+void fireSteamworksEvent() {
+  instance_event_iterator = &dummy_event_iterator;
+  for (iterator it = instance_list_first(); it; ++it) {
+    object_basic* const inst = ((object_basic*)*it);
+    extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
+    inst_steamworks->myevent_steam();
+  }
+}
 
 void write_appid_file() {
   std::string filename = fs::temp_directory_path().string();
@@ -70,15 +80,6 @@ void extension_steamworks_init() {
         "directory. If you are running your executable from a different directory you may need to relocate the "
         "steam_appid.txt file.",
         M_ERROR);
-  }
-}
-
-void fireSteamworksEvent() {
-  instance_event_iterator = &dummy_event_iterator;
-  for (iterator it = instance_list_first(); it; ++it) {
-    object_basic* const inst = ((object_basic*)*it);
-    extension_steamworks* const inst_steamworks = extension_cast::as_extension_steamworks(inst);
-    inst_steamworks->myevent_steam();
   }
 }
 
