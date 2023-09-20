@@ -82,7 +82,18 @@ std::string GameClient::get_available_game_languages() { return GameClient::avai
 // Static fields & functions (AKA Wrapper functions)
 ////////////////////////////////////////////////////////
 
-bool GameClient::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
+bool GameClient::is_user_logged_on() {
+  if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
+    if (!GCMain::steam_user_t_valid()) return false;
+    BLoggedOn_t f = reinterpret_cast<BLoggedOn_t>(dlsym(GCMain::get_dynamic_handle(), "BLoggedOn"));
+    if (f != nullptr) {
+      return f((void*)GCMain::get_steam_user_t());
+    } else
+      return false;
+  }
+
+  return SteamUser()->BLoggedOn();
+}
 
 std::string GameClient::get_steam_persona_name() { return std::string(SteamFriends()->GetPersonaName()); }
 
