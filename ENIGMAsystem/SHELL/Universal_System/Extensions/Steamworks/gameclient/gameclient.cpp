@@ -18,6 +18,7 @@
 #include "gameclient.h"
 
 #include "gc_leaderboards.h"
+#include "gc_main.h"
 #include "gc_overlay.h"
 #include "gc_remotestorage.h"
 #include "gc_statsandachievements.h"
@@ -63,9 +64,7 @@ void GameClient::init() {
 
 GCOverlay* GameClient::get_gc_overlay() { return GameClient::gc_overlay_; }
 
-GCStatsAndAchievements* GameClient::get_gc_statsandachievements() {
-  return GameClient::gc_statsandachievements_;
-}
+GCStatsAndAchievements* GameClient::get_gc_statsandachievements() { return GameClient::gc_statsandachievements_; }
 
 GCLeaderboards* GameClient::get_gc_leaderboards() { return GameClient::gc_leaderboards_; }
 

@@ -23,9 +23,12 @@
 
 #include <dlfcn.h>
 #include <filesystem>
+// #include <cstdlib>
 
 typedef bool (*restart_app_if_necessary_d)(AppId_t);
 typedef bool (*steam_api_init)();
+
+namespace fs = std::filesystem;
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 // TODO: Move the pre-checks here.
@@ -36,7 +39,7 @@ class GameClient;
 
 class GCMain {
  public:
- /*
+  /*
     Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
     if you are running your game from the executable or debugger directly and don't have steam_appid.txt in your game 
     directory so make sure to remove the steam_appid.txt file when uploading the game to your Steam depot!. Calling this 
@@ -85,9 +88,13 @@ class GCMain {
   // TODO: Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn
   // TODO: The path here need to be inside an env variable called `STEAM_SDK_PATH`.
   inline static bool init() {
-    std::filesystem::path dynamic_path_("Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
+    // const char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
 
-    GCMain::dynamic_path_exists_ = std::filesystem::exists(dynamic_path_);
+    std::string dynamic_path_ {"Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so"};
+
+    GCMain::dynamic_path_exists_ = fs::exists(dynamic_path_);
+
+    DEBUG_MESSAGE("GCMain::dynamic_path_exists_ = " +std::to_string(GCMain::dynamic_path_exists_), M_INFO);
 
     GCMain::dynamic_handle_ = dlopen(dynamic_path_.c_str(), RTLD_LAZY);
 
@@ -165,6 +172,8 @@ class GCMain {
     This function returns a pointer to the Game Client. This pointer can be used to access the Game Client's object pointers.
   */
   static GameClient* get_gameclient() { return GCMain::gameclient_; }
+
+  inline static bool dynamic_path_exists() { return GCMain::dynamic_path_exists_; }
 
  private:
   /**

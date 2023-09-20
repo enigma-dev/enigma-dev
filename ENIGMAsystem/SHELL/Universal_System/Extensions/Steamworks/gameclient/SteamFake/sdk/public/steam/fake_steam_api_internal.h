@@ -15,17 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "fake_steam_api.h"
+#include <cstdint>
 
-bool SteamAPI_Init() { return true; }
-
-void SteamAPI_Shutdown() {}
-
-/**
- * @brief 
- * 
- * @param unOwnAppID 
- * @return false when success
- * @return true when failure
- */
-bool SteamAPI_RestartAppIfNecessary(uint32 unOwnAppID) { return false; }
+struct FakeSteamContextInitData {
+  void (*pFn)(void *);
+  uintptr_t counter;
+  void *ptr;
+};
