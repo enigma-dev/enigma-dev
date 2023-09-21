@@ -29,8 +29,18 @@ typedef bool (*RestartAppIfNecessary_t)(AppId_t);
 typedef bool (*Init_t)();
 typedef void (*Shutdown_t)();
 typedef void (*RunCallbacks_t)();
-typedef void* (*SteamUser_t)();
-typedef bool (*BLoggedOn_t)(void*);
+
+typedef ISteamUser* (*SteamUser_t)();
+typedef bool (*BLoggedOn_t)(ISteamUser*);
+
+typedef ISteamUserStats* (*SteamUserStats_t)();
+
+typedef ISteamFriends* (*SteamFriends_t)();
+typedef const char* (*GetPersonaName_t)(ISteamFriends*);
+
+typedef ISteamApps* (*SteamApps_t)();
+
+typedef ISteamUtils* (*SteamUtils_t)();
 
 namespace fs = std::filesystem;
 
@@ -43,6 +53,83 @@ class GameClient;
 
 class GCMain {
  public:
+  /**
+  * @brief 
+  * 
+  * @note Check sdk/public/steam/steam_api_flat.h for more information about namings.
+  * 
+  * @return true 
+  * @return false 
+  */
+  inline static bool load_library_if_exists() {
+    // const char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
+
+    fs::path dynamic_path_{
+        "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/"
+        "sdk/redistributable_bin/linux64/libsteam_api.so"};
+
+    bool path_exists{fs::exists(dynamic_path_)};
+
+    if (!path_exists) {
+      DEBUG_MESSAGE("Steamworks SDK not found.", M_WARNING);
+      return false;
+    }
+
+    void* handle{dlopen(dynamic_path_.c_str(), RTLD_LAZY)};
+
+    if (nullptr == handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::handle_ = handle;
+
+    SteamUser_t steam_user_handle = reinterpret_cast<SteamUser_t>(dlsym(GCMain::handle_, "SteamAPI_SteamUser_v023"));
+    if (nullptr == steam_user_handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::steam_user_ = steam_user_handle();
+
+    SteamFriends_t steam_friends_handle =
+        reinterpret_cast<SteamFriends_t>(dlsym(GCMain::handle_, "SteamAPI_SteamFriends_v017"));
+    if (nullptr == steam_friends_handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::steam_friends_ = steam_friends_handle();
+
+    SteamApps_t steam_apps_handle = reinterpret_cast<SteamApps_t>(dlsym(GCMain::handle_, "SteamAPI_SteamApps_v008"));
+    if (nullptr == steam_apps_handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::steam_apps_ = steam_apps_handle();
+
+    SteamUserStats_t steam_user_stats_handle =
+        reinterpret_cast<SteamUserStats_t>(dlsym(GCMain::handle_, "SteamAPI_SteamUserStats_v012"));
+    if (nullptr == steam_user_stats_handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::steam_user_stats_ = steam_user_stats_handle();
+
+    SteamUtils_t steam_utils_handle =
+        reinterpret_cast<SteamUtils_t>(dlsym(GCMain::handle_, "SteamAPI_SteamUtils_v010"));
+    if (nullptr == steam_utils_handle) {
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return false;
+    }
+
+    GCMain::steam_utils_ = steam_utils_handle();
+
+    return true;
+  }
+
   /*
     Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
     if you are running your game from the executable or debugger directly and don't have steam_appid.txt in your game 
@@ -60,13 +147,13 @@ class GCMain {
    * @return true when fails
    */
   inline static bool restart_app_if_necessary() {
-    if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
+    if (GCMain::handle_valid()) {
       RestartAppIfNecessary_t f =
-          reinterpret_cast<RestartAppIfNecessary_t>(dlsym(GCMain::dynamic_handle_, "SteamAPI_RestartAppIfNecessary"));
-      if (f != nullptr)
-        return f(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
-      else
-        return true;
+          reinterpret_cast<RestartAppIfNecessary_t>(dlsym(GCMain::handle_, "SteamAPI_RestartAppIfNecessary"));
+      if (f != nullptr) return f(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
+
+      DEBUG_MESSAGE(dlerror(), M_ERROR);
+      return true;
     }
 
     return SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid);
@@ -91,36 +178,20 @@ class GCMain {
   // TODO: Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn
   // TODO: The path here need to be inside an env variable called `STEAM_SDK_PATH`.
   inline static bool init() {
-    const char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
-
-    fs::path dynamic_path_{
-        "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/"
-        "sdk/redistributable_bin/linux64/libsteam_api.so"};
-
-    GCMain::dynamic_path_exists_ = fs::exists(dynamic_path_);
-
-    GCMain::dynamic_handle_ = dlopen(dynamic_path_.c_str(), RTLD_LAZY);
-
-    if (nullptr != GCMain::dynamic_handle_) {
-      GCMain::get_steam_user_t_ = reinterpret_cast<SteamUser_t>(dlsym(GCMain::dynamic_handle_, "SteamUser"));
-
-      if (nullptr == GCMain::get_steam_user_t_) {
-        DEBUG_MESSAGE(dlerror(), M_ERROR);
-      }
-    }
-
     if (GCMain::restart_app_if_necessary()) {
       return false;
     }
 
-    if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
-      Init_t f = reinterpret_cast<Init_t>(dlsym(GCMain::dynamic_handle_, "SteamAPI_Init"));
+    if (GCMain::handle_valid()) {
+      Init_t f = reinterpret_cast<Init_t>(dlsym(GCMain::handle_, "SteamAPI_Init"));
       if (f != nullptr) {
         if (!f()) {
           return false;
         }
-      } else
+      } else {
+        DEBUG_MESSAGE(dlerror(), M_ERROR);
         return false;
+      }
     } else {
       if (!SteamAPI_Init()) {
         return false;
@@ -152,8 +223,8 @@ class GCMain {
   inline static void shutdown() {
     GCMain::is_initialised_ = false;
 
-    if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
-      Shutdown_t f = reinterpret_cast<Shutdown_t>(dlsym(GCMain::dynamic_handle_, "SteamAPI_Shutdown"));
+    if (GCMain::handle_valid()) {
+      Shutdown_t f = reinterpret_cast<Shutdown_t>(dlsym(GCMain::handle_, "SteamAPI_Shutdown"));
       if (f != nullptr) {
         f();
       } else
@@ -164,7 +235,7 @@ class GCMain {
 
     if (nullptr != GCMain::gameclient_) delete GCMain::gameclient_;
 
-    dlclose(GCMain::dynamic_handle_);
+    dlclose(GCMain::handle_);
   }
 
   /*
@@ -179,8 +250,8 @@ class GCMain {
     [OPTIONAL] Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_ReleaseCurrentThreadMemory for more information.
   */
   inline static void run_callbacks() {
-    if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
-      RunCallbacks_t f = reinterpret_cast<RunCallbacks_t>(dlsym(GCMain::dynamic_handle_, "SteamAPI_RunCallbacks"));
+    if (GCMain::handle_valid()) {
+      RunCallbacks_t f = reinterpret_cast<RunCallbacks_t>(dlsym(GCMain::handle_, "SteamAPI_RunCallbacks"));
       if (f != nullptr) {
         f();
       } else
@@ -204,30 +275,37 @@ class GCMain {
   */
   static GameClient* get_gameclient() { return GCMain::gameclient_; }
 
-  inline static void* get_dynamic_handle() { return GCMain::dynamic_handle_; }
+  inline static void* get_handle() { return GCMain::handle_; }
 
-  inline static bool dynamic_handle_valid() { return GCMain::dynamic_handle_ != nullptr; }
+  inline static bool handle_valid() { return GCMain::handle_ != nullptr; }
 
-  inline static bool dynamic_path_exists() { return GCMain::dynamic_path_exists_; }
+  inline static ISteamUser* get_steam_user() { return GCMain::steam_user_; }
+  inline static bool steam_user_valid() { return GCMain::steam_user_ != nullptr; }
 
-  inline static SteamUser_t get_steam_user_t() { return GCMain::get_steam_user_t_; }
+  inline static ISteamFriends* get_steam_friends() { return GCMain::steam_friends_; }
+  inline static bool steam_friends_valid() { return GCMain::steam_friends_ != nullptr; }
 
-  inline static bool steam_user_t_valid() { return GCMain::get_steam_user_t_ != nullptr; }
+  inline static ISteamUserStats* get_steam_user_stats() { return GCMain::steam_user_stats_; }
+  inline static bool steam_user_stats_valid() { return GCMain::steam_user_stats_ != nullptr; }
+
+  inline static ISteamApps* get_steam_apps() { return GCMain::steam_apps_; }
+  inline static bool steam_apps_valid() { return GCMain::steam_apps_ != nullptr; }
+
+  inline static ISteamUtils* get_steam_utils() { return GCMain::steam_utils_; }
+  inline static bool steam_utils_valid() { return GCMain::steam_utils_ != nullptr; }
 
  private:
   /**
   * @brief A hnadle to a dynamic loading library.
   * 
   */
-  inline static void* dynamic_handle_{nullptr};
+  inline static void* handle_{nullptr};
 
-  /**
-   * @brief 
-   * 
-   */
-  inline static bool dynamic_path_exists_{false};
-
-  inline static SteamUser_t get_steam_user_t_;
+  inline static ISteamUser* steam_user_{nullptr};
+  inline static ISteamFriends* steam_friends_{nullptr};
+  inline static ISteamUserStats* steam_user_stats_{nullptr};
+  inline static ISteamApps* steam_apps_{nullptr};
+  inline static ISteamUtils* steam_utils_{nullptr};
 
   /*
     This variable is used to store a pointer to the Game Client.

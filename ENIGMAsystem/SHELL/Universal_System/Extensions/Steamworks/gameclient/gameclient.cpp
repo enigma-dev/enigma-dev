@@ -83,19 +83,35 @@ std::string GameClient::get_available_game_languages() { return GameClient::avai
 ////////////////////////////////////////////////////////
 
 bool GameClient::is_user_logged_on() {
-  if (GCMain::dynamic_path_exists() && GCMain::dynamic_handle_valid()) {
-    if (!GCMain::steam_user_t_valid()) return false;
-    BLoggedOn_t f = reinterpret_cast<BLoggedOn_t>(dlsym(GCMain::get_dynamic_handle(), "BLoggedOn"));
+  if (GCMain::handle_valid()) {
+    if (!GCMain::steam_user_valid()) return false;
+    BLoggedOn_t f = reinterpret_cast<BLoggedOn_t>(dlsym(GCMain::get_handle(), "SteamAPI_ISteamUser_BLoggedOn"));
     if (f != nullptr) {
-      return f((void*)GCMain::get_steam_user_t());
-    } else
-      return false;
+      return f(GCMain::get_steam_user());
+    }
+
+    return false;
   }
 
   return SteamUser()->BLoggedOn();
 }
 
-std::string GameClient::get_steam_persona_name() { return std::string(SteamFriends()->GetPersonaName()); }
+bool GameClient::get_steam_persona_name(std::string& buffer) {
+  if (GCMain::handle_valid()) {
+    if (!GCMain::steam_friends_valid()) return false;
+    GetPersonaName_t f =
+        reinterpret_cast<GetPersonaName_t>(dlsym(GCMain::get_handle(), "SteamAPI_ISteamFriends_GetPersonaName"));
+    if (f != nullptr) {
+      buffer = f(GCMain::get_steam_friends());
+      return true;
+    }
+
+    return false;
+  }
+
+  buffer = std::string(SteamFriends()->GetPersonaName());
+  return true;
+}
 
 std::string GameClient::get_steam_user_persona_name(const uint64 steam_id) {
   CSteamID c_steam_id(steam_id);

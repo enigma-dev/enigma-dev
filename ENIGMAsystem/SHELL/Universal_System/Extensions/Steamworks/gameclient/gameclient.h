@@ -134,7 +134,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetPersonaName for more 
     information.
   */
-  static std::string get_steam_persona_name();
+  static bool get_steam_persona_name(std::string& buffer);
 
   /*
     Returns the specified user's persona (display) name. This will only be known to 

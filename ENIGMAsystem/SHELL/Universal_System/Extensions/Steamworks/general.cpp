@@ -62,9 +62,16 @@ unsigned long long steam_get_user_steam_id() {
 }
 
 std::string steam_get_persona_name() {
-  if (!general_pre_checks("steam_get_persona_name")) return "";
+  std::string buffer;
 
-  return steamworks_gc::GameClient::get_steam_persona_name();
+  if (!general_pre_checks("steam_get_persona_name")) return buffer;
+
+  if (!steamworks_gc::GameClient::get_steam_persona_name(buffer)) {
+    DEBUG_MESSAGE("Calling steam_get_persona_name failed. Getting address dynamically failed.", M_ERROR);
+    return "";
+  }
+
+  return buffer;
 }
 
 std::string steam_get_user_persona_name(const unsigned long long steamID) {

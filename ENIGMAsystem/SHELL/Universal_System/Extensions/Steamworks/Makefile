@@ -26,7 +26,7 @@ SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
 SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/SteamFake/sdk/public/steam/*.cpp)
 override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/public/
 
-export STEAM_SDK_PATH=$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/
+# export STEAM_SDK_PATH=$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/
 
 # ifeq ($(TARGET-PLATFORM), Windows)
 
