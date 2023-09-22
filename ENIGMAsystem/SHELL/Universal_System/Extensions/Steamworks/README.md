@@ -180,5 +180,6 @@ These are my critical sections:
 ## TODO
 
 TODO: Fill here the work that is left to be done.
+TODO: Create an error channel to report errors to Steamworks layer.
 
 

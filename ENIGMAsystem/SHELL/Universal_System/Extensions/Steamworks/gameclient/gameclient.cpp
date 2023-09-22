@@ -88,7 +88,13 @@ bool GameClient::get_available_game_languages(std::string& buffer) {
 // Static fields & functions (AKA Wrapper functions)
 ////////////////////////////////////////////////////////
 
-bool GameClient::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
+bool GameClient::is_user_logged_on() {
+  if (GCMain::handle_valid()) {
+    if (!GCMain::steam_user_valid()) return false;
+    BLoggedOn_t f = reinterpret_cast<BLoggedOn_t>(dlsym(GCMain::get_handle(), "SteamAPI_ISteamUser_BLoggedOn"));
+    if (f != nullptr) {
+      return f(GCMain::get_steam_user());
+    }
 
 bool GameClient::get_steam_persona_name(std::string& buffer) {
   buffer = std::string(SteamFriends()->GetPersonaName());
