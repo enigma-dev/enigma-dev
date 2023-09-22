@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef FAKE_STEAM_API_INTERNAL_H
+#define FAKE_STEAM_API_INTERNAL_H
+
 #include <cstdint>
 
 struct FakeSteamContextInitData {
@@ -22,3 +25,5 @@ struct FakeSteamContextInitData {
   uintptr_t counter;
   void *ptr;
 };
+
+#endif  // FAKE_STEAM_API_INTERNAL_H

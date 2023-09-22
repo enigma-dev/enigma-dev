@@ -18,20 +18,21 @@
 
 SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
 				$(wildcard Universal_System/Extensions/Steamworks/gameclient/*.cpp) \
-                    $(wildcard Universal_System/Extensions/Steamworks/gameclient/utils/*.cpp)
+                    $(wildcard Universal_System/Extensions/Steamworks/gameclient/utils/*.cpp) \
+						$(wildcard Universal_System/Extensions/Steamworks/gameclient/Binder/*.cpp)
 
 # defining directory of steam header files
-# override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/public/
+# override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/public/
 
-SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/SteamFake/sdk/public/steam/*.cpp)
-override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/public/
+SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/Binder/SteamFake/sdk/public/steam/*.cpp)
+override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/public/
 
-# export STEAM_SDK_PATH=$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/
+# export STEAM_SDK_PATH=$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/
 
 # ifeq ($(TARGET-PLATFORM), Windows)
 
 #     # defining directory of 64-bit lib file
-#     override LDFLAGS += -L$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/redistributable_bin/win64/
+#     override LDFLAGS += -L$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/redistributable_bin/win64/
 
 #     # check https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html#:~:text=Static%20Library%20vs.%20Shared%20Library
 #     # adding 64-bit lib file
@@ -41,7 +42,7 @@ override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extens
 # else ifeq ($(TARGET-PLATFORM), Linux)
 
 #     # defining directory of 64-bit lib file
-#     override LDFLAGS += -L$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Steamv157/sdk/redistributable_bin/linux64
+#     override LDFLAGS += -L$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/redistributable_bin/linux64
 
 #     # check https://www3.ntu.edu.sg/home/ehchua/programming/cpp/gcc_make.html#:~:text=Static%20Library%20vs.%20Shared%20Library
 #     # adding 64-bit lib file

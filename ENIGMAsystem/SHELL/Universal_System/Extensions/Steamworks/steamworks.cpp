@@ -70,6 +70,11 @@ void extension_steamworks_init() {
     return;
   }
 
+  if (!steamworks_gc::GCMain::invoke_binder()) {
+    DEBUG_MESSAGE("Failed to invoke binder.", M_ERROR);
+    return;
+  }
+
   if (!steamworks_gc::GCMain::init()) {
     DEBUG_MESSAGE(
         "Calling steam_init failed. Make sure that the Steam client is running. A running Steam client is required "

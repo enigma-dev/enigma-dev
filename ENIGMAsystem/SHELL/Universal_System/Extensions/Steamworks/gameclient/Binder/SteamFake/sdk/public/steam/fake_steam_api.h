@@ -15,8 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef FAKE_STEAM_API_H
+#define FAKE_STEAM_API_H
+
 #include "steam/steam_api.h"
 
 #ifndef ENIGMA_FAKE_STEAMWORKS_API
 #define ENIGMA_FAKE_STEAMWORKS_API
 #endif  // ENIGMA_FAKE_STEAMWORKS_API
+
+#endif  // FAKE_STEAM_API_H

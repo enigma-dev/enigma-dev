@@ -23,10 +23,7 @@
 // TODO: Separate the wrapper functions from the main architecture.
 // TODO: Why can't use inline here?
 
-/*
-    This is the lowest layer that game_client layer mainly depends on.
-*/
-#include "steam/steam_api.h"
+#include "Binder/binder.h"
 
 /*
     This include is the only special include that game_client layer uses. DON'T include any

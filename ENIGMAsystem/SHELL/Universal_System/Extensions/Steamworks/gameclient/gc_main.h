@@ -21,12 +21,6 @@
 
 #include "gameclient.h"
 
-#include <dlfcn.h>
-#include <filesystem>
-// #include <cstdlib>
-
-namespace fs = std::filesystem;
-
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 // TODO: Move the pre-checks here.
 
@@ -36,6 +30,14 @@ class GameClient;
 
 class GCMain {
  public:
+  /**
+  * @brief 
+  * 
+  * @return true 
+  * @return false 
+  */
+  inline static bool invoke_binder() { return steamworks_b::Binder::bind(); }
+
   /*
     Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
     if you are running your game from the executable or debugger directly and don't have steam_appid.txt in your game 
@@ -53,7 +55,7 @@ class GCMain {
    * @return true when fails
    */
   inline static bool restart_app_if_necessary() {
-    return SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
+    return steamworks_b::Binder::RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
   }
 
   /*
@@ -79,7 +81,7 @@ class GCMain {
       return false;
     }
 
-    if (!SteamAPI_Init()) {
+    if (!steamworks_b::Binder::Init()) {
       return false;
     }
 
@@ -108,7 +110,7 @@ class GCMain {
   inline static void shutdown() {
     GCMain::is_initialised_ = false;
 
-    SteamAPI_Shutdown();
+    steamworks_b::Binder::Shutdown();
 
     if (nullptr != GCMain::gameclient_) delete GCMain::gameclient_;
   }
@@ -124,7 +126,7 @@ class GCMain {
     Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RunCallbacks for more information.
     [OPTIONAL] Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_ReleaseCurrentThreadMemory for more information.
   */
-  inline static void run_callbacks() { SteamAPI_RunCallbacks(); }
+  inline static void run_callbacks() { steamworks_b::Binder::RunCallbacks(); }
 
   /*
     This function calls SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook). Sets a warning message hook to receive 
