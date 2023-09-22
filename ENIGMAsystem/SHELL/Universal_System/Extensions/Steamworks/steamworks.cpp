@@ -70,11 +70,6 @@ void extension_steamworks_init() {
     return;
   }
 
-  // No return here, because the Fake API will be used if library files don't exist.
-  if (!steamworks_gc::GCMain::load_library_if_exists()) {
-    DEBUG_MESSAGE("Something went wrong when loading the Steamworks SDK.", M_WARNING);
-  }
-
   if (!steamworks_gc::GCMain::init()) {
     DEBUG_MESSAGE(
         "Calling steam_init failed. Make sure that the Steam client is running. A running Steam client is required "
