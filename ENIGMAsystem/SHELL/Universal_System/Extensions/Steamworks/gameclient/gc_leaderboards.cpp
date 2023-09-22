@@ -47,9 +47,9 @@ GCLeaderboards::GCLeaderboards()
 
 GCLeaderboards::~GCLeaderboards() { GCLeaderboards::deallocate_all_leaderboards_cookies(); }
 
-bool GCLeaderboards::create_leaderboard(const int id, const std::string &leaderboard_name,
-                                        const GCLeaderboardSortMethod gc_leaderboard_sort_method,
-                                        const GCLeaderboardDisplayType gc_leaderboard_display_type) {
+bool GCLeaderboards::create_leaderboard(const int& id, const std::string &leaderboard_name,
+                                        const GCLeaderboardSortMethod& gc_leaderboard_sort_method,
+                                        const GCLeaderboardDisplayType& gc_leaderboard_display_type) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
@@ -115,7 +115,7 @@ bool GCLeaderboards::create_leaderboard(const int id, const std::string &leaderb
   return true;
 }
 
-void GCLeaderboards::find_leaderboard(const int id, const std::string &leaderboard_name) {
+void GCLeaderboards::find_leaderboard(const int& id, const std::string &leaderboard_name) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
@@ -139,8 +139,8 @@ void GCLeaderboards::find_leaderboard(const int id, const std::string &leaderboa
   }
 }
 
-bool GCLeaderboards::upload_score(const int id, const int score,
-                                  const GCLeaderboardUploadScoreMethod gc_leaderboard_upload_score_method) {
+bool GCLeaderboards::upload_score(const int& id, const int& score,
+                                  const GCLeaderboardUploadScoreMethod& gc_leaderboard_upload_score_method) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ == INVALID_LEADERBOARD) return false;
@@ -176,8 +176,8 @@ bool GCLeaderboards::upload_score(const int id, const int score,
   return true;
 }
 
-bool GCLeaderboards::download_scores(const int id, const GCLeaderboardDataRequest gc_leaderboard_data_request,
-                                     const int range_start, const int range_end) {
+bool GCLeaderboards::download_scores(const int& id, const GCLeaderboardDataRequest& gc_leaderboard_data_request,
+                                     const int& range_start, const int& range_end) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ == INVALID_LEADERBOARD) return false;
@@ -215,17 +215,17 @@ bool GCLeaderboards::download_scores(const int id, const GCLeaderboardDataReques
   return true;
 }
 
-void GCLeaderboards::set_current_leaderboard(const SteamLeaderboard_t leaderboard) {
+void GCLeaderboards::set_current_leaderboard(const SteamLeaderboard_t& leaderboard) {
   GCLeaderboards::current_leaderboard_ = leaderboard;
 }
 
-void GCLeaderboards::set_loading(const bool loading) { GCLeaderboards::loading_ = loading; }
+void GCLeaderboards::set_loading(const bool& loading) { GCLeaderboards::loading_ = loading; }
 
 ////////////////////////////////////////////////////////
 // Static fields & functions (AKA Wrapper functions)
 ////////////////////////////////////////////////////////
 
-std::string GCLeaderboards::get_leaderboard_name(const SteamLeaderboard_t leaderboard) {
+std::string GCLeaderboards::get_leaderboard_name(const SteamLeaderboard_t& leaderboard) {
   return std::string(SteamUserStats()->GetLeaderboardName(leaderboard));
 }
 

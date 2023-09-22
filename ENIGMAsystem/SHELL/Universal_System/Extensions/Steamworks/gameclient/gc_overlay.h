@@ -177,7 +177,7 @@ class GCOverlay {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#ActivateGameOverlayToUser
     for more information.
   */
-  inline static void activate_overlay_user(const std::string& dialog_name, const uint64 steam_id) {
+  inline static void activate_overlay_user(const std::string& dialog_name, const uint64& steam_id) {
     CSteamID c_steam_id(steam_id);
     SteamFriends()->ActivateGameOverlayToUser(dialog_name.c_str(), c_steam_id);
 #ifdef ENIGMA_STEAMWORKS_API_MOCK
@@ -198,7 +198,7 @@ class GCOverlay {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#SetOverlayNotificationInset
     for more information.
   */
-  inline static void set_overlay_notification_inset(const int horizontal_inset, const int vertical_inset) {
+  inline static void set_overlay_notification_inset(const int& horizontal_inset, const int& vertical_inset) {
     SteamUtils()->SetOverlayNotificationInset(horizontal_inset, vertical_inset);
   }
 
@@ -218,7 +218,7 @@ class GCOverlay {
   */
 #ifndef ENIGMA_STEAMWORKS_API_MOCK
   inline static void set_overlay_notification_position(
-      const GCNotificationPosition gc_notification_position = GCNotificationPosition::k_GCPosition_Invalid) {
+      const GCNotificationPosition& gc_notification_position = GCNotificationPosition::k_GCPosition_Invalid) {
     ENotificationPosition notification_position{ENotificationPosition::k_EPositionInvalid};
 
     switch (gc_notification_position) {

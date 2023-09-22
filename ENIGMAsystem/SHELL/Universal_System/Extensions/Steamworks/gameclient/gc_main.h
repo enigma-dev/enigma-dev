@@ -25,9 +25,6 @@
 #include <filesystem>
 // #include <cstdlib>
 
-typedef bool (*restart_app_if_necessary_d)(AppId_t);
-typedef bool (*steam_api_init)();
-
 namespace fs = std::filesystem;
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
@@ -56,16 +53,6 @@ class GCMain {
    * @return true when fails
    */
   inline static bool restart_app_if_necessary() {
-    if (GCMain::dynamic_path_exists_ && GCMain::dynamic_handle_ != nullptr) {
-      restart_app_if_necessary_d f = reinterpret_cast<restart_app_if_necessary_d>(
-          dlsym(GCMain::dynamic_handle_, "SteamAPI_RestartAppIfNecessary"));
-      if (f != nullptr)
-        return f(k_uAppIdInvalid);
-      else {
-        return true;
-      }
-    }
-
     return SteamAPI_RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
   }
 
@@ -88,33 +75,12 @@ class GCMain {
   // TODO: Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn
   // TODO: The path here need to be inside an env variable called `STEAM_SDK_PATH`.
   inline static bool init() {
-    // const char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
-
-    std::string dynamic_path_ {"Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so"};
-
-    GCMain::dynamic_path_exists_ = fs::exists(dynamic_path_);
-
-    DEBUG_MESSAGE("GCMain::dynamic_path_exists_ = " +std::to_string(GCMain::dynamic_path_exists_), M_INFO);
-
-    GCMain::dynamic_handle_ = dlopen(dynamic_path_.c_str(), RTLD_LAZY);
-
     if (GCMain::restart_app_if_necessary()) {
       return false;
     }
 
-    if (GCMain::dynamic_path_exists_ && GCMain::dynamic_handle_ != nullptr) {
-      steam_api_init f = reinterpret_cast<steam_api_init>(dlsym(GCMain::dynamic_handle_, "SteamAPI_Init"));
-      if (f != nullptr) {
-        if (!f()) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else {
-      if (!SteamAPI_Init()) {
-        return false;
-      }
+    if (!SteamAPI_Init()) {
+      return false;
     }
 
     if (!GameClient::is_user_logged_on()) {

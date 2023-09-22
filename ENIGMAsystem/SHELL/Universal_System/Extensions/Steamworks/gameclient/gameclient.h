@@ -109,7 +109,7 @@ class GameClient {
     check https://partner.steamgames.com/doc/api/ISteamApps#GetCurrentGameLanguage for 
     more information.
   */
-  std::string get_current_game_language();
+  bool get_current_game_language(std::string& buffer);
 
   /*
     Returns a comma separated list of the languages the current app supports. the list of 
@@ -119,7 +119,7 @@ class GameClient {
     check https://partner.steamgames.com/doc/api/ISteamApps#GetAvailableGameLanguages for 
     more information.
   */
-  std::string get_available_game_languages();
+  bool get_available_game_languages(std::string& buffer);
 
   /*
     Checks if the current user's Steam client is connected to the Steam servers.
@@ -134,7 +134,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetPersonaName for more 
     information.
   */
-  static std::string get_steam_persona_name();
+  static bool get_steam_persona_name(std::string& buffer);
 
   /*
     Returns the specified user's persona (display) name. This will only be known to 
@@ -144,7 +144,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetFriendPersonaName for 
     more information.
   */
-  static std::string get_steam_user_persona_name(const uint64 steam_id);
+  static bool get_steam_user_persona_name(std::string& buffer, const uint64& steam_id);
 
   /*
     Checks if the active user is subscribed to the current App ID. This will always 
@@ -178,7 +178,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#SetPlayedWith for more
     information.
   */
-  static void set_played_with(const uint64 steam_id);
+  static void set_played_with(const uint64& steam_id);
 
   /*
     Gets the size of a Steam image handle. This must be called before calling 
@@ -187,7 +187,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageSize for more
     information.
   */
-  static bool get_image_size(const int image, uint32* width, uint32* height);
+  static bool get_image_size(const int& image, uint32& width, uint32& height);
 
   /*
     Gets the image bytes from an image handle. Prior to calling this you must get the 
@@ -202,7 +202,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#GetImageRGBA for more
     information.
   */
-  static bool get_image_rgba(const int image, uint8* buffer, int buffer_size);
+  static bool get_image_rgba(const int& image, uint8* buffer, const int& buffer_size);
 
   /*
     Gets a handle to the small (32*32px) avatar for the specified user. You can pass in 
@@ -210,7 +210,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetSmallFriendAvatar for more
     information.
   */
-  static int32 get_small_friend_avatar(const uint64 steam_id_friend);
+  static int32 get_small_friend_avatar(const uint64& steam_id_friend);
 
   /*
     Gets a handle to the medium (64*64px) avatar for the specified user. You can pass in 
@@ -218,7 +218,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetMediumFriendAvatar for more
     information.
   */
-  static int32 get_medium_friend_avatar(const uint64 steam_id_friend);
+  static int32 get_medium_friend_avatar(const uint64& steam_id_friend);
 
   /*
     Gets a handle to the large (128*128px) avatar for the specified user. You can pass in 
@@ -226,7 +226,7 @@ class GameClient {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GetLargeFriendAvatar for more
     information.
   */
-  static int32 get_large_friend_avatar(const uint64 steam_id_friend);
+  static int32 get_large_friend_avatar(const uint64& steam_id_friend);
 
  private:
   /*

@@ -122,7 +122,7 @@ var steam_image_get_size(const int steam_image_id) {
 
   unsigned width{0}, height{0};
 
-  if (!steamworks_gc::GameClient::get_image_size(steam_image_id, &width, &height)) {
+  if (!steamworks_gc::GameClient::get_image_size(steam_image_id, width, height)) {
     DEBUG_MESSAGE(
         "Calling steam_image_get_size failed. This happens if the image handle is not "
         "valid or the sizes weren't filled out",

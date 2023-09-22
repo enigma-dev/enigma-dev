@@ -30,7 +30,7 @@ HSteamUser SteamAPI_GetHSteamUser() { return 0; }
 void *SteamInternal_ContextInit(void *pContextInitData) {
   FakeSteamContextInitData *initData = static_cast<FakeSteamContextInitData *>(pContextInitData);
 
-  initData->ptr = new void *;
+  initData->ptr = new void *; // TODO: This is a memory leak.
   void **ptr = &initData->ptr;
 
   if (initData->pFn != nullptr) {

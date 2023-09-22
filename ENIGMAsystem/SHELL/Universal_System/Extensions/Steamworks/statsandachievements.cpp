@@ -85,8 +85,7 @@ bool steam_get_achievement(const std::string& ach_name) {
 
   bool achieved{false};
 
-  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_achievement(ach_name,
-                                                                                                       &achieved)) {
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_achievement(ach_name, achieved)) {
     DEBUG_MESSAGE("Calling GetAchievement failed for '" + ach_name +
                       "'. Make sure that RequestCurrentStats has completed and successfully returned its callback and "
                       "the API Name of the specified achievement exists in App Admin on the Steamworks website, and "
@@ -132,8 +131,7 @@ void steam_set_stat_int(const std::string& stat_name, int value) {
 void steam_set_stat_float(const std::string& stat_name, float value) {
   if (!stats_and_achievements_pre_checks("steam_set_stat_float")) return;
 
-  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->set_stat_float(stat_name,
-                                                                                                      value)) {
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->set_stat_float(stat_name, value)) {
     DEBUG_MESSAGE(
         "Calling SetStat failed for '" + stat_name +
             "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
@@ -166,8 +164,7 @@ int steam_get_stat_int(const std::string& stat_name) {
 
   int32 value{-1};
 
-  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_stat_int(stat_name,
-                                                                                                    &value)) {
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_stat_int(stat_name, value)) {
     DEBUG_MESSAGE(
         "Calling GetStat failed for '" + stat_name +
             "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "
@@ -185,8 +182,7 @@ float steam_get_stat_float(const std::string& stat_name) {
 
   float value{-1.0f};
 
-  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_stat_float(stat_name,
-                                                                                                      &value)) {
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->get_stat_float(stat_name, value)) {
     DEBUG_MESSAGE(
         "Calling GetStat failed for '" + stat_name +
             "'. Make sure that RequestCurrentStats has completed and successfully returned its callback, the specified "

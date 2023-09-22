@@ -62,15 +62,29 @@ unsigned long long steam_get_user_steam_id() {
 }
 
 std::string steam_get_persona_name() {
-  if (!general_pre_checks("steam_get_persona_name")) return "";
+  std::string buffer;
 
-  return steamworks_gc::GameClient::get_steam_persona_name();
+  if (!general_pre_checks("steam_get_persona_name")) return buffer;
+
+  if(!steamworks_gc::GameClient::get_steam_persona_name(buffer)) {
+    DEBUG_MESSAGE("Calling steam_get_persona_name failed.", M_ERROR);
+    return buffer;
+  }
+
+  return buffer;
 }
 
 std::string steam_get_user_persona_name(const unsigned long long steamID) {
-  if (!general_pre_checks("steam_get_user_persona_name")) return "";
+  std::string buffer;
 
-  return steamworks_gc::GameClient::get_steam_user_persona_name(steamID);
+  if (!general_pre_checks("steam_get_user_persona_name")) return buffer;
+
+  if(!steamworks_gc::GameClient::get_steam_user_persona_name(buffer, steamID)) {
+    DEBUG_MESSAGE("Calling steam_get_user_persona_name failed.", M_ERROR);
+    return buffer;
+  }
+
+  return buffer;
 }
 
 bool steam_is_user_logged_on() {
@@ -83,15 +97,29 @@ bool steam_is_user_logged_on() {
 }
 
 std::string steam_current_game_language() {
-  if (!general_pre_checks("steam_current_game_language")) return "";
+  std::string buffer;
 
-  return steamworks_gc::GCMain::get_gameclient()->get_current_game_language();
+  if (!general_pre_checks("steam_current_game_language")) return buffer;
+
+  if(!steamworks_gc::GCMain::get_gameclient()->get_current_game_language(buffer)) {
+    DEBUG_MESSAGE("Calling steam_current_game_language failed.", M_ERROR);
+    return buffer;
+  }
+
+  return buffer;
 }
 
 std::string steam_available_languages() {
-  if (!general_pre_checks("steam_available_languages")) return "";
+  std::string buffer;
 
-  return steamworks_gc::GCMain::get_gameclient()->get_available_game_languages();
+  if (!general_pre_checks("steam_available_languages")) return buffer;
+
+  if(!steamworks_gc::GCMain::get_gameclient()->get_available_game_languages(buffer)) {
+    DEBUG_MESSAGE("Calling steam_available_languages failed.", M_ERROR);
+    return buffer;
+  }
+
+  return buffer;
 }
 
 bool steam_is_subscribed() {

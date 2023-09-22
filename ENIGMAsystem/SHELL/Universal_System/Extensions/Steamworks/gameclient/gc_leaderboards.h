@@ -86,32 +86,32 @@ class GCLeaderboards {
   GCLeaderboards();
   ~GCLeaderboards();
 
-  bool create_leaderboard(const int id, const std::string& leaderboard_name,
-                          const GCLeaderboardSortMethod gc_leaderboard_sort_method =
+  bool create_leaderboard(const int& id, const std::string& leaderboard_name,
+                          const GCLeaderboardSortMethod& gc_leaderboard_sort_method =
                               GCLeaderboardSortMethod::k_GCLeaderboardSortMethod_None,
-                          const GCLeaderboardDisplayType gc_leaderboard_display_type =
+                          const GCLeaderboardDisplayType& gc_leaderboard_display_type =
                               GCLeaderboardDisplayType::k_GCLeaderboardDisplayType_None);
 
-  void find_leaderboard(const int id, const std::string& leaderboard_name);
+  void find_leaderboard(const int& id, const std::string& leaderboard_name);
 
   /*
     Uploads a user score to a specified leaderboard. Uploading scores to Steam is rate limited to 10 uploads 
     per 10 minutes and you may only have one outstanding call to this function at a time. Calls UploadLeaderboardScore.
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for more information.
   */
-  bool upload_score(const int id, const int score,
-                    const GCLeaderboardUploadScoreMethod gc_leaderboard_upload_score_method =
+  bool upload_score(const int& id, const int& score,
+                    const GCLeaderboardUploadScoreMethod& gc_leaderboard_upload_score_method =
                         GCLeaderboardUploadScoreMethod::k_GCLeaderboardUploadScoreMethod_None);
 
-  bool download_scores(const int id,
-                       const GCLeaderboardDataRequest gc_leaderboard_data_request =
+  bool download_scores(const int& id,
+                       const GCLeaderboardDataRequest& gc_leaderboard_data_request =
                            GCLeaderboardDataRequest::k_GCLeaderboardDataRequest_Global,
-                       const int range_start = -1, const int range_end = -1);
+                       const int& range_start = -1, const int& range_end = -1);
 
-  void set_current_leaderboard(const SteamLeaderboard_t leaderboard);
-  void set_loading(const bool loading);
+  void set_current_leaderboard(const SteamLeaderboard_t& leaderboard);
+  void set_loading(const bool& loading);
 
-  static std::string get_leaderboard_name(const SteamLeaderboard_t leaderboard);
+  static std::string get_leaderboard_name(const SteamLeaderboard_t& leaderboard);
 
  private:
   SteamLeaderboard_t current_leaderboard_;

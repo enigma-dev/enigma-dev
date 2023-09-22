@@ -16,3 +16,7 @@
 **/
 
 #include "steam/steam_api.h"
+
+#ifndef ENIGMA_FAKE_STEAMWORKS_API
+#define ENIGMA_FAKE_STEAMWORKS_API
+#endif  // ENIGMA_FAKE_STEAMWORKS_API

@@ -41,13 +41,13 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
   leaderboard_entries_buffer << '\"' << "entries" << '\"' << ':';
   leaderboard_entries_buffer << '[';  // Entries array open bracket
 
+  std::string name_buffer;
   for (unsigned i{0}; i < leaderboard_entries_size; i++) {
+    GameClient::get_steam_user_persona_name(name_buffer, leaderboard_entries[i].m_steamIDUser.ConvertToUint64());
+
     leaderboard_entries_buffer << '{';
     leaderboard_entries_buffer << '\"' << "name" << '\"' << ':';
-    leaderboard_entries_buffer << '\"'
-                               << GameClient::get_steam_user_persona_name(
-                                      leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
-                               << '\"' << ',';
+    leaderboard_entries_buffer << '\"' << name_buffer << '\"' << ',';
     leaderboard_entries_buffer << '\"' << "score" << '\"' << ':';
     leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nScore) << ',';
     leaderboard_entries_buffer << '\"' << "rank" << '\"' << ':';
@@ -111,7 +111,7 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
   // Leaderboard entries handle will be invalid once we return from this function. Copy all data now.
   const int number_of_leaderboard_entries =
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
-  for (unsigned index {0}; index < (unsigned)number_of_leaderboard_entries; index++) {
+  for (unsigned index{0}; index < (unsigned)number_of_leaderboard_entries; index++) {
     SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
                                                     &leaderboard_entries[index], nullptr, 0);
   }

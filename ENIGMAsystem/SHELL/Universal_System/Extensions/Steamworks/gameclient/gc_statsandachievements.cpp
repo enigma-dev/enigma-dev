@@ -53,32 +53,32 @@ bool GCStatsAndAchievements::set_achievement(const std::string& achievement_name
   return GCStatsAndAchievements::steam_user_stats_->SetAchievement(achievement_name.c_str());
 }
 
-bool GCStatsAndAchievements::get_achievement(const std::string& achievement_name, bool* achieved) {
-  return GCStatsAndAchievements::steam_user_stats_->GetAchievement(achievement_name.c_str(), achieved);
+bool GCStatsAndAchievements::get_achievement(const std::string& achievement_name, bool& achieved) {
+  return GCStatsAndAchievements::steam_user_stats_->GetAchievement(achievement_name.c_str(), &achieved);
 }
 
 bool GCStatsAndAchievements::clear_achievement(const std::string& achievement_name) {
   return GCStatsAndAchievements::steam_user_stats_->ClearAchievement(achievement_name.c_str());
 }
 
-bool GCStatsAndAchievements::set_stat_int(const std::string& stat_name, const int32 value) {
+bool GCStatsAndAchievements::set_stat_int(const std::string& stat_name, const int32& value) {
   return GCStatsAndAchievements::steam_user_stats_->SetStat(stat_name.c_str(), value);
 }
 
-bool GCStatsAndAchievements::get_stat_int(const std::string& stat_name, int32* value) {
-  return GCStatsAndAchievements::steam_user_stats_->GetStat(stat_name.c_str(), value);
+bool GCStatsAndAchievements::get_stat_int(const std::string& stat_name, int32& value) {
+  return GCStatsAndAchievements::steam_user_stats_->GetStat(stat_name.c_str(), &value);
 }
 
-bool GCStatsAndAchievements::set_stat_float(const std::string& stat_name, const float value) {
+bool GCStatsAndAchievements::set_stat_float(const std::string& stat_name, const float& value) {
   return GCStatsAndAchievements::steam_user_stats_->SetStat(stat_name.c_str(), value);
 }
 
-bool GCStatsAndAchievements::get_stat_float(const std::string& stat_name, float* value) {
-  return GCStatsAndAchievements::steam_user_stats_->GetStat(stat_name.c_str(), value);
+bool GCStatsAndAchievements::get_stat_float(const std::string& stat_name, float& value) {
+  return GCStatsAndAchievements::steam_user_stats_->GetStat(stat_name.c_str(), &value);
 }
 
-bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name, const float count_this_session,
-                                                   const double session_length) {
+bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name, const float& count_this_session,
+                                                   const double& session_length) {
   return GCStatsAndAchievements::steam_user_stats_->UpdateAvgRateStat(stat_name.c_str(), count_this_session,
                                                                       session_length);
 }

@@ -79,7 +79,7 @@ class GCStatsAndAchievements {
     Gets the unlock status of the Achievement. Calls GetAchievement() function. 
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#GetAchievement for more information.
   */
-  bool get_achievement(const std::string& achievement_name, bool* achieved);
+  bool get_achievement(const std::string& achievement_name, bool& achieved);
 
   /*
     NOTE:   This is primarily only ever used for testing.
@@ -107,7 +107,7 @@ class GCStatsAndAchievements {
 
       2.  Calls gc_statsandachievements::store_stats() function to store the stats.
   */
-  bool set_stat_int(const std::string& stat_name, const int32 value);
+  bool set_stat_int(const std::string& stat_name, const int32& value);
 
   /*
     NOTE:   This is the int overload.
@@ -117,7 +117,7 @@ class GCStatsAndAchievements {
     callback prior to calling this. Calls GetStat() function. 
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#GetStat for more information.
   */
-  bool get_stat_int(const std::string& stat_name, int32* value);
+  bool get_stat_int(const std::string& stat_name, int32& value);
 
   /*
     NOTE:   This is the float overload.
@@ -133,7 +133,7 @@ class GCStatsAndAchievements {
 
       2.  Calls gc_statsandachievements::store_stats() function to store the stats.
   */
-  bool set_stat_float(const std::string& stat_name, const float value);
+  bool set_stat_float(const std::string& stat_name, const float& value);
 
   /*
     NOTE:   This is the float overload.
@@ -143,7 +143,7 @@ class GCStatsAndAchievements {
     callback prior to calling this. Calls GetStat() function. 
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#GetStat for more information.
   */
-  bool get_stat_float(const std::string& stat_name, float* value);
+  bool get_stat_float(const std::string& stat_name, float& value);
 
   /*
     This function has two important steps:
@@ -158,7 +158,7 @@ class GCStatsAndAchievements {
 
       2.  Calls gc_statsandachievements::store_stats() function to store the stats.
   */
-  bool set_stat_average_rate(const std::string& stat_name, const float count_this_session, const double session_length);
+  bool set_stat_average_rate(const std::string& stat_name, const float& count_this_session, const double& session_length);
 
   /*
     Gets the current value of the a stat for the current user. You must have called 
