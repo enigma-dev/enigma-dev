@@ -58,7 +58,8 @@ std::vector<std::byte> serialize_to_type(variant &value, buffer_data_t type);
  * @param type The type to be deserialized to
  * @return variant The deserialized form of the bytes contained between the iterators represented as @c type
  */
-variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last, buffer_data_t type);
+variant deserialize_from_type(std::vector<std::byte>::iterator first, std::vector<std::byte>::iterator last,
+                              buffer_data_t type);
 
 /**
  * @brief Creates a new buffer
@@ -123,7 +124,8 @@ void buffer_delete(buffer_t buffer);
  * @param dest_buffer The handle to the buffer into which the copied data has to be written
  * @param dest_offset The offset into the destination buffer where writing begins from
  */
-void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer, std::size_t dest_offset);
+void buffer_copy(buffer_t src_buffer, std::size_t src_offset, std::size_t size, buffer_t dest_buffer,
+                 std::size_t dest_offset);
 
 /**
  * @brief Write a buffer's bytes to a file
@@ -222,7 +224,8 @@ void buffer_load_ext(buffer_t buffer, std::string filename, std::size_t offset);
  * @param src_len The number of bytes to read from the file
  * @param dest_offset The offset into the buffer where the write will being from
  */
-void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len, std::size_t dest_offset);
+void buffer_load_partial(buffer_t buffer, std::string filename, std::size_t src_offset, std::size_t src_len,
+                         std::size_t dest_offset);
 
 /**
  * @brief Compress the contents of a buffer using the zlib library
@@ -353,7 +356,6 @@ std::string buffer_sha1(buffer_t buffer, std::size_t offset, std::size_t size);
  * @return An integer containing the crc32 checksum of the buffer
  */
 variant buffer_crc32(buffer_t buffer, std::size_t offset, std::size_t size);
-
 
 /**
  * @brief Get the address of a buffer
@@ -488,7 +490,6 @@ std::size_t buffer_sizeof(buffer_data_t type);
  */
 std::size_t buffer_tell(buffer_t buffer);
 
-
 /**
  * @brief Get the data element at a offset in a buffer
  *
@@ -569,7 +570,9 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
 /**
  * @brief Serialize the game state (objects, backgrounds and room index) into a buffer
  *
- * This function serializes (in the following order):
+ * This function has two options of serialization formats: a binary format and a JSON format, the JSON format is the default
+ *
+ * If you choose the binary format, the function will serialize (in the following order):
  * - The number of active objects
  * - The active objects themselves
  * - The number of inactive objects
@@ -621,9 +624,9 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *     std::vector<std::byte> serialized = assets_[i].serialize();
  *     // ...
  *   }
- * } else if constexpr (HAS_SERIALIZE_FUNCTION()) {
+ * } else if constexpr (HAS_INTERNAL_SERIALIZE_FUNCTION()) {
  *   for (std::size_t i = 0; i < assets_.size(); i++) {
- *     enigma::enigma_internal_serialize(operator[](i), len, result);
+ *     enigma::bytes_serialization::enigma_serialize(operator[](i), len, result);
  *     // ...
  *   }
  * }
@@ -631,7 +634,7 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *
  * Both of the functions used in the <tt> if constexpr </tt> blocks are defined in @c detect_serialization.h . The first
  * one, <tt> has_serialize_method_v<T> </tt>, checks if the object has a method of the form <tt> object.serialize() </tt>
- * following the type given before. The second one, <tt> HAS_SERIALIZE_FUNCTION() </tt>, checks if the <tt> enigma::serialize </tt>
+ * following the type given before. The second one, <tt> HAS_INTERNAL_SERIALIZE_FUNCTION() </tt>, checks if the <tt> enigma::serialize </tt>
  * function is invocable with the object's type. Together, these allow handling both cases of <tt> object.serialize() </tt>
  * and <tt> serialize(object) </tt>.
  *
@@ -667,11 +670,149 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  * │000001c0│ 85 c7 7f c5 91 0c       ┊                         │××•××_  ┊        │
  * └────────┴─────────────────────────┴─────────────────────────┴────────┴────────┘
  *
+ * If you choose the JSON format, the function will serialize (in the following order):
+ * - The active objects
+ * - The inactive objects
+ * - @c enigma::backgrounds
+ * - The current room index
+ * - A SHA1-checksum
+ * 
+ * The serialization for objects works in the following manner: for each class in the object hierarchy, a leading key-value pair
+ * is emitted to identify the object and verify that the data following it is valid. The key is "object_type" and the values are:
+ * - @c object_basic : @c "object_basic"
+ * - @c object_planar : @c "object_planar"
+ * - @c object_timelines : @c "object_timelines"
+ * - @c object_graphics : @c "object_graphics"
+ * - @c object_transform : @c "object_transform"
+ * - @c object_collisions : @c "object_collisions"
+ * - Any user defined object : @c "locals", but this one is the key for the object's local variables 
+ * 
+ * These leading key-value pairs are then followed by the data of each class.
+ * 
+ * An example of the serialized state may look like the following:
+ * 
+ * @code{.json}
+ * {
+ * "instance_list": [
+ *   {
+ *     "obj": {
+ *       "event_parent": {
+ *         "object_type": "object_collisions",
+ *         "parent": {
+ *           "object_type": "object_transform",
+ *           "parent": {
+ *             "object_type": "object_graphics",
+ *             "parent": {
+ *               "object_type": "object_timelines",
+ *               "parent": {
+ *                 "object_type": "object_planar",
+ *                 "parent": {
+ *                   "object_type": "object_basic",
+ *                   "id": 100001,
+ *                   "object_index": 0
+ *                 },
+ *                 "x": 0,
+ *                 "y": 0,
+ *                 "xprevious": 0,
+ *                 "yprevious": 0,
+ *                 "xstart": 0,
+ *                 "ystart": 0,
+ *                 "persistent": "false",
+ *                 "direction": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "speed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "hspeed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "vspeed": {
+ *                   "type": "real",
+ *                   "value": 0
+ *                 },
+ *                 "gravity": 0,
+ *                 "gravity_direction": 270,
+ *                 "friction": 0
+ *               },
+ *               "timeline_moments_maps": [],
+ *               "timeline_index": -1,
+ *               "timeline_running": "false",
+ *               "timeline_speed": 1,
+ *               "timeline_position": 0,
+ *               "timeline_loop": "false"
+ *             },
+ *             "sprite_index": -1,
+ *             "image_index": 0,
+ *             "image_speed": 1,
+ *             "image_single": {
+ *               "type": "real",
+ *               "value": -1
+ *             },
+ *             "depth": {
+ *               "type": "real",
+ *               "value": 0
+ *             },
+ *             "visible": "true",
+ *             "image_xscale": 1,
+ *             "image_yscale": 1,
+ *             "image_angle": 0
+ *           },
+ *           "image_alpha": 1,
+ *           "image_blend": 16777215
+ *         },
+ *         "mask_index": -1,
+ *         "solid": "false",
+ *         "polygon_index": -1,
+ *         "polygon_xscale": 1,
+ *         "polygon_yscale": 1,
+ *         "polygon_angle": 0
+ *       },
+ *       "vmap": {}
+ *     },
+ *     "locals": [
+ *       {
+ *         "name": "mydouble",
+ *         "data": {
+ *           "variant": {
+ *             "type": "real",
+ *             "value": 1.2345
+ *           },
+ *           "array1d": [],
+ *           "array2d": []
+ *         }
+ *       },
+ *       {
+ *         "name": "myuint8_t",
+ *         "data": {
+ *           "variant": {
+ *             "type": "real",
+ *             "value": 255
+ *           },
+ *           "array1d": [],
+ *           "array2d": []
+ *         }
+ *       }
+ *     ]
+ *   }
+ * ],
+ * "instance_deactivated_list": [],
+ * "backgrounds": [],
+ * "room_index": 0
+ * }
+ * @endcode
+ * 
  * @see game_load_buffer
  *
  * @param buffer The buffer to store the game state into
+ * @param backend The format to store the game state with
  */
-void game_save_buffer(buffer_t buffer);
+enum class SerializationBackend { JSON, Binary };
+
+void game_save_buffer(buffer_t buffer, enum SerializationBackend backend = SerializationBackend::JSON);
 
 /**
  * @brief Load previously saved state from a buffer
@@ -679,16 +820,17 @@ void game_save_buffer(buffer_t buffer);
  * This function firstly checks the checksum of the buffer's data. If it matches the checksum written at the end of the
  * buffer, it proceeds with deserializing the state written in the buffer. Before deserializing anything, however,
  * it clears the active and inactive instance lists to avoid issues with clashing object IDs. It then deserializes each
- * object by reading its object index (a unique identifier for each type), and calling the virtual @c deserialize_self()
- * function of the object after using <tt> enigma::instance_create_id </tt> to create the specific object type. After
- * checking the header of the <tt> enigma::backgrounds </tt> data, it reads that as well and verifies the footer. Finally,
- * it reads the room index and calls <tt> enigma::room_goto </tt> with the index.
+ * object by reading its object index (a unique identifier for each type), and calling the virtual @c deserialize_self()/
+ * @c json_deserialize_self() function of the object after using <tt> enigma::instance_create_id </tt> to create the specific
+ * object type. After checking the header of the <tt> enigma::backgrounds </tt> data, it reads that as well and verifies the
+ * footer. Finally, it reads the room index and calls <tt> enigma::room_goto </tt> with the index.
  *
  * @see game_save_buffer
  *
  * @param buffer The buffer to load the game state from
+ * @param backend The format to load the game state from
  */
-void game_load_buffer(buffer_t buffer);
+void game_load_buffer(buffer_t buffer, enum SerializationBackend backend = SerializationBackend::JSON);
 
 }  //namespace enigma_user
 

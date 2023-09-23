@@ -1,5 +1,6 @@
 /** Copyright (C) 2014 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -63,10 +64,15 @@ namespace enigma
     void loop_curr_timeline();
     virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
 
-    // Serialization and deserialization
-    std::vector<std::byte> serialize() override;
+    // Bytes (de)Serialization
+    std::vector<std::byte> serialize() const override;
     std::size_t deserialize_self(std::byte *iter) override;
     static std::pair<object_timelines, std::size_t> deserialize(std::byte *iter);
+
+    // JSON (de)Serialization 
+    std::string json_serialize() const override;
+    void json_deserialize_self(const std::string &json) override;
+    static object_timelines json_deserialize(const std::string &json);
   };
 } //namespace enigma
 

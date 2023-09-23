@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,13 +17,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include "Universal_System/var4.h"
 #include "Universal_System/reflexive_types.h"
 #include "object.h"
 #include "libEGMstd.h"
-#include "serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "../Serialization/serialization.h"
+#include "Universal_System/Resources/AssetArray.h"
 
 #ifdef DEBUG_MODE
   #include "Universal_System/Instances/instance_system.h"
@@ -34,7 +35,6 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include "Universal_System/Resources/AssetArray.h"
 
 namespace enigma
 {
@@ -90,27 +90,27 @@ namespace enigma
             objectdata[objs[i].id] = &objs[i];
     }
 
-    std::vector<std::byte> object_basic::serialize() {
+    std::vector<std::byte> object_basic::serialize() const {
       std::vector<std::byte> bytes{};
       std::size_t len = 0;
 
-      enigma_internal_serialize<unsigned char>(object_basic::objtype, len, bytes);
-      enigma_internal_serialize(id, len, bytes);
-      enigma_internal_serialize(object_index, len, bytes);
+      enigma::bytes_serialization::enigma_serialize<unsigned char>(object_basic::objtype, len, bytes);
+      enigma::bytes_serialization::enigma_serialize(id, len, bytes);
+      enigma::bytes_serialization::enigma_serialize(object_index, len, bytes);
 
       bytes.shrink_to_fit();
       return bytes;
     }
 
     std::size_t object_basic::deserialize_self(std::byte *iter) {
-      auto type = enigma::deserialize<unsigned char>(iter);
+      auto type =  enigma::bytes_serialization::internal_deserialize<unsigned char>(iter);
       if (type != object_basic::objtype) {
         DEBUG_MESSAGE("object_basic::deserialize_self: Object type '" + std::to_string(type) +
                       "' does not match expected: " + std::to_string(object_basic::objtype),
                       MESSAGE_TYPE::M_FATAL_ERROR);
       } else {
-        *const_cast<unsigned int *>(&id) = enigma::deserialize<unsigned int>(iter + 1);
-        *const_cast<int *>(&object_index) = enigma::deserialize<int>(iter + 1 + sizeof(id));
+        *const_cast<unsigned int *>(&id) = enigma::bytes_serialization::internal_deserialize<unsigned int>(iter + 1);
+        *const_cast<int *>(&object_index) = enigma::bytes_serialization::internal_deserialize<int>(iter + 1 + sizeof(id));
       }
       return sizeof(id) + sizeof(object_index) + 1;
     }
@@ -119,6 +119,39 @@ namespace enigma
       object_basic result;
       auto len = result.deserialize_self(iter);
       return {std::move(result), len};
+    }
+
+    std::string object_basic::json_serialize() const {
+      std::stringstream json ;
+      json << "{";
+      
+      json << "\"object_type\":\"object_basic\",";
+      json << "\"id\":" + enigma::JSON_serialization::enigma_serialize(id) + ",";
+      json << "\"object_index\":" + enigma::JSON_serialization::enigma_serialize(object_index);
+
+      json << "}";
+
+      return json.str();
+    }
+
+    void object_basic::json_deserialize_self(const std::string &json) {
+      std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+      if (type != "object_basic") {
+        DEBUG_MESSAGE(
+          "object_basic::json_deserialize_self: Object type '" + type + "' does not match expected: object_basic",
+          MESSAGE_TYPE::M_FATAL_ERROR);
+      } else {
+        *const_cast<unsigned int *>(&id) =
+        enigma::JSON_serialization::enigma_deserialize<unsigned int>(enigma::JSON_serialization::json_find_value(json,"id"));
+        *const_cast<int *>(&object_index) =
+        enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"object_index"));
+      }
+    }
+
+    object_basic object_basic::json_deserialize(const std::string &json) {
+      object_basic result;
+      result.json_deserialize_self(json);
+      return result;
     }
 }
 

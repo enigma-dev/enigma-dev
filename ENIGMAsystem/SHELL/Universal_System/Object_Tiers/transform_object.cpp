@@ -1,4 +1,5 @@
 /** Copyright (C) 2010-2011 Josh Ventura
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -22,7 +23,7 @@
 
 #include "transform_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
@@ -31,13 +32,13 @@ namespace enigma
   object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
   object_transform::~object_transform() {}
 
-  std::vector<std::byte> object_transform::serialize() {
+  std::vector<std::byte> object_transform::serialize() const {
     auto bytes = object_graphics::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_transform::objtype, len, bytes);
-    enigma_internal_serialize(image_alpha, len, bytes);
-    enigma_internal_serialize(image_blend, len, bytes);
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_transform::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize(image_alpha, len, bytes);
+    enigma::bytes_serialization::enigma_serialize(image_blend, len, bytes);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -47,14 +48,14 @@ namespace enigma
     auto len = object_graphics::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_transform::objtype) {
       DEBUG_MESSAGE("object_transform::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_transform::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize(image_alpha, iter, len);
-    enigma_internal_deserialize(image_blend, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(image_alpha, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(image_blend, iter, len);
 
     return len;
   }
@@ -63,5 +64,39 @@ namespace enigma
     object_transform result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_transform::json_serialize() const {
+    std::stringstream json;
+    json << "{";
+
+    json << "\"object_type\":\"object_transform\",";
+    json << "\"parent\":" + object_graphics::json_serialize() + ",";
+    json << "\"image_alpha\":" + enigma::JSON_serialization::enigma_serialize(image_alpha) + ",";
+    json << "\"image_blend\":" + enigma::JSON_serialization::enigma_serialize(image_blend);
+
+    json << "}";
+
+    return json.str();  
+  }
+
+  void object_transform::json_deserialize_self(const std::string& json) {
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    if (type != "object_transform") {
+      DEBUG_MESSAGE("object_transform::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_transform",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    object_graphics::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
+
+    image_alpha = enigma::JSON_serialization::enigma_deserialize<double>(enigma::JSON_serialization::json_find_value(json,"image_alpha"));
+    image_blend = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"image_blend"));
+  }
+
+  object_transform object_transform::josn_deserialize(const std::string& json){
+    object_transform result;
+    result.json_deserialize_self(json);
+    return result;
   }
 }

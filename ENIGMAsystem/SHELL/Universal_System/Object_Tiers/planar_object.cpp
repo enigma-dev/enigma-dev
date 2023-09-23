@@ -1,6 +1,7 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2011-2012 polygone
 *** Copyright (C) 2013 Robert B Colton, canthelp
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -28,7 +29,7 @@
 
 #include "Universal_System/var4.h"
 #include "object.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -75,16 +76,16 @@ namespace enigma
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
 
-  std::vector<std::byte> object_planar::serialize() {
+  std::vector<std::byte> object_planar::serialize() const {
     std::vector<std::byte> bytes = object_basic::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_planar::objtype, len, bytes);
-    enigma_internal_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_planar::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
 #ifdef ISLOCAL_persistent
-    enigma_internal_serialize(persistent, len, bytes);
+    enigma::bytes_serialization::enigma_serialize(persistent, len, bytes);
 #endif
-    enigma_internal_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
     bytes.shrink_to_fit();
     return bytes;
@@ -94,17 +95,17 @@ namespace enigma
     auto len = object_basic::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_planar::objtype) {
       DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_planar::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
 #ifdef ISLOCAL_persistent
-    enigma_internal_deserialize(persistent, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(persistent, iter, len);
 #endif
-    enigma_internal_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
 
     hspeed.vspd    = &vspeed.rval.d;
     hspeed.dir     = &direction.rval.d;
@@ -129,6 +130,84 @@ namespace enigma
     object_planar result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_planar::json_serialize() const {
+    std::stringstream json ;
+    json << "{";
+
+    json << "\"object_type\":\"object_planar\",";
+    json << "\"parent\":" + object_basic::json_serialize()+ ",";
+    json << "\"x\":" + enigma::JSON_serialization::enigma_serialize(x) + ",";
+    json << "\"y\":" + enigma::JSON_serialization::enigma_serialize(y) + ",";
+    json << "\"xprevious\":" + enigma::JSON_serialization::enigma_serialize(xprevious) + ",";
+    json << "\"yprevious\":" + enigma::JSON_serialization::enigma_serialize(yprevious) + ",";
+    json << "\"xstart\":" + enigma::JSON_serialization::enigma_serialize(xstart) + ",";
+    json << "\"ystart\":" + enigma::JSON_serialization::enigma_serialize(ystart) + ",";
+#ifdef ISLOCAL_persistent
+    json << "\"persistent\":" + enigma::JSON_serialization::enigma_serialize(persistent) + ",";
+#endif
+    json << "\"direction\":" + enigma::JSON_serialization::enigma_serialize(direction) + ",";
+    json << "\"speed\":" + enigma::JSON_serialization::enigma_serialize(speed) + ",";
+    json << "\"hspeed\":" + enigma::JSON_serialization::enigma_serialize(hspeed) + ",";
+    json << "\"vspeed\":" + enigma::JSON_serialization::enigma_serialize(vspeed) + ",";
+    json << "\"gravity\":" + enigma::JSON_serialization::enigma_serialize(gravity) + ",";
+    json << "\"gravity_direction\":" + enigma::JSON_serialization::enigma_serialize(gravity_direction) + ",";
+    json << "\"friction\":" + enigma::JSON_serialization::enigma_serialize(friction);
+
+    json << "}";
+
+    return json.str();
+  }
+
+  void object_planar::json_deserialize_self(const std::string &json) {
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    if (type != "object_planar") {
+      DEBUG_MESSAGE("object_planar::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_planar",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    object_basic::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
+
+    x = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"x"));
+    y = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"y"));
+    xprevious = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xprevious"));
+    yprevious = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"yprevious"));
+    xstart = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"xstart"));
+    ystart = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"ystart"));
+#ifdef ISLOCAL_persistent
+    persistent = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"persistent"));
+#endif
+    direction = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"direction"));
+    speed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"speed"));
+    hspeed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"hspeed"));
+    vspeed = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"vspeed"));
+    gravity = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity"));
+    gravity_direction = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"gravity_direction"));
+    friction = enigma::JSON_serialization::enigma_deserialize<cs_scalar>(enigma::JSON_serialization::json_find_value(json,"friction"));
+
+    hspeed.vspd    = &vspeed.rval.d;
+    hspeed.dir     = &direction.rval.d;
+    hspeed.spd     = &speed.rval.d;
+
+    vspeed.hspd    = &hspeed.rval.d;
+    vspeed.dir     = &direction.rval.d;
+    vspeed.spd     = &speed.rval.d;
+
+    direction.spd  = &speed.rval.d;
+    direction.hspd = &hspeed.rval.d;
+    direction.vspd = &vspeed.rval.d;
+
+    speed.dir      = &direction.rval.d;
+    speed.hspd     = &hspeed.rval.d;
+    speed.vspd     = &vspeed.rval.d;
+  }
+
+  object_planar object_planar::json_deserialize(const std::string& json){
+    object_planar result;
+    result.json_deserialize_self(json);
+    return result;
   }
 
   void propagate_locals(object_planar* instance)

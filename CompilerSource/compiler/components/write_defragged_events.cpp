@@ -43,7 +43,7 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "#include <vector>\n";
   wto << "#include <cstddef>\n";
-  wto << "#include \"Universal_System/Object_Tiers/serialization.h\"\n";
+  wto << "#include \"Universal_System/Serialization/serialization.h\"\n";
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
   for (size_t i = 0; i < game.timelines.size(); i++) {
@@ -61,12 +61,19 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-  wto << "    std::vector<std::byte> serialize() override { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
+  wto << "    std::vector<std::byte> serialize() const override { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
   wto << "    std::size_t deserialize_self(std::byte *iter) override { return " << system_get_uppermost_tier() << "::deserialize_self(iter); }\n\n";
   wto << "    std::pair<event_parent, std::size_t> deserialize(std::byte *iter) {\n"
          "      event_parent result;\n"
          "      auto len = result.deserialize_self(iter);\n"
          "      return {std::move(result), len};\n"
+         "    }\n\n";
+  wto << "    std::string json_serialize() const override { return " << system_get_uppermost_tier() << "::json_serialize(); }\n\n";
+  wto << "    void json_deserialize_self(const std::string &json) override { return " << system_get_uppermost_tier() << "::json_deserialize_self(json); }\n\n";
+  wto << "    event_parent json_deserialize(const std::string json) {\n"
+         "      event_parent result;\n"
+         "      result.json_deserialize_self(json);\n"
+         "      return result;\n"
          "    }\n\n";
 
   for (const auto &event : used_events) {

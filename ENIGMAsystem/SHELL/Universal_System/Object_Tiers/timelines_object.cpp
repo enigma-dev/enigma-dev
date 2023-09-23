@@ -2,6 +2,7 @@
 *** Copyright (C) 2011-2012 polygone
 *** Copyright (C) 2014 Robert B Colton, canthelp
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -25,7 +26,7 @@
 
 #include "timelines_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 namespace enigma
@@ -102,21 +103,21 @@ namespace enigma
     }
   }
 
-  std::vector<std::byte> object_timelines::serialize() {
+  std::vector<std::byte> object_timelines::serialize() const {
     auto bytes = object_planar::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_timelines::objtype, len, bytes);
-    enigma_internal_serialize(timeline_moments_maps.size(), len, bytes);
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_timelines::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize(timeline_moments_maps.size(), len, bytes);
     for (auto &map : timeline_moments_maps) {
-      enigma_internal_serialize(map.size(), len, bytes);
+      enigma::bytes_serialization::enigma_serialize(map.size(), len, bytes);
       for (auto &[key, value]: map) {
-        enigma_internal_serialize(key, len, bytes);
-        enigma_internal_serialize(value, len, bytes);
+        enigma::bytes_serialization::enigma_serialize(key, len, bytes);
+        enigma::bytes_serialization::enigma_serialize(value, len, bytes);
       }
     }
 
-    enigma_internal_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, timeline_index, timeline_running, timeline_speed,
                                    timeline_position, timeline_loop);
 
     bytes.shrink_to_fit();
@@ -127,28 +128,28 @@ namespace enigma
     auto len = object_planar::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_timelines::objtype) {
       DEBUG_MESSAGE("object_timelines::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_timelines::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
     std::size_t timeline_maps_len{};
-    enigma_internal_deserialize(timeline_maps_len, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(timeline_maps_len, iter, len);
     timeline_moments_maps.resize(timeline_maps_len);
     for (auto &map: timeline_moments_maps) {
       std::size_t map_len{};
-      enigma_internal_deserialize(map_len, iter, len);
+      enigma::bytes_serialization::enigma_deserialize(map_len, iter, len);
       for (std::size_t i = 0; i < map_len; i++) {
         int key{};
         int value{};
-        enigma_internal_deserialize(key, iter, len);
-        enigma_internal_deserialize(value, iter, len);
+        enigma::bytes_serialization::enigma_deserialize(key, iter, len);
+        enigma::bytes_serialization::enigma_deserialize(value, iter, len);
         map[key] = value;
       }
     }
 
-    enigma_internal_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, timeline_index, timeline_running, timeline_speed, timeline_position,
                                      timeline_loop);
 
     return len;
@@ -158,5 +159,47 @@ namespace enigma
     object_timelines result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_timelines::json_serialize() const {
+    std::stringstream json ;
+    json << "{";
+    
+    json << "\"object_type\":\"object_timelines\",";
+    json << "\"parent\":" + object_planar::json_serialize() + ",";;
+    json << "\"timeline_moments_maps\":" + enigma::JSON_serialization::enigma_serialize(timeline_moments_maps) + ","; 
+    json << "\"timeline_index\":" + enigma::JSON_serialization::enigma_serialize(timeline_index) + ",";
+    json << "\"timeline_running\":" + enigma::JSON_serialization::enigma_serialize(timeline_running) + ",";
+    json << "\"timeline_speed\":" + enigma::JSON_serialization::enigma_serialize(timeline_speed) + ",";
+    json << "\"timeline_position\":" + enigma::JSON_serialization::enigma_serialize(timeline_position) + ",";
+    json << "\"timeline_loop\":" + enigma::JSON_serialization::enigma_serialize(timeline_loop);
+
+    json << "}";
+
+    return json.str();
+  }
+
+  void object_timelines::json_deserialize_self(const std::string &json) {
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    if (type != "object_timelines") {
+      DEBUG_MESSAGE(
+          "object_timelines::json_deserialize_self: Object type '" + type + "' does not match expected: object_timelines",
+          MESSAGE_TYPE::M_FATAL_ERROR);
+    } 
+
+      object_planar::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
+    
+      timeline_moments_maps = enigma::JSON_serialization::enigma_deserialize<std::vector<std::map<int, int>>>(enigma::JSON_serialization::json_find_value(json,"timeline_moments_maps"));
+      timeline_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"timeline_index"));
+      timeline_running = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"timeline_running"));
+      timeline_speed = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"timeline_speed"));
+      timeline_position = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"timeline_position"));
+      timeline_loop = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"timeline_loop"));
+  }
+
+  object_timelines object_timelines::json_deserialize(const std::string &json){
+    object_timelines result;
+    result.json_deserialize_self(json);
+    return result;
   }
 }

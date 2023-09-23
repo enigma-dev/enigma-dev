@@ -1,4 +1,5 @@
 /** Copyright (C) 2010-2011 Josh Ventura
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -39,10 +40,15 @@ namespace enigma
       object_transform(unsigned x, int y);
       virtual ~object_transform();
 
-    // Serialization and deserialization
-      std::vector<std::byte> serialize() override;
+    // Bytes (de)Serialization
+      std::vector<std::byte> serialize() const override;
       std::size_t deserialize_self(std::byte *iter) override;
       static std::pair<object_transform, std::size_t> deserialize(std::byte *iter);
+
+    // JSON (de)Serialization
+      std::string json_serialize() const override;
+      void json_deserialize_self(const std::string& json) override;
+      static object_transform josn_deserialize(const std::string& json);
   };
 } //namespace ennigma
 

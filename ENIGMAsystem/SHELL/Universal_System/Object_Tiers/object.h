@@ -3,6 +3,7 @@
 **  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **  Copyright (C) 2021 Nabeel Danish                                            **
+**  Copyright (C) 2023 Fares Atef                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -76,9 +77,15 @@ namespace enigma
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();
 
-      virtual std::vector<std::byte> serialize();
+      // Bytes (de)Serialization
+      virtual std::vector<std::byte> serialize() const;
       virtual std::size_t deserialize_self(std::byte *iter);
       static std::pair<object_basic, std::size_t> deserialize(std::byte *iter);
+
+      // JSON (de)Serialization
+      virtual std::string json_serialize() const;
+      virtual void json_deserialize_self(const std::string &json);
+      static object_basic json_deserialize(const std::string &json);
 
       object_basic();
       object_basic(int uid, int uoid);

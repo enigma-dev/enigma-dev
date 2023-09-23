@@ -61,7 +61,7 @@ namespace enigma_user {
 template<typename T, typename U>
 void gtest_check_eq(T a, U b, std::string message, std::string aE, std::string bE, bool assert) {
   enigma::gtest_binary("(" + aE + ") == (" + bE + ")", toString(a), toString(b), aE, bE,
-                       "is equal to",                  a == b, assert, message, "EDL", 1);
+                       "is equal to",                  a == static_cast<T> (b), assert, message, "EDL", 1);
 }
 template<typename T, typename U>
 void gtest_check_ne(T a, U b, std::string message, std::string aE, std::string bE, bool assert) {

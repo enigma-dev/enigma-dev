@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2021 Nabeel Danish
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -23,7 +24,7 @@
 
 #include "collisions_object.h"
 
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/sprites_internal.h"
@@ -143,12 +144,12 @@ namespace enigma
 
     object_collisions::~object_collisions() {}
 
-    std::vector<std::byte> object_collisions::serialize() {
+    std::vector<std::byte> object_collisions::serialize() const {
       auto bytes = object_transform::serialize();
       std::size_t len = 0;
 
-      enigma_internal_serialize<unsigned char>(object_collisions::objtype, len, bytes);
-      enigma_internal_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
+      enigma::bytes_serialization::enigma_serialize<unsigned char>(object_collisions::objtype, len, bytes);
+      enigma::bytes_serialization::enigma_serialize_many(len, bytes, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       bytes.shrink_to_fit();
@@ -159,13 +160,13 @@ namespace enigma
       auto len = object_transform::deserialize_self(iter);
 
       unsigned char type;
-      enigma_internal_deserialize(type, iter, len);
+      enigma::bytes_serialization::enigma_deserialize(type, iter, len);
       if (type != object_collisions::objtype) {
         DEBUG_MESSAGE("object_collisions::deserialize_self: Object type '" + std::to_string(type) +
                           "' does not match expected: " + std::to_string(object_collisions::objtype),
                       MESSAGE_TYPE::M_FATAL_ERROR);
       }
-      enigma_internal_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
+      enigma::bytes_serialization::enigma_deserialize_many(iter, len, mask_index, solid, polygon_index, polygon_xscale,
                                      polygon_yscale, polygon_angle);
 
       return len;
@@ -175,5 +176,47 @@ namespace enigma
       object_collisions result;
       auto len = result.deserialize_self(iter);
       return {std::move(result), len};
+    }
+
+    std::string object_collisions::json_serialize() const {
+      std::stringstream json ;
+      json << "{";
+
+      json << "\"object_type\":\"object_collisions\",";
+      json << "\"parent\":" + object_transform::json_serialize() + ",";
+      json << "\"mask_index\":" + enigma::JSON_serialization::enigma_serialize(mask_index) + ",";
+      json << "\"solid\":" + enigma::JSON_serialization::enigma_serialize(solid) + ",";
+      json << "\"polygon_index\":" + enigma::JSON_serialization::enigma_serialize(polygon_index) + ","; 
+      json << "\"polygon_xscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_xscale) + ",";
+      json << "\"polygon_yscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_yscale) + ",";
+      json << "\"polygon_angle\":" + enigma::JSON_serialization::enigma_serialize(polygon_angle);
+
+      json << "}";
+
+      return json.str();
+    }
+
+    void object_collisions::json_deserialize_self(const std::string &json){
+      std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+      if (type != "object_collisions") {
+        DEBUG_MESSAGE("object_collisions::json_deserialize_self: Object type '" + type +
+                          "' does not match expected: object_collisions",
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+        }
+      
+      object_transform::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
+
+      mask_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"mask_index"));
+      solid = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"solid"));
+      polygon_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"polygon_index"));
+      polygon_xscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_xscale"));
+      polygon_yscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_yscale"));
+      polygon_angle = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"polygon_angle"));
+    }
+
+    object_collisions object_collisions::json_deserialize(const std::string &json){
+      object_collisions result;
+      result.json_deserialize_self(json);
+      return result;
     }
 }

@@ -22,8 +22,8 @@
 #include <string>
 #include <utility>
 
-#include "Universal_System/Object_Tiers/serialization.h"
-#include "Universal_System/detect_serialization.h"
+#include "Universal_System/Serialization/serialization.h"
+#include "Universal_System/Serialization/detect_serialization.h"
 
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h" // for DEBUG_MESSAGE
@@ -213,15 +213,16 @@ class AssetArray {
     return len;
   }
 
+  // Bytes (de)Serialization
   std::vector<std::byte> serialize() const {
-    static_assert(has_serialize_method_v<T> || HAS_SERIALIZE_FUNCTION(),
+    static_assert(has_serialize_method_v<T> || HAS_INTERNAL_SERIALIZE_FUNCTION(),
                   "Given type is required to have at least one of `x.serialize()` or `serialize(x)`.");
 
     std::vector<std::byte> result{};
     std::size_t len = 0;
-    enigma::enigma_internal_serialize(assets_.size(), len, result);
+    enigma::bytes_serialization::enigma_serialize(assets_.size(), len, result);
     for (std::size_t i = 0; i < assets_.size(); i++) {
-      enigma::enigma_internal_serialize(operator[](i), len, result);
+      enigma::bytes_serialization::enigma_serialize(operator[](i), len, result);
     }
     result.shrink_to_fit();
     return result;
@@ -233,10 +234,10 @@ class AssetArray {
 
     std::size_t len = 0;
     std::size_t elements = 0;
-    enigma::enigma_internal_deserialize(elements, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(elements, iter, len);
     resize(elements);
     for (std::size_t i = 0; i < elements; i++) {
-      enigma::enigma_internal_deserialize(assets_[i], iter, len);
+      enigma::bytes_serialization::enigma_deserialize(assets_[i], iter, len);
     }
     return len;
   }
@@ -246,6 +247,43 @@ class AssetArray {
       AssetArray<T, LEFT> result;
       auto len = result.deserialize_self(iter);
       return {std::move(result), len};
+    }
+    return {};
+  }
+
+  // JSON (de)Serialization
+  std::string json_serialize() const {
+    static_assert(has_json_serialize_method_v<T> || JSON_serialization_has_internal_serialize_into_fn<T>,
+                  "Given type is required to have at least one of `x.json_serialize()` or `internal_serialize_into_fn(x)`.");
+
+    std::string result = "[";
+    for (std::size_t i = 0; i < assets_.size(); i++) {
+      result += enigma::JSON_serialization::enigma_serialize(operator[](i));
+      if (i != assets_.size() - 1) {
+        result += ",";
+      }
+    }
+    result += "]";
+    return result;
+  }
+
+  void json_deserialize_self(const std::string & json) {
+    static_assert(has_json_deserialize_function_v<T> || JSON_serialization_has_internal_deserialize_fn<T> ||has_json_deserialize_self_method_v<T>,
+                  "Given type is required to have at least one of `x::json_deserialize()`, `internal_deserialize_fn<T>() or x.json_deserialize_self()`");
+
+    if (json.length() > 2) { 
+    std::string jsonCopy = json.substr(1, json.length() - 2);
+    std::vector<std::string> parts = enigma::JSON_serialization::json_split(jsonCopy, ',');
+    for (auto it = parts.begin(); it != parts.end(); ++it)
+      assets_.emplace_back(enigma::JSON_serialization::enigma_deserialize<T>(*it));
+  }
+  }
+
+  static AssetArray<T, LEFT> json_deserialize(const std::string & json) {
+    if constexpr (has_json_deserialize_function_v<T> || JSON_serialization_has_internal_deserialize_fn<T>||has_json_deserialize_self_method_v<T>) {
+      AssetArray<T, LEFT> result;
+      result.json_deserialize_self(json);
+      return result;
     }
     return {};
   }

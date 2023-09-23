@@ -30,7 +30,7 @@
 #include "Universal_System/Instances/instance.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance_system_frontend.h"
-#include "Universal_System/Object_Tiers/serialization.h"
+#include "Universal_System/Serialization/serialization.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Resources/backgrounds_internal.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -1420,108 +1420,187 @@ bool verify_checksum(std::vector<std::byte> &buffer) {
 }
 }
 
-void game_save_buffer(buffer_t buffer) {
+void game_save_buffer(buffer_t buffer, enum SerializationBackend backend ) {
   GET_BUFFER(binbuff, buffer)
-  std::size_t ptr = 0;
+  if(backend == SerializationBackend::Binary) {
+    std::size_t ptr = 0;
 
-  binbuff->data.resize(sizeof(std::size_t));
-  enigma::serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
-  for (auto &[id, obj] : enigma::instance_list) {
-    auto buf = obj->inst->serialize();
+    binbuff->data.resize(sizeof(std::size_t));
+    enigma::bytes_serialization::internal_serialize_into<std::size_t>(&binbuff->data[ptr], enigma::instance_list.size());
+    for (auto &[id, obj] : enigma::instance_list) {
+      auto buf = obj->inst->serialize();
+      ptr = binbuff->data.size();
+      binbuff->data.resize(binbuff->data.size() + buf.size());
+      std::move(buf.begin(), buf.end(), &binbuff->data[ptr]);
+    }
+
     ptr = binbuff->data.size();
-    binbuff->data.resize(binbuff->data.size() + buf.size());
-    std::move(buf.begin(), buf.end(), &binbuff->data[ptr]);
-  }
+    binbuff->data.resize(binbuff->data.size() + sizeof(std::size_t));
+    enigma::bytes_serialization::internal_serialize_into<std::size_t>(&binbuff->data[ptr],
+                                        enigma::instance_deactivated_list.size());
+    for (auto &[id, obj] : enigma::instance_deactivated_list) {
+      auto buf = obj->serialize();
+      ptr = binbuff->data.size();
+      binbuff->data.resize(binbuff->data.size() + buf.size());
+      std::move(buf.begin(), buf.end(), &binbuff->data[ptr]);
+    }
 
-  ptr = binbuff->data.size();
-  binbuff->data.resize(binbuff->data.size() + sizeof(std::size_t));
-  enigma::serialize_into<std::size_t>(&binbuff->data[ptr],
-                                      enigma::instance_deactivated_list.size());
-  for (auto &[id, obj] : enigma::instance_deactivated_list) {
-    auto buf = obj->serialize();
     ptr = binbuff->data.size();
-    binbuff->data.resize(binbuff->data.size() + buf.size());
-    std::move(buf.begin(), buf.end(), &binbuff->data[ptr]);
+    binbuff->data.resize(binbuff->data.size() + 1);
+    binbuff->data[ptr] = std::byte{0xee};
+
+    ptr = binbuff->data.size();
+    binbuff->data.resize(binbuff->data.size() + enigma::backgrounds.byte_size());
+    auto buf = enigma::backgrounds.serialize();
+    std::copy(buf.begin(), buf.end(), &binbuff->data[ptr]);
+
+    ptr = binbuff->data.size();
+    binbuff->data.resize(binbuff->data.size() + 1);
+    binbuff->data[ptr] = std::byte{0xef};
+
+    ptr = binbuff->data.size();
+    binbuff->data.resize(binbuff->data.size() + sizeof(int));
+    enigma::bytes_serialization::internal_serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
+
+    store_checksum(binbuff->data, calculate_checksum(binbuff->data));
+  } else {
+    std::string json="{\"instance_list\":["; 
+    for (auto &[id, obj] : enigma::instance_list) {
+      json+= obj->inst->json_serialize();
+      if(id!=enigma::instance_list.rbegin()->first)
+        json+=",";
+    }
+    
+    json+="],\"instance_deactivated_list\":[";  
+    for (auto &[id, obj] : enigma::instance_deactivated_list) {
+      json+=obj->json_serialize();
+      if(id!=enigma::instance_deactivated_list.rbegin()->first)
+        json+=",";
+    }
+
+    json+="],\"backgrounds\":";
+    json+=enigma::backgrounds.json_serialize();
+
+    json+=",\"room_index\":"+enigma::JSON_serialization::enigma_serialize(enigma_user::room.rval.d)+"}";
+
+    for (size_t i = 0; i < json.size(); ++i) {
+      binbuff->data.push_back(static_cast<std::byte>(json[i]));
+    }
+    
+    store_checksum(binbuff->data, calculate_checksum(binbuff->data));
   }
-
-  ptr = binbuff->data.size();
-  binbuff->data.resize(binbuff->data.size() + 1);
-  binbuff->data[ptr] = std::byte{0xee};
-
-  ptr = binbuff->data.size();
-  binbuff->data.resize(binbuff->data.size() + enigma::backgrounds.byte_size());
-  auto buf = enigma::backgrounds.serialize();
-  std::copy(buf.begin(), buf.end(), &binbuff->data[ptr]);
-
-  ptr = binbuff->data.size();
-  binbuff->data.resize(binbuff->data.size() + 1);
-  binbuff->data[ptr] = std::byte{0xef};
-
-  ptr = binbuff->data.size();
-  binbuff->data.resize(binbuff->data.size() + sizeof(int));
-  enigma::serialize_into(&binbuff->data[ptr], static_cast<int>(enigma_user::room.rval.d));
-
-  store_checksum(binbuff->data, calculate_checksum(binbuff->data));
 }
 
-void game_load_buffer(buffer_t buffer) {
+void game_load_buffer(buffer_t buffer, enum SerializationBackend backend) {
   GET_BUFFER(binbuff, buffer)
+
   if (!verify_checksum(binbuff->data)) {
     DEBUG_MESSAGE("game_load_buffer: Checksum is not correct, aborting", MESSAGE_TYPE::M_FATAL_ERROR);
     return;
   }
 
-  std::vector<int> active_ids{};
-  std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
-                 [](auto &value) { return value.first; });
-  for (int id : active_ids) {
-    instance_destroy(id);
-  }
-  std::vector<int> inactive_ids{};
-  std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
-                 [](auto &value) { return value.first; });
-  for (int id : inactive_ids) {
-    instance_destroy(id);
-  }
+  if(backend == SerializationBackend::Binary) {
+    std::vector<int> active_ids{};
+    std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
+                  [](auto &value) { return value.first; });
+    for (int id : active_ids) {
+      instance_destroy(id);
+    }
+    
+    std::vector<int> inactive_ids{};
+    std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
+                  [](auto &value) { return value.first; });
+    for (int id : inactive_ids) {
+      instance_destroy(id);
+    }
 
-  std::byte *ptr = &binbuff->data[0];
-  std::size_t active_size = enigma::deserialize<std::size_t>(ptr);
-  ptr += sizeof(std::size_t);
-  for (std::size_t i = 0; i < active_size; i++) {
-    // This should be an object, where `id` is serialized first and `object_id` second
-    auto obj_id = enigma::deserialize<int>(ptr + 1);
-    auto obj_ind = enigma::deserialize<int>(ptr + 1 + sizeof(unsigned int));
-    auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
-    ptr += obj->deserialize_self(ptr);
-    obj->activate();
+    std::byte *ptr = &binbuff->data[0];
+    std::size_t active_size = enigma::bytes_serialization::internal_deserialize<std::size_t>(ptr);
+    ptr += sizeof(std::size_t);
+    for (std::size_t i = 0; i < active_size; i++) {
+      // This should be an object, where `id` is serialized first and `object_id` second
+      auto obj_id = enigma::bytes_serialization::internal_deserialize<int>(ptr + 1);
+      auto obj_ind = enigma::bytes_serialization::internal_deserialize<int>(ptr + 1 + sizeof(unsigned int));
+      auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
+      ptr += obj->deserialize_self(ptr);
+      obj->activate();
+    }
+
+    std::size_t inactive_size = enigma::bytes_serialization::internal_deserialize<std::size_t>(ptr);
+    ptr += sizeof(std::size_t);
+    for (std::size_t i = 0; i < inactive_size; i++) {
+      auto obj_ind = enigma::bytes_serialization::internal_deserialize<int>(ptr + sizeof(unsigned int));
+      auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+      ptr += obj->deserialize_self(ptr);
+      obj->deactivate();
+    }
+
+    auto type = enigma::bytes_serialization::internal_deserialize<unsigned char>(ptr);
+    if (type != 0xee) {
+      DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    ptr += 1;
+
+    ptr += enigma::backgrounds.deserialize_self(ptr);
+
+    type = enigma::bytes_serialization::internal_deserialize<unsigned char>(ptr);
+    if (type != 0xef) {
+      DEBUG_MESSAGE("Invalid enigma::backgrounds footer", MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    ptr += 1;
+
+    auto room_index = enigma::bytes_serialization::internal_deserialize<int>(ptr);
+    enigma_user::room_goto(room_index);
+    ptr += sizeof(int);
+  } else {
+    std::vector<int> active_ids{};
+    std::transform(enigma::instance_list.begin(), enigma::instance_list.end(), std::back_inserter(active_ids),
+                  [](auto &value) { return value.first; });
+    for (int id : active_ids) {
+      instance_destroy(id);
+    }
+    
+    std::vector<int> inactive_ids{};
+    std::transform(enigma::instance_deactivated_list.begin(), enigma::instance_deactivated_list.end(), std::back_inserter(inactive_ids),
+                  [](auto &value) { return value.first; });
+    for (int id : inactive_ids) {
+      instance_destroy(id);
+    }
+
+    std::string json;
+    for (std::size_t i=1; i< binbuff->data.size();i++) {
+      json += static_cast<char>(binbuff->data[i]);
+    }
+
+    std::string active_list_part= enigma::JSON_serialization::json_find_value(json,"instance_list");
+    std::vector<std::string> active_list= enigma::JSON_serialization::json_split(active_list_part,',');
+    for (std::size_t i = 0; i < active_list.size(); i++) {
+      int obj_ind = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(active_list[i],"object_index"));
+      int obj_id = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(active_list[i],"id"));
+      auto obj = enigma::instance_create_id(0, 0, obj_ind, obj_id);
+      obj->json_deserialize_self(active_list[i]);
+      obj->activate();
+    }
+
+    std::string inactive_list_part= enigma::JSON_serialization::json_find_value(json,"instance_deactivated_list");
+    std::vector<std::string> inactive_list= enigma::JSON_serialization::json_split(inactive_list_part,',');
+    for(std::size_t i=0;i<inactive_list.size();i++) {
+      int obj_ind = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(inactive_list[i],"object_index"));
+      auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
+      obj->json_deserialize_self(inactive_list[i]);
+      obj->deactivate();
+    }
+
+    std::string backgrounds_list = enigma::JSON_serialization::json_find_value(json,"backgrounds");
+    if(backgrounds_list=="") {
+      DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    enigma::backgrounds.json_deserialize_self(backgrounds_list);
+
+    int room_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"room_index"));  
+    enigma_user::room_goto(room_index);
   }
-
-  std::size_t inactive_size = enigma::deserialize<std::size_t>(ptr);
-  ptr += sizeof(std::size_t);
-  for (std::size_t i = 0; i < inactive_size; i++) {
-    auto obj_ind = enigma::deserialize<int>(ptr + sizeof(unsigned int));
-    auto obj = enigma::instance_create_id(0, 0, obj_ind, -1);
-    ptr += obj->deserialize_self(ptr);
-    obj->deactivate();
-  }
-
-  auto type = enigma::deserialize<unsigned char>(ptr);
-  if (type != 0xee) {
-    DEBUG_MESSAGE("Invalid enigma::backgrounds header", MESSAGE_TYPE::M_FATAL_ERROR);
-  }
-  ptr += 1;
-
-  ptr += enigma::backgrounds.deserialize_self(ptr);
-
-  type = enigma::deserialize<unsigned char>(ptr);
-  if (type != 0xef) {
-    DEBUG_MESSAGE("Invalid enigma::backgrounds footer", MESSAGE_TYPE::M_FATAL_ERROR);
-  }
-  ptr += 1;
-
-  auto room_index = enigma::deserialize<int>(ptr);
-  enigma_user::room_goto(room_index);
-  ptr += sizeof(int);
 }
 
 }  // namespace enigma_user

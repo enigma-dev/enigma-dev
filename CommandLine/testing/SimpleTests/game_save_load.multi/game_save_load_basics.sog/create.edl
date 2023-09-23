@@ -1,0 +1,33 @@
+show_debug_message("Starting the test");
+
+myInteger1 = 5;
+myInteger2 = 16;
+myfloat1 = 3.14;
+myfloat2 = 13.5;
+myBoolean = true;
+
+show_debug_message("Starting the saving");
+var buf = buffer_create(1, buffer_grow, 1);
+game_save_buffer(buf,SerializationBackend::Binary);
+buffer_save(buf, "/tmp/test.bin");
+
+myInteger1 = 0;
+myInteger2 = -1;
+myfloat1 = 1.2;
+myfloat2 = 3.5;
+myBoolean = false;
+
+show_debug_message("Loading the file");
+buffer_delete(buf);
+buf = buffer_load("/tmp/test.bin");
+game_load_buffer(buf,SerializationBackend::Binary);
+
+gtest_assert_eq(int(id.myInteger1), 5);
+gtest_assert_eq(int(id.myInteger2), 16);
+gtest_assert_eq(double(id.myfloat1), 3.14);
+gtest_assert_eq(double(id.myfloat2), 13.5);
+gtest_assert_eq(bool(id.myBoolean), true);
+
+show_debug_message("Loading successful");
+
+game_end();

@@ -1,5 +1,6 @@
 /** Copyright (C) 2008 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2023 Fares Atef
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -23,7 +24,7 @@
 
 #include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
-#include "serialization.h"
+#include "../Serialization/serialization.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <math.h>
@@ -93,12 +94,12 @@ namespace enigma
   int object_graphics::$sprite_yoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_yoffset(sprite_index)*image_yscale; }
   int object_graphics::$image_number() const { return sprite_index == -1? 0 : enigma_user::sprite_get_number(sprite_index); }
 
-  std::vector<std::byte> object_graphics::serialize() {
+  std::vector<std::byte> object_graphics::serialize() const {
     auto bytes = object_timelines::serialize();
     std::size_t len = 0;
 
-    enigma_internal_serialize<unsigned char>(object_graphics::objtype, len, bytes);
-    enigma_internal_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
+    enigma::bytes_serialization::enigma_serialize<unsigned char>(object_graphics::objtype, len, bytes);
+    enigma::bytes_serialization::enigma_serialize_many(len, bytes, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     bytes.shrink_to_fit();
@@ -109,13 +110,13 @@ namespace enigma
     auto len = object_timelines::deserialize_self(iter);
 
     unsigned char type;
-    enigma_internal_deserialize(type, iter, len);
+    enigma::bytes_serialization::enigma_deserialize(type, iter, len);
     if (type != object_graphics::objtype) {
       DEBUG_MESSAGE("object_graphics::deserialize_self: Object type '" + std::to_string(type) +
                         "' does not match expected: " + std::to_string(object_graphics::objtype),
                     MESSAGE_TYPE::M_FATAL_ERROR);
     }
-    enigma_internal_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
+    enigma::bytes_serialization::enigma_deserialize_many(iter, len, sprite_index, image_index, image_speed, image_single, depth,
                                    visible, image_xscale, image_yscale, image_angle);
 
     return len;
@@ -125,5 +126,53 @@ namespace enigma
     object_graphics result;
     auto len = result.deserialize_self(iter);
     return {std::move(result), len};
+  }
+
+  std::string object_graphics::json_serialize() const {
+    std::stringstream json ;
+    json << "{";
+
+    json << "\"object_type\":\"object_graphics\",";
+    json << "\"parent\":" + object_timelines::json_serialize() + ",";
+    json << "\"sprite_index\":" + enigma::JSON_serialization::enigma_serialize(sprite_index) + ",";
+    json << "\"image_index\":" + enigma::JSON_serialization::enigma_serialize(image_index) + ",";
+    json << "\"image_speed\":" + enigma::JSON_serialization::enigma_serialize(image_speed) + ",";
+    json << "\"image_single\":" + enigma::JSON_serialization::enigma_serialize(image_single) + ",";
+    json << "\"depth\":" + enigma::JSON_serialization::enigma_serialize(depth) + ",";
+    json << "\"visible\":" + enigma::JSON_serialization::enigma_serialize(visible) + ",";
+    json << "\"image_xscale\":" + enigma::JSON_serialization::enigma_serialize(image_xscale) + ",";
+    json << "\"image_yscale\":" + enigma::JSON_serialization::enigma_serialize(image_yscale) + ",";
+    json << "\"image_angle\":" + enigma::JSON_serialization::enigma_serialize(image_angle);
+
+    json << "}";
+
+    return json.str();
+  }
+
+  void object_graphics::json_deserialize_self(const std::string &json) {
+    std::string type = enigma::JSON_serialization::enigma_deserialize<std::string>(enigma::JSON_serialization::json_find_value(json,"object_type"));
+    if (type != "object_graphics") {
+      DEBUG_MESSAGE("object_graphics::json_deserialize_self: Object type '" + type +
+                        "' does not match expected: object_graphics",
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+
+    object_timelines::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,"parent"));
+
+    sprite_index = enigma::JSON_serialization::enigma_deserialize<int>(enigma::JSON_serialization::json_find_value(json,"sprite_index"));
+    image_index = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_index"));
+    image_speed = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_speed"));
+    image_single = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"image_single"));
+    depth = enigma::JSON_serialization::enigma_deserialize<variant>(enigma::JSON_serialization::json_find_value(json,"depth"));
+    visible = enigma::JSON_serialization::enigma_deserialize<bool>(enigma::JSON_serialization::json_find_value(json,"visible"));
+    image_xscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_xscale"));  
+    image_yscale = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_yscale"));
+    image_angle = enigma::JSON_serialization::enigma_deserialize<gs_scalar>(enigma::JSON_serialization::json_find_value(json,"image_angle"));
+  }
+
+  object_graphics object_graphics::json_deserialize(const std::string& json) {
+    object_graphics result;
+    result.json_deserialize_self(json);
+    return result;
   }
 }
