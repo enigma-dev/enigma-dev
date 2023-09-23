@@ -111,7 +111,7 @@ class GCLeaderboards {
   void set_current_leaderboard(const SteamLeaderboard_t& leaderboard);
   void set_loading(const bool& loading);
 
-  static std::string get_leaderboard_name(const SteamLeaderboard_t& leaderboard);
+  static bool get_leaderboard_name(std::string& buffer, const SteamLeaderboard_t& leaderboard);
 
  private:
   SteamLeaderboard_t current_leaderboard_;

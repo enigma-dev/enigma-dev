@@ -24,6 +24,7 @@
 #include "gc_statsandachievements.h"
 
 // TODO: Test the cleaning algorithm here.
+// TODO: Check if this (x == nullptr) equal to this (!x).
 
 namespace steamworks_gc {
 
@@ -39,10 +40,10 @@ GameClient::GameClient()
       gc_statsandachievements_(nullptr),
       gc_leaderboards_(nullptr),
       gc_remotestorage_(nullptr),
-      steam_id_local_user_(SteamUser()->GetSteamID()),
-      steam_app_id_(SteamUtils()->GetAppID()),
-      current_game_language_(std::string(SteamApps()->GetCurrentGameLanguage())),
-      available_game_languages_(std::string(SteamApps()->GetAvailableGameLanguages())) {
+      steam_id_local_user_(CSteamID()),
+      steam_app_id_(INVALID_APP_ID),
+      current_game_language_(std::string()),
+      available_game_languages_(std::string()) {
   init();
 }
 
@@ -57,9 +58,45 @@ void GameClient::init() {
   // gameclient_ = this;
 
   GameClient::gc_overlay_ = new GCOverlay();
-  GameClient::gc_statsandachievements_ = new GCStatsAndAchievements();
+  GameClient::gc_statsandachievements_ = new GCStatsAndAchievements(GameClient::steam_app_id_);
   GameClient::gc_leaderboards_ = new GCLeaderboards();
   GameClient::gc_remotestorage_ = new GCRemoteStorage();
+
+  if (steamworks_b::Binder::ISteamUser_GetSteamID == nullptr || steamworks_b::Binder::SteamUser_v023 == nullptr) {
+    DEBUG_MESSAGE("GameClient::init() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  GameClient::steam_id_local_user_ =
+      steamworks_b::Binder::ISteamUser_GetSteamID(steamworks_b::Binder::SteamUser_v023());
+
+  if (steamworks_b::Binder::ISteamUtils_GetAppID == nullptr || steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    DEBUG_MESSAGE("GameClient::init() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  GameClient::steam_app_id_ = steamworks_b::Binder::ISteamUtils_GetAppID(steamworks_b::Binder::SteamUtils_v010());
+
+  if (steamworks_b::Binder::SteamApps_v008 == nullptr) {
+    DEBUG_MESSAGE("GameClient::init() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  if (steamworks_b::Binder::ISteamApps_GetCurrentGameLanguage == nullptr) {
+    DEBUG_MESSAGE("GameClient::init() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  GameClient::current_game_language_ =
+      std::string(steamworks_b::Binder::ISteamApps_GetCurrentGameLanguage(steamworks_b::Binder::SteamApps_v008()));
+
+  if (steamworks_b::Binder::ISteamApps_GetAvailableGameLanguages == nullptr) {
+    DEBUG_MESSAGE("GameClient::init() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  GameClient::available_game_languages_ =
+      std::string(steamworks_b::Binder::ISteamApps_GetAvailableGameLanguages(steamworks_b::Binder::SteamApps_v008()));
 }
 
 GCOverlay* GameClient::get_gc_overlay() { return GameClient::gc_overlay_; }
@@ -88,53 +125,129 @@ bool GameClient::get_available_game_languages(std::string& buffer) {
 // Static fields & functions (AKA Wrapper functions)
 ////////////////////////////////////////////////////////
 
-bool GameClient::is_user_logged_on() { return SteamUser()->BLoggedOn(); }
+bool GameClient::is_user_logged_on() {
+  if (steamworks_b::Binder::ISteamUser_BLoggedOn == nullptr || steamworks_b::Binder::SteamUser_v023 == nullptr) {
+    DEBUG_MESSAGE("GameClient::is_user_logged_on() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  return steamworks_b::Binder::ISteamUser_BLoggedOn(steamworks_b::Binder::SteamUser_v023());
+}
 
 bool GameClient::get_steam_persona_name(std::string& buffer) {
-  buffer = std::string(SteamFriends()->GetPersonaName());
+  if (steamworks_b::Binder::ISteamFriends_GetPersonaName == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_steam_persona_name() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  buffer = std::string(steamworks_b::Binder::ISteamFriends_GetPersonaName(steamworks_b::Binder::SteamFriends_v017()));
   return true;
 }
 
 bool GameClient::get_steam_user_persona_name(std::string& buffer, const uint64& steam_id) {
-  CSteamID c_steam_id(steam_id);
-  buffer = std::string(SteamFriends()->GetFriendPersonaName(c_steam_id));
+  if (steamworks_b::Binder::ISteamFriends_GetFriendPersonaName == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_steam_user_persona_name() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  buffer = std::string(
+      steamworks_b::Binder::ISteamFriends_GetFriendPersonaName(steamworks_b::Binder::SteamFriends_v017(), steam_id));
   return true;
 }
 
-bool GameClient::is_subscribed() { return SteamApps()->BIsSubscribed(); }
+bool GameClient::is_subscribed() {
+  if (steamworks_b::Binder::ISteamApps_BIsSubscribed == nullptr || steamworks_b::Binder::SteamApps_v008 == nullptr) {
+    DEBUG_MESSAGE("GameClient::is_subscribed() failed due to loading error.", M_ERROR);
+    return false;
+  }
 
-bool GameClient::set_rich_presence(const std::string& key, const std::string& value) {
-  return SteamFriends()->SetRichPresence(key.c_str(), value.c_str());
+  return steamworks_b::Binder::ISteamApps_BIsSubscribed(steamworks_b::Binder::SteamApps_v008());
 }
 
-void GameClient::clear_rich_presence() { SteamFriends()->ClearRichPresence(); }
+bool GameClient::set_rich_presence(const std::string& key, const std::string& value) {
+  if (steamworks_b::Binder::ISteamFriends_SetRichPresence == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::set_rich_presence() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  return steamworks_b::Binder::ISteamFriends_SetRichPresence(steamworks_b::Binder::SteamFriends_v017(), key.c_str(),
+                                                             value.c_str());
+}
+
+void GameClient::clear_rich_presence() {
+  if (steamworks_b::Binder::ISteamFriends_ClearRichPresence == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::clear_rich_presence() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::ISteamFriends_ClearRichPresence(steamworks_b::Binder::SteamFriends_v017());
+}
 
 void GameClient::set_played_with(const uint64& steam_id) {
-  CSteamID c_steam_id(steam_id);
-  SteamFriends()->SetPlayedWith(c_steam_id);
+  if (steamworks_b::Binder::ISteamFriends_SetPlayedWith == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::set_played_with() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::ISteamFriends_SetPlayedWith(steamworks_b::Binder::SteamFriends_v017(), steam_id);
 }
 
 bool GameClient::get_image_size(const int& image, uint32& width, uint32& height) {
-  return SteamUtils()->GetImageSize(image, &width, &height);
+  if (steamworks_b::Binder::ISteamUtils_GetImageSize == nullptr || steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_image_size() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  return steamworks_b::Binder::ISteamUtils_GetImageSize(steamworks_b::Binder::SteamUtils_v010(), image, &width,
+                                                        &height);
 }
 
 bool GameClient::get_image_rgba(const int& image, uint8* buffer, const int& buffer_size) {
-  return SteamUtils()->GetImageRGBA(image, buffer, buffer_size);
+  if (steamworks_b::Binder::ISteamUtils_GetImageRGBA == nullptr || steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_image_rgba() failed due to loading error.", M_ERROR);
+    return false;
+  }
+
+  return steamworks_b::Binder::ISteamUtils_GetImageRGBA(steamworks_b::Binder::SteamUtils_v010(), image, buffer,
+                                                        buffer_size);
 }
 
 int32 GameClient::get_small_friend_avatar(const uint64& steam_id_friend) {
-  CSteamID c_steam_id(steam_id_friend);
-  return SteamFriends()->GetSmallFriendAvatar(c_steam_id);
+  if (steamworks_b::Binder::ISteamFriends_GetSmallFriendAvatar == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_small_friend_avatar() failed due to loading error.", M_ERROR);
+    return 0;
+  }
+
+  return steamworks_b::Binder::ISteamFriends_GetSmallFriendAvatar(steamworks_b::Binder::SteamFriends_v017(),
+                                                                  steam_id_friend);
 }
 
 int32 GameClient::get_medium_friend_avatar(const uint64& steam_id_friend) {
-  CSteamID c_steam_id(steam_id_friend);
-  return SteamFriends()->GetMediumFriendAvatar(c_steam_id);
+  if (steamworks_b::Binder::ISteamFriends_GetMediumFriendAvatar == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_medium_friend_avatar() failed due to loading error.", M_ERROR);
+    return 0;
+  }
+
+  return steamworks_b::Binder::ISteamFriends_GetMediumFriendAvatar(steamworks_b::Binder::SteamFriends_v017(),
+                                                                   steam_id_friend);
 }
 
 int32 GameClient::get_large_friend_avatar(const uint64& steam_id_friend) {
-  CSteamID c_steam_id(steam_id_friend);
-  return SteamFriends()->GetLargeFriendAvatar(c_steam_id);
+  if (steamworks_b::Binder::ISteamFriends_GetLargeFriendAvatar == nullptr ||
+      steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    DEBUG_MESSAGE("GameClient::get_large_friend_avatar() failed due to loading error.", M_ERROR);
+    return 0;
+  }
+
+  return steamworks_b::Binder::ISteamFriends_GetLargeFriendAvatar(steamworks_b::Binder::SteamFriends_v017(),
+                                                                  steam_id_friend);
 }
 
 }  // namespace steamworks_gc

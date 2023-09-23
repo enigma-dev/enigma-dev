@@ -31,3 +31,6 @@
 # Don't ignore everything inside the SteamvXXX/sdk/redistributable_bin/ folder.
 # !/Steamv157/sdk/redistributable_bin/
 # !/Steamv157/sdk/redistributable_bin/**/*
+
+# Ignore everything inside SteamFake/sdk/redistributable_bin/ folder.
+/SteamFake/sdk/redistributable_bin/**/*

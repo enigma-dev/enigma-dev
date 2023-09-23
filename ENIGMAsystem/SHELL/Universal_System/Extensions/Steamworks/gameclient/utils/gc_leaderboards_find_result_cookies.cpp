@@ -26,8 +26,8 @@ namespace steamworks_gc {
 // Public functions
 ////////////////////////////////////////////////////////
 
-GCLeaderboardsFindResultCookies::GCLeaderboardsFindResultCookies(int id, GCLeaderboards* gc_leaderboards,
-                                                                 SteamAPICall_t steam_api_call)
+GCLeaderboardsFindResultCookies::GCLeaderboardsFindResultCookies(const int& id, GCLeaderboards* gc_leaderboards,
+                                                                 SteamAPICall_t& steam_api_call)
     : id_(id), gc_leaderboards_(gc_leaderboards), is_done_(false) {
   GCLeaderboardsFindResultCookies::set_call_result(steam_api_call);
 }
@@ -38,17 +38,9 @@ GCLeaderboardsFindResultCookies::GCLeaderboardsFindResultCookies(int id, GCLeade
 
 bool GCLeaderboardsFindResultCookies::is_done() const { return GCLeaderboardsFindResultCookies::is_done_; }
 
-void GCLeaderboardsFindResultCookies::set_call_result(SteamAPICall_t steam_api_call) {
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  GCLeaderboardsFindResultCookies::m_callResultFindLeaderboard.Set(
-      steam_api_call, this, &GCLeaderboardsFindResultCookies::on_find_leaderboard);
-#else
-  LeaderboardFindResult_t pFindLeaderboardResult;
-  pFindLeaderboardResult.m_hSteamLeaderboard = INVALID_LEADERBOARD;
-  pFindLeaderboardResult.m_bLeaderboardFound = true;
-
-  GCLeaderboardsFindResultCookies::on_find_leaderboard(&pFindLeaderboardResult, false);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+void GCLeaderboardsFindResultCookies::set_call_result(SteamAPICall_t& steam_api_call) {
+  // GCLeaderboardsFindResultCookies::m_callResultFindLeaderboard.Set(
+  //     steam_api_call, this, &GCLeaderboardsFindResultCookies::on_find_leaderboard);
 }
 
 void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult,

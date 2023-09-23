@@ -39,7 +39,8 @@ class GCLeaderboards;
 
 class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
  public:
-  GCLeaderboardsScoreDownloadedCookies(int id_, GCLeaderboards* gc_leaderboards, SteamAPICall_t steam_api_call);
+  GCLeaderboardsScoreDownloadedCookies(const int& id, GCLeaderboards* gc_leaderboards,
+                                       SteamAPICall_t& steam_api_call);
   ~GCLeaderboardsScoreDownloadedCookies() = default;
 
  private:
@@ -59,13 +60,11 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
 
   bool is_done() const override;
 
-  void set_call_result(SteamAPICall_t steam_api_call) override;
+  void set_call_result(SteamAPICall_t& steam_api_call) override;
 
   // Called when SteamUserStats()->DownloadLeaderboardEntries() returns asynchronously
   void on_download_scores(LeaderboardScoresDownloaded_t* pFindLearderboardResult, bool bIOFailure);
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  CCallResult<GCLeaderboardsScoreDownloadedCookies, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+  // CCallResult<GCLeaderboardsScoreDownloadedCookies, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
 };
 
 }  // namespace steamworks_gc

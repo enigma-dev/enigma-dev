@@ -17,7 +17,6 @@
 
 #include "gc_main.h"
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
 // TODO: this should be in namespace enigma? will check later.
 // TODO: Is this the right place for this function?
 extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
@@ -28,7 +27,6 @@ extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebu
     (void)x;
   }
 }
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
 namespace steamworks_gc {
 
@@ -41,11 +39,14 @@ namespace steamworks_gc {
 ////////////////////////////////////////////////////////
 
 void GCMain::set_warning_message_hook() {
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);
-#else
-  SteamUtils()->SetWarningMessageHook();
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+  if (steamworks_b::Binder::ISteamUtils_SetWarningMessageHook == nullptr ||
+      steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    DEBUG_MESSAGE("GCMain::set_warning_message_hook() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::ISteamUtils_SetWarningMessageHook(steamworks_b::Binder::SteamUtils_v010(),
+                                                          &SteamAPIDebugTextHook);
 }
 
 }  // namespace steamworks_gc

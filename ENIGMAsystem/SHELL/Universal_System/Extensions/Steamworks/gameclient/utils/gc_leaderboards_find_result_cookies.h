@@ -39,7 +39,7 @@ class GCLeaderboards;
 
 class GCLeaderboardsFindResultCookies : public GCLeaderboardsCookies {
  public:
-  GCLeaderboardsFindResultCookies(int id_, GCLeaderboards* gc_leaderboards, SteamAPICall_t steam_api_call);
+  GCLeaderboardsFindResultCookies(const int& id, GCLeaderboards* gc_leaderboards, SteamAPICall_t& steam_api_call);
   ~GCLeaderboardsFindResultCookies() = default;
 
  private:
@@ -59,13 +59,11 @@ class GCLeaderboardsFindResultCookies : public GCLeaderboardsCookies {
 
   bool is_done() const override;
 
-  void set_call_result(SteamAPICall_t steam_api_call) override;
+  void set_call_result(SteamAPICall_t& steam_api_call) override;
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+  // CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;
 };
 
 }  // namespace steamworks_gc

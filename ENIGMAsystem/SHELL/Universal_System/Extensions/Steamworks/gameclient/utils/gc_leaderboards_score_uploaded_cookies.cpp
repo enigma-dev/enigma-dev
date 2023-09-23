@@ -26,8 +26,8 @@ namespace steamworks_gc {
 // Public functions
 ////////////////////////////////////////////////////////
 
-GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(int id, GCLeaderboards* gc_leaderboards,
-                                                                       SteamAPICall_t steam_api_call)
+GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(const int& id, GCLeaderboards* gc_leaderboards,
+                                                                       SteamAPICall_t& steam_api_call)
     : id_(id), gc_leaderboards_(gc_leaderboards), is_done_(false) {
   GCLeaderboardsScoreUploadedCookies::set_call_result(steam_api_call);
 }
@@ -38,21 +38,9 @@ GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(int id, G
 
 bool GCLeaderboardsScoreUploadedCookies::is_done() const { return GCLeaderboardsScoreUploadedCookies::is_done_; }
 
-void GCLeaderboardsScoreUploadedCookies::set_call_result(SteamAPICall_t steam_api_call) {
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  GCLeaderboardsScoreUploadedCookies::m_SteamCallResultUploadScore.Set(
-      steam_api_call, this, &GCLeaderboardsScoreUploadedCookies::on_upload_score);
-#else
-  LeaderboardScoreUploaded_t pScoreUploadedResult;
-  pScoreUploadedResult.m_bSuccess = true;
-  pScoreUploadedResult.m_hSteamLeaderboard = INVALID_LEADERBOARD;
-  pScoreUploadedResult.m_nScore = 0;
-  pScoreUploadedResult.m_bScoreChanged = true;
-  pScoreUploadedResult.m_nGlobalRankNew = 0;
-  pScoreUploadedResult.m_nGlobalRankPrevious = 0;
-
-  GCLeaderboardsScoreUploadedCookies::on_upload_score(&pScoreUploadedResult, false);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+void GCLeaderboardsScoreUploadedCookies::set_call_result(SteamAPICall_t& steam_api_call) {
+  // GCLeaderboardsScoreUploadedCookies::m_SteamCallResultUploadScore.Set(
+  //     steam_api_call, this, &GCLeaderboardsScoreUploadedCookies::on_upload_score);
 }
 
 void GCLeaderboardsScoreUploadedCookies::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult,

@@ -16,6 +16,14 @@
 # with this code. If not, see <http://www.gnu.org/licenses/>
 ############################################################################
 
+# Directories
+STEAMWORKS_EXT_FAKE_LIB_DIR := $(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/SteamFake/sdk/redistributable_bin
+
+LINUX32 := linux32
+LINUX64 := linux64
+OSX := osx
+WIN64 := win64
+
 SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
 				$(wildcard Universal_System/Extensions/Steamworks/gameclient/*.cpp) \
                     $(wildcard Universal_System/Extensions/Steamworks/gameclient/utils/*.cpp) \
@@ -24,8 +32,17 @@ SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
 # defining directory of steam header files
 # override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/public/
 
-SOURCES += $(wildcard Universal_System/Extensions/Steamworks/gameclient/Binder/SteamFake/sdk/public/steam/*.cpp)
-override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/public/
+FAKE_API_SRC_FILES := $(wildcard Universal_System/Extensions/Steamworks/gameclient/Binder/SteamFake/sdk/public/steam/*.cpp)
+override CXXFLAGS += -Wall -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/public/
+
+STEAMWORKS_EXT_FAKE_LIB_NAME := fake_steam_api
+
+STEAMWORKS_EXT_FAKE_LIB:= $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(LINUX64)/lib$(STEAMWORKS_EXT_FAKE_LIB_NAME).so
+
+$(STEAMWORKS_EXT_FAKE_LIB): $(FAKE_API_SRC_FILES)
+	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^
+
+$(shell mkdir -p $(STEAMWORKS_EXT_FAKE_LIB_DIR) $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(LINUX32) $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(LINUX64) $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(OSX) $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(BIN_DIR) $(STEAMWORKS_EXT_FAKE_LIB_DIR)/$(WIN64))
 
 # export STEAM_SDK_PATH=$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/Steamv157/sdk/
 

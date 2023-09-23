@@ -69,8 +69,9 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
 // Public functions
 ////////////////////////////////////////////////////////
 
-GCLeaderboardsScoreDownloadedCookies::GCLeaderboardsScoreDownloadedCookies(int id, GCLeaderboards* gc_leaderboards,
-                                                                           SteamAPICall_t steam_api_call)
+GCLeaderboardsScoreDownloadedCookies::GCLeaderboardsScoreDownloadedCookies(const int& id,
+                                                                           GCLeaderboards* gc_leaderboards,
+                                                                           SteamAPICall_t& steam_api_call)
     : id_(id), gc_leaderboards_(gc_leaderboards), is_done_(false) {
   GCLeaderboardsScoreDownloadedCookies::set_call_result(steam_api_call);
 }
@@ -81,24 +82,23 @@ GCLeaderboardsScoreDownloadedCookies::GCLeaderboardsScoreDownloadedCookies(int i
 
 bool GCLeaderboardsScoreDownloadedCookies::is_done() const { return GCLeaderboardsScoreDownloadedCookies::is_done_; }
 
-void GCLeaderboardsScoreDownloadedCookies::set_call_result(SteamAPICall_t steam_api_call) {
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-  GCLeaderboardsScoreDownloadedCookies::m_SteamCallResultDownloadScores.Set(
-      steam_api_call, this, &GCLeaderboardsScoreDownloadedCookies::on_download_scores);
-#else
-  LeaderboardScoresDownloaded_t pLeaderboardScoresDownloaded;
-  pLeaderboardScoresDownloaded.m_hSteamLeaderboard = INVALID_LEADERBOARD;
-  pLeaderboardScoresDownloaded.m_hSteamLeaderboardEntries = INVALID_LEADERBOARD_ENTRIES;
-  pLeaderboardScoresDownloaded.m_cEntryCount = 1;
-
-  GCLeaderboardsScoreDownloadedCookies::on_download_scores(&pLeaderboardScoresDownloaded, false);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+void GCLeaderboardsScoreDownloadedCookies::set_call_result(SteamAPICall_t& steam_api_call) {
+  // GCLeaderboardsScoreDownloadedCookies::m_SteamCallResultDownloadScores.Set(
+  //     steam_api_call, this, &GCLeaderboardsScoreDownloadedCookies::on_download_scores);
 }
 
 void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
     LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
+    // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
+    GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
+    return;
+  }
+
+  if (steamworks_b::Binder::ISteamUserStats_GetDownloadedLeaderboardEntry == nullptr ||
+      steamworks_b::Binder::SteamUserStats_v012 == nullptr) {
+    DEBUG_MESSAGE("GCLeaderboardsScoreDownloadedCookies::on_download_scores() failed due to loading error.", M_ERROR);
     // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
     GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
     return;
@@ -112,8 +112,9 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
   const int number_of_leaderboard_entries =
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
   for (unsigned index{0}; index < (unsigned)number_of_leaderboard_entries; index++) {
-    SteamUserStats()->GetDownloadedLeaderboardEntry(pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
-                                                    &leaderboard_entries[index], nullptr, 0);
+    steamworks_b::Binder::ISteamUserStats_GetDownloadedLeaderboardEntry(
+        steamworks_b::Binder::SteamUserStats_v012(), pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
+        &leaderboard_entries[index], nullptr, 0);
   }
 
   // Now our entries is here, let's save it.

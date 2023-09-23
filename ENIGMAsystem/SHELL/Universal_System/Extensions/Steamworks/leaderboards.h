@@ -81,7 +81,7 @@ extern AssetArray<steamworks_gc::GCLeaderboardScoreUploadedResult*> scores_array
  * @param id 
  * @param pFindLeaderboardResult 
  */
-void push_create_leaderboard_steam_async_event(int id,
+void push_create_leaderboard_steam_async_event(int& id,
                                                const steamworks_gc::GCLeaderboardFindResult& pFindLeaderboardResult);
 
 /**
@@ -91,7 +91,7 @@ void push_create_leaderboard_steam_async_event(int id,
  * @param pScoreUploadedResult 
  */
 void push_leaderboard_upload_steam_async_event(
-    int id, const steamworks_gc::GCLeaderboardScoreUploadedResult& pScoreUploadedResult);
+    int& id, const steamworks_gc::GCLeaderboardScoreUploadedResult& pScoreUploadedResult);
 
 /**
  * @brief 
@@ -100,7 +100,7 @@ void push_leaderboard_upload_steam_async_event(
  * @param pLeaderboardScoresDownloaded 
  */
 void push_leaderboard_download_steam_async_event(
-    int id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& pLeaderboardScoresDownloaded);
+    int& id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& pLeaderboardScoresDownloaded);
 }  // namespace enigma
 
 namespace enigma_user {

@@ -47,13 +47,19 @@ AssetArray<steamworks_gc::GCLeaderboardScoresDownloadedResult*> entries_array;
 
 AssetArray<steamworks_gc::GCLeaderboardScoreUploadedResult*> scores_array;
 
-void push_create_leaderboard_steam_async_event(int id,
+void push_create_leaderboard_steam_async_event(int& id,
                                                const steamworks_gc::GCLeaderboardFindResult& leaderboard_find_result) {
-  const std::map<std::string, variant> leaderboard_find_event = {
-      {"id", id},
-      {"event_type", "create_leaderboard"},
-      {"status", leaderboard_find_result.leaderboard_found},
-      {"lb_name", steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_find_result.leaderboard)}};
+  std::string leaderboard_name_buffer;
+
+  if (!steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer,
+                                                           leaderboard_find_result.leaderboard)) {
+    return;
+  }
+
+  const std::map<std::string, variant> leaderboard_find_event = {{"id", id},
+                                                                 {"event_type", "create_leaderboard"},
+                                                                 {"status", leaderboard_find_result.leaderboard_found},
+                                                                 {"lb_name", leaderboard_name_buffer}};
 
   posted_async_events_mutex.lock();
   enigma::posted_async_events.push(leaderboard_find_event);
@@ -61,7 +67,7 @@ void push_create_leaderboard_steam_async_event(int id,
 }
 
 void push_leaderboard_upload_steam_async_event(
-    int id, const steamworks_gc::GCLeaderboardScoreUploadedResult& leaderboard_score_uploaded_result) {
+    int& id, const steamworks_gc::GCLeaderboardScoreUploadedResult& leaderboard_score_uploaded_result) {
   /*
     We have a successful upload request after a failed one. Let's reset the number of successful upload requests.
   */
@@ -71,6 +77,13 @@ void push_leaderboard_upload_steam_async_event(
   }
   enigma::number_of_successful_upload_requests++;  // Increase the number of successful upload requests.
 
+  std::string leaderboard_name_buffer;
+
+  if (!steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer,
+                                                           leaderboard_score_uploaded_result.leaderboard)) {
+    return;
+  }
+
   // GMS's output:
   /*
       Steam ASYNC: {"updated":1.0,"lb_name":"YYLeaderboard_10/29/21--","success":1.0,"event_type":"leaderboard_upload","score":325.0,"post_id":6.0}
@@ -78,7 +91,7 @@ void push_leaderboard_upload_steam_async_event(
   const std::map<std::string, variant> leaderboard_upload_event = {
       {"event_type", "leaderboard_upload"},
       {"post_id", id},
-      {"lb_name", steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_score_uploaded_result.leaderboard)},
+      {"lb_name", leaderboard_name_buffer},
       {"success", leaderboard_score_uploaded_result.success},
       {"updated", leaderboard_score_uploaded_result.score_changed},
       {"score", leaderboard_score_uploaded_result.score}};
@@ -89,7 +102,13 @@ void push_leaderboard_upload_steam_async_event(
 }
 
 void push_leaderboard_download_steam_async_event(
-    int id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& leaderboard_scores_downloaded_result) {
+    int& id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& leaderboard_scores_downloaded_result) {
+  std::string leaderboard_name_buffer;
+
+  if (!steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer,
+                                                           leaderboard_scores_downloaded_result.leaderboard)) {
+    return;
+  }
   // GMS's output:
   /*
       Steam ASYNC: {"entries":"{\n    "entries": [\n                { "name"  : "TomasJPereyra", "score" : 1, "rank"  : 1, "userID": "@i64@110000108ae8556$i64$" }
@@ -106,8 +125,7 @@ void push_leaderboard_download_steam_async_event(
   */
   const std::map<std::string, variant> leaderboard_download_event = {
       {"entries", leaderboard_scores_downloaded_result.entries_buffer},
-      {"lb_name",
-       steamworks_gc::GCLeaderboards::get_leaderboard_name(leaderboard_scores_downloaded_result.leaderboard)},
+      {"lb_name", leaderboard_name_buffer},
       {"event_type", "leaderboard_download"},
       {"id", id},
       {"num_entries", leaderboard_scores_downloaded_result.number_of_leaderboard_entries},

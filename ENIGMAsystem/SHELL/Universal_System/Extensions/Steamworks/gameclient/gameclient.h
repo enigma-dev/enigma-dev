@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <string>
 
+#define INVALID_APP_ID 0
+
 namespace steamworks_gc {
 
 class GCOverlay;

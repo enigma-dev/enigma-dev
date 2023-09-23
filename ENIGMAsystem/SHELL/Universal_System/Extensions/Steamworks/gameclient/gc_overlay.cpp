@@ -23,31 +23,24 @@ namespace steamworks_gc {
 // Public fields & functions
 ////////////////////////////////////////////////////////
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
+// m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated)
 GCOverlay::GCOverlay()
-    : m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated), overlay_activated_(false) {}
-#else
-GCOverlay::GCOverlay() {}
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+    : overlay_activated_(false) {}
 
-void GCOverlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
-  if (pCallback->m_bActive) {
-    GCOverlay::overlay_activated_ = true;
-    DEBUG_MESSAGE("Overlay activated successfully.", M_INFO);
-  } else {
-    GCOverlay::overlay_activated_ = false;
-    DEBUG_MESSAGE("Overlay deactivated successfully.", M_INFO);
-  }
-}
+// void GCOverlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
+//   if (pCallback->m_bActive) {
+//     GCOverlay::overlay_activated_ = true;
+//     DEBUG_MESSAGE("Overlay activated successfully.", M_INFO);
+//   } else {
+//     GCOverlay::overlay_activated_ = false;
+//     DEBUG_MESSAGE("Overlay deactivated successfully.", M_INFO);
+//   }
+// }
 
 bool GCOverlay::overlay_activated() { return GCOverlay::overlay_activated_; }
 
 ////////////////////////////////////////////////////////
 // Private fields & functions
 ////////////////////////////////////////////////////////
-
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-bool GCOverlay::overlay_activated_{false};
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
 }  // namespace steamworks_gc

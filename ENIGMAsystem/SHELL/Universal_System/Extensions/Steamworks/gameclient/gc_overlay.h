@@ -71,31 +71,20 @@ class GCOverlay {
   */
   ~GCOverlay() = default;
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   /*
     Macro for listening to GameOverlayActivated_t callback. Callbacks are dispatched by
     calling gc_main::run_callbacks().
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GameOverlayActivated_t for
     more information.
   */
-  STEAM_CALLBACK(GCOverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
-#else
-  /**
-   * @brief This function is used to test the overlay activation.
-   */
-  static void on_game_overlay_activated(GameOverlayActivated_t* pCallback);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+  // STEAM_CALLBACK(GCOverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
 
-/*
+  /*
     Checks Overlay's activation status. Returns true if the Overlay is activated. Otherwise, 
     it returns false. Overlay's activation status is stored in overlay_activated_ private
     variable.
   */
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   bool overlay_activated();
-#else
-  static bool overlay_activated();
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
   /*
     Checks if the Steam Overlay is running & the user can access it. The overlay process 
@@ -104,7 +93,15 @@ class GCOverlay {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#IsOverlayEnabled for more 
     information.
   */
-  inline static bool overlay_enabled() { return SteamUtils()->IsOverlayEnabled(); }
+  inline static bool overlay_enabled() {
+    if (steamworks_b::Binder::ISteamUtils_IsOverlayEnabled == nullptr ||
+        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::overlay_enabled() failed dure to loading error.", M_ERROR);
+      return false;
+    }
+
+    return steamworks_b::Binder::ISteamUtils_IsOverlayEnabled(steamworks_b::Binder::SteamUtils_v010());
+  }
 
   /*
     Activates the Steam Overlay to a specific dialog. Valid dialog options are: 
@@ -121,15 +118,13 @@ class GCOverlay {
     information.
   */
   inline static void activate_overlay(const std::string& dialog) {
-    SteamFriends()->ActivateGameOverlay(dialog.c_str());
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-    GameOverlayActivated_t pCallback;
-    pCallback.m_bActive = !GCOverlay::overlay_activated_;
-    pCallback.m_bUserInitiated = true;
-    pCallback.m_nAppID = 480;  // Spacewar's AppID
+    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlay == nullptr ||
+        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::activate_overlay() failed dure to loading error.", M_ERROR);
+      return;
+    }
 
-    GCOverlay::on_game_overlay_activated(&pCallback);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+    steamworks_b::Binder::ISteamFriends_ActivateGameOverlay(steamworks_b::Binder::SteamFriends_v017(), dialog.c_str());
   }
 
   /*
@@ -140,20 +135,15 @@ class GCOverlay {
     for more information.
   */
   inline static void activate_overlay_browser(const std::string& url) {
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
-    SteamFriends()->ActivateGameOverlayToWebPage(
-        url.c_str(), EActivateGameOverlayToWebPageMode::k_EActivateGameOverlayToWebPageMode_Default);
-#else
-    SteamFriends()->ActivateGameOverlayToWebPage(
-        url.c_str(), (int)GCActivateGameOverlayToWebPageMode::k_GCActivateGameOverlayToWebPageMode_Default);
+    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToWebPage == nullptr ||
+        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::activate_overlay_browser() failed dure to loading error.", M_ERROR);
+      return;
+    }
 
-    GameOverlayActivated_t pCallback;
-    pCallback.m_bActive = !GCOverlay::overlay_activated_;
-    pCallback.m_bUserInitiated = true;
-    pCallback.m_nAppID = 480;  // Spacewar's AppID
-
-    GCOverlay::on_game_overlay_activated(&pCallback);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
+    steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToWebPage(
+        steamworks_b::Binder::SteamFriends_v017(), url.c_str(),
+        EActivateGameOverlayToWebPageMode::k_EActivateGameOverlayToWebPageMode_Default);
   }
 
   /*
@@ -178,8 +168,15 @@ class GCOverlay {
     for more information.
   */
   inline static void activate_overlay_user(const std::string& dialog_name, const uint64& steam_id) {
-    CSteamID c_steam_id(steam_id);
-    SteamFriends()->ActivateGameOverlayToUser(dialog_name.c_str(), c_steam_id);
+    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToUser == nullptr ||
+        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::activate_overlay_user() failed dure to loading error.", M_ERROR);
+      return;
+    }
+
+    steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToUser(steamworks_b::Binder::SteamFriends_v017(),
+                                                                  dialog_name.c_str(), steam_id);
+
 #ifdef ENIGMA_STEAMWORKS_API_MOCK
     GameOverlayActivated_t pCallback;
     pCallback.m_bActive = !GCOverlay::overlay_activated_;
@@ -199,10 +196,17 @@ class GCOverlay {
     for more information.
   */
   inline static void set_overlay_notification_inset(const int& horizontal_inset, const int& vertical_inset) {
-    SteamUtils()->SetOverlayNotificationInset(horizontal_inset, vertical_inset);
+    if (steamworks_b::Binder::ISteamUtils_SetOverlayNotificationInset == nullptr ||
+        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::set_overlay_notification_inset() failed dure to loading error.", M_ERROR);
+      return;
+    }
+
+    steamworks_b::Binder::ISteamUtils_SetOverlayNotificationInset(steamworks_b::Binder::SteamUtils_v010(),
+                                                                  horizontal_inset, vertical_inset);
   }
 
-/*
+  /*
     Sets which corner the Steam overlay notification popup should display itself in. You 
     can also set the distance from the specified corner by using
     gc_overlay::set_overlay_notification_inset(). This position is per-game and is reset each 
@@ -216,9 +220,14 @@ class GCOverlay {
     Check https://partner.steamgames.com/doc/api/ISteamUtils#SetOverlayNotificationPosition
     for more information.
   */
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   inline static void set_overlay_notification_position(
       const GCNotificationPosition& gc_notification_position = GCNotificationPosition::k_GCPosition_Invalid) {
+    if (steamworks_b::Binder::ISteamUtils_SetOverlayNotificationPosition == nullptr ||
+        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+      DEBUG_MESSAGE("GCOverlay::set_overlay_notification_position() failed dure to loading error.", M_ERROR);
+      return;
+    }
+
     ENotificationPosition notification_position{ENotificationPosition::k_EPositionInvalid};
 
     switch (gc_notification_position) {
@@ -239,24 +248,15 @@ class GCOverlay {
         break;
     }
 
-    SteamUtils()->SetOverlayNotificationPosition(notification_position);
+    steamworks_b::Binder::ISteamUtils_SetOverlayNotificationPosition(steamworks_b::Binder::SteamUtils_v010(),
+                                                                     notification_position);
   }
-#else
-  inline static void set_overlay_notification_position(
-      const GCNotificationPosition gc_notification_position = GCNotificationPosition::k_GCPosition_Invalid) {
-    SteamUtils()->SetOverlayNotificationPosition((int)GCNotificationPosition::k_GCPosition_Invalid);
-  }
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 
  private:
   /*
     Stores the Overlay's activation status.
   */
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   bool overlay_activated_;
-#else
-  static bool overlay_activated_;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 };
 }  // namespace steamworks_gc
 
