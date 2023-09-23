@@ -29,12 +29,12 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_std_complex> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_std_complex> byte_size(const T &value) {
   return sizeof(value.real()) * 2;  // we don't need enigma_internal_sizeof
 }
 
 template <typename T>
-matches_t<T, void, is_std_complex> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline matches_t<T, void, is_std_complex> internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.real());
   iter += enigma_internal_sizeof(value.real());
   internal_serialize_into(iter, value.imag());
@@ -42,7 +42,7 @@ matches_t<T, void, is_std_complex> inline internal_serialize_into_fn(std::byte *
 }
 
 template <typename T>
-matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> inline internal_serialize_fn(T &&value) {
+inline matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
 
@@ -55,7 +55,7 @@ matches_t<T, std::vector<std::byte>, is_std_complex, is_std_pair> inline interna
 }
 
 template <typename T>
-matches_t<T, T, is_std_complex> inline internal_deserialize_fn(std::byte *iter) {
+inline matches_t<T, T, is_std_complex> internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
 
@@ -68,13 +68,13 @@ matches_t<T, T, is_std_complex> inline internal_deserialize_fn(std::byte *iter) 
 }
 
 template <typename T>
-matches_t<T, void, is_std_complex, is_std_pair> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
+inline matches_t<T, void, is_std_complex, is_std_pair> internal_resize_buffer_for_fn(std::vector<std::byte> &buffer,
                                                                                      T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-matches_t<T, void, is_std_complex> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_std_complex> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   using InnerType = typename complex_inner_type<std::decay_t<T>>::type;
 
   InnerType Real = internal_deserialize<InnerType>(iter + len);

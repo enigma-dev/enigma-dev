@@ -42,7 +42,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-matches_t<T, std::string, is_std_tuple> inline internal_serialize_into_fn(const T &value) {
+inline matches_t<T, std::string, is_std_tuple> internal_serialize_into_fn(const T &value) {
   std::string json = "[";
 
   std::size_t tupleSize = std::tuple_size<std::decay_t<T>>::value;
@@ -64,7 +64,7 @@ matches_t<T, std::string, is_std_tuple> inline internal_serialize_into_fn(const 
 }
 
 template <typename T>
-matches_t<T, T, is_std_tuple> inline internal_deserialize_fn(const std::string &json) {
+inline matches_t<T, T, is_std_tuple> internal_deserialize_fn(const std::string &json) {
   std::string tupleStr = json.substr(1, json.length() - 2);
 
   typename std::decay_t<T> resultTuple;

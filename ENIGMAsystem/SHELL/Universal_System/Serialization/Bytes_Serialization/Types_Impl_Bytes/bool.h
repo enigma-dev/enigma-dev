@@ -29,17 +29,17 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-is_t<T, bool> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline is_t<T, bool> internal_serialize_into_fn(std::byte *iter, T &&value) {
   *iter = static_cast<std::byte>(value);
 }
 
 template <typename T>
-is_t<T, bool, std::vector<std::byte>> inline internal_serialize_fn(const bool &value) {
+inline is_t<T, bool, std::vector<std::byte>> internal_serialize_fn(const bool &value) {
   return std::vector<std::byte>{static_cast<std::byte>(value)};
 }
 
 template <typename T>
-is_t<T, bool, T> inline internal_deserialize_fn(std::byte *iter) {
+inline is_t<T, bool, T> internal_deserialize_fn(std::byte *iter) {
   return static_cast<bool>(*iter);
 }
 

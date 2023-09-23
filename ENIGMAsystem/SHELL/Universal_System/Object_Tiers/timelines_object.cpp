@@ -162,20 +162,21 @@ namespace enigma
   }
 
   std::string object_timelines::json_serialize() const {
-    std::string json = "{";
+    std::stringstream json ;
+    json << "{";
     
-    json += "\"object_type\":\"object_timelines\",";
-    json += "\"parent\":" + object_planar::json_serialize() + ",";;
-    json += "\"timeline_moments_maps\":" + enigma::JSON_serialization::enigma_serialize(timeline_moments_maps) + ","; 
-    json += "\"timeline_index\":" + enigma::JSON_serialization::enigma_serialize(timeline_index) + ",";
-    json += "\"timeline_running\":" + enigma::JSON_serialization::enigma_serialize(timeline_running) + ",";
-    json += "\"timeline_speed\":" + enigma::JSON_serialization::enigma_serialize(timeline_speed) + ",";
-    json += "\"timeline_position\":" + enigma::JSON_serialization::enigma_serialize(timeline_position) + ",";
-    json += "\"timeline_loop\":" + enigma::JSON_serialization::enigma_serialize(timeline_loop);
+    json << "\"object_type\":\"object_timelines\",";
+    json << "\"parent\":" + object_planar::json_serialize() + ",";;
+    json << "\"timeline_moments_maps\":" + enigma::JSON_serialization::enigma_serialize(timeline_moments_maps) + ","; 
+    json << "\"timeline_index\":" + enigma::JSON_serialization::enigma_serialize(timeline_index) + ",";
+    json << "\"timeline_running\":" + enigma::JSON_serialization::enigma_serialize(timeline_running) + ",";
+    json << "\"timeline_speed\":" + enigma::JSON_serialization::enigma_serialize(timeline_speed) + ",";
+    json << "\"timeline_position\":" + enigma::JSON_serialization::enigma_serialize(timeline_position) + ",";
+    json << "\"timeline_loop\":" + enigma::JSON_serialization::enigma_serialize(timeline_loop);
 
-    json += "}";
+    json << "}";
 
-    return json;
+    return json.str();
   }
 
   void object_timelines::json_deserialize_self(const std::string &json) {

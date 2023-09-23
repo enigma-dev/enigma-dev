@@ -30,7 +30,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-enables_if_numeric_t<T, std::string> inline internal_serialize_into_fn(const T& value) {
+inline enables_if_numeric_t<T, std::string> internal_serialize_into_fn(const T& value) {
   std::string json = std::to_string(value);
 
   if constexpr (std::is_floating_point_v<std::decay_t<T>>) {
@@ -57,7 +57,7 @@ enables_if_numeric_t<T, std::string> inline internal_serialize_into_fn(const T& 
 }
 
 template <typename T>
-enables_if_numeric_t<T, T> inline internal_deserialize_fn(const std::string& json) {
+inline enables_if_numeric_t<T, T> internal_deserialize_fn(const std::string& json) {
   if constexpr (std::is_same_v<T, char>)
     return json[1];
   else if constexpr (std::is_integral_v<T>)

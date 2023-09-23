@@ -29,7 +29,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-is_t<T, std::string, std::string> inline internal_serialize_into_fn(const T& value) {
+inline is_t<T, std::string, std::string> internal_serialize_into_fn(const T& value) {
   std::string json = "\"";
 
   for (char c : value) {
@@ -66,7 +66,7 @@ is_t<T, std::string, std::string> inline internal_serialize_into_fn(const T& val
 }
 
 template <typename T>
-is_t<T, std::string, T> inline internal_deserialize_fn(const std::string& json) {
+inline is_t<T, std::string, T> internal_deserialize_fn(const std::string& json) {
   std::string result;
   bool escaped = false;
 

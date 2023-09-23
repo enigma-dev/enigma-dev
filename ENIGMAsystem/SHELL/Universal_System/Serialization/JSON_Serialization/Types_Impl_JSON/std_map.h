@@ -29,7 +29,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T& value) {
+inline matches_t<T, std::string, is_std_map> internal_serialize_into_fn(const T& value) {
   std::string json = "{";
 
   using KeyType = typename std::decay_t<T>::key_type;
@@ -51,7 +51,7 @@ matches_t<T, std::string, is_std_map> inline internal_serialize_into_fn(const T&
 }
 
 template <typename T>
-matches_t<T, T, is_std_map> inline internal_deserialize_fn(const std::string& json) {
+inline matches_t<T, T, is_std_map> internal_deserialize_fn(const std::string& json) {
   using KeyType = typename std::decay_t<T>::key_type;
   using ValueType = typename std::decay_t<T>::mapped_type;
 

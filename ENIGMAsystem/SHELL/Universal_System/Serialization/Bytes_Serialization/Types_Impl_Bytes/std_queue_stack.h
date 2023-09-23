@@ -30,7 +30,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_std_queue, is_std_stack> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_std_queue, is_std_stack> byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
   std::decay_t<T> tempContainer = value;
 
@@ -43,7 +43,7 @@ matches_t<T, std::size_t, is_std_queue, is_std_stack> inline byte_size(const T &
 }
 
 template <typename T>
-matches_t<T, void, is_std_queue, is_std_stack> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline matches_t<T, void, is_std_queue, is_std_stack> internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::decay_t<T> tempContainer = value;
 
   internal_serialize_into<std::size_t>(iter, tempContainer.size());
@@ -57,7 +57,7 @@ matches_t<T, void, is_std_queue, is_std_stack> inline internal_serialize_into_fn
 }
 
 template <typename T>
-matches_t<T, std::vector<std::byte>, is_std_queue, is_std_stack> inline internal_serialize_fn(T &&value) {
+inline matches_t<T, std::vector<std::byte>, is_std_queue, is_std_stack> internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into<std::size_t>(result.data(), value.size());
@@ -74,22 +74,21 @@ matches_t<T, std::vector<std::byte>, is_std_queue, is_std_stack> inline internal
 }
 
 template <typename T>
-matches_t<T, void, is_std_stack> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_std_stack> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   std::size_t size = internal_deserialize<std::size_t>(iter + len);
   len += sizeof(std::size_t);
 
   using InnerType = typename T::value_type;
-  std::stack<InnerType> tempStack;
+  std::vector<InnerType> tempVector;
 
   for (std::size_t i = 0; i < size; ++i) {
     InnerType element = internal_deserialize<InnerType>(iter + len);
-    insert_back(tempStack, std::move(element));
+    tempVector.push_back(std::move(element));
     len += enigma_internal_sizeof(element);
   }
 
-  while (!tempStack.empty()) {
-    insert_back(value, std::move(get_top(tempStack)));
-    tempStack.pop();
+  for (auto rIt = tempVector.rbegin(); rIt != tempVector.rend(); ++rIt) {
+    insert_back(value, std::move(*rIt));
   }
 }
 

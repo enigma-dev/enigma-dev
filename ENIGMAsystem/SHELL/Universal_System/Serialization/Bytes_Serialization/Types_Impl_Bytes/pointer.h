@@ -39,7 +39,7 @@ inline auto internal_serialize_fn(T *&&value) {
 }
 
 template <typename T>
-matches_t<T, T, std::is_pointer> inline internal_deserialize_fn(std::byte *iter) {
+inline matches_t<T, T, std::is_pointer> internal_deserialize_fn(std::byte *iter) {
   return nullptr;
 }
 

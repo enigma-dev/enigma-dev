@@ -133,30 +133,31 @@ namespace enigma
   }
 
   std::string object_planar::json_serialize() const {
-    std::string json = "{";
+    std::stringstream json ;
+    json << "{";
 
-    json += "\"object_type\":\"object_planar\",";
-    json += "\"parent\":" + object_basic::json_serialize()+ ",";
-    json += "\"x\":" + enigma::JSON_serialization::enigma_serialize(x) + ",";
-    json += "\"y\":" + enigma::JSON_serialization::enigma_serialize(y) + ",";
-    json += "\"xprevious\":" + enigma::JSON_serialization::enigma_serialize(xprevious) + ",";
-    json += "\"yprevious\":" + enigma::JSON_serialization::enigma_serialize(yprevious) + ",";
-    json += "\"xstart\":" + enigma::JSON_serialization::enigma_serialize(xstart) + ",";
-    json += "\"ystart\":" + enigma::JSON_serialization::enigma_serialize(ystart) + ",";
+    json << "\"object_type\":\"object_planar\",";
+    json << "\"parent\":" + object_basic::json_serialize()+ ",";
+    json << "\"x\":" + enigma::JSON_serialization::enigma_serialize(x) + ",";
+    json << "\"y\":" + enigma::JSON_serialization::enigma_serialize(y) + ",";
+    json << "\"xprevious\":" + enigma::JSON_serialization::enigma_serialize(xprevious) + ",";
+    json << "\"yprevious\":" + enigma::JSON_serialization::enigma_serialize(yprevious) + ",";
+    json << "\"xstart\":" + enigma::JSON_serialization::enigma_serialize(xstart) + ",";
+    json << "\"ystart\":" + enigma::JSON_serialization::enigma_serialize(ystart) + ",";
 #ifdef ISLOCAL_persistent
-    json += "\"persistent\":" + enigma::JSON_serialization::enigma_serialize(persistent) + ",";
+    json << "\"persistent\":" + enigma::JSON_serialization::enigma_serialize(persistent) + ",";
 #endif
-    json += "\"direction\":" + enigma::JSON_serialization::enigma_serialize(direction) + ",";
-    json += "\"speed\":" + enigma::JSON_serialization::enigma_serialize(speed) + ",";
-    json += "\"hspeed\":" + enigma::JSON_serialization::enigma_serialize(hspeed) + ",";
-    json += "\"vspeed\":" + enigma::JSON_serialization::enigma_serialize(vspeed) + ",";
-    json += "\"gravity\":" + enigma::JSON_serialization::enigma_serialize(gravity) + ",";
-    json += "\"gravity_direction\":" + enigma::JSON_serialization::enigma_serialize(gravity_direction) + ",";
-    json += "\"friction\":" + enigma::JSON_serialization::enigma_serialize(friction);
+    json << "\"direction\":" + enigma::JSON_serialization::enigma_serialize(direction) + ",";
+    json << "\"speed\":" + enigma::JSON_serialization::enigma_serialize(speed) + ",";
+    json << "\"hspeed\":" + enigma::JSON_serialization::enigma_serialize(hspeed) + ",";
+    json << "\"vspeed\":" + enigma::JSON_serialization::enigma_serialize(vspeed) + ",";
+    json << "\"gravity\":" + enigma::JSON_serialization::enigma_serialize(gravity) + ",";
+    json << "\"gravity_direction\":" + enigma::JSON_serialization::enigma_serialize(gravity_direction) + ",";
+    json << "\"friction\":" + enigma::JSON_serialization::enigma_serialize(friction);
 
-    json += "}";
+    json << "}";
 
-    return json;
+    return json.str();
   }
 
   void object_planar::json_deserialize_self(const std::string &json) {

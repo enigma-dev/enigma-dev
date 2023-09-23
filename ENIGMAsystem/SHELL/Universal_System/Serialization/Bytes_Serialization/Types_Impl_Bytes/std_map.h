@@ -29,7 +29,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_std_map> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_std_map> byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   for (const auto &element : value) {
@@ -40,7 +40,7 @@ matches_t<T, std::size_t, is_std_map> inline byte_size(const T &value) {
 }
 
 template <typename T>
-matches_t<T, void, is_std_map> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline matches_t<T, void, is_std_map> internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into<std::size_t>(iter, value.size());
   iter += sizeof(std::size_t);
   for (const auto &element : value) {
@@ -52,7 +52,7 @@ matches_t<T, void, is_std_map> inline internal_serialize_into_fn(std::byte *iter
 }
 
 template <typename T>
-matches_t<T, std::vector<std::byte>, is_std_map> inline internal_serialize_fn(T &&value) {
+inline matches_t<T, std::vector<std::byte>, is_std_map> internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into<std::size_t>(result.data(), value.size());
@@ -68,7 +68,7 @@ matches_t<T, std::vector<std::byte>, is_std_map> inline internal_serialize_fn(T 
 }
 
 template <typename T>
-matches_t<T, T, is_std_map> inline internal_deserialize_fn(std::byte *iter) {
+inline matches_t<T, T, is_std_map> internal_deserialize_fn(std::byte *iter) {
   std::size_t size = internal_deserialize<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
 
@@ -88,12 +88,12 @@ matches_t<T, T, is_std_map> inline internal_deserialize_fn(std::byte *iter) {
 }
 
 template <typename T>
-matches_t<T, void, is_std_map> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+inline matches_t<T, void, is_std_map> internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-matches_t<T, void, is_std_map> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_std_map> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   std::size_t size = internal_deserialize<std::size_t>(iter + len);
   len += sizeof(std::size_t);
   value.clear();

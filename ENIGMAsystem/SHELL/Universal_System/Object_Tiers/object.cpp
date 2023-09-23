@@ -122,14 +122,16 @@ namespace enigma
     }
 
     std::string object_basic::json_serialize() const {
-      std::string json = "{";
-      json += "\"object_type\":\"object_basic\",";
-      json += "\"id\":" + enigma::JSON_serialization::enigma_serialize(id) + ",";
-      json += "\"object_index\":" + enigma::JSON_serialization::enigma_serialize(object_index);
+      std::stringstream json ;
+      json << "{";
+      
+      json << "\"object_type\":\"object_basic\",";
+      json << "\"id\":" + enigma::JSON_serialization::enigma_serialize(id) + ",";
+      json << "\"object_index\":" + enigma::JSON_serialization::enigma_serialize(object_index);
 
-      json += "}";
+      json << "}";
 
-      return json;
+      return json.str();
     }
 
     void object_basic::json_deserialize_self(const std::string &json) {

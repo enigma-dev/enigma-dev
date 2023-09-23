@@ -30,7 +30,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_lua_table> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_lua_table> byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   totalSize += enigma_internal_sizeof(value.dense_part());  // The elements of `dense`, we can use `byte_size` directly
@@ -97,7 +97,7 @@ inline lua_table<T> enigma_internal_deserialize_lua_table(std::byte *iter) {
 }
 
 template <typename T>
-matches_t<T, void, is_lua_table> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_lua_table> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   using Type = typename lua_inner_type<T>::type;
   value = enigma_internal_deserialize_lua_table<Type>(iter);
   len += enigma_internal_sizeof(value);

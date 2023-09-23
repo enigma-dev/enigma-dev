@@ -179,20 +179,21 @@ namespace enigma
     }
 
     std::string object_collisions::json_serialize() const {
-      std::string json = "{";
+      std::stringstream json ;
+      json << "{";
 
-      json += "\"object_type\":\"object_collisions\",";
-      json += "\"parent\":" + object_transform::json_serialize() + ",";
-      json += "\"mask_index\":" + enigma::JSON_serialization::enigma_serialize(mask_index) + ",";
-      json += "\"solid\":" + enigma::JSON_serialization::enigma_serialize(solid) + ",";
-      json += "\"polygon_index\":" + enigma::JSON_serialization::enigma_serialize(polygon_index) + ","; 
-      json += "\"polygon_xscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_xscale) + ",";
-      json += "\"polygon_yscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_yscale) + ",";
-      json += "\"polygon_angle\":" + enigma::JSON_serialization::enigma_serialize(polygon_angle);
+      json << "\"object_type\":\"object_collisions\",";
+      json << "\"parent\":" + object_transform::json_serialize() + ",";
+      json << "\"mask_index\":" + enigma::JSON_serialization::enigma_serialize(mask_index) + ",";
+      json << "\"solid\":" + enigma::JSON_serialization::enigma_serialize(solid) + ",";
+      json << "\"polygon_index\":" + enigma::JSON_serialization::enigma_serialize(polygon_index) + ","; 
+      json << "\"polygon_xscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_xscale) + ",";
+      json << "\"polygon_yscale\":" + enigma::JSON_serialization::enigma_serialize(polygon_yscale) + ",";
+      json << "\"polygon_angle\":" + enigma::JSON_serialization::enigma_serialize(polygon_angle);
 
-      json += "}";
+      json << "}";
 
-      return json;
+      return json.str();
     }
 
     void object_collisions::json_deserialize_self(const std::string &json){

@@ -27,12 +27,12 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-matches_t<T,std::string,std::is_pointer> inline internal_serialize_into_fn(const T& value) {
+inline matches_t<T, std::string, std::is_pointer> internal_serialize_into_fn(const T& value) {
   return "0";
 }
 
 template <typename T>
-matches_t<T, T, std::is_pointer> inline internal_deserialize_fn(const std::string& json) {
+inline matches_t<T, T, std::is_pointer> internal_deserialize_fn(const std::string& json) {
   return nullptr;
 }
 

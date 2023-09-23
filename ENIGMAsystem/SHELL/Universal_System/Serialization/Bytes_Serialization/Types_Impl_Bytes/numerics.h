@@ -30,7 +30,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-enables_if_numeric_t<T> inline internal_serialize_into_fn(std::byte *iter, const T &value) {
+inline enables_if_numeric_t<T> internal_serialize_into_fn(std::byte *iter, const T &value) {
   if constexpr (std::is_integral_v<T>) {
     internal_serialize_primitive_into<std::make_unsigned_t<T>>(iter, value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -39,7 +39,8 @@ enables_if_numeric_t<T> inline internal_serialize_into_fn(std::byte *iter, const
     } else if constexpr (std::is_same_v<T, double>) {
       internal_serialize_primitive_into<std::uint64_t>(iter, value);
     } else {
-      static_assert(always_false<T>, "'internal_serialize_into' only accepts 'float' or 'double' from the floating-point types");
+      static_assert(always_false<T>,
+                    "'internal_serialize_into' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
     static_assert(always_false<T>, "'internal_serialize_into' takes either integral or floating types");
@@ -47,7 +48,7 @@ enables_if_numeric_t<T> inline internal_serialize_into_fn(std::byte *iter, const
 }
 
 template <typename T>
-enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline internal_serialize_fn(const T &value) {
+inline enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> internal_serialize_fn(const T &value) {
   if constexpr (std::is_integral_v<T>) {
     return serialize_primitive<std::make_unsigned_t<T>>(value);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -56,7 +57,8 @@ enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline internal_serial
     } else if constexpr (std::is_same_v<T, double>) {
       return serialize_primitive<std::uint64_t>(value);
     } else {
-      static_assert(always_false<T>, "'internal_serialize' only accepts 'float' or 'double' from the floating-point types");
+      static_assert(always_false<T>,
+                    "'internal_serialize' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
     static_assert(always_false<T>, "'internal_serialize' takes either integral or floating types");
@@ -64,7 +66,7 @@ enables_if_numeric_t<T, std::array<std::byte, sizeof(T)>> inline internal_serial
 }
 
 template <typename T>
-enables_if_numeric_t<T, T> inline internal_deserialize_fn(std::byte *iter) {
+inline enables_if_numeric_t<T, T> internal_deserialize_fn(std::byte *iter) {
   if constexpr (std::is_integral_v<T>) {
     return internal_deserialize_primitive<std::make_unsigned_t<T>, T>(iter);
   } else if constexpr (std::is_floating_point_v<T>) {
@@ -73,7 +75,8 @@ enables_if_numeric_t<T, T> inline internal_deserialize_fn(std::byte *iter) {
     } else if constexpr (std::is_same_v<T, double>) {
       return internal_deserialize_primitive<std::size_t, T>(iter);
     } else {
-      static_assert(always_false<T>, "'internal_deserialize' only accepts 'float' or 'double' from the floating-point types");
+      static_assert(always_false<T>,
+                    "'internal_deserialize' only accepts 'float' or 'double' from the floating-point types");
     }
   } else {
     static_assert(always_false<T>, "'internal_deserialize' takes either integral or floating types");

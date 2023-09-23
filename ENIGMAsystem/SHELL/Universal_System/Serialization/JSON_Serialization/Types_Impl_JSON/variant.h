@@ -30,7 +30,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-enable_if_inherits_variant_t<T, std::string> inline internal_serialize_into_fn(const T& value) {
+inline enable_if_inherits_variant_t<T, std::string> internal_serialize_into_fn(const T& value) {
   std::string json = "{";
 
   if (value.type == variant::ty_real)
@@ -44,7 +44,7 @@ enable_if_inherits_variant_t<T, std::string> inline internal_serialize_into_fn(c
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T, T> inline internal_deserialize_fn(const std::string& json) {
+inline enable_if_inherits_variant_t<T, T> internal_deserialize_fn(const std::string& json) {
   std::string type = json.substr(9, json.find(',') - 10);
   std::string value = json.substr(json.find("value") + 7, json.length() - json.find("value") - 8);
 

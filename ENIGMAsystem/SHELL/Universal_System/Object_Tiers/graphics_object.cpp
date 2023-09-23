@@ -129,23 +129,24 @@ namespace enigma
   }
 
   std::string object_graphics::json_serialize() const {
-    std::string json = "{";
+    std::stringstream json ;
+    json << "{";
 
-    json += "\"object_type\":\"object_graphics\",";
-    json += "\"parent\":" + object_timelines::json_serialize() + ",";
-    json += "\"sprite_index\":" + enigma::JSON_serialization::enigma_serialize(sprite_index) + ",";
-    json += "\"image_index\":" + enigma::JSON_serialization::enigma_serialize(image_index) + ",";
-    json += "\"image_speed\":" + enigma::JSON_serialization::enigma_serialize(image_speed) + ",";
-    json += "\"image_single\":" + enigma::JSON_serialization::enigma_serialize(image_single) + ",";
-    json += "\"depth\":" + enigma::JSON_serialization::enigma_serialize(depth) + ",";
-    json += "\"visible\":" + enigma::JSON_serialization::enigma_serialize(visible) + ",";
-    json += "\"image_xscale\":" + enigma::JSON_serialization::enigma_serialize(image_xscale) + ",";
-    json += "\"image_yscale\":" + enigma::JSON_serialization::enigma_serialize(image_yscale) + ",";
-    json += "\"image_angle\":" + enigma::JSON_serialization::enigma_serialize(image_angle);
+    json << "\"object_type\":\"object_graphics\",";
+    json << "\"parent\":" + object_timelines::json_serialize() + ",";
+    json << "\"sprite_index\":" + enigma::JSON_serialization::enigma_serialize(sprite_index) + ",";
+    json << "\"image_index\":" + enigma::JSON_serialization::enigma_serialize(image_index) + ",";
+    json << "\"image_speed\":" + enigma::JSON_serialization::enigma_serialize(image_speed) + ",";
+    json << "\"image_single\":" + enigma::JSON_serialization::enigma_serialize(image_single) + ",";
+    json << "\"depth\":" + enigma::JSON_serialization::enigma_serialize(depth) + ",";
+    json << "\"visible\":" + enigma::JSON_serialization::enigma_serialize(visible) + ",";
+    json << "\"image_xscale\":" + enigma::JSON_serialization::enigma_serialize(image_xscale) + ",";
+    json << "\"image_yscale\":" + enigma::JSON_serialization::enigma_serialize(image_yscale) + ",";
+    json << "\"image_angle\":" + enigma::JSON_serialization::enigma_serialize(image_angle);
 
-    json += "}";
+    json << "}";
 
-    return json;
+    return json.str();
   }
 
   void object_graphics::json_deserialize_self(const std::string &json) {

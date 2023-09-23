@@ -30,7 +30,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-matches_t<T, std::string, is_std_queue, is_std_stack> inline internal_serialize_into_fn(const T& value) {
+inline matches_t<T, std::string, is_std_queue, is_std_stack> internal_serialize_into_fn(const T& value) {
   std::string json = "[";
 
   std::decay_t<T> tempContainer = value;
@@ -46,14 +46,15 @@ matches_t<T, std::string, is_std_queue, is_std_stack> inline internal_serialize_
 }
 
 template <typename T>
-matches_t<T, T, is_std_stack> inline internal_deserialize_fn(const std::string& json) {
+inline matches_t<T, T, is_std_stack> internal_deserialize_fn(const std::string& json) {
   std::string tempJson = json.substr(1, json.length() - 2);
 
   T tempContainer;
 
   size_t commaPos = tempJson.find(',');
   while (commaPos != std::string::npos) {
-    tempContainer.push(enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(tempJson.substr(0, commaPos)));
+    tempContainer.push(
+        enigma::JSON_serialization::enigma_deserialize<typename T::value_type>(tempJson.substr(0, commaPos)));
     tempJson.erase(0, commaPos + 1);
     commaPos = tempJson.find(',');
   }

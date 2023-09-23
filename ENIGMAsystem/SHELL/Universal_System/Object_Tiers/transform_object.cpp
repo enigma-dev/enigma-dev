@@ -67,16 +67,17 @@ namespace enigma
   }
 
   std::string object_transform::json_serialize() const {
-    std::string json = "{";
+    std::stringstream json;
+    json << "{";
 
-    json += "\"object_type\":\"object_transform\",";
-    json += "\"parent\":" + object_graphics::json_serialize() + ",";
-    json += "\"image_alpha\":" + enigma::JSON_serialization::enigma_serialize(image_alpha) + ",";
-    json += "\"image_blend\":" + enigma::JSON_serialization::enigma_serialize(image_blend);
+    json << "\"object_type\":\"object_transform\",";
+    json << "\"parent\":" + object_graphics::json_serialize() + ",";
+    json << "\"image_alpha\":" + enigma::JSON_serialization::enigma_serialize(image_alpha) + ",";
+    json << "\"image_blend\":" + enigma::JSON_serialization::enigma_serialize(image_blend);
 
-    json += "}";
+    json << "}";
 
-    return json;  
+    return json.str();  
   }
 
   void object_transform::json_deserialize_self(const std::string& json) {

@@ -781,16 +781,8 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *             "type": "real",
  *             "value": 1.2345
  *           },
- *           "array1d": {
- *             "mx_size_part": 0,
- *             "dense_part": [],
- *             "sparse_part": {}
- *           },
- *           "array2d": {
- *             "mx_size_part": 0,
- *             "dense_part": [],
- *             "sparse_part": {}
- *           }
+ *           "array1d": [],
+ *           "array2d": []
  *         }
  *       },
  *       {
@@ -800,16 +792,8 @@ void buffer_write(buffer_t buffer, buffer_data_t type, variant value);
  *             "type": "real",
  *             "value": 255
  *           },
- *           "array1d": {
- *             "mx_size_part": 0,
- *             "dense_part": [],
- *             "sparse_part": {}
- *           },
- *           "array2d": {
- *             "mx_size_part": 0,
- *             "dense_part": [],
- *             "sparse_part": {}
- *           }
+ *           "array1d": [],
+ *           "array2d": []
  *         }
  *       }
  *     ]

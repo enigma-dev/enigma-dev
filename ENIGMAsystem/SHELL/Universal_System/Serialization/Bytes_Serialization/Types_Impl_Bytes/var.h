@@ -37,7 +37,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-is_t<T, var, std::size_t> inline byte_size(const T &value) {
+inline is_t<T, var, std::size_t> byte_size(const T &value) {
   std::size_t len = variant_size(value) + enigma_internal_sizeof(value.array1d);
   len += (3 * sizeof(std::size_t));
   for (auto &[key, elem] : value.array2d.sparse_part()) {
@@ -50,7 +50,7 @@ is_t<T, var, std::size_t> inline byte_size(const T &value) {
 }
 
 template <typename T>
-is_t<T, var> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline is_t<T, var> internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::size_t pos = 0;
   internal_serialize_into<const variant &>(iter, value);
   pos += variant_size(value);
@@ -60,7 +60,7 @@ is_t<T, var> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
 }
 
 template <typename T>
-is_t<T, var, std::vector<std::byte>> inline internal_serialize_fn(const T &value) {
+inline is_t<T, var, std::vector<std::byte>> internal_serialize_fn(const T &value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into(result.data(), value);
@@ -68,7 +68,7 @@ is_t<T, var, std::vector<std::byte>> inline internal_serialize_fn(const T &value
 }
 
 template <typename T>
-is_t<T, var, T> inline internal_deserialize_fn(std::byte *iter) {
+inline is_t<T, var, T> internal_deserialize_fn(std::byte *iter) {
   std::size_t pos = 0;
   variant inner = internal_deserialize<variant>(iter);
   pos += variant_size(inner);
@@ -80,12 +80,12 @@ is_t<T, var, T> inline internal_deserialize_fn(std::byte *iter) {
 }
 
 template <typename T>
-is_t<T, var> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+inline is_t<T, var> internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-is_t<T, var> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline is_t<T, var> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   value = internal_deserialize<var>(iter + len);
   len += enigma_internal_sizeof(value);
 }

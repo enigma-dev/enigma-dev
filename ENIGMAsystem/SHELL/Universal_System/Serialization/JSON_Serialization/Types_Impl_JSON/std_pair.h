@@ -29,7 +29,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-matches_t<T, std::string, is_std_pair> inline internal_serialize_into_fn(const T& value) {
+inline matches_t<T, std::string, is_std_pair>  internal_serialize_into_fn(const T& value) {
   std::string json = "[";
 
   json += enigma::JSON_serialization::enigma_serialize(value.first);
@@ -42,7 +42,7 @@ matches_t<T, std::string, is_std_pair> inline internal_serialize_into_fn(const T
 }
 
 template <typename T>
-matches_t<T, T, is_std_pair> inline internal_deserialize_fn(const std::string& json) {
+inline matches_t<T, T, is_std_pair>  internal_deserialize_fn(const std::string& json) {
   std::string firstStr = json.substr(1, json.find(',') - 1);
   std::string secondStr = json.substr(json.find(',') + 1, json.length() - firstStr.length() - 3);
 

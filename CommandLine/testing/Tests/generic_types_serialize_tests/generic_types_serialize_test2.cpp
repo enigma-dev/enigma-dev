@@ -1,21 +1,23 @@
 #include <gtest/gtest.h>
 #include "../../../../ENIGMAsystem/SHELL/Universal_System/Serialization/serialization.h"
 
+namespace ebs = enigma::bytes_serialization;
+
 TEST(enigma_internal_sizeof_function, Test_tuple) {
   std::tuple<int, double, long> tuple1 = {1233, 22334.24243234, 1241413};
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(tuple1), 28);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(tuple1), 28);
 
   std::tuple<char, bool, int> tuple2 = {'a', true, 123};
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(tuple2), 14);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(tuple2), 14);
 
   std::tuple<long, char> tuple3 = {12424, 'f'};
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(tuple3), 17);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(tuple3), 17);
 
   std::tuple<double> tuple4 = {12424.78557};
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(tuple4), 16);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(tuple4), 16);
 
   std::tuple<> tuple5;
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(tuple5), 8);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(tuple5), 8);
 }
 
 TEST(enigma_internal_sizeof_function, Test_queue) {
@@ -23,7 +25,7 @@ TEST(enigma_internal_sizeof_function, Test_queue) {
   queue1.push(123123);
   queue1.push(1231223);
   queue1.push(13341223);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(queue1), 20);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(queue1), 20);
 
   std::queue<char> queue2;
   queue2.push('a');
@@ -31,19 +33,19 @@ TEST(enigma_internal_sizeof_function, Test_queue) {
   queue2.push('c');
   queue2.push('d');
   queue2.push('e');
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(queue2), 13);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(queue2), 13);
 
   std::queue<bool> queue3;
   queue3.push(true);
   queue3.push(false);
   queue3.push(true);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(queue3), 11);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(queue3), 11);
 
   std::queue<long> queue4;
   queue4.push(123123);
   queue4.push(1231223);
   queue4.push(13341223);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(queue4), 32);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(queue4), 32);
 }
 
 TEST(enigma_internal_sizeof_function, Test_stack) {
@@ -51,7 +53,7 @@ TEST(enigma_internal_sizeof_function, Test_stack) {
   stack1.push(123123);
   stack1.push(1231223);
   stack1.push(13341223);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(stack1), 20);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(stack1), 20);
 
   std::stack<char> stack2;
   stack2.push('a');
@@ -59,19 +61,19 @@ TEST(enigma_internal_sizeof_function, Test_stack) {
   stack2.push('c');
   stack2.push('d');
   stack2.push('e');
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(stack2), 13);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(stack2), 13);
 
   std::stack<bool> stack3;
   stack3.push(true);
   stack3.push(false);
   stack3.push(true);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(stack3), 11);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(stack3), 11);
 
   std::stack<long> stack4;
   stack4.push(123123);
   stack4.push(1231223);
   stack4.push(13341223);
-  ASSERT_EQ(enigma::bytes_serialization::enigma_internal_sizeof(stack4), 32);
+  ASSERT_EQ(ebs::enigma_internal_sizeof(stack4), 32);
 }
 
 TEST(serialize_deserialize_functions, Test_tuple1) {
@@ -79,13 +81,13 @@ TEST(serialize_deserialize_functions, Test_tuple1) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 14);
 
   std::byte* iter = bytes.data();
   std::tuple<int, char, bool> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
 
   ASSERT_EQ(outputTuple, inputTuple);
 }
@@ -95,13 +97,13 @@ TEST(serialize_deserialize_functions, Test_tuple2) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 28);
 
   std::byte* iter = bytes.data();
   std::tuple<double, int, double> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
 
   ASSERT_EQ(outputTuple, inputTuple);
 }
@@ -111,13 +113,13 @@ TEST(serialize_deserialize_functions, Test_tuple3) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 11);
 
   std::byte* iter = bytes.data();
   std::tuple<char, char, char> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
 
   ASSERT_EQ(outputTuple, inputTuple);
 }
@@ -127,13 +129,13 @@ TEST(serialize_deserialize_functions, Test_tuple4) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 11);
 
   std::byte* iter = bytes.data();
   std::tuple<bool, char, bool> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
 
   ASSERT_EQ(outputTuple, inputTuple);
 }
@@ -143,13 +145,13 @@ TEST(serialize_deserialize_functions, Test_tuple5) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 17);
 
   std::byte* iter = bytes.data();
   std::tuple<bool, int, float> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
 
   ASSERT_EQ(outputTuple, inputTuple);
 }
@@ -160,21 +162,21 @@ TEST(serialize_deserialize_functions, Test_tuple6) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 14);
 
-  enigma::bytes_serialization::enigma_serialize(input_int, len, bytes);
+  ebs::enigma_serialize(input_int, len, bytes);
   ASSERT_EQ(bytes.size(), 18);
 
   std::byte* iter = bytes.data();
 
   std::tuple<int, char, bool> outputTuple;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len);
+  ebs::enigma_deserialize(outputTuple, iter, len);
   ASSERT_EQ(outputTuple, inputTuple);
 
   int output_int;
-  enigma::bytes_serialization::enigma_deserialize(output_int, iter, len);
+  ebs::enigma_deserialize(output_int, iter, len);
   ASSERT_EQ(output_int, input_int);
 }
 
@@ -184,21 +186,21 @@ TEST(serialize_deserialize_functions, Test_tuple7) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple1, len, bytes);
+  ebs::enigma_serialize(inputTuple1, len, bytes);
   ASSERT_EQ(bytes.size(), 14);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple2, len, bytes);
+  ebs::enigma_serialize(inputTuple2, len, bytes);
   ASSERT_EQ(bytes.size(), 28);
 
   std::byte* iter = bytes.data();
 
   std::tuple<int, char, bool> outputTuple1;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple1, iter, len1);
+  ebs::enigma_deserialize(outputTuple1, iter, len1);
   ASSERT_EQ(outputTuple1, inputTuple1);
 
   std::tuple<bool, char, int> outputTuple2;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple2, iter, len1);
+  ebs::enigma_deserialize(outputTuple2, iter, len1);
   ASSERT_EQ(outputTuple2, inputTuple2);
 }
 
@@ -211,42 +213,42 @@ TEST(serialize_deserialize_functions, Test_tuple8) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputComplex, len, bytes);
+  ebs::enigma_serialize(inputComplex, len, bytes);
   ASSERT_EQ(bytes.size(), 8);
 
-  enigma::bytes_serialization::enigma_serialize(inputVector, len, bytes);
+  ebs::enigma_serialize(inputVector, len, bytes);
   ASSERT_EQ(bytes.size(), 40);
 
-  enigma::bytes_serialization::enigma_serialize(inputMap, len, bytes);
+  ebs::enigma_serialize(inputMap, len, bytes);
   ASSERT_EQ(bytes.size(), 52);
 
-  enigma::bytes_serialization::enigma_serialize(inputSet, len, bytes);
+  ebs::enigma_serialize(inputSet, len, bytes);
   ASSERT_EQ(bytes.size(), 68);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 82);
 
   std::byte* iter = bytes.data();
 
   std::complex<int> outputComplex;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputComplex, iter, len1);
+  ebs::enigma_deserialize(outputComplex, iter, len1);
   ASSERT_EQ(outputComplex, inputComplex);
 
   std::vector<double> outputVector;
-  enigma::bytes_serialization::enigma_deserialize(outputVector, iter, len1);
+  ebs::enigma_deserialize(outputVector, iter, len1);
   ASSERT_EQ(outputVector, inputVector);
 
   std::map<bool, char> outputMap;
-  enigma::bytes_serialization::enigma_deserialize(outputMap, iter, len1);
+  ebs::enigma_deserialize(outputMap, iter, len1);
   ASSERT_EQ(outputMap, inputMap);
 
   std::set<int> outputSet;
-  enigma::bytes_serialization::enigma_deserialize(outputSet, iter, len1);
+  ebs::enigma_deserialize(outputSet, iter, len1);
   ASSERT_EQ(outputSet, inputSet);
 
   std::tuple<int, bool, char> outputTuple;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len1);
+  ebs::enigma_deserialize(outputTuple, iter, len1);
   ASSERT_EQ(outputTuple, inputTuple);
 }
 
@@ -259,35 +261,35 @@ TEST(serialize_deserialize_functions, Test_tuple9) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple1, len, bytes);
+  ebs::enigma_serialize(inputTuple1, len, bytes);
   ASSERT_EQ(bytes.size(), 13);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple2, len, bytes);
+  ebs::enigma_serialize(inputTuple2, len, bytes);
   ASSERT_EQ(bytes.size(), 25);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple3, len, bytes);
+  ebs::enigma_serialize(inputTuple3, len, bytes);
   ASSERT_EQ(bytes.size(), 39);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple4, len, bytes);
+  ebs::enigma_serialize(inputTuple4, len, bytes);
   ASSERT_EQ(bytes.size(), 70);
 
   std::size_t len1 = 0;
   std::byte* iter = bytes.data();
 
   std::tuple<int, bool> outputTuple1;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple1, iter, len1);
+  ebs::enigma_deserialize(outputTuple1, iter, len1);
   ASSERT_EQ(outputTuple1, inputTuple1);
 
   std::tuple<int> outputTuple2;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple2, iter, len1);
+  ebs::enigma_deserialize(outputTuple2, iter, len1);
   ASSERT_EQ(outputTuple2, inputTuple2);
 
   std::tuple<int, bool, char> outputTuple3;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple3, iter, len1);
+  ebs::enigma_deserialize(outputTuple3, iter, len1);
   ASSERT_EQ(outputTuple3, inputTuple3);
 
   std::tuple<int, bool, long, double, char, bool> outputTuple4;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple4, iter, len1);
+  ebs::enigma_deserialize(outputTuple4, iter, len1);
   ASSERT_EQ(outputTuple4, inputTuple4);
 }
 
@@ -299,14 +301,14 @@ TEST(serialize_deserialize_functions, Test_queue1) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 20);
 
   std::byte* iter = bytes.data();
   std::queue<int> outputQueue;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -323,14 +325,14 @@ TEST(serialize_deserialize_functions, Test_queue2) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 72);
 
   std::byte* iter = bytes.data();
   std::queue<double> outputQueue;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -347,14 +349,14 @@ TEST(serialize_deserialize_functions, Test_queue3) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
   std::byte* iter = bytes.data();
   std::queue<char> outputQueue;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -365,14 +367,14 @@ TEST(serialize_deserialize_functions, Test_queue4) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 10);
 
   std::byte* iter = bytes.data();
   std::queue<bool> outputQueue;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -381,14 +383,14 @@ TEST(serialize_deserialize_functions, Test_queue5) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 8);
 
   std::byte* iter = bytes.data();
   std::queue<bool> outputQueue;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -401,21 +403,21 @@ TEST(serialize_deserialize_functions, Test_queue6) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
-  enigma::bytes_serialization::enigma_serialize(input_int, len, bytes);
+  ebs::enigma_serialize(input_int, len, bytes);
   ASSERT_EQ(bytes.size(), 20);
 
   std::byte* iter = bytes.data();
 
   std::queue<int> outputQueue;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len);
+  ebs::enigma_deserialize(outputQueue, iter, len);
   ASSERT_EQ(outputQueue, inputQueue);
 
   int output_int;
-  enigma::bytes_serialization::enigma_deserialize(output_int, iter, len);
+  ebs::enigma_deserialize(output_int, iter, len);
   ASSERT_EQ(output_int, input_int);
 }
 
@@ -430,21 +432,21 @@ TEST(serialize_deserialize_functions, Test_queue7) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue1, len, bytes);
+  ebs::enigma_serialize(inputQueue1, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue2, len, bytes);
+  ebs::enigma_serialize(inputQueue2, len, bytes);
   ASSERT_EQ(bytes.size(), 26);
 
   std::byte* iter = bytes.data();
 
   std::queue<int> outputQueue1;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputQueue1, iter, len1);
+  ebs::enigma_deserialize(outputQueue1, iter, len1);
   ASSERT_EQ(outputQueue1, inputQueue1);
 
   std::queue<char> outputQueue2;
-  enigma::bytes_serialization::enigma_deserialize(outputQueue2, iter, len1);
+  ebs::enigma_deserialize(outputQueue2, iter, len1);
   ASSERT_EQ(outputQueue2, inputQueue2);
 }
 
@@ -462,49 +464,49 @@ TEST(serialize_deserialize_functions, Test_queue8) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputComplex, len, bytes);
+  ebs::enigma_serialize(inputComplex, len, bytes);
   ASSERT_EQ(bytes.size(), 8);
 
-  enigma::bytes_serialization::enigma_serialize(inputVector, len, bytes);
+  ebs::enigma_serialize(inputVector, len, bytes);
   ASSERT_EQ(bytes.size(), 40);
 
-  enigma::bytes_serialization::enigma_serialize(inputMap, len, bytes);
+  ebs::enigma_serialize(inputMap, len, bytes);
   ASSERT_EQ(bytes.size(), 52);
 
-  enigma::bytes_serialization::enigma_serialize(inputSet, len, bytes);
+  ebs::enigma_serialize(inputSet, len, bytes);
   ASSERT_EQ(bytes.size(), 68);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 82);
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 114);
 
   std::byte* iter = bytes.data();
 
   std::complex<int> outputComplex;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputComplex, iter, len1);
+  ebs::enigma_deserialize(outputComplex, iter, len1);
   ASSERT_EQ(outputComplex, inputComplex);
 
   std::vector<double> outputVector;
-  enigma::bytes_serialization::enigma_deserialize(outputVector, iter, len1);
+  ebs::enigma_deserialize(outputVector, iter, len1);
   ASSERT_EQ(outputVector, inputVector);
 
   std::map<bool, char> outputMap;
-  enigma::bytes_serialization::enigma_deserialize(outputMap, iter, len1);
+  ebs::enigma_deserialize(outputMap, iter, len1);
   ASSERT_EQ(outputMap, inputMap);
 
   std::set<int> outputSet;
-  enigma::bytes_serialization::enigma_deserialize(outputSet, iter, len1);
+  ebs::enigma_deserialize(outputSet, iter, len1);
   ASSERT_EQ(outputSet, inputSet);
 
   std::tuple<int, bool, char> outputTuple;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len1);
+  ebs::enigma_deserialize(outputTuple, iter, len1);
   ASSERT_EQ(outputTuple, inputTuple);
 
   std::queue<long> outputQueue;
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len1);
+  ebs::enigma_deserialize(outputQueue, iter, len1);
   ASSERT_EQ(outputQueue, inputQueue);
 }
 
@@ -516,14 +518,14 @@ TEST(serialize_deserialize_functions, Test_stack1) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 20);
 
   std::byte* iter = bytes.data();
   std::stack<int> outputStack;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 }
 
@@ -540,14 +542,14 @@ TEST(serialize_deserialize_functions, Test_stack2) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 72);
 
   std::byte* iter = bytes.data();
   std::stack<double> outputStack;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 }
 
@@ -564,14 +566,14 @@ TEST(serialize_deserialize_functions, Test_stack3) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
   std::byte* iter = bytes.data();
   std::stack<char> outputStack;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 }
 
@@ -582,14 +584,14 @@ TEST(serialize_deserialize_functions, Test_stack4) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 10);
 
   std::byte* iter = bytes.data();
   std::stack<bool> outputStack;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 }
 
@@ -598,14 +600,14 @@ TEST(serialize_deserialize_functions, Test_stack5) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 8);
 
   std::byte* iter = bytes.data();
   std::stack<bool> outputStack;
   len = 0;
 
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 }
 
@@ -618,21 +620,21 @@ TEST(serialize_deserialize_functions, Test_stack6) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
-  enigma::bytes_serialization::enigma_serialize(input_int, len, bytes);
+  ebs::enigma_serialize(input_int, len, bytes);
   ASSERT_EQ(bytes.size(), 20);
 
   std::byte* iter = bytes.data();
 
   std::stack<int> outputStack;
   len = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len);
+  ebs::enigma_deserialize(outputStack, iter, len);
   ASSERT_EQ(outputStack, inputStack);
 
   int output_int;
-  enigma::bytes_serialization::enigma_deserialize(output_int, iter, len);
+  ebs::enigma_deserialize(output_int, iter, len);
   ASSERT_EQ(output_int, input_int);
 }
 
@@ -647,21 +649,21 @@ TEST(serialize_deserialize_functions, Test_stack7) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputStack1, len, bytes);
+  ebs::enigma_serialize(inputStack1, len, bytes);
   ASSERT_EQ(bytes.size(), 16);
 
-  enigma::bytes_serialization::enigma_serialize(inputStack2, len, bytes);
+  ebs::enigma_serialize(inputStack2, len, bytes);
   ASSERT_EQ(bytes.size(), 26);
 
   std::byte* iter = bytes.data();
 
   std::stack<int> outputStack1;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputStack1, iter, len1);
+  ebs::enigma_deserialize(outputStack1, iter, len1);
   ASSERT_EQ(outputStack1, inputStack1);
 
   std::stack<char> outputStack2;
-  enigma::bytes_serialization::enigma_deserialize(outputStack2, iter, len1);
+  ebs::enigma_deserialize(outputStack2, iter, len1);
   ASSERT_EQ(outputStack2, inputStack2);
 }
 
@@ -684,55 +686,55 @@ TEST(serialize_deserialize_functions, Test_stack8) {
   std::vector<std::byte> bytes;
   std::size_t len = 0;
 
-  enigma::bytes_serialization::enigma_serialize(inputComplex, len, bytes);
+  ebs::enigma_serialize(inputComplex, len, bytes);
   ASSERT_EQ(bytes.size(), 8);
 
-  enigma::bytes_serialization::enigma_serialize(inputVector, len, bytes);
+  ebs::enigma_serialize(inputVector, len, bytes);
   ASSERT_EQ(bytes.size(), 40);
 
-  enigma::bytes_serialization::enigma_serialize(inputMap, len, bytes);
+  ebs::enigma_serialize(inputMap, len, bytes);
   ASSERT_EQ(bytes.size(), 52);
 
-  enigma::bytes_serialization::enigma_serialize(inputSet, len, bytes);
+  ebs::enigma_serialize(inputSet, len, bytes);
   ASSERT_EQ(bytes.size(), 68);
 
-  enigma::bytes_serialization::enigma_serialize(inputTuple, len, bytes);
+  ebs::enigma_serialize(inputTuple, len, bytes);
   ASSERT_EQ(bytes.size(), 82);
 
-  enigma::bytes_serialization::enigma_serialize(inputQueue, len, bytes);
+  ebs::enigma_serialize(inputQueue, len, bytes);
   ASSERT_EQ(bytes.size(), 114);
 
-  enigma::bytes_serialization::enigma_serialize(inputStack, len, bytes);
+  ebs::enigma_serialize(inputStack, len, bytes);
   ASSERT_EQ(bytes.size(), 146);
 
   std::byte* iter = bytes.data();
 
   std::complex<int> outputComplex;
   std::size_t len1 = 0;
-  enigma::bytes_serialization::enigma_deserialize(outputComplex, iter, len1);
+  ebs::enigma_deserialize(outputComplex, iter, len1);
   ASSERT_EQ(outputComplex, inputComplex);
 
   std::vector<double> outputVector;
-  enigma::bytes_serialization::enigma_deserialize(outputVector, iter, len1);
+  ebs::enigma_deserialize(outputVector, iter, len1);
   ASSERT_EQ(outputVector, inputVector);
 
   std::map<bool, char> outputMap;
-  enigma::bytes_serialization::enigma_deserialize(outputMap, iter, len1);
+  ebs::enigma_deserialize(outputMap, iter, len1);
   ASSERT_EQ(outputMap, inputMap);
 
   std::set<int> outputSet;
-  enigma::bytes_serialization::enigma_deserialize(outputSet, iter, len1);
+  ebs::enigma_deserialize(outputSet, iter, len1);
   ASSERT_EQ(outputSet, inputSet);
 
   std::tuple<int, bool, char> outputTuple;
-  enigma::bytes_serialization::enigma_deserialize(outputTuple, iter, len1);
+  ebs::enigma_deserialize(outputTuple, iter, len1);
   ASSERT_EQ(outputTuple, inputTuple);
 
   std::queue<long> outputQueue;
-  enigma::bytes_serialization::enigma_deserialize(outputQueue, iter, len1);
+  ebs::enigma_deserialize(outputQueue, iter, len1);
   ASSERT_EQ(outputQueue, inputQueue);
 
   std::stack<long> outputStack;
-  enigma::bytes_serialization::enigma_deserialize(outputStack, iter, len1);
+  ebs::enigma_deserialize(outputStack, iter, len1);
   ASSERT_EQ(outputStack, inputStack);
 }

@@ -29,12 +29,12 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_std_pair> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_std_pair> byte_size(const T &value) {
   return enigma_internal_sizeof(value.first) + enigma_internal_sizeof(value.second);
 }
 
 template <typename T>
-matches_t<T, void, is_std_pair> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline matches_t<T, void, is_std_pair> internal_serialize_into_fn(std::byte *iter, T &&value) {
   internal_serialize_into(iter, value.first);
   iter += enigma_internal_sizeof(value.first);
   internal_serialize_into(iter, value.second);
@@ -42,7 +42,7 @@ matches_t<T, void, is_std_pair> inline internal_serialize_into_fn(std::byte *ite
 }
 
 template <typename T>
-matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter) {
+inline matches_t<T, T, is_std_pair> internal_deserialize_fn(std::byte *iter) {
   std::size_t offset = 0;
   using firsttype = typename T::first_type;
   using secondtype = typename T::second_type;
@@ -56,7 +56,7 @@ matches_t<T, T, is_std_pair> inline internal_deserialize_fn(std::byte *iter) {
 }
 
 template <typename T>
-matches_t<T, void, is_std_pair> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_std_pair> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   using firsttype = typename T::first_type;
   using secondtype = typename T::second_type;
 

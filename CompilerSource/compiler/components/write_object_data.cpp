@@ -117,16 +117,16 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "      auto bytes = event_parent::serialize();\n"
          "      std::size_t len = 0;\n"
          "      if (vmap != nullptr) {\n"
-         "        enigma::bytes_serialization::internal_resize_buffer_for(bytes, vmap->size());\n"
+         "        ebs::internal_resize_buffer_for(bytes, vmap->size());\n"
          "        for (auto &[key, value] : *vmap) {\n"
-         "          enigma::bytes_serialization::enigma_serialize(key, len, bytes);\n"
-         "          enigma::bytes_serialization::enigma_serialize(value, len, bytes);\n"
+         "          ebs::enigma_serialize(key, len, bytes);\n"
+         "          ebs::enigma_serialize(value, len, bytes);\n"
          "        }\n"
          "        bytes.shrink_to_fit();\n"
          "      } else {\n"
          "        std::byte *iter = &bytes.back() + 1;\n"
          "        bytes.resize(bytes.size() + sizeof(std::size_t));\n"
-         "        enigma::bytes_serialization::internal_serialize_into<std::size_t>(iter, 0);\n"
+         "        ebs::internal_serialize_into<std::size_t>(iter, 0);\n"
          "      }\n"
          "      \n"
          "      return bytes;\n"
@@ -135,7 +135,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = event_parent::deserialize_self(iter);\n"
          "      std::size_t map_size = 0;\n"
-         "      enigma::bytes_serialization::enigma_deserialize(map_size, iter, len);\n"
+         "      ebs::enigma_deserialize(map_size, iter, len);\n"
          "\n"
          "      if (map_size != 0) {\n"
          "        if (vmap == nullptr) {\n"
@@ -145,8 +145,8 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "        for (std::size_t i = 0; i < map_size; i++) {\n"
          "          std::string key;\n"
          "          var value;\n"
-         "          enigma::bytes_serialization::enigma_deserialize(key, iter, len);\n"
-         "          enigma::bytes_serialization::enigma_deserialize(value, iter, len);\n"
+         "          ebs::enigma_deserialize(key, iter, len);\n"
+         "          ebs::enigma_deserialize(value, iter, len);\n"
          "          vmap->emplace(std::move(key), std::move(value));\n"
          "        }\n"
          "      }\n"
@@ -163,21 +163,21 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::string json_serialize() const override {\n"
          "      std::string json = \"{\\\"event_parent\\\":\" + event_parent::json_serialize() + \",\\\"vmap\\\":{\";\n"
          "      if (vmap != nullptr) {\n"
-         "        json += enigma::JSON_serialization::enigma_serialize(*vmap);\n"
+         "        json += ejs::enigma_serialize(*vmap);\n"
          "      }\n"
          "      json += \"}}\";\n"
          "      return json;\n"
          "    }\n\n";
 
   wto << "    void json_deserialize_self(const std::string & json) override {\n"
-         "      event_parent::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,\"event_parent\"));\n"
-         "      std::string vmap_part = enigma::JSON_serialization::json_find_value(json,\"vmap\");\n"
+         "      event_parent::json_deserialize_self(ejs::json_find_value(json,\"event_parent\"));\n"
+         "      std::string vmap_part = ejs::json_find_value(json,\"vmap\");\n"
          "\n"
          "      if (vmap_part != \"{}\") {\n"
          "        if (vmap == nullptr) {\n"
          "          vmap = new std::map<string, var>;\n"
          "        }\n"
-         "        *vmap = enigma::JSON_serialization::enigma_deserialize<std::map<string, var>>(vmap_part);\n"
+         "        *vmap = ejs::enigma_deserialize<std::map<string, var>>(vmap_part);\n"
          "      }\n"
          "    }\n\n";
 
@@ -326,11 +326,11 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   if (!locals.empty()) {
     for (auto &[name, type]: locals) {
       wto << "\n    void deserialize_" << name << "(std::byte *iter, std::size_t len) {\n"
-          << "      enigma::bytes_serialization::enigma_deserialize(" << name << ", iter, len);\n"
+          << "      ebs::enigma_deserialize(" << name << ", iter, len);\n"
              "    }\n";
 
       wto << "\n    void json_deserialize_" << name << "(const std::string& json) {\n"
-          << "      enigma::JSON_serialization::enigma_deserialize_val(" << name << ", json);\n"
+          << "      ejs::enigma_deserialize_val(" << name << ", json);\n"
              "    }\n";
     }
 
@@ -348,18 +348,18 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
     wto << "      std::vector<std::byte> serialized_data{};\n";
     wto << "      std::size_t offset = 0;\n\n";
   }
-  wto << "      enigma::bytes_serialization::enigma_serialize<unsigned char>(0xBB, len, bytes);\n";
+  wto << "      ebs::enigma_serialize<unsigned char>(0xBB, len, bytes);\n";
   for (auto &[name, type]: locals) {
     wto << "      object_offsets[\"" << name << "\"] = offset;\n";
-    wto << "      enigma::bytes_serialization::enigma_serialize(" << name << ", offset, serialized_data);\n";
+    wto << "      ebs::enigma_serialize(" << name << ", offset, serialized_data);\n";
   }
   if (!locals.empty()) {
-    wto << "      enigma::bytes_serialization::enigma_serialize(object_offsets.size(), len, bytes);\n";
+    wto << "      ebs::enigma_serialize(object_offsets.size(), len, bytes);\n";
     wto << "      for (auto &[name, offset]: object_offsets) {\n"
-           "        enigma::bytes_serialization::enigma_serialize(name, len, bytes);\n"
-           "        enigma::bytes_serialization::enigma_serialize(offset, len, bytes);\n"
+           "        ebs::enigma_serialize(name, len, bytes);\n"
+           "        ebs::enigma_serialize(offset, len, bytes);\n"
            "      }\n"
-           "      enigma::bytes_serialization::enigma_serialize(serialized_data.size(), len, bytes);\n"
+           "      ebs::enigma_serialize(serialized_data.size(), len, bytes);\n"
            "      std::copy(serialized_data.begin(), serialized_data.end(), std::back_inserter(bytes));\n";
     wto << "      bytes.shrink_to_fit();\n";
   }
@@ -369,15 +369,15 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
          "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
   wto << "      unsigned char type;\n";
-  wto << "      enigma::bytes_serialization::enigma_deserialize(type, iter, len);\n";
+  wto << "      ebs::enigma_deserialize(type, iter, len);\n";
   if (!locals.empty()) {
     wto << "      std::size_t objects_len = 0;\n";
-    wto << "      enigma::bytes_serialization::enigma_deserialize(objects_len, iter, len);\n";
+    wto << "      ebs::enigma_deserialize(objects_len, iter, len);\n";
     wto << "      std::unordered_map<std::string, std::size_t> object_offsets{};\n";
     wto << "      for (std::size_t i = 0; i < objects_len; i++) {\n"
            "        std::string name;\n"
-           "        enigma::bytes_serialization::enigma_deserialize(name, iter, len);\n"
-           "        enigma::bytes_serialization::enigma_deserialize(object_offsets[name], iter, len);\n"
+           "        ebs::enigma_deserialize(name, iter, len);\n"
+           "        ebs::enigma_deserialize(object_offsets[name], iter, len);\n"
            "      }\n";
     wto << "      std::unordered_map<std::size_t, Deserializer> intersection{};\n";
     wto << "      for (auto &[name, offset]: object_offsets) {\n"
@@ -387,7 +387,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
            "      }\n"
            "      std::size_t len_plus_offset = len;\n"
            "      std::size_t total_offset = 0;\n"
-           "      enigma::bytes_serialization::enigma_deserialize(total_offset, iter, len_plus_offset);\n";
+           "      ebs::enigma_deserialize(total_offset, iter, len_plus_offset);\n";
     wto << "      for (auto &[offset, deserializer]: intersection) {\n"
            "        len_plus_offset = len + offset + sizeof(std::size_t); // + sizeof(std::size_t) for `total_offset'\n"
            "        (this->*deserializer)(iter, len_plus_offset);\n"
@@ -411,7 +411,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   for (auto &[name, type]: locals) {
     wto << "      json += \"{\\\"name\\\":\";\n"; 
     wto << "      json += \"\\\"" << name << "\\\"\";\n"; 
-    wto << "      json += \",\\\"data\\\":\" + " << "enigma::JSON_serialization::enigma_serialize("<<name<<")" << " + \"}\";\n";
+    wto << "      json += \",\\\"data\\\":\" + " << "ejs::enigma_serialize("<<name<<")" << " + \"}\";\n";
     if (name!=locals.back().first) wto<<"      json += \",\";\n";
   }
   if (!locals.empty()) {
@@ -420,15 +420,15 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "      return json;\n     }\n";
   
   wto << "\n    void json_deserialize_self(const std::string& json) override {\n"
-      << "      " << (object->parent ? object->parent->name : "object_locals") << "::json_deserialize_self(enigma::JSON_serialization::json_find_value(json,\"obj\"));\n";
+      << "      " << (object->parent ? object->parent->name : "object_locals") << "::json_deserialize_self(ejs::json_find_value(json,\"obj\"));\n";
  
-  wto << "      std::string locals_part = enigma::JSON_serialization::json_find_value(json,\"locals\");\n";
-  wto << "      std::vector<std::string> locals = enigma::JSON_serialization::json_split(locals_part,',');\n";
+  wto << "      std::string locals_part = ejs::json_find_value(json,\"locals\");\n";
+  wto << "      std::vector<std::string> locals = ejs::json_split(locals_part,',');\n";
  
   wto << "      std::map<std::string,std::string> names_data;\n";
   wto << "      for (auto& local : locals) {\n";
-  wto << "        std::string name = enigma::JSON_serialization::json_find_value(local,\"name\");\n";
-  wto << "        std::string data = enigma::JSON_serialization::json_find_value(local,\"data\");\n";
+  wto << "        std::string name = ejs::json_find_value(local,\"name\");\n";
+  wto << "        std::string data = ejs::json_find_value(local,\"data\");\n";
   wto << "        names_data.insert({name.substr(1,name.length()-2),data});\n";
   wto << "      }\n";
   
@@ -899,6 +899,9 @@ static inline void write_object_declarations(
   wto << "#include <unordered_map>";
 
   declare_scripts(wto, game, state);
+
+  wto << "namespace ejs = enigma::JSON_serialization;\n";
+  wto << "namespace ebs = enigma::bytes_serialization;\n\n";
 
   wto << "namespace enigma\n{\n";
   declare_object_locals_class(wto, parsed_extensions);

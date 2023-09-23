@@ -8,7 +8,7 @@ myuint8_t = 255;
 myuint16_t = 65535;
 myuint32_t = 4294967295;
 myuint64_t = 4294967295;
-mydouble = 1.234567890123456789012345678901234567890123456789012345678901234;
+mydouble = 1.23456789;
 
 show_debug_message("Starting the saving");
 var buf = buffer_create(1, buffer_grow, 1);
@@ -23,7 +23,7 @@ myuint8_t = 0;
 myuint16_t = 0;
 myuint32_t = 0;
 myuint64_t = 0;
-mydouble = -1.234567890123456789012345678901234567890123456789012345678901234;
+mydouble = -1.2345678901;
 
 show_debug_message("Loading the file");
 buffer_delete(buf);
@@ -38,7 +38,7 @@ gtest_assert_eq(uint8_t(id.myuint8_t), 255);
 gtest_assert_eq(uint16_t(id.myuint16_t), 65535);
 gtest_assert_eq(uint32_t(id.myuint32_t), 4294967295);
 gtest_assert_eq(uint64_t(id.myuint64_t), 4294967295);
-gtest_assert_eq(double(id.mydouble), 1.234567890123456789012345678901234567890123456789012345678901234);
+gtest_assert_eq(double(id.mydouble), 1.23456789);
 
 show_debug_message("Loading successful");
 

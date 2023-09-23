@@ -30,13 +30,27 @@
 #include <stack>
 #include "../var4.h"
 
-template <typename T>
-struct is_lua_table : std::false_type {};
+#define DEFINE_STD_CONTAINER_TRAIT(CONTAINER_TYPE, TRAIT_NAME)    \
+  template <typename T>                                           \
+  struct TRAIT_NAME : std::false_type {};                         \
+                                                                  \
+  template <typename... Args>                                     \
+  struct TRAIT_NAME<CONTAINER_TYPE<Args...>> : std::true_type {}; \
+                                                                  \
+  template <typename T>                                           \
+  constexpr bool TRAIT_NAME##_v = TRAIT_NAME<T>::value;
 
-template <typename U>
-struct is_lua_table<lua_table<U>> : std::true_type {
-  using inner_type = U;
-};
+DEFINE_STD_CONTAINER_TRAIT(std::vector, is_std_vector)
+DEFINE_STD_CONTAINER_TRAIT(std::set, is_std_set)
+DEFINE_STD_CONTAINER_TRAIT(std::queue, is_std_queue)
+DEFINE_STD_CONTAINER_TRAIT(std::stack, is_std_stack)
+DEFINE_STD_CONTAINER_TRAIT(std::map, is_std_map)
+DEFINE_STD_CONTAINER_TRAIT(std::complex, is_std_complex)
+DEFINE_STD_CONTAINER_TRAIT(std::pair, is_std_pair)
+DEFINE_STD_CONTAINER_TRAIT(std::tuple, is_std_tuple)
+DEFINE_STD_CONTAINER_TRAIT(lua_table, is_lua_table)
+
+#undef DEFINE_STD_CONTAINER_TRAIT
 
 template <typename T>
 struct lua_inner_type;
@@ -45,81 +59,6 @@ template <typename T>
 struct lua_inner_type<lua_table<T>> {
   using type = T;
 };
-
-template <typename T>
-constexpr static inline bool is_lua_table_v = is_lua_table<T>::value;
-
-template <typename T>
-struct is_std_vector : std::false_type {};
-
-template <typename T, typename Alloc>
-struct is_std_vector<std::vector<T, Alloc>> : std::true_type {};
-
-template <typename T>
-constexpr static inline bool is_std_vector_v = is_std_vector<T>::value;
-
-template <typename T>
-struct is_std_set : std::false_type {};
-
-template <typename Key, typename Compare, typename Allocator>
-struct is_std_set<std::set<Key, Compare, Allocator>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_set_v = is_std_set<T>::value;
-
-template <typename T>
-struct is_std_queue : std::false_type {};
-
-template <typename T, typename Container>
-struct is_std_queue<std::queue<T, Container>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_queue_v = is_std_queue<T>::value;
-
-template <typename T>
-struct is_std_stack : std::false_type {};
-
-template <typename T, typename Container>
-struct is_std_stack<std::stack<T, Container>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_stack_v = is_std_stack<T>::value;
-
-template <typename T>
-struct is_std_map : std::false_type {};
-
-template <typename Key, typename T, typename Compare, typename Allocator>
-struct is_std_map<std::map<Key, T, Compare, Allocator>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_map_v = is_std_map<T>::value;
-
-template <typename T>
-struct is_std_complex : std::false_type {};
-
-template <typename T>
-struct is_std_complex<std::complex<T>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_complex_v = is_std_complex<T>::value;
-
-template <typename T>
-struct is_std_pair : std::false_type {};
-
-template <typename T, typename U>
-struct is_std_pair<std::pair<T, U>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_pair_v = is_std_pair<T>::value;
-
-template <typename T>
-struct is_std_tuple : std::false_type {};
-
-template <typename... Ts>
-struct is_std_tuple<std::tuple<Ts...>> : std::true_type {};
-
-template <typename T>
-constexpr bool is_std_tuple_v = is_std_tuple<T>::value;
 
 template <typename T>
 struct complex_inner_type;
@@ -251,7 +190,7 @@ inline void insert_back(std::set<T>& container, const T& val) {
 }
 
 template <typename Container, typename U>
-matches_t<Container, void, is_std_queue, is_std_stack> inline insert_back(Container& container, const U& val) {
+inline matches_t<Container, void, is_std_queue, is_std_stack> insert_back(Container& container, const U& val) {
   container.push(std::move(val));
 }
 

@@ -32,7 +32,7 @@ namespace enigma {
 namespace JSON_serialization {
 
 template <typename T>
-is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
+inline is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
   std::string json = "{\"variant\":";
 
   json += enigma::JSON_serialization::enigma_serialize<variant>(value);
@@ -46,7 +46,7 @@ is_t<T, var, std::string> internal_serialize_into_fn(const T &value) {
 }
 
 template <typename T>
-is_t<T, var, T> inline internal_deserialize_fn(const std::string &json) {
+inline is_t<T, var, T> internal_deserialize_fn(const std::string &json) {
   std::string variantStart = "\"variant\":";
   std::string array1dStart = "\"array1d\":";
   std::string array2dStart = "\"array2d\":";

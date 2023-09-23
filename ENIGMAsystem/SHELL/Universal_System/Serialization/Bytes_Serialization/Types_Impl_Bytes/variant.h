@@ -31,7 +31,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-enable_if_inherits_variant_t<T, std::size_t> inline byte_size(const T &value) {
+inline enable_if_inherits_variant_t<T, std::size_t> byte_size(const T &value) {
   if (value.type == variant::ty_real) {
     return 9;
   } else {
@@ -40,7 +40,7 @@ enable_if_inherits_variant_t<T, std::size_t> inline byte_size(const T &value) {
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline enable_if_inherits_variant_t<T> internal_serialize_into_fn(std::byte *iter, T &&value) {
   if (value.type == variant::ty_real) {
     *(iter++) = static_cast<std::byte>(variant::ty_real);
     internal_serialize_into(iter, value.rval.d);
@@ -53,7 +53,7 @@ enable_if_inherits_variant_t<T> inline internal_serialize_into_fn(std::byte *ite
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T, std::vector<std::byte>> inline internal_serialize_fn(T &&value) {
+inline enable_if_inherits_variant_t<T, std::vector<std::byte>> internal_serialize_fn(T &&value) {
   std::vector<std::byte> result{};
   result.resize(enigma_internal_sizeof(value));
   internal_serialize_into(result.data(), value);
@@ -61,7 +61,7 @@ enable_if_inherits_variant_t<T, std::vector<std::byte>> inline internal_serializ
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T, T> inline internal_deserialize_fn(std::byte *iter) {
+inline enable_if_inherits_variant_t<T, T> internal_deserialize_fn(std::byte *iter) {
   variant result;
   if (static_cast<int>(*iter) == variant::ty_real) {
     result.rval.d = internal_deserialize<double>(iter + 1);
@@ -76,12 +76,12 @@ enable_if_inherits_variant_t<T, T> inline internal_deserialize_fn(std::byte *ite
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+inline enable_if_inherits_variant_t<T> internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-enable_if_inherits_variant_t<T> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline enable_if_inherits_variant_t<T> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   value = internal_deserialize<variant>(iter + len);
   len += enigma_internal_sizeof(value);
 }

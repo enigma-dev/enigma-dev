@@ -29,7 +29,7 @@ namespace enigma {
 namespace bytes_serialization {
 
 template <typename T>
-matches_t<T, std::size_t, is_std_tuple> inline byte_size(const T &value) {
+inline matches_t<T, std::size_t, is_std_tuple> byte_size(const T &value) {
   std::size_t totalSize = sizeof(std::size_t);
 
   LoopTuple(
@@ -40,7 +40,7 @@ matches_t<T, std::size_t, is_std_tuple> inline byte_size(const T &value) {
 }
 
 template <typename T>
-matches_t<T, void, is_std_tuple> inline internal_serialize_into_fn(std::byte *iter, T &&value) {
+inline matches_t<T, void, is_std_tuple> internal_serialize_into_fn(std::byte *iter, T &&value) {
   std::size_t tupleSize = std::tuple_size<std::decay_t<T>>::value;
 
   auto serialize_process_element = [&iter](std::byte *&elementIter, const auto &element) {
@@ -61,7 +61,7 @@ matches_t<T, void, is_std_tuple> inline internal_serialize_into_fn(std::byte *it
 }
 
 template <typename T>
-matches_t<T, std::vector<std::byte>, is_std_tuple> inline internal_serialize_fn(T &&value) {
+inline matches_t<T, std::vector<std::byte>, is_std_tuple> internal_serialize_fn(T &&value) {
   std::vector<std::byte> result;
   result.resize(enigma_internal_sizeof(value));
 
@@ -83,7 +83,7 @@ matches_t<T, std::vector<std::byte>, is_std_tuple> inline internal_serialize_fn(
 }
 
 template <typename T>
-matches_t<T, T, is_std_tuple> inline internal_deserialize_fn(std::byte *iter) {
+inline matches_t<T, T, is_std_tuple> internal_deserialize_fn(std::byte *iter) {
   std::size_t tupleSize = internal_deserialize<std::size_t>(iter);
   std::size_t offset = sizeof(std::size_t);
 
@@ -104,12 +104,12 @@ matches_t<T, T, is_std_tuple> inline internal_deserialize_fn(std::byte *iter) {
 }
 
 template <typename T>
-matches_t<T, void, is_std_tuple> inline internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
+inline matches_t<T, void, is_std_tuple> internal_resize_buffer_for_fn(std::vector<std::byte> &buffer, T &&value) {
   buffer.resize(buffer.size() + enigma_internal_sizeof(value));
 }
 
 template <typename T>
-matches_t<T, void, is_std_tuple> inline enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
+inline matches_t<T, void, is_std_tuple> enigma_internal_deserialize_fn(T &value, std::byte *iter, std::size_t &len) {
   std::size_t tupleSize = internal_deserialize<std::size_t>(iter + len);
   len += sizeof(std::size_t);
   using ResultTuple = typename TupleTypeExtractor<T>::ResultType;

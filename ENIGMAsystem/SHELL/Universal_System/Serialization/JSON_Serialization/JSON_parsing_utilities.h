@@ -30,7 +30,7 @@
 namespace enigma {
 namespace JSON_serialization {
 
-std::vector<std::string> inline json_split(const std::string &s, char delimiter) {
+inline std::vector<std::string> json_split(const std::string &s, char delimiter) {
   std::vector<std::string> parts;
   if (s.size() > 2) {
     size_t start = 0;
@@ -63,7 +63,7 @@ std::vector<std::string> inline json_split(const std::string &s, char delimiter)
   return parts;
 }
 
-std::string inline json_find_value(const std::string &json, const std::string &key) {
+inline std::string json_find_value(const std::string &json, const std::string &key) {
   size_t startPos = json.find("\"" + key + "\":");
   if (startPos != std::string::npos) {
     startPos += key.length() + 3;  // Add 3 to account for quotes and colon
