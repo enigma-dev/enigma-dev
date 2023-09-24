@@ -29,10 +29,6 @@
 
 #include "gc_leaderboards_cookies.h"
 
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-typedef LeaderboardScoreUploadedMock LeaderboardScoreUploaded_t;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
-
 namespace steamworks_gc {
 
 class GCLeaderboards;

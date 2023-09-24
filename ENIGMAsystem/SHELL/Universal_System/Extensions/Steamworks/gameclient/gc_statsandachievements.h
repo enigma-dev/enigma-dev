@@ -34,12 +34,6 @@
 #define INVALID_GAMEID 0
 #define INVALID_STEAMID 0
 
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-typedef UserStatsReceivedMock UserStatsReceived_t;
-typedef UserStatsStoredMock UserStatsStored_t;
-typedef UserAchievementStoredMock UserAchievementStored_t;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
-
 namespace steamworks_gc {
 
 class GameClient;

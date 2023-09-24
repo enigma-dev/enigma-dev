@@ -124,6 +124,8 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 # Enable Steamworks stub if the real one is not enabled.
 ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
+else
+compile_game: $(STEAM_FAKE_LIB)
 endif
 
 # Enable DataStructures stub if the real one is not enabled.

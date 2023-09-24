@@ -90,9 +90,9 @@ bool Binder::bind() {
   // Check if the library exists.
   fs::path libpath(
       "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/"
-      "Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
+      "SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so");
 
-  if (!fs::exists(libpath)) {
+  if (fs::exists(libpath)) {
     if (!Binder::bind_fake()) {
       return false;
     }

@@ -30,10 +30,6 @@
 
 #include "gameclient.h"
 
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-typedef GameOverlayActivatedMock GameOverlayActivated_t;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
-
 namespace steamworks_gc {
 
 /**
@@ -176,15 +172,6 @@ class GCOverlay {
 
     steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToUser(steamworks_b::Binder::SteamFriends_v017(),
                                                                   dialog_name.c_str(), steam_id);
-
-#ifdef ENIGMA_STEAMWORKS_API_MOCK
-    GameOverlayActivated_t pCallback;
-    pCallback.m_bActive = !GCOverlay::overlay_activated_;
-    pCallback.m_bUserInitiated = true;
-    pCallback.m_nAppID = 480;  // Spacewar's AppID
-
-    GCOverlay::on_game_overlay_activated(&pCallback);
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
   }
 
   /*

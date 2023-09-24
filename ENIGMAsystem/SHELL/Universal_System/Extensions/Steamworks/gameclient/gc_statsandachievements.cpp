@@ -219,20 +219,7 @@ bool GCStatsAndAchievements::request_current_stats() {
     return false;
   }
 
-#ifndef ENIGMA_STEAMWORKS_API_MOCK
   return steamworks_b::Binder::ISteamUserStats_RequestCurrentStats((void*)GCStatsAndAchievements::steam_user_stats_);
-#else
-  bool success =
-      steamworks_b::Binder::ISteamUserStats_RequestCurrentStats((void*)GCStatsAndAchievements::steam_user_stats_);
-
-  UserStatsReceived_t pCallback;
-  pCallback.m_nGameID = INVALID_GAMEID;
-  pCallback.m_steamIDUser = INVALID_STEAMID;
-
-  GCStatsAndAchievements::on_user_stats_received(&pCallback);
-
-  return success;
-#endif  // ENIGMA_STEAMWORKS_API_MOCK
 }
 
 }  // namespace steamworks_gc
