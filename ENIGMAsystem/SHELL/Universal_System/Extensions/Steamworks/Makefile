@@ -45,6 +45,13 @@ $(STEAM_FAKE_LIB): $(FAKE_API_SRC_FILES)
 	@echo "Building fake API..."
 	$(CXX) $(CXXFLAGS) -shared -fPIC -o $@ $^
 
+steam_clean:
+	rm -rf $(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(LINUX32)/* \
+			$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(LINUX64)/* \
+			$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(OSX)/* \
+			$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(BIN_DIR)/* \
+			$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(WIN64)/*
+
 $(shell mkdir -p $(STEAM_FAKE_SDK_PATH)/redistributable_bin \
 					$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(LINUX32) \
 					$(STEAM_FAKE_SDK_PATH)/redistributable_bin/$(LINUX64) \

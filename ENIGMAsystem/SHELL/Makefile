@@ -126,6 +126,7 @@ ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
 else
 compile_game: $(STEAM_FAKE_LIB)
+clean: steam_clean
 endif
 
 # Enable DataStructures stub if the real one is not enabled.
