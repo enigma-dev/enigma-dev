@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef BINDER_H
-#define BINDER_H
+#ifndef STEAM_BINDER_H
+#define STEAM_BINDER_H
 
 /*
     This is the lowest layer that game_client layer mainly depends on.
@@ -34,6 +34,12 @@ typedef bool (*Init_t)();
 typedef void (*Shutdown_t)();
 typedef bool (*RestartAppIfNecessary_t)(uint32);
 typedef void (*RunCallbacks_t)();
+
+typedef void (*RegisterCallback_t)(class CCallbackBase*, int);
+typedef void (*UnregisterCallback_t)(class CCallbackBase*);
+
+typedef void (*RegisterCallResult_t)(class CCallbackBase*, SteamAPICall_t);
+typedef void (*UnregisterCallResult_t)(class CCallbackBase*, SteamAPICall_t);
 
 typedef void* (*SteamUser_v023_t)();
 
@@ -79,13 +85,18 @@ typedef bool (*ISteamUserStats_SetAchievement_t)(void*, const char*);
 typedef bool (*ISteamUserStats_ClearAchievement_t)(void*, const char*);
 typedef bool (*ISteamUserStats_StoreStats_t)(void*);
 typedef bool (*ISteamUserStats_ResetAllStats_t)(void*, bool);
-typedef SteamAPICall_t (*ISteamUserStats_FindOrCreateLeaderboard_t)(void*, const char*, ELeaderboardSortMethod, ELeaderboardDisplayType);
+typedef SteamAPICall_t (*ISteamUserStats_FindOrCreateLeaderboard_t)(void*, const char*, ELeaderboardSortMethod,
+                                                                    ELeaderboardDisplayType);
 typedef SteamAPICall_t (*ISteamUserStats_FindLeaderboard_t)(void*, const char*);
 typedef const char* (*ISteamUserStats_GetLeaderboardName_t)(void*, SteamLeaderboard_t);
 typedef int (*ISteamUserStats_GetLeaderboardEntryCount_t)(void*, SteamLeaderboard_t);
-typedef SteamAPICall_t (*ISteamUserStats_DownloadLeaderboardEntries_t)(void*, SteamLeaderboard_t, ELeaderboardDataRequest, int, int);
-typedef bool (*ISteamUserStats_GetDownloadedLeaderboardEntry_t)(void*, SteamLeaderboardEntries_t, int, LeaderboardEntry_t*, int32*, int);
-typedef SteamAPICall_t (*ISteamUserStats_UploadLeaderboardScore_t)(void*, SteamLeaderboard_t, ELeaderboardUploadScoreMethod, int32, const int32*, int);
+typedef SteamAPICall_t (*ISteamUserStats_DownloadLeaderboardEntries_t)(void*, SteamLeaderboard_t,
+                                                                       ELeaderboardDataRequest, int, int);
+typedef bool (*ISteamUserStats_GetDownloadedLeaderboardEntry_t)(void*, SteamLeaderboardEntries_t, int,
+                                                                LeaderboardEntry_t*, int32*, int);
+typedef SteamAPICall_t (*ISteamUserStats_UploadLeaderboardScore_t)(void*, SteamLeaderboard_t,
+                                                                   ELeaderboardUploadScoreMethod, int32, const int32*,
+                                                                   int);
 
 typedef void* (*SteamApps_v008_t)();
 
@@ -101,6 +112,12 @@ class Binder {
   static Shutdown_t Shutdown;
   static RestartAppIfNecessary_t RestartAppIfNecessary;
   static RunCallbacks_t RunCallbacks;
+
+  static RegisterCallback_t RegisterCallback;
+  static UnregisterCallback_t UnregisterCallback;
+
+  static RegisterCallResult_t RegisterCallResult;
+  static UnregisterCallResult_t UnregisterCallResult;
 
   static bool bind();
 
@@ -161,12 +178,8 @@ class Binder {
   static ISteamApps_BIsSubscribed_t ISteamApps_BIsSubscribed;
   static ISteamApps_GetCurrentGameLanguage_t ISteamApps_GetCurrentGameLanguage;
   static ISteamApps_GetAvailableGameLanguages_t ISteamApps_GetAvailableGameLanguages;
-
- private:
-  static bool bind_fake();
-  static bool bind_real(fs::path libpath);
 };
 
 }  // namespace steamworks_b
 
-#endif  // BINDER_H
+#endif  // STEAM_BINDER_H

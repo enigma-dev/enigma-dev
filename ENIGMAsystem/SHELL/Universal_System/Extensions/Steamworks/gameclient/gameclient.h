@@ -23,7 +23,7 @@
 // TODO: Separate the wrapper functions from the main architecture.
 // TODO: Why can't use inline here?
 
-#include "Binder/binder.h"
+#include "steambinder/steambinder.h"
 
 /*
     This include is the only special include that game_client layer uses. DON'T include any
@@ -273,5 +273,60 @@ class GameClient {
   std::string available_game_languages_;
 };
 }  // namespace steamworks_gc
+
+/**
+ * @brief Calls @c SteamAPI_RegisterCallback() which is loaded and binded by the binder.
+ * 
+ * @param pCallback 
+ * @param iCallback 
+ */
+inline void Custom_SteamAPI_RegisterCallback(class CCallbackBase* pCallback, int iCallback) {
+  if (steamworks_b::Binder::RegisterCallback == nullptr) {
+    DEBUG_MESSAGE("Custom_SteamAPI_RegisterCallback() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::RegisterCallback(pCallback, iCallback);
+}
+
+/**
+ * @brief Calls @c SteamAPI_UnregisterCallback() which is loaded and binded by the binder.
+ * 
+ * @param pCallback 
+ */
+inline void Custom_SteamAPI_UnregisterCallback(class CCallbackBase* pCallback) {
+  if (steamworks_b::Binder::UnregisterCallback == nullptr) {
+    DEBUG_MESSAGE("Custom_SteamAPI_UnregisterCallback() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::UnregisterCallback(pCallback);
+}
+
+#define Custom_SteamAPI_RegisterCallback SteamAPI_RegisterCallback
+
+#define Custom_SteamAPI_UnregisterCallback SteamAPI_UnregisterCallback
+
+inline void Custom_SteamAPI_RegisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall) {
+  if (steamworks_b::Binder::RegisterCallResult == nullptr) {
+    DEBUG_MESSAGE("Custom_SteamAPI_RegisterCallResult() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::RegisterCallResult(pCallback, hAPICall);
+}
+
+inline void Custom_SteamAPI_UnregisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall) {
+  if (steamworks_b::Binder::UnregisterCallResult == nullptr) {
+    DEBUG_MESSAGE("Custom_SteamAPI_UnregisterCallResult() failed due to loading error.", M_ERROR);
+    return;
+  }
+
+  steamworks_b::Binder::UnregisterCallResult(pCallback, hAPICall);
+}
+
+#define Custom_SteamAPI_RegisterCallResult SteamAPI_RegisterCallResult
+
+#define Custom_SteamAPI_UnregisterCallResult SteamAPI_UnregisterCallResult
 
 #endif  // GAMECLIENT_H

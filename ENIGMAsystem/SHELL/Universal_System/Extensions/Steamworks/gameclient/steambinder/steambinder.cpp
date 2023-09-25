@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "binder.h"
+#include "steambinder.h"
 
 #include <iostream>
 
@@ -25,6 +25,12 @@ Init_t Binder::Init{nullptr};
 Shutdown_t Binder::Shutdown{nullptr};
 RestartAppIfNecessary_t Binder::RestartAppIfNecessary{nullptr};
 RunCallbacks_t Binder::RunCallbacks{nullptr};
+
+RegisterCallback_t Binder::RegisterCallback{nullptr};
+UnregisterCallback_t Binder::UnregisterCallback{nullptr};
+
+RegisterCallResult_t Binder::RegisterCallResult{nullptr};
+UnregisterCallResult_t Binder::UnregisterCallResult{nullptr};
 
 SteamUser_v023_t Binder::SteamUser_v023{nullptr};
 
@@ -89,61 +95,57 @@ bool Binder::bind() {
 
   // Check if the library exists.
   fs::path libpath(
-      "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/"
-      "SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so");
+      "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/"
+      "Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
 
-  if (fs::exists(libpath)) {
-    if (!Binder::bind_fake()) {
-      return false;
-    }
-    return true;
+  if (!fs::exists(libpath)) {
+    libpath.assign(
+        "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/"
+        "steambinder/SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so");
   }
 
-  if (!Binder::bind_real(libpath)) {
-    return false;
-  }
-
-  return true;
-}
-
-bool Binder::bind_fake() {
-  // Binder::Init = &SteamAPI_Init;
-  // Binder::Shutdown = &SteamAPI_Shutdown;
-  // Binder::RestartAppIfNecessary = &SteamAPI_RestartAppIfNecessary;
-  // Binder::RunCallbacks = &SteamAPI_RunCallbacks;
-
-  void *handle = dlopen(
-      "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/Binder/"
-      "SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so",
-      RTLD_LAZY);
-
-  Binder::Init = reinterpret_cast<Init_t>(dlsym(handle, "SteamAPI_Init"));
-  Binder::Shutdown = reinterpret_cast<Shutdown_t>(dlsym(handle, "SteamAPI_Shutdown"));
-  Binder::RestartAppIfNecessary =
-      reinterpret_cast<RestartAppIfNecessary_t>(dlsym(handle, "SteamAPI_RestartAppIfNecessary"));
-  Binder::RunCallbacks = reinterpret_cast<RunCallbacks_t>(dlsym(handle, "SteamAPI_RunCallbacks"));
-
-  Binder::ISteamUtils_SetWarningMessageHook = reinterpret_cast<ISteamUtils_SetWarningMessageHook_t>(
-      dlsym(handle, "SteamAPI_ISteamUtils_SetWarningMessageHook"));
-
-  return true;
-}
-
-bool Binder::bind_real(fs::path libpath) {
   void *handle = dlopen(libpath.c_str(), RTLD_LAZY);
 
   Binder::Init = reinterpret_cast<Init_t>(dlsym(handle, "SteamAPI_Init"));
+
+  //   std::cout << "Init: " << std::to_string(Binder::Init == nullptr) << std::endl;  /////////////////
+
   Binder::Shutdown = reinterpret_cast<Shutdown_t>(dlsym(handle, "SteamAPI_Shutdown"));
+
+  //   std::cout << "Shutdown: " << std::to_string(Binder::Shutdown == nullptr) << std::endl;  //////////////////
+
   Binder::RestartAppIfNecessary =
       reinterpret_cast<RestartAppIfNecessary_t>(dlsym(handle, "SteamAPI_RestartAppIfNecessary"));
+
+  //   std::cout << "RestartAppIfNecessary: " << std::to_string(Binder::RestartAppIfNecessary == nullptr)
+  //             << std::endl;  /////////////////
+
   Binder::RunCallbacks = reinterpret_cast<RunCallbacks_t>(dlsym(handle, "SteamAPI_RunCallbacks"));
+
+  //   std::cout << "RunCallbacks: " << std::to_string(Binder::RunCallbacks == nullptr) << std::endl;  /////////////////
+
+  Binder::RegisterCallback = reinterpret_cast<RegisterCallback_t>(dlsym(handle, "SteamAPI_RegisterCallback"));
+  Binder::UnregisterCallback = reinterpret_cast<UnregisterCallback_t>(dlsym(handle, "SteamAPI_UnregisterCallback"));
+
+  Binder::RegisterCallResult = reinterpret_cast<RegisterCallResult_t>(dlsym(handle, "SteamAPI_RegisterCallResult"));
+  Binder::UnregisterCallResult =
+      reinterpret_cast<UnregisterCallResult_t>(dlsym(handle, "SteamAPI_UnregisterCallResult"));
 
   Binder::SteamUser_v023 = reinterpret_cast<SteamUser_v023_t>(dlsym(handle, "SteamAPI_SteamUser_v023"));
 
+  //   std::cout << "SteamUser_v023: " << std::to_string(Binder::SteamUser_v023 == nullptr) << std::endl;  /////////////////
+
   Binder::ISteamUser_BLoggedOn =
       reinterpret_cast<ISteamUser_BLoggedOn_t>(dlsym(handle, "SteamAPI_ISteamUser_BLoggedOn"));
+
+  //   std::cout << "ISteamUser_BLoggedOn: " << std::to_string(Binder::ISteamUser_BLoggedOn == nullptr)
+  //             << std::endl;  /////////////////
+
   Binder::ISteamUser_GetSteamID =
       reinterpret_cast<ISteamUser_GetSteamID_t>(dlsym(handle, "SteamAPI_ISteamUser_GetSteamID"));
+
+  //   std::cout << "ISteamUser_GetSteamID: " << std::to_string(Binder::ISteamUser_GetSteamID == nullptr)
+  //             << std::endl;  /////////////////
 
   Binder::SteamFriends_v017 = reinterpret_cast<SteamFriends_v017_t>(dlsym(handle, "SteamAPI_SteamFriends_v017"));
 

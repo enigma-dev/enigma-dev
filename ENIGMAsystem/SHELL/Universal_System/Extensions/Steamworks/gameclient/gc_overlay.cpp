@@ -23,7 +23,7 @@ namespace steamworks_gc {
 // Public fields & functions
 ////////////////////////////////////////////////////////
 
-// m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated)
+//  m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated),
 GCOverlay::GCOverlay()
     : overlay_activated_(false) {}
 

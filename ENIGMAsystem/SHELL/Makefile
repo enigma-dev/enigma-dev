@@ -121,7 +121,8 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
-# Enable Steamworks stub if the real one is not enabled.
+# If Steamworks extension not enabled, enable Steamworks stub.
+# Else build the fake library.
 ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
 else
@@ -129,7 +130,7 @@ compile_game: $(STEAM_FAKE_LIB)
 clean: steam_clean
 endif
 
-# Enable DataStructures stub if the real one is not enabled.
+# If DataStructures extension not enabled, enable DataStructures stub.
 ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
 include Universal_System/StubExtensions/DataStructures/Makefile
 endif
