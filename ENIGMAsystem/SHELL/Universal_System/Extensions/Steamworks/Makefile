@@ -30,7 +30,9 @@ SOURCES += $(wildcard Universal_System/Extensions/Steamworks/*.cpp) \
                     $(wildcard Universal_System/Extensions/Steamworks/gameclient/utils/*.cpp) \
 						$(wildcard Universal_System/Extensions/Steamworks/gameclient/steambinder/*.cpp)
 
-override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/public/
+override CXXFLAGS += -I$(ENIGMA_ROOT)/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/public/ \
+						-DSTEAM_SDK_PATH=\"$(STEAM_SDK_PATH)\" \
+						-DSTEAM_FAKE_SDK_PATH=\"$(STEAM_FAKE_SDK_PATH)\"
 
 FAKE_API_SRC_FILES := $(wildcard Universal_System/Extensions/Steamworks/gameclient/steambinder/SteamFake/sdk/public/steam/*.cpp)
 

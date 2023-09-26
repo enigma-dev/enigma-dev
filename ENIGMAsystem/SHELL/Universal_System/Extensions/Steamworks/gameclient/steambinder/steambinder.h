@@ -28,6 +28,14 @@
 #include <filesystem>
 // #include <cstdlib>
 
+#ifndef STEAM_SDK_PATH
+#define STEAM_SDK_PATH
+#endif  // STEAM_SDK_PATH
+
+#ifndef STEAM_FAKE_SDK_PATH
+#define STEAM_FAKE_SDK_PATH
+#endif  // STEAM_FAKE_SDK_PATH
+
 /**
  * @brief These defines will be updated on each new version of Steamworks SDK.
  * 

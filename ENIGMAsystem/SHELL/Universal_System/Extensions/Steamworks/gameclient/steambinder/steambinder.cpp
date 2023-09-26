@@ -17,6 +17,7 @@
 
 #include "steambinder.h"
 
+#include <cstdlib>
 #include <iostream>
 
 // TODO: Use ASSERT to check nullptrs here.
@@ -91,41 +92,23 @@ ISteamApps_GetCurrentGameLanguage_t SteamBinder::ISteamApps_GetCurrentGameLangua
 ISteamApps_GetAvailableGameLanguages_t SteamBinder::ISteamApps_GetAvailableGameLanguages{nullptr};
 
 bool SteamBinder::bind() {
-  // get env var STEAM_SDK_PATH
-//   char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
-
-//   std::cout << "STEAM_SDK_PATH: " << steam_sdk_path << std::endl;
-
   // Check if the library exists.
-  fs::path libpath(
-      "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/"
-      "Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
+  fs::path libpath(std::string(STEAM_SDK_PATH) + "/redistributable_bin/linux64/libsteam_api.so");
 
   if (!fs::exists(libpath)) {
-    libpath.assign(
-        "/home/saif/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/"
-        "steambinder/SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so");
+    libpath.assign(std::string(STEAM_FAKE_SDK_PATH) + "/redistributable_bin/linux64/libfake_steam_api.so");
   }
 
   void *handle = dlopen(libpath.c_str(), RTLD_LAZY);
 
   SteamBinder::Init = reinterpret_cast<Init_t>(dlsym(handle, "SteamAPI_Init"));
 
-  //   std::cout << "Init: " << std::to_string(Binder::Init == nullptr) << std::endl;  /////////////////
-
   SteamBinder::Shutdown = reinterpret_cast<Shutdown_t>(dlsym(handle, "SteamAPI_Shutdown"));
-
-  //   std::cout << "Shutdown: " << std::to_string(Binder::Shutdown == nullptr) << std::endl;  //////////////////
 
   SteamBinder::RestartAppIfNecessary =
       reinterpret_cast<RestartAppIfNecessary_t>(dlsym(handle, "SteamAPI_RestartAppIfNecessary"));
 
-  //   std::cout << "RestartAppIfNecessary: " << std::to_string(Binder::RestartAppIfNecessary == nullptr)
-  //             << std::endl;  /////////////////
-
   SteamBinder::RunCallbacks = reinterpret_cast<RunCallbacks_t>(dlsym(handle, "SteamAPI_RunCallbacks"));
-
-  //   std::cout << "RunCallbacks: " << std::to_string(Binder::RunCallbacks == nullptr) << std::endl;  /////////////////
 
   SteamBinder::RegisterCallback = reinterpret_cast<RegisterCallback_t>(dlsym(handle, "SteamAPI_RegisterCallback"));
   SteamBinder::UnregisterCallback =
@@ -136,22 +119,13 @@ bool SteamBinder::bind() {
   SteamBinder::UnregisterCallResult =
       reinterpret_cast<UnregisterCallResult_t>(dlsym(handle, "SteamAPI_UnregisterCallResult"));
 
-  SteamBinder::SteamUser_vXXX =
-      reinterpret_cast<SteamUser_vXXX_t>(dlsym(handle, VERSIONED_STEAM_USER_ACCESSOR_NAME));
-
-  //   std::cout << "SteamUser_vXXX: " << std::to_string(Binder::SteamUser_vXXX == nullptr) << std::endl;  /////////////////
+  SteamBinder::SteamUser_vXXX = reinterpret_cast<SteamUser_vXXX_t>(dlsym(handle, VERSIONED_STEAM_USER_ACCESSOR_NAME));
 
   SteamBinder::ISteamUser_BLoggedOn =
       reinterpret_cast<ISteamUser_BLoggedOn_t>(dlsym(handle, "SteamAPI_ISteamUser_BLoggedOn"));
 
-  //   std::cout << "ISteamUser_BLoggedOn: " << std::to_string(Binder::ISteamUser_BLoggedOn == nullptr)
-  //             << std::endl;  /////////////////
-
   SteamBinder::ISteamUser_GetSteamID =
       reinterpret_cast<ISteamUser_GetSteamID_t>(dlsym(handle, "SteamAPI_ISteamUser_GetSteamID"));
-
-  //   std::cout << "ISteamUser_GetSteamID: " << std::to_string(Binder::ISteamUser_GetSteamID == nullptr)
-  //             << std::endl;  /////////////////
 
   SteamBinder::SteamFriends_vXXX =
       reinterpret_cast<SteamFriends_vXXX_t>(dlsym(handle, VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME));
@@ -241,8 +215,7 @@ bool SteamBinder::bind() {
   SteamBinder::ISteamUserStats_UploadLeaderboardScore = reinterpret_cast<ISteamUserStats_UploadLeaderboardScore_t>(
       dlsym(handle, "SteamAPI_ISteamUserStats_UploadLeaderboardScore"));
 
-  SteamBinder::SteamApps_vXXX =
-      reinterpret_cast<SteamApps_vXXX_t>(dlsym(handle, VERSIONED_STEAM_APPS_ACCESSOR_NAME));
+  SteamBinder::SteamApps_vXXX = reinterpret_cast<SteamApps_vXXX_t>(dlsym(handle, VERSIONED_STEAM_APPS_ACCESSOR_NAME));
 
   SteamBinder::ISteamApps_BIsSubscribed =
       reinterpret_cast<ISteamApps_BIsSubscribed_t>(dlsym(handle, "SteamAPI_ISteamApps_BIsSubscribed"));

@@ -126,7 +126,6 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
 else
-STEAM_SDK_PATH
 compile_game: $(STEAM_FAKE_LIB)
 clean: steam_clean
 endif
