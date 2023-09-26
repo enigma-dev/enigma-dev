@@ -31,9 +31,6 @@
 
 #include "gameclient.h"
 
-#define INVALID_GAMEID 0
-#define INVALID_STEAMID 0
-
 namespace steamworks_gc {
 
 class GameClient;
@@ -189,7 +186,7 @@ class GCStatsAndAchievements {
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#UserStatsReceived_t for
     more information.
   */
-  // STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
+  STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
 
   /*
     Macro for listening to UserStatsStored_t callback. Callbacks are dispatched by
@@ -197,7 +194,7 @@ class GCStatsAndAchievements {
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#UserStatsStored_t for
     more information.
   */
-  // STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
+  STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
 
   /*
     Macro for listening to UserAchievementStored_t callback. Callbacks are dispatched by
@@ -205,7 +202,7 @@ class GCStatsAndAchievements {
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#UserAchievementStored_t for
     more information.
   */
-  // STEAM_CALLBACK(GCStatsAndAchievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
+  STEAM_CALLBACK(GCStatsAndAchievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
 
   /*
     NOTE:   This is primarily only ever used for testing.

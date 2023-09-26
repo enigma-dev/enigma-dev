@@ -73,7 +73,7 @@ class GCOverlay {
     Check https://partner.steamgames.com/doc/api/ISteamFriends#GameOverlayActivated_t for
     more information.
   */
-  // STEAM_CALLBACK(GCOverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
+  STEAM_CALLBACK(GCOverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
 
   /*
     Checks Overlay's activation status. Returns true if the Overlay is activated. Otherwise, 
@@ -90,13 +90,13 @@ class GCOverlay {
     information.
   */
   inline static bool overlay_enabled() {
-    if (steamworks_b::Binder::ISteamUtils_IsOverlayEnabled == nullptr ||
-        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamUtils_IsOverlayEnabled == nullptr ||
+        steamworks_b::SteamBinder::SteamUtils_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::overlay_enabled() failed dure to loading error.", M_ERROR);
       return false;
     }
 
-    return steamworks_b::Binder::ISteamUtils_IsOverlayEnabled(steamworks_b::Binder::SteamUtils_v010());
+    return steamworks_b::SteamBinder::ISteamUtils_IsOverlayEnabled(steamworks_b::SteamBinder::SteamUtils_vXXX());
   }
 
   /*
@@ -114,13 +114,13 @@ class GCOverlay {
     information.
   */
   inline static void activate_overlay(const std::string& dialog) {
-    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlay == nullptr ||
-        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlay == nullptr ||
+        steamworks_b::SteamBinder::SteamFriends_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::activate_overlay() failed dure to loading error.", M_ERROR);
       return;
     }
 
-    steamworks_b::Binder::ISteamFriends_ActivateGameOverlay(steamworks_b::Binder::SteamFriends_v017(), dialog.c_str());
+    steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlay(steamworks_b::SteamBinder::SteamFriends_vXXX(), dialog.c_str());
   }
 
   /*
@@ -131,14 +131,14 @@ class GCOverlay {
     for more information.
   */
   inline static void activate_overlay_browser(const std::string& url) {
-    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToWebPage == nullptr ||
-        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage == nullptr ||
+        steamworks_b::SteamBinder::SteamFriends_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::activate_overlay_browser() failed dure to loading error.", M_ERROR);
       return;
     }
 
-    steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToWebPage(
-        steamworks_b::Binder::SteamFriends_v017(), url.c_str(),
+    steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage(
+        steamworks_b::SteamBinder::SteamFriends_vXXX(), url.c_str(),
         EActivateGameOverlayToWebPageMode::k_EActivateGameOverlayToWebPageMode_Default);
   }
 
@@ -164,13 +164,13 @@ class GCOverlay {
     for more information.
   */
   inline static void activate_overlay_user(const std::string& dialog_name, const uint64& steam_id) {
-    if (steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToUser == nullptr ||
-        steamworks_b::Binder::SteamFriends_v017 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlayToUser == nullptr ||
+        steamworks_b::SteamBinder::SteamFriends_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::activate_overlay_user() failed dure to loading error.", M_ERROR);
       return;
     }
 
-    steamworks_b::Binder::ISteamFriends_ActivateGameOverlayToUser(steamworks_b::Binder::SteamFriends_v017(),
+    steamworks_b::SteamBinder::ISteamFriends_ActivateGameOverlayToUser(steamworks_b::SteamBinder::SteamFriends_vXXX(),
                                                                   dialog_name.c_str(), steam_id);
   }
 
@@ -183,13 +183,13 @@ class GCOverlay {
     for more information.
   */
   inline static void set_overlay_notification_inset(const int& horizontal_inset, const int& vertical_inset) {
-    if (steamworks_b::Binder::ISteamUtils_SetOverlayNotificationInset == nullptr ||
-        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamUtils_SetOverlayNotificationInset == nullptr ||
+        steamworks_b::SteamBinder::SteamUtils_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::set_overlay_notification_inset() failed dure to loading error.", M_ERROR);
       return;
     }
 
-    steamworks_b::Binder::ISteamUtils_SetOverlayNotificationInset(steamworks_b::Binder::SteamUtils_v010(),
+    steamworks_b::SteamBinder::ISteamUtils_SetOverlayNotificationInset(steamworks_b::SteamBinder::SteamUtils_vXXX(),
                                                                   horizontal_inset, vertical_inset);
   }
 
@@ -209,8 +209,8 @@ class GCOverlay {
   */
   inline static void set_overlay_notification_position(
       const GCNotificationPosition& gc_notification_position = GCNotificationPosition::k_GCPosition_Invalid) {
-    if (steamworks_b::Binder::ISteamUtils_SetOverlayNotificationPosition == nullptr ||
-        steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+    if (steamworks_b::SteamBinder::ISteamUtils_SetOverlayNotificationPosition == nullptr ||
+        steamworks_b::SteamBinder::SteamUtils_vXXX == nullptr) {
       DEBUG_MESSAGE("GCOverlay::set_overlay_notification_position() failed dure to loading error.", M_ERROR);
       return;
     }
@@ -235,7 +235,7 @@ class GCOverlay {
         break;
     }
 
-    steamworks_b::Binder::ISteamUtils_SetOverlayNotificationPosition(steamworks_b::Binder::SteamUtils_v010(),
+    steamworks_b::SteamBinder::ISteamUtils_SetOverlayNotificationPosition(steamworks_b::SteamBinder::SteamUtils_vXXX(),
                                                                      notification_position);
   }
 

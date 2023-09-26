@@ -35,6 +35,8 @@
 #include <string>
 
 #define INVALID_APP_ID 0
+#define INVALID_GAME_ID 0
+#define INVALID_STEAM_ID 0
 
 namespace steamworks_gc {
 
@@ -272,58 +274,35 @@ class GameClient {
   */
   std::string available_game_languages_;
 };
+
 }  // namespace steamworks_gc
 
 /**
- * @brief Calls @c SteamAPI_RegisterCallback() which is loaded and binded by the binder.
+ * @brief The official Steamworks API headers uses macros for generating callback and
+ *        callresult functions as well as the public accessors. As ENIGMA doesn't link
+ *        any library in the Steamworks/Makefile file, we need to change the macro to
+ *        to call the functions we loaded using @c dlsym() and because we can't change
+ *        anything inside the official headers, we need to redefine the macros here.
  * 
  * @param pCallback 
  * @param iCallback 
  */
-inline void Custom_SteamAPI_RegisterCallback(class CCallbackBase* pCallback, int iCallback) {
-  if (steamworks_b::Binder::RegisterCallback == nullptr) {
-    DEBUG_MESSAGE("Custom_SteamAPI_RegisterCallback() failed due to loading error.", M_ERROR);
-    return;
-  }
-
-  steamworks_b::Binder::RegisterCallback(pCallback, iCallback);
-}
+void Custom_SteamAPI_RegisterCallback(class CCallbackBase* pCallback, int iCallback);
 
 /**
  * @brief Calls @c SteamAPI_UnregisterCallback() which is loaded and binded by the binder.
  * 
  * @param pCallback 
  */
-inline void Custom_SteamAPI_UnregisterCallback(class CCallbackBase* pCallback) {
-  if (steamworks_b::Binder::UnregisterCallback == nullptr) {
-    DEBUG_MESSAGE("Custom_SteamAPI_UnregisterCallback() failed due to loading error.", M_ERROR);
-    return;
-  }
-
-  steamworks_b::Binder::UnregisterCallback(pCallback);
-}
+void Custom_SteamAPI_UnregisterCallback(class CCallbackBase* pCallback);
 
 #define Custom_SteamAPI_RegisterCallback SteamAPI_RegisterCallback
 
 #define Custom_SteamAPI_UnregisterCallback SteamAPI_UnregisterCallback
 
-inline void Custom_SteamAPI_RegisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall) {
-  if (steamworks_b::Binder::RegisterCallResult == nullptr) {
-    DEBUG_MESSAGE("Custom_SteamAPI_RegisterCallResult() failed due to loading error.", M_ERROR);
-    return;
-  }
+void Custom_SteamAPI_RegisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall);
 
-  steamworks_b::Binder::RegisterCallResult(pCallback, hAPICall);
-}
-
-inline void Custom_SteamAPI_UnregisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall) {
-  if (steamworks_b::Binder::UnregisterCallResult == nullptr) {
-    DEBUG_MESSAGE("Custom_SteamAPI_UnregisterCallResult() failed due to loading error.", M_ERROR);
-    return;
-  }
-
-  steamworks_b::Binder::UnregisterCallResult(pCallback, hAPICall);
-}
+void Custom_SteamAPI_UnregisterCallResult(class CCallbackBase* pCallback, SteamAPICall_t hAPICall);
 
 #define Custom_SteamAPI_RegisterCallResult SteamAPI_RegisterCallResult
 

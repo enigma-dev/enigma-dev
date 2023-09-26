@@ -83,8 +83,8 @@ GCLeaderboardsScoreDownloadedCookies::GCLeaderboardsScoreDownloadedCookies(const
 bool GCLeaderboardsScoreDownloadedCookies::is_done() const { return GCLeaderboardsScoreDownloadedCookies::is_done_; }
 
 void GCLeaderboardsScoreDownloadedCookies::set_call_result(SteamAPICall_t& steam_api_call) {
-  // GCLeaderboardsScoreDownloadedCookies::m_SteamCallResultDownloadScores.Set(
-  //     steam_api_call, this, &GCLeaderboardsScoreDownloadedCookies::on_download_scores);
+  GCLeaderboardsScoreDownloadedCookies::m_SteamCallResultDownloadScores.Set(
+      steam_api_call, this, &GCLeaderboardsScoreDownloadedCookies::on_download_scores);
 }
 
 void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
@@ -96,8 +96,8 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
     return;
   }
 
-  if (steamworks_b::Binder::ISteamUserStats_GetDownloadedLeaderboardEntry == nullptr ||
-      steamworks_b::Binder::SteamUserStats_v012 == nullptr) {
+  if (steamworks_b::SteamBinder::ISteamUserStats_GetDownloadedLeaderboardEntry == nullptr ||
+      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
     DEBUG_MESSAGE("GCLeaderboardsScoreDownloadedCookies::on_download_scores() failed due to loading error.", M_ERROR);
     // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
     GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
@@ -112,8 +112,8 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
   const int number_of_leaderboard_entries =
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
   for (unsigned index{0}; index < (unsigned)number_of_leaderboard_entries; index++) {
-    steamworks_b::Binder::ISteamUserStats_GetDownloadedLeaderboardEntry(
-        steamworks_b::Binder::SteamUserStats_v012(), pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
+    steamworks_b::SteamBinder::ISteamUserStats_GetDownloadedLeaderboardEntry(
+        steamworks_b::SteamBinder::SteamUserStats_vXXX(), pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
         &leaderboard_entries[index], nullptr, 0);
   }
 

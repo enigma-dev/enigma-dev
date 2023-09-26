@@ -39,13 +39,13 @@ namespace steamworks_gc {
 ////////////////////////////////////////////////////////
 
 void GCMain::set_warning_message_hook() {
-  if (steamworks_b::Binder::ISteamUtils_SetWarningMessageHook == nullptr ||
-      steamworks_b::Binder::SteamUtils_v010 == nullptr) {
+  if (steamworks_b::SteamBinder::ISteamUtils_SetWarningMessageHook == nullptr ||
+      steamworks_b::SteamBinder::SteamUtils_vXXX == nullptr) {
     DEBUG_MESSAGE("GCMain::set_warning_message_hook() failed due to loading error.", M_ERROR);
     return;
   }
 
-  steamworks_b::Binder::ISteamUtils_SetWarningMessageHook(steamworks_b::Binder::SteamUtils_v010(),
+  steamworks_b::SteamBinder::ISteamUtils_SetWarningMessageHook(steamworks_b::SteamBinder::SteamUtils_vXXX(),
                                                           &SteamAPIDebugTextHook);
 }
 

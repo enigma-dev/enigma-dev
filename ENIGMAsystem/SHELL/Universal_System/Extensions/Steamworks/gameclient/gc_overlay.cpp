@@ -23,19 +23,19 @@ namespace steamworks_gc {
 // Public fields & functions
 ////////////////////////////////////////////////////////
 
-//  m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated),
+//
 GCOverlay::GCOverlay()
-    : overlay_activated_(false) {}
+    : m_CallbackGameOverlayActivated(this, &GCOverlay::on_game_overlay_activated), overlay_activated_(false) {}
 
-// void GCOverlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
-//   if (pCallback->m_bActive) {
-//     GCOverlay::overlay_activated_ = true;
-//     DEBUG_MESSAGE("Overlay activated successfully.", M_INFO);
-//   } else {
-//     GCOverlay::overlay_activated_ = false;
-//     DEBUG_MESSAGE("Overlay deactivated successfully.", M_INFO);
-//   }
-// }
+void GCOverlay::on_game_overlay_activated(GameOverlayActivated_t* pCallback) {
+  if (pCallback->m_bActive) {
+    GCOverlay::overlay_activated_ = true;
+    DEBUG_MESSAGE("Overlay activated successfully.", M_INFO);
+  } else {
+    GCOverlay::overlay_activated_ = false;
+    DEBUG_MESSAGE("Overlay deactivated successfully.", M_INFO);
+  }
+}
 
 bool GCOverlay::overlay_activated() { return GCOverlay::overlay_activated_; }
 

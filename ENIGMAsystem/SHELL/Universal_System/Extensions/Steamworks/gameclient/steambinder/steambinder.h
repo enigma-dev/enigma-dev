@@ -28,6 +28,16 @@
 #include <filesystem>
 // #include <cstdlib>
 
+/**
+ * @brief These defines will be updated on each new version of Steamworks SDK.
+ * 
+ */
+#define VERSIONED_STEAM_USER_ACCESSOR_NAME "SteamAPI_SteamUser_v023"
+#define VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME "SteamAPI_SteamFriends_v017"
+#define VERSIONED_STEAM_UTILS_ACCESSOR_NAME "SteamAPI_SteamUtils_v010"
+#define VERSIONED_STEAM_USERSTATS_ACCESSOR_NAME "SteamAPI_SteamUserStats_v012"
+#define VERSIONED_STEAM_APPS_ACCESSOR_NAME "SteamAPI_SteamApps_v008"
+
 namespace fs = std::filesystem;
 
 typedef bool (*Init_t)();
@@ -41,12 +51,12 @@ typedef void (*UnregisterCallback_t)(class CCallbackBase*);
 typedef void (*RegisterCallResult_t)(class CCallbackBase*, SteamAPICall_t);
 typedef void (*UnregisterCallResult_t)(class CCallbackBase*, SteamAPICall_t);
 
-typedef void* (*SteamUser_v023_t)();
+typedef void* (*SteamUser_vXXX_t)();
 
 typedef bool (*ISteamUser_BLoggedOn_t)(void*);
 typedef uint64_steamid (*ISteamUser_GetSteamID_t)(void*);
 
-typedef void* (*SteamFriends_v017_t)();
+typedef void* (*SteamFriends_vXXX_t)();
 
 typedef const char* (*ISteamFriends_GetPersonaName_t)(void*);
 typedef const char* (*ISteamFriends_GetFriendPersonaName_t)(void*, uint64_steamid);
@@ -55,14 +65,13 @@ typedef void (*ISteamFriends_ActivateGameOverlayToUser_t)(void*, const char*, ui
 typedef void (*ISteamFriends_ActivateGameOverlayToWebPage_t)(void*, const char*, EActivateGameOverlayToWebPageMode);
 typedef void (*ISteamFriends_ActivateGameOverlayToStore_t)(void*, AppId_t, EOverlayToStoreFlag);
 typedef void (*ISteamFriends_SetPlayedWith_t)(void*, uint64_steamid);
-typedef void (*ISteamFriends_ActivateGameOverlayInviteDialog_t)(void*, uint64_steamid);
 typedef int (*ISteamFriends_GetSmallFriendAvatar_t)(void*, uint64_steamid);
 typedef int (*ISteamFriends_GetMediumFriendAvatar_t)(void*, uint64_steamid);
 typedef int (*ISteamFriends_GetLargeFriendAvatar_t)(void*, uint64_steamid);
 typedef bool (*ISteamFriends_SetRichPresence_t)(void*, const char*, const char*);
 typedef void (*ISteamFriends_ClearRichPresence_t)(void*);
 
-typedef void* (*SteamUtils_v010_t)();
+typedef void* (*SteamUtils_vXXX_t)();
 
 typedef bool (*ISteamUtils_GetImageSize_t)(void*, int, uint32*, uint32*);
 typedef bool (*ISteamUtils_GetImageRGBA_t)(void*, int, uint8*, int);
@@ -72,7 +81,7 @@ typedef void (*ISteamUtils_SetWarningMessageHook_t)(void*, SteamAPIWarningMessag
 typedef bool (*ISteamUtils_IsOverlayEnabled_t)(void*);
 typedef void (*ISteamUtils_SetOverlayNotificationInset_t)(void*, int, int);
 
-typedef void* (*SteamUserStats_v012_t)();
+typedef void* (*SteamUserStats_vXXX_t)();
 
 typedef bool (*ISteamUserStats_RequestCurrentStats_t)(void*);
 typedef bool (*ISteamUserStats_GetStatInt32_t)(void*, const char*, int32*);
@@ -89,7 +98,6 @@ typedef SteamAPICall_t (*ISteamUserStats_FindOrCreateLeaderboard_t)(void*, const
                                                                     ELeaderboardDisplayType);
 typedef SteamAPICall_t (*ISteamUserStats_FindLeaderboard_t)(void*, const char*);
 typedef const char* (*ISteamUserStats_GetLeaderboardName_t)(void*, SteamLeaderboard_t);
-typedef int (*ISteamUserStats_GetLeaderboardEntryCount_t)(void*, SteamLeaderboard_t);
 typedef SteamAPICall_t (*ISteamUserStats_DownloadLeaderboardEntries_t)(void*, SteamLeaderboard_t,
                                                                        ELeaderboardDataRequest, int, int);
 typedef bool (*ISteamUserStats_GetDownloadedLeaderboardEntry_t)(void*, SteamLeaderboardEntries_t, int,
@@ -98,7 +106,7 @@ typedef SteamAPICall_t (*ISteamUserStats_UploadLeaderboardScore_t)(void*, SteamL
                                                                    ELeaderboardUploadScoreMethod, int32, const int32*,
                                                                    int);
 
-typedef void* (*SteamApps_v008_t)();
+typedef void* (*SteamApps_vXXX_t)();
 
 typedef bool (*ISteamApps_BIsSubscribed_t)(void*);
 typedef const char* (*ISteamApps_GetCurrentGameLanguage_t)(void*);
@@ -106,7 +114,7 @@ typedef const char* (*ISteamApps_GetAvailableGameLanguages_t)(void*);
 
 namespace steamworks_b {
 
-class Binder {
+class SteamBinder {
  public:
   static Init_t Init;
   static Shutdown_t Shutdown;
@@ -121,12 +129,12 @@ class Binder {
 
   static bool bind();
 
-  static SteamUser_v023_t SteamUser_v023;
+  static SteamUser_vXXX_t SteamUser_vXXX;
 
   static ISteamUser_BLoggedOn_t ISteamUser_BLoggedOn;
   static ISteamUser_GetSteamID_t ISteamUser_GetSteamID;
 
-  static SteamFriends_v017_t SteamFriends_v017;
+  static SteamFriends_vXXX_t SteamFriends_vXXX;
 
   static ISteamFriends_GetPersonaName_t ISteamFriends_GetPersonaName;
   static ISteamFriends_GetFriendPersonaName_t ISteamFriends_GetFriendPersonaName;
@@ -135,14 +143,13 @@ class Binder {
   static ISteamFriends_ActivateGameOverlayToWebPage_t ISteamFriends_ActivateGameOverlayToWebPage;
   static ISteamFriends_ActivateGameOverlayToStore_t ISteamFriends_ActivateGameOverlayToStore;
   static ISteamFriends_SetPlayedWith_t ISteamFriends_SetPlayedWith;
-  static ISteamFriends_ActivateGameOverlayInviteDialog_t ISteamFriends_ActivateGameOverlayInviteDialog;
   static ISteamFriends_GetSmallFriendAvatar_t ISteamFriends_GetSmallFriendAvatar;
   static ISteamFriends_GetMediumFriendAvatar_t ISteamFriends_GetMediumFriendAvatar;
   static ISteamFriends_GetLargeFriendAvatar_t ISteamFriends_GetLargeFriendAvatar;
   static ISteamFriends_SetRichPresence_t ISteamFriends_SetRichPresence;
   static ISteamFriends_ClearRichPresence_t ISteamFriends_ClearRichPresence;
 
-  static SteamUtils_v010_t SteamUtils_v010;
+  static SteamUtils_vXXX_t SteamUtils_vXXX;
 
   static ISteamUtils_GetImageSize_t ISteamUtils_GetImageSize;
   static ISteamUtils_GetImageRGBA_t ISteamUtils_GetImageRGBA;
@@ -152,7 +159,7 @@ class Binder {
   static ISteamUtils_IsOverlayEnabled_t ISteamUtils_IsOverlayEnabled;
   static ISteamUtils_SetOverlayNotificationInset_t ISteamUtils_SetOverlayNotificationInset;
 
-  static SteamUserStats_v012_t SteamUserStats_v012;
+  static SteamUserStats_vXXX_t SteamUserStats_vXXX;
 
   static ISteamUserStats_RequestCurrentStats_t ISteamUserStats_RequestCurrentStats;
   static ISteamUserStats_GetStatInt32_t ISteamUserStats_GetStatInt32;
@@ -168,12 +175,11 @@ class Binder {
   static ISteamUserStats_FindOrCreateLeaderboard_t ISteamUserStats_FindOrCreateLeaderboard;
   static ISteamUserStats_FindLeaderboard_t ISteamUserStats_FindLeaderboard;
   static ISteamUserStats_GetLeaderboardName_t ISteamUserStats_GetLeaderboardName;
-  static ISteamUserStats_GetLeaderboardEntryCount_t ISteamUserStats_GetLeaderboardEntryCount;
   static ISteamUserStats_DownloadLeaderboardEntries_t ISteamUserStats_DownloadLeaderboardEntries;
   static ISteamUserStats_GetDownloadedLeaderboardEntry_t ISteamUserStats_GetDownloadedLeaderboardEntry;
   static ISteamUserStats_UploadLeaderboardScore_t ISteamUserStats_UploadLeaderboardScore;
 
-  static SteamApps_v008_t SteamApps_v008;
+  static SteamApps_vXXX_t SteamApps_vXXX;
 
   static ISteamApps_BIsSubscribed_t ISteamApps_BIsSubscribed;
   static ISteamApps_GetCurrentGameLanguage_t ISteamApps_GetCurrentGameLanguage;

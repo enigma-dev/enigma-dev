@@ -59,7 +59,7 @@ class GCLeaderboardsFindResultCookies : public GCLeaderboardsCookies {
 
   // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);
-  // CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;
+  CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;
 };
 
 }  // namespace steamworks_gc

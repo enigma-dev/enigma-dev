@@ -18,19 +18,23 @@
 
 # Ignore everything.
 /Steamv157/sdk/**/*
+/SteamFake/sdk/**/*
 
 # Don't ignore Readme.txt file.
 !/Steamv157/sdk/Readme.txt
+!/SteamFake/sdk/Readme.txt
 
 # Don't ignore files inside the SteamvXXX/sdk/public/steam/ folder.
 # Note that this code ignores directories inside the SteamvXXX/sdk/public/steam/ folder.
 !/Steamv157/sdk/public/
 !/Steamv157/sdk/public/steam/
 !/Steamv157/sdk/public/steam/*
+!/SteamFake/sdk/public/
+!/SteamFake/sdk/public/steam/
+!/SteamFake/sdk/public/steam/*
 
 # Don't ignore everything inside the SteamvXXX/sdk/redistributable_bin/ folder.
 # !/Steamv157/sdk/redistributable_bin/
 # !/Steamv157/sdk/redistributable_bin/**/*
-
-# Ignore everything inside SteamFake/sdk/redistributable_bin/ folder.
-/SteamFake/sdk/redistributable_bin/**/*
+# !/SteamFake/sdk/redistributable_bin/
+# !/SteamFake/sdk/redistributable_bin/**/*

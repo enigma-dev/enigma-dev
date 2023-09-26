@@ -36,7 +36,7 @@ class GCMain {
   * @return true 
   * @return false 
   */
-  inline static bool invoke_binder() { return steamworks_b::Binder::bind(); }
+  inline static bool invoke_binder() { return steamworks_b::SteamBinder::bind(); }
 
   /*
     Checks if your executable was launched through Steam and relaunches it through Steam if it wasn't. init() will fail 
@@ -55,12 +55,12 @@ class GCMain {
    * @return true when fails
    */
   inline static bool restart_app_if_necessary() {
-    if (steamworks_b::Binder::RestartAppIfNecessary == nullptr) {
+    if (steamworks_b::SteamBinder::RestartAppIfNecessary == nullptr) {
       DEBUG_MESSAGE("GCMain::restart_app_if_necessary() failed due to loading error.", M_ERROR);
       return false;
     }
 
-    return steamworks_b::Binder::RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
+    return steamworks_b::SteamBinder::RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
   }
 
   /*
@@ -86,12 +86,12 @@ class GCMain {
       return false;
     }
 
-    if (steamworks_b::Binder::Init == nullptr) {
+    if (steamworks_b::SteamBinder::Init == nullptr) {
       DEBUG_MESSAGE("GCMain::init() failed due to loading error.", M_ERROR);
       return false;
     }
 
-    if (!steamworks_b::Binder::Init()) {
+    if (!steamworks_b::SteamBinder::Init()) {
       return false;
     }
 
@@ -120,7 +120,7 @@ class GCMain {
   inline static void shutdown() {
     GCMain::is_initialised_ = false;
 
-    if (steamworks_b::Binder::Shutdown != nullptr) steamworks_b::Binder::Shutdown();
+    if (steamworks_b::SteamBinder::Shutdown != nullptr) steamworks_b::SteamBinder::Shutdown();
     else DEBUG_MESSAGE("GCMain::shutdown() failed due to loading error.", M_ERROR);
 
     if (nullptr != GCMain::gameclient_) delete GCMain::gameclient_;
@@ -138,11 +138,11 @@ class GCMain {
     [OPTIONAL] Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_ReleaseCurrentThreadMemory for more information.
   */
   inline static void run_callbacks() {
-    if (steamworks_b::Binder::RunCallbacks == nullptr) {
+    if (steamworks_b::SteamBinder::RunCallbacks == nullptr) {
       DEBUG_MESSAGE("GCMain::run_callbacks() failed due to loading error.", M_ERROR);
       return;
     }
-    steamworks_b::Binder::RunCallbacks();
+    steamworks_b::SteamBinder::RunCallbacks();
   }
 
   /*

@@ -39,8 +39,8 @@ GCLeaderboardsFindResultCookies::GCLeaderboardsFindResultCookies(const int& id, 
 bool GCLeaderboardsFindResultCookies::is_done() const { return GCLeaderboardsFindResultCookies::is_done_; }
 
 void GCLeaderboardsFindResultCookies::set_call_result(SteamAPICall_t& steam_api_call) {
-  // GCLeaderboardsFindResultCookies::m_callResultFindLeaderboard.Set(
-  //     steam_api_call, this, &GCLeaderboardsFindResultCookies::on_find_leaderboard);
+  GCLeaderboardsFindResultCookies::m_callResultFindLeaderboard.Set(
+      steam_api_call, this, &GCLeaderboardsFindResultCookies::on_find_leaderboard);
 }
 
 void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult,

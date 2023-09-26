@@ -60,7 +60,7 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
 
   // Called when SteamUserStats()->DownloadLeaderboardEntries() returns asynchronously
   void on_download_scores(LeaderboardScoresDownloaded_t* pFindLearderboardResult, bool bIOFailure);
-  // CCallResult<GCLeaderboardsScoreDownloadedCookies, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
+  CCallResult<GCLeaderboardsScoreDownloadedCookies, LeaderboardScoresDownloaded_t> m_SteamCallResultDownloadScores;
 };
 
 }  // namespace steamworks_gc

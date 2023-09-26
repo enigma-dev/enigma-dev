@@ -39,8 +39,8 @@ GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(const int
 bool GCLeaderboardsScoreUploadedCookies::is_done() const { return GCLeaderboardsScoreUploadedCookies::is_done_; }
 
 void GCLeaderboardsScoreUploadedCookies::set_call_result(SteamAPICall_t& steam_api_call) {
-  // GCLeaderboardsScoreUploadedCookies::m_SteamCallResultUploadScore.Set(
-  //     steam_api_call, this, &GCLeaderboardsScoreUploadedCookies::on_upload_score);
+  GCLeaderboardsScoreUploadedCookies::m_SteamCallResultUploadScore.Set(
+      steam_api_call, this, &GCLeaderboardsScoreUploadedCookies::on_upload_score);
 }
 
 void GCLeaderboardsScoreUploadedCookies::on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult,
