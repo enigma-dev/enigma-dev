@@ -20,16 +20,8 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 // TODO: Move the pre-checks here.
-// TODO: Separate the wrapper functions from the main architecture.
-// TODO: Why can't use inline here?
 
 #include "steambinder/steambinder.h"
-
-/*
-    This include is the only special include that game_client layer uses. DON'T include any
-    other includes in game_client layer that are outside Steamworks extension.
-*/
-#include "Widget_Systems/widgets_mandatory.h"
 
 #include <algorithm>
 #include <string>

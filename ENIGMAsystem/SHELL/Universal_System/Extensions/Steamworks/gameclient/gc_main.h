@@ -55,12 +55,8 @@ class GCMain {
    * @return true when fails
    */
   inline static bool restart_app_if_necessary() {
-    if (steamworks_b::SteamBinder::RestartAppIfNecessary == nullptr) {
-      DEBUG_MESSAGE("GCMain::restart_app_if_necessary() failed due to loading error.", M_ERROR);
-      return false;
-    }
-
-    return steamworks_b::SteamBinder::RestartAppIfNecessary(k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
+    return steamworks_b::SteamBinder::RestartAppIfNecessary(
+        k_uAppIdInvalid);  // replace k_uAppIdInvalid with your AppID
   }
 
   /*
@@ -83,11 +79,6 @@ class GCMain {
   // TODO: The path here need to be inside an env variable called `STEAM_SDK_PATH`.
   inline static bool init() {
     if (GCMain::restart_app_if_necessary()) {
-      return false;
-    }
-
-    if (steamworks_b::SteamBinder::Init == nullptr) {
-      DEBUG_MESSAGE("GCMain::init() failed due to loading error.", M_ERROR);
       return false;
     }
 
@@ -120,8 +111,10 @@ class GCMain {
   inline static void shutdown() {
     GCMain::is_initialised_ = false;
 
-    if (steamworks_b::SteamBinder::Shutdown != nullptr) steamworks_b::SteamBinder::Shutdown();
-    else DEBUG_MESSAGE("GCMain::shutdown() failed due to loading error.", M_ERROR);
+    if (steamworks_b::SteamBinder::Shutdown != nullptr)
+      steamworks_b::SteamBinder::Shutdown();
+    else
+      DEBUG_MESSAGE("GCMain::shutdown() failed due to loading error.", M_ERROR);
 
     if (nullptr != GCMain::gameclient_) delete GCMain::gameclient_;
   }
@@ -137,13 +130,7 @@ class GCMain {
     Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RunCallbacks for more information.
     [OPTIONAL] Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_ReleaseCurrentThreadMemory for more information.
   */
-  inline static void run_callbacks() {
-    if (steamworks_b::SteamBinder::RunCallbacks == nullptr) {
-      DEBUG_MESSAGE("GCMain::run_callbacks() failed due to loading error.", M_ERROR);
-      return;
-    }
-    steamworks_b::SteamBinder::RunCallbacks();
-  }
+  inline static void run_callbacks() { steamworks_b::SteamBinder::RunCallbacks(); }
 
   /*
     This function calls SteamUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook). Sets a warning message hook to receive 

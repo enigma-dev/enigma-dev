@@ -24,17 +24,18 @@
 #include "steam/steam_api.h"
 #include "steam/steam_api_flat.h"
 
+/*
+    This include is the only special include that game_client layer uses. DON'T include any
+    other includes in game_client layer that are outside Steamworks extension.
+*/
+#include "Widget_Systems/widgets_mandatory.h"
+
 #include <dlfcn.h>
 #include <filesystem>
-// #include <cstdlib>
 
-#ifndef STEAM_SDK_PATH
-#define STEAM_SDK_PATH
-#endif  // STEAM_SDK_PATH
-
-#ifndef STEAM_FAKE_SDK_PATH
-#define STEAM_FAKE_SDK_PATH
-#endif  // STEAM_FAKE_SDK_PATH
+#ifndef ENIGMA_STEAMWORKS_EXTENSION_ROOT
+#error "ENIGMA_STEAMWORKS_EXTENSION_ROOT is not defined."
+#endif  // ENIGMA_STEAMWORKS_EXTENSION_ROOT
 
 /**
  * @brief These defines will be updated on each new version of Steamworks SDK.
@@ -192,6 +193,9 @@ class SteamBinder {
   static ISteamApps_BIsSubscribed_t ISteamApps_BIsSubscribed;
   static ISteamApps_GetCurrentGameLanguage_t ISteamApps_GetCurrentGameLanguage;
   static ISteamApps_GetAvailableGameLanguages_t ISteamApps_GetAvailableGameLanguages;
+
+ private:
+  static bool validate();
 };
 
 }  // namespace steamworks_b

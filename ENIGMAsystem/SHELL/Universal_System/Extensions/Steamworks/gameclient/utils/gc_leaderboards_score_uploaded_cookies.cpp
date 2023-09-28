@@ -17,9 +17,6 @@
 
 #include "gc_leaderboards_score_uploaded_cookies.h"
 
-#include "../../leaderboards.h"
-#include "../gc_leaderboards.h"
-
 namespace steamworks_gc {
 
 ////////////////////////////////////////////////////////
@@ -68,16 +65,7 @@ void GCLeaderboardsScoreUploadedCookies::on_upload_score(LeaderboardScoreUploade
   // Done? We are ready to accept new requests.
   // gc_leaderboards_score_uploaded_cookies::gc_leaderboards_->set_loading(false);
 
-  GCLeaderboardScoreUploadedResult leaderboard_score_uploaded_result;
-  leaderboard_score_uploaded_result.success = pScoreUploadedResult->m_bSuccess;
-  leaderboard_score_uploaded_result.leaderboard = pScoreUploadedResult->m_hSteamLeaderboard;
-  leaderboard_score_uploaded_result.score = pScoreUploadedResult->m_nScore;
-  leaderboard_score_uploaded_result.score_changed = pScoreUploadedResult->m_bScoreChanged;
-  leaderboard_score_uploaded_result.global_rank_new = pScoreUploadedResult->m_nGlobalRankNew;
-  leaderboard_score_uploaded_result.global_rank_previous = pScoreUploadedResult->m_nGlobalRankPrevious;
-
-  enigma::push_leaderboard_upload_steam_async_event(GCLeaderboardsScoreUploadedCookies::id_,
-                                                    leaderboard_score_uploaded_result);
+  enigma::push_leaderboard_upload_steam_async_event(GCLeaderboardsScoreUploadedCookies::id_, *pScoreUploadedResult);
 
   GCLeaderboardsScoreUploadedCookies::is_done_ = true;
 }

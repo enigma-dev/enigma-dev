@@ -23,20 +23,14 @@ namespace steamworks_gc {
 // Public fields & functions
 ////////////////////////////////////////////////////////
 
-GCStatsAndAchievements::GCStatsAndAchievements(uint32 game_id)
+GCStatsAndAchievements::GCStatsAndAchievements(uint32 app_id)
     : m_CallbackUserStatsReceived(this, &GCStatsAndAchievements::on_user_stats_received),
       m_CallbackUserStatsStored(this, &GCStatsAndAchievements::on_user_stats_stored),
       m_CallbackAchievementStored(this, &GCStatsAndAchievements::on_achievement_stored),
-      game_id_(game_id),
+      game_id_(CGameID(app_id)),
       stats_valid_(false),
       steam_user_(nullptr),
       steam_user_stats_(nullptr) {
-  if (steamworks_b::SteamBinder::SteamUser_vXXX == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::GCStatsAndAchievements() failed due to loading error.", M_ERROR);
-    return;
-  }
-
   GCStatsAndAchievements::steam_user_ = (ISteamUser*)steamworks_b::SteamBinder::SteamUser_vXXX();
   GCStatsAndAchievements::steam_user_stats_ = (ISteamUserStats*)steamworks_b::SteamBinder::SteamUserStats_vXXX();
 
@@ -46,90 +40,42 @@ GCStatsAndAchievements::GCStatsAndAchievements(uint32 game_id)
 bool GCStatsAndAchievements::stats_valid() { return GCStatsAndAchievements::stats_valid_; }
 
 bool GCStatsAndAchievements::set_achievement(const std::string& achievement_name) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_SetAchievement == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::set_achievement() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_SetAchievement((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                    achievement_name.c_str());
 }
 
 bool GCStatsAndAchievements::get_achievement(const std::string& achievement_name, bool& achieved) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_GetAchievement == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::get_achievement() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_GetAchievement((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                    achievement_name.c_str(), &achieved);
 }
 
 bool GCStatsAndAchievements::clear_achievement(const std::string& achievement_name) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_ClearAchievement == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::clear_achievement() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_ClearAchievement((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                      achievement_name.c_str());
 }
 
 bool GCStatsAndAchievements::set_stat_int(const std::string& stat_name, const int32& value) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_SetStatInt32 == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::set_stat_int() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_SetStatInt32((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                  stat_name.c_str(), value);
 }
 
 bool GCStatsAndAchievements::get_stat_int(const std::string& stat_name, int32& value) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_GetStatInt32 == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::get_stat_int() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_GetStatInt32((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                  stat_name.c_str(), &value);
 }
 
 bool GCStatsAndAchievements::set_stat_float(const std::string& stat_name, const float& value) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_SetStatFloat == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::set_stat_float() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_SetStatFloat((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                  stat_name.c_str(), value);
 }
 
 bool GCStatsAndAchievements::get_stat_float(const std::string& stat_name, float& value) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_GetStatFloat == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::get_stat_float() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_GetStatFloat((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                  stat_name.c_str(), &value);
 }
 
 bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name, const float& count_this_session,
                                                    const double& session_length) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_UpdateAvgRateStat == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::set_stat_average_rate() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_UpdateAvgRateStat(
       (void*)GCStatsAndAchievements::steam_user_stats_, stat_name.c_str(), count_this_session, session_length);
 }
@@ -139,7 +85,11 @@ bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name,
 // }
 
 void GCStatsAndAchievements::on_user_stats_received(UserStatsReceived_t* pCallback) {
+  DEBUG_MESSAGE("Received stats and achievements from Steam.", M_INFO);
+  DEBUG_MESSAGE("Game ID: " + std::to_string(pCallback->m_nGameID), M_INFO);
+  DEBUG_MESSAGE("Game ID 2 " + std::to_string(GCStatsAndAchievements::game_id_.ToUint64()), M_INFO);
   if (GCStatsAndAchievements::game_id_.ToUint64() != pCallback->m_nGameID) return;
+  DEBUG_MESSAGE("Game ID matches.", M_INFO);
 
   if (GCStatsAndAchievements::stats_valid_) return;
 
@@ -188,43 +138,20 @@ void GCStatsAndAchievements::on_achievement_stored(UserAchievementStored_t* pCal
 }
 
 bool GCStatsAndAchievements::store_stats() {
-  if (steamworks_b::SteamBinder::ISteamUserStats_StoreStats == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::store_stats() failed due to loading error.", M_ERROR);
-    return false;
-  }
   return steamworks_b::SteamBinder::ISteamUserStats_StoreStats((void*)GCStatsAndAchievements::steam_user_stats_);
 }
 
 bool GCStatsAndAchievements::reset_all_stats() {
-  if (steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::reset_all_stats() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                   false);
 }
 
 bool GCStatsAndAchievements::reset_all_stats_achievements() {
-  if (steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::reset_all_stats_achievements() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats((void*)GCStatsAndAchievements::steam_user_stats_,
                                                                   true);
 }
 
 bool GCStatsAndAchievements::request_current_stats() {
-  if (steamworks_b::SteamBinder::ISteamUserStats_RequestCurrentStats == nullptr ||
-      GCStatsAndAchievements::steam_user_stats_ == nullptr) {
-    DEBUG_MESSAGE("GCStatsAndAchievements::request_current_stats() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   return steamworks_b::SteamBinder::ISteamUserStats_RequestCurrentStats(
       (void*)GCStatsAndAchievements::steam_user_stats_);
 }

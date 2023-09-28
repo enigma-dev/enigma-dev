@@ -17,9 +17,6 @@
 
 #include "gc_leaderboards_find_result_cookies.h"
 
-#include "../../leaderboards.h"
-#include "../gc_leaderboards.h"
-
 namespace steamworks_gc {
 
 ////////////////////////////////////////////////////////
@@ -64,11 +61,7 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
   // Done? We are ready to accept new requests.
   // gc_leaderboards_find_result_cookies::gc_leaderboards_->set_loading(false);
 
-  GCLeaderboardFindResult leaderboard_find_result;
-  leaderboard_find_result.leaderboard = pFindLeaderboardResult->m_hSteamLeaderboard;
-  leaderboard_find_result.leaderboard_found = pFindLeaderboardResult->m_bLeaderboardFound;
-
-  enigma::push_create_leaderboard_steam_async_event(GCLeaderboardsFindResultCookies::id_, leaderboard_find_result);
+  enigma::push_create_leaderboard_steam_async_event(GCLeaderboardsFindResultCookies::id_, *pFindLeaderboardResult);
 
   GCLeaderboardsFindResultCookies::is_done_ = true;
 }

@@ -2,8 +2,10 @@ var steam_api = 0;
 
 if (steam_initialised())
 {
+    show_debug_message("yaaaaaaaaaay 1");
     if (steam_stats_ready() && steam_is_overlay_enabled())
     {
+        show_debug_message("yaaaaaaaaaay 2");
         steam_api = 1;
     }
 }

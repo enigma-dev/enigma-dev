@@ -17,10 +17,8 @@
 
 #include "steambinder.h"
 
+#include <cassert>
 #include <cstdlib>
-#include <iostream>
-
-// TODO: Use ASSERT to check nullptrs here.
 
 namespace steamworks_b {
 
@@ -92,14 +90,33 @@ ISteamApps_GetCurrentGameLanguage_t SteamBinder::ISteamApps_GetCurrentGameLangua
 ISteamApps_GetAvailableGameLanguages_t SteamBinder::ISteamApps_GetAvailableGameLanguages{nullptr};
 
 bool SteamBinder::bind() {
-  // Check if the library exists.
-  fs::path libpath(std::string(STEAM_SDK_PATH) + "/redistributable_bin/linux64/libsteam_api.so");
+  fs::path libpath{std::string()};
 
-  if (!fs::exists(libpath)) {
-    libpath.assign(std::string(STEAM_FAKE_SDK_PATH) + "/redistributable_bin/linux64/libfake_steam_api.so");
+  const char* steam_sdk_path = std::getenv("STEAM_SDK_PATH");
+
+  if (steam_sdk_path != nullptr) {
+    libpath.assign(std::string(steam_sdk_path) + "/redistributable_bin/linux64/libsteam_api.so");
+    if (!fs::exists(libpath)) {
+      DEBUG_MESSAGE("STEAM_SDK_PATH environment variable is set but the file does not exist. Aborting...", M_ERROR);
+      return false;
+    }
+  } else {
+    DEBUG_MESSAGE("STEAM_SDK_PATH environment variable is not set. Switching to default path...", M_WARNING);
+    libpath.assign(std::string(ENIGMA_STEAMWORKS_EXTENSION_ROOT) +
+                   "/gameclient/steambinder/Steamv157/sdk/redistributable_bin/linux64/libsteam_api.so");
   }
 
-  void *handle = dlopen(libpath.c_str(), RTLD_LAZY);
+  if (!fs::exists(libpath)) {
+    DEBUG_MESSAGE("Something went wrong while reading Steamworks SDK. Switching to fake SDK...", M_WARNING);
+    libpath.assign(std::string(ENIGMA_STEAMWORKS_EXTENSION_ROOT) +
+                   "/gameclient/steambinder/SteamFake/sdk/redistributable_bin/linux64/libfake_steam_api.so");
+    if (!fs::exists(libpath)) {
+      DEBUG_MESSAGE("Something went wrong while reading fake SDK. Aborting...", M_ERROR);
+      return false;
+    }
+  }
+
+  void* handle = dlopen(libpath.c_str(), RTLD_LAZY);
 
   SteamBinder::Init = reinterpret_cast<Init_t>(dlsym(handle, "SteamAPI_Init"));
 
@@ -224,6 +241,102 @@ bool SteamBinder::bind() {
   SteamBinder::ISteamApps_GetAvailableGameLanguages = reinterpret_cast<ISteamApps_GetAvailableGameLanguages_t>(
       dlsym(handle, "SteamAPI_ISteamApps_GetAvailableGameLanguages"));
 
+  return SteamBinder::validate();
+}
+
+bool SteamBinder::validate() {
+  assert(SteamBinder::Init != nullptr && "Failed to load SteamAPI_Init.");
+  assert(SteamBinder::Shutdown != nullptr && "Failed to load SteamAPI_Shutdown.");
+  assert(SteamBinder::RestartAppIfNecessary != nullptr && "Failed to load SteamAPI_RestartAppIfNecessary.");
+  assert(SteamBinder::RunCallbacks != nullptr && "Failed to load SteamAPI_RunCallbacks.");
+  assert(SteamBinder::RegisterCallback != nullptr && "Failed to load SteamAPI_RegisterCallback.");
+  assert(SteamBinder::UnregisterCallback != nullptr && "Failed to load SteamAPI_UnregisterCallback.");
+  assert(SteamBinder::RegisterCallResult != nullptr && "Failed to load SteamAPI_RegisterCallResult.");
+  assert(SteamBinder::UnregisterCallResult != nullptr && "Failed to load SteamAPI_UnregisterCallResult.");
+  assert(SteamBinder::SteamUser_vXXX != nullptr &&
+         ("Failed to load " + std::string(VERSIONED_STEAM_USER_ACCESSOR_NAME) + ".").c_str());
+  assert(SteamBinder::ISteamUser_BLoggedOn != nullptr && "Failed to load SteamAPI_ISteamUser_BLoggedOn.");
+  assert(SteamBinder::ISteamUser_GetSteamID != nullptr && "Failed to load SteamAPI_ISteamUser_GetSteamID.");
+  assert(SteamBinder::SteamFriends_vXXX != nullptr &&
+         ("Failed to load " + std::string(VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME) + ".").c_str());
+  assert(SteamBinder::ISteamFriends_GetPersonaName != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_GetPersonaName.");
+  assert(SteamBinder::ISteamFriends_GetFriendPersonaName != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_GetFriendPersonaName.");
+  assert(SteamBinder::ISteamFriends_ActivateGameOverlay != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlay.");
+  assert(SteamBinder::ISteamFriends_ActivateGameOverlayToUser != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlayToUser.");
+  assert(SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlayToWebPage.");
+  assert(SteamBinder::ISteamFriends_ActivateGameOverlayToStore != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlayToStore.");
+  assert(SteamBinder::ISteamFriends_SetPlayedWith != nullptr && "Failed to load SteamAPI_ISteamFriends_SetPlayedWith.");
+  assert(SteamBinder::ISteamFriends_GetSmallFriendAvatar != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_GetSmallFriendAvatar.");
+  assert(SteamBinder::ISteamFriends_GetMediumFriendAvatar != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_GetMediumFriendAvatar.");
+  assert(SteamBinder::ISteamFriends_GetLargeFriendAvatar != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_GetLargeFriendAvatar.");
+  assert(SteamBinder::ISteamFriends_SetRichPresence != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_SetRichPresence.");
+  assert(SteamBinder::ISteamFriends_ClearRichPresence != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_ClearRichPresence.");
+  assert(SteamBinder::SteamUtils_vXXX != nullptr &&
+         ("Failed to load " + std::string(VERSIONED_STEAM_UTILS_ACCESSOR_NAME) + ".").c_str());
+  assert(SteamBinder::ISteamUtils_GetImageSize != nullptr && "Failed to load SteamAPI_ISteamUtils_GetImageSize.");
+  assert(SteamBinder::ISteamUtils_GetImageRGBA != nullptr && "Failed to load SteamAPI_ISteamUtils_GetImageRGBA.");
+  assert(SteamBinder::ISteamUtils_GetAppID != nullptr && "Failed to load SteamAPI_ISteamUtils_GetAppID.");
+  assert(SteamBinder::ISteamUtils_SetOverlayNotificationPosition != nullptr &&
+         "Failed to load SteamAPI_ISteamUtils_SetOverlayNotificationPosition.");
+  assert(SteamBinder::ISteamUtils_SetWarningMessageHook != nullptr &&
+         "Failed to load SteamAPI_ISteamUtils_SetWarningMessageHook.");
+  assert(SteamBinder::ISteamUtils_IsOverlayEnabled != nullptr &&
+         "Failed to load SteamAPI_ISteamUtils_IsOverlayEnabled.");
+  assert(SteamBinder::ISteamUtils_SetOverlayNotificationInset != nullptr &&
+         "Failed to load SteamAPI_ISteamUtils_SetOverlayNotificationInset.");
+  assert(SteamBinder::SteamUserStats_vXXX != nullptr &&
+         ("Failed to load " + std::string(VERSIONED_STEAM_USERSTATS_ACCESSOR_NAME) + ".").c_str());
+  assert(SteamBinder::ISteamUserStats_RequestCurrentStats != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_RequestCurrentStats.");
+  assert(SteamBinder::ISteamUserStats_GetStatInt32 != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_GetStatInt32.");
+  assert(SteamBinder::ISteamUserStats_GetStatFloat != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_GetStatFloat.");
+  assert(SteamBinder::ISteamUserStats_SetStatInt32 != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_SetStatInt32.");
+  assert(SteamBinder::ISteamUserStats_SetStatFloat != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_SetStatFloat.");
+  assert(SteamBinder::ISteamUserStats_UpdateAvgRateStat != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_UpdateAvgRateStat.");
+  assert(SteamBinder::ISteamUserStats_GetAchievement != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_GetAchievement.");
+  assert(SteamBinder::ISteamUserStats_SetAchievement != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_SetAchievement.");
+  assert(SteamBinder::ISteamUserStats_ClearAchievement != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_ClearAchievement.");
+  assert(SteamBinder::ISteamUserStats_StoreStats != nullptr && "Failed to load SteamAPI_ISteamUserStats_StoreStats.");
+  assert(SteamBinder::ISteamUserStats_ResetAllStats != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_ResetAllStats.");
+  assert(SteamBinder::ISteamUserStats_FindOrCreateLeaderboard != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_FindOrCreateLeaderboard.");
+  assert(SteamBinder::ISteamUserStats_FindLeaderboard != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_FindLeaderboard.");
+  assert(SteamBinder::ISteamUserStats_GetLeaderboardName != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_GetLeaderboardName.");
+  assert(SteamBinder::ISteamUserStats_DownloadLeaderboardEntries != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_DownloadLeaderboardEntries.");
+  assert(SteamBinder::ISteamUserStats_GetDownloadedLeaderboardEntry != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_GetDownloadedLeaderboardEntry.");
+  assert(SteamBinder::ISteamUserStats_UploadLeaderboardScore != nullptr &&
+         "Failed to load SteamAPI_ISteamUserStats_UploadLeaderboardScore.");
+  assert(SteamBinder::SteamApps_vXXX != nullptr &&
+         ("Failed to load " + std::string(VERSIONED_STEAM_APPS_ACCESSOR_NAME) + ".").c_str());
+  assert(SteamBinder::ISteamApps_BIsSubscribed != nullptr && "Failed to load SteamAPI_ISteamApps_BIsSubscribed.");
+  assert(SteamBinder::ISteamApps_GetCurrentGameLanguage != nullptr &&
+         "Failed to load SteamAPI_ISteamApps_GetCurrentGameLanguage.");
+  assert(SteamBinder::ISteamApps_GetAvailableGameLanguages != nullptr &&
+         "Failed to load SteamAPI_ISteamApps_GetAvailableGameLanguages.");
   return true;
 }
 

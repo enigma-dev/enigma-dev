@@ -48,15 +48,9 @@ GCLeaderboards::GCLeaderboards()
 GCLeaderboards::~GCLeaderboards() { GCLeaderboards::deallocate_all_leaderboards_cookies(); }
 
 bool GCLeaderboards::create_leaderboard(const int& id, const std::string& leaderboard_name,
-                                        const GCLeaderboardSortMethod& gc_leaderboard_sort_method,
-                                        const GCLeaderboardDisplayType& gc_leaderboard_display_type) {
+                                        const ELeaderboardSortMethod& leaderboard_sort_method,
+                                        const ELeaderboardDisplayType& leaderboard_display_type) {
   deallocate_leaderboards_cookies_if_done();
-
-  if (steamworks_b::SteamBinder::ISteamUserStats_FindOrCreateLeaderboard == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboards::create_leaderboard() failed due to loading error.", M_ERROR);
-    return false;
-  }
 
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
     std::string leaderboard_name_buffer;
@@ -68,37 +62,6 @@ bool GCLeaderboards::create_leaderboard(const int& id, const std::string& leader
     if (leaderboard_name_buffer == leaderboard_name) return true;
 
     GCLeaderboards::current_leaderboard_ = INVALID_LEADERBOARD;
-  }
-
-  ELeaderboardSortMethod leaderboard_sort_method{ELeaderboardSortMethod::k_ELeaderboardSortMethodNone};
-
-  switch (gc_leaderboard_sort_method) {
-    case GCLeaderboardSortMethod::k_GCLeaderboardSortMethod_Ascending:
-      leaderboard_sort_method = ELeaderboardSortMethod::k_ELeaderboardSortMethodAscending;
-      break;
-    case GCLeaderboardSortMethod::k_GCLeaderboardSortMethod_Descending:
-      leaderboard_sort_method = ELeaderboardSortMethod::k_ELeaderboardSortMethodDescending;
-      break;
-    default:
-      leaderboard_sort_method = ELeaderboardSortMethod::k_ELeaderboardSortMethodNone;
-      break;
-  }
-
-  ELeaderboardDisplayType leaderboard_display_type{ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNone};
-
-  switch (gc_leaderboard_display_type) {
-    case GCLeaderboardDisplayType::k_GCLeaderboardDisplayType_Numeric:
-      leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNumeric;
-      break;
-    case GCLeaderboardDisplayType::k_GCLeaderboardDisplayType_TimeSeconds:
-      leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeTimeSeconds;
-      break;
-    case GCLeaderboardDisplayType::k_GCLeaderboardDisplayType_TimeMilliSeconds:
-      leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeTimeMilliSeconds;
-      break;
-    default:
-      leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNone;
-      break;
   }
 
   SteamAPICall_t steam_api_call{0};
@@ -123,12 +86,6 @@ bool GCLeaderboards::create_leaderboard(const int& id, const std::string& leader
 void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderboard_name) {
   deallocate_leaderboards_cookies_if_done();
 
-  if (steamworks_b::SteamBinder::ISteamUserStats_FindLeaderboard == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboards::find_leaderboard() failed due to loading error.", M_ERROR);
-    return;
-  }
-
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
     std::string leaderboard_name_buffer;
 
@@ -143,8 +100,8 @@ void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderbo
 
   SteamAPICall_t steam_api_call{0};
 
-  steam_api_call = steamworks_b::SteamBinder::ISteamUserStats_FindLeaderboard(steamworks_b::SteamBinder::SteamUserStats_vXXX(),
-                                                                         leaderboard_name.c_str());
+  steam_api_call = steamworks_b::SteamBinder::ISteamUserStats_FindLeaderboard(
+      steamworks_b::SteamBinder::SteamUserStats_vXXX(), leaderboard_name.c_str());
 
   if (steam_api_call != 0) {
     GCLeaderboardsCookies* gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
@@ -157,31 +114,10 @@ void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderbo
 }
 
 bool GCLeaderboards::upload_score(const int& id, const int& score,
-                                  const GCLeaderboardUploadScoreMethod& gc_leaderboard_upload_score_method) {
+                                  const ELeaderboardUploadScoreMethod& leaderboard_upload_score_method) {
   deallocate_leaderboards_cookies_if_done();
 
-  if (steamworks_b::SteamBinder::ISteamUserStats_UploadLeaderboardScore == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboards::upload_score() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   if (GCLeaderboards::current_leaderboard_ == INVALID_LEADERBOARD) return false;
-
-  ELeaderboardUploadScoreMethod leaderboard_upload_score_method{
-      ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodNone};
-
-  switch (gc_leaderboard_upload_score_method) {
-    case GCLeaderboardUploadScoreMethod::k_GCLeaderboardUploadScoreMethod_KeepBest:
-      leaderboard_upload_score_method = ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodKeepBest;
-      break;
-    case GCLeaderboardUploadScoreMethod::k_GCLeaderboardUploadScoreMethod_ForceUpdate:
-      leaderboard_upload_score_method = ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodForceUpdate;
-      break;
-    default:
-      leaderboard_upload_score_method = ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodNone;
-      break;
-  }
 
   SteamAPICall_t steam_api_call{steamworks_b::SteamBinder::ISteamUserStats_UploadLeaderboardScore(
       steamworks_b::SteamBinder::SteamUserStats_vXXX(), GCLeaderboards::current_leaderboard_,
@@ -195,34 +131,11 @@ bool GCLeaderboards::upload_score(const int& id, const int& score,
   return true;
 }
 
-bool GCLeaderboards::download_scores(const int& id, const GCLeaderboardDataRequest& gc_leaderboard_data_request,
+bool GCLeaderboards::download_scores(const int& id, const ELeaderboardDataRequest& leaderboard_data_request,
                                      const int& range_start, const int& range_end) {
   deallocate_leaderboards_cookies_if_done();
 
-  if (steamworks_b::SteamBinder::ISteamUserStats_DownloadLeaderboardEntries == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboards::download_scores() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   if (GCLeaderboards::current_leaderboard_ == INVALID_LEADERBOARD) return false;
-
-  ELeaderboardDataRequest leaderboard_data_request{ELeaderboardDataRequest::k_ELeaderboardDataRequestGlobal};
-
-  switch (gc_leaderboard_data_request) {
-    case GCLeaderboardDataRequest::k_GCLeaderboardDataRequest_GlobalAroundUser:
-      leaderboard_data_request = ELeaderboardDataRequest::k_ELeaderboardDataRequestGlobalAroundUser;
-      break;
-    case GCLeaderboardDataRequest::k_GCLeaderboardDataRequest_Friends:
-      leaderboard_data_request = ELeaderboardDataRequest::k_ELeaderboardDataRequestFriends;
-      break;
-    case GCLeaderboardDataRequest::k_GCLeaderboardDataRequest_Users:
-      leaderboard_data_request = ELeaderboardDataRequest::k_ELeaderboardDataRequestUsers;
-      break;
-    default:
-      leaderboard_data_request = ELeaderboardDataRequest::k_ELeaderboardDataRequestGlobal;
-      break;
-  }
 
   SteamAPICall_t steam_api_call{steamworks_b::SteamBinder::ISteamUserStats_DownloadLeaderboardEntries(
       steamworks_b::SteamBinder::SteamUserStats_vXXX(), GCLeaderboards::current_leaderboard_, leaderboard_data_request,
@@ -247,12 +160,6 @@ void GCLeaderboards::set_loading(const bool& loading) { GCLeaderboards::loading_
 ////////////////////////////////////////////////////////
 
 bool GCLeaderboards::get_leaderboard_name(std::string& buffer, const SteamLeaderboard_t& leaderboard) {
-  if (steamworks_b::SteamBinder::ISteamUserStats_GetLeaderboardName == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboards::get_leaderboard_name() failed due to loading error.", M_ERROR);
-    return false;
-  }
-
   buffer = std::string(steamworks_b::SteamBinder::ISteamUserStats_GetLeaderboardName(
       steamworks_b::SteamBinder::SteamUserStats_vXXX(), leaderboard));
   return true;

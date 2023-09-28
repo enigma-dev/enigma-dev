@@ -17,9 +17,6 @@
 
 #include "gc_leaderboards_score_downloaded_cookies.h"
 
-#include "../../leaderboards.h"
-#include "../gc_leaderboards.h"
-
 #include <sstream>
 
 namespace steamworks_gc {
@@ -96,14 +93,6 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
     return;
   }
 
-  if (steamworks_b::SteamBinder::ISteamUserStats_GetDownloadedLeaderboardEntry == nullptr ||
-      steamworks_b::SteamBinder::SteamUserStats_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCLeaderboardsScoreDownloadedCookies::on_download_scores() failed due to loading error.", M_ERROR);
-    // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
-    GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
-    return;
-  }
-
   DEBUG_MESSAGE("Downloaded scores from leaderboard.", M_INFO);
 
   LeaderboardEntry_t leaderboard_entries[enigma_user::lb_max_entries];
@@ -113,8 +102,8 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
       std::min(pLeaderboardScoresDownloaded->m_cEntryCount, (int)enigma_user::lb_max_entries);
   for (unsigned index{0}; index < (unsigned)number_of_leaderboard_entries; index++) {
     steamworks_b::SteamBinder::ISteamUserStats_GetDownloadedLeaderboardEntry(
-        steamworks_b::SteamBinder::SteamUserStats_vXXX(), pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries, index,
-        &leaderboard_entries[index], nullptr, 0);
+        steamworks_b::SteamBinder::SteamUserStats_vXXX(), pLeaderboardScoresDownloaded->m_hSteamLeaderboardEntries,
+        index, &leaderboard_entries[index], nullptr, 0);
   }
 
   // Now our entries is here, let's save it.
@@ -128,13 +117,8 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
 
   get_leaderboard_entries(leaderboard_entries, number_of_leaderboard_entries, leaderboard_entries_buffer);
 
-  GCLeaderboardScoresDownloadedResult leaderboard_scores_downloaded_result;
-  leaderboard_scores_downloaded_result.leaderboard = pLeaderboardScoresDownloaded->m_hSteamLeaderboard;
-  leaderboard_scores_downloaded_result.entries_buffer = leaderboard_entries_buffer.str();
-  leaderboard_scores_downloaded_result.number_of_leaderboard_entries = pLeaderboardScoresDownloaded->m_cEntryCount;
-
   enigma::push_leaderboard_download_steam_async_event(GCLeaderboardsScoreDownloadedCookies::id_,
-                                                      leaderboard_scores_downloaded_result);
+                                                      leaderboard_entries_buffer.str(), *pLeaderboardScoresDownloaded);
 
   GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
 }

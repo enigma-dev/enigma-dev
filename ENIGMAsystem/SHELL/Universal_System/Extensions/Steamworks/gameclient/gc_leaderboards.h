@@ -36,48 +36,6 @@
 
 namespace steamworks_gc {
 
-/**
- * @brief This enum is created to prevent usage of API's types in the extension.
- * 
- */
-enum GCLeaderboardSortMethod {
-  k_GCLeaderboardSortMethod_None = 0,
-  k_GCLeaderboardSortMethod_Ascending = 1,
-  k_GCLeaderboardSortMethod_Descending = 2
-};
-
-/**
- * @brief This enum is created to prevent usage of API's types in the extension.
- * 
- */
-enum GCLeaderboardDisplayType {
-  k_GCLeaderboardDisplayType_None = 0,
-  k_GCLeaderboardDisplayType_Numeric = 1,
-  k_GCLeaderboardDisplayType_TimeSeconds = 2,
-  k_GCLeaderboardDisplayType_TimeMilliSeconds = 3
-};
-
-/**
- * @brief This enum is created to prevent usage of API's types in the extension.
- * 
- */
-enum GCLeaderboardUploadScoreMethod {
-  k_GCLeaderboardUploadScoreMethod_None = 0,
-  k_GCLeaderboardUploadScoreMethod_KeepBest = 1,
-  k_GCLeaderboardUploadScoreMethod_ForceUpdate = 2,
-};
-
-/**
- * @brief This enum is created to prevent usage of API's types in the extension.
- * 
- */
-enum GCLeaderboardDataRequest {
-  k_GCLeaderboardDataRequest_Global = 0,
-  k_GCLeaderboardDataRequest_GlobalAroundUser = 1,
-  k_GCLeaderboardDataRequest_Friends = 2,
-  k_GCLeaderboardDataRequest_Users = 3
-};
-
 class GCLeaderboardsCookies;
 class GameClient;
 
@@ -86,11 +44,10 @@ class GCLeaderboards {
   GCLeaderboards();
   ~GCLeaderboards();
 
-  bool create_leaderboard(const int& id, const std::string& leaderboard_name,
-                          const GCLeaderboardSortMethod& gc_leaderboard_sort_method =
-                              GCLeaderboardSortMethod::k_GCLeaderboardSortMethod_None,
-                          const GCLeaderboardDisplayType& gc_leaderboard_display_type =
-                              GCLeaderboardDisplayType::k_GCLeaderboardDisplayType_None);
+  bool create_leaderboard(
+      const int& id, const std::string& leaderboard_name,
+      const ELeaderboardSortMethod& leaderboard_sort_method = ELeaderboardSortMethod::k_ELeaderboardSortMethodNone,
+      const ELeaderboardDisplayType& leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNone);
 
   void find_leaderboard(const int& id, const std::string& leaderboard_name);
 
@@ -100,12 +57,12 @@ class GCLeaderboards {
     Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for more information.
   */
   bool upload_score(const int& id, const int& score,
-                    const GCLeaderboardUploadScoreMethod& gc_leaderboard_upload_score_method =
-                        GCLeaderboardUploadScoreMethod::k_GCLeaderboardUploadScoreMethod_None);
+                    const ELeaderboardUploadScoreMethod& leaderboard_upload_score_method =
+                        ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodNone);
 
   bool download_scores(const int& id,
-                       const GCLeaderboardDataRequest& gc_leaderboard_data_request =
-                           GCLeaderboardDataRequest::k_GCLeaderboardDataRequest_Global,
+                       const ELeaderboardDataRequest& leaderboard_data_request =
+                           ELeaderboardDataRequest::k_ELeaderboardDataRequestGlobal,
                        const int& range_start = -1, const int& range_end = -1);
 
   void set_current_leaderboard(const SteamLeaderboard_t& leaderboard);
@@ -129,38 +86,6 @@ class GCLeaderboards {
   void deallocate_all_leaderboards_cookies();
 
   void deallocate_leaderboards_cookies_if_done();
-};
-
-/**
- * @brief This struct is created to prevent usage of API's types in the extension.
- * 
- */
-struct GCLeaderboardFindResult {
-  SteamLeaderboard_t leaderboard;
-  bool leaderboard_found;
-};
-
-/**
- * @brief This struct is created to prevent usage of API's types in the extension.
- * 
- */
-struct GCLeaderboardScoresDownloadedResult {
-  SteamLeaderboard_t leaderboard;
-  std::string entries_buffer;
-  unsigned number_of_leaderboard_entries;
-};
-
-/**
- * @brief This struct is created to prevent usage of API's types in the extension.
- * 
- */
-struct GCLeaderboardScoreUploadedResult {
-  bool success;
-  SteamLeaderboard_t leaderboard;
-  int32 score;
-  bool score_changed;
-  unsigned global_rank_new;
-  unsigned global_rank_previous;
 };
 
 }  // namespace steamworks_gc

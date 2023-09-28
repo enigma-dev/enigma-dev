@@ -175,24 +175,19 @@ void steam_set_overlay_notification_position(const unsigned position) {
 
   switch (position) {
     case enigma_user::steam_overlay_notification_position_top_left:
-      steamworks_gc::GCOverlay::set_overlay_notification_position(
-          steamworks_gc::GCNotificationPosition::k_GCPosition_TopLeft);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(ENotificationPosition::k_EPositionTopLeft);
       break;
     case enigma_user::steam_overlay_notification_position_top_right:
-      steamworks_gc::GCOverlay::set_overlay_notification_position(
-          steamworks_gc::GCNotificationPosition::k_GCPosition_TopRight);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(ENotificationPosition::k_EPositionTopRight);
       break;
     case enigma_user::steam_overlay_notification_position_bottom_left:
-      steamworks_gc::GCOverlay::set_overlay_notification_position(
-          steamworks_gc::GCNotificationPosition::k_GCPosition_BottomLeft);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(ENotificationPosition::k_EPositionBottomLeft);
       break;
     case enigma_user::steam_overlay_notification_position_bottom_right:
-      steamworks_gc::GCOverlay::set_overlay_notification_position(
-          steamworks_gc::GCNotificationPosition::k_GCPosition_BottomRight);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(ENotificationPosition::k_EPositionBottomRight);
       break;
     case enigma_user::steam_overlay_notification_position_invalid:
-    steamworks_gc::GCOverlay::set_overlay_notification_position(
-          steamworks_gc::GCNotificationPosition::k_GCPosition_Invalid);
+      steamworks_gc::GCOverlay::set_overlay_notification_position(ENotificationPosition::k_EPositionInvalid);
       break;
     default:
       DEBUG_MESSAGE(

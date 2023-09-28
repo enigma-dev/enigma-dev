@@ -17,9 +17,7 @@
 
 #include "gc_main.h"
 
-// TODO: this should be in namespace enigma? will check later.
-// TODO: Is this the right place for this function?
-extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
+S_API void S_CALLTYPE SteamAPIDebugTextHook(int nSeverity, const char* pchDebugText) {
   DEBUG_MESSAGE(pchDebugText, M_INFO);
 
   if (nSeverity >= 1) {
@@ -39,14 +37,8 @@ namespace steamworks_gc {
 ////////////////////////////////////////////////////////
 
 void GCMain::set_warning_message_hook() {
-  if (steamworks_b::SteamBinder::ISteamUtils_SetWarningMessageHook == nullptr ||
-      steamworks_b::SteamBinder::SteamUtils_vXXX == nullptr) {
-    DEBUG_MESSAGE("GCMain::set_warning_message_hook() failed due to loading error.", M_ERROR);
-    return;
-  }
-
   steamworks_b::SteamBinder::ISteamUtils_SetWarningMessageHook(steamworks_b::SteamBinder::SteamUtils_vXXX(),
-                                                          &SteamAPIDebugTextHook);
+                                                               &SteamAPIDebugTextHook);
 }
 
 }  // namespace steamworks_gc

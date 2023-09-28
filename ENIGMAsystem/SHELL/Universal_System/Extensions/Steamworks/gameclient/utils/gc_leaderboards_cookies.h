@@ -25,7 +25,9 @@
 
 // TODO: This documentation need to be improved when uploading a game to Steam Store.
 
-#include "../gameclient.h"
+#include "Universal_System/Extensions/Steamworks/gameclient/gameclient.h"
+#include "Universal_System/Extensions/Steamworks/gameclient/gc_leaderboards.h"
+#include "Universal_System/Extensions/Steamworks/leaderboards.h"
 
 namespace steamworks_gc {
 

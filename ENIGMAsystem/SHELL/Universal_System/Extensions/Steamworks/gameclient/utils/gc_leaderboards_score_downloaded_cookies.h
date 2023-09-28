@@ -35,8 +35,7 @@ class GCLeaderboards;
 
 class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
  public:
-  GCLeaderboardsScoreDownloadedCookies(const int& id, GCLeaderboards* gc_leaderboards,
-                                       SteamAPICall_t& steam_api_call);
+  GCLeaderboardsScoreDownloadedCookies(const int& id, GCLeaderboards* gc_leaderboards, SteamAPICall_t& steam_api_call);
   ~GCLeaderboardsScoreDownloadedCookies() = default;
 
  private:

@@ -57,7 +57,7 @@ extern bool upload_rate_limit_exceeded;
  * @note This will be used for returning the id for each leaderboard we find.
  * 
  */
-extern AssetArray<steamworks_gc::GCLeaderboardFindResult*> leaderboards_array;
+extern AssetArray<LeaderboardFindResult_t*> leaderboards_array;
 
 /**
  * @brief 
@@ -65,7 +65,7 @@ extern AssetArray<steamworks_gc::GCLeaderboardFindResult*> leaderboards_array;
  * @note This will be used for returning the id for each leaderboard we upload.
  * 
  */
-extern AssetArray<steamworks_gc::GCLeaderboardScoresDownloadedResult*> entries_array;
+extern AssetArray<LeaderboardScoresDownloaded_t*> entries_array;
 
 /**
  * @brief 
@@ -73,7 +73,7 @@ extern AssetArray<steamworks_gc::GCLeaderboardScoresDownloadedResult*> entries_a
  * @note This will be used for returning the id for each score we upload.
  * 
  */
-extern AssetArray<steamworks_gc::GCLeaderboardScoreUploadedResult*> scores_array;
+extern AssetArray<LeaderboardScoreUploaded_t*> scores_array;
 
 /**
  * @brief 
@@ -81,8 +81,7 @@ extern AssetArray<steamworks_gc::GCLeaderboardScoreUploadedResult*> scores_array
  * @param id 
  * @param pFindLeaderboardResult 
  */
-void push_create_leaderboard_steam_async_event(int& id,
-                                               const steamworks_gc::GCLeaderboardFindResult& pFindLeaderboardResult);
+void push_create_leaderboard_steam_async_event(const int& id, const LeaderboardFindResult_t& pFindLeaderboardResult);
 
 /**
  * @brief 
@@ -90,8 +89,7 @@ void push_create_leaderboard_steam_async_event(int& id,
  * @param id 
  * @param pScoreUploadedResult 
  */
-void push_leaderboard_upload_steam_async_event(
-    int& id, const steamworks_gc::GCLeaderboardScoreUploadedResult& pScoreUploadedResult);
+void push_leaderboard_upload_steam_async_event(const int& id, const LeaderboardScoreUploaded_t& pScoreUploadedResult);
 
 /**
  * @brief 
@@ -99,8 +97,8 @@ void push_leaderboard_upload_steam_async_event(
  * @param id 
  * @param pLeaderboardScoresDownloaded 
  */
-void push_leaderboard_download_steam_async_event(
-    int& id, const steamworks_gc::GCLeaderboardScoresDownloadedResult& pLeaderboardScoresDownloaded);
+void push_leaderboard_download_steam_async_event(const int& id, const std::string& entries_buffer,
+                                                 const LeaderboardScoresDownloaded_t& pLeaderboardScoresDownloaded);
 }  // namespace enigma
 
 namespace enigma_user {

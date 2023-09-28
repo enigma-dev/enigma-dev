@@ -40,7 +40,7 @@ class GCStatsAndAchievements {
   /*
     Stats and Achievements client constructor.
   */
-  GCStatsAndAchievements(uint32 game_id);
+  GCStatsAndAchievements(uint32 app_id);
 
   /*
     Stats and Achievements client destructor.
@@ -149,7 +149,8 @@ class GCStatsAndAchievements {
 
       2.  Calls gc_statsandachievements::store_stats() function to store the stats.
   */
-  bool set_stat_average_rate(const std::string& stat_name, const float& count_this_session, const double& session_length);
+  bool set_stat_average_rate(const std::string& stat_name, const float& count_this_session,
+                             const double& session_length);
 
   /*
     Gets the current value of the a stat for the current user. You must have called 
