@@ -22,8 +22,7 @@ HSteamUser FakeSteamUser::GetHSteamUser() { return 0; }
 bool FakeSteamUser::BLoggedOn() { return true; }
 
 CSteamID FakeSteamUser::GetSteamID() {
-  CSteamID steamID;
-  return steamID;
+  return CSteamID();
 }
 
 int FakeSteamUser::InitiateGameConnection_DEPRECATED(void *pAuthBlob, int cbMaxAuthBlob, CSteamID steamIDGameServer,

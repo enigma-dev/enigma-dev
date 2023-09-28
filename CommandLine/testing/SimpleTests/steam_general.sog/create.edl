@@ -2,10 +2,8 @@ var steam_api = 0;
 
 if (steam_initialised())
 {
-    show_debug_message("yaaaaaaaaaay 1");
     if (steam_stats_ready() && steam_is_overlay_enabled())
     {
-        show_debug_message("yaaaaaaaaaay 2");
         steam_api = 1;
     }
 }
@@ -25,16 +23,16 @@ var logged_in = steam_is_user_logged_on();
 gtest_assert_true(logged_in);
 
 var name = steam_get_persona_name();
-gtest_assert_eq(name, "MockName");
+gtest_assert_eq(name, "FakeSteamUser");
 
 var user_name = steam_get_user_persona_name(0);
-gtest_assert_eq(user_name, "MockFriendName");
+gtest_assert_eq(user_name, "FakeSteamUser");
 
 var language = steam_current_game_language();
-gtest_assert_eq(language, "MockLanguage");
+gtest_assert_eq(language, "FakeLanguage");
 
 var languages = steam_available_languages();
-gtest_assert_eq(languages, "MockLanguages");
+gtest_assert_eq(languages, "FakeLanguages");
 
 steam_shutdown();
 steam_api = steam_initialised();

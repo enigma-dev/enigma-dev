@@ -91,6 +91,12 @@ class GCOverlay {
                                                                  dialog.c_str());
   }
 
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+  inline static void deactivate_overlay() {
+    steamworks_b::SteamBinder::ISteamFriends_DeactivateGameOverlay(steamworks_b::SteamBinder::SteamFriends_vXXX());
+  }
+#endif  // ENIGMA_FAKE_STEAMWORKS_API
+
   /*
     Activates Steam Overlay web browser directly to the specified URL. A fully qualified 
     address with the protocol is required, e.g. "http://www.steampowered.com". Calls 

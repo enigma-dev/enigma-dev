@@ -25,6 +25,8 @@
 #include "fake_steamuserstats.h"
 #include "fake_steamutils.h"
 
+#include <iostream>
+
 HSteamUser SteamAPI_GetHSteamUser() { return 0; }
 
 void *SteamInternal_ContextInit(void *pContextInitData) {
@@ -63,35 +65,18 @@ void *SteamInternal_FindOrCreateUserInterface(HSteamUser hSteamUser, const char 
 
 void SteamAPI_RegisterCallback(class CCallbackBase *pCallback, int iCallback) {
   switch (iCallback) {
-    case (int)(k_iSteamFriendsCallbacks + 31): {
-      GameOverlayActivated_t game_overlay_activated;
-      game_overlay_activated.m_bActive = true;
-      game_overlay_activated.m_bUserInitiated = true;
-      game_overlay_activated.m_nAppID = SteamUtils()->GetAppID();
-      pCallback->Run(&game_overlay_activated);
-    } break;
-    case (int)(k_iSteamUserStatsCallbacks + 1): {
-      UserStatsReceived_t user_stats_received;
-      user_stats_received.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
-      user_stats_received.m_eResult = k_EResultOK;
-      user_stats_received.m_steamIDUser = SteamUser()->GetSteamID();
-      pCallback->Run(&user_stats_received);
-    } break;
-    case (int)(k_iSteamUserStatsCallbacks + 2): {
-      UserStatsStored_t user_stats_stored;
-      user_stats_stored.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
-      user_stats_stored.m_eResult = k_EResultOK;
-      pCallback->Run(&user_stats_stored);
-    } break;
-    case (int)(k_iSteamUserStatsCallbacks + 3): {
-      UserAchievementStored_t user_achievement_stored;
-      user_achievement_stored.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
-      user_achievement_stored.m_bGroupAchievement = false;
-      user_achievement_stored.m_rgchAchievementName[0] = '\0';
-      user_achievement_stored.m_nCurProgress = 0;
-      user_achievement_stored.m_nMaxProgress = 0;
-      pCallback->Run(&user_achievement_stored);
-    } break;
+    case (int)(k_iSteamFriendsCallbacks + 31):
+      FakeSteamFriends::GetInstance()->RegisterGameOverlayActivatedCallback(pCallback);
+      break;
+    case (int)(k_iSteamUserStatsCallbacks + 1):
+      FakeSteamUserStats::GetInstance()->RegisterUserStatsReceivedCallback(pCallback);
+      break;
+    case (int)(k_iSteamUserStatsCallbacks + 2):
+      FakeSteamUserStats::GetInstance()->RegisterUserStatsStoredCallback(pCallback);
+      break;
+    case (int)(k_iSteamUserStatsCallbacks + 3):
+      FakeSteamUserStats::GetInstance()->RegisterUserAchievementStoredCallback(pCallback);
+      break;
     default:
       break;
   }
@@ -99,34 +84,21 @@ void SteamAPI_RegisterCallback(class CCallbackBase *pCallback, int iCallback) {
 
 void SteamAPI_UnregisterCallback(class CCallbackBase *pCallback) {}
 
+// TODO: Implement this function.
 void SteamAPI_RegisterCallResult(class CCallbackBase *pCallback, SteamAPICall_t hAPICall) {
-  switch (pCallback->GetICallback()) {
-    case (int)(k_iSteamUserStatsCallbacks + 4): {
-      LeaderboardFindResult_t leaderboard_find_result;
-      leaderboard_find_result.m_hSteamLeaderboard = 0;
-      leaderboard_find_result.m_bLeaderboardFound = true;
-      pCallback->Run(&leaderboard_find_result, false, hAPICall);
-    } break;
-    case (int)(k_iSteamUserStatsCallbacks + 5): {
-      LeaderboardScoresDownloaded_t leaderboard_scores_downloaded;
-      leaderboard_scores_downloaded.m_hSteamLeaderboard = 0;
-      leaderboard_scores_downloaded.m_hSteamLeaderboardEntries = 0;
-      leaderboard_scores_downloaded.m_cEntryCount = 1;
-      pCallback->Run(&leaderboard_scores_downloaded, false, hAPICall);
-    } break;
-    case (int)(k_iSteamUserStatsCallbacks + 6): {
-      LeaderboardScoreUploaded_t leaderboard_score_uploaded;
-      leaderboard_score_uploaded.m_bSuccess = true;
-      leaderboard_score_uploaded.m_hSteamLeaderboard = 0;
-      leaderboard_score_uploaded.m_nScore = -1;
-      leaderboard_score_uploaded.m_bScoreChanged = false;
-      leaderboard_score_uploaded.m_nGlobalRankNew = -1;
-      leaderboard_score_uploaded.m_nGlobalRankPrevious = -1;
-      pCallback->Run(&leaderboard_score_uploaded, false, hAPICall);
-    } break;
-    default:
-      break;
-  }
+  // switch (pCallback->GetICallback()) {
+  //   case (int)(k_iSteamUserStatsCallbacks + 4):
+  //     FakeSteamUserStats::GetInstance()->RegisterLeaderboardFindResultCallresult(pCallback, hAPICall);
+  //     break;
+  //   case (int)(k_iSteamUserStatsCallbacks + 5):
+  //     FakeSteamUserStats::GetInstance()->RegisterLeaderboardScoresDownloadedCallresult(pCallback, hAPICall);
+  //     break;
+  //   case (int)(k_iSteamUserStatsCallbacks + 6):
+  //     FakeSteamUserStats::GetInstance()->RegisterLeaderboardScoreUploadedCallresult(pCallback, hAPICall);
+  //     break;
+  //   default:
+  //     break;
+  // }
 }
 
 void SteamAPI_UnregisterCallResult(class CCallbackBase *pCallback, SteamAPICall_t hAPICall) {}

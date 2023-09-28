@@ -17,7 +17,50 @@
 
 #include "fake_steamuserstats.h"
 
-bool FakeSteamUserStats::RequestCurrentStats() { return true; }
+#include <iostream>
+
+void FakeSteamUserStats::RegisterUserStatsReceivedCallback(class CCallbackBase *pCallback) {
+  FakeSteamUserStats::GetInstance()->pCallbackUserStatsReceived = pCallback;
+}
+
+void FakeSteamUserStats::RegisterUserStatsStoredCallback(class CCallbackBase *pCallback) {
+  FakeSteamUserStats::GetInstance()->pCallbackUserStatsStored = pCallback;
+}
+
+void FakeSteamUserStats::RegisterUserAchievementStoredCallback(class CCallbackBase *pCallback) {
+  FakeSteamUserStats::GetInstance()->pCallbackUserAchievementStored = pCallback;
+}
+
+// void FakeSteamUserStats::RegisterLeaderboardFindResultCallresult(class CCallbackBase *pCallback,
+//                                                                  SteamAPICall_t hAPICall) {
+//   FakeSteamUserStats::GetInstance()->pCallresultLeaderboardFindResult = pCallback;
+//   FakeSteamUserStats::GetInstance()->hAPICallLeaderboardFindResult = hAPICall;
+// }
+
+// void FakeSteamUserStats::RegisterLeaderboardScoresDownloadedCallresult(class CCallbackBase *pCallback,
+//                                                                        SteamAPICall_t hAPICall) {
+//   FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoresDownloaded = pCallback;
+//   FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoresDownloaded = hAPICall;
+// }
+
+// void FakeSteamUserStats::RegisterLeaderboardScoreUploadedCallresult(class CCallbackBase *pCallback,
+//                                                                     SteamAPICall_t hAPICall) {
+//   FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoreUploaded = pCallback;
+//   FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoreUploaded = hAPICall;
+// }
+
+bool FakeSteamUserStats::RequestCurrentStats() {
+  if (FakeSteamUserStats::GetInstance()->pCallbackUserStatsReceived == nullptr) {
+    return false;
+  }
+
+  UserStatsReceived_t user_stats_received;
+  user_stats_received.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
+  user_stats_received.m_eResult = k_EResultOK;
+  user_stats_received.m_steamIDUser = SteamUser()->GetSteamID();
+  FakeSteamUserStats::GetInstance()->pCallbackUserStatsReceived->Run(&user_stats_received);
+  return true;
+}
 
 bool FakeSteamUserStats::GetStat(const char *pchName, int32 *pData) { return true; }
 
@@ -39,7 +82,27 @@ bool FakeSteamUserStats::GetAchievementAndUnlockTime(const char *pchName, bool *
   return true;
 }
 
-bool FakeSteamUserStats::StoreStats() { return true; }
+bool FakeSteamUserStats::StoreStats() {
+  if (FakeSteamUserStats::GetInstance()->pCallbackUserStatsStored == nullptr ||
+      FakeSteamUserStats::GetInstance()->pCallbackUserAchievementStored == nullptr) {
+    return false;
+  }
+
+  UserStatsStored_t user_stats_stored;
+  user_stats_stored.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
+  user_stats_stored.m_eResult = k_EResultOK;
+  FakeSteamUserStats::GetInstance()->pCallbackUserStatsStored->Run(&user_stats_stored);
+
+  UserAchievementStored_t user_achievement_stored;
+  user_achievement_stored.m_nGameID = CGameID(SteamUtils()->GetAppID()).ToUint64();
+  user_achievement_stored.m_bGroupAchievement = false;
+  user_achievement_stored.m_rgchAchievementName[0] = '\0';
+  user_achievement_stored.m_nCurProgress = 0;
+  user_achievement_stored.m_nMaxProgress = 0;
+  FakeSteamUserStats::GetInstance()->pCallbackUserAchievementStored->Run(&user_achievement_stored);
+
+  return true;
+}
 
 int FakeSteamUserStats::GetAchievementIcon(const char *pchName) { return 0; }
 
@@ -77,10 +140,30 @@ bool FakeSteamUserStats::ResetAllStats(bool bAchievementsToo) { return true; }
 SteamAPICall_t FakeSteamUserStats::FindOrCreateLeaderboard(const char *pchLeaderboardName,
                                                            ELeaderboardSortMethod eLeaderboardSortMethod,
                                                            ELeaderboardDisplayType eLeaderboardDisplayType) {
+  // if (FakeSteamUserStats::GetInstance()->pCallresultLeaderboardFindResult == nullptr) {
+  //   return 1;  // Return a valid SteamAPICall_t
+  // }
+
+  // LeaderboardFindResult_t leaderboard_find_result;
+  // leaderboard_find_result.m_hSteamLeaderboard = 0;
+  // leaderboard_find_result.m_bLeaderboardFound = true;
+  // FakeSteamUserStats::GetInstance()->pCallresultLeaderboardFindResult->Run(
+  //     &leaderboard_find_result, false, FakeSteamUserStats::GetInstance()->hAPICallLeaderboardFindResult);
+  // return FakeSteamUserStats::GetInstance()->hAPICallLeaderboardFindResult;
   return 1;  // Return a valid SteamAPICall_t
 }
 
 SteamAPICall_t FakeSteamUserStats::FindLeaderboard(const char *pchLeaderboardName) {
+  // if (FakeSteamUserStats::GetInstance()->pCallresultLeaderboardFindResult == nullptr) {
+  //   return 1;  // Return a valid SteamAPICall_t
+  // }
+
+  // LeaderboardFindResult_t leaderboard_find_result;
+  // leaderboard_find_result.m_hSteamLeaderboard = 0;
+  // leaderboard_find_result.m_bLeaderboardFound = true;
+  // FakeSteamUserStats::GetInstance()->pCallresultLeaderboardFindResult->Run(
+  //     &leaderboard_find_result, false, FakeSteamUserStats::GetInstance()->hAPICallLeaderboardFindResult);
+  // return FakeSteamUserStats::GetInstance()->hAPICallLeaderboardFindResult;
   return 1;  // Return a valid SteamAPICall_t
 }
 
@@ -99,6 +182,17 @@ ELeaderboardDisplayType FakeSteamUserStats::GetLeaderboardDisplayType(SteamLeade
 SteamAPICall_t FakeSteamUserStats::DownloadLeaderboardEntries(SteamLeaderboard_t hSteamLeaderboard,
                                                               ELeaderboardDataRequest eLeaderboardDataRequest,
                                                               int nRangeStart, int nRangeEnd) {
+  // if (FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoresDownloaded == nullptr) {
+  //   return 1;  // Return a valid SteamAPICall_t
+  // }
+
+  // LeaderboardScoresDownloaded_t leaderboard_scores_downloaded;
+  // leaderboard_scores_downloaded.m_hSteamLeaderboard = 0;
+  // leaderboard_scores_downloaded.m_hSteamLeaderboardEntries = 0;
+  // leaderboard_scores_downloaded.m_cEntryCount = 1;
+  // FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoresDownloaded->Run(
+  //     &leaderboard_scores_downloaded, false, FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoresDownloaded);
+  // return FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoresDownloaded;
   return 1;  // Return a valid SteamAPICall_t
 }
 
@@ -111,8 +205,7 @@ SteamAPICall_t FakeSteamUserStats::DownloadLeaderboardEntriesForUsers(
 bool FakeSteamUserStats::GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t hSteamLeaderboardEntries, int index,
                                                        LeaderboardEntry_t *pLeaderboardEntry, int32 *pDetails,
                                                        int cDetailsMax) {
-  CSteamID steamID;
-  pLeaderboardEntry->m_steamIDUser = steamID;
+  pLeaderboardEntry->m_steamIDUser = CSteamID();
   pLeaderboardEntry->m_nGlobalRank = 0;
   pLeaderboardEntry->m_nScore = 0;
   pLeaderboardEntry->m_cDetails = 0;
@@ -123,6 +216,20 @@ SteamAPICall_t FakeSteamUserStats::UploadLeaderboardScore(SteamLeaderboard_t hSt
                                                           ELeaderboardUploadScoreMethod eLeaderboardUploadScoreMethod,
                                                           int32 nScore, const int32 *pScoreDetails,
                                                           int cScoreDetailsCount) {
+  // if (FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoreUploaded == nullptr) {
+  //   return 1;  // Return a valid SteamAPICall_t
+  // }
+
+  // LeaderboardScoreUploaded_t leaderboard_score_uploaded;
+  // leaderboard_score_uploaded.m_bSuccess = true;
+  // leaderboard_score_uploaded.m_hSteamLeaderboard = 0;
+  // leaderboard_score_uploaded.m_nScore = -1;
+  // leaderboard_score_uploaded.m_bScoreChanged = false;
+  // leaderboard_score_uploaded.m_nGlobalRankNew = -1;
+  // leaderboard_score_uploaded.m_nGlobalRankPrevious = -1;
+  // FakeSteamUserStats::GetInstance()->pCallresultLeaderboardScoreUploaded->Run(
+  //     &leaderboard_score_uploaded, false, FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoreUploaded);
+  // return FakeSteamUserStats::GetInstance()->hAPICallLeaderboardScoreUploaded;
   return 1;  // Return a valid SteamAPICall_t
 }
 

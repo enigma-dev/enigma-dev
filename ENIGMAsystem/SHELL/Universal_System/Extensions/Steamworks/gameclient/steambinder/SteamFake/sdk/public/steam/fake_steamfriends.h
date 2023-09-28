@@ -27,6 +27,8 @@ class FakeSteamFriends : public ISteamFriends {
     return &instance;
   }
 
+  void RegisterGameOverlayActivatedCallback(class CCallbackBase *pCallback);
+
   const char *GetPersonaName() override;
 
   SteamAPICall_t SetPersonaName(const char *pchPersonaName) override;
@@ -84,6 +86,15 @@ class FakeSteamFriends : public ISteamFriends {
   void SetInGameVoiceSpeaking(CSteamID steamIDUser, bool bSpeaking) override;
 
   void ActivateGameOverlay(const char *pchDialog) override;
+
+  /**
+   * @brief This function will be used to simulate the Steam Overlay deactivation using keyboard 
+   *        shortcuts or close button on the top right corner.
+   * 
+   * @note This function is not part of the Steamworks API. It is only used for testing purposes.
+   * 
+   */
+  void DeactivateGameOverlay();
 
   void ActivateGameOverlayToUser(const char *pchDialog, CSteamID steamID) override;
 
@@ -172,6 +183,8 @@ class FakeSteamFriends : public ISteamFriends {
  private:
   FakeSteamFriends() {}
   ~FakeSteamFriends() {}
+
+  class CCallbackBase *pCallbackGameOverlayActivated { nullptr };
 
   FakeSteamFriends(FakeSteamFriends const &) = delete;
   void operator=(FakeSteamFriends const &) = delete;

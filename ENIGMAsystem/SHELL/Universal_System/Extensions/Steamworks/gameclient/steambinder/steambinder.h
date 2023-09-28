@@ -70,6 +70,9 @@ typedef void* (*SteamFriends_vXXX_t)();
 typedef const char* (*ISteamFriends_GetPersonaName_t)(void*);
 typedef const char* (*ISteamFriends_GetFriendPersonaName_t)(void*, uint64_steamid);
 typedef void (*ISteamFriends_ActivateGameOverlay_t)(void*, const char*);
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+typedef void (*ISteamFriends_DeactivateGameOverlay_t)(void*);  // Not part of official Steamworks API.
+#endif                                                         // ENIGMA_FAKE_STEAMWORKS_API
 typedef void (*ISteamFriends_ActivateGameOverlayToUser_t)(void*, const char*, uint64_steamid);
 typedef void (*ISteamFriends_ActivateGameOverlayToWebPage_t)(void*, const char*, EActivateGameOverlayToWebPageMode);
 typedef void (*ISteamFriends_ActivateGameOverlayToStore_t)(void*, AppId_t, EOverlayToStoreFlag);
@@ -148,6 +151,10 @@ class SteamBinder {
   static ISteamFriends_GetPersonaName_t ISteamFriends_GetPersonaName;
   static ISteamFriends_GetFriendPersonaName_t ISteamFriends_GetFriendPersonaName;
   static ISteamFriends_ActivateGameOverlay_t ISteamFriends_ActivateGameOverlay;
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+  static ISteamFriends_DeactivateGameOverlay_t
+      ISteamFriends_DeactivateGameOverlay;  // Not part of official Steamworks API.
+#endif                                      // ENIGMA_FAKE_STEAMWORKS_API
   static ISteamFriends_ActivateGameOverlayToUser_t ISteamFriends_ActivateGameOverlayToUser;
   static ISteamFriends_ActivateGameOverlayToWebPage_t ISteamFriends_ActivateGameOverlayToWebPage;
   static ISteamFriends_ActivateGameOverlayToStore_t ISteamFriends_ActivateGameOverlayToStore;

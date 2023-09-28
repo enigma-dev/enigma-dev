@@ -98,6 +98,15 @@ bool steam_is_overlay_activated();
 */
 void steam_activate_overlay(const int overlay_type);
 
+/**
+ * @brief This function will be used to simulate the Steam Overlay deactivation using keyboard 
+ *        shortcuts or close button on the top right corner.
+ * 
+ * @note This function is not part of the Overlay API. It is only used for testing purposes.
+ * 
+ */
+void steam_deactivate_overlay();
+
 /*
     This function is used to open the Steam game overlay to its web browser and then have it load 
     the specified URL. you need to use the full URL as a string for this to resolve correctly, 

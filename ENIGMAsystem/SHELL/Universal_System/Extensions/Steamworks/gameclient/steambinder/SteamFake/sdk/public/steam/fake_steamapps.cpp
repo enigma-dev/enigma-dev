@@ -52,8 +52,7 @@ uint32 FakeSteamApps::GetAppInstallDir(AppId_t appID, char *pchFolder, uint32 cc
 bool FakeSteamApps::BIsAppInstalled(AppId_t appID) { return true; }
 
 CSteamID FakeSteamApps::GetAppOwner() {
-  CSteamID steamID;
-  return steamID;
+  return CSteamID();
 }
 
 const char *FakeSteamApps::GetLaunchQueryParam(const char *pchKey) { return "FakeQueryParam"; }

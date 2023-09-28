@@ -17,6 +17,12 @@
 
 #include "fake_steamfriends.h"
 
+#include <iostream>
+
+void FakeSteamFriends::RegisterGameOverlayActivatedCallback(class CCallbackBase *pCallback) {
+  FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated = pCallback;
+}
+
 const char *FakeSteamFriends::GetPersonaName() { return "FakeSteamUser"; }
 
 SteamAPICall_t FakeSteamFriends::SetPersonaName(const char *pchPersonaName) { return 0; }
@@ -25,10 +31,7 @@ EPersonaState FakeSteamFriends::GetPersonaState() { return k_EPersonaStateOfflin
 
 int FakeSteamFriends::GetFriendCount(int iFriendFlags) { return 0; }
 
-CSteamID FakeSteamFriends::GetFriendByIndex(int iFriend, int iFriendFlags) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetFriendByIndex(int iFriend, int iFriendFlags) { return CSteamID(); }
 
 EFriendRelationship FakeSteamFriends::GetFriendRelationship(CSteamID steamIDFriend) {
   return k_EFriendRelationshipNone;
@@ -67,10 +70,7 @@ void FakeSteamFriends::GetFriendsGroupMembersList(FriendsGroupID_t friendsGroupI
 bool FakeSteamFriends::HasFriend(CSteamID steamIDFriend, int iFriendFlags) { return true; }
 
 int FakeSteamFriends::GetClanCount() { return 0; }
-CSteamID FakeSteamFriends::GetClanByIndex(int iClan) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetClanByIndex(int iClan) { return CSteamID(); }
 const char *FakeSteamFriends::GetClanName(CSteamID steamIDClan) { return "FakeClan"; }
 const char *FakeSteamFriends::GetClanTag(CSteamID steamIDClan) { return "FakeClan"; }
 
@@ -84,16 +84,35 @@ SteamAPICall_t FakeSteamFriends::DownloadClanActivityCounts(STEAM_ARRAY_COUNT(cC
 }
 
 int FakeSteamFriends::GetFriendCountFromSource(CSteamID steamIDSource) { return 0; }
-CSteamID FakeSteamFriends::GetFriendFromSourceByIndex(CSteamID steamIDSource, int iFriend) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetFriendFromSourceByIndex(CSteamID steamIDSource, int iFriend) { return CSteamID(); }
 
 bool FakeSteamFriends::IsUserInSource(CSteamID steamIDUser, CSteamID steamIDSource) { return true; }
 
 void FakeSteamFriends::SetInGameVoiceSpeaking(CSteamID steamIDUser, bool bSpeaking) {}
 
-void FakeSteamFriends::ActivateGameOverlay(const char *pchDialog) {}
+void FakeSteamFriends::ActivateGameOverlay(const char *pchDialog) {
+  if (FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated == nullptr) {
+    return;
+  }
+
+  GameOverlayActivated_t game_overlay_activated;
+  game_overlay_activated.m_bActive = true;
+  game_overlay_activated.m_bUserInitiated = true;
+  game_overlay_activated.m_nAppID = SteamUtils()->GetAppID();
+  FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated->Run(&game_overlay_activated);
+}
+
+void FakeSteamFriends::DeactivateGameOverlay() {
+  if (FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated == nullptr) {
+    return;
+  }
+
+  GameOverlayActivated_t game_overlay_activated;
+  game_overlay_activated.m_bActive = false;
+  game_overlay_activated.m_bUserInitiated = true;
+  game_overlay_activated.m_nAppID = SteamUtils()->GetAppID();
+  FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated->Run(&game_overlay_activated);
+}
 
 void FakeSteamFriends::ActivateGameOverlayToUser(const char *pchDialog, CSteamID steamID) {}
 
@@ -115,17 +134,11 @@ bool FakeSteamFriends::RequestUserInformation(CSteamID steamIDUser, bool bRequir
 
 SteamAPICall_t FakeSteamFriends::RequestClanOfficerList(CSteamID steamIDClan) { return 0; }
 
-CSteamID FakeSteamFriends::GetClanOwner(CSteamID steamIDClan) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetClanOwner(CSteamID steamIDClan) { return CSteamID(); }
 
 int FakeSteamFriends::GetClanOfficerCount(CSteamID steamIDClan) { return 0; }
 
-CSteamID FakeSteamFriends::GetClanOfficerByIndex(CSteamID steamIDClan, int iOfficer) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetClanOfficerByIndex(CSteamID steamIDClan, int iOfficer) { return CSteamID(); }
 
 uint32 FakeSteamFriends::GetUserRestrictions() { return 0; }
 
@@ -144,20 +157,14 @@ void FakeSteamFriends::RequestFriendRichPresence(CSteamID steamIDFriend) {}
 bool FakeSteamFriends::InviteUserToGame(CSteamID steamIDFriend, const char *pchConnectString) { return true; }
 
 int FakeSteamFriends::GetCoplayFriendCount() { return 0; }
-CSteamID FakeSteamFriends::GetCoplayFriend(int iCoplayFriend) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetCoplayFriend(int iCoplayFriend) { return CSteamID(); }
 int FakeSteamFriends::GetFriendCoplayTime(CSteamID steamIDFriend) { return 0; }
 AppId_t FakeSteamFriends::GetFriendCoplayGame(CSteamID steamIDFriend) { return 0; }
 
 SteamAPICall_t FakeSteamFriends::JoinClanChatRoom(CSteamID steamIDClan) { return 0; }
 bool FakeSteamFriends::LeaveClanChatRoom(CSteamID steamIDClan) { return true; }
 int FakeSteamFriends::GetClanChatMemberCount(CSteamID steamIDClan) { return 0; }
-CSteamID FakeSteamFriends::GetChatMemberByIndex(CSteamID steamIDClan, int iUser) {
-  CSteamID steamID;
-  return steamID;
-}
+CSteamID FakeSteamFriends::GetChatMemberByIndex(CSteamID steamIDClan, int iUser) { return CSteamID(); }
 bool FakeSteamFriends::SendClanChatMessage(CSteamID steamIDClanChat, const char *pchText) { return true; }
 int FakeSteamFriends::GetClanChatMessage(CSteamID steamIDClanChat, int iMessage, void *prgchText, int cchTextMax,
                                          EChatEntryType *peChatEntryType,

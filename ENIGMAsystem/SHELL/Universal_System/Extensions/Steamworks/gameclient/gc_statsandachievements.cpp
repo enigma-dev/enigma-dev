@@ -85,11 +85,7 @@ bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name,
 // }
 
 void GCStatsAndAchievements::on_user_stats_received(UserStatsReceived_t* pCallback) {
-  DEBUG_MESSAGE("Received stats and achievements from Steam.", M_INFO);
-  DEBUG_MESSAGE("Game ID: " + std::to_string(pCallback->m_nGameID), M_INFO);
-  DEBUG_MESSAGE("Game ID 2 " + std::to_string(GCStatsAndAchievements::game_id_.ToUint64()), M_INFO);
   if (GCStatsAndAchievements::game_id_.ToUint64() != pCallback->m_nGameID) return;
-  DEBUG_MESSAGE("Game ID matches.", M_INFO);
 
   if (GCStatsAndAchievements::stats_valid_) return;
 

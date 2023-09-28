@@ -27,6 +27,13 @@ class FakeSteamUserStats : public ISteamUserStats {
     return &instance;
   }
 
+  void RegisterUserStatsReceivedCallback(class CCallbackBase *pCallback);
+  void RegisterUserStatsStoredCallback(class CCallbackBase *pCallback);
+  void RegisterUserAchievementStoredCallback(class CCallbackBase *pCallback);
+  // void RegisterLeaderboardFindResultCallresult(class CCallbackBase *pCallback, SteamAPICall_t hAPICall);
+  // void RegisterLeaderboardScoresDownloadedCallresult(class CCallbackBase *pCallback, SteamAPICall_t hAPICall);
+  // void RegisterLeaderboardScoreUploadedCallresult(class CCallbackBase *pCallback, SteamAPICall_t hAPICall);
+
   bool RequestCurrentStats() override;
 
   bool GetStat(const char *pchName, int32 *pData) override;
@@ -130,6 +137,21 @@ class FakeSteamUserStats : public ISteamUserStats {
  private:
   FakeSteamUserStats() {}
   ~FakeSteamUserStats() {}
+
+  // Callbacks
+  class CCallbackBase *pCallbackUserStatsReceived{nullptr};
+  class CCallbackBase *pCallbackUserStatsStored{nullptr};
+  class CCallbackBase *pCallbackUserAchievementStored{nullptr};
+
+  // Callresults
+  // class CCallbackBase *pCallresultLeaderboardFindResult{nullptr};
+  // SteamAPICall_t hAPICallLeaderboardFindResult{0};
+
+  // class CCallbackBase *pCallresultLeaderboardScoresDownloaded{nullptr};
+  // SteamAPICall_t hAPICallLeaderboardScoresDownloaded{0};
+
+  // class CCallbackBase *pCallresultLeaderboardScoreUploaded{nullptr};
+  // SteamAPICall_t hAPICallLeaderboardScoreUploaded{0};
 
   FakeSteamUserStats(FakeSteamUserStats const &) = delete;
   void operator=(FakeSteamUserStats const &) = delete;

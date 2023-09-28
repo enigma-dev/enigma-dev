@@ -109,6 +109,15 @@ void steam_activate_overlay(const int overlay_type) {
   }
 }
 
+// TODO: There is a problem with this macro here.
+void steam_deactivate_overlay() {
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+  if (!overlay_pre_checks("steam_deactivate_overlay")) return;
+
+  steamworks_gc::GCOverlay::deactivate_overlay();
+#endif  // ENIGMA_FAKE_STEAMWORKS_API
+}
+
 void steam_activate_overlay_browser(const std::string& url) {
   if (!overlay_pre_checks("steam_activate_overlay_browser")) return;
 

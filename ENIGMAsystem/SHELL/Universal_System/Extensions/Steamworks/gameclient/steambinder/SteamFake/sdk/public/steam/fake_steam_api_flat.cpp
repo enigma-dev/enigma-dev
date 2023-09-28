@@ -15,9 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "steam/steam_api_flat.h"
-
 #include "fake_steam_api.h"
+
+#include "fake_steam_api_flat.h"
+#include "fake_steamfriends.h"
 
 /**
  * @brief These versions will be updated on each new version of Steamworks SDK.
@@ -50,6 +51,10 @@ const char* SteamAPI_ISteamFriends_GetFriendPersonaName(ISteamFriends* self, uin
 
 void SteamAPI_ISteamFriends_ActivateGameOverlay(ISteamFriends* self, const char* pchDialog) {
   self->ActivateGameOverlay(pchDialog);
+}
+
+void SteamAPI_ISteamFriends_DeactivateGameOverlay(ISteamFriends* self) {
+  FakeSteamFriends::GetInstance()->DeactivateGameOverlay();
 }
 
 void SteamAPI_ISteamFriends_ActivateGameOverlayToUser(ISteamFriends* self, const char* pchDialog,

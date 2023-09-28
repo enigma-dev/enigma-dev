@@ -43,6 +43,10 @@ SteamFriends_vXXX_t SteamBinder::SteamFriends_vXXX{nullptr};
 ISteamFriends_GetPersonaName_t SteamBinder::ISteamFriends_GetPersonaName{nullptr};
 ISteamFriends_GetFriendPersonaName_t SteamBinder::ISteamFriends_GetFriendPersonaName{nullptr};
 ISteamFriends_ActivateGameOverlay_t SteamBinder::ISteamFriends_ActivateGameOverlay{nullptr};
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+ISteamFriends_DeactivateGameOverlay_t SteamBinder::ISteamFriends_DeactivateGameOverlay{
+    nullptr};  // Not part of the official API.
+#endif         // ENIGMA_FAKE_STEAMWORKS_API
 ISteamFriends_ActivateGameOverlayToUser_t SteamBinder::ISteamFriends_ActivateGameOverlayToUser{nullptr};
 ISteamFriends_ActivateGameOverlayToWebPage_t SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage{nullptr};
 ISteamFriends_ActivateGameOverlayToStore_t SteamBinder::ISteamFriends_ActivateGameOverlayToStore{nullptr};
@@ -153,6 +157,10 @@ bool SteamBinder::bind() {
       dlsym(handle, "SteamAPI_ISteamFriends_GetFriendPersonaName"));
   SteamBinder::ISteamFriends_ActivateGameOverlay = reinterpret_cast<ISteamFriends_ActivateGameOverlay_t>(
       dlsym(handle, "SteamAPI_ISteamFriends_ActivateGameOverlay"));
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+  SteamBinder::ISteamFriends_DeactivateGameOverlay = reinterpret_cast<ISteamFriends_DeactivateGameOverlay_t>(
+      dlsym(handle, "SteamAPI_ISteamFriends_DeactivateGameOverlay"));  // Not part of the official API.
+#endif                                                                 // ENIGMA_FAKE_STEAMWORKS_API
   SteamBinder::ISteamFriends_ActivateGameOverlayToUser = reinterpret_cast<ISteamFriends_ActivateGameOverlayToUser_t>(
       dlsym(handle, "SteamAPI_ISteamFriends_ActivateGameOverlayToUser"));
   SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage =
@@ -265,6 +273,10 @@ bool SteamBinder::validate() {
          "Failed to load SteamAPI_ISteamFriends_GetFriendPersonaName.");
   assert(SteamBinder::ISteamFriends_ActivateGameOverlay != nullptr &&
          "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlay.");
+#ifdef ENIGMA_FAKE_STEAMWORKS_API
+  assert(SteamBinder::ISteamFriends_DeactivateGameOverlay != nullptr &&
+         "Failed to load SteamAPI_ISteamFriends_DeactivateGameOverlay.");  // Not part of the official API.
+#endif                                                                     // ENIGMA_FAKE_STEAMWORKS_API
   assert(SteamBinder::ISteamFriends_ActivateGameOverlayToUser != nullptr &&
          "Failed to load SteamAPI_ISteamFriends_ActivateGameOverlayToUser.");
   assert(SteamBinder::ISteamFriends_ActivateGameOverlayToWebPage != nullptr &&
