@@ -24,7 +24,6 @@
 #ifndef GC_LEADERBOARDS_COOKIES_H
 #define GC_LEADERBOARDS_COOKIES_H
 
-#include "Universal_System/Extensions/Steamworks/gameclient/gameclient.h"
 #include "Universal_System/Extensions/Steamworks/gameclient/gc_leaderboards.h"
 #include "Universal_System/Extensions/Steamworks/leaderboards.h"
 
