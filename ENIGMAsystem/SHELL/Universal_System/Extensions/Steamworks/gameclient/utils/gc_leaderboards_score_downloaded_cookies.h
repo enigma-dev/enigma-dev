@@ -30,8 +30,6 @@
 
 namespace steamworks_gc {
 
-class GCLeaderboards;
-
 class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
  public:
   /**
@@ -40,10 +38,9 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
    * @param id the id that will be attached to the callresult. This id is the output of 
    *           AssetArray @c add() function.
    * 
-   * @param gc_leaderboards 
    * @param steam_api_call 
    */
-  GCLeaderboardsScoreDownloadedCookies(const int& id, GCLeaderboards* gc_leaderboards, SteamAPICall_t& steam_api_call);
+  GCLeaderboardsScoreDownloadedCookies(const int& id, SteamAPICall_t& steam_api_call);
   
   // GCLeaderboardsScoreDownloadedCookies destructor.
   ~GCLeaderboardsScoreDownloadedCookies() = default;
@@ -56,9 +53,6 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
    * 
    */
   int id_;
-
-  // Pointer to leaderboards client.
-  GCLeaderboards* gc_leaderboards_;
 
   /**
    * @brief This flag will be set to true when the callresult is received. This flag will be used 

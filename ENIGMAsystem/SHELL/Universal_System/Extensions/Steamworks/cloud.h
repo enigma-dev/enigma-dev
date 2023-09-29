@@ -17,15 +17,14 @@
 
 /**
  * @brief The Steam Cloud provides an easy and transparent remote file storage system 
- * for your game. All files written to disk using the cloud functions will be replicated 
- * to the Steam servers after the game exits. If the user then changes computers, the 
- * files will then be downloaded to the new computer before the game launches, meaning 
- * that the game can then access the files by reading them using the appropriate Steam 
- * functions. The Steam Client does the work of ensuring that the files are kept synchronized 
- * across all computers the user may be accessing.
+ *        for your game. All files written to disk using the cloud functions will be replicated 
+ *        to the Steam servers after the game exits. If the user then changes computers, the 
+ *        files will then be downloaded to the new computer before the game launches, meaning 
+ *        that the game can then access the files by reading them using the appropriate Steam 
+ *        functions. The Steam Client does the work of ensuring that the files are kept synchronized 
+ *        across all computers the user may be accessing.
  * 
- * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#cloud for
- * more information.
+ * @see https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#cloud for more information.
  * 
  */
 

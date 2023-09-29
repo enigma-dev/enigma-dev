@@ -23,9 +23,8 @@ namespace steamworks_gc {
 // Public functions
 ////////////////////////////////////////////////////////
 
-GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(const int& id, GCLeaderboards* gc_leaderboards,
-                                                                       SteamAPICall_t& steam_api_call)
-    : id_(id), gc_leaderboards_(gc_leaderboards), is_done_(false) {
+GCLeaderboardsScoreUploadedCookies::GCLeaderboardsScoreUploadedCookies(const int& id, SteamAPICall_t& steam_api_call)
+    : id_(id), is_done_(false) {
   GCLeaderboardsScoreUploadedCookies::set_call_result(steam_api_call);
 }
 
@@ -49,9 +48,9 @@ void GCLeaderboardsScoreUploadedCookies::on_upload_score(LeaderboardScoreUploade
           "10 upload requests per 10 minutes so you may want to wait before another request.",
           M_WARNING);
       enigma::upload_rate_limit_exceeded = true;
-    } else
+    } else {
       DEBUG_MESSAGE("Failed to upload score to leaderboard.", M_ERROR);
-    // gc_leaderboards_score_uploaded_cookies::gc_leaderboards_->set_loading(false);
+    }
     GCLeaderboardsScoreUploadedCookies::is_done_ = true;
     return;
   }
@@ -60,10 +59,7 @@ void GCLeaderboardsScoreUploadedCookies::on_upload_score(LeaderboardScoreUploade
   // TODO: Create a struct for this.
   // Success? Let's save it.
   // LGM and SOGs are failing because of this line.
-  // enigma::scores_array.get(gc_leaderboards_score_uploaded_cookies::id_) = true;
-
-  // Done? We are ready to accept new requests.
-  // gc_leaderboards_score_uploaded_cookies::gc_leaderboards_->set_loading(false);
+  // enigma::scores_array.get(GCLeaderboardsScoreUploadedCookies::id_) = pScoreUploadedResult;
 
   enigma::push_leaderboard_upload_steam_async_event(GCLeaderboardsScoreUploadedCookies::id_, *pScoreUploadedResult);
 

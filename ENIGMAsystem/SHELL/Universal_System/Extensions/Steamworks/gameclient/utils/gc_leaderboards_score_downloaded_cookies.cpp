@@ -67,9 +67,8 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
 ////////////////////////////////////////////////////////
 
 GCLeaderboardsScoreDownloadedCookies::GCLeaderboardsScoreDownloadedCookies(const int& id,
-                                                                           GCLeaderboards* gc_leaderboards,
                                                                            SteamAPICall_t& steam_api_call)
-    : id_(id), gc_leaderboards_(gc_leaderboards), is_done_(false) {
+    : id_(id), is_done_(false) {
   GCLeaderboardsScoreDownloadedCookies::set_call_result(steam_api_call);
 }
 
@@ -88,7 +87,6 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
     LeaderboardScoresDownloaded_t* pLeaderboardScoresDownloaded, bool bIOFailure) {
   if (bIOFailure) {
     DEBUG_MESSAGE("Failed to download scores from leaderboard.", M_ERROR);
-    // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
     GCLeaderboardsScoreDownloadedCookies::is_done_ = true;
     return;
   }
@@ -108,10 +106,7 @@ void GCLeaderboardsScoreDownloadedCookies::on_download_scores(
 
   // Now our entries is here, let's save it.
   // SOGs are failing because of this line but LGM is not.
-  // enigma::entries_array.get(gc_leaderboards_score_downloaded_cookies::id_) = leaderboard_entries;
-
-  // Entries are saved? We are ready to accept new requests.
-  // gc_leaderboards_score_downloaded_cookies::gc_leaderboards_->set_loading(false);
+  // enigma::entries_array.get(GCLeaderboardsScoreDownloadedCookies::id_) = pLeaderboardScoresDownloaded;
 
   std::stringstream leaderboard_entries_buffer;
 

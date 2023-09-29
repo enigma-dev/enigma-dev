@@ -40,10 +40,9 @@ class GCLeaderboardsScoreUploadedCookies : public GCLeaderboardsCookies {
    * @param id the id that will be attached to the callresult. This id is the output of 
    *           AssetArray @c add() function.
    * 
-   * @param gc_leaderboards 
    * @param steam_api_call 
    */
-  GCLeaderboardsScoreUploadedCookies(const int& id, GCLeaderboards* gc_leaderboards, SteamAPICall_t& steam_api_call);
+  GCLeaderboardsScoreUploadedCookies(const int& id, SteamAPICall_t& steam_api_call);
   
   // GCLeaderboardsScoreUploadedCookies destructor.
   ~GCLeaderboardsScoreUploadedCookies() = default;
@@ -56,9 +55,6 @@ class GCLeaderboardsScoreUploadedCookies : public GCLeaderboardsCookies {
    * 
    */
   int id_;
-
-  // Pointer to leaderboards client.
-  GCLeaderboards* gc_leaderboards_;
 
   /**
    * @brief This flag will be set to true when the callresult is received. This flag will be used 

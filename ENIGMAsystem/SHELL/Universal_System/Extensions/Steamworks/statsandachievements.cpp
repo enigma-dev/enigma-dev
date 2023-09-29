@@ -218,7 +218,7 @@ void steam_reset_all_stats() {
 void steam_reset_all_stats_achievements() {
   if (!stats_and_achievements_pre_checks("steam_reset_all_stats_achievements")) return;
 
-  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->reset_all_stats_achievements()) {
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_statsandachievements()->reset_all_stats(true)) {
     DEBUG_MESSAGE(
         "Calling ResetAllStats failed. Make sure that RequestCurrentStats has completed and successfully returned its "
         "callback.",

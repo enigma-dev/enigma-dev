@@ -123,8 +123,7 @@ bool GCLeaderboards::upload_score(const int& id, const int& score,
       steamworks_b::SteamBinder::SteamUserStats_vXXX(), GCLeaderboards::current_leaderboard_,
       leaderboard_upload_score_method, score, nullptr, 0)};
 
-  GCLeaderboardsCookies* gc_leaderboards_score_uploaded{
-      new GCLeaderboardsScoreUploadedCookies(id, this, steam_api_call)};
+  GCLeaderboardsCookies* gc_leaderboards_score_uploaded{new GCLeaderboardsScoreUploadedCookies(id, steam_api_call)};
 
   gc_leaderboards_cookies_.push_back(gc_leaderboards_score_uploaded);
 
@@ -141,8 +140,7 @@ bool GCLeaderboards::download_scores(const int& id, const ELeaderboardDataReques
       steamworks_b::SteamBinder::SteamUserStats_vXXX(), GCLeaderboards::current_leaderboard_, leaderboard_data_request,
       range_start, range_end)};
 
-  GCLeaderboardsCookies* gc_leaderboards_score_downloaded{
-      new GCLeaderboardsScoreDownloadedCookies(id, this, steam_api_call)};
+  GCLeaderboardsCookies* gc_leaderboards_score_downloaded{new GCLeaderboardsScoreDownloadedCookies(id, steam_api_call)};
 
   gc_leaderboards_cookies_.push_back(gc_leaderboards_score_downloaded);
 
