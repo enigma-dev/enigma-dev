@@ -89,14 +89,12 @@ CSteamID GameClient::get_steam_id_local_user() { return GameClient::steam_id_loc
 
 uint32 GameClient::get_steam_app_id() { return GameClient::steam_app_id_; }
 
-bool GameClient::get_current_game_language(std::string& buffer) {
+void GameClient::get_current_game_language(std::string& buffer) {
   buffer = GameClient::current_game_language_;
-  return true;
 }
 
-bool GameClient::get_available_game_languages(std::string& buffer) {
+void GameClient::get_available_game_languages(std::string& buffer) {
   buffer = GameClient::available_game_languages_;
-  return true;
 }
 
 ////////////////////////////////////////////////////////
@@ -107,16 +105,14 @@ bool GameClient::is_user_logged_on() {
   return steamworks_b::SteamBinder::ISteamUser_BLoggedOn(steamworks_b::SteamBinder::SteamUser_vXXX());
 }
 
-bool GameClient::get_steam_persona_name(std::string& buffer) {
+void GameClient::get_steam_persona_name(std::string& buffer) {
   buffer = std::string(
       steamworks_b::SteamBinder::ISteamFriends_GetPersonaName(steamworks_b::SteamBinder::SteamFriends_vXXX()));
-  return true;
 }
 
-bool GameClient::get_steam_user_persona_name(std::string& buffer, const uint64& steam_id) {
+void GameClient::get_steam_user_persona_name(std::string& buffer, const uint64& steam_id) {
   buffer = std::string(steamworks_b::SteamBinder::ISteamFriends_GetFriendPersonaName(
       steamworks_b::SteamBinder::SteamFriends_vXXX(), steam_id));
-  return true;
 }
 
 bool GameClient::is_subscribed() {

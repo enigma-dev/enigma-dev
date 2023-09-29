@@ -18,16 +18,18 @@
 #ifndef STEAM_BINDER_H
 #define STEAM_BINDER_H
 
-/*
-    This is the lowest layer that game_client layer mainly depends on.
-*/
+/**
+ * @brief This is the lowest layer that @c steambinder layer mainly depends on.
+ * 
+ */
 #include "steam/steam_api.h"
 #include "steam/steam_api_flat.h"
 
-/*
-    This include is the only special include that game_client layer uses. DON'T include any
-    other includes in game_client layer that are outside Steamworks extension.
-*/
+/**
+ * @brief This include is the only special include that game_client layer uses. DON'T include any 
+ *        other includes in game_client layer that are outside Steamworks extension.
+ * 
+ */
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <dlfcn.h>
@@ -38,7 +40,9 @@
 #endif  // ENIGMA_STEAMWORKS_EXTENSION_ROOT
 
 /**
- * @brief These defines will be updated on each new version of Steamworks SDK.
+ * @todo Update versions here on each new version of Steamworks SDK.
+ * 
+ * @version Steamworks SDK v1.57
  * 
  */
 #define VERSIONED_STEAM_USER_ACCESSOR_NAME "SteamAPI_SteamUser_v023"
@@ -139,6 +143,14 @@ class SteamBinder {
   static RegisterCallResult_t RegisterCallResult;
   static UnregisterCallResult_t UnregisterCallResult;
 
+  /**
+   * @brief This is the main function that must be called before initializing Steamworks API.
+   * 
+   * @see @c SteamBinder::validate().
+   * 
+   * @return true 
+   * @return false 
+   */
   static bool bind();
 
   static SteamUser_vXXX_t SteamUser_vXXX;
@@ -202,6 +214,13 @@ class SteamBinder {
   static ISteamApps_GetAvailableGameLanguages_t ISteamApps_GetAvailableGameLanguages;
 
  private:
+  /**
+  * @brief Validates all the Steamworks API functions that are loaded dynamically using
+  *        @c assertions().
+  * 
+  * @return true 
+  * @return false 
+  */
   static bool validate();
 };
 

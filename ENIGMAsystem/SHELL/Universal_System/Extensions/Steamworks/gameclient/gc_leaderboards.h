@@ -15,19 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-  Steam supports persistent leaderboards with automatically ordered entries. These leaderboards can 
-  be used to display global and friend leaderboards in your game and on your community webpage. Each 
-  Steamworks title can create up to 10,000 leaderboards, and each leaderboard can be retrieved immediately 
-  after a player's score has been inserted.
-  Check https://partner.steamgames.com/doc/features/leaderboards for more information.
-*/
+/**
+ * @brief Steam supports persistent leaderboards with automatically ordered entries. These 
+ *        leaderboards can be used to display global and friend leaderboards in your game 
+ *        and on your community webpage. Each Steamworks title can create up to 10,000 leaderboards, 
+ *        and each leaderboard can be retrieved immediately after a player's score has been inserted.
+ * 
+ * @note Check https://partner.steamgames.com/doc/features/leaderboards for more information.
+ * 
+ */
 
 #ifndef GC_LEADERBOARDS_H
 #define GC_LEADERBOARDS_H
 #pragma once
-
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
 
 #include "gameclient.h"
 
@@ -41,33 +41,95 @@ class GameClient;
 
 class GCLeaderboards {
  public:
+  // GCLeaderboards constructor.
   GCLeaderboards();
+
+  // GCLeaderboards destructor.
   ~GCLeaderboards();
 
+  /**
+   * @brief Create a leaderboard object
+   * 
+   * @param id the id that will be attached to the callresult. This id is the output of
+   *           AssetArray @c add() function.
+   * 
+   * @param leaderboard_name the name of the leaderboard.
+   * @param leaderboard_sort_method the sort method of the leaderboard.
+   * @param leaderboard_display_type the display type of the leaderboard.
+   * @return true 
+   * @return false 
+   */
   bool create_leaderboard(
       const int& id, const std::string& leaderboard_name,
       const ELeaderboardSortMethod& leaderboard_sort_method = ELeaderboardSortMethod::k_ELeaderboardSortMethodNone,
       const ELeaderboardDisplayType& leaderboard_display_type = ELeaderboardDisplayType::k_ELeaderboardDisplayTypeNone);
 
+  /**
+   * @brief 
+   * 
+   * @param id the id that will be attached to the callresult. This id is the output of
+   *           AssetArray @c add() function.
+   * 
+   * @param leaderboard_name the name of the leaderboard.
+   */
   void find_leaderboard(const int& id, const std::string& leaderboard_name);
 
-  /*
-    Uploads a user score to a specified leaderboard. Uploading scores to Steam is rate limited to 10 uploads 
-    per 10 minutes and you may only have one outstanding call to this function at a time. Calls UploadLeaderboardScore.
-    Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for more information.
-  */
+  /**
+   * @brief Uploads a user score to a specified leaderboard.
+   * 
+   * @note Uploading scores to Steam is rate limited to 10 uploads per 10 minutes and you may only 
+   *       have one outstanding call to this function at a time.
+   * 
+   * @note Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for 
+   *       more information.
+   * 
+   * @param id 
+   * @param score 
+   * @param leaderboard_upload_score_method 
+   * @return true 
+   * @return false 
+   */
   bool upload_score(const int& id, const int& score,
                     const ELeaderboardUploadScoreMethod& leaderboard_upload_score_method =
                         ELeaderboardUploadScoreMethod::k_ELeaderboardUploadScoreMethodNone);
 
+  /**
+   * @brief 
+   * 
+   * @param id 
+   * @param leaderboard_data_request 
+   * @param range_start 
+   * @param range_end 
+   * @return true 
+   * @return false 
+   */
   bool download_scores(const int& id,
                        const ELeaderboardDataRequest& leaderboard_data_request =
                            ELeaderboardDataRequest::k_ELeaderboardDataRequestGlobal,
                        const int& range_start = -1, const int& range_end = -1);
 
+  /**
+   * @brief Set the current leaderboard object
+   * 
+   * @param leaderboard 
+   */
   void set_current_leaderboard(const SteamLeaderboard_t& leaderboard);
+
+  /**
+   * @brief Set the loading object
+   * 
+   * @param loading 
+   */
   void set_loading(const bool& loading);
 
+  /**
+   * @brief Get the leaderboard name object
+   * 
+   * @param buffer 
+   * @param leaderboard 
+   * @return true 
+   * @return false 
+   */
   static bool get_leaderboard_name(std::string& buffer, const SteamLeaderboard_t& leaderboard);
 
  private:
@@ -77,14 +139,25 @@ class GCLeaderboards {
 
   bool loading_;
 
-  // TODO: Make sure that this vector doesn't cause race conditions.
-  /*
-    This vector is used to track all instances of cookies so that we can destroy them when they are done.
+  /**
+  * @brief This vector is used to track all instances of cookies so that we can destroy them when 
+  *        they are done.
+  * 
+  * @todo Make sure that this vector doesn't cause race conditions.
+  * 
   */
   std::vector<GCLeaderboardsCookies*> gc_leaderboards_cookies_;
 
+  /**
+  * @brief Deallocates all leaderboards cookies.
+  * 
+  */
   void deallocate_all_leaderboards_cookies();
 
+  /**
+   * @brief Deallocates leaderboards cookies if done.
+   * 
+   */
   void deallocate_leaderboards_cookies_if_done();
 };
 

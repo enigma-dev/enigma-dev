@@ -80,10 +80,6 @@ bool GCStatsAndAchievements::set_stat_average_rate(const std::string& stat_name,
       (void*)GCStatsAndAchievements::steam_user_stats_, stat_name.c_str(), count_this_session, session_length);
 }
 
-// float gc_statsandachievements::get_stat_average_rate(const std::string& stat_name) {
-//   return gc_statsandachievements::get_stat_float(stat_name);
-// }
-
 void GCStatsAndAchievements::on_user_stats_received(UserStatsReceived_t* pCallback) {
   if (GCStatsAndAchievements::game_id_.ToUint64() != pCallback->m_nGameID) return;
 
@@ -113,10 +109,10 @@ void GCStatsAndAchievements::on_user_stats_stored(UserStatsStored_t* pCallback) 
     callback.m_eResult = k_EResultOK;
     callback.m_nGameID = GCStatsAndAchievements::game_id_.ToUint64();
     on_user_stats_received(&callback);
-    //gc_statsandachievements::store_stats();
+    //GCStatsAndAchievements::store_stats();
   } else {
     DEBUG_MESSAGE("Calling StoreStats failed. Retrying ..." + std::to_string(pCallback->m_eResult), M_INFO);
-    //gc_statsandachievements::store_stats();
+    //GCStatsAndAchievements::store_stats();
   }
 }
 
@@ -137,14 +133,9 @@ bool GCStatsAndAchievements::store_stats() {
   return steamworks_b::SteamBinder::ISteamUserStats_StoreStats((void*)GCStatsAndAchievements::steam_user_stats_);
 }
 
-bool GCStatsAndAchievements::reset_all_stats() {
+bool GCStatsAndAchievements::reset_all_stats(const bool& achievements_too) {
   return steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats((void*)GCStatsAndAchievements::steam_user_stats_,
-                                                                  false);
-}
-
-bool GCStatsAndAchievements::reset_all_stats_achievements() {
-  return steamworks_b::SteamBinder::ISteamUserStats_ResetAllStats((void*)GCStatsAndAchievements::steam_user_stats_,
-                                                                  true);
+                                                                  achievements_too);
 }
 
 bool GCStatsAndAchievements::request_current_stats() {

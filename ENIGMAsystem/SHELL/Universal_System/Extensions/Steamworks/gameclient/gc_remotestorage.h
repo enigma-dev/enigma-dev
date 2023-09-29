@@ -27,7 +27,10 @@ class GameClient;
 
 class GCRemoteStorage {
  public:
+  // GCRemoteStorage constructor.
   GCRemoteStorage() = default;
+
+  // GCRemoteStorage destructor.
   ~GCRemoteStorage() = default;
 };
 }  // namespace steamworks_gc

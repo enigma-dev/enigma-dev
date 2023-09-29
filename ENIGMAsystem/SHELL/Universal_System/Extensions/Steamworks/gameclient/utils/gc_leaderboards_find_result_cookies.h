@@ -15,17 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-  Whenever a gc_leaderboards::find_leaderboard() is called, a new object from this class will be instantiated 
-  with a unique id. This id will be used when the call result arrive. The call result setting operation is 
-  moved to this class from gc_leaderboards class, which means in order to setup a call result, you need to 
-  instantiate an onject from this class.
-*/
+/**
+ * @brief Whenever a @c GCLeaderboards::create_leaderboard() or @c GCLeaderboards::find_leaderboard() is called, a 
+ *        new object from this class will be instantiated with a unique id. This id will be used when the call 
+ *        result arrive. The call result setting operation is moved to this class from @c GCLeaderboards class, 
+ *        which means in order to setup a call result, you need to instantiate an onject from this class.
+ * 
+ */
 
 #ifndef GC_LEADERBOARDS_FIND_RESULT_COOKIES_H
 #define GC_LEADERBOARDS_FIND_RESULT_COOKIES_H
-
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
 
 #include "gc_leaderboards_cookies.h"
 
@@ -35,30 +34,73 @@ class GCLeaderboards;
 
 class GCLeaderboardsFindResultCookies : public GCLeaderboardsCookies {
  public:
+  /**
+   * @brief GCLeaderboardsFindResultCookies constructor.
+   * 
+   * @param id the id that will be attached to the callresult. This id is the output of 
+   *           AssetArray @c add() function.
+   * 
+   * @param gc_leaderboards 
+   * @param steam_api_call 
+   */
   GCLeaderboardsFindResultCookies(const int& id, GCLeaderboards* gc_leaderboards, SteamAPICall_t& steam_api_call);
+
+  // GCLeaderboardsFindResultCookies destructor.
   ~GCLeaderboardsFindResultCookies() = default;
 
  private:
-  /*
-      This id is part of the payload that will be attached to the leaderboard find results. This
-      id must be returned from AssetArray add() function.
- */
+  /**
+   * @brief The unique id that will be attached to the callresult. This id is part of the payload 
+   *        that will be attached to the leaderboard find results. This id must be returned from 
+   *        AssetArray @c add() function.
+   * 
+   */
   int id_;
 
+  // Pointer to leaderboards client.
   GCLeaderboards* gc_leaderboards_;
 
-  /*
-    This flag will be set to true when the call result is received. This flag will be used to
-    determine if we can destroy this object or not.
-*/
+  /**
+   * @brief This flag will be set to true when the callresult is received. This flag will be used 
+   *        to determine if we can destroy this object or not.
+   * 
+   * @see @c GCLeaderboardsFindResultCookies::is_done()
+   * 
+   */
   bool is_done_;
 
+  /**
+   * @brief is the callresult here and done?
+   * 
+   * @return true 
+   * @return false 
+   */
   bool is_done() const override;
 
+  /**
+   * @brief Registers a callresult.
+   * 
+   * @param steam_api_call 
+   */
   void set_call_result(SteamAPICall_t& steam_api_call) override;
 
-  // Called when SteamUserStats()->FindOrCreateLeaderboard() returns asynchronously
-  void on_find_leaderboard(LeaderboardFindResult_t* pFindLearderboardResult, bool bIOFailure);
+  /**
+   * @brief This function will be called when the callresult is received.
+   * 
+   * @see @c GCLeaderboards::create_leaderboard()
+   * @see @c GCLeaderboards::find_leaderboard()
+   * @see https://partner.steamgames.com/doc/api/ISteamUserStats#LeaderboardFindResult_t for
+   *      more information.
+   * 
+   * @param pFindLeaderboardResult 
+   * @param bIOFailure 
+   */
+  void on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult, bool bIOFailure);
+
+  /**
+   * @brief The callresult that will be used to download scores.
+   * 
+   */
   CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;
 };
 

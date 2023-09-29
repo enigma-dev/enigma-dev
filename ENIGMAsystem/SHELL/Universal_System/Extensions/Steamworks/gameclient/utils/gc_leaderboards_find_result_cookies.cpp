@@ -44,7 +44,7 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
                                                           bool bIOFailure) {
   if (!pFindLeaderboardResult->m_bLeaderboardFound || bIOFailure) {
     DEBUG_MESSAGE("Failed to find or create leaderboard.", M_ERROR);
-    // gc_leaderboards_find_result_cookies::gc_leaderboards_->set_loading(false);
+    // GCLeaderboardsFindResultCookies::gc_leaderboards_->set_loading(false);
     GCLeaderboardsFindResultCookies::is_done_ = true;
     return;
   }
@@ -56,10 +56,10 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
 
   // Success? Let's save it.
   // SOGs are failing because of this line but LGM is not.
-  // enigma::leaderboards_array.get(gc_leaderboards_find_result_cookies::id_) = pFindLeaderboardResult->m_hSteamLeaderboard;
+  // enigma::leaderboards_array.get(GCLeaderboardsFindResultCookies::id_) = pFindLeaderboardResult->m_hSteamLeaderboard;
 
   // Done? We are ready to accept new requests.
-  // gc_leaderboards_find_result_cookies::gc_leaderboards_->set_loading(false);
+  // GCLeaderboardsFindResultCookies::gc_leaderboards_->set_loading(false);
 
   enigma::push_create_leaderboard_steam_async_event(GCLeaderboardsFindResultCookies::id_, *pFindLeaderboardResult);
 

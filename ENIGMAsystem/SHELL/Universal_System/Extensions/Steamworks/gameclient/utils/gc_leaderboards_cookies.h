@@ -15,15 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-  This class will help attach a cookie (payload) to leaderboard call results. This class is mainly for
-  integrating with ENIGMA's AssetArray class and not directly related to Steamworks API.
-*/
+/**
+ * @brief This class will help attach a cookie (payload) to leaderboard callresults. This class is mainly for 
+ *        integrating with ENIGMA's @c AssetArray class and not directly related to Steamworks API.
+ * 
+ */
 
 #ifndef GC_LEADERBOARDS_COOKIES_H
 #define GC_LEADERBOARDS_COOKIES_H
-
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
 
 #include "Universal_System/Extensions/Steamworks/gameclient/gameclient.h"
 #include "Universal_System/Extensions/Steamworks/gameclient/gc_leaderboards.h"
@@ -33,10 +32,23 @@ namespace steamworks_gc {
 
 class GCLeaderboardsCookies {
  public:
+  // GCLeaderboardsCookies constructor.
   virtual ~GCLeaderboardsCookies() = default;
+
+  /**
+   * @brief is the callresult here and done?
+   * 
+   * @return true 
+   * @return false 
+   */
   virtual bool is_done() const = 0;
 
  private:
+  /**
+   * @brief Registers a callresult.
+   * 
+   * @param steam_api_call 
+   */
   virtual void set_call_result(SteamAPICall_t& steam_api_call) = 0;
 };
 
