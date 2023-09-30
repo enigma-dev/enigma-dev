@@ -173,7 +173,7 @@ int updateTimer() {
 }
 
 void fireEventsFromQueue() {
-  std::lock_guard<std::mutex> guard(posted_async_events_mutex);
+  std::lock_guard<std::mutex> guard(posted_async_events_mutex); // Acquire lock and realease it when out of scope.
   while (!posted_async_events.empty()) {
     enigma_user::ds_map_clear(enigma_user::async_load);
 

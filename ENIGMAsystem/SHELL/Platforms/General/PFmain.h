@@ -40,7 +40,8 @@ extern unsigned long current_time_mcs;
 extern bool game_window_focused;
 
 /**
-   * @brief This queue is used to store the events that are fired from the async event system.
+   * @brief This queue is used to store the events that are fired from the 
+   *        async event system.
    * 
    */
 extern std::queue<std::map<std::string, variant>> posted_async_events;
@@ -67,7 +68,8 @@ int gameWait();
 void set_room_speed(int rs);
 
 /**
-   * @brief This function is used to fire all the events that are stored in the posted_async_events queue.
+   * @brief This function is used to fire all the events that are stored in the 
+   *        @c posted_async_events queue.
    * 
    */
 void fireEventsFromQueue();
@@ -84,7 +86,8 @@ extern unsigned long delta_time;
 extern unsigned long current_time;
 
 /**
- * @brief When firing any event inside posted_async_events queue, this variable will contain the data that will be sent to the game.
+ * @brief When firing any event inside posted_async_events queue, this variable will 
+ *        contain the data that will be sent to the game.
  * 
  */
 extern int async_load;
