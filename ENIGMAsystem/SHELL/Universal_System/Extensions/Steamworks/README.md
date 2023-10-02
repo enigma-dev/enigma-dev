@@ -13,8 +13,8 @@ me on ENIGMA's official Discord server.
 1. Download [Steam](https://store.steampowered.com/about/download).
 2. Download [Steamworks SDK v157](https://partner.steamgames.com/downloads/steamworks_sdk_157.zip).
 3. Unzip the Steamworks SDK.
-4. Copy the `redistributable_bin` directory to `enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/`.
-5. [An alternative to step 4] Set the `STEAM_SDK_PATH` environment variable to the path of the `sdk` directory in your unzipped Steamworks SDK by appending this line inside `.bashrc`.
+4. Copy the `redistributable_bin/` directory to `enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/`.
+5. [An alternative to step 4] Set the `STEAM_SDK_PATH` environment variable to the path of the `sdk/` directory in your unzipped Steamworks SDK by appending this line inside `.bashrc`.
 ```bash
 cd ~
 ```
@@ -57,13 +57,14 @@ Note: Currently, the Steam Binder doesn't support Windows.
 1. Download [Steam](https://store.steampowered.com/about/download).
 2. Download [Steamworks SDK v157](https://partner.steamgames.com/downloads/steamworks_sdk_157.zip).
 3. Unzip the Steamworks SDK.
-4. Copy the `redistributable_bin` directory to `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv157\sdk\`.
+4. Copy the `redistributable_bin\` directory to `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv157\sdk\`.
 5. [An alternative to step 4] Set the `STEAM_SDK_PATH` environment variable to the path of the `sdk` directory in your unzipped Steamworks SDK (Note that if you used this step, you will have to run LGM/RGM from the same terminal):
 ```bash
 STEAM_SDK_PATH="\path\to\steamworks\sdk"
 ```
-6. Enable the Steamworks and Json extensions inside the IDE (LGM/RGM).
-7. Run the demo to make sure everything is working fine `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\steamworks_demo\demo.project.gmx`.
+6. Copy the `steam_api64.dll` from `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv157\sdk\redistributable_bin\win64\` and then paste it into `C:\msys64\tmp\` directory. This must be done as LGM exports the executable in that location and we need that DLL to be with the executable.
+7. Enable the Steamworks and Json extensions inside the IDE (LGM/RGM).
+8. Run the demo to make sure everything is working fine `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\steamworks_demo\demo.project.gmx`.
 
 ## Steamworks Extension's Structure
 
