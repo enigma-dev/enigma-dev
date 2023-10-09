@@ -21,8 +21,6 @@
 #include "Universal_System/buffers.h"
 #include "Universal_System/var4.h"
 
-#include <iostream>
-
 bool social_pre_checks(const std::string& script_name) {
   if (!steamworks_gc::GCMain::is_initialised()) {
     DEBUG_MESSAGE("Calling " + script_name + " failed. Make sure that the API is initialized correctly.", M_ERROR);
@@ -155,6 +153,8 @@ bool steam_image_get_rgba(const int steam_image_id, const int buffer, const int 
 
   delete[] flattened_image;
 
+  flattened_image = nullptr;
+
   return true;
 }
 
@@ -178,6 +178,8 @@ bool steam_image_get_bgra(const int steam_image_id, const int buffer, const int 
 
   delete[] flattened_image;
 
+  flattened_image = nullptr;
+
   return true;
 }
 
@@ -200,6 +202,8 @@ bool steam_image_get_argb(const int steam_image_id, const int buffer, const int 
   }
 
   delete[] flattened_image;
+
+  flattened_image = nullptr;
 
   return true;
 }

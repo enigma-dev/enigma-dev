@@ -29,12 +29,16 @@ namespace steamworks_gc {
 
 bool leaderboards_remove_all_lambda(const GCLeaderboardsCookies* cookie) {
   delete cookie;
+  cookie = nullptr;
   return true;
 }
 
 bool leaderboards_remove_if_done_lambda(const GCLeaderboardsCookies* cookie) {
   bool is_done{cookie->is_done()};
-  if (is_done) delete cookie;
+  if (is_done) {
+    delete cookie;
+    cookie = nullptr;
+  }
   return is_done;
 }
 

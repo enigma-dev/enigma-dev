@@ -49,6 +49,11 @@ GameClient::~GameClient() {
   if (nullptr != GameClient::gc_statsandachievements_) delete GameClient::gc_statsandachievements_;
   if (nullptr != GameClient::gc_leaderboards_) delete GameClient::gc_leaderboards_;
   if (nullptr != GameClient::gc_remotestorage_) delete GameClient::gc_remotestorage_;
+
+  GameClient::gc_overlay_ = nullptr;
+  GameClient::gc_statsandachievements_ = nullptr;
+  GameClient::gc_leaderboards_ = nullptr;
+  GameClient::gc_remotestorage_ = nullptr;
 }
 
 void GameClient::init() {

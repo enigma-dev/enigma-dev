@@ -17,8 +17,6 @@
 
 #include "fake_steamuserstats.h"
 
-#include <iostream>
-
 void FakeSteamUserStats::RegisterUserStatsReceivedCallback(class CCallbackBase *pCallback) {
   FakeSteamUserStats::GetInstance()->pCallbackUserStatsReceived = pCallback;
 }

@@ -18,7 +18,6 @@
 #ifndef FAKE_STEAMUTILS_H
 #define FAKE_STEAMUTILS_H
 
-#include <iostream>
 #include "fake_steam_api.h"
 
 class FakeSteamUtils : public ISteamUtils {

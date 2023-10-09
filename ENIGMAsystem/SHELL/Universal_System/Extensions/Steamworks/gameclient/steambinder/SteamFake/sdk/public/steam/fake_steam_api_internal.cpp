@@ -25,8 +25,6 @@
 #include "fake_steamuserstats.h"
 #include "fake_steamutils.h"
 
-#include <iostream>
-
 HSteamUser SteamAPI_GetHSteamUser() { return 0; }
 
 void *SteamInternal_ContextInit(void *pContextInitData) {

@@ -17,8 +17,6 @@
 
 #include "fake_steamfriends.h"
 
-#include <iostream>
-
 void FakeSteamFriends::RegisterGameOverlayActivatedCallback(class CCallbackBase *pCallback) {
   FakeSteamFriends::GetInstance()->pCallbackGameOverlayActivated = pCallback;
 }

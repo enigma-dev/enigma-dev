@@ -127,6 +127,8 @@ class GCMain {
     steamworks_b::SteamBinder::Shutdown();
 
     if (nullptr != GCMain::gameclient_) delete GCMain::gameclient_;
+
+    GCMain::gameclient_ = nullptr;
   }
 
   /**
