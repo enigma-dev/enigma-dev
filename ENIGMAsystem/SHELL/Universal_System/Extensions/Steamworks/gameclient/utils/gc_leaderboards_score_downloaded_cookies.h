@@ -58,7 +58,7 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
    * @brief This flag will be set to true when the callresult is received. This flag will be used 
    *        to determine if we can destroy this object or not.
    * 
-   * @see @c GCLeaderboardsFindResultCookies::is_done()
+   * @see @c GCLeaderboardsFindResultCookies::is_done() function.
    * 
    */
   bool is_done_;
@@ -81,7 +81,7 @@ class GCLeaderboardsScoreDownloadedCookies : public GCLeaderboardsCookies {
   /**
    * @brief This function will be called when the callresult is received.
    * 
-   * @see @c GCLeaderboards::download_scores()
+   * @see @c GCLeaderboards::download_scores() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#LeaderboardScoresDownloaded_t for
    *      more information.
    * 

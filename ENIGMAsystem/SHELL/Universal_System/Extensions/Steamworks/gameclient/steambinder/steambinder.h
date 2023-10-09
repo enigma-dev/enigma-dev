@@ -146,7 +146,7 @@ class SteamBinder {
   /**
    * @brief This is the main function that must be called before initializing Steamworks API.
    * 
-   * @see @c SteamBinder::validate().
+   * @see @c SteamBinder::validate() function.
    * 
    * @return true 
    * @return false 
@@ -216,7 +216,7 @@ class SteamBinder {
  private:
   /**
   * @brief Validates all the Steamworks API functions that are loaded dynamically using
-  *        @c assertions().
+  *        @c assertions() function.
   * 
   * @return true 
   * @return false 

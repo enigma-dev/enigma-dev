@@ -55,7 +55,7 @@ void write_appid_file() {
   appid_file.open(filename.c_str());
 
   if (appid_file.is_open()) {
-    appid_file << "480";  // appID for spacewar game which is the default game for steamworks SDK
+    appid_file << "480";  // appID for spacewar game which is the default game for steamworks SDK.
     appid_file.close();
     DEBUG_MESSAGE("steam_appid.txt created successfully.", M_INFO);
   } else

@@ -18,8 +18,6 @@
 #ifndef STEAMWORKS_H
 #define STEAMWORKS_H
 
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
-
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -28,13 +26,24 @@ namespace fs = std::filesystem;
 
 namespace enigma {
 
-/*
-    NOTE:   This function is automatically called by the extension system.
-    
-    This function initialises the steam APIs. Calls gc_main::init().
-*/
+/**
+ * @brief This function initialises the steam APIs.
+ * 
+ * @note This function is automatically called by the extension system.
+ * 
+ */
 void extension_steamworks_init();
 
+/**
+ * @brief This function fires an Async event from the Steamworks extension.
+ * 
+ * @note This function is called inside @c Platforms\General\PFmain.cpp to 
+ *       fire an Async event from the Steamworks extension.
+ * 
+ * @note It should be fired from @c Universal_System\Extensions\Asynchronous
+ *       extension but currently it is not thread safe.
+ * 
+ */
 void fireSteamworksEvent();
 
 }  // namespace enigma

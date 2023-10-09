@@ -63,10 +63,11 @@ class GCStatsAndAchievements {
    *        unlock an achievement multiple times so you don't need to worry about only setting 
    *        achievements that aren't already set. This call only modifies Steam's in-memory 
    *        state so it is quite cheap. To send the unlock status to the server and to trigger 
-   *        the Steam overlay notification you must call @c GCStatsAndAchievements::store_stats(). 
+   *        the Steam overlay notification you must call @c GCStatsAndAchievements::store_stats()
+   *        function.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#SetAchievement for more information.
    * 
@@ -95,12 +96,12 @@ class GCStatsAndAchievements {
    *        @c GCStatsAndAchievements::request_current_stats() and it needs to return successfully via its 
    *        callback prior to calling this! This call only modifies Steam's in-memory state so it is quite 
    *        cheap. To send the unlock status to the server and to trigger the Steam overlay notification 
-   *        you must call @c GCStatsAndAchievements::store_stats().
+   *        you must call @c GCStatsAndAchievements::store_stats() function.
    * 
    * @note This is primarily only ever used for testing.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#ClearAchievement for more 
    *      information.
    * 
@@ -116,12 +117,12 @@ class GCStatsAndAchievements {
    *        via its callback prior to calling this! This call only modifies Steam's in-memory 
    *        state and is very cheap. Doing so allows Steam to persist the changes even in the 
    *        event of a game crash or unexpected shutdown. To submit the stats to the server you 
-   *        must call @c GCStatsAndAchievements::store_stats().
+   *        must call @c GCStatsAndAchievements::store_stats() function.
    * 
    * @note This is the @c int overload.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#SetStat for more information.
    * 
    * @param stat_name the name of the stat to set.
@@ -138,8 +139,8 @@ class GCStatsAndAchievements {
    * 
    * @note This is the int overload.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#GetStat for more information.
    * 
    * @param stat_name the name of the stat to get the value of.
@@ -155,12 +156,12 @@ class GCStatsAndAchievements {
    *        successfully via its callback prior to calling this! This call only modifies Steam's in-memory 
    *        state and is very cheap. Doing so allows Steam to persist the changes even in the event of a 
    *        game crash or unexpected shutdown. To submit the stats to the server you must call 
-   *        @c GCStatsAndAchievements::store_stats(). 
+   *        @c GCStatsAndAchievements::store_stats() function.
    * 
    * @note This is the float overload.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#SetStat for more information.
    * 
    * @param stat_name the name of the stat to set.
@@ -177,8 +178,8 @@ class GCStatsAndAchievements {
    * 
    * @note This is the float overload.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#GetStat for more information.
    * 
    * @param stat_name the name of the stat to get the value of.
@@ -194,10 +195,10 @@ class GCStatsAndAchievements {
    *        via its callback prior to calling this! This call only modifies Steam's in-memory 
    *        state and is very cheap. Doing so allows Steam to persist the changes even in the 
    *        event of a game crash or unexpected shutdown. To submit the stats to the server you 
-   *        must call @c GCStatsAndAchievements::store_stats(). 
+   *        must call @c GCStatsAndAchievements::store_stats() function.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats()function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#UpdateAvgRateStat for more 
    *      information.
    * 
@@ -244,7 +245,7 @@ class GCStatsAndAchievements {
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#UserStatsReceived_t for 
    *      more information.
-   * @see @c GCMain::run_callbacks()
+   * @see @c GCMain::run_callbacks() function.
    * 
    */
   STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_received, UserStatsReceived_t, m_CallbackUserStatsReceived);
@@ -255,7 +256,7 @@ class GCStatsAndAchievements {
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#UserStatsStored_t for 
    *      more information.
-   * @see @c GCMain::run_callbacks()
+   * @see @c GCMain::run_callbacks() function.
    * 
    */
   STEAM_CALLBACK(GCStatsAndAchievements, on_user_stats_stored, UserStatsStored_t, m_CallbackUserStatsStored);
@@ -266,7 +267,7 @@ class GCStatsAndAchievements {
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#UserAchievementStored_t for 
    *      more information.
-   * @see @c GCMain::run_callbacks()
+   * @see @c GCMain::run_callbacks() function.
    * 
    */
   STEAM_CALLBACK(GCStatsAndAchievements, on_achievement_stored, UserAchievementStored_t, m_CallbackAchievementStored);
@@ -276,12 +277,12 @@ class GCStatsAndAchievements {
    *        @c GCStatsAndAchievements::store_stats() to persist the changes to the server. This should 
    *        typically only be used for testing purposes during development. Ensure that you sync up 
    *        your stats with the new default values provided by Steam after calling this by calling 
-   *        @c GCStatsAndAchievements::request_current_stats().
+   *        @c GCStatsAndAchievements::request_current_stats() function.
    * 
    * @note This is primarily only ever used for testing.
    * 
-   * @see @c GCStatsAndAchievements::request_current_stats()
-   * @see @c GCStatsAndAchievements::store_stats()
+   * @see @c GCStatsAndAchievements::request_current_stats() function.
+   * @see @c GCStatsAndAchievements::store_stats() function.
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#ResetAllStats for more 
    *      information.
    * 
@@ -301,7 +302,7 @@ class GCStatsAndAchievements {
   /**
    * @brief Stores stats status.
    * 
-   * @see @c GCStatsAndAchievements::stats_valid()
+   * @see @c GCStatsAndAchievements::stats_valid() function.
    * 
    */
   bool stats_valid_;

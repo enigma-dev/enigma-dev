@@ -56,7 +56,7 @@ class GCMain {
    *        recommended as the Steam context associated with your application (including your App ID) will not 
    *        be set up if the user launches the executable directly. If this occurs then @c SteamBinder::Init() will fail 
    *        and you will be unable to use the Steamworks API. If you choose to use this then it should be the first 
-   *        Steamworks function call you make, right before @c SteamBinder::Init().
+   *        Steamworks function call you make, right before @c SteamBinder::Init() function.
    * 
    * @note Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RestartAppIfNecessary for more information.
    * 
@@ -70,16 +70,16 @@ class GCMain {
 
   /**
    * @brief This function performs the following steps:
-   *         @c 1.  Calls @c GCMain::restart_app_if_necessary().
-   *         @c 2.  Calls @c SteamBinder::Init(). Initializes the Steamworks API. A Steam client must be running in 
-   *                order for @c GCMain::init() to pass. If you are running If you're running your application 
+   *         @c 1.  Calls @c GCMain::restart_app_if_necessary() function.
+   *         @c 2.  Calls @c SteamBinder::Init() function. Initializes the Steamworks API. A Steam client must 
+   *                be running in order for @c GCMain::init() to pass. If you are running If you're running your application 
    *                from the executable or debugger directly then you must have a steam_appid.txt in your game directory 
    *                next to the executable, with your app ID in it and nothing else.
-   *         @c 3.  Calls @c GameClient::is_user_logged_on(). Checks if the user has logged into Steam. We can't proceed 
+   *         @c 3.  Calls @c GameClient::is_user_logged_on() function. Checks if the user has logged into Steam. We can't proceed 
    *                with anything if the user is not logged in right?!
    *         @c 4.  Instantiates the Game Client. This includes instantiating all the other clients.
    *         @c 5.  Sets @c GCMain::is_initialised_ to true if all the above steps succeed. This variable can be accessed by
-   *                calling @c GCMain::is_initialised().
+   *                calling @c GCMain::is_initialised() function.
    * 
    * @note Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: 
    *       https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn.
@@ -113,7 +113,7 @@ class GCMain {
    * @brief This function performs the following steps:
    *         @c 1. Sets @c GCMain::is_initialised_ to false.
    *         @c 2. Freeing up memory by deleting Game Client.
-   *         @c 3. Calls @c SteamBinder::Shutdown(). Shuts down the Steamworks API, releases pointers and 
+   *         @c 3. Calls @c SteamBinder::Shutdown() function. Shuts down the Steamworks API, releases pointers and 
    *               frees memory. You should call this during process shutdown if possible. This will not 
    *               unhook the Steam Overlay from your game as there's no guarantee that your rendering API 
    *               is done using it.
@@ -130,7 +130,7 @@ class GCMain {
   }
 
   /**
-   * @brief Returns @c GCMain::is_initialised_.
+   * @brief Returns @c GCMain::is_initialised_ function.
    * 
    * @return true if Steamworks API is initialized successfully.
    * @return false if something went wrong while initializing the Steamworks API.
@@ -138,9 +138,9 @@ class GCMain {
   inline static bool is_initialised() { return GCMain::is_initialised_; }
 
   /**
-   * @brief This function calls @c SteamBinder::RunCallbacks(). Dispatches callbacks and call results to 
+   * @brief This function calls @c SteamBinder::RunCallbacks() function. Dispatches callbacks and call results to 
    *        all of the registered listeners. As ENIGMA is single-threaded, no need to call 
-   *        @c SteamBinder::ReleaseCurrentThreadMemory().
+   *        @c SteamBinder::ReleaseCurrentThreadMemory() function.
    * 
    * @note Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_RunCallbacks for more information.
    * @note [OPTIONAL] Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_ReleaseCurrentThreadMemory 
@@ -172,7 +172,7 @@ class GCMain {
   /**
    * @brief Pointer to Game Client.
    * 
-   * @see @c GCMain::get_gameclient()
+   * @see @c GCMain::get_gameclient() function.
    * 
    */
   inline static GameClient* gameclient_{nullptr};
@@ -180,7 +180,7 @@ class GCMain {
   /**
    * @brief Stores the initialization status of the Steamworks API.
    * 
-   * @see @c GCMain::is_initialised()
+   * @see @c GCMain::is_initialised() function.
    * 
    */
   inline static bool is_initialised_{false};

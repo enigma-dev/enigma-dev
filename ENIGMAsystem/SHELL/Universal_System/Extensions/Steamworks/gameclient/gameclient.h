@@ -18,8 +18,11 @@
 #ifndef GAMECLIENT_H
 #define GAMECLIENT_H
 
-// TODO: This documentation need to be improved when uploading a game to Steam Store.
-// TODO: Move the pre-checks here.
+/**
+ * @todo This documentation need to be improved when uploading a game to Steam Store. 
+ * @todo Move the pre-checks here.
+ * 
+ */
 
 #include "steambinder/steambinder.h"
 
@@ -155,7 +158,8 @@ class GameClient {
 
   /**
    * @brief Checks if the active user is subscribed to the current App ID. This will always 
-   *        return true if you're using Steam DRM or calling @c gc_main::restart_app_if_necessary().
+   *        return true if you're using Steam DRM or calling @c gc_main::restart_app_if_necessary()
+   *        function.
    * 
    * @return true 
    * @return false 
@@ -165,7 +169,7 @@ class GameClient {
   /**
    * @brief Sets a Rich Presence key/value for the current user that is automatically shared to all 
    *        friends playing the same game. Each user can have up to 20 keys set as defined by 
-   *        @c k_cchMaxRichPresenceKeys.
+   *        @c k_cchMaxRichPresenceKeys constant.
    * 
    * @note This is a wrapper function that doesn't require an object to be called.
    * 
@@ -264,7 +268,7 @@ class GameClient {
    * @endcode
    * 
    * 
-   * @see @c GameClient::get_image_size()
+   * @see @c GameClient::get_image_size() function.
    * 
    * @param image the id of the image.
    * @param buffer the buffer to fill with the image data.
@@ -276,12 +280,13 @@ class GameClient {
 
   /**
    * @brief Gets a handle to the small (32*32px) avatar for the specified user. You can pass 
-   *        in @c GameClient::get_steam_id_local_user().ConvertToUint64() to get the current user's avatar.
+   *        in @c GameClient::get_steam_id_local_user().ConvertToUint64() to get the current 
+   *        user's avatar.
    * 
    * @note This is a wrapper function that doesn't require an object to be called.
    * 
-   * @note check https://partner.steamgames.com/doc/api/ISteamFriends#GetSmallFriendAvatar for more
-   *       information.
+   * @note check https://partner.steamgames.com/doc/api/ISteamFriends#GetSmallFriendAvatar 
+   *       for more information.
    * 
    * @param steam_id_friend 
    * @return int32 
@@ -290,7 +295,8 @@ class GameClient {
 
   /**
    * @brief Gets a handle to the medium (64*64px) avatar for the specified user. You can pass in 
-   *        @c GameClient::get_steam_id_local_user().ConvertToUint64() to get the current user's avatar.
+   *        @c GameClient::get_steam_id_local_user().ConvertToUint64() to get the current 
+   *        user's avatar.
    * 
    * @note This is a wrapper function that doesn't require an object to be called.
    * 
@@ -333,7 +339,7 @@ class GameClient {
    * @brief steamID of the account currently logged into the Steam client. This can be accessed using 
    *        @c GameClient::get_steam_id_local_user() function.
    * 
-   * @see @c GameClient::get_steam_id_local_user()
+   * @see @c GameClient::get_steam_id_local_user() function.
    * 
    */
   CSteamID steam_id_local_user_;
@@ -342,7 +348,7 @@ class GameClient {
    * @brief appID of the current process. This can be accessed using @c GameClient::get_steam_app_id() 
    *        function.
    * 
-   * @see @c GameClient::get_steam_app_id()
+   * @see @c GameClient::get_steam_app_id() function.
    * 
    */
   uint32 steam_app_id_;
@@ -351,7 +357,7 @@ class GameClient {
    * @brief Current language that the user has set. This can be accessed using 
    *        @c GameClient::get_current_game_language() function.
    * 
-   * @see @c GameClient::get_current_game_language()
+   * @see @c GameClient::get_current_game_language() function.
    * 
    */
   std::string current_game_language_;
@@ -360,7 +366,7 @@ class GameClient {
    * @brief Comma separated list of the languages the current app supports. This can be accessed using 
    *        @c GameClient::get_available_game_languages() function.
    * 
-   * @see @c GameClient::get_available_game_languages()
+   * @see @c GameClient::get_available_game_languages() function.
    * 
    */
   std::string available_game_languages_;

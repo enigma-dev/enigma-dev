@@ -48,7 +48,7 @@ class GCOverlay {
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamFriends#GameOverlayActivated_t 
    *      for more information.
-   * @see @c GCMain::run_callbacks()
+   * @see @c GCMain::run_callbacks() function.
    * 
    */
   STEAM_CALLBACK(GCOverlay, on_game_overlay_activated, GameOverlayActivated_t, m_CallbackGameOverlayActivated);
@@ -153,7 +153,7 @@ class GCOverlay {
 
   /**
    * @brief Sets the inset of the overlay notification from the corner specified by 
-   *        @c GCOverlay::set_overlay_notification_position(). A value of (0, 0) 
+   *        @c GCOverlay::set_overlay_notification_position() function. A value of (0, 0) 
    *        resets the position into the corner. This position is per-game and is 
    *        reset each launch.
    * 
@@ -171,7 +171,7 @@ class GCOverlay {
   /**
    * @brief Sets which corner the Steam overlay notification popup should display itself in. You 
    *        can also set the distance from the specified corner by using
-   *        @c GCOverlay::set_overlay_notification_inset(). This position is per-game and is reset each 
+   *        @c GCOverlay::set_overlay_notification_inset() function. This position is per-game and is reset each 
    *        launch. Valid notification_position options are:
    *         - @c k_EPositionTopLeft
    *         - @c k_EPositionTopRight
@@ -193,7 +193,7 @@ class GCOverlay {
   /**
    * @brief Stores the Overlay's activation status.
    * 
-   * @see @c GCOverlay::overlay_activated()
+   * @see @c GCOverlay::overlay_activated() function.
    * 
    */
   bool overlay_activated_;

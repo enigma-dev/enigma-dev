@@ -15,8 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// TODO: Remove Steamworks enums direct usage.
-
 #include "cloud.h"
 #include "general.h"
 #include "leaderboards.h"

@@ -51,7 +51,10 @@ unsigned char RGBAtoBGRA(unsigned char rgba) {
 
 namespace enigma_user {
 
-// Continue after leaderboards constants to prevent overlapping
+/**
+ * @note Continue after leaderboards constants to prevent overlapping.
+ * 
+ */
 const unsigned steam_user_avatar_size_small{29};
 const unsigned steam_user_avatar_size_medium{30};
 const unsigned steam_user_avatar_size_large{31};
