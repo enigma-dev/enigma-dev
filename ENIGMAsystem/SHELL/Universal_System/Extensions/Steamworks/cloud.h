@@ -39,7 +39,7 @@ namespace enigma_user {
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_is_cloud_enabled_for_app
- * for more information.
+ *       for more information.
  * 
  * @return true 
  * @return false 
@@ -50,7 +50,7 @@ bool steam_is_cloud_enabled_for_app();
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_is_cloud_enabled_for_account
- * for more information.
+ *       for more information.
  * 
  * @return true 
  * @return false 
@@ -61,7 +61,7 @@ bool steam_is_cloud_enabled_for_account();
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_get_quota_total
- * for more information.
+ *       for more information.
  * 
  * @return int 
  */
@@ -71,7 +71,7 @@ int steam_get_quota_total();
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_get_quota_free
- * for more information.
+ *       for more information.
  * 
  * @return int 
  */
@@ -81,7 +81,7 @@ int steam_get_quota_free();
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_exists
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return true 
@@ -93,7 +93,7 @@ bool steam_file_exists(const std::string& filename);
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_size
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return int 
@@ -104,7 +104,7 @@ int steam_file_size(const std::string& filename);
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_persisted
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return true 
@@ -116,7 +116,7 @@ bool steam_file_persisted(const std::string& filename);
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_write
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @param data 
@@ -129,7 +129,7 @@ int steam_file_write(const std::string& filename, const std::string& data, int s
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_write_file
- * for more information.
+ *       for more information.
  * 
  * @param steam_filename 
  * @param local_filename 
@@ -141,7 +141,7 @@ int steam_file_write_file(std::string& steam_filename, const std::string& local_
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_read
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return std::string 
@@ -152,7 +152,7 @@ std::string steam_file_read(const std::string& filename);
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_share
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return int 
@@ -163,7 +163,7 @@ int steam_file_share(const std::string& filename);
  * @brief 
  * 
  * @note Check https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Cloud#steam_file_delete
- * for more information.
+ *       for more information.
  * 
  * @param filename 
  * @return int 

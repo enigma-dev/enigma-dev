@@ -91,6 +91,11 @@ class GCLeaderboardsScoreUploadedCookies : public GCLeaderboardsCookies {
    * @param bIOFailure 
    */
   void on_upload_score(LeaderboardScoreUploaded_t* pScoreUploadedResult, bool bIOFailure);
+
+  /**
+   * @brief The callresult that will be used to upload scores.
+   * 
+   */
   CCallResult<GCLeaderboardsScoreUploadedCookies, LeaderboardScoreUploaded_t> m_SteamCallResultUploadScore;
 };
 }  // namespace steamworks_gc

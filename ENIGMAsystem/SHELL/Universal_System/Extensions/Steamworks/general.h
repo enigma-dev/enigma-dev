@@ -35,10 +35,10 @@ namespace enigma_user {
 
 /**
  * @brief This function can be called to check that the Steam client API has been initialised 
- * correctly before any doing any further calls to Steam specific functions in your game.
+ *        correctly before any doing any further calls to Steam specific functions in your game.
  * 
  * @see https://github.com/YoYoGames/GMEXT-Steamworks/wiki/General#steam_initialised for 
- * more information.
+ *      more information.
  * 
  * @return true if the Steam client API has been initialised correctly.
  * @return false if the Steam client API has not been initialised correctly.

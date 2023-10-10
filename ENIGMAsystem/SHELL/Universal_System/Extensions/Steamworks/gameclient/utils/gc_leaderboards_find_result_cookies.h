@@ -98,7 +98,7 @@ class GCLeaderboardsFindResultCookies : public GCLeaderboardsCookies {
   void on_find_leaderboard(LeaderboardFindResult_t* pFindLeaderboardResult, bool bIOFailure);
 
   /**
-   * @brief The callresult that will be used to download scores.
+   * @brief The callresult that will be used to find leaderboards.
    * 
    */
   CCallResult<GCLeaderboardsFindResultCookies, LeaderboardFindResult_t> m_callResultFindLeaderboard;

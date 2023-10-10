@@ -89,7 +89,7 @@ extern const unsigned steam_overlay_notification_position_bottom_right;
  * @see https://github.com/YoYoGames/GMEXT-Steamworks/wiki/Overlay#steam_is_overlay_enabled 
  *      for more information.
  * 
- * @note On Linux, you need to add @c gameoverlayrenderer.so to the LD_PRELOAD
+ * @note On Linux, you need to add @c gameoverlayrenderer.so to the @c LD_PRELOAD
  *       in order for this function to return true and the overlay to work. This
  *       explained very well in the @c Steamworks\README.md file.
  * 

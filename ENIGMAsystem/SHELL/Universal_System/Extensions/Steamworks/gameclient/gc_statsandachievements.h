@@ -72,8 +72,8 @@ class GCStatsAndAchievements {
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#SetAchievement for more information.
    * 
    * @param achievement_name the name of the achievement to unlock.
-   * @return true 
-   * @return false 
+   * @return true If the achievement was successfully unlocked.
+   * @return false If the achievement was not successfully unlocked.
    */
   bool set_achievement(const std::string& achievement_name);
 
@@ -86,8 +86,8 @@ class GCStatsAndAchievements {
    * 
    * @param achievement_name the name of the achievement to get the unlock status of.
    * @param achieved the unlock status of the achievement.
-   * @return true 
-   * @return false 
+   * @return true If the achievement was successfully retrieved.
+   * @return false If the achievement was not successfully retrieved.
    */
   bool get_achievement(const std::string& achievement_name, bool& achieved);
 
@@ -106,8 +106,8 @@ class GCStatsAndAchievements {
    *      information.
    * 
    * @param achievement_name the name of the achievement to reset.
-   * @return true 
-   * @return false 
+   * @return true If the achievement was successfully reset.
+   * @return false If the achievement was not successfully reset.
    */
   bool clear_achievement(const std::string& achievement_name);
 
@@ -127,8 +127,8 @@ class GCStatsAndAchievements {
    * 
    * @param stat_name the name of the stat to set.
    * @param value the value to set the stat to.
-   * @return true 
-   * @return false 
+   * @return true If the stat was successfully set.
+   * @return false If the stat was not successfully set.
    */
   bool set_stat_int(const std::string& stat_name, const int32& value);
 
@@ -145,8 +145,8 @@ class GCStatsAndAchievements {
    * 
    * @param stat_name the name of the stat to get the value of.
    * @param value the value of the stat.
-   * @return true 
-   * @return false 
+   * @return true If the stat was successfully retrieved.
+   * @return false If the stat was not successfully retrieved.
    */
   bool get_stat_int(const std::string& stat_name, int32& value);
 
@@ -166,8 +166,8 @@ class GCStatsAndAchievements {
    * 
    * @param stat_name the name of the stat to set.
    * @param value the value to set the stat to.
-   * @return true 
-   * @return false 
+   * @return true If the stat was successfully set.
+   * @return false If the stat was not successfully set.
    */
   bool set_stat_float(const std::string& stat_name, const float& value);
 
@@ -184,8 +184,8 @@ class GCStatsAndAchievements {
    * 
    * @param stat_name the name of the stat to get the value of.
    * @param value the value of the stat.
-   * @return true 
-   * @return false 
+   * @return true If the stat was successfully retrieved.
+   * @return false If the stat was not successfully retrieved.
    */
   bool get_stat_float(const std::string& stat_name, float& value);
 
@@ -205,8 +205,8 @@ class GCStatsAndAchievements {
    * @param stat_name the name of the stat to set.
    * @param count_this_session The value accumulation since the last call to this function.
    * @param session_length The amount of time in seconds since the last call to this function.
-   * @return true 
-   * @return false 
+   * @return true If the stat was successfully updated.
+   * @return false If the stat was not successfully updated.
    */
   bool set_stat_average_rate(const std::string& stat_name, const float& count_this_session,
                              const double& session_length);
@@ -234,8 +234,8 @@ class GCStatsAndAchievements {
    * 
    * @see https://partner.steamgames.com/doc/api/ISteamUserStats#RequestCurrentStats for more information.
    * 
-   * @return true 
-   * @return false 
+   * @return true If the request was successfully sent to the server.
+   * @return false If the request was not successfully sent to the server.
    */
   bool request_current_stats();
 

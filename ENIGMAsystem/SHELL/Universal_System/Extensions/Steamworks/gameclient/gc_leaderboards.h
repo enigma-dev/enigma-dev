@@ -56,8 +56,8 @@ class GCLeaderboards {
    * @param leaderboard_name the name of the leaderboard.
    * @param leaderboard_sort_method the sort method of the leaderboard.
    * @param leaderboard_display_type the display type of the leaderboard.
-   * @return true 
-   * @return false 
+   * @return true If the leaderboard is successfully created.
+   * @return false If the leaderboard is not successfully created.
    */
   bool create_leaderboard(
       const int& id, const std::string& leaderboard_name,
@@ -83,11 +83,11 @@ class GCLeaderboards {
    * @note Check https://partner.steamgames.com/doc/api/ISteamUserStats#UploadLeaderboardScore for 
    *       more information.
    * 
-   * @param id 
-   * @param score 
+   * @param id The id that will be attached to the callresult.
+   * @param score The score that will be uploaded.
    * @param leaderboard_upload_score_method 
-   * @return true 
-   * @return false 
+   * @return true If the score is successfully uploaded.
+   * @return false If the score is not successfully uploaded.
    */
   bool upload_score(const int& id, const int& score,
                     const ELeaderboardUploadScoreMethod& leaderboard_upload_score_method =
@@ -96,12 +96,12 @@ class GCLeaderboards {
   /**
    * @brief 
    * 
-   * @param id 
-   * @param leaderboard_data_request 
-   * @param range_start 
-   * @param range_end 
-   * @return true 
-   * @return false 
+   * @param id The id that will be attached to the callresult.
+   * @param leaderboard_data_request The leaderboard data request.
+   * @param range_start The range start.
+   * @param range_end The range end.
+   * @return true If the scores are successfully downloaded.
+   * @return false If the scores are not successfully downloaded.
    */
   bool download_scores(const int& id,
                        const ELeaderboardDataRequest& leaderboard_data_request =
@@ -111,24 +111,24 @@ class GCLeaderboards {
   /**
    * @brief Set the current leaderboard object
    * 
-   * @param leaderboard 
+   * @param leaderboard If the leaderboard is successfully set.
    */
   void set_current_leaderboard(const SteamLeaderboard_t& leaderboard);
 
   /**
    * @brief Set the loading object
    * 
-   * @param loading 
+   * @param loading If the leaderboard is loading.
    */
   void set_loading(const bool& loading);
 
   /**
    * @brief Get the leaderboard name object
    * 
-   * @param buffer 
-   * @param leaderboard 
-   * @return true 
-   * @return false 
+   * @param buffer The buffer that will be used to store the leaderboard name.
+   * @param leaderboard The leaderboard that will be used to retrieve the leaderboard name.
+   * @return true If the leaderboard name is successfully retrieved.
+   * @return false If the leaderboard name is not successfully retrieved.
    */
   static bool get_leaderboard_name(std::string& buffer, const SteamLeaderboard_t& leaderboard);
 
