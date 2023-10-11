@@ -7,10 +7,16 @@
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
+#include "Universal_System/Extensions/Steamworks/steamworks.h"
+
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
 namespace enigma {
+
+std::queue<std::map<std::string, variant>> posted_async_events;
+
+std::mutex posted_async_events_mutex;
 
 std::vector<std::function<void()> > extension_update_hooks;
 
@@ -166,7 +172,27 @@ int updateTimer() {
   return 0;
 }
 
+void fireEventsFromQueue() {
+  // Acquire lock and release it when out of scope of fireEventsFromQueue().
+  std::lock_guard<std::mutex> guard(posted_async_events_mutex);
+  while (!posted_async_events.empty()) {
+    enigma_user::ds_map_clear(enigma_user::async_load);
+
+    std::map<std::string, variant> event = posted_async_events.front();
+
+    posted_async_events.pop();
+
+    for (auto& [key, value] : event) {
+      enigma_user::ds_map_add(enigma_user::async_load, key, value);
+    }
+
+    enigma::fireSteamworksEvent();
+  }
+}
+
 int enigma_main(int argc, char** argv) {
+  enigma_user::async_load = enigma_user::ds_map_create();
+
   // Initialize directory globals
   initialize_directory_globals();
   
@@ -201,6 +227,8 @@ int enigma_main(int argc, char** argv) {
     for (auto update_hook : extension_update_hooks)
       update_hook();
 
+    enigma::fireEventsFromQueue();
+
     ENIGMA_events();
     handleInput();
   }
@@ -214,6 +242,8 @@ int enigma_main(int argc, char** argv) {
 }  //namespace enigma
 
 namespace enigma_user {
+
+int async_load;
 
 const int os_browser = browser_not_a_browser;
 std::string working_directory = "";

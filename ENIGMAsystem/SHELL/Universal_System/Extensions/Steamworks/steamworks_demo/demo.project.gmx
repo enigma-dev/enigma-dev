@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<assets>
+  <Configs name="configs">
+    <Config>Configs\Default</Config>
+  </Configs>
+  <sprites name="sprites">
+    <sprite>sprites\Spr_ENIGMA_background</sprite>
+    <sprite>sprites\Spr_ENIGMA_button</sprite>
+    <sprite>sprites\Spr_ENIGMA_textbox</sprite>
+  </sprites>
+  <backgrounds name="background">
+    <background>background\ENIGMA_background</background>
+  </backgrounds>
+  <fonts name="fonts">
+    <font>fonts\Font_ENIGMA_20</font>
+    <font>fonts\Font_ENIGMA_30</font>
+    <font>fonts\Font_ENIGMA_50</font>
+  </fonts>
+  <objects name="objects">
+    <object>objects\Obj_Steam</object>
+    <objects name="Overlay">
+      <object>objects\Obj_Steam_Overlay_Achievements</object>
+      <object>objects\Obj_Steam_Overlay_Browser</object>
+      <object>objects\Obj_Steam_Overlay_Community</object>
+      <object>objects\Obj_Steam_Overlay_Friends</object>
+      <object>objects\Obj_Steam_Overlay_GameGroup</object>
+      <object>objects\Obj_Steam_Overlay_Players</object>
+      <object>objects\Obj_Steam_Overlay_Setting</object>
+      <object>objects\Obj_Steam_Overlay_Store</object>
+      <object>objects\Obj_Steam_Overlay_User</object>
+      <object>objects\Obj_Steam_OverlayInfo</object>
+    </objects>
+    <objects name="Main">
+      <object>objects\Obj_Steam_Goto</object>
+      <object>objects\Obj_Steam_GeneralInfo</object>
+      <object>objects\Obj_Steam_ProfileImage</object>
+      <object>objects\Obj_Steam_Screenshot  </object>
+      <object>objects\Obj_Steam_Ticket</object>
+    </objects>
+    <objects name="Assets">
+      <object>objects\Obj_ENIGMA_button</object>
+      <object>objects\Obj_ENIGMA_textbox</object>
+      <object>objects\Obj_ENIGMA_text</object>
+    </objects>
+    <objects name="Social">
+      <objects name="Achievement">
+        <object>objects\Obj_Steam_Achievement_Clear</object>
+        <object>objects\Obj_Steam_Achievement_ResetAll</object>
+        <object>objects\Obj_Steam_Achievement_Set</object>
+      </objects>
+      <objects name="Stats">
+        <objects name="Global">
+          <object>objects\Obj_Steam_Global_Stats</object>
+        </objects>
+        <object>objects\Obj_Steam_StatsInfo</object>
+        <object>objects\Obj_Steam_Stat_AverageSpeed</object>
+        <object>objects\Obj_Steam_Stat_FeetsTraveled</object>
+        <object>objects\Obj_Steam_Stat_Lose</object>
+        <object>objects\Obj_Steam_Stat_Win</object>
+      </objects>
+      <objects name="Leaderboard">
+        <object>objects\Obj_Steam_Leaderboard_Download</object>
+        <object>objects\Obj_Steam_Leaderboard_Download_AroundUser</object>
+        <object>objects\Obj_Steam_Leaderboard_Download_Friends</object>
+        <object>objects\Obj_Steam_Leaderboard_Download_General</object>
+        <object>objects\Obj_Steam_Leaderboard_Entry</object>
+        <object>objects\Obj_Steam_Leaderboard_Upload</object>
+        <object>objects\Obj_Steam_Leaderboard_UploadWithBuff</object>
+      </objects>
+    </objects>
+    <objects name="Networking"/>
+    <objects name="Storage"/>
+    <objects name="UGC"/>
+  </objects>
+  <rooms name="rooms">
+    <room>rooms\Room_Steam_Init</room>
+    <rooms name="Main">
+      <room>rooms\Room_Steam_Main</room>
+    </rooms>
+    <rooms name="Overlay">
+      <room>rooms\Room_Steam_Overlay</room>
+    </rooms>
+    <rooms name="Social">
+      <room>rooms\Room_Steam_Social</room>
+      <room>rooms\Room_Steam_Social_Leaderboard</room>
+    </rooms>
+    <rooms name="Networking">
+      <room>rooms\Room_Steam_Networking_Lobby</room>
+      <room>rooms\Room_Steam_Networking_Matchmaking</room>
+    </rooms>
+    <rooms name="Storage">
+      <room>rooms\Room_Steam_Storage</room>
+    </rooms>
+    <rooms name="UGC"/>
+  </rooms>
+  <constants number="0"/>
+  <help>
+    <rtf>help.rtf</rtf>
+  </help>
+</assets>

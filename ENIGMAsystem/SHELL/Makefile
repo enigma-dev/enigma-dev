@@ -121,6 +121,20 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
+# If Steamworks extension not enabled, enable Steamworks stub.
+# Else build the fake library.
+ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
+include Universal_System/StubExtensions/Steamworks/Makefile
+else
+compile_game: $(STEAM_FAKE_LIB)
+clean: steam_clean
+endif
+
+# If DataStructures extension not enabled, enable DataStructures stub.
+ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
+include Universal_System/StubExtensions/DataStructures/Makefile
+endif
+
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
 #RCFILES := $(addprefix $(WORKDIR),$(RESOURCES))
@@ -136,7 +150,6 @@ ifeq ($(RESOURCES),)
 else
 	RESOURCEBINARY := $(OBJDIR)/resources.res
 endif
-
 
 ############
 # building #

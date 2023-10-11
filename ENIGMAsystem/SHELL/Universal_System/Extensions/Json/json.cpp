@@ -190,6 +190,9 @@ namespace enigma_user
 		}
 	}
 
+	/*
+		Check https://github.com/enigma-dev/enigma-dev/pull/2358.
+	*/
 	string json_encode(variant ds_map) {
 		if (!enigma_user::ds_map_exists(ds_map)) {
 				DEBUG_MESSAGE("DS map does not exist", MESSAGE_TYPE::M_ERROR);

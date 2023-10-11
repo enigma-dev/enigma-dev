@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<sprite>
+  <xorig>0</xorig>
+  <yorigin>0</yorigin>
+  <colkind>1</colkind>
+  <sepmasks>0</sepmasks>
+  <bbox_left>0</bbox_left>
+  <bbox_right>48</bbox_right>
+  <bbox_top>0</bbox_top>
+  <bbox_bottom>48</bbox_bottom>
+  <bboxmode>0</bboxmode>
+  <coltolerance>0</coltolerance>
+  <HTile>0</HTile>
+  <VTile>0</VTile>
+  <For3D>0</For3D>
+  <width>49</width>
+  <height>49</height>
+  <frames>
+    <frame index="0">images\Spr_ENIGMA_textbox_0.png</frame>
+  </frames>
+</sprite>

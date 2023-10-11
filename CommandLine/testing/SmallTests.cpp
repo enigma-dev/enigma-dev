@@ -107,7 +107,7 @@ TEST_P(SimpleTestHarness, SimpleTestRunner) {
   // Iterate only platforms, graphics & collision systems for now
   for (TestConfig tc : GetValidConfigs(true, true, false, true, false, false)) {
   
-    tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest";
+    tc.extensions = "Alarms,Timelines,Paths,MotionPlanning,IniFilesystem,ParticleSystems,DateTime,DataStructures,libpng,GTest,Json,Steamworks";
     int ret = TestHarness::run_to_completion(game, tc);
     if (!ret) continue;
     switch (ret) {
