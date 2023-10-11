@@ -1,0 +1,97 @@
+var buf = buffer_create(8, buffer_grow, 1);
+const char *str = "Many hands make light work.";
+
+buffer_write(buf, buffer_string, str);
+var buf2 = buffer_create(8, buffer_grow, 1);
+buffer_base64_decode_ext(buf2, buffer_base64_encode(buf, 0, strlen(str) + 1), 2);
+gtest_assert_eq(buffer_get_size(buf2), strlen(str) + 4); // +2 for offset, +1 for null terminator, +1 for reserved byte
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_string), str);
+
+buffer_delete(buf2);
+
+buf2 = buffer_create(8, buffer_wrap, 1);
+buffer_base64_decode_ext(buf2, buffer_base64_encode(buf, 0, strlen(str) + 1), 2);
+buffer_save(buf2, "buf2.bin");
+gtest_assert_eq(buffer_get_size(buf2), 8);
+/*
+ * From GMS:
+ * 0: 119
+ * 1: 111
+ * 2: 114
+ * 3: 107
+ * 4: 46
+ * 5: 0
+ * 6: 116
+ * 7: 32
+*/
+buffer_seek(buf2, buffer_seek_start, 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 119);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 111);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 114);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 107);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 46);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 116);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 32);
+
+buffer_delete(buf2);
+
+buf2 = buffer_create(8, buffer_fixed, 1);
+buffer_base64_decode_ext(buf2, buffer_base64_encode(buf, 0, strlen(str) + 1), 2);
+buffer_save(buf2, "buf2.bin");
+gtest_assert_eq(buffer_get_size(buf2), 8);
+/*
+ * From GMS:
+ * 0: 0
+ * 1: 0
+ * 2: 77
+ * 3: 97
+ * 4: 110
+ * 5: 121
+ * 6: 32
+ * 7: 104
+*/
+buffer_seek(buf2, buffer_seek_start, 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 77);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 97);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 110);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 121);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 32);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 104);
+
+buffer_delete(buf2);
+
+buf2 = buffer_create(8, buffer_fast, 1);
+buffer_base64_decode_ext(buf2, buffer_base64_encode(buf, 0, strlen(str) + 1), 2);
+buffer_save(buf2, "buf2.bin");
+gtest_assert_eq(buffer_get_size(buf2), 8);
+/*
+ * From GMS:
+ * 0: 0
+ * 1: 0
+ * 2: 77
+ * 3: 97
+ * 4: 110
+ * 5: 121
+ * 6: 32
+ * 7: 104
+*/
+buffer_seek(buf2, buffer_seek_start, 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 77);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 97);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 110);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 121);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 32);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 104);
+
+buffer_delete(buf2);
+
+buffer_delete(buf);
+
+game_end();

@@ -1,0 +1,40 @@
+for var i = 3; i < 8; ++i {
+    var buf = buffer_create(i, buffer_fixed, buffer_sizeof(buffer_u8));
+
+    gtest_assert_eq(buffer_get_size(buf), i);
+    buffer_resize(buf, i + 3);
+    gtest_assert_eq(buffer_get_size(buf), i + 3);
+    buffer_resize(buf, i - 3);
+    gtest_assert_eq(buffer_get_size(buf), i - 3);
+
+    buffer_delete(buf);
+    buf = buffer_create(i, buffer_fast, buffer_sizeof(buffer_u8));
+
+    gtest_assert_eq(buffer_get_size(buf), i);
+    buffer_resize(buf, i + 3);
+    gtest_assert_eq(buffer_get_size(buf), i + 3);
+    buffer_resize(buf, i - 3);
+    gtest_assert_eq(buffer_get_size(buf), i - 3);
+
+    buffer_delete(buf);
+    buf = buffer_create(i, buffer_wrap, buffer_sizeof(buffer_u8));
+
+    gtest_assert_eq(buffer_get_size(buf), i);
+    buffer_resize(buf, i + 3);
+    gtest_assert_eq(buffer_get_size(buf), i + 3);
+    buffer_resize(buf, i - 3);
+    gtest_assert_eq(buffer_get_size(buf), i - 3);
+
+    buffer_delete(buf);
+    buf = buffer_create(i, buffer_grow, buffer_sizeof(buffer_u8));
+
+    gtest_assert_eq(buffer_get_size(buf), i);
+    buffer_resize(buf, i + 3);
+    gtest_assert_eq(buffer_get_size(buf), i + 3);
+    buffer_resize(buf, i - 3);
+    gtest_assert_eq(buffer_get_size(buf), i - 3);
+
+    buffer_delete(buf);
+}
+
+game_end();

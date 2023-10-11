@@ -1,0 +1,57 @@
+var buf = buffer_create(8, buffer_grow, 1);
+const char *str = "";
+var sha1 = "da39a3ee5e6b4b0d3255bfef95601890afd80709";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "a";
+sha1 = "86f7e437faa5a7fce15d1ddcb9eaeaea377667b8";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "abc";
+sha1 = "a9993e364706816aba3e25717850c26c9cd0d89d";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "message digest";
+sha1 = "c12252ceda8be8994d5fa0290a47231c1d16aae3";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "abcdefghijklmnopqrstuvwxyz";
+sha1 = "32d10c7b8cf96570ca04ce37f2a19d84240d3a89";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+sha1 = "761c457bf73b14d27e9e9265c46f4b4dda11f940";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+str = "12345678901234567890123456789012345678901234567890123456789012345678901234567890";
+sha1 = "50abf5706a150990a08b2c5ea40fa0e585554732";
+
+buffer_write(buf, buffer_string, str);
+gtest_assert_eq(buffer_sha1(buf, 0, strlen(str)), sha1);
+buffer_delete(buf);
+
+game_end();

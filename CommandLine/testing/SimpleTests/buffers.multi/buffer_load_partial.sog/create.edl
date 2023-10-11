@@ -1,0 +1,85 @@
+var src_offset = 2;
+var dst_offset = 5;
+
+var buf = buffer_create(16, buffer_fixed, 1);
+for var i = 0; i < buffer_get_size(buf); i++ {
+    buffer_write(buf, buffer_u8, i + 1);
+}
+buffer_save(buf, "buf.bin");
+
+var buf2 = buffer_create(16, buffer_grow, 1);
+buffer_load_partial(buf2, "buf.bin", src_offset, buffer_get_size(buf), dst_offset);
+
+buffer_save(buf2, "buf2.bin");
+gtest_assert_eq(buffer_get_size(buf2), dst_offset + (buffer_get_size(buf) - src_offset) + 1); // +1 for the reserved byte
+for var i = 0; i < dst_offset; i++ {
+    gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+}
+
+for var i = 0; i < buffer_get_size(buf) - src_offset; i++ {
+    gtest_assert_eq(buffer_read(buf2, buffer_u8), src_offset + i + 1);
+}
+
+buffer_delete(buf2);
+
+dst_offset = 20;
+buf2 = buffer_create(16, buffer_wrap, 1);
+buffer_load_partial(buf2, "buf.bin", src_offset, buffer_get_size(buf), dst_offset);
+/*
+ * From GMS:
+ * 0: 15
+ * 1: 16
+ * 2: 0
+ * 3: 0
+ * 4: 3
+ * 5: 4
+ * 6: 5
+ * 7: 6
+ * 8: 7
+ * 9: 8
+ * 10: 9
+ * 11: 10
+ * 12: 11
+ * 13: 12
+ * 14: 13
+ * 15: 14
+ */
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 15);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 16);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 3);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 4);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 5);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 6);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 7);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 8);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 9);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 10);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 11);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 12);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 13);
+gtest_assert_eq(buffer_read(buf2, buffer_u8), 14);
+gtest_assert_eq(buffer_get_size(buf2), 16);
+
+buffer_delete(buf2);
+
+dst_offset = 4;
+buf2 = buffer_create(16, buffer_fixed, 1);
+buffer_load_partial(buf2, "buf.bin", src_offset, buffer_get_size(buf), dst_offset);
+gtest_assert_eq(buffer_get_size(buf2), 16);
+gtest_assert_eq(buffer_read(buf2, buffer_u64), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u64), 0);
+buffer_delete(buf2);
+
+dst_offset = 20;
+buf2 = buffer_create(16, buffer_fast, 1);
+buffer_load_partial(buf2, "buf.bin", src_offset, buffer_get_size(buf), dst_offset);
+gtest_assert_eq(buffer_get_size(buf2), 16);
+gtest_assert_eq(buffer_read(buf2, buffer_u64), 0);
+gtest_assert_eq(buffer_read(buf2, buffer_u64), 0);
+buffer_delete(buf2);
+
+buffer_delete(buf);
+
+game_end();

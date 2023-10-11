@@ -1,0 +1,27 @@
+var str = "Many hands make light work.";
+var str2 = "ny hands make light work.";
+var buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+
+var buf2 = buffer_compress(buf, 2, buffer_get_size(buf));
+var buf3 = buffer_decompress(buf2);
+gtest_assert_eq(buffer_read(buf3, buffer_string), str2);
+
+buffer_delete(buf3);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+str = "test string";
+str2 = "t string";
+buf = buffer_create(8, buffer_grow, 1);
+buffer_write(buf, buffer_string, str);
+
+buf2 = buffer_compress(buf, 3, buffer_get_size(buf));
+buf3 = buffer_decompress(buf2);
+gtest_assert_eq(buffer_read(buf3, buffer_string), str2);
+
+buffer_delete(buf3);
+buffer_delete(buf2);
+buffer_delete(buf);
+
+game_end();

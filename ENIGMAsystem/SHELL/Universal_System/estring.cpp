@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "md5.h"
+#include "sha1.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "strings_util.h"
 
 #include <stdio.h>
@@ -385,5 +388,179 @@ var string_split(const std::string &str, const std::string &delim,
     res[found++] = str.substr(last);
   return res;
 }
+
+#define CHUNK_SIZE 16384
+
+char to_base16_char(std::uint8_t index) {
+  if (index > 15) {
+    DEBUG_MESSAGE("to_base16: index out of range", MESSAGE_TYPE::M_ERROR);
+  }
+  return "0123456789abcdef"[index];
+}
+
+std::string md5_string_utf8(std::string str) {
+  MD5_CTX ctx;
+  std::uint8_t digest[16];
+
+  MD5Init(&ctx);
+  MD5Update(&ctx, reinterpret_cast<std::uint8_t *>(const_cast<char *>(str.data())), str.length());
+  MD5Final(digest, &ctx);
+
+  std::string result{};
+  result.reserve(32);
+  for (std::uint8_t value : digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string md5_string_unicode(std::string str) {
+  return md5_string_unicode(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(str.data()));
+}
+
+std::string md5_string_unicode(std::u16string str) {
+  std::string res{};
+  res.reserve(str.length() * 2);
+  for (char16_t ch : str) {
+    res.push_back(static_cast<char>(ch & 0xff));
+    res.push_back(static_cast<char>(ch >> 8));
+  }
+
+  return md5_string_utf8(std::move(res));
+}
+
+std::string md5_file(std::string filename) {
+  std::ifstream myfile(filename);
+  if (!myfile.is_open()) {
+    DEBUG_MESSAGE("md5_file: could not open file", MESSAGE_TYPE::M_ERROR);
+    return "";
+  }
+
+  MD5_CTX ctx;
+  std::uint8_t digest[16];
+
+  MD5Init(&ctx);
+
+  while (true) {
+    std::string chunk{};
+    chunk.reserve(CHUNK_SIZE);
+    std::size_t read = myfile.readsome(chunk.data(), CHUNK_SIZE);
+
+    MD5Update(&ctx, reinterpret_cast<std::uint8_t *>(chunk.data()), read);
+
+    if (read == 0 || myfile.eof()) {
+      break;
+    }
+  }
+
+  MD5Final(digest, &ctx);
+
+  std::string result{};
+  result.reserve(32);
+  for (std::uint8_t value : digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string sha1_string_utf8(std::string str) {
+  SHA1Context ctx;
+  std::uint8_t message_digest[20];
+  int err = SHA1Reset(&ctx);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Input(&ctx, reinterpret_cast<const std::uint8_t *>(str.data()), str.length());
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  err = SHA1Result(&ctx, message_digest);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  std::string result{};
+  result.reserve(40);
+  for (std::uint8_t value : message_digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+std::string sha1_string_unicode(std::string str) {
+  return sha1_string_unicode(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(str.data()));
+}
+
+std::string sha1_string_unicode(std::u16string str) {
+  std::string res{};
+  res.reserve(str.length() * 2);
+  for (char16_t ch : str) {
+    res.push_back(static_cast<char>(ch & 0xff));
+    res.push_back(static_cast<char>(ch >> 8));
+  }
+
+  return sha1_string_utf8(std::move(res));
+}
+
+std::string sha1_file(std::string filename) {
+  std::ifstream myfile(filename);
+  if (!myfile.is_open()) {
+    DEBUG_MESSAGE("md5_file: could not open file", MESSAGE_TYPE::M_ERROR);
+    return "";
+  }
+
+  SHA1Context ctx;
+  std::uint8_t message_digest[20];
+  int err = SHA1Reset(&ctx);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+
+  while (true) {
+    std::string chunk{};
+    chunk.reserve(CHUNK_SIZE);
+    std::size_t read = myfile.readsome(chunk.data(), CHUNK_SIZE);
+
+    err = SHA1Input(&ctx, reinterpret_cast<const std::uint8_t *>(chunk.data()), read);
+    if (err != 0) {
+      DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+      return "";
+    }
+
+    if (read == 0 || myfile.eof()) {
+      break;
+    }
+  }
+
+  err = SHA1Result(&ctx, message_digest);
+  if (err != 0) {
+    DEBUG_MESSAGE("internal_sha1: sha1 error (" + std::to_string(err) + ")", MESSAGE_TYPE::M_FATAL_ERROR);
+    return "";
+  }
+
+  std::string result{};
+  result.reserve(40);
+  for (std::uint8_t value : message_digest) {
+    result += to_base16_char(value >> 4);
+    result += to_base16_char(value & 0xf);
+  }
+
+  return result;
+}
+
+#undef CHUNK_SIZE
 
 }
