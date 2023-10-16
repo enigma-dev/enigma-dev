@@ -3,7 +3,9 @@
 
 Name: SDL
 Identifier: SDL
-Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Represents: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Depends:
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Represents:
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Description: SDL dialogs
 Author: Samuel Venable
