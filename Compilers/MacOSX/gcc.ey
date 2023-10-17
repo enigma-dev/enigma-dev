@@ -24,7 +24,7 @@ Parser-Vars:
 
 EXE-Vars:
   resources: /tmp/stigma.res
-  Build-Extension: .app
+  Build-Extension:
   Run-output: $tempfile
   Run-Program: $game
   Run-Params:
