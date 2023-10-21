@@ -17,6 +17,8 @@
 - Expanded upon Shell and Process Execution (process info).
 - Improved upon Dialog Box and Native Widgets Systems.
 
+**NOTE!** M1/M2 Apple Silicon Mac users will need the OpenJDK downloaded and installed from [here](https://adoptium.net/temurin/releases/?version=17&os=mac&arch=aarch64&package=jdk) for free, (Intel Mac users can still use HomeBrew or MacPorts if needed), HomeBrew and MacPorts is broken on Apple Silicon.
+
 Supported Platforms:
 
 - Windows i686 7/8/8.1/10/11
@@ -36,6 +38,7 @@ Example Projects:
 - https://github.com/time-killer-games/ENIGMA-WebMPlayer-Demo
 - https://github.com/time-killer-games/ENIGMA-SystemInfo-Demo
 - https://github.com/time-killer-games/ENIGMA-xProcess-Demo
+- https://github.com/time-killer-games/Panoramica.gmx
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
