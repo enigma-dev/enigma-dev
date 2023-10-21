@@ -15,7 +15,7 @@
 - **Joystick Support** (cheated a little with using SDL2 library).
 - **Improved UTF-8 Support** on Windows (non-Latin support).
 - Expanded upon Shell and Process Execution (process info).
-- Improved upon Dialog Box and Native Widgets Systems.
+- Improved upon Dialog Box and Graphical Widgets System.
 
 **NOTE!** M1/M2 Apple Silicon Mac users will need the OpenJDK downloaded and installed from [here](https://adoptium.net/temurin/releases/?version=17&os=mac&arch=aarch64&package=jdk) for free, (Intel Mac users can still use HomeBrew or MacPorts if needed), HomeBrew and MacPorts is broken on Apple Silicon.
 
