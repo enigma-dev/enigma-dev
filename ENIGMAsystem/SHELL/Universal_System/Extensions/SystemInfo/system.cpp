@@ -783,8 +783,8 @@ std::string memory_usedram(bool human_readable) {
   if (GlobalMemoryStatusEx(&statex))
     usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
   #elif (defined(__APPLE__) && defined(__MACH__))
-  usedram = strtoll(read_output("echo $(($(vm_stat | grep -o 'Pages wired down:.*'  | cut -d' ' -f4- | awk '{print substr($1, 1, length($1)-1)}') + \
-  $(vm_stat | grep -o 'Pages active:.*'  | cut -d' ' -f3- | awk '{print substr($1, 1, length($1)-1)}')))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
+  usedram = strtoll(read_output("echo $(($(vm_stat | grep -o 'Pages wired down:.*' | cut -d' ' -f4- | awk '{print substr($1, 1, length($1)-1)}') + \
+  $(vm_stat | grep -o 'Pages active:.*' | cut -d' ' -f3- | awk '{print substr($1, 1, length($1)-1)}')))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info))
@@ -1094,7 +1094,7 @@ std::string gpu_manufacturer() {
   #endif
   #if defined(__sun)
   unsigned identifier = 0;
-  std::istringstream converter(read_output("prtconf |  awk '/display/{p=3} p > 0 {print $0; p--}'| awk -F'pci' 'NR==3{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}'"));
+  std::istringstream converter(read_output("prtconf | awk '/display/{p=3} p > 0 {print $0; p--}'| awk -F'pci' 'NR==3{print $0}' | sed 's/.*pci//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}'"));
   converter >> std::hex >> identifier;
   gpuvendor = get_vendor_or_device_name_by_id(identifier, false);
   if (!gpuvendor.empty())
@@ -1270,10 +1270,14 @@ std::string cpu_vendor() {
   #elif defined(__sun)
   cpuvendor = read_output("psrinfo -v -p | awk 'NR==2{print substr($2, 2)}'");
   #endif
-  std::string tmp = os_architecture();
-  std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
-  if (cpuvendor.empty() && (tmp.find("ARM") != std::string::npos || 
-    tmp.find("AARCH64") != std::string::npos))
+  std::string tmp1 = cpu_processor();
+  std::transform(tmp1.begin(), tmp1.end(), tmp1.begin(), ::toupper);
+  if (cpuvendor.empty() && tmp1.find("APPLE") != std::string::npos)
+    cpuvendor = "Apple";
+  std::string tmp2 = os_architecture();
+  std::transform(tmp2.begin(), tmp2.end(), tmp2.begin(), ::toupper);
+  if (cpuvendor.empty() && (tmp2.find("ARM") != std::string::npos || 
+    tmp2.find("AARCH64") != std::string::npos))
     cpuvendor = "ARM";
   while (!cpuvendor.empty() && cpuvendor.back() == ' ')
     cpuvendor.pop_back();
