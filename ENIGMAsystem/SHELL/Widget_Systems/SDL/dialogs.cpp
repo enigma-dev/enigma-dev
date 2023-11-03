@@ -115,7 +115,7 @@ int show_question_ext(string message) {
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
-  string no = (environment_get_variable("IMGUI_No").empty() ? "No" : environment_get_variable("IMGUI_YES"));
+  string no = (environment_get_variable("IMGUI_NO").empty() ? "No" : environment_get_variable("IMGUI_YES"));
   return ((result == yes) ? 1 : ((result == no) ? 0 : -1));
 }
 
