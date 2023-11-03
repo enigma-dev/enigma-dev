@@ -70,7 +70,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
     environment_set_variable("IMGUI_DIALOG_CAPTION", caption);
     environment_set_variable("IMGUI_OK", ok);
     abort();
-  } else   if (type == MESSAGE_TYPE::M_ERROR || 
+  } else if (type == MESSAGE_TYPE::M_ERROR || 
       type == MESSAGE_TYPE::M_USER_ERROR) {
     string yes = environment_get_variable("IMGUI_YES");
     string no = environment_get_variable("IMGUI_NO");
@@ -92,6 +92,7 @@ int show_message(const string &message) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return 1;
 }
 
@@ -101,6 +102,7 @@ bool show_question(string message) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
   return ((result == yes) ? true : false);
 }
@@ -111,6 +113,7 @@ int show_question_ext(string message) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
   string no = (environment_get_variable("IMGUI_No").empty() ? "No" : environment_get_variable("IMGUI_YES"));
   return ((result == yes) ? 1 : ((result == no) ? 0 : -1));
@@ -122,6 +125,7 @@ std::string get_string(std::string message, std::string defstr) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -131,6 +135,7 @@ double get_number(std::string message, double defnum) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -144,6 +149,7 @@ string get_open_filename(string filter, string fname) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -153,6 +159,7 @@ string get_open_filename_ext(string filter, string fname, string title, string d
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -162,6 +169,7 @@ string get_open_filenames(string filter, string fname) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -171,6 +179,7 @@ string get_open_filenames_ext(string filter, string fname, string title, string 
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -180,6 +189,7 @@ string get_save_filename(string filter, string fname) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -189,6 +199,7 @@ string get_save_filename_ext(string filter, string fname, string title, string d
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -198,6 +209,7 @@ string get_directory(string dname) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
@@ -207,6 +219,7 @@ string get_directory_alt(string capt, string root) {
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
   return result;
 }
 
