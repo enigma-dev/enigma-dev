@@ -763,9 +763,8 @@ std::string memory_freeram(bool human_readable) {
   mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
   vm_statistics64_data_t vmstat;
   if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) { 
-    if (vmstat.free_count * (long long)page_s != 0) {
+    if (vmstat.free_count * (long long)page_s != 0)
       freeram = (long long)(vmstat.free_count * (long long)page_s);
-    }
   }
   #elif defined(__linux__)
   struct sysinfo info;
