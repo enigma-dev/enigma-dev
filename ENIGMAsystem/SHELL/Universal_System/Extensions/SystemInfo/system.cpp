@@ -58,7 +58,11 @@
 #include <psapi.h>
 #include <dxgi.h>
 #else
-#if defined(__linux__)
+#if defined(__APPLE__)
+#include <mach/host_info.h>
+#include <mach/mach_host.h>
+#include <mach/mach_time.h>
+#elif defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
@@ -721,7 +725,13 @@ std::string memory_totalram(bool human_readable) {
   if (!sysinfo(&info))
     totalram = (info.totalram * info.mem_unit);
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  totalram = strtoll(read_output("sysctl -n hw.physmem").c_str(), nullptr, 10);
+  long page_s = sysconf(_SC_PAGESIZE);
+  unsigned long long tram = 0;
+  std::size_t sz = sizeof(tram);
+  if (sysctlbyname("vm.stats.vm.v_page_count", &tram, &sz, nullptr, 0) < 0)
+    return pointer_null();
+  if ((tram * page_s))
+    totalram = tram * page_s;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   mib[0] = CTL_VM;
@@ -748,17 +758,27 @@ std::string memory_freeram(bool human_readable) {
   statex.dwLength = sizeof(statex);
   if (GlobalMemoryStatusEx(&statex))
     freeram = (long long)statex.ullAvailPhys;
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__))
-  std::string strtotal = memory_totalram(false);
-  std::string strused = memory_usedram(false);
-  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
-  long long used = ((strused != pointer_null()) ? strtoull(strused.c_str(), nullptr, 10) : -1);
-  if (total != -1 && used != -1)
-    freeram = total - used;
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  long page_s = sysconf(_SC_PAGESIZE);
+  mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+  vm_statistics64_data_t vmstat;
+  if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) { 
+    if (vmstat.free_count * (long long)page_s != 0) {
+      freeram = (long long)(vmstat.free_count * (long long)page_s);
+    }
+  }
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info))
     freeram = (info.freeram * info.mem_unit);
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  long page_s = sysconf(_SC_PAGESIZE);
+  unsigned long long fram = 0;
+  std::size_t sz = sizeof(fram);
+  if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0) < 0)
+    return pointer_null();
+  if ((fram * page_s))
+    freeram = fram * page_s;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   mib[0] = CTL_VM;
@@ -782,17 +802,11 @@ std::string memory_usedram(bool human_readable) {
   statex.dwLength = sizeof(statex);
   if (GlobalMemoryStatusEx(&statex))
     usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  usedram = strtoll(read_output("echo $(($(vm_stat | grep -o 'Pages wired down:.*' | cut -d' ' -f4- | awk '{print substr($1, 1, length($1)-1)}') + \
-  $(vm_stat | grep -o 'Pages active:.*' | cut -d' ' -f3- | awk '{print substr($1, 1, length($1)-1)}')))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
   #elif defined(__linux__)
   struct sysinfo info;
   if (!sysinfo(&info))
     usedram = ((info.totalram - info.freeram) * info.mem_unit);
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
-  usedram = strtoll(read_output("echo $(($(sysctl -n vm.stats.vm.v_wire_count) + \
-  $(sysctl -n vm.stats.vm.v_active_count)))").c_str(), nullptr, 10) * sysconf(_SC_PAGESIZE);
-  #elif (defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   std::string strtotal = memory_totalram(false);
   std::string stravail = memory_freeram(false);
   long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
