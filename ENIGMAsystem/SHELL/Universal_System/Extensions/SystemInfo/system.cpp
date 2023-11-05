@@ -730,8 +730,8 @@ std::string memory_totalram(bool human_readable) {
   std::size_t sz = sizeof(tram);
   if (sysctlbyname("vm.stats.vm.v_page_count", &tram, &sz, nullptr, 0) < 0)
     return pointer_null();
-  if ((tram * page_s))
-    totalram = tram * page_s;
+  if ((tram * (long long)page_s))
+    totalram = tram * (long long)page_s;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   mib[0] = CTL_VM;
@@ -777,8 +777,8 @@ std::string memory_freeram(bool human_readable) {
   std::size_t sz = sizeof(fram);
   if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0) < 0)
     return pointer_null();
-  if ((fram * page_s))
-    freeram = fram * page_s;
+  if ((fram * (long long)page_s))
+    freeram = fram * (long long)page_s;
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
   int mib[2];
   mib[0] = CTL_VM;
