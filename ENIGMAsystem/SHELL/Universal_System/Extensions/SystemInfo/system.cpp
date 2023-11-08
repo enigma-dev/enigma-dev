@@ -1408,14 +1408,10 @@ std::string cpu_core_count() {
     return std::to_string(numcores);
   #endif
   /* dragonfly / net / open bsd have no api for getting the number of cores; 
-  we use x86-specific inline assembly for intel-and-amd-based cpus when it's
-  possible to do so. If the current platform is not i386/amd64 this fails */
-  std::string tmp1 = os_architecture();
-  std::string tmp2 = cpu_vendor();
-  std::transform(tmp1.begin(), tmp1.end(), tmp1.begin(), ::toupper);
-  std::transform(tmp2.begin(), tmp2.end(), tmp2.begin(), ::toupper);
-  if (tmp1.find("86") == std::string::npos && tmp1.find("AMD64") == std::string::npos &&
-    tmp2.find("INTEL") == std::string::npos && tmp2.find("AMD") == std::string::npos) {
+  use x86-specific inline assembly for intel / amd based cpus if possible */
+  std::string tmp = cpu_vendor();
+  std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
+  if (tmp.find("INTEL") == std::string::npos && tmp.find("AMD") == std::string::npos) {
     numcoreserror = true;
     return pointer_null();
   }
@@ -1450,7 +1446,7 @@ std::string cpu_core_count() {
     numcoreserror = true;
     return pointer_null();
   }
-  if (tmp2.find("INTEL") != std::string::npos) {
+  if (tmp.find("INTEL") != std::string::npos) {
     if(hfs >= 11) {
       cpuid cpuid4(0x0B, 0);
       numsmt = lvl_cores & cpuid4.ebx();
@@ -1466,7 +1462,7 @@ std::string cpu_core_count() {
       } else
         numcores = 1;
     }
-  } else if (tmp2.find("AMD") != std::string::npos) {
+  } else if (tmp.find("AMD") != std::string::npos) {
     numsmt = 1 + ((cpuid(0x8000001E, 0).ebx() >> 8) & 0xFF);
     if (numcpus > 0 && numsmt > 0)
       numcores = numcpus / numsmt;
