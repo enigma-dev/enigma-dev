@@ -728,8 +728,10 @@ std::string memory_totalram(bool human_readable) {
   long page_s = sysconf(_SC_PAGESIZE);
   unsigned long long tram = 0;
   std::size_t sz = sizeof(tram);
-  if (sysctlbyname("vm.stats.vm.v_page_count", &tram, &sz, nullptr, 0) < 0)
+  if (sysctlbyname("vm.stats.vm.v_page_count", &tram, &sz, nullptr, 0)) {
+    totalramerror = true;
     return pointer_null();
+  }
   if ((tram * (long long)page_s))
     totalram = (long long)(tram * (long long)page_s);
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
@@ -774,8 +776,10 @@ std::string memory_freeram(bool human_readable) {
   long page_s = sysconf(_SC_PAGESIZE);
   unsigned long long fram = 0;
   std::size_t sz = sizeof(fram);
-  if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0) < 0)
+  if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0)) {
+    freeramerror = true;
     return pointer_null();
+  }
   if ((fram * (long long)page_s))
     freeram = (long long)(fram * (long long)page_s);
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
@@ -1276,10 +1280,35 @@ std::string cpu_vendor() {
     cpuvendor = buf;
   #elif defined(__linux__)
   cpuvendor = read_output("lscpu | grep 'Vendor ID:' | uniq | cut -d' ' -f3- | awk 'NR==1{$1=$1;print}'");
-  #elif defined(__FreeBSD__)
-  cpuvendor = read_output("dmesg | awk '/CPU: /{p++;if(p==0){next}}p' | awk -F'Origin=\"' 'NR==2{print $0}' | sed 's/.*Origin=\"//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}' | awk '{print substr($0, 1, length($0) - 1)}'");
-  #elif defined(__DragonFly__)
-  cpuvendor = read_output("dmesg | awk '/CPU: /{p++;if(p==0){next}}p' | awk -F'Origin = \"' 'NR==2{print $0}' | sed 's/.*Origin = \"//g' | awk -F' ' '{print $1}' | awk -F',' '{print $1}' | awk '{print substr($0, 1, length($0) - 1)}'");
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
+  /* free / dragonfly bsd have no api for getting the cpu vendor; 
+  use x86-specific inline assembly. If the current platform isn't 
+  i386/amd64 this fails and the fallback will be check for ARM */
+  class cpuid {
+    unsigned regs[4];
+  public:
+    explicit cpuid(unsigned func_id, unsigned sub_func_id) {
+      asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
+    }
+    const unsigned &eax() const {
+      return regs[0];
+    }
+    const unsigned &ebx() const {
+      return regs[1];
+    }
+    const unsigned &ecx() const {
+      return regs[2];
+    }
+    const unsigned &edx() const {
+      return regs[3];
+    }
+  };
+  cpuid cpuid0(0, 0);
+  cpuvendor += string((const char *)&cpuid0.ebx(), 4);
+  cpuvendor += string((const char *)&cpuid0.edx(), 4);
+  cpuvendor += string((const char *)&cpuid0.ecx(), 4);
+  #endif
   #elif defined(__NetBSD__)
   cpuvendor = read_output("cat /proc/cpuinfo | grep 'vendor_id' | awk 'NR==1{print $3}'");
   #elif defined(__OpenBSD__)
@@ -1367,12 +1396,9 @@ std::string cpu_core_count() {
   /* number_of_thread_groups will return zero if threads are not grouped at all; this means the number of cores equals the number of cpus */
   int number_of_thread_groups = (int)strtol(read_output("sysctl -n kern.sched.topology_spec | grep -c 'THREAD group'").c_str(), nullptr, 10);
   numcores = (int)(number_of_thread_groups ? number_of_thread_groups : strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10));
-  #elif defined(__DragonFly__)
-  int threads_per_core = (int)strtol(read_output("dmesg | grep 'threads_per_core: ' | awk '{print substr($6, 0, length($6) - 1)}'").c_str(), nullptr, 10);
-  numcores = (int)(strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10) / ((threads_per_core) ? threads_per_core : 1));
   #endif
   #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
-  #if (defined(_WIN32) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #if (defined(_WIN32) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   #if defined(_WIN32)
   /* use x86-specific inline assembly as the fallback; 
   for windows programs run under WINE (no wmic cli) */
@@ -1381,7 +1407,7 @@ std::string cpu_core_count() {
   if (numcores != -1)
     return std::to_string(numcores);
   #endif
-  /* netbsd and openbsd have no exposed api for getting the number of cores; 
+  /* dragonfly / net / open bsd have no api for getting the number of cores; 
   we use x86-specific inline assembly for intel-and-amd-based cpus when it's
   possible to do so. If the current platform is not i386/amd64 this fails */
   std::string tmp1 = os_architecture();
