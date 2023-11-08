@@ -1305,9 +1305,9 @@ std::string cpu_vendor() {
     }
   };
   cpuid cpuid0(0, 0);
-  cpuvendor += string((const char *)&cpuid0.ebx(), 4);
-  cpuvendor += string((const char *)&cpuid0.edx(), 4);
-  cpuvendor += string((const char *)&cpuid0.ecx(), 4);
+  cpuvendor += std::string((const char *)&cpuid0.ebx(), 4);
+  cpuvendor += std::string((const char *)&cpuid0.edx(), 4);
+  cpuvendor += std::string((const char *)&cpuid0.ecx(), 4);
   #endif
   #elif defined(__NetBSD__)
   cpuvendor = read_output("cat /proc/cpuinfo | grep 'vendor_id' | awk 'NR==1{print $3}'");
