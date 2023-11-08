@@ -1282,7 +1282,7 @@ std::string cpu_vendor() {
   #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
   /* free / dragonfly bsd have no api for getting the cpu vendor; 
   use x86-specific inline assembly. If the current platform isn't 
-  i386/amd64 this fails and the fallback will be check for ARM */
+  x86 or x64 this fails and the fallback will be check for ARM */
   class cpuid {
     unsigned regs[4];
   public:
