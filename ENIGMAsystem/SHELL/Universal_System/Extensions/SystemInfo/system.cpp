@@ -776,10 +776,8 @@ std::string memory_freeram(bool human_readable) {
   long page_s = sysconf(_SC_PAGESIZE);
   unsigned long long fram = 0;
   std::size_t sz = sizeof(fram);
-  if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0)) {
-    freeramerror = true;
+  if (sysctlbyname("vm.stats.vm.v_free_count", &fram, &sz, nullptr, 0))
     return pointer_null();
-  }
   if ((fram * (long long)page_s))
     freeram = (long long)(fram * (long long)page_s);
   #elif (defined(__NetBSD__) || defined(__OpenBSD__))
