@@ -1472,7 +1472,6 @@ std::string cpu_core_count() {
   #endif
   /* dragonfly / net / open bsd have no api for getting the number of cores; 
   use x86-specific inline assembly for intel / amd based cpus if possible */
-  #if
   #if defined(_WIN32)
   tmp = cpu_vendor();
   #else
