@@ -52,6 +52,10 @@ inline std::string os_architecture() {
   return ngs::sys::os_architecture();
 }
 
+inline std::string os_is_virtual() {
+  return ngs::sys::os_is_virtual();
+}
+
 inline std::string memory_totalram(bool hr) {
   return ngs::sys::memory_totalram(hr);
 }
