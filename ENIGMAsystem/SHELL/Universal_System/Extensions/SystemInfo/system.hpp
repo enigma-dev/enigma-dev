@@ -35,6 +35,7 @@ std::string os_kernel_release();
 std::string os_product_name();
 std::string os_kernel_version();
 std::string os_architecture();
+std::string os_is_virtual();
 std::string memory_totalram(bool human_readable);
 std::string memory_freeram(bool human_readable);
 std::string memory_usedram(bool human_readable);

@@ -702,6 +702,71 @@ std::string os_architecture() {
   return pointer_null();
 }
 
+std::string os_is_virtual() {
+  #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
+  if (os_product_name().substr(0, 4) == "wine")
+    return "YES";
+  #if (defined(__APPLE__) && defined(__MACH__))
+  if (os_architecture() == "x86_64" && 
+    read_output("sysctl -in sysctl.proc_translated") == "1")
+    return "YES";
+  #endif
+  class cpuid {
+    unsigned regs[4];
+  public:
+    explicit cpuid(unsigned func_id, unsigned sub_func_id) {
+      asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
+    }
+    const unsigned &eax() const {
+      return regs[0];
+    }
+    const unsigned &ebx() const {
+      return regs[1];
+    }
+    const unsigned &ecx() const {
+      return regs[2];
+    }
+    const unsigned &edx() const {
+      return regs[3];
+    }
+  };
+  if (!(cpuid(1, 0).ecx() & (1 << 31)))
+    return "NO";
+  const int vendorIdLength = 13;
+  using VendorIdStr = char[vendorIdLength];
+  VendorIdStr hyperVendorId;
+  memcpy(hyperVendorId + 0, &cpuid(0x40000000, 0).ebx(), 4);
+  memcpy(hyperVendorId + 4, &cpuid(0x40000000, 0).ecx(), 4);
+  memcpy(hyperVendorId + 8, &cpuid(0x40000000, 0).edx(), 4);
+  hyperVendorId[12] = '\0';
+  static const VendorIdStr vendors[] {
+    "VBoxVBoxVBox",      // VirtualBox 
+    "bhyve bhyve ",      // bhyve
+    "KVMKVMKVM\0\0\0",   // KVM
+    "TCGTCGTCGTCG",      // QEMU
+    #if !defined(_WIN32)
+    "Microsoft Hv",      // Microsoft Hyper-V or Windows Virtual PC
+    #endif
+    "MicrosoftXTA",      // Microsoft x86-to-ARM
+    " lrpepyh  vr",      // Parallels
+    "VMwareVMware",      // VMware
+    "XenVMMXenVMM",      // Xen HVM
+    "ACRNACRNACRN",      // Project ACRN
+    " QNXQVMBSQG ",      // QNX Hypervisor
+    "VirtualApple"       // Apple Rosetta 2
+  };
+  for (const auto& vendor : vendors) {
+    if (!memcmp(vendor, hyperVendorId, vendorIdLength))
+      return "YES";
+  }
+  return "NO";
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  return "NO";
+  #endif
+  // non-x86 currently not supported outside of macOS ...
+  return pointer_null();
+}
+
 std::string memory_totalram(bool human_readable) {
   if (totalram != -1)
     return human_readable ? make_hreadable(totalram) : std::to_string(totalram);
