@@ -762,8 +762,16 @@ std::string os_is_virtual() {
   return "NO";
   #elif (defined(__APPLE__) && defined(__MACH__))
   return "NO";
+  #elif defined(__linux__)
+  std::string tmp = read_output("echo $(systemd-detect-virt 2> /dev/null)");
+  std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
+  if (tmp.empty()) 
+    return pointer_null();
+  else if (tmp == "NONE")
+    return "NO";
+  return "YES";
   #endif
-  // non-x86 currently not supported outside of macOS ...
+  // non-x86 currently not supported outside of macOS and Linux ...
   return pointer_null();
 }
 
