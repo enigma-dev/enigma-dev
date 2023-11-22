@@ -17,24 +17,32 @@
 ############################################################################
 
 # Ignore everything.
-/Steamv157/sdk/**/*
-/SteamFake/sdk/**/*
+/**/*
 
-# Don't ignore Readme.txt file.
-!/Steamv157/sdk/Readme.txt
-!/SteamFake/sdk/Readme.txt
+# Don't ignore me.
+!.gitignore
+
+# Don't ignore source and header files.
+!*.cpp
+!*.h
+
+# Don't ignore the SteamvXXX/ and SteamFake/ folders.
+!/Steamv*/
+!/SteamFake/
+!/Steamv*/sdk/
+!/SteamFake/sdk/
+
+# Don't ignore README files.
+!/Steamv*/sdk/Readme.txt
+!/SteamFake/sdk/README.md
+
+!/Steamv*/sdk/public/
+!/SteamFake/sdk/public/
+!/Steamv*/sdk/public/steam/
+!/SteamFake/sdk/public/steam/
 
 # Don't ignore files inside the SteamvXXX/sdk/public/steam/ folder.
-# Note that this code ignores directories inside the SteamvXXX/sdk/public/steam/ folder.
-!/Steamv157/sdk/public/
-!/Steamv157/sdk/public/steam/
-!/Steamv157/sdk/public/steam/*
-!/SteamFake/sdk/public/
-!/SteamFake/sdk/public/steam/
+# Note that this ignores directories inside the SteamvXXX/sdk/public/steam/ folder. This
+# includes the SteamvXXX/sdk/public/steam/lib/ folder. This is intentional.
+!/Steamv*/sdk/public/steam/*
 !/SteamFake/sdk/public/steam/*
-
-# Don't ignore everything inside the SteamvXXX/sdk/redistributable_bin/ folder.
-# !/Steamv157/sdk/redistributable_bin/
-# !/Steamv157/sdk/redistributable_bin/**/*
-# !/SteamFake/sdk/redistributable_bin/
-# !/SteamFake/sdk/redistributable_bin/**/*

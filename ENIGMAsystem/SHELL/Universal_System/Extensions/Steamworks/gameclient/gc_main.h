@@ -72,29 +72,38 @@ class GCMain {
    * @brief This function performs the following steps:
    *         @c 1.  Calls @c GCMain::restart_app_if_necessary() function.
    *         @c 2.  Calls @c SteamBinder::Init() function. Initializes the Steamworks API. A Steam client must 
-   *                be running in order for @c GCMain::init() to pass. If you are running If you're running your application 
-   *                from the executable or debugger directly then you must have a steam_appid.txt in your game directory 
-   *                next to the executable, with your app ID in it and nothing else.
-   *         @c 3.  Calls @c GameClient::is_user_logged_on() function. Checks if the user has logged into Steam. We can't proceed 
-   *                with anything if the user is not logged in right?!
+   *                be running in order for @c GCMain::init() to pass. If you are running your application 
+   *                from the executable or debugger directly then you must have a steam_appid.txt in your game 
+   *                directory next to the executable, with your app ID in it and nothing else.
+   *         @c 3.  Calls @c GameClient::is_user_logged_on() function. Checks if the user has logged into Steam. We 
+   *                can't proceed with anything if the user is not logged in right?!
    *         @c 4.  Instantiates the Game Client. This includes instantiating all the other clients.
-   *         @c 5.  Sets @c GCMain::is_initialised_ to true if all the above steps succeed. This variable can be accessed by
-   *                calling @c GCMain::is_initialised() function.
+   *         @c 5.  Sets @c GCMain::is_initialised_ to true if all the above steps succeed. This variable can be 
+   *                accessed by calling @c GCMain::is_initialised() function.
    * 
    * @note Maybe no need to call gameclient::is_user_logged_on() as advised by Steamworks here: 
    *       https://partner.steamgames.com/doc/api/ISteamUser#BLoggedOn.
    * 
    * @note Check https://partner.steamgames.com/doc/api/steam_api#SteamAPI_Init for more information.
    * 
-   * @return true 
-   * @return false 
+   * @return true If everything goes well.
+   * @return false in the below conditions:
+   *          - If @c GCMain::restart_app_if_necessary() function succeeds.
+   *          - If Steam client is not running.
+   *          - If you are running your application from the executable or debugger directly and you don't have
+   *            steam_appid.txt in your game directory.
+   *          - [ @c v1.58 ] If the installed Steam client needs to be updated to support the game's version of 
+   *            the SDK.
+   *          - If user is not logged in.
    */
   inline static bool init() {
     if (GCMain::restart_app_if_necessary()) {
       return false;
     }
 
-    if (!steamworks_b::SteamBinder::Init()) {
+    SteamErrMsg errMsg;
+    if (steamworks_b::SteamBinder::Init(NULL, &errMsg) != k_ESteamAPIInitResult_OK) {
+      DEBUG_MESSAGE(errMsg, M_ERROR);
       return false;
     }
 

@@ -24,6 +24,7 @@
  */
 #include "steam/steam_api.h"
 #include "steam/steam_api_flat.h"
+#include "versioned_accessor_name_macros.h"
 
 /**
  * @brief This include is the only special include that game_client layer uses. DON'T include any 
@@ -39,21 +40,34 @@
 #error "ENIGMA_STEAMWORKS_EXTENSION_ROOT is not defined."
 #endif  // ENIGMA_STEAMWORKS_EXTENSION_ROOT
 
-/**
- * @todo Update versions here on each new version of Steamworks SDK.
- * 
- * @version Steamworks SDK v1.57
- * 
- */
-#define VERSIONED_STEAM_USER_ACCESSOR_NAME "SteamAPI_SteamUser_v023"
-#define VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME "SteamAPI_SteamFriends_v017"
-#define VERSIONED_STEAM_UTILS_ACCESSOR_NAME "SteamAPI_SteamUtils_v010"
-#define VERSIONED_STEAM_USERSTATS_ACCESSOR_NAME "SteamAPI_SteamUserStats_v012"
-#define VERSIONED_STEAM_APPS_ACCESSOR_NAME "SteamAPI_SteamApps_v008"
+#ifndef STEAMWORKS_API_VERSION
+#error "STEAMWORKS_API_VERSION is not defined."
+#endif  // STEAMWORKS_API_VERSION
+
+#define STR(x) #x
+#define VERSIONED_ACCESSOR_NAME(name) STR(name)
 
 namespace fs = std::filesystem;
 
-typedef bool (*Init_t)();
+/**
+ * @brief The @c Init function is updated in @c v1.58 as it now calls 
+ *        @c SteamInternal_SteamAPI_Init instead of @c SteamAPI_Init
+ *        function. The @c SteamAPI_InitEx replaces @c SteamAPI_Init
+ *        in @c v1.58 and later however, we are dynamically loading
+ *        functions using the @c SteamBinder which means that we
+ *        need every function to have @c S_API and @c S_CALLTYPE
+ *        macros which is not the case for @c SteamAPI_InitEx
+ *        which is why we are using @c SteamInternal_SteamAPI_Init
+ *        function instead.
+ * 
+ * @see @file @c SteamvXXX/sdk/public/steam/steam_api.h for more
+ *      information.
+ * 
+ * @note @c v1.58 is broken so @c v1.58a is used instead. Note that
+ *       the @c a suffix means @c alpha.
+ * 
+ */
+typedef ESteamAPIInitResult (*Init_t)(const char*, SteamErrMsg*);
 typedef void (*Shutdown_t)();
 typedef bool (*RestartAppIfNecessary_t)(uint32);
 typedef void (*RunCallbacks_t)();

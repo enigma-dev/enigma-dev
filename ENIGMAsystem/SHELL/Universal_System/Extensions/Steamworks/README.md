@@ -8,12 +8,14 @@ me on ENIGMA's official Discord server.
 
  - Ubuntu Linux.
 
-## Building Steamworks Extension for Ubuntu Linux 64-bit
+## Building Steamworks Extension
+
+### Ubuntu Linux 64-bit
 
 1. Download [Steam](https://store.steampowered.com/about/download).
-2. Download [Steamworks SDK v157](https://partner.steamgames.com/downloads/steamworks_sdk_157.zip).
+2. Download [Steamworks SDK v158a](https://partner.steamgames.com/downloads/steamworks_sdk_158a.zip).
 3. Unzip the Steamworks SDK.
-4. Copy the `redistributable_bin/` directory to `enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/`.
+4. Copy the `redistributable_bin/` directory to `enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv158a/sdk/`.
 5. [An alternative to step 4] Set the `STEAM_SDK_PATH` environment variable to the path of the `sdk/` directory in your unzipped Steamworks SDK by appending this line inside `.bashrc`.
 ```bash
 cd ~
@@ -31,20 +33,20 @@ find ~ -name gameoverlayrenderer.so
 7. Now modify the `.bashrc` again and append these two lines (DON'T forget to change the path to your `gameoverlayrenderer.so` file):
  - 64-bit
 ```bash
-export LD_LIBRARY_PATH=~/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/redistributable_bin/linux64:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=~/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv158a/sdk/redistributable_bin/linux64:${LD_LIBRARY_PATH}
 
 export LD_PRELOAD=/path/to/ubuntu12_64/gameoverlayrenderer.so:${LD_PRELOAD}
 ```
  - 32-bit
 ```bash
-export LD_LIBRARY_PATH=~/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv157/sdk/redistributable_bin/linux32:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=~/Desktop/enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/gameclient/steambinder/Steamv158a/sdk/redistributable_bin/linux32:${LD_LIBRARY_PATH}
 
 export LD_PRELOAD=/path/to/ubuntu12_32/gameoverlayrenderer.so:${LD_PRELOAD}
 ```
 8. Enable the Steamworks and Json extensions inside the IDE (LGM/RGM).
 9. Run the demo to make sure everything is working fine `enigma-dev/ENIGMAsystem/SHELL/Universal_System/Extensions/Steamworks/steamworks_demo/demo.project.gmx`.
 
-## Building Steamworks Extension for Windows 64-bit
+### Windows 64-bit
 
 ```
 Note: Windows support will be postponed due to an ABI issue as ENIGMA doesn't support MSVC yet, I recommend using Ubuntu Linux - 20/06/2023 00:45
@@ -55,20 +57,20 @@ Note: Currently, the Steam Binder doesn't support Windows.
 ```
 
 1. Download [Steam](https://store.steampowered.com/about/download).
-2. Download [Steamworks SDK v157](https://partner.steamgames.com/downloads/steamworks_sdk_157.zip).
+2. Download [Steamworks SDK v158a](https://partner.steamgames.com/downloads/steamworks_sdk_158a.zip).
 3. Unzip the Steamworks SDK.
-4. Copy the `redistributable_bin\` directory to `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv157\sdk\`.
+4. Copy the `redistributable_bin\` directory to `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv158a\sdk\`.
 5. [An alternative to step 4] Set the `STEAM_SDK_PATH` environment variable to the path of the `sdk` directory in your unzipped Steamworks SDK (Note that if you used this step, you will have to run LGM/RGM from the same terminal):
 ```bash
 STEAM_SDK_PATH="\path\to\steamworks\sdk"
 ```
-6. Copy the `steam_api64.dll` from `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv157\sdk\redistributable_bin\win64\` and then paste it into `C:\msys64\tmp\` directory. This must be done as LGM exports the executable in that location and we need that DLL to be with the executable.
+6. Copy the `steam_api64.dll` from `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\gameclient\steambinder\Steamv158a\sdk\redistributable_bin\win64\` and then paste it into `C:\msys64\tmp\` directory. This must be done as LGM exports the executable in that location and we need that DLL to be with the executable.
 7. Enable the Steamworks and Json extensions inside the IDE (LGM/RGM).
 8. Run the demo to make sure everything is working fine `enigma-dev\ENIGMAsystem\SHELL\Universal_System\Extensions\Steamworks\steamworks_demo\demo.project.gmx`.
 
 ## Steamworks Extension's Structure
 
-```bash
+```
 Steamworks               <------- 4th layer
 ├── gameclient              <------- 3rd layer
 │   ├── steambinder            <------- 2nd layer
@@ -76,10 +78,11 @@ Steamworks               <------- 4th layer
 │   │   │   └── sdk
 │   │   │       ├── public
 │   │   │       │   └── steam
+│   │   │       │       ├── Makefile
 │   │   │       │       ├── *.h
 │   │   │       │       └── *.cpp
 │   │   │       │
-│   │   │       └── Readme.txt
+│   │   │       └── README.md
 │   │   │
 │   │   ├── SteamvXXX            <------- Real 1st layer
 │   │   │   └── sdk
@@ -90,6 +93,7 @@ Steamworks               <------- 4th layer
 │   │   │       └── Readme.txt
 │   │   │
 │   │   ├── .gitignore
+│   │   ├── versioned_accessor_name_macros.h
 │   │   ├── steambinder.h
 │   │   └── steambinder.cpp
 │   │
@@ -265,40 +269,19 @@ These are my critical sections:
 
 ## Integrating New Version of Steamworks SDK
 
- 1. Create a new version directory inside `Steamworks/gameclient/`,
+ 1. Create a new version directory inside `Steamworks/gameclient/steambinder/`,
  2. Download the new version of Steamworks SDK and extract it.
- 3. Copy only the `sdk` directory to `Steamworks/gameclient/steambinder/SteamvXXX/`.
- 4. Modify `Steamworks/Makefile` to point to the newer Steamworks SDK.
- 5. [Skip this step] Modify `Steamworks/CMakelists.txt` to point to the newer Steamworks SDK.
- 6. Add the new libraries to git inside `Steamworks/gameclient/steambinder/.gitignore` Leaving the old ones there.
- 7. Run the demo to make sure everything is working fine.
+ 3. Copy `sdk/` directory to `Steamworks/gameclient/steambinder/SteamvXXX/`.
+ 4. Modify `STEAMWORKS_API_VERSION` variable inside `Steamworks/Makefile` to point to the newer Steamworks SDK.
+ 5. Modify `Steamworks/gameclient/steambinder/steambinder.h` to point to the newer Steamworks SDK interfaces.
+ 6. [Skip this step] Modify `Steamworks/CMakelists.txt` to point to the newer Steamworks SDK.
+ 7. Update the version link in the [Building Steamworks Extension](#building-steamworks-extension).
+ 8. Run the demo to make sure everything is working fine.
 
 ## Incompatibility with GMS
 
-1. ``steam_activate_overlay_user();`` function
- - GMS:
-```c++
-steam_activate_overlay_user(string dialog_name, int64 steamid);
-```
-
- - ENIGMA
-```c++
-steam_activate_overlay_user(int dialog, int64 steamid);
-```
-
-dialog constants:
- - `user_ov_steamid`
- - `user_ov_chat`
- - `user_ov_jointrade`
- - `user_ov_stats`
- - `user_ov_achievements`
- - `user_ov_friendadd`
- - `user_ov_friendremove`
- - `user_ov_friendrequestaccept`
- - `user_ov_friendrequestignore`
-
-2. The user can set the maximum leaderboard entries to display using the user variable: ``lb_max_entries``.
-
-3. steam_set_rich_presence();
- - GMS: Returns ``void``
- - ENIGMA: Returns ``bool``
+| Incompatibility | ENIGMA | GMS | Notes | Breaks code? |
+| --- | --- | --- | --- | --- |
+| ``steam_activate_overlay_user`` function definition | steam_activate_overlay_user(int dialog, int64 steamid); | steam_activate_overlay_user(string dialog_name, int64 steamid); | dialog constants: `user_ov_steamid`, `user_ov_chat`, `user_ov_jointrade`, `user_ov_stats`, `user_ov_achievements`, `user_ov_friendadd`, `user_ov_friendremove`, `user_ov_friendrequestaccept`, and `user_ov_friendrequestignore` | Yes |
+| Maximum leaderboard entries: ``lb_max_entries`` | The user can set | - | - | No |
+| ``steam_set_rich_presence`` function return type | Returns ``bool`` | Returns ``void`` | - | No |

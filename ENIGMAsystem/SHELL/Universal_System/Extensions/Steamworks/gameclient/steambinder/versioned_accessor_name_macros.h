@@ -15,17 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef FAKE_STEAM_API_FLAT_H
-#define FAKE_STEAM_API_FLAT_H
-
-#include "../../../../versioned_accessor_name_macros.h"
-#include "steam/steam_api_flat.h"
+#ifndef VERSIONED_ACCESSOR_NAME_MACROS_H
+#define VERSIONED_ACCESSOR_NAME_MACROS_H
 
 /**
- * @note Only for testing purposes.
+ * @brief These versions will be updated on each new version of Steamworks SDK.
  * 
- * @param self 
+ * @version v1.58a
+ * 
  */
-S_API void SteamAPI_ISteamFriends_DeactivateGameOverlay(ISteamFriends* self);
+#define VERSIONED_STEAM_USER_ACCESSOR_NAME SteamAPI_SteamUser_v023
+#define VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME SteamAPI_SteamFriends_v017
+#define VERSIONED_STEAM_UTILS_ACCESSOR_NAME SteamAPI_SteamUtils_v010
+#define VERSIONED_STEAM_USERSTATS_ACCESSOR_NAME SteamAPI_SteamUserStats_v012
+#define VERSIONED_STEAM_APPS_ACCESSOR_NAME SteamAPI_SteamApps_v008
 
-#endif  // FAKE_STEAM_API_FLAT_H
+#endif  // VERSIONED_ACCESSOR_NAME_MACROS_H

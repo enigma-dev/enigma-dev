@@ -125,9 +125,6 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 # Else build the fake library.
 ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
 include Universal_System/StubExtensions/Steamworks/Makefile
-else
-compile_game: $(STEAM_FAKE_LIB)
-clean: steam_clean
 endif
 
 # If DataStructures extension not enabled, enable DataStructures stub.
