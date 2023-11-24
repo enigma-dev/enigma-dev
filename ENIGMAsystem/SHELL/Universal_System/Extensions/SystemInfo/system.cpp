@@ -712,10 +712,18 @@ std::string os_is_virtual() {
     return "YES";
   #endif
   class cpuid {
+    #if defined(_MSC_VER)
+    int regs[4];
+    #else
     unsigned regs[4];
+    #endif
   public:
     explicit cpuid(unsigned func_id, unsigned sub_func_id) {
+      #if defined(_MSC_VER)
+      __cpuidex(regs, func_id, sub_func_id);
+      #else
       asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
+      #endif  
     }
     const unsigned &eax() const {
       return regs[0];
@@ -1491,10 +1499,18 @@ std::string cpu_core_count() {
     return pointer_null();
   }
   class cpuid {
+    #if defined(_MSC_VER)
+    int regs[4];
+    #else
     unsigned regs[4];
+    #endif
   public:
     explicit cpuid(unsigned func_id, unsigned sub_func_id) {
+      #if defined(_MSC_VER)
+      __cpuidex(regs, func_id, sub_func_id);
+      #else
       asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
+      #endif  
     }
     const unsigned &eax() const {
       return regs[0];
