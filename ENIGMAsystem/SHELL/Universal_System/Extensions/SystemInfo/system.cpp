@@ -725,6 +725,20 @@ std::string os_is_virtual() {
       asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
       #endif  
     }
+    #if defined(_MSC_VER)
+    const int &eax() const {
+      return regs[0];
+    }
+    const int &ebx() const {
+      return regs[1];
+    }
+    const int &ecx() const {
+      return regs[2];
+    }
+    const int &edx() const {
+      return regs[3];
+    }
+    #else
     const unsigned &eax() const {
       return regs[0];
     }
@@ -737,6 +751,7 @@ std::string os_is_virtual() {
     const unsigned &edx() const {
       return regs[3];
     }
+    #endif
   };
   if (!(cpuid(1, 0).ecx() & (1 << 31)))
     return "NO";
@@ -1370,6 +1385,20 @@ std::string cpu_vendor() {
     explicit cpuid(unsigned func_id, unsigned sub_func_id) {
       asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
     }
+    #if defined(_MSC_VER)
+    const int &eax() const {
+      return regs[0];
+    }
+    const int &ebx() const {
+      return regs[1];
+    }
+    const int &ecx() const {
+      return regs[2];
+    }
+    const int &edx() const {
+      return regs[3];
+    }
+    #else
     const unsigned &eax() const {
       return regs[0];
     }
@@ -1382,6 +1411,7 @@ std::string cpu_vendor() {
     const unsigned &edx() const {
       return regs[3];
     }
+    #endif
   };
   cpuid cpuid0(0, 0);
   cpuvendor += std::string((const char *)&cpuid0.ebx(), 4);
