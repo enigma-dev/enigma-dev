@@ -270,6 +270,7 @@ namespace {
   vector<string> fonts;
   SDL_Renderer *renderer = nullptr;
   SDL_Surface *surf = nullptr;
+  ImFontAtlas *shared_font_atlas = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "", string def = "") {
     SDL_Window *window = nullptr;
@@ -290,21 +291,28 @@ namespace {
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return "";
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext(); ngs::imgui::ifd_load_fonts();
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
-    ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
-    ImGuiIO& io = ImGui::GetIO(); (void)io; ImFontConfig config; io.IniFilename = nullptr;
-    config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 };
-    float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
-    for (unsigned i = 0; i < fonts.size(); i++) {
-      message_pump();
-      if (ngs::fs::file_exists(fonts[i])) {
-        io.Fonts->AddFontFromFileTTF(fonts[i].c_str(), fontSize, (!i) ? nullptr : &config, ranges);
+    if (!shared_font_atlas)
+      shared_font_atlas = new ImFontAtlas();
+    ImGui::CreateContext(shared_font_atlas);
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_LOADED") != std::to_string(1)) { 
+      ngs::imgui::ifd_load_fonts();
+      if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
+      ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
+      ImFontConfig config; io.IniFilename = nullptr;
+      config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 };
+      float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
+      for (unsigned i = 0; i < fonts.size(); i++) {
+        message_pump();
+        if (ngs::fs::file_exists(fonts[i])) {
+          io.Fonts->AddFontFromFileTTF(fonts[i].c_str(), fontSize, (!i) ? nullptr : &config, ranges);
+        }
       }
+      if (!io.Fonts->Fonts.empty()) io.Fonts->Build();
+      ngs::fs::environment_set_variable("IMGUI_FONT_LOADED", std::to_string(1));
     }
-    if (!io.Fonts->Fonts.empty()) io.Fonts->Build();
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty()) {
-      ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", "0");
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(0));
     }
     int theme = (int)strtoul(ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").c_str(), nullptr, 10);
     if (theme == -1) {
