@@ -9,8 +9,8 @@ Make-Vars:
   path:
   make: gmake
   makeflags:
-  cc: /usr/local/bin/clang
-  cxx: /usr/local/bin/clang++
+  cc: clang
+  cxx: clang++
   cppflags:
   cxxflags: -m32 -stdlib=libc++ -Wno-missing-declarations -Wno-parentheses-equality
   cflags: -m32 -Wall -O3
