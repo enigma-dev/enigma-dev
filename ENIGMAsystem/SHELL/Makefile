@@ -101,7 +101,7 @@ override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR)
 
 .PHONY: all clean compile_game clean print_flags write_src_files android_game
 
-all: $(MAKE_TARGETS)
+all: $(MAKE_TARGETS) Stub
 
 print_flags:
 	@echo -e "\n################ Compiler Info ################"
@@ -123,14 +123,17 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
 # If Steamworks extension not enabled, enable Steamworks stub.
 # Else build the fake library.
-ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
-include Universal_System/StubExtensions/Steamworks/Makefile
-endif
+# ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
+# include Universal_System/StubExtensions/Steamworks/Makefile
+# endif
 
 # If DataStructures extension not enabled, enable DataStructures stub.
-ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
-include Universal_System/StubExtensions/DataStructures/Makefile
-endif
+Stub:
+	for i in `ls Universal_System/Extensions`; do \
+	ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
+	include Universal_System/StubExtensions/DataStructures/Makefile
+	endif \
+	done
 
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
