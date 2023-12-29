@@ -127,7 +127,7 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 # include Universal_System/StubExtensions/Steamworks/Makefile
 # endif
 
-# If DataStructures extension not enabled, enable DataStructures stub.
+# If certain extension not enabled, enable its stub.
 Stub:
 	for i in `ls Universal_System/Extensions`; do \
 	ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
