@@ -1,3 +1,7 @@
 #!/bin/sh
 cd "${0%/*}"
-sudo "java" -Djna.nosys=true -jar "lateralgm.jar" "$1"
+if [ $(uname) = "Darwin" ]; then
+  sudo "java" -Djna.nosys=true -jar "lateralgm.jar" "$1";
+else
+  "java" -Djna.nosys=true -jar "lateralgm.jar" "$1";
+fi
