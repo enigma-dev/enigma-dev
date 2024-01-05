@@ -8,8 +8,8 @@ Target-platform: MacOSX
 Make-Vars:
   make: make
   makeflags:
-  cc: gcc12
-  cxx: g++12
+  cc: gcc-*
+  cxx: g++-*
   cppflags:
   cxxflags:
   cflags:
@@ -17,8 +17,8 @@ Make-Vars:
   links:
 
 Parser-Vars:
-  defines: gcc12 -dM -x c++ --std=c++03 -E $blank
-  searchdirs: gcc12 -E -x c++ --std=c++03 -v $blank 
+  defines: gcc-* -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc-* -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
