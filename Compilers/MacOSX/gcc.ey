@@ -8,8 +8,8 @@ Target-platform: MacOSX
 Make-Vars:
   make: make
   makeflags:
-  cc: /opt/local/bin/gcc-mp-*
-  cxx: /opt/local/bin/g++-mp-*
+  cc: /opt/local/bin/gcc-mp-12
+  cxx: /opt/local/bin/g++-mp-12
   cppflags:
   cxxflags:
   cflags:
