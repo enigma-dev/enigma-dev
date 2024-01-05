@@ -24,6 +24,7 @@
 #include "treenode.pb.h"
 
 #include <cstdio>
+#include <cstdlib>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
  #define DLLEXPORT extern "C" __declspec(dllexport)
