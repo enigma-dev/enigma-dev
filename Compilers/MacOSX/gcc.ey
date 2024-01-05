@@ -8,8 +8,8 @@ Target-platform: MacOSX
 Make-Vars:
   make: make
   makeflags:
-  cc: gcc-*
-  cxx: g++-*
+  cc: /opt/local/bin/gcc-mp-*
+  cxx: /opt/local/bin/g++-mp-*
   cppflags:
   cxxflags:
   cflags:
@@ -17,8 +17,8 @@ Make-Vars:
   links:
 
 Parser-Vars:
-  defines: gcc-* -dM -x c++ --std=c++03 -E $blank
-  searchdirs: gcc-* -E -x c++ --std=c++03 -v $blank 
+  defines: /opt/local/bin/gcc-mp-* -dM -x c++ --std=c++03 -E $blank
+  searchdirs: /opt/local/bin/gcc-mp-* -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
