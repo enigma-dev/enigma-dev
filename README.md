@@ -17,7 +17,7 @@
 - Expanded upon Shell and Process Execution (process info).
 - Improved upon Dialog Box and Graphical Widgets System.
 
-**NOTE!** M1/M2 Apple Silicon Mac users will need the OpenJDK downloaded and installed from [here](https://adoptium.net/temurin/releases/?version=17&os=mac&arch=aarch64&package=jdk) for free, (Intel Mac users can still use HomeBrew or MacPorts if needed), HomeBrew and MacPorts is broken on Apple Silicon.
+**NOTE!** Apple Silicon Mac users will need the OpenJDK downloaded and installed from [here](https://adoptium.net/temurin/releases/?version=17&os=mac&arch=aarch64&package=jdk) for free, (Intel Mac users can still use HomeBrew or MacPorts if needed), HomeBrew and MacPorts is broken on Apple Silicon.
 
 Supported Platforms:
 
@@ -26,7 +26,7 @@ Supported Platforms:
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
 - FreeBSD/GhostBSD/NomadBSD
-- Limited Mac 10.15+ Support
+- MacOS Intel/AppleSilicon
 
 Complete Games:
 
