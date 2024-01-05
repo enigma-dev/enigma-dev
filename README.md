@@ -23,7 +23,7 @@ Supported Platforms:
 
 - Windows i686 7/8/8.1/10/11
 - Windows x86-64 7/8/8.1/10/11
-- MacOS Intel & Apple Silicon
+- Mac OS X x86-64/ARM64 10.15+
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
 - FreeBSD/GhostBSD/NomadBSD
