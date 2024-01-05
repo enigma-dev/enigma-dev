@@ -8,7 +8,6 @@ if [ -f "/opt/local/bin/port" ]; then
   sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
   cd /Applications/stigma-dev
   sudo env CC=clang CXX=clang++ gmake && sudo env CC=clang CXX=clang++ gmake emake
-  sudo port -f deactivate libiconv
   sudo chmod +x ./install.sh
   sudo ./install.sh
   sudo chmod +x ./start.sh
