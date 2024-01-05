@@ -26,7 +26,7 @@ Supported Platforms:
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
 - FreeBSD/GhostBSD/NomadBSD
-- MacOS Intel/AppleSilicon
+- MacOS Intel & Apple Silicon
 
 Complete Games:
 
