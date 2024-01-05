@@ -317,6 +317,10 @@ std::set<EventGroupKey> ListUsedEvents(
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
+  #if (defined(__MACH__) && defined(__APPLE__))
+  setenv("SUDO_ASKPASS", "/Applications/askpass.sh", 1);
+  system("sudo port -f deactivate libiconv");
+  #endif
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
@@ -836,6 +840,10 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     chdir(prevdir.data());
     #endif
   }
+
+  #if (defined(__MACH__) && defined(__APPLE__))
+  system("sudo port -f activate libiconv");
+  #endif
 
   idpr("Done.", 100);
   return 0;
