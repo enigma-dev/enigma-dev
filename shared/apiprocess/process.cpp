@@ -1466,8 +1466,10 @@ namespace ngs::ps {
       #endif
         std::lock_guard<std::mutex> guard(stdopt_mutex);
         stdopt_map[proc_index].append(buffer, nRead);
-        stdopt_map[proc_index] = stdopt_map[proc_index].substr(stdopt_map[proc_index].length() - 
-        ((optlmt) ? optlmt : stdopt_map[proc_index].length()));
+        long long limit = stdopt_map[proc_index].length() -
+        ((optlmt) ? optlmt : stdopt_map[proc_index].length());
+        limit = ((limit < 0) ? 0 : limit);
+        stdopt_map[proc_index] = stdopt_map[proc_index].substr(limit);
       }
     }
 
