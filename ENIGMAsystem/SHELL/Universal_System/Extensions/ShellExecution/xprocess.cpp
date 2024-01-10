@@ -751,7 +751,7 @@ namespace xprocess {
     return result.c_str();
   }
 
-  void buffer_set_limit_for_standard_output(long long limit) {
+  void set_buffer_limit_for_standard_output(long long limit) {
     ::buffer_set_limit_for_standard_output(limit);
   }
 
