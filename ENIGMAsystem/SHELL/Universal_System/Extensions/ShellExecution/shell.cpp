@@ -70,8 +70,8 @@ string ExecutedProcessReadFromStandardOutput(PROCID procIndex) {
   return executed_process_read_from_standard_output(procIndex);
 }
 
-void BufferSetLimitForStandardOutput(long long limit) {
-  buffer_set_limit_for_standard_output(limit);
+void SetBufferLimitForStandardOutput(long long limit) {
+  set_buffer_limit_for_standard_output(limit);
 }
 
 bool FreeExecutedProcessStandardInput(PROCID procIndex) {
