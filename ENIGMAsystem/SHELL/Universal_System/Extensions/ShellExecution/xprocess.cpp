@@ -752,7 +752,7 @@ namespace xprocess {
   }
 
   void set_buffer_limit_for_standard_output(long long limit) {
-    ::buffer_set_limit_for_standard_output(limit);
+    ::stdout_set_buffer_limit(limit);
   }
 
   bool free_executed_process_standard_input(NGS_PROCID proc_index) {
