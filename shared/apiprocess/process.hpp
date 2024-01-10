@@ -55,6 +55,7 @@ namespace ngs::ps {
   std::string envvar_value_from_proc_id(NGS_PROCID proc_id, std::string name);
   bool envvar_exists_from_proc_id(NGS_PROCID proc_id, std::string name);
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait);
+  void stdout_set_buffer_limit(long long limit);
   std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id);
   long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);
   bool child_proc_id_is_complete(NGS_PROCID proc_id);

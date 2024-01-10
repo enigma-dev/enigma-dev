@@ -1399,6 +1399,7 @@ namespace ngs::ps {
     std::unordered_map<int, bool> proc_did_execute;
     std::string standard_input;
     std::mutex stdopt_mutex;
+    long long optlmt = 0;
     int index = -1;
 
     #if !defined(_WIN32)
@@ -1465,6 +1466,8 @@ namespace ngs::ps {
       #endif
         std::lock_guard<std::mutex> guard(stdopt_mutex);
         stdopt_map[proc_index].append(buffer, nRead);
+        stdopt_map[proc_index] = stdopt_map[proc_index].substr(stdopt_map[proc_index].length() - 
+        ((optlmt) ? optlmt : stdopt_map[proc_index].length()));
       }
     }
 
@@ -1582,6 +1585,10 @@ namespace ngs::ps {
     complete_map[proc_index] = false;
     proc_thread.detach();
     return proc_index;
+  }
+
+  void stdout_set_buffer_limit(long long limit) {
+    optlmt = limit;
   }
 
   std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id) {
