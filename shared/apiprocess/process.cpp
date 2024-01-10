@@ -1426,7 +1426,11 @@ namespace ngs::ps {
         dup2(p_stdin[0], 0);
         close(p_stdout[0]);
         dup2(p_stdout[1], 1);
+        #if defined(NULLIFY_STDERR)
+        dup2(::open("/dev/null", O_RDONLY), 2);
+        #else
         dup2(p_stdout[1], 2);
+        #endif
         for (int i = 3; i < 4096; i++)
           close(i);
         setsid();
@@ -1537,7 +1541,11 @@ namespace ngs::ps {
       ZeroMemory(&si, sizeof(si));
       si.cb = sizeof(STARTUPINFOW);
       si.dwFlags = STARTF_USESTDHANDLES;
+      #if defined(NULLIFY_STDERR)
+      si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+      #else
       si.hStdError = stdout_write;
+      #endif
       si.hStdOutput = stdout_write;
       si.hStdInput = stdin_read;
       PROCESS_INFORMATION pi; ZeroMemory(&pi, sizeof(pi)); NGS_PROCID proc_index = 0;
