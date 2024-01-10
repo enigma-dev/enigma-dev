@@ -14,6 +14,7 @@ bool CompletionStatusFromExecutedProcess(PROCID procIndex);
 long long ExecutedProcessWriteToStandardInput(PROCID procIndex, std::string input);
 std::string CurrentProcessReadFromStandardInput();
 std::string ExecutedProcessReadFromStandardOutput(PROCID procIndex);
+void SetBufferLimitForStandardOutput(long long limit);
 bool FreeExecutedProcessStandardInput(PROCID procIndex);
 bool FreeExecutedProcessStandardOutput(PROCID procIndex);
 PROCID ProcIdFromSelf();
