@@ -130,7 +130,7 @@ namespace xprocess {
   PROCID process_execute_async(const char *command);
   long long executed_process_write_to_standard_input(PROCID proc_index, const char *input);
   const char *executed_process_read_from_standard_output(PROCID proc_index);
-  void buffer_set_limit_for_standard_output(long long limit);
+  void set_buffer_limit_for_standard_output(long long limit);
   bool free_executed_process_standard_input(PROCID proc_index);
   bool free_executed_process_standard_output(PROCID proc_index);
   bool completion_status_from_executed_process(PROCID proc_index);
