@@ -32,6 +32,8 @@
 
 #if defined(__MACH__) && defined(__APPLE__)
 #include <OpenAL/alure.h>
+#elif defined(__OpenBSD__)
+#include <AL/alure2.h>
 #else
 #include <AL/alure.h>
 #endif
