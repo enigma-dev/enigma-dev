@@ -16,5 +16,6 @@ else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
 	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
 else ifeq  ($(TARGET-PLATFORM), OpenBSD)
 	override LDLIBS += -lalure2 -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
+endif
 
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
