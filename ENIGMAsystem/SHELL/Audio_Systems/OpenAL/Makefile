@@ -1,5 +1,3 @@
-SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
-
 ifeq  ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
@@ -20,3 +18,5 @@ else ifeq  ($(TARGET-PLATFORM), OpenBSD)
 	override CXXFLAGS += -I../../shared/alure/include
 	override LDLIBS += ../../shared/alure/libalure2_s.a -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
 endif
+
+SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
