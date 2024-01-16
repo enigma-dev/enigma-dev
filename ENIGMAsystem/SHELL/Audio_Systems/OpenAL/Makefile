@@ -16,7 +16,7 @@ else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
 	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
 else ifeq  ($(TARGET-PLATFORM), OpenBSD)
 	override CXXFLAGS += -I../../shared/alure/include
-	override LDLIBS +=  -lopenal -lsndfile ../../shared/alure/libalure2_s.a /usr/local/lib/libvorbisfile.a /usr/local/lib/libvorbis.a /usr/local/lib/libopusfile.a /usr/local/lib/libopus.a /usr/local/lib/libogg.a /usr/lib/libpthread.a /usr/lib/libc++.a /usr/lib/libc++abi.a /usr/lib/libm.a /usr/lib/libsndio.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libFLAC.a /usr/local/lib/libmpg123.a /usr/local/lib/libmp3lame.a
+	override LDLIBS += ../../shared/alure/libalure2_s.a -lopenal /usr/local/lib/libvorbisfile.a /usr/local/lib/libvorbis.a /usr/local/lib/libopusfile.a /usr/local/lib/libopus.a /usr/local/lib/libogg.a /usr/lib/libpthread.a /usr/lib/libc++.a /usr/lib/libc++abi.a /usr/lib/libm.a /usr/lib/libsndio.a /usr/local/lib/libvorbisenc.a /usr/local/lib/libFLAC.a /usr/local/lib/libmpg123.a -lsndfile /usr/local/lib/libmp3lame.a
 endif
 
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
