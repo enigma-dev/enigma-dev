@@ -17,5 +17,6 @@ else ifeq  ($(TARGET-PLATFORM), FreeBSD)
 else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
 	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
 else ifeq  ($(TARGET-PLATFORM), OpenBSD)
-	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
+	override CXXFLAGS += -I../../shared/alure/include
+	override LDLIBS += ../../shared/alure/libalure-static.a -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
 endif
