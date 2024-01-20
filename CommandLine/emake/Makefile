@@ -19,7 +19,14 @@ ifeq ($(UNIX_BASED), true)
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../$(LIB_PFX)EGM -I../$(LIB_PFX)EGM
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf$(SUFFIX) -lEGM$(SUFFIX) -lProtocols$(SUFFIX) -lENIGMAShared$(SUFFIX) -lgrpc++ -lprotobuf -lyaml-cpp -lpng
+ifeq ($(OS), FreeBSD)
+	LDFLAGS += $(shell pkg-config --libs --cflags protobuf) -Wl,--allow-shlib-undefined
+else ifeq ($(OS), DragonFly)
+	LDFLAGS += $(shell pkg-config --libs --cflags protobuf) -Wl,--allow-shlib-undefined
+else ifeq ($(OS), OpenBSD)
+	LDFLAGS += $(shell pkg-config --libs --cflags protobuf) -Wl,--allow-shlib-undefined
+endif
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests$(SUFFIX)
