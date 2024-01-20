@@ -10,8 +10,8 @@ using enigma::AssetArray;
 enum load_state { LOADSTATE_NONE, LOADSTATE_INDICATED, LOADSTATE_COMPLETE };
 
 struct Sound {
-  Mix_Chunk *mc;
-  Mix_Music *mm;
+  Mix_Chunk *mc = nullptr;
+  Mix_Music *mm = nullptr;
   float X = 0, Y = 0, Z = 0 , minD = 1, maxD = 1000000000;
   
   static const char* getAssetTypeName() { return "sound"; }
