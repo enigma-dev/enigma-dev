@@ -30,6 +30,7 @@ struct Sound {
     if (!isDestroyed()) {
       if (mc) {
         Mix_FreeChunk(mc);
+        mc = nullptr;
       }
     }
   }
