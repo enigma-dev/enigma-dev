@@ -10,4 +10,4 @@ Depends:
 	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 	
 Represents:
-	Build-platforms: Windows, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
