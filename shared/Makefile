@@ -43,6 +43,7 @@ ifeq ($(UNIX_BASED), true)
 		LSVGREPOS += $(shell chmod +x ../ENIGMAsystem/SHELL/Widget_Systems/SDL/imgui.sh)
 	endif
 else
+	XPROCREPOS := $(shell xproc/example/example.sh)
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif
 SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)

@@ -8,3 +8,6 @@
 	path = shared/SDL_mixer
 	url = https://github.com/time-killer-games/SDL_mixer
 	branch = SDL2
+[submodule "shared/xproc"]
+	path = shared/xproc
+	url = https://github.com/time-killer-games/xproc
