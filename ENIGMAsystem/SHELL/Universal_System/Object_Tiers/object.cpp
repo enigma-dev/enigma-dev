@@ -21,6 +21,8 @@
 #include "Universal_System/reflexive_types.h"
 #include "object.h"
 #include "libEGMstd.h"
+#include "serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #ifdef DEBUG_MODE
   #include "Universal_System/Instances/instance_system.h"
@@ -86,6 +88,37 @@ namespace enigma
         objectdata.resize(object_idmax);
         for (int i = 0; i < objectcount; i++)
             objectdata[objs[i].id] = &objs[i];
+    }
+
+    std::vector<std::byte> object_basic::serialize() {
+      std::vector<std::byte> bytes{};
+      std::size_t len = 0;
+
+      enigma_internal_serialize<unsigned char>(object_basic::objtype, len, bytes);
+      enigma_internal_serialize(id, len, bytes);
+      enigma_internal_serialize(object_index, len, bytes);
+
+      bytes.shrink_to_fit();
+      return bytes;
+    }
+
+    std::size_t object_basic::deserialize_self(std::byte *iter) {
+      auto type = enigma::deserialize<unsigned char>(iter);
+      if (type != object_basic::objtype) {
+        DEBUG_MESSAGE("object_basic::deserialize_self: Object type '" + std::to_string(type) +
+                      "' does not match expected: " + std::to_string(object_basic::objtype),
+                      MESSAGE_TYPE::M_FATAL_ERROR);
+      } else {
+        *const_cast<unsigned int *>(&id) = enigma::deserialize<unsigned int>(iter + 1);
+        *const_cast<int *>(&object_index) = enigma::deserialize<int>(iter + 1 + sizeof(id));
+      }
+      return sizeof(id) + sizeof(object_index) + 1;
+    }
+
+    std::pair<object_basic, std::size_t> object_basic::deserialize(std::byte *iter) {
+      object_basic result;
+      auto len = result.deserialize_self(iter);
+      return {std::move(result), len};
     }
 }
 

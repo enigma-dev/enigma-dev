@@ -22,9 +22,46 @@
 
 #include "transform_object.h"
 
+#include "serialization.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
 namespace enigma
 {
   object_transform::object_transform(): object_graphics() {}
   object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
   object_transform::~object_transform() {}
+
+  std::vector<std::byte> object_transform::serialize() {
+    auto bytes = object_graphics::serialize();
+    std::size_t len = 0;
+
+    enigma_internal_serialize<unsigned char>(object_transform::objtype, len, bytes);
+    enigma_internal_serialize(image_alpha, len, bytes);
+    enigma_internal_serialize(image_blend, len, bytes);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_transform::deserialize_self(std::byte *iter) {
+    auto len = object_graphics::deserialize_self(iter);
+
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
+    if (type != object_transform::objtype) {
+      DEBUG_MESSAGE("object_transform::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_transform::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    enigma_internal_deserialize(image_alpha, iter, len);
+    enigma_internal_deserialize(image_blend, iter, len);
+
+    return len;
+  }
+
+  std::pair<object_transform, std::size_t> object_transform::deserialize(std::byte *iter) {
+    object_transform result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 }
