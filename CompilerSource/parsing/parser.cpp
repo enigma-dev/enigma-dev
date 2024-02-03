@@ -2263,6 +2263,9 @@ std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
   token = lexer->ReadToken();
   auto value = TryParseExpression(Precedence::kAll);
 
+  if(token.type == TT_SEMICOLON) 
+    token = lexer->ReadToken(); // Consume the semicolon  
+
   return std::make_unique<AST::ReturnStatement>(std::move(value), false);
 }
 
@@ -2277,7 +2280,7 @@ std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
 }
 
 std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
-  token = lexer->ReadToken(); // Consume the break
+  token = lexer->ReadToken(); // Consume the continue
   if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
       token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
     return std::make_unique<AST::ContinueStatement>(nullptr);
