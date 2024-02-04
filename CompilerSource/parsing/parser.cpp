@@ -1488,7 +1488,12 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
     require_token(TT_ENDBRACKET, "Expected ']' to close '[' in delete-expression");
   }
 
-  return std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+  auto node =  std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+  if(token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+
+  return node;
 }
 
 std::unique_ptr<AST::Node> TryParseIdExpression() {

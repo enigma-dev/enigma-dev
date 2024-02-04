@@ -452,8 +452,7 @@ TEST(ParserTest, NewExpression_4) {
 TEST(ParserTest, DeleteExpression_1) {
   ParserTester test{"delete x;"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DELETE);
   auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
@@ -466,8 +465,7 @@ TEST(ParserTest, DeleteExpression_1) {
 TEST(ParserTest, DeleteExpression_2) {
   ParserTester test{"::delete x;"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DELETE);
   auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
@@ -480,8 +478,7 @@ TEST(ParserTest, DeleteExpression_2) {
 TEST(ParserTest, DeleteExpression_3) {
   ParserTester test{"delete[] x;"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DELETE);
   auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
@@ -494,8 +491,7 @@ TEST(ParserTest, DeleteExpression_3) {
 TEST(ParserTest, DeleteExpression_4) {
   ParserTester test{"::delete[] x;"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DELETE);
   auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
@@ -574,6 +570,29 @@ TEST(ParserTest, SwitchStatement_3) {
   auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
   ASSERT_EQ(default_->statements->statements.size(), 1);
   ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::CONTINUE);
+} 
+
+TEST(ParserTest, SwitchStatement_4) {
+  ParserTester test{"switch (1) { default: delete [] x; return \"new test\";};"};  
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH); 
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 2);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::DELETE);
+  ASSERT_EQ(default_->statements->statements[1]->type, AST::NodeType::RETURN);
+
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(default_->statements->statements[0].get());
+  ASSERT_FALSE(delete_->is_global); 
+  ASSERT_TRUE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
 } 
 
 // TEST(ParserTest, CodeBlock) {
