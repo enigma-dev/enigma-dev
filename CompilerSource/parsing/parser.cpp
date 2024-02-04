@@ -2276,26 +2276,36 @@ std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
 
 std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
   token = lexer->ReadToken(); // Consume the break
+  std::unique_ptr<AST::BreakStatement> node ;
+
   if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
       token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
-        if(token.type == TT_SEMICOLON)
-          token = lexer->ReadToken();
-    return std::make_unique<AST::BreakStatement>(nullptr);
+    node = std::make_unique<AST::BreakStatement>(nullptr);
   } else {
-    return std::make_unique<AST::BreakStatement>(TryParseOperand());
+    node = std::make_unique<AST::BreakStatement>(TryParseOperand());
   }
+
+  if(token.type == TT_SEMICOLON)
+    token = lexer->ReadToken();
+
+  return node;
 }
 
 std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
   token = lexer->ReadToken(); // Consume the continue
+  std::unique_ptr<AST::ContinueStatement> node;
+
   if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
       token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
-        if(token.type == TT_SEMICOLON)
-          token = lexer->ReadToken();
-    return std::make_unique<AST::ContinueStatement>(nullptr);
+    node = std::make_unique<AST::ContinueStatement>(nullptr);
   } else {
-    return std::make_unique<AST::ContinueStatement>(TryParseOperand());
+    node = std::make_unique<AST::ContinueStatement>(TryParseOperand());
   }
+
+  if(token.type == TT_SEMICOLON)
+    token = lexer->ReadToken();
+
+  return node;
 }
 
 std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {

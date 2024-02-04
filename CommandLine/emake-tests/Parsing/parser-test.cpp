@@ -502,7 +502,7 @@ TEST(ParserTest, DeleteExpression_4) {
 }
 
 TEST(ParserTest, SwitchStatement_1) {
-  ParserTester test{"switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break };"};
+  ParserTester test{"switch (5 * 6) { case 1: return 2 break 13; case 2: return 3 break default: break };"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -557,7 +557,7 @@ TEST(ParserTest, SwitchStatement_2) {
 } 
 
 TEST(ParserTest, SwitchStatement_3) {
-  ParserTester test{"switch (1) { default: continue;};"};  
+  ParserTester test{"switch (1) { default: continue 12;};"};  
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
