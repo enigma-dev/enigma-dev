@@ -561,7 +561,7 @@ TEST(ParserTest, SwitchStatement_2) {
 } 
 
 TEST(ParserTest, SwitchStatement_3) {
-  ParserTester test{"switch (1) { default: break;};"}; 
+  ParserTester test{"switch (1) { default: continue;};"};  
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -573,7 +573,7 @@ TEST(ParserTest, SwitchStatement_3) {
   ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
   auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
   ASSERT_EQ(default_->statements->statements.size(), 1);
-  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BREAK);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::CONTINUE);
 } 
 
 // TEST(ParserTest, CodeBlock) {
