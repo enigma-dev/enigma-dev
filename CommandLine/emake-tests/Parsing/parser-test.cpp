@@ -360,8 +360,7 @@ void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::K
 TEST(ParserTest, NewExpression_1) {
   ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5};"};
   auto node = test->TryParseStatement();;
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
   auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
@@ -380,8 +379,7 @@ TEST(ParserTest, NewExpression_1) {
 TEST(ParserTest, NewExpression_2) {
   ParserTester test{"::new int[][15]{1, 2, 3, 4, 5};"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
   auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
@@ -403,8 +401,7 @@ TEST(ParserTest, NewExpression_2) {
 TEST(ParserTest, NewExpression_3) {
   ParserTester test{"::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5);"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
   auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
@@ -594,6 +591,35 @@ TEST(ParserTest, SwitchStatement_4) {
 
   assert_identifier_is(delete_->expression.get(), "x");
 } 
+
+TEST(ParserTest, SwitchStatement_5) {
+  ParserTester test{"switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5}; return \"new test\";};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 2);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::NEW);
+  ASSERT_EQ(default_->statements->statements[1]->type, AST::NodeType::RETURN);
+
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(default_->statements->statements[0].get());
+  ASSERT_FALSE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  check_placement(new_);
+
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 1);
+  ASSERT_EQ(new_->ft.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
+
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
+}
 
 // TEST(ParserTest, CodeBlock) {
 //   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};

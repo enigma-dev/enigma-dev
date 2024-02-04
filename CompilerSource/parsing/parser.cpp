@@ -1475,7 +1475,13 @@ std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
   is_array = !type.decl.components.empty() &&
              type.decl.components.begin()->kind == DeclaratorNode::Kind::ARRAY_BOUND;
 
-  return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), std::move(type), std::move(initializer));
+  std::unique_ptr<AST::Node> node = std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), std::move(type), std::move(initializer));
+
+  if(token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+
+  return node;
 }
 
 std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
