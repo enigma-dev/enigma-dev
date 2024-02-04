@@ -560,6 +560,22 @@ TEST(ParserTest, SwitchStatement_2) {
   ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::RETURN);
 } 
 
+TEST(ParserTest, SwitchStatement_3) {
+  ParserTester test{"switch (1) { default: break;};"}; 
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH); 
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BREAK);
+} 
+
 // TEST(ParserTest, CodeBlock) {
 //   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
 //   auto node = test->TryParseDeclarations(true);
