@@ -332,7 +332,6 @@ std::vector<std::string> string_split(std::string str, char delimiter) {
   return vec;
 }
 
-
 #if defined(__linux__)
 long long read_meminfo(std::string key) {
   long long meminfo = -1;
