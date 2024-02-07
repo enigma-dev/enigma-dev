@@ -227,7 +227,7 @@ std::string wine_get_version() {
   if (!wine_version.empty())
     return wine_version;
   static const char *(CDECL *pwine_get_version)(void);
-  HMODULE hntdll = GetModuleHandle("ntdll.dll");
+  HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
   if (!hntdll)
     return pointer_null();
   pwine_get_version = (const char *(*)())GetProcAddress(hntdll, "wine_get_version");
@@ -319,6 +319,42 @@ std::string read_output(std::string cmd) {
   return str;
 }
 
+std::vector<std::string> string_split(std::string str, char delimiter) {
+  std::vector<std::string> vec;
+  std::stringstream sstr(str);
+  std::string tmp;
+  while (std::getline(sstr, tmp, delimiter)) {
+    #if defined(_WIN32)
+    message_pump();
+    #endif
+    vec.push_back(tmp);
+  }
+  return vec;
+}
+
+
+#if defined(__linux__)
+long long read_meminfo(std::string key) {
+  long long meminfo = -1;
+  std::fstream doc;
+  doc.open("/proc/meminfo", std::ios::in);
+  if (doc.is_open()) {
+    std::string tmp;
+    while (std::getline(doc, tmp)) {
+      if (tmp.substr(0, key.length()) == key) {
+        key = std::regex_replace(key, std::regex(":"), "");
+        tmp = std::regex_replace(tmp, std::regex(":"), "");
+        tmp = std::regex_replace(tmp, std::regex(" kB"), "");
+        tmp = std::regex_replace(tmp, std::regex(" "), "");
+        meminfo = strtoll(tmp.substr(key.length()).c_str(), nullptr, 10) * 1024;
+      }
+    }
+  }
+  doc.close();
+  return meminfo;
+}
+#endif
+
 #if defined(_WIN32)
 void allocate_windows_version_number_and_product_name() {
   auto GetOSMajorVersionNumber = []() {
@@ -387,19 +423,6 @@ void allocate_windows_version_number_and_product_name() {
   }
 }
 #endif
-
-std::vector<std::string> string_split(std::string str, char delimiter) {
-  std::vector<std::string> vec;
-  std::stringstream sstr(str);
-  std::string tmp;
-  while (std::getline(sstr, tmp, delimiter)) {
-    #if defined(_WIN32)
-    message_pump();
-    #endif
-    vec.push_back(tmp);
-  }
-  return vec;
-}
 
 std::string get_vendor_or_device_name_by_id(unsigned identifier, bool vendor_or_device) {
   if (vendor_name_by_id.find(identifier) != vendor_name_by_id.end() && !vendor_or_device)
@@ -817,9 +840,7 @@ std::string memory_totalram(bool human_readable) {
   if (!sysctl(mib, 2, &buf, &sz, nullptr, 0))
     totalram = buf;
   #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    totalram = (info.totalram * info.mem_unit);
+  totalram = read_meminfo("MemTotal");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   long page_s = sysconf(_SC_PAGESIZE);
   unsigned long long tram = 0;
@@ -865,9 +886,7 @@ std::string memory_freeram(bool human_readable) {
       freeram = (long long)(vmstat.free_count * (long long)page_s);
   }
   #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    freeram = (info.freeram * info.mem_unit);
+  freeram = read_meminfo("MemFree");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   long page_s = sysconf(_SC_PAGESIZE);
   unsigned long long fram = 0;
@@ -899,11 +918,7 @@ std::string memory_usedram(bool human_readable) {
   statex.dwLength = sizeof(statex);
   if (GlobalMemoryStatusEx(&statex))
     usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
-  #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    usedram = ((info.totalram - info.freeram) * info.mem_unit);
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   std::string strtotal = memory_totalram(false);
   std::string stravail = memory_freeram(false);
   long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
@@ -930,9 +945,7 @@ std::string memory_totalswap(bool human_readable) {
   if (!sysctlbyname("vm.swapusage", &info, &sz, nullptr, 0))
     totalswap = info.xsu_total;
   #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    totalswap = (info.totalswap * info.mem_unit);
+  totalswap = read_meminfo("SwapTotal");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
@@ -1016,9 +1029,7 @@ std::string memory_freeswap(bool human_readable) {
   if (!sysctlbyname("vm.swapusage", &info, &sz, nullptr, 0))
     freeswap = info.xsu_avail;
   #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    freeswap = (info.freeswap * info.mem_unit);
+  freeswap = read_meminfo("SwapFree");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
@@ -1105,9 +1116,12 @@ std::string memory_usedswap(bool human_readable) {
   if (!sysctlbyname("vm.swapusage", &info, &sz, nullptr, 0))
     usedswap = info.xsu_used;
   #elif defined(__linux__)
-  struct sysinfo info;
-  if (!sysinfo(&info))
-    usedswap = ((info.totalswap - info.freeswap) * info.mem_unit);
+  std::string strtotal = memory_totalswap(false);
+  std::string stravail = memory_freeswap(false);
+  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
+  long long avail = ((stravail != pointer_null()) ? strtoull(stravail.c_str(), nullptr, 10) : -1);
+  if (total != -1 && avail != -1)
+    usedswap = total - avail;
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   kvm_t *kvmh = nullptr;
   long page_s = sysconf(_SC_PAGESIZE);
