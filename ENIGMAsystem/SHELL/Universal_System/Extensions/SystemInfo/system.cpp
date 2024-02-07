@@ -348,8 +348,8 @@ long long read_meminfo(std::string key) {
         meminfo = strtoll(tmp.substr(key.length()).c_str(), nullptr, 10) * 1024;
       }
     }
+    doc.close();
   }
-  doc.close();
   return meminfo;
 }
 #endif
