@@ -128,12 +128,11 @@ include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 # endif
 
 # If certain extension not enabled, enable its stub.
-Stub:
-	for i in `ls Universal_System/Extensions`; do \
-	ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
-	include Universal_System/StubExtensions/DataStructures/Makefile
-	endif \
-	done
+DISABLED_EXT :=$(filter-out $(EXTENSIONS),$(wildcard Universal_System/Extensions/*))
+
+ENABLED_STUB :=$(filter $(DISABLED_EXT),$(wildcard Universal_System/StubExtensions/*))
+
+$(foreach ext,$(ENABLED_STUB),include Universal_System/StubExtensions/$(ext)/Makefile)
 
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
