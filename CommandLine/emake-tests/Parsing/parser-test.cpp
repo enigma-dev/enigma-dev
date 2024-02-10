@@ -798,14 +798,82 @@ TEST(ParserTest, ForLoop_1) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto* for_ =  dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_EQ(for_->assignment->type, AST::NodeType::DECLARATION);
+  auto* decl = dynamic_cast<AST::DeclarationStatement *>(for_->assignment.get());
+  ASSERT_EQ(decl->storage_class, enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY);
+  ASSERT_EQ(decl->declarations.size(), 1);
+  ASSERT_NE(decl->declarations[0].init, nullptr);
+  ASSERT_EQ(decl->declarations[0].declarator->def, jdi::builtin_type__int);
+  ASSERT_EQ(decl->declarations[0].declarator->flags, 0);
+  auto &decl1 = decl->declarations[0].declarator->decl;
+  ASSERT_EQ(decl1.name.content, "i");
+  ASSERT_EQ(decl1.components.size(), 0);
+
+  ASSERT_EQ(for_->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  auto * binary = dynamic_cast<AST::BinaryExpression *>(for_->condition.get());
+  ASSERT_EQ(binary->operation, TT_LESS);
+  ASSERT_EQ(binary->left->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(binary->left.get(), "i");
+  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
+  auto *right = dynamic_cast<AST::Literal*>(binary->right.get());
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value), "5");
+
+  ASSERT_EQ(for_->increment->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(for_->increment.get());
+  ASSERT_EQ(unary->operation, TT_INCREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(unary->operand.get(), "i"); 
+
+  ASSERT_EQ(for_->body->type, AST::NodeType::BLOCK);
+  auto* block = dynamic_cast<AST::CodeBlock *>(for_->body.get());
+  ASSERT_EQ(block->statements.size(), 0);
 }
 
 TEST(ParserTest, ForLoop_2) {
-  ParserTester test{"for int i = 0; i < 5; i++ {}"};
+  ParserTester test{"for int i = 0, j=1; i >= 12; --i {}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto* for_ =  dynamic_cast<AST::ForLoop *>(node.get());
+  
+  ASSERT_EQ(for_->assignment->type, AST::NodeType::DECLARATION);
+  auto* decl = dynamic_cast<AST::DeclarationStatement *>(for_->assignment.get());
+  ASSERT_EQ(decl->storage_class, enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY);
+  ASSERT_EQ(decl->declarations.size(), 2);
+  ASSERT_NE(decl->declarations[0].init, nullptr);
+  ASSERT_EQ(decl->declarations[0].declarator->def, jdi::builtin_type__int);
+  ASSERT_EQ(decl->declarations[0].declarator->flags, 0);
+  auto &decl1 = decl->declarations[0].declarator->decl;
+  ASSERT_EQ(decl1.name.content, "i");
+  ASSERT_EQ(decl1.components.size(), 0);
+  ASSERT_NE(decl->declarations[1].init, nullptr);
+  ASSERT_EQ(decl->declarations[1].declarator->def, jdi::builtin_type__int);
+  ASSERT_EQ(decl->declarations[1].declarator->flags, 0);
+  auto &decl2 = decl->declarations[1].declarator->decl;
+  ASSERT_EQ(decl2.name.content, "j");
+  ASSERT_EQ(decl2.components.size(), 0);
+
+  ASSERT_EQ(for_->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  auto * binary = dynamic_cast<AST::BinaryExpression *>(for_->condition.get());
+  ASSERT_EQ(binary->operation, TT_GREATEREQUAL);
+  ASSERT_EQ(binary->left->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(binary->left.get(), "i");
+  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
+  auto *right = dynamic_cast<AST::Literal*>(binary->right.get());
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value), "12");
+
+  ASSERT_EQ(for_->increment->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  auto *unary = dynamic_cast<AST::UnaryPrefixExpression *>(for_->increment.get());
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(unary->operand.get(), "i"); 
+
+  ASSERT_EQ(for_->body->type, AST::NodeType::BLOCK);
+  auto* block = dynamic_cast<AST::CodeBlock *>(for_->body.get());
+  ASSERT_EQ(block->statements.size(), 0);
 }
 
 TEST(ParserTest, ForLoop_3) {
@@ -814,6 +882,37 @@ TEST(ParserTest, ForLoop_3) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto* for_ =  dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_EQ(for_->assignment->type, AST::NodeType::CAST);
+  auto* cast = dynamic_cast<AST::CastExpression *>(for_->assignment.get());
+  ASSERT_EQ(cast->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(cast->ft.flags, 0);
+  ASSERT_EQ(cast->ft.decl.components.size(), 0);
+  ASSERT_EQ(cast->ft.decl.name.content, "");
+  ASSERT_EQ(cast->ft.decl.has_nested_declarator, false);
+  ASSERT_EQ(cast->kind, enigma::parsing::AST::CastExpression::Kind::C_STYLE);
+  auto* expr = dynamic_cast<AST::Node *>(cast->expr.get());
+  ASSERT_EQ(expr->type, AST::NodeType::PARENTHETICAL);
+
+  ASSERT_EQ(for_->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  auto * binary = dynamic_cast<AST::BinaryExpression *>(for_->condition.get());
+  ASSERT_EQ(binary->operation, TT_LESS);
+  ASSERT_EQ(binary->left->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(binary->left.get(), "i");
+  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
+  auto *right = dynamic_cast<AST::Literal*>(binary->right.get());
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value), "5");
+
+  ASSERT_EQ(for_->increment->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(for_->increment.get());
+  ASSERT_EQ(unary->operation, TT_INCREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(unary->operand.get(), "i"); 
+
+  ASSERT_EQ(for_->body->type, AST::NodeType::BLOCK);
+  auto* block = dynamic_cast<AST::CodeBlock *>(for_->body.get());
+  ASSERT_EQ(block->statements.size(), 0);
 }
 
 TEST(ParserTest, ForLoop_4) {
@@ -822,4 +921,35 @@ TEST(ParserTest, ForLoop_4) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto* for_ =  dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_EQ(for_->assignment->type, AST::NodeType::CAST);
+  auto* cast = dynamic_cast<AST::CastExpression *>(for_->assignment.get());
+  ASSERT_EQ(cast->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(cast->ft.flags, 0);
+  ASSERT_EQ(cast->ft.decl.components.size(), 0);
+  ASSERT_EQ(cast->ft.decl.name.content, "");
+  ASSERT_EQ(cast->ft.decl.has_nested_declarator, false);
+  ASSERT_EQ(cast->kind, enigma::parsing::AST::CastExpression::Kind::FUNCTIONAL);
+  auto* expr = dynamic_cast<AST::Node *>(cast->expr.get());
+  ASSERT_EQ(expr->type, AST::NodeType::BINARY_EXPRESSION);
+
+  ASSERT_EQ(for_->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  auto * binary = dynamic_cast<AST::BinaryExpression *>(for_->condition.get());
+  ASSERT_EQ(binary->operation, TT_LESS);
+  ASSERT_EQ(binary->left->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(binary->left.get(), "i");
+  ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
+  auto *right = dynamic_cast<AST::Literal*>(binary->right.get());
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value), "5");
+
+  ASSERT_EQ(for_->increment->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(for_->increment.get());
+  ASSERT_EQ(unary->operation, TT_INCREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  assert_identifier_is(unary->operand.get(), "i"); 
+
+  ASSERT_EQ(for_->body->type, AST::NodeType::BLOCK);
+  auto* block = dynamic_cast<AST::CodeBlock *>(for_->body.get());
+  ASSERT_EQ(block->statements.size(), 0);
 }
