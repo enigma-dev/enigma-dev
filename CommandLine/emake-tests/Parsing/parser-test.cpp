@@ -785,12 +785,63 @@ TEST(ParserTest, TemporaryInitialization_4) {
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "4");
 }
 
+std::string ExpectedMsg = "";
+
+vector<std::string> NodeTypes = {"ERROR",
+                                 "BLOCK",
+                                 "BINARY_EXPRESSION",
+                                 "UNARY_PREFIX_EXPRESSION",
+                                 "UNARY_POSTFIX_EXPRESSION",
+                                 "TERNARY_EXPRESSION",
+                                 "SIZEOF",
+                                 "ALIGNOF",
+                                 "CAST",
+                                 "NEW",
+                                 "DELETE",
+                                 "PARENTHETICAL",
+                                 "ARRAY",
+                                 "IDENTIFIER",
+                                 "SCOPE_ACCESS",
+                                 "LITERAL",
+                                 "FUNCTION_CALL",
+                                 "IF",
+                                 "FOR",
+                                 "WHILE",
+                                 "DO",
+                                 "WITH",
+                                 "REPEAT",
+                                 "SWITCH",
+                                 "CASE",
+                                 "DEFAULT",
+                                 "BREAK",
+                                 "CONTINUE",
+                                 "RETURN",
+                                 "DECLARATION",
+                                 "INITIALIZER"};
+
+vector<std::string> StorageClasses = {"TEMPORARY", "LOCAL", "GLOBAL"};
+
 MATCHER_P(IsDeclaration, decls, "") {
   auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg);
 
   bool b1 = arg->type == AST::NodeType::DECLARATION,
        b2 = decl->storage_class == enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY,
        b3 = decl->declarations.size() == decls.size();
+
+  if (!b1 || !b2 || !b3) ExpectedMsg = "From IsDeclaration Matcher: ";
+
+  if (!b1) {
+    ExpectedMsg += "NodeType = DECLARATION\n";
+    *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+  }
+  if (!b2) {
+    ExpectedMsg += "StorageClass = TEMPORARY\n";
+    *result_listener << "got StorageClass = " << StorageClasses[(int)decl->storage_class] << "\n";
+  }
+  if (!b3) {
+    ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
+    *result_listener << "got DeclarationsSize = " << to_string(decl->declarations.size()) << "\n";
+  }
 
   bool b4 = 1;
   for (size_t i = 0; i < decls.size(); i++) {
@@ -800,6 +851,19 @@ MATCHER_P(IsDeclaration, decls, "") {
     b4 = b4 && decl->declarations[i].declarator->flags == 0;
     b4 = b4 && decli.name.content == decls[i];
     b4 = b4 && decli.components.size() == 0;
+    if (!b4) {
+      if(ExpectedMsg=="")
+        ExpectedMsg = "From IsDeclaration Matcher: ";
+      ExpectedMsg += "Declaration [" + to_string(i) +
+                     "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " + decls[i] +
+                     ", components.size() = 0\n";
+      *result_listener << " got Declaration [" << to_string(i) << "] has init "
+                       << ((decl->declarations[i].init) ? "!=" : "=")
+                       << " nullptr, def = jdi::builtin_type__int, flags = "
+                       << to_string(decl->declarations[i].declarator->flags)
+                       << ", name.content = " << decli.name.content
+                       << ", components.size() = " << to_string(decli.components.size()) << "\n";
+    }
   }
 
   return b1 && b2 && b3 && b4;
@@ -847,19 +911,21 @@ MATCHER_P3(IsUnaryPrefixOperator, opType, op, iden, "") {
 
   return b1 && b2 && b3 && b4;
 }
-std::string ExpectedMsg = "fares";
 
 MATCHER_P(IsStatementBlock, stateSize, "") {
   bool b1 = arg->type == AST::NodeType::BLOCK, b2 = arg->statements.size() == size_t(stateSize);
-  enum enigma::parsing::AST::NodeType type = arg->type;
 
-  // if (!b1) {
-  //   *result_listener << "got " << int(type) << "\n";
-  //   ExpectedMsg = int(AST::NodeType::BLOCK);
-  // }
+  if (!b1 || !b2) {
+    ExpectedMsg = "From IsStatementBlock Matcher: ";
+  }
+
+  if (!b1) {
+    ExpectedMsg += "NodeType = BLOCK";
+    *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+  }
   if (!b2) {
-    *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
     ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
+    *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
   }
 
   return b1 && b2;
