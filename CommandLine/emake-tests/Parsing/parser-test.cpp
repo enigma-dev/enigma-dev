@@ -4,36 +4,9 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "gmock/gmock-more-matchers.h"
 
 using namespace ::enigma::parsing;
 using namespace ::testing;
-// using ::testing::_;
-// using ::testing::AllOf;
-// using ::testing::AnyOf;
-// using ::testing::ContainerEq;
-// using ::testing::Contains;
-// using ::testing::Each;
-// using ::testing::ElementsAre;
-// using ::testing::ElementsAreArray;
-// using ::testing::Eq;
-// using ::testing::FieldsAre;
-// using ::testing::Gt;
-
-// using ::testing::Ge;
-// using ::testing::HasSubstr;
-// using ::testing::IsSubsetOf;
-// using ::testing::Lt;
-// using ::testing::Matcher;
-// using ::testing::Not;
-// using ::testing::Pair;
-// using ::testing::Pointwise;
-// using ::testing::PrintToString;
-// using ::testing::Truly;
-// using ::testing::UnorderedElementsAre;
-// using ::testing::UnorderedElementsAreArray;
-// using ::testing::WhenSorted;
-// using ::testing::internal::FormatMatcherDescription;
 
 class TestFailureErrorHandler : public ErrorHandler {
  public:
@@ -379,7 +352,7 @@ void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::K
 TEST(ParserTest, NewExpression_1) {
   ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5};"};
   auto node = test->TryParseStatement();
-  ;
+
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
@@ -813,9 +786,9 @@ TEST(ParserTest, TemporaryInitialization_4) {
 }
 
 MATCHER_P(IsDeclaration, decls, "") {
-  auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg->assignment.get());
+  auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg);
 
-  bool b1 = arg->assignment->type == AST::NodeType::DECLARATION,
+  bool b1 = arg->type == AST::NodeType::DECLARATION,
        b2 = decl->storage_class == enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY,
        b3 = decl->declarations.size() == decls.size();
 
@@ -833,65 +806,73 @@ MATCHER_P(IsDeclaration, decls, "") {
 }
 
 MATCHER_P2(IsCast, cast_kind, expr_type, "") {
-  auto *cast = dynamic_cast<AST::CastExpression *>(arg->assignment.get());
+  auto *cast = dynamic_cast<AST::CastExpression *>(arg);
   auto *expr = dynamic_cast<AST::Node *>(cast->expr.get());
 
-  bool b1 = arg->assignment->type == AST::NodeType::CAST, b2 = cast->ft.def == jdi::builtin_type__int,
-       b3 = cast->ft.flags == 0, b4 = cast->ft.decl.components.size() == 0, b5 = cast->ft.decl.name.content == "",
+  bool b1 = arg->type == AST::NodeType::CAST, b2 = cast->ft.def == jdi::builtin_type__int, b3 = cast->ft.flags == 0,
+       b4 = cast->ft.decl.components.size() == 0, b5 = cast->ft.decl.name.content == "",
        b6 = cast->ft.decl.has_nested_declarator == false, b7 = cast->kind == cast_kind, b8 = expr->type == expr_type;
 
   return b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
 }
 
-bool identifier_is(AST::Node *node, std::string_view name) {
-  return (dynamic_cast<AST::IdentifierAccess *>(node)->name.content == name);
-}
-
 MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
-  auto *binary = dynamic_cast<AST::BinaryExpression *>(arg->condition.get());
-  auto *right = dynamic_cast<AST::Literal *>(binary->right.get());
+  auto *right = dynamic_cast<AST::Literal *>(arg->right.get());
 
-  bool b1 = arg->condition->type == AST::NodeType::BINARY_EXPRESSION, b2 = binary->operation == op,
-       b3 = binary->left->type == left_, b4 = identifier_is(binary->left.get(), iden),
-       b5 = binary->right->type == right_,
+  auto identifier_is = [](AST::Node *node, std::string name) {
+    return dynamic_cast<AST::IdentifierAccess *>(node)->name.content == name;
+  };
+
+  bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op, b3 = arg->left->type == left_,
+       b4 = identifier_is(arg->left.get(), iden), b5 = arg->right->type == right_,
        b6 = std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value) == num;
 
   return b1 && b2 && b3 && b4 && b5 && b6;
 }
 
 MATCHER_P3(IsUnaryPostfixOperator, opType, op, iden, "") {
-  auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(arg->increment.get());
+  auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(arg);
 
-  bool b1 = arg->increment->type == opType, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+  bool b1 = unary->type == opType, b2 = unary->operation == op, b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
        b4 = dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content == iden;
 
   return b1 && b2 && b3 && b4;
 }
 
 MATCHER_P3(IsUnaryPrefixOperator, opType, op, iden, "") {
-  auto *unary = dynamic_cast<AST::UnaryPrefixExpression *>(arg->increment.get());
+  auto *unary = dynamic_cast<AST::UnaryPrefixExpression *>(arg);
 
-  bool b1 = arg->increment->type == opType, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+  bool b1 = unary->type == opType, b2 = unary->operation == op, b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
        b4 = dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content == iden;
 
   return b1 && b2 && b3 && b4;
 }
+std::string ExpectedMsg = "fares";
 
 MATCHER_P(IsStatementBlock, stateSize, "") {
-  EXPECT_EQ(arg->body->type, AST::NodeType::BLOCK);
-  auto *block = dynamic_cast<AST::CodeBlock *>(arg->body.get());
-  EXPECT_EQ(block->statements.size(), 0);
+  bool b1 = arg->type == AST::NodeType::BLOCK, b2 = arg->statements.size() == size_t(stateSize);
+  enum enigma::parsing::AST::NodeType type = arg->type;
 
-  bool b1 = arg->body->type == AST::NodeType::BLOCK, b2 = block->statements.size() == size_t(stateSize);
+  // if (!b1) {
+  //   *result_listener << "got " << int(type) << "\n";
+  //   ExpectedMsg = int(AST::NodeType::BLOCK);
+  // }
+  if (!b2) {
+    *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
+    ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
+  }
 
   return b1 && b2;
 }
 
-MATCHER_P4(IsForLoopWithChildren, M1, M2, M3, M4, "") {
-  return ExplainMatchResult(M1, arg, result_listener) && ExplainMatchResult(M2, arg, result_listener) &&
-         ExplainMatchResult(M3, arg, result_listener) && ExplainMatchResult(M4, arg, result_listener);
+MATCHER_P4(IsForLoopWithChildren, M1, M2, M3, M4, ExpectedMsg) {
+  auto *assign = (arg->assignment.get());
+  auto *binary = dynamic_cast<AST::BinaryExpression *>(arg->condition.get());
+  auto *unary = (arg->increment.get());
+  auto *block = dynamic_cast<AST::CodeBlock *>(arg->body.get());
+
+  return ExplainMatchResult(M1, assign, result_listener) && ExplainMatchResult(M2, binary, result_listener) &&
+         ExplainMatchResult(M3, unary, result_listener) && ExplainMatchResult(M4, block, result_listener);
 }
 
 TEST(ParserTest, ForLoop_1) {
