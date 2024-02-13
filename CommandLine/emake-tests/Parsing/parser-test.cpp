@@ -1114,3 +1114,33 @@ TEST(ParserTest, ForLoop_4) {
                         IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
                         IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
 }
+
+TEST(ParserTest, ForLoop_5) {
+  ParserTester test{"for int i = 0, j=1, k=133 ;i != 12; --i {j ++}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  std::vector<std::string> decls = {"i", "j", "k"};
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsDeclaration(decls),
+                        IsBinaryOperation(TT_NOTEQUAL, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
+                        IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(1)));
+}
+
+TEST(ParserTest, ForLoop_6) {
+  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++ return ;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
+                        IsBinaryOperation(TT_SLASH, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
+                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+}
