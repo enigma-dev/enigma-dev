@@ -26,6 +26,7 @@ Supported Platforms:
 - Mac OS X x86-64/ARM64 10.15+
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
+- Fedora/CentOS/RedHatLinux
 - FreeBSD/GhostBSD/NomadBSD
 
 Complete Games:
