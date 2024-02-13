@@ -818,8 +818,8 @@ vector<std::string> NodeTypes = {"ERROR",
                                  "RETURN",
                                  "DECLARATION",
                                  "INITIALIZER"};
-
 vector<std::string> StorageClasses = {"TEMPORARY", "LOCAL", "GLOBAL"};
+vector<std::string> CastKinds = {"C_STYLE", "STATIC", "DYNAMIC", "REINTERPRET", "CONST", "FUNCTIONAL"};
 
 MATCHER_P(IsDeclaration, decls, "") {
   auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg);
@@ -828,19 +828,21 @@ MATCHER_P(IsDeclaration, decls, "") {
        b2 = decl->storage_class == enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY,
        b3 = decl->declarations.size() == decls.size();
 
-  if (!b1 || !b2 || !b3) ExpectedMsg = "From IsDeclaration Matcher: ";
+  if (!b1 || !b2 || !b3) {
+    ExpectedMsg = "From IsDeclaration Matcher: ";
 
-  if (!b1) {
-    ExpectedMsg += "NodeType = DECLARATION\n";
-    *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
-  }
-  if (!b2) {
-    ExpectedMsg += "StorageClass = TEMPORARY\n";
-    *result_listener << "got StorageClass = " << StorageClasses[(int)decl->storage_class] << "\n";
-  }
-  if (!b3) {
-    ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
-    *result_listener << "got DeclarationsSize = " << to_string(decl->declarations.size()) << "\n";
+    if (!b1) {
+      ExpectedMsg += "NodeType = DECLARATION\n";
+      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "StorageClass = TEMPORARY\n";
+      *result_listener << "got StorageClass = " << StorageClasses[(int)decl->storage_class] << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
+      *result_listener << "got DeclarationsSize = " << to_string(decl->declarations.size()) << "\n";
+    }
   }
 
   bool b4 = 1;
@@ -852,8 +854,7 @@ MATCHER_P(IsDeclaration, decls, "") {
     b4 = b4 && decli.name.content == decls[i];
     b4 = b4 && decli.components.size() == 0;
     if (!b4) {
-      if(ExpectedMsg=="")
-        ExpectedMsg = "From IsDeclaration Matcher: ";
+      if (ExpectedMsg == "") ExpectedMsg = "From IsDeclaration Matcher: ";
       ExpectedMsg += "Declaration [" + to_string(i) +
                      "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " + decls[i] +
                      ", components.size() = 0\n";
@@ -877,39 +878,152 @@ MATCHER_P2(IsCast, cast_kind, expr_type, "") {
        b4 = cast->ft.decl.components.size() == 0, b5 = cast->ft.decl.name.content == "",
        b6 = cast->ft.decl.has_nested_declarator == false, b7 = cast->kind == cast_kind, b8 = expr->type == expr_type;
 
-  return b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
+  bool res = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
+
+  if (!res) {
+    ExpectedMsg = "From IsCast Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = CAST\n";
+      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "ft.flags = 0\n";
+      *result_listener << "got ft.flags = " << to_string(cast->ft.flags) << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "ft.decl.components.size() = 0\n";
+      *result_listener << "got ft.decl.components.size() = " << to_string(cast->ft.decl.components.size()) << "\n";
+    }
+    if (!b5) {
+      ExpectedMsg += "ft.decl.name.content = \"\"\n";
+      *result_listener << "got ft.decl.name.content = " << cast->ft.decl.name.content << "\n";
+    }
+    if (!b6) {
+      ExpectedMsg += "ft.decl.has_nested_declarator = false\n";
+      *result_listener << "got ft.decl.has_nested_declarator = " << to_string(cast->ft.decl.has_nested_declarator)
+                       << "\n";
+    }
+    if (!b7) {
+      ExpectedMsg += "cast->kind = " + CastKinds[(int)cast_kind] + "\n";
+      *result_listener << "got cast->kind = " << CastKinds[(int)cast->kind] << "\n";
+    }
+    if (!b8) {
+      ExpectedMsg += "expr->type = " + NodeTypes[(int)expr_type] + "\n";
+      *result_listener << "got expr->type = " << NodeTypes[(int)expr->type] << "\n";
+    }
+  }
+
+  return res;
 }
 
 MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
   auto *right = dynamic_cast<AST::Literal *>(arg->right.get());
 
-  auto identifier_is = [](AST::Node *node, std::string name) {
-    return dynamic_cast<AST::IdentifierAccess *>(node)->name.content == name;
-  };
-
   bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op, b3 = arg->left->type == left_,
-       b4 = identifier_is(arg->left.get(), iden), b5 = arg->right->type == right_,
+       b4 = dynamic_cast<AST::IdentifierAccess *>(arg->left.get())->name.content == iden,
+       b5 = arg->right->type == right_,
        b6 = std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value) == num;
 
-  return b1 && b2 && b3 && b4 && b5 && b6;
+  bool res = b1 && b2 && b3 && b4 && b5 && b6;
+  if (!res) {
+    ExpectedMsg = "From IsBinaryOperation Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = BINARY_EXPRESSION\n";
+      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
+      *result_listener << "got Operation = " << enigma::parsing::ToString(arg->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Left Type = " + NodeTypes[(int)left_] + "\n";
+      *result_listener << "got Left Type = " << NodeTypes[(int)arg->left->type] << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Left Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Left Identifier = "
+                       << dynamic_cast<AST::IdentifierAccess *>(arg->left.get())->name.content << "\n";
+    }
+    if (!b5) {
+      ExpectedMsg += "Right Type = " + NodeTypes[(int)right_] + "\n";
+      *result_listener << "got Right Type = " << NodeTypes[(int)arg->right->type] << "\n";
+    }
+    if (!b6) {
+      ExpectedMsg += "Right Literal = " + PrintToString(num) + "\n";
+      *result_listener << "got Right Literal = "
+                       << std::get<std::string>(dynamic_cast<AST::Literal *>(right)->value.value) << "\n";
+    }
+  }
+
+  return res;
 }
 
-MATCHER_P3(IsUnaryPostfixOperator, opType, op, iden, "") {
+MATCHER_P2(IsUnaryPostfixOperator, op, iden, "") {
   auto *unary = dynamic_cast<AST::UnaryPostfixExpression *>(arg);
 
-  bool b1 = unary->type == opType, b2 = unary->operation == op, b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+  bool b1 = unary->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION, b2 = unary->operation == op,
+       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
        b4 = dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content == iden;
 
-  return b1 && b2 && b3 && b4;
+  bool res = b1 && b2 && b3 && b4;
+  if (!res) {
+    ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = UNARY_POSTFIX_EXPRESSION\n";
+      *result_listener << "got NodeType = " << NodeTypes[(int)unary->type] << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
+      *result_listener << "got Operation = " << enigma::parsing::ToString(unary->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Operand Type = IDENTIFIER \n";
+      *result_listener << "got Operand Type = " << NodeTypes[(int)unary->operand->type] << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Operand Identifier = "
+                       << dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content << "\n";
+    }
+  }
+
+  return res;
 }
 
-MATCHER_P3(IsUnaryPrefixOperator, opType, op, iden, "") {
+MATCHER_P2(IsUnaryPrefixOperator, op, iden, "") {
   auto *unary = dynamic_cast<AST::UnaryPrefixExpression *>(arg);
 
-  bool b1 = unary->type == opType, b2 = unary->operation == op, b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+  bool b1 = unary->type == AST::NodeType::UNARY_PREFIX_EXPRESSION, b2 = unary->operation == op,
+       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
        b4 = dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content == iden;
 
-  return b1 && b2 && b3 && b4;
+  bool res = b1 && b2 && b3 && b4;
+  if (!res) {
+    ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = UNARY_PREFIX_EXPRESSION\n";
+      *result_listener << "got NodeType = " << NodeTypes[(int)unary->type] << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
+      *result_listener << "got Operation = " << enigma::parsing::ToString(unary->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Operand Type = IDENTIFIER \n";
+      *result_listener << "got Operand Type = " << NodeTypes[(int)unary->operand->type] << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Operand Identifier = "
+                       << dynamic_cast<AST::IdentifierAccess *>(unary->operand.get())->name.content << "\n";
+    }
+  }
+
+  return res;
 }
 
 MATCHER_P(IsStatementBlock, stateSize, "") {
@@ -917,15 +1031,15 @@ MATCHER_P(IsStatementBlock, stateSize, "") {
 
   if (!b1 || !b2) {
     ExpectedMsg = "From IsStatementBlock Matcher: ";
-  }
 
-  if (!b1) {
-    ExpectedMsg += "NodeType = BLOCK";
-    *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
-  }
-  if (!b2) {
-    ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
-    *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
+    if (!b1) {
+      ExpectedMsg += "NodeType = BLOCK";
+      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
+      *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
+    }
   }
 
   return b1 && b2;
@@ -951,11 +1065,10 @@ TEST(ParserTest, ForLoop_1) {
 
   std::vector<std::string> decls = {"i"};
 
-  ASSERT_THAT(
-      for_,
-      IsForLoopWithChildren(
-          IsDeclaration(decls), IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-          IsUnaryPostfixOperator(AST::NodeType::UNARY_POSTFIX_EXPRESSION, TT_INCREMENT, "i"), IsStatementBlock(0)));
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsDeclaration(decls),
+                        IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
+                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_2) {
@@ -968,11 +1081,10 @@ TEST(ParserTest, ForLoop_2) {
 
   std::vector<std::string> decls = {"i", "j"};
 
-  ASSERT_THAT(
-      for_, IsForLoopWithChildren(
-                IsDeclaration(decls),
-                IsBinaryOperation(TT_GREATEREQUAL, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
-                IsUnaryPrefixOperator(AST::NodeType::UNARY_PREFIX_EXPRESSION, TT_DECREMENT, "i"), IsStatementBlock(0)));
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+                                          IsBinaryOperation(TT_GREATEREQUAL, AST::NodeType::IDENTIFIER,
+                                                            AST::NodeType::LITERAL, "i", "12"),
+                                          IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_3) {
@@ -986,8 +1098,7 @@ TEST(ParserTest, ForLoop_3) {
   ASSERT_THAT(for_, IsForLoopWithChildren(
                         IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL),
                         IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-                        IsUnaryPostfixOperator(AST::NodeType::UNARY_POSTFIX_EXPRESSION, TT_INCREMENT, "i"),
-                        IsStatementBlock(0)));
+                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_4) {
@@ -1001,6 +1112,5 @@ TEST(ParserTest, ForLoop_4) {
   ASSERT_THAT(for_, IsForLoopWithChildren(
                         IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION),
                         IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-                        IsUnaryPostfixOperator(AST::NodeType::UNARY_POSTFIX_EXPRESSION, TT_INCREMENT, "i"),
-                        IsStatementBlock(0)));
+                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
 }
