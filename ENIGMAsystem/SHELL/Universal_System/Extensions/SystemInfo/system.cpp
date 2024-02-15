@@ -160,6 +160,9 @@ bool numcpuserror = false;
 long long totalram = -1;
 bool totalramerror = false;
 
+std::string isvirtual;
+bool isvirtualerror = false;
+
 #if defined(_WIN32)
 std::string wine_version;
 #endif
@@ -700,7 +703,13 @@ std::string os_architecture() {
   #if !defined(__sun)
   /* utsname.machine equals the achitecture of the 
   current executable - not the current platform */
+  #if (defined(__APPLE__) && defined(__MACH__))
+  /* macOS requires "arch -arch arm64" to 
+  force running without rosetta if x86 */
+  architecture = read_output("arch -arch arm64 uname -m");
+  #else
   architecture = read_output("uname -m");
+  #endif
   #else
   long count = sysinfo(SI_ARCHITECTURE_K, nullptr, 0);
   if (count > 0) {
@@ -725,13 +734,20 @@ std::string os_architecture() {
 }
 
 std::string os_is_virtual() {
+  if (!isvirtual.empty())
+    return isvirtual;
+  if (isvirtualerror)
+    return pointer_null();
   #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
-  if (os_product_name().substr(0, 4) == "wine")
-    return "YES";
+  if (os_product_name().substr(0, 4) == "wine") {
+    isvirtual = "YES";
+    return isvirtual;
+  }
   #if (defined(__APPLE__) && defined(__MACH__))
-  if (os_architecture() == "x86_64" && 
-    read_output("sysctl -in sysctl.proc_translated") == "1")
-    return "YES";
+  if (read_output("sysctl -in sysctl.proc_translated") == "1") {
+    isvirtual = "YES";
+    return isvirtual;
+  }
   #endif
   class cpuid {
     #if defined(_MSC_VER)
@@ -775,8 +791,10 @@ std::string os_is_virtual() {
     }
     #endif
   };
-  if (!(cpuid(1, 0).ecx() & (1 << 31)))
-    return "NO";
+  if (!(cpuid(1, 0).ecx() & (1 << 31))) {
+    isvirtual = "NO";
+    return isvirtual;
+  }
   const int vendorIdLength = 13;
   using VendorIdStr = char[vendorIdLength];
   VendorIdStr hyperVendorId;
@@ -798,25 +816,35 @@ std::string os_is_virtual() {
     "XenVMMXenVMM",      // Xen HVM
     "ACRNACRNACRN",      // Project ACRN
     " QNXQVMBSQG ",      // QNX Hypervisor
-    "VirtualApple"       // Apple Rosetta 2
+    "GenuineIntel",      // Apple Rosetta 2
+    "VirtualApple"       // Newer versions of Apple Rosetta 2
   };
   for (const auto& vendor : vendors) {
-    if (!memcmp(vendor, hyperVendorId, vendorIdLength))
-      return "YES";
+    if (!memcmp(vendor, hyperVendorId, vendorIdLength)) {
+      isvirtual = "YES";
+      return isvirtual;
+    }
   }
-  return "NO";
+  isvirtual = "NO";
+  return isvirtual;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  return "NO";
+  isvirtual = "NO";
+  return isvirtual;
   #elif defined(__linux__)
   std::string tmp = read_output("echo $(systemd-detect-virt 2> /dev/null)");
   std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
-  if (tmp.empty()) 
+  if (tmp.empty()) {
+    isvirtualerror = true;
     return pointer_null();
-  else if (tmp == "NONE")
-    return "NO";
-  return "YES";
+  } else if (tmp == "NONE") {
+    isvirtual = "NO";
+    return isvirtual;
+  }
+  isvirtual = "YES";
+  return isvirtual;
   #endif
   // non-x86 currently not supported outside of macOS and Linux ...
+  isvirtualerror = true;
   return pointer_null();
 }
 
