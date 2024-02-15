@@ -707,7 +707,7 @@ std::string os_architecture() {
   /* macOS requires "arch -arch arm64" to 
   force running without rosetta if x86 */
   if (cpu_processor().substr(0, 5) == "Apple") {
-    architecture = read_output("arch -arch arm64 uname -m");
+    architecture = read_output("arch -arch arm64 uname -m 2> /dev/null");
   } else {
     architecture = read_output("uname -m");
   }
