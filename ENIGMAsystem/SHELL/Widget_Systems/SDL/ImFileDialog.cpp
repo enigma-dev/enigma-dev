@@ -31,7 +31,7 @@
 
 #include "stb_image.h"
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 #include "lunasvg/include/lunasvg.h"
 #endif
 
@@ -45,7 +45,7 @@
 #else
 #if (defined(__MACH__) && defined(__APPLE__))
 #include <AppKit/AppKit.h>
-#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 #endif
@@ -58,7 +58,7 @@
 #define DEFAULT_ICON_SIZE 32
 #define PI 3.141592f
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 using namespace lunasvg;
 #endif
 
@@ -76,9 +76,6 @@ struct HumanReadable {
 };
 
 namespace ifd {
-  static const char *GetDefaultFolderIcon();
-  static const char *GetDefaultFileIcon();
-
   /* UI CONTROLS */
   bool FolderNode(const char* label, ImTextureID icon, bool& clicked) {
     ImGuiContext& g = *GImGui;
@@ -1023,7 +1020,7 @@ namespace ifd {
     [icon unlockFocus];
 
     return m_icons[pathU8];
-    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+    #elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
     if (m_icons.count(path.string()) > 0)
       return m_icons[path.string()];
 
@@ -1123,6 +1120,44 @@ namespace ifd {
     if (G_IS_OBJECT(gtkicon_info)) g_object_unref(gtkicon_info);
     if (G_IS_OBJECT(file_info)) g_object_unref(file_info);
     if (G_IS_OBJECT(file)) g_object_unref(file);
+    return m_icons[pathU8];
+    #else
+    if (m_icons.count(path.u8string()) > 0)
+      return m_icons[path.u8string()];
+    std::string pathU8 = path.u8string();
+    m_icons[pathU8] = nullptr;
+    std::error_code ec;
+    int iconID = 1;
+    if (ghc::filesystem::is_directory(path, ec)) iconID = 0;
+    auto itr = std::find(m_iconIndices.begin(), m_iconIndices.end(), iconID);
+    if (itr != m_iconIndices.end()) {
+      const std::string& existingIconFilepath = m_iconFilepaths[itr - m_iconIndices.begin()];
+      m_icons[pathU8] = m_icons[existingIconFilepath];
+      return m_icons[pathU8];
+    }
+    m_iconIndices.push_back(iconID);
+    m_iconFilepaths.push_back(pathU8);
+    ImVec4 wndBg = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+    if ((wndBg.x + wndBg.y + wndBg.z) / 3.0f > 0.5f) {
+      uint8_t *data = (uint8_t *)ifd::GetDefaultFileIcon();
+      if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
+      m_icons[pathU8] = this->CreateTexture(data, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, 0);
+    } else {
+      uint8_t *data = (uint8_t*)ifd::GetDefaultFileIcon();
+      if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
+      uint8_t *invData = (uint8_t*)malloc(DEFAULT_ICON_SIZE * DEFAULT_ICON_SIZE * 4);
+      for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 32; x++) {
+          int index = (y * DEFAULT_ICON_SIZE + x) * 4;
+          invData[index + 0] = 255 - data[index + 0];
+          invData[index + 1] = 255 - data[index + 1];
+          invData[index + 2] = 255 - data[index + 2];
+          invData[index + 3] = data[index + 3];
+        }
+      }
+      m_icons[pathU8] = this->CreateTexture(invData, DEFAULT_ICON_SIZE, DEFAULT_ICON_SIZE, 0);
+      free(invData);
+    }
     return m_icons[pathU8];
     #endif
   }
