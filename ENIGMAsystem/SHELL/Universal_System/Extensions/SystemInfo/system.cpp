@@ -349,6 +349,7 @@ long long read_meminfo(std::string key) {
         tmp = std::regex_replace(tmp, std::regex(" kB"), "");
         tmp = std::regex_replace(tmp, std::regex(" "), "");
         meminfo = strtoll(tmp.substr(key.length()).c_str(), nullptr, 10) * 1024;
+        break;
       }
     }
     doc.close();
