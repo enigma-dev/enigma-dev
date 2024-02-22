@@ -2,8 +2,8 @@
 sudo xcode-select --install
 if [ -f "/opt/local/bin/port" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  brew install curl wget make cmake pkg-config pugixml wavpack flac opusfile mpg123 libmodplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 openal-soft alure fluid-synth libxmp dumb boost
-  sudo port -N install gcc12 protobuf-c glfw glew glm libpng libvpx box2D freetype libffi rapidjson libyaml pugixml yaml-cpp grpc
+  brew install curl wget cmake pkg-config pugixml wavpack flac opusfile mpg123 libmodplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 openal-soft alure fluid-synth libxmp dumb boost
+  sudo port -N install gcc12 gmake protobuf-c glfw glew glm libpng libvpx box2D freetype libffi rapidjson libyaml pugixml yaml-cpp grpc
   sudo port -N reclaim
   sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
   cd /Applications/stigma-dev
