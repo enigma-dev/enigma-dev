@@ -787,37 +787,6 @@ TEST(ParserTest, TemporaryInitialization_4) {
 
 std::string ExpectedMsg = "";
 
-vector<std::string> NodeTypes = {"ERROR",
-                                 "BLOCK",
-                                 "BINARY_EXPRESSION",
-                                 "UNARY_PREFIX_EXPRESSION",
-                                 "UNARY_POSTFIX_EXPRESSION",
-                                 "TERNARY_EXPRESSION",
-                                 "SIZEOF",
-                                 "ALIGNOF",
-                                 "CAST",
-                                 "NEW",
-                                 "DELETE",
-                                 "PARENTHETICAL",
-                                 "ARRAY",
-                                 "IDENTIFIER",
-                                 "SCOPE_ACCESS",
-                                 "LITERAL",
-                                 "FUNCTION_CALL",
-                                 "IF",
-                                 "FOR",
-                                 "WHILE",
-                                 "DO",
-                                 "WITH",
-                                 "REPEAT",
-                                 "SWITCH",
-                                 "CASE",
-                                 "DEFAULT",
-                                 "BREAK",
-                                 "CONTINUE",
-                                 "RETURN",
-                                 "DECLARATION",
-                                 "INITIALIZER"};
 vector<std::string> StorageClasses = {"TEMPORARY", "LOCAL", "GLOBAL"};
 vector<std::string> CastKinds = {"C_STYLE", "STATIC", "DYNAMIC", "REINTERPRET", "CONST", "FUNCTIONAL"};
 
@@ -833,7 +802,7 @@ MATCHER_P(IsDeclaration, decls, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = DECLARATION\n";
-      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
     }
     if (!b2) {
       ExpectedMsg += "StorageClass = TEMPORARY\n";
@@ -885,7 +854,7 @@ MATCHER_P2(IsCast, cast_kind, expr_type, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = CAST\n";
-      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
     }
     if (!b3) {
       ExpectedMsg += "ft.flags = 0\n";
@@ -909,8 +878,8 @@ MATCHER_P2(IsCast, cast_kind, expr_type, "") {
       *result_listener << "got cast->kind = " << CastKinds[(int)cast->kind] << "\n";
     }
     if (!b8) {
-      ExpectedMsg += "expr->type = " + NodeTypes[(int)expr_type] + "\n";
-      *result_listener << "got expr->type = " << NodeTypes[(int)expr->type] << "\n";
+      ExpectedMsg += "expr->type = " + AST::NodeToString(expr_type) + "\n";
+      *result_listener << "got expr->type = " << AST::NodeToString(expr->type) << "\n";
     }
   }
 
@@ -931,15 +900,15 @@ MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = BINARY_EXPRESSION\n";
-      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
     }
     if (!b2) {
-      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
-      *result_listener << "got Operation = " << enigma::parsing::ToString(arg->operation) << "\n";
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(arg->operation) << "\n";
     }
     if (!b3) {
-      ExpectedMsg += "Left Type = " + NodeTypes[(int)left_] + "\n";
-      *result_listener << "got Left Type = " << NodeTypes[(int)arg->left->type] << "\n";
+      ExpectedMsg += "Left Type = " + AST::NodeToString(left_) + "\n";
+      *result_listener << "got Left Type = " << AST::NodeToString(arg->left->type) << "\n";
     }
     if (!b4) {
       ExpectedMsg += "Left Identifier = " + PrintToString(iden) + "\n";
@@ -947,8 +916,8 @@ MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
                        << dynamic_cast<AST::IdentifierAccess *>(arg->left.get())->name.content << "\n";
     }
     if (!b5) {
-      ExpectedMsg += "Right Type = " + NodeTypes[(int)right_] + "\n";
-      *result_listener << "got Right Type = " << NodeTypes[(int)arg->right->type] << "\n";
+      ExpectedMsg += "Right Type = " + AST::NodeToString(right_) + "\n";
+      *result_listener << "got Right Type = " << AST::NodeToString(arg->right->type) << "\n";
     }
     if (!b6) {
       ExpectedMsg += "Right Literal = " + PrintToString(num) + "\n";
@@ -973,15 +942,15 @@ MATCHER_P2(IsUnaryPostfixOperator, op, iden, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = UNARY_POSTFIX_EXPRESSION\n";
-      *result_listener << "got NodeType = " << NodeTypes[(int)unary->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
     }
     if (!b2) {
-      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
-      *result_listener << "got Operation = " << enigma::parsing::ToString(unary->operation) << "\n";
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
     }
     if (!b3) {
       ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << NodeTypes[(int)unary->operand->type] << "\n";
+      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
     }
     if (!b4) {
       ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
@@ -1006,15 +975,15 @@ MATCHER_P2(IsUnaryPrefixOperator, op, iden, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = UNARY_PREFIX_EXPRESSION\n";
-      *result_listener << "got NodeType = " << NodeTypes[(int)unary->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
     }
     if (!b2) {
-      ExpectedMsg += "Operation = " + enigma::parsing::ToString(op) + "\n";
-      *result_listener << "got Operation = " << enigma::parsing::ToString(unary->operation) << "\n";
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
     }
     if (!b3) {
       ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << NodeTypes[(int)unary->operand->type] << "\n";
+      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
     }
     if (!b4) {
       ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
@@ -1034,7 +1003,7 @@ MATCHER_P(IsStatementBlock, stateSize, "") {
 
     if (!b1) {
       ExpectedMsg += "NodeType = BLOCK";
-      *result_listener << "got NodeType = " << NodeTypes[(int)arg->type] << "\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
     }
     if (!b2) {
       ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);

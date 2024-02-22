@@ -157,4 +157,52 @@ void AST::DeclarationStatement::RecursiveSubVisit(Visitor &visitor) {
   
 }
 
+const std::vector<std::string> AST::NodesNames = [](){
+  std::vector<std::string> res;
+  int nsize = static_cast<int>(NodeType::INITIALIZER)+1;
+  res.resize(nsize);
+
+  #define REGISTER(name) [[fallthrough]]; case name: res[(int)AST::name] = \
+    std::string(#name).substr(std::string(#name).rfind(':') + 1)
+
+  switch (NodeType::ERROR) {
+    case NodeType::ERROR: res[(int)NodeType::ERROR] = "ERROR";
+    REGISTER(NodeType::BLOCK);
+    REGISTER(NodeType::BINARY_EXPRESSION);
+    REGISTER(NodeType::UNARY_PREFIX_EXPRESSION);
+    REGISTER(NodeType::UNARY_POSTFIX_EXPRESSION);
+    REGISTER(NodeType::TERNARY_EXPRESSION);
+    REGISTER(NodeType::SIZEOF);
+    REGISTER(NodeType::ALIGNOF);
+    REGISTER(NodeType::CAST);
+    REGISTER(NodeType::NEW);
+    REGISTER(NodeType::DELETE);
+    REGISTER(NodeType::PARENTHETICAL);
+    REGISTER(NodeType::ARRAY);
+    REGISTER(NodeType::IDENTIFIER);
+    REGISTER(NodeType::SCOPE_ACCESS);
+    REGISTER(NodeType::LITERAL);
+    REGISTER(NodeType::FUNCTION_CALL);
+    REGISTER(NodeType::IF);
+    REGISTER(NodeType::FOR);
+    REGISTER(NodeType::WHILE);
+    REGISTER(NodeType::DO);
+    REGISTER(NodeType::WITH);
+    REGISTER(NodeType::REPEAT);
+    REGISTER(NodeType::SWITCH);
+    REGISTER(NodeType::CASE);
+    REGISTER(NodeType::DEFAULT);
+    REGISTER(NodeType::BREAK);
+    REGISTER(NodeType::CONTINUE);
+    REGISTER(NodeType::RETURN);
+    REGISTER(NodeType::DECLARATION);
+    REGISTER(NodeType::INITIALIZER);
+  }
+  return res;
+}();
+
+std::string AST::NodeToString(NodeType nt) {
+  return NodesNames[(int)nt];
+}
+
 }  // namespace enigma::parsing

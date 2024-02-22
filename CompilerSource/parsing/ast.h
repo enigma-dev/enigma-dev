@@ -511,6 +511,8 @@ class AST {
   const std::shared_ptr<Lexer> lexer;
   // The raw input code, owned by the lexer.
   const std::string &code;
+  // Lambda function to get nodes types as strings 
+  static const std::vector<std::string> NodesNames;
 
   bool HasError() { return !herr.errors.empty(); }
   std::string ErrorString() {
@@ -546,6 +548,9 @@ class AST {
   void VisitNodes(Visitor &visitor) {
     if (root_) root_->RecurusiveVisit(visitor);
   }
+
+  // Get the node type as a string
+  static std::string NodeToString(NodeType nt);
 
   // Disallow copy. Our tokens point into our code.
   AST(const AST &) = delete;
