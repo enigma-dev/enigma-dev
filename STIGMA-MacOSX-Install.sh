@@ -8,6 +8,12 @@ if [ -f "/opt/local/bin/port" ]; then
   sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
   cd /Applications/stigma-dev
   sudo env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ gmake && sudo env CC=clang CXX=clang++ gmake emake
+  if [ `uname -m` = "arm64" ]; then
+    sudo cp -fr /opt/homebrew/lib/libvorbisfile.a /usr/local/lib/libvorbisfile.a 
+    sudo cp -fr /opt/homebrew/lib/libvorbisenc.a /usr/local/lib/libvorbisenc.a
+    sudo cp -fr /opt/homebrew/lib/libvorbis.a /usr/local/lib/libvorbis.a
+    sudo cp -fr /opt/homebrew/lib/libogg.a /usr/local/lib/libogg.a
+  fi
   sudo chmod +x ./install.sh
   sudo ./install.sh
   sudo chmod +x ./start.sh
