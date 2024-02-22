@@ -17,8 +17,6 @@
 - Expanded upon Shell and Process Execution (process info).
 - Improved upon Dialog Box and Graphical Widgets System.
 
-**NOTE!** Apple Silicon Mac users will need the OpenJDK downloaded and installed from [here](https://adoptium.net/temurin/releases/?version=17&os=mac&arch=aarch64&package=jdk) for free, (Intel Mac users can still use HomeBrew or MacPorts if needed), HomeBrew and MacPorts is broken on Apple Silicon.
-
 Supported Platforms (Examples):
 
 - Windows i686 7/8/8.1/10/11
