@@ -162,7 +162,7 @@ const std::vector<std::string> AST::NodesNames = [](){
   int nsize = static_cast<int>(NodeType::INITIALIZER)+1;
   res.resize(nsize);
 
-  #define REGISTER(name) [[fallthrough]]; case name: res[(int)AST::name] = \
+  #define REGISTER(name) [[fallthrough]]; case name: res[(int)name] = \
     std::string(#name).substr(std::string(#name).rfind(':') + 1)
 
   switch (NodeType::ERROR) {
