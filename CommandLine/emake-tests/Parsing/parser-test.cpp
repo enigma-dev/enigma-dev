@@ -787,8 +787,6 @@ TEST(ParserTest, TemporaryInitialization_4) {
 
 std::string ExpectedMsg = "";
 
-vector<std::string> CastKinds = {"C_STYLE", "STATIC", "DYNAMIC", "REINTERPRET", "CONST", "FUNCTIONAL"};
-
 MATCHER_P(IsDeclaration, decls, "") {
   auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg);
 
@@ -873,8 +871,8 @@ MATCHER_P2(IsCast, cast_kind, expr_type, "") {
                        << "\n";
     }
     if (!b7) {
-      ExpectedMsg += "cast->kind = " + CastKinds[(int)cast_kind] + "\n";
-      *result_listener << "got cast->kind = " << CastKinds[(int)cast->kind] << "\n";
+      ExpectedMsg += "cast->kind = " + AST::CastExpression::KindToString(cast_kind) + "\n";
+      *result_listener << "got cast->kind = " << AST::CastExpression::KindToString(cast->kind) << "\n";
     }
     if (!b8) {
       ExpectedMsg += "expr->type = " + AST::NodeToString(expr_type) + "\n";

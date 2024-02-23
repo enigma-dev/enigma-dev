@@ -217,12 +217,35 @@ const std::vector<std::string> AST::DeclarationStatement::StorageNames = [](){
   return res;
 }();
 
+const std::vector<std::string> AST::CastExpression::KindNames = [](){
+  std::vector<std::string> res;
+  int ksize = static_cast<int>(Kind::FUNCTIONAL)+1;
+  res.resize(ksize);
+
+  #define REGISTER(name) [[fallthrough]]; case name: res[(int)name] = \
+    std::string(#name).substr(std::string(#name).rfind(':') + 1)
+
+  switch (Kind::C_STYLE) {
+    case Kind::C_STYLE: res[(int)Kind::C_STYLE] = "C_STYLE";
+    REGISTER(Kind::STATIC);
+    REGISTER(Kind::DYNAMIC);
+    REGISTER(Kind::REINTERPRET);
+    REGISTER(Kind::CONST);
+    REGISTER(Kind::FUNCTIONAL);
+  }
+  return res;
+}();
+
 std::string AST::NodeToString(NodeType nt){
   return NodesNames[(int)nt];
 }
 
 std::string AST::DeclarationStatement::StorageToString(StorageClass st){
   return StorageNames[(int)st];
+}
+
+std::string AST::CastExpression::KindToString(Kind k){
+  return KindNames[(int)k];
 }
 
 }  // namespace enigma::parsing

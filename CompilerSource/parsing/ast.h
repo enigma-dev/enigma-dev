@@ -193,8 +193,10 @@ class AST {
     FullType ft;
     PNode expr;
     TokenType functional_cast_type;
+    static const std::vector<std::string> KindNames;
 
     BASIC_NODE_ROUTINES(CastExpression);
+    static std::string KindToString(Kind k);
 
     CastExpression(const Token &token, FullType type, PNode expr, TokenType cast_type):
        ft{std::move(type)}, expr{std::move(expr)}, functional_cast_type{cast_type} {
