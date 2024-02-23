@@ -201,8 +201,28 @@ const std::vector<std::string> AST::NodesNames = [](){
   return res;
 }();
 
-std::string AST::NodeToString(NodeType nt) {
+const std::vector<std::string> AST::DeclarationStatement::StorageNames = [](){
+  std::vector<std::string> res;
+  int stsize = static_cast<int>(StorageClass::GLOBAL)+1;
+  res.resize(stsize);
+
+  #define REGISTER(name) [[fallthrough]]; case name: res[(int)name] = \
+    std::string(#name).substr(std::string(#name).rfind(':') + 1)
+
+  switch (StorageClass::TEMPORARY) {
+    case StorageClass::TEMPORARY: res[(int)StorageClass::TEMPORARY] = "TEMPORARY";
+    REGISTER(StorageClass::LOCAL);
+    REGISTER(StorageClass::GLOBAL);
+  }
+  return res;
+}();
+
+std::string AST::NodeToString(NodeType nt){
   return NodesNames[(int)nt];
+}
+
+std::string AST::DeclarationStatement::StorageToString(StorageClass st){
+  return StorageNames[(int)st];
 }
 
 }  // namespace enigma::parsing

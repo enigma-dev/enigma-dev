@@ -787,14 +787,13 @@ TEST(ParserTest, TemporaryInitialization_4) {
 
 std::string ExpectedMsg = "";
 
-vector<std::string> StorageClasses = {"TEMPORARY", "LOCAL", "GLOBAL"};
 vector<std::string> CastKinds = {"C_STYLE", "STATIC", "DYNAMIC", "REINTERPRET", "CONST", "FUNCTIONAL"};
 
 MATCHER_P(IsDeclaration, decls, "") {
   auto *decl = dynamic_cast<AST::DeclarationStatement *>(arg);
 
   bool b1 = arg->type == AST::NodeType::DECLARATION,
-       b2 = decl->storage_class == enigma::parsing::AST::DeclarationStatement::StorageClass::TEMPORARY,
+       b2 = decl->storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY,
        b3 = decl->declarations.size() == decls.size();
 
   if (!b1 || !b2 || !b3) {
@@ -806,7 +805,7 @@ MATCHER_P(IsDeclaration, decls, "") {
     }
     if (!b2) {
       ExpectedMsg += "StorageClass = TEMPORARY\n";
-      *result_listener << "got StorageClass = " << StorageClasses[(int)decl->storage_class] << "\n";
+      *result_listener << "got StorageClass = " << AST::DeclarationStatement::StorageToString(decl->storage_class) << "\n";
     }
     if (!b3) {
       ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";

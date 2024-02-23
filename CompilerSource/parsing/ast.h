@@ -462,8 +462,10 @@ class AST {
     jdi::definition *def;
     StorageClass storage_class;
     std::vector<Declaration> declarations;
+    static const std::vector<std::string> StorageNames;
 
     BASIC_NODE_ROUTINES(DeclarationStatement);
+    static std::string StorageToString(StorageClass st);
 
     DeclarationStatement(StorageClass sc, jdi::definition *type,
                          std::vector<Declaration> declarations):
