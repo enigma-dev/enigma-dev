@@ -374,7 +374,49 @@ TEST(ParserTest, NewExpression_1) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
 
+TEST(ParserTest, NewExpression_1_NoSemicolon) {
+  ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5}"};
+  auto node = test->TryParseStatement();
+
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
+  ASSERT_FALSE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  check_placement(new_);
+
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 1);
+  ASSERT_EQ(new_->ft.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
+
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
+}
+
 TEST(ParserTest, NewExpression_2) {
+  ParserTester test{"::new int[][15]{1, 2, 3, 4, 5};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
+  ASSERT_TRUE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  ASSERT_EQ(new_->placement, nullptr);
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
+}
+
+TEST(ParserTest, NewExpression_2_NoSemiconlon) {
   ParserTester test{"::new int[][15]{1, 2, 3, 4, 5}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -421,11 +463,57 @@ TEST(ParserTest, NewExpression_3) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
 }
 
+TEST(ParserTest, NewExpression_3_NoSemicolon) {
+  ParserTester test{"::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5)"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
+  ASSERT_TRUE(new_->is_global);
+  ASSERT_FALSE(new_->is_array);
+
+  check_placement(new_);
+
+  ASSERT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO); 
+
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
+}
+ 
 TEST(ParserTest, NewExpression_4) {
   ParserTester test{"new (int *(**)[10]);"};
+  auto node = test->TryParseStatement(); 
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
+  ASSERT_FALSE(new_->is_global); 
+  ASSERT_FALSE(new_->is_array);
+
+  ASSERT_EQ(new_->placement, nullptr);
+  ASSERT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 2);
+  jdi::ref_stack stack;
+  new_->ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+}
+
+TEST(ParserTest, NewExpression_4_NoSemicolon) {
+  ParserTester test{"new (int *(**)[10])"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
-  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
   auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
@@ -457,8 +545,34 @@ TEST(ParserTest, DeleteExpression_1) {
   assert_identifier_is(delete_->expression.get(), "x");
 }
 
+TEST(ParserTest, DeleteExpression_1_NoSemicolon) {
+  ParserTester test{"delete x"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_FALSE(delete_->is_global);
+  ASSERT_FALSE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
+}
+
 TEST(ParserTest, DeleteExpression_2) {
   ParserTester test{"::delete x;"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_TRUE(delete_->is_global);
+  ASSERT_FALSE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
+}
+
+TEST(ParserTest, DeleteExpression_2_NoSemicolon) {
+  ParserTester test{"::delete x"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -483,6 +597,19 @@ TEST(ParserTest, DeleteExpression_3) {
   assert_identifier_is(delete_->expression.get(), "x");
 }
 
+TEST(ParserTest, DeleteExpression_3_NoSemiColon) {
+  ParserTester test{"delete[] x"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_FALSE(delete_->is_global);
+  ASSERT_TRUE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
+}
+
 TEST(ParserTest, DeleteExpression_4) {
   ParserTester test{"::delete[] x;"};
   auto node = test->TryParseStatement();
@@ -496,8 +623,53 @@ TEST(ParserTest, DeleteExpression_4) {
   assert_identifier_is(delete_->expression.get(), "x");
 }
 
+TEST(ParserTest, DeleteExpression_4_NoSemicolon) {
+  ParserTester test{"::delete[] x"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DELETE);
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(node.get());
+  ASSERT_TRUE(delete_->is_global);
+  ASSERT_TRUE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
+}
+
 TEST(ParserTest, SwitchStatement_1) {
-  ParserTester test{"switch (5 * 6) { case 1: return 2 break 13; case 2: return 3 break default: break };"};
+  ParserTester test{"switch (5 * 6) { case 1: return 2; break 13; case 2: return 3; break; default: break;};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 3);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::CASE);
+  auto *case1 = dynamic_cast<AST::CaseStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(case1->value->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(case1->value.get())->value.value), "1");
+  ASSERT_EQ(case1->statements->statements.size(), 2);
+  ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::RETURN);
+  ASSERT_EQ(case1->statements->statements[1]->type, AST::NodeType::BREAK);
+
+  ASSERT_EQ(switch_->body->statements[1]->type, AST::NodeType::CASE);
+  auto *case2 = dynamic_cast<AST::CaseStatement *>(switch_->body->statements[1].get());
+  ASSERT_EQ(case2->value->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(case2->value.get())->value.value), "2");
+  ASSERT_EQ(case2->statements->statements.size(), 2);
+  ASSERT_EQ(case2->statements->statements[0]->type, AST::NodeType::RETURN);
+  ASSERT_EQ(case2->statements->statements[1]->type, AST::NodeType::BREAK);
+
+  ASSERT_EQ(switch_->body->statements[2]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[2].get());
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BREAK);
+}
+
+TEST(ParserTest, SwitchStatement_1_NoSemicolon) {
+  ParserTester test{"switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break};"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -529,7 +701,30 @@ TEST(ParserTest, SwitchStatement_1) {
 }
 
 TEST(ParserTest, SwitchStatement_2) {
-  ParserTester test{"switch (1) { case 1: return 2; default: return \"test\"; };"};
+  ParserTester test{"switch (1) { case 1: return 2; default: return \"test\";};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 2);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::CASE);
+  auto *case1 = dynamic_cast<AST::CaseStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(case1->value->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(case1->value.get())->value.value), "1");
+  ASSERT_EQ(case1->statements->statements.size(), 1);
+  ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::RETURN);
+
+  ASSERT_EQ(switch_->body->statements[1]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[1].get());
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::RETURN);
+}
+
+TEST(ParserTest, SwitchStatement_2_NoSemicolon) {
+  ParserTester test{"switch (1) { case 1: return 2 default: return \"test\"};"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -567,8 +762,47 @@ TEST(ParserTest, SwitchStatement_3) {
   ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::CONTINUE);
 }
 
+TEST(ParserTest, SwitchStatement_3_NoSemicolon) {
+  ParserTester test{"switch (1) { default: continue 12};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::CONTINUE);
+}
+
 TEST(ParserTest, SwitchStatement_4) {
   ParserTester test{"switch (1) { default: delete [] x; return \"new test\";};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 2);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::DELETE);
+  ASSERT_EQ(default_->statements->statements[1]->type, AST::NodeType::RETURN);
+
+  auto *delete_ = reinterpret_cast<AST::DeleteExpression *>(default_->statements->statements[0].get());
+  ASSERT_FALSE(delete_->is_global);
+  ASSERT_TRUE(delete_->is_array);
+
+  assert_identifier_is(delete_->expression.get(), "x");
+}
+
+TEST(ParserTest, SwitchStatement_4_NoSemicolon) {
+  ParserTester test{"switch (1) { default: delete [] x return \"new test\"};"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -619,19 +853,50 @@ TEST(ParserTest, SwitchStatement_5) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
 
-// TEST(ParserTest, CodeBlock) {
-//   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
-//   auto node = test->TryParseDeclarations(true);
-//   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
+  ParserTester test{"switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5} return \"new test\"};"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = dynamic_cast<AST::CodeBlock *>(node.get());
-//   ASSERT_EQ(block->statements.size(), 4);
-//   ASSERT_EQ(block->statements[0]->type, AST::NodeType::DECLARATION);
-//   ASSERT_EQ(block->statements[1]->type, AST::NodeType::DECLARATION);
-//   ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
-//   ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
-// }
+  ASSERT_EQ(node->type, AST::NodeType::SWITCH);
+  auto *switch_ = dynamic_cast<AST::SwitchStatement *>(node.get());
+  ASSERT_EQ(switch_->body->statements.size(), 1);
+
+  ASSERT_EQ(switch_->body->statements[0]->type, AST::NodeType::DEFAULT);
+  auto *default_ = dynamic_cast<AST::DefaultStatement *>(switch_->body->statements[0].get());
+  ASSERT_EQ(default_->statements->statements.size(), 2);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::NEW);
+  ASSERT_EQ(default_->statements->statements[1]->type, AST::NodeType::RETURN);
+
+  auto *new_ = reinterpret_cast<AST::NewExpression *>(default_->statements->statements[0].get());
+  ASSERT_FALSE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  check_placement(new_);
+
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 1);
+  ASSERT_EQ(new_->ft.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
+
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
+}
+
+/*
+TEST(ParserTest, CodeBlock) {
+  ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
+  auto node = test->TryParseDeclarations(true);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = dynamic_cast<AST::CodeBlock *>(node.get());
+  ASSERT_EQ(block->statements.size(), 4);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[1]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
+  ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
+}
+*/
 
 TEST(ParserTest, TemporaryInitialization_1) {
   ParserTester test{"int((*x)[5] + 6)"};
@@ -1060,6 +1325,22 @@ TEST(ParserTest, ForLoop_2) {
 }
 
 TEST(ParserTest, ForLoop_3) {
+  ParserTester test{"for int i = 0, j=1, k=133 ;i != 12; --i {j ++;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  std::vector<std::string> decls = {"i", "j", "k"};
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsDeclaration(decls),
+                        IsBinaryOperation(TT_NOTEQUAL, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
+                        IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(1)));
+}
+
+TEST(ParserTest, ForLoop_3_NoSemicolon) {
   ParserTester test{"for int i = 0, j=1, k=133 ;i != 12; --i {j ++}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -1076,6 +1357,22 @@ TEST(ParserTest, ForLoop_3) {
 }
 
 TEST(ParserTest, ForLoop_4) {
+  ParserTester test{"for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break; else continue;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  std::vector<std::string> decls = {"i", "j", "k", "w"};
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsDeclaration(decls),
+                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
+                        IsUnaryPostfixOperator(TT_INCREMENT, "j"), IsStatementBlock(1)));
+}
+
+TEST(ParserTest, ForLoop_4_NoSemicolon) {
   ParserTester test{"for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break else continue}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -1092,7 +1389,23 @@ TEST(ParserTest, ForLoop_4) {
 }
 
 TEST(ParserTest, ForLoop_5) {
-  ParserTester test{"for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++; if(i) x = new int else delete y}"};
+  ParserTester test{"for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++; if(i) x = new int; else delete y;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsDeclaration(decls),
+                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
+                        IsUnaryPostfixOperator(TT_INCREMENT, "w"), IsStatementBlock(2)));
+}
+
+TEST(ParserTest, ForLoop_5_NoSemicolon) {
+  ParserTester test{"for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++ if(i) x = new int else delete y}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1136,7 +1449,21 @@ TEST(ParserTest, ForLoop_7) {
 }
 
 TEST(ParserTest, ForLoop_8) {
-  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++; return ;}"};
+  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++; return;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
+                        IsBinaryOperation(TT_SLASH, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
+                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+}
+
+TEST(ParserTest, ForLoop_8_NoSemicolon) {
+  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++ return}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1150,7 +1477,21 @@ TEST(ParserTest, ForLoop_8) {
 }
 
 TEST(ParserTest, ForLoop_9) {
-  ParserTester test{"for static_cast<int>(i = 10, j=12); i mod 3; i-- {k-- return 12 }"};
+  ParserTester test{"for static_cast<int>(i = 10, j=12); i mod 3; i-- {k--; return 12;}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::FOR);
+  auto *for_ = dynamic_cast<AST::ForLoop *>(node.get());
+
+  ASSERT_THAT(for_, IsForLoopWithChildren(
+                        IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
+                        IsBinaryOperation(TT_MOD, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
+                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+}
+
+TEST(ParserTest, ForLoop_9_NoSemicolon) {
+  ParserTester test{"for static_cast<int>(i = 10, j=12); i mod 3; i-- {k-- return 12}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
