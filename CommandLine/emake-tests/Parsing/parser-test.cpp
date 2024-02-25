@@ -1098,7 +1098,7 @@ TEST(ParserTest, ForLoop_5) {
 }
 
 TEST(ParserTest, ForLoop_6) {
-  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++ return ;}"};
+  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++; return ;}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
