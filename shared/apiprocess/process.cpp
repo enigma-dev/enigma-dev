@@ -1633,13 +1633,23 @@ namespace ngs::ps {
   std::string read_from_stdin_for_self() {
     standard_input = "";
     #if defined(_WIN32)
+    std::vector<char> buff;
     DWORD bytes_avail = 0;
-    HANDLE hpipe = GetStdHandle(STD_INPUT_HANDLE);
-    if (PeekNamedPipe(hpipe, nullptr, 0, nullptr, &bytes_avail, nullptr)) {
-      DWORD bytes_read = 0;
-      std::string buffer; buffer.resize(bytes_avail, '\0');
-      if (PeekNamedPipe(hpipe, &buffer[0], bytes_avail, &bytes_read, nullptr, nullptr)) {
-        standard_input = buffer;
+    HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+    if (GetFileType(handle) == FILE_TYPE_PIPE) {
+      if (PeekNamedPipe(handle, nullptr, 0, nullptr, &bytes_avail, nullptr)) {
+        DWORD bytes_read = 0;
+        buff.resize(bytes_avail);
+        if (PeekNamedPipe(handle, &buff[0], bytes_avail, &bytes_read, nullptr, nullptr)) {
+          standard_input = buff.data();
+        }
+      }
+    } else {
+      DWORD nRead = BUFSIZ;
+      buff.resize(nRead);
+      while (ReadFile(handle, &buff[0], nRead, &nRead, nullptr) && nRead) {
+        message_pump();
+        standard_input.append(buff.data(), nRead);
       }
     }
     #else
