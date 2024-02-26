@@ -1643,11 +1643,14 @@ namespace ngs::ps {
       }
     }
     #else
-    char buffer[BUFSIZ]; ssize_t nread = 0;
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0); if (-1 == flags) return "";
-    while ((nread = read(fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK), buffer, BUFSIZ)) > 0) {
-      buffer[nread] = '\0';
-      standard_input.append(buffer, nread);
+    std::vector<char> buff;
+    ssize_t nread = BUFSIZ;
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    if (flags != -1) {
+      buff.resize(nread);
+      while ((nread = read(fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK), &buff[0], nread)) > 0) {
+        standard_input.append(buff.data(), nread);
+      }
     }
     #endif
     return standard_input.c_str();
