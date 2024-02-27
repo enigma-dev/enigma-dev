@@ -771,6 +771,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), "") + "_files";
   std::filesystem::create_directories(resFname, ec);
   resFname = filename_change_ext(gameFname.u8string(), "") + "_files/data.res");
+  if (!std::filesystem::exists(filename_change_ext(gameFname.u8string(), "") + "_files/fonts", ec))
+    std::filesystem::copy("../../fonts", filename_change_ext(gameFname.u8string(), "") + "_files/fonts", std::filesystem::copy_options::recursive, ec);
   std::filesystem::rename(datares, resFname, ec);
  
   auto resname = resFname.u8string();
