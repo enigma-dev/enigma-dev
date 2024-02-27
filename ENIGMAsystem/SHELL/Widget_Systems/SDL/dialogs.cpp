@@ -62,8 +62,6 @@ namespace enigma {
     enigma_user::environment_set_variable("IMGUI_POPS_COLOR_0", std::to_string(0.07));
     enigma_user::environment_set_variable("IMGUI_POPS_COLOR_1", std::to_string(0.07));
     enigma_user::environment_set_variable("IMGUI_POPS_COLOR_2", std::to_string(0.07));
-    std::string dname = enigma_user::directory_get_current_working();
-    enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
     enigma_user::environment_set_variable("IMGUI_FONT_FILES",
     std::string("fonts/000-notosans-regular.ttf\n") +
     std::string("fonts/001-notokufiarabic-regular.ttf\n") +
@@ -223,8 +221,6 @@ namespace enigma {
     std::string("fonts/155-notosanskr-regular.otf\n") +
     std::string("fonts/156-notosanssc-regular.otf\n") +
     std::string("fonts/157-notosanshk-regular.otf"));
-    ngs::imgui::ifd_load_fonts();
-    enigma_user::directory_set_current_working(dname);
     return true;
   }
 
