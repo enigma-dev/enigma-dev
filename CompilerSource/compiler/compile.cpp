@@ -768,7 +768,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
 
   std::error_code ec;
-  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), ".res");
+  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), "") + "_files";
+  std::filesystem::create_directories(resFname, ec);
+  resFname = filename_change_ext(gameFname.u8string(), "") + "_files/data.res");
   std::filesystem::rename(datares, resFname, ec);
  
   auto resname = resFname.u8string();
