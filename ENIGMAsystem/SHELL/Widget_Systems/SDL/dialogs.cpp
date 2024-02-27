@@ -55,9 +55,6 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 void show_info() { }
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
-  enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   #ifndef DEBUG_MODE
   errortext += "\n";
   fputs(errortext.c_str(), stderr);
@@ -87,7 +84,6 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
     environment_set_variable("IMGUI_NO", no);
     if (question) abort();
   }
-  enigma_user::directory_set_current_working(original);
 }
 
 int show_message(const string &message) {
