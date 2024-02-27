@@ -175,6 +175,11 @@ int enigma_main(int argc, char** argv) {
   enigma_user::environment_set_variable("SDL_VIDEODRIVER", "x11");
   #endif
 
+  if (!initGameWindow()) {
+    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
+    return -4;
+  }
+
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   enigma_user::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(720));
   enigma_user::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(360));
@@ -195,11 +200,6 @@ int enigma_main(int argc, char** argv) {
   enigma_user::environment_set_variable("IMGUI_POPS_COLOR_1", std::to_string(0.07));
   enigma_user::environment_set_variable("IMGUI_POPS_COLOR_2", std::to_string(0.07));
   enigma_user::environment_set_variable("IMGUI_FONT_PATH", enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + std::string("_files/fonts");
-
-  if (!initGameWindow()) {
-    DEBUG_MESSAGE("Failed to create game window", MESSAGE_TYPE::M_FATAL_ERROR);
-    return -4;
-  }
   
   initTimer();
   initInput();
