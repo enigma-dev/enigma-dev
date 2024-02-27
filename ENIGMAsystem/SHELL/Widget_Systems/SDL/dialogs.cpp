@@ -43,6 +43,12 @@ using std::string;
 namespace enigma {
 
   bool widget_system_initialize() {
+    enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+    enigma_user::environment_set_variable("IMGUI_FONT_PATH", "fonts");
+    std::string original = enigma_user::directory_get_current_working();
+    enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
+    ngs::imgui::ifd_load_fonts();
+    enigma_user::directory_set_current_working(original);
     return true;
   }
 
@@ -55,6 +61,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 void show_info() { }
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  widget_system_initialize();
   #ifndef DEBUG_MODE
   errortext += "\n";
   fputs(errortext.c_str(), stderr);
@@ -87,6 +94,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
+  widget_system_initialize();
   ::show_message(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -97,6 +105,7 @@ int show_message(const string &message) {
 }
 
 bool show_question(string message) {
+  widget_system_initialize();
   string result = ::show_question(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -108,6 +117,7 @@ bool show_question(string message) {
 }
 
 int show_question_ext(string message) {
+  widget_system_initialize();
   string result = ::show_question_ext(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -120,6 +130,7 @@ int show_question_ext(string message) {
 }
 
 std::string get_string(std::string message, std::string defstr) {
+  widget_system_initialize();
   std::string result = ::get_string(message.c_str(), defstr.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -130,6 +141,7 @@ std::string get_string(std::string message, std::string defstr) {
 }
 
 double get_number(std::string message, double defnum) {
+  widget_system_initialize();
   double result = ::get_number(message.c_str(), defnum);
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -144,6 +156,7 @@ double get_integer(std::string message, double defint) {
 }
 
 string get_open_filename(string filter, string fname) {
+  widget_system_initialize();
   string result = ::get_open_filename(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -154,6 +167,7 @@ string get_open_filename(string filter, string fname) {
 }
 
 string get_open_filename_ext(string filter, string fname, string title, string dir) {
+  widget_system_initialize();
   string result = ::get_open_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -164,6 +178,7 @@ string get_open_filename_ext(string filter, string fname, string title, string d
 }
 
 string get_open_filenames(string filter, string fname) {
+  widget_system_initialize();
   string result = ::get_open_filenames(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -174,6 +189,7 @@ string get_open_filenames(string filter, string fname) {
 }
 
 string get_open_filenames_ext(string filter, string fname, string title, string dir) {
+  widget_system_initialize();
   string result = ::get_open_filenames_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -183,7 +199,8 @@ string get_open_filenames_ext(string filter, string fname, string title, string 
   return result;
 }
 
-string get_save_filename(string filter, string fname) { 
+string get_save_filename(string filter, string fname) {
+  widget_system_initialize();
   string result = ::get_save_filename(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -194,6 +211,7 @@ string get_save_filename(string filter, string fname) {
 }
 
 string get_save_filename_ext(string filter, string fname, string title, string dir) {
+  widget_system_initialize();
   string result = ::get_save_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -204,6 +222,7 @@ string get_save_filename_ext(string filter, string fname, string title, string d
 }
 
 string get_directory(string dname) {
+  widget_system_initialize();
   string result = ::get_directory(dname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
@@ -214,6 +233,7 @@ string get_directory(string dname) {
 }
 
 string get_directory_alt(string capt, string root) {
+  widget_system_initialize();
   string result = ::get_directory_alt(capt.c_str(), root.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
