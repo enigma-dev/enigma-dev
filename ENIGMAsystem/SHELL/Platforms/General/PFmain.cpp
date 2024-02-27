@@ -180,26 +180,6 @@ int enigma_main(int argc, char** argv) {
     return -4;
   }
 
-  enigma_user::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(720));
-  enigma_user::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(360));
-  enigma_user::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(2));
-  enigma_user::environment_set_variable("IMGUI_TEXT_COLOR_0", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_TEXT_COLOR_1", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_TEXT_COLOR_2", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_HEAD_COLOR_0", std::to_string(0.35));
-  enigma_user::environment_set_variable("IMGUI_HEAD_COLOR_1", std::to_string(0.35));
-  enigma_user::environment_set_variable("IMGUI_HEAD_COLOR_2", std::to_string(0.35));
-  enigma_user::environment_set_variable("IMGUI_AREA_COLOR_0", std::to_string(0.05));
-  enigma_user::environment_set_variable("IMGUI_AREA_COLOR_1", std::to_string(0.05));
-  enigma_user::environment_set_variable("IMGUI_AREA_COLOR_2", std::to_string(0.05));
-  enigma_user::environment_set_variable("IMGUI_BODY_COLOR_0", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_BODY_COLOR_1", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_BODY_COLOR_2", std::to_string(1));
-  enigma_user::environment_set_variable("IMGUI_POPS_COLOR_0", std::to_string(0.07));
-  enigma_user::environment_set_variable("IMGUI_POPS_COLOR_1", std::to_string(0.07));
-  enigma_user::environment_set_variable("IMGUI_POPS_COLOR_2", std::to_string(0.07));
-  enigma_user::environment_set_variable("IMGUI_FONT_PATH", enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + std::string("_files/fonts"));
-  
   initTimer();
   initInput();
 
