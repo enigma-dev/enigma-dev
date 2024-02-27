@@ -9,4 +9,3 @@ Represents:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Description: SDL dialogs
 Author: Samuel Venable
-Init: widget_system_initialize
