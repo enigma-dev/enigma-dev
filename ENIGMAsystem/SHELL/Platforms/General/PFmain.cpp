@@ -5,6 +5,7 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/estring.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
@@ -169,6 +170,7 @@ int updateTimer() {
 
 int enigma_main(int argc, char** argv) {
   // Copy our parameters
+  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   set_program_args(argc, argv);
   
   #ifdef SDL_VIDEO_DRIVER_X11
