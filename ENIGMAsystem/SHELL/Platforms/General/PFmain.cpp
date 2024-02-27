@@ -198,7 +198,7 @@ int enigma_main(int argc, char** argv) {
   enigma_user::environment_set_variable("IMGUI_POPS_COLOR_0", std::to_string(0.07));
   enigma_user::environment_set_variable("IMGUI_POPS_COLOR_1", std::to_string(0.07));
   enigma_user::environment_set_variable("IMGUI_POPS_COLOR_2", std::to_string(0.07));
-  enigma_user::environment_set_variable("IMGUI_FONT_PATH", enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + std::string("_files/fonts");
+  enigma_user::environment_set_variable("IMGUI_FONT_PATH", enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + std::string("_files/fonts"));
   
   initTimer();
   initInput();
