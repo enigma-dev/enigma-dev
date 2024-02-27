@@ -68,7 +68,7 @@ int handleEvents() {
             enigma_user::keyboard_lastchar = string(1, str[0]);
             if (actualKey == enigma_user::vk_backspace) {
               if (!enigma_user::keyboard_string.empty()) enigma_user::keyboard_string.pop_back();
-            } else {
+            } else if(actualKey != enigma_user::vk_enter) {
               enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
             }
           }
