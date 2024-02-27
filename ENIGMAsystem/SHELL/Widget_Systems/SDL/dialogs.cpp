@@ -43,6 +43,10 @@ using std::string;
 namespace enigma {
 
   bool widget_system_initialize() {
+    std::string dname = enigma_user::directory_set_current_working();
+    enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files/fonts");
+    ngs::imgui::ifd_load_fonts();
+    enigma_user::directory_set_current_working(dname);
     return true;
   }
 
