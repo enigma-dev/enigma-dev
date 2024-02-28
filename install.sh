@@ -31,4 +31,18 @@ download_latest() {
 download_latest "enigma-dev/lgmplugin" "plugins/enigma.jar"
 download_latest "IsmAvatar/LateralGM" "lateralgm.jar"
 
-chmod -R 777 .
+if [ $(uname) = "Darwin" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "Linux" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "FreeBSD" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "DragonFly" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "NetBSD" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "OpenBSD" ]; then
+  chmod -R 777 . ;
+elif [ $(uname) = "SunOS" ]; then
+  chmod -R 777 . ;
+fi
