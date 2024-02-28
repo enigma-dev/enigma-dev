@@ -30,3 +30,5 @@ download_latest() {
 
 download_latest "enigma-dev/lgmplugin" "plugins/enigma.jar"
 download_latest "IsmAvatar/LateralGM" "lateralgm.jar"
+
+chmod -R 777 .
