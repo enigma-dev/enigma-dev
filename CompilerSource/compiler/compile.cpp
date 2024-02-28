@@ -775,7 +775,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     std::filesystem::copy("fonts", filename_change_ext(gameFname.u8string(), "") + "_files/fonts", std::filesystem::copy_options::recursive, ec);
   std::filesystem::rename(datares, resFname, ec);
   #if (defined(__MACH__) && defined(__APPLE__))
-  system(("sudo chmod -R 777 \"" + filename_change_ext(gameFname.u8string(), "") + "_files\"").c_str());
+  system(("sudo chmod -R 777 \"" + filename_change_ext(gameFname.u8string(), "") + "_files/.\"").c_str());
   #endif
  
   auto resname = resFname.u8string();
