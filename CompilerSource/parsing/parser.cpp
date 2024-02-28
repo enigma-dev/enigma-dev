@@ -1430,6 +1430,10 @@ std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
       is_array = !type.decl.components.empty() &&
                  type.decl.components.begin()->kind == DeclaratorNode::Kind::ARRAY_BOUND;
 
+      if(token.type == TT_SEMICOLON) {
+        token = lexer->ReadToken();
+      }
+
       return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), std::move(type), std::move(initializer));
     } else {
       auto init = TryParseInitializerList(TT_ENDPARENTH);
@@ -1475,6 +1479,10 @@ std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
   is_array = !type.decl.components.empty() &&
              type.decl.components.begin()->kind == DeclaratorNode::Kind::ARRAY_BOUND;
 
+  if(token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+
   return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), std::move(type), std::move(initializer));
 }
 
@@ -1488,7 +1496,12 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
     require_token(TT_ENDBRACKET, "Expected ']' to close '[' in delete-expression");
   }
 
-  return std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+  auto node =  std::make_unique<AST::DeleteExpression>(is_global, is_array, TryParseExpression(Precedence::kUnaryPrefix));
+  if(token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+
+  return node;
 }
 
 std::unique_ptr<AST::Node> TryParseIdExpression() {
@@ -1846,6 +1859,10 @@ std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int 
     token = lexer->ReadToken(); // Consume the operator
 
     operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
+  }
+
+  if(token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
   }
 
   return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
@@ -2263,27 +2280,44 @@ std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
   token = lexer->ReadToken();
   auto value = TryParseExpression(Precedence::kAll);
 
+  if(token.type == TT_SEMICOLON) 
+    token = lexer->ReadToken(); // Consume the semicolon  
+
   return std::make_unique<AST::ReturnStatement>(std::move(value), false);
 }
 
 std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
   token = lexer->ReadToken(); // Consume the break
+  std::unique_ptr<AST::BreakStatement> node ;
+
   if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
       token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
-    return std::make_unique<AST::BreakStatement>(nullptr);
+    node = std::make_unique<AST::BreakStatement>(nullptr);
   } else {
-    return std::make_unique<AST::BreakStatement>(TryParseOperand());
+    node = std::make_unique<AST::BreakStatement>(TryParseOperand());
   }
+
+  if(token.type == TT_SEMICOLON)
+    token = lexer->ReadToken();
+
+  return node;
 }
 
 std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
-  token = lexer->ReadToken(); // Consume the break
+  token = lexer->ReadToken(); // Consume the continue
+  std::unique_ptr<AST::ContinueStatement> node;
+
   if (token.type != TT_DECLITERAL && token.type != TT_BINLITERAL &&
       token.type != TT_OCTLITERAL && token.type != TT_HEXLITERAL) {
-    return std::make_unique<AST::ContinueStatement>(nullptr);
+    node = std::make_unique<AST::ContinueStatement>(nullptr);
   } else {
-    return std::make_unique<AST::ContinueStatement>(TryParseOperand());
+    node = std::make_unique<AST::ContinueStatement>(TryParseOperand());
   }
+
+  if(token.type == TT_SEMICOLON)
+    token = lexer->ReadToken();
+
+  return node;
 }
 
 std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {

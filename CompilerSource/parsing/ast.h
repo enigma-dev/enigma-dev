@@ -193,8 +193,10 @@ class AST {
     FullType ft;
     PNode expr;
     TokenType functional_cast_type;
+    static const std::vector<std::string> KindNames;
 
     BASIC_NODE_ROUTINES(CastExpression);
+    static std::string KindToString(Kind k);
 
     CastExpression(const Token &token, FullType type, PNode expr, TokenType cast_type):
        ft{std::move(type)}, expr{std::move(expr)}, functional_cast_type{cast_type} {
@@ -462,8 +464,10 @@ class AST {
     jdi::definition *def;
     StorageClass storage_class;
     std::vector<Declaration> declarations;
+    static const std::vector<std::string> StorageNames;
 
     BASIC_NODE_ROUTINES(DeclarationStatement);
+    static std::string StorageToString(StorageClass st);
 
     DeclarationStatement(StorageClass sc, jdi::definition *type,
                          std::vector<Declaration> declarations):
@@ -511,6 +515,8 @@ class AST {
   const std::shared_ptr<Lexer> lexer;
   // The raw input code, owned by the lexer.
   const std::string &code;
+  // Lambda function to get nodes types as strings 
+  static const std::vector<std::string> NodesNames;
 
   bool HasError() { return !herr.errors.empty(); }
   std::string ErrorString() {
@@ -546,6 +552,9 @@ class AST {
   void VisitNodes(Visitor &visitor) {
     if (root_) root_->RecurusiveVisit(visitor);
   }
+
+  // Get the node type as a string
+  static std::string NodeToString(NodeType nt);
 
   // Disallow copy. Our tokens point into our code.
   AST(const AST &) = delete;

@@ -61,3 +61,4 @@ hs_err_pid*.log
 *.layout
 *.epackage
 *~
+.vscode

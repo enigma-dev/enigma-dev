@@ -5,11 +5,11 @@ SHARED_SRC_DIR := ../../shared
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Darwin)
-	OS_LIBS=-lboost_program_options -lpthread -ldl
+	OS_LIBS=-lboost_program_options -lpthread -ldl -lgmock
 else ifeq ($(UNIX_BASED), true)
-	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
+	OS_LIBS=-lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl -lgmock
 else
-	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread
+	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath,./ -lboost_program_options-mt -lpthread -lgmock
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I../../CompilerSource/JDI/src -I$(PROTO_DIR) -I../libEGM -I../libEGM
