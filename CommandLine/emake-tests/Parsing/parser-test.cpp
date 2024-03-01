@@ -483,19 +483,19 @@ TEST(ParserTest, NewExpression_3_NoSemicolon) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
-  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO); 
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
 
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
 }
- 
+
 TEST(ParserTest, NewExpression_4) {
   ParserTester test{"new (int *(**)[10]);"};
-  auto node = test->TryParseStatement(); 
+  auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::NEW);
   auto *new_ = reinterpret_cast<AST::NewExpression *>(node.get());
-  ASSERT_FALSE(new_->is_global); 
+  ASSERT_FALSE(new_->is_global);
   ASSERT_FALSE(new_->is_array);
 
   ASSERT_EQ(new_->placement, nullptr);
@@ -898,6 +898,78 @@ TEST(ParserTest, CodeBlock) {
 }
 */
 
+TEST(ParserTest, IfStatement_1) {
+  ParserTester test{"if(3>2) j++; else --k;"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+}
+
+TEST(ParserTest, IfStatement_1_NoSemicolon) {
+  ParserTester test{"if(3>2) j++ else --k"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+}
+
+TEST(ParserTest, IfStatement_2) {
+  ParserTester test{"if k k++;"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_->false_branch, nullptr);
+}
+
+TEST(ParserTest, IfStatement_2_NoSemicolon) {
+  ParserTester test{"if k k++"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_->false_branch, nullptr);
+}
+
+TEST(ParserTest, IfStatement_3) {
+  ParserTester test{"if (true) { return 1; } else { return 2; }"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::BLOCK);
+}
+
+TEST(ParserTest, IfStatement_3_NoSemicolon) {
+  ParserTester test{"if (true) { return 1 } else { return 2 }"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::BLOCK);
+}
+
 TEST(ParserTest, TemporaryInitialization_1) {
   ParserTester test{"int((*x)[5] + 6)"};
   auto node = test->TryParseStatement();
@@ -1074,7 +1146,8 @@ MATCHER_P(IsDeclaration, decls, "") {
     }
     if (!b2) {
       ExpectedMsg += "StorageClass = TEMPORARY\n";
-      *result_listener << "got StorageClass = " << AST::DeclarationStatement::StorageToString(decl->storage_class) << "\n";
+      *result_listener << "got StorageClass = " << AST::DeclarationStatement::StorageToString(decl->storage_class)
+                       << "\n";
     }
     if (!b3) {
       ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
