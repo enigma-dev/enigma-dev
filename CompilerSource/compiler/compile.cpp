@@ -768,14 +768,14 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
 
   std::error_code ec;
-  std::filesystem::path resFname = filename_change_ext(gameFname.u8string(), "") + "_files";
+  std::filesystem::path resFname = filename_path(gameFname.u8string()) + "assets";
   std::filesystem::create_directories(resFname, ec);
-  resFname = filename_change_ext(gameFname.u8string(), "") + "_files/data.res";
-  if (!std::filesystem::exists(filename_change_ext(gameFname.u8string(), "") + "_files/fonts", ec))
-    std::filesystem::copy("fonts", filename_change_ext(gameFname.u8string(), "") + "_files/fonts", std::filesystem::copy_options::recursive, ec);
+  resFname = filename_path(gameFname.u8string()) + "assets/data.res";
+  if (!std::filesystem::exists(filename_path(gameFname.u8string()) + "assets/fonts", ec))
+    std::filesystem::copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts", std::filesystem::copy_options::recursive, ec);
   std::filesystem::rename(datares, resFname, ec);
   #if (defined(__MACH__) && defined(__APPLE__))
-  system(("sudo chmod -R 777 \"" + filename_change_ext(gameFname.u8string(), "") + "_files/.\"").c_str());
+  system(("sudo chmod -R 777 \"" + filename_path(gameFname.u8string()) + "assets/.\"").c_str());
   #endif
  
   auto resname = resFname.u8string();
