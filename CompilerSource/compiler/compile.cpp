@@ -836,7 +836,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     std::filesystem::create_directories(newdir + "/assets", ec);
     if (!std::filesystem::exists(newdir + "/assets/fonts", ec))
       std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts", std::filesystem::copy_options::recursive, ec);
-    std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/fonts", std::filesystem::copy_options::overwrite_existing, ec);
+    std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/data.res", std::filesystem::copy_options::overwrite_existing, ec);
  
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());
