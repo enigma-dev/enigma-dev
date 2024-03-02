@@ -87,8 +87,6 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   ::show_message(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -96,13 +94,10 @@ int show_message(const string &message) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return 1;
 }
 
 bool show_question(string message) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::show_question(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -111,13 +106,10 @@ bool show_question(string message) {
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
-  enigma_user::directory_set_current_working(original);
   return ((result == yes) ? true : false);
 }
 
 int show_question_ext(string message) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::show_question_ext(message.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -127,13 +119,10 @@ int show_question_ext(string message) {
   SDL_RaiseWindow(enigma::windowHandle);
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
   string no = (environment_get_variable("IMGUI_NO").empty() ? "No" : environment_get_variable("IMGUI_YES"));
-  enigma_user::directory_set_current_working(original);
   return ((result == yes) ? 1 : ((result == no) ? 0 : -1));
 }
 
 std::string get_string(std::string message, std::string defstr) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   std::string result = ::get_string(message.c_str(), defstr.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -141,13 +130,10 @@ std::string get_string(std::string message, std::string defstr) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 double get_number(std::string message, double defnum) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   double result = ::get_number(message.c_str(), defnum);
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -155,7 +141,6 @@ double get_number(std::string message, double defnum) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
@@ -164,8 +149,6 @@ double get_integer(std::string message, double defint) {
 }
 
 string get_open_filename(string filter, string fname) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_open_filename(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -173,13 +156,10 @@ string get_open_filename(string filter, string fname) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_open_filename_ext(string filter, string fname, string title, string dir) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_open_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -187,13 +167,10 @@ string get_open_filename_ext(string filter, string fname, string title, string d
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_open_filenames(string filter, string fname) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_open_filenames(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -201,13 +178,10 @@ string get_open_filenames(string filter, string fname) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_open_filenames_ext(string filter, string fname, string title, string dir) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_open_filenames_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -215,13 +189,10 @@ string get_open_filenames_ext(string filter, string fname, string title, string 
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_save_filename(string filter, string fname) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_save_filename(filter.c_str(), fname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -229,13 +200,10 @@ string get_save_filename(string filter, string fname) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_save_filename_ext(string filter, string fname, string title, string dir) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_save_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -243,13 +211,10 @@ string get_save_filename_ext(string filter, string fname, string title, string d
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_directory(string dname) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_directory(dname.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -257,13 +222,10 @@ string get_directory(string dname) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
 string get_directory_alt(string capt, string root) {
-  std::string original = enigma_user::directory_get_current_working();
-  enigma_user::directory_set_current_working(enigma_user::filename_change_ext(enigma_user::executable_get_pathname(), "") + "_files");
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
   string result = ::get_directory_alt(capt.c_str(), root.c_str());
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
@@ -271,7 +233,6 @@ string get_directory_alt(string capt, string root) {
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
-  enigma_user::directory_set_current_working(original);
   return result;
 }
 
