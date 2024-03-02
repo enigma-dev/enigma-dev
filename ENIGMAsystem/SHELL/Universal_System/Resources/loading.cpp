@@ -84,17 +84,14 @@ namespace enigma
       FILE* resfile = nullptr; 
       #if !defined(_WIN32)
       resfile = fopen((enigma_user::filename_change_ext(program_pathname, "") + "_files/data.res").c_str(),"rb");
-     if (!enigma_user::file_exists(enigma_user::filename_change_ext(program_pathname, "") + "_files/data.res") || !resfile) {
-        exit(0);
-        break;
-      }
       #else
-      resfile = _wfopen(ghc::filesystem::path("C:\\Windows\\Temp\\assets\\data.res").wstring().c_str(), L"rb");
-      if (!enigma_user::file_exists("C:\\Windows\\Temp\\assets\\data.res") || !resfile) {
+      resfile = _wfopen(ghc::filesystem::path(enigma_user::filename_change_ext(program_pathname, "") + "_files/data.res").wstring().c_str(), L"rb");
+      #endif
+
+      if (!enigma_user::file_exists(enigma_user::filename_change_ext(program_pathname, "") + "_files/data.res") || !resfile) {
         exit(0);
         break;
       }
-      #endif
 
       enigma::exe_loadsprs(resfile);
       enigma::exe_loadsounds(resfile);
