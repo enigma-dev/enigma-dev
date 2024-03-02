@@ -493,7 +493,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Writing modes and settings" << flushl;
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").u8string().c_str(),ios_base::out);
   wto << license;
-  wto << "#pragma once\n"
+  wto << "#pragma once\n";
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
   wto << "#define PRIMDEPTH2 6\n";
