@@ -168,10 +168,6 @@ int updateTimer() {
 }
 
 int enigma_main(int argc, char** argv) {
-  #if defined(BUILDMODE)
-  enigma_user::directory_set_current_working(enigma_user::executable_get_directory());
-  #endif
-  
   // Copy our parameters
   set_program_args(argc, argv);
   
