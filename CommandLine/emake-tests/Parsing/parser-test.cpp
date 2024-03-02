@@ -970,6 +970,30 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
   ASSERT_EQ(if_->false_branch->type, AST::NodeType::BLOCK);
 }
 
+TEST(ParserTest, IfStatement_4) {
+  ParserTester test{"if (true) for(int i=0;i<12;i++) k++; else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::FOR);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::SWITCH);
+}
+
+TEST(ParserTest, IfStatement_4_NoSemicolon) {
+  ParserTester test{"if (true) for(int i=0;i<12;i++) k++ else switch(i){ case 1 : k-- case 2 : k+=3 default : k=0 }"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::IF);
+  auto *if_ = dynamic_cast<AST::IfStatement *>(node.get());
+  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_->true_branch->type, AST::NodeType::FOR);
+  ASSERT_EQ(if_->false_branch->type, AST::NodeType::SWITCH);
+}
+
 TEST(ParserTest, TemporaryInitialization_1) {
   ParserTester test{"int((*x)[5] + 6)"};
   auto node = test->TryParseStatement();
