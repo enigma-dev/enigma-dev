@@ -507,6 +507,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << license;
   wto << "#define BUILDMODE " << 0 << "\n";
   wto << "#define DEBUGMODE " << 0 << "\n";
+  if (mode == emode_compile)
+    wto << "#define COMPILE_MODE\n";
   wto << '\n';
   wto.close();
 
