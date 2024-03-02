@@ -493,14 +493,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Writing modes and settings" << flushl;
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").u8string().c_str(),ios_base::out);
   wto << license;
-  wto << "#pragma once\n";
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
   wto << "#define PRIMDEPTH2 6\n";
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
   wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
-  wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
   wto << '\n';
   wto.close();
 
