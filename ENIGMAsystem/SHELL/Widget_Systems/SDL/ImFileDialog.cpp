@@ -254,14 +254,14 @@ namespace ifd {
         if (!ImGui::IsMouseClicked(ImGuiMouseButton_Left))
           *state |= 0b100;
       }
+      std::error_code ec;
       ghc::filesystem::path pathToCheckExistenceFor = pathBuffer;
       if (ImGui::InputTextEx("##pathbox_input", "", pathBuffer, 1024, size_arg, ImGuiInputTextFlags_EnterReturnsTrue) &&
         #if defined(_WIN32)
         (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(pathToCheckExistenceFor.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND)) {
         #else
-        ghc::filesystem::exists(pathToCheckExistenceFor)) {
+        ghc::filesystem::exists(pathToCheckExistenceFor, ec)) {
         #endif
-        std::error_code ec;
         std::string tempStr(pathBuffer);
         if (ghc::filesystem::exists(tempStr, ec))
           path = ghc::filesystem::path(tempStr);
@@ -422,7 +422,8 @@ namespace ifd {
     m_previewLoader = nullptr;
     m_previewLoaderRunning = false;
 
-    m_setDirectory(ghc::filesystem::current_path(), false);
+    std::error_code ec;
+    m_setDirectory(ghc::filesystem::current_path(ec), false);
 
     // favorites are available on every OS
     FileTreeNode* quickAccess = new FileTreeNode(IFD_QUICK_ACCESS);
@@ -430,8 +431,6 @@ namespace ifd {
     m_treeCache.push_back(quickAccess);
 
     #ifdef _WIN32
-    std::error_code ec;
-
     // Quick Access
     ghc::filesystem::path homePath = ngs::fs::environment_get_variable("USERPROFILE");
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER").empty())
@@ -485,8 +484,6 @@ namespace ifd {
         thisPC->Children.push_back(new FileTreeNode(std::string(1, 'A' + i) + ":\\"));
     m_treeCache.push_back(thisPC);
     #else
-    std::error_code ec;
-    
     // Quick Access
     ghc::filesystem::path homePath = ngs::fs::environment_get_variable("HOME");
     if (ngs::fs::environment_get_variable("IMGUI_CONFIG_FOLDER").empty())
@@ -708,7 +705,8 @@ namespace ifd {
     if (std::count(m_favorites.begin(), m_favorites.end(), path) > 0)
       return;
 
-    if (!ghc::filesystem::exists(ghc::filesystem::path(path)))
+    std::error_code ec;
+    if (!ghc::filesystem::exists(ghc::filesystem::path(path), ec))
       return;
 
     m_favorites.push_back(path);
