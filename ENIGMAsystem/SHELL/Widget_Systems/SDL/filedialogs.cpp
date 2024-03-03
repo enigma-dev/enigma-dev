@@ -334,11 +334,12 @@ namespace {
       shared_font_atlas = new ImFontAtlas();
     ImGui::CreateContext(shared_font_atlas);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.IniFilename = nullptr;
     if (ngs::fs::environment_get_variable("IMGUI_FONT_LOADED") != std::to_string(1)) { 
       ngs::imgui::ifd_load_fonts();
       if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
       ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
-      ImFontConfig config; io.IniFilename = nullptr;
+      ImFontConfig config;
       config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 };
       float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
       for (unsigned i = 0; i < fonts.size(); i++) {
