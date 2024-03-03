@@ -1504,7 +1504,8 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
   return node;
 }
 
-std::unique_ptr<AST::Node> TryParseIdExpression() {
+// without_semi is used to indicate that we should not consume a semicolon after the expression if it is present
+std::unique_ptr<AST::Node> TryParseIdExpression(bool without_semi = false) {
   std::unique_ptr<AST::Node> node;
   Declarator decl;
   auto def = TryParseIdExpression(&decl);
@@ -1518,15 +1519,16 @@ std::unique_ptr<AST::Node> TryParseIdExpression() {
     node = std::make_unique<AST::IdentifierAccess>(def, decl.name);
   }
 
-  if(token.type == TT_SEMICOLON)
+  if(token.type == TT_SEMICOLON && !without_semi) {
       token = lexer->ReadToken();
-  
+  }
+
   return node;
 }
 
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
-std::unique_ptr<AST::Node> TryParseOperand() {
+std::unique_ptr<AST::Node> TryParseOperand(bool without_semi = false) {
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
     case TT_ENDPARENTH: case TT_ENDBRACKET:
@@ -1745,7 +1747,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
           return nullptr;
         }
       } else {
-        return TryParseIdExpression();
+        return TryParseIdExpression(without_semi);
       }
       herr->Error(token) << "INTERNAL ERROR: " __FILE__ ":" << __LINE__ << ": Unreachable";
       return nullptr;
@@ -1792,9 +1794,9 @@ static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                 prec.associativity == Associativity::RTL);
 }
 
-std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr, bool for_stm = false) {
+std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr, bool without_semi = false) {
   if (operand == nullptr) {
-    operand = TryParseOperand();
+    operand = TryParseOperand(without_semi);
   }
   if (operand != nullptr) {
     // TODO: Handle binary operators, unary postfix operators
@@ -1808,7 +1810,7 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
           break;
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
-        if(!for_stm && token.type == TT_SEMICOLON) {
+        if(!without_semi && token.type == TT_SEMICOLON) {
           token = lexer->ReadToken();
         }
       } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
@@ -1919,9 +1921,10 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
     while (token.type != TT_ENDPARENTH && token.type != TT_ENDOFCODE) {
-      arguments.emplace_back(TryParseExpression(Precedence::kTernary));
+      arguments.emplace_back(TryParseExpression(Precedence::kTernary, nullptr, true)); 
       if (token.type != TT_COMMA && token.type != TT_ENDPARENTH) {
         herr->Error(token) << "Expected ',' or ')' after function argument";
+        break;
       } else if (token.type == TT_COMMA) {
         token = lexer->ReadToken();
       }
