@@ -1921,7 +1921,7 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
     while (token.type != TT_ENDPARENTH && token.type != TT_ENDOFCODE) {
-      arguments.emplace_back(TryParseExpression(Precedence::kTernary, nullptr, true)); 
+      arguments.emplace_back(TryParseExpression(Precedence::kTernary, nullptr, true));
       if (token.type != TT_COMMA && token.type != TT_ENDPARENTH) {
         herr->Error(token) << "Expected ',' or ')' after function argument";
         break;

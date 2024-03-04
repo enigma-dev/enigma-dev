@@ -38,6 +38,242 @@ void assert_identifier_is(AST::Node *node, std::string_view name) {
   ASSERT_EQ(node->As<AST::IdentifierAccess>()->name.content, name);
 }
 
+std::string ExpectedMsg = "";
+
+MATCHER_P(IsDeclaration, decls, "") {
+  auto *decl = arg->template As<AST::DeclarationStatement>();
+
+  bool b1 = arg->type == AST::NodeType::DECLARATION,
+       b2 = decl->storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY,
+       b3 = decl->declarations.size() == decls.size();
+
+  if (!b1 || !b2 || !b3) {
+    ExpectedMsg = "From IsDeclaration Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = DECLARATION\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "StorageClass = TEMPORARY\n";
+      *result_listener << "got StorageClass = " << AST::DeclarationStatement::StorageToString(decl->storage_class)
+                       << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
+      *result_listener << "got DeclarationsSize = " << to_string(decl->declarations.size()) << "\n";
+    }
+  }
+
+  bool b4 = 1;
+  for (size_t i = 0; i < decls.size(); i++) {
+    auto &decli = decl->declarations[i].declarator->decl;
+    b4 = b4 && decl->declarations[i].init != nullptr;
+    b4 = b4 && decl->declarations[i].declarator->def == jdi::builtin_type__int;  // need to send the type
+    b4 = b4 && decl->declarations[i].declarator->flags == 0;
+    b4 = b4 && decli.name.content == decls[i];
+    b4 = b4 && decli.components.size() == 0;
+    if (!b4) {
+      if (ExpectedMsg == "") ExpectedMsg = "From IsDeclaration Matcher: ";
+      ExpectedMsg += "Declaration [" + to_string(i) +
+                     "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " + decls[i] +
+                     ", components.size() = 0\n";
+      *result_listener << " got Declaration [" << to_string(i) << "] has init "
+                       << ((decl->declarations[i].init) ? "!=" : "=")
+                       << " nullptr, def = jdi::builtin_type__int, flags = "
+                       << to_string(decl->declarations[i].declarator->flags)
+                       << ", name.content = " << decli.name.content
+                       << ", components.size() = " << to_string(decli.components.size()) << "\n";
+    }
+  }
+
+  return b1 && b2 && b3 && b4;
+}
+
+MATCHER_P2(IsCast, cast_kind, expr_type, "") {
+  auto *cast = arg->template As<AST::CastExpression>();
+  auto *expr = cast->expr->template As<AST::Node>();
+
+  bool b1 = arg->type == AST::NodeType::CAST, b2 = cast->ft.def == jdi::builtin_type__int, b3 = cast->ft.flags == 0,
+       b4 = cast->ft.decl.components.size() == 0, b5 = cast->ft.decl.name.content == "",
+       b6 = cast->ft.decl.has_nested_declarator == false, b7 = cast->kind == cast_kind, b8 = expr->type == expr_type;
+
+  bool res = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
+
+  if (!res) {
+    ExpectedMsg = "From IsCast Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = CAST\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "ft.flags = 0\n";
+      *result_listener << "got ft.flags = " << to_string(cast->ft.flags) << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "ft.decl.components.size() = 0\n";
+      *result_listener << "got ft.decl.components.size() = " << to_string(cast->ft.decl.components.size()) << "\n";
+    }
+    if (!b5) {
+      ExpectedMsg += "ft.decl.name.content = \"\"\n";
+      *result_listener << "got ft.decl.name.content = " << cast->ft.decl.name.content << "\n";
+    }
+    if (!b6) {
+      ExpectedMsg += "ft.decl.has_nested_declarator = false\n";
+      *result_listener << "got ft.decl.has_nested_declarator = " << to_string(cast->ft.decl.has_nested_declarator)
+                       << "\n";
+    }
+    if (!b7) {
+      ExpectedMsg += "cast->kind = " + AST::CastExpression::KindToString(cast_kind) + "\n";
+      *result_listener << "got cast->kind = " << AST::CastExpression::KindToString(cast->kind) << "\n";
+    }
+    if (!b8) {
+      ExpectedMsg += "expr->type = " + AST::NodeToString(expr_type) + "\n";
+      *result_listener << "got expr->type = " << AST::NodeToString(expr->type) << "\n";
+    }
+  }
+
+  return res;
+}
+
+MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
+  auto *right = arg->right->template As<AST::Literal>();
+
+  bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op, b3 = arg->left->type == left_,
+       b4 = arg->left->template As<AST::IdentifierAccess>()->name.content == iden, b5 = arg->right->type == right_,
+       b6 = std::get<std::string>(right->template As<AST::Literal>()->value.value) == num;
+
+  bool res = b1 && b2 && b3 && b4 && b5 && b6;
+  if (!res) {
+    ExpectedMsg = "From IsBinaryOperation Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = BINARY_EXPRESSION\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(arg->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Left Type = " + AST::NodeToString(left_) + "\n";
+      *result_listener << "got Left Type = " << AST::NodeToString(arg->left->type) << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Left Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Left Identifier = " << arg->left->template As<AST::IdentifierAccess>()->name.content
+                       << "\n";
+    }
+    if (!b5) {
+      ExpectedMsg += "Right Type = " + AST::NodeToString(right_) + "\n";
+      *result_listener << "got Right Type = " << AST::NodeToString(arg->right->type) << "\n";
+    }
+    if (!b6) {
+      ExpectedMsg += "Right Literal = " + PrintToString(num) + "\n";
+      *result_listener << "got Right Literal = "
+                       << std::get<std::string>(right->template As<AST::Literal>()->value.value) << "\n";
+    }
+  }
+
+  return res;
+}
+
+MATCHER_P2(IsUnaryPostfixOperator, op, iden, "") {
+  auto *unary = arg->template As<AST::UnaryPostfixExpression>();
+
+  bool b1 = unary->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION, b2 = unary->operation == op,
+       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
+
+  bool res = b1 && b2 && b3 && b4;
+  if (!res) {
+    ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = UNARY_POSTFIX_EXPRESSION\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Operand Type = IDENTIFIER \n";
+      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Operand Identifier = "
+                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
+    }
+  }
+
+  return res;
+}
+
+MATCHER_P2(IsUnaryPrefixOperator, op, iden, "") {
+  auto *unary = arg->template As<AST::UnaryPrefixExpression>();
+
+  bool b1 = unary->type == AST::NodeType::UNARY_PREFIX_EXPRESSION, b2 = unary->operation == op,
+       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
+       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
+
+  bool res = b1 && b2 && b3 && b4;
+  if (!res) {
+    ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = UNARY_PREFIX_EXPRESSION\n";
+      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg += "Operation = " + ToString(op) + "\n";
+      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    }
+    if (!b3) {
+      ExpectedMsg += "Operand Type = IDENTIFIER \n";
+      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
+    }
+    if (!b4) {
+      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
+      *result_listener << "got Operand Identifier = "
+                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
+    }
+  }
+
+  return res;
+}
+
+MATCHER_P(IsStatementBlock, stateSize, "") {
+  bool b1 = arg->type == AST::NodeType::BLOCK, b2 = arg->statements.size() == size_t(stateSize);
+
+  if (!b1 || !b2) {
+    ExpectedMsg = "From IsStatementBlock Matcher: ";
+
+    if (!b1) {
+      ExpectedMsg += "NodeType = BLOCK";
+      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    }
+    if (!b2) {
+      ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
+      *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
+    }
+  }
+
+  return b1 && b2;
+}
+
+MATCHER_P4(IsForLoopWithChildren, M1, M2, M3, M4, ExpectedMsg) {
+  auto *assign = (arg->assignment.get());
+  auto *binary = arg->condition->template As<AST::BinaryExpression>();
+  auto *unary = (arg->increment.get());
+  auto *block = arg->body->template As<AST::CodeBlock>();
+
+  return ExplainMatchResult(M1, assign, result_listener) && ExplainMatchResult(M2, binary, result_listener) &&
+         ExplainMatchResult(M3, unary, result_listener) && ExplainMatchResult(M4, block, result_listener);
+}
+
 TEST(ParserTest, Basics) {
   ParserTester test{"(x ? y : z ? a : (z[5](6)))"};
 
@@ -910,10 +1146,26 @@ TEST(ParserTest, IfStatement_1) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::BinaryExpression>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->operation, TT_GREATER);
+  ASSERT_EQ(expr->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(expr->right->type, AST::NodeType::LITERAL);
+
+  auto *true_branch = if_->true_branch->As<AST::UnaryPostfixExpression>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
+
+  auto *false_branch = if_->false_branch->As<AST::UnaryPrefixExpression>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->operation, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
 }
 
 TEST(ParserTest, IfStatement_1_NoSemicolon) {
@@ -923,10 +1175,26 @@ TEST(ParserTest, IfStatement_1_NoSemicolon) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::BinaryExpression>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->operation, TT_GREATER);
+  ASSERT_EQ(expr->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(expr->right->type, AST::NodeType::LITERAL);
+
+  auto *true_branch = if_->true_branch->As<AST::UnaryPostfixExpression>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
+
+  auto *false_branch = if_->false_branch->As<AST::UnaryPrefixExpression>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->operation, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
 }
 
 TEST(ParserTest, IfStatement_2) {
@@ -936,10 +1204,18 @@ TEST(ParserTest, IfStatement_2) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(if_->false_branch, nullptr);
+  auto *cond = if_->condition->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(cond);
+  ASSERT_EQ(cond->name.content, "k");
+
+  auto *true_branch = if_->true_branch->As<AST::UnaryPostfixExpression>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
+
+  ASSERT_FALSE(if_->false_branch);
 }
 
 TEST(ParserTest, IfStatement_2_NoSemicolon) {
@@ -949,10 +1225,18 @@ TEST(ParserTest, IfStatement_2_NoSemicolon) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(if_->false_branch, nullptr);
+  auto *cond = if_->condition->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(cond);
+  ASSERT_EQ(cond->name.content, "k");
+
+  auto *true_branch = if_->true_branch->As<AST::UnaryPostfixExpression>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
+
+  ASSERT_FALSE(if_->false_branch);
 }
 
 TEST(ParserTest, IfStatement_3) {
@@ -962,10 +1246,32 @@ TEST(ParserTest, IfStatement_3) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::BLOCK);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::BLOCK);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->name.content, "true");
+
+  auto *true_branch = if_->true_branch->As<AST::CodeBlock>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->statements.size(), 1);
+  ASSERT_EQ(true_branch->statements[0]->type, AST::NodeType::RETURN);
+
+  auto *return_1 = true_branch->statements[0]->As<AST::ReturnStatement>();
+  ASSERT_EQ(return_1->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(return_1->expression->As<AST::Literal>()->value.value), "1");
+
+  auto *false_branch = if_->false_branch->As<AST::CodeBlock>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->statements.size(), 1);
+  ASSERT_EQ(false_branch->statements[0]->type, AST::NodeType::RETURN);
+
+  auto *return_2 = false_branch->statements[0]->As<AST::ReturnStatement>();
+  ASSERT_EQ(return_2->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(return_2->expression->As<AST::Literal>()->value.value), "2");
 }
 
 TEST(ParserTest, IfStatement_3_NoSemicolon) {
@@ -975,37 +1281,144 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::BLOCK);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::BLOCK);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->name.content, "true");
+
+  auto *true_branch = if_->true_branch->As<AST::CodeBlock>();
+  ASSERT_TRUE(true_branch);
+  ASSERT_EQ(true_branch->statements.size(), 1);
+  ASSERT_EQ(true_branch->statements[0]->type, AST::NodeType::RETURN);
+
+  auto *return_1 = true_branch->statements[0]->As<AST::ReturnStatement>();
+  ASSERT_EQ(return_1->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(return_1->expression->As<AST::Literal>()->value.value), "1");
+
+  auto *false_branch = if_->false_branch->As<AST::CodeBlock>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->statements.size(), 1);
+  ASSERT_EQ(false_branch->statements[0]->type, AST::NodeType::RETURN);
+
+  auto *return_2 = false_branch->statements[0]->As<AST::ReturnStatement>();
+  ASSERT_EQ(return_2->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(return_2->expression->As<AST::Literal>()->value.value), "2");
 }
 
 TEST(ParserTest, IfStatement_4) {
   ParserTester test{
-      "if (true) for(int i=0;i<12;i++) k++; else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }"};
+      "if (false) for(int i=0;i<12;i++) {k++;} else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::FOR);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::SWITCH);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->name.content, "false");
+
+  auto *true_branch = if_->true_branch->As<AST::ForLoop>();
+  ASSERT_TRUE(true_branch);
+
+  vector<std::string> decls = {"i"};
+  ASSERT_THAT(true_branch, IsForLoopWithChildren(
+                               IsDeclaration(decls),
+                               IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
+                               IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(1)));
+
+  auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->body->statements.size(), 3);
+  ASSERT_EQ(false_branch->body->statements[0]->type, AST::NodeType::CASE);
+  ASSERT_EQ(false_branch->body->statements[1]->type, AST::NodeType::CASE);
+  ASSERT_EQ(false_branch->body->statements[2]->type, AST::NodeType::DEFAULT);
+
+  auto *case1 = false_branch->body->statements[0]->As<AST::CaseStatement>();
+  ASSERT_EQ(case1->statements->statements.size(), 1);
+  ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation, TT_DECREMENT);
+
+  auto *case2 = false_branch->body->statements[1]->As<AST::CaseStatement>();
+  ASSERT_EQ(case2->statements->statements.size(), 1);
+  ASSERT_EQ(case2->statements->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+  ASSERT_EQ(case2->statements->statements[0]->As<AST::BinaryExpression>()->operation, TT_ASSOP);
+
+  auto *default_ = false_branch->body->statements[2]->As<AST::DefaultStatement>();
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *assignment = default_->statements->statements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(assignment->operation, TT_EQUALS);
+  ASSERT_EQ(assignment->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(assignment->right->type, AST::NodeType::LITERAL);
+
+  ASSERT_EQ(assignment->left->As<AST::IdentifierAccess>()->name.content, "k");
+  ASSERT_EQ(std::get<std::string>(assignment->right->As<AST::Literal>()->value.value), "0");
 }
 
 TEST(ParserTest, IfStatement_4_NoSemicolon) {
-  ParserTester test{"if (true) for(int i=0;i<12;i++) k++ else switch(i){ case 1 : k-- case 2 : k+=3 default : k=0 }"};
+  ParserTester test{
+      "if (false) for(int i=0;i<12;i++) {k++} else switch(i){ case 1 : k-- case 2 : k+=3 default : k=0 }"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
   auto *if_ = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_);
 
-  ASSERT_EQ(if_->condition->type, AST::NodeType::PARENTHETICAL);
-  ASSERT_EQ(if_->true_branch->type, AST::NodeType::FOR);
-  ASSERT_EQ(if_->false_branch->type, AST::NodeType::SWITCH);
+  auto *cond = if_->condition->As<AST::Parenthetical>();
+  ASSERT_TRUE(cond);
+
+  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  ASSERT_TRUE(expr);
+  ASSERT_EQ(expr->name.content, "false");
+
+  auto *true_branch = if_->true_branch->As<AST::ForLoop>();
+  ASSERT_TRUE(true_branch);
+
+  vector<std::string> decls = {"i"};
+  ASSERT_THAT(true_branch, IsForLoopWithChildren(
+                               IsDeclaration(decls),
+                               IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
+                               IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(1)));
+
+  auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
+  ASSERT_TRUE(false_branch);
+  ASSERT_EQ(false_branch->body->statements.size(), 3);
+  ASSERT_EQ(false_branch->body->statements[0]->type, AST::NodeType::CASE);
+  ASSERT_EQ(false_branch->body->statements[1]->type, AST::NodeType::CASE);
+  ASSERT_EQ(false_branch->body->statements[2]->type, AST::NodeType::DEFAULT);
+
+  auto *case1 = false_branch->body->statements[0]->As<AST::CaseStatement>();
+  ASSERT_EQ(case1->statements->statements.size(), 1);
+  ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation, TT_DECREMENT);
+
+  auto *case2 = false_branch->body->statements[1]->As<AST::CaseStatement>();
+  ASSERT_EQ(case2->statements->statements.size(), 1);
+  ASSERT_EQ(case2->statements->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+  ASSERT_EQ(case2->statements->statements[0]->As<AST::BinaryExpression>()->operation, TT_ASSOP);
+
+  auto *default_ = false_branch->body->statements[2]->As<AST::DefaultStatement>();
+  ASSERT_EQ(default_->statements->statements.size(), 1);
+  ASSERT_EQ(default_->statements->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *assignment = default_->statements->statements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(assignment->operation, TT_EQUALS);
+  ASSERT_EQ(assignment->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(assignment->right->type, AST::NodeType::LITERAL);
+
+  ASSERT_EQ(assignment->left->As<AST::IdentifierAccess>()->name.content, "k");
+  ASSERT_EQ(std::get<std::string>(assignment->right->As<AST::Literal>()->value.value), "0");
 }
 
 TEST(ParserTest, TemporaryInitialization_1) {
@@ -1164,242 +1577,6 @@ TEST(ParserTest, TemporaryInitialization_4) {
 
   ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(binary->right->As<AST::Literal>()->value.value), "4");
-}
-
-std::string ExpectedMsg = "";
-
-MATCHER_P(IsDeclaration, decls, "") {
-  auto *decl = arg->template As<AST::DeclarationStatement>();
-
-  bool b1 = arg->type == AST::NodeType::DECLARATION,
-       b2 = decl->storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY,
-       b3 = decl->declarations.size() == decls.size();
-
-  if (!b1 || !b2 || !b3) {
-    ExpectedMsg = "From IsDeclaration Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = DECLARATION\n";
-      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    }
-    if (!b2) {
-      ExpectedMsg += "StorageClass = TEMPORARY\n";
-      *result_listener << "got StorageClass = " << AST::DeclarationStatement::StorageToString(decl->storage_class)
-                       << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "DeclarationsSize = " + to_string(decls.size()) + "\n";
-      *result_listener << "got DeclarationsSize = " << to_string(decl->declarations.size()) << "\n";
-    }
-  }
-
-  bool b4 = 1;
-  for (size_t i = 0; i < decls.size(); i++) {
-    auto &decli = decl->declarations[i].declarator->decl;
-    b4 = b4 && decl->declarations[i].init != nullptr;
-    b4 = b4 && decl->declarations[i].declarator->def == jdi::builtin_type__int;  // need to send the type
-    b4 = b4 && decl->declarations[i].declarator->flags == 0;
-    b4 = b4 && decli.name.content == decls[i];
-    b4 = b4 && decli.components.size() == 0;
-    if (!b4) {
-      if (ExpectedMsg == "") ExpectedMsg = "From IsDeclaration Matcher: ";
-      ExpectedMsg += "Declaration [" + to_string(i) +
-                     "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " + decls[i] +
-                     ", components.size() = 0\n";
-      *result_listener << " got Declaration [" << to_string(i) << "] has init "
-                       << ((decl->declarations[i].init) ? "!=" : "=")
-                       << " nullptr, def = jdi::builtin_type__int, flags = "
-                       << to_string(decl->declarations[i].declarator->flags)
-                       << ", name.content = " << decli.name.content
-                       << ", components.size() = " << to_string(decli.components.size()) << "\n";
-    }
-  }
-
-  return b1 && b2 && b3 && b4;
-}
-
-MATCHER_P2(IsCast, cast_kind, expr_type, "") {
-  auto *cast = arg->template As<AST::CastExpression>();
-  auto *expr = cast->expr->template As<AST::Node>();
-
-  bool b1 = arg->type == AST::NodeType::CAST, b2 = cast->ft.def == jdi::builtin_type__int, b3 = cast->ft.flags == 0,
-       b4 = cast->ft.decl.components.size() == 0, b5 = cast->ft.decl.name.content == "",
-       b6 = cast->ft.decl.has_nested_declarator == false, b7 = cast->kind == cast_kind, b8 = expr->type == expr_type;
-
-  bool res = b1 && b2 && b3 && b4 && b5 && b6 && b7 && b8;
-
-  if (!res) {
-    ExpectedMsg = "From IsCast Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = CAST\n";
-      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "ft.flags = 0\n";
-      *result_listener << "got ft.flags = " << to_string(cast->ft.flags) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "ft.decl.components.size() = 0\n";
-      *result_listener << "got ft.decl.components.size() = " << to_string(cast->ft.decl.components.size()) << "\n";
-    }
-    if (!b5) {
-      ExpectedMsg += "ft.decl.name.content = \"\"\n";
-      *result_listener << "got ft.decl.name.content = " << cast->ft.decl.name.content << "\n";
-    }
-    if (!b6) {
-      ExpectedMsg += "ft.decl.has_nested_declarator = false\n";
-      *result_listener << "got ft.decl.has_nested_declarator = " << to_string(cast->ft.decl.has_nested_declarator)
-                       << "\n";
-    }
-    if (!b7) {
-      ExpectedMsg += "cast->kind = " + AST::CastExpression::KindToString(cast_kind) + "\n";
-      *result_listener << "got cast->kind = " << AST::CastExpression::KindToString(cast->kind) << "\n";
-    }
-    if (!b8) {
-      ExpectedMsg += "expr->type = " + AST::NodeToString(expr_type) + "\n";
-      *result_listener << "got expr->type = " << AST::NodeToString(expr->type) << "\n";
-    }
-  }
-
-  return res;
-}
-
-MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
-  auto *right = arg->right->template As<AST::Literal>();
-
-  bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op, b3 = arg->left->type == left_,
-       b4 = arg->left->template As<AST::IdentifierAccess>()->name.content == iden, b5 = arg->right->type == right_,
-       b6 = std::get<std::string>(right->template As<AST::Literal>()->value.value) == num;
-
-  bool res = b1 && b2 && b3 && b4 && b5 && b6;
-  if (!res) {
-    ExpectedMsg = "From IsBinaryOperation Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = BINARY_EXPRESSION\n";
-      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    }
-    if (!b2) {
-      ExpectedMsg += "Operation = " + ToString(op) + "\n";
-      *result_listener << "got Operation = " << ToString(arg->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Left Type = " + AST::NodeToString(left_) + "\n";
-      *result_listener << "got Left Type = " << AST::NodeToString(arg->left->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Left Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Left Identifier = " << arg->left->template As<AST::IdentifierAccess>()->name.content
-                       << "\n";
-    }
-    if (!b5) {
-      ExpectedMsg += "Right Type = " + AST::NodeToString(right_) + "\n";
-      *result_listener << "got Right Type = " << AST::NodeToString(arg->right->type) << "\n";
-    }
-    if (!b6) {
-      ExpectedMsg += "Right Literal = " + PrintToString(num) + "\n";
-      *result_listener << "got Right Literal = "
-                       << std::get<std::string>(right->template As<AST::Literal>()->value.value) << "\n";
-    }
-  }
-
-  return res;
-}
-
-MATCHER_P2(IsUnaryPostfixOperator, op, iden, "") {
-  auto *unary = arg->template As<AST::UnaryPostfixExpression>();
-
-  bool b1 = unary->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
-       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
-
-  bool res = b1 && b2 && b3 && b4;
-  if (!res) {
-    ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = UNARY_POSTFIX_EXPRESSION\n";
-      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
-    }
-    if (!b2) {
-      ExpectedMsg += "Operation = " + ToString(op) + "\n";
-      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Operand Identifier = "
-                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
-    }
-  }
-
-  return res;
-}
-
-MATCHER_P2(IsUnaryPrefixOperator, op, iden, "") {
-  auto *unary = arg->template As<AST::UnaryPrefixExpression>();
-
-  bool b1 = unary->type == AST::NodeType::UNARY_PREFIX_EXPRESSION, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
-       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
-
-  bool res = b1 && b2 && b3 && b4;
-  if (!res) {
-    ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = UNARY_PREFIX_EXPRESSION\n";
-      *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
-    }
-    if (!b2) {
-      ExpectedMsg += "Operation = " + ToString(op) + "\n";
-      *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Operand Identifier = "
-                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
-    }
-  }
-
-  return res;
-}
-
-MATCHER_P(IsStatementBlock, stateSize, "") {
-  bool b1 = arg->type == AST::NodeType::BLOCK, b2 = arg->statements.size() == size_t(stateSize);
-
-  if (!b1 || !b2) {
-    ExpectedMsg = "From IsStatementBlock Matcher: ";
-
-    if (!b1) {
-      ExpectedMsg += "NodeType = BLOCK";
-      *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    }
-    if (!b2) {
-      ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
-      *result_listener << "Statements Size = " << to_string(arg->statements.size()) << "\n";
-    }
-  }
-
-  return b1 && b2;
-}
-
-MATCHER_P4(IsForLoopWithChildren, M1, M2, M3, M4, ExpectedMsg) {
-  auto *assign = (arg->assignment.get());
-  auto *binary = arg->condition->template As<AST::BinaryExpression>();
-  auto *unary = (arg->increment.get());
-  auto *block = arg->body->template As<AST::CodeBlock>();
-
-  return ExplainMatchResult(M1, assign, result_listener) && ExplainMatchResult(M2, binary, result_listener) &&
-         ExplainMatchResult(M3, unary, result_listener) && ExplainMatchResult(M4, block, result_listener);
 }
 
 TEST(ParserTest, ForLoop_1) {
