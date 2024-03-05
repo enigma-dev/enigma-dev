@@ -601,6 +601,7 @@ namespace {
           (parentFrame.origin.x + (parentFrame.size.width / 2)) - (childFrame.size.width / 2),
           (parentFrame.origin.y + (parentFrame.size.height / 2)) - (childFrame.size.height / 2),
           childFrame.size.width, childFrame.size.height) display:YES];
+          [nsWnd makeKeyAndOrderFront:nil];
         }
         #elif defined(__linux__) && !defined(__ANDROID__)
         SDL_SysWMinfo system_info;
