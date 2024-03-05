@@ -137,108 +137,110 @@ MATCHER_P2(IsCast, cast_kind, expr_type, "") {
   return res;
 }
 
-MATCHER_P5(IsBinaryOperation, op, left_, right_, iden, num, "") {
-  auto *right = arg->right->template As<AST::Literal>();
+MATCHER_P(IsIdentifier, iden, "") {
+  bool b1 = arg->type == AST::NodeType::IDENTIFIER;
+  if (!b1) {
+    ExpectedMsg += "From IsIdentifier Matcher: NodeType = IDENTIFIER\n";
+    *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    return 0;
+  }
 
-  bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op, b3 = arg->left->type == left_,
-       b4 = arg->left->template As<AST::IdentifierAccess>()->name.content == iden, b5 = arg->right->type == right_,
-       b6 = std::get<std::string>(right->template As<AST::Literal>()->value.value) == num;
+  bool b2 = arg->template As<AST::IdentifierAccess>()->name.content == iden;
+  if (!b2) {
+    ExpectedMsg += "From IsIdentifier Matcher: ";
+    ExpectedMsg += "Identifier = " + PrintToString(iden) + "\n";
+    *result_listener << "got Identifier = " << arg->template As<AST::IdentifierAccess>()->name.content << "\n";
+    return 0;
+  }
 
-  bool res = b1 && b2 && b3 && b4 && b5 && b6;
-  if (!res) {
-    ExpectedMsg = "From IsBinaryOperation Matcher: ";
+  return 1;
+}
+
+MATCHER_P(IsLiteral, lit, "") {
+  bool b1 = arg->type == AST::NodeType::LITERAL;
+  if (!b1) {
+    ExpectedMsg += "From IsLiteral Matcher: NodeType = LITERAL\n";
+    *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
+    return 0;
+  }
+
+  bool b2 = std::get<std::string>(arg->template As<AST::Literal>()->value.value) == lit;
+  if (!b2) {
+    ExpectedMsg += "From IsLiteral Matcher: ";
+    ExpectedMsg += "Literal = " + PrintToString(lit) + "\n";
+    *result_listener << "got Literal = " << std::get<std::string>(arg->template As<AST::Literal>()->value.value)
+                     << "\n";
+    return 0;
+  }
+
+  return 1;
+}
+
+MATCHER_P3(IsBinaryOperation, op, M1, M2, "") {
+  bool b1 = arg->type == AST::NodeType::BINARY_EXPRESSION, b2 = arg->operation == op,
+       b3 = ExplainMatchResult(M1, arg->left, result_listener),
+       b4 = ExplainMatchResult(M2, arg->right, result_listener);
+
+  bool res = b1 && b2 && b3 && b4;
+  if (!b1 || !b2) {
+    ExpectedMsg += "From IsBinaryOperation Matcher: ";
 
     if (!b1) {
       ExpectedMsg += "NodeType = BINARY_EXPRESSION\n";
       *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
     }
+
     if (!b2) {
       ExpectedMsg += "Operation = " + ToString(op) + "\n";
       *result_listener << "got Operation = " << ToString(arg->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Left Type = " + AST::NodeToString(left_) + "\n";
-      *result_listener << "got Left Type = " << AST::NodeToString(arg->left->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Left Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Left Identifier = " << arg->left->template As<AST::IdentifierAccess>()->name.content
-                       << "\n";
-    }
-    if (!b5) {
-      ExpectedMsg += "Right Type = " + AST::NodeToString(right_) + "\n";
-      *result_listener << "got Right Type = " << AST::NodeToString(arg->right->type) << "\n";
-    }
-    if (!b6) {
-      ExpectedMsg += "Right Literal = " + PrintToString(num) + "\n";
-      *result_listener << "got Right Literal = "
-                       << std::get<std::string>(right->template As<AST::Literal>()->value.value) << "\n";
     }
   }
 
   return res;
 }
 
-MATCHER_P2(IsUnaryPostfixOperator, op, iden, "") {
+MATCHER_P2(IsUnaryPostfixOperator, op, M1, "") {
   auto *unary = arg->template As<AST::UnaryPostfixExpression>();
 
   bool b1 = unary->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
-       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
+       b3 = ExplainMatchResult(M1, unary->operand, result_listener);
 
-  bool res = b1 && b2 && b3 && b4;
-  if (!res) {
+  bool res = b1 && b2 && b3;
+  if (!b1 || !b2) {
     ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
 
     if (!b1) {
       ExpectedMsg += "NodeType = UNARY_POSTFIX_EXPRESSION\n";
       *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
     }
+
     if (!b2) {
       ExpectedMsg += "Operation = " + ToString(op) + "\n";
       *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Operand Identifier = "
-                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
     }
   }
 
   return res;
 }
 
-MATCHER_P2(IsUnaryPrefixOperator, op, iden, "") {
+MATCHER_P2(IsUnaryPrefixOperator, op, M1, "") {
   auto *unary = arg->template As<AST::UnaryPrefixExpression>();
 
   bool b1 = unary->type == AST::NodeType::UNARY_PREFIX_EXPRESSION, b2 = unary->operation == op,
-       b3 = unary->operand->type == AST::NodeType::IDENTIFIER,
-       b4 = unary->operand->template As<AST::IdentifierAccess>()->name.content == iden;
+       b3 = ExplainMatchResult(M1, unary->operand, result_listener);
 
-  bool res = b1 && b2 && b3 && b4;
-  if (!res) {
+  bool res = b1 && b2 && b3;
+  if (!b1 || !b2) {
     ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
 
     if (!b1) {
       ExpectedMsg += "NodeType = UNARY_PREFIX_EXPRESSION\n";
       *result_listener << "got NodeType = " << AST::NodeToString(unary->type) << "\n";
     }
+
     if (!b2) {
       ExpectedMsg += "Operation = " + ToString(op) + "\n";
       *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
-    }
-    if (!b3) {
-      ExpectedMsg += "Operand Type = IDENTIFIER \n";
-      *result_listener << "got Operand Type = " << AST::NodeToString(unary->operand->type) << "\n";
-    }
-    if (!b4) {
-      ExpectedMsg += "Operand Identifier = " + PrintToString(iden) + "\n";
-      *result_listener << "got Operand Identifier = "
-                       << unary->operand->template As<AST::IdentifierAccess>()->name.content << "\n";
     }
   }
 
@@ -1331,9 +1333,8 @@ TEST(ParserTest, IfStatement_4) {
 
   vector<std::string> decls = {"i"};
   ASSERT_THAT(true_branch, IsForLoopWithChildren(
-                               IsDeclaration(decls),
-                               IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
-                               IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(1)));
+                               IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
+                               IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
   auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
@@ -1387,9 +1388,8 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
 
   vector<std::string> decls = {"i"};
   ASSERT_THAT(true_branch, IsForLoopWithChildren(
-                               IsDeclaration(decls),
-                               IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
-                               IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(1)));
+                               IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
+                               IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
   auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
@@ -1589,10 +1589,9 @@ TEST(ParserTest, ForLoop_1) {
 
   std::vector<std::string> decls = {"i"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_2) {
@@ -1606,9 +1605,8 @@ TEST(ParserTest, ForLoop_2) {
   std::vector<std::string> decls = {"i", "j"};
 
   ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
-                                          IsBinaryOperation(TT_GREATEREQUAL, AST::NodeType::IDENTIFIER,
-                                                            AST::NodeType::LITERAL, "i", "12"),
-                                          IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(0)));
+                                          IsBinaryOperation(TT_GREATEREQUAL, IsIdentifier("i"), IsLiteral("12")),
+                                          IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_3) {
@@ -1621,10 +1619,9 @@ TEST(ParserTest, ForLoop_3) {
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_NOTEQUAL, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
-                        IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(1)));
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+                                          IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
+                                          IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_3_NoSemicolon) {
@@ -1637,10 +1634,9 @@ TEST(ParserTest, ForLoop_3_NoSemicolon) {
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_NOTEQUAL, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "12"),
-                        IsUnaryPrefixOperator(TT_DECREMENT, "i"), IsStatementBlock(1)));
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+                                          IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
+                                          IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_4) {
@@ -1654,9 +1650,8 @@ TEST(ParserTest, ForLoop_4) {
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "j"), IsStatementBlock(1)));
+                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_4_NoSemicolon) {
@@ -1670,9 +1665,8 @@ TEST(ParserTest, ForLoop_4_NoSemicolon) {
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "j"), IsStatementBlock(1)));
+                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_5) {
@@ -1686,9 +1680,8 @@ TEST(ParserTest, ForLoop_5) {
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "w"), IsStatementBlock(2)));
+                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_5_NoSemicolon) {
@@ -1702,9 +1695,8 @@ TEST(ParserTest, ForLoop_5_NoSemicolon) {
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls),
-                        IsBinaryOperation(TT_PERCENT, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "w", "22"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "w"), IsStatementBlock(2)));
+                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_6) {
@@ -1715,10 +1707,10 @@ TEST(ParserTest, ForLoop_6) {
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION),
-                        IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION),
+                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_7) {
@@ -1729,10 +1721,10 @@ TEST(ParserTest, ForLoop_7) {
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL),
-                        IsBinaryOperation(TT_LESS, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "5"),
-                        IsUnaryPostfixOperator(TT_INCREMENT, "i"), IsStatementBlock(0)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL),
+                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_8) {
@@ -1743,10 +1735,10 @@ TEST(ParserTest, ForLoop_8) {
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                        IsBinaryOperation(TT_SLASH, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
-                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
+                                    IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_8_NoSemicolon) {
@@ -1757,10 +1749,10 @@ TEST(ParserTest, ForLoop_8_NoSemicolon) {
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                        IsBinaryOperation(TT_SLASH, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
-                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
+                                    IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_9) {
@@ -1773,8 +1765,8 @@ TEST(ParserTest, ForLoop_9) {
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
                         IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                        IsBinaryOperation(TT_MOD, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
-                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+                        IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
+                        IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_9_NoSemicolon) {
@@ -1787,6 +1779,6 @@ TEST(ParserTest, ForLoop_9_NoSemicolon) {
 
   ASSERT_THAT(for_, IsForLoopWithChildren(
                         IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                        IsBinaryOperation(TT_MOD, AST::NodeType::IDENTIFIER, AST::NodeType::LITERAL, "i", "3"),
-                        IsUnaryPostfixOperator(TT_DECREMENT, "i"), IsStatementBlock(2)));
+                        IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
+                        IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }

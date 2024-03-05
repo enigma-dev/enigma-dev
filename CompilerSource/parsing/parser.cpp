@@ -1913,6 +1913,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
 
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
+
 std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
   while (token.type == TT_BEGINPARENTH) {
