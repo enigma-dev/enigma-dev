@@ -31,7 +31,7 @@
 
 #include "stb_image.h"
 
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 #include "lunasvg/include/lunasvg.h"
 #endif
 
@@ -45,7 +45,7 @@
 #else
 #if (defined(__MACH__) && defined(__APPLE__))
 #include <AppKit/AppKit.h>
-#elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 #endif
@@ -58,7 +58,7 @@
 #define DEFAULT_ICON_SIZE 32
 #define PI 3.141592f
 
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
 using namespace lunasvg;
 #endif
 
@@ -1018,7 +1018,7 @@ namespace ifd {
     [icon unlockFocus];
 
     return m_icons[pathU8];
-    #elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
     if (m_icons.count(path.string()) > 0)
       return m_icons[path.string()];
 

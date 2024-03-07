@@ -37,12 +37,9 @@
 #include <map>
 
 #include "filedialogs.hpp"
-#if !defined(__ANDROID__)
+#if !defined(IFD_USE_OPENGL)
 #include "imgui_impl_sdlrenderer.h"
 #else
-#ifndef IMGUI_IMPL_OPENGL_ES3
-#define IMGUI_IMPL_OPENGL_ES3
-#endif
 #include "imgui_impl_opengl3.h"
 #endif
 #include "imgui.h"
@@ -53,12 +50,10 @@
 #include "ghc/filesystem.hpp"
 #include "filesystem.hpp"
 
-#if !defined(__ANDROID__)
-#include <SDL_syswm.h>
-#else
-#include <SDL2/SDL_opengles2.h>
-#include <SDL2/SDL_syswm.h>
+#if defined(IFD_USE_OPENGL)
+#include <SDL_opengl.h>
 #endif
+#include <SDL_syswm.h>
 
 #include <sys/stat.h>
 #if defined(_WIN32) 
@@ -67,9 +62,9 @@
 #define CHR_SLASH '\\'
 #define HOME_PATH "USERPROFILE"
 #else
-#if defined(__APPLE__) && defined(__MACH__)
+#if (defined(__APPLE__) && defined(__MACH__))
 #include <AppKit/AppKit.h>
-#elif defined(__linux__) && !defined(__ANDROID__)
+#elif defined(__linux__)
 #include <X11/Xlib.h>
 #endif
 #include <unistd.h>
@@ -81,6 +76,9 @@
 #define DIGITS_MAX  999999999999999
 
 #if defined(_MSC_VER)
+#if defined(IFD_USE_OPENGL)
+#pragma comment(lib, "OpenGL32.lib")
+#endif
 #if defined(_WIN32) && !defined(_WIN64)
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
 #elif defined(_WIN32) && defined(_WIN64)
@@ -281,7 +279,7 @@ namespace {
   }
 
   vector<string> fonts;
-  #if !defined(__ANDROID__)
+  #if !defined(IFD_USE_OPENGL)
   SDL_Renderer *renderer = nullptr;
   #endif
   SDL_Surface *surf = nullptr;
@@ -295,14 +293,22 @@ namespace {
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    #if !defined(__ANDROID__)
+    #if !defined(IFD_USE_OPENGL)
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     #else
-    const char *glsl_version = "#version 100";
+    #if (defined(__APPLE__) && defined(__MACH__))
+    const char *glsl_version = "#version 150";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    #else
+    const char *glsl_version = "#version 130";
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    #endif
     #ifdef SDL_HINT_IME_SHOW_UI
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
     #endif
@@ -321,7 +327,7 @@ namespace {
     dialog = window;
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    #if !defined(__ANDROID__)
+    #if !defined(IFD_USE_OPENGL)
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return "";
     #else
@@ -364,7 +370,7 @@ namespace {
     } else if (theme == 2) {
       SetupImGuiStyle2();
     }
-    #if !defined(__ANDROID__)
+    #if !defined(IFD_USE_OPENGL)
     ImGui_ImplSDL2_InitForSDLRenderer(window);
     ImGui_ImplSDLRenderer_Init(renderer); 
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
@@ -378,19 +384,18 @@ namespace {
     };
     #else
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init();
-    ifd::FileDialog::Instance().CreateTexture = [](uint8_t* data, int w, int h, char fmt) -> void* {
-      GLuint tex;
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
+      GLuint tex = 0;
       glGenTextures(1, &tex);
       glBindTexture(GL_TEXTURE_2D, tex);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-      glGenerateMipmap(GL_TEXTURE_2D);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
       glBindTexture(GL_TEXTURE_2D, 0);
-      return (void *)tex;
+      return (void *)(std::uintptr_t)tex;
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
       GLuint texID = (GLuint)((uintptr_t)tex);
@@ -404,7 +409,7 @@ namespace {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
       }
-      #if !defined(__ANDROID__)
+      #if !defined(IFD_USE_OPENGL)
       ImGui_ImplSDLRenderer_NewFrame();
       ImGui_ImplSDL2_NewFrame();
       #else
@@ -580,7 +585,7 @@ namespace {
           PostMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)GetIcon((HWND)(void *)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)));
         }
-        #elif defined(__APPLE__) && defined(__MACH__)
+        #elif (defined(__APPLE__) && defined(__MACH__))
         SDL_SysWMinfo system_info;
         SDL_VERSION(&system_info.version);
         if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
@@ -603,7 +608,7 @@ namespace {
           childFrame.size.width, childFrame.size.height) display:YES];
           [nsWnd makeKeyAndOrderFront:nil];
         }
-        #elif defined(__linux__) && !defined(__ANDROID__)
+        #elif defined(__linux__)
         SDL_SysWMinfo system_info;
         SDL_VERSION(&system_info.version);
         if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
@@ -646,7 +651,7 @@ namespace {
         dialog = nullptr;
       }
       ImGui::Render();
-      #if !defined(__ANDROID__)
+      #if !defined(IFD_USE_OPENGL)
       SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
       SDL_RenderClear(renderer);
       ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
@@ -663,14 +668,14 @@ namespace {
       }
     }
     finish:
-    #if !defined(__ANDROID__)
+    #if !defined(IFD_USE_OPENGL)
     ImGui_ImplSDLRenderer_Shutdown();
     #else
     ImGui_ImplOpenGL3_Shutdown();
     #endif
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
-    #if defined(__ANDROID__)
+    #if defined(IFD_USE_OPENGL)
     SDL_GL_DeleteContext(gl_context);
     #endif
     SDL_DestroyWindow(window);
