@@ -197,6 +197,12 @@ void window_set_position(int x, int y)
 void window_set_size(unsigned int width, unsigned int height)
 {
   if (window_get_fullscreen()) return;
+
+  if(enigma::window_min_width !=-1 && width<enigma::window_min_width) width = enigma::window_min_width;
+  if(enigma::window_max_width !=-1 && width>enigma::window_max_width) width = enigma::window_max_width;
+  if(enigma::window_min_height !=-1 && height<enigma::window_min_height) width = enigma::window_min_height;
+  if(enigma::window_max_height !=-1 && height>enigma::window_max_height) width = enigma::window_max_height;
+
   window_set_rectangle(enigma::windowX, enigma::windowY, width, height);
 }
 
@@ -256,6 +262,7 @@ void window_set_sizeable(bool sizeable) {
   if (window_get_sizeable() == sizeable) return;
   prefer_sizeable = sizeable;
   enigma::isSizeable = sizeable;
+
   int tmp2Width = window_get_width();
   int tmp2Height = window_get_height();
   DWORD style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
@@ -264,6 +271,26 @@ void window_set_sizeable(bool sizeable) {
   style |= WS_MINIMIZEBOX;
   SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
   window_set_size(tmp2Width, tmp2Height);
+}
+
+void window_set_min_width(int width) {
+  enigma::window_min_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_min_height(int height) {
+  enigma::window_min_height = height;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_width(int width) {
+  enigma::window_max_width = width;
+  window_set_sizeable(enigma::isSizeable);
+}
+
+void window_set_max_height(int height) {
+  enigma::window_max_height = height;
+  window_set_sizeable(enigma::isSizeable);
 }
 
 bool window_get_sizeable() {
