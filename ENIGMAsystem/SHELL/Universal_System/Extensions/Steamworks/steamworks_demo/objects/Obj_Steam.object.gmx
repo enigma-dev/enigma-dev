@@ -89,8 +89,7 @@ steam_update();</string>
 // This prsents a game restart implementation example&#13;
 // We use a variable as a flag to tell the system we are 'restarting' the game&#13;
 is_game_restarting = true;&#13;
-game_restart();&#13;
-</string>
+game_restart();</string>
           </argument>
         </arguments>
       </action>
@@ -144,8 +143,7 @@ show_debug_message("Steam ASYNC: " + json_encode(async_load))</string>
 // we now check our flag variable and we call 'steam_shutdown' only if not restarting&#13;
 if (is_game_restarting == false) {&#13;
 	steam_shutdown();&#13;
-}&#13;
-</string>
+}</string>
           </argument>
         </arguments>
       </action>

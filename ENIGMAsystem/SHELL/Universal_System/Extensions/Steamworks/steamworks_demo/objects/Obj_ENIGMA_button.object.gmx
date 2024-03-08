@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>Obj_ENIGMA_text</parentName>
+  <parentName>Obj_ENIGMA_text_Mid_Anchor</parentName>
   <events>
     <event enumb="0" eventtype="0">
       <action>
@@ -28,7 +28,13 @@
             <string>image_speed = 0&#13;
 event_inherited();&#13;
 &#13;
-locked = false</string>
+locked = false&#13;
+&#13;
+halign = fa_left&#13;
+valign = fa_top&#13;
+&#13;
+off_x = 40&#13;
+off_y = 20</string>
           </argument>
         </arguments>
       </action>
@@ -57,7 +63,8 @@ else&#13;
 if(mouse_check_button(mb_left) and point_in_rectangle(mouse_x,mouse_y,bbox_left,bbox_top,bbox_right,bbox_bottom))&#13;
 	image_index = 0&#13;
 else&#13;
-	image_index = 1</string>
+	image_index = 1&#13;
+	</string>
           </argument>
         </arguments>
       </action>
@@ -84,8 +91,17 @@ else&#13;
 &#13;
 draw_self();&#13;
 &#13;
-// Inherit the parent event&#13;
-event_inherited();</string>
+&#13;
+&#13;
+x = x + off_x&#13;
+y = y + off_y&#13;
+&#13;
+// Inherit the parent event , which creates the text right ?&#13;
+event_inherited();&#13;
+&#13;
+&#13;
+x = x - off_x&#13;
+y = y - off_y</string>
           </argument>
         </arguments>
       </action>
