@@ -1504,22 +1504,31 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
   return node;
 }
 
-std::unique_ptr<AST::Node> TryParseIdExpression() {
+// without_semi is used to indicate that we should not consume a semicolon after the expression if it is present
+std::unique_ptr<AST::Node> TryParseIdExpression(bool without_semi = false) {
+  std::unique_ptr<AST::Node> node;
   Declarator decl;
   auto def = TryParseIdExpression(&decl);
+  
   if (decl.name.content.empty()) {
     herr->Error(token) << "Unable to parse id-expression";
     return nullptr;
   } else if (map_contains(declarations, decl.name.content)) {
-    return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+    node = std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
   } else {
-    return std::make_unique<AST::IdentifierAccess>(def, decl.name);
+    node = std::make_unique<AST::IdentifierAccess>(def, decl.name);
   }
+
+  if(token.type == TT_SEMICOLON && !without_semi) {
+      token = lexer->ReadToken();
+  }
+
+  return node;
 }
 
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
-std::unique_ptr<AST::Node> TryParseOperand() {
+std::unique_ptr<AST::Node> TryParseOperand(bool without_semi = false) {
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
     case TT_ENDPARENTH: case TT_ENDBRACKET:
@@ -1738,7 +1747,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
           return nullptr;
         }
       } else {
-        return TryParseIdExpression();
+        return TryParseIdExpression(without_semi);
       }
       herr->Error(token) << "INTERNAL ERROR: " __FILE__ ":" << __LINE__ << ": Unreachable";
       return nullptr;
@@ -1785,9 +1794,9 @@ static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                 prec.associativity == Associativity::RTL);
 }
 
-std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr) {
+std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr, bool without_semi = false) {
   if (operand == nullptr) {
-    operand = TryParseOperand();
+    operand = TryParseOperand(without_semi);
   }
   if (operand != nullptr) {
     // TODO: Handle binary operators, unary postfix operators
@@ -1801,6 +1810,9 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
           break;
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
+        if(!without_semi && token.type == TT_SEMICOLON) {
+          token = lexer->ReadToken();
+        }
       } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
         if (precedence < Precedence::kUnaryPostfix) {
           break;
@@ -1838,6 +1850,10 @@ std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, 
     Token oper = token;
     OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
     token = lexer->ReadToken(); // Consume the operator
+
+    if(token.type == TT_ENDOFCODE || token.type == TT_SEMICOLON){ // there are more cases
+      herr->Error(token) << "Uncompleted binary expression";
+    }
 
     auto right = (rule.associativity == Associativity::LTR)
         ? TryParseExpression(rule.precedence - 1)
@@ -1897,6 +1913,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
 
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
+
 std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
   while (token.type == TT_BEGINPARENTH) {
@@ -1905,9 +1922,10 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
     while (token.type != TT_ENDPARENTH && token.type != TT_ENDOFCODE) {
-      arguments.emplace_back(TryParseExpression(Precedence::kTernary));
+      arguments.emplace_back(TryParseExpression(Precedence::kTernary, nullptr, true));
       if (token.type != TT_COMMA && token.type != TT_ENDPARENTH) {
         herr->Error(token) << "Expected ',' or ')' after function argument";
+        break;
       } else if (token.type == TT_COMMA) {
         token = lexer->ReadToken();
       }
@@ -1920,7 +1938,7 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
   return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
+std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_, bool for_stm = false) {
   switch (mode_) {
     case SyntaxMode::STRICT: {
       require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
@@ -1945,7 +1963,7 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
       return operand;
     }
     case SyntaxMode::GML:
-      return TryParseExpression(Precedence::kAll);
+      return TryParseExpression(Precedence::kAll, nullptr, for_stm);
   }
 }
 
@@ -2022,7 +2040,7 @@ std::unique_ptr<AST::Node> TryParseStatement() {
     case TT_INLINE: case TT_STATIC: case TT_EXTERN:
     case TT_MUTABLE: case TT_THREAD_LOCAL: {
       AST::DeclarationStatement::StorageClass sc;
-      if (false) {
+      if (false) { // what?
         if (false) case TT_LOCAL:
           sc = AST::DeclarationStatement::StorageClass::LOCAL;
         if (false) case TT_GLOBAL:
@@ -2216,7 +2234,7 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
       }
     }
   } else {
-    init = TryParseExpression(Precedence::kAll);
+    init = TryParseExpression(Precedence::kAll, nullptr, true);
   }
   if (token.type == TT_ENDPARENTH) {
     is_conventional = false;
@@ -2224,7 +2242,7 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
   }
   require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
   if (token.type != TT_SEMICOLON) {
-    cond = TryParseControlExpression(SyntaxMode::GML);
+    cond = TryParseControlExpression(SyntaxMode::GML, true);
   }
   require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
   if (token.type != TT_SEMICOLON) {

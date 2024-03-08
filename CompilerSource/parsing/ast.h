@@ -66,6 +66,11 @@ class AST {
     /// Visit children of this node (via RecurusiveVisit) with the given
     /// visitor. Do not invoke the visitor on this node itself.
     virtual void RecursiveSubVisit(Visitor &visitor) = 0;
+    /// Cast the node to a given type
+    template <typename T>
+    T* As() {
+        return dynamic_cast<T*>(this);
+    }
 
     Node(NodeType t = NodeType::ERROR): type(t) {}
     virtual ~Node() = default;
