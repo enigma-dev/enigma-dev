@@ -50,8 +50,8 @@ void get_leaderboard_entries(LeaderboardEntry_t leaderboard_entries[], unsigned 
     leaderboard_entries_buffer << '\"' << "rank" << '\"' << ':';
     leaderboard_entries_buffer << std::to_string(leaderboard_entries[i].m_nGlobalRank) << ',';
     leaderboard_entries_buffer << '\"' << "userID" << '\"' << ':';
-    leaderboard_entries_buffer << '\"' << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
-                               << '\"';
+    leaderboard_entries_buffer << '\"@i64@' << std::hex << std::to_string(leaderboard_entries[i].m_steamIDUser.ConvertToUint64())
+                               << std::dec << '$i64$\"';
     leaderboard_entries_buffer << '}';
 
     // Add comma if not last entry
