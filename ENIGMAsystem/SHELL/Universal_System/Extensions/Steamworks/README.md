@@ -120,7 +120,7 @@ Steamworks               <------- 4th layer
 └── *.cpp
 ```
 
-   -  `Steamworks/gameclient/steambinder/SteamvXXX/` and `Steamworks/gameclient/steambinder/SteamFake/` is the 1rd layer of the 
+   -  `Steamworks/gameclient/steambinder/SteamvXXX/` and `Steamworks/gameclient/steambinder/SteamFake/` is the 1st layer of the 
       extension. It is the Steamworks SDK.
    -  `Steamworks/steambinder/` is the 2nd layer of the extension. It contains the code that binds the Steamworks SDK to the extension.
    -  `Steamworks/gameclient/` is the 3rd layer of the extension. It contains the code that is directly calls the Steamworks API functions.
