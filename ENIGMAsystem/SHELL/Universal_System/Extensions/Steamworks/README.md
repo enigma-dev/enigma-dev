@@ -27,7 +27,7 @@ vim .bashrc
 export STEAM_SDK_PATH=/path/to/steamworks/sdk
 ```
 6. Find the path to your `gameoverlayrenderer.so` file:
-```
+```bash
 find ~ -name gameoverlayrenderer.so
 ```
 7. Now modify the `.bashrc` again and append these two lines (DON'T forget to change the path to your `gameoverlayrenderer.so` file):
