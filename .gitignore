@@ -38,6 +38,8 @@
 CMakeCache
 .DS_Store
 
+command.log
+start.sh
 enigma-launch.bat
 enigma-update.bat
 msys-shell.bat

@@ -87,17 +87,17 @@ bool GCLeaderboards::create_leaderboard(const int& id, const std::string& leader
   return true;
 }
 
-void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderboard_name) {
+bool GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderboard_name) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
     std::string leaderboard_name_buffer;
 
     if (!GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer, GCLeaderboards::current_leaderboard_)) {
-      return;
+      return false;
     }
 
-    if (leaderboard_name_buffer == leaderboard_name) return;
+    if (leaderboard_name_buffer == leaderboard_name) return false;
 
     GCLeaderboards::current_leaderboard_ = INVALID_LEADERBOARD;
   }
@@ -111,9 +111,11 @@ void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderbo
     GCLeaderboardsCookies* gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
 
     gc_leaderboards_cookies_.push_back(gc_leaderboards_find_result);
+    return true;
   } else {
     // TODO: Write more descriptive error message.
     DEBUG_MESSAGE("Calling FindOrCreateLeaderboard() failed for some reason.", M_ERROR);
+    return false;
   }
 }
 

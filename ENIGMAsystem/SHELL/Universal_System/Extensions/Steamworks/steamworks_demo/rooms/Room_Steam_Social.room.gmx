@@ -53,7 +53,7 @@
     <instance code="&#13;&#10;text = &quot;Steamworks Extension&quot;;&#13;&#10;font = Font_ENIGMA_50;" colour="4294967295" id="100277" locked="0" name="inst_EC626E6D" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="768" y="48"/>
     <instance code="" colour="4294967295" id="100278" locked="0" name="inst_67DB205B" objName="Obj_Steam_StatsInfo" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="96"/>
     <instance code="" colour="4294967295" id="100283" locked="0" name="inst_ED87C779" objName="Obj_Steam_Global_Stats" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="416"/>
-    <instance code="&#13;&#10;text = &quot;Leaderboards&quot;&#13;&#10;targetRoom = Room_Steam_Social_Leaderboard" colour="4294967295" id="100285" locked="0" name="inst_F9ACCB8A" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.12" scaleY="1.0" x="48" y="608"/>
+    <instance code="&#13;&#10;text = &quot;Leaderboards&quot;&#13;&#10;targetRoom = Room_Steam_Social_Leaderboard" colour="4294967295" id="100285" locked="0" name="inst_F9ACCB8A" objName="Obj_Steam_Goto_Leaderboards" rotation="0.0" scaleX="4.12" scaleY="1.0" x="48" y="608"/>
     <instance code="text = &quot;Stats&quot;" colour="4294967295" id="100286" locked="0" name="inst_6C4BE53D" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="576" y="128"/>
     <instance code="text = &quot;Achievements&quot;" colour="4294967295" id="100287" locked="0" name="inst_C6E0F4FD" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="976" y="128"/>
     <instance code="&#13;&#10;achievement = &quot;ACH_WIN_ONE_GAME&quot;" colour="4294967295" id="100288" locked="0" name="inst_EAA52CFA" objName="Obj_Steam_Achievement_Clear" rotation="0.0" scaleX="1.0" scaleY="1.0" x="1120" y="192"/>

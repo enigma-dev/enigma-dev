@@ -287,6 +287,15 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
 int steam_download_scores(const std::string& lb_name, const int start_idx, const int end_idx);
 
 /**
+ * @brief This function is used to find a leaderboard by name. If the function call fails for any reason 
+ *        it will return -1 and the async event will not be triggered.
+ * 
+ * @param lb_name The name of the leaderboard to find.
+ * @return int The asynchronous request ID. 
+ */
+int steam_find_leaderboard(const std::string& lb_name);
+
+/**
  * @brief This function is used retrieve a sequential range of leaderboard entries by leaderboard ranking. 
  *        If the function call fails for any reason it will return -1 and the async event will not be 
  *        triggered.

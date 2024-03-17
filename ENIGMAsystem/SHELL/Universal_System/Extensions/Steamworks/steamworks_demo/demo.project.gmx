@@ -36,6 +36,7 @@
       <object>objects\Obj_Steam_ProfileImage</object>
       <object>objects\Obj_Steam_Screenshot  </object>
       <object>objects\Obj_Steam_Ticket</object>
+      <object>objects\Obj_Steam_Goto_Leaderboards</object>
     </objects>
     <objects name="Assets">
       <object>objects\Obj_ENIGMA_button</object>

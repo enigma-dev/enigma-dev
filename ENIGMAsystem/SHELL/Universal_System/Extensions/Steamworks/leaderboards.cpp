@@ -15,12 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/**
- * @todo Use the find_leaderboard() function return id inside upload and download 
- *       functions.
- * 
- */
-
 #include "leaderboards.h"
 
 #include "Universal_System/../Platforms/General/PFmain.h"
@@ -226,11 +220,6 @@ int steam_create_leaderboard(const std::string& lb_name, const unsigned sort_ord
 }
 
 int steam_upload_score(const std::string& lb_name, const int score) {
-  if (!leaderboards_pre_checks("steam_upload_score")) return -1;
-
-  const int find_id{enigma::leaderboards_array.add(nullptr)};
-
-  steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(find_id, lb_name);
 
   const int id{enigma::scores_array.add(nullptr)};
 
@@ -244,12 +233,6 @@ int steam_upload_score(const std::string& lb_name, const int score) {
 }
 
 int steam_upload_score_ext(const std::string& lb_name, const unsigned score, const bool force_update) {
-  if (!leaderboards_pre_checks("steam_upload_score_ext")) return -1;
-
-  const int find_id{enigma::leaderboards_array.add(nullptr)};
-
-  // Resets the gc_leaderboards::current_leaderboard_ attribute and sets up a new call back.
-  steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(find_id, lb_name);
 
   const int id{enigma::scores_array.add(nullptr)};
   bool success{false};
@@ -277,13 +260,21 @@ int steam_upload_score_buffer_ext(const std::string& lb_name, const unsigned sco
   return -1;
 }
 
+int steam_find_leaderboard(const std::string& lb_name) {
+  if (!leaderboards_pre_checks("steam_find_leaderboard")) return -1;
+
+  const int id{enigma::leaderboards_array.add(nullptr)};
+
+  if (!steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(id, lb_name)) {
+    DEBUG_MESSAGE("Calling steam_find_leaderboard failed. Make sure that the leaderboard exists.", M_ERROR);
+    return -1;
+  }
+
+  return id;
+}
+
 int steam_download_scores(const std::string& lb_name, const int start_idx, const int end_idx) {
-  if (!leaderboards_pre_checks("steam_download_scores")) return -1;
-
-  const int find_id{enigma::leaderboards_array.add(nullptr)};
-
-  steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(find_id, lb_name);
-
+  
   const int id{enigma::entries_array.add(nullptr)};
 
   if (!steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->download_scores(
@@ -296,11 +287,6 @@ int steam_download_scores(const std::string& lb_name, const int start_idx, const
 }
 
 int steam_download_scores_around_user(const std::string& lb_name, const int range_start, const int range_end) {
-  if (!leaderboards_pre_checks("steam_download_scores_around_user")) return -1;
-
-  const int find_id{enigma::leaderboards_array.add(nullptr)};
-
-  steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(find_id, lb_name);
 
   const int id{enigma::entries_array.add(nullptr)};
 
@@ -314,11 +300,6 @@ int steam_download_scores_around_user(const std::string& lb_name, const int rang
 }
 
 int steam_download_friends_scores(const std::string& lb_name) {
-  if (!leaderboards_pre_checks("steam_download_friends_scores")) return -1;
-
-  const int find_id{enigma::leaderboards_array.add(nullptr)};
-
-  steamworks_gc::GCMain::get_gameclient()->get_gc_leaderboards()->find_leaderboard(find_id, lb_name);
 
   const int id{enigma::entries_array.add(nullptr)};
 
