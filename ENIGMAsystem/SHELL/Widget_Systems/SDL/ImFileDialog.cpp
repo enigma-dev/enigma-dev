@@ -4,6 +4,10 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
+#elif (defined(__APPLE__) && defined(__MACH__))
+#if !defined(IMGUI_IMPL_OPENGL_ES2)
+#define IMGUI_IMPL_OPENGL_ES2
+#endif
 #ifndef STBI_WINDOWS_UTF8
 #define STBI_WINDOWS_UTF8
 #endif
@@ -1000,10 +1004,17 @@ namespace ifd {
         for (int y = 0; y < height; y++) {
           for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
+            #if defined(IMGUI_IMPL_OPENGL_ES2)
+            invData[index + 0] = rawData[index + 0];
+            invData[index + 1] = rawData[index + 1];
+            invData[index + 2] = rawData[index + 2];
+            invData[index + 3] = rawData[index + 3];
+            #else
             invData[index + 2] = rawData[index + 0];
             invData[index + 1] = rawData[index + 1];
             invData[index + 0] = rawData[index + 2];
             invData[index + 3] = rawData[index + 3];
+            #endif
           }
         }
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
@@ -1239,10 +1250,17 @@ namespace ifd {
               for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                   int index = (y * width + x) * 4;
+                  #if defined(IMGUI_IMPL_OPENGL_ES2)
+                  invData[index + 0] = image[index + 0];
+                  invData[index + 1] = image[index + 1];
+                  invData[index + 2] = image[index + 2];
+                  invData[index + 3] = image[index + 3];
+                  #else
                   invData[index + 2] = image[index + 0];
                   invData[index + 1] = image[index + 1];
                   invData[index + 0] = image[index + 2];
                   invData[index + 3] = image[index + 3];
+                  #endif
                 }
               }
               free(image);
