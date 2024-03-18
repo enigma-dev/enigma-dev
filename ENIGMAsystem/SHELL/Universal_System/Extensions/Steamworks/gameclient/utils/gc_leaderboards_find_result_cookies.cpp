@@ -51,8 +51,6 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
   GCLeaderboardsFindResultCookies::gc_leaderboards_->set_current_leaderboard(
       pFindLeaderboardResult->m_hSteamLeaderboard);
 
-  DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
-
   // Success? Let's save it.
   // SOGs are failing because of this line but LGM is not.
   // enigma::leaderboards_array.get(GCLeaderboardsFindResultCookies::id_) = pFindLeaderboardResult;
@@ -60,6 +58,12 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
   enigma::push_create_leaderboard_steam_async_event(GCLeaderboardsFindResultCookies::id_, *pFindLeaderboardResult);
 
   GCLeaderboardsFindResultCookies::is_done_ = true;
+
+  // send download-waiting request
+  enigma::SendLBRequest();
+
+  DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
+  
 }
 
 }  // namespace steamworks_gc
