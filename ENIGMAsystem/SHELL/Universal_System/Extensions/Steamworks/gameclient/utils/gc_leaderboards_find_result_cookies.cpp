@@ -59,8 +59,8 @@ void GCLeaderboardsFindResultCookies::on_find_leaderboard(LeaderboardFindResult_
 
   GCLeaderboardsFindResultCookies::is_done_ = true;
 
-  // send download-waiting requests
-  
+  // send download-waiting request
+  enigma::SendLBRequest();
 
   DEBUG_MESSAGE("Calling FindOrCreateLeaderboard succeeded.", M_INFO);
   
