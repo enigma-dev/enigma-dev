@@ -114,6 +114,26 @@ void push_leaderboard_upload_steam_async_event(const int& id, const LeaderboardS
  */
 void push_leaderboard_download_steam_async_event(const int& id, const std::string& entries_buffer,
                                                  const LeaderboardScoresDownloaded_t& pLeaderboardScoresDownloaded);
+
+struct LeaderboardRequest {
+
+    std::string m_pszName;                    // get name of the leaderboards to use
+    int m_rangeStart;						  // get range
+	int m_rangeEnd;							  // get range
+    LeaderboardRequest* m_pNext;
+
+    LeaderboardRequest(const std::string& pLBName, int rangeStart, int rangeEnd)
+        : m_pszName(pLBName), m_rangeStart(rangeStart), m_rangeEnd(rangeEnd), m_pNext(nullptr) {}
+};
+
+extern LeaderboardRequest* g_pLBQueue;
+
+void QueueLBRequest(LeaderboardRequest* pRequest);
+
+void SendLBRequest();
+
+void PerformLBRequest(LeaderboardRequest* pRequest);
+
 }  // namespace enigma
 
 namespace enigma_user {
