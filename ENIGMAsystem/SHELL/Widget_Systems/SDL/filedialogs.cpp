@@ -405,7 +405,7 @@ namespace {
       return (void *)(std::uintptr_t)tex;
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void* tex) {
-      GLuint texID = (GLuint)((uintptr_t)tex);
+      GLuint texID = (GLuint)(std::uintptr_t)tex;
       glDeleteTextures(1, &texID);
     };
     #endif
