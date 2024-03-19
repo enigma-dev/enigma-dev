@@ -20,19 +20,9 @@
 #include "fake_steam_api_flat.h"
 #include "fake_steamfriends.h"
 
-/**
- * @brief These versions will be updated on each new version of Steamworks SDK.
- * 
- */
-#define SteamAPI_SteamUser_vXXX SteamAPI_SteamUser_v023
-#define SteamAPI_SteamFriends_vXXX SteamAPI_SteamFriends_v017
-#define SteamAPI_SteamUtils_vXXX SteamAPI_SteamUtils_v010
-#define SteamAPI_SteamUserStats_vXXX SteamAPI_SteamUserStats_v012
-#define SteamAPI_SteamApps_vXXX SteamAPI_SteamApps_v008
-
 /////////////////////////////////////////////// SteamUser ///////////////////////////////////////////////
 
-ISteamUser* SteamAPI_SteamUser_vXXX() { return SteamUser(); }
+ISteamUser* VERSIONED_STEAM_USER_ACCESSOR_NAME() { return SteamUser(); }
 
 bool SteamAPI_ISteamUser_BLoggedOn(ISteamUser* self) { return self->BLoggedOn(); }
 uint64_steamid SteamAPI_ISteamUser_GetSteamID(ISteamUser* self) { return self->GetSteamID().ConvertToUint64(); }
@@ -41,7 +31,7 @@ uint64_steamid SteamAPI_ISteamUser_GetSteamID(ISteamUser* self) { return self->G
 
 /////////////////////////////////////////////// SteamFriends ////////////////////////////////////////////
 
-ISteamFriends* SteamAPI_SteamFriends_vXXX() { return SteamFriends(); }
+ISteamFriends* VERSIONED_STEAM_FRIENDS_ACCESSOR_NAME() { return SteamFriends(); }
 
 const char* SteamAPI_ISteamFriends_GetPersonaName(ISteamFriends* self) { return self->GetPersonaName(); }
 
@@ -97,7 +87,7 @@ void SteamAPI_ISteamFriends_ClearRichPresence(ISteamFriends* self) { self->Clear
 
 /////////////////////////////////////////////// SteamUtils //////////////////////////////////////////////
 
-ISteamUtils* SteamAPI_SteamUtils_vXXX() { return SteamUtils(); }
+ISteamUtils* VERSIONED_STEAM_UTILS_ACCESSOR_NAME() { return SteamUtils(); }
 
 bool SteamAPI_ISteamUtils_GetImageSize(ISteamUtils* self, int iImage, uint32* pnWidth, uint32* pnHeight) {
   return self->GetImageSize(iImage, pnWidth, pnHeight);
@@ -128,7 +118,7 @@ void SteamAPI_ISteamUtils_SetOverlayNotificationInset(ISteamUtils* self, int nHo
 
 /////////////////////////////////////////////// SteamUserStats //////////////////////////////////////////
 
-ISteamUserStats* SteamAPI_SteamUserStats_vXXX() { return SteamUserStats(); }
+ISteamUserStats* VERSIONED_STEAM_USERSTATS_ACCESSOR_NAME() { return SteamUserStats(); }
 
 bool SteamAPI_ISteamUserStats_RequestCurrentStats(ISteamUserStats* self) { return self->RequestCurrentStats(); }
 
@@ -211,7 +201,7 @@ SteamAPICall_t SteamAPI_ISteamUserStats_UploadLeaderboardScore(
 
 /////////////////////////////////////////////// SteamApps ///////////////////////////////////////////////
 
-ISteamApps* SteamAPI_SteamApps_vXXX() { return SteamApps(); }
+ISteamApps* VERSIONED_STEAM_APPS_ACCESSOR_NAME() { return SteamApps(); }
 
 bool SteamAPI_ISteamApps_BIsSubscribed(ISteamApps* self) { return self->BIsSubscribed(); }
 
