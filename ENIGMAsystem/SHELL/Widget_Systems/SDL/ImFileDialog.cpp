@@ -4,13 +4,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
-#elif (defined(__APPLE__) && defined(__MACH__))
+#elif defined(IFD_USE_OPENGL)
+#if (defined(__APPLE__) && defined(__MACH__))
 #if !defined(IMGUI_IMPL_OPENGL_ES2)
 #define IMGUI_IMPL_OPENGL_ES2
 #endif
+#endif
+#endif
 #ifndef STBI_WINDOWS_UTF8
 #define STBI_WINDOWS_UTF8
-#endif
 #endif
 
 #include <cmath>
