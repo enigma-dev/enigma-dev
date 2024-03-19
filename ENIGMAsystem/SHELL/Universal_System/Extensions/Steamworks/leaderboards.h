@@ -34,6 +34,7 @@
 #include "Universal_System/Resources/AssetArray.h"
 #include "gameclient/gc_leaderboards.h"
 #include "gameclient/gc_main.h"
+#include <list>
 
 namespace enigma {
 
@@ -114,6 +115,40 @@ void push_leaderboard_upload_steam_async_event(const int& id, const LeaderboardS
  */
 void push_leaderboard_download_steam_async_event(const int& id, const std::string& entries_buffer,
                                                  const LeaderboardScoresDownloaded_t& pLeaderboardScoresDownloaded);
+
+
+struct LeaderboardRequest {
+
+    std::string m_pszName;                    // get name of the leaderboards to use
+    int m_postId;                             // request id
+    int m_score;
+    int m_method;                             // get method
+    int m_rangeStart;						  // get range
+	int m_rangeEnd;							  // get range
+    bool m_sign_post;                         // upload(post) or download(get)
+
+    LeaderboardRequest(const std::string& pLBName, int postId, int method, int rangeStart, int rangeEnd)
+        : m_pszName(pLBName), m_postId(postId), m_method(method), m_rangeStart(rangeStart), m_rangeEnd(rangeEnd), m_sign_post(false) {}
+
+    LeaderboardRequest(const std::string& pLBName, int postId, int score, int method)
+        : m_pszName(pLBName), m_postId(postId), m_score(score), m_method(method), m_sign_post(true) {}
+};
+
+/**
+ * @brief the STL List of Leaderboard Request
+ * 
+*/
+extern std::list<LeaderboardRequest> LBRequestList;
+
+/**
+ * @brief send the request from queue to the steam API 
+ */
+void SendLBRequest();
+
+void PerformLBRequest(LeaderboardRequest* pRequest);
+
+bool LookupLeaderboardHandle(const std::string& pszName);
+
 }  // namespace enigma
 
 namespace enigma_user {
