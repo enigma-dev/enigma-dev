@@ -1,0 +1,11 @@
+set(IPHONE_PLATFORM_LIB "iphone_platform_lib")
+set(IPHONE_PLATFORM_LIB_DESCRIPTION "iPhone Plaform")
+
+project(${IPHONE_PLATFORM_LIB} DESCRIPTION ${IPHONE_PLATFORM_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE IPHONE_PLATFORM_LIB_SOURCES 
+    *.cpp 
+    ../General/UNIXfilemanip.cpp 
+    *.m)
+
+add_library(${IPHONE_PLATFORM_LIB} ${IPHONE_PLATFORM_LIB_SOURCES})

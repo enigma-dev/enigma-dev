@@ -1,0 +1,13 @@
+set(WIDGETS_SYS_COCOA_LIB "widgets_sys_cocoa_lib")
+set(WIDGETS_SYS_COCOA_LIB_DESCRIPTION "Universal System Cocoa")
+
+project(${WIDGETS_SYS_COCOA_LIB} DESCRIPTION ${WIDGETS_SYS_COCOA_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE WIDGETS_SYS_COCOA_LIB_SOURCES 
+    ../Cocoa/dialogs.cpp
+    ../Cocoa/cocoaDialogs.m
+    ../General/WSdialogs.cpp)
+
+add_library(${WIDGETS_SYS_COCOA_LIB} ${WIDGETS_SYS_COCOA_LIB_SOURCES})
+
+target_include_directories(${WIDGETS_SYS_COCOA_LIB} PUBLIC ${CMAKE_SOURCE_DIR}/../${GENERAL})

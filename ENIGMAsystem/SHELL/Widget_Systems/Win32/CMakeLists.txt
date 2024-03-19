@@ -1,0 +1,14 @@
+set(WIDGETS_SYS_WIN32_LIB "widgets_sys_win32_lib")
+set(WIDGETS_SYS_WIN32_LIB_DESCRIPTION "Universal System Win32")
+
+project(${WIDGETS_SYS_WIN32_LIB} DESCRIPTION ${WIDGETS_SYS_WIN32_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE WIDGETS_SYS_WIN32_LIB_SOURCES 
+    *.cpp
+    ../General/WSdialogs.cpp)
+
+add_library(${WIDGETS_SYS_WIN32_LIB} ${WIDGETS_SYS_WIN32_LIB_SOURCES})
+
+target_include_directories(${WIDGETS_SYS_WIN32_LIB} PUBLIC ${CMAKE_SOURCE_DIR}/../${GENERAL})
+
+# todo: review makefile again
