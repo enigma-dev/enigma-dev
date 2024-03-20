@@ -7,12 +7,6 @@
 #ifndef STBI_WINDOWS_UTF8
 #define STBI_WINDOWS_UTF8
 #endif
-#elif defined(IFD_USE_OPENGL)
-#if (defined(__APPLE__) && defined(__MACH__))
-#if !defined(IMGUI_IMPL_OPENGL_ES2)
-#define IMGUI_IMPL_OPENGL_ES2
-#endif
-#endif
 #endif
 
 #include <cmath>
