@@ -4,15 +4,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 #endif
+#ifndef STBI_WINDOWS_UTF8
+#define STBI_WINDOWS_UTF8
+#endif
 #elif defined(IFD_USE_OPENGL)
 #if (defined(__APPLE__) && defined(__MACH__))
 #if !defined(IMGUI_IMPL_OPENGL_ES2)
 #define IMGUI_IMPL_OPENGL_ES2
 #endif
 #endif
-#endif
-#ifndef STBI_WINDOWS_UTF8
-#define STBI_WINDOWS_UTF8
 #endif
 
 #include <cmath>
@@ -1102,10 +1102,17 @@ namespace ifd {
             for (int y = 0; y < height; y++) {
               for (int x = 0; x < width; x++) {
                 int index = (y * width + x) * 4;
+                #if defined(IFD_USE_OPENGL)
+                invData[index + 0] = image[index + 0];
+                invData[index + 1] = image[index + 1];
+                invData[index + 2] = image[index + 2];
+                invData[index + 3] = image[index + 3];
+                #else
                 invData[index + 2] = image[index + 0];
                 invData[index + 1] = image[index + 1];
                 invData[index + 0] = image[index + 2];
                 invData[index + 3] = image[index + 3];
+                #endif
               }
             }
             m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
