@@ -1172,7 +1172,7 @@ namespace ifd {
 
     // delete textures
     for (auto& icon : m_icons) {
-      unsigned int ptr = (unsigned int)((std::uintptr_t)icon.second);
+      unsigned int ptr = (unsigned int)(std::uintptr_t)icon.second;
       if (std::count(deletedIcons.begin(), deletedIcons.end(), ptr)) // skip duplicates
         continue;
 
