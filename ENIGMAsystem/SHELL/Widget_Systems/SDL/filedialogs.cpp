@@ -51,14 +51,8 @@
 #include "filesystem.hpp"
 
 #if defined(IFD_USE_OPENGL)
-#if (defined(__APPLE__) && defined(__MACH__))
-#if !defined(IMGUI_IMPL_OPENGL_ES2)
-#define IMGUI_IMPL_OPENGL_ES2
-#endif
-#include <SDL_opengles2.h>
-#else
+#include <GL/glew.h>
 #include <SDL_opengl.h>
-#endif
 #endif
 #include <SDL_syswm.h>
 
@@ -304,14 +298,13 @@ namespace {
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     #else
     #if (defined(__APPLE__) && defined(__MACH__))
-    SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
     #else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     #endif
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
     #ifdef SDL_HINT_IME_SHOW_UI
     SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
     #endif
@@ -335,7 +328,10 @@ namespace {
     if (renderer == nullptr) return "";
     #else
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
     SDL_GL_MakeCurrent(window, gl_context);
+    if (glewInit() != GLEW_OK) return "";
     SDL_GL_SetSwapInterval(1);
     #endif
     IMGUI_CHECKVERSION();
@@ -396,11 +392,8 @@ namespace {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      #if defined(IMGUI_IMPL_OPENGL_ES2)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-      #else
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
-      #endif
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (!fmt) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+      glGenerateMipmap(GL_TEXTURE_2D);
       glBindTexture(GL_TEXTURE_2D, 0);
       return (void *)(std::uintptr_t)tex;
     };
