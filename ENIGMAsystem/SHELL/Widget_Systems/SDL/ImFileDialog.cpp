@@ -1006,7 +1006,7 @@ namespace ifd {
         for (int y = 0; y < height; y++) {
           for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
-            #if defined(IMGUI_IMPL_OPENGL_ES2)
+            #if defined(IFD_USE_OPENGL)
             invData[index + 0] = rawData[index + 0];
             invData[index + 1] = rawData[index + 1];
             invData[index + 2] = rawData[index + 2];
@@ -1252,7 +1252,7 @@ namespace ifd {
               for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                   int index = (y * width + x) * 4;
-                  #if defined(IMGUI_IMPL_OPENGL_ES2)
+                  #if defined(IFD_USE_OPENGL)
                   invData[index + 0] = image[index + 0];
                   invData[index + 1] = image[index + 1];
                   invData[index + 2] = image[index + 2];
