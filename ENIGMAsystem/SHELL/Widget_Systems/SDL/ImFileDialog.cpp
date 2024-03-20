@@ -1102,17 +1102,10 @@ namespace ifd {
             for (int y = 0; y < height; y++) {
               for (int x = 0; x < width; x++) {
                 int index = (y * width + x) * 4;
-                #if defined(IFD_USE_OPENGL)
-                invData[index + 0] = image[index + 0];
-                invData[index + 1] = image[index + 1];
-                invData[index + 2] = image[index + 2];
-                invData[index + 3] = image[index + 3];
-                #else
                 invData[index + 2] = image[index + 0];
                 invData[index + 1] = image[index + 1];
                 invData[index + 0] = image[index + 2];
                 invData[index + 3] = image[index + 3];
-                #endif
               }
             }
             m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
@@ -1252,7 +1245,6 @@ namespace ifd {
           if (image == nullptr)
             continue;
 
-          #if (defined(_WIN32) || (defined(__APPLE__) && defined(__MACH__)))
           if (image) {
             unsigned char *invData = (unsigned char *)calloc(height * width * 4, sizeof(unsigned char));
             if (invData) {
@@ -1276,7 +1268,6 @@ namespace ifd {
               image = invData;
             }
           }
-          #endif
 
           data.HasIconPreview = true;
           data.IconPreviewData = image;
