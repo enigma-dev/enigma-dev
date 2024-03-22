@@ -1000,17 +1000,10 @@ namespace ifd {
         for (int y = 0; y < height; y++) {
           for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
-            #if defined(IFD_USE_OPENGL)
-            invData[index + 0] = rawData[index + 0];
-            invData[index + 1] = rawData[index + 1];
-            invData[index + 2] = rawData[index + 2];
-            invData[index + 3] = rawData[index + 3];
-            #else
             invData[index + 2] = rawData[index + 0];
             invData[index + 1] = rawData[index + 1];
             invData[index + 0] = rawData[index + 2];
             invData[index + 3] = rawData[index + 3];
-            #endif
           }
         }
         m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
