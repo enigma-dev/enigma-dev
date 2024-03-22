@@ -772,7 +772,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::path resFname = filename_path(gameFname.u8string()) + "assets";
   std::filesystem::create_directories(resFname, ec);
   resFname = filename_path(gameFname.u8string()) + "assets/data.res";
-  ngs::fs::directory_copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts");
+  if (!std::filesystem::exists(filename_path(gameFname.u8string()) + "assets/fonts", ec))
+    std::filesystem::copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts", std::filesystem::copy_options::recursive, ec);
   std::filesystem::rename(datares, resFname, ec);
   #if (defined(__MACH__) && defined(__APPLE__))
   system(("sudo chmod -R 777 \"" + filename_path(gameFname.u8string()) + "assets/.\"").c_str());
@@ -834,7 +835,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     #endif
 
     std::filesystem::create_directories(newdir + "/assets", ec);
-    ngs::fs::directory_copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts");
+    if (!std::filesystem::exists(newdir + "/assets/fonts", ec))
+      std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts", std::filesystem::copy_options::recursive, ec);
     std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/data.res", std::filesystem::copy_options::overwrite_existing, ec);
     #if (defined(__MACH__) && defined(__APPLE__))
     system(("sudo chmod -R 777 \"" + newdir + "/assets/.\"").c_str());
