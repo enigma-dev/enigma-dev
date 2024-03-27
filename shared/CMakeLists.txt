@@ -6,6 +6,8 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 project(${SHARED_LIB} DESCRIPTION ${SHARED_LIB_DESCRIPTION})
 
+option(GRPC_EXE "Path to grpc_cpp_plugin executable")
+
 set(SHARED_SOURCES
    "eyaml/eyaml.cpp"
    "event_reader/event_parser.cpp"
