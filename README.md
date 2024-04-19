@@ -27,9 +27,8 @@ Supported Platforms (Examples):
 - Fedora/CentOS/RedHat-Linux
 - FreeBSD/GhostBSD/NomadBSD
 
-Complete Games:
+Completed Game:
 
-- https://github.com/time-killer-games/Flippy-Bored-Multiplayer
 - https://github.com/time-killer-games/Key-to-Success
 
 Example Projects:
@@ -38,7 +37,6 @@ Example Projects:
 - https://github.com/time-killer-games/ENIGMA-SystemInfo-Demo
 - https://github.com/time-killer-games/ENIGMA-xProcess-Demo
 - https://github.com/time-killer-games/ENIGMA-StockfishChess-Demo
-- https://github.com/time-killer-games/Panoramica.gmx
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
