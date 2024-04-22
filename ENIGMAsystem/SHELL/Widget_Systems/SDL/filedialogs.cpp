@@ -57,7 +57,7 @@
 #include <SDL_syswm.h>
 
 #include <sys/stat.h>
-#if defined(_WIN32) 
+#if defined(_WIN32)
 #include <windows.h>
 #define STR_SLASH "\\"
 #define CHR_SLASH '\\'
@@ -101,7 +101,7 @@ SDL_Window *dialog = nullptr;
 namespace {
 
   void message_pump() {
-    #if defined(_WIN32) 
+    #if defined(_WIN32)
     MSG msg; while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
@@ -109,17 +109,17 @@ namespace {
     #endif
   }
   
-  #if defined(_WIN32) 
+  #if defined(_WIN32)
   wstring widen(string str) {
     if (str.empty()) return L"";
-    size_t wchar_count = str.size() + 1; 
+    size_t wchar_count = str.size() + 1;
     vector<wchar_t> buf(wchar_count);
     return wstring { buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
   }
 
   string narrow(wstring wstr) {
     if (wstr.empty()) return "";
-    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
+    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
     vector<char> buf(nbytes);
     return string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   }
@@ -200,9 +200,9 @@ namespace {
     if (ec.value() != 0) return "";
     dname = p.string();
     #if defined(_WIN32)
-    while ((dname.back() == '\\' || dname.back() == '/') && 
+    while ((dname.back() == '\\' || dname.back() == '/') &&
       (p.root_name().string() + "\\" != dname && p.root_name().string() + "/" != dname)) {
-      message_pump(); 
+      message_pump();
       p = ghc::filesystem::path(dname); dname.pop_back();
     }
     #else
@@ -300,6 +300,7 @@ namespace {
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     #if !defined(IFD_USE_OPENGL)
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
     SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
     #else
     #if (defined(__APPLE__) && defined(__MACH__))
@@ -346,7 +347,7 @@ namespace {
     ImGui::CreateContext(shared_font_atlas);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.IniFilename = nullptr;
-    if (ngs::fs::environment_get_variable("IMGUI_FONT_LOADED") != std::to_string(1)) { 
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_LOADED") != std::to_string(1)) {
       ngs::imgui::ifd_load_fonts();
       if (ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").empty())
       ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
@@ -377,7 +378,7 @@ namespace {
     }
     #if !defined(IFD_USE_OPENGL)
     ImGui_ImplSDL2_InitForSDLRenderer(window);
-    ImGui_ImplSDLRenderer_Init(renderer); 
+    ImGui_ImplSDLRenderer_Init(renderer);
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
       if (surf) SDL_FreeSurface(surf);
       surf = SDL_CreateRGBSurfaceFrom((void *)data, w, h, 32, w * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
@@ -409,7 +410,7 @@ namespace {
     };
     #endif
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-    string filterNew = imgui_filter(filter, (type == selectFolder)); 
+    string filterNew = imgui_filter(filter, (type == selectFolder));
     SDL_Event e; string result;
     while (true) {
       while (SDL_PollEvent(&e)) {
@@ -517,7 +518,7 @@ namespace {
         double defnum = strtod(def.c_str(), nullptr);
         if (defnum < DIGITS_MIN) defnum = DIGITS_MIN;
         if (defnum > DIGITS_MAX) defnum = DIGITS_MAX;
-        def = remove_trailing_zeros(defnum); 
+        def = remove_trailing_zeros(defnum);
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
         msgbox.Init("##msgbox", message.c_str(), buttons, true);
