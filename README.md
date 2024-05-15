@@ -25,7 +25,6 @@ Supported Platforms (Examples):
 - Ubuntu/Debian/RPiOS/KDEneon
 - Arch-Linux/Manjaro/SteamOS
 - Fedora/CentOS/RedHat-Linux
-- FreeBSD/GhostBSD/NomadBSD
 
 Completed Game:
 
@@ -48,4 +47,4 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 - **Robert B. Colton**, Win32, RadialGM, emake, LGM, major contributor.
 - **Greg Williamson**, Linux, RadialGM, emake, SDL2, major contributor.
 - **Hugh Patrick Greene**, Wiki, games, tutorials, content contributor.
-- **Samuel Venable**, FreeBSD, GUI widgets, SDL2 joystick contributor.
+- **Samuel Venable**, STIGMA, GUI widgets, SDL2 joystick contributor.
