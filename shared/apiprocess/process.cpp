@@ -1001,9 +1001,8 @@ namespace ngs::ps {
     if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
       memset(&kif, 0, len);
       if (!sysctl(mib, 4, &kif, &len, nullptr, 0)) {
-        path = kif.kf_path;
         char buffer[PATH_MAX];
-        if (realpath(path.c_str(), buffer)) {
+        if (realpath(kif.kf_path, buffer)) {
            path = buffer;
         }
       }
