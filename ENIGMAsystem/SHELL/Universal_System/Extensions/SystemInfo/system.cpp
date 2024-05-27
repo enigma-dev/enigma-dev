@@ -1599,6 +1599,7 @@ std::string cpu_core_count() {
   };
   static const unsigned avx_pos = 0x10000000;
   static const unsigned lvl_cores = 0x0000FFFF;
+  static const unsigned lvl_type = 0x0000FF00;
   cpuid cpuid0(0, 0);
   unsigned hfs = cpuid0.eax();
   cpuid cpuid1(1, 0);
@@ -1611,9 +1612,15 @@ std::string cpu_core_count() {
   }
   if (tmp.find("INTEL") != std::string::npos) {
     if(hfs >= 11) {
-      cpuid cpuid4(0x0B, 0);
-      numsmt = lvl_cores & cpuid4.ebx();
-      numcores = numcpus / numsmt;
+      static constexpr int max_intel_top_lvl = 4;
+      for (unsigned int lvl = 0; lvl < max_intel_top_lvl; lvl++) {
+        cpuid cpuid4(0x0B, lvl);
+        unsigned curr_lvl = (lvl_type & cpuid4.ecx()) >> 8;
+        switch (curr_lvl) {
+          case 0x02: numcores = lvl_cores & cpuid4.eax(); break;
+          default: break;
+        }
+      }
     } else {
       if (hfs >= 1) {
         if (hfs >= 4)
