@@ -1095,9 +1095,10 @@ TEST(ParserTest, IfStatement_4) {
   ASSERT_TRUE(true_branch);
 
   vector<std::string> decls = {"i"};
-  ASSERT_THAT(true_branch, IsForLoopWithChildren(
-                               IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
-                               IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
+  ASSERT_THAT(true_branch,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
+                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
   auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
@@ -1150,9 +1151,10 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
   ASSERT_TRUE(true_branch);
 
   vector<std::string> decls = {"i"};
-  ASSERT_THAT(true_branch, IsForLoopWithChildren(
-                               IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
-                               IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
+  ASSERT_THAT(true_branch,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
+                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
   auto *false_branch = if_->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
@@ -1353,7 +1355,8 @@ TEST(ParserTest, ForLoop_1) {
   std::vector<std::string> decls = {"i"};
 
   ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsDeclaration(decls), IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
+                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
@@ -1367,7 +1370,7 @@ TEST(ParserTest, ForLoop_2) {
 
   std::vector<std::string> decls = {"i", "j"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                           IsBinaryOperation(TT_GREATEREQUAL, IsIdentifier("i"), IsLiteral("12")),
                                           IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
@@ -1382,13 +1385,13 @@ TEST(ParserTest, ForLoop_3) {
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                           IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
                                           IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_3_NoSemicolon) {
-  ParserTester test{"for int i = 0, j=1, k=133 ;i != 12; --i {j ++}"};
+  ParserTester test{"for char i = '0', j='1', k='3' ;i != 12; --i {j ++}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1397,7 +1400,7 @@ TEST(ParserTest, ForLoop_3_NoSemicolon) {
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls),
+  ASSERT_THAT(for_, IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__char),
                                           IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
                                           IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 }
@@ -1412,13 +1415,14 @@ TEST(ParserTest, ForLoop_4) {
 
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
-                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
+                                    IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_4_NoSemicolon) {
-  ParserTester test{"for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break else continue}"};
+  ParserTester test{"for double i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break else continue}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1427,9 +1431,10 @@ TEST(ParserTest, ForLoop_4_NoSemicolon) {
 
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
-                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__double),
+                                    IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
 }
 
 TEST(ParserTest, ForLoop_5) {
@@ -1442,13 +1447,14 @@ TEST(ParserTest, ForLoop_5) {
 
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
-                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
+                                    IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_5_NoSemicolon) {
-  ParserTester test{"for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++ if(i) x = new int else delete y}"};
+  ParserTester test{"for float i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++ if(i) x = new int else delete y}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1457,9 +1463,10 @@ TEST(ParserTest, ForLoop_5_NoSemicolon) {
 
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsDeclaration(decls), IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
-                        IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
+  ASSERT_THAT(for_,
+              IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__float),
+                                    IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
+                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_6) {

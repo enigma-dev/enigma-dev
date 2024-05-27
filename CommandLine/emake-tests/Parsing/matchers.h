@@ -24,7 +24,7 @@ using namespace ::testing;
 
 std::string ExpectedMsg = "";
 
-MATCHER_P(IsDeclaration, decls, "") {
+MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   if (arg->type != AST::NodeType::DECLARATION) {
     ExpectedMsg = "From IsDeclaration Matcher: NodeType = DECLARATION\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
@@ -59,18 +59,19 @@ MATCHER_P(IsDeclaration, decls, "") {
   for (size_t i = 0; i < decls.size(); i++) {
     auto &decli = decl->declarations[i].declarator->decl;
     b3 = b3 && decl->declarations[i].init != nullptr;
-    b3 = b3 && decl->declarations[i].declarator->def == jdi::builtin_type__int;  // need to send the type
+    b3 = b3 && decl->declarations[i].declarator->def == decl_type;
     b3 = b3 && decl->declarations[i].declarator->flags == 0;
     b3 = b3 && decli.name.content == decls[i];
     b3 = b3 && decli.components.size() == 0;
     if (!b3) {
       if (ExpectedMsg == "") ExpectedMsg = "From IsDeclaration Matcher: ";
-      ExpectedMsg += "Declaration [" + to_string(i) +
-                     "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " + decls[i] +
-                     ", components.size() = 0\n";
+      ExpectedMsg +=
+          "Declaration [" + to_string(i) +
+          "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " +  // modify type here
+          decls[i] + ", components.size() = 0\n";
       *result_listener << " got Declaration [" << to_string(i) << "] has init "
                        << ((decl->declarations[i].init) ? "!=" : "=")
-                       << " nullptr, def = jdi::builtin_type__int, flags = "
+                       << " nullptr, def = jdi::builtin_type__int, flags = "  // and here
                        << to_string(decl->declarations[i].declarator->flags)
                        << ", name.content = " << decli.name.content
                        << ", components.size() = " << to_string(decli.components.size()) << "\n";
