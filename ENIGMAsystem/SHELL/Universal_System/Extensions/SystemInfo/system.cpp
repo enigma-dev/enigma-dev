@@ -1547,13 +1547,9 @@ std::string cpu_core_count() {
   #elif defined(__linux__)
   int threads_per_core = (int)strtol(read_output("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'").c_str(), nullptr, 10);
   numcores = (int)(strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10) / ((threads_per_core) ? threads_per_core : 1));
-  #elif defined(__FreeBSD__)
-  /* number_of_thread_groups will return zero if threads are not grouped at all; this means the number of cores equals the number of cpus */
-  int number_of_thread_groups = (int)strtol(read_output("sysctl -n kern.sched.topology_spec | grep -c 'THREAD group'").c_str(), nullptr, 10);
-  numcores = (int)(number_of_thread_groups ? number_of_thread_groups : strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10));
   #endif
   #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
-  #if (defined(_WIN32) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #if (defined(_WIN32) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
   #if defined(_WIN32)
   /* use x86-specific inline assembly as the fallback; 
   for windows programs run under WINE (no wmic cli) */
@@ -1562,8 +1558,8 @@ std::string cpu_core_count() {
   if (numcores != -1)
     return std::to_string(numcores);
   #endif
-  /* dragonfly / net / open bsd have no api for getting the number of cores; 
-  use x86-specific inline assembly for intel / amd based cpus if possible */
+  /* free / dragonfly / net / open bsd have no api for getting the number of cores; 
+  use x86-specific inline assembly for intel / amd based cpus when it's possible */
   #if defined(_WIN32)
   tmp = cpu_vendor();
   #else
