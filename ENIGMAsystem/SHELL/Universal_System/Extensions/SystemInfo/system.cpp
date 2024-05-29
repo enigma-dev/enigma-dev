@@ -92,9 +92,16 @@
 #endif
 #include <unistd.h>
 #endif
-#if (defined(_WIN32) && defined(_MSC_VER))
+#if defined(_WIN32)
+#if defined(_MSC_VER)
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dxgi.lib")
+#if !defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x86\\libhwloc.lib")
+#elif defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x64\\libhwloc.lib")
+#endif
+#endif
 #endif
 
 #include "pci.ids.hpp"
