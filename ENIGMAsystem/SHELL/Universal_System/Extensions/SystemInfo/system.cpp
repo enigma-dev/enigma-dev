@@ -65,6 +65,9 @@
 #elif defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
+#if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
+#include <hwloc.h>
+#endif
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -1544,114 +1547,24 @@ std::string cpu_core_count() {
   std::size_t sz = sizeof(int);
   if (!sysctlbyname("machdep.cpu.core_count", &buf, &sz, nullptr, 0))
     numcores = buf;
-  #elif defined(__linux__)
-  int threads_per_core = (int)strtol(read_output("lscpu | grep 'Thread(s) per core:' | uniq | cut -d' ' -f4- | awk 'NR==1{$1=$1;print}'").c_str(), nullptr, 10);
-  numcores = (int)(strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10) / ((threads_per_core) ? threads_per_core : 1));
   #endif
-  #if (defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86))
-  #if (defined(_WIN32) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__))
+  #if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
   #if defined(_WIN32)
-  /* use x86-specific inline assembly as the fallback; 
-  for windows programs run under WINE (no wmic cli) */
+  /* for windows programs run under WINE (no wmic cli) */
   if (!numcores)
     numcores = -1;
   if (numcores != -1)
     return std::to_string(numcores);
   #endif
-  /* free / dragonfly / net / open bsd have no api for getting the number of cores; 
-  use x86-specific inline assembly for intel / amd based cpus when it's possible */
-  #if defined(_WIN32)
-  tmp = cpu_vendor();
-  #else
-  std::string tmp = cpu_vendor();
-  #endif
-  std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
-  if (tmp.find("INTEL") == std::string::npos && tmp.find("AMD") == std::string::npos) {
-    numcoreserror = true;
-    return pointer_null();
+  hwloc_topology_t topology = nullptr;
+  if (!hwloc_topology_init(&topology)) {
+    if (!hwloc_topology_load(topology)) {
+      int depth = hwloc_get_type_depth(topology, HWLOC_OBJ_CORE);
+      if (depth != HWLOC_TYPE_DEPTH_UNKNOWN)
+        numcores = hwloc_get_nbobjs_by_depth(topology, depth);
+    }
+    hwloc_topology_destroy(topology);
   }
-  class cpuid {
-    #if defined(_MSC_VER)
-    int regs[4];
-    #else
-    unsigned regs[4];
-    #endif
-  public:
-    explicit cpuid(unsigned func_id, unsigned sub_func_id) {
-      #if defined(_MSC_VER)
-      __cpuidex(regs, func_id, sub_func_id);
-      #else
-      asm volatile ("cpuid" : "=a" (regs[0]), "=b" (regs[1]), "=c" (regs[2]), "=d" (regs[3]) : "a" (func_id), "c" (sub_func_id));
-      #endif  
-    }
-    const unsigned &eax() const {
-      return regs[0];
-    }
-    const unsigned &ebx() const {
-      return regs[1];
-    }
-    const unsigned &ecx() const {
-      return regs[2];
-    }
-    const unsigned &edx() const {
-      return regs[3];
-    }
-  };
-  static const unsigned avx_pos = 0x10000000;
-  static const unsigned lvl_cores = 0x0000FFFF;
-  static const unsigned lvl_type = 0x0000FF00;
-  cpuid cpuid0(0, 0);
-  unsigned hfs = cpuid0.eax();
-  cpuid cpuid1(1, 0);
-  int numsmt = 0;
-  bool ishtt = cpuid1.edx() & avx_pos;
-  numcpus = (int)strtol(((cpu_processor_count() != pointer_null()) ? cpu_processor_count().c_str() : "0"), nullptr, 10);
-  if (!numcpus) {
-    numcoreserror = true;
-    return pointer_null();
-  }
-  if (tmp.find("INTEL") != std::string::npos) {
-    if(hfs >= 11) {
-      static constexpr int max_intel_top_lvl = 4;
-      for (unsigned int lvl = 0; lvl < max_intel_top_lvl; lvl++) {
-        cpuid cpuid4(0x0B, lvl);
-        unsigned curr_lvl = (lvl_type & cpuid4.ecx()) >> 8;
-        switch (curr_lvl) {
-          case 0x02: numcores = lvl_cores & cpuid4.eax(); break;
-          default: break;
-        }
-      }
-    } else {
-      if (hfs >= 1) {
-        if (hfs >= 4)
-          numcores = 1 + ((cpuid(4, 0).eax() >> 26) & 0x3F);
-      }
-      if (ishtt) {
-        if (numcores < 1)
-          numcores = 1;
-      } else
-        numcores = 1;
-    }
-  } else if (tmp.find("AMD") != std::string::npos) {
-    numsmt = 1 + ((cpuid(0x8000001E, 0).ebx() >> 8) & 0xFF);
-    if (numcpus > 0 && numsmt > 0)
-      numcores = numcpus / numsmt;
-    else {
-      if (hfs >= 1) {
-        if (cpuid(0x80000000, 0).eax() >= 8)
-          numcores = 1 + (cpuid(0x80000008, 0).ecx() & 0xFF);
-      }
-      if (ishtt) {
-        if (numcores < 1)
-          numcores = 1;
-      } else
-        numcores = 1;
-    }
-  }
-  #endif
-  #endif
-  #if defined(__sun)
-  numcores = (int)strtol(read_output("kstat -m cpu_info | grep -w core_id | uniq | wc -l | awk '{print $1}'").c_str(), nullptr, 10);
   #endif
   if (!numcores)
     numcores = -1;
