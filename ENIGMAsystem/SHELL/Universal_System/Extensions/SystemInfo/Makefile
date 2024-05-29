@@ -1,6 +1,6 @@
 ifeq ($(UNIX_BASED), false)
-	override LDFLAGS += -lws2_32 -ldxgi
-	override LDLIBS += -lws2_32 -ldxgi
+	override LDFLAGS += -lhwloc -lws2_32 -ldxgi
+	override LDLIBS += -lhwloc -lws2_32 -ldxgi
 else
 	ifeq ($(OS), Darwin)
 		override LDFLAGS += -framework OpenGL
@@ -14,8 +14,8 @@ else
 			override LDFLAGS += -lkvm
 			override LDLIBS += -lkvm
 		endif
-		override LDFLAGS += -lGL
-		override LDLIBS += -lGL
+		override LDFLAGS += -lGL -lhwloc
+		override LDLIBS += -lGL -lhwloc
 	endif
 endif
 SOURCES += Universal_System/Extensions/SystemInfo/system.cpp
