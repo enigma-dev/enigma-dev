@@ -65,9 +65,6 @@
 #elif defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
-#if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
-#include <hwloc.h>
-#endif
 #if ((defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
 #include <sys/types.h>
 #if (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -91,6 +88,9 @@
 #include <sys/swap.h>
 #endif
 #include <unistd.h>
+#endif
+#if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
+#include <hwloc.h>
 #endif
 #if defined(_WIN32)
 #if defined(_MSC_VER)
