@@ -89,7 +89,7 @@
 #endif
 #include <unistd.h>
 #endif
-#if (defined(__NetBSD__) || defined(__sun))
+#if (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
 #include <hwloc.h>
 #endif
 #if defined(_WIN32) && defined(_MSC_VER)
@@ -1533,7 +1533,7 @@ std::string cpu_core_count() {
   if (numcoreserror)
     return pointer_null();
   #if defined(_WIN32)
-  std::string tmp = read_output("wmic cpu get NumberOfCores");
+  std::string tmp = read_output("cmd /c wmic cpu get NumberOfCores");
   if (!tmp.empty()) {
     tmp = std::regex_replace(tmp, std::regex("NumberOfCores"), "");
     tmp = std::regex_replace(tmp, std::regex(" "), "");
@@ -1549,9 +1549,9 @@ std::string cpu_core_count() {
     numcores = buf;
   #elif defined(__linux__)
   numcores = (int)strtol(read_output("echo $(($(lscpu | awk '/^Socket\\(s\\)/{ print $2 }') * $(lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }')))").c_str(), nullptr, 10);
-  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  #elif defined(__FreeBSD__)
   numcores = (int)strtol(read_output("sysctl -n kern.smp.cores").c_str(), nullptr, 10);
-  #elif (defined(__NetBSD__) || defined(__sun))
+  #elif (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
   hwloc_topology_t topology = nullptr;
   if (!hwloc_topology_init(&topology)) {
     if (!hwloc_topology_load(topology)) {
