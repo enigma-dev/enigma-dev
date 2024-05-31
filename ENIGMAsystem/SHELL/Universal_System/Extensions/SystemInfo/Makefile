@@ -14,6 +14,8 @@ else
 			override LDFLAGS += -lkvm
 			override LDLIBS += -lkvm
 		endif
+		override LDFLAGS += -lGL
+		override LDLIBS += -lGL
 	endif
 endif
 SOURCES += Universal_System/Extensions/SystemInfo/system.cpp
