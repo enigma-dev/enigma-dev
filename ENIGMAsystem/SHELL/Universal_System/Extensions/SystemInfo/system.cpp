@@ -89,19 +89,12 @@
 #endif
 #include <unistd.h>
 #endif
-#if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
+#if (defined(__NetBSD__) || defined(__sun))
 #include <hwloc.h>
 #endif
-#if defined(_WIN32)
-#if defined(_MSC_VER)
+#if defined(_WIN32) && defined(_MSC_VER)
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dxgi.lib")
-#if !defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x86\\libhwloc.lib")
-#elif defined(_WIN64)
-#pragma comment(lib, __FILE__"\\..\\lib\\x64\\libhwloc.lib")
-#endif
-#endif
 #endif
 
 #include "pci.ids.hpp"
@@ -1554,15 +1547,11 @@ std::string cpu_core_count() {
   std::size_t sz = sizeof(int);
   if (!sysctlbyname("machdep.cpu.core_count", &buf, &sz, nullptr, 0))
     numcores = buf;
-  #endif
-  #if (defined(_WIN32) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) ||  defined(__sun))
-  #if defined(_WIN32)
-  /* for windows programs run under WINE (no wmic cli) */
-  if (!numcores)
-    numcores = -1;
-  if (numcores != -1)
-    return std::to_string(numcores);
-  #endif
+  #elif defined(__linux__)
+  numcores = (int)strtol(read_output("echo $(($(lscpu | awk '/^Socket\\(s\\)/{ print $2 }') * $(lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }')))").c_str(), nullptr, 10);
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
+  numcores = read_output("sysctl -n kern.smp.cores");
+  #elif (defined(__NetBSD__) || defined(__sun))
   hwloc_topology_t topology = nullptr;
   if (!hwloc_topology_init(&topology)) {
     if (!hwloc_topology_load(topology)) {
