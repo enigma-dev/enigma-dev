@@ -11,8 +11,10 @@ else
 			override LDLIBS += -lkvm
 		endif
 		ifeq ($(OS), DragonFly)
-			override LDFLAGS += -lkvm
-			override LDLIBS += -lkvm
+			override LDFLAGS += `pkg-config --libs hwloc --static` -lkvm
+			override LDLIBS += `pkg-config --libs hwloc --static` -lkvm
+			override CFLAGS += `pkg-config --cflags hwloc`
+			override CXXFLAGS += `pkg-config --cflags hwloc`
 		endif
 		override LDFLAGS += -lGL
 		override LDLIBS += -lGL
