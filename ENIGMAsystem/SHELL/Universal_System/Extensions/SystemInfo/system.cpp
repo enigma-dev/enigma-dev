@@ -267,7 +267,7 @@ std::string read_output(std::string cmd) {
   ZeroMemory(&si, sizeof(si));
   si.cb = sizeof(STARTUPINFO);
   si.dwFlags = STARTF_USESTDHANDLES;
-  si.hStdError = stdout_write;
+  si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
   si.hStdOutput = stdout_write;
   si.hStdInput = stdin_read;
   PROCESS_INFORMATION pi;
@@ -614,7 +614,7 @@ std::string os_kernel_version() {
   }
   #endif
   #else
-  std::string tmp = read_output("cmd /c ver");
+  std::string tmp = read_output("C:\\Windows\\System32\\cmd.exe /c ver");
   if (!tmp.empty()) {
     tmp = std::regex_replace(tmp, std::regex("\t"), "");
     tmp = std::regex_replace(tmp, std::regex("\r"), "");
@@ -1533,7 +1533,7 @@ std::string cpu_core_count() {
   if (numcoreserror)
     return pointer_null();
   #if defined(_WIN32)
-  std::string tmp = read_output("cmd /c wmic cpu get NumberOfCores");
+  std::string tmp = read_output("C:\\Windows\\System32\\wbem\\WMIC.exe cpu get NumberOfCores");
   if (!tmp.empty()) {
     tmp = std::regex_replace(tmp, std::regex("NumberOfCores"), "");
     tmp = std::regex_replace(tmp, std::regex(" "), "");
