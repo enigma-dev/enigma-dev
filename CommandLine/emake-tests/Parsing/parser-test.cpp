@@ -127,10 +127,8 @@ TEST(ParserTest, SizeofType) {
   ASSERT_TRUE(std::holds_alternative<FullType>(sizeof_->argument));
 
   auto &value = std::get<FullType>(sizeof_->argument);
-  auto has_value = [&value](jdi::typeflag *builtin) -> bool {
-    return (value.flags & builtin->mask) == builtin->value;
-  };
-  
+  auto has_value = [&value](jdi::typeflag *builtin) -> bool { return (value.flags & builtin->mask) == builtin->value; };
+
   ASSERT_TRUE(has_value(jdi::builtin_flag__const));
   ASSERT_TRUE(has_value(jdi::builtin_flag__volatile));
   ASSERT_TRUE(has_value(jdi::builtin_flag__unsigned));
