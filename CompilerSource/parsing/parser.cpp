@@ -1504,7 +1504,6 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
 }
 
 std::unique_ptr<AST::Node> TryParseIdExpression() {
-  std::unique_ptr<AST::Node> node;
   Declarator decl;
   auto def = TryParseIdExpression(&decl);
   
@@ -1512,11 +1511,10 @@ std::unique_ptr<AST::Node> TryParseIdExpression() {
     herr->Error(token) << "Unable to parse id-expression";
     return nullptr;
   } else if (map_contains(declarations, decl.name.content)) {
-    node = std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
+    return std::make_unique<AST::IdentifierAccess>(declarations[decl.name.content], decl.name);
   } else {
-    node = std::make_unique<AST::IdentifierAccess>(def, decl.name);
+    return std::make_unique<AST::IdentifierAccess>(def, decl.name);
   }
-  return node;
 }
 
 /// Parse an operand--this includes variables, literals, arrays, and
@@ -2028,7 +2026,7 @@ std::unique_ptr<AST::Node> TryParseStatement() {
     case TT_INLINE: case TT_STATIC: case TT_EXTERN:
     case TT_MUTABLE: case TT_THREAD_LOCAL: {
       AST::DeclarationStatement::StorageClass sc;
-      if (false) { // what?
+      if (false) {
         if (false) case TT_LOCAL:
           sc = AST::DeclarationStatement::StorageClass::LOCAL;
         if (false) case TT_GLOBAL:
