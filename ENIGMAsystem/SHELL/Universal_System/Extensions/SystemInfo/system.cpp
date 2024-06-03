@@ -645,7 +645,7 @@ std::string os_product_name() {
     productname = "wine-" + wine_version;
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
-  std::string tmp1 = read_output("echo $(sw_vers | grep 'ProductName:' | uniq | awk 'NR==1{$1=$1;print}' && sw_vers | grep 'ProductVersion:' | uniq | awk 'NR==1{$1=$1;print}')");
+  std::string tmp1 = read_output("echo `sw_vers | grep 'ProductName:' | uniq | awk 'NR==1{$1=$1;print}' && sw_vers | grep 'ProductVersion:' | uniq | awk 'NR==1{$1=$1;print}'`");
   if (!tmp1.empty()) {
     tmp1 = std::regex_replace(tmp1, std::regex("ProductName: "), "");
     tmp1 = std::regex_replace(tmp1, std::regex("ProductVersion: "), "");
@@ -675,7 +675,7 @@ std::string os_product_name() {
     productname = tmp1;
   }
   #elif defined(__linux__)
-  std::string tmp = read_output("echo $(lsb_release --id 2> /dev/null && lsb_release --release 2> /dev/null && lsb_release --codename 2> /dev/null)");
+  std::string tmp = read_output("echo `lsb_release --id 2> /dev/null && lsb_release --release 2> /dev/null && lsb_release --codename 2> /dev/null`");
   if (!tmp.empty()) {
     tmp = std::regex_replace(tmp, std::regex("\r"), "");
     tmp = std::regex_replace(tmp, std::regex("\n"), "");
@@ -839,7 +839,7 @@ std::string os_is_virtual() {
   isvirtual = "NO";
   return isvirtual;
   #elif defined(__linux__)
-  std::string tmp = read_output("echo $(systemd-detect-virt 2> /dev/null)");
+  std::string tmp = read_output("echo `systemd-detect-virt 2> /dev/null`");
   std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::toupper);
   if (tmp.empty()) {
     isvirtualerror = true;
@@ -1548,7 +1548,8 @@ std::string cpu_core_count() {
   if (!sysctlbyname("machdep.cpu.core_count", &buf, &sz, nullptr, 0))
     numcores = buf;
   #elif defined(__linux__)
-  numcores = (int)strtol(read_output("echo $(($(lscpu | awk '/^Socket\\(s\\)/{ print $2 }') * $(lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }')))").c_str(), nullptr, 10);
+  numcores = (int)(strtol(read_output("echo `lscpu | awk '/^Socket\\(s\\)/{ print $2 }'`").c_str(), nullptr, 10) * 
+    strtol(read_output("echo `lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }'`").c_str(), nullptr, 10));
   #elif defined(__FreeBSD__)
   numcores = (int)strtol(read_output("sysctl -n kern.smp.cores").c_str(), nullptr, 10);
   #elif (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
