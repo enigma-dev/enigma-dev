@@ -1475,10 +1475,11 @@ TEST(ParserTest, ForLoop_6) {
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION),
-                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
-                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
+  ASSERT_THAT(
+      for_, IsForLoopWithChildren(
+                IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
+                IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+                IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_7) {
@@ -1490,9 +1491,10 @@ TEST(ParserTest, ForLoop_7) {
   auto *for_ = node->As<AST::ForLoop>();
 
   ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL),
-                                    IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
-                                    IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
+                  IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
+                  IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_8) {
@@ -1504,23 +1506,25 @@ TEST(ParserTest, ForLoop_8) {
   auto *for_ = node->As<AST::ForLoop>();
 
   ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                                    IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
-                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
+                  IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                  IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_8_NoSemicolon) {
-  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++ return}"};
+  ParserTester test{"for static_cast<double>(i = 10222.2); i / 3; i-- {k++ return}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
   auto *for_ = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                                    IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
-                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
+  ASSERT_THAT(
+      for_, IsForLoopWithChildren(
+                IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__double),
+                IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_9) {
@@ -1532,13 +1536,14 @@ TEST(ParserTest, ForLoop_9) {
   auto *for_ = node->As<AST::ForLoop>();
 
   ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                                    IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
-                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
+                  IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
+                  IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }
 
 TEST(ParserTest, ForLoop_9_NoSemicolon) {
-  ParserTester test{"for static_cast<int>(i = 10, j=12); i mod 3; i-- {k-- return 12}"};
+  ParserTester test{"for static_cast<float>(i = 10.2, j=12); i mod 3; i-- {k-- return 12}"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1546,7 +1551,8 @@ TEST(ParserTest, ForLoop_9_NoSemicolon) {
   auto *for_ = node->As<AST::ForLoop>();
 
   ASSERT_THAT(for_,
-              IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION),
-                                    IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
-                                    IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__float),
+                  IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
+                  IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(2)));
 }

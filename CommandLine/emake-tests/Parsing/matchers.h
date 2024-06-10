@@ -28,14 +28,14 @@ MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   if (arg->type != AST::NodeType::DECLARATION) {
     ExpectedMsg = "From IsDeclaration Matcher: NodeType = DECLARATION\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *decl = arg->template As<AST::DeclarationStatement>();
   if (!decl) {
     ExpectedMsg += "From IsDeclaration Matcher: decl isn't nullptr\n";
     *result_listener << "got decl = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = decl->storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY,
@@ -55,7 +55,7 @@ MATCHER_P2(IsDeclaration, decls, decl_type, "") {
     }
   }
 
-  bool b3 = 1;
+  bool b3 = true;
   for (size_t i = 0; i < decls.size(); i++) {
     auto &decli = decl->declarations[i].declarator->decl;
     b3 = b3 && decl->declarations[i].init != nullptr;
@@ -81,28 +81,28 @@ MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   return b1 && b2 && b3;
 }
 
-MATCHER_P2(IsCast, cast_kind, expr_type, "") {
+MATCHER_P3(IsCast, cast_kind, expr_type, type, "") {
   if (arg->type != AST::NodeType::CAST) {
     ExpectedMsg = "From IsCast Matcher: NodeType = CAST\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *cast = arg->template As<AST::CastExpression>();
   if (!cast) {
     ExpectedMsg += "From IsCast Matcher: cast isn't nullptr\n";
     *result_listener << "got cast = nullptr\n";
-    return 0;
+    return false;
   }
 
   auto *expr = cast->expr->template As<AST::Node>();
   if (!expr) {
     ExpectedMsg += "From IsCast Matcher: expr isn't nullptr\n";
     *result_listener << "got expr = nullptr\n";
-    return 0;
+    return false;
   }
 
-  bool b1 = cast->ft.def == jdi::builtin_type__int, b2 = cast->ft.flags == 0, b3 = cast->ft.decl.components.size() == 0,
+  bool b1 = cast->ft.def == type, b2 = cast->ft.flags == 0, b3 = cast->ft.decl.components.size() == 0,
        b4 = cast->ft.decl.name.content == "", b5 = cast->ft.decl.has_nested_declarator == false,
        b6 = cast->kind == cast_kind, b7 = expr->type == expr_type;
 
@@ -145,14 +145,14 @@ MATCHER_P(IsIdentifier, iden, "") {
   if (arg->type != AST::NodeType::IDENTIFIER) {
     ExpectedMsg += "From IsIdentifier Matcher: NodeType = IDENTIFIER\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *iden_access = arg->template As<AST::IdentifierAccess>();
   if (!iden_access) {
     ExpectedMsg += "From IsIdentifier Matcher: iden_access isn't nullptr\n";
     *result_listener << "got iden_access = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = iden_access->name.content == iden;
@@ -160,24 +160,24 @@ MATCHER_P(IsIdentifier, iden, "") {
     ExpectedMsg += "From IsIdentifier Matcher: ";
     ExpectedMsg += "Identifier = " + PrintToString(iden) + "\n";
     *result_listener << "got Identifier = " << arg->template As<AST::IdentifierAccess>()->name.content << "\n";
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 MATCHER_P(IsLiteral, lit, "") {
   if (arg->type != AST::NodeType::LITERAL) {
     ExpectedMsg += "From IsLiteral Matcher: NodeType = LITERAL\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *literal = arg->template As<AST::Literal>();
   if (!literal) {
     ExpectedMsg += "From IsLiteral Matcher: literal isn't nullptr\n";
     *result_listener << "got literal = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = std::get<std::string>(literal->value.value) == lit;
@@ -186,24 +186,24 @@ MATCHER_P(IsLiteral, lit, "") {
     ExpectedMsg += "Literal = " + PrintToString(lit) + "\n";
     *result_listener << "got Literal = " << std::get<std::string>(arg->template As<AST::Literal>()->value.value)
                      << "\n";
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 MATCHER_P3(IsBinaryOperation, op, M1, M2, "") {
   if (arg->type != AST::NodeType::BINARY_EXPRESSION) {
     ExpectedMsg += "From IsBinaryOperation Matcher: NodeType = BINARY_EXPRESSION\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *binary = arg->template As<AST::BinaryExpression>();
   if (!binary) {
     ExpectedMsg += "From IsBinaryOperation Matcher: binary isn't nullptr\n";
     *result_listener << "got binary = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = binary->operation == op, b2 = ExplainMatchResult(M1, binary->left, result_listener),
@@ -223,14 +223,14 @@ MATCHER_P2(IsUnaryPostfixOperator, op, M1, "") {
   if (arg->type != AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
     ExpectedMsg = "From IsUnaryPostfixOperator Matcher: NodeType = UNARY_POSTFIX_EXPRESSION\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *unary = arg->template As<AST::UnaryPostfixExpression>();
   if (!unary) {
     ExpectedMsg += "From IsUnaryPostfixOperator Matcher: unary isn't nullptr\n";
     *result_listener << "got unary = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
@@ -249,14 +249,14 @@ MATCHER_P2(IsUnaryPrefixOperator, op, M1, "") {
   if (arg->type != AST::NodeType::UNARY_PREFIX_EXPRESSION) {
     ExpectedMsg = "From IsUnaryPrefixOperator Matcher: NodeType = UNARY_PREFIX_EXPRESSION\n";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *unary = arg->template As<AST::UnaryPrefixExpression>();
   if (!unary) {
     ExpectedMsg += "From IsUnaryPrefixOperator Matcher: unary isn't nullptr\n";
     *result_listener << "got unary = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
@@ -275,14 +275,14 @@ MATCHER_P(IsStatementBlock, stateSize, "") {
   if (arg->type != AST::NodeType::BLOCK) {
     ExpectedMsg = "From IsStatementBlock Matcher: NodeType = BLOCK";
     *result_listener << "got NodeType = " << AST::NodeToString(arg->type) << "\n";
-    return 0;
+    return false;
   }
 
   auto *block = arg->template As<AST::CodeBlock>();
   if (!block) {
     ExpectedMsg += "From IsStatementBlock Matcher: block isn't nullptr\n";
     *result_listener << "got block = nullptr\n";
-    return 0;
+    return false;
   }
 
   bool b1 = block->statements.size() == size_t(stateSize);
@@ -291,10 +291,10 @@ MATCHER_P(IsStatementBlock, stateSize, "") {
     ExpectedMsg = "From IsStatementBlock Matcher: ";
     ExpectedMsg = "IsStatementBlock Matcher: Statements Size = " + to_string(stateSize);
     *result_listener << "Statements Size = " << to_string(block->statements.size()) << "\n";
-    return 0;
+    return false;
   }
 
-  return 1;
+  return true;
 }
 
 MATCHER_P4(IsForLoopWithChildren, M1, M2, M3, M4, ExpectedMsg) {
