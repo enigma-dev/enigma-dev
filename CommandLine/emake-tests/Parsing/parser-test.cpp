@@ -200,26 +200,25 @@ TEST(ParserTest, Declarator_1) {
   jdi::ref_stack stack;
   ft2.decl.to_jdi_refstack(stack);
   auto first = stack.begin();
-  EXPECT_EQ(ft2.decl.name.content, "y");
-  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
-  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_MEMBER_POINTER);
-  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_ARRAYBOUND);
-  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
-  EXPECT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
-  EXPECT_EQ(test2.lexer.ReadToken().type, TT_ENDOFCODE);
+  ASSERT_EQ(ft2.decl.name.content, "y");
+  ASSERT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ((first++)->type, jdi::ref_stack::RT_MEMBER_POINTER);
+  ASSERT_EQ((first++)->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ((first++)->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(test2.lexer.ReadToken().type, TT_ENDOFCODE);
 }
+*/
 
 TEST(ParserTest, Declarator_2) {
-  FullType ft3;
   ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
-  auto node = test3->TryParseStatement();
-
+  auto node = test3->TryParseDeclarations(true);
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarator_3) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseStatement();
+  auto node = test->TryParseDeclarations(true);
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
   ASSERT_EQ(decls->declarations.size(), 1);
@@ -263,7 +262,7 @@ TEST(ParserTest, Declarator_3) {
 
 TEST(ParserTest, Declarator_4) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseStatement();
+  auto node = test->TryParseDeclarations(true);
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
   ASSERT_EQ(decls->declarations.size(), 1);
@@ -286,7 +285,7 @@ TEST(ParserTest, Declarator_4) {
 
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
-  auto node = test->TryParseStatement();
+  auto node = test->TryParseDeclarations(true);
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
@@ -294,7 +293,7 @@ TEST(ParserTest, Declaration) {
 TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
 
-  auto node = test->TryParseStatement();
+  auto node = test->TryParseDeclarations(true);
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -315,7 +314,6 @@ TEST(ParserTest, Declarations) {
   EXPECT_EQ(decls->declarations[2].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
   EXPECT_EQ(decls->declarations[2].declarator->decl.components.size(), 1);
 }
-*/
 
 void check_placement(AST::NewExpression *new_) {
   ASSERT_NE(new_->placement, nullptr);
@@ -886,10 +884,9 @@ TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
 
-/*
 TEST(ParserTest, CodeBlock) {
   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
-  auto node = test->TryParseDeclarations(true);
+  auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
@@ -900,7 +897,6 @@ TEST(ParserTest, CodeBlock) {
   ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
 }
-*/
 
 TEST(ParserTest, IfStatement_1) {
   ParserTester test{"if(3>2) j++; else --k;"};
@@ -1221,10 +1217,10 @@ TEST(ParserTest, TemporaryInitialization_1) {
   //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "6");
 }
 
-/*
 TEST(ParserTest, TemporaryInitialization_2) {
   ParserTester test{"int(*(*a)[10]) = nullptr;"};
-  auto node = test->TryParseStatement();
+  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, true,
+                                                              AST::DeclarationStatement::StorageClass::TEMPORARY);
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -1265,7 +1261,7 @@ TEST(ParserTest, TemporaryInitialization_2) {
   auto *expr = std::get<std::unique_ptr<AST::Node>>(init->initializer).get();
   assert_identifier_is(expr, "nullptr");
 }
-*/
+
 TEST(ParserTest, TemporaryInitialization_3) {
   ParserTester test{"int(*(*a)[10] + b);"};
   auto node = test->TryParseStatement();

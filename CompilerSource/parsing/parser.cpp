@@ -2102,19 +2102,25 @@ std::unique_ptr<AST::Node> ParseCFStmtBody() {
   if (token.type == TT_BEGINBRACE) {
     return ParseCodeBlock();
   } else {
-    return TryParseStatement();
+    return TryParseStatement(); // can be a declaration (yes it would be useless but valid)
   }
+}
+
+bool next_is_decl_specifier() {
+  return is_decl_specifier(token);
 }
 
 std::unique_ptr<AST::CodeBlock> ParseCode() {
   std::vector<std::unique_ptr<AST::Node>> statements{};
 
-  while (token.type != TT_ENDOFCODE) {
-    if (auto node = TryParseStatement()) {
-      statements.push_back(std::move(node));
-    } else if (token.type == TT_SEMICOLON) {
-      token = lexer->ReadToken();
-    } else break;
+  while (token.type != TT_ENDBRACE) {
+    if (token.type == TT_BEGINBRACE) {
+      statements.emplace_back(ParseCodeBlock());
+    } else if (next_is_decl_specifier()) {
+      statements.emplace_back(TryParseDeclarations(true));
+    } else {
+      statements.emplace_back(TryParseStatement());
+    }
   }
 
   return std::make_unique<AST::CodeBlock>(std::move(statements));
