@@ -18,11 +18,11 @@
 #ifndef ENIGMA_COMPILER_PARSING_AST_h
 #define ENIGMA_COMPILER_PARSING_AST_h
 
-#include "full_type.h"
+#include "darray.h"
 #include "error_reporting.h"
+#include "full_type.h"
 #include "lexer.h"
 #include "tokens.h"
-#include "darray.h"
 
 #include <memory>
 #include <optional>
@@ -45,12 +45,31 @@ class AST {
     UNARY_PREFIX_EXPRESSION,
     UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
-    SIZEOF, ALIGNOF, CAST,
-    NEW, DELETE,
-    PARENTHETICAL, ARRAY,
-    IDENTIFIER, SCOPE_ACCESS, LITERAL, FUNCTION_CALL,
-    IF, FOR, WHILE, DO, WITH, REPEAT, SWITCH, CASE, DEFAULT,
-    BREAK, CONTINUE, RETURN, DECLARATION, INITIALIZER
+    SIZEOF,
+    ALIGNOF,
+    CAST,
+    NEW,
+    DELETE,
+    PARENTHETICAL,
+    ARRAY,
+    IDENTIFIER,
+    SCOPE_ACCESS,
+    LITERAL,
+    FUNCTION_CALL,
+    IF,
+    FOR,
+    WHILE,
+    DO,
+    WITH,
+    REPEAT,
+    SWITCH,
+    CASE,
+    DEFAULT,
+    BREAK,
+    CONTINUE,
+    RETURN,
+    DECLARATION,
+    INITIALIZER
   };
 
   struct Node;
@@ -68,15 +87,15 @@ class AST {
     virtual void RecursiveSubVisit(Visitor &visitor) = 0;
     /// Cast the node to a given type
     template <typename T>
-    T* As() {
-        return dynamic_cast<T*>(this);
+    T *As() {
+      return dynamic_cast<T *>(this);
     }
 
-    Node(NodeType t = NodeType::ERROR): type(t) {}
+    Node(NodeType t = NodeType::ERROR) : type(t) {}
     virtual ~Node() = default;
 
    protected:
-    template<typename... SubNodes>
+    template <typename... SubNodes>
     void RV(Visitor &visitor, const SubNodes &...nodes);
 
    private:
@@ -84,8 +103,9 @@ class AST {
     void RVF(Visitor &visitor, const std::vector<PNode> &node_list);
   };
 
-  template<NodeType kType> struct TypedNode : Node {
-    TypedNode(): Node(kType) {}
+  template <NodeType kType>
+  struct TypedNode : Node {
+    TypedNode() : Node(kType) {}
   };
 
   struct ConstValue {
@@ -100,27 +120,27 @@ class AST {
     std::optional<std::string> literal_representation;
 
     // TODO: Make this parse the data correctly
-    ConstValue(const Token &t): value{std::string{t.content}} {}
+    ConstValue(const Token &t) : value{std::string{t.content}} {}
     std::string ToCppLiteral() const { return ""; }
-    std::string ToCppLiteral() { return "";}
+    std::string ToCppLiteral() { return ""; }
   };
 
-# define BASIC_NODE_ROUTINES(name)                                 \
-  void RecurusiveVisit(Visitor &visitor) final {                   \
-    if (visitor.Visit ## name(*this)) RecursiveSubVisit(visitor);  \
-  }                                                                \
+#define BASIC_NODE_ROUTINES(name)                               \
+  void RecurusiveVisit(Visitor &visitor) final {                \
+    if (visitor.Visit##name(*this)) RecursiveSubVisit(visitor); \
+  }                                                             \
   void RecursiveSubVisit(Visitor &visitor) final
 
   // Simple block of code, containing zero or more statements.
   // The root node of any piece of code will be a block node.
   struct CodeBlock : TypedNode<NodeType::BLOCK> {
-    // Individual statements or 
+    // Individual statements or
     std::vector<PNode> statements;
 
     BASIC_NODE_ROUTINES(CodeBlock);
 
     CodeBlock() noexcept = default;
-    CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {}
+    CodeBlock(std::vector<PNode> statements) : statements{std::move(statements)} {}
   };
   // Binary expressions; generally top-level will be "foo = expression"
   struct BinaryExpression : TypedNode<NodeType::BINARY_EXPRESSION> {
@@ -129,9 +149,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(BinaryExpression);
 
-    BinaryExpression(PNode left_, PNode right_, TokenType operation_):
-        left(std::move(left_)), right(std::move(right_)),
-        operation(operation_) {}
+    BinaryExpression(PNode left_, PNode right_, TokenType operation_)
+        : left(std::move(left_)), right(std::move(right_)), operation(operation_) {}
   };
   // Function call expression, foo(bar)
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
@@ -140,7 +159,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(FunctionCallExpression);
 
-    FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_): function{std::move(function_)}, arguments{std::move(arguments_)} {}
+    FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_)
+        : function{std::move(function_)}, arguments{std::move(arguments_)} {}
   };
   // Unary prefix expressions; generally top-level will be "++varname"
   struct UnaryPrefixExpression : TypedNode<NodeType::UNARY_PREFIX_EXPRESSION> {
@@ -149,8 +169,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(UnaryPrefixExpression);
 
-    UnaryPrefixExpression(PNode operand_, TokenType operation_):
-        operand(std::move(operand_)), operation(operation_) {}
+    UnaryPrefixExpression(PNode operand_, TokenType operation_) : operand(std::move(operand_)), operation(operation_) {}
   };
   // Unary postfix expression
   struct UnaryPostfixExpression : TypedNode<NodeType::UNARY_POSTFIX_EXPRESSION> {
@@ -159,8 +178,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(UnaryPostfixExpression);
 
-    UnaryPostfixExpression(PNode operand_, TokenType operation_):
-        operand(std::move(operand_)), operation(operation_) {}
+    UnaryPostfixExpression(PNode operand_, TokenType operation_)
+        : operand(std::move(operand_)), operation(operation_) {}
   };
   // Ternary expression; the only one is ?:
   struct TernaryExpression : TypedNode<NodeType::TERNARY_EXPRESSION> {
@@ -170,8 +189,10 @@ class AST {
 
     BASIC_NODE_ROUTINES(TernaryExpression);
 
-    TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
-      condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
+    TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_)
+        : condition{std::move(condition_)},
+          true_expression{std::move(true_expression_)},
+          false_expression{std::move(false_expression_)} {}
   };
   // Sizeof expression
   struct SizeofExpression : TypedNode<NodeType::SIZEOF> {
@@ -180,9 +201,9 @@ class AST {
 
     BASIC_NODE_ROUTINES(SizeofExpression);
 
-    explicit SizeofExpression(PNode arg): kind{Kind::EXPR}, argument{std::move(arg)} {}
-    explicit SizeofExpression(std::string ident): kind{Kind::VARIADIC}, argument{std::move(ident)} {}
-    explicit SizeofExpression(FullType ft): kind{Kind::TYPE}, argument{std::move(ft)} {}
+    explicit SizeofExpression(PNode arg) : kind{Kind::EXPR}, argument{std::move(arg)} {}
+    explicit SizeofExpression(std::string ident) : kind{Kind::VARIADIC}, argument{std::move(ident)} {}
+    explicit SizeofExpression(FullType ft) : kind{Kind::TYPE}, argument{std::move(ft)} {}
   };
   // Alignof expression
   struct AlignofExpression : TypedNode<NodeType::ALIGNOF> {
@@ -190,7 +211,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(AlignofExpression);
 
-    explicit AlignofExpression(FullType type): ft{std::move(type)} {}
+    explicit AlignofExpression(FullType type) : ft{std::move(type)} {}
   };
   // Cast expressions
   struct CastExpression : TypedNode<NodeType::CAST> {
@@ -203,21 +224,34 @@ class AST {
     BASIC_NODE_ROUTINES(CastExpression);
     static std::string KindToString(Kind k);
 
-    CastExpression(const Token &token, FullType type, PNode expr, TokenType cast_type):
-       ft{std::move(type)}, expr{std::move(expr)}, functional_cast_type{cast_type} {
+    CastExpression(const Token &token, FullType type, PNode expr, TokenType cast_type)
+        : ft{std::move(type)}, expr{std::move(expr)}, functional_cast_type{cast_type} {
       switch (token.type) {
-        case TT_BEGINPARENTH:     kind = Kind::C_STYLE; break;
-        case TT_STATIC_CAST:      kind = Kind::STATIC; break;
-        case TT_DYNAMIC_CAST:     kind = Kind::DYNAMIC; break;
-        case TT_REINTERPRET_CAST: kind = Kind::REINTERPRET; break;
-        case TT_CONST_CAST:       kind = Kind::CONST; break;
-        case TT_BEGINBRACE:       kind = Kind::FUNCTIONAL; break;
-        default:                  break;
+        case TT_BEGINPARENTH:
+          kind = Kind::C_STYLE;
+          break;
+        case TT_STATIC_CAST:
+          kind = Kind::STATIC;
+          break;
+        case TT_DYNAMIC_CAST:
+          kind = Kind::DYNAMIC;
+          break;
+        case TT_REINTERPRET_CAST:
+          kind = Kind::REINTERPRET;
+          break;
+        case TT_CONST_CAST:
+          kind = Kind::CONST;
+          break;
+        case TT_BEGINBRACE:
+          kind = Kind::FUNCTIONAL;
+          break;
+        default:
+          break;
       }
     }
 
-    CastExpression(Kind kind_, const Token &token, FullType type, PNode expr, TokenType cast_type):
-      CastExpression(token, std::move(type), std::move(expr), cast_type) {
+    CastExpression(Kind kind_, const Token &token, FullType type, PNode expr, TokenType cast_type)
+        : CastExpression(token, std::move(type), std::move(expr), cast_type) {
       kind = kind_;
     }
   };
@@ -229,14 +263,14 @@ class AST {
 
     BASIC_NODE_ROUTINES(Parenthetical);
 
-    Parenthetical(PNode expression_): expression(std::move(expression_)) {}
+    Parenthetical(PNode expression_) : expression(std::move(expression_)) {}
   };
   struct Array : TypedNode<NodeType::ARRAY> {
     std::vector<PNode> elements;
 
     BASIC_NODE_ROUTINES(Array);
 
-    Array(std::vector<PNode> &&elements_): elements(std::move(elements_)) {}
+    Array(std::vector<PNode> &&elements_) : elements(std::move(elements_)) {}
   };
 
   struct IdentifierAccess : TypedNode<NodeType::IDENTIFIER> {
@@ -247,8 +281,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(IdentifierAccess);
 
-    IdentifierAccess(FullType *type, Token name): kind{Kind::EDL}, type{type}, name{name} {}
-    IdentifierAccess(jdi::definition *type, Token name): kind{Kind::CPP}, type{type}, name{name} {}
+    IdentifierAccess(FullType *type, Token name) : kind{Kind::EDL}, type{type}, name{name} {}
+    IdentifierAccess(jdi::definition *type, Token name) : kind{Kind::CPP}, type{type}, name{name} {}
   };
 
   struct Literal : TypedNode<NodeType::LITERAL> {
@@ -256,17 +290,19 @@ class AST {
 
     BASIC_NODE_ROUTINES(Literal);
 
-    Literal(const Token &token): value{token} {}
+    Literal(const Token &token) : value{token} {}
   };
-  
+
   struct IfStatement : TypedNode<NodeType::IF> {
     PNode condition;
     PNode true_branch, false_branch;
 
     BASIC_NODE_ROUTINES(IfStatement);
 
-    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_): condition{std::move(condition_)},
-        true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)} {}
+    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_)
+        : condition{std::move(condition_)},
+          true_branch{std::move(true_branch_)},
+          false_branch{std::move(false_branch_)} {}
   };
   struct ForLoop : TypedNode<NodeType::FOR> {
     PNode assignment, condition, increment;
@@ -274,9 +310,11 @@ class AST {
 
     BASIC_NODE_ROUTINES(ForLoop);
 
-
-    ForLoop(PNode assignment_, PNode condition_, PNode increment_, PNode body_): assignment{std::move(assignment_)},
-        condition{std::move(condition_)}, increment{std::move(increment_)}, body{std::move(body_)} {}
+    ForLoop(PNode assignment_, PNode condition_, PNode increment_, PNode body_)
+        : assignment{std::move(assignment_)},
+          condition{std::move(condition_)},
+          increment{std::move(increment_)},
+          body{std::move(body_)} {}
   };
   struct WhileLoop : TypedNode<NodeType::WHILE> {
     PNode condition;
@@ -286,8 +324,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(WhileLoop);
 
-    WhileLoop(PNode condition_, PNode body_, Kind kind_): condition{std::move(condition_)},
-        body{std::move(body_)}, kind{kind_} {}
+    WhileLoop(PNode condition_, PNode body_, Kind kind_)
+        : condition{std::move(condition_)}, body{std::move(body_)}, kind{kind_} {}
   };
   struct DoLoop : TypedNode<NodeType::DO> {
     PNode body;
@@ -296,8 +334,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(DoLoop);
 
-    DoLoop(PNode body_, PNode condition_, bool until): body{std::move(body_)}, condition{std::move(condition_)},
-        is_until(until) {}
+    DoLoop(PNode body_, PNode condition_, bool until)
+        : body{std::move(body_)}, condition{std::move(condition_)}, is_until(until) {}
   };
 
   struct CaseStatement : TypedNode<NodeType::CASE> {
@@ -306,8 +344,8 @@ class AST {
 
     BASIC_NODE_ROUTINES(CaseStatement);
 
-    CaseStatement(PNode value, std::unique_ptr<AST::CodeBlock> statements): value{std::move(value)},
-                                                                             statements{std::move(statements)} {}
+    CaseStatement(PNode value, std::unique_ptr<AST::CodeBlock> statements)
+        : value{std::move(value)}, statements{std::move(statements)} {}
   };
 
   struct DefaultStatement : TypedNode<NodeType::DEFAULT> {
@@ -315,7 +353,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(DefaultStatement);
 
-    DefaultStatement(std::unique_ptr<AST::CodeBlock> statements): statements{std::move(statements)} {}
+    DefaultStatement(std::unique_ptr<AST::CodeBlock> statements) : statements{std::move(statements)} {}
   };
 
   struct SwitchStatement : TypedNode<NodeType::SWITCH> {
@@ -338,7 +376,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(ReturnStatement);
 
-    ReturnStatement(PNode expression_, bool is_exit_): expression{std::move(expression_)}, is_exit{is_exit_} {}
+    ReturnStatement(PNode expression_, bool is_exit_) : expression{std::move(expression_)}, is_exit{is_exit_} {}
   };
   struct BreakStatement : TypedNode<NodeType::BREAK> {
     // Optional: the number of nested loops to break out of (default = 1)
@@ -346,7 +384,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(BreakStatement);
 
-    explicit BreakStatement(PNode count_): count{std::move(count_)} {}
+    explicit BreakStatement(PNode count_) : count{std::move(count_)} {}
   };
   struct ContinueStatement : TypedNode<NodeType::CONTINUE> {
     // Optional: the number of nested loops to continue past (default = 1)
@@ -354,7 +392,7 @@ class AST {
 
     BASIC_NODE_ROUTINES(ContinueStatement);
 
-    explicit ContinueStatement(PNode count_): count{std::move(count_)} {}
+    explicit ContinueStatement(PNode count_) : count{std::move(count_)} {}
   };
   struct WithStatement : TypedNode<NodeType::WITH> {
     PNode object;
@@ -362,12 +400,10 @@ class AST {
 
     BASIC_NODE_ROUTINES(WithStatement);
 
-    WithStatement(PNode object_, PNode body_): object{std::move(object_)}, body{std::move(body_)} {}
+    WithStatement(PNode object_, PNode body_) : object{std::move(object_)}, body{std::move(body_)} {}
   };
 
-  enum class DeclaratorType {
-    ABSTRACT, NON_ABSTRACT, MAYBE_ABSTRACT
-  };
+  enum class DeclaratorType { ABSTRACT, NON_ABSTRACT, MAYBE_ABSTRACT };
 
   struct Initializer;
   struct BraceOrParenInitializer;
@@ -381,7 +417,7 @@ class AST {
     enum class Kind { BRACE_INIT, DESIGNATED_INIT, PAREN_INIT } kind;
     std::vector<std::pair<std::string, InitializerNode>> values{};
     template <typename T>
-    static BraceOrParenInitNode from(T&& value, Kind kind = Kind::BRACE_INIT) {
+    static BraceOrParenInitNode from(T &&value, Kind kind = Kind::BRACE_INIT) {
       return std::make_unique<BraceOrParenInitializer>(kind, std::forward<T>(value));
     }
   };
@@ -390,11 +426,11 @@ class AST {
     enum class Kind { BRACE_INIT, EXPR } kind;
     std::variant<BraceOrParenInitNode, PNode> initializer{};
 
-    explicit AssignmentInitializer(BraceOrParenInitNode init): kind{Kind::BRACE_INIT}, initializer{std::move(init)} {}
-    explicit AssignmentInitializer(PNode expr): kind{Kind::EXPR}, initializer{std::move(expr)} {}
+    explicit AssignmentInitializer(BraceOrParenInitNode init) : kind{Kind::BRACE_INIT}, initializer{std::move(init)} {}
+    explicit AssignmentInitializer(PNode expr) : kind{Kind::EXPR}, initializer{std::move(expr)} {}
 
     template <typename T>
-    static AssignmentInitNode from(T&& value) {
+    static AssignmentInitNode from(T &&value) {
       return std::make_unique<AssignmentInitializer>(std::forward<T>(value));
     }
   };
@@ -406,19 +442,19 @@ class AST {
 
     BASIC_NODE_ROUTINES(Initializer);
 
-    explicit Initializer(BraceOrParenInitNode init, bool is_variadic = false):
-      kind{Kind::BRACE_INIT}, initializer{std::move(init)}, is_variadic{is_variadic} {}
-    explicit Initializer(BraceOrParenInitializer init, bool is_variadic = false):
-      Initializer(std::make_unique<BraceOrParenInitializer>(std::move(init)), is_variadic) {}
-    explicit Initializer(AssignmentInitNode node, bool is_variadic = false):
-      kind{Kind::ASSIGN_EXPR}, initializer{std::move(node)}, is_variadic{is_variadic} {}
-    explicit Initializer(AssignmentInitializer node, bool is_variadic = false):
-      Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
-    explicit Initializer(PNode node, bool is_variadic = false):
-      Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
+    explicit Initializer(BraceOrParenInitNode init, bool is_variadic = false)
+        : kind{Kind::BRACE_INIT}, initializer{std::move(init)}, is_variadic{is_variadic} {}
+    explicit Initializer(BraceOrParenInitializer init, bool is_variadic = false)
+        : Initializer(std::make_unique<BraceOrParenInitializer>(std::move(init)), is_variadic) {}
+    explicit Initializer(AssignmentInitNode node, bool is_variadic = false)
+        : kind{Kind::ASSIGN_EXPR}, initializer{std::move(node)}, is_variadic{is_variadic} {}
+    explicit Initializer(AssignmentInitializer node, bool is_variadic = false)
+        : Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
+    explicit Initializer(PNode node, bool is_variadic = false)
+        : Initializer(std::make_unique<AssignmentInitializer>(std::move(node)), is_variadic) {}
 
     template <typename T>
-    static InitializerNode from(T&& value, bool is_variadic = false) {
+    static InitializerNode from(T &&value, bool is_variadic = false) {
       // I don't have the energy to constrain T
       return std::make_unique<Initializer>(std::forward<T>(value), is_variadic);
     }
@@ -435,9 +471,12 @@ class AST {
     BASIC_NODE_ROUTINES(NewExpression);
 
     NewExpression(bool is_global, bool is_array, std::unique_ptr<Initializer> placement, FullType type,
-                  std::unique_ptr<Initializer> initializer):
-      is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, ft{std::move(type)},
-      initializer{std::move(initializer)} {}
+                  std::unique_ptr<Initializer> initializer)
+        : is_global{is_global},
+          is_array{is_array},
+          placement{std::move(placement)},
+          ft{std::move(type)},
+          initializer{std::move(initializer)} {}
   };
   // Delete expression
   struct DeleteExpression : TypedNode<NodeType::DELETE> {
@@ -447,18 +486,18 @@ class AST {
 
     BASIC_NODE_ROUTINES(DeleteExpression);
 
-    DeleteExpression(bool is_global, bool is_array, PNode expression): is_global{is_global}, is_array{is_array},
-                                                                       expression{std::move(expression)} {}
+    DeleteExpression(bool is_global, bool is_array, PNode expression)
+        : is_global{is_global}, is_array{is_array}, expression{std::move(expression)} {}
   };
 
-  struct DeclarationStatement: TypedNode<NodeType::DECLARATION> {
+  struct DeclarationStatement : TypedNode<NodeType::DECLARATION> {
     struct Declaration {
       std::unique_ptr<FullType> declarator;
       InitializerNode init;
 
       Declaration() noexcept = default;
-      Declaration(FullType declarator, InitializerNode init):
-        declarator{std::make_unique<FullType>(std::move(declarator))}, init{std::move(init)} {}
+      Declaration(FullType declarator, InitializerNode init)
+          : declarator{std::make_unique<FullType>(std::move(declarator))}, init{std::move(init)} {}
     };
     enum class StorageClass {
       TEMPORARY,
@@ -474,15 +513,16 @@ class AST {
     BASIC_NODE_ROUTINES(DeclarationStatement);
     static std::string StorageToString(StorageClass st);
 
-    DeclarationStatement(StorageClass sc, jdi::definition *type,
-                         std::vector<Declaration> declarations):
-        def{type}, storage_class{sc},
-        declarations{std::move(declarations)} {}
+    DeclarationStatement(StorageClass sc, jdi::definition *type, std::vector<Declaration> declarations)
+        : def{type}, storage_class{sc}, declarations{std::move(declarations)} {}
   };
 
   class Visitor {
    public:
-    virtual bool DefaultVisit(Node &node) { (void) node; return true; }
+    virtual bool DefaultVisit(Node &node) {
+      (void)node;
+      return true;
+    }
     virtual bool VisitCodeBlock(CodeBlock &node) { return DefaultVisit(node); }
     virtual bool VisitBinaryExpression(BinaryExpression &node) { return DefaultVisit(node); }
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node) { return DefaultVisit(node); }
@@ -520,7 +560,7 @@ class AST {
   const std::shared_ptr<Lexer> lexer;
   // The raw input code, owned by the lexer.
   const std::string &code;
-  // Lambda function to get nodes types as strings 
+  // Lambda function to get nodes types as strings
   static const std::vector<std::string> NodesNames;
 
   bool HasError() { return !herr.errors.empty(); }
@@ -569,12 +609,10 @@ class AST {
   std::unique_ptr<Node> root_;
   // When specified, emits code to apply to a specific instance.
   std::optional<int> apply_to_;
-  
 
   // Constructs an AST from the code it will parse. Does not initiate parse.
-  AST(std::string &&code_, const ParseContext *ctex):
-      lexer(std::make_unique<Lexer>(std::move(code_), ctex, &herr)),
-      code(lexer->GetCode()) {}
+  AST(std::string &&code_, const ParseContext *ctex)
+      : lexer(std::make_unique<Lexer>(std::move(code_), ctex, &herr)), code(lexer->GetCode()) {}
 };
 
 }  // namespace enigma::parsing
