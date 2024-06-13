@@ -2190,16 +2190,22 @@ class AstBuilder {
 
   bool next_is_decl_specifier() { return is_decl_specifier(token); }
 
+  std::unique_ptr<AST::Node> ParseStatementOrBlock() {
+    if (token.type == TT_BEGINBRACE) {
+      return ParseCodeBlock();
+    } else {
+      return TryParseStatement();
+    }
+  }
+
   std::unique_ptr<AST::CodeBlock> ParseCode() {
     std::vector<std::unique_ptr<AST::Node>> statements{};
 
     while (token.type != TT_ENDBRACE) {
-      if (token.type == TT_BEGINBRACE) {
-        statements.emplace_back(ParseCodeBlock());
-      } else if (next_is_decl_specifier()) {
+      if (next_is_decl_specifier()) {
         statements.emplace_back(TryParseDeclarations(true));
       } else {
-        statements.emplace_back(TryParseStatement());
+        statements.emplace_back(ParseStatementOrBlock());
       }
     }
 
