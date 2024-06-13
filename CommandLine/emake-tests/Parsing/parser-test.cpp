@@ -220,7 +220,7 @@ TEST(ParserTest, Declarator_3) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
   auto node = test->TryParseDeclarations(true);
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decls = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
@@ -264,7 +264,7 @@ TEST(ParserTest, Declarator_4) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
   auto node = test->TryParseDeclarations(true);
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decls = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
@@ -884,18 +884,33 @@ TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
 
-TEST(ParserTest, CodeBlock) {
+TEST(ParserTest, CodeBlock_1) {
   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
   auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-  auto *block = dynamic_cast<AST::CodeBlock *>(node.get());
+  auto *block = node->As<AST::CodeBlock>();
   ASSERT_EQ(block->statements.size(), 4);
   ASSERT_EQ(block->statements[0]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
+}
+
+TEST(ParserTest, CodeBlock_2) {
+  ParserTester test{"{{{}}}"};
+  auto node = test->ParseCodeBlock();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BLOCK);
+
+  auto *inner_block = block->statements[0]->As<AST::CodeBlock>();
+  ASSERT_EQ(inner_block->statements.size(), 1);
+  ASSERT_EQ(inner_block->statements[0]->type, AST::NodeType::BLOCK);
 }
 
 TEST(ParserTest, IfStatement_1) {
@@ -1225,7 +1240,7 @@ TEST(ParserTest, TemporaryInitialization_2) {
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decl = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decl = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decl->declarations.size(), 1);
   ASSERT_EQ(decl->def, jdi::builtin_type__int);
   auto *decl1 = &decl->declarations[0];
