@@ -18,8 +18,8 @@
 #include "tokens.h"
 
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 namespace enigma {
@@ -28,144 +28,142 @@ namespace {
 
 using std::string;
 
-static const std::vector<std::string> kTokenNames = [](){
+static const std::vector<std::string> kTokenNames = []() {
   std::vector<std::string> res;
   res.resize(TT_ENDOFCODE + 1);
-  // Use a switch statement to enforce all values being defined.
-  #define REGISTER(name) [[fallthrough]]; case name: res[name] = #name
+// Use a switch statement to enforce all values being defined.
+#define REGISTER(name) \
+  [[fallthrough]];     \
+  case name:           \
+    res[name] = #name
   switch (TT_ERROR) {
     // Note that TT_ERROR must be named first as it is the switch value.
-    case TT_ERROR: res[TT_ERROR] = "<ERROR>";
+    case TT_ERROR:
+      res[TT_ERROR] = "<ERROR>";
 
-    REGISTER(TT_IDENTIFIER);
-    REGISTER(TT_SEMICOLON);
-    REGISTER(TT_COLON);
-    REGISTER(TT_COMMA);
-    REGISTER(TT_ASSIGN);
-    REGISTER(TT_ASSOP);
-    REGISTER(TT_EQUALS);
-    REGISTER(TT_DOT);
-    REGISTER(TT_ELLIPSES);
-    REGISTER(TT_ARROW);
-    REGISTER(TT_DOT_STAR);
-    REGISTER(TT_ARROW_STAR);
-    REGISTER(TT_PLUS);
-    REGISTER(TT_MINUS);
-    REGISTER(TT_STAR);
-    REGISTER(TT_SLASH);
-    REGISTER(TT_PERCENT);
-    REGISTER(TT_AMPERSAND);
-    REGISTER(TT_PIPE);
-    REGISTER(TT_CARET);
-    REGISTER(TT_AND);
-    REGISTER(TT_OR);
-    REGISTER(TT_XOR);
-    REGISTER(TT_DIV);
-    REGISTER(TT_MOD);
-    REGISTER(TT_NOT);
-    REGISTER(TT_EQUALTO);
-    REGISTER(TT_NOTEQUAL);
-    REGISTER(TT_BANG);
-    REGISTER(TT_TILDE);
-    REGISTER(TT_INCREMENT);
-    REGISTER(TT_DECREMENT);
-    REGISTER(TT_LESS);
-    REGISTER(TT_GREATER);
-    REGISTER(TT_LESSEQUAL);
-    REGISTER(TT_GREATEREQUAL);
-    REGISTER(TT_THREEWAY);
-    REGISTER(TT_LSH);
-    REGISTER(TT_RSH);
-    REGISTER(TT_QMARK);
-    REGISTER(TT_BEGINPARENTH);
-    REGISTER(TT_ENDPARENTH);
-    REGISTER(TT_BEGINBRACKET);
-    REGISTER(TT_ENDBRACKET);
-    REGISTER(TT_BEGINBRACE);
-    REGISTER(TT_ENDBRACE);
-    REGISTER(TT_DECLITERAL);
-    REGISTER(TT_BINLITERAL);
-    REGISTER(TT_OCTLITERAL);
-    REGISTER(TT_HEXLITERAL);
-    REGISTER(TT_STRINGLIT);
-    REGISTER(TT_CHARLIT);
-    REGISTER(TT_SCOPEACCESS);
-    REGISTER(TT_TYPE_NAME);
-    REGISTER(TT_LOCAL);
-    REGISTER(TT_GLOBAL);
-    REGISTER(TT_RETURN);
-    REGISTER(TT_EXIT);
-    REGISTER(TT_BREAK);
-    REGISTER(TT_CONTINUE);
-    REGISTER(TT_ENUM);
-    REGISTER(TT_TYPEDEF);
-    REGISTER(TT_TYPENAME);
-    REGISTER(TT_OPERATOR);
-    REGISTER(TT_CONSTEXPR);
-    REGISTER(TT_CONSTINIT);
-    REGISTER(TT_CONSTEVAL);
-    REGISTER(TT_INLINE);
-    REGISTER(TT_STATIC);
-    REGISTER(TT_THREAD_LOCAL);
-    REGISTER(TT_EXTERN);
-    REGISTER(TT_MUTABLE);
-    REGISTER(TT_CO_AWAIT);
-    REGISTER(TT_NOEXCEPT);
-    REGISTER(TT_ALIGNOF);
-    REGISTER(TT_SIZEOF);
-    REGISTER(TT_STATIC_CAST);
-    REGISTER(TT_DYNAMIC_CAST);
-    REGISTER(TT_REINTERPRET_CAST);
-    REGISTER(TT_CONST_CAST);
-    REGISTER(TT_S_SWITCH);
-    REGISTER(TT_S_REPEAT);
-    REGISTER(TT_S_CASE);
-    REGISTER(TT_S_DEFAULT);
-    REGISTER(TT_S_FOR);
-    REGISTER(TT_S_IF);
-    REGISTER(TT_S_THEN);
-    REGISTER(TT_S_ELSE);
-    REGISTER(TT_S_DO);
-    REGISTER(TT_S_WHILE);
-    REGISTER(TT_S_UNTIL);
-    REGISTER(TT_S_WITH);
-    REGISTER(TT_S_TRY);
-    REGISTER(TT_S_CATCH);
-    REGISTER(TT_S_NEW);
-    REGISTER(TT_S_DELETE);
-    REGISTER(TT_CLASS);
-    REGISTER(TT_STRUCT);
-    REGISTER(TT_UNION);
-    REGISTER(TT_SIGNED);
-    REGISTER(TT_UNSIGNED);
-    REGISTER(TT_CONST);
-    REGISTER(TT_VOLATILE);
-    REGISTER(TT_DECLTYPE);
-    REGISTER(TTM_WHITESPACE);
-    REGISTER(TTM_CONCAT);
-    REGISTER(TTM_STRINGIFY);
-    REGISTER(TT_ENDOFCODE);
+      REGISTER(TT_IDENTIFIER);
+      REGISTER(TT_SEMICOLON);
+      REGISTER(TT_COLON);
+      REGISTER(TT_COMMA);
+      REGISTER(TT_ASSIGN);
+      REGISTER(TT_ASSOP);
+      REGISTER(TT_EQUALS);
+      REGISTER(TT_DOT);
+      REGISTER(TT_ELLIPSES);
+      REGISTER(TT_ARROW);
+      REGISTER(TT_DOT_STAR);
+      REGISTER(TT_ARROW_STAR);
+      REGISTER(TT_PLUS);
+      REGISTER(TT_MINUS);
+      REGISTER(TT_STAR);
+      REGISTER(TT_SLASH);
+      REGISTER(TT_PERCENT);
+      REGISTER(TT_AMPERSAND);
+      REGISTER(TT_PIPE);
+      REGISTER(TT_CARET);
+      REGISTER(TT_AND);
+      REGISTER(TT_OR);
+      REGISTER(TT_XOR);
+      REGISTER(TT_DIV);
+      REGISTER(TT_MOD);
+      REGISTER(TT_NOT);
+      REGISTER(TT_EQUALTO);
+      REGISTER(TT_NOTEQUAL);
+      REGISTER(TT_BANG);
+      REGISTER(TT_TILDE);
+      REGISTER(TT_INCREMENT);
+      REGISTER(TT_DECREMENT);
+      REGISTER(TT_LESS);
+      REGISTER(TT_GREATER);
+      REGISTER(TT_LESSEQUAL);
+      REGISTER(TT_GREATEREQUAL);
+      REGISTER(TT_THREEWAY);
+      REGISTER(TT_LSH);
+      REGISTER(TT_RSH);
+      REGISTER(TT_QMARK);
+      REGISTER(TT_BEGINPARENTH);
+      REGISTER(TT_ENDPARENTH);
+      REGISTER(TT_BEGINBRACKET);
+      REGISTER(TT_ENDBRACKET);
+      REGISTER(TT_BEGINBRACE);
+      REGISTER(TT_ENDBRACE);
+      REGISTER(TT_DECLITERAL);
+      REGISTER(TT_BINLITERAL);
+      REGISTER(TT_OCTLITERAL);
+      REGISTER(TT_HEXLITERAL);
+      REGISTER(TT_STRINGLIT);
+      REGISTER(TT_CHARLIT);
+      REGISTER(TT_SCOPEACCESS);
+      REGISTER(TT_TYPE_NAME);
+      REGISTER(TT_LOCAL);
+      REGISTER(TT_GLOBAL);
+      REGISTER(TT_RETURN);
+      REGISTER(TT_EXIT);
+      REGISTER(TT_BREAK);
+      REGISTER(TT_CONTINUE);
+      REGISTER(TT_ENUM);
+      REGISTER(TT_TYPEDEF);
+      REGISTER(TT_TYPENAME);
+      REGISTER(TT_OPERATOR);
+      REGISTER(TT_CONSTEXPR);
+      REGISTER(TT_CONSTINIT);
+      REGISTER(TT_CONSTEVAL);
+      REGISTER(TT_INLINE);
+      REGISTER(TT_STATIC);
+      REGISTER(TT_THREAD_LOCAL);
+      REGISTER(TT_EXTERN);
+      REGISTER(TT_MUTABLE);
+      REGISTER(TT_CO_AWAIT);
+      REGISTER(TT_NOEXCEPT);
+      REGISTER(TT_ALIGNOF);
+      REGISTER(TT_SIZEOF);
+      REGISTER(TT_STATIC_CAST);
+      REGISTER(TT_DYNAMIC_CAST);
+      REGISTER(TT_REINTERPRET_CAST);
+      REGISTER(TT_CONST_CAST);
+      REGISTER(TT_S_SWITCH);
+      REGISTER(TT_S_REPEAT);
+      REGISTER(TT_S_CASE);
+      REGISTER(TT_S_DEFAULT);
+      REGISTER(TT_S_FOR);
+      REGISTER(TT_S_IF);
+      REGISTER(TT_S_THEN);
+      REGISTER(TT_S_ELSE);
+      REGISTER(TT_S_DO);
+      REGISTER(TT_S_WHILE);
+      REGISTER(TT_S_UNTIL);
+      REGISTER(TT_S_WITH);
+      REGISTER(TT_S_TRY);
+      REGISTER(TT_S_CATCH);
+      REGISTER(TT_S_NEW);
+      REGISTER(TT_S_DELETE);
+      REGISTER(TT_CLASS);
+      REGISTER(TT_STRUCT);
+      REGISTER(TT_UNION);
+      REGISTER(TT_SIGNED);
+      REGISTER(TT_UNSIGNED);
+      REGISTER(TT_CONST);
+      REGISTER(TT_VOLATILE);
+      REGISTER(TT_DECLTYPE);
+      REGISTER(TTM_WHITESPACE);
+      REGISTER(TTM_CONCAT);
+      REGISTER(TTM_STRINGIFY);
+      REGISTER(TT_ENDOFCODE);
   }
   return res;
 }();
 
 }  // namespace
 
-std::string ToString(TokenType tt) {
-  return kTokenNames[tt];
-}
+std::string ToString(TokenType tt) { return kTokenNames[tt]; }
 string Token::ToString() const {
   std::stringstream str;
   str << kTokenNames[type] << "(\"" << content << "\")";
   return str.str();
 }
 
-std::ostream &operator<<(std::ostream &os, TokenType tt) {
-  return os << kTokenNames[tt];
-}
-std::ostream &operator<<(std::ostream &os, const Token &t) {
-  return os << t.ToString();
-}
+std::ostream &operator<<(std::ostream &os, TokenType tt) { return os << kTokenNames[tt]; }
+std::ostream &operator<<(std::ostream &os, const Token &t) { return os << t.ToString(); }
 
 }  // namespace parsing
 }  // namespace enigma
