@@ -1184,7 +1184,7 @@ TEST(ParserTest, IfStatement_3) {
   ASSERT_TRUE(expr);
   ASSERT_EQ(expr->name.content, "true");
 
-  auto *true_branch = if_->true_branch->As<AST::CodeBlock>();
+  auto *true_branch = if_->true_branch->As<AST::CodeBlock>(); 
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->statements.size(), 1);
   ASSERT_EQ(true_branch->statements[0]->type, AST::NodeType::RETURN);
