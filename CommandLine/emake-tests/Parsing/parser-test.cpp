@@ -40,6 +40,56 @@ void assert_identifier_is(AST::Node *node, std::string_view name) {
 }
 
 TEST(ParserTest, Basics) {
+  ParserTester test{"(x ? y : z ? a : (z[5](6)));"};
+
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(node->type, AST::NodeType::PARENTHETICAL);
+
+  auto *expr = node->As<AST::Parenthetical>()->expression.get();
+  ASSERT_EQ(expr->type, AST::NodeType::TERNARY_EXPRESSION);
+
+  auto *ternary = expr->As<AST::TernaryExpression>();
+  auto *cond = ternary->condition.get();
+  auto *true_ = ternary->true_expression.get();
+  auto *false_ = ternary->false_expression.get();
+  assert_identifier_is(cond, "x");
+  assert_identifier_is(true_, "y");
+
+  ASSERT_EQ(false_->type, AST::NodeType::TERNARY_EXPRESSION);
+
+  ternary = false_->As<AST::TernaryExpression>();
+
+  cond = ternary->condition.get();
+  true_ = ternary->true_expression.get();
+  false_ = ternary->false_expression.get();
+
+  assert_identifier_is(cond, "z");
+  assert_identifier_is(true_, "a");
+
+  ASSERT_EQ(false_->type, AST::NodeType::PARENTHETICAL);
+  expr = false_->As<AST::Parenthetical>()->expression.get();
+  ASSERT_EQ(expr->type, AST::NodeType::FUNCTION_CALL);
+  auto *function = expr->As<AST::FunctionCallExpression>();
+  auto *called = function->function.get();
+  auto *args = &function->arguments;
+
+  ASSERT_EQ(called->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = called->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TokenType::TT_BEGINBRACKET);
+  assert_identifier_is(bin->left.get(), "z");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::LITERAL);
+  auto *right = bin->right->As<AST::Literal>();
+  ASSERT_EQ(std::get<std::string>(right->value.value), "5");
+
+  ASSERT_EQ(args->size(), 1);
+  auto *arg = (*args)[0].get();
+  ASSERT_EQ(arg->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(arg->As<AST::Literal>()->value.value), "6");
+}
+
+TEST(ParserTest, Basics_NoSemicolon) {
   ParserTester test{"(x ? y : z ? a : (z[5](6)))"};
 
   auto node = test->TryParseStatement();
@@ -211,16 +261,66 @@ TEST(ParserTest, Declarator_1) {
 */
 
 TEST(ParserTest, Declarator_2) {
+  ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int);"};
+  auto node = test3->TryParseStatement();
+  EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(ParserTest, Declarator_2_NoSemicolon) {
   ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
-  auto node = test3->TryParseDeclarations(true);
+  auto node = test3->TryParseStatement();
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarator_3) {
-  ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseDeclarations(true);
+  ParserTester test{"int *(*(*a)[10][12])[15];"};
+  auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decls = node->As<AST::DeclarationStatement>();
+  ASSERT_EQ(decls->declarations.size(), 1);
+
+  ASSERT_EQ(decls->declarations[0].init, nullptr);
+  auto &decl1 = decls->declarations[0].declarator->decl;
+  ASSERT_EQ(decl1.name.content, "a");
+  ASSERT_EQ(decl1.components.size(), 2);
+
+  ASSERT_EQ(decl1.components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &ptr = decl1.components[0].as<PointerNode>();
+  ASSERT_EQ(ptr.is_const, false);
+  ASSERT_EQ(ptr.is_volatile, false);
+  ASSERT_EQ(ptr.class_def, nullptr);
+
+  ASSERT_EQ(decl1.components[1].kind, DeclaratorNode::Kind::NESTED);
+  ASSERT_TRUE(decl1.components[1].as<NestedNode>().is<std::unique_ptr<Declarator>>());
+  auto *nested = decl1.components[1].as<NestedNode>().as<std::unique_ptr<Declarator>>().get();
+  ASSERT_EQ(nested->components.size(), 3);
+
+  ASSERT_EQ(nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &nested_ptr = nested->components[0].as<PointerNode>();
+  ASSERT_EQ(nested_ptr.is_const, false);
+  ASSERT_EQ(nested_ptr.is_volatile, false);
+  ASSERT_EQ(nested_ptr.class_def, nullptr);
+
+  ASSERT_EQ(nested->components[1].kind, DeclaratorNode::Kind::NESTED);
+  ASSERT_TRUE(nested->components[1].as<NestedNode>().is<std::unique_ptr<Declarator>>());
+  auto *nested_nested = nested->components[1].as<NestedNode>().as<std::unique_ptr<Declarator>>().get();
+  ASSERT_EQ(nested_nested->components.size(), 3);
+  ASSERT_EQ(nested_nested->components[0].kind, DeclaratorNode::Kind::POINTER_TO);
+  auto &nested_nested_ptr = nested_nested->components[0].as<PointerNode>();
+  ASSERT_EQ(nested_nested_ptr.is_const, false);
+  ASSERT_EQ(nested_nested_ptr.is_volatile, false);
+  ASSERT_EQ(nested_nested_ptr.class_def, nullptr);
+  ASSERT_EQ(nested_nested->components[1].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+  ASSERT_EQ(nested_nested->components[2].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+
+  ASSERT_EQ(nested->components[2].kind, DeclaratorNode::Kind::ARRAY_BOUND);
+}
+
+TEST(ParserTest, Declarator_3_NoSemicolon) {
+  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
@@ -261,10 +361,33 @@ TEST(ParserTest, Declarator_3) {
 }
 
 TEST(ParserTest, Declarator_4) {
-  ParserTester test{"int *(*(*a)[10][12])[15]"};
-  auto node = test->TryParseDeclarations(true);
+  ParserTester test{"int *(*(*a)[10][12])[15];"};
+  auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decls = node->As<AST::DeclarationStatement>();
+  ASSERT_EQ(decls->declarations.size(), 1);
+
+  ASSERT_EQ(decls->declarations[0].init, nullptr);
+  auto &decl1 = decls->declarations[0].declarator->decl;
+  ASSERT_EQ(decl1.name.content, "a");
+  ASSERT_EQ(decl1.components.size(), 2);
+
+  jdi::ref_stack stack;
+  decl1.to_jdi_refstack(stack);
+  auto first = stack.begin();
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
+  ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+}
+
+TEST(ParserTest, Declarator_4_NoSemicolon) {
+  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decls->declarations.size(), 1);
 
   ASSERT_EQ(decls->declarations[0].init, nullptr);
@@ -285,16 +408,48 @@ TEST(ParserTest, Declarator_4) {
 
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
-  auto node = test->TryParseDeclarations(true);
+  auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(ParserTest, Declaration_NoSemicolon) {
+  ParserTester test{"const unsigned *(*x)[10] = nullptr"};
+  auto node = test->TryParseStatement();
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
 
-  auto node = test->TryParseDeclarations(true);
+  auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
+  auto *decls = reinterpret_cast<AST::DeclarationStatement *>(node.get());
+  EXPECT_EQ(decls->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+
+  EXPECT_EQ(decls->declarations.size(), 3);
+  EXPECT_NE(decls->declarations[0].init, nullptr);
+  EXPECT_EQ(decls->declarations[0].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[0].declarator->decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
+
+  EXPECT_EQ(decls->declarations[1].init, nullptr);
+  EXPECT_EQ(decls->declarations[1].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[1].declarator->decl.components.size(), 0);
+
+  EXPECT_NE(decls->declarations[2].init, nullptr);
+  EXPECT_EQ(decls->declarations[2].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
+  EXPECT_EQ(decls->declarations[2].declarator->decl.components.size(), 1);
+}
+
+TEST(ParserTest, Declarations_NoSemicolon) {
+  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y"};
+
+  auto node = test->TryParseStatement();
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
@@ -884,18 +1039,33 @@ TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::BRACE_INIT);
 }
 
-TEST(ParserTest, CodeBlock) {
+TEST(ParserTest, CodeBlock_1) {
   ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
   auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-  auto *block = dynamic_cast<AST::CodeBlock *>(node.get());
+  auto *block = node->As<AST::CodeBlock>();
   ASSERT_EQ(block->statements.size(), 4);
   ASSERT_EQ(block->statements[0]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[2]->type, AST::NodeType::DECLARATION);
   ASSERT_EQ(block->statements[3]->type, AST::NodeType::FUNCTION_CALL);
+}
+
+TEST(ParserTest, CodeBlock_2) {
+  ParserTester test{"{{{}}}"};
+  auto node = test->ParseCodeBlock();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BLOCK);
+
+  auto *inner_block = block->statements[0]->As<AST::CodeBlock>();
+  ASSERT_EQ(inner_block->statements.size(), 1);
+  ASSERT_EQ(inner_block->statements[0]->type, AST::NodeType::BLOCK);
 }
 
 TEST(ParserTest, IfStatement_1) {
@@ -1219,13 +1389,12 @@ TEST(ParserTest, TemporaryInitialization_1) {
 
 TEST(ParserTest, TemporaryInitialization_2) {
   ParserTester test{"int(*(*a)[10]) = nullptr;"};
-  auto node = test->TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, true,
-                                                              AST::DeclarationStatement::StorageClass::TEMPORARY);
+  auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decl = dynamic_cast<AST::DeclarationStatement *>(node.get());
+  auto *decl = node->As<AST::DeclarationStatement>();
   ASSERT_EQ(decl->declarations.size(), 1);
   ASSERT_EQ(decl->def, jdi::builtin_type__int);
   auto *decl1 = &decl->declarations[0];

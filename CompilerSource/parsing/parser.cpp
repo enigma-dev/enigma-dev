@@ -1950,7 +1950,29 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
   }
 }
 
+std::unique_ptr<AST::Node> Maybe_Declaration() {
+  if (next_is_decl_specifier() || next_maybe_functional_cast()) {
+    if (token.type == TT_SCOPEACCESS) {
+      token = lexer->ReadToken();
+      if (token.type == TT_S_NEW) {
+        return TryParseNewExpression(true);
+      } else if (token.type == TT_S_DELETE) {
+        return TryParseDeleteExpression(true);
+      }
+    }
+    return TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, true,
+                                                     AST::DeclarationStatement::StorageClass::TEMPORARY);
+  }
+  return nullptr;
+}
+
+// since we can place declarations in the same places we can place statements,
+// so this function will check first if this is a declaration, to be able to handle both
 std::unique_ptr<AST::Node> TryParseStatement() {
+  auto decl_node = Maybe_Declaration();
+  if (decl_node != nullptr) {
+    return decl_node;
+  }
   switch (token.type) {
     case TTM_WHITESPACE:
     case TTM_CONCAT:
@@ -2098,29 +2120,25 @@ std::unique_ptr<AST::Node> TryParseStatement() {
 }
 
 // Parse control flow statement body
-std::unique_ptr<AST::Node> ParseCFStmtBody() {
-  if (token.type == TT_BEGINBRACE) {
-    return ParseCodeBlock();
-  } else {
-    return TryParseStatement(); // can be a declaration (yes it would be useless but valid)
-  }
-}
+std::unique_ptr<AST::Node> ParseCFStmtBody() { return ParseStatementOrBlock(); }
 
 bool next_is_decl_specifier() {
   return is_decl_specifier(token);
+}
+
+std::unique_ptr<AST::Node> ParseStatementOrBlock() {
+  if (token.type == TT_BEGINBRACE) {
+    return ParseCodeBlock();
+  } else {
+    return TryParseStatement();
+  }
 }
 
 std::unique_ptr<AST::CodeBlock> ParseCode() {
   std::vector<std::unique_ptr<AST::Node>> statements{};
 
   while (token.type != TT_ENDBRACE) {
-    if (token.type == TT_BEGINBRACE) {
-      statements.emplace_back(ParseCodeBlock());
-    } else if (next_is_decl_specifier()) {
-      statements.emplace_back(TryParseDeclarations(true));
-    } else {
-      statements.emplace_back(TryParseStatement());
-    }
+    statements.emplace_back(ParseStatementOrBlock());
   }
 
   return std::make_unique<AST::CodeBlock>(std::move(statements));
