@@ -59,3 +59,19 @@ bool AST::Visitor::VisitDeleteExpression(DeleteExpression &node) {
     VisitParenthetical(*node.expression->As<Parenthetical>());
   }
 }
+
+bool AST::Visitor::VisitBreakStatement(BreakStatement &node) {
+  print("break");
+  if(node.count){
+    print(" ");
+    print(std::get<std::string>(node.count->As<Literal>()->value.value));
+  }
+}
+
+bool AST::Visitor::VisitContinueStatement(ContinueStatement &node){
+  print("continue");
+  if(node.count){
+    print(" ");
+    print(std::get<std::string>(node.count->As<Literal>()->value.value));
+  }
+}

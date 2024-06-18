@@ -515,8 +515,8 @@ class AST {
     virtual bool VisitDefaultStatement(DefaultStatement &node) { return DefaultVisit(node); }
     virtual bool VisitSwitchStatement(SwitchStatement &node) { return DefaultVisit(node); }
     virtual bool VisitReturnStatement(ReturnStatement &node) { return DefaultVisit(node); }
-    virtual bool VisitBreakStatement(BreakStatement &node) { return DefaultVisit(node); }
-    virtual bool VisitContinueStatement(ContinueStatement &node) { return DefaultVisit(node); }
+    virtual bool VisitBreakStatement(BreakStatement &node);
+    virtual bool VisitContinueStatement(ContinueStatement &node);
     virtual bool VisitWithStatement(WithStatement &node) { return DefaultVisit(node); }
     virtual bool VisitInitializer(Initializer &node) { return DefaultVisit(node); }
     virtual bool VisitNewExpression(NewExpression &node) { return DefaultVisit(node); }
