@@ -174,6 +174,7 @@ struct Token:
 };
 
 std::string ToString(TokenType token);
+std::string ToSymbol(TokenType token);
 std::ostream &operator<<(std::ostream &os, TokenType tt);
 std::ostream &operator<<(std::ostream &os, const Token &t);
 
