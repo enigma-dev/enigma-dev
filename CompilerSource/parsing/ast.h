@@ -481,20 +481,31 @@ class AST {
   };
 
   class Visitor {
+    std::ofstream of;
+
    public:
-    virtual bool DefaultVisit(Node &node) { (void) node; return true; }
+    Visitor() {
+      if (!of.is_open()) of.open("output.txt");
+    }
+
+    void print(std::string code) { of << code; }
+
+    virtual bool DefaultVisit(Node &node) {
+      (void)node;
+      return true;
+    }
     virtual bool VisitCodeBlock(CodeBlock &node) { return DefaultVisit(node); }
     virtual bool VisitBinaryExpression(BinaryExpression &node) { return DefaultVisit(node); }
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node) { return DefaultVisit(node); }
-    virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node) { return DefaultVisit(node); }
-    virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
+    virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
     virtual bool VisitTernaryExpression(TernaryExpression &node) { return DefaultVisit(node); }
     virtual bool VisitSizeofExpression(SizeofExpression &node) { return DefaultVisit(node); }
     virtual bool VisitAlignofExpression(AlignofExpression &node) { return DefaultVisit(node); }
     virtual bool VisitCastExpression(CastExpression &node) { return DefaultVisit(node); }
-    virtual bool VisitParenthetical(Parenthetical &node) { return DefaultVisit(node); }
+    virtual bool VisitParenthetical(Parenthetical &node);
     virtual bool VisitArray(Array &node) { return DefaultVisit(node); }
-    virtual bool VisitIdentifierAccess(IdentifierAccess &node) { return DefaultVisit(node); }
+    virtual bool VisitIdentifierAccess(IdentifierAccess &node);
     virtual bool VisitLiteral(Literal &node) { return DefaultVisit(node); }
     virtual bool VisitIfStatement(IfStatement &node) { return DefaultVisit(node); }
     virtual bool VisitForLoop(ForLoop &node) { return DefaultVisit(node); }
@@ -509,9 +520,10 @@ class AST {
     virtual bool VisitWithStatement(WithStatement &node) { return DefaultVisit(node); }
     virtual bool VisitInitializer(Initializer &node) { return DefaultVisit(node); }
     virtual bool VisitNewExpression(NewExpression &node) { return DefaultVisit(node); }
-    virtual bool VisitDeleteExpression(DeleteExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitDeleteExpression(DeleteExpression &node);
     virtual bool VisitDeclarationStatement(DeclarationStatement &node) { return DefaultVisit(node); }
-    virtual ~Visitor() {}
+
+    virtual ~Visitor() { of.close(); }
   };
 
   // Used to adapt to current single-error syntax checking interface.
