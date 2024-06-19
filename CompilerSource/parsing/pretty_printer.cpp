@@ -139,3 +139,35 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     print("]");
   }
 }
+
+bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.function->As<IdentifierAccess>());
+  } else if (node.function->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.function->As<BinaryExpression>());
+  }
+
+  print("(");
+
+  for (auto &arg : node.arguments) {
+    if (arg->type == AST::NodeType::IDENTIFIER) {
+      VisitIdentifierAccess(*arg->As<IdentifierAccess>());
+    } else if (arg->type == AST::NodeType::LITERAL) {
+      VisitLiteral(*arg->As<Literal>());
+    } else if (arg->type == AST::NodeType::PARENTHETICAL) {
+      VisitParenthetical(*arg->As<Parenthetical>());
+    } else if (arg->type == AST::NodeType::BINARY_EXPRESSION) {
+      VisitBinaryExpression(*arg->As<BinaryExpression>());
+    } else if (arg->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+      VisitUnaryPrefixExpression(*arg->As<UnaryPrefixExpression>());
+    } else if (arg->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+      VisitUnaryPostfixExpression(*arg->As<UnaryPostfixExpression>());
+    }
+
+    if (&arg != &node.arguments.back()) {
+      print(", ");
+    }
+  }
+
+  print(")");
+}
