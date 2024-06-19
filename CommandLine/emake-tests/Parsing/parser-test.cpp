@@ -1384,7 +1384,7 @@ TEST(ParserTest, TemporaryInitialization_1) {
   //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(left->right.get())->value.value), "5");
 
   ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
-  //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "6");
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "6");
 }
 
 TEST(ParserTest, TemporaryInitialization_2) {

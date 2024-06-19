@@ -495,7 +495,7 @@ class AST {
       return true;
     }
     virtual bool VisitCodeBlock(CodeBlock &node) { return DefaultVisit(node); }
-    virtual bool VisitBinaryExpression(BinaryExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitBinaryExpression(BinaryExpression &node);
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node) { return DefaultVisit(node); }
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
