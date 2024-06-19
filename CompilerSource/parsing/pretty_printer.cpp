@@ -35,6 +35,10 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
     VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
   } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
     VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
+  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
+  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.expression->As<TernaryExpression>());
   }
 
   print(")");
@@ -49,6 +53,14 @@ bool AST::Visitor::VisitUnaryPostfixExpression(UnaryPostfixExpression &node) {
     VisitLiteral(*node.operand->As<Literal>());
   } else if (node.operand->type == AST::NodeType::BINARY_EXPRESSION) {
     VisitBinaryExpression(*node.operand->As<BinaryExpression>());
+  } else if (node.operand->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.operand->As<UnaryPrefixExpression>());
+  } else if (node.operand->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.operand->As<UnaryPostfixExpression>());
+  } else if (node.operand->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.operand->As<FunctionCallExpression>());
+  } else if (node.operand->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.operand->As<TernaryExpression>());
   }
 
   print(ToSymbol(node.operation));
@@ -65,6 +77,14 @@ bool AST::Visitor::VisitUnaryPrefixExpression(UnaryPrefixExpression &node) {
     VisitLiteral(*node.operand->As<Literal>());
   } else if (node.operand->type == AST::NodeType::BINARY_EXPRESSION) {
     VisitBinaryExpression(*node.operand->As<BinaryExpression>());
+  } else if (node.operand->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.operand->As<UnaryPrefixExpression>());
+  } else if (node.operand->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.operand->As<UnaryPostfixExpression>());
+  } else if (node.operand->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.operand->As<FunctionCallExpression>());
+  } else if (node.operand->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.operand->As<TernaryExpression>());
   }
 }
 
@@ -115,6 +135,10 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitUnaryPrefixExpression(*node.left->As<UnaryPrefixExpression>());
   } else if (node.left->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
     VisitUnaryPostfixExpression(*node.left->As<UnaryPostfixExpression>());
+  } else if (node.left->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.left->As<FunctionCallExpression>());
+  } else if (node.left->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.left->As<TernaryExpression>());
   }
 
   print(" ");
@@ -133,6 +157,10 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitUnaryPrefixExpression(*node.right->As<UnaryPrefixExpression>());
   } else if (node.right->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
     VisitUnaryPostfixExpression(*node.right->As<UnaryPostfixExpression>());
+  } else if (node.right->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.right->As<FunctionCallExpression>());
+  } else if (node.right->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.right->As<TernaryExpression>());
   }
 
   if (node.operation == TT_BEGINBRACKET) {
@@ -170,4 +198,68 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
   }
 
   print(")");
+}
+
+bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
+  if (node.condition->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.condition->As<IdentifierAccess>());
+  } else if (node.condition->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.condition->As<Literal>());
+  } else if (node.condition->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.condition->As<Parenthetical>());
+  } else if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.condition->As<BinaryExpression>());
+  } else if (node.condition->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.condition->As<UnaryPrefixExpression>());
+  } else if (node.condition->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.condition->As<UnaryPostfixExpression>());
+  } else if (node.condition->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.condition->As<FunctionCallExpression>());
+  }
+
+  print(" ? ");
+
+  if (node.true_expression->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.true_expression->As<IdentifierAccess>());
+  } else if (node.true_expression->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.true_expression->As<Literal>());
+  } else if (node.true_expression->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.true_expression->As<Parenthetical>());
+  } else if (node.true_expression->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.true_expression->As<BinaryExpression>());
+  } else if (node.true_expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.true_expression->As<UnaryPrefixExpression>());
+  } else if (node.true_expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.true_expression->As<UnaryPostfixExpression>());
+  } else if (node.true_expression->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.true_expression->As<FunctionCallExpression>());
+  } else if (node.true_expression->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.true_expression->As<TernaryExpression>());
+  } else if (node.true_expression->type == AST::NodeType::DELETE) {
+    VisitDeleteExpression(*node.true_expression->As<DeleteExpression>());
+  }
+  // else new expression
+
+  print(" : ");
+
+  if (node.false_expression->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.false_expression->As<IdentifierAccess>());
+  } else if (node.false_expression->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.false_expression->As<Literal>());
+  } else if (node.false_expression->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.false_expression->As<Parenthetical>());
+  } else if (node.false_expression->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.false_expression->As<BinaryExpression>());
+  } else if (node.false_expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.false_expression->As<UnaryPrefixExpression>());
+  } else if (node.false_expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.false_expression->As<UnaryPostfixExpression>());
+  } else if (node.false_expression->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.false_expression->As<FunctionCallExpression>());
+  } else if (node.false_expression->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.false_expression->As<TernaryExpression>());
+  } else if (node.false_expression->type == AST::NodeType::DELETE) {
+    VisitDeleteExpression(*node.false_expression->As<DeleteExpression>());
+  }
+  // else new expression
 }

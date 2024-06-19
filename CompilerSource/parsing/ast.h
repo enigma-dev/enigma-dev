@@ -499,7 +499,7 @@ class AST {
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node);
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
-    virtual bool VisitTernaryExpression(TernaryExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitTernaryExpression(TernaryExpression &node);
     virtual bool VisitSizeofExpression(SizeofExpression &node) { return DefaultVisit(node); }
     virtual bool VisitAlignofExpression(AlignofExpression &node) { return DefaultVisit(node); }
     virtual bool VisitCastExpression(CastExpression &node) { return DefaultVisit(node); }
