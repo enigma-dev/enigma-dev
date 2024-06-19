@@ -263,3 +263,25 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
   }
   // else new expression
 }
+
+bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
+  print("return ");
+
+  if (node.expression->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
+  } else if (node.expression->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.expression->As<Literal>());
+  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.expression->As<Parenthetical>());
+  } else if (node.expression->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.expression->As<BinaryExpression>());
+  } else if (node.expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
+  } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
+  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
+  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.expression->As<TernaryExpression>());
+  }
+}
