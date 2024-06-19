@@ -506,7 +506,7 @@ class AST {
     virtual bool VisitParenthetical(Parenthetical &node);
     virtual bool VisitArray(Array &node) { return DefaultVisit(node); }
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
-    virtual bool VisitLiteral(Literal &node) { return DefaultVisit(node); }
+    virtual bool VisitLiteral(Literal &node);
     virtual bool VisitIfStatement(IfStatement &node) { return DefaultVisit(node); }
     virtual bool VisitForLoop(ForLoop &node) { return DefaultVisit(node); }
     virtual bool VisitWhileLoop(WhileLoop &node) { return DefaultVisit(node); }

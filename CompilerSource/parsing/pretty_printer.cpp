@@ -20,6 +20,8 @@ using namespace enigma::parsing;
 
 bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) { print(std::string(node.name.content)); }
 
+bool AST::Visitor::VisitLiteral(Literal &node) { print(std::get<std::string>(node.value.value)); }
+
 bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
   print("(");
   // assuming the idenetifier is the expression
@@ -62,16 +64,16 @@ bool AST::Visitor::VisitDeleteExpression(DeleteExpression &node) {
 
 bool AST::Visitor::VisitBreakStatement(BreakStatement &node) {
   print("break");
-  if(node.count){
+  if (node.count) {
     print(" ");
-    print(std::get<std::string>(node.count->As<Literal>()->value.value));
+    VisitLiteral(*node.count->As<Literal>());
   }
 }
 
-bool AST::Visitor::VisitContinueStatement(ContinueStatement &node){
+bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
   print("continue");
-  if(node.count){
+  if (node.count) {
     print(" ");
-    print(std::get<std::string>(node.count->As<Literal>()->value.value));
+    VisitLiteral(*node.count->As<Literal>());
   }
 }
