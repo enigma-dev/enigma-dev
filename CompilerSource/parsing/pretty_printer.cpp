@@ -43,6 +43,8 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
     VisitTernaryExpression(*node.expression->As<TernaryExpression>());
   } else if (node.expression->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.expression->As<SizeofExpression>());
+  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.expression->As<AlignofExpression>());
   }
 
   print(")");
@@ -145,6 +147,8 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitTernaryExpression(*node.left->As<TernaryExpression>());
   } else if (node.left->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.left->As<SizeofExpression>());
+  } else if (node.left->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.left->As<AlignofExpression>());
   }
 
   print(" ");
@@ -169,6 +173,8 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitTernaryExpression(*node.right->As<TernaryExpression>());
   } else if (node.right->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.right->As<SizeofExpression>());
+  } else if (node.right->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.right->As<AlignofExpression>());
   }
 
   if (node.operation == TT_BEGINBRACKET) {
@@ -202,6 +208,8 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
       VisitFunctionCallExpression(*arg->As<FunctionCallExpression>());
     } else if (arg->type == AST::NodeType::SIZEOF) {
       VisitSizeofExpression(*arg->As<SizeofExpression>());
+    } else if (arg->type == AST::NodeType::ALIGNOF) {
+      VisitAlignofExpression(*arg->As<AlignofExpression>());
     }
 
     if (&arg != &node.arguments.back()) {
@@ -229,6 +237,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitFunctionCallExpression(*node.condition->As<FunctionCallExpression>());
   } else if (node.condition->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.condition->As<SizeofExpression>());
+  } else if (node.condition->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.condition->As<AlignofExpression>());
   }
 
   print(" ? ");
@@ -253,6 +263,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitDeleteExpression(*node.true_expression->As<DeleteExpression>());
   } else if (node.true_expression->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.true_expression->As<SizeofExpression>());
+  } else if (node.true_expression->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.true_expression->As<AlignofExpression>());
   }
   // else new expression
 
@@ -278,6 +290,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitDeleteExpression(*node.false_expression->As<DeleteExpression>());
   } else if (node.false_expression->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.false_expression->As<SizeofExpression>());
+  } else if (node.false_expression->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.false_expression->As<AlignofExpression>());
   }
   // else new expression
 }
@@ -303,6 +317,8 @@ bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
     VisitTernaryExpression(*node.expression->As<TernaryExpression>());
   } else if (node.expression->type == AST::NodeType::SIZEOF) {
     VisitSizeofExpression(*node.expression->As<SizeofExpression>());
+  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.expression->As<AlignofExpression>());
   }
 }
 
@@ -398,4 +414,12 @@ bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
 
     print(")");
   }
+}
+
+bool AST::Visitor::VisitAlignofExpression(AlignofExpression &node) {
+  print("alignof(");
+
+  VisitFullType(node.ft);
+
+  print(")");
 }

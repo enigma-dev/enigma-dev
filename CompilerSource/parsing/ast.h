@@ -502,7 +502,7 @@ class AST {
     virtual bool VisitTernaryExpression(TernaryExpression &node);
     virtual bool VisitFullType(FullType &node);
     virtual bool VisitSizeofExpression(SizeofExpression &node);
-    virtual bool VisitAlignofExpression(AlignofExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitAlignofExpression(AlignofExpression &node);
     virtual bool VisitCastExpression(CastExpression &node) { return DefaultVisit(node); }
     virtual bool VisitParenthetical(Parenthetical &node);
     virtual bool VisitArray(Array &node) { return DefaultVisit(node); }
