@@ -485,7 +485,7 @@ class AST {
 
    public:
     Visitor() {
-      if (!of.is_open()) of.open("output.txt");
+      if (!of.is_open()) of.open("./CompilerSource/parsing/output.txt");
     }
 
     void print(std::string code) { of << code; }
@@ -500,7 +500,8 @@ class AST {
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
     virtual bool VisitTernaryExpression(TernaryExpression &node);
-    virtual bool VisitSizeofExpression(SizeofExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitFullType(FullType &node);
+    virtual bool VisitSizeofExpression(SizeofExpression &node);
     virtual bool VisitAlignofExpression(AlignofExpression &node) { return DefaultVisit(node); }
     virtual bool VisitCastExpression(CastExpression &node) { return DefaultVisit(node); }
     virtual bool VisitParenthetical(Parenthetical &node);

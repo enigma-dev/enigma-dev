@@ -15,7 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <JDI/src/System/builtins.h>
 #include "ast.h"
+
 using namespace enigma::parsing;
 
 bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) { print(std::string(node.name.content)); }
@@ -39,6 +41,8 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
     VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
   } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
     VisitTernaryExpression(*node.expression->As<TernaryExpression>());
+  } else if (node.expression->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.expression->As<SizeofExpression>());
   }
 
   print(")");
@@ -139,6 +143,8 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitFunctionCallExpression(*node.left->As<FunctionCallExpression>());
   } else if (node.left->type == AST::NodeType::TERNARY_EXPRESSION) {
     VisitTernaryExpression(*node.left->As<TernaryExpression>());
+  } else if (node.left->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.left->As<SizeofExpression>());
   }
 
   print(" ");
@@ -161,6 +167,8 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitFunctionCallExpression(*node.right->As<FunctionCallExpression>());
   } else if (node.right->type == AST::NodeType::TERNARY_EXPRESSION) {
     VisitTernaryExpression(*node.right->As<TernaryExpression>());
+  } else if (node.right->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.right->As<SizeofExpression>());
   }
 
   if (node.operation == TT_BEGINBRACKET) {
@@ -190,6 +198,10 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
       VisitUnaryPrefixExpression(*arg->As<UnaryPrefixExpression>());
     } else if (arg->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
       VisitUnaryPostfixExpression(*arg->As<UnaryPostfixExpression>());
+    } else if (arg->type == AST::NodeType::FUNCTION_CALL) {
+      VisitFunctionCallExpression(*arg->As<FunctionCallExpression>());
+    } else if (arg->type == AST::NodeType::SIZEOF) {
+      VisitSizeofExpression(*arg->As<SizeofExpression>());
     }
 
     if (&arg != &node.arguments.back()) {
@@ -215,6 +227,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitUnaryPostfixExpression(*node.condition->As<UnaryPostfixExpression>());
   } else if (node.condition->type == AST::NodeType::FUNCTION_CALL) {
     VisitFunctionCallExpression(*node.condition->As<FunctionCallExpression>());
+  } else if (node.condition->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.condition->As<SizeofExpression>());
   }
 
   print(" ? ");
@@ -237,6 +251,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitTernaryExpression(*node.true_expression->As<TernaryExpression>());
   } else if (node.true_expression->type == AST::NodeType::DELETE) {
     VisitDeleteExpression(*node.true_expression->As<DeleteExpression>());
+  } else if (node.true_expression->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.true_expression->As<SizeofExpression>());
   }
   // else new expression
 
@@ -260,6 +276,8 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
     VisitTernaryExpression(*node.false_expression->As<TernaryExpression>());
   } else if (node.false_expression->type == AST::NodeType::DELETE) {
     VisitDeleteExpression(*node.false_expression->As<DeleteExpression>());
+  } else if (node.false_expression->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.false_expression->As<SizeofExpression>());
   }
   // else new expression
 }
@@ -283,5 +301,101 @@ bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
     VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
   } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
     VisitTernaryExpression(*node.expression->As<TernaryExpression>());
+  } else if (node.expression->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.expression->As<SizeofExpression>());
+  }
+}
+
+bool AST::Visitor::VisitFullType(FullType &ft) {
+  std::vector<std::size_t> flags_values = {
+      jdi::builtin_flag__const->value,    jdi::builtin_flag__static->value,       jdi::builtin_flag__volatile->value,
+      jdi::builtin_flag__mutable->value,  jdi::builtin_flag__register->value,     jdi::builtin_flag__inline->value,
+      jdi::builtin_flag__Complex->value,  jdi::builtin_flag__unsigned->value,     jdi::builtin_flag__signed->value,
+      jdi::builtin_flag__short->value,    jdi::builtin_flag__long->value,         jdi::builtin_flag__long_long->value,
+      jdi::builtin_flag__restrict->value, jdi::builtin_typeflag__override->value, jdi::builtin_typeflag__final->value};
+
+  std::vector<std::size_t> flags_masks = {
+      jdi::builtin_flag__const->mask,    jdi::builtin_flag__static->mask,       jdi::builtin_flag__volatile->mask,
+      jdi::builtin_flag__mutable->mask,  jdi::builtin_flag__register->mask,     jdi::builtin_flag__inline->mask,
+      jdi::builtin_flag__Complex->mask,  jdi::builtin_flag__unsigned->mask,     jdi::builtin_flag__signed->mask,
+      jdi::builtin_flag__short->mask,    jdi::builtin_flag__long->mask,         jdi::builtin_flag__long_long->mask,
+      jdi::builtin_flag__restrict->mask, jdi::builtin_typeflag__override->mask, jdi::builtin_typeflag__final->mask};
+
+  std::vector<std::string> flags_names = {"const",  "static",    "volatile", "mutable",  "register",
+                                          "inline", "complex",   "unsigned", "signed",   "short",
+                                          "long",   "long long", "restrict", "override", "final"};
+
+  for (std::size_t i = 0; i < flags_values.size(); i++) {
+    if ((ft.flags & flags_masks[i]) == flags_values[i]) {
+      print(flags_names[i]);
+      print(" ");
+    }
+  }
+
+  print(ft.def->name);
+  print(" ");
+
+  jdi::ref_stack stack;
+  ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+
+  std::string ref;
+  bool flag = false;
+
+  for (auto it = first; it != stack.end(); it++) {
+    if (it->type == jdi::ref_stack::RT_POINTERTO) {
+      flag = true;
+      ref = '*' + ref;
+    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
+      flag = true;
+      ref = '&' + ref;
+    } else {
+      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
+        if (flag) {
+          ref = '(' + ref + ')';
+        }
+        ref += '[' + std::to_string(it->arraysize()) + ']';
+      }
+
+      // TODO: RT_MEMBER_POINTER
+
+      flag = false;
+    }
+
+    if (it == first) {
+      std::string name = std::string(ft.decl.name.content);
+      if (name != "") {
+        ref += name;
+      }
+    }
+  }
+
+  print(ref);
+}
+
+bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
+  print("sizeof");
+
+  if (node.kind == AST::SizeofExpression::Kind::EXPR) {
+    print(" ");
+
+    auto &arg = std::get<AST::PNode>(node.argument);
+    if (arg->type == AST::NodeType::LITERAL) {
+      VisitLiteral(*arg->As<AST::Literal>());
+    } else if (arg->type == AST::NodeType::IDENTIFIER) {
+      VisitIdentifierAccess(*arg->As<AST::IdentifierAccess>());
+    }
+  } else if (node.kind == AST::SizeofExpression::Kind::VARIADIC) {
+    print("...(");
+
+    std::string arg = std::get<std::string>(node.argument);
+    print(arg + ")");
+  } else {
+    print("(");
+
+    FullType &ft = std::get<FullType>(node.argument);
+    VisitFullType(ft);
+
+    print(")");
   }
 }

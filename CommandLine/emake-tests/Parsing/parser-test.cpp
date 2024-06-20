@@ -140,7 +140,7 @@ TEST(ParserTest, Basics_NoSemicolon) {
 }
 
 TEST(ParserTest, SizeofExpression) {
-  ParserTester test{"sizeof 5"};
+  ParserTester test{"sizeof 5"};  // we need to support sizeof (5)
   auto expr = test->TryParseStatement();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
@@ -371,6 +371,8 @@ TEST(ParserTest, Declarator_4) {
   auto &decl1 = decls->declarations[0].declarator->decl;
   ASSERT_EQ(decl1.name.content, "a");
   ASSERT_EQ(decl1.components.size(), 2);
+  // ASSERT_FALSE((decls->declarations[0].declarator->flags & jdi::builtin_flag__signed->mask) ==
+  //              jdi::builtin_flag__signed->value);  // this gives true
 
   jdi::ref_stack stack;
   decl1.to_jdi_refstack(stack);
@@ -612,6 +614,7 @@ TEST(ParserTest, NewExpression_3) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
+  ASSERT_EQ(new_->ft.decl.name.content, "");
 
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
 }
