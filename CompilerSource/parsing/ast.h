@@ -197,7 +197,7 @@ class AST {
     enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
     FullType ft;
     PNode expr;
-    TokenType functional_cast_type;
+    TokenType functional_cast_type; // ???
     static const std::vector<std::string> KindNames;
 
     BASIC_NODE_ROUTINES(CastExpression);
@@ -503,7 +503,7 @@ class AST {
     virtual bool VisitFullType(FullType &node);
     virtual bool VisitSizeofExpression(SizeofExpression &node);
     virtual bool VisitAlignofExpression(AlignofExpression &node);
-    virtual bool VisitCastExpression(CastExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitCastExpression(CastExpression &node);
     virtual bool VisitParenthetical(Parenthetical &node);
     virtual bool VisitArray(Array &node) { return DefaultVisit(node); }
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
