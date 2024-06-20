@@ -1855,6 +1855,277 @@ TEST(ParserTest, ForLoop_18) {
                   IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
+TEST(ParserTest, Array_1) {
+  ParserTester test{"a = [1,2,3]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+  auto bin2 = array->elements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin2->operation, TT_COMMA);
+  ASSERT_EQ(bin2->left->type, AST::NodeType::BINARY_EXPRESSION);
+  ASSERT_EQ(bin2->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin2->right->As<AST::Literal>()->value.value), "3");
+  auto bin3 = bin2->left->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin3->operation, TT_COMMA);
+  ASSERT_EQ(bin3->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin3->left->As<AST::Literal>()->value.value), "1");
+  ASSERT_EQ(bin3->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin3->right->As<AST::Literal>()->value.value), "2");
+}
+
+TEST(ParserTest, Array_2) {
+  ParserTester test{"a = [1]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(array->elements[0]->As<AST::Literal>()->value.value), "1");
+}
+
+TEST(ParserTest, Array_3) {
+  ParserTester test{"a = [2+3]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *bin2 = array->elements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin2->operation, TT_PLUS);
+  ASSERT_EQ(bin2->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin2->left->As<AST::Literal>()->value.value), "2");
+  ASSERT_EQ(bin2->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin2->right->As<AST::Literal>()->value.value), "3");
+}
+
+TEST(ParserTest, Array_4) {
+  ParserTester test{"a = [x]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::IDENTIFIER);
+  auto *right = array->elements[0]->As<AST::IdentifierAccess>();
+  ASSERT_EQ(right->name.content, "x");
+}
+
+TEST(ParserTest, Array_5) {
+  ParserTester test{"a = [2+3, 4*6, 5/2]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin2 = array->elements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin2->operation, TT_COMMA);
+  ASSERT_EQ(bin2->right->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin3 = bin2->right->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin3->operation, TT_SLASH);
+  ASSERT_EQ(bin3->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin3->left->As<AST::Literal>()->value.value), "5");
+  ASSERT_EQ(bin3->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin3->right->As<AST::Literal>()->value.value), "2");
+  ASSERT_EQ(bin2->left->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin4 = bin2->left->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin4->operation, TT_COMMA);
+  ASSERT_EQ(bin4->left->type, AST::NodeType::BINARY_EXPRESSION);
+  ASSERT_EQ(bin4->right->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin5 = bin4->left->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin5->operation, TT_PLUS);
+  ASSERT_EQ(bin5->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin5->left->As<AST::Literal>()->value.value), "2");
+  ASSERT_EQ(bin5->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin5->right->As<AST::Literal>()->value.value), "3");
+
+  auto *bin6 = bin4->right->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin6->operation, TT_STAR);
+  ASSERT_EQ(bin6->left->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin6->left->As<AST::Literal>()->value.value), "4");
+  ASSERT_EQ(bin6->right->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(bin6->right->As<AST::Literal>()->value.value), "6");
+}
+
+TEST(ParserTest, Array_6) {
+  ParserTester test{"a = [(12)]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::PARENTHETICAL);
+  auto *paren = array->elements[0]->As<AST::Parenthetical>();
+  ASSERT_EQ(paren->expression->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(paren->expression->As<AST::Literal>()->value.value), "12");
+}
+
+TEST(ParserTest, Array_7) {
+  ParserTester test{"a = [x++]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  auto *unary = array->elements[0]->As<AST::UnaryPostfixExpression>();
+  ASSERT_EQ(unary->operation, TT_INCREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+}
+
+TEST(ParserTest, Array_8) {
+  ParserTester test{"a = [--x]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  auto *unary = array->elements[0]->As<AST::UnaryPrefixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+}
+
+TEST(ParserTest, Array_9) {
+  ParserTester test{"a = [foo(12)]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::FUNCTION_CALL);
+  auto *call = array->elements[0]->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(call->function->As<AST::IdentifierAccess>()->name.content, "foo");
+  ASSERT_EQ(call->arguments.size(), 1);
+  ASSERT_EQ(call->arguments[0]->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(call->arguments[0]->As<AST::Literal>()->value.value), "12");
+}
+
+TEST(ParserTest, Array_10) {
+  ParserTester test{"a = [sizeof 12]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::SIZEOF);
+  auto *sizeof_exp = array->elements[0]->As<AST::SizeofExpression>();
+  auto &arg = std::get<AST::PNode>(sizeof_exp->argument);
+  ASSERT_EQ(arg->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(arg->As<AST::Literal>()->value.value), "12");
+}
+
+TEST(ParserTest, Array_11) {
+  ParserTester test{"a = [reinterpret_cast<int>(i)]"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BINARY_EXPRESSION);
+  auto bin = node->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation, TT_EQUALS);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  ASSERT_EQ(bin->right->type, AST::NodeType::ARRAY);
+  auto *array = bin->right->As<AST::Array>();
+
+  ASSERT_EQ(array->elements[0]->type, AST::NodeType::CAST);
+  auto *cast_ex = array->elements[0]->As<AST::CastExpression>();
+  ASSERT_EQ(cast_ex->kind, AST::CastExpression::Kind::REINTERPRET);
+  ASSERT_EQ(cast_ex->expr->type, AST::NodeType::IDENTIFIER);
+  auto *iden = cast_ex->expr->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden->name.content, "i");
+}
+
 TEST(ParserTest, ParseCodeFunction) {
   ParserTester test{"x++; if(true) --l"};
   auto node = test->ParseCode();

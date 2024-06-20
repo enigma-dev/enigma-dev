@@ -231,6 +231,7 @@ class AST {
 
     Parenthetical(PNode expression_): expression(std::move(expression_)) {}
   };
+
   struct Array : TypedNode<NodeType::ARRAY> {
     std::vector<PNode> elements;
 
@@ -505,7 +506,7 @@ class AST {
     virtual bool VisitAlignofExpression(AlignofExpression &node);
     virtual bool VisitCastExpression(CastExpression &node);
     virtual bool VisitParenthetical(Parenthetical &node);
-    virtual bool VisitArray(Array &node) { return DefaultVisit(node); }
+    virtual bool VisitArray(Array &node);
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
     virtual bool VisitLiteral(Literal &node);
     virtual bool VisitIfStatement(IfStatement &node) { return DefaultVisit(node); }
