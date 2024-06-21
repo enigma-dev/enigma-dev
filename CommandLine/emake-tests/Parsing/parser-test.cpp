@@ -486,7 +486,8 @@ void check_placement(AST::NewExpression *new_) {
   assert_identifier_is(placement_expr, "nullptr");
 }
 
-void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::Kind kind) {
+void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::Kind kind,
+                       std::vector<std::string> attributes = {}) {
   ASSERT_NE(new_->initializer, nullptr);
   auto *init = new_->initializer.get();
   ASSERT_EQ(init->kind, AST::Initializer::Kind::BRACE_INIT);
@@ -494,8 +495,13 @@ void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::K
   auto *brace = std::get<AST::BraceOrParenInitNode>(init->initializer).get();
   ASSERT_EQ(brace->kind, kind);
   ASSERT_EQ(brace->values.size(), 5);
+  // will be written in a more general way in the testing phase
   for (int i = 0; i < 5; i++) {
-    ASSERT_EQ(brace->values[i].first, "");
+    if (attributes.size()) {
+      ASSERT_EQ(brace->values[i].first, attributes[i]);
+    } else {
+      ASSERT_EQ(brace->values[i].first, "");
+    }
     ASSERT_EQ(brace->values[i].second->kind, AST::Initializer::Kind::ASSIGN_EXPR);
     ASSERT_TRUE(std::holds_alternative<AST::AssignmentInitNode>(brace->values[i].second->initializer));
     auto *assign = std::get<AST::AssignmentInitNode>(brace->values[i].second->initializer).get();
@@ -640,6 +646,44 @@ TEST(ParserTest, NewExpression_3_NoSemicolon) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
 
   check_initializer(new_, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
+}
+
+TEST(ParserTest, Designated_Initializer) {
+  ParserTester test{"new (nullptr) int[]{.x=1, .y=2, .z=3, .u=4, .v=5}"};
+  auto node = test->TryParseStatement();
+
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = node->As<AST::NewExpression>();
+  ASSERT_FALSE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  check_placement(new_);
+
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 1);
+  ASSERT_EQ(new_->ft.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
+  check_initializer(new_, AST::BraceOrParenInitializer::Kind::DESIGNATED_INIT, {"x", "y", "z", "u", "v"});
+}
+
+TEST(ParserTest, Variadic_Initializer) {
+  ParserTester test{"new (nullptr) int[]{args...}"};
+  auto node = test->TryParseStatement();
+
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::NEW);
+  auto *new_ = node->As<AST::NewExpression>();
+  ASSERT_FALSE(new_->is_global);
+  ASSERT_TRUE(new_->is_array);
+
+  check_placement(new_);
+
+  EXPECT_EQ(new_->ft.def, jdi::builtin_type__int);
+  ASSERT_EQ(new_->ft.decl.components.size(), 1);
+  ASSERT_EQ(new_->ft.decl.components.begin()->kind, DeclaratorNode::Kind::ARRAY_BOUND);
+  ASSERT_TRUE(std::get<AST::BraceOrParenInitNode>(new_->initializer->initializer)->values[0].second->is_variadic);
 }
 
 TEST(ParserTest, NewExpression_4) {

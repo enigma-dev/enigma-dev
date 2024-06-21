@@ -393,6 +393,7 @@ class AST {
 
     explicit AssignmentInitializer(BraceOrParenInitNode init): kind{Kind::BRACE_INIT}, initializer{std::move(init)} {}
     explicit AssignmentInitializer(PNode expr): kind{Kind::EXPR}, initializer{std::move(expr)} {}
+    // I think there is no need for the kind in this struct
 
     template <typename T>
     static AssignmentInitNode from(T&& value) {
@@ -520,7 +521,9 @@ class AST {
     virtual bool VisitBreakStatement(BreakStatement &node);
     virtual bool VisitContinueStatement(ContinueStatement &node);
     virtual bool VisitWithStatement(WithStatement &node) { return DefaultVisit(node); }
-    virtual bool VisitInitializer(Initializer &node) { return DefaultVisit(node); }
+    virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
+    virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
+    virtual bool VisitInitializer(Initializer &node);
     virtual bool VisitNewExpression(NewExpression &node) { return DefaultVisit(node); }
     virtual bool VisitDeleteExpression(DeleteExpression &node);
     virtual bool VisitDeclarationStatement(DeclarationStatement &node) { return DefaultVisit(node); }

@@ -404,7 +404,13 @@ bool AST::Visitor::VisitFullType(FullType &ft) {
         if (flag) {
           ref = '(' + ref + ')';
         }
-        ref += '[' + std::to_string(it->arraysize()) + ']';
+
+        std::size_t arr_size = it->arraysize();
+        if (arr_size != 0) {
+          ref += '[' + std::to_string(arr_size) + ']';
+        } else {
+          ref += "[]";
+        }
       }
 
       // TODO: RT_MEMBER_POINTER
@@ -546,4 +552,83 @@ bool AST::Visitor::VisitArray(Array &node) {
   }
 
   print("]");
+}
+
+bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
+  if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
+    print("(");
+  } else {
+    print("{");
+  }
+
+  for (auto &val : node.values) {
+    if (node.kind == BraceOrParenInitializer::Kind::DESIGNATED_INIT) {
+      print(".");
+    }
+
+    if (val.first != "") {
+      print(val.first);
+      print("=");
+    }
+
+    VisitInitializer(*val.second);
+
+    if (&val != &node.values.back()) {
+      print(", ");
+    }
+  }
+
+  if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
+    print(")");
+  } else {
+    print("}");
+  }
+}
+
+bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
+  if (node.kind == AssignmentInitializer::Kind::BRACE_INIT) {
+    VisitBraceOrParenInitializer(*std::get<BraceOrParenInitNode>(node.initializer));
+  } else {
+    auto &expr = std::get<AST::PNode>(node.initializer);
+
+    if (expr->type == AST::NodeType::IDENTIFIER) {
+      VisitIdentifierAccess(*expr->As<AST::IdentifierAccess>());
+    } else if (expr->type == AST::NodeType::LITERAL) {
+      VisitLiteral(*expr->As<AST::Literal>());
+    } else if (expr->type == AST::NodeType::PARENTHETICAL) {
+      VisitParenthetical(*expr->As<AST::Parenthetical>());
+    } else if (expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+      VisitUnaryPostfixExpression(*expr->As<AST::UnaryPostfixExpression>());
+    } else if (expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+      VisitUnaryPrefixExpression(*expr->As<AST::UnaryPrefixExpression>());
+    } else if (expr->type == AST::NodeType::BINARY_EXPRESSION) {
+      VisitBinaryExpression(*expr->As<AST::BinaryExpression>());
+    } else if (expr->type == AST::NodeType::FUNCTION_CALL) {
+      VisitFunctionCallExpression(*expr->As<FunctionCallExpression>());
+    } else if (expr->type == AST::NodeType::SIZEOF) {
+      VisitSizeofExpression(*expr->As<SizeofExpression>());
+    } else if (expr->type == AST::NodeType::ALIGNOF) {
+      VisitAlignofExpression(*expr->As<AlignofExpression>());
+    } else if (expr->type == AST::NodeType::CAST) {
+      VisitCastExpression(*expr->As<CastExpression>());
+    } else if (expr->type == AST::NodeType::ARRAY) {
+      VisitArray(*expr->As<Array>());
+    }
+  }
+}
+
+bool AST::Visitor::VisitInitializer(Initializer &node) {
+  if (node.kind == Initializer::Kind::BRACE_INIT) {
+    auto &init = std::get<BraceOrParenInitNode>(node.initializer);
+    VisitBraceOrParenInitializer(*init);
+  } else if (node.kind == Initializer::Kind::ASSIGN_EXPR) {
+    auto &init = std::get<AssignmentInitNode>(node.initializer);
+    VisitAssignmentInitializer(*init);
+  } else {
+    print("after finishing visitnew");
+  }
+
+  if (node.is_variadic) {
+    print("...");
+  }
 }
