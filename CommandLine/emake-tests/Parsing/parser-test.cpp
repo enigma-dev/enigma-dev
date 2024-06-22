@@ -406,11 +406,14 @@ TEST(ParserTest, Declarator_4_NoSemicolon) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
 }
 
+bool contains_flag2(FullType &ft, jdi::typeflag *builtin) { return (ft.flags & builtin->mask) == builtin->value; }
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
+  auto decl = node->As<AST::DeclarationStatement>();
+  // EXPECT_TRUE(contains_flag2(*decl->declarations[0].declarator, jdi::builtin_flag__const));  it gives false
 }
 
 TEST(ParserTest, Declaration_NoSemicolon) {

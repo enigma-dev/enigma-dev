@@ -502,7 +502,7 @@ class AST {
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
     virtual bool VisitTernaryExpression(TernaryExpression &node);
-    virtual bool VisitFullType(FullType &node);
+    virtual bool VisitFullType(FullType &node, bool print_type = true);
     virtual bool VisitSizeofExpression(SizeofExpression &node);
     virtual bool VisitAlignofExpression(AlignofExpression &node);
     virtual bool VisitCastExpression(CastExpression &node);
@@ -526,7 +526,7 @@ class AST {
     virtual bool VisitInitializer(Initializer &node);
     virtual bool VisitNewExpression(NewExpression &node);
     virtual bool VisitDeleteExpression(DeleteExpression &node);
-    virtual bool VisitDeclarationStatement(DeclarationStatement &node) { return DefaultVisit(node); }
+    virtual bool VisitDeclarationStatement(DeclarationStatement &node);
 
     virtual ~Visitor() { of.close(); }
   };
