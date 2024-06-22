@@ -511,7 +511,7 @@ class AST {
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
     virtual bool VisitLiteral(Literal &node);
     virtual bool VisitIfStatement(IfStatement &node);
-    virtual bool VisitForLoop(ForLoop &node) { return DefaultVisit(node); }
+    virtual bool VisitForLoop(ForLoop &node);
     virtual bool VisitWhileLoop(WhileLoop &node) { return DefaultVisit(node); }
     virtual bool VisitDoLoop(DoLoop &node) { return DefaultVisit(node); }
     virtual bool VisitCaseStatement(CaseStatement &node) { return DefaultVisit(node); }
