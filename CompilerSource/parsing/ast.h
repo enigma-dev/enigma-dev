@@ -524,7 +524,7 @@ class AST {
     virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
     virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
     virtual bool VisitInitializer(Initializer &node);
-    virtual bool VisitNewExpression(NewExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitNewExpression(NewExpression &node);
     virtual bool VisitDeleteExpression(DeleteExpression &node);
     virtual bool VisitDeclarationStatement(DeclarationStatement &node) { return DefaultVisit(node); }
 

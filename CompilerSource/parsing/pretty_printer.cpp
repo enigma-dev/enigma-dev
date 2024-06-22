@@ -618,17 +618,36 @@ bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
 }
 
 bool AST::Visitor::VisitInitializer(Initializer &node) {
-  if (node.kind == Initializer::Kind::BRACE_INIT) {
+  if (node.kind == Initializer::Kind::BRACE_INIT || node.kind == Initializer::Kind::PLACEMENT_NEW) {
     auto &init = std::get<BraceOrParenInitNode>(node.initializer);
     VisitBraceOrParenInitializer(*init);
   } else if (node.kind == Initializer::Kind::ASSIGN_EXPR) {
     auto &init = std::get<AssignmentInitNode>(node.initializer);
     VisitAssignmentInitializer(*init);
-  } else {
-    print("after finishing visitnew");
   }
 
   if (node.is_variadic) {
     print("...");
+  }
+}
+
+bool AST::Visitor::VisitNewExpression(NewExpression &node) {
+  if (node.is_global) {
+    print("::");
+  }
+
+  print("new ");
+
+  if (node.placement) {
+    VisitInitializer(*node.placement);
+    print(" ");
+  }
+
+  print("(");
+  VisitFullType(node.ft);
+  print(")");
+
+  if (node.initializer) {
+    VisitInitializer(*node.initializer);
   }
 }
