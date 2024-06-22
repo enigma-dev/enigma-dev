@@ -496,7 +496,7 @@ class AST {
       (void)node;
       return true;
     }
-    virtual bool VisitCodeBlock(CodeBlock &node) { return DefaultVisit(node); }
+    virtual bool VisitCodeBlock(CodeBlock &node);
     virtual bool VisitBinaryExpression(BinaryExpression &node);
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node);
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
@@ -510,7 +510,7 @@ class AST {
     virtual bool VisitArray(Array &node);
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
     virtual bool VisitLiteral(Literal &node);
-    virtual bool VisitIfStatement(IfStatement &node) { return DefaultVisit(node); }
+    virtual bool VisitIfStatement(IfStatement &node);
     virtual bool VisitForLoop(ForLoop &node) { return DefaultVisit(node); }
     virtual bool VisitWhileLoop(WhileLoop &node) { return DefaultVisit(node); }
     virtual bool VisitDoLoop(DoLoop &node) { return DefaultVisit(node); }
