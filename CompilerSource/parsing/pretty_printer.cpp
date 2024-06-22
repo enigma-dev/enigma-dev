@@ -721,9 +721,17 @@ bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
       VisitIfStatement(*stmt->As<IfStatement>());
     } else if (stmt->type == AST::NodeType::FOR) {
       VisitForLoop(*stmt->As<ForLoop>());
+    } else if (stmt->type == AST::NodeType::CASE) {
+      VisitCaseStatement(*stmt->As<CaseStatement>());
+    } else if (stmt->type == AST::NodeType::DEFAULT) {
+      VisitDefaultStatement(*stmt->As<DefaultStatement>());
+    } else if (stmt->type == AST::NodeType::SWITCH) {
+      VisitSwitchStatement(*stmt->As<SwitchStatement>());
     }
 
-    if (stmt->type != AST::NodeType::BLOCK && stmt->type != AST::NodeType::IF && stmt->type != AST::NodeType::FOR) {
+    if (stmt->type != AST::NodeType::BLOCK && stmt->type != AST::NodeType::IF && stmt->type != AST::NodeType::FOR &&
+        stmt->type != AST::NodeType::CASE && stmt->type != AST::NodeType::DEFAULT &&
+        stmt->type != AST::NodeType::SWITCH) {
       print("; ");
     }
   }
@@ -808,10 +816,12 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
     VisitIfStatement(*node.true_branch->As<IfStatement>());
   } else if (node.true_branch->type == AST::NodeType::FOR) {
     VisitForLoop(*node.true_branch->As<ForLoop>());
+  } else if (node.true_branch->type == AST::NodeType::SWITCH) {
+    VisitSwitchStatement(*node.true_branch->As<SwitchStatement>());
   }
 
   if (node.true_branch->type != AST::NodeType::BLOCK && node.true_branch->type != AST::NodeType::IF &&
-      node.true_branch->type != AST::NodeType::FOR) {
+      node.true_branch->type != AST::NodeType::FOR && node.true_branch->type != AST::NodeType::SWITCH) {
     print(";");
   }
   print(" ");
@@ -857,10 +867,12 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
       VisitIfStatement(*node.false_branch->As<IfStatement>());
     } else if (node.false_branch->type == AST::NodeType::FOR) {
       VisitForLoop(*node.false_branch->As<ForLoop>());
+    } else if (node.false_branch->type == AST::NodeType::SWITCH) {
+      VisitSwitchStatement(*node.false_branch->As<SwitchStatement>());
     }
 
     if (node.false_branch->type != AST::NodeType::BLOCK && node.false_branch->type != AST::NodeType::IF &&
-        node.false_branch->type != AST::NodeType::FOR) {
+        node.false_branch->type != AST::NodeType::FOR && node.false_branch->type != AST::NodeType::SWITCH) {
       print(";");
     }
     print(" ");
@@ -992,11 +1004,89 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
     VisitIfStatement(*node.body->As<IfStatement>());
   } else if (node.body->type == AST::NodeType::FOR) {
     VisitForLoop(*node.body->As<ForLoop>());
+  } else if (node.body->type == AST::NodeType::SWITCH) {
+    VisitSwitchStatement(*node.body->As<SwitchStatement>());
   }
 
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
-      node.body->type != AST::NodeType::FOR) {
+      node.body->type != AST::NodeType::FOR && node.body->type != AST::NodeType::SWITCH) {
     print(";");
   }
+  print(" ");
+}
+
+bool AST::Visitor::VisitCaseStatement(CaseStatement &node) {
+  print("case ");
+
+  if (node.value->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.value->As<IdentifierAccess>());
+  } else if (node.value->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.value->As<Literal>());
+  } else if (node.value->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitLiteral(*node.value->As<Literal>());
+  } else if (node.value->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.value->As<Parenthetical>());
+  } else if (node.value->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.value->As<FunctionCallExpression>());
+  } else if (node.value->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.value->As<TernaryExpression>());
+  } else if (node.value->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.value->As<SizeofExpression>());
+  } else if (node.value->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.value->As<AlignofExpression>());
+  } else if (node.value->type == AST::NodeType::CAST) {
+    VisitCastExpression(*node.value->As<CastExpression>());
+  }
+
+  print(": ");
+
+  VisitCodeBlock(*node.statements->As<AST::CodeBlock>());
+  print(" ");
+}
+
+bool AST::Visitor::VisitDefaultStatement(DefaultStatement &node) {
+  print("default: ");
+  VisitCodeBlock(*node.statements->As<CodeBlock>());
+  print(" ");
+}
+
+bool AST::Visitor::VisitSwitchStatement(SwitchStatement &node) {
+  print("switch");
+  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
+    print("(");
+  }
+
+  if (node.expression->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
+  } else if (node.expression->type == AST::NodeType::LITERAL) {
+    VisitLiteral(*node.expression->As<Literal>());
+  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.expression->As<Parenthetical>());
+  } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
+  } else if (node.expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
+  } else if (node.expression->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.expression->As<BinaryExpression>());
+  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
+  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.expression->As<TernaryExpression>());
+  } else if (node.expression->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.expression->As<SizeofExpression>());
+  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.expression->As<AlignofExpression>());
+  } else if (node.expression->type == AST::NodeType::CAST) {
+    VisitCastExpression(*node.expression->As<CastExpression>());
+  } else if (node.expression->type == AST::NodeType::DECLARATION) {
+    VisitDeclarationStatement(*node.expression->As<DeclarationStatement>());
+  }
+
+  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
+    print(")");
+  }
+  print(" ");
+
+  VisitCodeBlock(*node.body->As<CodeBlock>());
   print(" ");
 }
