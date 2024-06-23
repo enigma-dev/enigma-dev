@@ -1932,6 +1932,75 @@ TEST(ParserTest, ForLoop_18) {
                   IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
+TEST(ParserTest, WhileLoop_1) {
+  ParserTester test{"while(i==1){i++}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::WHILE);
+  auto *while_loop = node->As<AST::WhileLoop>();
+
+  ASSERT_EQ(while_loop->kind, AST::WhileLoop::Kind::WHILE);
+  ASSERT_EQ(while_loop->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(while_loop->body->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(while_loop->body->As<AST::CodeBlock>()->statements.size(), 1);
+}
+
+TEST(ParserTest, WhileLoop_2) {
+  ParserTester test{"until(i==1) {i++}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::WHILE);
+  auto *while_loop = node->As<AST::WhileLoop>();
+
+  ASSERT_EQ(while_loop->kind, AST::WhileLoop::Kind::UNTIL);
+  ASSERT_EQ(while_loop->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(while_loop->body->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(while_loop->body->As<AST::CodeBlock>()->statements.size(), 1);
+}
+
+TEST(ParserTest, WhileLoop_3) {
+  ParserTester test{"repeat(4){i++}"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::WHILE);
+  auto *while_loop = node->As<AST::WhileLoop>();
+
+  ASSERT_EQ(while_loop->kind, AST::WhileLoop::Kind::REPEAT);
+  ASSERT_EQ(while_loop->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(while_loop->body->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(while_loop->body->As<AST::CodeBlock>()->statements.size(), 1);
+}
+
+TEST(ParserTest, DoLoop_1) {
+  ParserTester test{"do{c++}while(i)"};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DO);
+  auto *do_loop = node->As<AST::DoLoop>();
+
+  ASSERT_EQ(do_loop->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(do_loop->body->type, AST::NodeType::BLOCK);
+  ASSERT_EQ(do_loop->body->As<AST::CodeBlock>()->statements.size(), 1);
+  ASSERT_FALSE(do_loop->is_until);
+}
+
+TEST(ParserTest, DoLoop_2) {
+  ParserTester test{"do c++ until i "};
+  auto node = test->TryParseStatement();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::DO);
+  auto *do_loop = node->As<AST::DoLoop>();
+
+  ASSERT_EQ(do_loop->condition->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(do_loop->body->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_TRUE(do_loop->is_until);
+}
+
 TEST(ParserTest, Array_1) {
   ParserTester test{"a = [1,2,3]"};
   auto node = test->TryParseStatement();

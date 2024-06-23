@@ -512,8 +512,8 @@ class AST {
     virtual bool VisitLiteral(Literal &node);
     virtual bool VisitIfStatement(IfStatement &node);
     virtual bool VisitForLoop(ForLoop &node);
-    virtual bool VisitWhileLoop(WhileLoop &node) { return DefaultVisit(node); }
-    virtual bool VisitDoLoop(DoLoop &node) { return DefaultVisit(node); }
+    virtual bool VisitWhileLoop(WhileLoop &node);
+    virtual bool VisitDoLoop(DoLoop &node);
     virtual bool VisitCaseStatement(CaseStatement &node);
     virtual bool VisitDefaultStatement(DefaultStatement &node);
     virtual bool VisitSwitchStatement(SwitchStatement &node);
