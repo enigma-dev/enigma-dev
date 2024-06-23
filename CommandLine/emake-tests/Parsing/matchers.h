@@ -22,7 +22,7 @@
 using namespace ::enigma::parsing;
 using namespace ::testing;
 
-std::string ExpectedMsg = "";
+extern std::string ExpectedMsg;
 
 MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   if (arg->type != AST::NodeType::DECLARATION) {

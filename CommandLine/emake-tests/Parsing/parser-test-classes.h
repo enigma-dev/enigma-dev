@@ -5,6 +5,7 @@
 #include <languages/lang_CPP.h>
 #include <parsing/ast.h>
 #include <parsing/parser.h>
+#include "matchers.h"
 
 using namespace ::enigma::parsing;
 

@@ -14,4 +14,3 @@ TEST(PrinterTest, test1) {
   ASSERT_EQ(inner_block->statements.size(), 1);
   ASSERT_EQ(inner_block->statements[0]->type, AST::NodeType::BLOCK);
 }
- 

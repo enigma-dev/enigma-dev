@@ -1,9 +1,10 @@
 #include <gmock/gmock.h>
 #include "parser-test-classes.h"
-#include "matchers.h"
- 
+
 using namespace ::enigma::parsing;
 using namespace ::testing;
+
+std::string ExpectedMsg = "";
 
 void assert_identifier_is(AST::Node *node, std::string_view name) {
   ASSERT_EQ(node->type, AST::NodeType::IDENTIFIER);
