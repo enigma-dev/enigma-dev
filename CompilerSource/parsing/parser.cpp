@@ -1,49 +1,19 @@
 #include "parser.h"
 
-#include "ast.h"
-#include "full_type.h"
-#include "lexer.h"
-#include "precedence.h"
-#include "settings.h"
-#include "tokens.h"
-
-#include <JDI/src/System/builtins.h>
-#include <memory>
-
 namespace enigma::parsing {
 
-class AstBuilder {
-
-using SyntaxMode = setting::SyntaxMode;
-
-Lexer *lexer;
-ErrorHandler *herr;
-SyntaxMode mode;
-const LanguageFrontend *frontend;
-
-Token token;
-
-/**
- * @brief Store a mapping from variable name to the @c FullType of its definition
- *
- * This is designed around the assumption that EDL does not yet support namespaces, so there is no need to consider
- * stacks here. If EDL were to support namespaces, this would have to be changed to a <tt> std::stack<...> </tt> and the
- * namespace or nested scope parser would have to push a new map onto the stack.
- */
-std::unordered_map<std::string_view, FullType *> declarations;
-
 template <typename T1, typename T2>
-bool map_contains(const std::unordered_map<T1, T2> &map, const T1 &value) {
+bool AstBuilder::map_contains(const std::unordered_map<T1, T2> &map, const T1 &value) {
   return map.find(value) != map.end();
 }
 
 template <typename T2, typename T1, typename = std::enable_if_t<std::is_base_of_v<T1, T2>>>
-std::unique_ptr<T2> dynamic_unique_pointer_cast(std::unique_ptr<T1> value) {
+std::unique_ptr<T2> AstBuilder::dynamic_unique_pointer_cast(std::unique_ptr<T1> value) {
   return std::unique_ptr<T2>(dynamic_cast<T2*>(value.release()));
 }
 
 template <typename... Messages>
-bool require_any_of(std::initializer_list<TokenType> tt, Messages &&...messages) {
+bool AstBuilder::require_any_of(std::initializer_list<TokenType> tt, Messages &&...messages) {
   if (std::any_of(tt.begin(), tt.end(), [this](TokenType tt) { return token.type == tt; })) {
     token = lexer->ReadToken();
     return true;
@@ -58,11 +28,11 @@ bool require_any_of(std::initializer_list<TokenType> tt, Messages &&...messages)
 }
 
 template <typename ... Messages>
-bool require_token(TokenType tt, Messages &&...messages) {
+bool AstBuilder::require_token(TokenType tt, Messages &&...messages) {
   return require_any_of({tt}, std::forward<Messages>(messages)...);
 }
 
-bool is_class_key(const Token &tok) {
+bool AstBuilder::is_class_key(const Token &tok) {
   switch (tok.type) {
     case TT_CLASS:
     case TT_STRUCT:
@@ -74,27 +44,27 @@ bool is_class_key(const Token &tok) {
   }
 }
 
-bool next_is_class_key() {
+bool AstBuilder::next_is_class_key() {
   return is_class_key(token);
 }
 
-bool is_cv_qualifier(const Token &tok) {
+bool AstBuilder::is_cv_qualifier(const Token &tok) {
   return tok.type == TT_CONST || tok.type == TT_VOLATILE;
 }
 
-bool next_is_cv_qualifier() {
+bool AstBuilder::next_is_cv_qualifier() {
   return is_cv_qualifier(token);
 }
 
-bool is_ref_qualifier(const Token &tok) {
+bool AstBuilder::is_ref_qualifier(const Token &tok) {
   return tok.type == TT_AMPERSAND || tok.type == TT_AND;
 }
 
-bool next_is_ref_qualifier() {
+bool AstBuilder::next_is_ref_qualifier() {
   return is_ref_qualifier(token);
 }
 
-std::string read_required_operatorkw() {
+std::string AstBuilder::read_required_operatorkw() {
   if (next_is_operatorkw()) {
     if (token.type == TT_S_NEW || token.type == TT_S_DELETE) {
       TokenType type = token.type;
@@ -125,7 +95,7 @@ std::string read_required_operatorkw() {
   }
 }
 
-bool is_operatorkw(const Token &tok) {
+bool AstBuilder::is_operatorkw(const Token &tok) {
   switch (tok.type) {
     case TT_S_NEW:
     case TT_S_DELETE:
@@ -168,11 +138,11 @@ bool is_operatorkw(const Token &tok) {
   }
 }
 
-bool next_is_operatorkw() {
+bool AstBuilder::next_is_operatorkw() {
   return is_operatorkw(token);
 }
 
-bool is_user_defined_type(const Token &tok) {
+bool AstBuilder::is_user_defined_type(const Token &tok) {
   switch (tok.type) {
     case TT_IDENTIFIER:
       if (auto def = frontend->look_up(tok.content); def != nullptr) {
@@ -185,11 +155,11 @@ bool is_user_defined_type(const Token &tok) {
   }
 }
 
-bool next_is_user_defined_type() {
+bool AstBuilder::next_is_user_defined_type() {
   return is_user_defined_type(token);
 }
 
-bool is_type_specifier(const Token &tok) {
+bool AstBuilder::is_type_specifier(const Token &tok) {
   switch (tok.type) {
     case TT_TYPE_NAME:
     case TT_TYPENAME:
@@ -208,11 +178,11 @@ bool is_type_specifier(const Token &tok) {
   }
 }
 
-bool next_is_type_specifier() {
+bool AstBuilder::next_is_type_specifier() {
   return is_type_specifier(token);
 }
 
-bool maybe_nested_name(const Token &tok) {
+bool AstBuilder::maybe_nested_name(const Token &tok) {
   switch (tok.type) {
     case TT_SCOPEACCESS:
     case TT_DECLTYPE:
@@ -228,34 +198,34 @@ bool maybe_nested_name(const Token &tok) {
   }
 }
 
-bool next_maybe_nested_name() {
+bool AstBuilder::next_maybe_nested_name() {
   return maybe_nested_name(token);
 }
 
-bool is_template_type(const Token &tok) {
+bool AstBuilder::is_template_type(const Token &tok) {
   if (auto def = frontend->look_up(tok.content); def != nullptr) {
     return def->flags & jdi::DEF_TEMPLATE;
   }
   return false;
 }
 
-bool is_template_type(jdi::definition *def) {
+bool AstBuilder::is_template_type(jdi::definition *def) {
   return def->flags & jdi::DEF_TEMPLATE;
 }
 
-bool next_is_template_type() {
+bool AstBuilder::next_is_template_type() {
   return is_template_type(token);
 }
 
-bool maybe_ptr_decl_operator(const Token &tok) {
+bool AstBuilder::maybe_ptr_decl_operator(const Token &tok) {
   return tok.type == TT_STAR || is_ref_qualifier(tok) || maybe_nested_name(tok);
 }
 
-bool next_maybe_ptr_decl_operator() {
+bool AstBuilder::next_maybe_ptr_decl_operator() {
   return maybe_ptr_decl_operator(token);
 }
 
-bool is_decl_specifier(const Token &tok) {
+bool AstBuilder::is_decl_specifier(const Token &tok) {
   switch (tok.type) {
     case TT_TYPEDEF:
     case TT_CONSTEXPR:
@@ -273,7 +243,7 @@ bool is_decl_specifier(const Token &tok) {
   }
 }
 
-std::size_t sizeof_builtin_type(std::string_view type) {
+std::size_t AstBuilder::sizeof_builtin_type(std::string_view type) {
   static const std::unordered_map<std::string_view, std::size_t> sizes{
     { "char",     sizeof(char) },
     { "char8_t",  1 },
@@ -296,7 +266,7 @@ std::size_t sizeof_builtin_type(std::string_view type) {
   }
 }
 
-std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
+std::pair<std::size_t, std::size_t> AstBuilder::jdi_decflag_bitmask(std::string_view tok) {
   static const std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>> bitmasks{
     { "volatile",  {jdi::builtin_flag__volatile->mask,  jdi::builtin_flag__volatile->value}  },
     { "static",    {jdi::builtin_flag__static->mask,    jdi::builtin_flag__static->value}    },
@@ -325,7 +295,7 @@ std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
   }
 }
 
-jdi::definition *require_defined_type(const Token &tok) {
+jdi::definition *AstBuilder::require_defined_type(const Token &tok) {
   if (auto def = frontend->look_up(tok.content); def != nullptr) {
     return def;
   } else {
@@ -334,7 +304,7 @@ jdi::definition *require_defined_type(const Token &tok) {
   }
 }
 
-jdi::definition *require_scope_type(const Token &tok) {
+jdi::definition *AstBuilder::require_scope_type(const Token &tok) {
   if (auto def = frontend->look_up(tok.content);
       def != nullptr && (def->flags & jdi::DEF_SCOPE || def->flags & jdi::DEF_CLASS)) {
     return def;
@@ -344,7 +314,7 @@ jdi::definition *require_scope_type(const Token &tok) {
   }
 }
 
-jdi::definition_scope *require_scope_type(jdi::definition *def, const Token &tok) {
+jdi::definition_scope *AstBuilder::require_scope_type(jdi::definition *def, const Token &tok) {
   if (def != nullptr && (def->flags & jdi::DEF_SCOPE || def->flags & jdi::DEF_CLASS)) {
     return dynamic_cast<jdi::definition_scope *>(def);
   } else {
@@ -353,12 +323,12 @@ jdi::definition_scope *require_scope_type(jdi::definition *def, const Token &tok
   }
 }
 
-void MaybeConsumeSemicolon(){
+void AstBuilder::MaybeConsumeSemicolon(){
   if(token.type == TT_SEMICOLON)
     token = lexer->ReadToken();
 }
 
-bool is_start_of_initializer(const Token &tok) {
+bool AstBuilder::is_start_of_initializer(const Token &tok) {
   switch (tok.type) {
     case TT_EQUALS:
     case TT_BEGINBRACE:
@@ -370,11 +340,11 @@ bool is_start_of_initializer(const Token &tok) {
   }
 }
 
-bool next_is_start_of_initializer() {
+bool AstBuilder::next_is_start_of_initializer() {
   return is_start_of_initializer(token);
 }
 
-bool is_start_of_id_expression(const Token &tok) {
+bool AstBuilder::is_start_of_id_expression(const Token &tok) {
   switch (tok.type) {
     case TT_TILDE:
     case TT_IDENTIFIER:
@@ -388,11 +358,11 @@ bool is_start_of_id_expression(const Token &tok) {
   }
 }
 
-bool next_is_start_of_id_expression() {
+bool AstBuilder::next_is_start_of_id_expression() {
   return is_start_of_id_expression(token);
 }
 
-bool maybe_functional_cast(const Token &tok) {
+bool AstBuilder::maybe_functional_cast(const Token &tok) {
   switch (tok.type) {
     case TT_SCOPEACCESS:
     case TT_TYPENAME:
@@ -408,14 +378,14 @@ bool maybe_functional_cast(const Token &tok) {
   }
 }
 
-bool next_maybe_functional_cast() {
+bool AstBuilder::next_maybe_functional_cast() {
   return maybe_functional_cast(token);
 }
 
-std::unique_ptr<AST::DeclarationStatement> parse_declarations(
+std::unique_ptr<AST::DeclarationStatement> AstBuilder::parse_declarations(
     AST::DeclarationStatement::StorageClass sc, jdi::definition *def,
     AST::DeclaratorType decl_type,
-  bool parse_unbounded, std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first = false) {
+  bool parse_unbounded, std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first ) {
   while (true) {
     if (!already_parsed_first) {
       FullType decl;
@@ -434,7 +404,7 @@ std::unique_ptr<AST::DeclarationStatement> parse_declarations(
   return std::make_unique<AST::DeclarationStatement>(sc, def, std::move(decls));
 }
 
-void maybe_infer_int(FullType &type) {
+void AstBuilder::maybe_infer_int(FullType &type) {
   // This is a pretty hacky way to implicitly infer int, but it is the only way I can think of to prevent `int int x`
   // from being legal
   if (type.def == nullptr && (contains_decflag_bitmask(type.flags, "long")
@@ -446,24 +416,22 @@ void maybe_infer_int(FullType &type) {
   }
 }
 
-public:
-
-AstBuilder(Lexer *lexer, ErrorHandler *herr):
+AstBuilder::AstBuilder(Lexer *lexer, ErrorHandler *herr):
   lexer{lexer}, herr{herr},
   mode{lexer->GetContext().compatibility_opts.syntax_mode},
   frontend{lexer->GetContext().language_fe} {
   token = lexer->ReadToken();
 }
 
-const Token &current_token() {
+const Token &AstBuilder::current_token() {
   return token;
 }
 
-std::unique_ptr<AST::Node> TryParseConstantExpression() {
+std::unique_ptr<AST::Node> AstBuilder::TryParseConstantExpression() {
   return TryParseExpression(Precedence::kTernary);
 }
 
-std::unique_ptr<AST::Node> TryParseArrayBoundsExpression(Declarator *decl, bool outside_nested) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseArrayBoundsExpression(Declarator *decl, bool outside_nested) {
   require_token(TT_BEGINBRACKET, "Expected '[' before array bounds expression");
   std::unique_ptr<AST::Node> expr = nullptr;
   if (token.type != TT_ENDBRACKET) {
@@ -477,7 +445,7 @@ std::unique_ptr<AST::Node> TryParseArrayBoundsExpression(Declarator *decl, bool 
   return nullptr;
 }
 
-jdi::definition *TryParseNoexceptSpecifier() {
+jdi::definition *AstBuilder::TryParseNoexceptSpecifier() {
   herr->Error(token) << "Unimplemented: noexcept";
 
   require_token(TT_NOEXCEPT, "Expected 'noexcept' in noexcept specifier");
@@ -490,7 +458,7 @@ jdi::definition *TryParseNoexceptSpecifier() {
   return nullptr;
 }
 
-void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool did_consume_paren,
+void AstBuilder::TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool did_consume_paren,
                                      bool maybe_expression) {
   if (!did_consume_paren) {
     require_token(TT_BEGINPARENTH, "Expected '(' before function parameters");
@@ -597,7 +565,7 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
   }
 }
 
-jdi::definition *TryParseTypeName() {
+jdi::definition *AstBuilder::TryParseTypeName() {
   Token name = token;
   require_token(TT_IDENTIFIER, "Expected identifier in type name");
   if (is_template_type(name) && token.type == TT_LESS) {
@@ -607,7 +575,7 @@ jdi::definition *TryParseTypeName() {
   return frontend->look_up(name.content);
 }
 
-jdi::definition *TryParseIdExpression(Declarator *decl) {
+jdi::definition *AstBuilder::TryParseIdExpression(Declarator *decl) {
   switch (token.type) {
     case TT_SCOPEACCESS: {
       token = lexer->ReadToken();
@@ -689,7 +657,7 @@ jdi::definition *TryParseIdExpression(Declarator *decl) {
   }
 }
 
-jdi::definition *TryParseDecltype() {
+jdi::definition *AstBuilder::TryParseDecltype() {
   require_token(TT_DECLTYPE, "Expected 'decltype' keyword");
   require_token(TT_BEGINPARENTH, "Expected '(' after 'decltype'");
   auto expr = TryParseExpression(Precedence::kAll);
@@ -698,7 +666,7 @@ jdi::definition *TryParseDecltype() {
   return nullptr;
 }
 
-void TryParseTemplateArgs(jdi::definition *def) {
+void AstBuilder::TryParseTemplateArgs(jdi::definition *def) {
   if (def->flags & jdi::DEF_TEMPLATE) {
     require_token(TT_LESS, "Expected '<' at start of template arguments");
     auto template_def = reinterpret_cast<jdi::definition_template *>(def);
@@ -778,7 +746,7 @@ void TryParseTemplateArgs(jdi::definition *def) {
   }
 }
 
-jdi::definition *TryParseTypenameSpecifier() {
+jdi::definition *AstBuilder::TryParseTypenameSpecifier() {
   require_token(TT_TYPENAME, "Expected 'typename' in typename specifier");
 
   switch (token.type) {
@@ -793,7 +761,7 @@ jdi::definition *TryParseTypenameSpecifier() {
   }
 }
 
-jdi::definition *TryParsePrefixIdentifier(Declarator *decl = nullptr, bool is_declarator = false) {
+jdi::definition *AstBuilder::TryParsePrefixIdentifier(Declarator *decl , bool is_declarator) {
   Token id = token;
   require_token(TT_IDENTIFIER, "Expected identifier");
   auto def = require_defined_type(id);
@@ -809,7 +777,7 @@ jdi::definition *TryParsePrefixIdentifier(Declarator *decl = nullptr, bool is_de
   return def;
 }
 
-jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, Declarator *decl = nullptr, bool is_declarator = false) {
+jdi::definition *AstBuilder::TryParseNestedNameSpecifier(jdi::definition *scope, Declarator *decl , bool is_declarator) {
   if (token.type != TT_SCOPEACCESS) {
     herr->Error(token) << "Expected scope access '::' in nested name specifier, got: '" << token.content << '\'';
     return nullptr;
@@ -864,7 +832,7 @@ jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, Declarator 
   return def;
 }
 
-bool matches_token_type(jdi::definition *def, const Token &tok) {
+bool AstBuilder::matches_token_type(jdi::definition *def, const Token &tok) {
   switch (tok.type) {
     case TT_ENUM: return def->flags & jdi::DEF_ENUM;
     case TT_STRUCT:
@@ -877,7 +845,7 @@ bool matches_token_type(jdi::definition *def, const Token &tok) {
   }
 }
 
-void TryParseElaboratedName(FullType *type) {
+void AstBuilder::TryParseElaboratedName(FullType *type) {
   Token tok = token;
 
   token = lexer->ReadToken();
@@ -906,12 +874,12 @@ void TryParseElaboratedName(FullType *type) {
   }
 }
 
-bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
+bool AstBuilder::contains_decflag_bitmask(std::size_t combined, std::string_view name) {
   auto builtin = jdi_decflag_bitmask(name);
   return (combined & builtin.first) == builtin.second;
 }
 
-void maybe_assign_full_type(FullType *type, jdi::definition *def, Token token) {
+void AstBuilder::maybe_assign_full_type(FullType *type, jdi::definition *def, Token token) {
   if (def != nullptr && type->def == nullptr) {
     type->def = def;
   } else if (type->def != nullptr) {
@@ -919,7 +887,7 @@ void maybe_assign_full_type(FullType *type, jdi::definition *def, Token token) {
   }
 }
 
-jdi::definition *get_builtin(std::string_view name) {
+jdi::definition *AstBuilder::get_builtin(std::string_view name) {
   if (name == "char" || name == "char8_t") {
     return jdi::builtin_type__char;
   } else if (name == "char16_t" || name == "wchar_t") {
@@ -939,7 +907,7 @@ jdi::definition *get_builtin(std::string_view name) {
   }
 }
 
-void TryParseTypeSpecifier(FullType *type) {
+void AstBuilder::TryParseTypeSpecifier(FullType *type) {
   switch (token.type) {
     case TT_TYPE_NAME: {
       if (token.content == "long" || token.content == "short") {
@@ -1023,13 +991,13 @@ void TryParseTypeSpecifier(FullType *type) {
   }
 }
 
-void TryParseTypeSpecifierSeq(FullType *type) {
+void AstBuilder::TryParseTypeSpecifierSeq(FullType *type) {
   while (next_is_type_specifier()) {
     TryParseTypeSpecifier(type);
   }
 }
 
-void TryParsePtrOperator(FullType *type) {
+void AstBuilder::TryParsePtrOperator(FullType *type) {
   if (token.type == TT_STAR) {
     bool is_const = false;
     bool is_volatile = false;
@@ -1059,7 +1027,7 @@ void TryParsePtrOperator(FullType *type) {
   }
 }
 
-void TryParseMaybeNestedPtrOperator(FullType *type) {
+void AstBuilder::TryParseMaybeNestedPtrOperator(FullType *type) {
   if (next_maybe_nested_name()) {
     jdi::definition *def = nullptr;
     if (token.type == TT_IDENTIFIER) {
@@ -1097,7 +1065,7 @@ void TryParseMaybeNestedPtrOperator(FullType *type) {
   }
 }
 
-FullType TryParseTypeID() {
+FullType AstBuilder::TryParseTypeID() {
   FullType type;
   while (next_is_type_specifier()) {
     TryParseTypeSpecifier(&type);
@@ -1112,7 +1080,7 @@ FullType TryParseTypeID() {
   return type;
 }
 
-void TryParseDeclSpecifier(FullType *type) {
+void AstBuilder::TryParseDeclSpecifier(FullType *type) {
   switch (token.type) {
     case TT_TYPEDEF: {
       TryParseTypeSpecifierSeq(type);
@@ -1145,13 +1113,13 @@ void TryParseDeclSpecifier(FullType *type) {
   }
 }
 
-void TryParseDeclSpecifierSeq(FullType *type) {
+void AstBuilder::TryParseDeclSpecifierSeq(FullType *type) {
   while (is_decl_specifier(token)) {
     TryParseDeclSpecifier(type);
   }
 }
 
-std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
+std::unique_ptr<AST::Node> AstBuilder::TryParsePtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression ) {
   while (next_maybe_ptr_decl_operator()) {
     if (next_maybe_nested_name()) {
       TryParseMaybeNestedPtrOperator(type);
@@ -1163,7 +1131,7 @@ std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::Declarator
   return TryParseNoPtrDeclarator(type, is_abstract, maybe_expression);
 }
 
-std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseNoPtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression) {
   auto maybe_prefix_operator = [this]() {
     return Precedence::kUnaryPrefixOps.find(token.type) != Precedence::kUnaryPrefixOps.end();
   };
@@ -1262,7 +1230,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
   return nullptr;
 }
 
-void TryParseDeclarator(FullType *type, AST::DeclaratorType is_abstract = AST::DeclaratorType::NON_ABSTRACT) {
+void AstBuilder::TryParseDeclarator(FullType *type, AST::DeclaratorType is_abstract ) {
   if (next_maybe_ptr_decl_operator()) {
     TryParsePtrDeclarator(type, is_abstract);
   } else {
@@ -1274,7 +1242,7 @@ void TryParseDeclarator(FullType *type, AST::DeclaratorType is_abstract = AST::D
   }
 }
 
-AST::InitializerNode TryParseExprOrBracedInitList(bool is_init_clause, bool in_init_list) {
+AST::InitializerNode AstBuilder::TryParseExprOrBracedInitList(bool is_init_clause, bool in_init_list) {
   // This function handles:
   // <brace-or-equal-initializer>    ::= = <initializer-clause>
   //                                   | <braced-init-list>
@@ -1320,7 +1288,7 @@ AST::InitializerNode TryParseExprOrBracedInitList(bool is_init_clause, bool in_i
   }
 }
 
-AST::BraceOrParenInitNode TryParseInitializerList(TokenType closing) {
+AST::BraceOrParenInitNode AstBuilder::TryParseInitializerList(TokenType closing) {
   AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
   while (token.type != closing) {
     init->values.emplace_back("", TryParseExprOrBracedInitList(true, true));
@@ -1333,7 +1301,7 @@ AST::BraceOrParenInitNode TryParseInitializerList(TokenType closing) {
   return init;
 }
 
-AST::BraceOrParenInitNode TryParseBraceInitializer() {
+AST::BraceOrParenInitNode AstBuilder::TryParseBraceInitializer() {
   require_token(TT_BEGINBRACE, "Expected opening brace ('{') at the start of brace initializer");
   AST::BraceOrParenInitNode init = std::make_unique<AST::BraceOrParenInitializer>();
   if (token.type == TT_DOT) {
@@ -1358,7 +1326,7 @@ AST::BraceOrParenInitNode TryParseBraceInitializer() {
   return init;
 }
 
-AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
+AST::InitializerNode AstBuilder::TryParseInitializer(bool allow_paren_init) {
   switch (token.type) {
     case TT_EQUALS: {
       token = lexer->ReadToken();
@@ -1398,7 +1366,7 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseDeclarations(bool parse_unbounded) {
   if (is_decl_specifier(token)) {
     FullType type;
     TryParseDeclSpecifierSeq(&type);
@@ -1416,7 +1384,7 @@ std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseNewExpression(bool is_global) {
   require_token(TT_S_NEW, "Expected 'new' in new-expression");
 
   bool is_array = false;
@@ -1487,7 +1455,7 @@ std::unique_ptr<AST::Node> TryParseNewExpression(bool is_global) {
   return std::make_unique<AST::NewExpression>(is_global, is_array, std::move(placement), std::move(type), std::move(initializer));
 }
 
-std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseDeleteExpression(bool is_global) {
   require_token(TT_S_DELETE, "Expected 'delete' in delete-expression");
 
   bool is_array = false;
@@ -1503,7 +1471,7 @@ std::unique_ptr<AST::Node> TryParseDeleteExpression(bool is_global) {
   return node;
 }
 
-std::unique_ptr<AST::Node> TryParseIdExpression() {
+std::unique_ptr<AST::Node> AstBuilder::TryParseIdExpression() {
   Declarator decl;
   auto def = TryParseIdExpression(&decl);
   
@@ -1519,7 +1487,7 @@ std::unique_ptr<AST::Node> TryParseIdExpression() {
 
 /// Parse an operand--this includes variables, literals, arrays, and
 /// unary expressions on these.
-std::unique_ptr<AST::Node> TryParseOperand() {
+std::unique_ptr<AST::Node> AstBuilder::TryParseOperand() {
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
     case TT_ENDPARENTH: case TT_ENDBRACKET:
@@ -1778,14 +1746,14 @@ std::unique_ptr<AST::Node> TryParseOperand() {
   return nullptr;
 }
 
-static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
+bool AstBuilder::ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                                    int target_prec) {
   return target_prec >= prec.precedence ||
             (target_prec == prec.precedence &&
                 prec.associativity == Associativity::RTL);
 }
 
-std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   if (operand == nullptr) {
     operand = TryParseOperand();
   }
@@ -1832,7 +1800,7 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
   return nullptr;
 }
 
-std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseBinaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   while (map_contains(Precedence::kBinaryPrec, token.type) &&
          precedence >= Precedence::kBinaryPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
     Token oper = token;
@@ -1855,7 +1823,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, 
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+std::unique_ptr<AST::UnaryPostfixExpression> AstBuilder::TryParseUnaryPostfixExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   while (Precedence::kUnaryPostfixPrec.find(token.type) != Precedence::kUnaryPostfixPrec.end() &&
          precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
     Token oper = token;
@@ -1867,7 +1835,7 @@ std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(int 
   return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::TernaryExpression> TryParseTernaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+std::unique_ptr<AST::TernaryExpression> AstBuilder::TryParseTernaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
 //  Token oper = token;
   token = lexer->ReadToken(); // Consume the operator
@@ -1882,7 +1850,7 @@ std::unique_ptr<AST::TernaryExpression> TryParseTernaryExpression(int precedence
   return dynamic_unique_pointer_cast<AST::TernaryExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseSubscriptExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
   while (token.type == TT_BEGINBRACKET) {
     Token oper = token;
@@ -1897,7 +1865,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
+std::unique_ptr<AST::FunctionCallExpression> AstBuilder::TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
   while (token.type == TT_BEGINPARENTH) {
     // Token oper = token;
@@ -1921,7 +1889,7 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
   return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
+std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression(SyntaxMode mode_) {
   switch (mode_) {
     case SyntaxMode::STRICT: {
       require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
@@ -1950,7 +1918,7 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
   }
 }
 
-std::unique_ptr<AST::Node> MaybeDeclaration() {
+std::unique_ptr<AST::Node> AstBuilder::MaybeDeclaration() {
   if (next_is_decl_specifier() || next_maybe_functional_cast()) {
     if (token.type == TT_SCOPEACCESS) {
       token = lexer->ReadToken();
@@ -1968,7 +1936,7 @@ std::unique_ptr<AST::Node> MaybeDeclaration() {
 
 // since we can place declarations in the same places we can place statements,
 // so this function will check first if this is a declaration, to be able to handle both
-std::unique_ptr<AST::Node> TryParseStatement() {
+std::unique_ptr<AST::Node> AstBuilder::TryParseStatement() {
   auto decl_node = MaybeDeclaration();
   if (decl_node != nullptr) {
     return decl_node;
@@ -2120,13 +2088,13 @@ std::unique_ptr<AST::Node> TryParseStatement() {
 }
 
 // Parse control flow statement body
-std::unique_ptr<AST::Node> ParseCFStmtBody() { return ParseStatementOrBlock(); }
+std::unique_ptr<AST::Node> AstBuilder::ParseCFStmtBody() { return ParseStatementOrBlock(); }
 
-bool next_is_decl_specifier() {
+bool AstBuilder::next_is_decl_specifier() {
   return is_decl_specifier(token);
 }
 
-std::unique_ptr<AST::Node> ParseStatementOrBlock() {
+std::unique_ptr<AST::Node> AstBuilder::ParseStatementOrBlock() {
   if (token.type == TT_BEGINBRACE) {
     return ParseCodeBlock();
   } else {
@@ -2134,7 +2102,7 @@ std::unique_ptr<AST::Node> ParseStatementOrBlock() {
   }
 }
 
-std::unique_ptr<AST::CodeBlock> ParseCode() {
+std::unique_ptr<AST::CodeBlock> AstBuilder::ParseCode() {
   std::vector<std::unique_ptr<AST::Node>> statements{};
 
   while (token.type != TT_ENDBRACE && token.type != TT_ENDOFCODE) {
@@ -2144,14 +2112,14 @@ std::unique_ptr<AST::CodeBlock> ParseCode() {
   return std::make_unique<AST::CodeBlock>(std::move(statements));
 }
 
-std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
+std::unique_ptr<AST::CodeBlock> AstBuilder::ParseCodeBlock() {
   require_token(TT_BEGINBRACE, "Internal error: Expected opening brace ('{') at the start of code block");
   auto res = ParseCode();
   require_token(TT_ENDBRACE, "Expected closing brace ('}') at the end of code block");
   return res;
 }
 
-std::unique_ptr<AST::IfStatement> ParseIfStatement() {
+std::unique_ptr<AST::IfStatement> AstBuilder::ParseIfStatement() {
   token = lexer->ReadToken();
   auto condition = TryParseControlExpression(mode);
   if (token.type == TT_S_THEN) {
@@ -2172,7 +2140,7 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 }
 
-std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
+std::unique_ptr<AST::Node> AstBuilder::TryParseEitherFunctionalCastOrDeclaration(
     AST::DeclaratorType decl_type, bool parse_unbounded,
     bool maybe_c_style_cast, AST::DeclarationStatement::StorageClass sc) {
   if (next_maybe_functional_cast()) {
@@ -2223,7 +2191,7 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
   }
 }
 
-std::unique_ptr<AST::ForLoop> ParseForLoop() {
+std::unique_ptr<AST::ForLoop> AstBuilder::ParseForLoop() {
   require_token(TT_S_FOR, "Expected 'for' in for-loop");
 
   std::unique_ptr<AST::Node> init = nullptr;
@@ -2270,7 +2238,7 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
                                         std::move(incr), std::move(body));
 }
 
-std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
+std::unique_ptr<AST::WhileLoop> AstBuilder::ParseWhileLoop() {
   token = lexer->ReadToken();
   auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
@@ -2278,7 +2246,7 @@ std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::WHILE);
 }
 
-std::unique_ptr<AST::WhileLoop> ParseUntilLoop() {
+std::unique_ptr<AST::WhileLoop> AstBuilder::ParseUntilLoop() {
   token = lexer->ReadToken();
   auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
@@ -2286,7 +2254,7 @@ std::unique_ptr<AST::WhileLoop> ParseUntilLoop() {
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::UNTIL);
 }
 
-std::unique_ptr<AST::DoLoop> ParseDoLoop() {
+std::unique_ptr<AST::DoLoop> AstBuilder::ParseDoLoop() {
   token = lexer->ReadToken();
   auto body = ParseCFStmtBody();
 
@@ -2298,7 +2266,7 @@ std::unique_ptr<AST::DoLoop> ParseDoLoop() {
   return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }
 
-std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
+std::unique_ptr<AST::WhileLoop> AstBuilder::ParseRepeatStatement() {
   token = lexer->ReadToken();
   auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
@@ -2306,7 +2274,7 @@ std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
 }
 
-std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
+std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseReturnStatement() {
   token = lexer->ReadToken();
   auto value = TryParseExpression(Precedence::kAll);
 
@@ -2315,7 +2283,7 @@ std::unique_ptr<AST::ReturnStatement> ParseReturnStatement() {
   return std::make_unique<AST::ReturnStatement>(std::move(value), false);
 }
 
-std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
+std::unique_ptr<AST::BreakStatement> AstBuilder::ParseBreakStatement() {
   token = lexer->ReadToken(); // Consume the break
   std::unique_ptr<AST::BreakStatement> node ;
 
@@ -2331,7 +2299,7 @@ std::unique_ptr<AST::BreakStatement> ParseBreakStatement() {
   return node;
 }
 
-std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
+std::unique_ptr<AST::ContinueStatement> AstBuilder::ParseContinueStatement() {
   token = lexer->ReadToken(); // Consume the continue
   std::unique_ptr<AST::ContinueStatement> node;
 
@@ -2347,12 +2315,12 @@ std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
   return node;
 }
 
-std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {
+std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseExitStatement() {
   token = lexer->ReadToken();
   return std::make_unique<AST::ReturnStatement>(nullptr, true);
 }
 
-std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement() {
+std::unique_ptr<AST::SwitchStatement> AstBuilder::ParseSwitchStatement() {
   require_token(TT_S_SWITCH, "Expected 'switch' in switch-statement");
 
   auto switch_ = std::make_unique<AST::SwitchStatement>();
@@ -2380,7 +2348,7 @@ std::unique_ptr<AST::SwitchStatement> ParseSwitchStatement() {
   return switch_;
 }
 
-std::unique_ptr<AST::Node> ParseCaseOrDefaultStatement(bool is_default) {
+std::unique_ptr<AST::Node> AstBuilder::ParseCaseOrDefaultStatement(bool is_default) {
   std::unique_ptr<AST::Node> expr = nullptr;
   if (is_default) {
     require_token(TT_S_DEFAULT, "Expected 'default' at the start of default statement");
@@ -2408,15 +2376,13 @@ std::unique_ptr<AST::Node> ParseCaseOrDefaultStatement(bool is_default) {
   }
 }
 
-std::unique_ptr<AST::WithStatement> ParseWithStatement() {
+std::unique_ptr<AST::WithStatement> AstBuilder::ParseWithStatement() {
   token = lexer->ReadToken();
   auto object = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
 
   return std::make_unique<AST::WithStatement>(std::move(object), std::move(body));
 }
-
-};  // class AstBuilder
 
 std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
   AstBuilder ab(lexer, herr);
