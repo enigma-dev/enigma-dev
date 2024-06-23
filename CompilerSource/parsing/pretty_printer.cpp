@@ -1327,4 +1327,6 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+
+  print(";");
 }
