@@ -110,7 +110,8 @@ void make_array_subscript_expression(ArrayBoundNode &node, std::unique_ptr<AST::
   token_contents.emplace_back(std::to_string(node.size));
   CodeSnippet location = {token_contents.back(), 0, 0};
   Token index = {TT_DECLITERAL, location};
-  expr = std::make_unique<AST::BinaryExpression>(std::move(expr), std::make_unique<AST::Literal>(index), TT_BEGINBRACKET);
+  AST::Operation op(TT_BEGINBRACKET, "[");
+  expr = std::make_unique<AST::BinaryExpression>(std::move(expr), std::make_unique<AST::Literal>(index), op);
 }
 
 void make_function_call_expression(FunctionParameterNode &node, std::unique_ptr<AST::Node> &expr) {
@@ -126,9 +127,10 @@ void make_function_call_expression(FunctionParameterNode &node, std::unique_ptr<
     for (auto &param : node.as<FunctionParameterNode::ParameterList>()) {
       auto decl_expr = std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(param.type->decl.to_expression()));
       if (param.default_value != nullptr) {
+        AST::Operation op(TT_EQUALS, "=");
         decl_expr = std::make_unique<AST::BinaryExpression>(
             std::move(decl_expr), std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(param.default_value)),
-            TT_EQUALS);
+            op);
         param.default_value = nullptr;
       }
       call->arguments.emplace_back(std::move(decl_expr));

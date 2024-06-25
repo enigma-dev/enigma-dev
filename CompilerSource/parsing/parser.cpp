@@ -496,9 +496,10 @@ void AstBuilder::TryParseParametersAndQualifiers(Declarator *decl, bool outside_
           for (auto &param : params.as<FunctionParameterNode::ParameterList>()) {
             auto decl_expr = std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(param.type->decl.to_expression()));
             if (param.default_value != nullptr) {
+              AST::Operation op(TT_EQUALS,"=");
               decl_expr = std::make_unique<AST::BinaryExpression>(
                 std::move(decl_expr), std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(param.default_value)),
-                TT_EQUALS);
+                op);
               param.default_value = nullptr;
             }
             parameters->arguments.emplace_back(std::move(decl_expr));
@@ -1817,7 +1818,8 @@ std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseBinaryExpression(int 
             ? TryParseExpression(rule.precedence)
             : nullptr;
 
-    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+    AST::Operation op(oper.type, std::string(oper.content));
+    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
   }
 
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
@@ -1857,7 +1859,9 @@ std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseSubscriptExpression(i
     token = lexer->ReadToken(); // Consume the operator
 
     auto right = TryParseExpression(Precedence::kMin);
-    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+
+    AST::Operation op(oper.type, std::string(oper.content));
+    operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
 
     require_token(TT_ENDBRACKET, "Expected closing bracket (']') at the end of array subscript");
   }
@@ -1908,7 +1912,8 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression(SyntaxMode mode
         Token oper = token;
         token = lexer->ReadToken(); // Consume the token
         auto right = TryParseControlExpression(mode);
-        operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), oper.type);
+        AST::Operation op(oper.type, std::string(oper.content));
+        operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
       }
       // TODO: handle [] for array access and () for direct func call
       return operand;
@@ -2264,6 +2269,8 @@ std::unique_ptr<AST::DoLoop> AstBuilder::ParseDoLoop() {
   require_any_of({TT_S_WHILE, TT_S_UNTIL}, "Expected `while` or `until` after do loop body");
 
   auto condition = TryParseControlExpression(mode);
+
+  MaybeConsumeSemicolon();
 
   return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }

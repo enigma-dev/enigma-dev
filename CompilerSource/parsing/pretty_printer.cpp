@@ -165,7 +165,7 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitCastExpression(*node.left->As<CastExpression>());
   }
 
-  print(" " + ToSymbol(node.operation) + " ");
+  print(" " + node.operation.token + " ");
 
   if (node.right->type == AST::NodeType::IDENTIFIER) {
     VisitIdentifierAccess(*node.right->As<IdentifierAccess>());
@@ -195,7 +195,7 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
     VisitNewExpression(*node.right->As<NewExpression>());
   }
 
-  if (node.operation == TT_BEGINBRACKET) {
+  if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
 }

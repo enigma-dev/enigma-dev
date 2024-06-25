@@ -206,14 +206,14 @@ MATCHER_P3(IsBinaryOperation, op, M1, M2, "") {
     return false;
   }
 
-  bool b1 = binary->operation == op, b2 = ExplainMatchResult(M1, binary->left, result_listener),
+  bool b1 = binary->operation.type == op, b2 = ExplainMatchResult(M1, binary->left, result_listener),
        b3 = ExplainMatchResult(M2, binary->right, result_listener);
 
   bool res = b1 && b2 && b3;
   if (!b1) {
     ExpectedMsg += "From IsBinaryOperation Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(binary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(binary->operation.type) << "\n";
   }
 
   return res;

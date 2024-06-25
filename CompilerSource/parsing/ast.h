@@ -122,14 +122,22 @@ class AST {
     CodeBlock() noexcept = default;
     CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {}
   };
+
+  struct Operation{
+    TokenType type;
+    std::string token;
+
+    Operation(TokenType type_, std::string token_):type(type_), token(token_){}
+  };
+
   // Binary expressions; generally top-level will be "foo = expression"
   struct BinaryExpression : TypedNode<NodeType::BINARY_EXPRESSION> {
     PNode left, right;
-    TokenType operation;
+    Operation operation;
 
     BASIC_NODE_ROUTINES(BinaryExpression);
 
-    BinaryExpression(PNode left_, PNode right_, TokenType operation_):
+    BinaryExpression(PNode left_, PNode right_, Operation operation_):
         left(std::move(left_)), right(std::move(right_)),
         operation(operation_) {}
   };
