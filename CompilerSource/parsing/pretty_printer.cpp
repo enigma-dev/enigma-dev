@@ -47,6 +47,8 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
     VisitAlignofExpression(*node.expression->As<AlignofExpression>());
   } else if (node.expression->type == AST::NodeType::CAST) {
     VisitCastExpression(*node.expression->As<CastExpression>());
+  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.expression->As<Parenthetical>());
   }
 
   print(")");
@@ -1116,18 +1118,24 @@ bool AST::Visitor::VisitSwitchStatement(SwitchStatement &node) {
   print(" ");
 }
 
-// TODO: handle repeat
 bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
-  print("while");
-  if (node.condition->type != AST::NodeType::PARENTHETICAL) {
-    print("(");
+  // temp sol
+  if (node.kind == AST::WhileLoop::Kind::REPEAT) {
+    print("int strange_name = ");
   }
 
-  if (node.kind == AST::WhileLoop::Kind::UNTIL) {
-    if (node.condition->type == AST::NodeType::PARENTHETICAL) {
-      print("(!");
-    } else {
-      print("!(");
+  else {
+    print("while");
+    if (node.condition->type != AST::NodeType::PARENTHETICAL) {
+      print("(");
+    }
+
+    if (node.kind == AST::WhileLoop::Kind::UNTIL) {
+      if (node.condition->type == AST::NodeType::PARENTHETICAL) {
+        print("(!");
+      } else {
+        print("!(");
+      }
     }
   }
 
@@ -1159,12 +1167,16 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
     VisitDeclarationStatement(*node.condition->As<DeclarationStatement>());
   }
 
-  if (node.kind == AST::WhileLoop::Kind::UNTIL) {
-    print(")");
-  }
+  if (node.kind != AST::WhileLoop::Kind::REPEAT) {
+    if (node.kind == AST::WhileLoop::Kind::UNTIL) {
+      print(")");
+    }
 
-  if (node.condition->type != AST::NodeType::PARENTHETICAL) {
-    print(")");
+    if (node.condition->type != AST::NodeType::PARENTHETICAL) {
+      print(")");
+    }
+  } else {
+    print("; while(strange_name)");
   }
 
   print(" ");
