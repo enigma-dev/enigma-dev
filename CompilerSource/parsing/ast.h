@@ -492,10 +492,26 @@ class AST {
 
     void print(std::string code) { of << code; }
 
+    std::string GetPrintedCode() {
+      of.close();
+      std::ifstream file("./CompilerSource/parsing/output.txt");
+      std::string code = "";
+
+      if (file.is_open()) {
+        std::string line = "";
+        while (getline(file, line)) {
+          code += line;
+        }
+      }
+
+      return code;
+    }
+
     virtual bool DefaultVisit(Node &node) {
       (void)node;
       return true;
     }
+    virtual bool VisitCode(CodeBlock &node);
     virtual bool VisitCodeBlock(CodeBlock &node);
     virtual bool VisitBinaryExpression(BinaryExpression &node);
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node);

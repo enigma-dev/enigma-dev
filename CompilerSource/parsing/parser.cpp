@@ -1939,6 +1939,7 @@ std::unique_ptr<AST::Node> AstBuilder::MaybeDeclaration() {
 std::unique_ptr<AST::Node> AstBuilder::TryParseStatement() {
   auto decl_node = MaybeDeclaration();
   if (decl_node != nullptr) {
+    MaybeConsumeSemicolon();
     return decl_node;
   }
   switch (token.type) {
@@ -2031,6 +2032,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseStatement() {
           herr->Error(start) << "Trying to parse declaration within <stmt>";
         }
         // Parse it anyways
+        // MaybeConsumeSemicolon();
         return decl;
       } else {
         auto node = TryParseExpression(Precedence::kAll);

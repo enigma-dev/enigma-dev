@@ -382,7 +382,7 @@ bool contains_flag2(FullType &ft, jdi::typeflag *builtin) { return (ft.flags & b
 TEST(ParserTest, Declaration) {
   ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
   auto node = test->TryParseStatement();
-  EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
   //auto decl = node->As<AST::DeclarationStatement>();
   // EXPECT_TRUE(contains_flag2(*decl->declarations[0].declarator, jdi::builtin_flag__const));  it gives false
@@ -399,7 +399,7 @@ TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
 
   auto node = test->TryParseStatement();
-  EXPECT_EQ(test->current_token().type, TT_SEMICOLON);
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
@@ -1440,7 +1440,7 @@ TEST(ParserTest, TemporaryInitialization_1) {
 TEST(ParserTest, TemporaryInitialization_2) {
   ParserTester test{"int(*(*a)[10]) = nullptr;"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
@@ -1484,7 +1484,7 @@ TEST(ParserTest, TemporaryInitialization_2) {
 TEST(ParserTest, TemporaryInitialization_3) {
   ParserTester test{"int(*(*a)[10] + b);"};
   auto node = test->TryParseStatement();
-  ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::CAST);

@@ -625,6 +625,8 @@ bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
       VisitCastExpression(*expr->As<CastExpression>());
     } else if (expr->type == AST::NodeType::ARRAY) {
       VisitArray(*expr->As<Array>());
+    } else if (expr->type == AST::NodeType::NEW) {
+      VisitNewExpression(*expr->As<NewExpression>());
     }
   }
 }
@@ -679,9 +681,7 @@ bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
   }
 }
 
-bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
-  print("{");
-
+bool AST::Visitor::VisitCode(CodeBlock &node) {
   for (auto &stmt : node.statements) {
     if (stmt->type == AST::NodeType::DECLARATION) {
       VisitDeclarationStatement(*stmt->As<DeclarationStatement>());
@@ -739,6 +739,12 @@ bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
       print("; ");
     }
   }
+}
+
+bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
+  print("{");
+
+  VisitCode(node);
 
   print("}");
 }
