@@ -1176,7 +1176,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
       print(")");
     }
   } else {
-    print("; while(strange_name)");
+    print("; while(strange_name--)");
   }
 
   print(" ");

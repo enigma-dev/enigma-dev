@@ -180,7 +180,7 @@ TEST(PrinterTest, test9) {
   v.VisitCode(*block);
   std::string printed = v.GetPrintedCode();
   code =
-      "int strange_name = (3); while(strange_name){signed int xx =12;  foo(12, fo(12), sizeof(signed int)); "
+      "int strange_name = (3); while(strange_name--){signed int xx =12;  foo(12, fo(12), sizeof(signed int)); "
       "while((2)){c--; "
       "c++; c*=2;}}";
 
@@ -465,6 +465,86 @@ TEST(PrinterTest, test23) {
       "{switch (i) {case "
       "'A':{break;}case 'B':{break;}default:{break;}}condition = (i == 'A' && j == '1') || (k == 'b' && l == 'Y');if "
       "(condition) {c++;}++l;} while (l <= 'Y');k--;k++;}++j;}++i;} while (i <= 'B');";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test24) {
+  std::string code =
+      "int outerLoopLimit = 3;int innerLoopLimit = 2;for (int i = 0; i < outerLoopLimit; ++i) {int j = 0;while (j < "
+      "innerLoopLimit) {int k = 0;do {int a = 5;int b = 3;int result;result = a + b;result = a * b;int preIncrement = "
+      "++a;int postIncrement = b++;double castResult = static_cast<double>(a) / b; ++k;} while (k < 1);++j;}}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  v.VisitCode(*block);
+  std::string printed = v.GetPrintedCode();
+  code =
+      "signed int outerLoopLimit = 3; signed int innerLoopLimit = 2;for (signed int i = 0; i < outerLoopLimit; ++i) "
+      "{signed int j = 0;while (j < "
+      "innerLoopLimit) {signed int k = 0;do {signed int a = 5; signed int b = 3;signed int result;result = a + "
+      "b;result = a * b;signed int preIncrement = "
+      "++a;signed int postIncrement = b++;signed double castResult = static_cast<signed double>(a) / b; ++k;} while (k "
+      "< "
+      "1);++j;}}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test25) {
+  std::string code =
+      "{int x = 2;for (int i = 1; i <= 3; ++i) {int y = i * 2;int z = y - x;int j = 1;while (j <= 2) {z = "
+      "static_cast<int>(z * 1.5);int k = 0;do {int result = (y << 1) - (--x) + (z++ * (k++));switch (result % 5) {case "
+      "0:break;case 1:result += x;break;case 2:result -= y;break;case 3:result *= z;break;case 4:result = (result / 2) "
+      "+ 1;break;default:break;}} while (k < 1);++j;}}return 0;}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  v.VisitCode(*block);
+  std::string printed = v.GetPrintedCode();
+  code =
+      "{signed int x = 2;for (signed int i = 1; i <= 3; ++i) {signed int y = i * 2;signed int z = y - x;signed int j = "
+      "1;while (j <= 2) {z = "
+      "static_cast<signed int>(z * 1.5);signed int k = 0;do {signed int result = (y << 1) - (--x) + (z++ * "
+      "(k++));switch (result % 5) {case "
+      "0:{break;}case 1:{result += x;break;}case 2:{result -= y;break;}case 3:{result *= z;break;}case 4:{result = "
+      "(result / 2) "
+      "+ 1;break;}default:{break;}}} while (k < 1);++j;}}return 0;}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test26) {
+  std::string code =
+      "condition = (size_a > size_b) ? 1 : 0;result = (condition) ? size_a : size_b;outer = 1;do {"
+      "inner = 1;do {inner++;} while (inner <= outer);outer++;} until (outer <= 3);result = (c > 10.0) ? (int)c "
+      ": b; repeat 123 {int * z = new int, d = new int, g; fn(alignof (int), sizeof 4, 12, x+x+(x++)-x*22); }";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  v.VisitCode(*block);
+  std::string printed = v.GetPrintedCode();
+  code =
+      "condition = (size_a > size_b) ? 1 : 0;result = (condition) ? size_a : size_b;outer = 1;do {"
+      "inner = 1;do {inner++;} while (inner <= outer);outer++;} while (!(outer <= 3));result = (c > 10.0) ? (signed "
+      "int)c "
+      ": b; int strange_name = 123; while(strange_name--){signed int * z = new (signed int), d = new (signed int), g; "
+      "fn(alignof (signed int), sizeof 4, 12, x+x+(x++)-x*22); }";
 
   ASSERT_TRUE(compare(code, printed));
 }
