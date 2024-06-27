@@ -1692,6 +1692,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseOperand() {
         TryParseTypeSpecifier(&type);
         if (token.type == TT_BEGINPARENTH) {
           auto tok = token;
+          token = lexer->ReadToken();
           auto expr = TryParseExpression(Precedence::kAll);
           require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after functional cast");
           return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok,

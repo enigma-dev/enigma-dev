@@ -384,7 +384,9 @@ bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
 
     for (std::size_t i = 0; i < flags_values.size(); i++) {
       if ((ft.flags & flags_masks[i]) == flags_values[i]) {
-        print(flags_names[i] + " ");
+        if (i != 8 || (i == 8 && ft.def->name == "char")) {
+          print(flags_names[i] + " ");
+        }
       }
     }
 
@@ -483,32 +485,10 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
     VisitFullType(node.ft);
     print("(");
-
-    if (node.expr->type == AST::NodeType::BINARY_EXPRESSION) {
-      VisitBinaryExpression(*node.expr->As<BinaryExpression>());
-    } else if (node.expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      VisitUnaryPrefixExpression(*node.expr->As<UnaryPrefixExpression>());
-    } else if (node.expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      VisitUnaryPostfixExpression(*node.expr->As<UnaryPostfixExpression>());
-    }
-
-    print(")");
   } else if (node.kind == AST::CastExpression::Kind::C_STYLE) {
     print("(");
     VisitFullType(node.ft);
     print(")");
-
-    if (node.expr->type == AST::NodeType::BINARY_EXPRESSION) {
-      VisitBinaryExpression(*node.expr->As<BinaryExpression>());
-    } else if (node.expr->type == AST::NodeType::IDENTIFIER) {
-      VisitIdentifierAccess(*node.expr->As<IdentifierAccess>());
-    } else if (node.expr->type == AST::NodeType::PARENTHETICAL) {
-      VisitParenthetical(*node.expr->As<Parenthetical>());
-    } else if (node.expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      VisitUnaryPrefixExpression(*node.expr->As<UnaryPrefixExpression>());
-    } else if (node.expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      VisitUnaryPostfixExpression(*node.expr->As<UnaryPostfixExpression>());
-    }
   } else {
     if (node.kind == AST::CastExpression::Kind::STATIC) {
       print("static_cast<");
@@ -519,22 +499,35 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
     } else if (node.kind == AST::CastExpression::Kind::REINTERPRET) {
       print("reinterpret_cast<");
     }
-
     VisitFullType(node.ft);
     print(">(");
+  }
 
-    if (node.expr->type == AST::NodeType::BINARY_EXPRESSION) {
-      VisitBinaryExpression(*node.expr->As<BinaryExpression>());
-    } else if (node.expr->type == AST::NodeType::IDENTIFIER) {
-      VisitIdentifierAccess(*node.expr->As<IdentifierAccess>());
-    } else if (node.expr->type == AST::NodeType::PARENTHETICAL) {
-      VisitParenthetical(*node.expr->As<Parenthetical>());
-    } else if (node.expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      VisitUnaryPrefixExpression(*node.expr->As<UnaryPrefixExpression>());
-    } else if (node.expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      VisitUnaryPostfixExpression(*node.expr->As<UnaryPostfixExpression>());
-    }
+  if (node.expr->type == AST::NodeType::BINARY_EXPRESSION) {
+    VisitBinaryExpression(*node.expr->As<BinaryExpression>());
+  } else if (node.expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    VisitUnaryPrefixExpression(*node.expr->As<UnaryPrefixExpression>());
+  } else if (node.expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    VisitUnaryPostfixExpression(*node.expr->As<UnaryPostfixExpression>());
+  } else if (node.expr->type == AST::NodeType::IDENTIFIER) {
+    VisitIdentifierAccess(*node.expr->As<IdentifierAccess>());
+  } else if (node.expr->type == AST::NodeType::PARENTHETICAL) {
+    VisitParenthetical(*node.expr->As<Parenthetical>());
+  } else if (node.expr->type == AST::NodeType::FUNCTION_CALL) {
+    VisitFunctionCallExpression(*node.expr->As<FunctionCallExpression>());
+  } else if (node.expr->type == AST::NodeType::TERNARY_EXPRESSION) {
+    VisitTernaryExpression(*node.expr->As<TernaryExpression>());
+  } else if (node.expr->type == AST::NodeType::SIZEOF) {
+    VisitSizeofExpression(*node.expr->As<SizeofExpression>());
+  } else if (node.expr->type == AST::NodeType::ALIGNOF) {
+    VisitAlignofExpression(*node.expr->As<AlignofExpression>());
+  } else if (node.expr->type == AST::NodeType::CAST) {
+    VisitCastExpression(*node.expr->As<CastExpression>());
+  }
 
+  if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
+    print(")");
+  } else if (node.kind != AST::CastExpression::Kind::C_STYLE) {
     print(")");
   }
 }
