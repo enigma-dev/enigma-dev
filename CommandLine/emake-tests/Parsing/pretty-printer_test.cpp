@@ -141,7 +141,7 @@ TEST(PrinterTest, test7) {
   v.VisitCode(*block);
   std::string printed = v.GetPrintedCode();
   code =
-      "{int x = 5; int y = 6; float *(*z)[18446744073709551615] = nullptr ;foo(bar); while(i) "
+      "{int x = 5; int y = 6; float *(*z)[10] = nullptr ;foo(bar); while(i) "
       "for(int p=12;p/2;p++){while(12){if(1)c++; else c--;}}}";
 
   ASSERT_TRUE(compare(code, printed));
@@ -603,6 +603,27 @@ TEST(PrinterTest, test29) {
   AST::Visitor v;
   v.VisitCode(*block);
   std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test30) {
+  std::string code =
+      "int* a = new int[3];  int b [3] = {1,2,3};  a[0] = 1;  a[1] = 2;  a[2] = 3;  int c[3]; a = "
+      "new (nullptr) int[]{1, 2, 3, 4, 5}; foo([1,2],[]);";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  v.VisitCode(*block);
+  std::string printed = v.GetPrintedCode();
+  code =
+      "int* a = new (int[3]);  int b [3] = {1,2,3};  a[0] = 1;  a[1] = 2;  a[2] = 3;  int c[3]; a = "
+      "new (nullptr) (int[]){1, 2, 3, 4, 5}; foo([1,2],[]);";
 
   ASSERT_TRUE(compare(code, printed));
 }

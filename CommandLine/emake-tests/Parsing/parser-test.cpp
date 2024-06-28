@@ -1441,7 +1441,7 @@ TEST(ParserTest, TemporaryInitialization_1) {
   ASSERT_EQ(std::get<std::string>(left_left_unary_operand->value.value), "x");
 
   ASSERT_EQ(left->right->type, AST::NodeType::LITERAL);
-  //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(left->right.get())->value.value), "5");
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(left->right.get())->value.value), "5");
 
   ASSERT_EQ(binary->right->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(binary->right.get())->value.value), "6");
@@ -1528,7 +1528,7 @@ TEST(ParserTest, TemporaryInitialization_3) {
   ASSERT_EQ(std::get<std::string>(left_unary->operand->As<AST::Literal>()->value.value), "a");
 
   ASSERT_EQ(operand->right->type, AST::NodeType::LITERAL);
-  //  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(operand->right.get())->value.value), "10");
+  ASSERT_EQ(std::get<std::string>(dynamic_cast<AST::Literal *>(operand->right.get())->value.value), "10");
 
   assert_identifier_is(binary->right.get(), "b");
 }

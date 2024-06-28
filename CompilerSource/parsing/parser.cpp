@@ -440,8 +440,21 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseArrayBoundsExpression(Declarator 
   require_token(TT_ENDBRACKET, "Expected ']' after array bounds expression");
 
   // TODO: Check that expression is constant, then evaluate it
-  decl->add_array_bound(ArrayBoundNode::nsize, outside_nested);
-
+  // for handling new expressions we need to support also non-constant expressions, like `new int[x]`
+  std::size_t arr_size = 0;
+  if (expr) {
+    if (expr->type == AST::NodeType::LITERAL) {
+      auto *lit = expr->As<AST::Literal>();
+      try {
+        arr_size = std::stoi(std::get<string>(lit->value.value));
+      } catch (std::exception) {
+        herr->Error(token) << "Array size must be a numeric literal";
+      }
+    } else {
+      herr->Error(token) << "Array size must be a constant expression";
+    }
+  }
+  decl->add_array_bound(arr_size, outside_nested);
   return nullptr;
 }
 
