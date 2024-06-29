@@ -111,9 +111,8 @@ class AstBuilder {
   bool next_maybe_functional_cast();
 
   std::unique_ptr<AST::DeclarationStatement> parse_declarations(
-      AST::DeclarationStatement::StorageClass sc, jdi::definition *def, AST::DeclaratorType decl_type,
-      bool parse_unbounded, std::vector<AST::DeclarationStatement::Declaration> decls,
-      bool already_parsed_first = false);
+      AST::DeclarationStatement::StorageClass sc, FullType &ft, AST::DeclaratorType decl_type, bool parse_unbounded,
+      std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first = false);
 
   void maybe_infer_int(FullType &type);
 
@@ -155,7 +154,7 @@ class AstBuilder {
 
   jdi::definition *get_builtin(std::string_view name);
 
-  void TryParseTypeSpecifier(FullType *type);
+  void TryParseTypeSpecifier(FullType *type, bool &first_signed);
 
   void TryParseTypeSpecifierSeq(FullType *type);
 
@@ -165,7 +164,7 @@ class AstBuilder {
 
   FullType TryParseTypeID();
 
-  void TryParseDeclSpecifier(FullType *type);
+  void TryParseDeclSpecifier(FullType *type, bool &first_signed);
 
   void TryParseDeclSpecifierSeq(FullType *type);
 

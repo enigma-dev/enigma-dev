@@ -383,15 +383,12 @@ bool AstBuilder::next_maybe_functional_cast() {
 }
 
 std::unique_ptr<AST::DeclarationStatement> AstBuilder::parse_declarations(
-    AST::DeclarationStatement::StorageClass sc, jdi::definition *def,
-    AST::DeclaratorType decl_type,
-  bool parse_unbounded, std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first ) {
+    AST::DeclarationStatement::StorageClass sc, FullType &ft, AST::DeclaratorType decl_type, bool parse_unbounded,
+    std::vector<AST::DeclarationStatement::Declaration> decls, bool already_parsed_first) {
   while (true) {
     if (!already_parsed_first) {
-      FullType decl;
-      decl.def = def;
-      TryParseDeclarator(&decl, decl_type);
-      decls.emplace_back(std::move(decl), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
+      TryParseDeclarator(&ft, decl_type);
+      decls.emplace_back(std::move(ft), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
       declarations[decls.back().declarator->decl.name.content] = decls.back().declarator.get();
     }
     if (token.type == TT_COMMA && parse_unbounded) {
@@ -401,7 +398,7 @@ std::unique_ptr<AST::DeclarationStatement> AstBuilder::parse_declarations(
     }
   }
 
-  return std::make_unique<AST::DeclarationStatement>(sc, def, std::move(decls));
+  return std::make_unique<AST::DeclarationStatement>(sc, ft.def, std::move(decls));
 }
 
 void AstBuilder::maybe_infer_int(FullType &type) {
@@ -921,7 +918,7 @@ jdi::definition *AstBuilder::get_builtin(std::string_view name) {
   }
 }
 
-void AstBuilder::TryParseTypeSpecifier(FullType *type) {
+void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {
   switch (token.type) {
     case TT_TYPE_NAME: {
       if (token.content == "long" || token.content == "short") {
@@ -990,7 +987,11 @@ void AstBuilder::TryParseTypeSpecifier(FullType *type) {
         if (contains_decflag_bitmask(type->flags, "unsigned") && token.type == TT_SIGNED) {
           herr->Error(token) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
         } else if (contains_decflag_bitmask(type->flags, token.content)) {
-          herr->Warning(token) << "Duplicate usage of flags in type specifier";
+          if (first_signed && token.type == TT_SIGNED) {
+            first_signed = false;
+          } else {
+            herr->Warning(token) << "Duplicate usage of flags in type specifier";
+          }
         } else {
           type->flags |= jdi_decflag_bitmask(token.content).second;
         }
@@ -1006,8 +1007,9 @@ void AstBuilder::TryParseTypeSpecifier(FullType *type) {
 }
 
 void AstBuilder::TryParseTypeSpecifierSeq(FullType *type) {
+  bool first_signed = true;
   while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(type);
+    TryParseTypeSpecifier(type, first_signed);
   }
 }
 
@@ -1081,8 +1083,9 @@ void AstBuilder::TryParseMaybeNestedPtrOperator(FullType *type) {
 
 FullType AstBuilder::TryParseTypeID() {
   FullType type;
+  bool first_signed = true;
   while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(&type);
+    TryParseTypeSpecifier(&type, first_signed);
   }
 
   maybe_infer_int(type);
@@ -1094,7 +1097,7 @@ FullType AstBuilder::TryParseTypeID() {
   return type;
 }
 
-void AstBuilder::TryParseDeclSpecifier(FullType *type) {
+void AstBuilder::TryParseDeclSpecifier(FullType *type, bool& first_signed) {
   switch (token.type) {
     case TT_TYPEDEF: {
       TryParseTypeSpecifierSeq(type);
@@ -1121,15 +1124,16 @@ void AstBuilder::TryParseDeclSpecifier(FullType *type) {
 
     default:
       if (next_is_type_specifier()) {
-        TryParseTypeSpecifier(type);
+        TryParseTypeSpecifier(type, first_signed);
         break;
       }
   }
 }
 
 void AstBuilder::TryParseDeclSpecifierSeq(FullType *type) {
+  bool first_signed = true;
   while (is_decl_specifier(token)) {
-    TryParseDeclSpecifier(type);
+    TryParseDeclSpecifier(type, first_signed);
   }
 }
 
@@ -1392,7 +1396,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseDeclarations(bool parse_unbounded
 
     // XXX: Implementation disallows, e.g, `int global foo;`
     auto sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
-    return parse_declarations(sc, type.def, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
+    return parse_declarations(sc, type, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
   } else {
     return nullptr;
   }
@@ -1702,7 +1706,8 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseOperand() {
     case TT_LOCAL: {
       if (next_maybe_functional_cast()) {
         FullType type;
-        TryParseTypeSpecifier(&type);
+        bool first_signed = true;
+        TryParseTypeSpecifier(&type, first_signed);
         if (token.type == TT_BEGINPARENTH) {
           auto tok = token;
           token = lexer->ReadToken();
@@ -2166,13 +2171,14 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseEitherFunctionalCastOrDeclaration
     bool maybe_c_style_cast, AST::DeclarationStatement::StorageClass sc) {
   if (next_maybe_functional_cast()) {
     FullType type;
-    TryParseTypeSpecifier(&type);
+    bool first_signed = true;
+    TryParseTypeSpecifier(&type, first_signed);
     if (next_is_type_specifier() ||
         // Make sure we don't accidentally consume a c-style cast when its required
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
       TryParseTypeSpecifierSeq(&type);
-      return parse_declarations(sc, type.def, decl_type, parse_unbounded, {});
+      return parse_declarations(sc, type, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;
       return std::make_unique<AST::CastExpression>(AST::CastExpression::Kind::FUNCTIONAL, tok, FullType{type.def},
@@ -2193,8 +2199,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseEitherFunctionalCastOrDeclaration
         std::vector<AST::DeclarationStatement::Declaration> decls = {};
         decls.emplace_back(std::move(type), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
         if (token.type == TT_COMMA && parse_unbounded) {
-          auto def = decls[0].declarator->def;
-          return parse_declarations(sc, def, decl_type, parse_unbounded, std::move(decls), true);
+          return parse_declarations(sc, type, decl_type, parse_unbounded, std::move(decls), true);
         } else {
           return std::make_unique<AST::DeclarationStatement>(sc, decls[0].declarator->def, std::move(decls));
         }

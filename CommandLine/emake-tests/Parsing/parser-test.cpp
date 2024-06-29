@@ -386,8 +386,8 @@ TEST(ParserTest, Declaration) {
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
-  //auto decl = node->As<AST::DeclarationStatement>();
-  // EXPECT_TRUE(contains_flag2(*decl->declarations[0].declarator, jdi::builtin_flag__const));  it gives false
+  auto decl = node->As<AST::DeclarationStatement>();
+  EXPECT_TRUE(contains_flag2(*decl->declarations[0].declarator, jdi::builtin_flag__const));
 }
 
 TEST(ParserTest, Declaration_NoSemicolon) {
