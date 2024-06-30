@@ -38,7 +38,7 @@ TEST(PrinterTest, test1) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -53,7 +53,7 @@ TEST(PrinterTest, test2) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "int x = new(int);";
 
@@ -69,7 +69,7 @@ TEST(PrinterTest, test3) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "{c++; g++; {int x=12; {for(int i=12;i!=22;i++){g++; c+=23;int cc = new (int);}}}}";
 
@@ -85,7 +85,7 @@ TEST(PrinterTest, test4) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "int x; int y=12,v=2333,dd=33; for(int g=0;g<22;g++){do{c++; "
@@ -103,7 +103,7 @@ TEST(PrinterTest, test5) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -118,7 +118,7 @@ TEST(PrinterTest, test6) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "int count =0; if(inc) count++; else if(dec) count--; else count=0; int flag=0; flag= (count)? "
@@ -138,7 +138,7 @@ TEST(PrinterTest, test7) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "{int x = 5; const int y = 6; float *(*z)[10] = nullptr ;foo(bar); while(i) "
@@ -157,7 +157,7 @@ TEST(PrinterTest, test8) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "if(true) for ( int i = 0; i < 12; i++) k++; else switch (i) { case 1 : {k--;} case 2 :{k += 3;} default "
@@ -176,7 +176,7 @@ TEST(PrinterTest, test9) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "int strange_name = (3); while(strange_name--){ int xx =12;  foo(12, fo(12), sizeof( int)); "
@@ -195,7 +195,7 @@ TEST(PrinterTest, test10) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "alignof(const volatile unsigned long long int*);";
 
@@ -213,7 +213,7 @@ TEST(PrinterTest, test11) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "switch (5 * 6 +12) { case 1: {while(1){while((f)) do{s--;  float a = new ( float);}while(!(1));} "
@@ -233,7 +233,7 @@ TEST(PrinterTest, test12) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -251,7 +251,7 @@ TEST(PrinterTest, test13) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -268,7 +268,7 @@ TEST(PrinterTest, test14) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -284,7 +284,7 @@ TEST(PrinterTest, test15) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -301,7 +301,7 @@ TEST(PrinterTest, test16) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -318,7 +318,7 @@ TEST(PrinterTest, test17) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -336,7 +336,7 @@ TEST(PrinterTest, test18) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -355,7 +355,7 @@ TEST(PrinterTest, test19) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -378,7 +378,7 @@ TEST(PrinterTest, test20) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "if (cmd == \" add\") { int title, author; int year;getline(infile, title);getline(infile, "
@@ -406,7 +406,7 @@ TEST(PrinterTest, test21) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "for (signed char i = 'A'; i <= 'B'; ++i) {for (signed char j = '1'; j <= '2'; ++j) {for (signed char k = 'a'; k "
@@ -428,7 +428,7 @@ TEST(PrinterTest, test22) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "signed char i = 'A';do {signed char j = '1';while (j <= '2') {for (signed char k = 'a'; k <= 'b'; ++k) {signed "
@@ -451,7 +451,7 @@ TEST(PrinterTest, test23) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "do {signed char j = '1';while (j <= '2') {for (signed char k = 'a'; k <= 'b'; ++k) {signed char l = 'X';do "
@@ -475,7 +475,7 @@ TEST(PrinterTest, test24) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -495,7 +495,7 @@ TEST(PrinterTest, test25) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "{ int x = 2;for ( int i = 1; i <= 3; ++i) { int y = i * 2; int z = y - x; int j = "
@@ -522,7 +522,7 @@ TEST(PrinterTest, test26) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "condition = (size_a > size_b) ? 1 : 0;result = (condition) ? size_a : size_b;outer = 1;do {"
@@ -547,7 +547,7 @@ TEST(PrinterTest, test27) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -569,7 +569,7 @@ TEST(PrinterTest, test28) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       " int *num1 = new ( int)(5);  int *num2 = new ( int)(3);  int *result = new "
@@ -601,7 +601,7 @@ TEST(PrinterTest, test29) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
@@ -619,7 +619,7 @@ TEST(PrinterTest, test30) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
       "int* a = new (int[3]);  int b [3] = {1,2,3};  a[0] = 1;  a[1] = 2;  a[2] = 3;  int c[3]; a = "
@@ -640,7 +640,7 @@ TEST(PrinterTest, test31) {
   auto *block = node->As<AST::CodeBlock>();
 
   AST::Visitor v;
-  v.VisitCode(*block);
+  ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
