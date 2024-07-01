@@ -645,3 +645,55 @@ TEST(PrinterTest, test31) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test32) {
+  std::string code =
+      "int x [2]; int* y = new int[2]; int z[2] = {1,2}; int* p = new int(12); float* q = new float(2+3); int* r = new "
+      "int(sizeof 12); bool* b = new bool; char* c = new char; double* d = new double;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "int x [2]; int* y = new (int[2]); int z[2] = {1,2}; int* p = new (int)(12); float* q = new (float)(2+3); int* r "
+      "= new "
+      "(int)(sizeof 12); bool* b = new (bool); signed char* c = new (signed char); double* d = new (double);";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test33) {
+  std::string code =
+      "int result = 0;for (int i = 0; i < n; ++i) {for (int j = 0; j < n; ++j) {int k = 0;while (k < n) {int m = 0;do "
+      "{int value = arr[i][j][k];value = -value;value = value * 2 + 3; double sqrtValue = "
+      "static_cast<double>(value);sqrtValue = sqrt(sqrtValue);switch (m) {case 0:result += (value << 1) - 3;result = "
+      "~result;break;case 1:result += static_cast<int>(sqrtValue) * 2;result = result ^ 1;break;default:result += "
+      "(value & 2) | 1;result = ++result;break;}++m;} while (m < 3);++k;}}}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "int result = 0; for (int i = 0; i < n; ++i) {for (int j = 0; j < n; ++j) {int k = 0; while (k < n) {int m = "
+      "0;do "
+      "{int value = arr[i][j][k];value = -value; value = value * 2 + 3; double sqrtValue = "
+      "static_cast<double>(value); sqrtValue = sqrt(sqrtValue); switch (m) {case 0:{result += (value << 1) - 3;result "
+      "= "
+      "~result;break;} case 1:{result += static_cast<int>(sqrtValue) * 2;result = result ^ 1;break;}default:{result "
+      "+= "
+      "(value & 2) | 1;result = ++result;break;}}++m;} while (m < 3);++k;}}}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
