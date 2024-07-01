@@ -1942,7 +1942,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression(SyntaxMode mode
   }
 }
 
-std::unique_ptr<AST::Node> AstBuilder::MaybeDeclaration() {
+std::unique_ptr<AST::Node> TryParseDeclOrTypeExpression() {
   if (next_is_decl_specifier() || next_maybe_functional_cast()) {
     if (token.type == TT_SCOPEACCESS) {
       token = lexer->ReadToken();
@@ -1960,10 +1960,9 @@ std::unique_ptr<AST::Node> AstBuilder::MaybeDeclaration() {
 
 // since we can place declarations in the same places we can place statements,
 // so this function will check first if this is a declaration, to be able to handle both
-std::unique_ptr<AST::Node> AstBuilder::TryParseStatement() {
-  auto decl_node = MaybeDeclaration();
+std::unique_ptr<AST::Node> TryParseStatement() {
+  auto decl_node = TryParseDeclOrTypeExpression();
   if (decl_node != nullptr) {
-    MaybeConsumeSemicolon();
     return decl_node;
   }
   switch (token.type) {
