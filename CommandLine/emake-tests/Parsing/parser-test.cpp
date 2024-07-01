@@ -48,7 +48,8 @@ TEST(ParserTest, Basics) {
   ASSERT_EQ(called->type, AST::NodeType::BINARY_EXPRESSION);
 
   auto *bin = called->As<AST::BinaryExpression>();
-  ASSERT_EQ(bin->operation, TokenType::TT_BEGINBRACKET);
+  ASSERT_EQ(bin->operation.type, TokenType::TT_BEGINBRACKET);
+  ASSERT_EQ(bin->operation.token, "[");
   assert_identifier_is(bin->left.get(), "z");
 
   ASSERT_EQ(bin->right->type, AST::NodeType::LITERAL);
@@ -396,65 +397,8 @@ TEST(ParserTest, Declaration_NoSemicolon) {
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
-TEST(ParserTest, Declaration_NoSemicolon) {
-  ParserTester test{"const unsigned *(*x)[10] = nullptr"};
-  auto node = test->TryParseStatement();
-  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
-  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
-}
-
 TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
-
-  auto node = test->TryParseStatement();
-  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
-  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
-
-  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = node->As<AST::DeclarationStatement>();
-  EXPECT_EQ(decls->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-
-  EXPECT_EQ(decls->declarations.size(), 3);
-  EXPECT_NE(decls->declarations[0].init, nullptr);
-  EXPECT_EQ(decls->declarations[0].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[0].declarator->decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
-
-  EXPECT_EQ(decls->declarations[1].init, nullptr);
-  EXPECT_EQ(decls->declarations[1].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[1].declarator->decl.components.size(), 0);
-
-  EXPECT_NE(decls->declarations[2].init, nullptr);
-  EXPECT_EQ(decls->declarations[2].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[2].declarator->decl.components.size(), 1);
-}
-
-TEST(ParserTest, Declarations_NoSemicolon) {
-  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y"};
-
-  auto node = test->TryParseStatement();
-  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
-  EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
-
-  ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
-  auto *decls = node->As<AST::DeclarationStatement>();
-  EXPECT_EQ(decls->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-
-  EXPECT_EQ(decls->declarations.size(), 3);
-  EXPECT_NE(decls->declarations[0].init, nullptr);
-  EXPECT_EQ(decls->declarations[0].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[0].declarator->decl.components.begin()->kind, DeclaratorNode::Kind::POINTER_TO);
-
-  EXPECT_EQ(decls->declarations[1].init, nullptr);
-  EXPECT_EQ(decls->declarations[1].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[1].declarator->decl.components.size(), 0);
-
-  EXPECT_NE(decls->declarations[2].init, nullptr);
-  EXPECT_EQ(decls->declarations[2].declarator->def->flags & jdi::DEF_TYPENAME, jdi::DEF_TYPENAME);
-  EXPECT_EQ(decls->declarations[2].declarator->decl.components.size(), 1);
-}
-
-TEST(ParserTest, Declarations_NoSemicolon) {
-  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y"};
 
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -651,7 +595,7 @@ TEST(ParserTest, NewExpression_3) {
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_ARRAYBOUND);
   ASSERT_EQ(first++->type, jdi::ref_stack::RT_POINTERTO);
-  ASSERT_EQ(new_->ft.decl.name.content, "");
+  ASSERT_EQ(new_exp->ft.decl.name.content, "");
 
   check_initializer(new_exp, AST::BraceOrParenInitializer::Kind::PAREN_INIT);
 }

@@ -213,7 +213,7 @@ class AstBuilder {
 
   std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_);
 
-  std::unique_ptr<AST::Node> MaybeDeclaration();
+  std::unique_ptr<AST::Node> TryParseDeclOrTypeExpression();
 
   std::unique_ptr<AST::Node> TryParseStatement();
 
