@@ -444,7 +444,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseArrayBoundsExpression(Declarator 
       auto *lit = expr->As<AST::Literal>();
       try {
         arr_size = std::stoi(std::get<string>(lit->value.value));
-      } catch (std::exception) {
+      } catch (const std::exception& e) {
         herr->Error(token) << "Array size must be a numeric literal";
       }
     } else {
@@ -1963,6 +1963,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseDeclOrTypeExpression() {
 std::unique_ptr<AST::Node> AstBuilder::TryParseStatement() {
   auto decl_node = TryParseDeclOrTypeExpression();
   if (decl_node != nullptr) {
+    MaybeConsumeSemicolon();
     return decl_node;
   }
   switch (token.type) {
