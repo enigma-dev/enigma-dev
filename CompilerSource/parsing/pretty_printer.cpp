@@ -56,6 +56,8 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
     printed = VisitCastExpression(*node.expression->As<CastExpression>());
   } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
     printed = VisitParenthetical(*node.expression->As<Parenthetical>());
+  } else if (node.expression->type == AST::NodeType::ARRAY) {
+    printed = VisitArray(*node.expression->As<Array>());
   }
 
   if (!printed) return false;
@@ -520,6 +522,8 @@ bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
 
     std::string arg = std::get<std::string>(node.argument);
     print(arg + ")");
+
+    printed = true;
   } else {
     print("(");
 

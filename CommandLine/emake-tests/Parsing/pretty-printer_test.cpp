@@ -697,3 +697,60 @@ TEST(PrinterTest, test33) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test34) {
+  std::string code =
+      "int *(*(*a)[10][12])[15];  s = (x ? y : z ? a : (z[5](6))); ss = sizeof...(ident); int x = sizeof(const "
+      "volatile unsigned long long int **(*)[10]); int size = alignof(const volatile unsigned long long int*);";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test35) {
+  std::string code =
+      "s = new (nullptr) int[]{1, 2, 3, 4, 5}; a=::new int[][15]{1, 2, 3, 4, 5}; b=::new (nullptr) (int *(**)[10])(1, "
+      "2, 3, 4, 5); c=new (int *(**)[10]); d=new (nullptr) (int[]){.x=1, .y=2, .z=3, .u=4, .v=5}; e=new (nullptr) "
+      "int[]{args...};";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "s = new (nullptr) (int[]){1, 2, 3, 4, 5}; a=::new (int[][15]){1, 2, 3, 4, 5}; b=::new (nullptr) (int "
+      "*(**)[10])(1, 2, 3, 4, 5); c=new (int *(**)[10]); d=new (nullptr) (int[]){.x=1, .y=2, .z=3, .u=4, .v=5}; e=new "
+      "(nullptr) (int[]){args...};";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test36) {
+  std::string code = "delete x; ::delete x; delete[] x; ::delete[] x;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}

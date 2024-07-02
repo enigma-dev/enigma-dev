@@ -234,6 +234,7 @@ TEST(ParserTest, Declarator_1) {
 }
 */
 
+//
 TEST(ParserTest, Declarator_2) {
   ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int);"};
   auto node = test3->TryParseStatement();
@@ -290,6 +291,7 @@ TEST(ParserTest, Declarator_3) {
   ASSERT_EQ(nested->components[2].kind, DeclaratorNode::Kind::ARRAY_BOUND);
 }
 
+//
 TEST(ParserTest, Declarator_3_NoSemicolon) {
   ParserTester test{"int *(*(*a)[10][12])[15]"};
   auto node = test->TryParseStatement();
@@ -397,6 +399,7 @@ TEST(ParserTest, Declaration_NoSemicolon) {
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
+//
 TEST(ParserTest, Declarations) {
   ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
 

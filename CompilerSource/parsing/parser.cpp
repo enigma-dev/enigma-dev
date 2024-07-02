@@ -1778,6 +1778,9 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
     operand = TryParseOperand();
   }
   if (operand != nullptr) {
+    if (operand->type == AST::NodeType::DELETE || operand->type == AST::NodeType::NEW) {
+      return operand;
+    }
     // TODO: Handle binary operators, unary postfix operators
     // (including function calls, array indexing, etc).
     // XXX: Maybe handle TT_IDENTIFIER here when `operand` names a type
