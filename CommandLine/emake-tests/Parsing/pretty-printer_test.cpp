@@ -754,3 +754,182 @@ TEST(PrinterTest, test36) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test37) {
+  std::string code =
+      "switch (5 * 6) { case 1: return 2; break 13; case 2: return 3; break; default: break;} switch (1) { case 1: "
+      "return 2; default: return \"test\";} switch (1) { default: continue 12;} switch (1) { default: continue 12} "
+      "switch (1) { default: delete [] x; return \"new test\";} switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, "
+      "5}; return \"new test\";}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "switch (5 * 6) { case 1:{ return 2; break 13; }case 2: {return 3; break; } default:{ break;}} switch (1) { case "
+      "1: "
+      "{return 2; }default:{ return \"test\";}} switch (1) { default:{ continue 12;}} switch (1) { default: {continue "
+      "12;}} "
+      "switch (1) { default:{ delete [] x; return \"new test\";}} switch (1) { default: {new (nullptr) (int[]){1, 2, "
+      "3, 4, "
+      "5}; return \"new test\";}}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test38) {
+  std::string code = "{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) } {{{}}}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "{ int x = 5; const int y = 6; float *(*z)[10] = nullptr; foo(bar); } {{{}}}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test39) {
+  std::string code =
+      "if(3>2) (j)++; else --k; if k k++; if (true) { return 1; } else { return 2; } if (false) for(int i=0;i<12;i++) "
+      "{k++;} else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "if(3>2) (j)++; else --k; if (k) k++; if (true) { return 1; } else { return 2; } if (false) for(int "
+      "i=0;i<12;i++) "
+      "{k++;} else switch(i){ case 1 :{ k--;} case 2 : {k+=3; }default :{ k=0;} }";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test40) {
+  std::string code = "int((*x)[5] + 6); int(*(*a)[10]) = nullptr;  int(*(*a)[10] + b); int(*(*(*(*x + 4))));";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "int((*(x))[5] + 6); int *(*a)[10] = nullptr;  int(*((*(a))[10]) + b); int(*(*(*(*(x) + 4))));";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test41) {
+  std::string code =
+      "for (int i = 0; i < 5; i++) {} for int i = 0, j=1; i >= 12; --i {} for int i = 0, j=1, k=133 ;i != 12; --i {j "
+      "++;} for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break; else continue;} for int i = 0, j=1, k=133, "
+      "w=44, u=-77 ;w % 22; w++ {f++; if(i) x = new int; else delete y;} for int(i = 5); i < 5; i++ {} for (int)(i = "
+      "0); i < 5; i++ {} for static_cast<int>(i = 10); i / 3; i-- {k++; return;} for static_cast<int>(i = 10, j=12); i "
+      "mod 3; i-- {k--; return 12;} for dynamic_cast<int>(i = 10); i / 3; i-- {} for dynamic_cast<int>(i); i / 3; i-- "
+      "{} for dynamic_cast<int>((i)); i / 3; i-- {} for const_cast<int>(i = 10); i / 3; i-- {} for const_cast<int>(i); "
+      "i / 3; i-- {} for const_cast<int>((i)); i / 3; i-- {} for reinterpret_cast<int>(i = 10); i / 3; i-- {} for "
+      "reinterpret_cast<int>(i); i / 3; i-- {} for reinterpret_cast<int>((i)); i / 3; i-- {}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "for (int i = 0; i < 5; i++) {} for( int i = 0, j=1; i >= 12; --i) {} for (int i = 0, j=1, k=133 ;i != 12; --i) "
+      "{j "
+      "++;} for( int i = 0, j=1, k=133, w=-99 ;w % 22; j++) {if(l) break; else continue;} for (int i = 0, j=1, k=133, "
+      "w=44, u=-77 ;w % 22; w++) {f++; if(i) x = new (int); else delete y;} for (int(i = 5); i < 5; i++ ){} for( "
+      "(int)(i = "
+      "0); i < 5; i++ ){} for( static_cast<int>(i = 10); i / 3; i-- ){k++; return;} for (static_cast<int>(i = 10, "
+      "j=12); i "
+      "mod 3; i--) {k--; return 12;} for( dynamic_cast<int>(i = 10); i / 3; i--) {} for (dynamic_cast<int>(i); i / 3; "
+      "i--) "
+      "{} for (dynamic_cast<int>((i)); i / 3; i--) {} for (const_cast<int>(i = 10); i / 3; i--) {} for "
+      "(const_cast<int>(i); "
+      "i / 3; i--) {} for( const_cast<int>((i)); i / 3; i-- ){} for (reinterpret_cast<int>(i = 10); i / 3; i--) {} for "
+      "("
+      "reinterpret_cast<int>(i); i / 3; i--) {} for (reinterpret_cast<int>((i)); i / 3; i--) {}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test42) {
+  std::string code = "while(i==1){i++} until(i==1) {i++} repeat(4){i++} ";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "while(i==1){i++;} while(!(i==1)) {i++;} int strange_name =(4) ; while(strange_name--){i++;}";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test43) {
+  std::string code = "do{c++}while(i) do c++ until i ";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "do{c++;}while(i); do{ c++;} while(!(i)); ";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test44) {
+  std::string code =
+      "a = [1,2,3] a = [1] a = [2+3] a = [x] a = [2+3, 4*6, 5/2] a = [(12)] a = [x++] a = [--x] a = [foo(12)] a = "
+      "[sizeof 12] a = [reinterpret_cast<int>(i)] x++; if(true) --l";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "a = [1,2,3]; a = [1]; a = [2+3]; a = [x]; a = [2+3, 4*6, 5/2]; a = [(12)]; a = [x++]; a = [--x]; a = [foo(12)]; "
+      "a = "
+      "[sizeof 12]; a = [reinterpret_cast<int>(i)]; x++; if(true) --l;";
+
+  ASSERT_TRUE(compare(code, printed));
+}
