@@ -933,3 +933,23 @@ TEST(PrinterTest, test44) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test45) {
+  std::string code =
+      "char y = '\n'; y='\t'; y='\v'; y = '\b'; y='\r'; y='\f'; y = '\a'; y='\t'; y='\v'; y='\\';y='\?';";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code =
+      "signed char y = '\\n'; y='\\t'; y='\\v'; y = '\\b'; y='\\r'; y='\\f'; y = '\\a'; y='\\t'; y='\\v'; y='\\\'; "
+      "y='\\?';";
+
+  ASSERT_TRUE(compare(code, printed));
+}

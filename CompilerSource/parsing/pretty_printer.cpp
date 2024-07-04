@@ -26,7 +26,32 @@ bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
 }
 
 bool AST::Visitor::VisitLiteral(Literal &node) {
-  print(std::get<std::string>(node.value.value));
+  std::string value = std::get<std::string>(node.value.value);
+  if (value == "'\n'") {
+    print("'\\n'");
+  } else if (value == "'\t'") {
+    print("'\\t'");
+  } else if (value == "'\v'") {
+    print("'\\v'");
+  } else if (value == "'\b'") {
+    print("'\\b'");
+  } else if (value == "'\r'") {
+    print("'\\r'");
+  } else if (value == "'\f'") {
+    print("'\\f'");
+  } else if (value == "'\a'") {
+    print("'\\a'");
+  } else if (value == "'\\'") {
+    print("'\\\'");
+  } else if (value == "'\''") {
+    print("'\\''");
+  } else if (value == "'\"'") {
+    print("'\\\"'");
+  } else if (value == "'\?'") {
+    print("'\\?'");
+  } else {
+    print(value);
+  }
   return true;
 }
 
