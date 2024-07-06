@@ -893,6 +893,58 @@ bool AST::Visitor::VisitCondition(PNode &node) {
   return printed;
 }
 
+bool AST::Visitor::VisitBody(PNode &node) {
+  bool printed = false;
+
+  if (node->type == AST::NodeType::BLOCK) {
+    printed = VisitCodeBlock(*node->As<CodeBlock>());
+  } else if (node->type == AST::NodeType::IDENTIFIER) {
+    printed = VisitIdentifierAccess(*node->As<AST::IdentifierAccess>());
+  } else if (node->type == AST::NodeType::PARENTHETICAL) {
+    printed = VisitParenthetical(*node->As<Parenthetical>());
+  } else if (node->type == AST::NodeType::NEW) {
+    printed = VisitNewExpression(*node->As<NewExpression>());
+  } else if (node->type == AST::NodeType::DELETE) {
+    printed = VisitDeleteExpression(*node->As<DeleteExpression>());
+  } else if (node->type == AST::NodeType::BINARY_EXPRESSION) {
+    printed = VisitBinaryExpression(*node->As<BinaryExpression>());
+  } else if (node->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
+    printed = VisitUnaryPrefixExpression(*node->As<UnaryPrefixExpression>());
+  } else if (node->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+    printed = VisitUnaryPostfixExpression(*node->As<UnaryPostfixExpression>());
+  } else if (node->type == AST::NodeType::FUNCTION_CALL) {
+    printed = VisitFunctionCallExpression(*node->As<FunctionCallExpression>());
+  } else if (node->type == AST::NodeType::TERNARY_EXPRESSION) {
+    printed = VisitTernaryExpression(*node->As<TernaryExpression>());
+  } else if (node->type == AST::NodeType::SIZEOF) {
+    printed = VisitSizeofExpression(*node->As<SizeofExpression>());
+  } else if (node->type == AST::NodeType::ALIGNOF) {
+    printed = VisitAlignofExpression(*node->As<AlignofExpression>());
+  } else if (node->type == AST::NodeType::CAST) {
+    printed = VisitCastExpression(*node->As<CastExpression>());
+  } else if (node->type == AST::NodeType::DECLARATION) {
+    printed = VisitDeclarationStatement(*node->As<DeclarationStatement>());
+  } else if (node->type == AST::NodeType::BREAK) {
+    printed = VisitBreakStatement(*node->As<BreakStatement>());
+  } else if (node->type == AST::NodeType::CONTINUE) {
+    printed = VisitContinueStatement(*node->As<ContinueStatement>());
+  } else if (node->type == AST::NodeType::RETURN) {
+    printed = VisitReturnStatement(*node->As<ReturnStatement>());
+  } else if (node->type == AST::NodeType::IF) {
+    printed = VisitIfStatement(*node->As<IfStatement>());
+  } else if (node->type == AST::NodeType::FOR) {
+    printed = VisitForLoop(*node->As<ForLoop>());
+  } else if (node->type == AST::NodeType::SWITCH) {
+    printed = VisitSwitchStatement(*node->As<SwitchStatement>());
+  } else if (node->type == AST::NodeType::WHILE) {
+    printed = VisitWhileLoop(*node->As<WhileLoop>());
+  } else if (node->type == AST::NodeType::DO) {
+    printed = VisitDoLoop(*node->As<DoLoop>());
+  }
+
+  return printed;
+}
+
 bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   bool printed = false;
 
@@ -909,51 +961,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   }
   print(" ");
 
-  if (node.true_branch->type == AST::NodeType::BLOCK) {
-    printed = VisitCodeBlock(*node.true_branch->As<CodeBlock>());
-  } else if (node.true_branch->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.true_branch->As<AST::IdentifierAccess>());
-  } else if (node.true_branch->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.true_branch->As<Parenthetical>());
-  } else if (node.true_branch->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.true_branch->As<NewExpression>());
-  } else if (node.true_branch->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.true_branch->As<DeleteExpression>());
-  } else if (node.true_branch->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.true_branch->As<BinaryExpression>());
-  } else if (node.true_branch->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.true_branch->As<UnaryPrefixExpression>());
-  } else if (node.true_branch->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.true_branch->As<UnaryPostfixExpression>());
-  } else if (node.true_branch->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.true_branch->As<FunctionCallExpression>());
-  } else if (node.true_branch->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.true_branch->As<TernaryExpression>());
-  } else if (node.true_branch->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.true_branch->As<SizeofExpression>());
-  } else if (node.true_branch->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.true_branch->As<AlignofExpression>());
-  } else if (node.true_branch->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.true_branch->As<CastExpression>());
-  } else if (node.true_branch->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.true_branch->As<DeclarationStatement>());
-  } else if (node.true_branch->type == AST::NodeType::BREAK) {
-    printed = VisitBreakStatement(*node.true_branch->As<BreakStatement>());
-  } else if (node.true_branch->type == AST::NodeType::CONTINUE) {
-    printed = VisitContinueStatement(*node.true_branch->As<ContinueStatement>());
-  } else if (node.true_branch->type == AST::NodeType::RETURN) {
-    printed = VisitReturnStatement(*node.true_branch->As<ReturnStatement>());
-  } else if (node.true_branch->type == AST::NodeType::IF) {
-    printed = VisitIfStatement(*node.true_branch->As<IfStatement>());
-  } else if (node.true_branch->type == AST::NodeType::FOR) {
-    printed = VisitForLoop(*node.true_branch->As<ForLoop>());
-  } else if (node.true_branch->type == AST::NodeType::SWITCH) {
-    printed = VisitSwitchStatement(*node.true_branch->As<SwitchStatement>());
-  } else if (node.true_branch->type == AST::NodeType::WHILE) {
-    printed = VisitWhileLoop(*node.true_branch->As<WhileLoop>());
-  } else if (node.true_branch->type == AST::NodeType::DO) {
-    printed = VisitDoLoop(*node.true_branch->As<DoLoop>());
-  }
+  printed = VisitBody(node.true_branch);
 
   if (!printed) return false;
   if (node.true_branch->type != AST::NodeType::BLOCK && node.true_branch->type != AST::NodeType::IF &&
@@ -966,51 +974,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   if (node.false_branch) {
     print("else ");
 
-    if (node.false_branch->type == AST::NodeType::BLOCK) {
-      printed = VisitCodeBlock(*node.false_branch->As<CodeBlock>());
-    } else if (node.false_branch->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*node.false_branch->As<AST::IdentifierAccess>());
-    } else if (node.false_branch->type == AST::NodeType::PARENTHETICAL) {
-      printed = VisitParenthetical(*node.false_branch->As<Parenthetical>());
-    } else if (node.false_branch->type == AST::NodeType::NEW) {
-      printed = VisitNewExpression(*node.false_branch->As<NewExpression>());
-    } else if (node.false_branch->type == AST::NodeType::DELETE) {
-      printed = VisitDeleteExpression(*node.false_branch->As<DeleteExpression>());
-    } else if (node.false_branch->type == AST::NodeType::BINARY_EXPRESSION) {
-      printed = VisitBinaryExpression(*node.false_branch->As<BinaryExpression>());
-    } else if (node.false_branch->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      printed = VisitUnaryPrefixExpression(*node.false_branch->As<UnaryPrefixExpression>());
-    } else if (node.false_branch->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      printed = VisitUnaryPostfixExpression(*node.false_branch->As<UnaryPostfixExpression>());
-    } else if (node.false_branch->type == AST::NodeType::FUNCTION_CALL) {
-      printed = VisitFunctionCallExpression(*node.false_branch->As<FunctionCallExpression>());
-    } else if (node.false_branch->type == AST::NodeType::TERNARY_EXPRESSION) {
-      printed = VisitTernaryExpression(*node.false_branch->As<TernaryExpression>());
-    } else if (node.false_branch->type == AST::NodeType::SIZEOF) {
-      printed = VisitSizeofExpression(*node.false_branch->As<SizeofExpression>());
-    } else if (node.false_branch->type == AST::NodeType::ALIGNOF) {
-      printed = VisitAlignofExpression(*node.false_branch->As<AlignofExpression>());
-    } else if (node.false_branch->type == AST::NodeType::CAST) {
-      printed = VisitCastExpression(*node.false_branch->As<CastExpression>());
-    } else if (node.false_branch->type == AST::NodeType::DECLARATION) {
-      printed = VisitDeclarationStatement(*node.false_branch->As<DeclarationStatement>());
-    } else if (node.false_branch->type == AST::NodeType::BREAK) {
-      printed = VisitBreakStatement(*node.false_branch->As<BreakStatement>());
-    } else if (node.false_branch->type == AST::NodeType::CONTINUE) {
-      printed = VisitContinueStatement(*node.false_branch->As<ContinueStatement>());
-    } else if (node.false_branch->type == AST::NodeType::RETURN) {
-      printed = VisitReturnStatement(*node.false_branch->As<ReturnStatement>());
-    } else if (node.false_branch->type == AST::NodeType::IF) {
-      printed = VisitIfStatement(*node.false_branch->As<IfStatement>());
-    } else if (node.false_branch->type == AST::NodeType::FOR) {
-      printed = VisitForLoop(*node.false_branch->As<ForLoop>());
-    } else if (node.false_branch->type == AST::NodeType::SWITCH) {
-      printed = VisitSwitchStatement(*node.false_branch->As<SwitchStatement>());
-    } else if (node.false_branch->type == AST::NodeType::WHILE) {
-      printed = VisitWhileLoop(*node.false_branch->As<WhileLoop>());
-    } else if (node.false_branch->type == AST::NodeType::DO) {
-      printed = VisitDoLoop(*node.false_branch->As<DoLoop>());
-    }
+    printed = VisitBody(node.false_branch);
 
     if (!printed) return false;
     if (node.false_branch->type != AST::NodeType::BLOCK && node.false_branch->type != AST::NodeType::IF &&
@@ -1088,51 +1052,7 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
   if (!printed) return false;
   print(") ");
 
-  if (node.body->type == AST::NodeType::BLOCK) {
-    printed = VisitCodeBlock(*node.body->As<CodeBlock>());
-  } else if (node.body->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.body->As<AST::IdentifierAccess>());
-  } else if (node.body->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.body->As<Parenthetical>());
-  } else if (node.body->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.body->As<NewExpression>());
-  } else if (node.body->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.body->As<DeleteExpression>());
-  } else if (node.body->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.body->As<BinaryExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.body->As<UnaryPrefixExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.body->As<UnaryPostfixExpression>());
-  } else if (node.body->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.body->As<FunctionCallExpression>());
-  } else if (node.body->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.body->As<TernaryExpression>());
-  } else if (node.body->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.body->As<SizeofExpression>());
-  } else if (node.body->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.body->As<AlignofExpression>());
-  } else if (node.body->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.body->As<CastExpression>());
-  } else if (node.body->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.body->As<DeclarationStatement>());
-  } else if (node.body->type == AST::NodeType::BREAK) {
-    printed = VisitBreakStatement(*node.body->As<BreakStatement>());
-  } else if (node.body->type == AST::NodeType::CONTINUE) {
-    printed = VisitContinueStatement(*node.body->As<ContinueStatement>());
-  } else if (node.body->type == AST::NodeType::RETURN) {
-    printed = VisitReturnStatement(*node.body->As<ReturnStatement>());
-  } else if (node.body->type == AST::NodeType::IF) {
-    printed = VisitIfStatement(*node.body->As<IfStatement>());
-  } else if (node.body->type == AST::NodeType::FOR) {
-    printed = VisitForLoop(*node.body->As<ForLoop>());
-  } else if (node.body->type == AST::NodeType::SWITCH) {
-    printed = VisitSwitchStatement(*node.body->As<SwitchStatement>());
-  } else if (node.body->type == AST::NodeType::WHILE) {
-    printed = VisitWhileLoop(*node.body->As<WhileLoop>());
-  } else if (node.body->type == AST::NodeType::DO) {
-    printed = VisitDoLoop(*node.body->As<DoLoop>());
-  }
+  printed = VisitBody(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
@@ -1269,51 +1189,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
 
   print(" ");
 
-  if (node.body->type == AST::NodeType::BLOCK) {
-    printed = VisitCodeBlock(*node.body->As<CodeBlock>());
-  } else if (node.body->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.body->As<AST::IdentifierAccess>());
-  } else if (node.body->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.body->As<Parenthetical>());
-  } else if (node.body->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.body->As<NewExpression>());
-  } else if (node.body->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.body->As<DeleteExpression>());
-  } else if (node.body->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.body->As<BinaryExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.body->As<UnaryPrefixExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.body->As<UnaryPostfixExpression>());
-  } else if (node.body->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.body->As<FunctionCallExpression>());
-  } else if (node.body->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.body->As<TernaryExpression>());
-  } else if (node.body->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.body->As<SizeofExpression>());
-  } else if (node.body->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.body->As<AlignofExpression>());
-  } else if (node.body->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.body->As<CastExpression>());
-  } else if (node.body->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.body->As<DeclarationStatement>());
-  } else if (node.body->type == AST::NodeType::BREAK) {
-    printed = VisitBreakStatement(*node.body->As<BreakStatement>());
-  } else if (node.body->type == AST::NodeType::CONTINUE) {
-    printed = VisitContinueStatement(*node.body->As<ContinueStatement>());
-  } else if (node.body->type == AST::NodeType::RETURN) {
-    printed = VisitReturnStatement(*node.body->As<ReturnStatement>());
-  } else if (node.body->type == AST::NodeType::IF) {
-    printed = VisitIfStatement(*node.body->As<IfStatement>());
-  } else if (node.body->type == AST::NodeType::FOR) {
-    printed = VisitForLoop(*node.body->As<ForLoop>());
-  } else if (node.body->type == AST::NodeType::SWITCH) {
-    printed = VisitSwitchStatement(*node.body->As<SwitchStatement>());
-  } else if (node.body->type == AST::NodeType::WHILE) {
-    printed = VisitWhileLoop(*node.body->As<WhileLoop>());
-  } else if (node.body->type == AST::NodeType::DO) {
-    printed = VisitDoLoop(*node.body->As<DoLoop>());
-  }
+  printed = VisitBody(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
@@ -1332,51 +1208,7 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
     print("{");
   }
 
-  if (node.body->type == AST::NodeType::BLOCK) {
-    printed = VisitCodeBlock(*node.body->As<CodeBlock>());
-  } else if (node.body->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.body->As<AST::IdentifierAccess>());
-  } else if (node.body->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.body->As<Parenthetical>());
-  } else if (node.body->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.body->As<NewExpression>());
-  } else if (node.body->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.body->As<DeleteExpression>());
-  } else if (node.body->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.body->As<BinaryExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.body->As<UnaryPrefixExpression>());
-  } else if (node.body->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.body->As<UnaryPostfixExpression>());
-  } else if (node.body->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.body->As<FunctionCallExpression>());
-  } else if (node.body->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.body->As<TernaryExpression>());
-  } else if (node.body->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.body->As<SizeofExpression>());
-  } else if (node.body->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.body->As<AlignofExpression>());
-  } else if (node.body->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.body->As<CastExpression>());
-  } else if (node.body->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.body->As<DeclarationStatement>());
-  } else if (node.body->type == AST::NodeType::BREAK) {
-    printed = VisitBreakStatement(*node.body->As<BreakStatement>());
-  } else if (node.body->type == AST::NodeType::CONTINUE) {
-    printed = VisitContinueStatement(*node.body->As<ContinueStatement>());
-  } else if (node.body->type == AST::NodeType::RETURN) {
-    printed = VisitReturnStatement(*node.body->As<ReturnStatement>());
-  } else if (node.body->type == AST::NodeType::IF) {
-    printed = VisitIfStatement(*node.body->As<IfStatement>());
-  } else if (node.body->type == AST::NodeType::FOR) {
-    printed = VisitForLoop(*node.body->As<ForLoop>());
-  } else if (node.body->type == AST::NodeType::SWITCH) {
-    printed = VisitSwitchStatement(*node.body->As<SwitchStatement>());
-  } else if (node.body->type == AST::NodeType::WHILE) {
-    printed = VisitWhileLoop(*node.body->As<WhileLoop>());
-  } else if (node.body->type == AST::NodeType::DO) {
-    printed = VisitDoLoop(*node.body->As<DoLoop>());
-  }
+  printed = VisitBody(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
