@@ -89,6 +89,9 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_HEXLITERAL);
     REGISTER(TT_STRINGLIT);
     REGISTER(TT_CHARLIT);
+    REGISTER(TT_VECTOR);
+    REGISTER(TT_SET);
+    REGISTER(TT_STACK);
     REGISTER(TT_SCOPEACCESS);
     REGISTER(TT_TYPE_NAME);
     REGISTER(TT_LOCAL);
@@ -201,6 +204,9 @@ static const std::vector<std::string> kTokenSymbols = {"Identifier",
                                                        "Hexadecimal",
                                                        "String",
                                                        "Char",
+                                                       "vector",
+                                                       "set",
+                                                       "stack",
                                                        "::",
                                                        "Type Name",
                                                        "local",

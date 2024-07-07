@@ -180,3 +180,146 @@ TEST(LexerTest, VariadicMacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(LexerTest, Vector1) {
+  LexerTester lex("vector<int>vec;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_VECTOR);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "vec");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Vector2) {
+  LexerTester lex("vector<int>vect;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_VECTOR);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "vect");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Vector3) {
+  LexerTester lex("vector<int>v;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_VECTOR);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "v");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Vector4) {
+  LexerTester lex("vector<int>vectorr;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_VECTOR);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "vectorr");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Set1) {
+  LexerTester lex("set<int>sel;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_SET);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "sel");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Set2) {
+  LexerTester lex("set<int>sla;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_SET);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "sla");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Set3) {
+  LexerTester lex("set<int>s;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_SET);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "s");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Set4) {
+  LexerTester lex("set<int>seta;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_SET);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "seta");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Stack1) {
+  LexerTester lex("stack<int>sta;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_STACK);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "sta");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Stack2) {
+  LexerTester lex("stack<int>stac;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_STACK);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "stac");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Stack3) {
+  LexerTester lex("stack<int>stackk;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_STACK);
+  EXPECT_EQ(lex->ReadToken().type, TT_LESS);
+  EXPECT_EQ(lex->ReadToken().type, TT_TYPE_NAME);
+  EXPECT_EQ(lex->ReadToken().type, TT_GREATER);
+  Token tok = lex->ReadToken();
+  EXPECT_EQ(tok.type, TT_IDENTIFIER);
+  EXPECT_EQ(tok.content, "stackk");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}

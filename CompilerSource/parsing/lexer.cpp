@@ -179,6 +179,10 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "float",    TT_TYPE_NAME },
   { "double",   TT_TYPE_NAME },
   { "void",     TT_TYPE_NAME },
+
+  {"vector", TT_VECTOR},
+  {"set",    TT_SET},
+  {"stack",  TT_STACK}
 };
 
 #define PURE_VIRTUAL(t, x) t x final { \
