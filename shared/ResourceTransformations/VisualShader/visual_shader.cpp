@@ -719,7 +719,7 @@ int VisualShaderNode::get_expanded_output_port_count() const {
 }
 
 void VisualShaderNode::set_output_ports_expanded(const std::vector<int>& values) {
-	for (int i {0}; i < values.size(); i++) {
+	for (size_t i {0}; i < values.size(); i++) {
 		VisualShaderNode::expanded_output_ports.at(values.at(i)) = true;
 	}
 }
@@ -797,11 +797,11 @@ int VisualShaderNodeInput::get_input_port_count() const {
     return 0;
 }
 
-VisualShaderNode::PortType VisualShaderNodeInput::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeInput::get_input_port_type([[maybe_unused]] const int& port) const {
     return VisualShaderNode::PortType::PORT_TYPE_SCALAR;
 }
 
-std::string VisualShaderNodeInput::get_input_port_name(const int& port) const {
+std::string VisualShaderNodeInput::get_input_port_name([[maybe_unused]] const int& port) const {
     return "";
 }
 
@@ -813,7 +813,7 @@ VisualShaderNode::PortType VisualShaderNodeInput::get_output_port_type(const int
     return port == 0 ? VisualShaderNodeInput::get_input_type_by_name(VisualShaderNodeInput::input_name) : VisualShaderNode::PortType::PORT_TYPE_SCALAR;
 }
 
-std::string VisualShaderNodeInput::get_output_port_name(const int& port) const {
+std::string VisualShaderNodeInput::get_output_port_name([[maybe_unused]] const int& port) const {
     return "";
 }
 
@@ -880,10 +880,10 @@ int VisualShaderNodeOutput::get_output_port_count() const {
     return 0;
 }
 
-VisualShaderNode::PortType VisualShaderNodeOutput::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeOutput::get_output_port_type([[maybe_unused]] const int& port) const {
     return VisualShaderNode::PortType::PORT_TYPE_SCALAR;
 }
 
-std::string VisualShaderNodeOutput::get_output_port_name(const int& port) const {
+std::string VisualShaderNodeOutput::get_output_port_name([[maybe_unused]] const int& port) const {
     return "";
 }

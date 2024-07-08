@@ -55,15 +55,20 @@ class VisualShader {
         };
 
         union ConnectionKey {
+// Ignore the warning about the anonymous struct.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
             struct {
                 uint64_t node : 32;
                 uint64_t port : 32;
             };
+#pragma GCC diagnostic pop
             uint64_t key = 0;
             bool operator<(const ConnectionKey &key) const {
                 return this->key < key.key;
             }
         };
+
 
         VisualShader();
 
@@ -187,7 +192,7 @@ class VisualShaderNode {
         virtual std::string get_caption() const = 0;
 
         // If no output is connected, the output var passed will be empty. If no input is connected and input is NIL, the input var passed will be empty.
-        virtual std::string generate_code([[maybe_unused]] [[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const = 0;
+        virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const = 0;
 
         virtual int get_input_port_count() const = 0;
         virtual VisualShaderNode::PortType get_input_port_type(const int& port) const = 0;
@@ -221,15 +226,15 @@ class VisualShaderNodeInput : public VisualShaderNode {
     public:
         VisualShaderNodeInput();
 
-        virtual std::string generate_code([[maybe_unused]] [[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
+        virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
 
         virtual int get_input_port_count() const override;
-        virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-        virtual std::string get_input_port_name(const int& port) const override;
+        virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+        virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
         virtual int get_output_port_count() const override;
         virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-        virtual std::string get_output_port_name(const int& port) const override;
+        virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
         virtual std::string get_caption() const override;
 
@@ -252,15 +257,15 @@ class VisualShaderNodeOutput : public VisualShaderNode {
     public:
         VisualShaderNodeOutput();
 
-        virtual std::string generate_code([[maybe_unused]] [[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
+        virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
 
         virtual int get_input_port_count() const override;
         virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
         virtual std::string get_input_port_name(const int& port) const override;
 
         virtual int get_output_port_count() const override;
-        virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-        virtual std::string get_output_port_name(const int& port) const override;
+        virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+        virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
         virtual std::string get_caption() const override;
 
