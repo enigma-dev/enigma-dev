@@ -899,23 +899,7 @@ void AstBuilder::maybe_assign_full_type(FullType *type, jdi::definition *def, To
 }
 
 jdi::definition *AstBuilder::get_builtin(std::string_view name) {
-  if (name == "char" || name == "char8_t") {
-    return jdi::builtin_type__char;
-  } else if (name == "char16_t" || name == "wchar_t") {
-    return jdi::builtin_type__wchar_t;
-  } else if (name == "char32_t" || name == "int") {
-    return jdi::builtin_type__int;
-  } else if (name == "bool") {
-    return jdi::builtin_type__bool;
-  } else if (name == "float") {
-    return jdi::builtin_type__float;
-  } else if (name == "double") {
-    return jdi::builtin_type__double;
-  } else if (name == "void") {
-    return jdi::builtin_type__void;
-  } else {
-    return nullptr;
-  }
+  return jdi::builtin_primitives[std::string(name)];
 }
 
 void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {

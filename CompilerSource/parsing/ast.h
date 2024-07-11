@@ -141,6 +141,7 @@ class AST {
         left(std::move(left_)), right(std::move(right_)),
         operation(operation_) {}
   };
+
   // Function call expression, foo(bar)
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
     PNode function;
@@ -150,6 +151,7 @@ class AST {
 
     FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_): function{std::move(function_)}, arguments{std::move(arguments_)} {}
   };
+
   // Unary prefix expressions; generally top-level will be "++varname"
   struct UnaryPrefixExpression : TypedNode<NodeType::UNARY_PREFIX_EXPRESSION> {
     PNode operand;
@@ -160,6 +162,7 @@ class AST {
     UnaryPrefixExpression(PNode operand_, TokenType operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
+
   // Unary postfix expression
   struct UnaryPostfixExpression : TypedNode<NodeType::UNARY_POSTFIX_EXPRESSION> {
     PNode operand;
@@ -170,6 +173,7 @@ class AST {
     UnaryPostfixExpression(PNode operand_, TokenType operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
+
   // Ternary expression; the only one is ?:
   struct TernaryExpression : TypedNode<NodeType::TERNARY_EXPRESSION> {
     PNode condition;
@@ -181,6 +185,7 @@ class AST {
     TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
       condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
   };
+
   // Sizeof expression
   struct SizeofExpression : TypedNode<NodeType::SIZEOF> {
     enum class Kind { EXPR, VARIADIC, TYPE } kind;
@@ -192,6 +197,7 @@ class AST {
     explicit SizeofExpression(std::string ident): kind{Kind::VARIADIC}, argument{std::move(ident)} {}
     explicit SizeofExpression(FullType ft): kind{Kind::TYPE}, argument{std::move(ft)} {}
   };
+
   // Alignof expression
   struct AlignofExpression : TypedNode<NodeType::ALIGNOF> {
     FullType ft;
@@ -200,6 +206,7 @@ class AST {
 
     explicit AlignofExpression(FullType type): ft{std::move(type)} {}
   };
+
   // Cast expressions
   struct CastExpression : TypedNode<NodeType::CAST> {
     enum class Kind { C_STYLE, STATIC, DYNAMIC, REINTERPRET, CONST, FUNCTIONAL } kind;
@@ -277,6 +284,7 @@ class AST {
     IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_): condition{std::move(condition_)},
         true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)} {}
   };
+
   struct ForLoop : TypedNode<NodeType::FOR> {
     PNode assignment, condition, increment;
     PNode body;
@@ -287,6 +295,7 @@ class AST {
     ForLoop(PNode assignment_, PNode condition_, PNode increment_, PNode body_): assignment{std::move(assignment_)},
         condition{std::move(condition_)}, increment{std::move(increment_)}, body{std::move(body_)} {}
   };
+
   struct WhileLoop : TypedNode<NodeType::WHILE> {
     PNode condition;
     PNode body;
@@ -298,6 +307,7 @@ class AST {
     WhileLoop(PNode condition_, PNode body_, Kind kind_): condition{std::move(condition_)},
         body{std::move(body_)}, kind{kind_} {}
   };
+
   struct DoLoop : TypedNode<NodeType::DO> {
     PNode body;
     PNode condition;
@@ -349,6 +359,7 @@ class AST {
 
     ReturnStatement(PNode expression_, bool is_exit_): expression{std::move(expression_)}, is_exit{is_exit_} {}
   };
+
   struct BreakStatement : TypedNode<NodeType::BREAK> {
     // Optional: the number of nested loops to break out of (default = 1)
     PNode count;
@@ -357,6 +368,7 @@ class AST {
 
     explicit BreakStatement(PNode count_): count{std::move(count_)} {}
   };
+
   struct ContinueStatement : TypedNode<NodeType::CONTINUE> {
     // Optional: the number of nested loops to continue past (default = 1)
     PNode count;
@@ -365,6 +377,7 @@ class AST {
 
     explicit ContinueStatement(PNode count_): count{std::move(count_)} {}
   };
+
   struct WithStatement : TypedNode<NodeType::WITH> {
     PNode object;
     PNode body;
@@ -449,6 +462,7 @@ class AST {
       is_global{is_global}, is_array{is_array}, placement{std::move(placement)}, ft{std::move(type)},
       initializer{std::move(initializer)} {}
   };
+
   // Delete expression
   struct DeleteExpression : TypedNode<NodeType::DELETE> {
     bool is_global;
@@ -479,7 +493,7 @@ class AST {
     jdi::definition *def;
     StorageClass storage_class;
     std::vector<Declaration> declarations;
-    static const std::vector<std::string> StorageNames;
+    static const std::vector<std::string> StorageNames; // what is the use of this?
 
     BASIC_NODE_ROUTINES(DeclarationStatement);
     static std::string StorageToString(StorageClass st);

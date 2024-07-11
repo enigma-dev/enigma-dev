@@ -83,9 +83,6 @@ enum TokenType {
   TT_HEXLITERAL,      // 0x0 $1 0x2... 0x9 0xA... $F $10... $FEDCBA9876543210...
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
-  TT_VECTOR,          // The `vector` keyword
-  TT_SET,             // The `set` keyword
-  TT_STACK,           // The `stack` keyword
   TT_SCOPEACCESS,     // ::
   TT_TYPE_NAME,       // var, char, char8_t, char16_t, char32_t, wchar_t, bool, short, int, long, float, double, void; any baked-in primitive type (includes C++ types in namespace enigma_user).
   TT_LOCAL,           // `local` storage specifier
