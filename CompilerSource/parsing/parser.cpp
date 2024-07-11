@@ -964,11 +964,12 @@ void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {
 
     default: {
       if (token.type == TT_SIGNED || token.type == TT_UNSIGNED || next_is_cv_qualifier()) {
-//        if (contains_decflag_bitmask(type->flags, "signed") && token.type == TT_UNSIGNED) {
-//          // TODO: There is no way to actually detect this, as signed's value is 0
-//          herr->Error(token) << "Conflicting use of 'signed' and 'unsigned' in the same type specifier";
-//        } else
-        if (contains_decflag_bitmask(type->flags, "unsigned") && token.type == TT_SIGNED) {
+        if (token.type == TT_UNSIGNED && first_signed) {
+          // TODO: There is no way to actually detect this, as signed's value is 0 --> solved using the first_signed
+          type->flags |= jdi_decflag_bitmask(token.content).second;
+        } else if (token.type == TT_UNSIGNED && !first_signed) {
+          herr->Error(token) << "Conflicting use of 'signed' and 'unsigned' in the same type specifier";
+        } else if (contains_decflag_bitmask(type->flags, "unsigned") && token.type == TT_SIGNED) {
           herr->Error(token) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
         } else if (contains_decflag_bitmask(type->flags, token.content)) {
           if (first_signed && token.type == TT_SIGNED) {
