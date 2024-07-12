@@ -2292,4 +2292,26 @@ TEST(ParserTest, ParseCodeFunction) {
   ASSERT_EQ(block->statements.size(), 2);
   ASSERT_EQ(block->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::IF);
-}
+} 
+
+// TEST(ParserTest, ss) {
+//   ParserTester test{"if((x * 2)> s(12)) --l"};
+//   auto node = test->ParseCode();
+//   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+//   auto *block = node->As<AST::CodeBlock>();
+//   ASSERT_EQ(block->statements.size(), 1);
+//   ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+// }
+
+// TEST(ParserTest, ss2) {
+//   ParserTester test{"if (x * 2)> s(12) --l"};
+//   auto node = test->ParseCode();
+//   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+//   auto *block = node->As<AST::CodeBlock>();
+//   ASSERT_EQ(block->statements.size(), 1);
+//   ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+// }

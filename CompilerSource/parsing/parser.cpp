@@ -1771,6 +1771,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
     // XXX: Maybe handle TT_IDENTIFIER here when `operand` names a type
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
+    bool postfix = false;
     while (token.type != TT_ENDOFCODE) {
       if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
@@ -1781,7 +1782,12 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
         if (precedence < Precedence::kUnaryPostfix) {
           break;
         }
+        if(postfix){
+          herr->Error(token) << "Unary postfix operator cannot be applied to another unary postfix operator";
+          break;
+        } 
         operand = TryParseUnaryPostfixExpression(precedence, std::move(operand));
+        postfix = true;
       } else if (map_contains(Precedence::kTernaryPrec, token.type)) {
         if (precedence < Precedence::kTernary) {
           break;
@@ -1833,14 +1839,9 @@ std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseBinaryExpression(int 
 }
 
 std::unique_ptr<AST::UnaryPostfixExpression> AstBuilder::TryParseUnaryPostfixExpression(int precedence, std::unique_ptr<AST::Node> operand) {
-  while (Precedence::kUnaryPostfixPrec.find(token.type) != Precedence::kUnaryPostfixPrec.end() &&
-         precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
-    Token oper = token;
-//    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
-    token = lexer->ReadToken(); // Consume the operator
-
-    operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
-  }
+  Token oper = token;
+  token = lexer->ReadToken();  // Consume the operator
+  operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
   return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
 }
 
