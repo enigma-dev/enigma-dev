@@ -2292,7 +2292,7 @@ TEST(ParserTest, ParseCodeFunction) {
   ASSERT_EQ(block->statements.size(), 2);
   ASSERT_EQ(block->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::IF);
-} 
+}
 
 // TEST(ParserTest, ss) {
 //   ParserTester test{"if((x * 2)> s(12)) --l"};

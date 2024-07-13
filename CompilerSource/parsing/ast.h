@@ -71,6 +71,8 @@ class AST {
     T* As() {
         return dynamic_cast<T*>(this);
     }
+    // Helper function that calls the appropriate Visitor function for this node type
+    virtual bool accept(Visitor& visitor) = 0;
 
     Node(NodeType t = NodeType::ERROR): type(t) {}
     virtual ~Node() = default;
@@ -105,10 +107,11 @@ class AST {
     std::string ToCppLiteral() { return "";}
   };
 
-# define BASIC_NODE_ROUTINES(name)                                 \
-  void RecurusiveVisit(Visitor &visitor) final {                   \
-    if (visitor.Visit ## name(*this)) RecursiveSubVisit(visitor);  \
-  }                                                                \
+#define BASIC_NODE_ROUTINES(name)                                            \
+  bool accept(Visitor &visitor) final { return visitor.Visit##name(*this); } \
+  void RecurusiveVisit(Visitor &visitor) final {                             \
+    if (visitor.Visit##name(*this)) RecursiveSubVisit(visitor);              \
+  }                                                                          \
   void RecursiveSubVisit(Visitor &visitor) final
 
   // Simple block of code, containing zero or more statements.
@@ -548,8 +551,6 @@ class AST {
     virtual bool VisitArray(Array &node);
     virtual bool VisitIdentifierAccess(IdentifierAccess &node);
     virtual bool VisitLiteral(Literal &node);
-    virtual bool VisitCondition(PNode &node);
-    virtual bool VisitBody(PNode &node);
     virtual bool VisitIfStatement(IfStatement &node);
     virtual bool VisitForLoop(ForLoop &node);
     virtual bool VisitWhileLoop(WhileLoop &node);
@@ -567,6 +568,9 @@ class AST {
     virtual bool VisitNewExpression(NewExpression &node);
     virtual bool VisitDeleteExpression(DeleteExpression &node);
     virtual bool VisitDeclarationStatement(DeclarationStatement &node);
+    virtual bool Visit(PNode &node) {
+      return node->accept(*this);
+    }
 
     virtual ~Visitor() { of.close(); }
   };

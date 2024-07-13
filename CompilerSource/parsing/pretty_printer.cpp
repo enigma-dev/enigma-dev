@@ -59,31 +59,7 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
   bool printed = false;
   print("(");
 
-  if (node.expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
-  } else if (node.expression->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.expression->As<Literal>());
-  } else if (node.expression->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.expression->As<BinaryExpression>());
-  } else if (node.expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
-  } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
-  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
-  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.expression->As<TernaryExpression>());
-  } else if (node.expression->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.expression->As<SizeofExpression>());
-  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.expression->As<AlignofExpression>());
-  } else if (node.expression->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.expression->As<CastExpression>());
-  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.expression->As<Parenthetical>());
-  } else if (node.expression->type == AST::NodeType::ARRAY) {
-    printed = VisitArray(*node.expression->As<Array>());
-  }
+  printed = Visit(node.expression);
 
   if (!printed) return false;
   print(")");
@@ -94,23 +70,7 @@ bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
 bool AST::Visitor::VisitUnaryPostfixExpression(UnaryPostfixExpression &node) {
   bool printed = false;
 
-  if (node.operand->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.operand->As<IdentifierAccess>());
-  } else if (node.operand->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.operand->As<Parenthetical>());
-  } else if (node.operand->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.operand->As<Literal>());
-  } else if (node.operand->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.operand->As<BinaryExpression>());
-  } else if (node.operand->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.operand->As<UnaryPrefixExpression>());
-  } else if (node.operand->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.operand->As<UnaryPostfixExpression>());
-  } else if (node.operand->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.operand->As<FunctionCallExpression>());
-  } else if (node.operand->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.operand->As<TernaryExpression>());
-  }
+  printed = Visit(node.operand);
 
   if (!printed) return false;
   print(ToSymbol(node.operation));
@@ -126,23 +86,7 @@ bool AST::Visitor::VisitUnaryPrefixExpression(UnaryPrefixExpression &node) {
     print("(");
   }
 
-  if (node.operand->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.operand->As<IdentifierAccess>());
-  } else if (node.operand->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.operand->As<Parenthetical>());
-  } else if (node.operand->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.operand->As<Literal>());
-  } else if (node.operand->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.operand->As<BinaryExpression>());
-  } else if (node.operand->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.operand->As<UnaryPrefixExpression>());
-  } else if (node.operand->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.operand->As<UnaryPostfixExpression>());
-  } else if (node.operand->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.operand->As<FunctionCallExpression>());
-  } else if (node.operand->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.operand->As<TernaryExpression>());
-  }
+  printed = Visit(node.operand);
 
   if (!printed) return false;
   if (node.operation == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
@@ -200,60 +144,12 @@ bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
 bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
   bool printed = false;
 
-  if (node.left->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.left->As<IdentifierAccess>());
-  } else if (node.left->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.left->As<Parenthetical>());
-  } else if (node.left->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.left->As<Literal>());
-  } else if (node.left->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.left->As<BinaryExpression>());
-  } else if (node.left->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.left->As<UnaryPrefixExpression>());
-  } else if (node.left->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.left->As<UnaryPostfixExpression>());
-  } else if (node.left->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.left->As<FunctionCallExpression>());
-  } else if (node.left->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.left->As<TernaryExpression>());
-  } else if (node.left->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.left->As<SizeofExpression>());
-  } else if (node.left->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.left->As<AlignofExpression>());
-  } else if (node.left->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.left->As<CastExpression>());
-  }
+  printed = Visit(node.left);
 
   if (!printed) return false;
   print(" " + node.operation.token + " ");
 
-  if (node.right->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.right->As<IdentifierAccess>());
-  } else if (node.right->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.right->As<Parenthetical>());
-  } else if (node.right->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.right->As<Literal>());
-  } else if (node.right->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.right->As<BinaryExpression>());
-  } else if (node.right->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.right->As<UnaryPrefixExpression>());
-  } else if (node.right->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.right->As<UnaryPostfixExpression>());
-  } else if (node.right->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.right->As<FunctionCallExpression>());
-  } else if (node.right->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.right->As<TernaryExpression>());
-  } else if (node.right->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.right->As<SizeofExpression>());
-  } else if (node.right->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.right->As<AlignofExpression>());
-  } else if (node.right->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.right->As<CastExpression>());
-  } else if (node.right->type == AST::NodeType::ARRAY) {
-    printed = VisitArray(*node.right->As<Array>());
-  } else if (node.right->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.right->As<NewExpression>());
-  }
+  printed = Visit(node.right);
 
   if (!printed) return false;
   if (node.operation.type == TT_BEGINBRACKET) {
@@ -275,29 +171,7 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
   print("(");
 
   for (auto &arg : node.arguments) {
-    if (arg->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*arg->As<IdentifierAccess>());
-    } else if (arg->type == AST::NodeType::LITERAL) {
-      printed = VisitLiteral(*arg->As<Literal>());
-    } else if (arg->type == AST::NodeType::PARENTHETICAL) {
-      printed = VisitParenthetical(*arg->As<Parenthetical>());
-    } else if (arg->type == AST::NodeType::BINARY_EXPRESSION) {
-      printed = VisitBinaryExpression(*arg->As<BinaryExpression>());
-    } else if (arg->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      printed = VisitUnaryPrefixExpression(*arg->As<UnaryPrefixExpression>());
-    } else if (arg->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      printed = VisitUnaryPostfixExpression(*arg->As<UnaryPostfixExpression>());
-    } else if (arg->type == AST::NodeType::FUNCTION_CALL) {
-      printed = VisitFunctionCallExpression(*arg->As<FunctionCallExpression>());
-    } else if (arg->type == AST::NodeType::SIZEOF) {
-      printed = VisitSizeofExpression(*arg->As<SizeofExpression>());
-    } else if (arg->type == AST::NodeType::ALIGNOF) {
-      printed = VisitAlignofExpression(*arg->As<AlignofExpression>());
-    } else if (arg->type == AST::NodeType::CAST) {
-      printed = VisitCastExpression(*arg->As<CastExpression>());
-    } else if (arg->type == AST::NodeType::ARRAY) {
-      printed = VisitArray(*arg->As<Array>());
-    }
+    printed = Visit(arg);
 
     if (!printed) return false;
     if (&arg != &node.arguments.back()) {
@@ -312,73 +186,17 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
 bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
   bool printed = false;
 
-  printed = VisitCondition(node.condition);
+  printed = Visit(node.condition);
 
   if (!printed) return false;
   print(" ? ");
 
-  if (node.true_expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.true_expression->As<IdentifierAccess>());
-  } else if (node.true_expression->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.true_expression->As<Literal>());
-  } else if (node.true_expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.true_expression->As<Parenthetical>());
-  } else if (node.true_expression->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.true_expression->As<BinaryExpression>());
-  } else if (node.true_expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.true_expression->As<UnaryPrefixExpression>());
-  } else if (node.true_expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.true_expression->As<UnaryPostfixExpression>());
-  } else if (node.true_expression->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.true_expression->As<FunctionCallExpression>());
-  } else if (node.true_expression->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.true_expression->As<TernaryExpression>());
-  } else if (node.true_expression->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.true_expression->As<DeleteExpression>());
-  } else if (node.true_expression->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.true_expression->As<SizeofExpression>());
-  } else if (node.true_expression->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.true_expression->As<AlignofExpression>());
-  } else if (node.true_expression->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.true_expression->As<CastExpression>());
-  } else if (node.true_expression->type == AST::NodeType::ARRAY) {
-    printed = VisitArray(*node.true_expression->As<Array>());
-  } else if (node.true_expression->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.true_expression->As<NewExpression>());
-  }
+  printed = Visit(node.true_expression);
 
   if (!printed) return false;
   print(" : ");
 
-  if (node.false_expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.false_expression->As<IdentifierAccess>());
-  } else if (node.false_expression->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.false_expression->As<Literal>());
-  } else if (node.false_expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.false_expression->As<Parenthetical>());
-  } else if (node.false_expression->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.false_expression->As<BinaryExpression>());
-  } else if (node.false_expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.false_expression->As<UnaryPrefixExpression>());
-  } else if (node.false_expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.false_expression->As<UnaryPostfixExpression>());
-  } else if (node.false_expression->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.false_expression->As<FunctionCallExpression>());
-  } else if (node.false_expression->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.false_expression->As<TernaryExpression>());
-  } else if (node.false_expression->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node.false_expression->As<DeleteExpression>());
-  } else if (node.false_expression->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.false_expression->As<SizeofExpression>());
-  } else if (node.false_expression->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.false_expression->As<AlignofExpression>());
-  } else if (node.false_expression->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.false_expression->As<CastExpression>());
-  } else if (node.false_expression->type == AST::NodeType::ARRAY) {
-    printed = VisitArray(*node.false_expression->As<Array>());
-  } else if (node.true_expression->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.true_expression->As<NewExpression>());
-  }
+  printed = Visit(node.false_expression);
 
   return printed;
 }
@@ -387,32 +205,10 @@ bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
   bool printed = false;
   print("return ");
 
-  if (node.expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
-  } else if (node.expression->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.expression->As<Literal>());
-  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.expression->As<Parenthetical>());
-  } else if (node.expression->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.expression->As<BinaryExpression>());
-  } else if (node.expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
-  } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
-  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
-  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.expression->As<TernaryExpression>());
-  } else if (node.expression->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.expression->As<SizeofExpression>());
-  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.expression->As<AlignofExpression>());
-  } else if (node.expression->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.expression->As<CastExpression>());
-  } else if (node.expression->type == AST::NodeType::ARRAY) {
-    printed = VisitArray(*node.expression->As<Array>());
-  } else if (node.expression->type == AST::NodeType::BLOCK) {
+  if (node.expression->type == AST::NodeType::BLOCK) {
     printed = true;
+  } else {
+    printed = Visit(node.expression);
   }
 
   return printed;
@@ -576,27 +372,7 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
 
   if (!printed) return false;
 
-  if (node.expr->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.expr->As<BinaryExpression>());
-  } else if (node.expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.expr->As<UnaryPrefixExpression>());
-  } else if (node.expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.expr->As<UnaryPostfixExpression>());
-  } else if (node.expr->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.expr->As<IdentifierAccess>());
-  } else if (node.expr->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.expr->As<Parenthetical>());
-  } else if (node.expr->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.expr->As<FunctionCallExpression>());
-  } else if (node.expr->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.expr->As<TernaryExpression>());
-  } else if (node.expr->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.expr->As<SizeofExpression>());
-  } else if (node.expr->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.expr->As<AlignofExpression>());
-  } else if (node.expr->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.expr->As<CastExpression>());
-  }
+  printed = Visit(node.expr);
 
   if (!printed) return false;
 
@@ -614,29 +390,7 @@ bool AST::Visitor::VisitArray(Array &node) {
   print("[");
 
   if (node.elements.size()) {
-    if (node.elements[0]->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*node.elements[0]->As<IdentifierAccess>());
-    } else if (node.elements[0]->type == AST::NodeType::LITERAL) {
-      printed = VisitLiteral(*node.elements[0]->As<Literal>());
-    } else if (node.elements[0]->type == AST::NodeType::PARENTHETICAL) {
-      printed = VisitParenthetical(*node.elements[0]->As<Parenthetical>());
-    } else if (node.elements[0]->type == AST::NodeType::BINARY_EXPRESSION) {
-      printed = VisitBinaryExpression(*node.elements[0]->As<BinaryExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      printed = VisitUnaryPrefixExpression(*node.elements[0]->As<UnaryPrefixExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      printed = VisitUnaryPostfixExpression(*node.elements[0]->As<UnaryPostfixExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::FUNCTION_CALL) {
-      printed = VisitFunctionCallExpression(*node.elements[0]->As<FunctionCallExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::SIZEOF) {
-      printed = VisitSizeofExpression(*node.elements[0]->As<SizeofExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::ALIGNOF) {
-      printed = VisitAlignofExpression(*node.elements[0]->As<AlignofExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::CAST) {
-      printed = VisitCastExpression(*node.elements[0]->As<CastExpression>());
-    } else if (node.elements[0]->type == AST::NodeType::ARRAY) {
-      printed = VisitArray(*node.elements[0]->As<Array>());
-    }
+    printed = Visit(node.elements[0]);
   } else {
     printed = true;
   }
@@ -691,31 +445,7 @@ bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
   } else {
     auto &expr = std::get<AST::PNode>(node.initializer);
 
-    if (expr->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*expr->As<AST::IdentifierAccess>());
-    } else if (expr->type == AST::NodeType::LITERAL) {
-      printed = VisitLiteral(*expr->As<AST::Literal>());
-    } else if (expr->type == AST::NodeType::PARENTHETICAL) {
-      printed = VisitParenthetical(*expr->As<AST::Parenthetical>());
-    } else if (expr->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      printed = VisitUnaryPostfixExpression(*expr->As<AST::UnaryPostfixExpression>());
-    } else if (expr->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      printed = VisitUnaryPrefixExpression(*expr->As<AST::UnaryPrefixExpression>());
-    } else if (expr->type == AST::NodeType::BINARY_EXPRESSION) {
-      printed = VisitBinaryExpression(*expr->As<AST::BinaryExpression>());
-    } else if (expr->type == AST::NodeType::FUNCTION_CALL) {
-      printed = VisitFunctionCallExpression(*expr->As<FunctionCallExpression>());
-    } else if (expr->type == AST::NodeType::SIZEOF) {
-      printed = VisitSizeofExpression(*expr->As<SizeofExpression>());
-    } else if (expr->type == AST::NodeType::ALIGNOF) {
-      printed = VisitAlignofExpression(*expr->As<AlignofExpression>());
-    } else if (expr->type == AST::NodeType::CAST) {
-      printed = VisitCastExpression(*expr->As<CastExpression>());
-    } else if (expr->type == AST::NodeType::ARRAY) {
-      printed = VisitArray(*expr->As<Array>());
-    } else if (expr->type == AST::NodeType::NEW) {
-      printed = VisitNewExpression(*expr->As<NewExpression>());
-    }
+    printed = Visit(expr);
   }
 
   return printed;
@@ -788,55 +518,7 @@ bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
 bool AST::Visitor::VisitCode(CodeBlock &node) {
   bool printed = false;
   for (auto &stmt : node.statements) {
-    if (stmt->type == AST::NodeType::DECLARATION) {
-      printed = VisitDeclarationStatement(*stmt->As<DeclarationStatement>());
-    } else if (stmt->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*stmt->As<AST::IdentifierAccess>());
-    } else if (stmt->type == AST::NodeType::PARENTHETICAL) {
-      printed = VisitParenthetical(*stmt->As<Parenthetical>());
-    } else if (stmt->type == AST::NodeType::RETURN) {
-      printed = VisitReturnStatement(*stmt->As<ReturnStatement>());
-    } else if (stmt->type == AST::NodeType::BREAK) {
-      printed = VisitBreakStatement(*stmt->As<BreakStatement>());
-    } else if (stmt->type == AST::NodeType::CONTINUE) {
-      printed = VisitContinueStatement(*stmt->As<ContinueStatement>());
-    } else if (stmt->type == AST::NodeType::NEW) {
-      printed = VisitNewExpression(*stmt->As<NewExpression>());
-    } else if (stmt->type == AST::NodeType::DELETE) {
-      printed = VisitDeleteExpression(*stmt->As<DeleteExpression>());
-    } else if (stmt->type == AST::NodeType::BINARY_EXPRESSION) {
-      printed = VisitBinaryExpression(*stmt->As<BinaryExpression>());
-    } else if (stmt->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-      printed = VisitUnaryPrefixExpression(*stmt->As<UnaryPrefixExpression>());
-    } else if (stmt->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-      printed = VisitUnaryPostfixExpression(*stmt->As<UnaryPostfixExpression>());
-    } else if (stmt->type == AST::NodeType::FUNCTION_CALL) {
-      printed = VisitFunctionCallExpression(*stmt->As<FunctionCallExpression>());
-    } else if (stmt->type == AST::NodeType::TERNARY_EXPRESSION) {
-      printed = VisitTernaryExpression(*stmt->As<TernaryExpression>());
-    } else if (stmt->type == AST::NodeType::SIZEOF) {
-      printed = VisitSizeofExpression(*stmt->As<SizeofExpression>());
-    } else if (stmt->type == AST::NodeType::ALIGNOF) {
-      printed = VisitAlignofExpression(*stmt->As<AlignofExpression>());
-    } else if (stmt->type == AST::NodeType::CAST) {
-      printed = VisitCastExpression(*stmt->As<CastExpression>());
-    } else if (stmt->type == AST::NodeType::BLOCK) {
-      printed = VisitCodeBlock(*stmt->As<CodeBlock>());
-    } else if (stmt->type == AST::NodeType::IF) {
-      printed = VisitIfStatement(*stmt->As<IfStatement>());
-    } else if (stmt->type == AST::NodeType::FOR) {
-      printed = VisitForLoop(*stmt->As<ForLoop>());
-    } else if (stmt->type == AST::NodeType::CASE) {
-      printed = VisitCaseStatement(*stmt->As<CaseStatement>());
-    } else if (stmt->type == AST::NodeType::DEFAULT) {
-      printed = VisitDefaultStatement(*stmt->As<DefaultStatement>());
-    } else if (stmt->type == AST::NodeType::SWITCH) {
-      printed = VisitSwitchStatement(*stmt->As<SwitchStatement>());
-    } else if (stmt->type == AST::NodeType::WHILE) {
-      printed = VisitWhileLoop(*stmt->As<WhileLoop>());
-    } else if (stmt->type == AST::NodeType::DO) {
-      printed = VisitDoLoop(*stmt->As<DoLoop>());
-    }
+    printed = Visit(stmt);
 
     if (!printed) return false;
     if (stmt->type != AST::NodeType::BLOCK && stmt->type != AST::NodeType::IF && stmt->type != AST::NodeType::FOR &&
@@ -859,92 +541,6 @@ bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
   return true;
 }
 
-bool AST::Visitor::VisitCondition(PNode &node) {
-  bool printed = false;
-
-  if (node->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node->As<AST::IdentifierAccess>());
-  } else if (node->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node->As<AST::Literal>());
-  } else if (node->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node->As<Parenthetical>());
-  } else if (node->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node->As<NewExpression>());
-  } else if (node->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node->As<BinaryExpression>());
-  } else if (node->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node->As<UnaryPrefixExpression>());
-  } else if (node->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node->As<UnaryPostfixExpression>());
-  } else if (node->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node->As<FunctionCallExpression>());
-  } else if (node->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node->As<TernaryExpression>());
-  } else if (node->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node->As<SizeofExpression>());
-  } else if (node->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node->As<AlignofExpression>());
-  } else if (node->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node->As<CastExpression>());
-  } else if (node->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node->As<DeclarationStatement>());
-  }
-
-  return printed;
-}
-
-bool AST::Visitor::VisitBody(PNode &node) {
-  bool printed = false;
-
-  if (node->type == AST::NodeType::BLOCK) {
-    printed = VisitCodeBlock(*node->As<CodeBlock>());
-  } else if (node->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node->As<AST::IdentifierAccess>());
-  } else if (node->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node->As<Parenthetical>());
-  } else if (node->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node->As<NewExpression>());
-  } else if (node->type == AST::NodeType::DELETE) {
-    printed = VisitDeleteExpression(*node->As<DeleteExpression>());
-  } else if (node->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node->As<BinaryExpression>());
-  } else if (node->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node->As<UnaryPrefixExpression>());
-  } else if (node->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node->As<UnaryPostfixExpression>());
-  } else if (node->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node->As<FunctionCallExpression>());
-  } else if (node->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node->As<TernaryExpression>());
-  } else if (node->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node->As<SizeofExpression>());
-  } else if (node->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node->As<AlignofExpression>());
-  } else if (node->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node->As<CastExpression>());
-  } else if (node->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node->As<DeclarationStatement>());
-  } else if (node->type == AST::NodeType::BREAK) {
-    printed = VisitBreakStatement(*node->As<BreakStatement>());
-  } else if (node->type == AST::NodeType::CONTINUE) {
-    printed = VisitContinueStatement(*node->As<ContinueStatement>());
-  } else if (node->type == AST::NodeType::RETURN) {
-    printed = VisitReturnStatement(*node->As<ReturnStatement>());
-  } else if (node->type == AST::NodeType::IF) {
-    printed = VisitIfStatement(*node->As<IfStatement>());
-  } else if (node->type == AST::NodeType::FOR) {
-    printed = VisitForLoop(*node->As<ForLoop>());
-  } else if (node->type == AST::NodeType::SWITCH) {
-    printed = VisitSwitchStatement(*node->As<SwitchStatement>());
-  } else if (node->type == AST::NodeType::WHILE) {
-    printed = VisitWhileLoop(*node->As<WhileLoop>());
-  } else if (node->type == AST::NodeType::DO) {
-    printed = VisitDoLoop(*node->As<DoLoop>());
-  }
-
-  return printed;
-}
-
 bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   bool printed = false;
 
@@ -953,7 +549,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
     print("(");
   }
 
-  printed = VisitCondition(node.condition);
+  printed = Visit(node.condition);
 
   if (!printed) return false;
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
@@ -961,7 +557,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   }
   print(" ");
 
-  printed = VisitBody(node.true_branch);
+  printed = Visit(node.true_branch);
 
   if (!printed) return false;
   if (node.true_branch->type != AST::NodeType::BLOCK && node.true_branch->type != AST::NodeType::IF &&
@@ -974,7 +570,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   if (node.false_branch) {
     print("else ");
 
-    printed = VisitBody(node.false_branch);
+    printed = Visit(node.false_branch);
 
     if (!printed) return false;
     if (node.false_branch->type != AST::NodeType::BLOCK && node.false_branch->type != AST::NodeType::IF &&
@@ -991,68 +587,22 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
   bool printed = false;
   print("for(");
 
-  if (node.assignment->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.assignment->As<DeclarationStatement>());
-  } else if (node.assignment->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.assignment->As<AST::IdentifierAccess>());
-  } else if (node.assignment->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.assignment->As<Parenthetical>());
-  } else if (node.assignment->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.assignment->As<BinaryExpression>());
-  } else if (node.assignment->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.assignment->As<UnaryPrefixExpression>());
-  } else if (node.assignment->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.assignment->As<UnaryPostfixExpression>());
-  } else if (node.assignment->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.assignment->As<FunctionCallExpression>());
-  } else if (node.assignment->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.assignment->As<TernaryExpression>());
-  } else if (node.assignment->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.assignment->As<SizeofExpression>());
-  } else if (node.assignment->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.assignment->As<AlignofExpression>());
-  } else if (node.assignment->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.assignment->As<CastExpression>());
-  }
+  printed = Visit(node.assignment);
 
   if (!printed) return false;
   print("; ");
 
-  printed = VisitCondition(node.condition);
+  printed = Visit(node.condition);
 
   if (!printed) return false;
   print("; ");
 
-  if (node.increment->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.increment->As<AST::IdentifierAccess>());
-  } else if (node.increment->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.increment->As<AST::Literal>());
-  } else if (node.increment->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.increment->As<Parenthetical>());
-  } else if (node.increment->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.increment->As<BinaryExpression>());
-  } else if (node.increment->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.increment->As<UnaryPrefixExpression>());
-  } else if (node.increment->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.increment->As<UnaryPostfixExpression>());
-  } else if (node.increment->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.increment->As<FunctionCallExpression>());
-  } else if (node.increment->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.increment->As<TernaryExpression>());
-  } else if (node.increment->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.increment->As<SizeofExpression>());
-  } else if (node.increment->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.increment->As<AlignofExpression>());
-  } else if (node.increment->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.increment->As<CastExpression>());
-  } else if (node.increment->type == AST::NodeType::NEW) {
-    printed = VisitNewExpression(*node.increment->As<NewExpression>());
-  }
+  printed = Visit(node.increment);
 
   if (!printed) return false;
   print(") ");
 
-  printed = VisitBody(node.body);
+  printed = Visit(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
@@ -1069,25 +619,7 @@ bool AST::Visitor::VisitCaseStatement(CaseStatement &node) {
   bool printed = false;
   print("case ");
 
-  if (node.value->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.value->As<IdentifierAccess>());
-  } else if (node.value->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.value->As<Literal>());
-  } else if (node.value->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitLiteral(*node.value->As<Literal>());
-  } else if (node.value->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.value->As<Parenthetical>());
-  } else if (node.value->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.value->As<FunctionCallExpression>());
-  } else if (node.value->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.value->As<TernaryExpression>());
-  } else if (node.value->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.value->As<SizeofExpression>());
-  } else if (node.value->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.value->As<AlignofExpression>());
-  } else if (node.value->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.value->As<CastExpression>());
-  }
+  printed = Visit(node.value);
 
   if (!printed) return false;
   print(": ");
@@ -1112,31 +644,7 @@ bool AST::Visitor::VisitSwitchStatement(SwitchStatement &node) {
     print("(");
   }
 
-  if (node.expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
-  } else if (node.expression->type == AST::NodeType::LITERAL) {
-    printed = VisitLiteral(*node.expression->As<Literal>());
-  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.expression->As<Parenthetical>());
-  } else if (node.expression->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-    printed = VisitUnaryPostfixExpression(*node.expression->As<UnaryPostfixExpression>());
-  } else if (node.expression->type == AST::NodeType::UNARY_PREFIX_EXPRESSION) {
-    printed = VisitUnaryPrefixExpression(*node.expression->As<UnaryPrefixExpression>());
-  } else if (node.expression->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.expression->As<BinaryExpression>());
-  } else if (node.expression->type == AST::NodeType::FUNCTION_CALL) {
-    printed = VisitFunctionCallExpression(*node.expression->As<FunctionCallExpression>());
-  } else if (node.expression->type == AST::NodeType::TERNARY_EXPRESSION) {
-    printed = VisitTernaryExpression(*node.expression->As<TernaryExpression>());
-  } else if (node.expression->type == AST::NodeType::SIZEOF) {
-    printed = VisitSizeofExpression(*node.expression->As<SizeofExpression>());
-  } else if (node.expression->type == AST::NodeType::ALIGNOF) {
-    printed = VisitAlignofExpression(*node.expression->As<AlignofExpression>());
-  } else if (node.expression->type == AST::NodeType::CAST) {
-    printed = VisitCastExpression(*node.expression->As<CastExpression>());
-  } else if (node.expression->type == AST::NodeType::DECLARATION) {
-    printed = VisitDeclarationStatement(*node.expression->As<DeclarationStatement>());
-  }
+  printed = Visit(node.expression);
 
   if (!printed) return false;
   if (node.expression->type != AST::NodeType::PARENTHETICAL) {
@@ -1172,7 +680,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
     }
   }
 
-  printed = VisitCondition(node.condition);
+  printed = Visit(node.condition);
 
   if (!printed) return false;
   if (node.kind != AST::WhileLoop::Kind::REPEAT) {
@@ -1189,7 +697,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
 
   print(" ");
 
-  printed = VisitBody(node.body);
+  printed = Visit(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
@@ -1208,7 +716,7 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
     print("{");
   }
 
-  printed = VisitBody(node.body);
+  printed = Visit(node.body);
 
   if (!printed) return false;
   if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
@@ -1234,7 +742,7 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
     }
   }
 
-  printed = VisitCondition(node.condition);
+  printed = Visit(node.condition);
 
   if (!printed) return false;
   if (node.is_until) {
