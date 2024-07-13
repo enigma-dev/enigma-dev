@@ -516,6 +516,15 @@ class AST {
     }
 
     void print(std::string code) { of << code; }
+    
+    void PrintSemiColon(PNode &node) {
+      if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
+          node->type != AST::NodeType::CASE && node->type != AST::NodeType::DEFAULT &&
+          node->type != AST::NodeType::SWITCH && node->type != AST::NodeType::WHILE &&
+          node->type != AST::NodeType::DO) {
+        print("; ");
+      }
+    }
 
     std::string GetPrintedCode() {
       of.close();

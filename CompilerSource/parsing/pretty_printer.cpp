@@ -521,11 +521,7 @@ bool AST::Visitor::VisitCode(CodeBlock &node) {
     printed = Visit(stmt);
 
     if (!printed) return false;
-    if (stmt->type != AST::NodeType::BLOCK && stmt->type != AST::NodeType::IF && stmt->type != AST::NodeType::FOR &&
-        stmt->type != AST::NodeType::CASE && stmt->type != AST::NodeType::DEFAULT &&
-        stmt->type != AST::NodeType::SWITCH && stmt->type != AST::NodeType::WHILE && stmt->type != AST::NodeType::DO) {
-      print("; ");
-    }
+    PrintSemiColon(stmt);
   }
 
   return true;
@@ -560,11 +556,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   printed = Visit(node.true_branch);
 
   if (!printed) return false;
-  if (node.true_branch->type != AST::NodeType::BLOCK && node.true_branch->type != AST::NodeType::IF &&
-      node.true_branch->type != AST::NodeType::FOR && node.true_branch->type != AST::NodeType::SWITCH &&
-      node.true_branch->type != AST::NodeType::WHILE && node.true_branch->type != AST::NodeType::DO) {
-    print(";");
-  }
+  PrintSemiColon(node.true_branch);
   print(" ");
 
   if (node.false_branch) {
@@ -573,11 +565,8 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
     printed = Visit(node.false_branch);
 
     if (!printed) return false;
-    if (node.false_branch->type != AST::NodeType::BLOCK && node.false_branch->type != AST::NodeType::IF &&
-        node.false_branch->type != AST::NodeType::FOR && node.false_branch->type != AST::NodeType::SWITCH &&
-        node.false_branch->type != AST::NodeType::WHILE && node.false_branch->type != AST::NodeType::DO) {
-      print(";");
-    }
+    
+    PrintSemiColon(node.false_branch);
     print(" ");
   }
   return true;
@@ -605,11 +594,7 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
   printed = Visit(node.body);
 
   if (!printed) return false;
-  if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
-      node.body->type != AST::NodeType::FOR && node.body->type != AST::NodeType::SWITCH &&
-      node.body->type != AST::NodeType::WHILE && node.body->type != AST::NodeType::DO) {
-    print(";");
-  }
+  PrintSemiColon(node.body);
   print(" ");
 
   return true;
@@ -700,11 +685,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
   printed = Visit(node.body);
 
   if (!printed) return false;
-  if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
-      node.body->type != AST::NodeType::FOR && node.body->type != AST::NodeType::SWITCH &&
-      node.body->type != AST::NodeType::WHILE && node.body->type != AST::NodeType::DO) {
-    print(";");
-  }
+  PrintSemiColon(node.body);
   return true;
 }
 
@@ -719,11 +700,7 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
   printed = Visit(node.body);
 
   if (!printed) return false;
-  if (node.body->type != AST::NodeType::BLOCK && node.body->type != AST::NodeType::IF &&
-      node.body->type != AST::NodeType::FOR && node.body->type != AST::NodeType::SWITCH &&
-      node.body->type != AST::NodeType::WHILE && node.body->type != AST::NodeType::DO) {
-    print(";");
-  }
+  PrintSemiColon(node.body);
 
   if (node.body->type != AST::NodeType::BLOCK) {
     print("}");
