@@ -1494,11 +1494,8 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseOperand() {
   switch (token.type) {
     case TT_BEGINBRACE: case TT_ENDBRACE:
     case TT_ENDPARENTH: case TT_ENDBRACKET:
-    case TT_ENDOFCODE:
+    case TT_ENDOFCODE: case TT_SEMICOLON:
       return nullptr;
-
-    case TT_SEMICOLON:
-      return std::make_unique<AST::CodeBlock>();
     case TT_COLON:
       herr->ReportError(token, "Expected label or ternary expression before colon");
       token = lexer->ReadToken();
@@ -1779,11 +1776,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
       } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
-        if (precedence < Precedence::kUnaryPostfix) {
-          break;
-        }
-        if(postfix){
-          herr->Error(token) << "Unary postfix operator cannot be applied to another unary postfix operator";
+        if (precedence < Precedence::kUnaryPostfix || postfix) {
           break;
         } 
         operand = TryParseUnaryPostfixExpression(precedence, std::move(operand));
@@ -1916,7 +1909,9 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression(SyntaxMode mode
       [[fallthrough]];
     case SyntaxMode::QUIRKS: {
       auto operand = TryParseOperand();
-      if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
+      if(map_contains(Precedence::kUnaryPostfixPrec, token.type)){
+        operand = TryParseExpression(Precedence::kAll, std::move(operand));
+      } else if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
         Token oper = token;
         token = lexer->ReadToken(); // Consume the token
         auto right = TryParseControlExpression(mode);
@@ -2295,9 +2290,13 @@ std::unique_ptr<AST::ReturnStatement> AstBuilder::ParseReturnStatement() {
   token = lexer->ReadToken();
   auto value = TryParseExpression(Precedence::kAll);
 
-  MaybeConsumeSemicolon(); 
+  MaybeConsumeSemicolon();
 
-  return std::make_unique<AST::ReturnStatement>(std::move(value), false);
+  if (value) {
+    return std::make_unique<AST::ReturnStatement>(std::move(value), false);
+  } else {
+    return std::make_unique<AST::ReturnStatement>(nullptr, false);
+  }
 }
 
 std::unique_ptr<AST::BreakStatement> AstBuilder::ParseBreakStatement() {

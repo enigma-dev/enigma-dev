@@ -202,12 +202,10 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
 }
 
 bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
-  bool printed = false;
+  bool printed = true;
   print("return ");
 
-  if (node.expression->type == AST::NodeType::BLOCK) {
-    printed = true;
-  } else {
+  if (node.expression) {
     printed = Visit(node.expression);
   }
 
@@ -565,7 +563,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
     printed = Visit(node.false_branch);
 
     if (!printed) return false;
-    
+
     PrintSemiColon(node.false_branch);
     print(" ");
   }

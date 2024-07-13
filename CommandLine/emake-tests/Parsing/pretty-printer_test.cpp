@@ -915,7 +915,7 @@ TEST(PrinterTest, test43) {
 TEST(PrinterTest, test44) {
   std::string code =
       "a = [1,2,3] a = [1] a = [2+3] a = [x] a = [2+3, 4*6, 5/2] a = [(12)] a = [x++] a = [--x] a = [foo(12)] a = "
-      "[sizeof 12] a = [reinterpret_cast<int>(i)] x++; if(true) --l";
+      "[sizeof 12] a = [reinterpret_cast<int>(i)] x++; if(true) l--";
 
   ParserTester test{code};
   auto node = test->ParseCode();
@@ -929,7 +929,7 @@ TEST(PrinterTest, test44) {
   code =
       "a = [1,2,3]; a = [1]; a = [2+3]; a = [x]; a = [2+3, 4*6, 5/2]; a = [(12)]; a = [x++]; a = [--x]; a = [foo(12)]; "
       "a = "
-      "[sizeof 12]; a = [reinterpret_cast<int>(i)]; x++; if(true) --l;";
+      "[sizeof 12]; a = [reinterpret_cast<int>(i)]; x++; if(true) l--;";
 
   ASSERT_TRUE(compare(code, printed));
 }
@@ -972,36 +972,19 @@ TEST(PrinterTest, test45) {
 //   ASSERT_TRUE(compare(code, printed));
 // }
 
-// TEST(PrinterTest, test47) {
-//   std::string code = "if c++ --l";
+TEST(PrinterTest, test47) {
+  std::string code = "if c++ --l";
 
-//   ParserTester test{code};
-//   auto node = test->ParseCode();
+  ParserTester test{code};
+  auto node = test->ParseCode();
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
 
-//   AST::Visitor v;
-//   ASSERT_TRUE(v.VisitCode(*block));
-//   std::string printed = v.GetPrintedCode();
-//   code ="if (c++) --l;";
-// // if((x * 2) > s(12)-- ) l;
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "if (c++) --l;";
 
-//   ASSERT_TRUE(compare(code, printed));
-// }
-
-// TEST(PrinterTest, test48) {
-//   std::string code = "int x = y++++;";
-
-//   ParserTester test{code};
-//   auto node = test->ParseCode();
-
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
-
-//   AST::Visitor v;
-//   ASSERT_TRUE(v.VisitCode(*block));
-//   std::string printed = v.GetPrintedCode();
-
-//   ASSERT_TRUE(compare(code, printed));
-// }
+  ASSERT_TRUE(compare(code, printed));
+}
