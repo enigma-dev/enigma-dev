@@ -2283,7 +2283,7 @@ TEST(ParserTest, Array_11) {
 }
 
 TEST(ParserTest, ParseCodeFunction) {
-  ParserTester test{"x++; if(true) --l"};
+  ParserTester test{"x++; if(x) --l"};
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2292,6 +2292,17 @@ TEST(ParserTest, ParseCodeFunction) {
   ASSERT_EQ(block->statements.size(), 2);
   ASSERT_EQ(block->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::IF);
+
+  auto unary_exp = block->statements[0]->As<AST::UnaryPostfixExpression>();
+  ASSERT_EQ(unary_exp->operation, TT_INCREMENT);
+  ASSERT_EQ(unary_exp->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary_exp->operand->As<AST::IdentifierAccess>()->name.content, "x");
+
+  auto if_exp = block->statements[1]->As<AST::IfStatement>();
+  //As said before, in quirks mode, the -- here is considered as a part of the condition
+  ASSERT_EQ(if_exp->condition->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_exp->true_branch->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(if_exp->false_branch, nullptr);
 }
 
 // TEST(ParserTest, ss) {
@@ -2315,3 +2326,26 @@ TEST(ParserTest, ParseCodeFunction) {
 //   ASSERT_EQ(block->statements.size(), 1);
 //   ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
 // }
+
+TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
+  ParserTester test{"foo(12)--x;"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 2);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::FUNCTION_CALL);
+  ASSERT_EQ(block->statements[1]->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+
+  auto *call = block->statements[0]->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(call->arguments.size(), 1);
+  ASSERT_EQ(call->arguments[0]->type, AST::NodeType::LITERAL);
+  ASSERT_EQ(std::get<std::string>(call->arguments[0]->As<AST::Literal>()->value.value), "12");
+
+  auto *unary = block->statements[1]->As<AST::UnaryPrefixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+}
