@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "visual_shader_nodes.h"
+#include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
 
 #include <gtest/gtest.h>
 

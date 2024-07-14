@@ -29,6 +29,8 @@
 
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
+#include <sstream>
 
 VisualShader::VisualShader() {
     // Initialize the graphs with the output node.
@@ -47,7 +49,7 @@ int VisualShader::get_valid_node_id() const {
     return g->nodes.size() ? std::max(min_valid_id, g->nodes.rbegin()->first + 1) : min_valid_id;
 }
 
-void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const EVector2& position, const int& id) {
+void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TEVector2& position, const int& id) {
     if (!node) {
         std::cout << "Invalid VisualShaderNode" << std::endl;
         return;
@@ -133,10 +135,6 @@ bool VisualShader::generate_shader() const {
     static const std::string func_name { "fragment" };
 
     std::string shader_code;
-
-    // Store the connections for faster generation.
-    // VMap<ConnectionKey, const List<Connection>::Element *> input_connections;
-	// VMap<ConnectionKey, const List<Connection>::Element *> output_connections;
 
     // Store the connections for faster generation.
     std::map<ConnectionKey, const Connection *> input_connections;
@@ -228,8 +226,64 @@ bool VisualShader::generate_shader_for_each_node(std::string& func_code,
         key.port = i;
 
         // Check if the input is not connected.
-        if (input_connections.find(key) != input_connections.end()) {
+        if (input_connections.find(key) == input_connections.end()) {
             // Add the default value.
+
+            TEVariant defval {n->get_input_port_default_value(i)};
+
+			switch (defval.index()) {
+				case 1: { // float
+					float val {std::get<float>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					std::ostringstream oss;
+					oss << "	float " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << val << ";\n";
+					node_code += oss.str();
+				} break;
+				case 2: { // int
+					int val {std::get<int>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					if (n->get_input_port_type(i) == VisualShaderNode::PORT_TYPE_SCALAR_UINT) {
+						node_code += "	uint " + input_vars.at(i) + " = " + std::to_string(val) + "u;\n";
+					} else {
+						node_code += "	int " + input_vars.at(i) + " = " + std::to_string(val) + ";\n";
+					}
+				} break;
+				case 3: { // TEVector2
+					TEVector2 val {std::get<TEVector2>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					std::ostringstream oss;
+					oss << "	vec2 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec2(" << std::get<0>(val) << ", " 
+																													 << std::get<1>(val) << ");\n";
+					node_code += oss.str();
+				} break;
+				case 4: { // TEVector3
+					TEVector3 val {std::get<TEVector3>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					std::ostringstream oss;
+					oss << "	vec3 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec3(" << std::get<0>(val) << ", " 
+																													 << std::get<1>(val) << ", "
+																													 << std::get<2>(val) << ");\n";
+					node_code += oss.str();
+				} break;
+				case 5: { // TEQuaternion
+					TEQuaternion val {std::get<TEQuaternion>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					std::ostringstream oss;
+					oss << "	vec4 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec4(" << std::get<0>(val) << ", " 
+																													 << std::get<1>(val) << ", "
+																													 << std::get<2>(val) << ", "
+																													 << std::get<3>(val) << ");\n";
+					node_code += oss.str();
+				} break;
+				case 6: { // bool
+					bool val {std::get<bool>(defval)};
+					input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+					node_code += "	bool " + input_vars.at(i) + " = " + (val ? "true" : "false") + ";\n";
+				} break;
+				default:
+					break;
+			}
+
             continue;
         }
 
@@ -243,7 +297,9 @@ bool VisualShader::generate_shader_for_each_node(std::string& func_code,
 
         std::string from_var {"var_from_" + std::to_string(from_node) + "_" + std::to_string(from_port)};
 
-        if (to_port_type == from_port_type) {
+		if (to_port_type == VisualShaderNode::PORT_TYPE_SAMPLER && from_port_type == VisualShaderNode::PORT_TYPE_SAMPLER) {
+			// TODO
+		} else if (to_port_type == from_port_type) {
             input_vars.at(i) = from_var;
         } else {
             switch (to_port_type) {
@@ -675,6 +731,164 @@ VisualShaderNode::VisualShaderNode() : simple_decl(true) {
 
 bool VisualShaderNode::is_simple_decl() const {
 	return simple_decl;
+}
+
+void VisualShaderNode::set_input_port_default_value(const int& port, const TEVariant& value, const TEVariant& prev_value) {
+	TEVariant v {value};
+
+    if (prev_value.index() == 0) { // std::monostate
+		return;
+	}
+
+	switch (value.index()) {
+		case 1: { // float
+			switch (prev_value.index()) {
+				case 1: { // float
+					v = prev_value;
+				} break;
+				case 2: { // int
+					v = std::get<float>(prev_value);
+				} break;
+				case 3: { // TEVector2
+					TEVector2 pv {std::get<TEVector2>(prev_value)};
+					v = std::get<0>(pv);
+				} break;
+				case 4: { // TEVector3
+					TEVector3 pv {std::get<TEVector3>(prev_value)};
+					v = std::get<0>(pv);
+				} break;
+				case 5: { // TEQuaternion
+					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+					v = std::get<0>(pv);
+				} break;
+				default:
+					break;
+			}
+		} break;
+		case 2: { // int
+			switch (prev_value.index()) {
+				case 1: { // float
+					v = std::get<int>(prev_value);
+				} break;
+				case 2: { // int
+					v = prev_value;
+				} break;
+				case 3: { // TEVector2
+					TEVector2 pv {std::get<TEVector2>(prev_value)};
+					v = (int)std::get<0>(pv);
+				} break;
+				case 4: { // TEVector3
+					TEVector3 pv {std::get<TEVector3>(prev_value)};
+					v = (int)std::get<0>(pv);
+				} break;
+				case 5: { // TEQuaternion
+					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+					v = (int)std::get<0>(pv);
+				} break;
+				default:
+					break;
+			}
+		} break;
+		case 3: { // TEVector2
+			switch (prev_value.index()) {
+				case 1: { // float
+					float pv {std::get<float>(prev_value)};
+					v = TEVector2(pv, pv);
+				} break;
+				case 2: { // int
+					float pv {(float)std::get<int>(prev_value)};
+					v = TEVector2(pv, pv);
+				} break;
+				case 3: { // TEVector2
+					v = prev_value;
+				} break;
+				case 4: { // TEVector3
+					TEVector3 pv {std::get<TEVector3>(prev_value)};
+					v = TEVector2(std::get<0>(pv), 
+								  std::get<1>(pv));
+				} break;
+				case 5: { // TEQuaternion
+					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+					v = TEVector2(std::get<0>(pv), 
+								  std::get<1>(pv));
+				} break;
+				default:
+					break;
+			}
+		} break;
+		case 4: { // TEVector3
+			switch (prev_value.index()) {
+				case 1: { // float
+					float pv {std::get<float>(prev_value)};
+					v = TEVector3(pv, pv, pv);
+				} break;
+				case 2: { // int
+					float pv {(float)std::get<int>(prev_value)};
+					v = TEVector3(pv, pv, pv);
+				} break;
+				case 3: { // TEVector2
+					TEVector2 pv {std::get<TEVector2>(prev_value)};
+					v = TEVector3(std::get<0>(pv), 
+								  std::get<1>(pv), 
+								  std::get<1>(pv));
+				} break;
+				case 4: { // TEVector3
+					v = prev_value;
+				} break;
+				case 5: { // TEQuaternion
+					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+					v = TEVector3(std::get<0>(pv), 
+								  std::get<1>(pv), 
+								  std::get<2>(pv));
+				} break;
+				default:
+					break;
+			}
+		} break;
+		case 5: { // TEQuaternion
+			switch (prev_value.index()) {
+				case 1: { // float
+					float pv {std::get<float>(prev_value)};
+					v = TEQuaternion(pv, pv, pv, pv);
+				} break;
+				case 2: { // int
+					float pv {(float)std::get<int>(prev_value)};
+					v = TEQuaternion(pv, pv, pv, pv);
+				} break;
+				case 3: { // TEVector2
+					TEVector2 pv {std::get<TEVector2>(prev_value)};
+					v = TEQuaternion(std::get<0>(pv), 
+					                 std::get<1>(pv), 
+									 std::get<1>(pv), 
+									 std::get<1>(pv));
+				} break;
+				case 4: { // TEVector3
+					TEVector3 pv {std::get<TEVector3>(prev_value)};
+					v = TEQuaternion(std::get<0>(pv), 
+					                 std::get<1>(pv), 
+									 std::get<2>(pv), 
+									 std::get<2>(pv));
+				} break;
+				case 5: { // TEQuaternion
+					v = prev_value;
+				} break;
+				default:
+					break;
+			}
+		} break;
+		default:
+			break;
+	}
+
+	default_input_values[port] = value;
+}
+
+TEVariant VisualShaderNode::get_input_port_default_value(const int& port) const {
+	if (VisualShaderNode::default_input_values.find(port) == VisualShaderNode::default_input_values.end()) {
+		return TEVariant();
+	}
+
+	return default_input_values.at(port);
 }
 
 bool VisualShaderNode::is_output_port_expandable(const int& port) const {

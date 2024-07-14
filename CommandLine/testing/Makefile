@@ -16,7 +16,7 @@ else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif
 
-SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
+SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS) $(wildcard ../../shared/ResourceTransformations/VisualShader/*.cpp)
 LDFLAGS += $(OS_LIBS) -lgtest_main -lgtest -lpthread
 
 include ../../Default.mk

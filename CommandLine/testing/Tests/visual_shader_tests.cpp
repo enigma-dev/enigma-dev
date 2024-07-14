@@ -25,11 +25,34 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "visual_shader.h"
+#include "ResourceTransformations/VisualShader/visual_shader.h"
 
 #include <gtest/gtest.h>
 
 #include <iostream>
+
+TEST(VisualShaderTest, Test_generate_shader) {
+    // Create a node to insert into the graph.
+    VisualShaderNodeInput vsni;
+    std::shared_ptr<VisualShaderNode> vsni_ptr = std::make_shared<VisualShaderNodeInput>(vsni);
+
+    VisualShader vs;
+
+    // Add the node to the graph.
+    vs.add_node(vsni_ptr, {0.0f, 0.0f}, 1);
+
+    // Generate the shader.
+    bool status {vs.generate_shader()};
+
+    // The shader should be generated successfully.
+    EXPECT_EQ(status, true);
+
+    std::string code {vs.get_code()};
+
+    // The code should be the same as the input node's code.
+    EXPECT_EQ(code, "\nvoid fragment() {\n"
+    "}\n");
+}
 
 TEST(VisualShaderTest, Test_remove_node) {
     // Add 10 nodes to the graph.
