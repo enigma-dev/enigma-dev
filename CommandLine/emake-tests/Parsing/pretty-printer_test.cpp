@@ -802,7 +802,7 @@ TEST(PrinterTest, test38) {
 
 TEST(PrinterTest, test39) {
   std::string code =
-      "if(3>2) (j)++; else --k; if k k++; if (true) { return 1; } else { return 2; } if (false) for(int i=0;i<12;i++) "
+      "if(3>2) j++; else --k; if k k++; if (true) { return 1; } else { return 2; } if (false) for(int i=0;i<12;i++) "
       "{k++;} else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }";
 
   ParserTester test{code};
@@ -815,7 +815,7 @@ TEST(PrinterTest, test39) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
-      "if(3>2) (j)++; else --k; if (k) k++; if (true) { return 1; } else { return 2; } if (false) for(int "
+      "if(3>2) j++; else --k; if (k) k++; if (true) { return 1; } else { return 2; } if (false) for(int "
       "i=0;i<12;i++) "
       "{k++;} else switch(i){ case 1 :{ k--;} case 2 : {k+=3; }default :{ k=0;} }";
 
@@ -1001,6 +1001,39 @@ TEST(PrinterTest, test48) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "foo(12); --x;";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test49) {
+  std::string code = "if((x * 2)> s(12)) --l;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test50) {
+  std::string code = "if (x * 2)> s(12) --l";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "if ((x * 2)> s(12)) --l;";
 
   ASSERT_TRUE(compare(code, printed));
 }

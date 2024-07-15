@@ -1124,15 +1124,15 @@ TEST(ParserTest, CodeBlock_2) {
 }
 
 TEST(ParserTest, IfStatement_1) {
-  ParserTester test{"if(3>2) (j)++; else --k;"};
+  ParserTester test{"if(3>2) j++; else --k;"};
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::BinaryExpression>();
@@ -1142,12 +1142,12 @@ TEST(ParserTest, IfStatement_1) {
   ASSERT_EQ(expr->left->type, AST::NodeType::LITERAL);
   ASSERT_EQ(expr->right->type, AST::NodeType::LITERAL);
 
-  auto *true_branch = if_exp->true_branch->As<AST::UnaryPostfixExpression>();
+  auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->operation, TT_INCREMENT);
-  ASSERT_EQ(true_branch->operand->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
-  auto *false_branch = if_exp->false_branch->As<AST::UnaryPrefixExpression>();
+  auto *false_branch = if_stmt->false_branch->As<AST::UnaryPrefixExpression>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->operation, TT_DECREMENT);
   ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
@@ -1159,10 +1159,10 @@ TEST(ParserTest, IfStatement_1_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::BinaryExpression>();
@@ -1172,12 +1172,12 @@ TEST(ParserTest, IfStatement_1_NoSemicolon) {
   ASSERT_EQ(expr->left->type, AST::NodeType::LITERAL);
   ASSERT_EQ(expr->right->type, AST::NodeType::LITERAL);
 
-  auto *true_branch = if_exp->true_branch->As<AST::UnaryPostfixExpression>();
+  auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->operation, TT_INCREMENT);
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
-  auto *false_branch = if_exp->false_branch->As<AST::UnaryPrefixExpression>();
+  auto *false_branch = if_stmt->false_branch->As<AST::UnaryPrefixExpression>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->operation, TT_DECREMENT);
   ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
@@ -1189,19 +1189,19 @@ TEST(ParserTest, IfStatement_2) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::IdentifierAccess>();
+  auto *cond = if_stmt->condition->As<AST::IdentifierAccess>();
   ASSERT_TRUE(cond);
   ASSERT_EQ(cond->name.content, "k");
 
-  auto *true_branch = if_exp->true_branch->As<AST::UnaryPostfixExpression>();
+  auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->operation, TT_INCREMENT);
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
-  ASSERT_FALSE(if_exp->false_branch);
+  ASSERT_FALSE(if_stmt->false_branch);
 }
 
 TEST(ParserTest, IfStatement_2_NoSemicolon) {
@@ -1210,19 +1210,19 @@ TEST(ParserTest, IfStatement_2_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::IdentifierAccess>();
+  auto *cond = if_stmt->condition->As<AST::IdentifierAccess>();
   ASSERT_TRUE(cond);
   ASSERT_EQ(cond->name.content, "k");
 
-  auto *true_branch = if_exp->true_branch->As<AST::UnaryPostfixExpression>();
+  auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->operation, TT_INCREMENT);
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
-  ASSERT_FALSE(if_exp->false_branch);
+  ASSERT_FALSE(if_stmt->false_branch);
 }
 
 TEST(ParserTest, IfStatement_3) {
@@ -1231,17 +1231,17 @@ TEST(ParserTest, IfStatement_3) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::IdentifierAccess>();
   ASSERT_TRUE(expr);
   ASSERT_EQ(expr->name.content, "true");
 
-  auto *true_branch = if_exp->true_branch->As<AST::CodeBlock>();
+  auto *true_branch = if_stmt->true_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->statements.size(), 1);
   ASSERT_EQ(true_branch->statements[0]->type, AST::NodeType::RETURN);
@@ -1250,7 +1250,7 @@ TEST(ParserTest, IfStatement_3) {
   ASSERT_EQ(return_1->expression->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(return_1->expression->As<AST::Literal>()->value.value), "1");
 
-  auto *false_branch = if_exp->false_branch->As<AST::CodeBlock>();
+  auto *false_branch = if_stmt->false_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->statements.size(), 1);
   ASSERT_EQ(false_branch->statements[0]->type, AST::NodeType::RETURN);
@@ -1266,17 +1266,17 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::IdentifierAccess>();
   ASSERT_TRUE(expr);
   ASSERT_EQ(expr->name.content, "true");
 
-  auto *true_branch = if_exp->true_branch->As<AST::CodeBlock>();
+  auto *true_branch = if_stmt->true_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(true_branch);
   ASSERT_EQ(true_branch->statements.size(), 1);
   ASSERT_EQ(true_branch->statements[0]->type, AST::NodeType::RETURN);
@@ -1285,7 +1285,7 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
   ASSERT_EQ(return_1->expression->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(return_1->expression->As<AST::Literal>()->value.value), "1");
 
-  auto *false_branch = if_exp->false_branch->As<AST::CodeBlock>();
+  auto *false_branch = if_stmt->false_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->statements.size(), 1);
   ASSERT_EQ(false_branch->statements[0]->type, AST::NodeType::RETURN);
@@ -1302,17 +1302,17 @@ TEST(ParserTest, IfStatement_4) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::IdentifierAccess>();
   ASSERT_TRUE(expr);
   ASSERT_EQ(expr->name.content, "false");
 
-  auto *true_branch = if_exp->true_branch->As<AST::ForLoop>();
+  auto *true_branch = if_stmt->true_branch->As<AST::ForLoop>();
   ASSERT_TRUE(true_branch);
 
   vector<std::string> decls = {"i"};
@@ -1321,7 +1321,7 @@ TEST(ParserTest, IfStatement_4) {
                                     IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
-  auto *false_branch = if_exp->false_branch->As<AST::SwitchStatement>();
+  auto *false_branch = if_stmt->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->body->statements.size(), 3);
   ASSERT_EQ(false_branch->body->statements[0]->type, AST::NodeType::CASE);
@@ -1360,17 +1360,17 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::IF);
-  auto *if_exp = node->As<AST::IfStatement>();
-  ASSERT_TRUE(if_exp);
+  auto *if_stmt = node->As<AST::IfStatement>();
+  ASSERT_TRUE(if_stmt);
 
-  auto *cond = if_exp->condition->As<AST::Parenthetical>();
+  auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
   auto *expr = cond->expression->As<AST::IdentifierAccess>();
   ASSERT_TRUE(expr);
   ASSERT_EQ(expr->name.content, "false");
 
-  auto *true_branch = if_exp->true_branch->As<AST::ForLoop>();
+  auto *true_branch = if_stmt->true_branch->As<AST::ForLoop>();
   ASSERT_TRUE(true_branch);
 
   vector<std::string> decls = {"i"};
@@ -1379,7 +1379,7 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
                                     IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("12")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(1)));
 
-  auto *false_branch = if_exp->false_branch->As<AST::SwitchStatement>();
+  auto *false_branch = if_stmt->false_branch->As<AST::SwitchStatement>();
   ASSERT_TRUE(false_branch);
   ASSERT_EQ(false_branch->body->statements.size(), 3);
   ASSERT_EQ(false_branch->body->statements[0]->type, AST::NodeType::CASE);
@@ -1579,11 +1579,11 @@ TEST(ParserTest, ForLoop_1) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                     IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("i")), IsStatementBlock(0)));
@@ -1595,11 +1595,11 @@ TEST(ParserTest, ForLoop_2) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                     IsBinaryOperation(TT_GREATEREQUAL, IsIdentifier("i"), IsLiteral("12")),
                                     IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
@@ -1611,11 +1611,11 @@ TEST(ParserTest, ForLoop_3) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                     IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
                                     IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
@@ -1627,11 +1627,11 @@ TEST(ParserTest, ForLoop_3_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__char),
                                     IsBinaryOperation(TT_NOTEQUAL, IsIdentifier("i"), IsLiteral("12")),
                                     IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(1)));
@@ -1643,11 +1643,11 @@ TEST(ParserTest, ForLoop_4) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                     IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
@@ -1659,11 +1659,11 @@ TEST(ParserTest, ForLoop_4_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k", "w"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__double),
                                     IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("j")), IsStatementBlock(1)));
@@ -1675,11 +1675,11 @@ TEST(ParserTest, ForLoop_5) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__int),
                                     IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
@@ -1691,11 +1691,11 @@ TEST(ParserTest, ForLoop_5_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
   std::vector<std::string> decls = {"i", "j", "k", "w", "u"};
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsDeclaration(decls, jdi::builtin_type__float),
                                     IsBinaryOperation(TT_PERCENT, IsIdentifier("w"), IsLiteral("22")),
                                     IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("w")), IsStatementBlock(2)));
@@ -1707,9 +1707,9 @@ TEST(ParserTest, ForLoop_6) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::FUNCTIONAL, AST::NodeType::BINARY_EXPRESSION,
                                            jdi::builtin_type__int),
                                     IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
@@ -1722,9 +1722,9 @@ TEST(ParserTest, ForLoop_7) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::C_STYLE, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
                   IsBinaryOperation(TT_LESS, IsIdentifier("i"), IsLiteral("5")),
@@ -1737,9 +1737,9 @@ TEST(ParserTest, ForLoop_8) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1752,9 +1752,9 @@ TEST(ParserTest, ForLoop_8_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION,
                                            jdi::builtin_type__double),
                                     IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1767,9 +1767,9 @@ TEST(ParserTest, ForLoop_9) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
                   IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
@@ -1782,9 +1782,9 @@ TEST(ParserTest, ForLoop_9_NoSemicolon) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_exp = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_exp,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::STATIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__float),
                   IsBinaryOperation(TT_MOD, IsIdentifier("i"), IsLiteral("3")),
@@ -1797,9 +1797,9 @@ TEST(ParserTest, ForLoop_10) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::DYNAMIC, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1812,12 +1812,13 @@ TEST(ParserTest, ForLoop_11) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::DYNAMIC, AST::NodeType::IDENTIFIER, jdi::builtin_type__int),
-                        IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
-                        IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
+  ASSERT_THAT(for_stmt,
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::DYNAMIC, AST::NodeType::IDENTIFIER, jdi::builtin_type__int),
+                  IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                  IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_12) {
@@ -1826,9 +1827,9 @@ TEST(ParserTest, ForLoop_12) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::DYNAMIC, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1841,9 +1842,9 @@ TEST(ParserTest, ForLoop_13) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::CONST, AST::NodeType::BINARY_EXPRESSION, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1856,12 +1857,12 @@ TEST(ParserTest, ForLoop_14) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::CONST, AST::NodeType::IDENTIFIER, jdi::builtin_type__int),
-                        IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
-                        IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
+  ASSERT_THAT(for_stmt, IsForLoopWithChildren(
+                            IsCast(AST::CastExpression::Kind::CONST, AST::NodeType::IDENTIFIER, jdi::builtin_type__int),
+                            IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                            IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_15) {
@@ -1870,12 +1871,13 @@ TEST(ParserTest, ForLoop_15) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_, IsForLoopWithChildren(
-                        IsCast(AST::CastExpression::Kind::CONST, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
-                        IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
-                        IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
+  ASSERT_THAT(for_stmt,
+              IsForLoopWithChildren(
+                  IsCast(AST::CastExpression::Kind::CONST, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
+                  IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
+                  IsUnaryPostfixOperator(TT_DECREMENT, IsIdentifier("i")), IsStatementBlock(0)));
 }
 
 TEST(ParserTest, ForLoop_16) {
@@ -1884,9 +1886,9 @@ TEST(ParserTest, ForLoop_16) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(IsCast(AST::CastExpression::Kind::REINTERPRET, AST::NodeType::BINARY_EXPRESSION,
                                            jdi::builtin_type__int),
                                     IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1899,9 +1901,9 @@ TEST(ParserTest, ForLoop_17) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::REINTERPRET, AST::NodeType::IDENTIFIER, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -1914,9 +1916,9 @@ TEST(ParserTest, ForLoop_18) {
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
   ASSERT_EQ(node->type, AST::NodeType::FOR);
-  auto *for_ = node->As<AST::ForLoop>();
+  auto *for_stmt = node->As<AST::ForLoop>();
 
-  ASSERT_THAT(for_,
+  ASSERT_THAT(for_stmt,
               IsForLoopWithChildren(
                   IsCast(AST::CastExpression::Kind::REINTERPRET, AST::NodeType::PARENTHETICAL, jdi::builtin_type__int),
                   IsBinaryOperation(TT_SLASH, IsIdentifier("i"), IsLiteral("3")),
@@ -2298,34 +2300,114 @@ TEST(ParserTest, ParseCodeFunction) {
   ASSERT_EQ(unary_exp->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary_exp->operand->As<AST::IdentifierAccess>()->name.content, "x");
 
-  auto if_exp = block->statements[1]->As<AST::IfStatement>();
-  //As said before, in quirks mode, the -- here is considered as a part of the condition
-  ASSERT_EQ(if_exp->condition->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(if_exp->true_branch->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(if_exp->false_branch, nullptr);
+  auto if_stmt = block->statements[1]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_stmt->true_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  ASSERT_EQ(if_stmt->false_branch, nullptr);
 }
 
-// TEST(ParserTest, ss) {
-//   ParserTester test{"if((x * 2)> s(12)) --l"};
-//   auto node = test->ParseCode();
-//   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+TEST(ParserTest, ParseControlExpression_1) {
+  ParserTester test{"if((x * 2)> s(12)) --l"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
-//   ASSERT_EQ(block->statements.size(), 1);
-//   ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
-// }
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
 
-// TEST(ParserTest, ss2) {
-//   ParserTester test{"if (x * 2)> s(12) --l"};
-//   auto node = test->ParseCode();
-//   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  auto *if_stmt = block->statements[0]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(if_stmt->true_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  ASSERT_EQ(if_stmt->false_branch, nullptr);
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
-//   ASSERT_EQ(block->statements.size(), 1);
-//   ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
-// }
+  auto &cond = if_stmt->condition->As<AST::Parenthetical>()->expression;
+  ASSERT_EQ(cond->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = cond->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_GREATER);
+  ASSERT_EQ(bin->left->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(bin->right->type, AST::NodeType::FUNCTION_CALL);
+
+  auto *paren = bin->left->As<AST::Parenthetical>();
+  ASSERT_EQ(paren->expression->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *bin2 = paren->expression->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin2->operation.type, TT_STAR);
+  ASSERT_EQ(bin2->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin2->right->type, AST::NodeType::LITERAL);
+
+  auto *call = bin->right->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(call->arguments.size(), 1);
+  ASSERT_EQ(call->arguments[0]->type, AST::NodeType::LITERAL);
+
+  auto *iden = bin2->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden->name.content, "x");
+
+  auto *lit = bin2->right->As<AST::Literal>();
+  ASSERT_EQ(std::get<std::string>(lit->value.value), "2");
+
+  auto *iden2 = call->function->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden2->name.content, "s");
+
+  auto *lit2 = call->arguments[0]->As<AST::Literal>();
+  ASSERT_EQ(std::get<std::string>(lit2->value.value), "12");
+
+  auto *unary = if_stmt->true_branch->As<AST::UnaryPrefixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "l");
+}
+
+TEST(ParserTest, ParseControlExpression_2) {
+  ParserTester test{"if (x * 2)> s(12) --l"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+
+  auto *if_stmt = block->statements[0]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  ASSERT_EQ(if_stmt->true_branch->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
+  ASSERT_EQ(if_stmt->false_branch, nullptr);
+
+  auto bin = if_stmt->condition->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_GREATER);
+  ASSERT_EQ(bin->left->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(bin->right->type, AST::NodeType::FUNCTION_CALL);
+
+  auto *paren = bin->left->As<AST::Parenthetical>();
+  ASSERT_EQ(paren->expression->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *bin2 = paren->expression->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin2->operation.type, TT_STAR);
+  ASSERT_EQ(bin2->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin2->right->type, AST::NodeType::LITERAL);
+
+  auto *call = bin->right->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(call->arguments.size(), 1);
+  ASSERT_EQ(call->arguments[0]->type, AST::NodeType::LITERAL);
+
+  auto *iden = bin2->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden->name.content, "x");
+
+  auto *lit = bin2->right->As<AST::Literal>();
+  ASSERT_EQ(std::get<std::string>(lit->value.value), "2");
+
+  auto *iden2 = call->function->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden2->name.content, "s");
+
+  auto *lit2 = call->arguments[0]->As<AST::Literal>();
+  ASSERT_EQ(std::get<std::string>(lit2->value.value), "12");
+
+  auto *unary = if_stmt->true_branch->As<AST::UnaryPrefixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "l");
+}
 
 TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
   ParserTester test{"foo(12)--x;"};

@@ -1768,8 +1768,6 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
     // XXX: Maybe handle TT_IDENTIFIER here when `operand` names a type
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
-    bool postfix = false;
-    bool func_call = false;
     while (token.type != TT_ENDOFCODE) {
       if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
@@ -1777,11 +1775,10 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
       } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
-        if (precedence < Precedence::kUnaryPostfix || postfix || func_call) {
+        if (precedence < Precedence::kUnaryPostfix || operand->type != AST::NodeType::IDENTIFIER) {
           break;
         } 
         operand = TryParseUnaryPostfixExpression(precedence, std::move(operand));
-        postfix = true;
       } else if (map_contains(Precedence::kTernaryPrec, token.type)) {
         if (precedence < Precedence::kTernary) {
           break;
@@ -1797,7 +1794,6 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
           break;
         }
         operand = TryParseFunctionCallExpression(precedence, std::move(operand));
-        func_call = true;
       } else {
         // If we reach this point, then the token that we are at is not an operator, otherwise it would have been picked
         // up by one of the branches, thus we need to break from the loop
@@ -1833,10 +1829,14 @@ std::unique_ptr<AST::BinaryExpression> AstBuilder::TryParseBinaryExpression(int 
   return dynamic_unique_pointer_cast<AST::BinaryExpression>(std::move(operand));
 }
 
-std::unique_ptr<AST::UnaryPostfixExpression> AstBuilder::TryParseUnaryPostfixExpression(int precedence, std::unique_ptr<AST::Node> operand) {
-  Token oper = token;
-  token = lexer->ReadToken();  // Consume the operator
-  operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
+std::unique_ptr<AST::UnaryPostfixExpression> AstBuilder::TryParseUnaryPostfixExpression(
+    int precedence, std::unique_ptr<AST::Node> operand) {
+  if (Precedence::kUnaryPostfixPrec.find(token.type) != Precedence::kUnaryPostfixPrec.end() &&
+      precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence) {
+    Token oper = token;
+    token = lexer->ReadToken();  // Consume the operator
+    operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
+  }
   return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
 }
 
@@ -1897,40 +1897,22 @@ std::unique_ptr<AST::FunctionCallExpression> AstBuilder::TryParseFunctionCallExp
 }
 
 std::unique_ptr<AST::Node> AstBuilder::TryParseControlExpression(SyntaxMode mode_) {
-  switch (mode_) {
-    case SyntaxMode::STRICT: {
-      require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
-      auto expr = TryParseExpression(Precedence::kAll);
-      require_token(TT_ENDPARENTH, "Expected ')' after control expression");
-      return expr;
-    }
-    default:
-      herr->Error(token)
-          << "Internal error: unreachable (" __FILE__ ":" << __LINE__
-          << "): SyntaxMode " << (int) mode_ << " unknown to system";
-      [[fallthrough]];
-    case SyntaxMode::QUIRKS: {
-      auto operand = TryParseOperand();
-      if(map_contains(Precedence::kUnaryPostfixPrec, token.type)){
-        operand = TryParseExpression(Precedence::kAll, std::move(operand));
-      } else if (map_contains(Precedence::kBinaryPrec, token.type) && token.type != TT_STAR) {
-        Token oper = token;
-        token = lexer->ReadToken(); // Consume the token
-        auto right = TryParseControlExpression(mode);
-        if(token.type == TT_BEGINPARENTH){
-          std::cout<< token.content << std::endl;
-          right = TryParseExpression(Precedence::kAll, std::move(right));
-          std::cout<< token.content << std::endl;
-        }
-        AST::Operation op(oper.type, std::string(oper.content));
-        operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
-      }
-      // TODO: handle [] for array access and () for direct func call
-      return operand;
-    }
-    case SyntaxMode::GML:
-      return TryParseExpression(Precedence::kAll, nullptr);
+  if ((int)mode_ > 2) {
+    herr->Error(token) << "Internal error: unreachable (" __FILE__ ":" << __LINE__ << "): SyntaxMode " << (int)mode_
+                       << " unknown to system";
   }
+
+  if (mode_ == SyntaxMode::STRICT) {
+    require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
+  }
+
+  auto expr = TryParseExpression(Precedence::kAll);
+
+  if (mode_ == SyntaxMode::STRICT) {
+    require_token(TT_ENDPARENTH, "Expected ')' after control expression");
+  }
+
+  return expr;
 }
 
 std::unique_ptr<AST::Node> AstBuilder::TryParseDeclOrTypeExpression() {
