@@ -1037,3 +1037,37 @@ TEST(PrinterTest, test50) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test51) {
+  std::string code = "if a.b --l";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "if (a.b --) l;";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test52) {
+  std::string code = "if a->b --l";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "if (a->b --) l;";
+
+  ASSERT_TRUE(compare(code, printed));
+}

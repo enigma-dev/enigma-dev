@@ -1775,9 +1775,17 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseExpression(int precedence, std::u
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
       } else if (map_contains(Precedence::kUnaryPostfixPrec, token.type)) {
-        if (precedence < Precedence::kUnaryPostfix || operand->type != AST::NodeType::IDENTIFIER) {
+        if (operand->type == AST::NodeType::BINARY_EXPRESSION) {
+          auto exp = operand->As<AST::BinaryExpression>();
+          if (exp->operation.type != TT_DOT && exp->operation.type != TT_ARROW) {
+            break;
+          }
+        }
+        bool valid_operand_type =
+            operand->type == AST::NodeType::IDENTIFIER || operand->type == AST::NodeType::BINARY_EXPRESSION;
+        if (precedence < Precedence::kUnaryPostfix || !valid_operand_type) {
           break;
-        } 
+        }
         operand = TryParseUnaryPostfixExpression(precedence, std::move(operand));
       } else if (map_contains(Precedence::kTernaryPrec, token.type)) {
         if (precedence < Precedence::kTernary) {

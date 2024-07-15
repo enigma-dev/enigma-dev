@@ -2409,6 +2409,74 @@ TEST(ParserTest, ParseControlExpression_2) {
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "l");
 }
 
+TEST(ParserTest, QualifiedExpressions_1) {
+  ParserTester test{"if a.b --l"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+
+  auto *if_stmt = block->statements[0]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_stmt->true_branch->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(if_stmt->false_branch, nullptr);
+
+  auto *unary = if_stmt->condition->As<AST::UnaryPostfixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = unary->operand->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_DOT);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::IDENTIFIER);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  auto *right = bin->right->As<AST::IdentifierAccess>();
+  ASSERT_EQ(right->name.content, "b");
+
+  auto *iden = if_stmt->true_branch->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden->name.content, "l");
+}
+
+TEST(ParserTest, QualifiedExpressions_2) {
+  ParserTester test{"if a->b --l"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+
+  auto *if_stmt = block->statements[0]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  ASSERT_EQ(if_stmt->true_branch->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(if_stmt->false_branch, nullptr);
+
+  auto *unary = if_stmt->condition->As<AST::UnaryPostfixExpression>();
+  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = unary->operand->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_ARROW);
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::IDENTIFIER);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "a");
+
+  auto *right = bin->right->As<AST::IdentifierAccess>();
+  ASSERT_EQ(right->name.content, "b");
+
+  auto *iden = if_stmt->true_branch->As<AST::IdentifierAccess>();
+  ASSERT_EQ(iden->name.content, "l");
+}
+
 TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
   ParserTester test{"foo(12)--x;"};
   auto node = test->ParseCode();
