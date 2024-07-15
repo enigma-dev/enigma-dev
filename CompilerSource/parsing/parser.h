@@ -154,7 +154,7 @@ class AstBuilder {
 
   jdi::definition *get_builtin(std::string_view name);
 
-  void TryParseTypeSpecifier(FullType *type, bool &first_signed);
+  void TryParseTypeSpecifier(FullType *type);
 
   void TryParseTypeSpecifierSeq(FullType *type);
 
@@ -164,7 +164,7 @@ class AstBuilder {
 
   FullType TryParseTypeID();
 
-  void TryParseDeclSpecifier(FullType *type, bool &first_signed);
+  void TryParseDeclSpecifier(FullType *type);
 
   void TryParseDeclSpecifierSeq(FullType *type);
 

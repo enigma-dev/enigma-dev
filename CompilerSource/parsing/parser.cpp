@@ -902,7 +902,7 @@ jdi::definition *AstBuilder::get_builtin(std::string_view name) {
   return jdi::builtin_primitives[std::string(name)];
 }
 
-void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {
+void AstBuilder::TryParseTypeSpecifier(FullType *type) {
   switch (token.type) {
     case TT_TYPE_NAME: {
       if (token.content == "long" || token.content == "short") {
@@ -964,22 +964,7 @@ void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {
 
     default: {
       if (token.type == TT_SIGNED || token.type == TT_UNSIGNED || next_is_cv_qualifier()) {
-        if (token.type == TT_UNSIGNED && first_signed) {
-          // TODO: There is no way to actually detect this, as signed's value is 0 --> solved using the first_signed
-          type->flags |= jdi_decflag_bitmask(token.content).second;
-        } else if (token.type == TT_UNSIGNED && !first_signed) {
-          herr->Error(token) << "Conflicting use of 'signed' and 'unsigned' in the same type specifier";
-        } else if (contains_decflag_bitmask(type->flags, "unsigned") && token.type == TT_SIGNED) {
-          herr->Error(token) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
-        } else if (contains_decflag_bitmask(type->flags, token.content)) {
-          if (first_signed && token.type == TT_SIGNED) {
-            first_signed = false;
-          } else {
-            herr->Warning(token) << "Duplicate usage of flags in type specifier";
-          }
-        } else {
-          type->flags |= jdi_decflag_bitmask(token.content).second;
-        }
+        type->flags |= jdi_decflag_bitmask(token.content).second;
         token = lexer->ReadToken();
       } else if (next_is_class_key() || token.type == TT_ENUM) {
         TryParseElaboratedName(type);
@@ -992,9 +977,8 @@ void AstBuilder::TryParseTypeSpecifier(FullType *type, bool& first_signed) {
 }
 
 void AstBuilder::TryParseTypeSpecifierSeq(FullType *type) {
-  bool first_signed = true;
   while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(type, first_signed);
+    TryParseTypeSpecifier(type);
   }
 }
 
@@ -1068,9 +1052,8 @@ void AstBuilder::TryParseMaybeNestedPtrOperator(FullType *type) {
 
 FullType AstBuilder::TryParseTypeID() {
   FullType type;
-  bool first_signed = true;
   while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(&type, first_signed);
+    TryParseTypeSpecifier(&type);
   }
 
   maybe_infer_int(type);
@@ -1082,7 +1065,7 @@ FullType AstBuilder::TryParseTypeID() {
   return type;
 }
 
-void AstBuilder::TryParseDeclSpecifier(FullType *type, bool& first_signed) {
+void AstBuilder::TryParseDeclSpecifier(FullType *type) {
   switch (token.type) {
     case TT_TYPEDEF: {
       TryParseTypeSpecifierSeq(type);
@@ -1109,16 +1092,15 @@ void AstBuilder::TryParseDeclSpecifier(FullType *type, bool& first_signed) {
 
     default:
       if (next_is_type_specifier()) {
-        TryParseTypeSpecifier(type, first_signed);
+        TryParseTypeSpecifier(type);
         break;
       }
   }
 }
 
 void AstBuilder::TryParseDeclSpecifierSeq(FullType *type) {
-  bool first_signed = true;
   while (is_decl_specifier(token)) {
-    TryParseDeclSpecifier(type, first_signed);
+    TryParseDeclSpecifier(type);
   }
 }
 
@@ -1688,8 +1670,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseOperand() {
     case TT_LOCAL: {
       if (next_maybe_functional_cast()) {
         FullType type;
-        bool first_signed = true;
-        TryParseTypeSpecifier(&type, first_signed);
+        TryParseTypeSpecifier(&type);
         if (token.type == TT_BEGINPARENTH) {
           auto tok = token;
           token = lexer->ReadToken();
@@ -2152,8 +2133,7 @@ std::unique_ptr<AST::Node> AstBuilder::TryParseEitherFunctionalCastOrDeclaration
     bool maybe_c_style_cast, AST::DeclarationStatement::StorageClass sc) {
   if (next_maybe_functional_cast()) {
     FullType type;
-    bool first_signed = true;
-    TryParseTypeSpecifier(&type, first_signed);
+    TryParseTypeSpecifier(&type);
     if (next_is_type_specifier() ||
         // Make sure we don't accidentally consume a c-style cast when its required
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
