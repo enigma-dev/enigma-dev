@@ -1033,7 +1033,7 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TEVar
 			break;
 	}
 
-	default_input_values[port] = value;
+	default_input_values.at(port) = value;
 }
 
 TEVariant VisualShaderNode::get_input_port_default_value(const int& port) const {
