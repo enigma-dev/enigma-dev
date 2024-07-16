@@ -44,7 +44,7 @@ const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 	{ VisualShaderNode::PortType::PORT_TYPE_SAMPLER, "specular_shininess_texture", "SPECULAR_SHININESS_TEXTURE" },
 	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "vertex", "VERTEX" },
 
-	{ VisualShaderNode::PORT_TYPE_MAX, "", "" }, // End of list.
+	{ VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", "" }, // End of list.
     
 };
 
@@ -56,7 +56,7 @@ const VisualShaderNodeInput::Port VisualShaderNodeInput::preview_ports[] = {
 	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_uv", "UV" },
 	{ VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "TIME" },
 
-	{ VisualShaderNode::PORT_TYPE_MAX, "", "" }, // End of list.
+	{ VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", "" }, // End of list.
 
 };
 
@@ -70,5 +70,5 @@ const VisualShaderNodeOutput::Port VisualShaderNodeOutput::ports[] = {
 	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Light Vertex", "LIGHT_VERTEX" },
 	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "Shadow Vertex", "SHADOW_VERTEX" },
 
-	{ VisualShaderNode::PortType::PORT_TYPE_MAX, "", "" },
+	{ VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE, "", "" },
 };

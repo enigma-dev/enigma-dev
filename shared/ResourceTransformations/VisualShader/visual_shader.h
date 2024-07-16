@@ -42,9 +42,13 @@ using TEVector2 = std::tuple<float, float>;
 /** Temporary type instead of @c Vector3 type. */
 using TEVector3 = std::tuple<float, float, float>;
 
+/** Temporary type instead of @c Vector4 type. */
+using TEVector4 = std::tuple<float, float, float, float>;
+
 /** Temporary type instead of @c Quaternion type. */
 using TEQuaternion = std::tuple<float, float, float, float>;
 
+/** Temporary type instead of @c Variant type. */
 using TEVariant = std::variant<std::monostate, float, int, TEVector2, TEVector3, TEQuaternion, bool>;
 
 class VisualShaderNode;
@@ -129,6 +133,22 @@ class VisualShader {
          */
         std::shared_ptr<VisualShaderNode> get_node(const int& id) const;
 
+        /**
+         * @brief Check if two ports are compatible.
+         * 
+         * @note Ports: PORT_TYPE_SCALAR, PORT_TYPE_SCALAR_INT, PORT_TYPE_SCALAR_UINT, 
+         *              PORT_TYPE_VECTOR_2D, PORT_TYPE_VECTOR_3D, PORT_TYPE_VECTOR_4D, and 
+         *              PORT_TYPE_BOOLEAN are compatible with each other. Other types are 
+         *              also compatible with each other but not with the previous types.
+         */
+        bool is_port_types_compatible(const int& p1, const int& p2) const;
+
+        bool is_nodes_connected_relatively(const int& node, const int& target) const;
+
+        bool can_connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port) const;
+	    bool connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
+	    void disconnect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
+
         bool generate_shader() const;
 
         bool generate_shader_for_each_node(std::string& func_code, 
@@ -175,7 +195,7 @@ class VisualShaderNode {
             PORT_TYPE_BOOLEAN,
             PORT_TYPE_TRANSFORM,
             PORT_TYPE_SAMPLER,
-            PORT_TYPE_MAX,
+            PORT_TYPE_ENUM_SIZE,
         };
 
         enum Category {
@@ -191,7 +211,7 @@ class VisualShaderNode {
             CATEGORY_VECTOR,
             CATEGORY_SPECIAL,
             CATEGORY_PARTICLE,
-            CATEGORY_MAX
+            CATEGORY_ENUM_SIZE
         };
 
         VisualShaderNode();
@@ -226,10 +246,18 @@ class VisualShaderNode {
         bool is_input_port_connected(const int& port) const;
         void set_input_port_connected(const int& port, const bool& connected);
 
+        virtual VisualShaderNode::Category get_category() const;
+
+        virtual std::vector<std::string> get_editable_properties() const;
+	    virtual std::unordered_map<std::string, std::string> get_editable_properties_names() const;
+
+        virtual std::string get_warning() const;
+
+    protected:
+        bool simple_decl;
+
     private:
         std::unordered_map<int, TEVariant> default_input_values;
-
-        bool simple_decl;
 
         std::unordered_map<int, bool> connected_input_ports;
         std::unordered_map<int, int> connected_output_ports;
@@ -256,7 +284,7 @@ class VisualShaderNodeInput : public VisualShaderNode {
 
     private:
         struct Port {
-            PortType type = VisualShaderNode::PortType::PORT_TYPE_MAX;
+            PortType type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE;
             std::string name;
             std::string string_value;
         };
@@ -285,7 +313,7 @@ class VisualShaderNodeOutput : public VisualShaderNode {
 
     private:
         struct Port {
-            VisualShaderNode::PortType type = VisualShaderNode::PortType::PORT_TYPE_MAX;
+            VisualShaderNode::PortType type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE;
             std::string name;
             std::string string_value;
         };

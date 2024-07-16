@@ -5,6 +5,7 @@
 
 # TODO
 
+- [ ] Modify each node to accept unknown number of inputs.
 - [ ] Implement a Genetic Algorithm to evolve visual shader graph parameters.
 - [ ] Extend the Genetic Algorithm to evolve the visual shader graph nodes and connections (Generate the whole graph).
 - [ ] Extend the Genetic Algorithm to evolve the visual shader graphs (both fragment and vertex shaders together).
