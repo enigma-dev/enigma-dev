@@ -75,10 +75,20 @@
 #include <sys/time.h>
 #include <sys/proc.h>
 #endif
+#if defined(USE_SDL_POLLEVENT)
 #include <SDL2/SDL.h>
-
+#endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
+#endif
+#if defined(USE_SDL_POLLEVENT)
+#if defined(_MSC_VER)
+#if defined(_WIN32) && !defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
+#elif defined(_WIN32) && defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
+#endif
+#endif
 #endif
 
 namespace {
@@ -1548,6 +1558,7 @@ namespace ngs::ps {
   } // anonymous namespace
 
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait) {
+    #if defined(USE_SDL_POLLEVENT)
     if (wait) {
       int prevIndex = index;
       std::thread proc_thread(spawn_child_proc_id_helper, command);
@@ -1567,6 +1578,9 @@ namespace ngs::ps {
       proc_thread.join();
       return proc_index;
     }
+    #else
+    if (wait) return spawn_child_proc_id_helper(command);
+    #endif
     int prevIndex = index;
     std::thread proc_thread(spawn_child_proc_id_helper, command);
     while (prevIndex == index) {
