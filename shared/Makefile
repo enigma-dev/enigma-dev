@@ -33,8 +33,8 @@ else ifeq ($(OS), OpenBSD)
 	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lz -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
 endif
 
-override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT
-override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT
+override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2) -DUSE_SDL_POLLEVENT
+override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2) -DUSE_SDL_POLLEVENT
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
 	ifeq ($(OS), Darwin)
