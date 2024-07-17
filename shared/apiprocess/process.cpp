@@ -76,7 +76,7 @@
 #include <sys/proc.h>
 #endif
 #if defined(USE_SDL_POLLEVENT)
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
