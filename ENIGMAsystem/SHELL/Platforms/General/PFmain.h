@@ -82,6 +82,8 @@ extern double fps;
 extern unsigned long delta_time;
 extern unsigned long current_time;
 
+std::string pointer_to_ull_string(void *pointer);
+
 void sleep(int ms);
 unsigned long get_timer(); // number of microseconds since the game started
 void game_end();
