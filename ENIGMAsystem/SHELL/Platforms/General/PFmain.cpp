@@ -440,6 +440,8 @@ int os_type = os_sunos;
 int os_type = os_unknown;
 #endif
 
+std::string pointer_to_ull_string(void *pointer) { return std::to_string((unsigned long long)pointer); }
+
 std::string game_save_id = "";
 std::string keyboard_string = "";
 double fps = 0;
