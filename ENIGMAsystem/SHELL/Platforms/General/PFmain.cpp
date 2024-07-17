@@ -440,13 +440,14 @@ int os_type = os_sunos;
 int os_type = os_unknown;
 #endif
 
-std::string pointer_to_ull_string(void *pointer) { return std::to_string((unsigned long long)pointer); }
-
 std::string game_save_id = "";
 std::string keyboard_string = "";
 double fps = 0;
 unsigned long delta_time = 0;
 unsigned long current_time = 0;
+
+std::string pointer_to_ull_string(void *pointer) { return std::to_string((unsigned long long)pointer); }
+void *ull_string_to_pointer(std::string ull_string) { return strtoull(ull_string.c_str(), nullptr, 10); }
 
 bool os_is_paused() { return !enigma::game_window_focused && enigma::freezeOnLoseFocus; }
 
