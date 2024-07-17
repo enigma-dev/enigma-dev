@@ -29,7 +29,7 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 #include "apifilesystem/filesystem.hpp"
-#include "Universal_System/joysticks.h"
+#include "Platforms/General/PFjoystick.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
@@ -77,7 +77,9 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
+    #if defined(ENIGMA_PLATFORM_SDL)
     joystick_init();
+    #endif
 
     // Open the exe for resource load
     do { // Allows break

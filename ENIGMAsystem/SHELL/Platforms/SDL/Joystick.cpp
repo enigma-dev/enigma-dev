@@ -26,7 +26,6 @@
 
 #include <string>
 
-#include "joysticks.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFjoystick.h"
 

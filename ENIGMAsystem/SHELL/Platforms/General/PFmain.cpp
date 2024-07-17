@@ -370,8 +370,14 @@ int enigma_main(int argc, char** argv) {
 
   // Call ENIGMA system initializers; sprites, audio, and what have you
   initialize_everything();
+  
+  int i = 0;
 
   while (!game_isending) {
+  
+    i++;
+    if (i <= 2) enigma_user::window_center();
+    else i = 3;
 
     if (!((std::string)enigma_user::room_caption).empty() && 
       enigma_user::window_get_caption() != enigma_user::room_caption)

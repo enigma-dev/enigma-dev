@@ -24,6 +24,9 @@
 namespace enigma {
   void init_joysticks();
   void handle_joysticks();
+  bool joystick_init();
+  void joystick_uninit();
+  void joystick_update();
 }
 
 namespace enigma_user {
