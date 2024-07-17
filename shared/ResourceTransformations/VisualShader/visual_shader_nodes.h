@@ -92,6 +92,241 @@ public:
 };
 
 /*************************************/
+/* Float Constant                    */
+/*************************************/
+
+class VisualShaderNodeFloatConstant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeFloatConstant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const float& c);
+		float get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		float constant;
+};
+
+/*************************************/
+/* Int Constant                      */
+/*************************************/
+
+class VisualShaderNodeIntConstant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeIntConstant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const int& c);
+		int get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		int constant;
+
+};
+
+/*************************************/
+/* UInt Constant                     */
+/*************************************/
+
+class VisualShaderNodeUIntConstant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeUIntConstant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const int& c);
+		int get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		int constant;
+
+};
+
+/*************************************/
+/* Boolean Constant                  */
+/*************************************/
+
+class VisualShaderNodeBooleanConstant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeBooleanConstant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const bool& c);
+		bool get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		bool constant;
+
+};
+
+/*************************************/
+/* Color Constant                    */
+/*************************************/
+
+class VisualShaderNodeColorConstant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeColorConstant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const TEColor& c);
+		TEColor get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		TEColor constant;
+};
+
+/*************************************/
+/* Vector2 Constant                  */
+/*************************************/
+
+class VisualShaderNodeVec2Constant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeVec2Constant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const TEVector2& c);
+		TEVector2 get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		TEVector2 constant;	
+};
+
+/*************************************/
+/* Vector3 Constant                  */
+/*************************************/
+
+class VisualShaderNodeVec3Constant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeVec3Constant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const TEVector3& c);
+		TEVector3 get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		TEVector3 constant;
+};
+
+/*************************************/
+/* Vector4 Constant                  */
+/*************************************/
+
+class VisualShaderNodeVec4Constant : public VisualShaderNodeConstant {
+	public:
+		VisualShaderNodeVec4Constant();
+
+		virtual std::string get_caption() const override;
+
+		virtual int get_input_port_count() const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual int get_output_port_count() const override;
+		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+		virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+
+		void set_constant(const TEQuaternion& c);
+		TEQuaternion get_constant() const;
+
+		virtual std::vector<std::string> get_editable_properties() const override;
+
+	private:
+		TEQuaternion constant;
+};
+
+/*************************************/
 /* OPERATORS                         */
 /*************************************/
 

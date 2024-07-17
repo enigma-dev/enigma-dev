@@ -28,6 +28,8 @@
 #include "visual_shader_nodes.h"
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 /*************************************/
 /* Vector Base Node                  */
@@ -92,6 +94,473 @@ std::vector<std::string> VisualShaderNodeVectorBase::get_editable_properties() c
 
 VisualShaderNodeConstant::VisualShaderNodeConstant() {}
 
+/*************************************/
+/* Float Constant                    */
+/*************************************/
+
+VisualShaderNodeFloatConstant::VisualShaderNodeFloatConstant() : constant(0.0f) {}
+
+std::string VisualShaderNodeFloatConstant::get_caption() const {
+	return "FloatConstant";
+}
+
+int VisualShaderNodeFloatConstant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeFloatConstant::PortType VisualShaderNodeFloatConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeFloatConstant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeFloatConstant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeFloatConstant::PortType VisualShaderNodeFloatConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeFloatConstant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeFloatConstant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::ostringstream oss;
+	oss << "\t" << output_vars.at(0) << " = " << std::fixed << std::setprecision(6) << constant << ";\n";
+	return oss.str();
+}
+
+void VisualShaderNodeFloatConstant::set_constant(const float& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+float VisualShaderNodeFloatConstant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeFloatConstant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+
+/*************************************/
+/* Int Constant                      */
+/*************************************/
+
+VisualShaderNodeIntConstant::VisualShaderNodeIntConstant() : constant(0) {}
+
+std::string VisualShaderNodeIntConstant::get_caption() const {
+	return "IntConstant";
+}
+
+int VisualShaderNodeIntConstant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeIntConstant::PortType VisualShaderNodeIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR_INT;
+}
+
+std::string VisualShaderNodeIntConstant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeIntConstant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIntConstant::PortType VisualShaderNodeIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR_INT;
+}
+
+std::string VisualShaderNodeIntConstant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeIntConstant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = " + std::to_string(constant) + ";\n";
+}
+
+void VisualShaderNodeIntConstant::set_constant(const int& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+int VisualShaderNodeIntConstant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeIntConstant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* UInt Constant                     */
+/*************************************/
+
+VisualShaderNodeUIntConstant::VisualShaderNodeUIntConstant() : constant(0) {}
+
+std::string VisualShaderNodeUIntConstant::get_caption() const {
+	return "UIntConstant";
+}
+
+int VisualShaderNodeUIntConstant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeUIntConstant::PortType VisualShaderNodeUIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR_UINT;
+}
+
+std::string VisualShaderNodeUIntConstant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeUIntConstant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeUIntConstant::PortType VisualShaderNodeUIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_SCALAR_UINT;
+}
+
+std::string VisualShaderNodeUIntConstant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeUIntConstant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = " + std::to_string(constant) + "u;\n";
+}
+
+void VisualShaderNodeUIntConstant::set_constant(const int& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+int VisualShaderNodeUIntConstant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeUIntConstant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* Boolean Constant                  */
+/*************************************/
+
+VisualShaderNodeBooleanConstant::VisualShaderNodeBooleanConstant() : constant(false) {}
+
+std::string VisualShaderNodeBooleanConstant::get_caption() const {
+	return "BooleanConstant";
+}
+
+int VisualShaderNodeBooleanConstant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeBooleanConstant::PortType VisualShaderNodeBooleanConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_BOOLEAN;
+}
+
+std::string VisualShaderNodeBooleanConstant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeBooleanConstant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeBooleanConstant::PortType VisualShaderNodeBooleanConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_BOOLEAN;
+}
+
+std::string VisualShaderNodeBooleanConstant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeBooleanConstant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = " + (constant ? "true" : "false") + ";\n";
+}
+
+void VisualShaderNodeBooleanConstant::set_constant(const bool& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+bool VisualShaderNodeBooleanConstant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeBooleanConstant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* Color Constant                    */
+/*************************************/
+
+VisualShaderNodeColorConstant::VisualShaderNodeColorConstant() : constant({1.0f, 1.0f, 1.0f, 1.0f}) {}
+
+std::string VisualShaderNodeColorConstant::get_caption() const {
+	return "ColorConstant";
+}
+
+int VisualShaderNodeColorConstant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeColorConstant::PortType VisualShaderNodeColorConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_VECTOR_4D;
+}
+
+std::string VisualShaderNodeColorConstant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeColorConstant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeColorConstant::PortType VisualShaderNodeColorConstant::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeColorConstant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeColorConstant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::ostringstream oss;
+	oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
+																						 << std::get<1>(constant) << ", " 
+																						 << std::get<2>(constant) << ", " 
+																						 << std::get<3>(constant) << ");\n";
+	return oss.str();
+}
+
+void VisualShaderNodeColorConstant::set_constant(const TEColor& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+TEColor VisualShaderNodeColorConstant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeColorConstant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* Vector2 Constant                  */
+/*************************************/
+
+VisualShaderNodeVec2Constant::VisualShaderNodeVec2Constant() {}
+
+std::string VisualShaderNodeVec2Constant::get_caption() const {
+	return "Vector2Constant";
+}
+
+int VisualShaderNodeVec2Constant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeVec2Constant::PortType VisualShaderNodeVec2Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_VECTOR_2D;
+}
+
+std::string VisualShaderNodeVec2Constant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeVec2Constant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeVec2Constant::PortType VisualShaderNodeVec2Constant::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVec2Constant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeVec2Constant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::ostringstream oss;
+	oss << "\t" << output_vars.at(0) << " = vec2(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
+																						 << std::get<1>(constant) << ");\n";
+	return oss.str();
+}
+
+void VisualShaderNodeVec2Constant::set_constant(const TEVector2& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+TEVector2 VisualShaderNodeVec2Constant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeVec2Constant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* Vector3 Constant                  */
+/*************************************/
+
+VisualShaderNodeVec3Constant::VisualShaderNodeVec3Constant() {
+}
+std::string VisualShaderNodeVec3Constant::get_caption() const {
+	return "Vector3Constant";
+}
+
+int VisualShaderNodeVec3Constant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeVec3Constant::PortType VisualShaderNodeVec3Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_VECTOR_3D;
+}
+
+std::string VisualShaderNodeVec3Constant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeVec3Constant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeVec3Constant::PortType VisualShaderNodeVec3Constant::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVec3Constant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeVec3Constant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::ostringstream oss;
+	oss << "\t" << output_vars.at(0) << " = vec3(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
+																						 << std::get<1>(constant) << ", "
+																						 << std::get<2>(constant) << ");\n";
+	return oss.str();
+}
+
+void VisualShaderNodeVec3Constant::set_constant(const TEVector3& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+TEVector3 VisualShaderNodeVec3Constant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeVec3Constant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
+
+/*************************************/
+/* Vector4 Constant                  */
+/*************************************/
+
+VisualShaderNodeVec4Constant::VisualShaderNodeVec4Constant() {
+}
+std::string VisualShaderNodeVec4Constant::get_caption() const {
+	return "Vector4Constant";
+}
+
+int VisualShaderNodeVec4Constant::get_input_port_count() const {
+	return 0;
+}
+
+VisualShaderNodeVec4Constant::PortType VisualShaderNodeVec4Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+	return PORT_TYPE_VECTOR_4D;
+}
+
+std::string VisualShaderNodeVec4Constant::get_input_port_name([[maybe_unused]] const int& port) const {
+	return std::string();
+}
+
+int VisualShaderNodeVec4Constant::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeVec4Constant::PortType VisualShaderNodeVec4Constant::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVec4Constant::get_output_port_name([[maybe_unused]] const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeVec4Constant::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::ostringstream oss;
+	oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
+																						 << std::get<1>(constant) << ", " 
+																						 << std::get<2>(constant) << ", " 
+																						 << std::get<3>(constant) << ");\n";
+	return oss.str();
+}
+
+void VisualShaderNodeVec4Constant::set_constant(const TEQuaternion& c) {
+	if (constant == c) {
+		return;
+	}
+
+	constant = c;
+}
+
+TEQuaternion VisualShaderNodeVec4Constant::get_constant() const {
+	return constant;
+}
+
+std::vector<std::string> VisualShaderNodeVec4Constant::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("constant");
+	return props;
+}
 
 /*************************************/
 /* OPERATORS                         */
@@ -192,7 +661,7 @@ VisualShaderNodeFloatOp::Operator VisualShaderNodeFloatOp::get_operator() const 
 
 std::vector<std::string> VisualShaderNodeFloatOp::get_editable_properties() const {
 	std::vector<std::string> props;
-	props.push_back("operator");
+	props.emplace_back("operator");
 	return props;
 }
 
@@ -298,7 +767,7 @@ VisualShaderNodeIntOp::Operator VisualShaderNodeIntOp::get_operator() const {
 
 std::vector<std::string> VisualShaderNodeIntOp::get_editable_properties() const {
 	std::vector<std::string> props;
-	props.push_back("operator");
+	props.emplace_back("operator");
 	return props;
 }
 
@@ -404,7 +873,7 @@ VisualShaderNodeUIntOp::Operator VisualShaderNodeUIntOp::get_operator() const {
 
 std::vector<std::string> VisualShaderNodeUIntOp::get_editable_properties() const {
 	std::vector<std::string> props;
-	props.push_back("operator");
+	props.emplace_back("operator");
 	return props;
 }
 
@@ -558,7 +1027,7 @@ VisualShaderNodeVectorOp::Operator VisualShaderNodeVectorOp::get_operator() cons
 
 std::vector<std::string> VisualShaderNodeVectorOp::get_editable_properties() const {
 	std::vector<std::string> props {VisualShaderNodeVectorBase::get_editable_properties()};
-	props.push_back("operator");
+	props.emplace_back("operator");
 	return props;
 }
 
@@ -630,10 +1099,9 @@ std::string VisualShaderNodeColorOp::generate_code([[maybe_unused]] const int& i
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_LIGHTEN: {
 			code += "\t" + output_vars.at(0) + " = max(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
-
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_OVERLAY: {
-			for (int i = 0; i < 3; i++) {
+			for (int i {0}; i < 3; i++) {
 				code += "\t{\n";
 				code += "\t\tfloat base = " + input_vars.at(0) + "." + axisn[i] + ";\n";
 				code += "\t\tfloat blend = " + input_vars.at(1) + "." + axisn[i] + ";\n";
@@ -642,19 +1110,17 @@ std::string VisualShaderNodeColorOp::generate_code([[maybe_unused]] const int& i
 				code += "\t\t} else {\n";
 				code += "\t\t\t" + output_vars.at(0) + "." + axisn[i] + " = 1.0 - 2.0 * (1.0 - blend) * (1.0 - base);\n";
 				code += "\t\t}\n";
-				code += "\t}\n";
+				code += "\t}\n\n";
 			}
-
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_DODGE: {
 			code += "\t" + output_vars.at(0) + " = (" + input_vars.at(0) + ") / (vec3(1.0) - " + input_vars.at(1) + ");\n";
-
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_BURN: {
 			code += "\t" + output_vars.at(0) + " = vec3(1.0) - (vec3(1.0) - " + input_vars.at(0) + ") / (" + input_vars.at(1) + ");\n";
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_SOFT_LIGHT: {
-			for (int i = 0; i < 3; i++) {
+			for (int i {0}; i < 3; i++) {
 				code += "\t{\n";
 				code += "\t\tfloat base = " + input_vars.at(0) + "." + axisn[i] + ";\n";
 				code += "\t\tfloat blend = " + input_vars.at(1) + "." + axisn[i] + ";\n";
@@ -663,12 +1129,11 @@ std::string VisualShaderNodeColorOp::generate_code([[maybe_unused]] const int& i
 				code += "\t\t} else {\n";
 				code += "\t\t\t" + output_vars.at(0) + "." + axisn[i] + " = (1.0 - (1.0 - base) * (1.0 - (blend - 0.5)));\n";
 				code += "\t\t}\n";
-				code += "\t}\n";
+				code += "\t}\n\n";
 			}
-
 		} break;
 		case VisualShaderNodeColorOp::Operator::OP_HARD_LIGHT: {
-			for (int i = 0; i < 3; i++) {
+			for (int i {0}; i < 3; i++) {
 				code += "\t{\n";
 				code += "\t\tfloat base = " + input_vars.at(0) + "." + axisn[i] + ";\n";
 				code += "\t\tfloat blend = " + input_vars.at(1) + "." + axisn[i] + ";\n";
@@ -677,9 +1142,8 @@ std::string VisualShaderNodeColorOp::generate_code([[maybe_unused]] const int& i
 				code += "\t\t} else {\n";
 				code += "\t\t\t" + output_vars.at(0) + "." + axisn[i] + " = (1.0 - (1.0 - base) * (1.0 - 2.0 * (blend - 0.5)));\n";
 				code += "\t\t}\n";
-				code += "\t}\n";
+				code += "\t}\n\n";
 			}
-
 		} break;
 		default:
 			break;
@@ -739,6 +1203,6 @@ VisualShaderNodeColorOp::Operator VisualShaderNodeColorOp::get_operator() const 
 
 std::vector<std::string> VisualShaderNodeColorOp::get_editable_properties() const {
 	std::vector<std::string> props;
-	props.push_back("operator");
+	props.emplace_back("operator");
 	return props;
 }

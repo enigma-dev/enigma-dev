@@ -181,3 +181,175 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeUIntOp_generate_code) {
   expected_code = "\tc = a >> b;\n";
   EXPECT_EQ(code, expected_code);
 }
+
+TEST(VisualShaderNodesTest, Test_VisualShaderNodeVectorOp_generate_code) {
+  VisualShaderNodeVectorOp node;
+  std::vector<std::string> input_vars = {"a", "b"};
+  std::vector<std::string> output_vars = {"c"};
+  std::string code {node.generate_code(0, input_vars, output_vars)};
+  std::string expected_code {"\tc = a + b;\n"};
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_SUB);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = a - b;\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_MUL);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = a * b;\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_DIV);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = a / b;\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_MOD);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = mod(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_POW);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = pow(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_MAX);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = max(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_MIN);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = min(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_CROSS);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = cross(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_ATAN2);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = atan(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_REFLECT);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = reflect(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeVectorOp::Operator::OP_STEP);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = step(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+}
+
+TEST(VisualShaderNodesTest, Test_VisualShaderNodeColorOp_generate_code) {
+  VisualShaderNodeColorOp node;
+  std::vector<std::string> input_vars = {"a", "b"};
+  std::vector<std::string> output_vars = {"c"};
+  std::string code {node.generate_code(0, input_vars, output_vars)};
+  std::string expected_code {"\tc = vec3(1.0) - (vec3(1.0) - a) * (vec3(1.0) - b);\n"};
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_DIFFERENCE);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = abs(a - b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_DARKEN);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = min(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_LIGHTEN);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = max(a, b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_OVERLAY);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\t{\n"
+  "\t\tfloat base = a.x;\n"
+  "\t\tfloat blend = b.x;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.x = 2.0 * base * blend;\n"
+  "\t\t} else {\n"
+  "\t\t\tc.x = 1.0 - 2.0 * (1.0 - blend) * (1.0 - base);\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.y;\n"
+  "\t\tfloat blend = b.y;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.y = 2.0 * base * blend;\n"
+  "\t\t} else {\n"
+  "\t\t\tc.y = 1.0 - 2.0 * (1.0 - blend) * (1.0 - base);\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.z;\n"
+  "\t\tfloat blend = b.z;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.z = 2.0 * base * blend;\n"
+  "\t\t} else {\n"
+  "\t\t\tc.z = 1.0 - 2.0 * (1.0 - blend) * (1.0 - base);\n"
+  "\t\t}\n"
+  "\t}\n\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_DODGE);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = (a) / (vec3(1.0) - b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_BURN);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\tc = vec3(1.0) - (vec3(1.0) - a) / (b);\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_SOFT_LIGHT);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\t{\n"
+  "\t\tfloat base = a.x;\n"
+  "\t\tfloat blend = b.x;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.x = (base * (blend + 0.5));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.x = (1.0 - (1.0 - base) * (1.0 - (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.y;\n"
+  "\t\tfloat blend = b.y;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.y = (base * (blend + 0.5));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.y = (1.0 - (1.0 - base) * (1.0 - (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.z;\n"
+  "\t\tfloat blend = b.z;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.z = (base * (blend + 0.5));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.z = (1.0 - (1.0 - base) * (1.0 - (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n";
+  EXPECT_EQ(code, expected_code);
+  node.set_operator(VisualShaderNodeColorOp::Operator::OP_HARD_LIGHT);
+  code = node.generate_code(0, input_vars, output_vars);
+  expected_code = "\t{\n"
+  "\t\tfloat base = a.x;\n"
+  "\t\tfloat blend = b.x;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.x = (base * (2.0 * blend));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.x = (1.0 - (1.0 - base) * (1.0 - 2.0 * (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.y;\n"
+  "\t\tfloat blend = b.y;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.y = (base * (2.0 * blend));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.y = (1.0 - (1.0 - base) * (1.0 - 2.0 * (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n"
+  "\t{\n"
+  "\t\tfloat base = a.z;\n"
+  "\t\tfloat blend = b.z;\n"
+  "\t\tif (base < 0.5) {\n"
+  "\t\t\tc.z = (base * (2.0 * blend));\n"
+  "\t\t} else {\n"
+  "\t\t\tc.z = (1.0 - (1.0 - base) * (1.0 - 2.0 * (blend - 0.5)));\n"
+  "\t\t}\n"
+  "\t}\n\n";
+  EXPECT_EQ(code, expected_code);
+}

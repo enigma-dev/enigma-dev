@@ -51,6 +51,9 @@ using TEQuaternion = std::tuple<float, float, float, float>;
 /** Temporary type instead of @c Variant type. */
 using TEVariant = std::variant<std::monostate, float, int, TEVector2, TEVector3, TEQuaternion, bool>;
 
+/** Temporary type instead of @c Color type. */
+using TEColor = std::tuple<float, float, float, float>;
+
 class VisualShaderNode;
 
 class VisualShader {
