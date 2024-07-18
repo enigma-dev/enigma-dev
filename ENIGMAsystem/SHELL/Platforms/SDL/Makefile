@@ -4,6 +4,7 @@ endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Platforms/SDL/Win32/*.cpp)
+	RESOURCES += $(wildcard Platforms/SDL/Win32/*.rc)
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += $(wildcard Platforms/SDL/MacOSX/*.cpp) 
