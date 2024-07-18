@@ -495,7 +495,7 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
           auto *param_decl = dynamic_cast<AST::DeclarationStatement *>(declaration.get());
           if (param_decl->declarations.size() != 1) {
             herr->Error(token) <<
-                "Internal error: number of declarations in TryParseParametersAndQualifiers not 1";
+                "Internal error: number of declarations in AstBuilder::TryParseParametersAndQualifiers not 1";
           } else {
             auto param = FunctionParameterNode::Parameter{
                 false, param_decl->declarations[0].init.release(),
@@ -524,7 +524,7 @@ void TryParseParametersAndQualifiers(Declarator *decl, bool outside_nested, bool
       } else if (is_expression) {
         if (!params.is<void *>()) {
           herr->Error(token) <<
-            "Internal error: params.parameters is not FunctionCallExpression in TryParseParametersAndQualifiers";
+            "Internal error: params.parameters is not FunctionCallExpression in AstBuilder::TryParseParametersAndQualifiers";
         } else {
           reinterpret_cast<AST::FunctionCallExpression *>(
             params.as<void *>())->arguments.emplace_back(TryParseExpression(Precedence::kTernary));
@@ -777,7 +777,7 @@ jdi::definition *TryParseTypenameSpecifier() {
   }
 }
 
-jdi::definition *TryParsePrefixIdentifier(Declarator *decl =nullptr, bool is_declarator = false) {
+jdi::definition *TryParsePrefixIdentifier(Declarator *decl = nullptr, bool is_declarator = false) {
   Token id = token;
   require_token(TT_IDENTIFIER, "Expected identifier");
   auto def = require_defined_type(id);
@@ -1220,7 +1220,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
   return nullptr;
 }
 
-void TryParseDeclarator(FullType *type, AST::DeclaratorType is_abstract ) {
+void TryParseDeclarator(FullType *type, AST::DeclaratorType is_abstract = AST::DeclaratorType::NON_ABSTRACT) {
   if (next_maybe_ptr_decl_operator()) {
     TryParsePtrDeclarator(type, is_abstract);
   } else {
@@ -1734,7 +1734,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
   return nullptr;
 }
 
-bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
+static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                                    int target_prec) {
   return target_prec >= prec.precedence ||
             (target_prec == prec.precedence &&
@@ -2382,7 +2382,7 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
   return std::make_unique<AST::WithStatement>(std::move(object), std::move(body));
 }
 
-};
+};  // class AstBuilder
 
 std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
   AstBuilder ab(lexer, herr);
