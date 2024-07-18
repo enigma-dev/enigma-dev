@@ -4,7 +4,7 @@
 Name: X11
 Identifier: xlib
 Represents: None
-Description: X11 windowing
+Description: X11 windowing. Requires the 'SDL' widget system changed to 'None'; otherwise, you will get compile errors.
 Author: IsmAvatar, Josh Ventura
 
 Depends:
