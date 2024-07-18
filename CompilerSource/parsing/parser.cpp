@@ -416,11 +416,7 @@ void maybe_infer_int(FullType &type) {
 }
 
 AstBuilder(Lexer *lexer, ErrorHandler *herr){
-  this->lexer = lexer; 
-  this->herr = herr;
-  this->mode = lexer->GetContext().compatibility_opts.syntax_mode;
-  this->frontend= lexer->GetContext().language_fe;
-  token = lexer->ReadToken();
+  initialize(lexer, herr);
 }
 
 AstBuilder(){}
@@ -793,7 +789,7 @@ jdi::definition *TryParsePrefixIdentifier(Declarator *decl = nullptr, bool is_de
   return def;
 }
 
-jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, Declarator *decl =nullptr, bool is_declarator = false) {
+jdi::definition *TryParseNestedNameSpecifier(jdi::definition *scope, Declarator *decl = nullptr, bool is_declarator = false) {
   if (token.type != TT_SCOPEACCESS) {
     herr->Error(token) << "Expected scope access '::' in nested name specifier, got: '" << token.content << '\'';
     return nullptr;
