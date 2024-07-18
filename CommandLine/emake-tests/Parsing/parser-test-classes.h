@@ -23,15 +23,17 @@ class TestFailureErrorHandler : public ErrorHandler {
 
 struct ParserTester {
   TestFailureErrorHandler herr;
-  const ParseContext *context;
+  const ParseContext* context;
   Lexer lexer;
   lang_CPP cpp{};
-  AstBuilder builder;
+  AstBuilderTestAPI* builder = CreateBuilder();
 
-  AstBuilder *operator->() { return &builder; }
+  AstBuilderTestAPI* operator->() { return builder; }
 
   explicit ParserTester(std::string code, bool use_cpp = false)
-      : context(&ParseContext::ForTesting(use_cpp)), lexer(std::move(code), context, &herr), builder{&lexer, &herr} {}
+      : context(&ParseContext::ForTesting(use_cpp)), lexer(std::move(code), context, &herr) {
+    builder->initialize(&lexer, &herr);
+  }
 };
 
 #endif
