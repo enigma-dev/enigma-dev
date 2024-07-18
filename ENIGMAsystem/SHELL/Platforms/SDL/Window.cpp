@@ -1,11 +1,11 @@
 #include "Window.h"
 #include "Event.h"
-#include "Universal_System/joysticks.h"
 #include "Gamepad.h"
 #include "Icon.h"
 
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
