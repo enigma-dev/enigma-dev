@@ -8,4 +8,4 @@ Description: X11 windowing. Requires the 'SDL' widget system changed to 'None'; 
 Author: IsmAvatar, Josh Ventura
 
 Depends:
-	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD
+	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
