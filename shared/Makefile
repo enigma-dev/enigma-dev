@@ -12,8 +12,15 @@ ifeq ($(OS), Darwin)
 	SDLMIXERREPOS := $(shell cd SDL_mixer;mkdir build;cd build;../configure;make;make install;cd ../..)
 	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
 	override LDLIBS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
-	override CXXFLAGS += -ObjC++
-	override CFLAGS += -ObjC++
+	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -ObjC++
+	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -ObjC++
+	ifeq ($(shell uname -m), arm64)
+ 		override LDFLAGS += "/opt/homebrew/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
+ 		override LDLIBS += "/opt/homebrew/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
+ 	else
+ 		override LDFLAGS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
+ 		override LDLIBS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
+ 	endif
 else ifeq ($(OS), Linux)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
