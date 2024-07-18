@@ -38,6 +38,11 @@ else ifeq ($(OS), OpenBSD)
 	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
 	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lz -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
+else
+	override CXXFLAGS += $(shell pkg-config --cflags sdl2)
+	override CFLAGS += $(shell pkg-config --cflags sdl2)
+	override LDLIBS += -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
+	override LDFLAGS += -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
 endif
 
 override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2) -DUSE_SDL_POLLEVENT
