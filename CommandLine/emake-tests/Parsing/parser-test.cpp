@@ -1144,12 +1144,14 @@ TEST(ParserTest, IfStatement_1) {
 
   auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
-  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.type, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.token, "++");
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
   auto *false_branch = if_stmt->false_branch->As<AST::UnaryPrefixExpression>();
   ASSERT_TRUE(false_branch);
-  ASSERT_EQ(false_branch->operation, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operation.type, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operation.token, "--");
   ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
 }
 
@@ -1174,12 +1176,14 @@ TEST(ParserTest, IfStatement_1_NoSemicolon) {
 
   auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
-  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.type, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.token, "++");
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
   auto *false_branch = if_stmt->false_branch->As<AST::UnaryPrefixExpression>();
   ASSERT_TRUE(false_branch);
-  ASSERT_EQ(false_branch->operation, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operation.type, TT_DECREMENT);
+  ASSERT_EQ(false_branch->operation.token, "--");
   ASSERT_EQ(false_branch->operand->type, AST::NodeType::IDENTIFIER);
 }
 
@@ -1198,7 +1202,8 @@ TEST(ParserTest, IfStatement_2) {
 
   auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
-  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.type, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.token, "++");
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
   ASSERT_FALSE(if_stmt->false_branch);
@@ -1219,7 +1224,8 @@ TEST(ParserTest, IfStatement_2_NoSemicolon) {
 
   auto *true_branch = if_stmt->true_branch->As<AST::UnaryPostfixExpression>();
   ASSERT_TRUE(true_branch);
-  ASSERT_EQ(true_branch->operation, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.type, TT_INCREMENT);
+  ASSERT_EQ(true_branch->operation.token, "++");
   ASSERT_EQ(true_branch->operand->type, AST::NodeType::IDENTIFIER);
 
   ASSERT_FALSE(if_stmt->false_branch);
@@ -1331,7 +1337,8 @@ TEST(ParserTest, IfStatement_4) {
   auto *case1 = false_branch->body->statements[0]->As<AST::CaseStatement>();
   ASSERT_EQ(case1->statements->statements.size(), 1);
   ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation, TT_DECREMENT);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation.type, TT_DECREMENT);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation.token, "--");
 
   auto *case2 = false_branch->body->statements[1]->As<AST::CaseStatement>();
   ASSERT_EQ(case2->statements->statements.size(), 1);
@@ -1389,7 +1396,8 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
   auto *case1 = false_branch->body->statements[0]->As<AST::CaseStatement>();
   ASSERT_EQ(case1->statements->statements.size(), 1);
   ASSERT_EQ(case1->statements->statements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation, TT_DECREMENT);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation.type, TT_DECREMENT);
+  ASSERT_EQ(case1->statements->statements[0]->As<AST::UnaryPostfixExpression>()->operation.token, "--");
 
   auto *case2 = false_branch->body->statements[1]->As<AST::CaseStatement>();
   ASSERT_EQ(case2->statements->statements.size(), 1);
@@ -1438,7 +1446,8 @@ TEST(ParserTest, TemporaryInitialization_1) {
   ASSERT_EQ(left->left->type, AST::NodeType::PARENTHETICAL);
   auto *left_left_paren = left->left->As<AST::Parenthetical>();
   auto *left_left_unary = left_left_paren->expression->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(left_left_unary->operation, TT_STAR);
+  ASSERT_EQ(left_left_unary->operation.type, TT_STAR);
+  ASSERT_EQ(left_left_unary->operation.token, "*");
   ASSERT_EQ(left_left_unary->operand->type, AST::NodeType::LITERAL);
   auto *left_left_unary_operand = left_left_unary->operand->As<AST::Literal>();
   ASSERT_EQ(std::get<std::string>(left_left_unary_operand->value.value), "x");
@@ -1515,7 +1524,8 @@ TEST(ParserTest, TemporaryInitialization_3) {
 
   ASSERT_EQ(binary->left->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   auto *left = binary->left->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(left->operation, TT_STAR);
+  ASSERT_EQ(left->operation.type, TT_STAR);
+  ASSERT_EQ(left->operation.token, "*");
   ASSERT_EQ(left->operand->type, AST::NodeType::BINARY_EXPRESSION);
   auto *operand = left->operand->As<AST::BinaryExpression>();
   ASSERT_EQ(operand->operation.type, TT_BEGINBRACKET);
@@ -1526,7 +1536,8 @@ TEST(ParserTest, TemporaryInitialization_3) {
   auto *left_operand = (operand->left.get())->As<AST::Parenthetical>()->expression.get();
   ASSERT_EQ(left_operand->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   auto *left_unary = left_operand->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(left_unary->operation, TT_STAR);
+  ASSERT_EQ(left_unary->operation.type, TT_STAR);
+  ASSERT_EQ(left_unary->operation.token, "*");
   ASSERT_EQ(left_unary->operand->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(left_unary->operand->As<AST::Literal>()->value.value), "a");
 
@@ -1552,20 +1563,24 @@ TEST(ParserTest, TemporaryInitialization_4) {
   ASSERT_EQ(cast->kind, AST::CastExpression::Kind::FUNCTIONAL);
   ASSERT_EQ(cast->expr->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   auto *unary = cast->expr->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operation.type, TT_STAR);
+  ASSERT_EQ(unary->operation.token, "*");
   ASSERT_EQ(unary->operand->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   unary = unary->operand->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operation.type, TT_STAR);
+  ASSERT_EQ(unary->operation.token, "*");
   ASSERT_EQ(unary->operand->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   unary = unary->operand->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operation.type, TT_STAR);
+  ASSERT_EQ(unary->operation.token, "*");
   ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
   auto *binary = unary->operand->As<AST::BinaryExpression>();
   ASSERT_EQ(binary->operation.type, TT_PLUS);
   ASSERT_EQ(binary->operation.token, "+");
   ASSERT_EQ(binary->left->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   unary = binary->left->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_STAR);
+  ASSERT_EQ(unary->operation.type, TT_STAR);
+  ASSERT_EQ(unary->operation.token, "*");
   ASSERT_EQ(unary->operand->type, AST::NodeType::LITERAL);
   ASSERT_EQ(std::get<std::string>(unary->operand->As<AST::Literal>()->value.value), "x");
 
@@ -2184,7 +2199,8 @@ TEST(ParserTest, Array_7) {
 
   ASSERT_EQ(array->elements[0]->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
   auto *unary = array->elements[0]->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary->operation, TT_INCREMENT);
+  ASSERT_EQ(unary->operation.type, TT_INCREMENT);
+  ASSERT_EQ(unary->operation.token, "++");
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
 }
@@ -2207,7 +2223,8 @@ TEST(ParserTest, Array_8) {
 
   ASSERT_EQ(array->elements[0]->type, AST::NodeType::UNARY_PREFIX_EXPRESSION);
   auto *unary = array->elements[0]->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
 }
@@ -2296,7 +2313,8 @@ TEST(ParserTest, ParseCodeFunction) {
   ASSERT_EQ(block->statements[1]->type, AST::NodeType::IF);
 
   auto unary_exp = block->statements[0]->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary_exp->operation, TT_INCREMENT);
+  ASSERT_EQ(unary_exp->operation.type, TT_INCREMENT);
+  ASSERT_EQ(unary_exp->operation.token, "++");
   ASSERT_EQ(unary_exp->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary_exp->operand->As<AST::IdentifierAccess>()->name.content, "x");
 
@@ -2354,7 +2372,8 @@ TEST(ParserTest, ParseControlExpression_1) {
   ASSERT_EQ(std::get<std::string>(lit2->value.value), "12");
 
   auto *unary = if_stmt->true_branch->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "l");
 }
@@ -2404,7 +2423,8 @@ TEST(ParserTest, ParseControlExpression_2) {
   ASSERT_EQ(std::get<std::string>(lit2->value.value), "12");
 
   auto *unary = if_stmt->true_branch->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "l");
 }
@@ -2425,7 +2445,8 @@ TEST(ParserTest, QualifiedExpressions_1) {
   ASSERT_EQ(if_stmt->false_branch, nullptr);
 
   auto *unary = if_stmt->condition->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
 
   auto *bin = unary->operand->As<AST::BinaryExpression>();
@@ -2459,7 +2480,8 @@ TEST(ParserTest, QualifiedExpressions_2) {
   ASSERT_EQ(if_stmt->false_branch, nullptr);
 
   auto *unary = if_stmt->condition->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
 
   auto *bin = unary->operand->As<AST::BinaryExpression>();
@@ -2495,7 +2517,8 @@ TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
   ASSERT_EQ(std::get<std::string>(call->arguments[0]->As<AST::Literal>()->value.value), "12");
 
   auto *unary = block->statements[1]->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
+  ASSERT_EQ(unary->operation.token, "--");
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
 }

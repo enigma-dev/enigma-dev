@@ -196,14 +196,16 @@ void *Declarator::to_expression() {
     for (std::int64_t i = ptrs - 1; i >= 0; i--) {
       if (components[i].is<PointerNode>()) {
         // TODO: Implement accessing class members, though idk if its legally allowed
-        expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), TT_STAR);
+        AST::Operation op(TT_STAR, "*");
+        expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
       } else if (components[i].is<ReferenceNode>()) {
+        AST::Operation op(TT_AMPERSAND, "&");
         if (components[i].kind == DeclaratorNode::Kind::RVAL_REFERENCE) {
           // TODO: Maybe make this an error, however for now let the compiler deal with it
-          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), TT_AMPERSAND);
-          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), TT_AMPERSAND);
+          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
+          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
         } else {
-          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), TT_AMPERSAND);
+          expr = std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
         }
       } else if (components[i].is<NestedNode>()) {
         continue;

@@ -149,17 +149,6 @@ static const std::vector<std::string> kTokenNames = [](){
   return res;
 }();
 
-static const std::vector<std::string> kTokenSymbols = {
-  "Identifier", ";", ":", ",", ":=", "+=", "=", ".", "...", "->", ".*", "->*", "+", "-", "*", "/", "%",
-  "&", "|", "^", "&&", "||", "^^", "Div", "mod", "not", "==", "!=", "!", "~", "++", "--", "<", ">", "<=",
-  ">=", "<=>", "<<", ">>", "?", "(", ")", "[", "]", "{", "}", "Decimal", "Binary", "Octal", "Hexadecimal",
-  "String", "Char", "::", "Type Name", "local", "global", "return", "exit", "break", "continue", "enum",
-  "typedef", "typename", "operator", "constexpr", "constinit", "consteval", "inline", "static", "thread_local",
-  "extern", "mutable", "co_await", "noexcept", "alignof", "sizeof", "static_cast", "dynamic_cast", "reinterpret_cast",
-  "const_cast", "switch", "repeat", "case", "default", "for", "if", "then", "else", "do", "while", "until", "with",
-  "try", "catch", "new", "delete", "class", "struct", "union", "signed", "unsigned", "const", "volatile",
-  "decltype", " ", "##", "#", "Error", "EndOfCode"};
-
 }  // namespace
 
 std::string ToString(TokenType tt) {
@@ -170,10 +159,6 @@ string Token::ToString() const {
   std::stringstream str;
   str << kTokenNames[type] << "(\"" << content << "\")";
   return str.str();
-}
-
-std::string ToSymbol (TokenType tt) {
-  return kTokenSymbols[tt];
 }
 
 std::ostream &operator<<(std::ostream &os, TokenType tt) {

@@ -158,22 +158,22 @@ class AST {
   // Unary prefix expressions; generally top-level will be "++varname"
   struct UnaryPrefixExpression : TypedNode<NodeType::UNARY_PREFIX_EXPRESSION> {
     PNode operand;
-    TokenType operation;
+    Operation operation;
 
     BASIC_NODE_ROUTINES(UnaryPrefixExpression);
 
-    UnaryPrefixExpression(PNode operand_, TokenType operation_):
+    UnaryPrefixExpression(PNode operand_, Operation operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
 
   // Unary postfix expression
   struct UnaryPostfixExpression : TypedNode<NodeType::UNARY_POSTFIX_EXPRESSION> {
     PNode operand;
-    TokenType operation;
+    Operation operation;
 
     BASIC_NODE_ROUTINES(UnaryPostfixExpression);
 
-    UnaryPostfixExpression(PNode operand_, TokenType operation_):
+    UnaryPostfixExpression(PNode operand_, Operation operation_):
         operand(std::move(operand_)), operation(operation_) {}
   };
 

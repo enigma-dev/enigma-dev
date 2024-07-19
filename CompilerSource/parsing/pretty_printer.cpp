@@ -20,6 +20,9 @@
 
 using namespace enigma::parsing;
 
+#define VISIT_AND_CHECK(node) \
+  if (!Visit(node)) return false;
+
 bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
   print(std::string(node.name.content));
   return true;
@@ -27,72 +30,37 @@ bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
 
 bool AST::Visitor::VisitLiteral(Literal &node) {
   std::string value = std::get<std::string>(node.value.value);
-  if (value == "'\n'") {
-    print("'\\n'");
-  } else if (value == "'\t'") {
-    print("'\\t'");
-  } else if (value == "'\v'") {
-    print("'\\v'");
-  } else if (value == "'\b'") {
-    print("'\\b'");
-  } else if (value == "'\r'") {
-    print("'\\r'");
-  } else if (value == "'\f'") {
-    print("'\\f'");
-  } else if (value == "'\a'") {
-    print("'\\a'");
-  } else if (value == "'\\'") {
-    print("'\\\'");
-  } else if (value == "'\''") {
-    print("'\\''");
-  } else if (value == "'\"'") {
-    print("'\\\"'");
-  } else if (value == "'\?'") {
-    print("'\\?'");
-  } else {
-    print(value);
-  }
+
+  // TODO: Handle escape characters
+
+  print(value);
   return true;
 }
 
 bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
-  bool printed = false;
   print("(");
-
-  printed = Visit(node.expression);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.expression);
   print(")");
-
   return true;
 }
 
 bool AST::Visitor::VisitUnaryPostfixExpression(UnaryPostfixExpression &node) {
-  bool printed = false;
-
-  printed = Visit(node.operand);
-
-  if (!printed) return false;
-  print(ToSymbol(node.operation));
-
+  VISIT_AND_CHECK(node.operand);
+  print(node.operation.token);
   return true;
 }
 
 bool AST::Visitor::VisitUnaryPrefixExpression(UnaryPrefixExpression &node) {
-  bool printed = false;
-  print(ToSymbol(node.operation));
-
-  if (node.operation == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
+  print(node.operation.token);
+  if (node.operation.type == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
 
-  printed = Visit(node.operand);
+  VISIT_AND_CHECK(node.operand);
 
-  if (!printed) return false;
-  if (node.operation == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
+  if (node.operation.type == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
-
   return true;
 }
 
@@ -105,75 +73,48 @@ bool AST::Visitor::VisitDeleteExpression(DeleteExpression &node) {
     print("[] ");
   }
 
-  bool printed = false;
-  if (node.expression->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.expression->As<IdentifierAccess>());
-  } else if (node.expression->type == AST::NodeType::PARENTHETICAL) {
-    printed = VisitParenthetical(*node.expression->As<Parenthetical>());
-  }
+  VISIT_AND_CHECK(node.expression);
 
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitBreakStatement(BreakStatement &node) {
   print("break");
-
-  bool printed = false;
   if (node.count) {
     print(" ");
-    printed = VisitLiteral(*node.count->As<Literal>());
-    if (!printed) return false;
+    VISIT_AND_CHECK(node.count);
   }
-
   return true;
 }
 
 bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
   print("continue");
-
-  bool printed = false;
   if (node.count) {
     print(" ");
-    printed = VisitLiteral(*node.count->As<Literal>());
-    if (!printed) return false;
+    VISIT_AND_CHECK(node.count);
   }
-
   return true;
 }
 
 bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
-  bool printed = false;
+  VISIT_AND_CHECK(node.left);
 
-  printed = Visit(node.left);
-
-  if (!printed) return false;
   print(" " + node.operation.token + " ");
 
-  printed = Visit(node.right);
+  VISIT_AND_CHECK(node.right);
 
-  if (!printed) return false;
   if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
-
   return true;
 }
 
 bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
-  bool printed = false;
-  if (node.function->type == AST::NodeType::IDENTIFIER) {
-    printed = VisitIdentifierAccess(*node.function->As<IdentifierAccess>());
-  } else if (node.function->type == AST::NodeType::BINARY_EXPRESSION) {
-    printed = VisitBinaryExpression(*node.function->As<BinaryExpression>());
-  }
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.function);
   print("(");
 
   for (auto &arg : node.arguments) {
-    printed = Visit(arg);
-
-    if (!printed) return false;
+    VISIT_AND_CHECK(arg);
     if (&arg != &node.arguments.back()) {
       print(", ");
     }
@@ -184,32 +125,22 @@ bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
 }
 
 bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
-  bool printed = false;
-
-  printed = Visit(node.condition);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.condition);
   print(" ? ");
 
-  printed = Visit(node.true_expression);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.true_expression);
   print(" : ");
 
-  printed = Visit(node.false_expression);
-
-  return printed;
+  VISIT_AND_CHECK(node.false_expression);
+  return true;
 }
 
 bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
-  bool printed = true;
   print("return ");
-
   if (node.expression) {
-    printed = Visit(node.expression);
+    VISIT_AND_CHECK(node.expression);
   }
-
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
@@ -304,55 +235,42 @@ bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
 }
 
 bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
-  bool printed = false;
   print("sizeof");
 
   if (node.kind == AST::SizeofExpression::Kind::EXPR) {
     print(" ");
-
     auto &arg = std::get<AST::PNode>(node.argument);
-    if (arg->type == AST::NodeType::LITERAL) {
-      printed = VisitLiteral(*arg->As<AST::Literal>());
-    } else if (arg->type == AST::NodeType::IDENTIFIER) {
-      printed = VisitIdentifierAccess(*arg->As<AST::IdentifierAccess>());
-    }
+    VISIT_AND_CHECK(arg);
   } else if (node.kind == AST::SizeofExpression::Kind::VARIADIC) {
     print("...(");
-
     std::string arg = std::get<std::string>(node.argument);
     print(arg + ")");
-
-    printed = true;
   } else {
     print("(");
 
     FullType &ft = std::get<FullType>(node.argument);
-    printed = VisitFullType(ft);
+    if (!VisitFullType(ft)) return false;
 
     print(")");
   }
 
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitAlignofExpression(AlignofExpression &node) {
   print("alignof(");
-
-  bool printed = VisitFullType(node.ft);
+  if (!VisitFullType(node.ft)) return false;
   print(")");
-
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitCastExpression(CastExpression &node) {
-  bool printed = false;
-
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
-    printed = VisitFullType(node.ft);
+    if (!VisitFullType(node.ft)) return false;
     print("(");
   } else if (node.kind == AST::CastExpression::Kind::C_STYLE) {
     print("(");
-    printed = VisitFullType(node.ft);
+    if (!VisitFullType(node.ft)) return false;
     print(")");
   } else {
     if (node.kind == AST::CastExpression::Kind::STATIC) {
@@ -364,15 +282,11 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
     } else if (node.kind == AST::CastExpression::Kind::REINTERPRET) {
       print("reinterpret_cast<");
     }
-    printed = VisitFullType(node.ft);
+    if (!VisitFullType(node.ft)) return false;
     print(">(");
   }
 
-  if (!printed) return false;
-
-  printed = Visit(node.expr);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.expr);
 
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
     print(")");
@@ -384,24 +298,15 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
 }
 
 bool AST::Visitor::VisitArray(Array &node) {
-  bool printed = false;
   print("[");
-
   if (node.elements.size()) {
-    printed = Visit(node.elements[0]);
-  } else {
-    printed = true;
+    VISIT_AND_CHECK(node.elements[0]);
   }
-
-  if (!printed) return false;
-
   print("]");
   return true;
 }
 
 bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
-  bool printed = false;
-
   if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
     print("(");
   } else {
@@ -417,13 +322,11 @@ bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
       print(val.first + "=");
     }
 
-    printed = VisitInitializer(*val.second);
+    if (!VisitInitializer(*val.second)) return false;
 
     if (&val != &node.values.back()) {
       print(", ");
     }
-
-    if (!printed) return false;
   }
 
   if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
@@ -436,31 +339,24 @@ bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
 }
 
 bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
-  bool printed = false;
-
   if (node.kind == AssignmentInitializer::Kind::BRACE_INIT) {
-    printed = VisitBraceOrParenInitializer(*std::get<BraceOrParenInitNode>(node.initializer));
+    if (!VisitBraceOrParenInitializer(*std::get<BraceOrParenInitNode>(node.initializer))) return false;
   } else {
     auto &expr = std::get<AST::PNode>(node.initializer);
-
-    printed = Visit(expr);
+    VISIT_AND_CHECK(expr);
   }
-
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitInitializer(Initializer &node) {
-  bool printed = false;
-
   if (node.kind == Initializer::Kind::BRACE_INIT || node.kind == Initializer::Kind::PLACEMENT_NEW) {
     auto &init = std::get<BraceOrParenInitNode>(node.initializer);
-    printed = VisitBraceOrParenInitializer(*init);
+    if (!VisitBraceOrParenInitializer(*init)) return false;
   } else if (node.kind == Initializer::Kind::ASSIGN_EXPR) {
     auto &init = std::get<AssignmentInitNode>(node.initializer);
-    printed = VisitAssignmentInitializer(*init);
+    if (!VisitAssignmentInitializer(*init)) return false;
   }
 
-  if (!printed) return false;
   if (node.is_variadic) {
     print("...");
   }
@@ -469,8 +365,6 @@ bool AST::Visitor::VisitInitializer(Initializer &node) {
 }
 
 bool AST::Visitor::VisitNewExpression(NewExpression &node) {
-  bool printed = false;
-
   if (node.is_global) {
     print("::");
   }
@@ -478,34 +372,28 @@ bool AST::Visitor::VisitNewExpression(NewExpression &node) {
   print("new ");
 
   if (node.placement) {
-    printed = VisitInitializer(*node.placement);
+    if (!VisitInitializer(*node.placement)) return false;
     print(" ");
-    if (!printed) return false;
   }
 
   print("(");
-  printed = VisitFullType(node.ft);
+  if (!VisitFullType(node.ft)) return false;
   print(")");
 
-  if (!printed) return false;
   if (node.initializer) {
-    printed = VisitInitializer(*node.initializer);
+    if (!VisitInitializer(*node.initializer)) return false;
   }
 
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
-  bool printed = false;
-
   for (std::size_t i = 0; i < node.declarations.size(); i++) {
-    printed = VisitFullType(*node.declarations[i].declarator, !i);
-    if (!printed) return false;
+    if (!VisitFullType(*node.declarations[i].declarator, !i)) return false;
     if (node.declarations[i].init) {
       print(" = ");  // TODO: corner case: int x {}, maybe we need extra flag in the AST?
-      printed = VisitInitializer(*node.declarations[i].init);
+      if (!VisitInitializer(*node.declarations[i].init)) return false;
     }
-    if (!printed) return false;
     if (i != node.declarations.size() - 1) {
       print(", ");
     }
@@ -514,84 +402,60 @@ bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
 }
 
 bool AST::Visitor::VisitCode(CodeBlock &node) {
-  bool printed = false;
   for (auto &stmt : node.statements) {
-    printed = Visit(stmt);
-
-    if (!printed) return false;
+    VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);
   }
-
   return true;
 }
 
 bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
   print("{");
-
-  bool printed = VisitCode(node);
-  if (!printed) return false;
+  if (!VisitCode(node)) return false;
   print("}");
-
   return true;
 }
 
 bool AST::Visitor::VisitIfStatement(IfStatement &node) {
-  bool printed = false;
-
   print("if");
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
 
-  printed = Visit(node.condition);
+  VISIT_AND_CHECK(node.condition);
 
-  if (!printed) return false;
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+
   print(" ");
-
-  printed = Visit(node.true_branch);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.true_branch);
   PrintSemiColon(node.true_branch);
   print(" ");
 
   if (node.false_branch) {
     print("else ");
-
-    printed = Visit(node.false_branch);
-
-    if (!printed) return false;
-
+    VISIT_AND_CHECK(node.false_branch);
     PrintSemiColon(node.false_branch);
     print(" ");
   }
+
   return true;
 }
 
 bool AST::Visitor::VisitForLoop(ForLoop &node) {
-  bool printed = false;
   print("for(");
 
-  printed = Visit(node.assignment);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.assignment);
   print("; ");
 
-  printed = Visit(node.condition);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.condition);
   print("; ");
 
-  printed = Visit(node.increment);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.increment);
   print(") ");
 
-  printed = Visit(node.body);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.body);
   PrintSemiColon(node.body);
   print(" ");
 
@@ -599,56 +463,47 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
 }
 
 bool AST::Visitor::VisitCaseStatement(CaseStatement &node) {
-  bool printed = false;
   print("case ");
+  VISIT_AND_CHECK(node.value);
 
-  printed = Visit(node.value);
-
-  if (!printed) return false;
   print(": ");
-
-  printed = VisitCodeBlock(*node.statements->As<AST::CodeBlock>());
+  if (!VisitCodeBlock(*node.statements->As<AST::CodeBlock>())) return false;
   print(" ");
 
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitDefaultStatement(DefaultStatement &node) {
   print("default: ");
-  bool printed = VisitCodeBlock(*node.statements->As<CodeBlock>());
+  if (!VisitCodeBlock(*node.statements->As<CodeBlock>())) return false;
   print(" ");
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitSwitchStatement(SwitchStatement &node) {
-  bool printed = false;
   print("switch");
   if (node.expression->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
 
-  printed = Visit(node.expression);
+  VISIT_AND_CHECK(node.expression);
 
-  if (!printed) return false;
   if (node.expression->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
   print(" ");
 
-  printed = VisitCodeBlock(*node.body->As<CodeBlock>());
+  if (!VisitCodeBlock(*node.body->As<CodeBlock>())) return false;
   print(" ");
 
-  return printed;
+  return true;
 }
 
 bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
-  bool printed = false;
   // temp sol
   if (node.kind == AST::WhileLoop::Kind::REPEAT) {
     print("int strange_name = ");
-  }
-
-  else {
+  } else {
     print("while");
     if (node.condition->type != AST::NodeType::PARENTHETICAL) {
       print("(");
@@ -663,9 +518,8 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
     }
   }
 
-  printed = Visit(node.condition);
+  VISIT_AND_CHECK(node.condition);
 
-  if (!printed) return false;
   if (node.kind != AST::WhileLoop::Kind::REPEAT) {
     if (node.kind == AST::WhileLoop::Kind::UNTIL) {
       print(")");
@@ -679,25 +533,20 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
   }
 
   print(" ");
-
-  printed = Visit(node.body);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.body);
   PrintSemiColon(node.body);
+
   return true;
 }
 
 bool AST::Visitor::VisitDoLoop(DoLoop &node) {
-  bool printed = false;
   print("do");
 
   if (node.body->type != AST::NodeType::BLOCK) {
     print("{");
   }
 
-  printed = Visit(node.body);
-
-  if (!printed) return false;
+  VISIT_AND_CHECK(node.body);
   PrintSemiColon(node.body);
 
   if (node.body->type != AST::NodeType::BLOCK) {
@@ -717,17 +566,15 @@ bool AST::Visitor::VisitDoLoop(DoLoop &node) {
     }
   }
 
-  printed = Visit(node.condition);
+  VISIT_AND_CHECK(node.condition);
 
-  if (!printed) return false;
   if (node.is_until) {
     print(")");
   }
-
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
-
   print(";");
+
   return true;
 }

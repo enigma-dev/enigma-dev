@@ -233,13 +233,13 @@ MATCHER_P2(IsUnaryPostfixOperator, op, M1, "") {
     return false;
   }
 
-  bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
+  bool b1 = unary->operation.type == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
 
   bool res = b1 && b2;
   if (!b1) {
     ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(unary->operation.type) << "\n";
   }
 
   return res;
@@ -259,13 +259,13 @@ MATCHER_P2(IsUnaryPrefixOperator, op, M1, "") {
     return false;
   }
 
-  bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
+  bool b1 = unary->operation.type == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
 
   bool res = b1 && b2;
   if (!b1) {
     ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(unary->operation.type) << "\n";
   }
 
   return res;

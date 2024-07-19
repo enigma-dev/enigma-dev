@@ -1521,7 +1521,8 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       token = lexer->ReadToken();
 
       if (auto exp = TryParseExpression(Precedence::kUnaryPrefix)) {
-        return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
+        AST::Operation op(unary_op.type, std::string(unary_op.content));
+        return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), op);
       }
       herr->Error(unary_op) << "Expected expression following unary operator, got: '" << token.content << '\'';
       return nullptr;
@@ -1601,7 +1602,8 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       auto oper = token;
       token = lexer->ReadToken();
       auto expr = TryParseExpression(Precedence::kUnaryPrefix);
-      return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
+      AST::Operation op(oper.type, std::string(oper.content));
+      return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
     }
 
     case TT_NOEXCEPT: {
@@ -1611,7 +1613,8 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         token = lexer->ReadToken();
         auto expr = TryParseExpression(Precedence::kAll);
         require_token(TT_ENDPARENTH, "Expected closing ')' after noexcept expression");
-        return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), oper.type);
+        AST::Operation op(oper.type, std::string(oper.content));
+        return std::make_unique<AST::UnaryPrefixExpression>(std::move(expr), op);
       } else {
         return nullptr;
       }
@@ -1649,7 +1652,8 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         token = lexer->ReadToken();
 
         if (auto exp = TryParseExpression(Precedence::kUnaryPrefix)) {
-          return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), unary_op.type);
+          AST::Operation op(unary_op.type, std::string(unary_op.content));
+          return std::make_unique<AST::UnaryPrefixExpression>(std::move(exp), op);
         }
         herr->Error(unary_op) << "Expected expression following unary operator";
         return nullptr;
@@ -1825,7 +1829,8 @@ std::unique_ptr<AST::UnaryPostfixExpression> TryParseUnaryPostfixExpression(
       precedence >= Precedence::kUnaryPostfixPrec[token.type].precedence) {
     Token oper = token;
     token = lexer->ReadToken();  // Consume the operator
-    operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), oper.type);
+    AST::Operation op(oper.type, std::string(oper.content));
+    operand = std::make_unique<AST::UnaryPostfixExpression>(std::move(operand), op);
   }
   return dynamic_unique_pointer_cast<AST::UnaryPostfixExpression>(std::move(operand));
 }
