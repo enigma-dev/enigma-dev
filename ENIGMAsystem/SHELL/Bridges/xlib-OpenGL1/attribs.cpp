@@ -1,4 +1,4 @@
-#if (defined(__APPLE___) && defined(__MACH__))
+#if (defined(__APPLE__) && defined(__MACH__))
 #include <OpenGL/gl.h>
 #include <OpenGL/glx.h>
 #else
