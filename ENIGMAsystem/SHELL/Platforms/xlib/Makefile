@@ -1,8 +1,8 @@
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
 ifeq ($(OS), Darwin)
-	override CXXFLAGS += -I/usr/X11R6/include
-	override CFLAGS += -I/usr/X11R6/include
-	override LDLIBS += -L/usr/X11R6/lib
+	override CXXFLAGS += -I/opt/X11/include
+	override CFLAGS += -I/opt/X11/include
+	override LDLIBS += -L/opt/X11/lib
 endif
 override CXXFLAGS += $(shell pkg-config x11 --cflags)
 override CFLAGS += $(shell pkg-config x11 --cflags)
