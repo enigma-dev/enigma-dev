@@ -35,6 +35,7 @@ Example Projects:
 - https://github.com/time-killer-games/ENIGMA-WebMPlayer-Demo
 - https://github.com/time-killer-games/ENIGMA-SystemInfo-Demo
 - https://github.com/time-killer-games/ENIGMA-xProcess-Demo
+- https://github.com/time-killer-games/ENIGMA-DialogModule-Demo
 - https://github.com/time-killer-games/ENIGMA-StockfishChess-Demo
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
