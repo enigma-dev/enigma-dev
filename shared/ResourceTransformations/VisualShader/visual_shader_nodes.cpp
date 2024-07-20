@@ -31,6 +31,8 @@
 #include <iomanip>
 #include <sstream>
 
+#define CMP_EPSILON 0.00001f
+
 /*************************************/
 /* Vector Base Node                  */
 /*************************************/
@@ -66,7 +68,7 @@ VisualShaderNodeVectorBase::PortType VisualShaderNodeVectorBase::get_output_port
 }
 
 void VisualShaderNodeVectorBase::set_op_type(const VisualShaderNodeVectorBase::OpType& op_type) {
-    if (op_type < 0 || op_type >= OP_ENUM_SIZE) {
+    if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
         std::cerr << "VisualShaderNodeVectorBase::set_op_type: Invalid op_type: " << op_type << std::endl;
         return;
     }
@@ -979,7 +981,7 @@ std::string VisualShaderNodeVectorOp::generate_code([[maybe_unused]] const int& 
 }
 
 void VisualShaderNodeVectorOp::set_op_type(const VisualShaderNodeVectorBase::OpType& op_type) {
-    if (op_type < 0 || op_type >= VisualShaderNodeVectorBase::OpType::OP_ENUM_SIZE) {
+    if (op_type < 0 || op_type >= VisualShaderNodeVectorBase::OpType::OP_TYPE_ENUM_SIZE) {
         std::cerr << "VisualShaderNodeVectorOp::set_op_type: Invalid op_type: " << op_type << std::endl;
         return;
     }
@@ -1205,4 +1207,3205 @@ std::vector<std::string> VisualShaderNodeColorOp::get_editable_properties() cons
 	std::vector<std::string> props;
 	props.emplace_back("operator");
 	return props;
+}
+
+/*************************************/
+/* Float Funcs Node                  */
+/*************************************/
+
+VisualShaderNodeFloatFunc::VisualShaderNodeFloatFunc() : func(FUNC_SIN) {
+	set_input_port_default_value(0, 0.0f);
+}
+
+std::string VisualShaderNodeFloatFunc::get_caption() const {
+	return "FloatFunc";
+}
+
+int VisualShaderNodeFloatFunc::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeFloatFunc::PortType VisualShaderNodeFloatFunc::get_input_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeFloatFunc::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeFloatFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeFloatFunc::PortType VisualShaderNodeFloatFunc::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeFloatFunc::get_output_port_name(const int& port) const {
+	return ""; 
+}
+
+std::string VisualShaderNodeFloatFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case VisualShaderNodeFloatFunc::Function::FUNC_SIN:
+			code += "\t" + output_vars.at(0) + " = sin(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_COS:
+			code += "\t" + output_vars.at(0) + " = cos(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_TAN:
+			code += "\t" + output_vars.at(0) + " = tan(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ASIN:
+			code += "\t" + output_vars.at(0) + " = asin(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ACOS:
+			code += "\t" + output_vars.at(0) + " = acos(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ATAN:
+			code += "\t" + output_vars.at(0) + " = atan(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_SINH:
+			code += "\t" + output_vars.at(0) + " = sinh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_COSH:
+			code += "\t" + output_vars.at(0) + " = cosh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_TANH:
+			code += "\t" + output_vars.at(0) + " = tanh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_LOG:
+			code += "\t" + output_vars.at(0) + " = log(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_EXP:
+			code += "\t" + output_vars.at(0) + " = exp(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_SQRT:
+			code += "\t" + output_vars.at(0) + " = sqrt(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ABS:
+			code += "\t" + output_vars.at(0) + " = abs(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_SIGN:
+			code += "\t" + output_vars.at(0) + " = sign(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_FLOOR:
+			code += "\t" + output_vars.at(0) + " = floor(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ROUND:
+			code += "\t" + output_vars.at(0) + " = round(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_CEIL:
+			code += "\t" + output_vars.at(0) + " = ceil(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_FRACT:
+			code += "\t" + output_vars.at(0) + " = fract(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_SATURATE:
+			code += "\t" + output_vars.at(0) + " = min(max(" + input_vars.at(0) + ", 0.0), 1.0);\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_NEGATE:
+			code += "\t" + output_vars.at(0) + " = -(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ACOSH:
+			code += "\t" + output_vars.at(0) + " = acosh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ASINH:
+			code += "\t" + output_vars.at(0) + " = asinh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ATANH:
+			code += "\t" + output_vars.at(0) + " = atanh(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_DEGREES:
+			code += "\t" + output_vars.at(0) + " = degrees(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_EXP2:
+			code += "\t" + output_vars.at(0) + " = exp2(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_INVERSE_SQRT:
+			code += "\t" + output_vars.at(0) + " = inversesqrt(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_LOG2:
+			code += "\t" + output_vars.at(0) + " = log2(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_RADIANS:
+			code += "\t" + output_vars.at(0) + " = radians(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_RECIPROCAL:
+			code += "\t" + output_vars.at(0) + " = 1.0 / (" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ROUNDEVEN:
+			code += "\t" + output_vars.at(0) + " = roundEven(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_TRUNC:
+			code += "\t" + output_vars.at(0) + " = trunc(" + input_vars.at(0) + ");\n";
+			break;
+		case VisualShaderNodeFloatFunc::Function::FUNC_ONEMINUS:
+			code += "\t" + output_vars.at(0) + " = 1.0 - " + input_vars.at(0) + ";\n";
+			break;
+		default:
+			break;
+		
+	}
+	return code;
+}
+
+void VisualShaderNodeFloatFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeFloatFunc::Function VisualShaderNodeFloatFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeFloatFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* Int Funcs Node                    */
+/*************************************/
+
+VisualShaderNodeIntFunc::VisualShaderNodeIntFunc() : func(FUNC_SIGN) {
+	set_input_port_default_value(0, 0);
+}
+
+std::string VisualShaderNodeIntFunc::get_caption() const {
+	return "IntFunc";
+}
+
+int VisualShaderNodeIntFunc::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIntFunc::PortType VisualShaderNodeIntFunc::get_input_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR_INT;
+}
+
+std::string VisualShaderNodeIntFunc::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeIntFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIntFunc::PortType VisualShaderNodeIntFunc::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR_INT;
+}
+
+std::string VisualShaderNodeIntFunc::get_output_port_name(const int& port) const {
+	return ""; 
+}
+
+std::string VisualShaderNodeIntFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case FUNC_ABS:
+			code += "\t" + output_vars.at(0) + " = abs(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_NEGATE:
+			code += "\t" + output_vars.at(0) + " = -(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SIGN:
+			code += "\t" + output_vars.at(0) + " = sign(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_BITWISE_NOT:
+			code += "\t" + output_vars.at(0) + " = ~(" + input_vars.at(0) + ");\n";
+			break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeIntFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeIntFunc::Function VisualShaderNodeIntFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeIntFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* UInt Funcs Node                   */
+/*************************************/
+
+VisualShaderNodeUIntFunc::VisualShaderNodeUIntFunc() : func(FUNC_NEGATE) {
+	set_input_port_default_value(0, 0);
+}
+
+std::string VisualShaderNodeUIntFunc::get_caption() const {
+	return "UIntFunc";
+}
+
+int VisualShaderNodeUIntFunc::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeUIntFunc::PortType VisualShaderNodeUIntFunc::get_input_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR_UINT;
+}
+
+std::string VisualShaderNodeUIntFunc::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeUIntFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeUIntFunc::PortType VisualShaderNodeUIntFunc::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR_UINT;
+}
+
+std::string VisualShaderNodeUIntFunc::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeUIntFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case FUNC_NEGATE:
+			code += "\t" + output_vars.at(0) + " = -(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_BITWISE_NOT:
+			code += "\t" + output_vars.at(0) + " = ~(" + input_vars.at(0) + ");\n";
+			break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeUIntFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeUIntFunc::Function VisualShaderNodeUIntFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeUIntFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* Vector Funcs Node                 */
+/*************************************/
+
+VisualShaderNodeVectorFunc::VisualShaderNodeVectorFunc() : func(FUNC_NORMALIZE) {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2());
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3());
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion());
+		} break;
+		default:
+			break;
+	}
+}
+
+std::string VisualShaderNodeVectorFunc::get_caption() const {
+	return "VectorFunc";
+}
+
+int VisualShaderNodeVectorFunc::get_input_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorFunc::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeVectorFunc::get_output_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorFunc::get_output_port_name(const int& port) const {
+	return "result";
+}
+
+std::string VisualShaderNodeVectorFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case FUNC_NORMALIZE:
+			code += "\t" + output_vars.at(0) + " = normalize(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SATURATE:
+			switch (op_type) {
+				case OP_TYPE_VECTOR_2D:
+					code += "\t" + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec2(1.0)), vec2(0.0));\n";
+					break;
+				case OP_TYPE_VECTOR_3D:
+					code += "\t" + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec3(1.0)), vec3(0.0));\n";
+					break;
+				case OP_TYPE_VECTOR_4D:
+					code += "\t" + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec4(1.0)), vec4(0.0));\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		case FUNC_NEGATE:
+			code += "\t" + output_vars.at(0) + " = -(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_RECIPROCAL:
+			code += "\t" + output_vars.at(0) + " = 1.0 / (" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ABS:
+			code += "\t" + output_vars.at(0) + " = abs(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ACOS:
+			code += "\t" + output_vars.at(0) + " = acos(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ACOSH:
+			code += "\t" + output_vars.at(0) + " = acosh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ASIN:
+			code += "\t" + output_vars.at(0) + " = asin(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ASINH:
+			code += "\t" + output_vars.at(0) + " = asinh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ATAN:
+			code += "\t" + output_vars.at(0) + " = atan(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ATANH:
+			code += "\t" + output_vars.at(0) + " = atanh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_CEIL:
+			code += "\t" + output_vars.at(0) + " = ceil(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_COS:
+			code += "\t" + output_vars.at(0) + " = cos(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_COSH:
+			code += "\t" + output_vars.at(0) + " = cosh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_DEGREES:
+			code += "\t" + output_vars.at(0) + " = degrees(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_EXP:
+			code += "\t" + output_vars.at(0) + " = exp(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_EXP2:
+			code += "\t" + output_vars.at(0) + " = exp2(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_FLOOR:
+			code += "\t" + output_vars.at(0) + " = floor(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_FRACT:
+			code += "\t" + output_vars.at(0) + " = fract(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_INVERSE_SQRT:
+			code += "\t" + output_vars.at(0) + " = inversesqrt(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_LOG:
+			code += "\t" + output_vars.at(0) + " = log(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_LOG2:
+			code += "\t" + output_vars.at(0) + " = log2(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_RADIANS:
+			code += "\t" + output_vars.at(0) + " = radians(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ROUND:
+			code += "\t" + output_vars.at(0) + " = round(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ROUNDEVEN:
+			code += "\t" + output_vars.at(0) + " = roundEven(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SIGN:
+			code += "\t" + output_vars.at(0) + " = sign(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SIN:
+			code += "\t" + output_vars.at(0) + " = sin(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SINH:
+			code += "\t" + output_vars.at(0) + " = sinh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_SQRT:
+			code += "\t" + output_vars.at(0) + " = sqrt(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_TAN:
+			code += "\t" + output_vars.at(0) + " = tan(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_TANH:
+			code += "\t" + output_vars.at(0) + " = tanh(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_TRUNC:
+			code += "\t" + output_vars.at(0) + " = trunc(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_ONEMINUS:
+			switch (op_type) {
+				case OP_TYPE_VECTOR_2D:
+					code += "\t" + output_vars.at(0) + " = vec2(1.0) - " + input_vars.at(0) + ";\n";
+					break;
+				case OP_TYPE_VECTOR_3D:
+					code += "\t" + output_vars.at(0) + " = vec3(1.0) - " + input_vars.at(0) + ";\n";
+					break;
+				case OP_TYPE_VECTOR_4D:
+					code += "\t" + output_vars.at(0) + " = vec4(1.0) - " + input_vars.at(0) + ";\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeVectorFunc::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorFunc::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+void VisualShaderNodeVectorFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeVectorFunc::Function VisualShaderNodeVectorFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeVectorFunc::get_editable_properties() const {
+	std::vector<std::string> props = VisualShaderNodeVectorBase::get_editable_properties();
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* Color Funcs Node                  */
+/*************************************/
+
+VisualShaderNodeColorFunc::VisualShaderNodeColorFunc() : func(FUNC_GRAYSCALE) {
+	simple_decl = false;
+	set_input_port_default_value(0, TEVector3());
+}
+
+std::string VisualShaderNodeColorFunc::get_caption() const {
+	return "ColorFunc";
+}
+
+int VisualShaderNodeColorFunc::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeColorFunc::PortType VisualShaderNodeColorFunc::get_input_port_type(const int& port) const {
+	return PORT_TYPE_VECTOR_3D;
+}
+
+std::string VisualShaderNodeColorFunc::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeColorFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeColorFunc::PortType VisualShaderNodeColorFunc::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeColorFunc::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeColorFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+
+	switch (func) {
+		case FUNC_GRAYSCALE:
+			code += "\t{\n";
+			code += "\t\tvec3 c = " + input_vars.at(0) + ";\n";
+			code += "\t\tfloat max1 = max(c.r, c.g);\n";
+			code += "\t\tfloat max2 = max(max1, c.b);\n";
+			code += "\t\t" + output_vars.at(0) + " = vec3(max2, max2, max2);\n";
+			code += "\t}\n";
+			break;
+		case FUNC_HSV2RGB:
+			code += "\t{\n";
+			code += "\t\tvec3 c = " + input_vars.at(0) + ";\n";
+			code += "\t\tvec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n";
+			code += "\t\tvec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);\n";
+			code += "\t\t" + output_vars.at(0) + " = c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n";
+			code += "\t}\n";
+			break;
+		case FUNC_RGB2HSV:
+			code += "\t{\n";
+			code += "\t\tvec3 c = " + input_vars.at(0) + ";\n";
+			code += "\t\tvec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);\n";
+			code += "\t\tvec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));\n";
+			code += "\t\tvec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));\n";
+			code += "\t\tfloat d = q.x - min(q.w, q.y);\n";
+			code += "\t\tfloat e = 1.0e-10;\n";
+			code += "\t\t" + output_vars.at(0) + " = vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);\n";
+			code += "\t}\n";
+			break;
+		case FUNC_SEPIA:
+			code += "\t{\n";
+			code += "\t\tvec3 c = " + input_vars.at(0) + ";\n";
+			code += "\t\tfloat r = (c.r * .393) + (c.g *.769) + (c.b * .189);\n";
+			code += "\t\tfloat g = (c.r * .349) + (c.g *.686) + (c.b * .168);\n";
+			code += "\t\tfloat b = (c.r * .272) + (c.g *.534) + (c.b * .131);\n";
+			code += "\t\t" + output_vars.at(0) + " = vec3(r, g, b);\n";
+			code += "\t}\n";
+			break;
+		default:
+			break;
+	}
+
+	return code;
+}
+
+void VisualShaderNodeColorFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeColorFunc::Function VisualShaderNodeColorFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeColorFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* UV Funcs Node                     */
+/*************************************/
+
+VisualShaderNodeUVFunc::VisualShaderNodeUVFunc() : func(FUNC_PANNING) {
+	set_input_port_default_value(1, TEVector2(1.0f, 1.0f)); // Scale
+	set_input_port_default_value(2, TEVector2()); // Offset
+}
+
+std::string VisualShaderNodeUVFunc::get_caption() const {
+	return "UVFunc";
+}
+
+int VisualShaderNodeUVFunc::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeUVFunc::PortType VisualShaderNodeUVFunc::get_input_port_type(const int& port) const {
+	switch (port) {
+		case 0:
+			return PORT_TYPE_VECTOR_2D; // uv
+		case 1:
+			return PORT_TYPE_VECTOR_2D; // scale
+		case 2:
+			return PORT_TYPE_VECTOR_2D; // offset & pivot
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeUVFunc::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "uv";
+		case 1:
+			return "scale";
+		case 2:
+			switch (func) {
+				case FUNC_PANNING:
+					return "offset";
+				case FUNC_SCALING:
+					return "pivot";
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+	return "";
+}
+
+bool VisualShaderNodeUVFunc::is_input_port_default(const int& port) const {
+	if (port == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+int VisualShaderNodeUVFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeUVFunc::PortType VisualShaderNodeUVFunc::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeUVFunc::get_output_port_name(const int& port) const {
+	return "uv";
+}
+
+bool VisualShaderNodeUVFunc::is_show_prop_names() const {
+	return true;
+}
+
+std::string VisualShaderNodeUVFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string uv;
+	if (input_vars.at(0).empty()) {
+		uv = "UV";
+	} else {
+		uv = input_vars.at(0);
+	}
+
+	std::string scale {input_vars.at(1)};
+	std::string offset_pivot {input_vars.at(2)};
+
+	std::string code;
+
+	switch (func) {
+		case FUNC_PANNING: {
+			code += "\t" + output_vars.at(0) + " = (" + offset_pivot + " * " + scale + ") + " + uv + ";\n";
+		} break;
+		case FUNC_SCALING: {
+			code += "\t" + output_vars.at(0) + " = ((" + uv + " - " + offset_pivot + ") * " + scale + ") + " + offset_pivot + ";\n";
+		} break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeUVFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeUVFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	switch (func) {
+		case FUNC_PANNING: {
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2)); // offset
+		} break;
+		case FUNC_SCALING: {
+			set_input_port_default_value(2, TEVector2(0.5f, 0.5f), get_input_port_default_value(2)); // pivot
+		} break;
+		default:
+			break;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeUVFunc::Function VisualShaderNodeUVFunc::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeUVFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* UV PolarCoord Funcs Node          */
+/*************************************/
+
+VisualShaderNodeUVPolarCoord::VisualShaderNodeUVPolarCoord() {
+	set_input_port_default_value(1, TEVector2(0.5f, 0.5f)); // center
+	set_input_port_default_value(2, 1.0f); // zoom
+	set_input_port_default_value(3, 1.0f); // repeat
+
+	simple_decl = false;
+}
+
+std::string VisualShaderNodeUVPolarCoord::get_caption() const {
+	return "UVPolarCoord";
+}
+
+int VisualShaderNodeUVPolarCoord::get_input_port_count() const {
+	return 4;
+}
+
+VisualShaderNodeUVPolarCoord::PortType VisualShaderNodeUVPolarCoord::get_input_port_type(const int& port) const {
+	switch (port) {
+		case 0:
+			return PORT_TYPE_VECTOR_2D; // uv
+		case 1:
+			return PORT_TYPE_VECTOR_2D; // center
+		case 2:
+			return PORT_TYPE_SCALAR; // zoom
+		case 3:
+			return PORT_TYPE_SCALAR; // repeat
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeUVPolarCoord::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "uv";
+		case 1:
+			return "scale";
+		case 2:
+			return "zoom strength";
+		case 3:
+			return "repeat";
+		default:
+			break;
+	}
+	return "";
+}
+
+bool VisualShaderNodeUVPolarCoord::is_input_port_default(const int& port) const {
+	if (port == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+int VisualShaderNodeUVPolarCoord::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeUVPolarCoord::PortType VisualShaderNodeUVPolarCoord::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeUVPolarCoord::get_output_port_name(const int& port) const {
+	return "uv";
+}
+
+std::string VisualShaderNodeUVPolarCoord::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string uv;
+	if (input_vars.at(0).empty()) {
+		uv = "UV";
+	} else {
+		uv = input_vars.at(0);
+	}
+
+	std::string center {input_vars.at(1)};
+	std::string zoom {input_vars.at(2)};
+	std::string repeat {input_vars.at(3)};
+
+	std::string code;
+
+	code += "\t{\n";
+	code += "\t\tvec2 __dir = " + uv + " - " + center + ";\n";
+	code += "\t\tfloat __radius = length(__dir) * 2.0;\n";
+	code += "\t\tfloat __angle = atan(__dir.y, __dir.x) * 1.0 / (PI * 2.0);\n";
+	code += "\t\t" + output_vars.at(0) + " = mod(vec2(__radius * " + zoom + ", __angle * " + repeat + "), 1.0);\n";
+	code += "\t}\n";
+	
+	return code;
+}
+
+/*************************************/
+/* Dot Node                          */
+/*************************************/
+
+VisualShaderNodeDotProduct::VisualShaderNodeDotProduct() {
+	set_input_port_default_value(0, TEVector3());
+	set_input_port_default_value(1, TEVector3());
+}
+
+std::string VisualShaderNodeDotProduct::get_caption() const {
+	return "DotProduct";
+}
+
+int VisualShaderNodeDotProduct::get_input_port_count() const {
+	return 2;
+}
+
+VisualShaderNodeDotProduct::PortType VisualShaderNodeDotProduct::get_input_port_type(const int& port) const {
+	return PORT_TYPE_VECTOR_3D;
+}
+
+std::string VisualShaderNodeDotProduct::get_input_port_name(const int& port) const {
+	return port == 0 ? "a" : "b";
+}
+
+int VisualShaderNodeDotProduct::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeDotProduct::PortType VisualShaderNodeDotProduct::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeDotProduct::get_output_port_name(const int& port) const {
+	return "dot";
+}
+
+std::string VisualShaderNodeDotProduct::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = dot(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+}
+
+/*************************************/
+/* Length Node                       */
+/*************************************/
+
+VisualShaderNodeVectorLen::VisualShaderNodeVectorLen() {
+	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+}
+
+std::string VisualShaderNodeVectorLen::get_caption() const {
+	return "VectorLen";
+}
+
+int VisualShaderNodeVectorLen::get_input_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorLen::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeVectorLen::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeVectorLen::PortType VisualShaderNodeVectorLen::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVectorLen::get_output_port_name(const int& port) const {
+	return "length";
+}
+
+void VisualShaderNodeVectorLen::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorLen::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+std::string VisualShaderNodeVectorLen::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = length(" + input_vars.at(0) + ");\n";
+}
+
+/*************************************/
+/* Clamp Node                        */
+/*************************************/
+
+VisualShaderNodeClamp::VisualShaderNodeClamp() : op_type(OP_TYPE_FLOAT) {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 0.0f);
+	set_input_port_default_value(2, 1.0f);
+}
+
+std::string VisualShaderNodeClamp::get_caption() const {
+	return "Clamp";
+}
+
+int VisualShaderNodeClamp::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeClamp::PortType VisualShaderNodeClamp::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_INT:
+			return PORT_TYPE_SCALAR_INT;
+		case OP_TYPE_UINT:
+			return PORT_TYPE_SCALAR_UINT;
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeClamp::get_input_port_name(const int& port) const {
+	if (port == 0) {
+		return "";
+	} else if (port == 1) {
+		return "min";
+	} else if (port == 2) {
+		return "max";
+	}
+	return "";
+}
+
+int VisualShaderNodeClamp::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeClamp::PortType VisualShaderNodeClamp::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_INT:
+			return PORT_TYPE_SCALAR_INT;
+		case OP_TYPE_UINT:
+			return PORT_TYPE_SCALAR_UINT;
+		case OP_TYPE_VECTOR_2D:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeClamp::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeClamp::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = clamp(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+}
+
+void VisualShaderNodeClamp::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeClamp::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+	
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_FLOAT:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1));
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2));
+			break;
+		case OP_TYPE_UINT:
+		case OP_TYPE_INT:
+			set_input_port_default_value(0, 0, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0, get_input_port_default_value(1));
+			set_input_port_default_value(2, 0, get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_2D:
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_3D:
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_4D:
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2));
+			break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeClamp::OpType VisualShaderNodeClamp::get_op_type() const {
+	return op_type;
+}
+
+std::vector<std::string> VisualShaderNodeClamp::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+/*************************************/
+/* Derivative Func Node              */
+/*************************************/
+
+VisualShaderNodeDerivativeFunc::VisualShaderNodeDerivativeFunc() : op_type(OP_TYPE_SCALAR), func(FUNC_SUM), precision(PRECISION_NONE) {
+	set_input_port_default_value(0, 0.0f);
+}
+
+std::string VisualShaderNodeDerivativeFunc::get_caption() const {
+	return "DerivativeFunc";
+}
+
+int VisualShaderNodeDerivativeFunc::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeDerivativeFunc::PortType VisualShaderNodeDerivativeFunc::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeDerivativeFunc::get_input_port_name(const int& port) const {
+	return "p";
+}
+
+int VisualShaderNodeDerivativeFunc::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeDerivativeFunc::PortType VisualShaderNodeDerivativeFunc::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeDerivativeFunc::get_output_port_name(const int& port) const {
+	return "result";
+}
+
+std::string VisualShaderNodeDerivativeFunc::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case FUNC_SUM:
+			switch (precision) {
+				case PRECISION_NONE: // Set to none in case of gl_compatibility profile.
+					code += "\t" + output_vars.at(0) + " = fwidth(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_COARSE:
+					code += "\t" + output_vars.at(0) + " = fwidthCoarse(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_FINE:
+					code += "\t" + output_vars.at(0) + " = fwidthFine(" + input_vars.at(0) + ");\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		case FUNC_X:
+			switch (precision) {
+				case PRECISION_NONE: // Set to none in case of gl_compatibility profile.
+					code += "\t" + output_vars.at(0) + " = dFdx(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_COARSE:
+					code += "\t" + output_vars.at(0) + " = dFdxCoarse(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_FINE:
+					code += "\t" + output_vars.at(0) + " = dFdxFine(" + input_vars.at(0) + ");\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		case FUNC_Y:
+			switch (precision) {
+				case PRECISION_NONE: // Set to none in case of gl_compatibility profile.
+					code += "\t" + output_vars.at(0) + " = dFdy(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_COARSE:
+					code += "\t" + output_vars.at(0) + " = dFdyCoarse(" + input_vars.at(0) + ");\n";
+					break;
+				case PRECISION_FINE:
+					code += "\t" + output_vars.at(0) + " = dFdyFine(" + input_vars.at(0) + ");\n";
+					break;
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+
+	return code;
+}
+
+void VisualShaderNodeDerivativeFunc::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeDerivativeFunc::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+	
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeDerivativeFunc::OpType VisualShaderNodeDerivativeFunc::get_op_type() const {
+	return op_type;
+}
+
+void VisualShaderNodeDerivativeFunc::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeDerivativeFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeDerivativeFunc::Function VisualShaderNodeDerivativeFunc::get_function() const {
+	return func;
+}
+
+void VisualShaderNodeDerivativeFunc::set_precision(const Precision& precision) {
+	if (precision < 0 || precision >= PRECISION_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeDerivativeFunc::set_precision: Invalid precision: " << precision << std::endl;
+		return;
+	}
+
+	if (this->precision == precision) {
+		return;
+	}
+
+	this->precision = precision;
+}
+
+VisualShaderNodeDerivativeFunc::Precision VisualShaderNodeDerivativeFunc::get_precision() const {
+	return precision;
+}
+
+std::vector<std::string> VisualShaderNodeDerivativeFunc::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	props.emplace_back("function");
+	props.emplace_back("precision");
+	return props;
+}
+
+/*************************************/
+/* Face Forward Node                 */
+/*************************************/
+
+VisualShaderNodeFaceForward::VisualShaderNodeFaceForward() {
+	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(2, TEVector3(0.0f, 0.0f, 0.0f));
+}
+
+std::string VisualShaderNodeFaceForward::get_caption() const {
+	return "FaceForward";
+}
+
+int VisualShaderNodeFaceForward::get_input_port_count() const {
+	return 3;
+}
+
+std::string VisualShaderNodeFaceForward::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "N";
+		case 1:
+			return "I";
+		case 2:
+			return "Nref";
+		default:
+			break;
+	}
+	return "";
+}
+
+int VisualShaderNodeFaceForward::get_output_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeFaceForward::get_output_port_name(const int& port) const {
+	return "";
+}
+
+void VisualShaderNodeFaceForward::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFaceForward::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+std::string VisualShaderNodeFaceForward::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = faceforward(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+}
+
+/*************************************/
+/* Step Node                         */
+/*************************************/
+
+VisualShaderNodeStep::VisualShaderNodeStep() : op_type(OP_TYPE_SCALAR) {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 0.0f);
+}
+
+std::string VisualShaderNodeStep::get_caption() const {
+	return "Step";
+}
+
+int VisualShaderNodeStep::get_input_port_count() const {
+	return 2;
+}
+
+VisualShaderNodeStep::PortType VisualShaderNodeStep::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			if (port == 1) {
+				return PORT_TYPE_VECTOR_2D;
+			}
+			break;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			if (port == 1) {
+				return PORT_TYPE_VECTOR_3D;
+			}
+			break;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			if (port == 1) {
+				return PORT_TYPE_VECTOR_4D;
+			}
+			break;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeStep::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "edge";
+		case 1:
+			return "x";
+	}
+	return std::string();
+}
+
+int VisualShaderNodeStep::get_default_input_port(const PortType& type) const {
+	return 1;
+}
+
+int VisualShaderNodeStep::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeStep::PortType VisualShaderNodeStep::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeStep::get_output_port_name(const int& port) const {
+	return "";
+}
+
+void VisualShaderNodeStep::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeStep::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_2D_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_3D_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_4D_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeStep::OpType VisualShaderNodeStep::get_op_type() const {
+	return op_type;
+}
+
+std::string VisualShaderNodeStep::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = step(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+}
+
+std::vector<std::string> VisualShaderNodeStep::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+/*************************************/
+/* Smooth Step Node                  */
+/*************************************/
+
+VisualShaderNodeSmoothStep::VisualShaderNodeSmoothStep() : op_type(OP_TYPE_SCALAR) {
+	set_input_port_default_value(0, 0.0f); // edge0
+	set_input_port_default_value(1, 1.0f); // edge1
+	set_input_port_default_value(2, 0.5f); // x
+}
+
+std::string VisualShaderNodeSmoothStep::get_caption() const {
+	return "SmoothStep";
+}
+
+int VisualShaderNodeSmoothStep::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeSmoothStep::PortType VisualShaderNodeSmoothStep::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			if (port == 2) {
+				return PORT_TYPE_VECTOR_2D; // x
+			}
+			break;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			if (port == 2) {
+				return PORT_TYPE_VECTOR_3D; // x
+			}
+			break;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			if (port == 2) {
+				return PORT_TYPE_VECTOR_4D; // x
+			}
+			break;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeSmoothStep::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "edge0";
+		case 1:
+			return "edge1";
+		case 2:
+			return "x";
+	}
+	return std::string();
+}
+
+int VisualShaderNodeSmoothStep::get_default_input_port(const PortType& type) const {
+	return 2;
+}
+
+int VisualShaderNodeSmoothStep::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeSmoothStep::PortType VisualShaderNodeSmoothStep::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeSmoothStep::get_output_port_name(const int& port) const {
+	return "";
+}
+
+void VisualShaderNodeSmoothStep::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeSmoothStep::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_SCALAR:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_2D:
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_3D:
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_4D:
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2)); // x
+			break;
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0)); // edge0
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1)); // edge1
+			set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2)); // x
+			break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeSmoothStep::OpType VisualShaderNodeSmoothStep::get_op_type() const {
+	return op_type;
+}
+
+std::string VisualShaderNodeSmoothStep::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = smoothstep(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+}
+
+std::vector<std::string> VisualShaderNodeSmoothStep::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+/*************************************/
+/* Distance Node                     */
+/*************************************/
+
+VisualShaderNodeVectorDistance::VisualShaderNodeVectorDistance() {
+	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f)); // a
+	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f)); // b
+}
+
+std::string VisualShaderNodeVectorDistance::get_caption() const {
+	return "Distance";
+}
+
+int VisualShaderNodeVectorDistance::get_input_port_count() const {
+	return 2;
+}
+
+std::string VisualShaderNodeVectorDistance::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "a";
+		case 1:
+			return "b";
+	}
+	return std::string();
+}
+
+int VisualShaderNodeVectorDistance::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeVectorDistance::PortType VisualShaderNodeVectorDistance::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVectorDistance::get_output_port_name(const int& port) const {
+	return "";
+}
+
+void VisualShaderNodeVectorDistance::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorDistance::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1)); // b
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1)); // b
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1)); // b
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+std::string VisualShaderNodeVectorDistance::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = distance(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+}
+
+/*************************************/
+/* Refract Node                      */
+/*************************************/
+
+VisualShaderNodeVectorRefract::VisualShaderNodeVectorRefract() {
+	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(2, 0.0f);
+}
+
+std::string VisualShaderNodeVectorRefract::get_caption() const {
+	return "Refract";
+}
+
+int VisualShaderNodeVectorRefract::get_input_port_count() const {
+	return 3;
+}
+
+std::string VisualShaderNodeVectorRefract::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "I";
+		case 1:
+			return "N";
+		case 2:
+			return "eta";
+	}
+	return std::string();
+}
+
+int VisualShaderNodeVectorRefract::get_output_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorRefract::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeVectorRefract::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = refract(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+}
+
+void VisualShaderNodeVectorRefract::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorRefract::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+/*************************************/
+/* Mix Node                          */
+/*************************************/
+
+VisualShaderNodeMix::VisualShaderNodeMix() : op_type(OP_TYPE_SCALAR) {
+	set_input_port_default_value(0, 0.0f); // a
+	set_input_port_default_value(1, 1.0f); // b
+	set_input_port_default_value(2, 0.5f); // weight
+}
+
+std::string VisualShaderNodeMix::get_caption() const {
+	return "Mix";
+}
+
+int VisualShaderNodeMix::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeMix::PortType VisualShaderNodeMix::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			if (port == 2) {
+				break;
+			}
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			if (port == 2) {
+				break;
+			}
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			if (port == 2) {
+				break;
+			}
+			return PORT_TYPE_VECTOR_4D;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeMix::get_input_port_name(const int& port) const {
+	if (port == 0) {
+		return "a";
+	} else if (port == 1) {
+		return "b";
+	} else {
+		return "weight";
+	}
+}
+
+int VisualShaderNodeMix::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeMix::PortType VisualShaderNodeMix::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeMix::get_output_port_name(const int& port) const {
+	return "mix";
+}
+
+void VisualShaderNodeMix::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeMix::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_2D_SCALAR: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_3D_SCALAR: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2)); // weight
+		} break;
+		case OP_TYPE_VECTOR_4D_SCALAR: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0)); // a
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1)); // b
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2)); // weight
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeMix::OpType VisualShaderNodeMix::get_op_type() const {
+	return op_type;
+}
+
+std::string VisualShaderNodeMix::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	return "\t" + output_vars.at(0) + " = mix(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+}
+
+std::vector<std::string> VisualShaderNodeMix::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+/*************************************/
+/* Vector Compose Node               */
+/*************************************/
+
+VisualShaderNodeVectorCompose::VisualShaderNodeVectorCompose() {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 0.0f);
+	set_input_port_default_value(2, 0.0f);
+}
+
+std::string VisualShaderNodeVectorCompose::get_caption() const {
+	return "VectorCompose";
+}
+
+int VisualShaderNodeVectorCompose::get_input_port_count() const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return 2;
+		case OP_TYPE_VECTOR_3D:
+			return 3;
+		case OP_TYPE_VECTOR_4D:
+			return 4;
+		default:
+			break;
+	}
+	return 0;
+}
+
+VisualShaderNodeVectorCompose::PortType VisualShaderNodeVectorCompose::get_input_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVectorCompose::get_input_port_name(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+			}
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+				case 2:
+					return "z";
+			}
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+				case 2:
+					return "z";
+				case 3:
+					return "w";
+			}
+		} break;
+		default:
+			break;
+	}
+	return std::string();
+}
+
+int VisualShaderNodeVectorCompose::get_output_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorCompose::get_output_port_name(const int& port) const {
+	return "vec";
+}
+
+void VisualShaderNodeVectorCompose::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorCompose::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	float p1 {std::get<float>(get_input_port_default_value(0))};
+	float p2 {std::get<float>(get_input_port_default_value(1))};
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, p1);
+			set_input_port_default_value(1, p2);
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, p1);
+			set_input_port_default_value(1, p2);
+			set_input_port_default_value(2, 0.0f);
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, p1);
+			set_input_port_default_value(1, p2);
+			set_input_port_default_value(2, 0.0f);
+			set_input_port_default_value(3, 0.0f);
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+std::string VisualShaderNodeVectorCompose::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			code += "\t" + output_vars.at(0) + " = vec2(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			code += "\t" + output_vars.at(0) + " = vec3(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ");\n";
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			code += "\t" + output_vars.at(0) + " = vec4(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) + ", " + input_vars.at(3) + ");\n";
+		} break;
+		default:
+			break;
+	}
+	return code;
+}
+
+/*************************************/
+/* Vector Decompose Node             */
+/*************************************/
+
+VisualShaderNodeVectorDecompose::VisualShaderNodeVectorDecompose() {
+	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+}
+
+std::string VisualShaderNodeVectorDecompose::get_caption() const {
+	return "VectorDecompose";
+}
+
+int VisualShaderNodeVectorDecompose::get_input_port_count() const {
+	return 1;
+}
+
+std::string VisualShaderNodeVectorDecompose::get_input_port_name(const int& port) const {
+	return "vec";
+}
+
+int VisualShaderNodeVectorDecompose::get_output_port_count() const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return 2;
+		case OP_TYPE_VECTOR_3D:
+			return 3;
+		case OP_TYPE_VECTOR_4D:
+			return 4;
+		default:
+			break;
+	}
+	return 0;
+}
+
+VisualShaderNodeVectorDecompose::PortType VisualShaderNodeVectorDecompose::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeVectorDecompose::get_output_port_name(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+			}
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+				case 2:
+					return "z";
+			}
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			switch (port) {
+				case 0:
+					return "x";
+				case 1:
+					return "y";
+				case 2:
+					return "z";
+				case 3:
+					return "w";
+			}
+		} break;
+		default:
+			break;
+	}
+	return std::string();
+}
+
+void VisualShaderNodeVectorDecompose::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeVectorDecompose::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+std::string VisualShaderNodeVectorDecompose::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D: {
+			code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + ".x;\n";
+			code += "\t" + output_vars.at(1) + " = " + input_vars.at(0) + ".y;\n";
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + ".x;\n";
+			code += "\t" + output_vars.at(1) + " = " + input_vars.at(0) + ".y;\n";
+			code += "\t" + output_vars.at(2) + " = " + input_vars.at(0) + ".z;\n";
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + ".x;\n";
+			code += "\t" + output_vars.at(1) + " = " + input_vars.at(0) + ".y;\n";
+			code += "\t" + output_vars.at(2) + " = " + input_vars.at(0) + ".z;\n";
+			code += "\t" + output_vars.at(3) + " = " + input_vars.at(0) + ".w;\n";
+		} break;
+		default:
+			break;
+	}
+
+	return code;
+}
+
+/*************************************/
+/* If Node                           */
+/*************************************/
+
+VisualShaderNodeIf::VisualShaderNodeIf() {
+	simple_decl = false;
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 0.0f);
+	set_input_port_default_value(2, CMP_EPSILON);
+	set_input_port_default_value(3, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(4, TEVector3(0.0f, 0.0f, 0.0f));
+	set_input_port_default_value(5, TEVector3(0.0f, 0.0f, 0.0f));
+}
+
+std::string VisualShaderNodeIf::get_caption() const {
+	return "If";
+}
+
+int VisualShaderNodeIf::get_input_port_count() const {
+	return 6;
+}
+
+VisualShaderNodeIf::PortType VisualShaderNodeIf::get_input_port_type(const int& port) const {
+	if (port == 0 || port == 1 || port == 2) {
+		return PORT_TYPE_SCALAR;
+	}
+
+	return PORT_TYPE_VECTOR_3D;
+}
+
+std::string VisualShaderNodeIf::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "a";
+		case 1:
+			return "b";
+		case 2:
+			return "tolerance";
+		case 3:
+			return "a == b";
+		case 4:
+			return "a > b";
+		case 5:
+			return "a < b";
+		default:
+			break;
+	}
+	return "";
+}
+
+int VisualShaderNodeIf::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIf::PortType VisualShaderNodeIf::get_output_port_type(const int& port) const {
+	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeIf::get_output_port_name(const int& port) const {
+	return "result";
+}
+
+std::string VisualShaderNodeIf::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	code += "\tif(abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " + input_vars.at(2) + ") {\n"; // abs(a - b) < tolerance eg. a == b
+	code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(3) + ";\n";
+	code += "\t} else if(" + input_vars.at(0) + " < " + input_vars.at(1) + ") {\n"; // a < b
+	code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(5) + ";\n";
+	code += "\t} else {\n"; // a > b (or a >= b if abs(a - b) < tolerance is false)
+	code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(4) + ";\n";
+	code += "\t}\n";
+	return code;
+}
+
+/*************************************/
+/* Switch Node                       */
+/*************************************/
+
+VisualShaderNodeSwitch::VisualShaderNodeSwitch() : op_type(OP_TYPE_FLOAT) {
+	simple_decl = false;
+	set_input_port_default_value(0, false);
+	set_input_port_default_value(1, 1.0f);
+	set_input_port_default_value(2, 0.0f);
+}
+
+std::string VisualShaderNodeSwitch::get_caption() const {
+	return "Switch";
+}
+
+int VisualShaderNodeSwitch::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeSwitch::PortType VisualShaderNodeSwitch::get_input_port_type(const int& port) const {
+	if (port == 0) {
+		return PORT_TYPE_BOOLEAN;
+	}
+
+	if (port == 1 || port == 2) {
+		switch (op_type) {
+			case OP_TYPE_INT:
+				return PORT_TYPE_SCALAR_INT;
+			case OP_TYPE_UINT:
+				return PORT_TYPE_SCALAR_UINT;
+			case OP_TYPE_VECTOR_2D:
+				return PORT_TYPE_VECTOR_2D;
+			case OP_TYPE_VECTOR_3D:
+				return PORT_TYPE_VECTOR_3D;
+			case OP_TYPE_VECTOR_4D:
+				return PORT_TYPE_VECTOR_4D;
+			case OP_TYPE_BOOLEAN:
+				return PORT_TYPE_BOOLEAN;
+			default:
+				break;
+		}
+	}
+
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeSwitch::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "value";
+		case 1:
+			return "true";
+		case 2:
+			return "false";
+		default:
+			break;
+	}
+	return "";
+}
+
+int VisualShaderNodeSwitch::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeSwitch::PortType VisualShaderNodeSwitch::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_INT:
+			return PORT_TYPE_SCALAR_INT;
+		case OP_TYPE_UINT:
+			return PORT_TYPE_SCALAR_UINT;
+		case OP_TYPE_VECTOR_2D:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		case OP_TYPE_BOOLEAN:
+			return PORT_TYPE_BOOLEAN;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeSwitch::get_output_port_name(const int& port) const {
+	return "result";
+}
+
+void VisualShaderNodeSwitch::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeSwitch::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_FLOAT:
+			set_input_port_default_value(1, 1.0f, get_input_port_default_value(1));
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2));
+			break;
+		case OP_TYPE_UINT:
+		case OP_TYPE_INT:
+			set_input_port_default_value(1, 1, get_input_port_default_value(1));
+			set_input_port_default_value(2, 0, get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_2D:
+			set_input_port_default_value(1, TEVector2(1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector2(0.0f, 0.0f), get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_3D:
+			set_input_port_default_value(1, TEVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector3(0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
+			break;
+		case OP_TYPE_VECTOR_4D:
+			set_input_port_default_value(1, TEQuaternion(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEQuaternion(0.0f, 0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
+			break;
+		case OP_TYPE_BOOLEAN:
+			set_input_port_default_value(1, true);
+			set_input_port_default_value(2, false);
+			break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeSwitch::OpType VisualShaderNodeSwitch::get_op_type() const {
+	return op_type;
+}
+
+std::vector<std::string> VisualShaderNodeSwitch::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+std::string VisualShaderNodeSwitch::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	bool use_mix {false};
+
+	switch (op_type) {
+		case OP_TYPE_FLOAT:
+		case OP_TYPE_VECTOR_2D:
+		case OP_TYPE_VECTOR_3D:
+		case OP_TYPE_VECTOR_4D: 
+			use_mix = true;
+			break;
+		default:
+			break;
+	}
+
+	std::string code;
+	if (use_mix) {
+		code += "\t" + output_vars.at(0) + " = mix(" + input_vars.at(2) + ", " + input_vars.at(1) + ", float(" + input_vars.at(0) + "));\n";
+	} else {
+		code += "\tif (" + input_vars.at(0) + ") {\n";
+		code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(1) + ";\n";
+		code += "\t} else {\n";
+		code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(2) + ";\n";
+		code += "\t}\n";
+	}
+	return code;
+}
+
+/*************************************/
+/* Is Node                           */
+/*************************************/
+
+VisualShaderNodeIs::VisualShaderNodeIs() : func(FUNC_IS_INF) {
+	set_input_port_default_value(0, 0.0f);
+}
+
+std::string VisualShaderNodeIs::get_caption() const {
+	return "Is";
+}
+
+int VisualShaderNodeIs::get_input_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIs::PortType VisualShaderNodeIs::get_input_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeIs::get_input_port_name(const int& port) const {
+	return "";
+}
+
+int VisualShaderNodeIs::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeIs::PortType VisualShaderNodeIs::get_output_port_type(const int& port) const {
+	return PORT_TYPE_BOOLEAN;
+}
+
+std::string VisualShaderNodeIs::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeIs::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (func) {
+		case FUNC_IS_INF:
+			code += "\t" + output_vars.at(0) + " = isinf(" + input_vars.at(0) + ");\n";
+			break;
+		case FUNC_IS_NAN:
+			code += "\t" + output_vars.at(0) + " = isnan(" + input_vars.at(0) + ");\n";
+			break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeIs::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeIs::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeIs::Function VisualShaderNodeIs::get_function() const {
+	return func;
+}
+
+std::vector<std::string> VisualShaderNodeIs::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("function");
+	return props;
+}
+
+/*************************************/
+/* Compare Node                      */
+/*************************************/
+
+VisualShaderNodeCompare::VisualShaderNodeCompare() : comparison_type(CMP_TYPE_SCALAR), func(FUNC_EQUAL), condition(COND_ALL) {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 0.0f);
+	set_input_port_default_value(2, CMP_EPSILON);
+}
+
+std::string VisualShaderNodeCompare::get_caption() const {
+	return "Compare";
+}
+
+int VisualShaderNodeCompare::get_input_port_count() const {
+	switch (comparison_type) {
+		case CMP_TYPE_SCALAR:
+		    switch (func) {
+			    case FUNC_EQUAL:
+			    case FUNC_NOT_EQUAL:
+				    return 3;
+			    default:
+				    break;
+		    }
+			break;
+		default:
+			break;
+	}
+
+	return 2;
+}
+
+VisualShaderNodeCompare::PortType VisualShaderNodeCompare::get_input_port_type(const int& port) const {
+	switch (comparison_type) {
+		case CMP_TYPE_SCALAR:
+			return PORT_TYPE_SCALAR;
+		case CMP_TYPE_SCALAR_INT:
+			return PORT_TYPE_SCALAR_INT;
+		case CMP_TYPE_SCALAR_UINT:
+			return PORT_TYPE_SCALAR_UINT;
+		case CMP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case CMP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case CMP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		case CMP_TYPE_BOOLEAN:
+			return PORT_TYPE_BOOLEAN;
+		default:
+			break;
+	}
+
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeCompare::get_input_port_name(const int& port) const {
+	if (port == 0) {
+		return "a";
+	} else if (port == 1) {
+		return "b";
+	} else if (port == 2) {
+		return "tolerance";
+	}
+	return "";
+}
+
+int VisualShaderNodeCompare::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeCompare::PortType VisualShaderNodeCompare::get_output_port_type(const int& port) const {
+	return PORT_TYPE_BOOLEAN;
+}
+
+std::string VisualShaderNodeCompare::get_output_port_name(const int& port) const {
+	if (port == 0) {
+		return "result";
+	}
+	return "";
+}
+
+std::string VisualShaderNodeCompare::get_warning() const {
+	if (comparison_type == CMP_TYPE_BOOLEAN) {
+		if (func > FUNC_NOT_EQUAL) {
+			return "Invalid comparison function for that type.";
+		}
+	}
+	return "";
+}
+
+std::string VisualShaderNodeCompare::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	switch (comparison_type) {
+		case CMP_TYPE_SCALAR: {
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t" + output_vars.at(0) + " = (abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " + input_vars.at(2) + ");\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t" + output_vars.at(0) + " = !(abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " + input_vars.at(2) + ");\n";
+					break;
+				case FUNC_GREATER_THAN:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_GREATER_THAN_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_LESS_THAN:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";\n";
+					break;
+				default:
+					break;
+			}
+		} break;
+		case CMP_TYPE_SCALAR_UINT:
+		case CMP_TYPE_SCALAR_INT: {
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_GREATER_THAN:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_GREATER_THAN_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_LESS_THAN:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";\n";
+					break;
+				default:
+					break;
+			}
+		} break;
+		case CMP_TYPE_VECTOR_2D: {
+			code += "\t{\n";
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t\tbvec2 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t\tbvec2 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN:
+					code += "\t\tbvec2 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN_EQUAL:
+					code += "\t\tbvec2 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN:
+					code += "\t\tbvec2 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t\tbvec2 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				default:
+					break;
+			}
+			
+			switch (condition) {
+				case COND_ALL:
+					code += "\t\t" + output_vars.at(0) + " = all(_bv);\n";
+					break;
+				case COND_ANY:
+					code += "\t\t" + output_vars.at(0) + " = any(_bv);\n";
+					break;
+				default:
+					break;
+			}
+
+			code += "\t}\n";
+		} break;
+		case CMP_TYPE_VECTOR_3D: {
+			code += "\t{\n";
+
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t\tbvec3 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t\tbvec3 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN:
+					code += "\t\tbvec3 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN_EQUAL:
+					code += "\t\tbvec3 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN:
+					code += "\t\tbvec3 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t\tbvec3 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				default:
+					break;
+			}
+			
+			switch (condition) {
+				case COND_ALL:
+					code += "\t\t" + output_vars.at(0) + " = all(_bv);\n";
+					break;
+				case COND_ANY:
+					code += "\t\t" + output_vars.at(0) + " = any(_bv);\n";
+					break;
+				default:
+					break;
+			}
+
+			code += "\t}\n";
+		} break;
+		case CMP_TYPE_VECTOR_4D: {
+			code += "\t{\n";
+
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t\tbvec4 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t\tbvec4 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN:
+					code += "\t\tbvec4 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_GREATER_THAN_EQUAL:
+					code += "\t\tbvec4 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN:
+					code += "\t\tbvec4 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t\tbvec4 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");\n";
+					break;
+				default:
+					break;
+			}
+			
+			switch (condition) {
+				case COND_ALL:
+					code += "\t\t" + output_vars.at(0) + " = all(_bv);\n";
+					break;
+				case COND_ANY:
+					code += "\t\t" + output_vars.at(0) + " = any(_bv);\n";
+					break;
+				default:
+					break;
+			}
+
+			code += "\t}\n";
+		} break;
+		case CMP_TYPE_BOOLEAN: {
+			switch (func) {
+				case FUNC_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_NOT_EQUAL:
+					code += "\t" + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";\n";
+					break;
+				case FUNC_GREATER_THAN:
+				case FUNC_GREATER_THAN_EQUAL:
+				case FUNC_LESS_THAN:
+				case FUNC_LESS_THAN_EQUAL:
+					code += "\t" + output_vars.at(0) + " = false;\n";
+					break;
+				default:
+					break;
+			}
+		} break;
+		default:
+			break;
+	}
+	return code;
+}
+
+void VisualShaderNodeCompare::set_comparison_type(const ComparisonType& type) {
+	if (type < 0 || type >= CMP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeCompare::set_comparison_type: Invalid type: " << type << std::endl;
+		return;
+	}
+
+	if (comparison_type == type) {
+		return;
+	}
+
+	switch (type) {
+		case CMP_TYPE_SCALAR:
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0f, get_input_port_default_value(1));
+			simple_decl = true;
+			break;
+		case CMP_TYPE_SCALAR_UINT:
+		case CMP_TYPE_SCALAR_INT:
+			set_input_port_default_value(0, 0, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0, get_input_port_default_value(1));
+			simple_decl = true;
+			break;
+		case CMP_TYPE_VECTOR_2D:
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+			simple_decl = false;
+			break;
+		case CMP_TYPE_VECTOR_3D:
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+			simple_decl = false;
+			break;
+		case CMP_TYPE_VECTOR_4D:
+			set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+			simple_decl = false;
+			break;
+		case CMP_TYPE_BOOLEAN:
+			set_input_port_default_value(0, false);
+			set_input_port_default_value(1, false);
+			simple_decl = true;
+			break;
+		default:
+			break;
+	}
+
+	comparison_type = type;
+}
+
+VisualShaderNodeCompare::ComparisonType VisualShaderNodeCompare::get_comparison_type() const {
+	return comparison_type;
+}
+
+void VisualShaderNodeCompare::set_function(const Function& func) {
+	if (func < 0 || func >= FUNC_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeFloatFunc::set_function: Invalid func: " << func << std::endl;
+		return;
+	}
+
+	if (this->func == func) {
+		return;
+	}
+
+	this->func = func;
+}
+
+VisualShaderNodeCompare::Function VisualShaderNodeCompare::get_function() const {
+	return func;
+}
+
+void VisualShaderNodeCompare::set_condition(const Condition& cond) {
+	if (cond < 0 || cond >= COND_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeCompare::set_condition: Invalid cond: " << cond << std::endl;
+		return;
+	}
+
+	if (condition == cond) {
+		return;
+	}
+
+	condition = cond;
+}
+
+VisualShaderNodeCompare::Condition VisualShaderNodeCompare::get_condition() const {
+	return condition;
+}
+
+std::vector<std::string> VisualShaderNodeCompare::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("type");
+	props.emplace_back("function");
+
+	switch (comparison_type) {
+		case CMP_TYPE_VECTOR_2D:
+		case CMP_TYPE_VECTOR_3D:
+		case CMP_TYPE_VECTOR_4D:
+			props.emplace_back("condition");
+			break;
+		default:
+			break;
+	}
+
+	return props;
+}
+
+/*************************************/
+/* Multiply Add Node                 */
+/*************************************/
+
+VisualShaderNodeMultiplyAdd::VisualShaderNodeMultiplyAdd() : op_type(OP_TYPE_SCALAR) {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 1.0f);
+	set_input_port_default_value(2, 0.0f);
+}
+
+std::string VisualShaderNodeMultiplyAdd::get_caption() const {
+	return "MultiplyAdd";
+}
+
+int VisualShaderNodeMultiplyAdd::get_input_port_count() const {
+	return 3;
+}
+
+VisualShaderNodeMultiplyAdd::PortType VisualShaderNodeMultiplyAdd::get_input_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeMultiplyAdd::get_input_port_name(const int& port) const {
+	if (port == 0) {
+		return "a";
+	} else if (port == 1) {
+		return "b(*)";
+	} else if (port == 2) {
+		return "c(+)";
+	}
+	return "";
+}
+
+int VisualShaderNodeMultiplyAdd::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeMultiplyAdd::PortType VisualShaderNodeMultiplyAdd::get_output_port_type(const int& port) const {
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_3D:
+			return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
+		case OP_TYPE_VECTOR_4D:
+			return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeMultiplyAdd::get_output_port_name(const int& port) const {
+	return "";
+}
+
+std::string VisualShaderNodeMultiplyAdd::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	// TODO: Can use fma()?
+	return "\t" + output_vars.at(0) + " = (" + input_vars.at(0) + " * " + input_vars.at(1) + ") + " + input_vars.at(2) + ";\n";
+}
+
+void VisualShaderNodeMultiplyAdd::set_op_type(const OpType& op_type) {
+	if (op_type < 0 || op_type >= OP_TYPE_ENUM_SIZE) {
+		std::cerr << "VisualShaderNodeMultiplyAdd::set_op_type: Invalid op_type: " << op_type << std::endl;
+		return;
+	}
+
+	if (this->op_type == op_type) {
+		return;
+	}
+
+	switch (op_type) {
+		case OP_TYPE_SCALAR: {
+			set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
+			set_input_port_default_value(1, 1.0f, get_input_port_default_value(1));
+			set_input_port_default_value(2, 0.0f, get_input_port_default_value(2));
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector2(1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, TEVector4(), get_input_port_default_value(0));
+			set_input_port_default_value(1, TEVector4(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+			set_input_port_default_value(2, TEVector4(), get_input_port_default_value(2));
+		} break;
+		default:
+			break;
+	}
+
+	this->op_type = op_type;
+}
+
+VisualShaderNodeMultiplyAdd::OpType VisualShaderNodeMultiplyAdd::get_op_type() const {
+	return op_type;
+}
+
+std::vector<std::string> VisualShaderNodeMultiplyAdd::get_editable_properties() const {
+	std::vector<std::string> props;
+	props.emplace_back("op_type");
+	return props;
+}
+
+/*************************************/
+/* DistanceFade Node                 */
+/*************************************/
+
+VisualShaderNodeDistanceFade::VisualShaderNodeDistanceFade() {
+	set_input_port_default_value(0, 0.0f);
+	set_input_port_default_value(1, 10.0f);
+}
+
+std::string VisualShaderNodeDistanceFade::get_caption() const {
+	return "DistanceFade";
+}
+
+int VisualShaderNodeDistanceFade::get_input_port_count() const {
+	return 2;
+}
+
+VisualShaderNodeDistanceFade::PortType VisualShaderNodeDistanceFade::get_input_port_type(const int& port) const {
+	switch (port) {
+		case 0:
+			return PORT_TYPE_SCALAR;
+		case 1:
+			return PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeDistanceFade::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "min";
+		case 1:
+			return "max";
+		default:
+			break;
+	}
+
+	return "";
+}
+
+int VisualShaderNodeDistanceFade::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeDistanceFade::PortType VisualShaderNodeDistanceFade::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeDistanceFade::get_output_port_name(const int& port) const {
+	return "amount";
+}
+
+bool VisualShaderNodeDistanceFade::has_output_port_preview(const int& port) const {
+	return false;
+}
+
+std::string VisualShaderNodeDistanceFade::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	code += "\t" + output_vars.at(0) + " = clamp(smoothstep(" + input_vars.at(0) + ", " + input_vars.at(1) + ", length(VERTEX)), 0.0, 1.0);\n";
+	return code;
+}
+
+/*************************************/
+/* Remap Node                        */
+/*************************************/
+
+VisualShaderNodeRemap::VisualShaderNodeRemap() {
+	set_input_port_default_value(1, 0.0f);
+	set_input_port_default_value(2, 1.0f);
+	set_input_port_default_value(3, 0.0f);
+	set_input_port_default_value(4, 1.0f);
+
+	simple_decl = false;
+}
+
+std::string VisualShaderNodeRemap::get_caption() const {
+	return "Remap";
+}
+
+int VisualShaderNodeRemap::get_input_port_count() const {
+	return 5;
+}
+
+VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_input_port_type(const int& port) const {
+	switch (port) {
+		case 0:
+			return PORT_TYPE_SCALAR;
+		case 1:
+			return PORT_TYPE_SCALAR;
+		case 2:
+			return PORT_TYPE_SCALAR;
+		case 3:
+			return PORT_TYPE_SCALAR;
+		case 4:
+			return PORT_TYPE_SCALAR;
+		default:
+			break;
+	}
+
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeRemap::get_input_port_name(const int& port) const {
+	switch (port) {
+		case 0:
+			return "value";
+		case 1:
+			return "input min";
+		case 2:
+			return "input max";
+		case 3:
+			return "output min";
+		case 4:
+			return "output max";
+		default:
+			break;
+	}
+
+	return "";
+}
+
+int VisualShaderNodeRemap::get_output_port_count() const {
+	return 1;
+}
+
+VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_output_port_type(const int& port) const {
+	return PORT_TYPE_SCALAR;
+}
+
+std::string VisualShaderNodeRemap::get_output_port_name(const int& port) const {
+	return "value";
+}
+
+std::string VisualShaderNodeRemap::generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const {
+	std::string code;
+	code += "\t{\n";
+	code += "\t\tfloat __input_range = " + input_vars.at(2) + " - " + input_vars.at(1) + ";\n";
+	code += "\t\tfloat __output_range = " + input_vars.at(4) + " - " + input_vars.at(3) + ";\n";
+	code += "\t\t" + output_vars.at(0) + " = " + input_vars.at(3) + " + __output_range * ((" + input_vars.at(0) + " - " + input_vars.at(1) + ") / __input_range);\n";
+	code += "\t}\n";
+	return code;
 }

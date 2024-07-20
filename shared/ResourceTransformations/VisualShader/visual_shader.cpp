@@ -286,6 +286,9 @@ bool VisualShader::generate_shader() const {
 	const VisualShader::Graph *g {&graph};
     static const std::string func_name { "fragment" };
 
+	std::string global_code;
+	std::string global_code_per_node;
+	std::string global_code_per_func;
     std::string shader_code;
 
     // Store the connections for faster generation.
@@ -312,7 +315,7 @@ bool VisualShader::generate_shader() const {
     func_code += "\nvoid " + func_name + "() {\n";
 
     // Generate the code for each node.
-    bool status {generate_shader_for_each_node(func_code, input_connections, output_connections, VisualShader::NODE_ID_OUTPUT, processed)};
+    bool status {generate_shader_for_each_node(global_code, global_code_per_node, global_code_per_func, func_code, input_connections, output_connections, VisualShader::NODE_ID_OUTPUT, processed)};
 
     if (!status) {
         std::cout << "Failed to generate shader for node " << VisualShader::NODE_ID_OUTPUT << std::endl;
@@ -331,11 +334,14 @@ bool VisualShader::generate_shader() const {
     return true;
 }
 
-bool VisualShader::generate_shader_for_each_node(std::string& func_code, 
-                                                    const std::map<ConnectionKey, const Connection *>& input_connections,
-                                                    const std::map<ConnectionKey, const Connection *>& output_connections,
-                                                    const int& node_id,
-                                                    std::unordered_set<int>& processed) const {
+bool VisualShader::generate_shader_for_each_node(std::string& global_code,
+												 std::string& global_code_per_node,
+												 std::string& global_code_per_func,
+												 std::string& func_code, 
+												 const std::map<ConnectionKey, const Connection *>& input_connections,
+												 const std::map<ConnectionKey, const Connection *>& output_connections,
+												 const int& node_id,
+												 std::unordered_set<int>& processed) const {
 
     const VisualShader::Graph *g {&graph};
 	const std::shared_ptr<VisualShaderNode> n {g->nodes.at(node_id).node};
@@ -359,12 +365,21 @@ bool VisualShader::generate_shader_for_each_node(std::string& func_code,
             continue;
         }
 
-        bool status {generate_shader_for_each_node(func_code, input_connections, output_connections, from_node, processed)};
+        bool status {generate_shader_for_each_node(global_code, global_code_per_node, global_code_per_func, func_code, input_connections, output_connections, from_node, processed)};
         if (!status) {
             std::cout << "Failed to generate shader for node " << from_node << std::endl;
             return false;
         }
     }
+
+	// Generate the global code for the current node.
+	std::shared_ptr<VisualShaderNodeInput> input {std::static_pointer_cast<VisualShaderNodeInput>(n)};
+	bool skip_global {input != nullptr};
+
+	if (!skip_global) {
+		global_code_per_node += n->generate_global_per_node(node_id);
+		global_code_per_func += n->generate_global_per_func(node_id);
+	}
 
     // Generate the code for the current node.
     std::string node_name {"// " + n->get_caption() + ":" + std::to_string(node_id) + "\n"};
@@ -699,9 +714,6 @@ bool VisualShader::generate_shader_for_each_node(std::string& func_code,
 				case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN:
 					output_vars.at(i) = "bool " + to_var;
 					break;
-				case VisualShaderNode::PortType::PORT_TYPE_TRANSFORM:
-					output_vars.at(i) = "mat4 " + to_var;
-					break;
 				default:
 					break;
 			}
@@ -746,9 +758,6 @@ bool VisualShader::generate_shader_for_each_node(std::string& func_code,
 					break;
 				case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN:
 					func_code += "\tbool " + output_vars.at(i) + ";\n";
-					break;
-				case VisualShaderNode::PortType::PORT_TYPE_TRANSFORM:
-					func_code += "\tmat4 " + output_vars.at(i) + ";\n";
 					break;
 				default:
 					break;
@@ -884,6 +893,26 @@ VisualShaderNode::VisualShaderNode() : simple_decl(true) {
 
 bool VisualShaderNode::is_simple_decl() const {
 	return simple_decl;
+}
+
+std::string VisualShaderNode::generate_global([[maybe_unused]] const int& id) const {
+	return std::string();
+}
+
+std::string VisualShaderNode::generate_global_per_node([[maybe_unused]] const int& id) const {
+	return std::string();
+}
+
+std::string VisualShaderNode::generate_global_per_func([[maybe_unused]] const int& id) const {
+	return std::string();
+}
+
+int VisualShaderNode::get_default_input_port(const VisualShaderNode::PortType& type) const {
+	return 0;
+}
+
+bool VisualShaderNode::is_input_port_default(const int& port) const {
+	return false;
 }
 
 void VisualShaderNode::set_input_port_default_value(const int& port, const TEVariant& value, const TEVariant& prev_value) {
@@ -1044,6 +1073,10 @@ TEVariant VisualShaderNode::get_input_port_default_value(const int& port) const 
 	return default_input_values.at(port);
 }
 
+bool VisualShaderNode::is_show_prop_names() const {
+	return false;
+}
+
 bool VisualShaderNode::is_output_port_expandable(const int& port) const {
 	VisualShaderNode::PortType p {get_output_port_type(port)};
 	if (get_output_port_count() == 1 && 
@@ -1129,6 +1162,10 @@ bool VisualShaderNode::is_input_port_connected(const int& port) const {
 
 void VisualShaderNode::set_input_port_connected(const int& port, const bool& connected) {
 	VisualShaderNode::connected_input_ports.at(port) = connected;
+}
+
+bool VisualShaderNode::has_output_port_preview(const int& port) const {
+	return true;
 }
 
 VisualShaderNode::Category VisualShaderNode::get_category() const {

@@ -154,11 +154,14 @@ class VisualShader {
 
         bool generate_shader() const;
 
-        bool generate_shader_for_each_node(std::string& func_code, 
-                                            const std::map<ConnectionKey, const Connection *>& input_connections,
-                                            const std::map<ConnectionKey, const Connection *>& output_connections,
-                                            const int& node_id,
-                                            std::unordered_set<int>& processed) const;
+        bool generate_shader_for_each_node(std::string& global_code,
+                                           std::string& global_code_per_node,
+                                           std::string& global_code_per_func,
+                                           std::string& func_code, 
+                                           const std::map<ConnectionKey, const Connection *>& input_connections,
+                                           const std::map<ConnectionKey, const Connection *>& output_connections,
+                                           const int& node_id,
+                                           std::unordered_set<int>& processed) const;
 
         std::string get_code() const;
     
@@ -196,7 +199,6 @@ class VisualShaderNode {
             PORT_TYPE_VECTOR_3D,
             PORT_TYPE_VECTOR_4D,
             PORT_TYPE_BOOLEAN,
-            PORT_TYPE_TRANSFORM,
             PORT_TYPE_SAMPLER,
             PORT_TYPE_ENUM_SIZE,
         };
@@ -223,12 +225,18 @@ class VisualShaderNode {
 
         virtual std::string get_caption() const = 0;
 
+        virtual std::string generate_global([[maybe_unused]] const int& id) const;
+        virtual std::string generate_global_per_node([[maybe_unused]] const int& id) const;
+        virtual std::string generate_global_per_func([[maybe_unused]] const int& id) const;
+
         // If no output is connected, the output var passed will be empty. If no input is connected and input is NIL, the input var passed will be empty.
         virtual std::string generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const = 0;
 
         virtual int get_input_port_count() const = 0;
         virtual VisualShaderNode::PortType get_input_port_type(const int& port) const = 0;
 	    virtual std::string get_input_port_name(const int& port) const = 0;
+        virtual int get_default_input_port(const VisualShaderNode::PortType& type) const;
+        virtual bool is_input_port_default(const int& port) const;
 
         virtual void set_input_port_default_value(const int& port, const TEVariant& value, const TEVariant& prev_value = TEVariant());
 	    TEVariant get_input_port_default_value(const int& port) const;
@@ -236,6 +244,8 @@ class VisualShaderNode {
         virtual int get_output_port_count() const = 0;
         virtual VisualShaderNode::PortType get_output_port_type(const int& port) const = 0;
 	    virtual std::string get_output_port_name(const int& port) const = 0;
+
+        virtual bool is_show_prop_names() const;
 
         virtual bool is_output_port_expandable(const int& port) const;
         void set_output_ports_expanded(const std::vector<int>& data);
@@ -248,6 +258,8 @@ class VisualShaderNode {
         void set_output_port_connected(const int& port, const bool& connected);
         bool is_input_port_connected(const int& port) const;
         void set_input_port_connected(const int& port, const bool& connected);
+
+        virtual bool has_output_port_preview(const int& port) const;
 
         virtual VisualShaderNode::Category get_category() const;
 
