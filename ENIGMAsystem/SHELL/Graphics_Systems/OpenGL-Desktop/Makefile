@@ -12,7 +12,7 @@ else ifeq ($(TARGET-PLATFORM), DragonFlyBSD)
 else ifeq ($(TARGET-PLATFORM), OpenBSD)
 	override LDLIBS += -lGL -lGLEW
 else ifeq ($(TARGET-PLATFORM), MacOSX)
-	if ($(TARGET-WINDOWING), SDL)
+	ifeq ($(TARGET-WINDOWING), SDL)
 		override LDLIBS += -framework OpenGL /opt/local/lib/libGLEW.a
 	else
 		override LDLIBS += -lGL -lGLEW
