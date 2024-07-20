@@ -15,6 +15,6 @@ else ifeq ($(TARGET-PLATFORM), MacOSX)
 	ifeq ($(TARGET-WINDOWING), SDL)
 		override LDLIBS += -framework OpenGL /opt/local/lib/libGLEW.a
 	else
-		override LDLIBS += -lGL -lGLEW
+		override LDLIBS += -framework OpenGL -lGL -lGLEW
 	endif
 endif
