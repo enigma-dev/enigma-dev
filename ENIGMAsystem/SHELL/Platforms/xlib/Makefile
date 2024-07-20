@@ -1,3 +1,7 @@
+ifndef TARGET-WINDOWING
+	TARGET-WINDOWING := X11
+endif
+
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp)
 ifeq ($(OS), Darwin)
 	override CXXFLAGS += -I/opt/X11/include
