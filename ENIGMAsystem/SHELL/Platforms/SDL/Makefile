@@ -2,6 +2,10 @@ ifndef PKG-CONFIG
 	PKG-CONFIG := pkg-config
 endif
 
+ifndef TARGET-WINDOWING
+	TARGET-WINDOWING := SDL
+endif
+
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Platforms/SDL/Win32/*.cpp)
 	RESOURCES += $(wildcard Platforms/SDL/Win32/*.rc)
