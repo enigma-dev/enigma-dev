@@ -62,3 +62,6 @@ hs_err_pid*.log
 *.epackage
 *~
 .vscode
+
+# it is a file for testing the output of the pretty printer
+output.txt

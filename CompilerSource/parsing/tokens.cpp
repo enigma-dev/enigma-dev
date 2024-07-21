@@ -154,6 +154,7 @@ static const std::vector<std::string> kTokenNames = [](){
 std::string ToString(TokenType tt) {
   return kTokenNames[tt];
 }
+
 string Token::ToString() const {
   std::stringstream str;
   str << kTokenNames[type] << "(\"" << content << "\")";
@@ -163,6 +164,7 @@ string Token::ToString() const {
 std::ostream &operator<<(std::ostream &os, TokenType tt) {
   return os << kTokenNames[tt];
 }
+
 std::ostream &operator<<(std::ostream &os, const Token &t) {
   return os << t.ToString();
 }

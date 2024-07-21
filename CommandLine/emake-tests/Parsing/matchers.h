@@ -22,7 +22,7 @@
 using namespace ::enigma::parsing;
 using namespace ::testing;
 
-std::string ExpectedMsg = "";
+extern std::string ExpectedMsg;
 
 MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   if (arg->type != AST::NodeType::DECLARATION) {
@@ -206,14 +206,14 @@ MATCHER_P3(IsBinaryOperation, op, M1, M2, "") {
     return false;
   }
 
-  bool b1 = binary->operation == op, b2 = ExplainMatchResult(M1, binary->left, result_listener),
+  bool b1 = binary->operation.type == op, b2 = ExplainMatchResult(M1, binary->left, result_listener),
        b3 = ExplainMatchResult(M2, binary->right, result_listener);
 
   bool res = b1 && b2 && b3;
   if (!b1) {
     ExpectedMsg += "From IsBinaryOperation Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(binary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(binary->operation.type) << "\n";
   }
 
   return res;
@@ -233,13 +233,13 @@ MATCHER_P2(IsUnaryPostfixOperator, op, M1, "") {
     return false;
   }
 
-  bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
+  bool b1 = unary->operation.type == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
 
   bool res = b1 && b2;
   if (!b1) {
     ExpectedMsg = "From IsUnaryPostfixOperator Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(unary->operation.type) << "\n";
   }
 
   return res;
@@ -259,13 +259,13 @@ MATCHER_P2(IsUnaryPrefixOperator, op, M1, "") {
     return false;
   }
 
-  bool b1 = unary->operation == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
+  bool b1 = unary->operation.type == op, b2 = ExplainMatchResult(M1, unary->operand, result_listener);
 
   bool res = b1 && b2;
   if (!b1) {
     ExpectedMsg = "From IsUnaryPrefixOperator Matcher: ";
     ExpectedMsg += "Operation = " + ToString(op) + "\n";
-    *result_listener << "got Operation = " << ToString(unary->operation) << "\n";
+    *result_listener << "got Operation = " << ToString(unary->operation.type) << "\n";
   }
 
   return res;
