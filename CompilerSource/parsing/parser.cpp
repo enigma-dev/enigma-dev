@@ -1892,7 +1892,7 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
 }
 
 std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
-  if ((int)mode_ > 2) {
+  if (mode_ != setting::SyntaxMode::GML && mode != setting::SyntaxMode::QUIRKS && mode != setting::SyntaxMode::STRICT) {
     herr->Error(token) << "Internal error: unreachable (" __FILE__ ":" << __LINE__ << "): SyntaxMode " << (int)mode_
                        << " unknown to system";
   }

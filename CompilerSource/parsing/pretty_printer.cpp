@@ -167,7 +167,7 @@ bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
 
     for (std::size_t i = 0; i < flags_values.size(); i++) {
       if ((ft.flags & flags_masks[i]) == flags_values[i]) {
-        if (i != 8 || (i == 8 && ft.def->name == "char")) {
+        if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
           print(flags_names[i] + " ");
         }
       }
