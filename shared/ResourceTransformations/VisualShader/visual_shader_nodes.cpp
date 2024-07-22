@@ -39,7 +39,7 @@
 
 VisualShaderNodeVectorBase::VisualShaderNodeVectorBase() : op_type(VisualShaderNodeVectorBase::OpType::OP_TYPE_VECTOR_3D) {}
 
-VisualShaderNodeVectorBase::PortType VisualShaderNodeVectorBase::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorBase::get_input_port_type([[maybe_unused]] const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -53,7 +53,7 @@ VisualShaderNodeVectorBase::PortType VisualShaderNodeVectorBase::get_input_port_
 	return PORT_TYPE_SCALAR;
 }
 
-VisualShaderNodeVectorBase::PortType VisualShaderNodeVectorBase::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorBase::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return port == 0 || get_output_port_count() > 1 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
@@ -110,7 +110,7 @@ int VisualShaderNodeFloatConstant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeFloatConstant::PortType VisualShaderNodeFloatConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatConstant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -122,7 +122,7 @@ int VisualShaderNodeFloatConstant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeFloatConstant::PortType VisualShaderNodeFloatConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatConstant::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -169,7 +169,7 @@ int VisualShaderNodeIntConstant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeIntConstant::PortType VisualShaderNodeIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -181,7 +181,7 @@ int VisualShaderNodeIntConstant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIntConstant::PortType VisualShaderNodeIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -225,7 +225,7 @@ int VisualShaderNodeUIntConstant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeUIntConstant::PortType VisualShaderNodeUIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntConstant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -237,7 +237,7 @@ int VisualShaderNodeUIntConstant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUIntConstant::PortType VisualShaderNodeUIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntConstant::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -281,7 +281,7 @@ int VisualShaderNodeBooleanConstant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeBooleanConstant::PortType VisualShaderNodeBooleanConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeBooleanConstant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_BOOLEAN;
 }
 
@@ -293,7 +293,7 @@ int VisualShaderNodeBooleanConstant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeBooleanConstant::PortType VisualShaderNodeBooleanConstant::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeBooleanConstant::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_BOOLEAN;
 }
 
@@ -337,7 +337,7 @@ int VisualShaderNodeColorConstant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeColorConstant::PortType VisualShaderNodeColorConstant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorConstant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_4D;
 }
 
@@ -349,7 +349,7 @@ int VisualShaderNodeColorConstant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeColorConstant::PortType VisualShaderNodeColorConstant::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorConstant::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
 }
 
@@ -398,7 +398,7 @@ int VisualShaderNodeVec2Constant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeVec2Constant::PortType VisualShaderNodeVec2Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec2Constant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_2D;
 }
 
@@ -410,7 +410,7 @@ int VisualShaderNodeVec2Constant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeVec2Constant::PortType VisualShaderNodeVec2Constant::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec2Constant::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
 }
 
@@ -457,7 +457,7 @@ int VisualShaderNodeVec3Constant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeVec3Constant::PortType VisualShaderNodeVec3Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec3Constant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_3D;
 }
 
@@ -469,7 +469,7 @@ int VisualShaderNodeVec3Constant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeVec3Constant::PortType VisualShaderNodeVec3Constant::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec3Constant::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
 }
 
@@ -517,7 +517,7 @@ int VisualShaderNodeVec4Constant::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeVec4Constant::PortType VisualShaderNodeVec4Constant::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec4Constant::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_4D;
 }
 
@@ -529,7 +529,7 @@ int VisualShaderNodeVec4Constant::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeVec4Constant::PortType VisualShaderNodeVec4Constant::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVec4Constant::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_4D : PORT_TYPE_SCALAR;
 }
 
@@ -585,7 +585,7 @@ int VisualShaderNodeFloatOp::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeFloatOp::PortType VisualShaderNodeFloatOp::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatOp::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -597,7 +597,7 @@ int VisualShaderNodeFloatOp::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeFloatOp::PortType VisualShaderNodeFloatOp::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatOp::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -684,7 +684,7 @@ int VisualShaderNodeIntOp::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeIntOp::PortType VisualShaderNodeIntOp::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntOp::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -696,7 +696,7 @@ int VisualShaderNodeIntOp::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIntOp::PortType VisualShaderNodeIntOp::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntOp::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -790,7 +790,7 @@ int VisualShaderNodeUIntOp::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeUIntOp::PortType VisualShaderNodeUIntOp::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntOp::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -802,7 +802,7 @@ int VisualShaderNodeUIntOp::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUIntOp::PortType VisualShaderNodeUIntOp::get_output_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntOp::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -1066,7 +1066,7 @@ int VisualShaderNodeColorOp::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeColorOp::PortType VisualShaderNodeColorOp::get_input_port_type([[maybe_unused]] const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorOp::get_input_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_3D;
 }
 
@@ -1078,7 +1078,7 @@ int VisualShaderNodeColorOp::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeColorOp::PortType VisualShaderNodeColorOp::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorOp::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
 }
 
@@ -1225,7 +1225,7 @@ int VisualShaderNodeFloatFunc::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeFloatFunc::PortType VisualShaderNodeFloatFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatFunc::get_input_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -1237,7 +1237,7 @@ int VisualShaderNodeFloatFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeFloatFunc::PortType VisualShaderNodeFloatFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeFloatFunc::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -1390,7 +1390,7 @@ int VisualShaderNodeIntFunc::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIntFunc::PortType VisualShaderNodeIntFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntFunc::get_input_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -1402,7 +1402,7 @@ int VisualShaderNodeIntFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIntFunc::PortType VisualShaderNodeIntFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIntFunc::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR_INT;
 }
 
@@ -1470,7 +1470,7 @@ int VisualShaderNodeUIntFunc::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUIntFunc::PortType VisualShaderNodeUIntFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntFunc::get_input_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -1482,7 +1482,7 @@ int VisualShaderNodeUIntFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUIntFunc::PortType VisualShaderNodeUIntFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUIntFunc::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR_UINT;
 }
 
@@ -1767,7 +1767,7 @@ int VisualShaderNodeColorFunc::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeColorFunc::PortType VisualShaderNodeColorFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorFunc::get_input_port_type(const int& port) const {
 	return PORT_TYPE_VECTOR_3D;
 }
 
@@ -1779,7 +1779,7 @@ int VisualShaderNodeColorFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeColorFunc::PortType VisualShaderNodeColorFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeColorFunc::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
 }
 
@@ -1874,7 +1874,7 @@ int VisualShaderNodeUVFunc::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeUVFunc::PortType VisualShaderNodeUVFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUVFunc::get_input_port_type(const int& port) const {
 	switch (port) {
 		case 0:
 			return PORT_TYPE_VECTOR_2D; // uv
@@ -1922,7 +1922,7 @@ int VisualShaderNodeUVFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUVFunc::PortType VisualShaderNodeUVFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUVFunc::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
 }
 
@@ -2014,7 +2014,7 @@ int VisualShaderNodeUVPolarCoord::get_input_port_count() const {
 	return 4;
 }
 
-VisualShaderNodeUVPolarCoord::PortType VisualShaderNodeUVPolarCoord::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUVPolarCoord::get_input_port_type(const int& port) const {
 	switch (port) {
 		case 0:
 			return PORT_TYPE_VECTOR_2D; // uv
@@ -2058,7 +2058,7 @@ int VisualShaderNodeUVPolarCoord::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeUVPolarCoord::PortType VisualShaderNodeUVPolarCoord::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeUVPolarCoord::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
 }
 
@@ -2107,7 +2107,7 @@ int VisualShaderNodeDotProduct::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeDotProduct::PortType VisualShaderNodeDotProduct::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDotProduct::get_input_port_type(const int& port) const {
 	return PORT_TYPE_VECTOR_3D;
 }
 
@@ -2119,7 +2119,7 @@ int VisualShaderNodeDotProduct::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeDotProduct::PortType VisualShaderNodeDotProduct::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDotProduct::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -2155,7 +2155,7 @@ int VisualShaderNodeVectorLen::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeVectorLen::PortType VisualShaderNodeVectorLen::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorLen::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -2212,7 +2212,7 @@ int VisualShaderNodeClamp::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeClamp::PortType VisualShaderNodeClamp::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeClamp::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_INT:
 			return PORT_TYPE_SCALAR_INT;
@@ -2245,7 +2245,7 @@ int VisualShaderNodeClamp::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeClamp::PortType VisualShaderNodeClamp::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeClamp::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_INT:
 			return PORT_TYPE_SCALAR_INT;
@@ -2341,7 +2341,7 @@ int VisualShaderNodeDerivativeFunc::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeDerivativeFunc::PortType VisualShaderNodeDerivativeFunc::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDerivativeFunc::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -2363,7 +2363,7 @@ int VisualShaderNodeDerivativeFunc::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeDerivativeFunc::PortType VisualShaderNodeDerivativeFunc::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDerivativeFunc::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
@@ -2606,7 +2606,7 @@ int VisualShaderNodeStep::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeStep::PortType VisualShaderNodeStep::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeStep::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -2653,7 +2653,7 @@ int VisualShaderNodeStep::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeStep::PortType VisualShaderNodeStep::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeStep::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 		case OP_TYPE_VECTOR_2D_SCALAR:
@@ -2752,7 +2752,7 @@ int VisualShaderNodeSmoothStep::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeSmoothStep::PortType VisualShaderNodeSmoothStep::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeSmoothStep::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -2801,7 +2801,7 @@ int VisualShaderNodeSmoothStep::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeSmoothStep::PortType VisualShaderNodeSmoothStep::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeSmoothStep::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 		case OP_TYPE_VECTOR_2D_SCALAR:
@@ -2920,7 +2920,7 @@ int VisualShaderNodeVectorDistance::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeVectorDistance::PortType VisualShaderNodeVectorDistance::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorDistance::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -3052,7 +3052,7 @@ int VisualShaderNodeMix::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeMix::PortType VisualShaderNodeMix::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeMix::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -3095,7 +3095,7 @@ int VisualShaderNodeMix::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeMix::PortType VisualShaderNodeMix::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeMix::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 		case OP_TYPE_VECTOR_2D_SCALAR:
@@ -3211,7 +3211,7 @@ int VisualShaderNodeVectorCompose::get_input_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeVectorCompose::PortType VisualShaderNodeVectorCompose::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorCompose::get_input_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -3349,7 +3349,7 @@ int VisualShaderNodeVectorDecompose::get_output_port_count() const {
 	return 0;
 }
 
-VisualShaderNodeVectorDecompose::PortType VisualShaderNodeVectorDecompose::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeVectorDecompose::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -3465,7 +3465,7 @@ int VisualShaderNodeIf::get_input_port_count() const {
 	return 6;
 }
 
-VisualShaderNodeIf::PortType VisualShaderNodeIf::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIf::get_input_port_type(const int& port) const {
 	if (port == 0 || port == 1 || port == 2) {
 		return PORT_TYPE_SCALAR;
 	}
@@ -3497,7 +3497,7 @@ int VisualShaderNodeIf::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIf::PortType VisualShaderNodeIf::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIf::get_output_port_type(const int& port) const {
 	return port == 0 ? PORT_TYPE_VECTOR_3D : PORT_TYPE_SCALAR;
 }
 
@@ -3536,7 +3536,7 @@ int VisualShaderNodeSwitch::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeSwitch::PortType VisualShaderNodeSwitch::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeSwitch::get_input_port_type(const int& port) const {
 	if (port == 0) {
 		return PORT_TYPE_BOOLEAN;
 	}
@@ -3581,7 +3581,7 @@ int VisualShaderNodeSwitch::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeSwitch::PortType VisualShaderNodeSwitch::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeSwitch::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_INT:
 			return PORT_TYPE_SCALAR_INT;
@@ -3701,7 +3701,7 @@ int VisualShaderNodeIs::get_input_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIs::PortType VisualShaderNodeIs::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIs::get_input_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -3713,7 +3713,7 @@ int VisualShaderNodeIs::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeIs::PortType VisualShaderNodeIs::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeIs::get_output_port_type(const int& port) const {
 	return PORT_TYPE_BOOLEAN;
 }
 
@@ -3791,7 +3791,7 @@ int VisualShaderNodeCompare::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeCompare::PortType VisualShaderNodeCompare::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeCompare::get_input_port_type(const int& port) const {
 	switch (comparison_type) {
 		case CMP_TYPE_SCALAR:
 			return PORT_TYPE_SCALAR;
@@ -3829,7 +3829,7 @@ int VisualShaderNodeCompare::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeCompare::PortType VisualShaderNodeCompare::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeCompare::get_output_port_type(const int& port) const {
 	return PORT_TYPE_BOOLEAN;
 }
 
@@ -4164,7 +4164,7 @@ int VisualShaderNodeMultiplyAdd::get_input_port_count() const {
 	return 3;
 }
 
-VisualShaderNodeMultiplyAdd::PortType VisualShaderNodeMultiplyAdd::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeMultiplyAdd::get_input_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return PORT_TYPE_VECTOR_2D;
@@ -4193,7 +4193,7 @@ int VisualShaderNodeMultiplyAdd::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeMultiplyAdd::PortType VisualShaderNodeMultiplyAdd::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeMultiplyAdd::get_output_port_type(const int& port) const {
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D:
 			return port == 0 ? PORT_TYPE_VECTOR_2D : PORT_TYPE_SCALAR;
@@ -4281,7 +4281,7 @@ int VisualShaderNodeDistanceFade::get_input_port_count() const {
 	return 2;
 }
 
-VisualShaderNodeDistanceFade::PortType VisualShaderNodeDistanceFade::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDistanceFade::get_input_port_type(const int& port) const {
 	switch (port) {
 		case 0:
 			return PORT_TYPE_SCALAR;
@@ -4311,7 +4311,7 @@ int VisualShaderNodeDistanceFade::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeDistanceFade::PortType VisualShaderNodeDistanceFade::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeDistanceFade::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 
@@ -4350,7 +4350,7 @@ int VisualShaderNodeRemap::get_input_port_count() const {
 	return 5;
 }
 
-VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_input_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeRemap::get_input_port_type(const int& port) const {
 	switch (port) {
 		case 0:
 			return PORT_TYPE_SCALAR;
@@ -4392,7 +4392,7 @@ int VisualShaderNodeRemap::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeRemap::get_output_port_type(const int& port) const {
 	return PORT_TYPE_SCALAR;
 }
 

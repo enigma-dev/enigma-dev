@@ -120,6 +120,7 @@ class VisualShader {
          *           @c VisualShader::get_valid_node_id() function.
          */
         void add_node(const std::shared_ptr<VisualShaderNode>& node, const TEVector2& position, const int& id);
+        int find_node_id(const std::shared_ptr<VisualShaderNode>& node) const;
         void remove_node(const int& id);
 
         /**

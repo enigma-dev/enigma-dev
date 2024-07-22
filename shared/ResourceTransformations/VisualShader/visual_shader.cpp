@@ -80,6 +80,18 @@ void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const
     g->nodes[id] = n; // Add the node to the graph.
 }
 
+int VisualShader::find_node_id(const std::shared_ptr<VisualShaderNode>& node) const {
+	const VisualShader::Graph *g {&graph};
+
+	for (const std::pair<int, VisualShader::Node>& p : g->nodes) {
+		if (p.second.node == node) {
+			return p.first;
+		}
+	}
+
+	return NODE_ID_INVALID;
+}
+
 void VisualShader::remove_node(const int& id) {
 	/* Start the ids from 1 as 0 is reserved for the Output node. */
     if (id < VisualShader::NODE_ID_OUTPUT+1) {
@@ -1209,7 +1221,27 @@ VisualShaderNode::PortType VisualShaderNodeInput::get_input_type_by_name(const s
 }
 
 std::string VisualShaderNodeInput::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const {
-    std::string code;
+    if (get_output_port_type(0) == PORT_TYPE_SAMPLER) {
+		return "";
+	}
+
+	const VisualShaderNodeInput::Port* p {VisualShaderNodeInput::ports};
+	
+	std::string code;
+
+	int i {0};
+
+	while (p[i].type != VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) {
+		if (p[i].name == input_name) {
+			code = "\t" + output_vars.at(0) + " = " + p[i].string_value + ";\n";
+			break;
+		}
+		i++;
+	}
+
+	if (code.empty()) {
+		code = "\t" + output_vars.at(0) + " = 0.0;\n";
+	}
 
     return code;
 }
@@ -1247,7 +1279,20 @@ std::string VisualShaderNodeOutput::get_caption() const {
 }
 
 std::string VisualShaderNodeOutput::generate_code([[maybe_unused]] const int& id, [[maybe_unused]] const std::vector<std::string>& input_vars, [[maybe_unused]] const std::vector<std::string>& output_vars) const {
-    std::string code;
+    const VisualShaderNodeOutput::Port* p {VisualShaderNodeOutput::ports};
+	
+	std::string code;
+
+	int i {0}, count {0};
+
+	while (p[i].type != VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) {
+		if (!input_vars.at(count).empty()) {
+			std::string s {p[i].string_value};
+			code += "\t" + s + " = " + input_vars.at(count) + ";\n";
+		}
+		count++;
+		i++;
+	}
 
     return code;
 }

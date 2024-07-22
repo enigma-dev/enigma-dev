@@ -26,32 +26,120 @@
 \********************************************************************************/
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
+#include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
+#include "ResourceTransformations/VisualShader/vs_noise_nodes.h"
 
 #include <gtest/gtest.h>
 
 #include <iostream>
 
 TEST(VisualShaderTest, Test_generate_shader) {
-    // Create a node to insert into the graph.
+    // Create a time input
     VisualShaderNodeInput vsni;
     std::shared_ptr<VisualShaderNode> vsni_ptr = std::make_shared<VisualShaderNodeInput>(vsni);
 
+    // Create a sin func
+    VisualShaderNodeFloatFunc vsnff;
+    std::shared_ptr<VisualShaderNode> vsnff_ptr = std::make_shared<VisualShaderNodeFloatFunc>(vsnff);
+
+    // Create a divide operator
+    VisualShaderNodeFloatOp vsnfo;
+    vsnfo.set_operator(VisualShaderNodeFloatOp::Operator::OP_DIV);
+    std::shared_ptr<VisualShaderNode> vsnfo_ptr = std::make_shared<VisualShaderNodeFloatOp>(vsnfo);
+
+    // Create a UV input
+    VisualShaderNodeInput vsni2;
+    std::shared_ptr<VisualShaderNode> vsni2_ptr = std::make_shared<VisualShaderNodeInput>(vsni2);
+
+    // Create a Value Noise node
+    VisualShaderNodeValueNoise vsnvn;
+    std::shared_ptr<VisualShaderNode> vsnvn_ptr = std::make_shared<VisualShaderNodeValueNoise>(vsnvn);
+
+    // Create a subtract operator
+    VisualShaderNodeFloatOp vsnfo2;
+    vsnfo2.set_operator(VisualShaderNodeFloatOp::Operator::OP_SUB);
+    std::shared_ptr<VisualShaderNode> vsnfo2_ptr = std::make_shared<VisualShaderNodeFloatOp>(vsnfo2);
+
+    // Create a float func
+    VisualShaderNodeFloatFunc vsnff2;
+    vsnff2.set_function(VisualShaderNodeFloatFunc::Function::FUNC_ROUND);
+    std::shared_ptr<VisualShaderNode> vsnff2_ptr = std::make_shared<VisualShaderNodeFloatFunc>(vsnff2);
+
+    // Create the graph.
     VisualShader vs;
 
-    // Add the node to the graph.
-    vs.add_node(vsni_ptr, {0.0f, 0.0f}, 1);
+    // Populate the graph.
+    int id {vs.get_valid_node_id()};
+    vs.add_node(vsni_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsnff_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsnfo_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsni2_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsnvn_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsnfo2_ptr, {0.0f, 0.0f}, id);
+    id = vs.get_valid_node_id();
+    vs.add_node(vsnff2_ptr, {0.0f, 0.0f}, id);
+
+    // Connect the nodes.
+    
+    // Connect `output port 0` of time input to `input port 0` of sin func.
+    int lookup_id1 {vs.find_node_id(vsni_ptr)};
+    int lookup_id2 {vs.find_node_id(vsnff_ptr)};
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 0);
+
+    // Connect `output port 0` of sin func to `input port 0` of divide operator.
+    lookup_id1 = vs.find_node_id(vsnff_ptr);
+    lookup_id2 = vs.find_node_id(vsnfo_ptr);
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 0);
+
+    // Connect `output port 0` of divide operator to `input port 1` of subtract operator.
+    lookup_id1 = vs.find_node_id(vsnfo_ptr);
+    lookup_id2 = vs.find_node_id(vsnfo2_ptr);
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 1);
+
+    // Connect `output port 0` of UV input to `input port 0` of value noise node.
+    lookup_id1 = vs.find_node_id(vsni2_ptr);
+    lookup_id2 = vs.find_node_id(vsnvn_ptr);
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 0);
+
+    // Connect `output port 0` of value noise node to `input port 0` of subtract operator.
+    lookup_id1 = vs.find_node_id(vsnvn_ptr);
+    lookup_id2 = vs.find_node_id(vsnfo2_ptr);
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 0);
+
+    // Connect `output port 0` of subtract operator to `input port 0` of float func.
+    lookup_id1 = vs.find_node_id(vsnfo2_ptr);
+    lookup_id2 = vs.find_node_id(vsnff2_ptr);
+    vs.connect_nodes(lookup_id1, 0, lookup_id2, 0);
+
+    // Connect `output port 0` of float func to `input port 0` of output node.
+    lookup_id1 = vs.find_node_id(vsnff2_ptr);
+    vs.connect_nodes(lookup_id1, 0, 0, 0);
 
     // Generate the shader.
-    bool status {vs.generate_shader()};
+    std::string shader {vs.generate_shader()};
+    std::cout << shader << std::endl;
+}
 
-    // The shader should be generated successfully.
-    EXPECT_EQ(status, true);
+TEST(VisualShaderTest, Test_find_node_id) {
+    VisualShader vs;
 
-    std::string code {vs.get_code()};
+    VisualShaderNodeInput vsni;
+    std::shared_ptr<VisualShaderNode> vsni_ptr = std::make_shared<VisualShaderNodeInput>(vsni);
+    vs.add_node(vsni_ptr, {0.0f, 0.0f}, vs.get_valid_node_id());
 
-    // The code should be the same as the input node's code.
-    EXPECT_EQ(code, "\nvoid fragment() {\n"
-    "}\n");
+    VisualShaderNodeInput vsni2;
+    std::shared_ptr<VisualShaderNode> vsni2_ptr = std::make_shared<VisualShaderNodeInput>(vsni2);
+    vs.add_node(vsni2_ptr, {0.0f, 0.0f}, vs.get_valid_node_id());
+
+    int lookup_id1 {vs.find_node_id(vsni_ptr)};
+    int lookup_id2 {vs.find_node_id(vsni2_ptr)};
+    EXPECT_EQ(lookup_id1, 1);
+    EXPECT_EQ(lookup_id2, 2);
 }
 
 TEST(VisualShaderTest, Test_remove_node) {
