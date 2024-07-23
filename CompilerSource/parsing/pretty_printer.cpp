@@ -429,8 +429,12 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   }
 
   print(" ");
-  VISIT_AND_CHECK(node.true_branch);
-  PrintSemiColon(node.true_branch);
+  if (node.true_branch) {
+    VISIT_AND_CHECK(node.true_branch);
+    PrintSemiColon(node.true_branch);
+  } else {
+    print(";");
+  }
   print(" ");
 
   if (node.false_branch) {

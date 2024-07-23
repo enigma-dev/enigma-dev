@@ -2522,3 +2522,25 @@ TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
   ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
   ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
 }
+
+TEST(ParserTest, NULLTrueBranch) {
+  ParserTester test{"if(1);else x++"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::IF);
+
+  auto *if_stmt = block->statements[0]->As<AST::IfStatement>();
+  ASSERT_EQ(if_stmt->condition->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_FALSE(if_stmt->true_branch);
+  ASSERT_TRUE(if_stmt->false_branch);
+
+  auto *unary = if_stmt->false_branch->As<AST::UnaryPostfixExpression>();
+  ASSERT_EQ(unary->operation.type, TT_INCREMENT);
+  ASSERT_EQ(unary->operation.token, "++");
+  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+}

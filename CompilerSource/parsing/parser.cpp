@@ -2123,15 +2123,20 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
     token = lexer->ReadToken();
   }
 
-  auto true_branch = ParseCFStmtBody();
+  AST::PNode true_branch = nullptr;
+  if (token.type != TT_SEMICOLON) {
+    true_branch = ParseCFStmtBody();
+  } else {
+    token = lexer->ReadToken();
+  }
 
+  AST::PNode false_branch = nullptr;
   if (token.type == TT_S_ELSE) {
     token = lexer->ReadToken();
-    auto false_branch = ParseCFStmtBody();
-    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
-  } else {
-    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), nullptr);
+    false_branch = ParseCFStmtBody();
   }
+  
+  return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
 }
 
 std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
