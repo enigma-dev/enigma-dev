@@ -175,10 +175,6 @@ bool VisualShader::can_connect_nodes(const int& from_node, const int& from_port,
 		return false;
 	}
 
-	if (from_port == to_port) {
-		return false;
-	}
-
 	const VisualShader::Graph *g {&graph};
 
 	if (g->nodes.find(from_node) == g->nodes.end()) {
@@ -219,10 +215,6 @@ bool VisualShader::can_connect_nodes(const int& from_node, const int& from_port,
 
 bool VisualShader::connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port) {
 	if (from_node == to_node) {
-		return false;
-	}
-
-	if (from_port == to_port) {
 		return false;
 	}
 	
@@ -315,13 +307,13 @@ bool VisualShader::generate_shader() const {
         from_key.node = c.from_node;
         from_key.port = c.from_port;
 
-        output_connections.at(from_key) = &c;
+        output_connections[from_key] = &c;
 
         ConnectionKey to_key;
         to_key.node = c.to_node;
         to_key.port = c.to_port;
 
-        input_connections.at(to_key) = &c;
+        input_connections[to_key] = &c;
     }
 
     func_code += "\nvoid " + func_name + "() {\n";
@@ -1159,9 +1151,15 @@ bool VisualShaderNode::is_output_port_connected(const int& port) const {
 
 void VisualShaderNode::set_output_port_connected(const int& port, const bool& connected) {
 	if (connected) {
-		VisualShaderNode::connected_output_ports.at(port)++;
+		if (VisualShaderNode::connected_output_ports.find(port) == VisualShaderNode::connected_output_ports.end()) {
+			VisualShaderNode::connected_output_ports[port] = 1; // Initialize to 1.
+		} else {
+			VisualShaderNode::connected_output_ports.at(port)++;
+		}
 	} else {
-		VisualShaderNode::connected_output_ports.at(port)--;
+		if (VisualShaderNode::connected_output_ports.find(port) != VisualShaderNode::connected_output_ports.end()) {
+			VisualShaderNode::connected_output_ports.at(port)--;
+		}
 	}
 }
 
@@ -1173,7 +1171,7 @@ bool VisualShaderNode::is_input_port_connected(const int& port) const {
 }
 
 void VisualShaderNode::set_input_port_connected(const int& port, const bool& connected) {
-	VisualShaderNode::connected_input_ports.at(port) = connected;
+	VisualShaderNode::connected_input_ports[port] = connected;
 }
 
 bool VisualShaderNode::has_output_port_preview(const int& port) const {
@@ -1200,6 +1198,43 @@ std::string VisualShaderNode::get_warning() const {
 VisualShaderNodeInput::VisualShaderNodeInput() : input_name("[None]") {
     // std::cout << "VisualShaderNodeInput::VisualShaderNodeInput()" << std::endl;
 }
+
+/*************************************/
+/* Input Node                        */
+/*************************************/
+
+const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
+
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "fragcoord", "FRAGCOORD" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "UV" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "color", "COLOR" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_uv", "SCREEN_UV" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "texture_pixel_size", "TEXTURE_PIXEL_SIZE" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_pixel_size", "SCREEN_PIXEL_SIZE" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "point_coord", "POINT_COORD" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "TIME" },
+	{ VisualShaderNode::PortType::PORT_TYPE_BOOLEAN, "at_light_pass", "AT_LIGHT_PASS" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SAMPLER, "texture", "TEXTURE" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SAMPLER, "normal_texture", "NORMAL_TEXTURE" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "specular_shininess", "SPECULAR_SHININESS" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SAMPLER, "specular_shininess_texture", "SPECULAR_SHININESS_TEXTURE" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "vertex", "VERTEX" },
+
+	{ VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", "" }, // End of list.
+    
+};
+
+const VisualShaderNodeInput::Port VisualShaderNodeInput::preview_ports[] = {
+
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "fragcoord", "FRAGCOORD" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "UV" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "color", "vec4(1.0)" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_uv", "UV" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "TIME" },
+
+	{ VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", "" }, // End of list.
+
+};
 
 std::string VisualShaderNodeInput::get_caption() const {
     return "Input";
@@ -1270,9 +1305,26 @@ std::string VisualShaderNodeInput::get_output_port_name([[maybe_unused]] const i
     return "";
 }
 
+/*************************************/
+/* Output Node                       */
+/*************************************/
+
 VisualShaderNodeOutput::VisualShaderNodeOutput() {
     // std::cout << "VisualShaderNodeOutput::VisualShaderNodeOutput()" << std::endl;
 }
+
+const VisualShaderNodeOutput::Port VisualShaderNodeOutput::ports[] = {
+	
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Color", "COLOR.rgb" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SCALAR, "Alpha", "COLOR.a" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Normal", "NORMAL" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Normal Map", "NORMAL_MAP" },
+	{ VisualShaderNode::PortType::PORT_TYPE_SCALAR, "Normal Map Depth", "NORMAL_MAP_DEPTH" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Light Vertex", "LIGHT_VERTEX" },
+	{ VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "Shadow Vertex", "SHADOW_VERTEX" },
+
+	{ VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE, "", "" },
+};
 
 std::string VisualShaderNodeOutput::get_caption() const {
     return "Output";

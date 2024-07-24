@@ -280,6 +280,10 @@ class VisualShaderNode {
         std::unordered_map<int, bool> expanded_output_ports;
 };
 
+/*************************************/
+/* Input Node                        */
+/*************************************/
+
 class VisualShaderNodeInput : public VisualShaderNode {
     public:
         VisualShaderNodeInput();
@@ -310,6 +314,10 @@ class VisualShaderNodeInput : public VisualShaderNode {
 
         std::string input_name;
 };
+
+/*************************************/
+/* Output Node                       */
+/*************************************/
 
 class VisualShaderNodeOutput : public VisualShaderNode {
     public:
