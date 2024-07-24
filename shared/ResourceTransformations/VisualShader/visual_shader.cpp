@@ -347,8 +347,14 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 												 const int& node_id,
 												 std::unordered_set<int>& processed) const {
 
-    const VisualShader::Graph *g {&graph};
+	const VisualShader::Graph *g {&graph};
 	const std::shared_ptr<VisualShaderNode> n {g->nodes.at(node_id).node};
+
+	// if (n->is_disabled()) {
+	// 	func_code += "// " + n->get_caption() + ":" + std::to_string(node_id) + "\n";
+	// 	func_code += "\t// Node is disabled and code is not generated.\n";
+	// 	return true;
+	// }
 
     // Check inputs recursively.
     int input_port_count {n->get_input_port_count()};
@@ -365,7 +371,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 
         int from_node {c->from_node};
 
-        if (processed.find(from_node) == processed.end()) {
+        if (processed.find(from_node) != processed.end()) {
             continue;
         }
 
@@ -398,8 +404,210 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
         key.port = i;
 
         // Check if the input is not connected.
-        if (input_connections.find(key) == input_connections.end()) {
-            // Add the default value.
+        if (input_connections.find(key) != input_connections.end()) {
+			const Connection *c {input_connections.at(key)};
+
+			int from_node {c->from_node};
+			int from_port {c->from_port};
+
+			VisualShaderNode::PortType to_port_type {n->get_input_port_type(i)};
+			VisualShaderNode::PortType from_port_type {g->nodes.at(from_node).node->get_output_port_type(from_port)};
+
+			std::string from_var {"var_from_" + std::to_string(from_node) + "_" + std::to_string(from_port)};
+
+			if (to_port_type == VisualShaderNode::PORT_TYPE_SAMPLER && from_port_type == VisualShaderNode::PORT_TYPE_SAMPLER) {
+				// TODO
+			} else if (to_port_type == from_port_type) {
+				input_vars.at(i) = from_var;
+			} else {
+				switch (to_port_type) {
+					case VisualShaderNode::PortType::PORT_TYPE_SCALAR:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = "float(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = "float(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "(" + from_var + " ? 1.0 : 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = from_var + ".x";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
+									input_vars.at(i) = from_var + ".x";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = from_var + ".x";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = "int(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = "int(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "(" + from_var + " ? 1 : 0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = "int(" + from_var + ".x)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
+									input_vars.at(i) = "int(" + from_var + ".x)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = "int(" + from_var + ".x)";
+								} break;
+								default:
+									break;
+							}
+						} 
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = "uint(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = "uint(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "(" + from_var + " ? 1u : 0u)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = "uint(" + from_var + ".x)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
+									input_vars.at(i) = "uint(" + from_var + ".x)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = "uint(" + from_var + ".x)";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = from_var + " > 0.0 ? true : false";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = from_var + " > 0 ? true : false";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = from_var + " > 0u ? true : false";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = "all(bvec2(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
+									input_vars.at(i) = "all(bvec3(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = "all(bvec4(" + from_var + "))";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = "vec2(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = "vec2(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = "vec2(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "vec2(" + from_var + " ? 1.0 : 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D:
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = "vec2(" + from_var + ".xy)";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = "vec3(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = "vec3(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = "vec3(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "vec3(" + from_var + " ? 1.0 : 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = "vec3(" + from_var + ", 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
+									input_vars.at(i) = "vec3(" + from_var + ".xyz)";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D:
+						{
+							switch (from_port_type) {
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
+									input_vars.at(i) = "vec4(" + from_var + ")";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
+									input_vars.at(i) = "vec4(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
+									input_vars.at(i) = "vec4(float(" + from_var + "))";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
+									input_vars.at(i) = "vec4(" + from_var + " ? 1.0 : 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
+									input_vars.at(i) = "vec4(" + from_var + ", 0.0, 0.0)";
+								} break;
+								case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
+									input_vars.at(i) = "vec4(" + from_var + ", 0.0)";
+								} break;
+								default:
+									break;
+							}
+						}
+						break;
+					default:
+						break;
+				} // end of switch (to_port_type)
+			} // end of if (to_port_type == from_port_type)
+        }
+		else {
+			// Add the default value.
 
             TEVariant defval {n->get_input_port_default_value(i)};
 
@@ -454,212 +662,9 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 				} break;
 				default:
 					break;
-			}
-
-            continue;
-        }
-
-        const Connection *c {input_connections.at(key)};
-
-        int from_node {c->from_node};
-        int from_port {c->from_port};
-
-        VisualShaderNode::PortType to_port_type {n->get_input_port_type(i)};
-        VisualShaderNode::PortType from_port_type {g->nodes.at(from_node).node->get_output_port_type(from_port)};
-
-        std::string from_var {"var_from_" + std::to_string(from_node) + "_" + std::to_string(from_port)};
-
-		if (to_port_type == VisualShaderNode::PORT_TYPE_SAMPLER && from_port_type == VisualShaderNode::PORT_TYPE_SAMPLER) {
-			// TODO
-		} else if (to_port_type == from_port_type) {
-            input_vars.at(i) = from_var;
-        } else {
-            switch (to_port_type) {
-                case VisualShaderNode::PortType::PORT_TYPE_SCALAR:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = "float(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = "float(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "(" + from_var + " ? 1.0 : 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = from_var + ".x";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-								input_vars.at(i) = from_var + ".x";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = from_var + ".x";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = "int(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = "int(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "(" + from_var + " ? 1 : 0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = "int(" + from_var + ".x)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-								input_vars.at(i) = "int(" + from_var + ".x)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = "int(" + from_var + ".x)";
-							} break;
-							default:
-								break;
-						}
-                    } 
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = "uint(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = "uint(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "(" + from_var + " ? 1u : 0u)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = "uint(" + from_var + ".x)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-								input_vars.at(i) = "uint(" + from_var + ".x)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = "uint(" + from_var + ".x)";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = from_var + " > 0.0 ? true : false";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = from_var + " > 0 ? true : false";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = from_var + " > 0u ? true : false";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = "all(bvec2(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-								input_vars.at(i) = "all(bvec3(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = "all(bvec4(" + from_var + "))";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = "vec2(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = "vec2(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = "vec2(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "vec2(" + from_var + " ? 1.0 : 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D:
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = "vec2(" + from_var + ".xy)";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = "vec3(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = "vec3(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = "vec3(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "vec3(" + from_var + " ? 1.0 : 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = "vec3(" + from_var + ", 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D: {
-								input_vars.at(i) = "vec3(" + from_var + ".xyz)";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                case VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D:
-                    {
-                        switch (from_port_type) {
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR: {
-								input_vars.at(i) = "vec4(" + from_var + ")";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_INT: {
-								input_vars.at(i) = "vec4(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_SCALAR_UINT: {
-								input_vars.at(i) = "vec4(float(" + from_var + "))";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_BOOLEAN: {
-								input_vars.at(i) = "vec4(" + from_var + " ? 1.0 : 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-								input_vars.at(i) = "vec4(" + from_var + ", 0.0, 0.0)";
-							} break;
-							case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-								input_vars.at(i) = "vec4(" + from_var + ", 0.0)";
-							} break;
-							default:
-								break;
-						}
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+			} // end of switch
+		} // end of else
+    } // end of for (int i = 0; i < input_port_count; i++)
 
     int output_port_count {n->get_output_port_count()};
     int initial_output_count {output_port_count};
@@ -686,7 +691,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 					break;
 			}
 		}
-		expanded_output_ports.at(i) = expanded;
+		expanded_output_ports[i] = expanded;
 	}
 
     std::vector<std::string> output_vars;
@@ -784,7 +789,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 		}
 	}
 
-    node_code = n->generate_code(node_id, input_vars, output_vars);
+    node_code += n->generate_code(node_id, input_vars, output_vars);
 
     if (!node_code.empty()) {
         // Add the node code to the function code buffer.
@@ -922,151 +927,149 @@ bool VisualShaderNode::is_input_port_default(const int& port) const {
 void VisualShaderNode::set_input_port_default_value(const int& port, const TEVariant& value, const TEVariant& prev_value) {
 	TEVariant v {value};
 
-    if (prev_value.index() == 0) { // std::monostate
-		return;
+    if (prev_value.index() != 0) { // std::monostate
+		switch (value.index()) {
+			case 1: { // float
+				switch (prev_value.index()) {
+					case 1: { // float
+						v = prev_value;
+					} break;
+					case 2: { // int
+						v = std::get<float>(prev_value);
+					} break;
+					case 3: { // TEVector2
+						TEVector2 pv {std::get<TEVector2>(prev_value)};
+						v = std::get<0>(pv);
+					} break;
+					case 4: { // TEVector3
+						TEVector3 pv {std::get<TEVector3>(prev_value)};
+						v = std::get<0>(pv);
+					} break;
+					case 5: { // TEQuaternion
+						TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+						v = std::get<0>(pv);
+					} break;
+					default:
+						break;
+				}
+			} break;
+			case 2: { // int
+				switch (prev_value.index()) {
+					case 1: { // float
+						v = std::get<int>(prev_value);
+					} break;
+					case 2: { // int
+						v = prev_value;
+					} break;
+					case 3: { // TEVector2
+						TEVector2 pv {std::get<TEVector2>(prev_value)};
+						v = (int)std::get<0>(pv);
+					} break;
+					case 4: { // TEVector3
+						TEVector3 pv {std::get<TEVector3>(prev_value)};
+						v = (int)std::get<0>(pv);
+					} break;
+					case 5: { // TEQuaternion
+						TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+						v = (int)std::get<0>(pv);
+					} break;
+					default:
+						break;
+				}
+			} break;
+			case 3: { // TEVector2
+				switch (prev_value.index()) {
+					case 1: { // float
+						float pv {std::get<float>(prev_value)};
+						v = TEVector2(pv, pv);
+					} break;
+					case 2: { // int
+						float pv {(float)std::get<int>(prev_value)};
+						v = TEVector2(pv, pv);
+					} break;
+					case 3: { // TEVector2
+						v = prev_value;
+					} break;
+					case 4: { // TEVector3
+						TEVector3 pv {std::get<TEVector3>(prev_value)};
+						v = TEVector2(std::get<0>(pv), 
+									std::get<1>(pv));
+					} break;
+					case 5: { // TEQuaternion
+						TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+						v = TEVector2(std::get<0>(pv), 
+									std::get<1>(pv));
+					} break;
+					default:
+						break;
+				}
+			} break;
+			case 4: { // TEVector3
+				switch (prev_value.index()) {
+					case 1: { // float
+						float pv {std::get<float>(prev_value)};
+						v = TEVector3(pv, pv, pv);
+					} break;
+					case 2: { // int
+						float pv {(float)std::get<int>(prev_value)};
+						v = TEVector3(pv, pv, pv);
+					} break;
+					case 3: { // TEVector2
+						TEVector2 pv {std::get<TEVector2>(prev_value)};
+						v = TEVector3(std::get<0>(pv), 
+									std::get<1>(pv), 
+									std::get<1>(pv));
+					} break;
+					case 4: { // TEVector3
+						v = prev_value;
+					} break;
+					case 5: { // TEQuaternion
+						TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
+						v = TEVector3(std::get<0>(pv), 
+									std::get<1>(pv), 
+									std::get<2>(pv));
+					} break;
+					default:
+						break;
+				}
+			} break;
+			case 5: { // TEQuaternion
+				switch (prev_value.index()) {
+					case 1: { // float
+						float pv {std::get<float>(prev_value)};
+						v = TEQuaternion(pv, pv, pv, pv);
+					} break;
+					case 2: { // int
+						float pv {(float)std::get<int>(prev_value)};
+						v = TEQuaternion(pv, pv, pv, pv);
+					} break;
+					case 3: { // TEVector2
+						TEVector2 pv {std::get<TEVector2>(prev_value)};
+						v = TEQuaternion(std::get<0>(pv), 
+										std::get<1>(pv), 
+										std::get<1>(pv), 
+										std::get<1>(pv));
+					} break;
+					case 4: { // TEVector3
+						TEVector3 pv {std::get<TEVector3>(prev_value)};
+						v = TEQuaternion(std::get<0>(pv), 
+										std::get<1>(pv), 
+										std::get<2>(pv), 
+										std::get<2>(pv));
+					} break;
+					case 5: { // TEQuaternion
+						v = prev_value;
+					} break;
+					default:
+						break;
+				}
+			} break;
+			default:
+				break;
+		}
 	}
 
-	switch (value.index()) {
-		case 1: { // float
-			switch (prev_value.index()) {
-				case 1: { // float
-					v = prev_value;
-				} break;
-				case 2: { // int
-					v = std::get<float>(prev_value);
-				} break;
-				case 3: { // TEVector2
-					TEVector2 pv {std::get<TEVector2>(prev_value)};
-					v = std::get<0>(pv);
-				} break;
-				case 4: { // TEVector3
-					TEVector3 pv {std::get<TEVector3>(prev_value)};
-					v = std::get<0>(pv);
-				} break;
-				case 5: { // TEQuaternion
-					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
-					v = std::get<0>(pv);
-				} break;
-				default:
-					break;
-			}
-		} break;
-		case 2: { // int
-			switch (prev_value.index()) {
-				case 1: { // float
-					v = std::get<int>(prev_value);
-				} break;
-				case 2: { // int
-					v = prev_value;
-				} break;
-				case 3: { // TEVector2
-					TEVector2 pv {std::get<TEVector2>(prev_value)};
-					v = (int)std::get<0>(pv);
-				} break;
-				case 4: { // TEVector3
-					TEVector3 pv {std::get<TEVector3>(prev_value)};
-					v = (int)std::get<0>(pv);
-				} break;
-				case 5: { // TEQuaternion
-					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
-					v = (int)std::get<0>(pv);
-				} break;
-				default:
-					break;
-			}
-		} break;
-		case 3: { // TEVector2
-			switch (prev_value.index()) {
-				case 1: { // float
-					float pv {std::get<float>(prev_value)};
-					v = TEVector2(pv, pv);
-				} break;
-				case 2: { // int
-					float pv {(float)std::get<int>(prev_value)};
-					v = TEVector2(pv, pv);
-				} break;
-				case 3: { // TEVector2
-					v = prev_value;
-				} break;
-				case 4: { // TEVector3
-					TEVector3 pv {std::get<TEVector3>(prev_value)};
-					v = TEVector2(std::get<0>(pv), 
-								  std::get<1>(pv));
-				} break;
-				case 5: { // TEQuaternion
-					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
-					v = TEVector2(std::get<0>(pv), 
-								  std::get<1>(pv));
-				} break;
-				default:
-					break;
-			}
-		} break;
-		case 4: { // TEVector3
-			switch (prev_value.index()) {
-				case 1: { // float
-					float pv {std::get<float>(prev_value)};
-					v = TEVector3(pv, pv, pv);
-				} break;
-				case 2: { // int
-					float pv {(float)std::get<int>(prev_value)};
-					v = TEVector3(pv, pv, pv);
-				} break;
-				case 3: { // TEVector2
-					TEVector2 pv {std::get<TEVector2>(prev_value)};
-					v = TEVector3(std::get<0>(pv), 
-								  std::get<1>(pv), 
-								  std::get<1>(pv));
-				} break;
-				case 4: { // TEVector3
-					v = prev_value;
-				} break;
-				case 5: { // TEQuaternion
-					TEQuaternion pv {std::get<TEQuaternion>(prev_value)};
-					v = TEVector3(std::get<0>(pv), 
-								  std::get<1>(pv), 
-								  std::get<2>(pv));
-				} break;
-				default:
-					break;
-			}
-		} break;
-		case 5: { // TEQuaternion
-			switch (prev_value.index()) {
-				case 1: { // float
-					float pv {std::get<float>(prev_value)};
-					v = TEQuaternion(pv, pv, pv, pv);
-				} break;
-				case 2: { // int
-					float pv {(float)std::get<int>(prev_value)};
-					v = TEQuaternion(pv, pv, pv, pv);
-				} break;
-				case 3: { // TEVector2
-					TEVector2 pv {std::get<TEVector2>(prev_value)};
-					v = TEQuaternion(std::get<0>(pv), 
-					                 std::get<1>(pv), 
-									 std::get<1>(pv), 
-									 std::get<1>(pv));
-				} break;
-				case 4: { // TEVector3
-					TEVector3 pv {std::get<TEVector3>(prev_value)};
-					v = TEQuaternion(std::get<0>(pv), 
-					                 std::get<1>(pv), 
-									 std::get<2>(pv), 
-									 std::get<2>(pv));
-				} break;
-				case 5: { // TEQuaternion
-					v = prev_value;
-				} break;
-				default:
-					break;
-			}
-		} break;
-		default:
-			break;
-	}
-
-	default_input_values.at(port) = value;
+	default_input_values[port] = v;
 }
 
 TEVariant VisualShaderNode::get_input_port_default_value(const int& port) const {
@@ -1195,13 +1198,13 @@ std::string VisualShaderNode::get_warning() const {
 	return std::string();
 }
 
-VisualShaderNodeInput::VisualShaderNodeInput() : input_name("[None]") {
-    // std::cout << "VisualShaderNodeInput::VisualShaderNodeInput()" << std::endl;
-}
-
 /*************************************/
 /* Input Node                        */
 /*************************************/
+
+VisualShaderNodeInput::VisualShaderNodeInput() : input_name("[None]") {
+    // std::cout << "VisualShaderNodeInput::VisualShaderNodeInput()" << std::endl;
+}
 
 const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 
@@ -1303,6 +1306,30 @@ VisualShaderNode::PortType VisualShaderNodeInput::get_output_port_type(const int
 
 std::string VisualShaderNodeInput::get_output_port_name([[maybe_unused]] const int& port) const {
     return "";
+}
+
+void VisualShaderNodeInput::set_input_name(const std::string& name) {
+	PortType prev_type {get_input_type_by_name(input_name)};
+	input_name = name;
+}
+
+std::string VisualShaderNodeInput::get_input_name() const {
+	return input_name;
+}
+
+std::string VisualShaderNodeInput::get_input_real_name() const {
+	const VisualShaderNodeInput::Port* p {VisualShaderNodeInput::ports};
+
+	int i {0};
+
+	while (p[i].type != VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE) {
+		if (p[i].name == input_name) {
+			return p[i].string_value;
+		}
+		i++;
+	}
+
+	return "";
 }
 
 /*************************************/

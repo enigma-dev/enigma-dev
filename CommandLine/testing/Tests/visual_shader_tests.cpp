@@ -36,6 +36,7 @@
 TEST(VisualShaderTest, Test_generate_shader) {
     // Create a time input
     VisualShaderNodeInput vsni;
+    vsni.set_input_name("time");
     std::shared_ptr<VisualShaderNode> vsni_ptr = std::make_shared<VisualShaderNodeInput>(vsni);
 
     // Create a sin func
@@ -49,6 +50,7 @@ TEST(VisualShaderTest, Test_generate_shader) {
 
     // Create a UV input
     VisualShaderNodeInput vsni2;
+    vsni2.set_input_name("uv");
     std::shared_ptr<VisualShaderNode> vsni2_ptr = std::make_shared<VisualShaderNodeInput>(vsni2);
 
     // Create a Value Noise node
@@ -70,18 +72,25 @@ TEST(VisualShaderTest, Test_generate_shader) {
 
     // Populate the graph.
     int id {vs.get_valid_node_id()};
+    EXPECT_EQ(id, 1);
     vs.add_node(vsni_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 2);
     vs.add_node(vsnff_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 3);
     vs.add_node(vsnfo_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 4);
     vs.add_node(vsni2_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 5);
     vs.add_node(vsnvn_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 6);
     vs.add_node(vsnfo2_ptr, {0.0f, 0.0f}, id);
     id = vs.get_valid_node_id();
+    EXPECT_EQ(id, 7);
     vs.add_node(vsnff2_ptr, {0.0f, 0.0f}, id);
 
     // Connect the nodes.
@@ -121,7 +130,11 @@ TEST(VisualShaderTest, Test_generate_shader) {
     vs.connect_nodes(lookup_id1, 0, 0, 0);
 
     // Generate the shader.
-    std::string shader {vs.generate_shader()};
+    bool status {vs.generate_shader()};
+    EXPECT_EQ(status, true);
+
+    // Get the shader.
+    std::string shader {vs.get_code()};
     std::cout << shader << std::endl;
 }
 

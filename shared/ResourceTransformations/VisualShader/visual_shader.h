@@ -298,6 +298,10 @@ class VisualShaderNodeInput : public VisualShaderNode {
         virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
         virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
+        void set_input_name(const std::string& name);
+        std::string get_input_name() const;
+        std::string get_input_real_name() const;
+
         virtual std::string get_caption() const override;
 
         VisualShaderNode::PortType get_input_type_by_name(const std::string& name) const;
