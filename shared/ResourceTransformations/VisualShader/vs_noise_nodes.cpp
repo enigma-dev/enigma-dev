@@ -70,11 +70,11 @@ std::string VisualShaderNodeValueNoise::generate_global(const int& id) const {
     std::string code;
     code += "float noise_random_value(vec2 uv) {\n";
     code += "\treturn fract(sin(dot(uv, vec2(12.9898, 78.233)))*43758.5453);\n";
-    code += "}\n";
+    code += "}\n\n";
 
     code += "float noise_interpolate(float a, float b, float t) {\n";
     code += "\treturn (1.0-t)*a + (t*b);\n";
-    code += "}\n";
+    code += "}\n\n";
 
     code += "float value_noise(vec2 uv) {\n";
     code += "\tvec2 i = floor(uv);\n";
@@ -95,7 +95,7 @@ std::string VisualShaderNodeValueNoise::generate_global(const int& id) const {
     code += "\tfloat topOfGrid = noise_interpolate(r2, r3, f.x);\n";
     code += "\tfloat t = noise_interpolate(bottomOfGrid, topOfGrid, f.y);\n";
     code += "\treturn t;\n";
-    code += "}\n";
+    code += "}\n\n";
 
     code += "void generate_value_noise_float(vec2 uv, float scale, out float out_buffer) {\n";
     code += "\tfloat t = 0.0;\n";
@@ -113,7 +113,7 @@ std::string VisualShaderNodeValueNoise::generate_global(const int& id) const {
     code += "\tt += value_noise(vec2(uv.x*scale/freq, uv.y*scale/freq))*amp;\n";
     code += "\t\n";
     code += "\tout_buffer = t;\n";
-    code += "}\n";
+    code += "}\n\n";
 
     return code;
 }

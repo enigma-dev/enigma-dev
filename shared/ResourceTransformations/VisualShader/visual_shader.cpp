@@ -326,7 +326,7 @@ bool VisualShader::generate_shader() const {
         return false;
     }
 
-    func_code += "}\n";
+    func_code += "}\n\n";
     shader_code += func_code;
 
     std::string generated_code;
