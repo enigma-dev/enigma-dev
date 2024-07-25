@@ -45,6 +45,7 @@ class AST {
     UNARY_PREFIX_EXPRESSION,
     UNARY_POSTFIX_EXPRESSION,
     TERNARY_EXPRESSION,
+    LAMBDA_EXPRESSION,
     SIZEOF, ALIGNOF, CAST,
     NEW, DELETE,
     PARENTHETICAL, ARRAY,
@@ -187,6 +188,17 @@ class AST {
 
     TernaryExpression(PNode condition_, PNode true_expression_, PNode false_expression_):
       condition{std::move(condition_)}, true_expression{std::move(true_expression_)}, false_expression{std::move(false_expression_)} {}
+  };
+
+  // Lambda expression: x => x + 10;
+  struct LambdaExpression : TypedNode<NodeType::LAMBDA_EXPRESSION> {
+    std::vector<PNode> parameters;
+    PNode body;
+
+    BASIC_NODE_ROUTINES(LambdaExpression);
+
+    LambdaExpression(std::vector<PNode> &&parameters_, PNode body_):
+      parameters{std::move(parameters_)}, body{std::move(body_)} {}
   };
 
   // Sizeof expression
@@ -514,6 +526,8 @@ class AST {
     Visitor() {
       if (!of.is_open()) of.open("./CompilerSource/parsing/output.txt");
     }
+    // Visitor(std::ofstream& ofs): of(ofs){
+    // }
 
     void print(std::string code) { of << code; }
     
@@ -552,6 +566,7 @@ class AST {
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
     virtual bool VisitTernaryExpression(TernaryExpression &node);
+    virtual bool VisitLambdaExpression(LambdaExpression &node) { return DefaultVisit(node); }
     virtual bool VisitFullType(FullType &node, bool print_type = true);
     virtual bool VisitSizeofExpression(SizeofExpression &node);
     virtual bool VisitAlignofExpression(AlignofExpression &node);

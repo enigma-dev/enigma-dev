@@ -41,8 +41,16 @@ void AST::WriteCppToStream(std::ofstream &of, int base_indent) const {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
     // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
     //               junkshit.strc, junkshit.strs, base_indent, of);
+    // ErrorCollector herr2;
+    // std::unique_ptr<AST::Node> root = enigma::parsing::Parse(lexer.get(), &herr2);
+    // Visitor visitor(of);
+    // visitor.Visit(root);
     of << std::string(base_indent, ' ') << "}\n";
   } else {
+    // ErrorCollector herr2;
+    // std::unique_ptr<AST::Node> root = enigma::parsing::Parse(lexer.get(), &herr2);
+    // Visitor visitor(of);
+    // visitor.Visit(root);
     // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
     //               junkshit.strc, junkshit.strs, base_indent, of);
   }
@@ -90,6 +98,9 @@ void AST::UnaryPostfixExpression::RecursiveSubVisit(Visitor &visitor) {
 }
 void AST::TernaryExpression::RecursiveSubVisit(Visitor &visitor) {
   RV(visitor, condition, true_expression, false_expression);
+}
+void AST::LambdaExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, parameters, body);
 }
 void AST::SizeofExpression::RecursiveSubVisit(Visitor &visitor) {
   if (std::holds_alternative<PNode>(argument))
@@ -171,6 +182,7 @@ const std::vector<std::string> AST::NodesNames = [](){
     REGISTER(NodeType, UNARY_PREFIX_EXPRESSION);
     REGISTER(NodeType, UNARY_POSTFIX_EXPRESSION);
     REGISTER(NodeType, TERNARY_EXPRESSION);
+    REGISTER(NodeType, LAMBDA_EXPRESSION);
     REGISTER(NodeType, SIZEOF);
     REGISTER(NodeType, ALIGNOF);
     REGISTER(NodeType, CAST);
