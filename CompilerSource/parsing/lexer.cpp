@@ -94,6 +94,7 @@ static TokenTrie token_lookup {
   { "<=",  TT_LESSEQUAL    },
   { "<>",  TT_NOTEQUAL     },
   { "<=>", TT_THREEWAY     },
+  { "=>",  TT_JS_ARROW     },
   { "=",   TT_EQUALS,      },
   { "==",  TT_EQUALTO,     },
   { ">",   TT_GREATER      },

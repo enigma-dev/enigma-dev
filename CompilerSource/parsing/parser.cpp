@@ -1508,6 +1508,11 @@ std::unique_ptr<AST::Node> TryParseOperand() {
       herr->Error(token) << "Expected expression before binary operator `" << token.content << '`';
       token = lexer->ReadToken();
       return nullptr;
+    
+    case TT_JS_ARROW:
+      herr->Error(token) << "Expected parameter list before '=>'";
+      token = lexer->ReadToken();
+      return nullptr;
 
     case TT_QMARK:
       herr->Error(token) << "Expected expression before ternary operator ?";
@@ -1755,6 +1760,9 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
     while (token.type != TT_ENDOFCODE) {
+      if(token.type == TT_JS_ARROW){
+        // ParseLambdaExpression
+      }
       if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
           break;
@@ -1945,7 +1953,6 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       herr->ReportError(token, "Internal error: Bad token");
       token = lexer->ReadToken();
       return nullptr;
-
     case TT_COMMA:
       herr->ReportError(token, "Expected expression before comma");
       token = lexer->ReadToken();
@@ -2054,6 +2061,11 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       return nullptr;
     case TT_S_ELSE:
       herr->ReportError(token, "`else` statement not paired with an `if`");
+      token = lexer->ReadToken();
+      return nullptr;
+
+    case TT_JS_ARROW:
+      herr->ReportError(token, "`=>` not paired with a lambda expression");
       token = lexer->ReadToken();
       return nullptr;
 

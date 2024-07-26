@@ -180,3 +180,17 @@ TEST(LexerTest, VariadicMacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(LexerTest, LambdaExpressions) {
+  LexerTester lex("y = x => x+10;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_EQUALS);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_JS_ARROW);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_PLUS);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+ 
