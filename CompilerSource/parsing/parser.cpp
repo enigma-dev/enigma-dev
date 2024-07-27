@@ -1746,6 +1746,12 @@ static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                 prec.associativity == Associativity::RTL);
 }
 
+std::unique_ptr<AST::Node> TryParseLambdaExpression(std::unique_ptr<AST::Node> operand) {
+  token = lexer->ReadToken();
+  auto body = ParseStatementOrBlock();
+  return std::make_unique<AST::LambdaExpression>(std::move(operand), std::move(body));
+}
+
 std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr) {
   if (operand == nullptr) {
     operand = TryParseOperand();
@@ -1760,10 +1766,9 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
     while (token.type != TT_ENDOFCODE) {
-      if(token.type == TT_JS_ARROW){
-        // ParseLambdaExpression
-      }
-      if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
+      if(token.type == TT_JS_ARROW){ // TODO: case x,y => { z= x+y;}
+        operand = TryParseLambdaExpression(std::move(operand));
+      } else if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
           break;
         }
