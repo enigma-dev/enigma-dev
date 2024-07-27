@@ -2480,20 +2480,8 @@ TEST(ParserTest, QualifiedExpressions_2) {
   ASSERT_EQ(if_stmt->false_branch, nullptr);
 
   auto *unary = if_stmt->condition->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
-  ASSERT_EQ(unary->operation.token, "--");
-  ASSERT_EQ(unary->operand->type, AST::NodeType::BINARY_EXPRESSION);
-
-  auto *bin = unary->operand->As<AST::BinaryExpression>();
-  ASSERT_EQ(bin->operation.type, TT_ARROW);
-  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(bin->right->type, AST::NodeType::IDENTIFIER);
-
-  auto *left = bin->left->As<AST::IdentifierAccess>();
-  ASSERT_EQ(left->name.content, "a");
-
-  auto *right = bin->right->As<AST::IdentifierAccess>();
-  ASSERT_EQ(right->name.content, "b");
+  ASSERT_THAT(unary,
+              IsUnaryPostfixOperator(TT_DECREMENT, IsBinaryOperation(TT_ARROW, IsIdentifier("a"), IsIdentifier("b"))));
 
   auto *iden = if_stmt->true_branch->As<AST::IdentifierAccess>();
   ASSERT_EQ(iden->name.content, "l");
@@ -2517,10 +2505,7 @@ TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
   ASSERT_EQ(std::get<std::string>(call->arguments[0]->As<AST::Literal>()->value.value), "12");
 
   auto *unary = block->statements[1]->As<AST::UnaryPrefixExpression>();
-  ASSERT_EQ(unary->operation.type, TT_DECREMENT);
-  ASSERT_EQ(unary->operation.token, "--");
-  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+  ASSERT_THAT(unary, IsUnaryPrefixOperator(TT_DECREMENT, IsIdentifier("x")));
 }
 
 TEST(ParserTest, NULLTrueBranch) {
@@ -2539,14 +2524,135 @@ TEST(ParserTest, NULLTrueBranch) {
   ASSERT_TRUE(if_stmt->false_branch);
 
   auto *unary = if_stmt->false_branch->As<AST::UnaryPostfixExpression>();
-  ASSERT_EQ(unary->operation.type, TT_INCREMENT);
-  ASSERT_EQ(unary->operation.token, "++");
-  ASSERT_EQ(unary->operand->type, AST::NodeType::IDENTIFIER);
-  ASSERT_EQ(unary->operand->As<AST::IdentifierAccess>()->name.content, "x");
+  ASSERT_THAT(unary, IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("x")));
 }
 
-TEST(ParserTest, Lambda1) {
+TEST(ParserTest, Lambda_1) {
   ParserTester test{"y = x=> x+10;"};
   auto node = test->ParseCode();
-  // ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = block->statements[0]->As<AST::BinaryExpression>();
+
+  ASSERT_EQ(bin->operation.type, TT_EQUALS);
+  ASSERT_EQ(bin->operation.token, "=");
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::LAMBDA_EXPRESSION);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "y");
+
+  auto *lambda = bin->right->As<AST::LambdaExpression>();
+  ASSERT_EQ(lambda->parameters->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(lambda->body->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *param = lambda->parameters->As<AST::IdentifierAccess>();
+  ASSERT_EQ(param->name.content, "x");
+
+  auto *body = lambda->body->As<AST::BinaryExpression>();
+  ASSERT_THAT(body, IsBinaryOperation(TT_PLUS, IsIdentifier("x"), IsLiteral("10")));
+}
+
+TEST(ParserTest, Lambda_2) {
+  ParserTester test{"y = (x)=> x+10;"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = block->statements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_EQUALS);
+  ASSERT_EQ(bin->operation.token, "=");
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::LAMBDA_EXPRESSION);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "y");
+
+  auto *lambda = bin->right->As<AST::LambdaExpression>();
+  ASSERT_EQ(lambda->parameters->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(lambda->body->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *params = lambda->parameters->As<AST::Parenthetical>();
+  ASSERT_EQ(params->expression->type, AST::NodeType::IDENTIFIER);
+  auto *param = params->expression->As<AST::IdentifierAccess>();
+  ASSERT_EQ(param->name.content, "x");
+
+  auto *body = lambda->body->As<AST::BinaryExpression>();
+  ASSERT_THAT(body, IsBinaryOperation(TT_PLUS, IsIdentifier("x"), IsLiteral("10")));
+}
+
+TEST(ParserTest, Lambda_3) {
+  ParserTester test{"y = ()=> x+10;"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = block->statements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_EQUALS);
+  ASSERT_EQ(bin->operation.token, "=");
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::LAMBDA_EXPRESSION);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "y");
+
+  auto *lambda = bin->right->As<AST::LambdaExpression>();
+  ASSERT_EQ(lambda->parameters->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(lambda->body->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *params = lambda->parameters->As<AST::Parenthetical>();
+  ASSERT_FALSE(params->expression);
+
+  auto *body = lambda->body->As<AST::BinaryExpression>();
+  ASSERT_THAT(body, IsBinaryOperation(TT_PLUS, IsIdentifier("x"), IsLiteral("10")));
+}
+
+TEST(ParserTest, Lambda_4) {
+  ParserTester test{"y = (x,c,z)=> v= c++ + ++x;"};
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *bin = block->statements[0]->As<AST::BinaryExpression>();
+  ASSERT_EQ(bin->operation.type, TT_EQUALS);
+  ASSERT_EQ(bin->operation.token, "=");
+  ASSERT_EQ(bin->left->type, AST::NodeType::IDENTIFIER);
+  ASSERT_EQ(bin->right->type, AST::NodeType::LAMBDA_EXPRESSION);
+
+  auto *left = bin->left->As<AST::IdentifierAccess>();
+  ASSERT_EQ(left->name.content, "y");
+
+  auto *lambda = bin->right->As<AST::LambdaExpression>();
+  ASSERT_EQ(lambda->parameters->type, AST::NodeType::PARENTHETICAL);
+  ASSERT_EQ(lambda->body->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *params = lambda->parameters->As<AST::Parenthetical>();
+  ASSERT_EQ(params->expression->type, AST::NodeType::BINARY_EXPRESSION);
+
+  auto *param = params->expression->As<AST::BinaryExpression>();
+  ASSERT_THAT(param, IsBinaryOperation(TT_COMMA, IsBinaryOperation(TT_COMMA, IsIdentifier("x"), IsIdentifier("c")),
+                                       IsIdentifier("z")));
+
+  auto *body = lambda->body->As<AST::BinaryExpression>();
+  ASSERT_THAT(body,
+              IsBinaryOperation(TT_EQUALS, IsIdentifier("v"),
+                                IsBinaryOperation(TT_PLUS, IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("c")),
+                                                  IsUnaryPrefixOperator(TT_INCREMENT, IsIdentifier("x")))));
 }

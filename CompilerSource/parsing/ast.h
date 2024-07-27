@@ -192,12 +192,12 @@ class AST {
 
   // Lambda expression: x => x + 10;
   struct LambdaExpression : TypedNode<NodeType::LAMBDA_EXPRESSION> {
-    std::vector<PNode> parameters;
+    PNode parameters;
     PNode body;
 
     BASIC_NODE_ROUTINES(LambdaExpression);
 
-    LambdaExpression(std::vector<PNode> &&parameters_, PNode body_):
+    LambdaExpression(PNode parameters_, PNode body_):
       parameters{std::move(parameters_)}, body{std::move(body_)} {}
   };
 
