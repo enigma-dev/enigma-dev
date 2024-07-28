@@ -83,7 +83,7 @@ void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const
 int VisualShader::find_node_id(const std::shared_ptr<VisualShaderNode>& node) const {
 	const VisualShader::Graph *g {&graph};
 
-	for (const std::pair<int, VisualShader::Node>& p : g->nodes) {
+	for (const std::pair<const int, VisualShader::Node>& p : g->nodes) {
 		if (p.second.node == node) {
 			return p.first;
 		}
@@ -292,8 +292,8 @@ bool VisualShader::generate_shader() const {
 
 	std::string global_code;
 	std::string global_code_per_node;
-	std::string global_code_per_func;
     std::string shader_code;
+	std::unordered_set<std::string> global_processed;
 
     // Store the connections for faster generation.
     std::map<ConnectionKey, const Connection *> input_connections;
@@ -319,7 +319,7 @@ bool VisualShader::generate_shader() const {
     func_code += "\nvoid " + func_name + "() {\n";
 
     // Generate the code for each node.
-    bool status {generate_shader_for_each_node(global_code, global_code_per_node, global_code_per_func, func_code, input_connections, output_connections, VisualShader::NODE_ID_OUTPUT, processed)};
+    bool status {generate_shader_for_each_node(global_code, global_code_per_node, func_code, input_connections, output_connections, VisualShader::NODE_ID_OUTPUT, processed, global_processed)};
 
     if (!status) {
         std::cout << "Failed to generate shader for node " << VisualShader::NODE_ID_OUTPUT << std::endl;
@@ -329,7 +329,8 @@ bool VisualShader::generate_shader() const {
     func_code += "}\n\n";
     shader_code += func_code;
 
-    std::string generated_code;
+    std::string generated_code {global_code};
+	generated_code += global_code_per_node;
 
     generated_code += shader_code;
 
@@ -340,12 +341,12 @@ bool VisualShader::generate_shader() const {
 
 bool VisualShader::generate_shader_for_each_node(std::string& global_code,
 												 std::string& global_code_per_node,
-												 std::string& global_code_per_func,
 												 std::string& func_code, 
 												 const std::map<ConnectionKey, const Connection *>& input_connections,
 												 const std::map<ConnectionKey, const Connection *>& output_connections,
 												 const int& node_id,
-												 std::unordered_set<int>& processed) const {
+												 std::unordered_set<int>& processed,
+												 std::unordered_set<std::string>& global_processed) const {
 
 	const VisualShader::Graph *g {&graph};
 	const std::shared_ptr<VisualShaderNode> n {g->nodes.at(node_id).node};
@@ -375,7 +376,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
             continue;
         }
 
-        bool status {generate_shader_for_each_node(global_code, global_code_per_node, global_code_per_func, func_code, input_connections, output_connections, from_node, processed)};
+        bool status {generate_shader_for_each_node(global_code, global_code_per_node, func_code, input_connections, output_connections, from_node, processed, global_processed)};
         if (!status) {
             std::cout << "Failed to generate shader for node " << from_node << std::endl;
             return false;
@@ -383,12 +384,16 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code,
     }
 
 	// Generate the global code for the current node.
-	std::shared_ptr<VisualShaderNodeInput> input {std::static_pointer_cast<VisualShaderNodeInput>(n)};
+	std::shared_ptr<VisualShaderNodeInput> input {std::dynamic_pointer_cast<VisualShaderNodeInput>(n)};
 	bool skip_global {input != nullptr};
 
 	if (!skip_global) {
-		global_code_per_node += n->generate_global_per_node(node_id);
-		global_code_per_func += n->generate_global_per_func(node_id);
+		std::string id_name {n->get_name_id()};
+		global_code += n->generate_global(node_id);
+		if (global_processed.find(id_name) == global_processed.end()) {
+			global_code_per_node += n->generate_global_per_node(node_id);
+		}
+		global_processed.insert(id_name);
 	}
 
     // Generate the code for the current node.
@@ -902,6 +907,10 @@ VisualShaderNode::VisualShaderNode() : simple_decl(true) {
 
 bool VisualShaderNode::is_simple_decl() const {
 	return simple_decl;
+}
+
+std::string VisualShaderNode::get_name_id() const {
+	return NAME_ID;
 }
 
 std::string VisualShaderNode::generate_global([[maybe_unused]] const int& id) const {

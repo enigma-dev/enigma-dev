@@ -678,7 +678,6 @@ class VisualShaderNodeUIntFunc : public VisualShaderNode {
 			FUNC_ENUM_SIZE,
 		};
 
-
 		VisualShaderNodeUIntFunc();
 		
 		virtual std::string get_caption() const override;

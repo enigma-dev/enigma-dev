@@ -36,6 +36,8 @@
 
 class VisualShaderNodeValueNoise : public VisualShaderNode {
 	public:
+		static constexpr const char* ID = "node_value_noise";
+
 		VisualShaderNodeValueNoise();
 
 		virtual std::string get_caption() const override;

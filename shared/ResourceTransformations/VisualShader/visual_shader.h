@@ -157,12 +157,12 @@ class VisualShader {
 
         bool generate_shader_for_each_node(std::string& global_code,
                                            std::string& global_code_per_node,
-                                           std::string& global_code_per_func,
                                            std::string& func_code, 
                                            const std::map<ConnectionKey, const Connection *>& input_connections,
                                            const std::map<ConnectionKey, const Connection *>& output_connections,
                                            const int& node_id,
-                                           std::unordered_set<int>& processed) const;
+                                           std::unordered_set<int>& processed,
+                                           std::unordered_set<std::string>& global_processed) const;
 
         std::string get_code() const;
     
@@ -224,6 +224,8 @@ class VisualShaderNode {
 
         bool is_simple_decl() const;
 
+        std::string get_name_id() const;
+
         virtual std::string get_caption() const = 0;
 
         virtual std::string generate_global([[maybe_unused]] const int& id) const;
@@ -270,6 +272,8 @@ class VisualShaderNode {
         virtual std::string get_warning() const;
 
     protected:
+        std::string NAME_ID;
+
         bool simple_decl;
 
     private:

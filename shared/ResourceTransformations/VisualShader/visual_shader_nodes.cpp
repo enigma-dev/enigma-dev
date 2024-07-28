@@ -100,7 +100,9 @@ VisualShaderNodeConstant::VisualShaderNodeConstant() {}
 /* Float Constant                    */
 /*************************************/
 
-VisualShaderNodeFloatConstant::VisualShaderNodeFloatConstant() : constant(0.0f) {}
+VisualShaderNodeFloatConstant::VisualShaderNodeFloatConstant() : constant(0.0f) {
+	NAME_ID = "node_float_const";
+}
 
 std::string VisualShaderNodeFloatConstant::get_caption() const {
 	return "FloatConstant";
@@ -159,7 +161,9 @@ std::vector<std::string> VisualShaderNodeFloatConstant::get_editable_properties(
 /* Int Constant                      */
 /*************************************/
 
-VisualShaderNodeIntConstant::VisualShaderNodeIntConstant() : constant(0) {}
+VisualShaderNodeIntConstant::VisualShaderNodeIntConstant() : constant(0) {
+	NAME_ID = "node_int_const";
+}
 
 std::string VisualShaderNodeIntConstant::get_caption() const {
 	return "IntConstant";
@@ -215,7 +219,9 @@ std::vector<std::string> VisualShaderNodeIntConstant::get_editable_properties() 
 /* UInt Constant                     */
 /*************************************/
 
-VisualShaderNodeUIntConstant::VisualShaderNodeUIntConstant() : constant(0) {}
+VisualShaderNodeUIntConstant::VisualShaderNodeUIntConstant() : constant(0) {
+	NAME_ID = "node_uint_const";
+}
 
 std::string VisualShaderNodeUIntConstant::get_caption() const {
 	return "UIntConstant";
@@ -271,7 +277,9 @@ std::vector<std::string> VisualShaderNodeUIntConstant::get_editable_properties()
 /* Boolean Constant                  */
 /*************************************/
 
-VisualShaderNodeBooleanConstant::VisualShaderNodeBooleanConstant() : constant(false) {}
+VisualShaderNodeBooleanConstant::VisualShaderNodeBooleanConstant() : constant(false) {
+	NAME_ID = "node_bool_const";
+}
 
 std::string VisualShaderNodeBooleanConstant::get_caption() const {
 	return "BooleanConstant";
@@ -327,7 +335,9 @@ std::vector<std::string> VisualShaderNodeBooleanConstant::get_editable_propertie
 /* Color Constant                    */
 /*************************************/
 
-VisualShaderNodeColorConstant::VisualShaderNodeColorConstant() : constant({1.0f, 1.0f, 1.0f, 1.0f}) {}
+VisualShaderNodeColorConstant::VisualShaderNodeColorConstant() : constant({1.0f, 1.0f, 1.0f, 1.0f}) {
+	NAME_ID = "node_color_const";
+}
 
 std::string VisualShaderNodeColorConstant::get_caption() const {
 	return "ColorConstant";
@@ -388,7 +398,9 @@ std::vector<std::string> VisualShaderNodeColorConstant::get_editable_properties(
 /* Vector2 Constant                  */
 /*************************************/
 
-VisualShaderNodeVec2Constant::VisualShaderNodeVec2Constant() {}
+VisualShaderNodeVec2Constant::VisualShaderNodeVec2Constant() {
+	NAME_ID = "node_vec2_const";
+}
 
 std::string VisualShaderNodeVec2Constant::get_caption() const {
 	return "Vector2Constant";
@@ -448,7 +460,9 @@ std::vector<std::string> VisualShaderNodeVec2Constant::get_editable_properties()
 /*************************************/
 
 VisualShaderNodeVec3Constant::VisualShaderNodeVec3Constant() {
+	NAME_ID = "node_vec3_const";
 }
+
 std::string VisualShaderNodeVec3Constant::get_caption() const {
 	return "Vector3Constant";
 }
@@ -508,7 +522,9 @@ std::vector<std::string> VisualShaderNodeVec3Constant::get_editable_properties()
 /*************************************/
 
 VisualShaderNodeVec4Constant::VisualShaderNodeVec4Constant() {
+	NAME_ID = "node_vec4_const";
 }
+
 std::string VisualShaderNodeVec4Constant::get_caption() const {
 	return "Vector4Constant";
 }
@@ -573,6 +589,8 @@ std::vector<std::string> VisualShaderNodeVec4Constant::get_editable_properties()
 /*************************************/
 
 VisualShaderNodeFloatOp::VisualShaderNodeFloatOp() : op(VisualShaderNodeFloatOp::Operator::OP_ADD) {
+	NAME_ID = "node_float_op";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
 }
@@ -672,6 +690,8 @@ std::vector<std::string> VisualShaderNodeFloatOp::get_editable_properties() cons
 /*************************************/
 
 VisualShaderNodeIntOp::VisualShaderNodeIntOp() : op(VisualShaderNodeIntOp::Operator::OP_ADD) {
+	NAME_ID = "node_int_op";
+
 	set_input_port_default_value(0, 0);
 	set_input_port_default_value(1, 0);
 }
@@ -778,6 +798,8 @@ std::vector<std::string> VisualShaderNodeIntOp::get_editable_properties() const 
 /*************************************/
 
 VisualShaderNodeUIntOp::VisualShaderNodeUIntOp() : op(VisualShaderNodeUIntOp::Operator::OP_ADD) {
+	NAME_ID = "node_uint_op";
+
 	set_input_port_default_value(0, 0);
 	set_input_port_default_value(1, 0);
 }
@@ -884,6 +906,8 @@ std::vector<std::string> VisualShaderNodeUIntOp::get_editable_properties() const
 /*************************************/
 
 VisualShaderNodeVectorOp::VisualShaderNodeVectorOp() : op(VisualShaderNodeVectorOp::Operator::OP_ADD) {
+	NAME_ID = "node_vector_op";
+
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D: {
 			set_input_port_default_value(0, TEVector2());
@@ -1054,6 +1078,8 @@ std::string VisualShaderNodeVectorOp::get_warning() const {
 /*************************************/
 
 VisualShaderNodeColorOp::VisualShaderNodeColorOp() : op(VisualShaderNodeColorOp::Operator::OP_SCREEN) {
+	NAME_ID = "node_color_op";
+
 	set_input_port_default_value(0, TEVector3());
 	set_input_port_default_value(1, TEVector3());
 }
@@ -1214,6 +1240,8 @@ std::vector<std::string> VisualShaderNodeColorOp::get_editable_properties() cons
 /*************************************/
 
 VisualShaderNodeFloatFunc::VisualShaderNodeFloatFunc() : func(FUNC_SIN) {
+	NAME_ID = "node_float_func";
+
 	set_input_port_default_value(0, 0.0f);
 }
 
@@ -1379,6 +1407,8 @@ std::vector<std::string> VisualShaderNodeFloatFunc::get_editable_properties() co
 /*************************************/
 
 VisualShaderNodeIntFunc::VisualShaderNodeIntFunc() : func(FUNC_SIGN) {
+	NAME_ID = "node_int_func";
+
 	set_input_port_default_value(0, 0);
 }
 
@@ -1459,6 +1489,8 @@ std::vector<std::string> VisualShaderNodeIntFunc::get_editable_properties() cons
 /*************************************/
 
 VisualShaderNodeUIntFunc::VisualShaderNodeUIntFunc() : func(FUNC_NEGATE) {
+	NAME_ID = "node_uint_func";
+
 	set_input_port_default_value(0, 0);
 }
 
@@ -1533,6 +1565,8 @@ std::vector<std::string> VisualShaderNodeUIntFunc::get_editable_properties() con
 /*************************************/
 
 VisualShaderNodeVectorFunc::VisualShaderNodeVectorFunc() : func(FUNC_NORMALIZE) {
+	NAME_ID = "node_vector_func";
+
 	switch (op_type) {
 		case OP_TYPE_VECTOR_2D: {
 			set_input_port_default_value(0, TEVector2());
@@ -1755,6 +1789,8 @@ std::vector<std::string> VisualShaderNodeVectorFunc::get_editable_properties() c
 /*************************************/
 
 VisualShaderNodeColorFunc::VisualShaderNodeColorFunc() : func(FUNC_GRAYSCALE) {
+	NAME_ID = "node_color_func";
+
 	simple_decl = false;
 	set_input_port_default_value(0, TEVector3());
 }
@@ -1862,6 +1898,8 @@ std::vector<std::string> VisualShaderNodeColorFunc::get_editable_properties() co
 /*************************************/
 
 VisualShaderNodeUVFunc::VisualShaderNodeUVFunc() : func(FUNC_PANNING) {
+	NAME_ID = "node_uv_func";
+
 	set_input_port_default_value(1, TEVector2(1.0f, 1.0f)); // Scale
 	set_input_port_default_value(2, TEVector2()); // Offset
 }
@@ -1999,11 +2037,12 @@ std::vector<std::string> VisualShaderNodeUVFunc::get_editable_properties() const
 /*************************************/
 
 VisualShaderNodeUVPolarCoord::VisualShaderNodeUVPolarCoord() {
+	NAME_ID = "node_uv_polar_coord";
+
+	simple_decl = false;
 	set_input_port_default_value(1, TEVector2(0.5f, 0.5f)); // center
 	set_input_port_default_value(2, 1.0f); // zoom
 	set_input_port_default_value(3, 1.0f); // repeat
-
-	simple_decl = false;
 }
 
 std::string VisualShaderNodeUVPolarCoord::get_caption() const {
@@ -2095,6 +2134,8 @@ std::string VisualShaderNodeUVPolarCoord::generate_code(const int& id, const std
 /*************************************/
 
 VisualShaderNodeDotProduct::VisualShaderNodeDotProduct() {
+	NAME_ID = "node_dot_product";
+
 	set_input_port_default_value(0, TEVector3());
 	set_input_port_default_value(1, TEVector3());
 }
@@ -2136,6 +2177,8 @@ std::string VisualShaderNodeDotProduct::generate_code(const int& id, const std::
 /*************************************/
 
 VisualShaderNodeVectorLen::VisualShaderNodeVectorLen() {
+	NAME_ID = "node_vector_len";
+
 	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
 }
 
@@ -2199,6 +2242,8 @@ std::string VisualShaderNodeVectorLen::generate_code(const int& id, const std::v
 /*************************************/
 
 VisualShaderNodeClamp::VisualShaderNodeClamp() : op_type(OP_TYPE_FLOAT) {
+	NAME_ID = "node_clamp";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
 	set_input_port_default_value(2, 1.0f);
@@ -2330,6 +2375,8 @@ std::vector<std::string> VisualShaderNodeClamp::get_editable_properties() const 
 /*************************************/
 
 VisualShaderNodeDerivativeFunc::VisualShaderNodeDerivativeFunc() : op_type(OP_TYPE_SCALAR), func(FUNC_SUM), precision(PRECISION_NONE) {
+	NAME_ID = "node_derivative_func";
+
 	set_input_port_default_value(0, 0.0f);
 }
 
@@ -2517,6 +2564,8 @@ std::vector<std::string> VisualShaderNodeDerivativeFunc::get_editable_properties
 /*************************************/
 
 VisualShaderNodeFaceForward::VisualShaderNodeFaceForward() {
+	NAME_ID = "node_face_forward";
+
 	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
 	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
 	set_input_port_default_value(2, TEVector3(0.0f, 0.0f, 0.0f));
@@ -2594,6 +2643,8 @@ std::string VisualShaderNodeFaceForward::generate_code(const int& id, const std:
 /*************************************/
 
 VisualShaderNodeStep::VisualShaderNodeStep() : op_type(OP_TYPE_SCALAR) {
+	NAME_ID = "node_step";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
 }
@@ -2739,6 +2790,8 @@ std::vector<std::string> VisualShaderNodeStep::get_editable_properties() const {
 /*************************************/
 
 VisualShaderNodeSmoothStep::VisualShaderNodeSmoothStep() : op_type(OP_TYPE_SCALAR) {
+	NAME_ID = "node_smooth_step";
+
 	set_input_port_default_value(0, 0.0f); // edge0
 	set_input_port_default_value(1, 1.0f); // edge1
 	set_input_port_default_value(2, 0.5f); // x
@@ -2894,6 +2947,8 @@ std::vector<std::string> VisualShaderNodeSmoothStep::get_editable_properties() c
 /*************************************/
 
 VisualShaderNodeVectorDistance::VisualShaderNodeVectorDistance() {
+	NAME_ID = "node_vector_distance";
+
 	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f)); // a
 	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f)); // b
 }
@@ -2967,6 +3022,8 @@ std::string VisualShaderNodeVectorDistance::generate_code(const int& id, const s
 /*************************************/
 
 VisualShaderNodeVectorRefract::VisualShaderNodeVectorRefract() {
+	NAME_ID = "node_vector_refract";
+
 	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
 	set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
 	set_input_port_default_value(2, 0.0f);
@@ -3039,6 +3096,8 @@ void VisualShaderNodeVectorRefract::set_op_type(const OpType& op_type) {
 /*************************************/
 
 VisualShaderNodeMix::VisualShaderNodeMix() : op_type(OP_TYPE_SCALAR) {
+	NAME_ID = "node_mix";
+
 	set_input_port_default_value(0, 0.0f); // a
 	set_input_port_default_value(1, 1.0f); // b
 	set_input_port_default_value(2, 0.5f); // weight
@@ -3188,6 +3247,8 @@ std::vector<std::string> VisualShaderNodeMix::get_editable_properties() const {
 /*************************************/
 
 VisualShaderNodeVectorCompose::VisualShaderNodeVectorCompose() {
+	NAME_ID = "node_vector_compose";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
 	set_input_port_default_value(2, 0.0f);
@@ -3320,6 +3381,8 @@ std::string VisualShaderNodeVectorCompose::generate_code(const int& id, const st
 /*************************************/
 
 VisualShaderNodeVectorDecompose::VisualShaderNodeVectorDecompose() {
+	NAME_ID = "node_vector_decompose";
+
 	set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
 }
 
@@ -3448,6 +3511,8 @@ std::string VisualShaderNodeVectorDecompose::generate_code(const int& id, const 
 /*************************************/
 
 VisualShaderNodeIf::VisualShaderNodeIf() {
+	NAME_ID = "node_if";
+
 	simple_decl = false;
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
@@ -3522,6 +3587,8 @@ std::string VisualShaderNodeIf::generate_code(const int& id, const std::vector<s
 /*************************************/
 
 VisualShaderNodeSwitch::VisualShaderNodeSwitch() : op_type(OP_TYPE_FLOAT) {
+	NAME_ID = "node_switch";
+
 	simple_decl = false;
 	set_input_port_default_value(0, false);
 	set_input_port_default_value(1, 1.0f);
@@ -3690,6 +3757,8 @@ std::string VisualShaderNodeSwitch::generate_code(const int& id, const std::vect
 /*************************************/
 
 VisualShaderNodeIs::VisualShaderNodeIs() : func(FUNC_IS_INF) {
+	NAME_ID = "node_is";
+
 	set_input_port_default_value(0, 0.0f);
 }
 
@@ -3764,6 +3833,8 @@ std::vector<std::string> VisualShaderNodeIs::get_editable_properties() const {
 /*************************************/
 
 VisualShaderNodeCompare::VisualShaderNodeCompare() : comparison_type(CMP_TYPE_SCALAR), func(FUNC_EQUAL), condition(COND_ALL) {
+	NAME_ID = "node_compare";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 0.0f);
 	set_input_port_default_value(2, CMP_EPSILON);
@@ -4151,6 +4222,8 @@ std::vector<std::string> VisualShaderNodeCompare::get_editable_properties() cons
 /*************************************/
 
 VisualShaderNodeMultiplyAdd::VisualShaderNodeMultiplyAdd() : op_type(OP_TYPE_SCALAR) {
+	NAME_ID = "node_multiply_add";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 1.0f);
 	set_input_port_default_value(2, 0.0f);
@@ -4269,6 +4342,8 @@ std::vector<std::string> VisualShaderNodeMultiplyAdd::get_editable_properties() 
 /*************************************/
 
 VisualShaderNodeDistanceFade::VisualShaderNodeDistanceFade() {
+	NAME_ID = "node_distance_fade";
+
 	set_input_port_default_value(0, 0.0f);
 	set_input_port_default_value(1, 10.0f);
 }
@@ -4334,12 +4409,13 @@ std::string VisualShaderNodeDistanceFade::generate_code(const int& id, const std
 /*************************************/
 
 VisualShaderNodeRemap::VisualShaderNodeRemap() {
+	NAME_ID = "node_remap";
+
+	simple_decl = false;
 	set_input_port_default_value(1, 0.0f);
 	set_input_port_default_value(2, 1.0f);
 	set_input_port_default_value(3, 0.0f);
 	set_input_port_default_value(4, 1.0f);
-
-	simple_decl = false;
 }
 
 std::string VisualShaderNodeRemap::get_caption() const {
