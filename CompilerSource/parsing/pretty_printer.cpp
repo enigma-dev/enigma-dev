@@ -99,6 +99,22 @@ bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
   return true;
 }
 
+bool AST::Visitor::VisitWithStatement(WithStatement &node) {
+  print("with");
+  if (node.object->type != AST::NodeType::PARENTHETICAL) {
+    print("(");
+  }
+  VISIT_AND_CHECK(node.object);
+  if (node.object->type != AST::NodeType::PARENTHETICAL) {
+    print(")");
+  }
+
+  VISIT_AND_CHECK(node.body);
+  PrintSemiColon(node.body);
+
+  return true;
+}
+
 bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
   VISIT_AND_CHECK(node.left);
 

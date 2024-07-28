@@ -23,7 +23,7 @@ bool compare(std::string code, std::string printed) {
     ind++;
   }
 
-  if (ind != printed.size()) {
+  if (ind != printed.size() && printed[ind] != ' ') {
     return false;
   }
   return true;
@@ -1170,6 +1170,38 @@ TEST(PrinterTest, test58) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&](auto x, auto c, auto z) { v= c++ + ++x; };";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test59) {
+  std::string code = "if (power_up_collected) { with (obj_enemy) { image_blend = c_red; } }";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test60) {
+  std::string code = "if (power_up_collected)  with (obj_enemy)  image_blend = c_red; ";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
 }

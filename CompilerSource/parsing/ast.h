@@ -537,7 +537,7 @@ class AST {
       if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
           node->type != AST::NodeType::CASE && node->type != AST::NodeType::DEFAULT &&
           node->type != AST::NodeType::SWITCH && node->type != AST::NodeType::WHILE &&
-          node->type != AST::NodeType::DO) {
+          node->type != AST::NodeType::DO && node->type != AST::NodeType::WITH) {
         print("; ");
       }
     }
@@ -587,7 +587,7 @@ class AST {
     virtual bool VisitReturnStatement(ReturnStatement &node);
     virtual bool VisitBreakStatement(BreakStatement &node);
     virtual bool VisitContinueStatement(ContinueStatement &node);
-    virtual bool VisitWithStatement(WithStatement &node) { return DefaultVisit(node); }
+    virtual bool VisitWithStatement(WithStatement &node);
     virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
     virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
     virtual bool VisitInitializer(Initializer &node);
