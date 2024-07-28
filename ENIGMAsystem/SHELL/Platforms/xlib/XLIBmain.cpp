@@ -146,6 +146,7 @@ int handleEvents() {
         platform_focus_gained();
         continue;
       case FocusOut:
+        joystick_uninit();
         platform_focus_lost();
         continue;
       case ClientMessage:
