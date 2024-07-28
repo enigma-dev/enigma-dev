@@ -1766,7 +1766,7 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
     while (token.type != TT_ENDOFCODE) {
-      if(token.type == TT_JS_ARROW){ // TODO: case x,y => { z= x+y;}
+      if(token.type == TT_JS_ARROW){
         operand = TryParseLambdaExpression(std::move(operand));
       } else if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {

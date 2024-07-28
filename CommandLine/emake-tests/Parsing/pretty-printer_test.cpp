@@ -1088,3 +1088,88 @@ TEST(PrinterTest, test53) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test54) {
+  std::string code = "y = x=> x+10;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "y = [&] (auto x) {x+10;};";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test55) {
+  std::string code = "y = (x)=> x+10;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "y = [&](auto x) {x+10;};";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test56) {
+  std::string code = "y = ()=> x+10;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "y = [&]() {x+10;};";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test57) {
+  std::string code = "y = (x,c,z)=> v= c++ + ++x;";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "y = [&](auto x, auto c, auto z) { v= c++ + ++x; };";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test58) {
+  std::string code = "y = (x,c,z)=> {v= c++ + ++x;}";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "y = [&](auto x, auto c, auto z) { v= c++ + ++x; };";
+
+  ASSERT_TRUE(compare(code, printed));
+}

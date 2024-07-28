@@ -24,6 +24,7 @@ using namespace enigma::parsing;
   if (!Visit(node)) return false;
 
 bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
+  if (print_type) print("auto ");
   print(std::string(node.name.content));
   return true;
 }
@@ -39,7 +40,9 @@ bool AST::Visitor::VisitLiteral(Literal &node) {
 
 bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
   print("(");
-  VISIT_AND_CHECK(node.expression);
+  if (node.expression) {
+    VISIT_AND_CHECK(node.expression);
+  }
   print(")");
   return true;
 }
@@ -132,6 +135,31 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
   print(" : ");
 
   VISIT_AND_CHECK(node.false_expression);
+  return true;
+}
+
+bool AST::Visitor::VisitLambdaExpression(LambdaExpression &node) {
+  print("[&]");
+
+  if (node.parameters->type == AST::NodeType::IDENTIFIER) {
+    print("(");
+  }
+  print_type = true;
+  VISIT_AND_CHECK(node.parameters);
+  print_type = false;
+  if (node.parameters->type == AST::NodeType::IDENTIFIER) {
+    print(")");
+  }
+
+  if (node.body->type != AST::NodeType::BLOCK) {
+    print("{");
+  }
+  VISIT_AND_CHECK(node.body);
+  PrintSemiColon(node.body);
+  if (node.body->type != AST::NodeType::BLOCK) {
+    print("}");
+  }
+
   return true;
 }
 

@@ -521,10 +521,12 @@ class AST {
 
   class Visitor {
     std::ofstream of;
+    bool print_type;
 
    public:
     Visitor() {
       if (!of.is_open()) of.open("./CompilerSource/parsing/output.txt");
+      print_type = false;
     }
     // Visitor(std::ofstream& ofs): of(ofs){
     // }
@@ -566,7 +568,7 @@ class AST {
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
     virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
     virtual bool VisitTernaryExpression(TernaryExpression &node);
-    virtual bool VisitLambdaExpression(LambdaExpression &node) { return DefaultVisit(node); }
+    virtual bool VisitLambdaExpression(LambdaExpression &node);
     virtual bool VisitFullType(FullType &node, bool print_type = true);
     virtual bool VisitSizeofExpression(SizeofExpression &node);
     virtual bool VisitAlignofExpression(AlignofExpression &node);
