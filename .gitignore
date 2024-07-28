@@ -35,6 +35,11 @@
 /CompilerSource/JDI/test/defines_mingw.txt
 /CompilerSource/stupidity-buffer/obj
 
+/shared/lunasvg/3rdparty/plutovg/Makefile
+/shared/lunasvg/Makefile
+/shared/lunasvg/include/Makefile
+/shared/lunasvg/source/Makefile
+
 .DS_Store
 
 CMakeCache.txt
