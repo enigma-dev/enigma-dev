@@ -36,21 +36,19 @@
 
 class VisualShaderNodeValueNoise : public VisualShaderNode {
 	public:
-		static constexpr const char* ID = "node_value_noise";
-
 		VisualShaderNodeValueNoise();
 
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
         virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-        virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+        virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-        virtual std::string generate_global(const int& id) const override;
+        virtual std::string generate_global([[maybe_unused]] const int& id) const override;
 		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_scale(const float& s);

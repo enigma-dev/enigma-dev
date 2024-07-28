@@ -55,7 +55,7 @@ class VisualShaderNodeVectorBase : public VisualShaderNode {
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
 		virtual std::string get_output_port_name(const int& port) const override = 0;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override = 0;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override = 0;
 
 		virtual void set_op_type(const VisualShaderNodeVectorBase::OpType& op_type);
 		VisualShaderNodeVectorBase::OpType get_op_type() const;
@@ -86,7 +86,7 @@ public:
 	virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override = 0;
 	virtual std::string get_output_port_name(const int& port) const override = 0;
 
-	virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override = 0;
+	virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override = 0;
 
 	inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_INPUT; }
 };
@@ -607,14 +607,14 @@ class VisualShaderNodeFloatFunc : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const VisualShaderNodeFloatFunc::Function& func);
 		VisualShaderNodeFloatFunc::Function get_function() const;
@@ -646,14 +646,14 @@ class VisualShaderNodeIntFunc : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const VisualShaderNodeIntFunc::Function& func);
 		VisualShaderNodeIntFunc::Function get_function() const;
@@ -683,14 +683,14 @@ class VisualShaderNodeUIntFunc : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const VisualShaderNodeUIntFunc::Function& func);
 		VisualShaderNodeUIntFunc::Function get_function() const;
@@ -751,12 +751,12 @@ class VisualShaderNodeVectorFunc : public VisualShaderNodeVectorBase {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
 
@@ -788,14 +788,14 @@ class VisualShaderNodeColorFunc : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const VisualShaderNodeColorFunc::Function& func);
 		VisualShaderNodeColorFunc::Function get_function() const;
@@ -831,11 +831,11 @@ class VisualShaderNodeUVFunc : public VisualShaderNode {
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual bool is_show_prop_names() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const VisualShaderNodeUVFunc::Function& func);
 		VisualShaderNodeUVFunc::Function get_function() const;
@@ -865,9 +865,9 @@ class VisualShaderNodeUVPolarCoord : public VisualShaderNode {
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_TEXTURES; }
 
@@ -884,14 +884,14 @@ class VisualShaderNodeDotProduct : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_VECTOR; }
 
@@ -908,14 +908,14 @@ class VisualShaderNodeVectorLen : public VisualShaderNodeVectorBase {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 };
 
@@ -940,19 +940,19 @@ class VisualShaderNodeClamp : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
 
 		virtual std::vector<std::string> get_editable_properties() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override {
 			switch (op_type) {
@@ -1003,14 +1003,14 @@ class VisualShaderNodeDerivativeFunc : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
@@ -1045,10 +1045,10 @@ class VisualShaderNodeFaceForward : public VisualShaderNodeVectorBase {
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 };
 
@@ -1078,18 +1078,18 @@ class VisualShaderNodeStep : public VisualShaderNode {
 		virtual int get_input_port_count() const override;
 		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
-		virtual int get_default_input_port(const PortType& type) const override;
+		virtual int get_default_input_port([[maybe_unused]] const PortType& type) const override;
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
 
 		virtual std::vector<std::string> get_editable_properties() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override {
 			switch (op_type) {
@@ -1130,18 +1130,18 @@ class VisualShaderNodeSmoothStep : public VisualShaderNode {
 		virtual int get_input_port_count() const override;
 		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
-		virtual int get_default_input_port(const PortType& type) const override;
+		virtual int get_default_input_port([[maybe_unused]] const PortType& type) const override;
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
 
 		virtual std::vector<std::string> get_editable_properties() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override {
 			switch (op_type) {
@@ -1172,11 +1172,11 @@ class VisualShaderNodeVectorDistance : public VisualShaderNodeVectorBase {
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 };
 
@@ -1194,9 +1194,9 @@ class VisualShaderNodeVectorRefract : public VisualShaderNodeVectorBase {
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 		virtual void set_op_type(const OpType& op_type) override;
 
 };
@@ -1228,14 +1228,14 @@ class VisualShaderNodeMix : public VisualShaderNode {
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
 
 		virtual std::vector<std::string> get_editable_properties() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override {
 			switch (op_type) {
@@ -1263,14 +1263,14 @@ class VisualShaderNodeVectorCompose : public VisualShaderNodeVectorBase {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 };
 
@@ -1285,14 +1285,14 @@ class VisualShaderNodeVectorDecompose : public VisualShaderNodeVectorBase {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_output_port_name(const int& port) const override;
 
 		virtual void set_op_type(const OpType& op_type) override;
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 };
 
@@ -1312,9 +1312,9 @@ class VisualShaderNodeIf : public VisualShaderNode {
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_CONDITIONAL; }
 
@@ -1347,14 +1347,14 @@ class VisualShaderNodeSwitch : public VisualShaderNode {
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
 
 		virtual std::vector<std::string> get_editable_properties() const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_CONDITIONAL; }
 
@@ -1379,14 +1379,14 @@ class VisualShaderNodeIs : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-		virtual std::string get_input_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_function(const Function& func);
 		Function get_function() const;
@@ -1437,14 +1437,14 @@ class VisualShaderNodeCompare : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_output_port_name(const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_comparison_type(const ComparisonType& type);
 		ComparisonType get_comparison_type() const;
@@ -1485,14 +1485,14 @@ class VisualShaderNodeMultiplyAdd : public VisualShaderNode {
 		virtual std::string get_caption() const override;
 
 		virtual int get_input_port_count() const override;
-		virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
+		virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
 		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		void set_op_type(const OpType& op_type);
 		OpType get_op_type() const;
@@ -1529,11 +1529,11 @@ class VisualShaderNodeDistanceFade : public VisualShaderNode {
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
-		virtual bool has_output_port_preview(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+		virtual bool has_output_port_preview([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_UTILITY; }
 
@@ -1554,10 +1554,10 @@ class VisualShaderNodeRemap : public VisualShaderNode {
 		virtual std::string get_input_port_name(const int& port) const override;
 
 		virtual int get_output_port_count() const override;
-		virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-		virtual std::string get_output_port_name(const int& port) const override;
+		virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+		virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
 
-		virtual std::string generate_code(const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
+		virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars, const std::vector<std::string>& output_vars) const override;
 
 		inline virtual VisualShaderNode::Category get_category() const override { return VisualShaderNode::Category::CATEGORY_UTILITY; }
 

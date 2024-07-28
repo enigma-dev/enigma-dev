@@ -238,8 +238,8 @@ class VisualShaderNode {
         virtual int get_input_port_count() const = 0;
         virtual VisualShaderNode::PortType get_input_port_type(const int& port) const = 0;
 	    virtual std::string get_input_port_name(const int& port) const = 0;
-        virtual int get_default_input_port(const VisualShaderNode::PortType& type) const;
-        virtual bool is_input_port_default(const int& port) const;
+        virtual int get_default_input_port([[maybe_unused]] const VisualShaderNode::PortType& type) const;
+        virtual bool is_input_port_default([[maybe_unused]] const int& port) const;
 
         virtual void set_input_port_default_value(const int& port, const TEVariant& value, const TEVariant& prev_value = TEVariant());
 	    TEVariant get_input_port_default_value(const int& port) const;
@@ -262,7 +262,7 @@ class VisualShaderNode {
         bool is_input_port_connected(const int& port) const;
         void set_input_port_connected(const int& port, const bool& connected);
 
-        virtual bool has_output_port_preview(const int& port) const;
+        virtual bool has_output_port_preview([[maybe_unused]] const int& port) const;
 
         virtual VisualShaderNode::Category get_category() const;
 

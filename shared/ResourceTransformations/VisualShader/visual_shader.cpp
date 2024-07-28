@@ -925,11 +925,11 @@ std::string VisualShaderNode::generate_global_per_func([[maybe_unused]] const in
 	return std::string();
 }
 
-int VisualShaderNode::get_default_input_port(const VisualShaderNode::PortType& type) const {
+int VisualShaderNode::get_default_input_port([[maybe_unused]] const VisualShaderNode::PortType& type) const {
 	return 0;
 }
 
-bool VisualShaderNode::is_input_port_default(const int& port) const {
+bool VisualShaderNode::is_input_port_default([[maybe_unused]] const int& port) const {
 	return false;
 }
 
@@ -1186,7 +1186,7 @@ void VisualShaderNode::set_input_port_connected(const int& port, const bool& con
 	VisualShaderNode::connected_input_ports[port] = connected;
 }
 
-bool VisualShaderNode::has_output_port_preview(const int& port) const {
+bool VisualShaderNode::has_output_port_preview([[maybe_unused]] const int& port) const {
 	return true;
 }
 
@@ -1318,7 +1318,6 @@ std::string VisualShaderNodeInput::get_output_port_name([[maybe_unused]] const i
 }
 
 void VisualShaderNodeInput::set_input_name(const std::string& name) {
-	PortType prev_type {get_input_type_by_name(input_name)};
 	input_name = name;
 }
 

@@ -35,6 +35,8 @@
 /*************************************/
 
 VisualShaderNodeValueNoise::VisualShaderNodeValueNoise() : scale(100.0f) {
+    NAME_ID = "node_value_noise";
+
 	set_input_port_default_value(0, TEVector2());
 }
 
@@ -50,7 +52,7 @@ VisualShaderNode::PortType VisualShaderNodeValueNoise::get_input_port_type([[may
 	return PORT_TYPE_VECTOR_2D;
 }
 
-std::string VisualShaderNodeValueNoise::get_input_port_name(const int& port) const {
+std::string VisualShaderNodeValueNoise::get_input_port_name([[maybe_unused]] const int& port) const {
 	return "uv";
 }
 
@@ -58,7 +60,7 @@ int VisualShaderNodeValueNoise::get_output_port_count() const {
 	return 1;
 }
 
-VisualShaderNode::PortType VisualShaderNodeValueNoise::get_output_port_type(const int& port) const {
+VisualShaderNode::PortType VisualShaderNodeValueNoise::get_output_port_type([[maybe_unused]] const int& port) const {
 	return PORT_TYPE_VECTOR_4D;
 }
 
@@ -66,7 +68,7 @@ std::string VisualShaderNodeValueNoise::get_output_port_name([[maybe_unused]] co
 	return "noise";
 }
 
-std::string VisualShaderNodeValueNoise::generate_global(const int& id) const {
+std::string VisualShaderNodeValueNoise::generate_global([[maybe_unused]] const int& id) const {
     std::string code;
     code += "float noise_random_value(vec2 uv) {\n";
     code += "\treturn fract(sin(dot(uv, vec2(12.9898, 78.233)))*43758.5453);\n";
