@@ -142,7 +142,7 @@ int handleEvents() {
         continue;
       }
       case FocusIn:
-        //init_joysticks();
+        joystick_init();
         platform_focus_gained();
         continue;
       case FocusOut:
@@ -169,11 +169,11 @@ int handleEvents() {
 
 void initInput() {
   initkeymap();
-  //init_joysticks();
+  joystick_init();
 }
 
 void handleInput() {
-  //handle_joysticks();
+  joystick_update();
   input_push();
 }
 

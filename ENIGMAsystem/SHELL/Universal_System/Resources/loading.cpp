@@ -77,9 +77,7 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
-    #if defined(ENIGMA_PLATFORM_SDL)
     joystick_init();
-    #endif
 
     // Open the exe for resource load
     do { // Allows break
