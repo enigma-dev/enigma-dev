@@ -319,6 +319,61 @@ TokenType Lexer::LookUpOperator(std::string_view op) {
   return tnode.first;
 }
 
+std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
+  std::string str_value;
+  str_value.reserve(lit.length() - 2);
+  if (options.use_escapes) {
+    for (size_t i = 1; i < lit.length() - 1; ++i) {
+      if (lit[i] == '\\') {
+        if (++i >= lit.length()) {
+          herr->Error(Mark(spos, 1)) << "Internal error: lexer stopped parsing string literal early";
+          return lit;
+        }
+        switch (lit[i]) {
+          case '\\':
+            str_value += '\\';
+            break;
+          case 'n':
+            str_value += '\n';
+            break;
+          case 't':
+            str_value += '\t';
+            break;
+          case 'v':
+            str_value += '\v';
+            break;
+          case 'b':
+            str_value += '\b';
+            break;
+          case 'r':
+            str_value += '\r';
+            break;
+          case 'f':
+            str_value += '\f';
+            break;
+          case 'a':
+            str_value += '\a';
+            break;
+          case '?':
+            str_value += '\?';
+            break;
+          default: 
+            herr->Error(Mark(spos, 1)) << "Unkown escape";
+            return lit;
+          
+        }
+      } else {
+        str_value += lit[i];
+      }
+    }
+  } else {
+    for (size_t i = 1; i < lit.length() - 1; ++i) {
+      str_value += lit[i] == '#' ? '\n' : lit[i];
+    }
+  }
+  return str_value;
+}
+
 Token Lexer::ReadRawToken() {
   if (pos >= code.length()) {
     // We need custom logic for this because string_view::substr checks bounds
@@ -369,7 +424,11 @@ Token Lexer::ReadRawToken() {
         }
         if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '"') {
-          return Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          std::string raw_value = code.substr(spos, pos - spos + 1);
+          std::string value = ProcessLiteral(raw_value, spos);
+          Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          token.content = value;
+          return token;
         }
       }
     }
@@ -384,7 +443,11 @@ Token Lexer::ReadRawToken() {
         }
         if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '\'') {
-          return Token(token_type, Mark(spos, ++pos - spos));
+          std::string raw_value = code.substr(spos, pos - spos + 1);
+          std::string value = ProcessLiteral(raw_value, spos);
+          Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          token.content = value;
+          return token;
         }
       }
     }
