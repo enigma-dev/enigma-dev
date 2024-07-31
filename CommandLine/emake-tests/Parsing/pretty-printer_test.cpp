@@ -18,9 +18,6 @@ bool compare(std::string code, std::string printed) {
       continue;
     }
     if (code[i] != printed[ind]) {
-      std::cout << code[i - 1] << code[i] << code[i + 1] << "\n";
-      std::cout << printed[i - 5] << printed[i - 4] << printed[i - 3] << printed[i - 2] << printed[i - 1] << printed[i]
-                << printed[i + 1];
       return false;
     }
     ind++;
