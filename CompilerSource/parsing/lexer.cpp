@@ -309,8 +309,7 @@ size_t Lexer::ComputeLineNumber(size_t lpos) {
 
 CodeSnippet Lexer::Mark(size_t pos, size_t length) {
   ComputeLineNumber(pos);
-  return CodeSnippet{std::string_view{code}.substr(pos, length),
-                     line_number, pos - last_line_position};
+  return CodeSnippet{code.substr(pos, length), line_number, pos - last_line_position};
 }
 
 TokenType Lexer::LookUpOperator(std::string_view op) {
@@ -379,9 +378,7 @@ Token Lexer::ReadRawToken() {
     // We need custom logic for this because string_view::substr checks bounds
     // even for zero-width views.
     ComputeLineNumber(pos);
-    return Token(TT_ENDOFCODE, CodeSnippet{
-                     std::string_view{code.data() + pos, 0},
-                     line_number, pos - last_line_position});
+    return Token(TT_ENDOFCODE, CodeSnippet{std::string{code.data() + pos, 0}, line_number, pos - last_line_position});
   }
 
   if (isspace(code[pos])) {
@@ -445,7 +442,7 @@ Token Lexer::ReadRawToken() {
         if (code[pos] == '\'') {
           std::string raw_value = code.substr(spos, pos - spos + 1);
           std::string value = ProcessLiteral(raw_value, spos);
-          Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          Token token = Token(token_type, Mark(spos, ++pos - spos));
           token.content = value;
           return token;
         }

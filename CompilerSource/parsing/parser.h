@@ -31,7 +31,7 @@ class AstBuilderTestAPI {
  * stacks here. If EDL were to support namespaces, this would have to be changed to a <tt> std::stack<...> </tt> and the
  * namespace or nested scope parser would have to push a new map onto the stack.
  */
-  std::unordered_map<std::string_view, FullType *> declarations;
+  std::unordered_map<std::string, FullType *> declarations;
 
   AstBuilderTestAPI() = default;
 

@@ -95,6 +95,7 @@ class AST {
     /// Hardware representation of supported values.
     typedef std::variant<long double, long long, std::string> HardwareValue;
     HardwareValue value;
+    TokenType type;
 
     /// When processed from a C++-compatible token, this is the original
     /// spelling. Useful for preserving floats like 0.123.
@@ -103,7 +104,7 @@ class AST {
     std::optional<std::string> literal_representation;
 
     // TODO: Make this parse the data correctly
-    ConstValue(const Token &t): value{std::string{t.content}} {}
+    ConstValue(const Token &t): value{std::string{t.content}}, type{t.type} {}
     std::string ToCppLiteral() const { return ""; }
     std::string ToCppLiteral() { return "";}
   };

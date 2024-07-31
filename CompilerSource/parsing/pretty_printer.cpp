@@ -31,10 +31,43 @@ bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
 
 bool AST::Visitor::VisitLiteral(Literal &node) {
   std::string value = std::get<std::string>(node.value.value);
+  if (node.value.type != TT_CHARLIT && node.value.type != TT_STRINGLIT) {
+    print(value);
+    return true;
+  }
 
-  // TODO: Handle escape characters
+  print(node.value.type == TT_CHARLIT ? "'" : "\"");
+  std::string to_print;
+  for (char c : value) {
+    if (c == '\\') {
+      to_print += "\\\\";
+    } else if (c >= ' ' && c <= '~') {
+      to_print += c;
+    } else if (c == '\n') {
+      to_print += "\\n";
+    } else if (c == '\t') {
+      to_print += "\\t";
+    } else if (c == '\v') {
+      to_print += "\\v";
+    } else if (c == '\b') {
+      to_print += "\\b";
+    } else if (c == '\r') {
+      to_print += "\\r";
+    } else if (c == '\f') {
+      to_print += "\\f";
+    } else if (c == '\a') {
+      to_print += "\\a";
+    } else if (c == '\?') {
+      to_print += "\\?";
+    } else {
+      std::ostringstream oss;
+      oss << '\\' << std::oct << static_cast<int>(c);
+      to_print += oss.str();
+    }
+  }
+  print(to_print);
+  print(node.value.type == TT_CHARLIT ? "'" : "\"");
 
-  print(value);
   return true;
 }
 
