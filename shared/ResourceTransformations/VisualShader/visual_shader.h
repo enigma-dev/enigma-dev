@@ -87,7 +87,7 @@ struct TColor {
   bool operator==(const TColor& c) const { return r == c.r && g == c.g && b == c.b && a == c.a; }
 };
 
-using TEVariant = std::variant<std::monostate, float, int, TVector2, TVector3, TVector4, bool>;
+using TVariant = std::variant<std::monostate, float, int, TVector2, TVector3, TVector4, bool>;
 
 class VisualShaderNode;
 
@@ -274,9 +274,9 @@ class VisualShaderNode {
   virtual int get_default_input_port([[maybe_unused]] const VisualShaderNode::PortType& type) const;
   virtual bool is_input_port_default([[maybe_unused]] const int& port) const;
 
-  virtual void set_input_port_default_value(const int& port, const TEVariant& value,
-                                            const TEVariant& prev_value = TEVariant());
-  TEVariant get_input_port_default_value(const int& port) const;
+  virtual void set_input_port_default_value(const int& port, const TVariant& value,
+                                            const TVariant& prev_value = TVariant());
+  TVariant get_input_port_default_value(const int& port) const;
 
   virtual int get_output_port_count() const = 0;
   virtual VisualShaderNode::PortType get_output_port_type(const int& port) const = 0;
@@ -311,7 +311,7 @@ class VisualShaderNode {
   bool simple_decl;
 
  private:
-  std::unordered_map<int, TEVariant> default_input_values;
+  std::unordered_map<int, TVariant> default_input_values;
 
   std::unordered_map<int, bool> connected_input_ports;
   std::unordered_map<int, int> connected_output_ports;

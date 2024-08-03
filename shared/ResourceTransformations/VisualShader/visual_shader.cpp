@@ -607,7 +607,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
     } else {
       // Add the default value.
 
-      TEVariant defval{n->get_input_port_default_value(i)};
+      TVariant defval{n->get_input_port_default_value(i)};
 
       switch (defval.index()) {
         case 1: {  // float
@@ -908,9 +908,9 @@ int VisualShaderNode::get_default_input_port([[maybe_unused]] const VisualShader
 
 bool VisualShaderNode::is_input_port_default([[maybe_unused]] const int& port) const { return false; }
 
-void VisualShaderNode::set_input_port_default_value(const int& port, const TEVariant& value,
-                                                    const TEVariant& prev_value) {
-  TEVariant v{value};
+void VisualShaderNode::set_input_port_default_value(const int& port, const TVariant& value,
+                                                    const TVariant& prev_value) {
+  TVariant v{value};
 
   if (prev_value.index() != 0) {  // std::monostate
     switch (value.index()) {
@@ -1045,9 +1045,9 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TEVar
   default_input_values[port] = v;
 }
 
-TEVariant VisualShaderNode::get_input_port_default_value(const int& port) const {
+TVariant VisualShaderNode::get_input_port_default_value(const int& port) const {
   if (VisualShaderNode::default_input_values.find(port) == VisualShaderNode::default_input_values.end()) {
-    return TEVariant();
+    return TVariant();
   }
 
   return default_input_values.at(port);
