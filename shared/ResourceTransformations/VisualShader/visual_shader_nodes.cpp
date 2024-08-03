@@ -370,12 +370,12 @@ std::string VisualShaderNodeColorConstant::generate_code([[maybe_unused]] const 
                                                          [[maybe_unused]] const std::vector<std::string>& input_vars,
                                                          const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
-  oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
-      << std::get<1>(constant) << ", " << std::get<2>(constant) << ", " << std::get<3>(constant) << ");\n";
+  oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << constant.r << ", "
+      << constant.g << ", " << constant.b << ", " << constant.a << ");\n";
   return oss.str();
 }
 
-void VisualShaderNodeColorConstant::set_constant(const TEColor& c) {
+void VisualShaderNodeColorConstant::set_constant(const TColor& c) {
   if (constant == c) {
     return;
   }
@@ -383,7 +383,7 @@ void VisualShaderNodeColorConstant::set_constant(const TEColor& c) {
   constant = c;
 }
 
-TEColor VisualShaderNodeColorConstant::get_constant() const { return constant; }
+TColor VisualShaderNodeColorConstant::get_constant() const { return constant; }
 
 std::vector<std::string> VisualShaderNodeColorConstant::get_editable_properties() const {
   std::vector<std::string> props;
@@ -431,12 +431,12 @@ std::string VisualShaderNodeVec2Constant::generate_code([[maybe_unused]] const i
                                                         [[maybe_unused]] const std::vector<std::string>& input_vars,
                                                         const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
-  oss << "\t" << output_vars.at(0) << " = vec2(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
-      << std::get<1>(constant) << ");\n";
+  oss << "\t" << output_vars.at(0) << " = vec2(" << std::fixed << std::setprecision(6) << constant.x << ", "
+      << constant.y << ");\n";
   return oss.str();
 }
 
-void VisualShaderNodeVec2Constant::set_constant(const TEVector2& c) {
+void VisualShaderNodeVec2Constant::set_constant(const TVector2& c) {
   if (constant == c) {
     return;
   }
@@ -444,7 +444,7 @@ void VisualShaderNodeVec2Constant::set_constant(const TEVector2& c) {
   constant = c;
 }
 
-TEVector2 VisualShaderNodeVec2Constant::get_constant() const { return constant; }
+TVector2 VisualShaderNodeVec2Constant::get_constant() const { return constant; }
 
 std::vector<std::string> VisualShaderNodeVec2Constant::get_editable_properties() const {
   std::vector<std::string> props;
@@ -492,12 +492,12 @@ std::string VisualShaderNodeVec3Constant::generate_code([[maybe_unused]] const i
                                                         [[maybe_unused]] const std::vector<std::string>& input_vars,
                                                         const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
-  oss << "\t" << output_vars.at(0) << " = vec3(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
-      << std::get<1>(constant) << ", " << std::get<2>(constant) << ");\n";
+  oss << "\t" << output_vars.at(0) << " = vec3(" << std::fixed << std::setprecision(6) << constant.x << ", "
+      << constant.y << ", " << constant.z << ");\n";
   return oss.str();
 }
 
-void VisualShaderNodeVec3Constant::set_constant(const TEVector3& c) {
+void VisualShaderNodeVec3Constant::set_constant(const TVector3& c) {
   if (constant == c) {
     return;
   }
@@ -505,7 +505,7 @@ void VisualShaderNodeVec3Constant::set_constant(const TEVector3& c) {
   constant = c;
 }
 
-TEVector3 VisualShaderNodeVec3Constant::get_constant() const { return constant; }
+TVector3 VisualShaderNodeVec3Constant::get_constant() const { return constant; }
 
 std::vector<std::string> VisualShaderNodeVec3Constant::get_editable_properties() const {
   std::vector<std::string> props;
@@ -553,12 +553,12 @@ std::string VisualShaderNodeVec4Constant::generate_code([[maybe_unused]] const i
                                                         [[maybe_unused]] const std::vector<std::string>& input_vars,
                                                         const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
-  oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << std::get<0>(constant) << ", "
-      << std::get<1>(constant) << ", " << std::get<2>(constant) << ", " << std::get<3>(constant) << ");\n";
+  oss << "\t" << output_vars.at(0) << " = vec4(" << std::fixed << std::setprecision(6) << constant.x << ", "
+      << constant.y << ", " << constant.z << ", " << constant.w << ");\n";
   return oss.str();
 }
 
-void VisualShaderNodeVec4Constant::set_constant(const TEQuaternion& c) {
+void VisualShaderNodeVec4Constant::set_constant(const TVector4& c) {
   if (constant == c) {
     return;
   }
@@ -566,7 +566,7 @@ void VisualShaderNodeVec4Constant::set_constant(const TEQuaternion& c) {
   constant = c;
 }
 
-TEQuaternion VisualShaderNodeVec4Constant::get_constant() const { return constant; }
+TVector4 VisualShaderNodeVec4Constant::get_constant() const { return constant; }
 
 std::vector<std::string> VisualShaderNodeVec4Constant::get_editable_properties() const {
   std::vector<std::string> props;
@@ -910,16 +910,16 @@ VisualShaderNodeVectorOp::VisualShaderNodeVectorOp() : op(VisualShaderNodeVector
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2());
-      set_input_port_default_value(1, TEVector2());
+      set_input_port_default_value(0, TVector2());
+      set_input_port_default_value(1, TVector2());
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3());
-      set_input_port_default_value(1, TEVector3());
+      set_input_port_default_value(0, TVector3());
+      set_input_port_default_value(1, TVector3());
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion());
-      set_input_port_default_value(1, TEQuaternion());
+      set_input_port_default_value(0, TVector4());
+      set_input_port_default_value(1, TVector4());
     } break;
     default:
       break;
@@ -1020,16 +1020,16 @@ void VisualShaderNodeVectorOp::set_op_type(const VisualShaderNodeVectorBase::OpT
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
     } break;
     default:
       break;
@@ -1084,8 +1084,8 @@ std::string VisualShaderNodeVectorOp::get_warning() const {
 VisualShaderNodeColorOp::VisualShaderNodeColorOp() : op(VisualShaderNodeColorOp::Operator::OP_SCREEN) {
   NAME_ID = "node_color_op";
 
-  set_input_port_default_value(0, TEVector3());
-  set_input_port_default_value(1, TEVector3());
+  set_input_port_default_value(0, TVector3());
+  set_input_port_default_value(1, TVector3());
 }
 
 std::string VisualShaderNodeColorOp::get_caption() const { return "ColorOp"; }
@@ -1555,13 +1555,13 @@ VisualShaderNodeVectorFunc::VisualShaderNodeVectorFunc() : func(FUNC_NORMALIZE) 
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2());
+      set_input_port_default_value(0, TVector2());
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3());
+      set_input_port_default_value(0, TVector3());
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion());
+      set_input_port_default_value(0, TVector4());
     } break;
     default:
       break;
@@ -1726,13 +1726,13 @@ void VisualShaderNodeVectorFunc::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
     } break;
     default:
       break;
@@ -1770,7 +1770,7 @@ VisualShaderNodeColorFunc::VisualShaderNodeColorFunc() : func(FUNC_GRAYSCALE) {
   NAME_ID = "node_color_func";
 
   simple_decl = false;
-  set_input_port_default_value(0, TEVector3());
+  set_input_port_default_value(0, TVector3());
 }
 
 std::string VisualShaderNodeColorFunc::get_caption() const { return "ColorFunc"; }
@@ -1882,8 +1882,8 @@ std::vector<std::string> VisualShaderNodeColorFunc::get_editable_properties() co
 VisualShaderNodeUVFunc::VisualShaderNodeUVFunc() : func(FUNC_PANNING) {
   NAME_ID = "node_uv_func";
 
-  set_input_port_default_value(1, TEVector2(1.0f, 1.0f));  // Scale
-  set_input_port_default_value(2, TEVector2());            // Offset
+  set_input_port_default_value(1, TVector2(1.0f, 1.0f));  // Scale
+  set_input_port_default_value(2, TVector2());            // Offset
 }
 
 std::string VisualShaderNodeUVFunc::get_caption() const { return "UVFunc"; }
@@ -1996,11 +1996,11 @@ void VisualShaderNodeUVFunc::set_function(const Function& func) {
 
   switch (func) {
     case FUNC_PANNING: {
-      set_input_port_default_value(2, TEVector2(),
+      set_input_port_default_value(2, TVector2(),
                                    get_input_port_default_value(2));  // offset
     } break;
     case FUNC_SCALING: {
-      set_input_port_default_value(2, TEVector2(0.5f, 0.5f),
+      set_input_port_default_value(2, TVector2(0.5f, 0.5f),
                                    get_input_port_default_value(2));  // pivot
     } break;
     default:
@@ -2026,7 +2026,7 @@ VisualShaderNodeUVPolarCoord::VisualShaderNodeUVPolarCoord() {
   NAME_ID = "node_uv_polar_coord";
 
   simple_decl = false;
-  set_input_port_default_value(1, TEVector2(0.5f, 0.5f));  // center
+  set_input_port_default_value(1, TVector2(0.5f, 0.5f));  // center
   set_input_port_default_value(2, 1.0f);                   // zoom
   set_input_port_default_value(3, 1.0f);                   // repeat
 }
@@ -2129,8 +2129,8 @@ std::string VisualShaderNodeUVPolarCoord::generate_code([[maybe_unused]] const i
 VisualShaderNodeDotProduct::VisualShaderNodeDotProduct() {
   NAME_ID = "node_dot_product";
 
-  set_input_port_default_value(0, TEVector3());
-  set_input_port_default_value(1, TEVector3());
+  set_input_port_default_value(0, TVector3());
+  set_input_port_default_value(1, TVector3());
 }
 
 std::string VisualShaderNodeDotProduct::get_caption() const { return "DotProduct"; }
@@ -2176,7 +2176,7 @@ std::string VisualShaderNodeDotProduct::generate_code([[maybe_unused]] const int
 VisualShaderNodeVectorLen::VisualShaderNodeVectorLen() {
   NAME_ID = "node_vector_len";
 
-  set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
 }
 
 std::string VisualShaderNodeVectorLen::get_caption() const { return "VectorLen"; }
@@ -2205,13 +2205,13 @@ void VisualShaderNodeVectorLen::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
     } break;
     default:
       break;
@@ -2350,19 +2350,19 @@ void VisualShaderNodeClamp::set_op_type(const OpType& op_type) {
       set_input_port_default_value(2, 0, get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_2D:
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector2(), get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_3D:
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector3(), get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_4D:
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector4(), get_input_port_default_value(2));
       break;
     default:
       break;
@@ -2534,13 +2534,13 @@ void VisualShaderNodeDerivativeFunc::set_op_type(const OpType& op_type) {
       set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
     } break;
     default:
       break;
@@ -2596,9 +2596,9 @@ std::vector<std::string> VisualShaderNodeDerivativeFunc::get_editable_properties
 VisualShaderNodeFaceForward::VisualShaderNodeFaceForward() {
   NAME_ID = "node_face_forward";
 
-  set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
-  set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
-  set_input_port_default_value(2, TEVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(1, TVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(2, TVector3(0.0f, 0.0f, 0.0f));
 }
 
 std::string VisualShaderNodeFaceForward::get_caption() const { return "FaceForward"; }
@@ -2635,19 +2635,19 @@ void VisualShaderNodeFaceForward::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector2(), get_input_port_default_value(2));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector3(), get_input_port_default_value(2));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEQuaternion(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector4(), get_input_port_default_value(2));
     } break;
     default:
       break;
@@ -2791,28 +2791,28 @@ void VisualShaderNodeStep::set_op_type(const OpType& op_type) {
       set_input_port_default_value(1, 0.0f, get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_2D_SCALAR: {
       set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_3D_SCALAR: {
       set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_4D_SCALAR: {
       set_input_port_default_value(0, 0.0f, get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
     } break;
     default:
       break;
@@ -2976,11 +2976,11 @@ void VisualShaderNodeSmoothStep::set_op_type(const OpType& op_type) {
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_2D:
-      set_input_port_default_value(0, TEVector2(),
+      set_input_port_default_value(0, TVector2(),
                                    get_input_port_default_value(0));  // edge0
-      set_input_port_default_value(1, TEVector2(),
+      set_input_port_default_value(1, TVector2(),
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEVector2(),
+      set_input_port_default_value(2, TVector2(),
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_2D_SCALAR:
@@ -2988,15 +2988,15 @@ void VisualShaderNodeSmoothStep::set_op_type(const OpType& op_type) {
                                    get_input_port_default_value(0));  // edge0
       set_input_port_default_value(1, 0.0f,
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEVector2(),
+      set_input_port_default_value(2, TVector2(),
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_3D:
-      set_input_port_default_value(0, TEVector3(),
+      set_input_port_default_value(0, TVector3(),
                                    get_input_port_default_value(0));  // edge0
-      set_input_port_default_value(1, TEVector3(),
+      set_input_port_default_value(1, TVector3(),
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEVector3(),
+      set_input_port_default_value(2, TVector3(),
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_3D_SCALAR:
@@ -3004,15 +3004,15 @@ void VisualShaderNodeSmoothStep::set_op_type(const OpType& op_type) {
                                    get_input_port_default_value(0));  // edge0
       set_input_port_default_value(1, 0.0f,
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEVector3(),
+      set_input_port_default_value(2, TVector3(),
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_4D:
-      set_input_port_default_value(0, TEQuaternion(),
+      set_input_port_default_value(0, TVector4(),
                                    get_input_port_default_value(0));  // edge0
-      set_input_port_default_value(1, TEQuaternion(),
+      set_input_port_default_value(1, TVector4(),
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEQuaternion(),
+      set_input_port_default_value(2, TVector4(),
                                    get_input_port_default_value(2));  // x
       break;
     case OP_TYPE_VECTOR_4D_SCALAR:
@@ -3020,7 +3020,7 @@ void VisualShaderNodeSmoothStep::set_op_type(const OpType& op_type) {
                                    get_input_port_default_value(0));  // edge0
       set_input_port_default_value(1, 0.0f,
                                    get_input_port_default_value(1));  // edge1
-      set_input_port_default_value(2, TEQuaternion(),
+      set_input_port_default_value(2, TVector4(),
                                    get_input_port_default_value(2));  // x
       break;
     default:
@@ -3052,8 +3052,8 @@ std::vector<std::string> VisualShaderNodeSmoothStep::get_editable_properties() c
 VisualShaderNodeVectorDistance::VisualShaderNodeVectorDistance() {
   NAME_ID = "node_vector_distance";
 
-  set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));  // a
-  set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));  // b
+  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));  // a
+  set_input_port_default_value(1, TVector3(0.0f, 0.0f, 0.0f));  // b
 }
 
 std::string VisualShaderNodeVectorDistance::get_caption() const { return "Distance"; }
@@ -3091,21 +3091,21 @@ void VisualShaderNodeVectorDistance::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(),
+      set_input_port_default_value(0, TVector2(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector2(),
+      set_input_port_default_value(1, TVector2(),
                                    get_input_port_default_value(1));  // b
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(),
+      set_input_port_default_value(0, TVector3(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector3(),
+      set_input_port_default_value(1, TVector3(),
                                    get_input_port_default_value(1));  // b
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(),
+      set_input_port_default_value(0, TVector4(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEQuaternion(),
+      set_input_port_default_value(1, TVector4(),
                                    get_input_port_default_value(1));  // b
     } break;
     default:
@@ -3128,8 +3128,8 @@ std::string VisualShaderNodeVectorDistance::generate_code([[maybe_unused]] const
 VisualShaderNodeVectorRefract::VisualShaderNodeVectorRefract() {
   NAME_ID = "node_vector_refract";
 
-  set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
-  set_input_port_default_value(1, TEVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(1, TVector3(0.0f, 0.0f, 0.0f));
   set_input_port_default_value(2, 0.0f);
 }
 
@@ -3172,16 +3172,16 @@ void VisualShaderNodeVectorRefract::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
     } break;
     default:
       break;
@@ -3336,49 +3336,49 @@ void VisualShaderNodeMix::set_op_type(const OpType& op_type) {
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(),
+      set_input_port_default_value(0, TVector2(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector2(),
+      set_input_port_default_value(1, TVector2(),
                                    get_input_port_default_value(1));  // b
-      set_input_port_default_value(2, TEVector2(),
+      set_input_port_default_value(2, TVector2(),
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_2D_SCALAR: {
-      set_input_port_default_value(0, TEVector2(),
+      set_input_port_default_value(0, TVector2(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector2(),
+      set_input_port_default_value(1, TVector2(),
                                    get_input_port_default_value(1));  // b
       set_input_port_default_value(2, 0.0f,
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(),
+      set_input_port_default_value(0, TVector3(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector3(),
+      set_input_port_default_value(1, TVector3(),
                                    get_input_port_default_value(1));  // b
-      set_input_port_default_value(2, TEVector3(),
+      set_input_port_default_value(2, TVector3(),
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_3D_SCALAR: {
-      set_input_port_default_value(0, TEVector3(),
+      set_input_port_default_value(0, TVector3(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEVector3(),
+      set_input_port_default_value(1, TVector3(),
                                    get_input_port_default_value(1));  // b
       set_input_port_default_value(2, 0.0f,
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(),
+      set_input_port_default_value(0, TVector4(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEQuaternion(),
+      set_input_port_default_value(1, TVector4(),
                                    get_input_port_default_value(1));  // b
-      set_input_port_default_value(2, TEQuaternion(),
+      set_input_port_default_value(2, TVector4(),
                                    get_input_port_default_value(2));  // weight
     } break;
     case OP_TYPE_VECTOR_4D_SCALAR: {
-      set_input_port_default_value(0, TEQuaternion(),
+      set_input_port_default_value(0, TVector4(),
                                    get_input_port_default_value(0));  // a
-      set_input_port_default_value(1, TEQuaternion(),
+      set_input_port_default_value(1, TVector4(),
                                    get_input_port_default_value(1));  // b
       set_input_port_default_value(2, 0.0f,
                                    get_input_port_default_value(2));  // weight
@@ -3546,7 +3546,7 @@ std::string VisualShaderNodeVectorCompose::generate_code([[maybe_unused]] const 
 VisualShaderNodeVectorDecompose::VisualShaderNodeVectorDecompose() {
   NAME_ID = "node_vector_decompose";
 
-  set_input_port_default_value(0, TEVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
 }
 
 std::string VisualShaderNodeVectorDecompose::get_caption() const { return "VectorDecompose"; }
@@ -3626,13 +3626,13 @@ void VisualShaderNodeVectorDecompose::set_op_type(const OpType& op_type) {
 
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
     } break;
     default:
       break;
@@ -3679,9 +3679,9 @@ VisualShaderNodeIf::VisualShaderNodeIf() {
   set_input_port_default_value(0, 0.0f);
   set_input_port_default_value(1, 0.0f);
   set_input_port_default_value(2, CMP_EPSILON);
-  set_input_port_default_value(3, TEVector3(0.0f, 0.0f, 0.0f));
-  set_input_port_default_value(4, TEVector3(0.0f, 0.0f, 0.0f));
-  set_input_port_default_value(5, TEVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(3, TVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(4, TVector3(0.0f, 0.0f, 0.0f));
+  set_input_port_default_value(5, TVector3(0.0f, 0.0f, 0.0f));
 }
 
 std::string VisualShaderNodeIf::get_caption() const { return "If"; }
@@ -3886,16 +3886,16 @@ void VisualShaderNodeSwitch::set_op_type(const OpType& op_type) {
       set_input_port_default_value(2, 0, get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_2D:
-      set_input_port_default_value(1, TEVector2(1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector2(0.0f, 0.0f), get_input_port_default_value(2));
+      set_input_port_default_value(1, TVector2(1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector2(0.0f, 0.0f), get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_3D:
-      set_input_port_default_value(1, TEVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector3(0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
+      set_input_port_default_value(1, TVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector3(0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
       break;
     case OP_TYPE_VECTOR_4D:
-      set_input_port_default_value(1, TEQuaternion(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEQuaternion(0.0f, 0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
+      set_input_port_default_value(1, TVector4(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector4(0.0f, 0.0f, 0.0f, 0.0f), get_input_port_default_value(2));
       break;
     case OP_TYPE_BOOLEAN:
       set_input_port_default_value(1, true);
@@ -4336,18 +4336,18 @@ void VisualShaderNodeCompare::set_comparison_type(const ComparisonType& type) {
       break;
     case CMP_TYPE_VECTOR_2D:
       simple_decl = false;
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(), get_input_port_default_value(1));
       break;
     case CMP_TYPE_VECTOR_3D:
       simple_decl = false;
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(), get_input_port_default_value(1));
       break;
     case CMP_TYPE_VECTOR_4D:
       simple_decl = false;
-      set_input_port_default_value(0, TEQuaternion(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEQuaternion(), get_input_port_default_value(1));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(), get_input_port_default_value(1));
       break;
     case CMP_TYPE_BOOLEAN:
       simple_decl = true;
@@ -4527,19 +4527,19 @@ void VisualShaderNodeMultiplyAdd::set_op_type(const OpType& op_type) {
       set_input_port_default_value(2, 0.0f, get_input_port_default_value(2));
     } break;
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, TEVector2(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector2(1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector2(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector2(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector2(1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector2(), get_input_port_default_value(2));
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, TEVector3(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector3(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector3(1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector3(), get_input_port_default_value(2));
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, TEVector4(), get_input_port_default_value(0));
-      set_input_port_default_value(1, TEVector4(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
-      set_input_port_default_value(2, TEVector4(), get_input_port_default_value(2));
+      set_input_port_default_value(0, TVector4(), get_input_port_default_value(0));
+      set_input_port_default_value(1, TVector4(1.0f, 1.0f, 1.0f, 1.0f), get_input_port_default_value(1));
+      set_input_port_default_value(2, TVector4(), get_input_port_default_value(2));
     } break;
     default:
       break;

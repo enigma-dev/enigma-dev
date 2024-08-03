@@ -67,7 +67,7 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeBooleanConstant_generate_code) 
 
 TEST(VisualShaderNodesTest, Test_VisualShaderNodeColorConstant_generate_code) {
   VisualShaderNodeColorConstant node;
-  node.set_constant(TEColor(1.0, 2.0, 3.0, 0.0));
+  node.set_constant(TColor(1.0, 2.0, 3.0, 0.0));
   std::string code{node.generate_code(0, {}, {"c"})};
   std::string expected_code{"\tc = vec4(1.000000, 2.000000, 3.000000, 0.000000);\n"};
   EXPECT_EQ(code, expected_code);
@@ -75,7 +75,7 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeColorConstant_generate_code) {
 
 TEST(VisualShaderNodesTest, Test_VisualShaderNodeVec2Constant_generate_code) {
   VisualShaderNodeVec2Constant node;
-  node.set_constant(TEVector2(1.0, 2.0));
+  node.set_constant(TVector2(1.0, 2.0));
   std::string code{node.generate_code(0, {}, {"c"})};
   std::string expected_code{"\tc = vec2(1.000000, 2.000000);\n"};
   EXPECT_EQ(code, expected_code);
@@ -83,7 +83,7 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeVec2Constant_generate_code) {
 
 TEST(VisualShaderNodesTest, Test_VisualShaderNodeVec3Constant_generate_code) {
   VisualShaderNodeVec3Constant node;
-  node.set_constant(TEVector3(1.0, 2.0, 3.0));
+  node.set_constant(TVector3(1.0, 2.0, 3.0));
   std::string code{node.generate_code(0, {}, {"c"})};
   std::string expected_code{"\tc = vec3(1.000000, 2.000000, 3.000000);\n"};
   EXPECT_EQ(code, expected_code);
@@ -91,7 +91,7 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeVec3Constant_generate_code) {
 
 TEST(VisualShaderNodesTest, Test_VisualShaderNodeVec4Constant_generate_code) {
   VisualShaderNodeVec4Constant node;
-  node.set_constant(TEQuaternion(1.0, 2.0, 3.0, 4.0));
+  node.set_constant(TVector4(1.0, 2.0, 3.0, 4.0));
   std::string code{node.generate_code(0, {}, {"c"})};
   std::string expected_code{"\tc = vec4(1.000000, 2.000000, 3.000000, 4.000000);\n"};
   EXPECT_EQ(code, expected_code);

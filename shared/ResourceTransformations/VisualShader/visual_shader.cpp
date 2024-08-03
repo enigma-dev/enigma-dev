@@ -54,7 +54,7 @@ int VisualShader::get_valid_node_id() const {
   return g->nodes.size() ? std::max(min_valid_id, g->nodes.rbegin()->first + 1) : min_valid_id;
 }
 
-void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TEVector2& position, const int& id) {
+void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& position, const int& id) {
   if (!node) {
     std::cout << "Invalid VisualShaderNode" << std::endl;
     return;
@@ -626,28 +626,28 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
             node_code += "\tint " + input_vars.at(i) + " = " + std::to_string(val) + ";\n";
           }
         } break;
-        case 3: {  // TEVector2
-          TEVector2 val{std::get<TEVector2>(defval)};
+        case 3: {  // TVector2
+          TVector2 val{std::get<TVector2>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
           oss << "\tvec2 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec2("
-              << std::get<0>(val) << ", " << std::get<1>(val) << ");\n";
+              << val.x << ", " << val.y << ");\n";
           node_code += oss.str();
         } break;
-        case 4: {  // TEVector3
-          TEVector3 val{std::get<TEVector3>(defval)};
+        case 4: {  // TVector3
+          TVector3 val{std::get<TVector3>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
           oss << "\tvec3 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec3("
-              << std::get<0>(val) << ", " << std::get<1>(val) << ", " << std::get<2>(val) << ");\n";
+              << val.x << ", " << val.y << ", " << val.z << ");\n";
           node_code += oss.str();
         } break;
-        case 5: {  // TEQuaternion
-          TEQuaternion val{std::get<TEQuaternion>(defval)};
+        case 5: {  // TVector4
+          TVector4 val{std::get<TVector4>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
           oss << "\tvec4 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << "vec4("
-              << std::get<0>(val) << ", " << std::get<1>(val) << ", " << std::get<2>(val) << ", " << std::get<3>(val)
+              << val.x << ", " << val.y << ", " << val.z << ", " << val.w
               << ");\n";
           node_code += oss.str();
         } break;
@@ -922,17 +922,17 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TEVar
           case 2: {  // int
             v = std::get<float>(prev_value);
           } break;
-          case 3: {  // TEVector2
-            TEVector2 pv{std::get<TEVector2>(prev_value)};
-            v = std::get<0>(pv);
+          case 3: {  // TVector2
+            TVector2 pv{std::get<TVector2>(prev_value)};
+            v = pv.x;
           } break;
-          case 4: {  // TEVector3
-            TEVector3 pv{std::get<TEVector3>(prev_value)};
-            v = std::get<0>(pv);
+          case 4: {  // TVector3
+            TVector3 pv{std::get<TVector3>(prev_value)};
+            v = pv.x;
           } break;
-          case 5: {  // TEQuaternion
-            TEQuaternion pv{std::get<TEQuaternion>(prev_value)};
-            v = std::get<0>(pv);
+          case 5: {  // TVector4
+            TVector4 pv{std::get<TVector4>(prev_value)};
+            v = pv.x;
           } break;
           default:
             break;
@@ -946,91 +946,91 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TEVar
           case 2: {  // int
             v = prev_value;
           } break;
-          case 3: {  // TEVector2
-            TEVector2 pv{std::get<TEVector2>(prev_value)};
-            v = (int)std::get<0>(pv);
+          case 3: {  // TVector2
+            TVector2 pv{std::get<TVector2>(prev_value)};
+            v = (int)pv.x;
           } break;
-          case 4: {  // TEVector3
-            TEVector3 pv{std::get<TEVector3>(prev_value)};
-            v = (int)std::get<0>(pv);
+          case 4: {  // TVector3
+            TVector3 pv{std::get<TVector3>(prev_value)};
+            v = (int)pv.x;
           } break;
-          case 5: {  // TEQuaternion
-            TEQuaternion pv{std::get<TEQuaternion>(prev_value)};
-            v = (int)std::get<0>(pv);
+          case 5: {  // TVector4
+            TVector4 pv{std::get<TVector4>(prev_value)};
+            v = (int)pv.x;
           } break;
           default:
             break;
         }
       } break;
-      case 3: {  // TEVector2
+      case 3: {  // TVector2
         switch (prev_value.index()) {
           case 1: {  // float
             float pv{std::get<float>(prev_value)};
-            v = TEVector2(pv, pv);
+            v = TVector2(pv, pv);
           } break;
           case 2: {  // int
             float pv{(float)std::get<int>(prev_value)};
-            v = TEVector2(pv, pv);
+            v = TVector2(pv, pv);
           } break;
-          case 3: {  // TEVector2
+          case 3: {  // TVector2
             v = prev_value;
           } break;
-          case 4: {  // TEVector3
-            TEVector3 pv{std::get<TEVector3>(prev_value)};
-            v = TEVector2(std::get<0>(pv), std::get<1>(pv));
+          case 4: {  // TVector3
+            TVector3 pv{std::get<TVector3>(prev_value)};
+            v = TVector2(pv.x, pv.y);
           } break;
-          case 5: {  // TEQuaternion
-            TEQuaternion pv{std::get<TEQuaternion>(prev_value)};
-            v = TEVector2(std::get<0>(pv), std::get<1>(pv));
+          case 5: {  // TVector4
+            TVector4 pv{std::get<TVector4>(prev_value)};
+            v = TVector2(pv.x, pv.y);
           } break;
           default:
             break;
         }
       } break;
-      case 4: {  // TEVector3
+      case 4: {  // TVector3
         switch (prev_value.index()) {
           case 1: {  // float
             float pv{std::get<float>(prev_value)};
-            v = TEVector3(pv, pv, pv);
+            v = TVector3(pv, pv, pv);
           } break;
           case 2: {  // int
             float pv{(float)std::get<int>(prev_value)};
-            v = TEVector3(pv, pv, pv);
+            v = TVector3(pv, pv, pv);
           } break;
-          case 3: {  // TEVector2
-            TEVector2 pv{std::get<TEVector2>(prev_value)};
-            v = TEVector3(std::get<0>(pv), std::get<1>(pv), std::get<1>(pv));
+          case 3: {  // TVector2
+            TVector2 pv{std::get<TVector2>(prev_value)};
+            v = TVector3(pv.x, pv.y, pv.y);
           } break;
-          case 4: {  // TEVector3
+          case 4: {  // TVector3
             v = prev_value;
           } break;
-          case 5: {  // TEQuaternion
-            TEQuaternion pv{std::get<TEQuaternion>(prev_value)};
-            v = TEVector3(std::get<0>(pv), std::get<1>(pv), std::get<2>(pv));
+          case 5: {  // TVector4
+            TVector4 pv{std::get<TVector4>(prev_value)};
+            v = TVector3(pv.x, pv.y, pv.z);
           } break;
           default:
             break;
         }
       } break;
-      case 5: {  // TEQuaternion
+      case 5: {  // TVector4
         switch (prev_value.index()) {
           case 1: {  // float
             float pv{std::get<float>(prev_value)};
-            v = TEQuaternion(pv, pv, pv, pv);
+            v = TVector4(pv, pv, pv, pv);
           } break;
           case 2: {  // int
             float pv{(float)std::get<int>(prev_value)};
-            v = TEQuaternion(pv, pv, pv, pv);
+            v = TVector4(pv, pv, pv, pv);
           } break;
-          case 3: {  // TEVector2
-            TEVector2 pv{std::get<TEVector2>(prev_value)};
-            v = TEQuaternion(std::get<0>(pv), std::get<1>(pv), std::get<1>(pv), std::get<1>(pv));
+          case 3: {  // TVector2
+            TVector2 pv{std::get<TVector2>(prev_value)};
+            v = TVector4(pv.x, pv.y, pv.y, pv.y);
           } break;
-          case 4: {  // TEVector3
-            TEVector3 pv{std::get<TEVector3>(prev_value)};
-            v = TEQuaternion(std::get<0>(pv), std::get<1>(pv), std::get<2>(pv), std::get<2>(pv));
+          case 4: {  // TVector3
+            TVector3 pv{std::get<TVector3>(prev_value)};
+            v = TVector4(pv.x, pv.y, pv.z, pv.z);
           } break;
-          case 5: {  // TEQuaternion
+          case 5: {  // TVector4
             v = prev_value;
           } break;
           default:

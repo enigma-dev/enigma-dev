@@ -39,7 +39,7 @@
 VisualShaderNodeValueNoise::VisualShaderNodeValueNoise() : scale(100.0f) {
   NAME_ID = "node_value_noise";
 
-  set_input_port_default_value(0, TEVector2());
+  set_input_port_default_value(0, TVector2());
 }
 
 std::string VisualShaderNodeValueNoise::get_caption() const { return "ValueNoise"; }

@@ -245,13 +245,13 @@ class VisualShaderNodeColorConstant : public VisualShaderNodeConstant {
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     const std::vector<std::string>& output_vars) const override;
 
-  void set_constant(const TEColor& c);
-  TEColor get_constant() const;
+  void set_constant(const TColor& c);
+  TColor get_constant() const;
 
   virtual std::vector<std::string> get_editable_properties() const override;
 
  private:
-  TEColor constant;
+  TColor constant;
 };
 
 /*************************************/
@@ -276,13 +276,13 @@ class VisualShaderNodeVec2Constant : public VisualShaderNodeConstant {
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     const std::vector<std::string>& output_vars) const override;
 
-  void set_constant(const TEVector2& c);
-  TEVector2 get_constant() const;
+  void set_constant(const TVector2& c);
+  TVector2 get_constant() const;
 
   virtual std::vector<std::string> get_editable_properties() const override;
 
  private:
-  TEVector2 constant;
+  TVector2 constant;
 };
 
 /*************************************/
@@ -307,13 +307,13 @@ class VisualShaderNodeVec3Constant : public VisualShaderNodeConstant {
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     const std::vector<std::string>& output_vars) const override;
 
-  void set_constant(const TEVector3& c);
-  TEVector3 get_constant() const;
+  void set_constant(const TVector3& c);
+  TVector3 get_constant() const;
 
   virtual std::vector<std::string> get_editable_properties() const override;
 
  private:
-  TEVector3 constant;
+  TVector3 constant;
 };
 
 /*************************************/
@@ -338,13 +338,13 @@ class VisualShaderNodeVec4Constant : public VisualShaderNodeConstant {
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     const std::vector<std::string>& output_vars) const override;
 
-  void set_constant(const TEQuaternion& c);
-  TEQuaternion get_constant() const;
+  void set_constant(const TVector4& c);
+  TVector4 get_constant() const;
 
   virtual std::vector<std::string> get_editable_properties() const override;
 
  private:
-  TEQuaternion constant;
+  TVector4 constant;
 };
 
 /*************************************/
