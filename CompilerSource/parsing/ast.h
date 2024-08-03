@@ -643,7 +643,7 @@ class AST {
   static AST Parse(std::string code, const ParseContext *ctex);
 
   void VisitNodes(Visitor &visitor) {
-    if (root_) root_->RecurusiveVisit(visitor);
+    if (root_) root_->accept(visitor);
   }
 
   // Get the node type as a string

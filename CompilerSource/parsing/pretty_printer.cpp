@@ -363,7 +363,9 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
     print(">(");
   }
 
-  VISIT_AND_CHECK(node.expr);
+  if (node.expr) {
+    VISIT_AND_CHECK(node.expr);
+  }
 
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
     print(")");

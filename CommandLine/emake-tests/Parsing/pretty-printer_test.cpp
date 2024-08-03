@@ -936,7 +936,7 @@ TEST(PrinterTest, test44) {
 
 // TEST(PrinterTest, test45) {
 //   std::string code =
-//       "char y = '\n'; y='\\t'; y='\\v'; y = '\\b'; y='\\r'; y='\\f'; y = '\\a'; y='\\t'; y='\\v'; y='\\';y='\\?';";
+//       "char y = '\\n'; y='\\t'; y='\\v'; y = '\\b'; y='\\r'; y='\\f'; y = '\\a'; y='\\t'; y='\\v'; y='\\';y='\\?';";
 
 //   ParserTester test{code};
 //   auto node = test->ParseCode();
@@ -1191,6 +1191,22 @@ TEST(PrinterTest, test59) {
 
 TEST(PrinterTest, test60) {
   std::string code = "if (power_up_collected)  with (obj_enemy)  image_blend = c_red; ";
+
+  ParserTester test{code};
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test61) {
+  std::string code = "{if(y<(room_height / 2-350));}";
 
   ParserTester test{code};
   auto node = test->ParseCode();
