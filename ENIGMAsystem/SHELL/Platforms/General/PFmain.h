@@ -84,6 +84,7 @@ extern unsigned long current_time;
 
 std::string pointer_to_ull_string(void *pointer);
 void *ull_string_to_pointer(std::string ull_string);
+int number_of_bits();
 
 void sleep(int ms);
 unsigned long get_timer(); // number of microseconds since the game started
