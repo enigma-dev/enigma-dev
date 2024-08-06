@@ -9,6 +9,7 @@
 #include "Universal_System/fileio.h"
 #include "Universal_System/mathnc.h" // enigma_user::clamp
 
+#include <cstdint>
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
@@ -454,6 +455,7 @@ unsigned long current_time = 0;
 
 std::string pointer_to_ull_string(void *pointer) { return std::to_string((unsigned long long)pointer); }
 void *ull_string_to_pointer(std::string ull_string) { return (void *)strtoull(ull_string.c_str(), nullptr, 10); }
+int number_of_bits() { if (INTPTR_MAX == INT64_MAX) { return 64; }  else if (INTPTR_MAX == INT32_MAX) { return 32; } else { return -1; } }
 
 bool os_is_paused() { return !enigma::game_window_focused && enigma::freezeOnLoseFocus; }
 
