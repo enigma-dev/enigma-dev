@@ -71,9 +71,11 @@
 #include <kvm.h>
 #elif defined(__sun)
 #include <kvm.h>
+#include <dirent.h>
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/proc.h>
+#include <sys/procfs.h>
 #endif
 #if defined(USE_SDL_POLLEVENT)
 #include <SDL.h>
@@ -360,7 +362,7 @@ namespace ngs::ps {
       if (proc_info[i] <= 0) continue;
       vec.push_back(proc_info[i]);
     }
-    #elif (defined(__linux__) || defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
     vec.push_back(0);
     DIR *proc = opendir("/proc");
     struct dirent *ent = nullptr;
@@ -428,10 +430,14 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
     proc *proc_info = nullptr;
+    if (!vec.empty()) { 
+      goto finish;
+    }
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
@@ -440,6 +446,7 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
+    finish:
     #endif
     std::sort(vec.begin(), vec.end());
     return vec;
@@ -601,15 +608,30 @@ namespace ngs::ps {
     kvm_close(kd);
     if (vec.empty() && proc_id == 0)
       vec.push_back(0);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
+    pstatus_t status;
+    char buffer[BUFSIZ];
+    sprintf(buffer, "/proc/%d/status", proc_id);
+    int fd = open(buffer, O_RDONLY);
+    if (fd != -1) {
+      if (read(fd, &status, sizeof(pstatus_t)) != -1) {
+        vec.push_back(status.pr_ppid);
+      }
+      close(fd);
+    }
     kvm_t *kd = nullptr;
     proc *proc_info = nullptr;
+    if (!vec.empty()) { 
+      goto finish;
+    }
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       vec.push_back(proc_info->p_ppid);
     }
     kvm_close(kd);
+    finish:
     #endif
     return vec;
   }
@@ -642,7 +664,7 @@ namespace ngs::ps {
       }
       vec.push_back(proc_info[i]);
     }
-    #elif (defined(__linux__) || defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
     std::vector<NGS_PROCID> proc_id = proc_id_enum();
     for (std::size_t i = 0; i < proc_id.size(); i++) {
       std::vector<NGS_PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
@@ -716,10 +738,14 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
     proc *proc_info = nullptr;
+    if (!vec.empty()) { 
+      goto finish;
+    }
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
@@ -730,6 +756,7 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
+    finish:
     #endif
     std::sort(vec.begin(), vec.end());
     return vec;
@@ -1111,7 +1138,7 @@ namespace ngs::ps {
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMCMD);
-    #elif (defined(__linux__) || defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/cmdline").c_str(), "rb");
     if (file) {
       char *cmd = nullptr;
@@ -1171,11 +1198,15 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     kvm_t *kd = nullptr;
     char **cmd = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
+    if (!vec.empty()) { 
+      goto finish;
+    }
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
@@ -1189,6 +1220,7 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
+    finish:
     #endif
     return vec;
   }
@@ -1211,7 +1243,7 @@ namespace ngs::ps {
     CloseHandle(proc);
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMENV);
-    #elif (defined(__linux__) || defined(__ANDROID__))
+    #elif (defined(__linux__) || defined(__ANDROID__) || defined(__sun))
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/environ").c_str(), "rb");
     if (file) {
       char *env = nullptr;
@@ -1269,11 +1301,15 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     kvm_t *kd = nullptr;
     char **env = nullptr;
     proc *proc_info = nullptr;
     user *proc_user = nullptr;
+    if (!vec.empty()) { 
+      goto finish;
+    }
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
@@ -1287,6 +1323,7 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
+    finish:
     #endif
     struct is_invalid {
       bool operator()(const std::string &s) {
