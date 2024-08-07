@@ -521,18 +521,19 @@ class AST {
   };
 
   class Visitor {
-    std::ofstream of;
+    std::ofstream* of;
     bool print_type;
 
    public:
     Visitor() {
-      if (!of.is_open()) of.open("./CompilerSource/parsing/output.txt");
+      of = new std::ofstream();
+      if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
       print_type = false;
     }
-    // Visitor(std::ofstream& ofs): of(ofs){
-    // }
 
-    void print(std::string code) { of << code; }
+    Visitor(std::ofstream &ofs) : of(&ofs) { print_type = false; }
+
+    void print(std::string code) { *of << code; }
     
     void PrintSemiColon(PNode &node) {
       if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
@@ -544,7 +545,7 @@ class AST {
     }
 
     std::string GetPrintedCode() {
-      of.close();
+      of->close();
       std::ifstream file("./CompilerSource/parsing/output.txt");
       std::string code = "";
 
@@ -599,7 +600,7 @@ class AST {
       return node->accept(*this);
     }
 
-    virtual ~Visitor() { of.close(); }
+    // virtual ~Visitor() { of->close(); }
   };
 
   // Used to adapt to current single-error syntax checking interface.

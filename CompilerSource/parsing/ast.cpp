@@ -36,23 +36,15 @@ void AST::ApplyTo(int instance_id) {
 }
 
 void AST::WriteCppToStream(std::ofstream &of, int base_indent) const {
-  // TODO: Implement
+  Visitor visitor(of);
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
-    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-    //               junkshit.strc, junkshit.strs, base_indent, of);
-    // ErrorCollector herr2;
-    // std::unique_ptr<AST::Node> root = enigma::parsing::Parse(lexer.get(), &herr2);
-    // Visitor visitor(of);
-    // visitor.Visit(root);
+  }
+
+  if (root_) root_->accept(visitor);
+  
+  if (apply_to_) {
     of << std::string(base_indent, ' ') << "}\n";
-  } else {
-    // ErrorCollector herr2;
-    // std::unique_ptr<AST::Node> root = enigma::parsing::Parse(lexer.get(), &herr2);
-    // Visitor visitor(of);
-    // visitor.Visit(root);
-    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-    //               junkshit.strc, junkshit.strs, base_indent, of);
   }
 }
 

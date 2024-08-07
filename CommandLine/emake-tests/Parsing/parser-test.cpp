@@ -12,7 +12,7 @@ void assert_identifier_is(AST::Node *node, std::string_view name) {
 }
 
 TEST(ParserTest, Basics) {
-  ParserTester test{"(x ? y : z ? a : (z[5](6)));"};
+  ParserTester test = ParserTester::CreateWithCpp("(x ? y : z ? a : (z[5](6)));");
 
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::PARENTHETICAL);
@@ -63,7 +63,7 @@ TEST(ParserTest, Basics) {
 }
 
 TEST(ParserTest, Basics_NoSemicolon) {
-  ParserTester test{"(x ? y : z ? a : (z[5](6)))"};
+  ParserTester test = ParserTester::CreateWithCpp("(x ? y : z ? a : (z[5](6)))");
 
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::PARENTHETICAL);
@@ -114,7 +114,7 @@ TEST(ParserTest, Basics_NoSemicolon) {
 }
 
 TEST(ParserTest, SizeofExpression) {
-  ParserTester test{"sizeof 5"};  // we need to support sizeof (5)
+  ParserTester test = ParserTester::CreateWithCpp("sizeof 5");  // we need to support sizeof (5)
   auto expr = test->TryParseStatement();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
@@ -129,7 +129,7 @@ TEST(ParserTest, SizeofExpression) {
 }
 
 TEST(ParserTest, SizeofVariadic) {
-  ParserTester test{"sizeof...(ident)"};
+  ParserTester test = ParserTester::CreateWithCpp("sizeof...(ident)");
   auto expr = test->TryParseStatement();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
@@ -142,7 +142,7 @@ TEST(ParserTest, SizeofVariadic) {
 }
 
 TEST(ParserTest, SizeofType) {
-  ParserTester test{"sizeof(const volatile unsigned long long int **(*)[10])"};
+  ParserTester test = ParserTester::CreateWithCpp("sizeof(const volatile unsigned long long int **(*)[10])");
   auto expr = test->TryParseStatement();
 
   ASSERT_EQ(expr->type, AST::NodeType::SIZEOF);
@@ -170,7 +170,7 @@ TEST(ParserTest, SizeofType) {
 }
 
 TEST(ParserTest, AlignofType) {
-  ParserTester test{"alignof(const volatile unsigned long long *)"};
+  ParserTester test = ParserTester::CreateWithCpp("alignof(const volatile unsigned long long *)");
   auto expr = test->TryParseStatement();
 
   ASSERT_EQ(expr->type, AST::NodeType::ALIGNOF);
@@ -195,7 +195,7 @@ bool contains_flag(FullType *ft, std::size_t decflag) { return (ft->flags & decf
 bool def_type_is(FullType *ft, std::size_t dectype) { return (ft->def->flags & dectype) == dectype; }
 
 TEST(ParserTest, TypeSpecifierAndDeclarator) {
-  ParserTester test{"const unsigned int ****(***)[10]"};
+  ParserTester test = ParserTester::CreateWithCpp("const unsigned int ****(***)[10]");
   FullType ft = test->TryParseTypeID();
   EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__const->value));
@@ -236,19 +236,19 @@ TEST(ParserTest, Declarator_1) {
 
 //
 TEST(ParserTest, Declarator_2) {
-  ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int);"};
+  ParserTester test3 = ParserTester::CreateWithCpp("int ((*a)(int (*x)(int x), int (*)[10]))(int);");
   auto node = test3->TryParseStatement();
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarator_2_NoSemicolon) {
-  ParserTester test3{"int ((*a)(int (*x)(int x), int (*)[10]))(int)"};
+  ParserTester test3 = ParserTester::CreateWithCpp("int ((*a)(int (*x)(int x), int (*)[10]))(int)");
   auto node = test3->TryParseStatement();
   EXPECT_EQ(test3.lexer.ReadToken().type, TT_ENDOFCODE);
 }
 
 TEST(ParserTest, Declarator_3) {
-  ParserTester test{"int *(*(*a)[10][12])[15];"};
+  ParserTester test = ParserTester::CreateWithCpp("int *(*(*a)[10][12])[15];");
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = node->As<AST::DeclarationStatement>();
@@ -293,7 +293,7 @@ TEST(ParserTest, Declarator_3) {
 
 //
 TEST(ParserTest, Declarator_3_NoSemicolon) {
-  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  ParserTester test = ParserTester::CreateWithCpp("int *(*(*a)[10][12])[15]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = node->As<AST::DeclarationStatement>();
@@ -337,7 +337,7 @@ TEST(ParserTest, Declarator_3_NoSemicolon) {
 }
 
 TEST(ParserTest, Declarator_4) {
-  ParserTester test{"int *(*(*a)[10][12])[15];"};
+  ParserTester test = ParserTester::CreateWithCpp("int *(*(*a)[10][12])[15];");
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = node->As<AST::DeclarationStatement>();
@@ -360,7 +360,7 @@ TEST(ParserTest, Declarator_4) {
 }
 
 TEST(ParserTest, Declarator_4_NoSemicolon) {
-  ParserTester test{"int *(*(*a)[10][12])[15]"};
+  ParserTester test = ParserTester::CreateWithCpp("int *(*(*a)[10][12])[15]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(node->type, AST::NodeType::DECLARATION);
   auto *decls = node->As<AST::DeclarationStatement>();
@@ -384,7 +384,7 @@ TEST(ParserTest, Declarator_4_NoSemicolon) {
 
 bool contains_flag2(FullType &ft, jdi::typeflag *builtin) { return (ft.flags & builtin->mask) == builtin->value; }
 TEST(ParserTest, Declaration) {
-  ParserTester test{"const unsigned *(*x)[10] = nullptr;"};
+  ParserTester test = ParserTester::CreateWithCpp("const unsigned *(*x)[10] = nullptr;");
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -393,7 +393,7 @@ TEST(ParserTest, Declaration) {
 }
 
 TEST(ParserTest, Declaration_NoSemicolon) {
-  ParserTester test{"const unsigned *(*x)[10] = nullptr"};
+  ParserTester test = ParserTester::CreateWithCpp("const unsigned *(*x)[10] = nullptr");
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -401,7 +401,7 @@ TEST(ParserTest, Declaration_NoSemicolon) {
 
 //
 TEST(ParserTest, Declarations) {
-  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y;"};
+  ParserTester test = ParserTester::CreateWithCpp("int *x = nullptr, y, (*z)(int x, int) = &y;");
 
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -426,7 +426,7 @@ TEST(ParserTest, Declarations) {
 }
 
 TEST(ParserTest, Declarations_NoSemicolon) {
-  ParserTester test{"int *x = nullptr, y, (*z)(int x, int) = &y"};
+  ParserTester test = ParserTester::CreateWithCpp("int *x = nullptr, y, (*z)(int x, int) = &y");
 
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -494,7 +494,7 @@ void check_initializer(AST::NewExpression *new_, AST::BraceOrParenInitializer::K
 }
 
 TEST(ParserTest, NewExpression_1) {
-  ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5};"};
+  ParserTester test = ParserTester::CreateWithCpp("new (nullptr) int[]{1, 2, 3, 4, 5};");
   auto node = test->TryParseStatement();
 
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -514,7 +514,7 @@ TEST(ParserTest, NewExpression_1) {
 }
 
 TEST(ParserTest, NewExpression_1_NoSemicolon) {
-  ParserTester test{"new (nullptr) int[]{1, 2, 3, 4, 5}"};
+  ParserTester test = ParserTester::CreateWithCpp("new (nullptr) int[]{1, 2, 3, 4, 5}");
   auto node = test->TryParseStatement();
 
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -534,7 +534,7 @@ TEST(ParserTest, NewExpression_1_NoSemicolon) {
 }
 
 TEST(ParserTest, NewExpression_2) {
-  ParserTester test{"::new int[][15]{1, 2, 3, 4, 5};"};
+  ParserTester test = ParserTester::CreateWithCpp("::new int[][15]{1, 2, 3, 4, 5};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
 
@@ -556,7 +556,7 @@ TEST(ParserTest, NewExpression_2) {
 }
 
 TEST(ParserTest, NewExpression_2_NoSemiconlon) {
-  ParserTester test{"::new int[][15]{1, 2, 3, 4, 5}"};
+  ParserTester test = ParserTester::CreateWithCpp("::new int[][15]{1, 2, 3, 4, 5}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -578,7 +578,7 @@ TEST(ParserTest, NewExpression_2_NoSemiconlon) {
 }
 
 TEST(ParserTest, NewExpression_3) {
-  ParserTester test{"::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5);"};
+  ParserTester test = ParserTester::CreateWithCpp("::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5);");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -604,7 +604,7 @@ TEST(ParserTest, NewExpression_3) {
 }
 
 TEST(ParserTest, NewExpression_3_NoSemicolon) {
-  ParserTester test{"::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5)"};
+  ParserTester test = ParserTester::CreateWithCpp("::new (nullptr) (int *(**)[10])(1, 2, 3, 4, 5)");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -629,7 +629,7 @@ TEST(ParserTest, NewExpression_3_NoSemicolon) {
 }
 
 TEST(ParserTest, NewExpression_4) {
-  ParserTester test{"new (int *(**)[10]);"};
+  ParserTester test = ParserTester::CreateWithCpp("new (int *(**)[10]);");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -651,7 +651,7 @@ TEST(ParserTest, NewExpression_4) {
 }
 
 TEST(ParserTest, NewExpression_4_NoSemicolon) {
-  ParserTester test{"new (int *(**)[10])"};
+  ParserTester test = ParserTester::CreateWithCpp("new (int *(**)[10])");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -673,7 +673,7 @@ TEST(ParserTest, NewExpression_4_NoSemicolon) {
 }
 
 TEST(ParserTest, NewExpression_5) {
-  ParserTester test{"new int;"};
+  ParserTester test = ParserTester::CreateWithCpp("new int;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -688,7 +688,7 @@ TEST(ParserTest, NewExpression_5) {
 }
 
 TEST(ParserTest, NewExpression_5_NoSemicolon) {
-  ParserTester test{"new int"};
+  ParserTester test = ParserTester::CreateWithCpp("new int");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -703,7 +703,7 @@ TEST(ParserTest, NewExpression_5_NoSemicolon) {
 }
 
 TEST(ParserTest, Designated_Initializer) {
-  ParserTester test{"new (nullptr) int[]{.x=1, .y=2, .z=3, .u=4, .v=5}"};
+  ParserTester test = ParserTester::CreateWithCpp("new (nullptr) int[]{.x=1, .y=2, .z=3, .u=4, .v=5}");
   auto node = test->TryParseStatement();
 
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -722,7 +722,7 @@ TEST(ParserTest, Designated_Initializer) {
 }
 
 TEST(ParserTest, Variadic_Initializer) {
-  ParserTester test{"new (nullptr) int[]{args...}"};
+  ParserTester test = ParserTester::CreateWithCpp("new (nullptr) int[]{args...}");
   auto node = test->TryParseStatement();
 
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
@@ -741,7 +741,7 @@ TEST(ParserTest, Variadic_Initializer) {
 }
 
 TEST(ParserTest, DeleteExpression_1) {
-  ParserTester test{"delete x;"};
+  ParserTester test = ParserTester::CreateWithCpp("delete x;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -754,7 +754,7 @@ TEST(ParserTest, DeleteExpression_1) {
 }
 
 TEST(ParserTest, DeleteExpression_1_NoSemicolon) {
-  ParserTester test{"delete x"};
+  ParserTester test = ParserTester::CreateWithCpp("delete x");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -767,7 +767,7 @@ TEST(ParserTest, DeleteExpression_1_NoSemicolon) {
 }
 
 TEST(ParserTest, DeleteExpression_2) {
-  ParserTester test{"::delete x;"};
+  ParserTester test = ParserTester::CreateWithCpp("::delete x;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -780,7 +780,7 @@ TEST(ParserTest, DeleteExpression_2) {
 }
 
 TEST(ParserTest, DeleteExpression_2_NoSemicolon) {
-  ParserTester test{"::delete x"};
+  ParserTester test = ParserTester::CreateWithCpp("::delete x");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -793,7 +793,7 @@ TEST(ParserTest, DeleteExpression_2_NoSemicolon) {
 }
 
 TEST(ParserTest, DeleteExpression_3) {
-  ParserTester test{"delete[] x;"};
+  ParserTester test = ParserTester::CreateWithCpp("delete[] x;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -806,7 +806,7 @@ TEST(ParserTest, DeleteExpression_3) {
 }
 
 TEST(ParserTest, DeleteExpression_3_NoSemiColon) {
-  ParserTester test{"delete[] x"};
+  ParserTester test = ParserTester::CreateWithCpp("delete[] x");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -819,7 +819,7 @@ TEST(ParserTest, DeleteExpression_3_NoSemiColon) {
 }
 
 TEST(ParserTest, DeleteExpression_4) {
-  ParserTester test{"::delete[] x;"};
+  ParserTester test = ParserTester::CreateWithCpp("::delete[] x;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -832,7 +832,7 @@ TEST(ParserTest, DeleteExpression_4) {
 }
 
 TEST(ParserTest, DeleteExpression_4_NoSemicolon) {
-  ParserTester test{"::delete[] x"};
+  ParserTester test = ParserTester::CreateWithCpp("::delete[] x");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -845,7 +845,8 @@ TEST(ParserTest, DeleteExpression_4_NoSemicolon) {
 }
 
 TEST(ParserTest, SwitchStatement_1) {
-  ParserTester test{"switch (5 * 6) { case 1: return 2; break 13; case 2: return 3; break; default: break;};"};
+  ParserTester test = ParserTester::CreateWithCpp(
+      "switch (5 * 6) { case 1: return 2; break 13; case 2: return 3; break; default: break;};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -880,7 +881,8 @@ TEST(ParserTest, SwitchStatement_1) {
 }
 
 TEST(ParserTest, SwitchStatement_1_NoSemicolon) {
-  ParserTester test{"switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break};"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("switch (5 * 6) { case 1: return 2 break case 2: return 3 break default: break};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -912,7 +914,7 @@ TEST(ParserTest, SwitchStatement_1_NoSemicolon) {
 }
 
 TEST(ParserTest, SwitchStatement_2) {
-  ParserTester test{"switch (1) { case 1: return 2; default: return \"test\";};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { case 1: return 2; default: return \"test\";};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -935,7 +937,7 @@ TEST(ParserTest, SwitchStatement_2) {
 }
 
 TEST(ParserTest, SwitchStatement_2_NoSemicolon) {
-  ParserTester test{"switch (1) { case 1: return 2 default: return \"test\"};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { case 1: return 2 default: return \"test\"};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -958,7 +960,7 @@ TEST(ParserTest, SwitchStatement_2_NoSemicolon) {
 }
 
 TEST(ParserTest, SwitchStatement_3) {
-  ParserTester test{"switch (1) { default: continue 12;};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { default: continue 12;};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -974,7 +976,7 @@ TEST(ParserTest, SwitchStatement_3) {
 }
 
 TEST(ParserTest, SwitchStatement_3_NoSemicolon) {
-  ParserTester test{"switch (1) { default: continue 12};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { default: continue 12};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -990,7 +992,7 @@ TEST(ParserTest, SwitchStatement_3_NoSemicolon) {
 }
 
 TEST(ParserTest, SwitchStatement_4) {
-  ParserTester test{"switch (1) { default: delete [] x; return \"new test\";};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { default: delete [] x; return \"new test\";};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1013,7 +1015,7 @@ TEST(ParserTest, SwitchStatement_4) {
 }
 
 TEST(ParserTest, SwitchStatement_4_NoSemicolon) {
-  ParserTester test{"switch (1) { default: delete [] x return \"new test\"};"};
+  ParserTester test = ParserTester::CreateWithCpp("switch (1) { default: delete [] x return \"new test\"};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1037,7 +1039,8 @@ TEST(ParserTest, SwitchStatement_4_NoSemicolon) {
 }
 
 TEST(ParserTest, SwitchStatement_5) {
-  ParserTester test{"switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5}; return \"new test\";};"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5}; return \"new test\";};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1066,7 +1069,8 @@ TEST(ParserTest, SwitchStatement_5) {
 }
 
 TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
-  ParserTester test{"switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5} return \"new test\"};"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("switch (1) { default: new (nullptr) int[]{1, 2, 3, 4, 5} return \"new test\"};");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_SEMICOLON);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1095,7 +1099,7 @@ TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
 }
 
 TEST(ParserTest, CodeBlock_1) {
-  ParserTester test{"{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }"};
+  ParserTester test = ParserTester::CreateWithCpp("{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }");
   auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1109,7 +1113,7 @@ TEST(ParserTest, CodeBlock_1) {
 }
 
 TEST(ParserTest, CodeBlock_2) {
-  ParserTester test{"{{{}}}"};
+  ParserTester test = ParserTester::CreateWithCpp("{{{}}}");
   auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1124,7 +1128,7 @@ TEST(ParserTest, CodeBlock_2) {
 }
 
 TEST(ParserTest, IfStatement_1) {
-  ParserTester test{"if(3>2) j++; else --k;"};
+  ParserTester test = ParserTester::CreateWithCpp("if(3>2) j++; else --k;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1156,7 +1160,7 @@ TEST(ParserTest, IfStatement_1) {
 }
 
 TEST(ParserTest, IfStatement_1_NoSemicolon) {
-  ParserTester test{"if(3>2) j++ else --k"};
+  ParserTester test = ParserTester::CreateWithCpp("if(3>2) j++ else --k");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1188,7 +1192,7 @@ TEST(ParserTest, IfStatement_1_NoSemicolon) {
 }
 
 TEST(ParserTest, IfStatement_2) {
-  ParserTester test{"if k k++;"};
+  ParserTester test = ParserTester::CreateWithCpp("if k k++;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1210,7 +1214,7 @@ TEST(ParserTest, IfStatement_2) {
 }
 
 TEST(ParserTest, IfStatement_2_NoSemicolon) {
-  ParserTester test{"if k k++"};
+  ParserTester test = ParserTester::CreateWithCpp("if k k++");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1232,7 +1236,7 @@ TEST(ParserTest, IfStatement_2_NoSemicolon) {
 }
 
 TEST(ParserTest, IfStatement_3) {
-  ParserTester test{"if (true) { return 1; } else { return 2; }"};
+  ParserTester test = ParserTester::CreateWithCpp("if (true) { return 1; } else { return 2; }");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1267,7 +1271,7 @@ TEST(ParserTest, IfStatement_3) {
 }
 
 TEST(ParserTest, IfStatement_3_NoSemicolon) {
-  ParserTester test{"if (true) { return 1 } else { return 2 }"};
+  ParserTester test = ParserTester::CreateWithCpp("if (true) { return 1 } else { return 2 }");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1302,8 +1306,8 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
 }
 
 TEST(ParserTest, IfStatement_4) {
-  ParserTester test{
-      "if (false) for(int i=0;i<12;i++) {k++;} else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }"};
+  ParserTester test = ParserTester::CreateWithCpp(
+      "if (false) for(int i=0;i<12;i++) {k++;} else switch(i){ case 1 : k--; case 2 : k+=3; default : k=0; }");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1361,8 +1365,8 @@ TEST(ParserTest, IfStatement_4) {
 }
 
 TEST(ParserTest, IfStatement_4_NoSemicolon) {
-  ParserTester test{
-      "if (false) for(int i=0;i<12;i++) {k++} else switch(i){ case 1 : k-- case 2 : k+=3 default : k=0 }"};
+  ParserTester test = ParserTester::CreateWithCpp(
+      "if (false) for(int i=0;i<12;i++) {k++} else switch(i){ case 1 : k-- case 2 : k+=3 default : k=0 }");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1420,7 +1424,7 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
 }
 
 TEST(ParserTest, TemporaryInitialization_1) {
-  ParserTester test{"int((*x)[5] + 6)"};
+  ParserTester test = ParserTester::CreateWithCpp("int((*x)[5] + 6)");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1460,7 +1464,7 @@ TEST(ParserTest, TemporaryInitialization_1) {
 }
 
 TEST(ParserTest, TemporaryInitialization_2) {
-  ParserTester test{"int(*(*a)[10]) = nullptr;"};
+  ParserTester test = ParserTester::CreateWithCpp("int(*(*a)[10]) = nullptr;");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1504,7 +1508,7 @@ TEST(ParserTest, TemporaryInitialization_2) {
 }
 
 TEST(ParserTest, TemporaryInitialization_3) {
-  ParserTester test{"int(*(*a)[10] + b);"};
+  ParserTester test = ParserTester::CreateWithCpp("int(*(*a)[10] + b);");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
   ASSERT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1548,7 +1552,7 @@ TEST(ParserTest, TemporaryInitialization_3) {
 }
 
 TEST(ParserTest, TemporaryInitialization_4) {
-  ParserTester test{"int(*(*(*(*x + 4))))"};
+  ParserTester test = ParserTester::CreateWithCpp("int(*(*(*(*x + 4))))");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1589,7 +1593,7 @@ TEST(ParserTest, TemporaryInitialization_4) {
 }
 
 TEST(ParserTest, ForLoop_1) {
-  ParserTester test{"for (int i = 0; i < 5; i++) {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for (int i = 0; i < 5; i++) {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1605,7 +1609,7 @@ TEST(ParserTest, ForLoop_1) {
 }
 
 TEST(ParserTest, ForLoop_2) {
-  ParserTester test{"for int i = 0, j=1; i >= 12; --i {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for int i = 0, j=1; i >= 12; --i {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1621,7 +1625,7 @@ TEST(ParserTest, ForLoop_2) {
 }
 
 TEST(ParserTest, ForLoop_3) {
-  ParserTester test{"for int i = 0, j=1, k=133 ;i != 12; --i {j ++;}"};
+  ParserTester test = ParserTester::CreateWithCpp("for int i = 0, j=1, k=133 ;i != 12; --i {j ++;}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1637,7 +1641,7 @@ TEST(ParserTest, ForLoop_3) {
 }
 
 TEST(ParserTest, ForLoop_3_NoSemicolon) {
-  ParserTester test{"for char i = '0', j='1', k='3' ;i != 12; --i {j ++}"};
+  ParserTester test = ParserTester::CreateWithCpp("for char i = '0', j='1', k='3' ;i != 12; --i {j ++}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1653,7 +1657,8 @@ TEST(ParserTest, ForLoop_3_NoSemicolon) {
 }
 
 TEST(ParserTest, ForLoop_4) {
-  ParserTester test{"for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break; else continue;}"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("for int i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break; else continue;}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1669,7 +1674,8 @@ TEST(ParserTest, ForLoop_4) {
 }
 
 TEST(ParserTest, ForLoop_4_NoSemicolon) {
-  ParserTester test{"for double i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break else continue}"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("for double i = 0, j=1, k=133, w=-99 ;w % 22; j++ {if(l) break else continue}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1685,7 +1691,8 @@ TEST(ParserTest, ForLoop_4_NoSemicolon) {
 }
 
 TEST(ParserTest, ForLoop_5) {
-  ParserTester test{"for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++; if(i) x = new int; else delete y;}"};
+  ParserTester test = ParserTester::CreateWithCpp(
+      "for int i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++; if(i) x = new int; else delete y;}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1701,7 +1708,8 @@ TEST(ParserTest, ForLoop_5) {
 }
 
 TEST(ParserTest, ForLoop_5_NoSemicolon) {
-  ParserTester test{"for float i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++ if(i) x = new int else delete y}"};
+  ParserTester test = ParserTester::CreateWithCpp(
+      "for float i = 0, j=1, k=133, w=44, u=-77 ;w % 22; w++ {f++ if(i) x = new int else delete y}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1717,7 +1725,7 @@ TEST(ParserTest, ForLoop_5_NoSemicolon) {
 }
 
 TEST(ParserTest, ForLoop_6) {
-  ParserTester test{"for int(i = 5); i < 5; i++ {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for int(i = 5); i < 5; i++ {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1732,7 +1740,7 @@ TEST(ParserTest, ForLoop_6) {
 }
 
 TEST(ParserTest, ForLoop_7) {
-  ParserTester test{"for (int)(i = 0); i < 5; i++ {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for (int)(i = 0); i < 5; i++ {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1747,7 +1755,7 @@ TEST(ParserTest, ForLoop_7) {
 }
 
 TEST(ParserTest, ForLoop_8) {
-  ParserTester test{"for static_cast<int>(i = 10); i / 3; i-- {k++; return;}"};
+  ParserTester test = ParserTester::CreateWithCpp("for static_cast<int>(i = 10); i / 3; i-- {k++; return;}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1762,7 +1770,7 @@ TEST(ParserTest, ForLoop_8) {
 }
 
 TEST(ParserTest, ForLoop_8_NoSemicolon) {
-  ParserTester test{"for static_cast<double>(i = 10222.2); i / 3; i-- {k++ return}"};
+  ParserTester test = ParserTester::CreateWithCpp("for static_cast<double>(i = 10222.2); i / 3; i-- {k++ return}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1777,7 +1785,7 @@ TEST(ParserTest, ForLoop_8_NoSemicolon) {
 }
 
 TEST(ParserTest, ForLoop_9) {
-  ParserTester test{"for static_cast<int>(i = 10, j=12); i mod 3; i-- {k--; return 12;}"};
+  ParserTester test = ParserTester::CreateWithCpp("for static_cast<int>(i = 10, j=12); i mod 3; i-- {k--; return 12;}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1792,7 +1800,8 @@ TEST(ParserTest, ForLoop_9) {
 }
 
 TEST(ParserTest, ForLoop_9_NoSemicolon) {
-  ParserTester test{"for static_cast<float>(i = 10.2, j=12); i mod 3; i-- {k-- return 12}"};
+  ParserTester test =
+      ParserTester::CreateWithCpp("for static_cast<float>(i = 10.2, j=12); i mod 3; i-- {k-- return 12}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1807,7 +1816,7 @@ TEST(ParserTest, ForLoop_9_NoSemicolon) {
 }
 
 TEST(ParserTest, ForLoop_10) {
-  ParserTester test{"for dynamic_cast<int>(i = 10); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for dynamic_cast<int>(i = 10); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1822,7 +1831,7 @@ TEST(ParserTest, ForLoop_10) {
 }
 
 TEST(ParserTest, ForLoop_11) {
-  ParserTester test{"for dynamic_cast<int>(i); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for dynamic_cast<int>(i); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1837,7 +1846,7 @@ TEST(ParserTest, ForLoop_11) {
 }
 
 TEST(ParserTest, ForLoop_12) {
-  ParserTester test{"for dynamic_cast<int>((i)); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for dynamic_cast<int>((i)); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1852,7 +1861,7 @@ TEST(ParserTest, ForLoop_12) {
 }
 
 TEST(ParserTest, ForLoop_13) {
-  ParserTester test{"for const_cast<int>(i = 10); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for const_cast<int>(i = 10); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1867,7 +1876,7 @@ TEST(ParserTest, ForLoop_13) {
 }
 
 TEST(ParserTest, ForLoop_14) {
-  ParserTester test{"for const_cast<int>(i); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for const_cast<int>(i); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1881,7 +1890,7 @@ TEST(ParserTest, ForLoop_14) {
 }
 
 TEST(ParserTest, ForLoop_15) {
-  ParserTester test{"for const_cast<int>((i)); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for const_cast<int>((i)); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1896,7 +1905,7 @@ TEST(ParserTest, ForLoop_15) {
 }
 
 TEST(ParserTest, ForLoop_16) {
-  ParserTester test{"for reinterpret_cast<int>(i = 10); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for reinterpret_cast<int>(i = 10); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1911,7 +1920,7 @@ TEST(ParserTest, ForLoop_16) {
 }
 
 TEST(ParserTest, ForLoop_17) {
-  ParserTester test{"for reinterpret_cast<int>(i); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for reinterpret_cast<int>(i); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1926,7 +1935,7 @@ TEST(ParserTest, ForLoop_17) {
 }
 
 TEST(ParserTest, ForLoop_18) {
-  ParserTester test{"for reinterpret_cast<int>((i)); i / 3; i-- {}"};
+  ParserTester test = ParserTester::CreateWithCpp("for reinterpret_cast<int>((i)); i / 3; i-- {}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1941,7 +1950,7 @@ TEST(ParserTest, ForLoop_18) {
 }
 
 TEST(ParserTest, WhileLoop_1) {
-  ParserTester test{"while(i==1){i++}"};
+  ParserTester test = ParserTester::CreateWithCpp("while(i==1){i++}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1955,7 +1964,7 @@ TEST(ParserTest, WhileLoop_1) {
 }
 
 TEST(ParserTest, WhileLoop_2) {
-  ParserTester test{"until(i==1) {i++}"};
+  ParserTester test = ParserTester::CreateWithCpp("until(i==1) {i++}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1969,7 +1978,7 @@ TEST(ParserTest, WhileLoop_2) {
 }
 
 TEST(ParserTest, WhileLoop_3) {
-  ParserTester test{"repeat(4){i++}"};
+  ParserTester test = ParserTester::CreateWithCpp("repeat(4){i++}");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1983,7 +1992,7 @@ TEST(ParserTest, WhileLoop_3) {
 }
 
 TEST(ParserTest, DoLoop_1) {
-  ParserTester test{"do{c++}while(i)"};
+  ParserTester test = ParserTester::CreateWithCpp("do{c++}while(i)");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -1997,7 +2006,7 @@ TEST(ParserTest, DoLoop_1) {
 }
 
 TEST(ParserTest, DoLoop_2) {
-  ParserTester test{"do c++ until i "};
+  ParserTester test = ParserTester::CreateWithCpp("do c++ until i ");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2010,7 +2019,7 @@ TEST(ParserTest, DoLoop_2) {
 }
 
 TEST(ParserTest, Array_1) {
-  ParserTester test{"a = [1,2,3]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [1,2,3]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2041,7 +2050,7 @@ TEST(ParserTest, Array_1) {
 }
 
 TEST(ParserTest, Array_2) {
-  ParserTester test{"a = [1]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [1]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2060,7 +2069,7 @@ TEST(ParserTest, Array_2) {
 }
 
 TEST(ParserTest, Array_3) {
-  ParserTester test{"a = [2+3]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [2+3]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2085,7 +2094,7 @@ TEST(ParserTest, Array_3) {
 }
 
 TEST(ParserTest, Array_4) {
-  ParserTester test{"a = [x]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [x]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2106,7 +2115,7 @@ TEST(ParserTest, Array_4) {
 }
 
 TEST(ParserTest, Array_5) {
-  ParserTester test{"a = [2+3, 4*6, 5/2]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [2+3, 4*6, 5/2]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2160,7 +2169,7 @@ TEST(ParserTest, Array_5) {
 }
 
 TEST(ParserTest, Array_6) {
-  ParserTester test{"a = [(12)]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [(12)]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2182,7 +2191,7 @@ TEST(ParserTest, Array_6) {
 }
 
 TEST(ParserTest, Array_7) {
-  ParserTester test{"a = [x++]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [x++]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2206,7 +2215,7 @@ TEST(ParserTest, Array_7) {
 }
 
 TEST(ParserTest, Array_8) {
-  ParserTester test{"a = [--x]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [--x]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2230,7 +2239,7 @@ TEST(ParserTest, Array_8) {
 }
 
 TEST(ParserTest, Array_9) {
-  ParserTester test{"a = [foo(12)]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [foo(12)]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2255,7 +2264,7 @@ TEST(ParserTest, Array_9) {
 }
 
 TEST(ParserTest, Array_10) {
-  ParserTester test{"a = [sizeof 12]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [sizeof 12]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2278,7 +2287,7 @@ TEST(ParserTest, Array_10) {
 }
 
 TEST(ParserTest, Array_11) {
-  ParserTester test{"a = [reinterpret_cast<int>(i)]"};
+  ParserTester test = ParserTester::CreateWithCpp("a = [reinterpret_cast<int>(i)]");
   auto node = test->TryParseStatement();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2302,7 +2311,7 @@ TEST(ParserTest, Array_11) {
 }
 
 TEST(ParserTest, ParseCodeFunction) {
-  ParserTester test{"x++; if(x) --l"};
+  ParserTester test = ParserTester::CreateWithCpp("x++; if(x) --l");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2325,7 +2334,7 @@ TEST(ParserTest, ParseCodeFunction) {
 }
 
 TEST(ParserTest, ParseControlExpression_1) {
-  ParserTester test{"if((x * 2)> s(12)) --l"};
+  ParserTester test = ParserTester::CreateWithCpp("if((x * 2)> s(12)) --l");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2379,7 +2388,7 @@ TEST(ParserTest, ParseControlExpression_1) {
 }
 
 TEST(ParserTest, ParseControlExpression_2) {
-  ParserTester test{"if (x * 2)> s(12) --l"};
+  ParserTester test = ParserTester::CreateWithCpp("if (x * 2)> s(12) --l");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2430,7 +2439,7 @@ TEST(ParserTest, ParseControlExpression_2) {
 }
 
 TEST(ParserTest, QualifiedExpressions_1) {
-  ParserTester test{"if a.b --l"};
+  ParserTester test = ParserTester::CreateWithCpp("if a.b --l");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2465,7 +2474,7 @@ TEST(ParserTest, QualifiedExpressions_1) {
 }
 
 TEST(ParserTest, QualifiedExpressions_2) {
-  ParserTester test{"if a->b --l"};
+  ParserTester test = ParserTester::CreateWithCpp("if a->b --l");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2488,7 +2497,7 @@ TEST(ParserTest, QualifiedExpressions_2) {
 }
 
 TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
-  ParserTester test{"foo(12)--x;"};
+  ParserTester test = ParserTester::CreateWithCpp("foo(12)--x;");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2509,7 +2518,7 @@ TEST(ParserTest, UnaryPrefixAfterFunctionCall) {
 }
 
 TEST(ParserTest, NULLTrueBranch) {
-  ParserTester test{"if(1);else x++"};
+  ParserTester test = ParserTester::CreateWithCpp("if(1);else x++");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2528,7 +2537,7 @@ TEST(ParserTest, NULLTrueBranch) {
 }
 
 TEST(ParserTest, Lambda_1) {
-  ParserTester test{"y = x=> x+10;"};
+  ParserTester test = ParserTester::CreateWithCpp("y = x=> x+10;");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2559,7 +2568,7 @@ TEST(ParserTest, Lambda_1) {
 }
 
 TEST(ParserTest, Lambda_2) {
-  ParserTester test{"y = (x)=> x+10;"};
+  ParserTester test = ParserTester::CreateWithCpp("y = (x)=> x+10;");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2591,7 +2600,7 @@ TEST(ParserTest, Lambda_2) {
 }
 
 TEST(ParserTest, Lambda_3) {
-  ParserTester test{"y = ()=> x+10;"};
+  ParserTester test = ParserTester::CreateWithCpp("y = ()=> x+10;");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2621,7 +2630,7 @@ TEST(ParserTest, Lambda_3) {
 }
 
 TEST(ParserTest, Lambda_4) {
-  ParserTester test{"y = (x,c,z)=> v= c++ + ++x;"};
+  ParserTester test = ParserTester::CreateWithCpp("y = (x,c,z)=> v= c++ + ++x;");
   auto node = test->ParseCode();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 
@@ -2655,4 +2664,16 @@ TEST(ParserTest, Lambda_4) {
               IsBinaryOperation(TT_EQUALS, IsIdentifier("v"),
                                 IsBinaryOperation(TT_PLUS, IsUnaryPostfixOperator(TT_INCREMENT, IsIdentifier("c")),
                                                   IsUnaryPrefixOperator(TT_INCREMENT, IsIdentifier("x")))));
+}
+
+TEST(ParserTest, TestSetUp) {
+  ParserTester test = ParserTester::CreateWithSetUp("room_height = 12;");
+  ASSERT_TRUE(test.context->language_fe->look_up("room_height"));
+  auto node = test->ParseCode();
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  ASSERT_EQ(block->statements[0]->type, AST::NodeType::BINARY_EXPRESSION);
 }

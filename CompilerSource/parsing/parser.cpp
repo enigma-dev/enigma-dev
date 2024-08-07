@@ -172,8 +172,8 @@ bool is_type_specifier(const Token &tok) {
     case TT_UNSIGNED:
       return true;
 
-    case TT_IDENTIFIER:
-      return is_user_defined_type(tok);
+    // case TT_IDENTIFIER:
+    //   return is_user_defined_type(tok);
 
     default:
       return is_cv_qualifier(tok) || is_class_key(tok);
@@ -372,8 +372,8 @@ bool maybe_functional_cast(const Token &tok) {
     case TT_DECLTYPE:
       return true;
 
-    case TT_IDENTIFIER:
-      return is_user_defined_type(tok);
+    // case TT_IDENTIFIER:
+    //   return is_user_defined_type(tok);
 
     default:
       return false;
@@ -610,7 +610,7 @@ jdi::definition *TryParseIdExpression(Declarator *decl) {
     }
 
     case TT_IDENTIFIER: {
-      if (next_is_user_defined_type()) {
+      if (false/*next_is_user_defined_type()*/) {
         return TryParsePrefixIdentifier(decl);
       } else {
         Token name = token;
