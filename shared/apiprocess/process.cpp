@@ -434,7 +434,7 @@ namespace ngs::ps {
     #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
-    proc *proc_info = nullptr;
+    struct proc *proc_info = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
@@ -621,7 +621,7 @@ namespace ngs::ps {
       close(fd);
     }
     kvm_t *kd = nullptr;
-    proc *proc_info = nullptr;
+    struct proc *proc_info = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
@@ -742,7 +742,7 @@ namespace ngs::ps {
     #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
-    proc *proc_info = nullptr;
+    struct proc *proc_info = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
@@ -1202,8 +1202,8 @@ namespace ngs::ps {
     #if defined(__sun)
     kvm_t *kd = nullptr;
     char **cmd = nullptr;
-    proc *proc_info = nullptr;
-    user *proc_user = nullptr;
+    struct proc *proc_info = nullptr;
+    struct user *proc_user = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
@@ -1305,8 +1305,8 @@ namespace ngs::ps {
     #if defined(__sun)
     kvm_t *kd = nullptr;
     char **env = nullptr;
-    proc *proc_info = nullptr;
-    user *proc_user = nullptr;
+    struct proc *proc_info = nullptr;
+    struct user *proc_user = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
