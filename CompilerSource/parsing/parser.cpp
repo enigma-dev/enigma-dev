@@ -415,8 +415,8 @@ void maybe_infer_int(FullType &type) {
   }
 }
 
-AstBuilder(Lexer *lexer, ErrorHandler *herr){
-  initialize(lexer, herr);
+AstBuilder(Lexer *lexer, ErrorHandler *herr, CompileState* cs) {
+  initialize(lexer, herr, cs);
 }
 
 AstBuilder(){}
@@ -1099,10 +1099,15 @@ void TryParseDeclSpecifier(FullType *type) {
   }
 }
 
-void TryParseDeclSpecifierSeq(FullType *type) {
-  while (is_decl_specifier(token)) {
-    TryParseDeclSpecifier(type);
+bool TryParseDeclSpecifierSeq(FullType *type) {
+  bool is_global = false;
+  while (is_decl_specifier(token) || token.content == "global") {
+    if (token.content == "global")
+      is_global = true, token = lexer->ReadToken();
+    else
+      TryParseDeclSpecifier(type);
   }
+  return is_global;
 }
 
 std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
@@ -1353,17 +1358,18 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
 }
 
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
-  if (is_decl_specifier(token)) {
+  bool is_global = token.content == "global";
+  if (is_decl_specifier(token)||token.content=="global") {
     FullType type;
-    TryParseDeclSpecifierSeq(&type);
+    is_global = TryParseDeclSpecifierSeq(&type);
     maybe_infer_int(type);
     if (type.def == nullptr) {
       herr->Error(token) << "Unable to parse type specifier in declaration";
       return nullptr;
     }
 
-    // XXX: Implementation disallows, e.g, `int global foo;`
-    auto sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
+    auto sc = is_global ? AST::DeclarationStatement::StorageClass::GLOBAL
+                        : AST::DeclarationStatement::StorageClass::TEMPORARY;
     return parse_declarations(sc, type, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
   } else {
     return nullptr;
@@ -1828,6 +1834,8 @@ std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, 
         : (rule.associativity == Associativity::RTL)
             ? TryParseExpression(rule.precedence)
             : nullptr;
+    if(oper.type==TT_DOT &&right->type==AST::NodeType::IDENTIFIER)
+      cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
 
     AST::Operation op(oper.type, std::string(oper.content));
     operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
@@ -2407,8 +2415,8 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
 
 };  // class AstBuilder
 
-std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
-  AstBuilder ab(lexer, herr);
+std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr, CompileState& cs) {
+  AstBuilder ab(lexer, herr, &cs);
   return ab.ParseCode();
 }
 

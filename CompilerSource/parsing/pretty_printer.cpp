@@ -148,7 +148,19 @@ bool AST::Visitor::VisitWithStatement(WithStatement &node) {
   return true;
 }
 
+bool AST::Visitor::VisitGlobal(BinaryExpression &node) {
+  print("enigma::varaccess_");
+  VISIT_AND_CHECK(node.right);
+  print("(int(global))");
+  return true;
+}
+
 bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
+  if (node.left->type == AST::NodeType::IDENTIFIER) {
+    if (node.left->As<AST::IdentifierAccess>()->name.content == "global") {
+      return VisitGlobal(node);
+    }
+  }
   VISIT_AND_CHECK(node.left);
 
   print(" " + node.operation.token + " ");
@@ -164,14 +176,25 @@ bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
 bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
   VISIT_AND_CHECK(node.function);
   print("(");
-
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    if (node.function->As<AST::IdentifierAccess>()->name.content == "choose") {
+      print("(enigma::varargs()");
+      if (node.arguments.size()) {
+        print(", ");
+      }
+    }
+  }
   for (auto &arg : node.arguments) {
     VISIT_AND_CHECK(arg);
     if (&arg != &node.arguments.back()) {
       print(", ");
     }
   }
-
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    if (node.function->As<AST::IdentifierAccess>()->name.content == "choose") {
+      print(")");
+    }
+  }
   print(")");
   return true;
 }
@@ -467,6 +490,7 @@ bool AST::Visitor::VisitNewExpression(NewExpression &node) {
 }
 
 bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
+  // Handle global
   for (std::size_t i = 0; i < node.declarations.size(); i++) {
     if (!VisitFullType(*node.declarations[i].declarator, !i)) return false;
     if (node.declarations[i].init) {

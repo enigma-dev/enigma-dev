@@ -33,7 +33,7 @@
 #include <vector>
 
 struct ParsedScope;  // object_storage.h
-
+struct CompileState;
 namespace enigma::parsing {
 
 class AST {
@@ -565,6 +565,7 @@ class AST {
     }
     virtual bool VisitCode(CodeBlock &node);
     virtual bool VisitCodeBlock(CodeBlock &node);
+    virtual bool VisitGlobal(BinaryExpression &node);
     virtual bool VisitBinaryExpression(BinaryExpression &node);
     virtual bool VisitFunctionCallExpression(FunctionCallExpression &node);
     virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
@@ -641,7 +642,7 @@ class AST {
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.
-  static AST Parse(std::string code, const ParseContext *ctex);
+  static AST Parse(std::string code, CompileState& ctex);
 
   void VisitNodes(Visitor &visitor) {
     if (root_) root_->accept(visitor);

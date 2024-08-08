@@ -11,6 +11,7 @@
 
 #include <JDI/src/System/builtins.h>
 #include <memory>
+#include "../parser/object_storage.h"
 
 namespace enigma::parsing {
 
@@ -23,6 +24,7 @@ class AstBuilderTestAPI {
   SyntaxMode mode;
   const LanguageFrontend *frontend;
   Token token;
+  CompileState* cs;
 
   /**
  * @brief Store a mapping from variable name to the @c FullType of its definition
@@ -35,11 +37,12 @@ class AstBuilderTestAPI {
 
   AstBuilderTestAPI() = default;
 
-  void initialize(Lexer *lexer, ErrorHandler *herr) {
+  void initialize(Lexer *lexer, ErrorHandler *herr, CompileState* cs) {
     this->lexer = lexer;
     this->herr = herr;
     this->mode = lexer->GetContext().compatibility_opts.syntax_mode;
     this->frontend = lexer->GetContext().language_fe;
+    this->cs = cs;
     token = lexer->ReadToken();
   }
 
@@ -53,7 +56,7 @@ class AstBuilderTestAPI {
 };
 
 AstBuilderTestAPI *CreateBuilder();
-std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr);
+std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr, CompileState &cs);
 
 }  // namespace enigma::parsing
 
