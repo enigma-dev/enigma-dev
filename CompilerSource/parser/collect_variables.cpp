@@ -34,8 +34,8 @@
 #include <cstdio>
 #include <iostream>
 #include <map>
-#include <string>
 #include <sstream>
+#include <string>
 #include <unordered_set>
 
 using namespace std;
@@ -43,17 +43,18 @@ using namespace std;
 extern int global_script_argument_count;
 
 struct scope_ignore {
-  map<string,int> ignore;
+  map<string, int> ignore;
   bool is_with;
-  
-  scope_ignore(scope_ignore*x): is_with(x->is_with) {}
-  scope_ignore(bool x): is_with(x) {}
-  scope_ignore(int x): is_with(x) {}
+
+  scope_ignore(scope_ignore *x) : is_with(x->is_with) {}
+  scope_ignore(bool x) : is_with(x) {}
+  scope_ignore(int x) : is_with(x) {}
 };
 
-#include "object_storage.h"
+#include "../parsing/tokens.h"
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
+#include "object_storage.h"
 
 using enigma::parsing::AST;
 
@@ -69,21 +70,55 @@ class DeclGatheringVisitor : public AST::Visitor {
   const NameSet &script_names;
 
   bool VisitCodeBlock(AST::CodeBlock &node) final {
-    DeclGatheringVisitor sub(this);
-    node.RecursiveSubVisit(sub);
+    node.RecursiveSubVisit(*this);
     return false;
   }
-  
+
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
     for (const auto &decl : node.declarations) {
-      
+      dectrip dtrip("var");  // FIXME
+      parsed_scope->declarations[decl.declarator->decl.name.content] = dtrip;
     }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBinaryExpression(AST::BinaryExpression &node) final {
+    if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
+      if (node.right->type == AST::NodeType::IDENTIFIER) {
+        parsed_scope->dots[node.left->As<AST::IdentifierAccess>()->name.content] = 0;
+      }
+    } else if (node.operation.type == enigma::parsing::TokenType::TT_EQUALS) {
+      if (node.left->type == AST::NodeType::IDENTIFIER) {
+        std::string name = node.left->As<AST::IdentifierAccess>()->name.content;
+        // if (std::find(defined.begin(), defined.end(), name) == defined.end()) parsed_scope->locals[name] = dectrip();
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitFunctionCall(AST::FunctionCallExpression &node) {
+    if (node.function->type == AST::NodeType::IDENTIFIER) {
+      parsed_scope->funcs[node.function->As<AST::IdentifierAccess>()->name.content] = node.arguments.size();
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWithStatement(AST::WithStatement &node) final {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitIfStatement(AST::IfStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
   }
 
  public:
-  DeclGatheringVisitor(const LanguageFrontend *language_fe,
-                       ParsedScope *pscope, const NameSet &scripts):
-    lang(language_fe), parsed_scope(pscope), script_names(scripts) {}
+  DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts)
+      : lang(language_fe), parsed_scope(pscope), script_names(scripts) {}
 
  private:
   DeclGatheringVisitor *parent_ = nullptr;
@@ -101,15 +136,15 @@ class DeclGatheringVisitor : public AST::Visitor {
     return decls_;
   }
 
-  DeclGatheringVisitor(DeclGatheringVisitor *parent):
-      lang(parent_->lang),
-      parsed_scope(parent_->parsed_scope),
-      script_names(parent_->script_names),
-      parent_(parent) {}
+  DeclGatheringVisitor(DeclGatheringVisitor *parent)
+      : lang(parent_->lang),
+        parsed_scope(parent_->parsed_scope),
+        script_names(parent_->script_names),
+        parent_(parent) {}
 };
 
-void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast,
-                       ParsedScope *parsed_scope, const NameSet &script_names) {
+void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast, ParsedScope *parsed_scope,
+                       const NameSet &script_names) {
   DeclGatheringVisitor visitor(lang, parsed_scope, script_names);
   ast->VisitNodes(visitor);
 }

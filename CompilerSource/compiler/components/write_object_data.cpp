@@ -855,7 +855,7 @@ static inline void write_object_functionality(
   wto << "struct log_xor_helper { bool value; };" << endl;
   wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
   wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
-  wto << "#define with(x) for(int i=0;i<1;i++)" << endl;  // FIXME
+  wto << "#define with(x) while(0)" << endl;  // FIXME
   write_script_implementations(wto, game, state, mode);
   write_timeline_implementations(wto, game, state);
   write_event_bodies(wto, game, mode, state.parsed_objects, state.script_lookup, state.timeline_lookup);

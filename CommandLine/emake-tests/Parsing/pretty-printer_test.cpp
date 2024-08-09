@@ -1238,3 +1238,19 @@ TEST(PrinterTest, test62) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test63) {
+  std::string code = "var gg=1;";
+
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::Visitor v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}

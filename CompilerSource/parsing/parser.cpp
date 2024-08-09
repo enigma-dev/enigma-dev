@@ -900,7 +900,11 @@ void maybe_assign_full_type(FullType *type, jdi::definition *def, Token token) {
 }
 
 jdi::definition *get_builtin(std::string_view name) {
-  return jdi::builtin_primitives[std::string(name)];
+  auto it = jdi::builtin_primitives.find(std::string(name));
+  if (it != jdi::builtin_primitives.end()) {
+    return it->second;
+  }
+  return frontend->look_up(std::string(name));
 }
 
 void TryParseTypeSpecifier(FullType *type) {

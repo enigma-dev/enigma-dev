@@ -36,7 +36,7 @@ struct ParserTester {
 
   explicit ParserTester(std::string code, bool use_cpp)
       : context(&ParseContext::ForTesting(use_cpp)), lexer(std::move(code), context, &herr) {
-        cs = new CompileState(&cpp, kNoNames);
+    cs = new CompileState(&cpp, kNoNames);
     builder->initialize(&lexer, &herr, cs);
   }
 

@@ -208,6 +208,8 @@ struct ParsedScope {
   map<string,dectrip> ambiguous;
   /// Any variable KEY declared as global VALUE.
   map<string,dectrip> globals;  ///< 
+  /// Any Declration (eg, `int x`)
+  map<string,dectrip> declarations;
   /// Any variable, KEY, declared as constant VALUE.
   map<string,decquad> consts;
   /// Any shared local variable, KEY, used in this scope.
