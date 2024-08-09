@@ -62,6 +62,10 @@ include(FindProtobuf)
 include_directories(${Protobuf_INCLUDE_DIRS})
 target_link_libraries(${CLI_TARGET} PRIVATE ${Protobuf_LIBRARIES})
 
+# Find absl
+find_package(absl CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE absl::base absl::strings absl::synchronization absl::time absl::status absl::statusor)
+
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
