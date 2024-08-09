@@ -1532,7 +1532,7 @@ namespace ngs::ps {
       si.cb = sizeof(STARTUPINFOW);
       si.dwFlags = STARTF_USESTDHANDLES;
       #if defined(NULLIFY_STDERR)
-      si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+      si.hStdError = nullptr;
       #else
       si.hStdError = stdout_write;
       #endif
