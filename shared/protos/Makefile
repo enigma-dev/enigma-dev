@@ -2,7 +2,7 @@ include ../../Config.mk
 
 PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
 SOURCES_GRPC := server.proto
-LDFLAGS += -shared -lprotobuf -lgrpc++
+LDFLAGS += -shared -lgrpc++ -lprotobuf
 CXXFLAGS += -D_WIN32_WINNT=0x0600 -I$(OBJ_DIR) -fPIC
 GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)$(BIN_EXT)
 
