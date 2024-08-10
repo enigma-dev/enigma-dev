@@ -69,7 +69,39 @@ class DeclGatheringVisitor : public AST::Visitor {
   ParsedScope *const parsed_scope;
   const NameSet &script_names;
 
+  bool CheckIfReserved(const std::string &name) {
+    bool res = lang->is_shared_local(name);
+    res |= lang->global_exists(name);
+    return res;
+  }
+
+  std::string CheckIfIdentifier(AST::PNode &node) {
+    if (node->type == AST::NodeType::IDENTIFIER) {
+      std::string name = node->As<AST::IdentifierAccess>()->name.content;
+      if (!CheckIfReserved(name)) return name;
+    }
+    return "";
+  }
+
+  void AddLocal(AST::PNode &node) {
+    if (!node) return;
+    std::string name = CheckIfIdentifier(node);
+    if (name != "") parsed_scope->locals[name] = dectrip();
+  }
+
+  void AddDot(AST::PNode &node) {
+    if (!node) return;
+    std::string name = CheckIfIdentifier(node);
+    if (name != "") parsed_scope->dots[name] = 0;
+  }
+
+  void AddFunction(AST::FunctionCallExpression &node) {
+    std::string name = CheckIfIdentifier(node.function);
+    if (name != "") parsed_scope->funcs[name] = node.arguments.size();
+  }
+
   bool VisitCodeBlock(AST::CodeBlock &node) final {
+    for (auto &stmt : node.statements) AddLocal(stmt);
     node.RecursiveSubVisit(*this);
     return false;
   }
@@ -84,37 +116,155 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitBinaryExpression(AST::BinaryExpression &node) final {
+    AddLocal(node.left);
     if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
-      if (node.right->type == AST::NodeType::IDENTIFIER) {
-        parsed_scope->dots[node.left->As<AST::IdentifierAccess>()->name.content] = 0;
-      }
-    } else if (node.operation.type == enigma::parsing::TokenType::TT_EQUALS) {
-      if (node.left->type == AST::NodeType::IDENTIFIER) {
-        std::string name = node.left->As<AST::IdentifierAccess>()->name.content;
-        // if (std::find(defined.begin(), defined.end(), name) == defined.end()) parsed_scope->locals[name] = dectrip();
-      }
+      AddDot(node.right);  // what if it is reserved?
+    } else {
+      AddLocal(node.right);
     }
     node.RecursiveSubVisit(*this);
     return false;
   }
 
   bool VisitFunctionCall(AST::FunctionCallExpression &node) {
-    if (node.function->type == AST::NodeType::IDENTIFIER) {
-      parsed_scope->funcs[node.function->As<AST::IdentifierAccess>()->name.content] = node.arguments.size();
-    }
+    AddFunction(node);
+    for (auto &arg : node.arguments) AddLocal(arg);
     node.RecursiveSubVisit(*this);
     return false;
   }
 
   bool VisitWithStatement(AST::WithStatement &node) final {
+    AddLocal(node.object);
+    AddLocal(node.body);
     node.RecursiveSubVisit(*this);
     return false;
   }
 
   bool VisitIfStatement(AST::IfStatement &node) {
+    AddLocal(node.condition);
+    AddLocal(node.true_branch);
+    AddLocal(node.false_branch);
     node.RecursiveSubVisit(*this);
     return false;
   }
+
+  bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
+    AddLocal(node.operand);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) {
+    AddLocal(node.operand);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitTernaryExpression(AST::TernaryExpression &node) {
+    AddLocal(node.condition);
+    AddLocal(node.true_expression);
+    AddLocal(node.false_expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLambdaExpression(AST::LambdaExpression &node) {
+    // I think no need to add locals for the arguments, because we give them `auto` in the prett
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  virtual bool VisitSizeofExpression(AST::SizeofExpression &node) {
+    if (node.kind == AST::SizeofExpression::Kind::EXPR) {
+      AddLocal(std::get<AST::PNode>(node.argument));
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCastExpression(AST::CastExpression &node) {
+    AddLocal(node.expr);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitParenthetical(AST::Parenthetical &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitArray(AST::Array &node) {
+    for (auto &elem : node.elements) AddLocal(elem);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitForLoop(AST::ForLoop &node) {
+    AddLocal(node.assignment);
+    AddLocal(node.condition);
+    AddLocal(node.increment);
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWhileLoop(AST::WhileLoop &node) {
+    AddLocal(node.condition);
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  virtual bool VisitDoLoop(AST::DoLoop &node) {
+    AddLocal(node.body);
+    AddLocal(node.condition);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCaseStatement(AST::CaseStatement &node) {
+    AddLocal(node.value);
+    // CaseStatement::statements is code block, no need to add locals here
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDefaultStatement(AST::DefaultStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSwitchStatement(AST::SwitchStatement &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitReturnStatement(AST::ReturnStatement &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBreakStatement(AST::BreakStatement &node) {
+    AddLocal(node.count);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitContinueStatement(AST::ContinueStatement &node) {
+    AddLocal(node.count);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  // virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
+  // virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
+  // virtual bool VisitInitializer(Initializer &node);
+  // virtual bool VisitNewExpression(NewExpression &node);
+  // virtual bool VisitDeleteExpression(DeleteExpression &node)
 
  public:
   DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts)

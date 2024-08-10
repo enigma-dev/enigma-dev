@@ -398,6 +398,7 @@ struct CompileState {
   ParsedRoomVec parsed_rooms;
   
   ScriptLookupMap script_lookup;
+  //
   TimelineLookupMap timeline_lookup;
   
   ParsedScope global_object;
