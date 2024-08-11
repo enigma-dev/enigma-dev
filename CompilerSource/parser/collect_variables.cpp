@@ -72,6 +72,8 @@ class DeclGatheringVisitor : public AST::Visitor {
   bool CheckIfReserved(const std::string &name) {
     bool res = lang->is_shared_local(name);
     res |= lang->global_exists(name);
+    res |= script_names.find(name) != script_names.end();
+    res |= parsed_scope->declarations.find(name) != parsed_scope->declarations.end();
     return res;
   }
 
@@ -169,7 +171,7 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitLambdaExpression(AST::LambdaExpression &node) {
-    // I think no need to add locals for the arguments, because we give them `auto` in the prett
+    // I think no need to add locals for the arguments, because we give them `auto` in the pretty printer
     AddLocal(node.body);
     node.RecursiveSubVisit(*this);
     return false;
