@@ -51,16 +51,17 @@ struct ParsedCode {
   // Allows us to add to locals when parsing the code.
   ParsedScope *my_scope;
 
-  ParsedCode(ParsedScope *scope, enigma::parsing::AST &&ast_)
+  ParsedCode(ParsedScope *scope, enigma::parsing::AST &&ast_, CompileState *cs)
       : ast(std::move(ast_)), my_scope(scope) {
-    ast.ExtractDeclarations(scope);
+    ast.ExtractDeclarations(scope, cs);
   }
 };
+
 struct ParsedEvent : ParsedCode {
   Event ev_id;
 
-  ParsedEvent(Event ev_id, ParsedScope *scope, enigma::parsing::AST &&ast)
-      : ParsedCode(scope, std::move(ast)), ev_id(ev_id) {}
+  ParsedEvent(Event ev_id, ParsedScope *scope, enigma::parsing::AST &&ast, CompileState *cs)
+      : ParsedCode(scope, std::move(ast), cs), ev_id(ev_id) {}
 };
 
 // Leverages EDL's direct use of C++ declaration syntax to represent type
@@ -334,8 +335,8 @@ struct ParsedScript {
   ParsedCode *global_code;
   int globargs; // The maximum number of arguments with which this was invoked from all contexts.
   // Automatically link our event to our object.
-  ParsedScript(enigma::parsing::AST &&ast)
-      : scope(), code(&scope, std::move(ast)), global_code(nullptr), globargs(0) {}
+  ParsedScript(enigma::parsing::AST &&ast, CompileState *cs)
+      : scope(), code(&scope, std::move(ast), cs), global_code(nullptr), globargs(0) {}
 };
 
 struct parsed_moment {
@@ -398,7 +399,6 @@ struct CompileState {
   ParsedRoomVec parsed_rooms;
   
   ScriptLookupMap script_lookup;
-  //
   TimelineLookupMap timeline_lookup;
   
   ParsedScope global_object;

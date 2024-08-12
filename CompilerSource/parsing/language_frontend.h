@@ -53,7 +53,6 @@ class LanguageFrontend {
 
   /// Returns whether the given definition is a variadic function--in ENIGMA's
   /// case, this means a function accepting `enigma::varargs` as its final arg.
-  //
   virtual bool is_variadic_function(jdi::definition *d) const = 0;
   /// Returns the index at which a function parameters ref_stack is variadic;
   /// that is, at which argument position it accepts `enigma::varargs`.

@@ -68,6 +68,7 @@ class DeclGatheringVisitor : public AST::Visitor {
   const LanguageFrontend *const lang;
   ParsedScope *const parsed_scope;
   const NameSet &script_names;
+  CompileState *cs;
 
   bool CheckIfReserved(const std::string &name) {
     bool res = lang->is_shared_local(name);
@@ -88,6 +89,10 @@ class DeclGatheringVisitor : public AST::Visitor {
   void AddLocal(AST::PNode &node) {
     if (!node) return;
     std::string name = CheckIfIdentifier(node);
+    if (cs->timeline_lookup.find(name) != cs->timeline_lookup.end()) {
+      parsed_scope->tlines[name] = 0;
+      return;
+    }
     if (name != "") parsed_scope->locals[name] = dectrip();
   }
 
@@ -269,8 +274,9 @@ class DeclGatheringVisitor : public AST::Visitor {
   // virtual bool VisitDeleteExpression(DeleteExpression &node)
 
  public:
-  DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts)
-      : lang(language_fe), parsed_scope(pscope), script_names(scripts) {}
+  DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts,
+                       CompileState *cs)
+      : lang(language_fe), parsed_scope(pscope), script_names(scripts), cs(cs) {}
 
  private:
   DeclGatheringVisitor *parent_ = nullptr;
@@ -296,7 +302,7 @@ class DeclGatheringVisitor : public AST::Visitor {
 };
 
 void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast, ParsedScope *parsed_scope,
-                       const NameSet &script_names) {
-  DeclGatheringVisitor visitor(lang, parsed_scope, script_names);
+                       const NameSet &script_names, CompileState *cs) {
+  DeclGatheringVisitor visitor(lang, parsed_scope, script_names, cs);
   ast->VisitNodes(visitor);
 }

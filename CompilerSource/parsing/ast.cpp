@@ -54,10 +54,10 @@ AST AST::Parse(std::string code, CompileState& ctex) {
   return res;
 }
 
-void AST::ExtractDeclarations(ParsedScope *destination_scope) {
+void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs) {
   std::cout << "collecting variables..." << std::flush;
   const ParseContext &ctex = lexer->GetContext();
-  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names);
+  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs);
   std::cout << " done." << std::endl;
 }
 

@@ -626,7 +626,7 @@ class AST {
   void ApplyTo(int instance_id);
 
   // Extract declarations from this AST into the specified scope.
-  void ExtractDeclarations(ParsedScope *destination_scope);
+  void ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs);
 
   // Pretty-prints this code to a stream with the given base indentation.
   // void PrettyPrint(std::ofstream &of, int base_indent = 2) const;
