@@ -71,9 +71,7 @@ class DeclGatheringVisitor : public AST::Visitor {
   CompileState *cs;
 
   bool CheckIfReserved(const std::string &name) {
-    bool res = lang->is_shared_local(name);
-    res |= lang->global_exists(name);
-    res |= script_names.find(name) != script_names.end();
+    bool res = script_names.find(name) != script_names.end();
     res |= parsed_scope->declarations.find(name) != parsed_scope->declarations.end();
     return res;
   }
@@ -86,14 +84,24 @@ class DeclGatheringVisitor : public AST::Visitor {
     return "";
   }
 
-  void AddLocal(AST::PNode &node) {
-    if (!node) return;
+  std::string AddLocal(AST::PNode &node) {
+    if (!node) return "";
     std::string name = CheckIfIdentifier(node);
+    if (name == "") return "";
+    if (lang->is_shared_local(name)) {
+      parsed_scope->globallocals[name] = 0;
+      return "";
+    }
     if (cs->timeline_lookup.find(name) != cs->timeline_lookup.end()) {
       parsed_scope->tlines[name] = 0;
-      return;
+      return "";
     }
-    if (name != "") parsed_scope->locals[name] = dectrip();
+    if (script_names.find(name) == script_names.end() && lang->global_exists(name)) {
+      // parsed_scope->globals[name] = dectrip();
+      return "";
+    }
+    if (script_names.find(name) == script_names.end()) parsed_scope->locals[name] = dectrip();
+    return name;
   }
 
   void AddDot(AST::PNode &node) {
@@ -142,7 +150,12 @@ class DeclGatheringVisitor : public AST::Visitor {
 
   bool VisitWithStatement(AST::WithStatement &node) final {
     AddLocal(node.object);
-    AddLocal(node.body);
+    std::string name = AddLocal(node.body);
+    // This will work only if the body is an identifier
+    if (name != "") {
+      parsed_scope->locals.erase(name);
+      parsed_scope->ambiguous[name] = dectrip();
+    }
     node.RecursiveSubVisit(*this);
     return false;
   }
