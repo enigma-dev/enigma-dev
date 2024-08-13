@@ -37,7 +37,7 @@ TEST(PrinterTest, test1) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -52,7 +52,7 @@ TEST(PrinterTest, test2) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "int x = new(int);";
@@ -68,7 +68,7 @@ TEST(PrinterTest, test3) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "{c++; g++; {int x=12; {for(int i=12;i!=22;i++){g++; c+=23;int cc = new (int);}}}}";
@@ -84,7 +84,7 @@ TEST(PrinterTest, test4) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -102,7 +102,7 @@ TEST(PrinterTest, test5) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -117,7 +117,7 @@ TEST(PrinterTest, test6) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -137,7 +137,7 @@ TEST(PrinterTest, test7) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -156,7 +156,7 @@ TEST(PrinterTest, test8) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -175,7 +175,7 @@ TEST(PrinterTest, test9) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -194,7 +194,7 @@ TEST(PrinterTest, test10) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "alignof(const volatile unsigned long long int*);";
@@ -212,7 +212,7 @@ TEST(PrinterTest, test11) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -232,7 +232,7 @@ TEST(PrinterTest, test12) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -250,7 +250,7 @@ TEST(PrinterTest, test13) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -267,7 +267,7 @@ TEST(PrinterTest, test14) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -283,7 +283,7 @@ TEST(PrinterTest, test15) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -300,7 +300,7 @@ TEST(PrinterTest, test16) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -317,7 +317,7 @@ TEST(PrinterTest, test17) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -335,7 +335,7 @@ TEST(PrinterTest, test18) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -354,7 +354,7 @@ TEST(PrinterTest, test19) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -377,7 +377,7 @@ TEST(PrinterTest, test20) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -405,7 +405,7 @@ TEST(PrinterTest, test21) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -427,7 +427,7 @@ TEST(PrinterTest, test22) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -450,7 +450,7 @@ TEST(PrinterTest, test23) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -474,7 +474,7 @@ TEST(PrinterTest, test24) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -494,7 +494,7 @@ TEST(PrinterTest, test25) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -521,7 +521,7 @@ TEST(PrinterTest, test26) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -546,7 +546,7 @@ TEST(PrinterTest, test27) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -568,7 +568,7 @@ TEST(PrinterTest, test28) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -600,7 +600,7 @@ TEST(PrinterTest, test29) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -618,7 +618,7 @@ TEST(PrinterTest, test30) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -639,7 +639,7 @@ TEST(PrinterTest, test31) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -657,7 +657,7 @@ TEST(PrinterTest, test32) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -682,7 +682,7 @@ TEST(PrinterTest, test33) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -709,7 +709,7 @@ TEST(PrinterTest, test34) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -728,7 +728,7 @@ TEST(PrinterTest, test35) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -748,7 +748,7 @@ TEST(PrinterTest, test36) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -768,7 +768,7 @@ TEST(PrinterTest, test37) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -792,7 +792,7 @@ TEST(PrinterTest, test38) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "{ int x = 5; const int y = 6; float *(*z)[10] = nullptr; foo(bar); } {{{}}}";
@@ -811,7 +811,7 @@ TEST(PrinterTest, test39) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -831,7 +831,7 @@ TEST(PrinterTest, test40) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "int((*(x))[5] + 6); int *(*a)[10] = nullptr;  int(*((*(a))[10]) + b); int(*(*(*(*(x) + 4))));";
@@ -856,7 +856,7 @@ TEST(PrinterTest, test41) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -887,7 +887,7 @@ TEST(PrinterTest, test42) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "while(i==1){i++;} while(!(i==1)) {i++;} int strange_name =(4) ; while(strange_name--){i++;}";
@@ -904,7 +904,7 @@ TEST(PrinterTest, test43) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "do{c++;}while(i); do{ c++;} while(!(i)); ";
@@ -923,7 +923,7 @@ TEST(PrinterTest, test44) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
@@ -944,7 +944,7 @@ TEST(PrinterTest, test44) {
 //   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
 //   auto *block = node->As<AST::CodeBlock>();
 
-//   AST::Visitor v;
+//   AST::CppPrettyPrinter v;
 //   ASSERT_TRUE(v.VisitCode(*block));
 //   std::string printed = v.GetPrintedCode();
 //   code =
@@ -962,7 +962,7 @@ TEST(PrinterTest, test46) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if ((x * 2)> s(12)) --l;";
@@ -979,7 +979,7 @@ TEST(PrinterTest, test47) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if (c++) --l;";
@@ -996,7 +996,7 @@ TEST(PrinterTest, test48) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "foo(12); --x;";
@@ -1013,7 +1013,7 @@ TEST(PrinterTest, test49) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -1029,7 +1029,7 @@ TEST(PrinterTest, test50) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if ((x * 2)> s(12)) --l;";
@@ -1046,7 +1046,7 @@ TEST(PrinterTest, test51) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if (a.b --) l;";
@@ -1063,7 +1063,7 @@ TEST(PrinterTest, test52) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if (a->b --) l;";
@@ -1080,7 +1080,7 @@ TEST(PrinterTest, test53) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "if(1); else x++;";
@@ -1097,7 +1097,7 @@ TEST(PrinterTest, test54) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&] (auto x) {x+10;};";
@@ -1114,7 +1114,7 @@ TEST(PrinterTest, test55) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&](auto x) {x+10;};";
@@ -1131,7 +1131,7 @@ TEST(PrinterTest, test56) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&]() {x+10;};";
@@ -1148,7 +1148,7 @@ TEST(PrinterTest, test57) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&](auto x, auto c, auto z) { v= c++ + ++x; };";
@@ -1165,7 +1165,7 @@ TEST(PrinterTest, test58) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "y = [&](auto x, auto c, auto z) { v= c++ + ++x; };";
@@ -1182,7 +1182,7 @@ TEST(PrinterTest, test59) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -1198,7 +1198,7 @@ TEST(PrinterTest, test60) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
@@ -1215,7 +1215,7 @@ TEST(PrinterTest, test60) {
 //   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
 //   auto *block = node->As<AST::CodeBlock>();
 
-//   AST::Visitor v;
+//   AST::CppPrettyPrinter v;
 //   ASSERT_TRUE(v.VisitCode(*block));
 //   std::string printed = v.GetPrintedCode();
 
@@ -1231,7 +1231,7 @@ TEST(PrinterTest, test62) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = "enigma::varaccess_x(int(global))=1;";
@@ -1248,9 +1248,26 @@ TEST(PrinterTest, test63) {
   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
   auto *block = node->As<AST::CodeBlock>();
 
-  AST::Visitor v;
+  AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+// TEST(PrinterTest, test64) {
+//   std::string code = "instance_create((choose(x+0, x+96, x+192, x+288)), 576, obj_blue)";
+
+//   ParserTester test = ParserTester::CreateWithSetUp(code);
+//   auto node = test->ParseCode();
+
+//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+//   auto *block = node->As<AST::CodeBlock>();
+
+//   AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+//   ASSERT_TRUE(v.VisitCode(*block));
+//   std::string printed = v.GetPrintedCode();
+//   code = "instance_create((choose((enigma::varargs(), x + 0, x + 96, x + 192, x + 288))), 576, obj_blue);";
+
+//   ASSERT_TRUE(compare(code, printed));
+// }

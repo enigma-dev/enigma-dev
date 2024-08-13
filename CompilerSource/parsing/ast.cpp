@@ -36,7 +36,7 @@ void AST::ApplyTo(int instance_id) {
 }
 
 void AST::WriteCppToStream(std::ofstream &of, int base_indent) const {
-  Visitor visitor(of);
+  CppPrettyPrinter visitor(of, lexer->GetContext().language_fe);
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
   }

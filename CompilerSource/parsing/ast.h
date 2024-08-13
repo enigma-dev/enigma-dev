@@ -34,6 +34,8 @@
 
 struct ParsedScope;  // object_storage.h
 struct CompileState;
+// class CppPrettyPrinter;
+
 namespace enigma::parsing {
 
 class AST {
@@ -521,87 +523,91 @@ class AST {
   };
 
   class Visitor {
-    std::ofstream* of;
-    bool print_type;
-
    public:
-    Visitor() {
-      of = new std::ofstream();
-      if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
-      print_type = false;
-    }
-
-    Visitor(std::ofstream &ofs) : of(&ofs) { print_type = false; }
-
-    void print(std::string code) { *of << code; }
-    
-    void PrintSemiColon(PNode &node) {
-      if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
-          node->type != AST::NodeType::CASE && node->type != AST::NodeType::DEFAULT &&
-          node->type != AST::NodeType::SWITCH && node->type != AST::NodeType::WHILE &&
-          node->type != AST::NodeType::DO && node->type != AST::NodeType::WITH) {
-        print("; ");
-      }
-    }
-
-    std::string GetPrintedCode() {
-      of->close();
-      std::ifstream file("./CompilerSource/parsing/output.txt");
-      std::string code = "";
-
-      if (file.is_open()) {
-        std::string line = "";
-        while (getline(file, line)) {
-          code += line;
-        }
-      }
-
-      return code;
-    }
-
     virtual bool DefaultVisit(Node &node) {
       (void)node;
       return true;
     }
-    virtual bool VisitCode(CodeBlock &node);
-    virtual bool VisitCodeBlock(CodeBlock &node);
-    virtual bool VisitGlobal(BinaryExpression &node);
-    virtual bool VisitBinaryExpression(BinaryExpression &node);
-    virtual bool VisitFunctionCallExpression(FunctionCallExpression &node);
-    virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
-    virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
-    virtual bool VisitTernaryExpression(TernaryExpression &node);
-    virtual bool VisitLambdaExpression(LambdaExpression &node);
-    virtual bool VisitFullType(FullType &node, bool print_type = true);
-    virtual bool VisitSizeofExpression(SizeofExpression &node);
-    virtual bool VisitAlignofExpression(AlignofExpression &node);
-    virtual bool VisitCastExpression(CastExpression &node);
-    virtual bool VisitParenthetical(Parenthetical &node);
-    virtual bool VisitArray(Array &node);
-    virtual bool VisitIdentifierAccess(IdentifierAccess &node);
-    virtual bool VisitLiteral(Literal &node);
-    virtual bool VisitIfStatement(IfStatement &node);
-    virtual bool VisitForLoop(ForLoop &node);
-    virtual bool VisitWhileLoop(WhileLoop &node);
-    virtual bool VisitDoLoop(DoLoop &node);
-    virtual bool VisitCaseStatement(CaseStatement &node);
-    virtual bool VisitDefaultStatement(DefaultStatement &node);
-    virtual bool VisitSwitchStatement(SwitchStatement &node);
-    virtual bool VisitReturnStatement(ReturnStatement &node);
-    virtual bool VisitBreakStatement(BreakStatement &node);
-    virtual bool VisitContinueStatement(ContinueStatement &node);
-    virtual bool VisitWithStatement(WithStatement &node);
-    virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
-    virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
-    virtual bool VisitInitializer(Initializer &node);
-    virtual bool VisitNewExpression(NewExpression &node);
-    virtual bool VisitDeleteExpression(DeleteExpression &node);
-    virtual bool VisitDeclarationStatement(DeclarationStatement &node);
+    virtual bool VisitCodeBlock(CodeBlock &node){ return DefaultVisit(node); }
+    virtual bool VisitBinaryExpression(BinaryExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitFunctionCallExpression(FunctionCallExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitTernaryExpression(TernaryExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitLambdaExpression(LambdaExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitSizeofExpression(SizeofExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitAlignofExpression(AlignofExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitCastExpression(CastExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitParenthetical(Parenthetical &node){ return DefaultVisit(node); }
+    virtual bool VisitArray(Array &node){ return DefaultVisit(node); }
+    virtual bool VisitIdentifierAccess(IdentifierAccess &node){ return DefaultVisit(node); }
+    virtual bool VisitLiteral(Literal &node){ return DefaultVisit(node); }
+    virtual bool VisitIfStatement(IfStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitForLoop(ForLoop &node){ return DefaultVisit(node); }
+    virtual bool VisitWhileLoop(WhileLoop &node){ return DefaultVisit(node); }
+    virtual bool VisitDoLoop(DoLoop &node){ return DefaultVisit(node); }
+    virtual bool VisitCaseStatement(CaseStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitDefaultStatement(DefaultStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitSwitchStatement(SwitchStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitReturnStatement(ReturnStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitBreakStatement(BreakStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitContinueStatement(ContinueStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitWithStatement(WithStatement &node){ return DefaultVisit(node); }
+    virtual bool VisitInitializer(Initializer &node){ return DefaultVisit(node); }
+    virtual bool VisitNewExpression(NewExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitDeleteExpression(DeleteExpression &node){ return DefaultVisit(node); }
+    virtual bool VisitDeclarationStatement(DeclarationStatement &node){ return DefaultVisit(node); }
     virtual bool Visit(PNode &node) {
       return node->accept(*this);
     }
+  };
 
-    // virtual ~Visitor() { of->close(); }
+  class CppPrettyPrinter : public AST::Visitor {
+    std::ofstream *of;
+    bool print_type;
+    const LanguageFrontend *language_fe = nullptr;
+
+   public:
+    CppPrettyPrinter();
+    CppPrettyPrinter(const LanguageFrontend *lfe);
+    CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe);
+    void print(std::string code);
+    void PrintSemiColon(PNode &node);
+    std::string GetPrintedCode();
+    bool VisitCode(CodeBlock &node);
+    bool VisitCodeBlock(CodeBlock &node);
+    bool VisitGlobal(BinaryExpression &node);
+    bool VisitBinaryExpression(BinaryExpression &node);
+    bool VisitFunctionCallExpression(FunctionCallExpression &node);
+    bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
+    bool VisitUnaryPostfixExpression(UnaryPostfixExpression &node);
+    bool VisitTernaryExpression(TernaryExpression &node);
+    bool VisitLambdaExpression(LambdaExpression &node);
+    bool VisitFullType(FullType &node, bool print_type = true);
+    bool VisitSizeofExpression(SizeofExpression &node);
+    bool VisitAlignofExpression(AlignofExpression &node);
+    bool VisitCastExpression(CastExpression &node);
+    bool VisitParenthetical(Parenthetical &node);
+    bool VisitArray(Array &node);
+    bool VisitIdentifierAccess(IdentifierAccess &node);
+    bool VisitLiteral(Literal &node);
+    bool VisitIfStatement(IfStatement &node);
+    bool VisitForLoop(ForLoop &node);
+    bool VisitWhileLoop(WhileLoop &node);
+    bool VisitDoLoop(DoLoop &node);
+    bool VisitCaseStatement(CaseStatement &node);
+    bool VisitDefaultStatement(DefaultStatement &node);
+    bool VisitSwitchStatement(SwitchStatement &node);
+    bool VisitReturnStatement(ReturnStatement &node);
+    bool VisitBreakStatement(BreakStatement &node);
+    bool VisitContinueStatement(ContinueStatement &node);
+    bool VisitWithStatement(WithStatement &node);
+    bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
+    bool VisitAssignmentInitializer(AssignmentInitializer &node);
+    bool VisitInitializer(Initializer &node);
+    bool VisitNewExpression(NewExpression &node);
+    bool VisitDeleteExpression(DeleteExpression &node);
+    bool VisitDeclarationStatement(DeclarationStatement &node);
   };
 
   // Used to adapt to current single-error syntax checking interface.
