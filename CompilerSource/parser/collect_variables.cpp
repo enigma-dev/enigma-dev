@@ -96,18 +96,31 @@ class DeclGatheringVisitor : public AST::Visitor {
       parsed_scope->tlines[name] = 0;
       return "";
     }
-    if (script_names.find(name) == script_names.end() && lang->global_exists(name)) {
-      // parsed_scope->globals[name] = dectrip();
-      return "";
+    if (script_names.find(name) == script_names.end() && !lang->global_exists(name)) {
+      parsed_scope->locals[name] = dectrip();
+      return name;
     }
-    if (script_names.find(name) == script_names.end()) parsed_scope->locals[name] = dectrip();
-    return name;
+    return "";
+  }
+
+  bool AddGlobal(AST::BinaryExpression &node) {
+    if (node.left->type == AST::NodeType::IDENTIFIER) {
+      auto left = node.left->As<AST::IdentifierAccess>();
+      if (left->name.content == "global" && node.operation.type == enigma::parsing::TokenType::TT_DOT) {
+        auto right = node.right->As<AST::IdentifierAccess>();
+        parsed_scope->globals[right->name.content] = dectrip("var");
+        cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
+        return true;
+      }
+    }
+    return false;
   }
 
   void AddDot(AST::PNode &node) {
     if (!node) return;
     std::string name = CheckIfIdentifier(node);
     if (name != "") parsed_scope->dots[name] = 0;
+    cs->add_dot_accessed_local(name);
   }
 
   void AddFunction(AST::FunctionCallExpression &node) {
@@ -131,11 +144,14 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitBinaryExpression(AST::BinaryExpression &node) final {
-    AddLocal(node.left);
-    if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
-      AddDot(node.right);  // what if it is reserved?
-    } else {
-      AddLocal(node.right);
+    bool added = AddGlobal(node);
+    if (!added) {
+      AddLocal(node.left);
+      if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
+        AddDot(node.right);
+      } else {
+        AddLocal(node.right);
+      }
     }
     node.RecursiveSubVisit(*this);
     return false;

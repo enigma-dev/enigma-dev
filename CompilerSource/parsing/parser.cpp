@@ -1838,8 +1838,6 @@ std::unique_ptr<AST::BinaryExpression> TryParseBinaryExpression(int precedence, 
         : (rule.associativity == Associativity::RTL)
             ? TryParseExpression(rule.precedence)
             : nullptr;
-    if(oper.type==TT_DOT &&right->type==AST::NodeType::IDENTIFIER)
-      cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
 
     AST::Operation op(oper.type, std::string(oper.content));
     operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
