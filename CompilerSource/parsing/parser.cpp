@@ -981,10 +981,17 @@ void TryParseTypeSpecifier(FullType *type) {
   }
 }
 
-void TryParseTypeSpecifierSeq(FullType *type) {
-  while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(type);
+bool TryParseTypeSpecifierSeq(FullType *type) {
+  bool is_global = false;
+  while (next_is_type_specifier() || token.content == "global") {
+    if (token.content == "global") {
+      is_global = true;
+      token = lexer->ReadToken();
+    } else {
+      TryParseTypeSpecifier(type);
+    }
   }
+  return is_global;
 }
 
 void TryParsePtrOperator(FullType *type) {
@@ -1363,7 +1370,7 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
 
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
   bool is_global = token.content == "global";
-  if (is_decl_specifier(token)||token.content=="global") {
+  if (is_decl_specifier(token)||token.content == "global") {
     FullType type;
     is_global = TryParseDeclSpecifierSeq(&type);
     maybe_infer_int(type);
@@ -2039,17 +2046,22 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       } else {
         sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
       }
-      if (is_decl_specifier(token) || next_maybe_functional_cast()) {
+      bool is_global = token.content == "global";
+      Token maybe_global = token;
+      if (is_global) {
+        token = lexer->ReadToken();
+        sc = AST::DeclarationStatement::StorageClass::GLOBAL;
+      }
+      if (is_decl_specifier(token) || next_maybe_functional_cast() || (is_global && token.type != TT_DOT)) {
         Token start = token;
         auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, false, sc);
-        if (decl->type == AST::NodeType::DECLARATION) {
-          herr->Error(start) << "Trying to parse declaration within <stmt>";
-        }
-        // Parse it anyways
-        // MaybeConsumeSemicolon();
+        MaybeConsumeSemicolon();
         return decl;
       } else {
-        auto node = TryParseExpression(Precedence::kAll);
+        jdi::definition *def = nullptr;
+        std::unique_ptr<AST::Node> operand =
+            is_global ? std::make_unique<AST::IdentifierAccess>(def, maybe_global) : nullptr;
+        auto node = TryParseExpression(Precedence::kAll, std::move(operand));
         MaybeConsumeSemicolon();
         return node;
       }
@@ -2176,7 +2188,8 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
         // Make sure we don't accidentally consume a c-style cast when its required
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
-      TryParseTypeSpecifierSeq(&type);
+      bool is_global = TryParseTypeSpecifierSeq(&type);
+      sc = is_global ? AST::DeclarationStatement::StorageClass::GLOBAL : sc;
       return parse_declarations(sc, type, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;

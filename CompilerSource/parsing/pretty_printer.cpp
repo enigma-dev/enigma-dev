@@ -533,7 +533,7 @@ bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
-  // Handle global
+  if (node.storage_class == DeclarationStatement::StorageClass::GLOBAL) return true;
   for (std::size_t i = 0; i < node.declarations.size(); i++) {
     if (!VisitFullType(*node.declarations[i].declarator, !i)) return false;
     if (node.declarations[i].init) {

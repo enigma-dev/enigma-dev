@@ -1205,22 +1205,21 @@ TEST(PrinterTest, test60) {
   ASSERT_TRUE(compare(code, printed));
 }
 
-// It takes some time to setup, let's comment it out for now
-// TEST(PrinterTest, test61) {
-//   std::string code = "{if(y<(room_height / 2-350));}";
+TEST(PrinterTest, test61) {
+  std::string code = "{if(y<(room_height / 2-350));}";
 
-//   ParserTester test = ParserTester::CreateWithSetUp(code);
-//   auto node = test->ParseCode();
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
 
-//   AST::CppPrettyPrinter v;
-//   ASSERT_TRUE(v.VisitCode(*block));
-//   std::string printed = v.GetPrintedCode();
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
 
-//   ASSERT_TRUE(compare(code, printed));
-// }
+  ASSERT_TRUE(compare(code, printed));
+}
 
 TEST(PrinterTest, test62) {
   std::string code = "global.x=1";
@@ -1255,19 +1254,53 @@ TEST(PrinterTest, test63) {
   ASSERT_TRUE(compare(code, printed));
 }
 
-// TEST(PrinterTest, test64) {
-//   std::string code = "instance_create((choose(x+0, x+96, x+192, x+288)), 576, obj_blue)";
+TEST(PrinterTest, test64) {
+  std::string code = "instance_create((choose(x+0, x+96, x+192, x+288)), 576, obj_blue)";
 
-//   ParserTester test = ParserTester::CreateWithSetUp(code);
-//   auto node = test->ParseCode();
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
 
-//   ASSERT_EQ(node->type, AST::NodeType::BLOCK);
-//   auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
 
-//   AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
-//   ASSERT_TRUE(v.VisitCode(*block));
-//   std::string printed = v.GetPrintedCode();
-//   code = "instance_create((choose((enigma::varargs(), x + 0, x + 96, x + 192, x + 288))), 576, obj_blue);";
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "instance_create((choose((enigma::varargs(), x + 0, x + 96, x + 192, x + 288))), 576, obj_blue);";
 
-//   ASSERT_TRUE(compare(code, printed));
-// }
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test65) {
+  std::string code = "int global foo;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = ";";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test66) {
+  std::string code = "global int foo;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = ";";
+
+  ASSERT_TRUE(compare(code, printed));
+}
