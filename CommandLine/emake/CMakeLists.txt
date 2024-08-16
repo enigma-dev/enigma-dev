@@ -46,25 +46,16 @@ find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp)
 
 #Find gRPC
-if (MSVC) # Windows actually does something right for once
-  find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-else() # https://tinyurl.com/arch-grpc-bug
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GPR NAMES gpr)
-  find_library(LIB_CARES NAMES cares)
-  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-  target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-endif()
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
-include(FindProtobuf)
-include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${CLI_TARGET} PRIVATE ${Protobuf_LIBRARIES})
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE protobuf::libprotobuf)
 
 # Find absl
 find_package(absl CONFIG REQUIRED)
-target_link_libraries(${CLI_TARGET} PRIVATE absl::base absl::strings absl::synchronization absl::time absl::status absl::statusor)
+target_link_libraries(${CLI_TARGET} PRIVATE absl::log_internal_check_op)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)

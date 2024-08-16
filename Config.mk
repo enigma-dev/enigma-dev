@@ -61,7 +61,7 @@ ifeq ($(OS), DragonFly)
 endif
 
 # Which search priority to use for libraries (system or local)
-CUSTOM_LIB_SEARCH_PRIORITY := local
+CUSTOM_LIB_SEARCH_PRIORITY := system
 
 ifeq ($(CUSTOM_LIB_SEARCH_PRIORITY), local)
     LDFLAGS += -L/usr/local/lib

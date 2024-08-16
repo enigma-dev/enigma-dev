@@ -13,7 +13,7 @@ else
 endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM -I../../ENIGMAsystem/SHELL
-LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lENIGMAShared -lProtocols -lgrpc++ -lgpr -lprotobuf -labseil_dll -lyaml-cpp -lpng
+LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lENIGMAShared -lProtocols -lgrpc++ -lgpr -lprotobuf -labsl_log_internal_message -labsl_log_internal_check_op -lyaml-cpp -lpng
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
