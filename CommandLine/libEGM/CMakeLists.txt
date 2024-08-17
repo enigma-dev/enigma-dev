@@ -27,8 +27,9 @@ target_link_libraries(${LIB_EGM} PRIVATE yaml-cpp)
 
 include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/")
 
-include(FindProtobuf)
-target_link_libraries(${LIB_EGM} PRIVATE ${Protobuf_LIBRARY})
+# Find Protobuf
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${LIB_EGM} PRIVATE protobuf::libprotobuf)
 
 add_dependencies(${LIB_EGM} "Protocols" "ENIGMAShared")
 target_link_libraries(${LIB_EGM} PRIVATE "Protocols" "ENIGMAShared")

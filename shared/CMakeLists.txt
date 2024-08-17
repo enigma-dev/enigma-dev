@@ -38,8 +38,9 @@ find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
 target_link_libraries(${SHARED_LIB} PRIVATE "Protocols")
 
-include(FindProtobuf)
-target_link_libraries(${SHARED_LIB} PRIVATE ${Protobuf_LIBRARY})
+# Find Protobuf
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${SHARED_LIB} PRIVATE protobuf::libprotobuf)
 
 install(TARGETS ${SHARED_LIB} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${SHARED_LIB}.dir/Debug/${SHARED_LIB}.pdb" DESTINATION . OPTIONAL)

@@ -56,6 +56,8 @@ target_link_libraries(${CLI_TARGET} PRIVATE protobuf::libprotobuf)
 # Find absl
 find_package(absl CONFIG REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE absl::log_internal_check_op)
+# Use the one below if you installed abseil manually
+# target_link_libraries(${CLI_TARGET} PRIVATE abseil_dll)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)

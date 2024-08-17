@@ -66,21 +66,13 @@ if(MSVC)
   target_compile_options(${LIB_PROTO} PRIVATE /W1)
 endif()
 
-#Find gRPC
-if (MSVC) # Windows actually does something right for once
-  find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-else() # https://tinyurl.com/arch-grpc-bug
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GPR NAMES gpr)
-  find_library(LIB_CARES NAMES cares)
-  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-  target_link_libraries(${LIB_PROTO} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-endif()
+# Find gRPC
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${LIB_PROTO} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
-include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${LIB_PROTO} PRIVATE ${Protobuf_LIBRARIES})
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${LIB_PROTO} PRIVATE protobuf::libprotobuf)
 
 install(TARGETS ${LIB_PROTO} DESTINATION .)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${LIB_PROTO}.dir/Debug/${LIB_PROTO}.pdb" DESTINATION . OPTIONAL)
