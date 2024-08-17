@@ -24,7 +24,6 @@ class AstBuilderTestAPI {
   SyntaxMode mode;
   const LanguageFrontend *frontend;
   Token token;
-  CompileState* cs;
 
   /**
  * @brief Store a mapping from variable name to the @c FullType of its definition
@@ -37,12 +36,11 @@ class AstBuilderTestAPI {
 
   AstBuilderTestAPI() = default;
 
-  void initialize(Lexer *lexer, ErrorHandler *herr, CompileState* cs) {
+  void initialize(Lexer *lexer, ErrorHandler *herr) {
     this->lexer = lexer;
     this->herr = herr;
     this->mode = lexer->GetContext().compatibility_opts.syntax_mode;
     this->frontend = lexer->GetContext().language_fe;
-    this->cs = cs;
     token = lexer->ReadToken();
   }
 
@@ -51,12 +49,13 @@ class AstBuilderTestAPI {
   virtual const Token &current_token() = 0;
   virtual std::unique_ptr<AST::CodeBlock> ParseCodeBlock() = 0;
   virtual FullType TryParseTypeID() = 0;
+  // virtual bool contains_decflag_bitmask(std::size_t combined, std::string_view name)=0;
 
   virtual ~AstBuilderTestAPI() = default;
 };
 
 AstBuilderTestAPI *CreateBuilder();
-std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr, CompileState &cs);
+std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr);
 
 }  // namespace enigma::parsing
 

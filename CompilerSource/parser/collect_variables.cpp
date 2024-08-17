@@ -135,8 +135,10 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
+    bool is_global = node.storage_class == AST::DeclarationStatement::StorageClass::GLOBAL;
     for (const auto &decl : node.declarations) {
       dectrip dtrip("var");  // FIXME
+      if (is_global) parsed_scope->globals[decl.declarator->decl.name.content] = dtrip;
       parsed_scope->declarations[decl.declarator->decl.name.content] = dtrip;
     }
     node.RecursiveSubVisit(*this);

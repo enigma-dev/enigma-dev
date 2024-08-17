@@ -268,7 +268,7 @@ std::size_t sizeof_builtin_type(std::string_view type) {
   }
 }
 
-std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
+static std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
   static const std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>> bitmasks{
     { "volatile",  {jdi::builtin_flag__volatile->mask,  jdi::builtin_flag__volatile->value}  },
     { "static",    {jdi::builtin_flag__static->mask,    jdi::builtin_flag__static->value}    },
@@ -415,8 +415,8 @@ void maybe_infer_int(FullType &type) {
   }
 }
 
-AstBuilder(Lexer *lexer, ErrorHandler *herr, CompileState* cs) {
-  initialize(lexer, herr, cs);
+AstBuilder(Lexer *lexer, ErrorHandler *herr) {
+  initialize(lexer, herr);
 }
 
 AstBuilder(){}
@@ -886,7 +886,7 @@ void TryParseElaboratedName(FullType *type) {
   }
 }
 
-bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
+static bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
   auto builtin = jdi_decflag_bitmask(name);
   return (combined & builtin.first) == builtin.second;
 }
@@ -2430,9 +2430,244 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
 
 };  // class AstBuilder
 
-std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr, CompileState& cs) {
-  AstBuilder ab(lexer, herr, &cs);
-  return ab.ParseCode();
+class SyntaxChecker : public AST::Visitor {
+  ErrorHandler *herr;
+  const LanguageFrontend * frontend;
+
+ public:
+  SyntaxChecker(ErrorHandler *herr, const LanguageFrontend *fe) : herr(herr), frontend(fe) {}
+  bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+    if (node.function->type == AST::NodeType::IDENTIFIER) {
+      auto func = node.function->As<AST::IdentifierAccess>();
+      jdi::definition *def = nullptr;
+      if (std::holds_alternative<jdi::definition *>(func->type)) {
+        def = std::get<jdi::definition *>(func->type);
+      } else {
+        node.RecursiveSubVisit(*this);
+        return false;
+      }
+      unsigned int min = 0;
+      unsigned int max = 0;
+      frontend->definition_parameter_bounds(def, min, max);
+      Token tok;
+      tok.content = func->name.content;
+      tok.type = TT_IDENTIFIER;
+      if (max != unsigned(-1)) {
+        if (node.arguments.size() < min) {
+          herr->Error(tok) << "Too few arguments to function call";
+        } else if (node.arguments.size() > max) {
+          herr->Error(tok) << "Too many arguments to function call";
+        }
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
+    auto type = node.def;
+    // if (type) {
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "unsigned") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "signed")) {
+    //     Token tok;
+    //     tok.content = "unsigned";
+    //     tok.type = TT_UNSIGNED;
+    //     herr->Error(tok) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "long") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "short")) {
+    //     Token tok;
+    //     tok.content = "long";
+    //     tok.type = TT_TYPE_NAME;
+    //     herr->Error(tok) << "Conflicting use of 'long' and 'short' in the same type specifier";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "const") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "mutable")) {
+    //     Token tok;
+    //     tok.content = "const";
+    //     tok.type = TT_CONST;
+    //     herr->Error(tok) << "Conflicting use of 'const' and 'mutable' in the same type specifier";
+    //   }else{
+    //     Token tok;
+    //     tok.content = "const";
+    //     tok.type = TT_CONST;
+    //     herr->Error(tok) << "nooooooooooooooo";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "static") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+    //     Token tok;
+    //     tok.content = "static";
+    //     tok.type = TT_STATIC;
+    //     herr->Error(tok) << "Conflicting use of 'static' and 'register' in the same type specifier";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "inline") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+    //     Token tok;
+    //     tok.content = "inline";
+    //     tok.type = TT_INLINE;
+    //     herr->Error(tok) << "Conflicting use of 'inline' and 'register' in the same type specifier";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "extern") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+    //     Token tok;
+    //     tok.content = "extern";
+    //     tok.type = TT_EXTERN;
+    //     herr->Error(tok) << "Conflicting use of 'extern' and 'register' in the same type specifier";
+    //   }
+    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "mutable") &&
+    //       AstBuilder::contains_decflag_bitmask(type->flags, "static")) {
+    //     Token tok;
+    //     tok.content = "mutable";
+    //     tok.type = TT_MUTABLE;
+    //     herr->Error(tok) << "Conflicting use of 'mutable' and 'static' in the same type specifier";
+    //   }
+    // }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCodeBlock(AST::CodeBlock &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBinaryExpression(AST::BinaryExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitTernaryExpression(AST::TernaryExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLambdaExpression(AST::LambdaExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSizeofExpression(AST::SizeofExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitAlignofExpression(AST::AlignofExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCastExpression(AST::CastExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitParenthetical(AST::Parenthetical &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitArray(AST::Array &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitIdentifierAccess(AST::IdentifierAccess &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLiteral(AST::Literal &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitIfStatement(AST::IfStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitForLoop(AST::ForLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWhileLoop(AST::WhileLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDoLoop(AST::DoLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCaseStatement(AST::CaseStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDefaultStatement(AST::DefaultStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSwitchStatement(AST::SwitchStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitReturnStatement(AST::ReturnStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBreakStatement(AST::BreakStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitContinueStatement(AST::ContinueStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWithStatement(AST::WithStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitInitializer(AST::Initializer &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitNewExpression(AST::NewExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDeleteExpression(AST::DeleteExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+};
+
+std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
+  AstBuilder ab(lexer, herr);
+  auto root = ab.ParseCode();
+  SyntaxChecker sc(herr, lexer->GetContext().language_fe);
+  root->accept(sc);
+  return root;
 }
 
 AstBuilderTestAPI *CreateBuilder() {

@@ -30,19 +30,16 @@ struct ParserTester {
   Lexer lexer;
   lang_CPP cpp{};
   AstBuilderTestAPI* builder = CreateBuilder();
-  CompileState* cs;
 
   AstBuilderTestAPI* operator->() { return builder; }
 
   explicit ParserTester(std::string code, bool use_cpp)
       : context(&ParseContext::ForTesting(use_cpp)), lexer(std::move(code), context, &herr) {
-    cs = new CompileState(&cpp, kNoNames);
-    builder->initialize(&lexer, &herr, cs);
+    builder->initialize(&lexer, &herr);
   }
 
   explicit ParserTester(std::string code) : context(&SetUp()), lexer(std::move(code), context, &herr) {
-    cs = new CompileState(&cpp, kNoNames);
-    builder->initialize(&lexer, &herr, cs);
+    builder->initialize(&lexer, &herr);
   }
 
   static ParserTester CreateWithCpp(std::string code) { return ParserTester(std::move(code), true); }

@@ -648,7 +648,7 @@ class AST {
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.
-  static AST Parse(std::string code, CompileState& ctex);
+  static AST Parse(std::string code, const ParseContext* ctex);
 
   void VisitNodes(Visitor &visitor) {
     if (root_) root_->accept(visitor);

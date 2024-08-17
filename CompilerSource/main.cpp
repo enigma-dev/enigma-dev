@@ -155,11 +155,11 @@ DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names,
     script_name_set.insert(std::move(name));
   }
 
-  CompileState cstate(current_language, std::move(script_name_set)); 
+  enigma::parsing::ParseContext ctex(current_language, std::move(script_name_set));
 
   cout << "Starting syntax check." << endl;
   using enigma::parsing::AST;
-  AST ast = AST::Parse(code, cstate);
+  AST ast = AST::Parse(code, &ctex);
   cout << "Syntax checking complete." << endl;
 
   static std::string static_error_text;

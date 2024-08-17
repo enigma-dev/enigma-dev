@@ -199,6 +199,15 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
       return VisitGlobal(node);
     }
   }
+
+  // if (node.operation.type == TT_DOT) {
+  //   print("varaccess_");
+  //   print(node.right->As<AST::IdentifierAccess>()->name.content);
+  //   print("(");
+  //   VISIT_AND_CHECK(node.left);
+  //   print(")");
+  //   return true;
+  // }
   VISIT_AND_CHECK(node.left);
 
   print(" " + node.operation.token + " ");
