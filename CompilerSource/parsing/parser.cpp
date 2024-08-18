@@ -1368,12 +1368,21 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
   }
 }
 
+void maybe_assign_def(FullType *type) {
+  if ((contains_decflag_bitmask(type->flags, "long long") || contains_decflag_bitmask(type->flags, "long") ||
+       contains_decflag_bitmask(type->flags, "short")) &&
+      type->def == nullptr) {
+    maybe_assign_full_type(type, get_builtin("int"), token);
+  }
+}
+
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
   bool is_global = token.content == "global";
   if (is_decl_specifier(token)||token.content == "global") {
     FullType type;
     is_global = TryParseDeclSpecifierSeq(&type);
     maybe_infer_int(type);
+    maybe_assign_def(&type);
     if (type.def == nullptr) {
       herr->Error(token) << "Unable to parse type specifier in declaration";
       return nullptr;
@@ -2190,6 +2199,7 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
       bool is_global = TryParseTypeSpecifierSeq(&type);
       sc = is_global ? AST::DeclarationStatement::StorageClass::GLOBAL : sc;
+      maybe_assign_def(&type);
       return parse_declarations(sc, type, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;
@@ -2211,6 +2221,7 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
         std::vector<AST::DeclarationStatement::Declaration> decls = {};
         decls.emplace_back(std::move(type), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
         if (token.type == TT_COMMA && parse_unbounded) {
+          maybe_assign_def(&type);
           return parse_declarations(sc, type, decl_type, parse_unbounded, std::move(decls), true);
         } else {
           return std::make_unique<AST::DeclarationStatement>(sc, decls[0].declarator->def, std::move(decls));
@@ -2465,63 +2476,58 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
-    auto type = node.def;
-    // if (type) {
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "unsigned") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "signed")) {
-    //     Token tok;
-    //     tok.content = "unsigned";
-    //     tok.type = TT_UNSIGNED;
-    //     herr->Error(tok) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "long") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "short")) {
-    //     Token tok;
-    //     tok.content = "long";
-    //     tok.type = TT_TYPE_NAME;
-    //     herr->Error(tok) << "Conflicting use of 'long' and 'short' in the same type specifier";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "const") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "mutable")) {
-    //     Token tok;
-    //     tok.content = "const";
-    //     tok.type = TT_CONST;
-    //     herr->Error(tok) << "Conflicting use of 'const' and 'mutable' in the same type specifier";
-    //   }else{
-    //     Token tok;
-    //     tok.content = "const";
-    //     tok.type = TT_CONST;
-    //     herr->Error(tok) << "nooooooooooooooo";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "static") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
-    //     Token tok;
-    //     tok.content = "static";
-    //     tok.type = TT_STATIC;
-    //     herr->Error(tok) << "Conflicting use of 'static' and 'register' in the same type specifier";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "inline") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
-    //     Token tok;
-    //     tok.content = "inline";
-    //     tok.type = TT_INLINE;
-    //     herr->Error(tok) << "Conflicting use of 'inline' and 'register' in the same type specifier";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "extern") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
-    //     Token tok;
-    //     tok.content = "extern";
-    //     tok.type = TT_EXTERN;
-    //     herr->Error(tok) << "Conflicting use of 'extern' and 'register' in the same type specifier";
-    //   }
-    //   if (AstBuilder::contains_decflag_bitmask(type->flags, "mutable") &&
-    //       AstBuilder::contains_decflag_bitmask(type->flags, "static")) {
-    //     Token tok;
-    //     tok.content = "mutable";
-    //     tok.type = TT_MUTABLE;
-    //     herr->Error(tok) << "Conflicting use of 'mutable' and 'static' in the same type specifier";
-    //   }
-    // }
+    auto &type = node.declarations[0].declarator;
+    if (type) {
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "unsigned") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "signed")) {
+        Token tok;
+        tok.content = "unsigned";
+        tok.type = TT_UNSIGNED;
+        herr->Error(tok) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "long") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "short")) {
+        Token tok;
+        tok.content = "long";
+        tok.type = TT_TYPE_NAME;
+        herr->Error(tok) << "Conflicting use of 'long' and 'short' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "const") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "mutable")) {
+        Token tok;
+        tok.content = "const";
+        tok.type = TT_CONST;
+        herr->Error(tok) << "Conflicting use of 'const' and 'mutable' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "static") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+        Token tok;
+        tok.content = "static";
+        tok.type = TT_STATIC;
+        herr->Error(tok) << "Conflicting use of 'static' and 'register' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "inline") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+        Token tok;
+        tok.content = "inline";
+        tok.type = TT_INLINE;
+        herr->Error(tok) << "Conflicting use of 'inline' and 'register' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "extern") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+        Token tok;
+        tok.content = "extern";
+        tok.type = TT_EXTERN;
+        herr->Error(tok) << "Conflicting use of 'extern' and 'register' in the same type specifier";
+      }
+      if (AstBuilder::contains_decflag_bitmask(type->flags, "mutable") &&
+          AstBuilder::contains_decflag_bitmask(type->flags, "static")) {
+        Token tok;
+        tok.content = "mutable";
+        tok.type = TT_MUTABLE;
+        herr->Error(tok) << "Conflicting use of 'mutable' and 'static' in the same type specifier";
+      }
+    }
     node.RecursiveSubVisit(*this);
     return false;
   }

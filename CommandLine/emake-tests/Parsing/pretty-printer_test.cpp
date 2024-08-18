@@ -1049,7 +1049,7 @@ TEST(PrinterTest, test51) {
   AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
-  code = "if (a.b --) l;";
+  code = "if (enigma::varaccess_b(a) --) l;";
 
   ASSERT_TRUE(compare(code, printed));
 }
@@ -1301,6 +1301,57 @@ TEST(PrinterTest, test66) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code = ";";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test67) {
+  std::string code = "long long foo;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "long long int foo;";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test68) {
+  std::string code = "long foo;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "long int foo;";
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test69) {
+  std::string code = "short foo;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "short int foo;";
 
   ASSERT_TRUE(compare(code, printed));
 }

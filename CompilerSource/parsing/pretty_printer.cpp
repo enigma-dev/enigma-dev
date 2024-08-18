@@ -186,28 +186,25 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
   return true;
 }
 
-bool AST::CppPrettyPrinter::VisitGlobal(AST::BinaryExpression &node) {
+bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
   print("enigma::varaccess_");
   VISIT_AND_CHECK(node.right);
-  print("(int(global))");
+  print("(");
+  if (node.left->As<AST::IdentifierAccess>()->name.content == "global") {
+    print("int(global)");
+  } else {
+    VISIT_AND_CHECK(node.left);
+  }
+  print(")");
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
-  if (node.left->type == AST::NodeType::IDENTIFIER) {
-    if (node.left->As<AST::IdentifierAccess>()->name.content == "global") {
-      return VisitGlobal(node);
-    }
+  if (node.operation.type == TT_DOT && node.left->type == AST::NodeType::IDENTIFIER &&
+      node.right->type == AST::NodeType::IDENTIFIER) {
+    return VisitDot(node);
   }
 
-  // if (node.operation.type == TT_DOT) {
-  //   print("varaccess_");
-  //   print(node.right->As<AST::IdentifierAccess>()->name.content);
-  //   print("(");
-  //   VISIT_AND_CHECK(node.left);
-  //   print(")");
-  //   return true;
-  // }
   VISIT_AND_CHECK(node.left);
 
   print(" " + node.operation.token + " ");

@@ -576,7 +576,7 @@ class AST {
     std::string GetPrintedCode();
     bool VisitCode(CodeBlock &node);
     bool VisitCodeBlock(CodeBlock &node);
-    bool VisitGlobal(BinaryExpression &node);
+    bool VisitDot(BinaryExpression &node);
     bool VisitBinaryExpression(BinaryExpression &node);
     bool VisitFunctionCallExpression(FunctionCallExpression &node);
     bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node);
