@@ -139,7 +139,12 @@ class DeclGatheringVisitor : public AST::Visitor {
       if (is_global) parsed_scope->globals[decl.declarator->decl.name.content] = dtrip;
       parsed_scope->declarations[decl.declarator->decl.name.content] = dtrip;
     }
-    node.RecursiveSubVisit(*this);
+    
+    for (int i = 0; i < node.declarations.size(); i++) {
+      if (node.declarations[i].init) {
+        VisitInitializer(*node.declarations[i].init);
+      }
+    }
     return false;
   }
 
@@ -304,11 +309,32 @@ class DeclGatheringVisitor : public AST::Visitor {
     return false;
   }
 
-  // virtual bool VisitBraceOrParenInitializer(BraceOrParenInitializer &node);
-  // virtual bool VisitAssignmentInitializer(AssignmentInitializer &node);
-  // virtual bool VisitInitializer(Initializer &node);
-  // virtual bool VisitNewExpression(NewExpression &node);
-  // virtual bool VisitDeleteExpression(DeleteExpression &node)
+  bool VisitBraceOrParenInitializer(AST::BraceOrParenInitializer &node) {
+    for (auto &val : node.values) VisitInitializer(*val.second);
+    return false;
+  }
+
+  bool VisitAssignmentInitializer(AST::AssignmentInitializer &node) {
+    if (node.kind == AST::AssignmentInitializer::Kind::BRACE_INIT) {
+      VisitBraceOrParenInitializer(*std::get<AST::BraceOrParenInitNode>(node.initializer));
+    } else {
+      auto &expr = std::get<AST::PNode>(node.initializer);
+      AddLocal(expr);
+      expr->accept(*this);
+    }
+    return false;
+  }
+
+  bool VisitInitializer(AST::Initializer &node) {
+    if (node.kind == AST::Initializer::Kind::ASSIGN_EXPR) {
+      auto &init = std::get<AST::AssignmentInitNode>(node.initializer);
+      VisitAssignmentInitializer(*init);
+    } else if (node.kind == AST::Initializer::Kind::BRACE_INIT) {
+      auto &init = std::get<AST::BraceOrParenInitNode>(node.initializer);
+      VisitBraceOrParenInitializer(*init);
+    }
+    return false;
+  }
 
  public:
   DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts,
