@@ -84,23 +84,21 @@ class DeclGatheringVisitor : public AST::Visitor {
     return "";
   }
 
-  std::string AddLocal(AST::PNode &node) {
-    if (!node) return "";
+  void AddLocal(AST::PNode &node) {
+    if (!node) return;
     std::string name = CheckIfIdentifier(node);
-    if (name == "") return "";
+    if (name == "") return;
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
-      return "";
+      return;
     }
     if (cs->timeline_lookup.find(name) != cs->timeline_lookup.end()) {
       parsed_scope->tlines[name] = 0;
-      return "";
+      return;
     }
     if (script_names.find(name) == script_names.end() && !lang->global_exists(name)) {
       parsed_scope->locals[name] = dectrip();
-      return name;
     }
-    return "";
   }
 
   bool AddGlobal(AST::BinaryExpression &node) {
@@ -128,7 +126,7 @@ class DeclGatheringVisitor : public AST::Visitor {
     if (name != "") parsed_scope->funcs[name] = node.arguments.size();
   }
 
-  bool VisitCodeBlock(AST::CodeBlock &node) final {
+  bool VisitCodeBlock(AST::CodeBlock &node) {
     for (auto &stmt : node.statements) AddLocal(stmt);
     node.RecursiveSubVisit(*this);
     return false;
@@ -145,7 +143,7 @@ class DeclGatheringVisitor : public AST::Visitor {
     return false;
   }
 
-  bool VisitBinaryExpression(AST::BinaryExpression &node) final {
+  bool VisitBinaryExpression(AST::BinaryExpression &node) {
     bool added = AddGlobal(node);
     if (!added) {
       AddLocal(node.left);
@@ -159,22 +157,30 @@ class DeclGatheringVisitor : public AST::Visitor {
     return false;
   }
 
-  bool VisitFunctionCall(AST::FunctionCallExpression &node) {
+  bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
     AddFunction(node);
     for (auto &arg : node.arguments) AddLocal(arg);
     node.RecursiveSubVisit(*this);
     return false;
   }
 
-  bool VisitWithStatement(AST::WithStatement &node) final {
+  bool VisitWithStatement(AST::WithStatement &node) {
     AddLocal(node.object);
-    std::string name = AddLocal(node.body);
-    // This will work only if the body is an identifier
-    if (name != "") {
-      parsed_scope->locals.erase(name);
-      parsed_scope->ambiguous[name] = dectrip();
+
+    vector<std::string> prev_locals;
+    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end(); ++it) {
+      prev_locals.push_back(it->first);
     }
+
+    AddLocal(node.body);
     node.RecursiveSubVisit(*this);
+
+    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end(); ++it)
+      if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end())
+        parsed_scope->ambiguous[it->first] = dectrip();
+    for (auto it = parsed_scope->ambiguous.begin(); it != parsed_scope->ambiguous.end(); ++it)
+      parsed_scope->locals.erase(it->first);
+
     return false;
   }
 
