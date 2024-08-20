@@ -570,6 +570,7 @@ bool AST::CppPrettyPrinter::VisitCodeBlock(AST::CodeBlock &node) {
 
 bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
   print("if");
+  if (node.not_condition) print("(!");
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
@@ -579,6 +580,7 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+  if (node.not_condition) print(")");
 
   print(" ");
   if (node.true_branch) {

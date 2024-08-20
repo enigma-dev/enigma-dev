@@ -142,6 +142,7 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "until",    TT_S_UNTIL   },
   { "while",    TT_S_WHILE   },
   { "with",     TT_S_WITH    },
+  { "then",     TT_S_THEN    },
 
   { "and", TT_AND },
   { "div", TT_DIV },

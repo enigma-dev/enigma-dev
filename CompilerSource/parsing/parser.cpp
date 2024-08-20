@@ -2173,6 +2173,16 @@ std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
 
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   token = lexer->ReadToken();
+  bool not_condition = false;
+
+  if (token.type == TT_NOT) {
+    if (mode == SyntaxMode::STRICT) {
+      herr->Warning(token) << "Use of `not` keyword in if statement";
+    }
+    not_condition = true;
+    token = lexer->ReadToken();
+  }
+
   auto condition = TryParseControlExpression(mode);
   if (token.type == TT_S_THEN) {
     if (mode == SyntaxMode::STRICT) {
@@ -2194,7 +2204,8 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
     false_branch = ParseCFStmtBody();
   }
   
-  return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
+  return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch),
+                                            not_condition);
 }
 
 std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
@@ -2610,6 +2621,12 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitIfStatement(AST::IfStatement &node) {
+    if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
+      if (node.condition->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
+        node.condition->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
+        node.condition->As<AST::BinaryExpression>()->operation.token = "==";
+      }
+    }
     node.RecursiveSubVisit(*this);
     return false;
   }

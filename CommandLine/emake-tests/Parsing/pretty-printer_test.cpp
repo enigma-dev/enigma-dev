@@ -1355,3 +1355,20 @@ TEST(PrinterTest, test69) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test70) {
+  std::string code = "if not grabbed=true then {x=mouse_x-xpart;y=mouse_y-ypart;friction=0;}else{friction=0.5;}";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+  code = "if (!(grabbed=true)) {x=mouse_x-xpart;y=mouse_y-ypart;friction=0;}else{friction=0.5;}";
+
+  ASSERT_TRUE(compare(code, printed));
+}

@@ -2,6 +2,7 @@
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
+**  Copyright (C) 2024 Fares Atef                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **

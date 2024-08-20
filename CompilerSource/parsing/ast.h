@@ -296,11 +296,12 @@ class AST {
   struct IfStatement : TypedNode<NodeType::IF> {
     PNode condition;
     PNode true_branch, false_branch;
+    bool not_condition;
 
     BASIC_NODE_ROUTINES(IfStatement);
 
-    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_): condition{std::move(condition_)},
-        true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)} {}
+    IfStatement(PNode condition_, PNode true_branch_, PNode false_branch_, bool not_condition_): condition{std::move(condition_)},
+        true_branch{std::move(true_branch_)}, false_branch{std::move(false_branch_)}, not_condition(not_condition_){}
   };
 
   struct ForLoop : TypedNode<NodeType::FOR> {
