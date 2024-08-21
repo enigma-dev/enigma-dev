@@ -991,17 +991,20 @@ void TryParseTypeSpecifier(FullType *type) {
   }
 }
 
-bool TryParseTypeSpecifierSeq(FullType *type) {
-  bool is_global = false;
-  while (next_is_type_specifier() || token.content == "global") {
+std::pair<bool, bool> TryParseTypeSpecifierSeq(FullType *type) {
+  std::pair<bool, bool> global_local = {false, false};
+  while (next_is_type_specifier() || token.content == "global" || token.content == "local") {
     if (token.content == "global") {
-      is_global = true;
+      global_local.first = true;
+      token = lexer->ReadToken();
+    } else if (token.content == "local") {
+      global_local.second = true;
       token = lexer->ReadToken();
     } else {
       TryParseTypeSpecifier(type);
     }
   }
-  return is_global;
+  return global_local;
 }
 
 void TryParsePtrOperator(FullType *type) {
@@ -1120,15 +1123,19 @@ void TryParseDeclSpecifier(FullType *type) {
   }
 }
 
-bool TryParseDeclSpecifierSeq(FullType *type) {
-  bool is_global = false;
-  while (is_decl_specifier(token) || token.content == "global") {
-    if (token.content == "global")
-      is_global = true, token = lexer->ReadToken();
-    else
+std::pair<bool, bool> TryParseDeclSpecifierSeq(FullType *type) {
+  std::pair<bool, bool> global_local = {false, false};
+  while (is_decl_specifier(token) || token.content == "global" || token.content == "local") {
+    if (token.content == "global") {
+      global_local.first = true;
+      token = lexer->ReadToken();
+    } else if (token.content == "local") {
+      global_local.second = true;
+      token = lexer->ReadToken();
+    } else
       TryParseDeclSpecifier(type);
   }
-  return is_global;
+  return global_local;
 }
 
 std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
@@ -1388,9 +1395,14 @@ void maybe_assign_def(FullType *type) {
 
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
   bool is_global = token.content == "global";
-  if (is_decl_specifier(token)||token.content == "global") {
+  bool is_local = token.content == "local";
+  if (is_decl_specifier(token) || is_global || is_local) {
     FullType type;
-    is_global = TryParseDeclSpecifierSeq(&type);
+    std::pair<bool, bool> global_local = TryParseDeclSpecifierSeq(&type);
+    if (global_local.first && global_local.second) {
+      herr->Error(token) << "Cannot have both 'global' and 'local' in the same declaration";
+      return nullptr;
+    }
     maybe_infer_int(type);
     maybe_assign_def(&type);
     if (type.def == nullptr) {
@@ -1398,8 +1410,9 @@ std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
       return nullptr;
     }
 
-    auto sc = is_global ? AST::DeclarationStatement::StorageClass::GLOBAL
-                        : AST::DeclarationStatement::StorageClass::TEMPORARY;
+    auto sc = is_global || global_local.first   ? AST::DeclarationStatement::StorageClass::GLOBAL
+              : is_local || global_local.second ? AST::DeclarationStatement::StorageClass::LOCAL
+                                                : AST::DeclarationStatement::StorageClass::TEMPORARY;
     return parse_declarations(sc, type, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
   } else {
     return nullptr;
@@ -1905,7 +1918,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
     Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
 
-    auto right = TryParseExpression(Precedence::kMin);
+    auto right = TryParseExpression(Precedence::kAll);
 
     AST::Operation op(oper.type, std::string(oper.content));
     operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
@@ -2065,13 +2078,14 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       } else {
         sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
       }
-      bool is_global = token.content == "global";
-      Token maybe_global = token;
-      if (is_global) {
+      bool is_global_local = token.content == "global" || token.content == "local";
+      Token maybe_global_local = token;
+      if (is_global_local) {
+        sc = token.content == "global" ? AST::DeclarationStatement::StorageClass::GLOBAL
+                                       : AST::DeclarationStatement::StorageClass::LOCAL;
         token = lexer->ReadToken();
-        sc = AST::DeclarationStatement::StorageClass::GLOBAL;
       }
-      if (is_decl_specifier(token) || next_maybe_functional_cast() || (is_global && token.type != TT_DOT)) {
+      if (is_decl_specifier(token) || next_maybe_functional_cast() || (is_global_local && token.type != TT_DOT)) {
         Token start = token;
         auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, false, sc);
         MaybeConsumeSemicolon();
@@ -2079,7 +2093,7 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       } else {
         jdi::definition *def = nullptr;
         std::unique_ptr<AST::Node> operand =
-            is_global ? std::make_unique<AST::IdentifierAccess>(def, maybe_global) : nullptr;
+            is_global_local ? std::make_unique<AST::IdentifierAccess>(def, maybe_global_local) : nullptr;
         auto node = TryParseExpression(Precedence::kAll, std::move(operand));
         MaybeConsumeSemicolon();
         return node;
@@ -2218,8 +2232,13 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
         // Make sure we don't accidentally consume a c-style cast when its required
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
-      bool is_global = TryParseTypeSpecifierSeq(&type);
-      sc = is_global ? AST::DeclarationStatement::StorageClass::GLOBAL : sc;
+      std::pair<bool, bool> global_local = TryParseTypeSpecifierSeq(&type);
+      if (global_local.first && global_local.second) {
+        herr->Error(token) << "Cannot have both `global` and `local` storage class specifiers";
+      }
+      sc = global_local.first    ? AST::DeclarationStatement::StorageClass::GLOBAL
+           : global_local.second ? AST::DeclarationStatement::StorageClass::LOCAL
+                                 : sc;
       maybe_assign_def(&type);
       return parse_declarations(sc, type, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {

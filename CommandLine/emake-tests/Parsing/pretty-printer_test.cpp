@@ -1372,3 +1372,35 @@ TEST(PrinterTest, test70) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test71) {
+  std::string code = "for (b = 1; b < 11; b += 1) {game_field[a, b] = -1;}";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}
+
+TEST(PrinterTest, test72) {
+  std::string code = "pf_phi_shield ^= 1;";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}

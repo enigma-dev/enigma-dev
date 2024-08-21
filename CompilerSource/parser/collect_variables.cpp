@@ -97,8 +97,8 @@ class DeclGatheringVisitor : public AST::Visitor {
       parsed_scope->tlines[name] = 0;
       return;
     }
-    if (script_names.find(name) == script_names.end() && !lang->global_exists(name)) {
-      parsed_scope->locals[name] = dectrip();
+    if (!lang->global_exists(name)) {
+      parsed_scope->locals[name] = dectrip("var");
     }
   }
 
@@ -108,6 +108,7 @@ class DeclGatheringVisitor : public AST::Visitor {
       if (left->name.content == "global" && node.operation.type == enigma::parsing::TokenType::TT_DOT) {
         auto right = node.right->As<AST::IdentifierAccess>();
         parsed_scope->globals[right->name.content] = dectrip("var");
+        parsed_scope->locals[right->name.content] = dectrip("var");
         cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
         return true;
       }
@@ -135,15 +136,17 @@ class DeclGatheringVisitor : public AST::Visitor {
 
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
     bool is_global = node.storage_class == AST::DeclarationStatement::StorageClass::GLOBAL;
+    bool is_local = node.storage_class == AST::DeclarationStatement::StorageClass::LOCAL;
     for (const auto &decl : node.declarations) {
       dectrip dtrip("var");  // FIXME
       if (is_global) parsed_scope->globals[decl.declarator->decl.name.content] = dtrip;
+      if (is_local) parsed_scope->locals[decl.declarator->decl.name.content] = dtrip;
       parsed_scope->declarations[decl.declarator->decl.name.content] = dtrip;
     }
-    
-    for (int i = 0; i < node.declarations.size(); i++) {
-      if (node.declarations[i].init) {
-        VisitInitializer(*node.declarations[i].init);
+
+    for (const auto &decl : node.declarations) {
+      if (decl.init) {
+        VisitInitializer(*decl.init);
       }
     }
     return false;
@@ -181,9 +184,21 @@ class DeclGatheringVisitor : public AST::Visitor {
     AddLocal(node.body);
     node.RecursiveSubVisit(*this);
 
-    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end(); ++it)
-      if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end())
-        parsed_scope->ambiguous[it->first] = dectrip();
+    // std::vector<std::string> erases;
+    // for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
+    //   if (it->first.substr(0, 8) == "argument") {
+    //     erases.push_back(it->first);
+    //     ++it;
+    //   } else {
+    //     if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end()) {
+    //       parsed_scope->ambiguous[it->first] = dectrip();
+    //     }
+    //     ++it;
+    //   }
+    // }
+    // for (auto &erase : erases) {
+    //   parsed_scope->locals.erase(erase);
+    // }
     for (auto it = parsed_scope->ambiguous.begin(); it != parsed_scope->ambiguous.end(); ++it)
       parsed_scope->locals.erase(it->first);
 

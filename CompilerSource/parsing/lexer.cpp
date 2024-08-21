@@ -71,6 +71,7 @@ static TokenTrie token_lookup {
   { "+",   TT_PLUS         },
   { "++",  TT_INCREMENT    },
   { "+=",  TT_ASSOP        },
+  { "^=",  TT_ASSOP        },
   { ",",   TT_COMMA        },
   { "-",   TT_MINUS        },
   { "--",  TT_DECREMENT    },

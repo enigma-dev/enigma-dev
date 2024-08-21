@@ -187,10 +187,17 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
+  std::string left = node.left->As<AST::IdentifierAccess>()->name.content;
+  if (left == "local") {
+    VISIT_AND_CHECK(node.right);
+    return true;
+  }
+
   print("enigma::varaccess_");
   VISIT_AND_CHECK(node.right);
   print("(");
-  if (node.left->As<AST::IdentifierAccess>()->name.content == "global") {
+
+  if (left == "global") {
     print("int(global)");
   } else {
     VISIT_AND_CHECK(node.left);
@@ -539,7 +546,21 @@ bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
-  if (node.storage_class == DeclarationStatement::StorageClass::GLOBAL) return true;
+  if (node.storage_class == DeclarationStatement::StorageClass::GLOBAL ||
+      node.storage_class == DeclarationStatement::StorageClass::LOCAL) {
+    bool printed = false;
+    for (std::size_t i = 0; i < node.declarations.size(); i++) {
+      if (node.declarations[i].init) {
+        if (printed) print(", ");
+        std::string name = node.declarations[i].declarator->decl.name.content;
+        print(name + " = ");
+        if (!VisitInitializer(*node.declarations[i].init)) return false;
+        printed = true;
+      }
+    }
+    return true;
+  }
+
   for (std::size_t i = 0; i < node.declarations.size(); i++) {
     if (!VisitFullType(*node.declarations[i].declarator, !i)) return false;
     if (node.declarations[i].init) {
@@ -555,14 +576,16 @@ bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement 
 
 bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
   for (auto &stmt : node.statements) {
+    print("    ");
     VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);
+    print("\n");
   }
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitCodeBlock(AST::CodeBlock &node) {
-  print("{");
+  print("{\n");
   if (!VisitCode(node)) return false;
   print("}");
   return true;
