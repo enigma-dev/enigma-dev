@@ -32,6 +32,7 @@
 
 #include "event_reader/event_parser.h"
 
+#include <JDI/src/System/builtins.h>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -58,6 +59,90 @@ struct scope_ignore {
 #include "object_storage.h"
 
 using enigma::parsing::AST;
+
+std::string GetFullType(enigma::parsing::FullType &ft) {
+  std::string type;
+  std::vector<std::size_t> flags_values = {
+      jdi::builtin_flag__const->value,    jdi::builtin_flag__static->value,       jdi::builtin_flag__volatile->value,
+      jdi::builtin_flag__mutable->value,  jdi::builtin_flag__register->value,     jdi::builtin_flag__inline->value,
+      jdi::builtin_flag__Complex->value,  jdi::builtin_flag__unsigned->value,     jdi::builtin_flag__signed->value,
+      jdi::builtin_flag__short->value,    jdi::builtin_flag__long->value,         jdi::builtin_flag__long_long->value,
+      jdi::builtin_flag__restrict->value, jdi::builtin_typeflag__override->value, jdi::builtin_typeflag__final->value};
+
+  std::vector<std::size_t> flags_masks = {
+      jdi::builtin_flag__const->mask,    jdi::builtin_flag__static->mask,       jdi::builtin_flag__volatile->mask,
+      jdi::builtin_flag__mutable->mask,  jdi::builtin_flag__register->mask,     jdi::builtin_flag__inline->mask,
+      jdi::builtin_flag__Complex->mask,  jdi::builtin_flag__unsigned->mask,     jdi::builtin_flag__signed->mask,
+      jdi::builtin_flag__short->mask,    jdi::builtin_flag__long->mask,         jdi::builtin_flag__long_long->mask,
+      jdi::builtin_flag__restrict->mask, jdi::builtin_typeflag__override->mask, jdi::builtin_typeflag__final->mask};
+
+  std::vector<std::string> flags_names = {"const",  "static",    "volatile", "mutable",  "register",
+                                          "inline", "complex",   "unsigned", "signed",   "short",
+                                          "long",   "long long", "restrict", "override", "final"};
+
+  for (std::size_t i = 0; i < flags_values.size(); i++) {
+    if ((ft.flags & flags_masks[i]) == flags_values[i]) {
+      if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
+        type += flags_names[i] + " ";
+      }
+    }
+  }
+
+  // type += ft.def->name + " ";
+
+  std::string name = std::string(ft.decl.name.content);
+  if (name != "" && !ft.decl.components.size()) {
+    type += name + " ";
+  }
+
+  jdi::ref_stack stack;
+  ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+
+  std::string ref;
+  bool flag = false;
+  bool print_name = true;
+
+  for (auto it = first; it != stack.end(); it++) {
+    if (it->type == jdi::ref_stack::RT_POINTERTO) {
+      flag = true;
+      ref = '*' + ref;
+    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
+      flag = true;
+      ref = '&' + ref;
+    } else {
+      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
+        if (flag) {
+          ref = '(' + ref + ')';
+        }
+
+        std::size_t arr_size = it->arraysize();
+        if (arr_size != 0) {
+          ref += '[' + std::to_string(arr_size) + ']';
+        } else {
+          ref += "[]";
+        }
+      }
+      // TODO: RT_MEMBER_POINTER
+      flag = false;
+    }
+
+    if (print_name) {
+      std::string name = std::string(ft.decl.name.content);
+      if (name != "") {
+        if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
+          ref = name + ref;
+        } else {
+          ref += name;
+        }
+      }
+      print_name = false;
+    }
+  }
+
+  type += ref;
+  return type;
+}
 
 /**
   AST Node Visitor that mines a piece of code for variables declared,
@@ -138,10 +223,20 @@ class DeclGatheringVisitor : public AST::Visitor {
     bool is_global = node.storage_class == AST::DeclarationStatement::StorageClass::GLOBAL;
     bool is_local = node.storage_class == AST::DeclarationStatement::StorageClass::LOCAL;
     for (const auto &decl : node.declarations) {
-      dectrip dtrip("var");  // FIXME
-      if (is_global) parsed_scope->globals[decl.declarator->decl.name.content] = dtrip;
-      if (is_local) parsed_scope->locals[decl.declarator->decl.name.content] = dtrip;
-      parsed_scope->declarations[decl.declarator->decl.name.content] = dtrip;
+      std::string name = decl.declarator->decl.name.content;
+      std::string ftype = GetFullType(*decl.declarator);
+      std::string type = decl.declarator->def->name;
+      size_t pos = ftype.find(name);
+      std::string prefix;
+      std::string suffix;
+      if (pos != std::string::npos) {
+        prefix = ftype.substr(0, pos);
+        suffix = ftype.substr(pos + name.length());
+      }
+      dectrip dtrip(type, prefix, suffix);
+      if (is_global) parsed_scope->globals[name] = dtrip;
+      if (is_local) parsed_scope->locals[name] = dtrip;
+      parsed_scope->declarations[name] = dtrip;
     }
 
     for (const auto &decl : node.declarations) {
