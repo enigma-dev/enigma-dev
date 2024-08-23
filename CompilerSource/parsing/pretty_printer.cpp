@@ -239,7 +239,9 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
 
   VISIT_AND_CHECK(node.left);
 
-  print(" " + node.operation.token + " ");
+  std::string operation = node.operation.token;
+  if (operation == ":=") operation = "=";
+  print(" " + operation + " ");
 
   VISIT_AND_CHECK(node.right);
 

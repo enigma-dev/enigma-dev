@@ -184,6 +184,7 @@ class DeclGatheringVisitor : public AST::Visitor {
     }
     if (!lang->global_exists(name)) {
       parsed_scope->locals[name] = dectrip("var");
+      cs->add_dot_accessed_local(name);
     }
   }
 
