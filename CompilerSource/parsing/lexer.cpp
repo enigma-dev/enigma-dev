@@ -396,8 +396,8 @@ Token Lexer::ReadRawToken() {
           herr->Error(Mark(spos, 1)) << "GML-style hex literal is trunucated";
           return ReadRawToken();
         }
-        while (!is_nybble(code[++pos]));
-        return Token(TT_HEXLITERAL, Mark(pos, pos - spos));
+        while (is_nybble(code[++pos]));
+        return Token(TT_HEXLITERAL, Mark(spos + 1, pos - spos - 1));
       } else [[fallthrough]];
     }
 

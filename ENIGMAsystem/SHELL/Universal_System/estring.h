@@ -44,6 +44,7 @@ bool is_base64(unsigned char byte);
 std::string ansi_char(char byte);
 std::string chr(char val);
 int ord(std::string str);
+int ord(char c);
 
 double real(variant str);
 

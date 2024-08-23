@@ -2488,29 +2488,29 @@ class SyntaxChecker : public AST::Visitor {
  public:
   SyntaxChecker(ErrorHandler *herr, const LanguageFrontend *fe) : herr(herr), frontend(fe) {}
   bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
-    if (node.function->type == AST::NodeType::IDENTIFIER) {
-      auto func = node.function->As<AST::IdentifierAccess>();
-      jdi::definition *def = nullptr;
-      if (std::holds_alternative<jdi::definition *>(func->type)) {
-        def = std::get<jdi::definition *>(func->type);
-      } else {
-        node.RecursiveSubVisit(*this);
-        return false;
-      }
-      unsigned int min = 0;
-      unsigned int max = 0;
-      frontend->definition_parameter_bounds(def, min, max);
-      Token tok;
-      tok.content = func->name.content;
-      tok.type = TT_IDENTIFIER;
-      if (max != unsigned(-1)) {
-        if (node.arguments.size() < min) {
-          herr->Error(tok) << "Too few arguments to function call";
-        } else if (node.arguments.size() > max) {
-          herr->Error(tok) << "Too many arguments to function call";
-        }
-      }
-    }
+    // if (node.function->type == AST::NodeType::IDENTIFIER) {
+    //   auto func = node.function->As<AST::IdentifierAccess>();
+    //   jdi::definition *def = nullptr;
+    //   if (std::holds_alternative<jdi::definition *>(func->type)) {
+    //     def = std::get<jdi::definition *>(func->type);
+    //   } else {
+    //     node.RecursiveSubVisit(*this);
+    //     return false;
+    //   }
+    //   unsigned int min = 0;
+    //   unsigned int max = 0;
+    //   frontend->definition_parameter_bounds(def, min, max);
+    //   Token tok;
+    //   tok.content = func->name.content;
+    //   tok.type = TT_IDENTIFIER;
+    //   if (max != unsigned(-1)) {
+    //     if (node.arguments.size() < min) {
+    //       herr->Error(tok) << "Too few arguments to function call";
+    //     } else if (node.arguments.size() > max) {
+    //       herr->Error(tok) << "Too many arguments to function call";
+    //     }
+    //   }
+    // }
     node.RecursiveSubVisit(*this);
     return false;
   }

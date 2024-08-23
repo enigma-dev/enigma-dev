@@ -883,8 +883,9 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
     wto << "  ";
-    auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
-    ast.WriteCppToStream(wto, 2);
+    // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
+    auto &ast = (scr->code).ast;
+    ast.WriteCppToStream(wto, 2, true);
     wto << "\n  return 0;\n}\n\n";
   }
 }

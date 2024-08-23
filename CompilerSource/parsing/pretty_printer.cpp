@@ -27,11 +27,17 @@ AST::CppPrettyPrinter::CppPrettyPrinter() {
   of = new std::ofstream();
   if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
   print_type = false;
+  is_script = false;
 }
 
-AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPrettyPrinter() { this->language_fe = lfe; }
+AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPrettyPrinter() {
+  this->language_fe = lfe;
+  print_type = false;
+  is_script = false;
+}
 
-AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe) : of(&ofs), language_fe(lfe) {
+AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script)
+    : of(&ofs), is_script(is_script), language_fe(lfe) {
   print_type = false;
 }
 
@@ -63,13 +69,31 @@ std::string AST::CppPrettyPrinter::GetPrintedCode() {
 
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
   if (print_type) print("auto ");
-  print(std::string(node.name.content));
+  std::string name = node.name.content;
+  if (is_script && name != "self") {
+    if (language_fe->is_shared_local(name)) {
+      print("enigma::glaccess(int(self))->" + name);
+    } else if (language_fe->global_exists(name)) {
+      print(name);
+    } else if (std::holds_alternative<jdi::definition *>(node.type) && std::get<jdi::definition *>(node.type)) {
+      print(name);
+    } else if (name.substr(0, 8) == "argument") {
+      print(name);
+    } else {
+      print("enigma::varaccess_" + name + "(int(self))");
+    }
+  } else {
+    print(name);
+  }
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
   std::string value = std::get<std::string>(node.value.value);
   if (node.value.type != TT_CHARLIT && node.value.type != TT_STRINGLIT) {
+    if (node.value.type == TT_HEXLITERAL) {
+      print("0x");
+    }
     print(value);
     return true;
   }
@@ -188,19 +212,20 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
 
 bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
   std::string left = node.left->As<AST::IdentifierAccess>()->name.content;
+  std::string right = node.right->As<AST::IdentifierAccess>()->name.content;
   if (left == "local") {
-    VISIT_AND_CHECK(node.right);
+    print(right);
     return true;
   }
 
   print("enigma::varaccess_");
-  VISIT_AND_CHECK(node.right);
+  print(right);
   print("(");
 
   if (left == "global") {
     print("int(global)");
   } else {
-    VISIT_AND_CHECK(node.left);
+    print(left);
   }
   print(")");
   return true;
@@ -229,22 +254,23 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
   print("(");
 
   bool is_variadic = false;
+  int variadic_index = 0;
   if (node.function->type == AST::NodeType::IDENTIFIER && language_fe) {
     auto fn = node.function->As<AST::IdentifierAccess>();
     jdi::definition *def = nullptr;
     if (std::holds_alternative<jdi::definition *>(fn->type)) def = std::get<jdi::definition *>(fn->type);
     if (def && language_fe->is_variadic_function(def)) {
       is_variadic = true;
-      print("(enigma::varargs()");
-      if (node.arguments.size()) {
-        print(", ");
-      }
+      variadic_index = language_fe->function_variadic_after((jdi::definition_function *)def);
     }
   }
 
-  for (auto &arg : node.arguments) {
-    VISIT_AND_CHECK(arg);
-    if (&arg != &node.arguments.back()) {
+  for (std::size_t i = 0; i < node.arguments.size(); i++) {
+    if (is_variadic && i == std::size_t(variadic_index)) {
+      print("(enigma::varargs(),");
+    }
+    VISIT_AND_CHECK(node.arguments[i]);
+    if (i < node.arguments.size() - 1) {
       print(", ");
     }
   }
@@ -546,14 +572,18 @@ bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
-  if (node.storage_class == DeclarationStatement::StorageClass::GLOBAL ||
-      node.storage_class == DeclarationStatement::StorageClass::LOCAL) {
+  bool is_global = node.storage_class == DeclarationStatement::StorageClass::GLOBAL;
+  bool is_local = node.storage_class == DeclarationStatement::StorageClass::LOCAL;
+  if (is_global || is_local) {
     bool printed = false;
     for (std::size_t i = 0; i < node.declarations.size(); i++) {
       if (node.declarations[i].init) {
         if (printed) print(", ");
         std::string name = node.declarations[i].declarator->decl.name.content;
-        print(name + " = ");
+        if (is_global)
+          print("enigma::varaccess_" + name + "(int(global)) =");
+        else
+          print(name + " = ");
         if (!VisitInitializer(*node.declarations[i].init)) return false;
         printed = true;
       }
@@ -662,17 +692,9 @@ bool AST::CppPrettyPrinter::VisitDefaultStatement(AST::DefaultStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
-  print("switch");
-  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
-    print("(");
-  }
-
+  print("switch(int(");
   VISIT_AND_CHECK(node.expression);
-
-  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
-    print(")");
-  }
-  print(" ");
+  print(")) ");
 
   if (!VisitCodeBlock(*node.body->As<AST::CodeBlock>())) return false;
   print(" ");
@@ -681,7 +703,6 @@ bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
-  // temp sol
   if (node.kind == AST::WhileLoop::Kind::REPEAT) {
     print("int strange_name = ");
   } else {

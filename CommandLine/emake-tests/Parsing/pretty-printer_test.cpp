@@ -160,7 +160,7 @@ TEST(PrinterTest, test8) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
-      "if(true) for ( int i = 0; i < 12; i++) k++; else switch (i) { case 1 : {k--;} case 2 :{k += 3;} default "
+      "if(true) for ( int i = 0; i < 12; i++) k++; else switch (int((i))) { case 1 : {k--;} case 2 :{k += 3;} default "
       ":{ k = "
       "0;} }";
 
@@ -216,7 +216,7 @@ TEST(PrinterTest, test11) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
-      "switch (5 * 6 +12) { case 1: {while(1){while((f)) do{s--;  float a = new ( float);}while(!(1));} "
+      "switch (int((5 * 6 +12))) { case 1: {while(1){while((f)) do{s--;  float a = new ( float);}while(!(1));} "
       "return 2; break; }case 2:{ return 3;  int x = sizeof 12; break; } default:{ f-=22; break;}}";
 
   ASSERT_TRUE(compare(code, printed));
@@ -455,7 +455,7 @@ TEST(PrinterTest, test23) {
   std::string printed = v.GetPrintedCode();
   code =
       "do {signed char j = '1';while (j <= '2') {for (signed char k = 'a'; k <= 'b'; ++k) {signed char l = 'X';do "
-      "{switch (i) {case "
+      "{switch (int((i))) {case "
       "'A':{break;}case 'B':{break;}default:{break;}}condition = (i == 'A' && j == '1') || (k == 'b' && l == 'Y');if "
       "(condition) {c++;}++l;} while (l <= 'Y');k--;k++;}++j;}++i;} while (i <= 'B');";
 
@@ -501,7 +501,7 @@ TEST(PrinterTest, test25) {
       "{ int x = 2;for ( int i = 1; i <= 3; ++i) { int y = i * 2; int z = y - x; int j = "
       "1;while (j <= 2) {z = "
       "static_cast< int>(z * 1.5); int k = 0;do { int result = (y << 1) - (--x) + (z++ * "
-      "(k++));switch (result % 5) {case "
+      "(k++));switch (int((result % 5))) {case "
       "0:{break;}case 1:{result += x;break;}case 2:{result -= y;break;}case 3:{result *= z;break;}case 4:{result = "
       "(result / 2) "
       "+ 1;break;}default:{break;}}} while (k < 1);++j;}}return 0;}";
@@ -574,7 +574,7 @@ TEST(PrinterTest, test28) {
   code =
       " int *num1 = new ( int)(5);  int *num2 = new ( int)(3);  int *result = new "
       "( "
-      "int);  int choice = 2; do {switch(choice) {case "
+      "int);  int choice = 2; do {switch(int((choice))) {case "
       "1: {*(result) = *(num1) + *(num2);break;} case 2:{ *(result) = *(num1) - *(num2);break;} case 3:{ *(result) = "
       "*(num1) * "
       "*(num2);break;} case 4: {if (*(num2) != 0) { int tempResult = static_cast< int>(*(num1)) / "
@@ -689,7 +689,8 @@ TEST(PrinterTest, test33) {
       "int result = 0; for (int i = 0; i < n; ++i) {for (int j = 0; j < n; ++j) {int k = 0; while (k < n) {int m = "
       "0;do "
       "{int value = arr[i][j][k];value = -value; value = value * 2 + 3; double sqrtValue = "
-      "static_cast<double>(value); sqrtValue = sqrt(sqrtValue); switch (m) {case 0:{result += (value << 1) - 3;result "
+      "static_cast<double>(value); sqrtValue = sqrt(sqrtValue); switch (int((m))) {case 0:{result += (value << 1) - "
+      "3;result "
       "= "
       "~result;break;} case 1:{result += static_cast<int>(sqrtValue) * 2;result = result ^ 1;break;}default:{result "
       "+= "
@@ -772,11 +773,14 @@ TEST(PrinterTest, test37) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
-      "switch (5 * 6) { case 1:{ return 2; break 13; }case 2: {return 3; break; } default:{ break;}} switch (1) { case "
+      "switch (int((5 * 6))) { case 1:{ return 2; break 13; }case 2: {return 3; break; } default:{ break;}} switch "
+      "(int((1))) { case "
       "1: "
-      "{return 2; }default:{ return \"test\";}} switch (1) { default:{ continue 12;}} switch (1) { default: {continue "
+      "{return 2; }default:{ return \"test\";}} switch (int((1))) { default:{ continue 12;}} switch (int((1))) { "
+      "default: {continue "
       "12;}} "
-      "switch (1) { default:{ delete [] x; return \"new test\";}} switch (1) { default: {new (nullptr) (int[]){1, 2, "
+      "switch (int((1))) { default:{ delete [] x; return \"new test\";}} switch (int((1))) { default: {new (nullptr) "
+      "(int[]){1, 2, "
       "3, 4, "
       "5}; return \"new test\";}}";
 
@@ -817,7 +821,7 @@ TEST(PrinterTest, test39) {
   code =
       "if(3>2) j++; else --k; if (k) k++; if (true) { return 1; } else { return 2; } if (false) for(int "
       "i=0;i<12;i++) "
-      "{k++;} else switch(i){ case 1 :{ k--;} case 2 : {k+=3; }default :{ k=0;} }";
+      "{k++;} else switch(int((i))){ case 1 :{ k--;} case 2 : {k+=3; }default :{ k=0;} }";
 
   ASSERT_TRUE(compare(code, printed));
 }

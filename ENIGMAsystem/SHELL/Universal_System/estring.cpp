@@ -172,6 +172,7 @@ double real(variant str) { return str.type ? atof(((string)str).c_str()) : (doub
 string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
 int ord(string str)  { return str[0]; }
+int ord(char c) { return c; }
 
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str) { return strlen(str); }

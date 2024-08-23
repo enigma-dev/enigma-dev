@@ -566,12 +566,13 @@ class AST {
   class CppPrettyPrinter : public AST::Visitor {
     std::ofstream *of;
     bool print_type;
+    bool is_script;
     const LanguageFrontend *language_fe = nullptr;
 
    public:
     CppPrettyPrinter();
     CppPrettyPrinter(const LanguageFrontend *lfe);
-    CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe);
+    CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script);
     void print(std::string code);
     void PrintSemiColon(PNode &node);
     std::string GetPrintedCode();
@@ -645,7 +646,7 @@ class AST {
   // The caller is responsible for having already printed applicable
   // function declarations and opening braces, statements, etc, and for
   // printing the closing statements and braces afterward.
-  void WriteCppToStream(std::ofstream &of, int base_indent = 2) const;
+  void WriteCppToStream(std::ofstream &of, int base_indent = 2, bool is_script = false) const;
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.

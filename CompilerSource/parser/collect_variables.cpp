@@ -156,16 +156,16 @@ class DeclGatheringVisitor : public AST::Visitor {
   const NameSet &script_names;
   CompileState *cs;
 
-  bool CheckIfReserved(const std::string &name) {
-    bool res = script_names.find(name) != script_names.end();
-    res |= parsed_scope->declarations.find(name) != parsed_scope->declarations.end();
-    return res;
-  }
-
   std::string CheckIfIdentifier(AST::PNode &node) {
     if (node->type == AST::NodeType::IDENTIFIER) {
       std::string name = node->As<AST::IdentifierAccess>()->name.content;
-      if (!CheckIfReserved(name)) return name;
+      if (parsed_scope->declarations.find(name) != parsed_scope->declarations.end()) {
+        node->As<AST::IdentifierAccess>()->type = parsed_scope->declarations[name];
+        return "";
+      } else if (script_names.find(name) != script_names.end()) {
+        return "";
+      } else
+        return name;
     }
     return "";
   }
@@ -236,7 +236,8 @@ class DeclGatheringVisitor : public AST::Visitor {
       dectrip dtrip(type, prefix, suffix);
       if (is_global) parsed_scope->globals[name] = dtrip;
       if (is_local) parsed_scope->locals[name] = dtrip;
-      parsed_scope->declarations[name] = dtrip;
+      cs->add_dot_accessed_local(name);
+      parsed_scope->declarations[name] = node.def;
     }
 
     for (const auto &decl : node.declarations) {
