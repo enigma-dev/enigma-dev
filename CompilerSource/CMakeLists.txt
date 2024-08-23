@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(COMPILER_LIB "compileEGMf")
+set(COMPILER_LIB "compileEGMf" CACHE STRING "Compiler library name")
 set(COMPILER_LIB_DESCRIPTION "Enigma Compiler")
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -24,12 +24,12 @@ if(MSVC)
   target_compile_options(${COMPILER_LIB} PRIVATE "/permissive-")
 endif()
 
-add_dependencies(${COMPILER_LIB} "Protocols" "ENIGMAShared")
-target_link_libraries(${COMPILER_LIB} PRIVATE "Protocols" "ENIGMAShared")
+add_dependencies(${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
+target_link_libraries(${COMPILER_LIB} PRIVATE ${LIB_PROTO} ${SHARED_LIB})
 
 # Find Protobuf
-include(FindProtobuf)
-target_link_libraries(${COMPILER_LIB} PRIVATE ${Protobuf_LIBRARIES})
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${LIB_PROTO} PRIVATE protobuf::libprotobuf)
 
 # Find libpng
 find_package(PNG REQUIRED)

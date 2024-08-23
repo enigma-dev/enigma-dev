@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(SHARED_LIB "ENIGMAShared")
+set(SHARED_LIB "ENIGMAShared" CACHE STRING "Shared library name")
 set(SHARED_LIB_DESCRIPTION "Enigma Shared Utilities")
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -15,11 +15,14 @@ set(SHARED_SOURCES
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
    "ProtoYaml/proto-yaml.cpp"
+   "ResourceTransformations/VisualShader/visual_shader.cpp"
+   "ResourceTransformations/VisualShader/visual_shader_nodes.cpp"
+   "ResourceTransformations/VisualShader/vs_noise_nodes.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
 
-target_include_directories(${SHARED_LIB} PRIVATE "${ENIGMA_DIR}/CompilerSource")
+target_include_directories(${SHARED_LIB} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/" "${ENIGMA_DIR}/CompilerSource")
 
 if(MSVC)
   # Default MSVC warnings are overkill. Set to Lvl 1
@@ -32,11 +35,11 @@ endif()
 find_package(PNG REQUIRED)
 target_link_libraries(${SHARED_LIB} PRIVATE ${PNG_LIBRARY})
 
-add_dependencies(${SHARED_LIB} "Protocols")
+add_dependencies(${SHARED_LIB} ${LIB_PROTO})
 
 find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
-target_link_libraries(${SHARED_LIB} PRIVATE "Protocols")
+target_link_libraries(${SHARED_LIB} PRIVATE ${LIB_PROTO})
 
 # Find Protobuf
 find_package(Protobuf CONFIG REQUIRED)

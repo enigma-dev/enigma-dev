@@ -1,9 +1,20 @@
 cmake_minimum_required(VERSION 3.14)
 
+# Set default build type
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Build type not set - defaulting to Debug")
+  set(
+    CMAKE_BUILD_TYPE "Debug"
+    CACHE
+      STRING
+      "Choose the type of build from:  Debug Release MinSizeRel RelWithDebInfo."
+    FORCE)
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-  set(CLI_TARGET "emake-debug")
+  set(CLI_TARGET "emake-debug" CACHE STRING "CLI target name")
 else()
-  set(CLI_TARGET "emake")
+  set(CLI_TARGET "emake" CACHE STRING "CLI target name")
 endif()
 
 set(CLI_TARGET_DESCRIPTION "ENIGMA CLI")
@@ -30,8 +41,8 @@ endif()
 target_include_directories(${CLI_TARGET} PRIVATE "${ENIGMA_DIR}/CompilerSource")
 
 # Our libs
-add_dependencies(${CLI_TARGET} "EGM" "compileEGMf" "Protocols")
-target_link_libraries(${CLI_TARGET} PRIVATE "EGM" "Protocols" "compileEGMf" "ENIGMAShared")
+add_dependencies(${CLI_TARGET} ${LIB_EGM} ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
+target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_EGM} ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
 
 # Find PugiXML
 find_library(LIB_PUGIXML NAMES pugixml)
@@ -94,7 +105,8 @@ if(WIN32)
 endif(WIN32)
 
 # Find Boost
-find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
+# https://cmake.org/cmake/help/latest/policy/CMP0167.html
+find_package(Boost CONFIG COMPONENTS system program_options filesystem REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE Boost::program_options)
 
 install(TARGETS ${CLI_TARGET} RUNTIME DESTINATION .)

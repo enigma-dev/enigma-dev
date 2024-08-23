@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-set(LIB_EGM "EGM")
+set(LIB_EGM "EGM" CACHE STRING "EGM library name")
 set(LIB_EGM_DESCRIPTION "Interface for reading and writing ENIGMA and GameMaker files")
 
 set(CMAKE_DEBUG_POSTFIX d)
@@ -31,8 +31,8 @@ include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/prot
 find_package(Protobuf CONFIG REQUIRED)
 target_link_libraries(${LIB_EGM} PRIVATE protobuf::libprotobuf)
 
-add_dependencies(${LIB_EGM} "Protocols" "ENIGMAShared")
-target_link_libraries(${LIB_EGM} PRIVATE "Protocols" "ENIGMAShared")
+add_dependencies(${LIB_EGM} ${LIB_PROTO} ${SHARED_LIB})
+target_link_libraries(${LIB_EGM} PRIVATE ${LIB_PROTO} ${SHARED_LIB})
 
 find_package(PNG REQUIRED)
 include_directories(${PNG_INCLUDE_DIR})
