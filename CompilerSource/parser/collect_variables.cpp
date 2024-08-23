@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <unordered_set>
@@ -234,6 +235,8 @@ class DeclGatheringVisitor : public AST::Visitor {
         prefix = ftype.substr(0, pos);
         suffix = ftype.substr(pos + name.length());
       }
+      prefix = std::regex_replace(prefix, std::regex("^ +| +$|( ) +"), "$1");
+      suffix = std::regex_replace(suffix, std::regex("^ +| +$|( ) +"), "$1");
       dectrip dtrip(type, prefix, suffix);
       if (is_global) parsed_scope->globals[name] = dtrip;
       if (is_local) parsed_scope->locals[name] = dtrip;
