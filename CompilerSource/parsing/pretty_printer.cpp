@@ -668,8 +668,12 @@ bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
   VISIT_AND_CHECK(node.increment);
   print(") ");
 
-  VISIT_AND_CHECK(node.body);
-  PrintSemiColon(node.body);
+  if (node.body) {
+    VISIT_AND_CHECK(node.body);
+    PrintSemiColon(node.body);
+  } else {
+    print(";");
+  }
   print(" ");
 
   return true;

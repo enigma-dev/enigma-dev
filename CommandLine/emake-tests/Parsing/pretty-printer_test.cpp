@@ -1408,3 +1408,19 @@ TEST(PrinterTest, test72) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, test73) {
+  std::string code = "for(int i=0;i<n;i++);";
+
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  ASSERT_TRUE(compare(code, printed));
+}

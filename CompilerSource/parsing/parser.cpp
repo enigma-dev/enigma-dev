@@ -2322,9 +2322,14 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after for-loop header");
   }
 
-  auto body = ParseCFStmtBody();
-  return std::make_unique<AST::ForLoop>(std::move(init), std::move(cond),
-                                        std::move(incr), std::move(body));
+  AST::PNode body = nullptr;
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  } else {
+    body = ParseCFStmtBody();
+  }
+
+  return std::make_unique<AST::ForLoop>(std::move(init), std::move(cond), std::move(incr), std::move(body));
 }
 
 std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
