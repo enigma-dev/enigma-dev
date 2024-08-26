@@ -1001,8 +1001,10 @@ namespace ngs::ps {
         if (argv0) { 
           Tcl_FindExecutable(argv0);
           const char *nameOfExecutable = Tcl_GetNameOfExecutable();
-          if (realpath(nameOfExecutable, exe)) {
-            path = exe;
+          if (nameOfExecutable) {
+            if (realpath(nameOfExecutable, exe)) {
+              path = exe;
+            }
           }
           free(argv0);
         }
