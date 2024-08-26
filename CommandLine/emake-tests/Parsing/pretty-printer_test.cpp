@@ -1389,6 +1389,7 @@ TEST(PrinterTest, test71) {
   AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
+  code = "for (b = 1; b < 11; b += 1) {game_field(a, b) = -1;}";
 
   ASSERT_TRUE(compare(code, printed));
 }

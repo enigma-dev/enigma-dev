@@ -97,8 +97,11 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
     print(value);
     return true;
   }
-
-  print(node.value.type == TT_CHARLIT ? "'" : "\"");
+  enigma::parsing::TokenType type = node.value.type;
+  if (type == TT_CHARLIT && value.size() > 1) {
+    type = TT_STRINGLIT;
+  }
+  print(type == TT_CHARLIT ? "'" : "\"");
   std::string to_print;
   for (char c : value) {
     if (c == '\\') {
@@ -128,7 +131,7 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
     }
   }
   print(to_print);
-  print(node.value.type == TT_CHARLIT ? "'" : "\"");
+  print(type == TT_CHARLIT ? "'" : "\"");
 
   return true;
 }
@@ -240,12 +243,25 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   VISIT_AND_CHECK(node.left);
 
   std::string operation = node.operation.token;
+  bool is_multi_dim = false;
+  if (node.operation.type == TT_BEGINBRACKET) {
+    if (node.right->type == AST::NodeType::BINARY_EXPRESSION) {
+      auto bin = node.right->As<AST::BinaryExpression>();
+      if (bin->operation.type == TT_COMMA) {
+        is_multi_dim = true;
+        operation = "(";
+      }
+    }
+  }
+
   if (operation == ":=") operation = "=";
   print(" " + operation + " ");
 
   VISIT_AND_CHECK(node.right);
 
-  if (node.operation.type == TT_BEGINBRACKET) {
+  if (is_multi_dim) {
+    print(")");
+  } else if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
   return true;
@@ -323,6 +339,9 @@ bool AST::CppPrettyPrinter::VisitReturnStatement(AST::ReturnStatement &node) {
   print("return ");
   if (node.expression) {
     VISIT_AND_CHECK(node.expression);
+  }
+  if (node.is_exit) {
+    print("0");
   }
   return true;
 }

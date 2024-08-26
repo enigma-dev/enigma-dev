@@ -2579,6 +2579,25 @@ class SyntaxChecker : public AST::Visitor {
     return false;
   }
 
+  bool VisitIfStatement(AST::IfStatement &node) {
+    if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
+      if (node.condition->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
+        node.condition->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
+        node.condition->As<AST::BinaryExpression>()->operation.token = "==";
+      }
+    } else if (node.condition->type == AST::NodeType::PARENTHETICAL) {
+      auto paren = node.condition->As<AST::Parenthetical>();
+      if (paren->expression->type == AST::NodeType::BINARY_EXPRESSION) {
+        if (paren->expression->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
+          paren->expression->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
+          paren->expression->As<AST::BinaryExpression>()->operation.token = "==";
+        }
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
   bool VisitCodeBlock(AST::CodeBlock &node) {
     node.RecursiveSubVisit(*this);
     return false;
@@ -2640,17 +2659,6 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitLiteral(AST::Literal &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
-  }
-
-  bool VisitIfStatement(AST::IfStatement &node) {
-    if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
-      if (node.condition->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
-        node.condition->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
-        node.condition->As<AST::BinaryExpression>()->operation.token = "==";
-      }
-    }
     node.RecursiveSubVisit(*this);
     return false;
   }
