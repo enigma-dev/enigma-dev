@@ -1011,9 +1011,7 @@ namespace ngs::ps {
       }
     } else {
       int err = 0;
-      struct ps_prochandle *P = proc_arg_grab(
-        std::to_string(proc_id).c_str(), 
-        PR_ARG_PIDS, PGRAB_RDONLY, &err, nullptr);
+      struct ps_prochandle *P = Pgrab(proc_id, PGRAB_RDONLY, &err);
       if (P) {
         if (!err && !errno) {
           char buffer[PATH_MAX];
