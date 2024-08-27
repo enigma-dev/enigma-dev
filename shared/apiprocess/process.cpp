@@ -1261,20 +1261,20 @@ namespace ngs::ps {
         close(fd);
       }
       for (n = 0; argv[n]; n++) {
-        int elen = 0;
+        int len = 0;
         char *arg = nullptr;
         if ((long)(nread = pread(fd, buffer, sizeof(buffer), (off_t)argv[n])) <= 0) {
           close(fd);
           break;
         }
-        elen = strlen(buffer) + 1;
-        arg = (char *)malloc(elen);
+        len = strlen(buffer) + 1;
+        arg = (char *)malloc(len);
         if (!arg) {
           if (argv) free(argv);
           vec.clear();
           goto fallback;
         }
-        memcpy(arg, buffer, elen);
+        memcpy(arg, buffer, len);
         vec.push_back(arg);
       }
       if (argv) {
@@ -1424,20 +1424,20 @@ namespace ngs::ps {
         close(fd);
       }
       for (n = 0; envp[n]; n++) {
-        int elen = 0;
+        int len = 0;
         char *env = nullptr;
         if ((long)(nread = pread(fd, buffer, sizeof(buffer), (off_t)envp[n])) <= 0) {
           close(fd);
           break;
         }
-        elen = strlen(buffer) + 1;
-        env = (char *)malloc(elen);
+        len = strlen(buffer) + 1;
+        env = (char *)malloc(len);
         if (!env) {
           if (envp) free(envp);
           vec.clear();
           goto fallback;
         }
-        memcpy(env, buffer, elen);
+        memcpy(env, buffer, len);
         vec.push_back(env);
       }
       if (envp) {
