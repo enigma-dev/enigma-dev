@@ -1245,7 +1245,11 @@ namespace ngs::ps {
       char **argv = (char **)malloc(ARG_MAX);
       if (!argv) goto fallback;
       psinfo.pr_dmodel = 0;
-      proc_psinfo_get(&psinfo, proc_id);
+      int err = proc_psinfo_get(&psinfo, proc_id);
+      if (err) {
+        free(argv);
+        goto fallback;
+      }
       argv_size = sizeof(*argv) * ARG_MAX;
       sprintf(buffer, "/proc/%d/as", proc_id);
       if ((fd = open(buffer, O_RDONLY)) < 0) {
@@ -1408,7 +1412,11 @@ namespace ngs::ps {
       char **envp = (char **)malloc(ARG_MAX);
       if (!envp) goto fallback;
       psinfo.pr_dmodel = 0;
-      proc_psinfo_get(&psinfo, proc_id);
+      int err = proc_psinfo_get(&psinfo, proc_id);
+      if (err) {
+        free(envp);
+        goto fallback;
+      }
       envp_size = sizeof(*envp) * ARG_MAX;
       sprintf(buffer, "/proc/%d/as", proc_id);
       if ((fd = open(buffer, O_RDONLY)) < 0) {
