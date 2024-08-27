@@ -451,6 +451,8 @@ namespace ngs::ps {
     finish:
     #endif
     std::sort(vec.begin(), vec.end());
+    auto itr = std::unique(vec.begin(), vec.end());
+    vec.erase(itr, vec.end());
     return vec;
   }
 
@@ -761,6 +763,8 @@ namespace ngs::ps {
     finish:
     #endif
     std::sort(vec.begin(), vec.end());
+    auto itr = std::unique(vec.begin(), vec.end());
+    vec.erase(itr, vec.end());
     return vec;
   }
 
@@ -1219,6 +1223,66 @@ namespace ngs::ps {
     kvm_close(kd);
     #endif
     #if defined(__sun)
+    if (vec.empty()) {
+      auto proc_psinfo_get = [](psinfo_t *psinfo, NGS_PROCID proc_id) {
+        int fd = -1, retval = 0;
+        char buffer[BUFSIZ];
+        sprintf(buffer, "/proc/%d/psinfo", proc_id);
+        if ((fd = open(buffer, O_RDONLY)) < 0) {
+          return ESRCH;
+        }
+        if (pread(fd, psinfo, sizeof(psinfo_t), 0) != sizeof(psinfo_t)) {
+          retval = errno;
+        }
+        close(fd);
+        return retval;
+      };
+      psinfo_t psinfo;
+      char buffer[BUFSIZ];
+      int n = 0, fd = -1;
+      size_t nread = 0;
+      unsigned argv_size = 0;
+      char **argv = (char **)malloc(ARG_MAX);
+      if (!argv) goto fallback;
+      psinfo.pr_dmodel = 0;
+      proc_psinfo_get(&psinfo, proc_id);
+      argv_size = sizeof(*argv) * ARG_MAX;
+      sprintf(buffer, "/proc/%d/as", proc_id);
+      if ((fd = open(buffer, O_RDONLY)) < 0) {
+        free(argv);
+        goto fallback;
+      }
+      if (argv_size > sizeof(argv)) {
+        free(argv);
+        argv = (char **)malloc(argv_size);
+        if (!argv) goto fallback;
+      }
+      if ((long)(nread = pread(fd, argv, argv_size, (off_t)psinfo.pr_argv)) <= 0) {
+        close(fd);
+      }
+      for (n = 0; argv[n]; n++) {
+        int elen = 0;
+        char *arg = nullptr;
+        if ((long)(nread = pread(fd, buffer, sizeof(buffer), (off_t)argv[n])) <= 0) {
+          close(fd);
+          break;
+        }
+        elen = strlen(buffer) + 1;
+        arg = (char *)malloc(elen);
+        if (!arg) {
+          if (argv) free(argv);
+          vec.clear();
+          goto fallback;
+        }
+        memcpy(arg, buffer, elen);
+        vec.push_back(arg);
+      }
+      if (argv) {
+        free(argv);
+      }
+      close(fd);
+    }
+    fallback:
     kvm_t *kd = nullptr;
     char **cmd = nullptr;
     struct proc *proc_info = nullptr;
@@ -1322,6 +1386,66 @@ namespace ngs::ps {
     kvm_close(kd);
     #endif
     #if defined(__sun)
+    if (vec.empty()) {
+      auto proc_psinfo_get = [](psinfo_t *psinfo, NGS_PROCID proc_id) {
+        int fd = -1, retval = 0;
+        char buffer[BUFSIZ];
+        sprintf(buffer, "/proc/%d/psinfo", proc_id);
+        if ((fd = open(buffer, O_RDONLY)) < 0) {
+          return ESRCH;
+        }
+        if (pread(fd, psinfo, sizeof(psinfo_t), 0) != sizeof(psinfo_t)) {
+          retval = errno;
+        }
+        close(fd);
+        return retval;
+      };
+      psinfo_t psinfo;
+      char buffer[BUFSIZ];
+      int n = 0, fd = -1;
+      size_t nread = 0;
+      unsigned envp_size = 0;
+      char **envp = (char **)malloc(ARG_MAX);
+      if (!envp) goto fallback;
+      psinfo.pr_dmodel = 0;
+      proc_psinfo_get(&psinfo, proc_id);
+      envp_size = sizeof(*envp) * ARG_MAX;
+      sprintf(buffer, "/proc/%d/as", proc_id);
+      if ((fd = open(buffer, O_RDONLY)) < 0) {
+        free(envp);
+        goto fallback;
+      }
+      if (envp_size > sizeof(envp)) {
+        free(envp);
+        envp = (char **)malloc(envp_size);
+        if (!envp) goto fallback;
+      }
+      if ((long)(nread = pread(fd, envp, envp_size, (off_t)psinfo.pr_envp)) <= 0) {
+        close(fd);
+      }
+      for (n = 0; envp[n]; n++) {
+        int elen = 0;
+        char *env = nullptr;
+        if ((long)(nread = pread(fd, buffer, sizeof(buffer), (off_t)envp[n])) <= 0) {
+          close(fd);
+          break;
+        }
+        elen = strlen(buffer) + 1;
+        env = (char *)malloc(elen);
+        if (!env) {
+          if (envp) free(envp);
+          vec.clear();
+          goto fallback;
+        }
+        memcpy(env, buffer, elen);
+        vec.push_back(env);
+      }
+      if (envp) {
+        free(envp);
+      }
+      close(fd);
+    }
+    fallback:
     kvm_t *kd = nullptr;
     char **env = nullptr;
     struct proc *proc_info = nullptr;
