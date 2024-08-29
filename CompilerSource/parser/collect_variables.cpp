@@ -164,6 +164,9 @@ class DeclGatheringVisitor : public AST::Visitor {
         node->As<AST::IdentifierAccess>()->type = parsed_scope->declarations[name];
         return "";
       } else if (script_names.find(name) != script_names.end()) {
+        if (node->type == AST::NodeType::FUNCTION_CALL) {
+          parsed_scope->funcs[name] = node->As<AST::FunctionCallExpression>()->arguments.size();
+        }
         return "";
       } else
         return name;
@@ -284,23 +287,18 @@ class DeclGatheringVisitor : public AST::Visitor {
     AddLocal(node.body);
     node.RecursiveSubVisit(*this);
 
-    // std::vector<std::string> erases;
-    // for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
-    //   if (it->first.substr(0, 8) == "argument") {
-    //     erases.push_back(it->first);
-    //     ++it;
-    //   } else {
-    //     if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end()) {
-    //       parsed_scope->ambiguous[it->first] = dectrip();
-    //     }
-    //     ++it;
-    //   }
-    // }
-    // for (auto &erase : erases) {
-    //   parsed_scope->locals.erase(erase);
-    // }
-    for (auto it = parsed_scope->ambiguous.begin(); it != parsed_scope->ambiguous.end(); ++it)
-      parsed_scope->locals.erase(it->first);
+    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
+      if (it->first.substr(0, 8) == "argument") {
+        it = parsed_scope->locals.erase(it);
+      } else {
+        if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end()) {
+          parsed_scope->ambiguous[it->first] = dectrip();
+          it = parsed_scope->locals.erase(it);
+        } else {
+          it++;
+        }
+      }
+    }
 
     return false;
   }

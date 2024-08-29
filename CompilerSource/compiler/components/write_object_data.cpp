@@ -308,7 +308,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   }
 
   wto << "\n    std::vector<std::byte> serialize() override {\n"
-         "      auto bytes = " << (object->parent ? object->parent->name : "object_locals") << "::serialize();\n";
+         "      auto bytes = " << (object->parent ? "OBJ_" + object->parent->name : "object_locals") << "::serialize();\n";
   wto << "      std::size_t len = 0;\n\n";
   if (!locals.empty()) {
     wto << "      std::unordered_map<std::string, std::size_t> object_offsets{};\n";
@@ -334,7 +334,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
          "    }\n";
 
   wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
-         "      auto len = " << (object->parent ? object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
+         "      auto len = " << (object->parent ? "OBJ_" + object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
   wto << "      unsigned char type;\n";
   wto << "      enigma_internal_deserialize(type, iter, len);\n";
   if (!locals.empty()) {
@@ -941,8 +941,23 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
     // Inherit default code from object_locals.
     // Don't generate the same default code for all objects.
     if (event.ast.empty()) continue;
+    bool defined_inherited = false;
+
+    // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
+    // for no reason 99% of the time, and it doesn't allow us to give any
+    // feedback as to why a call to event_inherited() may not be valid.
+    if (object->InheritsSpecifically(event.ev_id) &&
+        event.ast.lexer->GetCode().find("event_inherited") != std::string::npos) {
+      wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
+      defined_inherited = true;
+    }
 
     write_event_func(wto, event, object->name, evname, mode);
+
+    if (defined_inherited) {
+      wto << "#undef event_inherited\n";
+    }
+    
     if (event.ev_id.HasSubCheck()) {
       // Write event sub check code
       wto << "inline bool enigma::OBJ_" << object->name
@@ -985,7 +1000,7 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      subscr->second->code.ast.WriteCppToStream(wto, 2);
+      subscr->second->code.ast.WriteCppToStream(wto, 2, true);
       wto << "\n  return 0;\n}\n\n";
     }
   }
