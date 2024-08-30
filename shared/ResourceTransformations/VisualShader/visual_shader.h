@@ -251,6 +251,7 @@ class VisualShaderNode {
   };
 
   VisualShaderNode();
+  virtual ~VisualShaderNode() = default;
 
   bool is_simple_decl() const;
 
@@ -325,6 +326,7 @@ class VisualShaderNode {
 class VisualShaderNodeInput : public VisualShaderNode {
  public:
   VisualShaderNodeInput();
+  virtual ~VisualShaderNodeInput() = default;
 
   virtual std::string generate_code([[maybe_unused]] const int& id,
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
@@ -366,6 +368,7 @@ class VisualShaderNodeInput : public VisualShaderNode {
 class VisualShaderNodeOutput : public VisualShaderNode {
  public:
   VisualShaderNodeOutput();
+  virtual ~VisualShaderNodeOutput() = default;
 
   virtual std::string generate_code([[maybe_unused]] const int& id,
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
