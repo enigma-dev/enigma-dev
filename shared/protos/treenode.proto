@@ -7,6 +7,7 @@ import "Background.proto";
 import "Object.proto";
 import "Script.proto";
 import "Shader.proto";
+import "VisualShader.proto";
 import "Path.proto";
 import "Font.proto";
 import "Timeline.proto";
@@ -35,11 +36,12 @@ message TreeNode {
     resources.Timeline timeline = 9;
     // NOTE: No idea what 9(+1) is in GM
     resources.Shader shader = 11;
+    resources.VisualShader visual_shader = 12;
     // NOTE: these below don't exist in GM's map
-    resources.Include include = 12;
-    resources.Settings settings = 13;
-    //resources.Macros macros = 14;
-    //resources.Help help = 15;
+    resources.Include include = 13;
+    resources.Settings settings = 14;
+    //resources.Macros macros = 15;
+    //resources.Help help = 16;
   }
 
   optional string name = 101;

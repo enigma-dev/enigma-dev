@@ -1,0 +1,8 @@
+syntax = "proto3";
+package buffers.resources;
+
+import "options.proto";
+
+message VisualShader {
+    optional int32 id = 2;
+}
