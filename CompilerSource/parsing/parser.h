@@ -11,7 +11,6 @@
 
 #include <JDI/src/System/builtins.h>
 #include <memory>
-#include "../parser/object_storage.h"
 
 namespace enigma::parsing {
 
@@ -49,7 +48,6 @@ class AstBuilderTestAPI {
   virtual const Token &current_token() = 0;
   virtual std::unique_ptr<AST::CodeBlock> ParseCodeBlock() = 0;
   virtual FullType TryParseTypeID() = 0;
-  // virtual bool contains_decflag_bitmask(std::size_t combined, std::string_view name)=0;
 
   virtual ~AstBuilderTestAPI() = default;
 };

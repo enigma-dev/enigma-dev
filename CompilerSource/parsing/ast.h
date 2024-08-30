@@ -34,7 +34,6 @@
 
 struct ParsedScope;  // object_storage.h
 struct CompileState;
-// class CppPrettyPrinter;
 
 namespace enigma::parsing {
 
