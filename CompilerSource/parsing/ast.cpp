@@ -35,29 +35,29 @@ void AST::ApplyTo(int instance_id) {
   apply_to_ = instance_id;
 }
 
-void AST::WriteCppToStream(std::ofstream &of, int base_indent) const {
-  // TODO: Implement
+void AST::WriteCppToStream(std::ofstream &of, int base_indent, bool is_script) const {
+  CppPrettyPrinter visitor(of, lexer->GetContext().language_fe, is_script);
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
-    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-    //               junkshit.strc, junkshit.strs, base_indent, of);
+  }
+
+  if (root_) root_->accept(visitor);
+  
+  if (apply_to_) {
     of << std::string(base_indent, ' ') << "}\n";
-  } else {
-    // print_to_file(lexer->GetContext(), junkshit.code, junkshit.synt,
-    //               junkshit.strc, junkshit.strs, base_indent, of);
   }
 }
 
-AST AST::Parse(std::string code, const ParseContext *ctex) {
+AST AST::Parse(std::string code, const ParseContext* ctex) {
   AST res(std::move(code), ctex);
   res.root_ = enigma::parsing::Parse(res.lexer.get(), &res.herr);
   return res;
 }
 
-void AST::ExtractDeclarations(ParsedScope *destination_scope) {
+void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs) {
   std::cout << "collecting variables..." << std::flush;
   const ParseContext &ctex = lexer->GetContext();
-  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names);
+  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs);
   std::cout << " done." << std::endl;
 }
 
@@ -90,6 +90,9 @@ void AST::UnaryPostfixExpression::RecursiveSubVisit(Visitor &visitor) {
 }
 void AST::TernaryExpression::RecursiveSubVisit(Visitor &visitor) {
   RV(visitor, condition, true_expression, false_expression);
+}
+void AST::LambdaExpression::RecursiveSubVisit(Visitor &visitor) {
+  RV(visitor, parameters, body);
 }
 void AST::SizeofExpression::RecursiveSubVisit(Visitor &visitor) {
   if (std::holds_alternative<PNode>(argument))
@@ -171,6 +174,7 @@ const std::vector<std::string> AST::NodesNames = [](){
     REGISTER(NodeType, UNARY_PREFIX_EXPRESSION);
     REGISTER(NodeType, UNARY_POSTFIX_EXPRESSION);
     REGISTER(NodeType, TERNARY_EXPRESSION);
+    REGISTER(NodeType, LAMBDA_EXPRESSION);
     REGISTER(NodeType, SIZEOF);
     REGISTER(NodeType, ALIGNOF);
     REGISTER(NodeType, CAST);

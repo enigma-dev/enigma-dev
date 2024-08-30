@@ -74,6 +74,7 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_LESSEQUAL);
     REGISTER(TT_GREATEREQUAL);
     REGISTER(TT_THREEWAY);
+    REGISTER(TT_JS_ARROW);
     REGISTER(TT_LSH);
     REGISTER(TT_RSH);
     REGISTER(TT_QMARK);

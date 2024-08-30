@@ -172,8 +172,8 @@ bool is_type_specifier(const Token &tok) {
     case TT_UNSIGNED:
       return true;
 
-    case TT_IDENTIFIER:
-      return is_user_defined_type(tok);
+    // case TT_IDENTIFIER:
+    //   return is_user_defined_type(tok);
 
     default:
       return is_cv_qualifier(tok) || is_class_key(tok);
@@ -268,7 +268,7 @@ std::size_t sizeof_builtin_type(std::string_view type) {
   }
 }
 
-std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
+static std::pair<std::size_t, std::size_t> jdi_decflag_bitmask(std::string_view tok) {
   static const std::unordered_map<std::string_view, std::pair<std::size_t, std::size_t>> bitmasks{
     { "volatile",  {jdi::builtin_flag__volatile->mask,  jdi::builtin_flag__volatile->value}  },
     { "static",    {jdi::builtin_flag__static->mask,    jdi::builtin_flag__static->value}    },
@@ -372,8 +372,8 @@ bool maybe_functional_cast(const Token &tok) {
     case TT_DECLTYPE:
       return true;
 
-    case TT_IDENTIFIER:
-      return is_user_defined_type(tok);
+    // case TT_IDENTIFIER:
+    //   return is_user_defined_type(tok);
 
     default:
       return false;
@@ -415,7 +415,7 @@ void maybe_infer_int(FullType &type) {
   }
 }
 
-AstBuilder(Lexer *lexer, ErrorHandler *herr){
+AstBuilder(Lexer *lexer, ErrorHandler *herr) {
   initialize(lexer, herr);
 }
 
@@ -610,7 +610,7 @@ jdi::definition *TryParseIdExpression(Declarator *decl) {
     }
 
     case TT_IDENTIFIER: {
-      if (next_is_user_defined_type()) {
+      if (false/*next_is_user_defined_type()*/) {
         return TryParsePrefixIdentifier(decl);
       } else {
         Token name = token;
@@ -886,7 +886,7 @@ void TryParseElaboratedName(FullType *type) {
   }
 }
 
-bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
+static bool contains_decflag_bitmask(std::size_t combined, std::string_view name) {
   auto builtin = jdi_decflag_bitmask(name);
   return (combined & builtin.first) == builtin.second;
 }
@@ -900,7 +900,11 @@ void maybe_assign_full_type(FullType *type, jdi::definition *def, Token token) {
 }
 
 jdi::definition *get_builtin(std::string_view name) {
-  return jdi::builtin_primitives[std::string(name)];
+  auto it = jdi::builtin_primitives.find(std::string(name));
+  if (it != jdi::builtin_primitives.end()) {
+    return it->second;
+  }
+  return frontend->look_up(std::string(name));
 }
 
 void TryParseTypeSpecifier(FullType *type) {
@@ -965,7 +969,17 @@ void TryParseTypeSpecifier(FullType *type) {
 
     default: {
       if (token.type == TT_SIGNED || token.type == TT_UNSIGNED || next_is_cv_qualifier()) {
-        type->flags |= jdi_decflag_bitmask(token.content).second;
+        //        if (contains_decflag_bitmask(type->flags, "signed") && token.type == TT_UNSIGNED) {
+        //          // TODO: There is no way to actually detect this, as signed's value is 0
+        //          herr->Error(token) << "Conflicting use of 'signed' and 'unsigned' in the same type specifier";
+        //        } else
+        if (contains_decflag_bitmask(type->flags, "unsigned") && token.type == TT_SIGNED) {
+          herr->Error(token) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
+        } else if (contains_decflag_bitmask(type->flags, token.content) && token.type != TT_SIGNED) {
+          herr->Warning(token) << "Duplicate usage of flags in type specifier";
+        } else {
+          type->flags |= jdi_decflag_bitmask(token.content).second;
+        }
         token = lexer->ReadToken();
       } else if (next_is_class_key() || token.type == TT_ENUM) {
         TryParseElaboratedName(type);
@@ -977,10 +991,20 @@ void TryParseTypeSpecifier(FullType *type) {
   }
 }
 
-void TryParseTypeSpecifierSeq(FullType *type) {
-  while (next_is_type_specifier()) {
-    TryParseTypeSpecifier(type);
+std::pair<bool, bool> TryParseTypeSpecifierSeq(FullType *type) {
+  std::pair<bool, bool> global_local = {false, false};
+  while (next_is_type_specifier() || token.content == "global" || token.content == "local") {
+    if (token.content == "global") {
+      global_local.first = true;
+      token = lexer->ReadToken();
+    } else if (token.content == "local") {
+      global_local.second = true;
+      token = lexer->ReadToken();
+    } else {
+      TryParseTypeSpecifier(type);
+    }
   }
+  return global_local;
 }
 
 void TryParsePtrOperator(FullType *type) {
@@ -1099,10 +1123,19 @@ void TryParseDeclSpecifier(FullType *type) {
   }
 }
 
-void TryParseDeclSpecifierSeq(FullType *type) {
-  while (is_decl_specifier(token)) {
-    TryParseDeclSpecifier(type);
+std::pair<bool, bool> TryParseDeclSpecifierSeq(FullType *type) {
+  std::pair<bool, bool> global_local = {false, false};
+  while (is_decl_specifier(token) || token.content == "global" || token.content == "local") {
+    if (token.content == "global") {
+      global_local.first = true;
+      token = lexer->ReadToken();
+    } else if (token.content == "local") {
+      global_local.second = true;
+      token = lexer->ReadToken();
+    } else
+      TryParseDeclSpecifier(type);
   }
+  return global_local;
 }
 
 std::unique_ptr<AST::Node> TryParsePtrDeclarator(FullType *type, AST::DeclaratorType is_abstract, bool maybe_expression = false) {
@@ -1352,18 +1385,34 @@ AST::InitializerNode TryParseInitializer(bool allow_paren_init = true) {
   }
 }
 
+void maybe_assign_def(FullType *type) {
+  if ((contains_decflag_bitmask(type->flags, "long long") || contains_decflag_bitmask(type->flags, "long") ||
+       contains_decflag_bitmask(type->flags, "short")) &&
+      type->def == nullptr) {
+    maybe_assign_full_type(type, get_builtin("int"), token);
+  }
+}
+
 std::unique_ptr<AST::Node> TryParseDeclarations(bool parse_unbounded) {
-  if (is_decl_specifier(token)) {
+  bool is_global = token.content == "global";
+  bool is_local = token.content == "local";
+  if (is_decl_specifier(token) || is_global || is_local) {
     FullType type;
-    TryParseDeclSpecifierSeq(&type);
+    std::pair<bool, bool> global_local = TryParseDeclSpecifierSeq(&type);
+    if (global_local.first && global_local.second) {
+      herr->Error(token) << "Cannot have both 'global' and 'local' in the same declaration";
+      return nullptr;
+    }
     maybe_infer_int(type);
+    maybe_assign_def(&type);
     if (type.def == nullptr) {
       herr->Error(token) << "Unable to parse type specifier in declaration";
       return nullptr;
     }
 
-    // XXX: Implementation disallows, e.g, `int global foo;`
-    auto sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
+    auto sc = is_global || global_local.first   ? AST::DeclarationStatement::StorageClass::GLOBAL
+              : is_local || global_local.second ? AST::DeclarationStatement::StorageClass::LOCAL
+                                                : AST::DeclarationStatement::StorageClass::TEMPORARY;
     return parse_declarations(sc, type, AST::DeclaratorType::NON_ABSTRACT, parse_unbounded, {});
   } else {
     return nullptr;
@@ -1506,6 +1555,11 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     case TT_LESS: case TT_GREATER: case TT_LESSEQUAL: case TT_THREEWAY:
     case TT_GREATEREQUAL: case TT_LSH: case TT_RSH:
       herr->Error(token) << "Expected expression before binary operator `" << token.content << '`';
+      token = lexer->ReadToken();
+      return nullptr;
+    
+    case TT_JS_ARROW:
+      herr->Error(token) << "Expected parameter list before '=>'";
       token = lexer->ReadToken();
       return nullptr;
 
@@ -1741,6 +1795,12 @@ static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                 prec.associativity == Associativity::RTL);
 }
 
+std::unique_ptr<AST::Node> TryParseLambdaExpression(std::unique_ptr<AST::Node> operand) {
+  token = lexer->ReadToken();
+  auto body = ParseStatementOrBlock();
+  return std::make_unique<AST::LambdaExpression>(std::move(operand), std::move(body));
+}
+
 std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AST::Node> operand = nullptr) {
   if (operand == nullptr) {
     operand = TryParseOperand();
@@ -1755,7 +1815,9 @@ std::unique_ptr<AST::Node> TryParseExpression(int precedence, std::unique_ptr<AS
     // to parse a declaration as an expression. This is a bold move, but
     // more robust than handling it in TryParseExpression.
     while (token.type != TT_ENDOFCODE) {
-      if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
+      if(token.type == TT_JS_ARROW){
+        operand = TryParseLambdaExpression(std::move(operand));
+      } else if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
         if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
           break;
         }
@@ -1856,7 +1918,7 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
     Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
 
-    auto right = TryParseExpression(Precedence::kMin);
+    auto right = TryParseExpression(Precedence::kAll);
 
     AST::Operation op(oper.type, std::string(oper.content));
     operand = std::make_unique<AST::BinaryExpression>(std::move(operand), std::move(right), op);
@@ -1892,7 +1954,7 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
 }
 
 std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
-  if ((int)mode_ > 2) {
+  if (mode_ != setting::SyntaxMode::GML && mode != setting::SyntaxMode::QUIRKS && mode != setting::SyntaxMode::STRICT) {
     herr->Error(token) << "Internal error: unreachable (" __FILE__ ":" << __LINE__ << "): SyntaxMode " << (int)mode_
                        << " unknown to system";
   }
@@ -1945,7 +2007,6 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       herr->ReportError(token, "Internal error: Bad token");
       token = lexer->ReadToken();
       return nullptr;
-
     case TT_COMMA:
       herr->ReportError(token, "Expected expression before comma");
       token = lexer->ReadToken();
@@ -2017,17 +2078,23 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       } else {
         sc = AST::DeclarationStatement::StorageClass::TEMPORARY;
       }
-      if (is_decl_specifier(token) || next_maybe_functional_cast()) {
+      bool is_global_local = token.content == "global" || token.content == "local";
+      Token maybe_global_local = token;
+      if (is_global_local) {
+        sc = token.content == "global" ? AST::DeclarationStatement::StorageClass::GLOBAL
+                                       : AST::DeclarationStatement::StorageClass::LOCAL;
+        token = lexer->ReadToken();
+      }
+      if (is_decl_specifier(token) || next_maybe_functional_cast() || (is_global_local && token.type != TT_DOT)) {
         Token start = token;
         auto decl = TryParseEitherFunctionalCastOrDeclaration(AST::DeclaratorType::NON_ABSTRACT, true, false, sc);
-        if (decl->type == AST::NodeType::DECLARATION) {
-          herr->Error(start) << "Trying to parse declaration within <stmt>";
-        }
-        // Parse it anyways
-        // MaybeConsumeSemicolon();
+        MaybeConsumeSemicolon();
         return decl;
       } else {
-        auto node = TryParseExpression(Precedence::kAll);
+        jdi::definition *def = nullptr;
+        std::unique_ptr<AST::Node> operand =
+            is_global_local ? std::make_unique<AST::IdentifierAccess>(def, maybe_global_local) : nullptr;
+        auto node = TryParseExpression(Precedence::kAll, std::move(operand));
         MaybeConsumeSemicolon();
         return node;
       }
@@ -2054,6 +2121,11 @@ std::unique_ptr<AST::Node> TryParseStatement() {
       return nullptr;
     case TT_S_ELSE:
       herr->ReportError(token, "`else` statement not paired with an `if`");
+      token = lexer->ReadToken();
+      return nullptr;
+
+    case TT_JS_ARROW:
+      herr->ReportError(token, "`=>` not paired with a lambda expression");
       token = lexer->ReadToken();
       return nullptr;
 
@@ -2115,6 +2187,16 @@ std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
 
 std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   token = lexer->ReadToken();
+  bool not_condition = false;
+
+  if (token.type == TT_NOT) {
+    if (mode == SyntaxMode::STRICT) {
+      herr->Warning(token) << "Use of `not` keyword in if statement";
+    }
+    not_condition = true;
+    token = lexer->ReadToken();
+  }
+
   auto condition = TryParseControlExpression(mode);
   if (token.type == TT_S_THEN) {
     if (mode == SyntaxMode::STRICT) {
@@ -2123,15 +2205,21 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
     token = lexer->ReadToken();
   }
 
-  auto true_branch = ParseCFStmtBody();
+  AST::PNode true_branch = nullptr;
+  if (token.type != TT_SEMICOLON) {
+    true_branch = ParseCFStmtBody();
+  } else {
+    token = lexer->ReadToken();
+  }
 
+  AST::PNode false_branch = nullptr;
   if (token.type == TT_S_ELSE) {
     token = lexer->ReadToken();
-    auto false_branch = ParseCFStmtBody();
-    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch));
-  } else {
-    return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), nullptr);
+    false_branch = ParseCFStmtBody();
   }
+  
+  return std::make_unique<AST::IfStatement>(std::move(condition), std::move(true_branch), std::move(false_branch),
+                                            not_condition);
 }
 
 std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
@@ -2144,7 +2232,14 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
         // Make sure we don't accidentally consume a c-style cast when its required
         (!(maybe_c_style_cast && token.type == TT_ENDPARENTH) &&
          (token.type != TT_BEGINBRACE && token.type != TT_BEGINPARENTH))) {
-      TryParseTypeSpecifierSeq(&type);
+      std::pair<bool, bool> global_local = TryParseTypeSpecifierSeq(&type);
+      if (global_local.first && global_local.second) {
+        herr->Error(token) << "Cannot have both `global` and `local` storage class specifiers";
+      }
+      sc = global_local.first    ? AST::DeclarationStatement::StorageClass::GLOBAL
+           : global_local.second ? AST::DeclarationStatement::StorageClass::LOCAL
+                                 : sc;
+      maybe_assign_def(&type);
       return parse_declarations(sc, type, decl_type, parse_unbounded, {});
     } else if (token.type == TT_BEGINBRACE) {
       Token tok = token;
@@ -2166,6 +2261,7 @@ std::unique_ptr<AST::Node> TryParseEitherFunctionalCastOrDeclaration(
         std::vector<AST::DeclarationStatement::Declaration> decls = {};
         decls.emplace_back(std::move(type), next_is_start_of_initializer() ? TryParseInitializer() : nullptr);
         if (token.type == TT_COMMA && parse_unbounded) {
+          maybe_assign_def(&type);
           return parse_declarations(sc, type, decl_type, parse_unbounded, std::move(decls), true);
         } else {
           return std::make_unique<AST::DeclarationStatement>(sc, decls[0].declarator->def, std::move(decls));
@@ -2226,9 +2322,14 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after for-loop header");
   }
 
-  auto body = ParseCFStmtBody();
-  return std::make_unique<AST::ForLoop>(std::move(init), std::move(cond),
-                                        std::move(incr), std::move(body));
+  AST::PNode body = nullptr;
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  } else {
+    body = ParseCFStmtBody();
+  }
+
+  return std::make_unique<AST::ForLoop>(std::move(init), std::move(cond), std::move(incr), std::move(body));
 }
 
 std::unique_ptr<AST::WhileLoop> ParseWhileLoop() {
@@ -2385,9 +2486,255 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
 
 };  // class AstBuilder
 
+class SyntaxChecker : public AST::Visitor {
+  ErrorHandler *herr;
+  const LanguageFrontend * frontend;
+
+ public:
+  SyntaxChecker(ErrorHandler *herr, const LanguageFrontend *fe) : herr(herr), frontend(fe) {}
+  bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+    if (node.function->type == AST::NodeType::IDENTIFIER) {
+      auto func = node.function->As<AST::IdentifierAccess>();
+      jdi::definition *def = nullptr;
+      if (std::holds_alternative<jdi::definition *>(func->type)) {
+        def = std::get<jdi::definition *>(func->type);
+      } else {
+        node.RecursiveSubVisit(*this);
+        return false;
+      }
+      unsigned int min = 0;
+      unsigned int max = 0;
+      frontend->definition_parameter_bounds(def, min, max);
+      Token tok;
+      tok.content = func->name.content;
+      tok.type = TT_IDENTIFIER;
+      if (max != unsigned(-1)) {
+        if (node.arguments.size() < min) {
+          herr->Error(tok) << "Too few arguments to function call";
+        } else if (node.arguments.size() > max) {
+          herr->Error(tok) << "Too many arguments to function call";
+        }
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
+    if (node.declarations.size()) {
+      auto &type = node.declarations[0].declarator;
+      if (type) {
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "unsigned") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "signed")) {
+          Token tok;
+          tok.content = "unsigned";
+          tok.type = TT_UNSIGNED;
+          herr->Error(tok) << "Conflicting use of 'unsigned' and 'signed' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "long") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "short")) {
+          Token tok;
+          tok.content = "long";
+          tok.type = TT_TYPE_NAME;
+          herr->Error(tok) << "Conflicting use of 'long' and 'short' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "const") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "mutable")) {
+          Token tok;
+          tok.content = "const";
+          tok.type = TT_CONST;
+          herr->Error(tok) << "Conflicting use of 'const' and 'mutable' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "static") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+          Token tok;
+          tok.content = "static";
+          tok.type = TT_STATIC;
+          herr->Error(tok) << "Conflicting use of 'static' and 'register' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "inline") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+          Token tok;
+          tok.content = "inline";
+          tok.type = TT_INLINE;
+          herr->Error(tok) << "Conflicting use of 'inline' and 'register' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "extern") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "register")) {
+          Token tok;
+          tok.content = "extern";
+          tok.type = TT_EXTERN;
+          herr->Error(tok) << "Conflicting use of 'extern' and 'register' in the same type specifier";
+        }
+        if (AstBuilder::contains_decflag_bitmask(type->flags, "mutable") &&
+            AstBuilder::contains_decflag_bitmask(type->flags, "static")) {
+          Token tok;
+          tok.content = "mutable";
+          tok.type = TT_MUTABLE;
+          herr->Error(tok) << "Conflicting use of 'mutable' and 'static' in the same type specifier";
+        }
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitIfStatement(AST::IfStatement &node) {
+    if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
+      if (node.condition->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
+        node.condition->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
+        node.condition->As<AST::BinaryExpression>()->operation.token = "==";
+      }
+    } else if (node.condition->type == AST::NodeType::PARENTHETICAL) {
+      auto paren = node.condition->As<AST::Parenthetical>();
+      if (paren->expression->type == AST::NodeType::BINARY_EXPRESSION) {
+        if (paren->expression->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
+          paren->expression->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
+          paren->expression->As<AST::BinaryExpression>()->operation.token = "==";
+        }
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCodeBlock(AST::CodeBlock &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBinaryExpression(AST::BinaryExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitTernaryExpression(AST::TernaryExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLambdaExpression(AST::LambdaExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSizeofExpression(AST::SizeofExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitAlignofExpression(AST::AlignofExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCastExpression(AST::CastExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitParenthetical(AST::Parenthetical &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitArray(AST::Array &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitIdentifierAccess(AST::IdentifierAccess &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLiteral(AST::Literal &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitForLoop(AST::ForLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWhileLoop(AST::WhileLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDoLoop(AST::DoLoop &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCaseStatement(AST::CaseStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDefaultStatement(AST::DefaultStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSwitchStatement(AST::SwitchStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitReturnStatement(AST::ReturnStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBreakStatement(AST::BreakStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitContinueStatement(AST::ContinueStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWithStatement(AST::WithStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitInitializer(AST::Initializer &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitNewExpression(AST::NewExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDeleteExpression(AST::DeleteExpression &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+};
+
 std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
   AstBuilder ab(lexer, herr);
-  return ab.ParseCode();
+  auto root = ab.ParseCode();
+  SyntaxChecker sc(herr, lexer->GetContext().language_fe);
+  root->accept(sc);
+  return root;
 }
 
 AstBuilderTestAPI *CreateBuilder() {

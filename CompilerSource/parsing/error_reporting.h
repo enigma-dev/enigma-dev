@@ -29,7 +29,7 @@ namespace parsing {
 
 struct CodeSnippet {
   /// Token content within the code. Can be used to obtain position/length info.
-  std::string_view content;
+  std::string content;
   size_t line;  ///< Line number at which this token appears.
   size_t position;  ///< Position within that line.
 };
