@@ -255,8 +255,6 @@ class VisualShaderNode {
 
   bool is_simple_decl() const;
 
-  std::string get_name_id() const;
-
   virtual std::string get_caption() const = 0;
 
   virtual std::string generate_global([[maybe_unused]] const int& id) const;
@@ -307,8 +305,6 @@ class VisualShaderNode {
   virtual std::string get_warning() const;
 
  protected:
-  std::string NAME_ID;
-
   bool simple_decl;
 
  private:

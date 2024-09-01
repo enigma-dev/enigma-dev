@@ -395,12 +395,12 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
   bool skip_global{input != nullptr};
 
   if (!skip_global) {
-    std::string id_name{n->get_name_id()};
+    std::string type_str{typeid(*n).name()}; // This gives (length of string name of the class) + (the string name of the class). Ex.: 26VisualShaderNodeValueNoise
     global_code += n->generate_global(node_id);
-    if (global_processed.find(id_name) == global_processed.end()) {
+    if (global_processed.find(type_str) == global_processed.end()) {
       global_code_per_node += n->generate_global_per_node(node_id);
     }
-    global_processed.insert(id_name);
+    global_processed.insert(type_str);
   }
 
   // Generate the code for the current node.
@@ -893,8 +893,6 @@ VisualShaderNode::VisualShaderNode() : simple_decl(true) {
 }
 
 bool VisualShaderNode::is_simple_decl() const { return simple_decl; }
-
-std::string VisualShaderNode::get_name_id() const { return NAME_ID; }
 
 std::string VisualShaderNode::generate_global([[maybe_unused]] const int& id) const { return std::string(); }
 

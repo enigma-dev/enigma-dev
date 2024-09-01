@@ -18,6 +18,7 @@ else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif
 
+# TODO: Remove the direct inclusion of VisualShader sources
 # CXXFLAGS += -I$(VISUAL_SHADER_OBJ_DIR)
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS) $(wildcard ../../shared/ResourceTransformations/VisualShader/*.cpp)
 LDFLAGS += $(OS_LIBS) -lgtest_main -lgtest -lpthread
