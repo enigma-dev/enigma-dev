@@ -14,10 +14,11 @@ endif
 
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM -I../../ENIGMAsystem/SHELL
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lProtocols -lENIGMAShared -lgrpc++ -lprotobuf -lyaml-cpp -lpng 
+include ../emake-tests/Emake_Tests_Config.mk
 
 ifeq ($(TESTS), TRUE)
 	TARGET=../../emake-tests
-	SOURCES := $(call rwildcard, ../emake-tests,*.cpp) $(call rwildcard, ../emake-tests/Extensions/Json,*.cpp)
+	SOURCES := $(EMAKE_TESTS_SRC)
 	LDFLAGS += -lpthread -lgtest_main -lgtest
 else
 	TARGET = ../../emake
