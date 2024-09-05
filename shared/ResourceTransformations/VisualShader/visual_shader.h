@@ -87,7 +87,7 @@ struct TColor {
   bool operator==(const TColor& c) const { return r == c.r && g == c.g && b == c.b && a == c.a; }
 };
 
-using TVariant = std::variant<std::monostate, float, int, TVector2, TVector3, TVector4, bool>;
+using TVariant = std::variant<std::monostate, float, int, TVector2, TVector3, TVector4, bool, std::string>;
 
 class VisualShaderNode;
 
