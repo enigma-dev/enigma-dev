@@ -622,14 +622,14 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       TVariant defval{n->get_input_port_default_value(i)};
 
       switch (defval.index()) {
-        case 1: {  // float
+        case TVARIANT_FLOAT_INDEX: {  // float
           float val{std::get<float>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
           oss << std::string("\t") + "float " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << val << ";" << std::string("\n");
           node_code += oss.str();
         } break;
-        case 2: {  // int
+        case TVARIANT_INT_INDEX: {  // int
           int val{std::get<int>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           if (n->get_input_port_type(i) == VisualShaderNode::PORT_TYPE_SCALAR_UINT) {
@@ -638,7 +638,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
             node_code += std::string("\t") + "int " + input_vars.at(i) + " = " + std::to_string(val) + ";" + std::string("\n");
           }
         } break;
-        case 3: {  // TVector2
+        case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
           TVector2 val{std::get<TVector2>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
@@ -646,7 +646,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
               << val.x << ", " << val.y << ");" << std::string("\n");
           node_code += oss.str();
         } break;
-        case 4: {  // TVector3
+        case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
           TVector3 val{std::get<TVector3>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
@@ -654,7 +654,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
               << val.x << ", " << val.y << ", " << val.z << ");" << std::string("\n");
           node_code += oss.str();
         } break;
-        case 5: {  // TVector4
+        case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
           TVector4 val{std::get<TVector4>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           std::ostringstream oss;
@@ -663,7 +663,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
               << ");" << std::string("\n");
           node_code += oss.str();
         } break;
-        case 6: {  // bool
+        case TVARIANT_BOOL_INDEX: {  // bool
           bool val{std::get<bool>(defval)};
           input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
           node_code += std::string("\t") + "bool " + input_vars.at(i) + " = " + (val ? "true" : "false") + ";" + std::string("\n");
@@ -924,23 +924,23 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
 
   if (prev_value.index() != 0) {  // std::monostate
     switch (value.index()) {
-      case 1: {  // float
+      case TVARIANT_FLOAT_INDEX: {  // float
         switch (prev_value.index()) {
-          case 1: {  // float
+          case TVARIANT_FLOAT_INDEX: {  // float
             v = prev_value;
           } break;
-          case 2: {  // int
+          case TVARIANT_INT_INDEX: {  // int
             v = std::get<float>(prev_value);
           } break;
-          case 3: {  // TVector2
+          case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             TVector2 pv{std::get<TVector2>(prev_value)};
             v = pv.x;
           } break;
-          case 4: {  // TVector3
+          case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
             TVector3 pv{std::get<TVector3>(prev_value)};
             v = pv.x;
           } break;
-          case 5: {  // TVector4
+          case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
             TVector4 pv{std::get<TVector4>(prev_value)};
             v = pv.x;
           } break;
@@ -948,23 +948,23 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
             break;
         }
       } break;
-      case 2: {  // int
+      case TVARIANT_INT_INDEX: {  // int
         switch (prev_value.index()) {
-          case 1: {  // float
+          case TVARIANT_FLOAT_INDEX: {  // float
             v = std::get<int>(prev_value);
           } break;
-          case 2: {  // int
+          case TVARIANT_INT_INDEX: {  // int
             v = prev_value;
           } break;
-          case 3: {  // TVector2
+          case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             TVector2 pv{std::get<TVector2>(prev_value)};
             v = (int)pv.x;
           } break;
-          case 4: {  // TVector3
+          case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
             TVector3 pv{std::get<TVector3>(prev_value)};
             v = (int)pv.x;
           } break;
-          case 5: {  // TVector4
+          case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
             TVector4 pv{std::get<TVector4>(prev_value)};
             v = (int)pv.x;
           } break;
@@ -972,24 +972,24 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
             break;
         }
       } break;
-      case 3: {  // TVector2
+      case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
         switch (prev_value.index()) {
-          case 1: {  // float
+          case TVARIANT_FLOAT_INDEX: {  // float
             float pv{std::get<float>(prev_value)};
             v = TVector2(pv, pv);
           } break;
-          case 2: {  // int
+          case TVARIANT_INT_INDEX: {  // int
             float pv{(float)std::get<int>(prev_value)};
             v = TVector2(pv, pv);
           } break;
-          case 3: {  // TVector2
+          case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             v = prev_value;
           } break;
-          case 4: {  // TVector3
+          case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
             TVector3 pv{std::get<TVector3>(prev_value)};
             v = TVector2(pv.x, pv.y);
           } break;
-          case 5: {  // TVector4
+          case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
             TVector4 pv{std::get<TVector4>(prev_value)};
             v = TVector2(pv.x, pv.y);
           } break;
@@ -997,24 +997,24 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
             break;
         }
       } break;
-      case 4: {  // TVector3
+      case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
         switch (prev_value.index()) {
-          case 1: {  // float
+          case TVARIANT_FLOAT_INDEX: {  // float
             float pv{std::get<float>(prev_value)};
             v = TVector3(pv, pv, pv);
           } break;
-          case 2: {  // int
+          case TVARIANT_INT_INDEX: {  // int
             float pv{(float)std::get<int>(prev_value)};
             v = TVector3(pv, pv, pv);
           } break;
-          case 3: {  // TVector2
+          case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             TVector2 pv{std::get<TVector2>(prev_value)};
             v = TVector3(pv.x, pv.y, pv.y);
           } break;
-          case 4: {  // TVector3
+          case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
             v = prev_value;
           } break;
-          case 5: {  // TVector4
+          case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
             TVector4 pv{std::get<TVector4>(prev_value)};
             v = TVector3(pv.x, pv.y, pv.z);
           } break;
@@ -1022,25 +1022,25 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
             break;
         }
       } break;
-      case 5: {  // TVector4
+      case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
         switch (prev_value.index()) {
-          case 1: {  // float
+          case TVARIANT_FLOAT_INDEX: {  // float
             float pv{std::get<float>(prev_value)};
             v = TVector4(pv, pv, pv, pv);
           } break;
-          case 2: {  // int
+          case TVARIANT_INT_INDEX: {  // int
             float pv{(float)std::get<int>(prev_value)};
             v = TVector4(pv, pv, pv, pv);
           } break;
-          case 3: {  // TVector2
+          case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             TVector2 pv{std::get<TVector2>(prev_value)};
             v = TVector4(pv.x, pv.y, pv.y, pv.y);
           } break;
-          case 4: {  // TVector3
+          case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
             TVector3 pv{std::get<TVector3>(prev_value)};
             v = TVector4(pv.x, pv.y, pv.z, pv.z);
           } break;
-          case 5: {  // TVector4
+          case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
             v = prev_value;
           } break;
           default:

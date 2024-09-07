@@ -110,6 +110,15 @@ struct TColor {
 
 using TVariant = std::variant<std::monostate, float, int, TVector2, TVector3, TVector4, bool, std::string>;
 
+#define TVARIANT_MONOSTATE_INDEX 0
+#define TVARIANT_FLOAT_INDEX 1
+#define TVARIANT_INT_INDEX 2
+#define TVARIANT_VECTOR_2D_INDEX 3
+#define TVARIANT_VECTOR_3D_INDEX 4
+#define TVARIANT_VECTOR_4D_INDEX 5
+#define TVARIANT_BOOL_INDEX 6
+#define TVARIANT_STRING_INDEX 7
+
 class VisualShaderNode;
 
 class VisualShader {
