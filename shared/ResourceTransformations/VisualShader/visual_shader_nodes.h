@@ -743,7 +743,7 @@ class VisualShaderNodeUIntFunc : public VisualShaderNode {
   }
 
  protected:
-  VisualShaderNodeUIntFunc::Function func = FUNC_NEGATE;
+  VisualShaderNodeUIntFunc::Function func;
 };
 
 /*************************************/
@@ -853,76 +853,6 @@ class VisualShaderNodeColorFunc : public VisualShaderNode {
 
  protected:
   VisualShaderNodeColorFunc::Function func;
-};
-
-/*************************************/
-/* UV Funcs Node                     */
-/*************************************/
-
-class VisualShaderNodeUVFunc : public VisualShaderNode {
- public:
-  enum Function {
-    FUNC_PANNING,
-    FUNC_SCALING,
-    FUNC_ENUM_SIZE,
-  };
-
-  VisualShaderNodeUVFunc();
-
-  virtual std::string get_caption() const override;
-
-  virtual int get_input_port_count() const override;
-  virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-  virtual std::string get_input_port_name(const int& port) const override;
-  virtual bool is_input_port_default(const int& port) const override;
-
-  virtual int get_output_port_count() const override;
-  virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-  virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
-
-  virtual bool is_show_prop_names() const override;
-
-  virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars,
-                                    const std::vector<std::string>& output_vars) const override;
-
-  void set_function(const VisualShaderNodeUVFunc::Function& func);
-  VisualShaderNodeUVFunc::Function get_function() const;
-
-  virtual std::vector<std::string> get_editable_properties() const override;
-
-  inline virtual VisualShaderNode::Category get_category() const override {
-    return VisualShaderNode::Category::CATEGORY_TEXTURES;
-  }
-
- protected:
-  VisualShaderNodeUVFunc::Function func;
-};
-
-/*************************************/
-/* UV PolarCoord Funcs Node          */
-/*************************************/
-
-class VisualShaderNodeUVPolarCoord : public VisualShaderNode {
- public:
-  VisualShaderNodeUVPolarCoord();
-
-  virtual std::string get_caption() const override;
-
-  virtual int get_input_port_count() const override;
-  virtual VisualShaderNode::PortType get_input_port_type(const int& port) const override;
-  virtual std::string get_input_port_name(const int& port) const override;
-  virtual bool is_input_port_default(const int& port) const override;
-
-  virtual int get_output_port_count() const override;
-  virtual VisualShaderNode::PortType get_output_port_type(const int& port) const override;
-  virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
-
-  virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars,
-                                    const std::vector<std::string>& output_vars) const override;
-
-  inline virtual VisualShaderNode::Category get_category() const override {
-    return VisualShaderNode::Category::CATEGORY_TEXTURES;
-  }
 };
 
 /*************************************/
@@ -1083,10 +1013,10 @@ class VisualShaderNodeDerivativeFunc : public VisualShaderNode {
     return VisualShaderNode::Category::CATEGORY_UTILITY;
   }
 
- protected:
-  OpType op_type;
-  Function func;
-  Precision precision;
+ private:
+  VisualShaderNodeDerivativeFunc::OpType op_type;
+  VisualShaderNodeDerivativeFunc::Function func;
+  VisualShaderNodeDerivativeFunc::Precision precision;
 };
 
 /*************************************/
@@ -1534,9 +1464,9 @@ class VisualShaderNodeCompare : public VisualShaderNode {
   }
 
  protected:
-  ComparisonType comparison_type;
-  Function func;
-  Condition condition;
+  VisualShaderNodeCompare::ComparisonType comparison_type;
+  VisualShaderNodeCompare::Function func;
+  VisualShaderNodeCompare::Condition condition;
 };
 
 /*************************************/
@@ -1611,6 +1541,33 @@ class VisualShaderNodeDistanceFade : public VisualShaderNode {
                                     const std::vector<std::string>& output_vars) const override;
 
   inline virtual VisualShaderNode::Category get_category() const override {
+    return VisualShaderNode::Category::CATEGORY_UTILITY;
+  }
+};
+
+/*************************************/
+/* Random Range Node                 */
+/*************************************/
+
+class VisualShaderNodeRandomRange : public VisualShaderNode {
+public:
+  VisualShaderNodeRandomRange();
+
+	virtual std::string get_caption() const override;
+
+	virtual int get_input_port_count() const override;
+	virtual PortType get_input_port_type(const int& port) const override;
+	virtual std::string get_input_port_name(const int& port) const override;
+
+	virtual int get_output_port_count() const override;
+	virtual PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+	virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+	virtual std::string generate_global_per_node([[maybe_unused]] const int& id) const override;
+	virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars,
+                                    const std::vector<std::string>& output_vars) const override;
+
+	inline virtual VisualShaderNode::Category get_category() const override {
     return VisualShaderNode::Category::CATEGORY_UTILITY;
   }
 };

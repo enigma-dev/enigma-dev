@@ -37,6 +37,13 @@
 #include <unordered_set>
 #include <variant>
 #include <vector>
+#include <cmath>
+#include <limits>
+
+#define T_E 2.71828182845904523536 // Euler's number
+#define T_PHI 1.618033988749895 // Golden ratio
+
+bool t_are_almost_equal(const float& a, const float& b);
 
 struct TVector2 {
   float x;
@@ -45,6 +52,8 @@ struct TVector2 {
   TVector2() : x(0.0f), y(0.0f) {}
 
   TVector2(const float& x, const float& y) : x(x), y(y) {}
+
+  bool are_almost_equal(const TVector2& vector) const { return t_are_almost_equal(x, vector.x) && t_are_almost_equal(y, vector.y); }
 
   bool operator==(const TVector2& v) const { return x == v.x && y == v.y; }
 };
@@ -57,6 +66,10 @@ struct TVector3 {
   TVector3() : x(0.0f), y(0.0f), z(0.0f) {}
 
   TVector3(const float& x, const float& y, const float& z) : x(x), y(y), z(z) {}
+
+  bool are_almost_equal(const TVector3& vector) const {
+    return t_are_almost_equal(x, vector.x) && t_are_almost_equal(y, vector.y) && t_are_almost_equal(z, vector.z);
+  }
 
   bool operator==(const TVector3& v) const { return x == v.x && y == v.y && z == v.z; }
 };
@@ -71,6 +84,10 @@ struct TVector4 {
 
   TVector4(const float& x, const float& y, const float& z, const float& w) : x(x), y(y), z(z), w(w) {}
 
+  bool are_almost_equal(const TVector4& vector) const {
+    return t_are_almost_equal(x, vector.x) && t_are_almost_equal(y, vector.y) && t_are_almost_equal(z, vector.z) && t_are_almost_equal(w, vector.w);
+  }
+
   bool operator==(const TVector4& v) const { return x == v.x && y == v.y && z == v.z && w == v.w; }
 };
 
@@ -83,6 +100,10 @@ struct TColor {
   TColor() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}
 
   TColor(const float& r, const float& g, const float& b, const float& a) : r(r), g(g), b(b), a(a) {}
+
+  bool are_almost_equal(const TColor& color) const {
+    return t_are_almost_equal(r, color.r) && t_are_almost_equal(g, color.g) && t_are_almost_equal(b, color.b) && t_are_almost_equal(a, color.a);
+  }
 
   bool operator==(const TColor& c) const { return r == c.r && g == c.g && b == c.b && a == c.a; }
 };
@@ -230,7 +251,6 @@ class VisualShaderNode {
     PORT_TYPE_VECTOR_3D,
     PORT_TYPE_VECTOR_4D,
     PORT_TYPE_BOOLEAN,
-    PORT_TYPE_SAMPLER,
     PORT_TYPE_ENUM_SIZE,
   };
 
@@ -241,12 +261,8 @@ class VisualShaderNode {
     CATEGORY_CONDITIONAL,
     CATEGORY_INPUT,
     CATEGORY_SCALAR,
-    CATEGORY_TEXTURES,
-    CATEGORY_TRANSFORM,
     CATEGORY_UTILITY,
     CATEGORY_VECTOR,
-    CATEGORY_SPECIAL,
-    CATEGORY_PARTICLE,
     CATEGORY_ENUM_SIZE
   };
 

@@ -798,28 +798,3 @@ TEST(VisualShaderNodesTest, Test_VisualShaderNodeColorFunc_generate_code) {
       "\t}\n";
   EXPECT_EQ(code, expected_code);
 }
-
-TEST(VisualShaderNodesTest, Test_VisualShaderNodeUVFunc_generate_code) {
-  VisualShaderNodeUVFunc node;
-  std::vector<std::string> input_vars = {"a", "1.0", "0.0"};  // scale, offset
-  std::vector<std::string> output_vars = {"c"};
-  std::string code{node.generate_code(0, input_vars, output_vars)};
-  std::string expected_code{"\tc = (0.0 * 1.0) + a;\n"};
-  EXPECT_EQ(code, expected_code);
-  node.set_function(VisualShaderNodeUVFunc::Function::FUNC_SCALING);
-  code = node.generate_code(0, input_vars, output_vars);
-  expected_code = "\tc = ((a - 0.0) * 1.0) + 0.0;\n";
-  EXPECT_EQ(code, expected_code);
-
-  input_vars.at(0) = "";
-
-  node.set_function(VisualShaderNodeUVFunc::Function::FUNC_PANNING);
-  code = node.generate_code(0, input_vars, output_vars);
-  expected_code = "\tc = (0.0 * 1.0) + UV;\n";
-  EXPECT_EQ(code, expected_code);
-
-  node.set_function(VisualShaderNodeUVFunc::Function::FUNC_SCALING);
-  code = node.generate_code(0, input_vars, output_vars);
-  expected_code = "\tc = ((UV - 0.0) * 1.0) + 0.0;\n";
-  EXPECT_EQ(code, expected_code);
-}
