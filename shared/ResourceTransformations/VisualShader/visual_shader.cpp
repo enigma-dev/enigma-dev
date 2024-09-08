@@ -1182,17 +1182,8 @@ VisualShaderNodeInput::VisualShaderNodeInput() : input_name("[None]") {
 
 const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "fragcoord", "FRAGCOORD"},
     {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "UV"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "color", "COLOR"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_uv", "SCREEN_UV"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "texture_pixel_size", "TEXTURE_PIXEL_SIZE"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_pixel_size", "SCREEN_PIXEL_SIZE"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "point_coord", "POINT_COORD"},
     {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "TIME"},
-    {VisualShaderNode::PortType::PORT_TYPE_BOOLEAN, "at_light_pass", "AT_LIGHT_PASS"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "specular_shininess", "SPECULAR_SHININESS"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "vertex", "VERTEX"},
 
     {VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", ""},  // End of list.
 
@@ -1200,10 +1191,7 @@ const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 
 const VisualShaderNodeInput::Port VisualShaderNodeInput::preview_ports[] = {
 
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "fragcoord", "FRAGCOORD"},
     {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "UV"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "color", "vec4(1.0)"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "screen_uv", "UV"},
     {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "TIME"},
 
     {VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", ""},  // End of list.
@@ -1300,11 +1288,6 @@ const VisualShaderNodeOutput::Port VisualShaderNodeOutput::ports[] = {
 
     {VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Color", "COLOR.rgb"},
     {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "Alpha", "COLOR.a"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Normal", "NORMAL"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Normal Map", "NORMAL_MAP"},
-    {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "Normal Map Depth", "NORMAL_MAP_DEPTH"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Light Vertex", "LIGHT_VERTEX"},
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "Shadow Vertex", "SHADOW_VERTEX"},
 
     {VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE, "", ""},
 };

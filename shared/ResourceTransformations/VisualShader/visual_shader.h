@@ -40,9 +40,6 @@
 #include <cmath>
 #include <limits>
 
-#define T_E 2.71828182845904523536 // Euler's number
-#define T_PHI 1.618033988749895 // Golden ratio
-
 bool t_are_almost_equal(const float& a, const float& b);
 
 struct TVector2 {
