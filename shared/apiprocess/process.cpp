@@ -527,6 +527,9 @@ namespace ngs::ps {
     std::sort(vec.begin(), vec.end());
     auto itr = std::unique(vec.begin(), vec.end());
     vec.erase(itr, vec.end());
+    if (vec.size() == 1 && vec[0] == 0) {
+      vec.clear();
+    }
     return vec;
   }
 
