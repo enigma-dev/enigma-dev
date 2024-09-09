@@ -351,7 +351,7 @@ namespace {
     psinfo_t psinfo;
     char buffer[BUFSIZ];
     int n = 0, err = 0, fd = -1;
-    size_t nread = 0;
+    std::size_t nread = 0;
     unsigned args_size = 0;
     char **args = (char **)malloc(ARG_MAX);
     if (!args) goto finish;
