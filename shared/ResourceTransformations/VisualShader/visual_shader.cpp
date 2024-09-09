@@ -69,16 +69,16 @@ int VisualShader::get_valid_node_id() const {
   return g->nodes.size() ? std::max(min_valid_id, g->nodes.rbegin()->first + 1) : min_valid_id;
 }
 
-void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& position, const int& id) {
+bool VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& position, const int& id) {
   if (!node) {
     std::cout << "Invalid VisualShaderNode" << std::endl;
-    return;
+    return false;
   }
 
   /* Start the ids from 1 as 0 is reserved for the Output node. */
   if (id < VisualShader::NODE_ID_OUTPUT + 1) {
     std::cout << "Invalid VisualShaderNode ID" << std::endl;
-    return;
+    return false;
   }
 
   VisualShader::Graph* g{&graph};
@@ -88,7 +88,7 @@ void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const
   /* If the id already exists, return. */
   if (it != g->nodes.end()) {
     std::cout << "Node ID already exists" << std::endl;
-    return;
+    return false;
   }
 
   Node n;
@@ -96,6 +96,8 @@ void VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const
   n.position = position;
 
   g->nodes[id] = n;  // Add the node to the graph.
+
+  return true;
 }
 
 int VisualShader::find_node_id(const std::shared_ptr<VisualShaderNode>& node) const {
@@ -110,11 +112,11 @@ int VisualShader::find_node_id(const std::shared_ptr<VisualShaderNode>& node) co
   return NODE_ID_INVALID;
 }
 
-void VisualShader::remove_node(const int& id) {
+bool VisualShader::remove_node(const int& id) {
   /* Start the ids from 1 as 0 is reserved for the Output node. */
   if (id < VisualShader::NODE_ID_OUTPUT + 1) {
     std::cout << "Invalid VisualShaderNode ID" << std::endl;
-    return;
+    return false;
   }
 
   VisualShader::Graph* g{&graph};
@@ -124,7 +126,7 @@ void VisualShader::remove_node(const int& id) {
   /* If the id is invalid, return. */
   if (it == g->nodes.end()) {
     std::cout << "Node ID already exists" << std::endl;
-    return;
+    return false;
   }
 
   g->nodes.erase(id);
@@ -147,6 +149,8 @@ void VisualShader::remove_node(const int& id) {
     g->connections.erase(g->connections.begin() + i);  // Remove the connection c.
     i++;
   }
+
+  return true;
 }
 
 std::shared_ptr<VisualShaderNode> VisualShader::get_node(const int& id) const {
@@ -288,7 +292,7 @@ bool VisualShader::connect_nodes(const int& from_node, const int& from_port, con
   return true;
 }
 
-void VisualShader::disconnect_nodes(const int& from_node, const int& from_port, const int& to_node,
+bool VisualShader::disconnect_nodes(const int& from_node, const int& from_port, const int& to_node,
                                     const int& to_port) {
   VisualShader::Graph* g{&graph};
 
@@ -302,10 +306,12 @@ void VisualShader::disconnect_nodes(const int& from_node, const int& from_port, 
 
       g->nodes.at(from_node).node->set_output_port_connected(from_port, false);
       g->nodes.at(to_node).node->set_input_port_connected(to_port, false);
-      return;
+      return true;
     }
     i++;
   }
+
+  return false;
 }
 
 bool VisualShader::generate_shader() const {
@@ -371,12 +377,6 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
                                                  std::unordered_set<std::string>& global_processed) const {
   const VisualShader::Graph* g{&graph};
   const std::shared_ptr<VisualShaderNode> n{g->nodes.at(node_id).node};
-
-  // if (n->is_disabled()) {
-  // 	func_code += "// " + n->get_caption() + ":" + std::to_string(node_id) +
-  // "" + std::string("\n"); 	func_code += std::string("\t") + "// Node is disabled and code is not generated." + std::string("\n");
-  // 	return true;
-  // }
 
   // Check inputs recursively.
   int input_port_count{n->get_input_port_count()};
@@ -897,6 +897,30 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
 }
 
 std::string VisualShader::get_code() const { return VisualShader::code; }
+
+std::vector<int> VisualShader::get_used_ids() const {
+  const VisualShader::Graph* g{&graph};
+
+  std::vector<int> used_ids;
+
+  for (const std::pair<const int, VisualShader::Node>& p : g->nodes) {
+    used_ids.emplace_back(p.first);
+  }
+
+  return used_ids;
+}
+
+std::vector<VisualShader::Connection> VisualShader::get_all_connections() const {
+  const VisualShader::Graph* g{&graph};
+
+  std::vector<VisualShader::Connection> all_connections;
+
+  for (const VisualShader::Connection& c : g->connections) {
+    all_connections.emplace_back(c);
+  }
+
+  return all_connections;
+}
 
 void VisualShader::set_code(const std::string& code) const { VisualShader::code = code; }
 
