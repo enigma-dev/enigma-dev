@@ -132,6 +132,10 @@ class VisualShader {
     NODE_ID_OUTPUT = 0,
   };
 
+  enum {
+    CONNECTION_ID_INVALID = -1,
+  };
+
   union ConnectionKey {
 // Ignore the warning about the anonymous struct.
 #pragma GCC diagnostic push
@@ -171,7 +175,7 @@ class VisualShader {
    *             for now.
    *
    * @param node The node to add.
-   * @param position The position of the node in the graph editor.
+   * @param coordinate The coordinate of the node in the graph editor.
    *                 This is an array of two integers. @todo Should
    *                 this be a @c Vector2 type?
    *
@@ -180,7 +184,7 @@ class VisualShader {
    * 
    * @return bool Returns @c true if the node is added successfully.
    */
-  bool add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& position, const int& id);
+  bool add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& coordinate, const int& id);
   int find_node_id(const std::shared_ptr<VisualShaderNode>& node) const;
   bool remove_node(const int& id);
 
@@ -197,6 +201,7 @@ class VisualShader {
    * @return std::shared_ptr<VisualShaderNode> The node object.
    */
   std::shared_ptr<VisualShaderNode> get_node(const int& id) const;
+  TVector2 get_node_coordinate(const int& id) const;
 
   /**
    * @brief Check if two ports are compatible.
@@ -213,6 +218,9 @@ class VisualShader {
   bool can_connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port) const;
   bool connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
   bool disconnect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
+  int find_connection_id(const int& from_node, const int& from_port, const int& to_node, const int& to_port) const;
+
+  VisualShader::Connection get_connection(const int& id) const;
 
   bool generate_shader() const;
 
@@ -225,30 +233,14 @@ class VisualShader {
 
   std::string get_code() const;
 
-  /**
-   * @brief Get the used ids object
-   * 
-   * @note This function is created especially for the
-   *       @c QtNodes library.
-   * 
-   * @return std::vector<int> 
-   */
-  std::vector<int> get_used_ids() const;
+  std::vector<int> get_nodes() const;
 
-  /**
-   * @brief Get the all connections object
-   * 
-   * @note This function is created especially for the
-   *       @c QtNodes library.
-   * 
-   * @return std::vector<VisualShader::Connection> 
-   */
-  std::vector<VisualShader::Connection> get_all_connections() const;
+  std::vector<int> get_connections() const;
 
  private:
   struct Node {
     std::shared_ptr<VisualShaderNode> node;
-    TVector2 position;
+    TVector2 coordinate;
     std::vector<int> prev_connected_nodes;
     std::vector<int> next_connected_nodes;
   };
