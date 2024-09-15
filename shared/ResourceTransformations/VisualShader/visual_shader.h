@@ -164,6 +164,7 @@ class VisualShader {
    * @return int The id of the new node.
    */
   int get_valid_node_id() const;
+  int get_valid_connection_id() const;
 
   /**
    * @brief The function adds a node to the graph.
@@ -202,6 +203,7 @@ class VisualShader {
    */
   std::shared_ptr<VisualShaderNode> get_node(const int& id) const;
   TVector2 get_node_coordinate(const int& id) const;
+  bool set_node_coordinate(const int& id, const TVector2& coordinate);
 
   /**
    * @brief Check if two ports are compatible.

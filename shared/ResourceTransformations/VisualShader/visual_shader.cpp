@@ -69,6 +69,12 @@ int VisualShader::get_valid_node_id() const {
   return g->nodes.size() ? std::max(min_valid_id, g->nodes.rbegin()->first + 1) : min_valid_id;
 }
 
+int VisualShader::get_valid_connection_id() const {
+  const VisualShader::Graph* g{&graph};
+  // Return the size of the vector as the new connection ID.
+  return g->connections.size();
+}
+
 bool VisualShader::add_node(const std::shared_ptr<VisualShaderNode>& node, const TVector2& coordinate, const int& id) {
   if (!node) {
     std::cout << "Invalid VisualShaderNode" << std::endl;
@@ -179,6 +185,22 @@ TVector2 VisualShader::get_node_coordinate(const int& id) const {
   }
 
   return it->second.coordinate;
+}
+
+bool VisualShader::set_node_coordinate(const int& id, const TVector2& coordinate) {
+  VisualShader::Graph* g{&graph};
+
+  auto it{g->nodes.find(id)};
+
+  /* If the id is invalid, return. */
+  if (it == g->nodes.end()) {
+    std::cout << "Node ID does not exist" << std::endl;
+    return false;
+  }
+
+  it->second.coordinate = coordinate;
+
+  return true;
 }
 
 bool VisualShader::is_port_types_compatible(const int& p1, const int& p2) const {
