@@ -5,5 +5,5 @@ Name: DearImGui Widgets
 Identifier: SDL
 Depends:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Description: DearImGui widgets powered by SDL Windowing and SDL Renderer's OpenGL backend.
+Description: Highly-customize-able and theme-able custom-drawn DearImGui widgets powered by SDL Windowing and SDL Renderer's OpenGL backend. Complete with custom localization support using environment variables.
 Author: Samuel Venable
