@@ -56,7 +56,7 @@
 #include <shlobj.h>
 
 #if !defined(_MSC_VER)
-#include <apiprocess/xprocess.hpp>
+#include <xprocess.hpp>
 #endif
 
 using namespace Gdiplus;
