@@ -3,6 +3,9 @@
 
 Name: Native Widgets
 Identifier: Native
-Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Description: Native widgets. Uses standard Win32/WinAPI on Windows. AppKit on macOS. Requires kdialog package in KDE Plasma Desktop for xlib-supported platforms. On non-KDE xlib-supported platforms, zenity package is required.
+Depends:
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Represents:
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Author: Samuel Venable
