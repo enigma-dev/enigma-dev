@@ -1,6 +1,5 @@
-SHARED_SRC_DIR := ../../shared
-override CFLAGS += -IWidget_Systems/Native -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
-override CXXFLAGS += -IWidget_Systems/Native -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
+override CFLAGS += -IWidget_Systems/Native -std=c++17 $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
+override CXXFLAGS += -IWidget_Systems/Native -std=c++17 $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/win32/*.cpp)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/apiprocess/*.cpp)
@@ -27,4 +26,4 @@ else
 		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/*.cpp)		
 	endif
 endif
-SOURCES += $(wildcard Widget_Systems/Native/*.cpp) $(SHARED_SRC_DIR)/xprocess.cpp
+SOURCES += $(wildcard Widget_Systems/Native/*.cpp)
