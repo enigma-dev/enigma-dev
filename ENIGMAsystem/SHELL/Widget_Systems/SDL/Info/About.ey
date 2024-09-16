@@ -1,7 +1,7 @@
 %e-yaml
 ---
 
-Name: SDL
+Name: SDL + Dear ImGui Widgets
 Identifier: SDL
 Depends:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
