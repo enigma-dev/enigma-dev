@@ -40,9 +40,9 @@
 #include <algorithm>
 #include <unordered_map>
 
-#include <xprocess.hpp>
 #include <libdlgmod/libdlgmod.h>
 #include <libdlgmod/general/lodepng.h>
+#include <apiprocess/xprocess.hpp>
 
 #include <sys/types.h>
 #include <sys/wait.h>
