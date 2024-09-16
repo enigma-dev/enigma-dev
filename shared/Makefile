@@ -57,6 +57,6 @@ ifeq ($(UNIX_BASED), true)
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif
-SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp) $(call rwildcard,.,*.cpp)
+SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp) xprocess.cpp
 
 include ../Default.mk
