@@ -56,8 +56,8 @@
 #include <shlobj.h>
 
 #if !defined(_MSC_VER)
-#include "libdlgmod/general/apiprocess/process.hpp"
-#include "libdlgmod/general/xprocess.hpp"
+#include <apiprocess/process.hpp>
+#include <apiprocess/xprocess.hpp>
 #endif
 
 using namespace Gdiplus;
