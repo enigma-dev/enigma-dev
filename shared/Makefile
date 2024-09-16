@@ -45,8 +45,8 @@ else
 	override LDFLAGS += -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
 endif
 
-override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2) -DUSE_SDL_POLLEVENT
-override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2) -DUSE_SDL_POLLEVENT
+override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
+override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
 ifeq ($(UNIX_BASED), true)
 	WEBMREPOS := $(shell cd libwebm;cmake .;make;cd ..)
 	ifeq ($(OS), Darwin)
