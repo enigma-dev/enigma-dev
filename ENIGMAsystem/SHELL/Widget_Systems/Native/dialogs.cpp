@@ -36,8 +36,6 @@ using std::string;
 namespace enigma {
 
   bool widget_system_initialize() {
-    static string handle = enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle());
-    dialog_module::widget_set_owner((char *)handle.c_str());
     return true;
   }
 
@@ -72,6 +70,7 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::show_message((char *)message.c_str());
 }
 
