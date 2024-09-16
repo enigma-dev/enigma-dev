@@ -33,7 +33,7 @@
 namespace enigma_user {
 
   int show_message_cancelable(std::string str);
-  int show_question(std::string str);
+  bool show_question(std::string str);
   int show_question_cancelable(std::string str);
   int show_attempt(std::string str);
   int show_error(std::string str, bool abort);
@@ -64,7 +64,7 @@ namespace enigma_user {
   std::string widget_get_button_name(int type);
   bool widget_get_canceled();
   inline bool action_if_question(std::string message) {
-    return (bool)show_question(message);
+    return show_question(message);
   }
 
 } // namespace enigma_user
