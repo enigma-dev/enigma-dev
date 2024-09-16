@@ -26,10 +26,6 @@
 
 #include <string>
 
-#ifndef USE_SDL_POLLEVENT
-#define USE_SDL_POLLEVENT
-#endif
-
 namespace enigma_user {
 
   int show_message_cancelable(std::string str);
