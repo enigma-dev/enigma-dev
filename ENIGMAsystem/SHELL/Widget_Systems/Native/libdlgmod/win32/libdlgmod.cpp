@@ -56,7 +56,6 @@
 #include <shlobj.h>
 
 #if !defined(_MSC_VER)
-#include <apiprocess/process.hpp>
 #include <apiprocess/xprocess.hpp>
 #endif
 
