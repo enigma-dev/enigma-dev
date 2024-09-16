@@ -5,7 +5,5 @@ Name: DearImGui Widgets
 Identifier: SDL
 Depends:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Represents:
-	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Description: SDL dialogs
+Description: DearImGui widgets powered by SDL Windowing and SDL Renderer's OpenGL backend.
 Author: Samuel Venable
