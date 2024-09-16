@@ -77,7 +77,7 @@ int show_message_cancelable(std::string str) {
   return dialog_module::show_message_cancelable((char *)str.c_str());
 }
 
-int show_question(std::string str) {
+bool show_question(std::string str) {
   return dialog_module::show_question((char *)str.c_str());
 }
 
@@ -87,10 +87,6 @@ int show_question_cancelable(std::string str) {
 
 int show_attempt(std::string str) {
   return dialog_module::show_attempt((char *)str.c_str());
-}
-
-int show_error(std::string str, bool abort) {
-  return dialog_module::show_error((char *)str.c_str(), abort);
 }
 
 std::string get_string(std::string str, std::string def) {
