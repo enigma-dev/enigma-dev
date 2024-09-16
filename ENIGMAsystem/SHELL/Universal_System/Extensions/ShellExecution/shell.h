@@ -2,7 +2,7 @@
 #define PROCESS_GUIWINDOW_IMPL
 #endif
 
-#include "xprocess.hpp"
+#include <xprocess.hpp>
 
 using namespace xprocess;
 
