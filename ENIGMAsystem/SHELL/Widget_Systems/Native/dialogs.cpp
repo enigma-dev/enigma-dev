@@ -78,7 +78,7 @@ int show_message_cancelable(std::string str) {
 }
 
 bool show_question(std::string str) {
-  return dialog_module::show_question((char *)str.c_str());
+  return (bool)dialog_module::show_question((char *)str.c_str());
 }
 
 int show_question_cancelable(std::string str) {
