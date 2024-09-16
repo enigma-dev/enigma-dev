@@ -1,5 +1,5 @@
-override CFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT
-override CXXFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT
+override CFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
+override CXXFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
 override LDFLAGS += -Wl,--allow-multiple-definition
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/win32/*.cpp)
