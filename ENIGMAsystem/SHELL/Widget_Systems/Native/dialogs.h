@@ -36,7 +36,6 @@ namespace enigma_user {
   bool show_question(std::string str);
   int show_question_cancelable(std::string str);
   int show_attempt(std::string str);
-  int show_error(std::string str, bool abort);
   std::string get_string(std::string str, std::string def);
   std::string get_password(std::string str, std::string def);
   double get_number(std::string str, double def);
