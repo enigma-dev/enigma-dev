@@ -5,7 +5,7 @@ Name: SDL
 Identifier: SDL
 Represents:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Description: SDL windowing.
+Description: SDL Windowing.
 Author: fundies
 
 Depends:
