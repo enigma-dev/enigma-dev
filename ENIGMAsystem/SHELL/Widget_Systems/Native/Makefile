@@ -1,3 +1,6 @@
+override CFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT
+override CXXFLAGS += -IWidget_Systems/Native -DUSE_SDL_POLLEVENT
+override LDFLAGS += -Wl,--allow-multiple-definition
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/win32/*.cpp)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/apiprocess/*.cpp)
@@ -24,7 +27,4 @@ else
 		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/*.cpp)		
 	endif
 endif
-override CFLAGS += -IWidget_Systems/Native
-override CXXFLAGS += -IWidget_Systems/Native
-override LDFLAGS += -Wl,--allow-multiple-definition
 SOURCES += $(wildcard Widget_Systems/Native/*.cpp) 
