@@ -24,4 +24,6 @@ else
 		SOURCES += $(wildcard Widget_Systems/Native/general/*.cpp)		
 	endif
 endif
+override CFLAGS += -IWidget_Systems/Native
+override CXXFLAGS += -IWidget_Systems/Native
 SOURCES += $(wildcard Widget_Systems/Native/*.cpp) 
