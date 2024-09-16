@@ -73,6 +73,7 @@ SHARED_SRC_DIR := ../../shared
 SOURCES += $(SHARED_SRC_DIR)/xprocess.cpp
 override CXXFLAGS += -I$(SHARED_SRC_DIR) -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
 override CFLAGS += -I$(SHARED_SRC_DIR) -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
+SOURCES += xprocess.cpp
 
 ifeq ($(OS), Darwin)
 	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
