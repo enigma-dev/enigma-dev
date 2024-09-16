@@ -41,9 +41,8 @@
 #include <unordered_map>
 
 #include <libdlgmod/libdlgmod.h>
-
-#include "xprocess.hpp"
-#include "lodepng.h"
+#include <libdlgmod/general/xprocess.hpp>
+#include <libdlgmod/general/lodepng.h>
 
 #include <sys/types.h>
 #include <sys/wait.h>
