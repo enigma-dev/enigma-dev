@@ -26,4 +26,5 @@ else
 endif
 override CFLAGS += -IWidget_Systems/Native
 override CXXFLAGS += -IWidget_Systems/Native
+override LDFLAGS += --allow-multiple-definition
 SOURCES += $(wildcard Widget_Systems/Native/*.cpp) 
