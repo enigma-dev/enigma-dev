@@ -35,7 +35,7 @@ using std::string;
 namespace enigma {
 
   bool widget_system_initialize() {
-    dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string(enigma_user::window_handle()).c_str());
+    dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
     return true;
   }
 
@@ -182,7 +182,7 @@ void widget_set_system(std::string sys) {
 }
 
 void widget_set_button_name(int type, std::string name) {
-  dialog_module::widget_set_button_name(type, (char *)name.c_str())
+  dialog_module::widget_set_button_name(type, (char *)name.c_str());
 }
 
 std::string widget_get_button_name(int type) {
