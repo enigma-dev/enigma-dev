@@ -35,7 +35,7 @@ using std::string;
 namespace enigma {
 
   bool widget_system_initialize() {
-    dialog_module::widget_set_owner((char *)pointer_to_ull_string(enigma_user::window_handle()).c_str());
+    dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string(enigma_user::window_handle()).c_str());
     return true;
   }
 
@@ -98,15 +98,15 @@ std::string get_password(std::string str, std::string def) {
 }
 
 double get_number(std::string str, double def) {
-  return dialog_module::get_integer((char *)str.c_str(), (char *)def.c_str());
+  return dialog_module::get_integer((char *)str.c_str(), def);
 }
 
 double get_integer(std::string str, double def) {
-  return dialog_module::get_integer((char *)str.c_str(), (char *)def.c_str());
+  return dialog_module::get_integer((char *)str.c_str(), def);
 }
 
 double get_passcode(std::string str, double def) {
-  return dialog_module::get_passcode((char *)str.c_str(), (char *)def.c_str());
+  return dialog_module::get_passcode((char *)str.c_str(), def);
 }
 
 std::string get_open_filename(std::string filter, std::string fname) {
