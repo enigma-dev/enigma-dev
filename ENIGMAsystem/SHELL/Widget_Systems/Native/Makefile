@@ -1,3 +1,4 @@
+SHARED_SRC_DIR := ../../shared
 override CFLAGS += -IWidget_Systems/Native
 override CXXFLAGS += -IWidget_Systems/Native
 ifeq ($(TARGET-PLATFORM), Windows)
@@ -26,4 +27,4 @@ else
 		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/*.cpp)		
 	endif
 endif
-SOURCES += $(wildcard Widget_Systems/Native/*.cpp) 
+SOURCES += $(wildcard Widget_Systems/Native/*.cpp) $(SHARED_SRC_DIR)/xprocess.cpp
