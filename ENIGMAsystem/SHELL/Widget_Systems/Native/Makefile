@@ -1,6 +1,5 @@
 override CFLAGS += -IWidget_Systems/Native
 override CXXFLAGS += -IWidget_Systems/Native
-override LDFLAGS += -Wl,--allow-multiple-definition
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/win32/*.cpp)
 	SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/general/apiprocess/*.cpp)
