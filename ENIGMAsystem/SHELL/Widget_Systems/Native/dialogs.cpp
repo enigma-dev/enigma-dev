@@ -48,6 +48,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 void show_info() { }
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   #ifndef DEBUG_MODE
   errortext += "\n";
   fputs(errortext.c_str(), stderr);
@@ -75,78 +76,97 @@ int show_message(const string &message) {
 }
 
 int show_message_cancelable(std::string str) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::show_message_cancelable((char *)str.c_str());
 }
 
 bool show_question(std::string str) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return (bool)dialog_module::show_question((char *)str.c_str());
 }
 
 int show_question_cancelable(std::string str) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::show_question_cancelable((char *)str.c_str());
 }
 
 int show_attempt(std::string str) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::show_attempt((char *)str.c_str());
 }
 
 std::string get_string(std::string str, std::string def) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_string((char *)str.c_str(), (char *)def.c_str());
 }
 
 std::string get_password(std::string str, std::string def) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_password((char *)str.c_str(), (char *)def.c_str());
 }
 
 double get_number(std::string str, double def) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_integer((char *)str.c_str(), def);
 }
 
 double get_integer(std::string str, double def) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_integer((char *)str.c_str(), def);
 }
 
 double get_passcode(std::string str, double def) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_passcode((char *)str.c_str(), def);
 }
 
 std::string get_open_filename(std::string filter, std::string fname) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_open_filename((char *)filter.c_str(), (char *)fname.c_str());
 }
 
 std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_open_filename_ext((char *)filter.c_str(), (char *)fname.c_str(), (char *)dir.c_str(), (char *)title.c_str());
 }
 
 std::string get_open_filenames(std::string filter, std::string fname) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_open_filenames((char *)filter.c_str(), (char *)fname.c_str());
 }
 
 std::string get_open_filenames_ext(std::string filter, std::string fname, std::string dir, std::string title) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_open_filenames_ext((char *)filter.c_str(), (char *)fname.c_str(), (char *)dir.c_str(), (char *)title.c_str());
 }
 
 std::string get_save_filename(std::string filter, std::string fname) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_save_filename((char *)filter.c_str(), (char *)fname.c_str());
 }
 
 std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_save_filename_ext((char *)filter.c_str(), (char *)fname.c_str(), (char *)dir.c_str(), (char *)title.c_str());
 }
 
 std::string get_directory(std::string dname) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_directory((char *)dname.c_str());
 }
 
 std::string get_directory_alt(std::string capt, std::string root) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_directory_alt((char *)capt.c_str(), (char *)root.c_str());
 }
 
 int get_color(int defcol) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_color(defcol);
 }
 
 int get_color_ext(int defcol, std::string title) {
+  dialog_module::widget_set_owner((char *)enigma_user::pointer_to_ull_string((void *)enigma_user::window_handle()).c_str());
   return dialog_module::get_color_ext(defcol, (char *)title.c_str());
 }
 
