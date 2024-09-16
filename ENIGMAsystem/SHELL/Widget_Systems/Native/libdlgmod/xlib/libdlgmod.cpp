@@ -40,8 +40,8 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <xprocess.hpp>
 #include <libdlgmod/libdlgmod.h>
-#include <libdlgmod/general/xprocess.hpp>
 #include <libdlgmod/general/lodepng.h>
 
 #include <sys/types.h>
