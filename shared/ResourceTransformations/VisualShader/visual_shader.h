@@ -133,7 +133,7 @@ class VisualShader {
   };
 
   enum {
-    CONNECTION_ID_INVALID = -1,
+    PORT_INDEX_INVALID = -1,
   };
 
   union ConnectionKey {
@@ -164,7 +164,6 @@ class VisualShader {
    * @return int The id of the new node.
    */
   int get_valid_node_id() const;
-  int get_valid_connection_id() const;
 
   /**
    * @brief The function adds a node to the graph.
@@ -220,7 +219,6 @@ class VisualShader {
   bool can_connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port) const;
   bool connect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
   bool disconnect_nodes(const int& from_node, const int& from_port, const int& to_node, const int& to_port);
-  int find_connection_id(const int& from_node, const int& from_port, const int& to_node, const int& to_port) const;
 
   VisualShader::Connection get_connection(const int& id) const;
 
