@@ -950,16 +950,10 @@ std::vector<int> VisualShader::get_nodes() const {
   return used_ids;
 }
 
-std::vector<int> VisualShader::get_connections() const {
+std::vector<VisualShader::Connection> VisualShader::get_connections() const {
   const VisualShader::Graph* g{&graph};
 
-  std::vector<int> all_connections;
-
-  for (int i{0}; i < g->connections.size(); i++) {
-    all_connections.emplace_back(i);
-  }
-
-  return all_connections;
+  return g->connections;
 }
 
 void VisualShader::set_code(const std::string& code) const { VisualShader::code = code; }

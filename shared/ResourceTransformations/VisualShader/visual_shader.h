@@ -235,7 +235,7 @@ class VisualShader {
 
   std::vector<int> get_nodes() const;
 
-  std::vector<int> get_connections() const;
+  std::vector<VisualShader::Connection> get_connections() const;
 
  private:
   struct Node {
