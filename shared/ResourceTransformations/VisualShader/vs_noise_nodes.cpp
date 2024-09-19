@@ -89,7 +89,8 @@ std::string VisualShaderNodeValueNoise::generate_global([[maybe_unused]] const i
 
   code +=
       "void generate_value_noise_float(vec2 uv, float scale, out float "
-      "out_buffer) {" + std::string("\n");
+      "out_buffer) {" +
+      std::string("\n");
   code += std::string("\t") + "float t = 0.0;" + std::string("\n");
   code += std::string("\t") + std::string("\n");
   code += std::string("\t") + "float freq = pow(2.0, float(0));" + std::string("\n");
@@ -120,8 +121,10 @@ std::string VisualShaderNodeValueNoise::generate_code([[maybe_unused]] const int
 
   code += std::string("\t") + "{ // Value Noise" + std::string("\n");
   code += std::string("\t") + std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() + ", out_buffer);" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() +
+          ", out_buffer);" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" +
+          std::string("\n");
   code += std::string("\t") + std::string("}") + std::string("\n");
 
   return code;

@@ -132,7 +132,7 @@ VisualShaderNodeConstant::VisualShaderNodeConstant() {}
 /* Float Constant                    */
 /*************************************/
 
-VisualShaderNodeFloatConstant::VisualShaderNodeFloatConstant() : constant(0.0f) {  }
+VisualShaderNodeFloatConstant::VisualShaderNodeFloatConstant() : constant(0.0f) {}
 
 std::string VisualShaderNodeFloatConstant::get_caption() const { return "FloatConstant"; }
 
@@ -158,14 +158,15 @@ std::string VisualShaderNodeFloatConstant::generate_code([[maybe_unused]] const 
                                                          [[maybe_unused]] const std::vector<std::string>& input_vars,
                                                          const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
-  oss << "\t" << output_vars.at(0) << " = " << std::fixed << std::setprecision(6) << constant << ";" << std::string("\n");
+  oss << "\t" << output_vars.at(0) << " = " << std::fixed << std::setprecision(6) << constant << ";"
+      << std::string("\n");
   return oss.str();
 }
 
 void VisualShaderNodeFloatConstant::set_constant(const float& c) {
   if (t_are_almost_equal(constant, c)) {
-		return;
-	}
+    return;
+  }
 
   constant = c;
 }
@@ -182,7 +183,7 @@ std::vector<std::string> VisualShaderNodeFloatConstant::get_editable_properties(
 /* Int Constant                      */
 /*************************************/
 
-VisualShaderNodeIntConstant::VisualShaderNodeIntConstant() : constant(0) {  }
+VisualShaderNodeIntConstant::VisualShaderNodeIntConstant() : constant(0) {}
 
 std::string VisualShaderNodeIntConstant::get_caption() const { return "IntConstant"; }
 
@@ -230,7 +231,7 @@ std::vector<std::string> VisualShaderNodeIntConstant::get_editable_properties() 
 /* UInt Constant                     */
 /*************************************/
 
-VisualShaderNodeUIntConstant::VisualShaderNodeUIntConstant() : constant(0) {  }
+VisualShaderNodeUIntConstant::VisualShaderNodeUIntConstant() : constant(0) {}
 
 std::string VisualShaderNodeUIntConstant::get_caption() const { return "UIntConstant"; }
 
@@ -278,7 +279,7 @@ std::vector<std::string> VisualShaderNodeUIntConstant::get_editable_properties()
 /* Boolean Constant                  */
 /*************************************/
 
-VisualShaderNodeBooleanConstant::VisualShaderNodeBooleanConstant() : constant(false) {  }
+VisualShaderNodeBooleanConstant::VisualShaderNodeBooleanConstant() : constant(false) {}
 
 std::string VisualShaderNodeBooleanConstant::get_caption() const { return "BooleanConstant"; }
 
@@ -371,8 +372,8 @@ std::string VisualShaderNodeColorConstant::generate_code([[maybe_unused]] const 
 
 void VisualShaderNodeColorConstant::set_constant(const TColor& c) {
   if (constant.are_almost_equal(c)) {
-		return;
-	}
+    return;
+  }
 
   constant = c;
 }
@@ -389,7 +390,7 @@ std::vector<std::string> VisualShaderNodeColorConstant::get_editable_properties(
 /* Vector2 Constant                  */
 /*************************************/
 
-VisualShaderNodeVec2Constant::VisualShaderNodeVec2Constant() {  }
+VisualShaderNodeVec2Constant::VisualShaderNodeVec2Constant() {}
 
 std::string VisualShaderNodeVec2Constant::get_caption() const { return "Vector2Constant"; }
 
@@ -432,8 +433,8 @@ std::string VisualShaderNodeVec2Constant::generate_code([[maybe_unused]] const i
 
 void VisualShaderNodeVec2Constant::set_constant(const TVector2& c) {
   if (constant.are_almost_equal(c)) {
-		return;
-	}
+    return;
+  }
 
   constant = c;
 }
@@ -450,7 +451,7 @@ std::vector<std::string> VisualShaderNodeVec2Constant::get_editable_properties()
 /* Vector3 Constant                  */
 /*************************************/
 
-VisualShaderNodeVec3Constant::VisualShaderNodeVec3Constant() {  }
+VisualShaderNodeVec3Constant::VisualShaderNodeVec3Constant() {}
 
 std::string VisualShaderNodeVec3Constant::get_caption() const { return "Vector3Constant"; }
 
@@ -493,8 +494,8 @@ std::string VisualShaderNodeVec3Constant::generate_code([[maybe_unused]] const i
 
 void VisualShaderNodeVec3Constant::set_constant(const TVector3& c) {
   if (constant.are_almost_equal(c)) {
-		return;
-	}
+    return;
+  }
 
   constant = c;
 }
@@ -511,7 +512,7 @@ std::vector<std::string> VisualShaderNodeVec3Constant::get_editable_properties()
 /* Vector4 Constant                  */
 /*************************************/
 
-VisualShaderNodeVec4Constant::VisualShaderNodeVec4Constant() {  }
+VisualShaderNodeVec4Constant::VisualShaderNodeVec4Constant() {}
 
 std::string VisualShaderNodeVec4Constant::get_caption() const { return "Vector4Constant"; }
 
@@ -554,8 +555,8 @@ std::string VisualShaderNodeVec4Constant::generate_code([[maybe_unused]] const i
 
 void VisualShaderNodeVec4Constant::set_constant(const TVector4& c) {
   if (constant.are_almost_equal(c)) {
-		return;
-	}
+    return;
+  }
 
   constant = c;
 }
@@ -1067,9 +1068,7 @@ std::string VisualShaderNodeVectorOp::get_warning() const {
 /* Float Funcs Node                  */
 /*************************************/
 
-VisualShaderNodeFloatFunc::VisualShaderNodeFloatFunc() : func(FUNC_SIN) {
-  set_input_port_default_value(0, 0.0f);
-}
+VisualShaderNodeFloatFunc::VisualShaderNodeFloatFunc() : func(FUNC_SIN) { set_input_port_default_value(0, 0.0f); }
 
 std::string VisualShaderNodeFloatFunc::get_caption() const { return "FloatFunc"; }
 
@@ -1149,7 +1148,8 @@ std::string VisualShaderNodeFloatFunc::generate_code([[maybe_unused]] const int&
       code += std::string("\t") + output_vars.at(0) + " = fract(" + input_vars.at(0) + ");" + std::string("\n");
       break;
     case VisualShaderNodeFloatFunc::Function::FUNC_SATURATE:
-      code += std::string("\t") + output_vars.at(0) + " = min(max(" + input_vars.at(0) + ", 0.0), 1.0);" + std::string("\n");
+      code += std::string("\t") + output_vars.at(0) + " = min(max(" + input_vars.at(0) + ", 0.0), 1.0);" +
+              std::string("\n");
       break;
     case VisualShaderNodeFloatFunc::Function::FUNC_NEGATE:
       code += std::string("\t") + output_vars.at(0) + " = -(" + input_vars.at(0) + ");" + std::string("\n");
@@ -1221,9 +1221,7 @@ std::vector<std::string> VisualShaderNodeFloatFunc::get_editable_properties() co
 /* Int Funcs Node                    */
 /*************************************/
 
-VisualShaderNodeIntFunc::VisualShaderNodeIntFunc() : func(FUNC_SIGN) {
-  set_input_port_default_value(0, 0);
-}
+VisualShaderNodeIntFunc::VisualShaderNodeIntFunc() : func(FUNC_SIGN) { set_input_port_default_value(0, 0); }
 
 std::string VisualShaderNodeIntFunc::get_caption() const { return "IntFunc"; }
 
@@ -1291,9 +1289,7 @@ std::vector<std::string> VisualShaderNodeIntFunc::get_editable_properties() cons
 /* UInt Funcs Node                   */
 /*************************************/
 
-VisualShaderNodeUIntFunc::VisualShaderNodeUIntFunc() : func(FUNC_NEGATE) {
-  set_input_port_default_value(0, 0);
-}
+VisualShaderNodeUIntFunc::VisualShaderNodeUIntFunc() : func(FUNC_NEGATE) { set_input_port_default_value(0, 0); }
 
 std::string VisualShaderNodeUIntFunc::get_caption() const { return "UIntFunc"; }
 
@@ -1394,13 +1390,16 @@ std::string VisualShaderNodeVectorFunc::generate_code([[maybe_unused]] const int
     case FUNC_SATURATE:
       switch (op_type) {
         case OP_TYPE_VECTOR_2D:
-          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec2(1.0)), vec2(0.0));" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) +
+                  ", vec2(1.0)), vec2(0.0));" + std::string("\n");
           break;
         case OP_TYPE_VECTOR_3D:
-          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec3(1.0)), vec3(0.0));" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) +
+                  ", vec3(1.0)), vec3(0.0));" + std::string("\n");
           break;
         case OP_TYPE_VECTOR_4D:
-          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) + ", vec4(1.0)), vec4(0.0));" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + "max(min(" + input_vars.at(0) +
+                  ", vec4(1.0)), vec4(0.0));" + std::string("\n");
           break;
         default:
           break;
@@ -1499,13 +1498,16 @@ std::string VisualShaderNodeVectorFunc::generate_code([[maybe_unused]] const int
     case FUNC_ONEMINUS:
       switch (op_type) {
         case OP_TYPE_VECTOR_2D:
-          code += std::string("\t") + output_vars.at(0) + " = vec2(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = vec2(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
           break;
         case OP_TYPE_VECTOR_3D:
-          code += std::string("\t") + output_vars.at(0) + " = vec3(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = vec3(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
           break;
         case OP_TYPE_VECTOR_4D:
-          code += std::string("\t") + output_vars.at(0) + " = vec4(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = vec4(1.0) - " + input_vars.at(0) + ";" + std::string("\n");
           break;
         default:
           break;
@@ -1607,16 +1609,15 @@ std::string VisualShaderNodeDotProduct::get_output_port_name([[maybe_unused]] co
 std::string VisualShaderNodeDotProduct::generate_code([[maybe_unused]] const int& id,
                                                       const std::vector<std::string>& input_vars,
                                                       const std::vector<std::string>& output_vars) const {
-  return std::string("\t") + output_vars.at(0) + " = dot(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+  return std::string("\t") + output_vars.at(0) + " = dot(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" +
+         std::string("\n");
 }
 
 /*************************************/
 /* Length Node                       */
 /*************************************/
 
-VisualShaderNodeVectorLen::VisualShaderNodeVectorLen() {
-  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
-}
+VisualShaderNodeVectorLen::VisualShaderNodeVectorLen() { set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f)); }
 
 std::string VisualShaderNodeVectorLen::get_caption() const { return "VectorLen"; }
 
@@ -1760,8 +1761,8 @@ std::string VisualShaderNodeClamp::get_output_port_name([[maybe_unused]] const i
 std::string VisualShaderNodeClamp::generate_code([[maybe_unused]] const int& id,
                                                  const std::vector<std::string>& input_vars,
                                                  const std::vector<std::string>& output_vars) const {
-  return std::string("\t") + output_vars.at(0) + " = clamp(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) +
-         ");" + std::string("\n");
+  return std::string("\t") + output_vars.at(0) + " = clamp(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " +
+         input_vars.at(2) + ");" + std::string("\n");
 }
 
 void VisualShaderNodeClamp::set_op_type(const OpType& op_type) {
@@ -1906,10 +1907,12 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
           code += std::string("\t") + output_vars.at(0) + " = fwidth(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
-          code += std::string("\t") + output_vars.at(0) + " = fwidthCoarse(" + input_vars.at(0) + ");" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = fwidthCoarse(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_FINE:
-          code += std::string("\t") + output_vars.at(0) + " = fwidthFine(" + input_vars.at(0) + ");" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = fwidthFine(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         default:
           break;
@@ -1922,7 +1925,8 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
           code += std::string("\t") + output_vars.at(0) + " = dFdx(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
-          code += std::string("\t") + output_vars.at(0) + " = dFdxCoarse(" + input_vars.at(0) + ");" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = dFdxCoarse(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_FINE:
           code += std::string("\t") + output_vars.at(0) + " = dFdxFine(" + input_vars.at(0) + ");" + std::string("\n");
@@ -1938,7 +1942,8 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
           code += std::string("\t") + output_vars.at(0) + " = dFdy(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
-          code += std::string("\t") + output_vars.at(0) + " = dFdyCoarse(" + input_vars.at(0) + ");" + std::string("\n");
+          code +=
+              std::string("\t") + output_vars.at(0) + " = dFdyCoarse(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_FINE:
           code += std::string("\t") + output_vars.at(0) + " = dFdyFine(" + input_vars.at(0) + ");" + std::string("\n");
@@ -2185,7 +2190,8 @@ VisualShaderNodeStep::OpType VisualShaderNodeStep::get_op_type() const { return 
 std::string VisualShaderNodeStep::generate_code([[maybe_unused]] const int& id,
                                                 const std::vector<std::string>& input_vars,
                                                 const std::vector<std::string>& output_vars) const {
-  return std::string("\t") + output_vars.at(0) + " = step(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+  return std::string("\t") + output_vars.at(0) + " = step(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" +
+         std::string("\n");
 }
 
 std::vector<std::string> VisualShaderNodeStep::get_editable_properties() const {
@@ -2473,7 +2479,8 @@ void VisualShaderNodeVectorDistance::set_op_type(const OpType& op_type) {
 std::string VisualShaderNodeVectorDistance::generate_code([[maybe_unused]] const int& id,
                                                           const std::vector<std::string>& input_vars,
                                                           const std::vector<std::string>& output_vars) const {
-  return std::string("\t") + output_vars.at(0) + " = distance(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+  return std::string("\t") + output_vars.at(0) + " = distance(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" +
+         std::string("\n");
 }
 
 /*************************************/
@@ -2679,8 +2686,8 @@ VisualShaderNodeMix::OpType VisualShaderNodeMix::get_op_type() const { return op
 std::string VisualShaderNodeMix::generate_code([[maybe_unused]] const int& id,
                                                const std::vector<std::string>& input_vars,
                                                const std::vector<std::string>& output_vars) const {
-  return std::string("\t") + output_vars.at(0) + " = mix(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " + input_vars.at(2) +
-         ");" + std::string("\n");
+  return std::string("\t") + output_vars.at(0) + " = mix(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " +
+         input_vars.at(2) + ");" + std::string("\n");
 }
 
 std::vector<std::string> VisualShaderNodeMix::get_editable_properties() const {
@@ -2805,7 +2812,8 @@ std::string VisualShaderNodeVectorCompose::generate_code([[maybe_unused]] const 
   std::string code;
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      code += std::string("\t") + output_vars.at(0) + " = vec2(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+      code += std::string("\t") + output_vars.at(0) + " = vec2(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" +
+              std::string("\n");
     } break;
     case OP_TYPE_VECTOR_3D: {
       code += std::string("\t") + output_vars.at(0) + " = vec3(" + input_vars.at(0) + ", " + input_vars.at(1) + ", " +
@@ -3026,11 +3034,16 @@ std::string VisualShaderNodeIf::generate_code([[maybe_unused]] const int& id,
   std::string code;
   code += std::string("\t") + "if(abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " + input_vars.at(2) +
           ") {" + std::string("\n");  // abs(p1 - p2) < tolerance eg. p1 == p2
-  code += std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(3) + ";" + std::string("\n");
-  code += std::string("\t") + "} else if(" + input_vars.at(0) + " < " + input_vars.at(1) + ") {" + std::string("\n");  // p1 < p2
-  code += std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(5) + ";" + std::string("\n");
-  code += std::string("\t") + "} else {" + std::string("\n");  // p1 > p2 (or p1 >= p2 if abs(p1 - p2) < tolerance is false)
-  code += std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(4) + ";" + std::string("\n");
+  code +=
+      std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(3) + ";" + std::string("\n");
+  code += std::string("\t") + "} else if(" + input_vars.at(0) + " < " + input_vars.at(1) + ") {" +
+          std::string("\n");  // p1 < p2
+  code +=
+      std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(5) + ";" + std::string("\n");
+  code +=
+      std::string("\t") + "} else {" + std::string("\n");  // p1 > p2 (or p1 >= p2 if abs(p1 - p2) < tolerance is false)
+  code +=
+      std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(4) + ";" + std::string("\n");
   code += std::string("\t") + std::string("}") + std::string("\n");
   return code;
 }
@@ -3210,13 +3223,15 @@ std::string VisualShaderNodeSwitch::generate_code([[maybe_unused]] const int& id
 
   std::string code;
   if (use_mix) {
-    code += std::string("\t") + output_vars.at(0) + " = mix(" + input_vars.at(2) + ", " + input_vars.at(1) + ", float(" +
-            input_vars.at(0) + "));" + std::string("\n");
+    code += std::string("\t") + output_vars.at(0) + " = mix(" + input_vars.at(2) + ", " + input_vars.at(1) +
+            ", float(" + input_vars.at(0) + "));" + std::string("\n");
   } else {
     code += std::string("\t") + "if (" + input_vars.at(0) + ") {" + std::string("\n");
-    code += std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(1) + ";" + std::string("\n");
+    code +=
+        std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(1) + ";" + std::string("\n");
     code += std::string("\t") + "} else {" + std::string("\n");
-    code += std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(2) + ";" + std::string("\n");
+    code +=
+        std::string("\t") + std::string("\t") + output_vars.at(0) + " = " + input_vars.at(2) + ";" + std::string("\n");
     code += std::string("\t") + std::string("}") + std::string("\n");
   }
   return code;
@@ -3226,9 +3241,7 @@ std::string VisualShaderNodeSwitch::generate_code([[maybe_unused]] const int& id
 /* Is Node                           */
 /*************************************/
 
-VisualShaderNodeIs::VisualShaderNodeIs() : func(FUNC_IS_INF) {
-  set_input_port_default_value(0, 0.0f);
-}
+VisualShaderNodeIs::VisualShaderNodeIs() : func(FUNC_IS_INF) { set_input_port_default_value(0, 0.0f); }
 
 std::string VisualShaderNodeIs::get_caption() const { return "Is"; }
 
@@ -3396,24 +3409,28 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
     case CMP_TYPE_SCALAR: {
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = (abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " +
-                  input_vars.at(2) + ");" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = (abs(" + input_vars.at(0) + " - " + input_vars.at(1) +
+                  ") < " + input_vars.at(2) + ");" + std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = !(abs(" + input_vars.at(0) + " - " + input_vars.at(1) + ") < " +
-                  input_vars.at(2) + ");" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = !(abs(" + input_vars.at(0) + " - " + input_vars.at(1) +
+                  ") < " + input_vars.at(2) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_GREATER_THAN_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_LESS_THAN:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_LESS_THAN_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         default:
           break;
@@ -3423,22 +3440,28 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
     case CMP_TYPE_SCALAR_INT: {
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_GREATER_THAN:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " > " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_GREATER_THAN_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " >= " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_LESS_THAN:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " < " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_LESS_THAN_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " <= " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         default:
           break;
@@ -3448,22 +3471,28 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
       code += std::string("\t") + std::string("{") + std::string("\n");
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = equal(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = notEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = greaterThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = greaterThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = lessThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec2 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec2 _bv = lessThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         default:
           break;
@@ -3487,22 +3516,28 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
 
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = equal(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = notEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = greaterThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = greaterThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = lessThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec3 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec3 _bv = lessThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         default:
           break;
@@ -3526,22 +3561,28 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
 
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = equal(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = equal(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = notEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = notEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = greaterThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = greaterThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_GREATER_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = greaterThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = greaterThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = lessThan(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = lessThan(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         case FUNC_LESS_THAN_EQUAL:
-          code += std::string("\t") + std::string("\t") + "bvec4 _bv = lessThanEqual(" + input_vars.at(0) + ", " + input_vars.at(1) + ");" + std::string("\n");
+          code += std::string("\t") + std::string("\t") + "bvec4 _bv = lessThanEqual(" + input_vars.at(0) + ", " +
+                  input_vars.at(1) + ");" + std::string("\n");
           break;
         default:
           break;
@@ -3563,10 +3604,12 @@ std::string VisualShaderNodeCompare::generate_code([[maybe_unused]] const int& i
     case CMP_TYPE_BOOLEAN: {
       switch (func) {
         case FUNC_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " == " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_NOT_EQUAL:
-          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";" + std::string("\n");
+          code += std::string("\t") + output_vars.at(0) + " = " + input_vars.at(0) + " != " + input_vars.at(1) + ";" +
+                  std::string("\n");
           break;
         case FUNC_GREATER_THAN:
         case FUNC_GREATER_THAN_EQUAL:
