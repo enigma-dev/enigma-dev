@@ -345,7 +345,7 @@ bool VisualShader::disconnect_nodes(const int& from_node, const int& from_port, 
 VisualShader::Connection VisualShader::get_connection(const int& id) const {
   const VisualShader::Graph* g{&graph};
 
-  if (id < 0 || id >= g->connections.size()) {
+  if (id < 0 || id >= (int)g->connections.size()) {
     return Connection();
   }
 
@@ -405,6 +405,89 @@ bool VisualShader::generate_shader() const {
   VisualShader::set_code(generated_code);
 
   return true;
+}
+
+std::string VisualShader::generate_preview_shader(const int& node_id, const int& port) const {
+  const VisualShader::Graph* g{&graph};
+  static const std::string func_name{"fragment"};
+
+  const std::shared_ptr<VisualShaderNode> n{get_node(node_id)};
+
+  if (!n) {
+    std::cout << "Invalid node" << std::endl;
+    return std::string();
+  }
+
+  std::string global_code;
+  std::string global_code_per_node;
+  std::string shader_code;
+  std::unordered_set<std::string> global_processed;
+
+  // Store the connections for faster generation.
+  std::map<ConnectionKey, const Connection*> input_connections;
+  std::map<ConnectionKey, const Connection*> output_connections;
+
+  std::unordered_set<int> processed;
+
+  for (const Connection& c : g->connections) {
+    ConnectionKey from_key;
+    from_key.node = c.from_node;
+    from_key.port = c.from_port;
+
+    output_connections[from_key] = &c;
+
+    ConnectionKey to_key;
+    to_key.node = c.to_node;
+    to_key.port = c.to_port;
+
+    input_connections[to_key] = &c;
+  }
+
+  shader_code += "\nvoid " + func_name + "() {" + std::string("\n");
+
+  // Generate the code for each node.
+  bool status{generate_shader_for_each_node(global_code, global_code_per_node, shader_code, input_connections,
+                                            output_connections, node_id, processed, global_processed)};
+  if (!status) {
+    std::cout << "Failed to generate shader for node " << node_id << std::endl;
+    return std::string();
+  }
+
+  switch (n->get_output_port_type(port)) {
+		case VisualShaderNode::PORT_TYPE_SCALAR: 
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ");" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_SCALAR_INT: 
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + "));" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_SCALAR_UINT: 
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + "));" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_BOOLEAN: 
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + " ? 1.0 : 0.0);" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_VECTOR_2D: 
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ", 0.0);" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_VECTOR_3D: 
+			shader_code += std::string("\t") + "COLOR.rgb = var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ";" + std::string("\n");
+		  break;
+		case VisualShaderNode::PORT_TYPE_VECTOR_4D: 
+			shader_code += std::string("\t") + "COLOR.rgb = var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ".xyz;" + std::string("\n");
+		  break;
+		default:
+			shader_code += std::string("\t") + "COLOR.rgb = vec3(0.0);" + std::string("\n");
+		  break;
+	}
+
+  shader_code += std::string("}") + "\n\n";
+
+  std::string generated_code{global_code};
+  generated_code += global_code_per_node;
+
+  generated_code += shader_code;
+
+  return generated_code;
 }
 
 bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::string& global_code_per_node,
@@ -480,7 +563,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       VisualShaderNode::PortType to_port_type{n->get_input_port_type(i)};
       VisualShaderNode::PortType from_port_type{g->nodes.at(from_node).node->get_output_port_type(from_port)};
 
-      std::string from_var{"var_from_" + std::to_string(from_node) + "_" + std::to_string(from_port)};
+      std::string from_var{"var_from_n" + std::to_string(from_node) + "_p" + std::to_string(from_port)};
 
       if (to_port_type == from_port_type) {
         input_vars.at(i) = from_var;
@@ -664,7 +747,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       switch (defval.index()) {
         case TVARIANT_FLOAT_INDEX: {  // float
           float val{std::get<float>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           std::ostringstream oss;
           oss << std::string("\t") + "float " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5) << val
               << ";" << std::string("\n");
@@ -672,7 +755,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
         } break;
         case TVARIANT_INT_INDEX: {  // int
           int val{std::get<int>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           if (n->get_input_port_type(i) == VisualShaderNode::PORT_TYPE_SCALAR_UINT) {
             node_code +=
                 std::string("\t") + "uint " + input_vars.at(i) + " = " + std::to_string(val) + "u;" + std::string("\n");
@@ -683,7 +766,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
         } break;
         case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
           TVector2 val{std::get<TVector2>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           std::ostringstream oss;
           oss << std::string("\t") + "vec2 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5)
               << "vec2(" << val.x << ", " << val.y << ");" << std::string("\n");
@@ -691,7 +774,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
         } break;
         case TVARIANT_VECTOR_3D_INDEX: {  // TVector3
           TVector3 val{std::get<TVector3>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           std::ostringstream oss;
           oss << std::string("\t") + "vec3 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5)
               << "vec3(" << val.x << ", " << val.y << ", " << val.z << ");" << std::string("\n");
@@ -699,7 +782,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
         } break;
         case TVARIANT_VECTOR_4D_INDEX: {  // TVector4
           TVector4 val{std::get<TVector4>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           std::ostringstream oss;
           oss << std::string("\t") + "vec4 " << input_vars.at(i) << " = " << std::fixed << std::setprecision(5)
               << "vec4(" << val.x << ", " << val.y << ", " << val.z << ", " << val.w << ");" << std::string("\n");
@@ -707,7 +790,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
         } break;
         case TVARIANT_BOOL_INDEX: {  // bool
           bool val{std::get<bool>(defval)};
-          input_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(i);
+          input_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i);
           node_code += std::string("\t") + "bool " + input_vars.at(i) + " = " + (val ? "true" : "false") + ";" +
                        std::string("\n");
         } break;
@@ -751,7 +834,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
   if (n->is_simple_decl()) {
     // Generate less code for some simple_decl nodes.
     for (int i{0}, j{0}; i < initial_output_count; i++, j++) {
-      std::string to_var{"var_to_" + std::to_string(node_id) + "_" + std::to_string(j)};
+      std::string to_var{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(j)};
       switch (n->get_output_port_type(i)) {
         case VisualShaderNode::PortType::PORT_TYPE_SCALAR:
           output_vars.at(i) = "float " + to_var;
@@ -796,7 +879,7 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
 
   } else {
     for (int i{0}, j{0}; i < initial_output_count; i++, j++) {
-      output_vars.at(i) = "var_to_" + std::to_string(node_id) + "_" + std::to_string(j);
+      output_vars.at(i) = "var_to_n" + std::to_string(node_id) + "_p" + std::to_string(j);
       switch (n->get_output_port_type(i)) {
         case VisualShaderNode::PortType::PORT_TYPE_SCALAR:
           func_code += std::string("\t") + "float " + output_vars.at(i) + ";" + std::string("\n");
@@ -856,16 +939,16 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       case VisualShaderNode::PORT_TYPE_VECTOR_2D: {
         if (n->is_output_port_connected(i + 1)) {
           // Red component.
-          std::string r{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 1)};
-          func_code += std::string("\t") + "float " + r + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string r{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 1)};
+          func_code += std::string("\t") + "float " + r + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".r;" + std::string("\n");
           output_vars.at(i + 1) = r;
         }
 
         if (n->is_output_port_connected(i + 2)) {
           // Green component.
-          std::string g{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 2)};
-          func_code += std::string("\t") + "float " + g + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string g{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 2)};
+          func_code += std::string("\t") + "float " + g + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".g;" + std::string("\n");
           output_vars.at(i + 2) = g;
         }
@@ -875,24 +958,24 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       case VisualShaderNode::PORT_TYPE_VECTOR_3D: {
         if (n->is_output_port_connected(i + 1)) {
           // Red component.
-          std::string r{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 1)};
-          func_code += std::string("\t") + "float " + r + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string r{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 1)};
+          func_code += std::string("\t") + "float " + r + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".r;" + std::string("\n");
           output_vars.at(i + 1) = r;
         }
 
         if (n->is_output_port_connected(i + 2)) {
           // Green component.
-          std::string g{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 2)};
-          func_code += std::string("\t") + "float " + g + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string g{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 2)};
+          func_code += std::string("\t") + "float " + g + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".g;" + std::string("\n");
           output_vars.at(i + 2) = g;
         }
 
         if (n->is_output_port_connected(i + 3)) {
           // Blue component.
-          std::string b{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 3)};
-          func_code += std::string("\t") + "float " + b + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string b{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 3)};
+          func_code += std::string("\t") + "float " + b + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".b;" + std::string("\n");
           output_vars.at(i + 3) = b;
         }
@@ -902,32 +985,32 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
       case VisualShaderNode::PORT_TYPE_VECTOR_4D: {
         if (n->is_output_port_connected(i + 1)) {
           // Red component.
-          std::string r{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 1)};
-          func_code += std::string("\t") + "float " + r + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string r{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 1)};
+          func_code += std::string("\t") + "float " + r + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".r;" + std::string("\n");
           output_vars.at(i + 1) = r;
         }
 
         if (n->is_output_port_connected(i + 2)) {
           // Green component.
-          std::string g{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 2)};
-          func_code += std::string("\t") + "float " + g + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string g{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 2)};
+          func_code += std::string("\t") + "float " + g + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".g;" + std::string("\n");
           output_vars.at(i + 2) = g;
         }
 
         if (n->is_output_port_connected(i + 3)) {
           // Blue component.
-          std::string b{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 3)};
-          func_code += std::string("\t") + "float " + b + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string b{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 3)};
+          func_code += std::string("\t") + "float " + b + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".b;" + std::string("\n");
           output_vars.at(i + 3) = b;
         }
 
         if (n->is_output_port_connected(i + 4)) {
           // Alpha component.
-          std::string a{"var_to_" + std::to_string(node_id) + "_" + std::to_string(i + 4)};
-          func_code += std::string("\t") + "float " + a + " = var_to_" + std::to_string(node_id) + "_" +
+          std::string a{"var_to_n" + std::to_string(node_id) + "_p" + std::to_string(i + 4)};
+          func_code += std::string("\t") + "float " + a + " = var_to_n" + std::to_string(node_id) + "_" +
                        std::to_string(i) + ".a;" + std::string("\n");
           output_vars.at(i + 4) = a;
         }

@@ -225,6 +225,7 @@ class VisualShader {
   VisualShader::Connection get_connection(const int& id) const;
 
   bool generate_shader() const;
+  std::string generate_preview_shader(const int& node_id, const int& port) const;
 
   bool generate_shader_for_each_node(std::string& global_code, std::string& global_code_per_node,
                                      std::string& func_code,
