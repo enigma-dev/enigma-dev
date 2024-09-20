@@ -3,9 +3,9 @@
 
 Name: SDL
 Identifier: SDL
+Description: SDL Windowing.
+Author: fundies
 Depends:
 	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
 Represents:
 	Build-Platforms: Windows, MacOSX
-Description: SDL Windowing.
-Author: fundies
