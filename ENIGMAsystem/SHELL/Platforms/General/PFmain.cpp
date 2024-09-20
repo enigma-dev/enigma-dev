@@ -377,8 +377,8 @@ int enigma_main(int argc, char** argv) {
   while (!game_isending) {
   
     i++;
-    if (i <= 2) enigma_user::window_center();
-    else i = 3;
+    if (i <= 9) enigma_user::window_center();
+    else i = 10;
 
     if (!((std::string)enigma_user::room_caption).empty() && 
       enigma_user::window_get_caption() != enigma_user::room_caption)
