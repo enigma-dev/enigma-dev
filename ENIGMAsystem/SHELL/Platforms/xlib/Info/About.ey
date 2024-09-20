@@ -1,10 +1,10 @@
 %e-yaml
 ---
 
-Name: X11
+Name: xlib
 Identifier: xlib
 Represents: None
-Description: X11 Windowing.
+Description: xlib Windowing.
 Author: IsmAvatar, Josh Ventura
 Depends:
 	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
