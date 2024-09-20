@@ -6,6 +6,7 @@ Identifier: xlib
 Represents: None
 Description: X11 Windowing.
 Author: IsmAvatar, Josh Ventura
-
 Depends:
 	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Represents:
+	Build-Platforms: Linux, FreeBSD, DragonFlyBSD, OpenBSD
