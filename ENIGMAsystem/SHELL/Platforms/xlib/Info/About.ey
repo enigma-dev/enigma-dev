@@ -4,7 +4,7 @@
 Name: xlib
 Identifier: xlib
 Represents: None
-Description: xlib Windowing.
+Description: X11 Windowing.
 Author: IsmAvatar, Josh Ventura
 Depends:
 	Build-Platforms: MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
