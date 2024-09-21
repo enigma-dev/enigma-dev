@@ -360,6 +360,12 @@ class VisualShaderNode {
 
 class VisualShaderNodeInput : public VisualShaderNode {
  public:
+  struct Port {
+    PortType type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE;
+    std::string name;
+    std::string string_value;
+  };
+
   VisualShaderNodeInput();
   virtual ~VisualShaderNodeInput() = default;
 
@@ -383,13 +389,9 @@ class VisualShaderNodeInput : public VisualShaderNode {
 
   VisualShaderNode::PortType get_input_type_by_name(const std::string& name) const;
 
- private:
-  struct Port {
-    PortType type = VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE;
-    std::string name;
-    std::string string_value;
-  };
+  static const VisualShaderNodeInput::Port* get_ports() { return VisualShaderNodeInput::ports; }
 
+ private:
   static const VisualShaderNodeInput::Port ports[];
   static const VisualShaderNodeInput::Port preview_ports[];
 
