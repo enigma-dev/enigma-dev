@@ -163,7 +163,7 @@ namespace dialog_module {
       UINT flags = MB_DEFBUTTON1 | MB_APPLMODAL;
       flags |= cancelable ? (MB_OKCANCEL | MB_ICONQUESTION) : (MB_OK | MB_ICONINFORMATION);
 
-      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags);
+      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags | MB_TOPMOST);
       return cancelable ? ((result == IDOK) ? 1 : -1) : 1;
     }
 
@@ -176,7 +176,7 @@ namespace dialog_module {
       UINT flags = MB_DEFBUTTON1 | MB_APPLMODAL | MB_ICONQUESTION;
       flags |= cancelable ? MB_YESNOCANCEL : MB_YESNO;
 
-      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags);
+      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags | MB_TOPMOST);
       return cancelable ? ((result == IDYES) ? 1 : ((result == IDNO) ? 0 : -1)) : (result == IDYES);
     }
 
@@ -188,12 +188,12 @@ namespace dialog_module {
 
       if (attempt) {
         UINT flags = MB_RETRYCANCEL | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL;
-        int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags);
+        int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags | MB_TOPMOST);
         return (result == IDRETRY) ? 0 : -1;
       }
 
       UINT flags = (abort ? MB_OK : MB_OKCANCEL) | MB_ICONERROR | MB_DEFBUTTON1 | MB_APPLMODAL;
-      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags);
+      int result = MessageBoxW(owner_window(), wstr.c_str(), wtitle.c_str(), flags | MB_TOPMOST);
       result = abort ? 1 : ((result == IDOK) ? 1 : -1);
 
       if (result == 1) exit(0);
@@ -314,6 +314,11 @@ namespace dialog_module {
 
       if (dlg != nullptr) {
         if (nCode == HCBT_ACTIVATE && init == true) {
+          SetWindowLongPtr(dlg, GWLP_HWNDPARENT, (LONG_PTR)GetDesktopWindow());
+          ShowWindow(dlg, SW_SHOW);
+          SetWindowLongPtr(dlg, GWL_EXSTYLE, GetWindowLongPtr(dlg, GWL_EXSTYLE) | WS_EX_APPWINDOW);
+          SetWindowPos(dlg, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+          EnableWindow(win, true);
           if (hidden == true)
             SendDlgItemMessageW(dlg, 1000, EM_SETPASSWORDCHAR, L'\x25cf', 0);
           init = false;
@@ -350,6 +355,11 @@ namespace dialog_module {
           init = true;
         }
         if (dlg != nullptr && init) {
+          SetWindowLongPtr(dlg, GWLP_HWNDPARENT, (LONG_PTR)GetDesktopWindow());
+          ShowWindow(dlg, SW_SHOW);
+          SetWindowLongPtr(dlg, GWL_EXSTYLE, GetWindowLongPtr(dlg, GWL_EXSTYLE) | WS_EX_APPWINDOW);
+          SetWindowPos(dlg, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+          EnableWindow(win, true);
           RECT wrect1; GetWindowRect(dlg, &wrect1);
           RECT wrect2; GetWindowRect(win, &wrect2);
           unsigned width1 = wrect1.right - wrect1.left;
@@ -401,6 +411,11 @@ namespace dialog_module {
           init = true;
         }
         if (dlg != nullptr && init) {
+          SetWindowLongPtr(dlg, GWLP_HWNDPARENT, (LONG_PTR)GetDesktopWindow());
+          ShowWindow(dlg, SW_SHOW);
+          SetWindowLongPtr(dlg, GWL_EXSTYLE, GetWindowLongPtr(dlg, GWL_EXSTYLE) | WS_EX_APPWINDOW);
+          SetWindowPos(dlg, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+          EnableWindow(win, true);
           RECT wrect1; GetWindowRect(dlg, &wrect1);
           RECT wrect2; GetWindowRect(win, &wrect2);
           unsigned width1 = wrect1.right - wrect1.left;
@@ -449,6 +464,11 @@ namespace dialog_module {
       }
 
       if (nCode == HCBT_ACTIVATE && init) {
+        SetWindowLongPtr(dlg, GWLP_HWNDPARENT, (LONG_PTR)GetDesktopWindow());
+        ShowWindow(dlg, SW_SHOW);
+        SetWindowLongPtr(dlg, GWL_EXSTYLE, GetWindowLongPtr(dlg, GWL_EXSTYLE) | WS_EX_APPWINDOW);
+        SetWindowPos(dlg, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        EnableWindow(win, true);
         RECT wrect1; GetWindowRect(dlg, &wrect1);
         RECT wrect2; GetWindowRect(win, &wrect2);
         unsigned width1 = wrect1.right - wrect1.left;
@@ -521,6 +541,11 @@ namespace dialog_module {
       }
 
       if (nCode == HCBT_ACTIVATE && init) {
+        SetWindowLongPtr(dlg, GWLP_HWNDPARENT, (LONG_PTR)GetDesktopWindow());
+        ShowWindow(dlg, SW_SHOW);
+        SetWindowLongPtr(dlg, GWL_EXSTYLE, GetWindowLongPtr(dlg, GWL_EXSTYLE) | WS_EX_APPWINDOW);
+        SetWindowPos(dlg, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        EnableWindow(win, true);
         textbox = FindWindowEx(dlg, nullptr, "DUIViewWndClassName", nullptr);
         textbox = FindWindowEx(textbox, nullptr, "DirectUIHWND", nullptr);
         textbox = FindWindowEx(textbox, nullptr, "FloatNotifySink", nullptr);
