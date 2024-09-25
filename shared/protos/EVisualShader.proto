@@ -1,0 +1,20 @@
+syntax = "proto3";
+package buffers.resources;
+
+// I could have named it VisualShader, but we have a VisualShader class in the project.
+// The E is for ENIGMA.
+message EVisualShader {
+    optional int32 id = 1;
+
+    message Connection {
+        optional int32 to_node = 1;
+        optional int32 to_port = 2;
+        optional int32 from_node = 3;
+        optional int32 from_port = 4;
+    }
+
+    message Node {
+        optional int32 id = 1;
+        optional string type = 2; // Type of the node. For example: "VisualShaderNodeFloatFunc"
+    }
+}
