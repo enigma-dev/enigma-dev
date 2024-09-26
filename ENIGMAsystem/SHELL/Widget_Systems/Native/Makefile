@@ -5,7 +5,7 @@ ifeq ($(TARGET-PLATFORM), Windows)
 	override LDLIBS += -lntdll -lgdiplus -lcomctl32 -lshlwapi -lcomdlg32 -lole32 -loleaut32 -luuid
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
-		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/macos/*.mm)
+		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/macos/*.cpp)
 		override LDLIBS += -lobjc -ObjC++ -framework AppKit -framework UniformTypeIdentifiers
 	else ifeq ($(TARGET-PLATFORM), Linux)
 		SOURCES += $(wildcard Widget_Systems/Native/libdlgmod/xlib/*.cpp)
