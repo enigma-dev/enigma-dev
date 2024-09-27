@@ -39,10 +39,10 @@ TEST(VisualShaderNoiseNodesTest, Test_VisualShaderNodeValueNoise_generate_code) 
   std::vector<std::string> output_vars = {"b"};
   std::string code{node.generate_code(0, input_vars, output_vars)};
   std::string expected_code{
-      "\t{ // Value Noise\n"
-      "\t\tfloat out_buffer = 0.0;\n"
-      "\t\tgenerate_simple_noise_float(a, 100.000000, out_buffer);\n"
-      "\t\tb = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
-      "\t}\n"};
+      "\t// Value Noise\n"
+      "\tfloat out_buffer = 0.0;\n"
+      "\tgenerate_simple_noise_float(a, 100.000000, out_buffer);\n"
+      "\tb = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
+      "\t\n"};
   EXPECT_EQ(code, expected_code);
 }

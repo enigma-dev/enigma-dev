@@ -119,13 +119,13 @@ std::string VisualShaderNodeValueNoise::generate_code([[maybe_unused]] const int
 
   std::string code;
 
-  code += std::string("\t") + "{ // Value Noise" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() +
+  code += std::string("\t") + "// Value Noise" + std::string("\n");
+  code += std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
+  code += std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() +
           ", out_buffer);" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" +
+  code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" +
           std::string("\n");
-  code += std::string("\t") + std::string("}") + std::string("\n");
+  code += std::string("\t") + std::string("\n");
 
   return code;
 }
