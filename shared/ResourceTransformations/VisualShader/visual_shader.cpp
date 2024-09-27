@@ -288,8 +288,6 @@ bool VisualShader::connect_nodes(const int& from_node, const int& from_port, con
     return false;
   }
 
-  // Allow connection with incompatible port types only if the reroute node
-  // isn't connected to anything.
   VisualShaderNode::PortType from_port_type{g->nodes.at(from_node).node->get_output_port_type(from_port)};
   VisualShaderNode::PortType to_port_type{g->nodes.at(to_node).node->get_input_port_type(to_port)};
   bool are_compatible{is_port_types_compatible(from_port_type, to_port_type)};
