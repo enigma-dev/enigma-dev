@@ -369,6 +369,7 @@ class VisualShaderNodeInput : public VisualShaderNode {
   VisualShaderNodeInput();
   virtual ~VisualShaderNodeInput() = default;
 
+  virtual std::string generate_global([[maybe_unused]] const int& id) const override;
   virtual std::string generate_code([[maybe_unused]] const int& id,
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
@@ -407,6 +408,7 @@ class VisualShaderNodeOutput : public VisualShaderNode {
   VisualShaderNodeOutput();
   virtual ~VisualShaderNodeOutput() = default;
 
+  virtual std::string generate_global([[maybe_unused]] const int& id) const override;
   virtual std::string generate_code([[maybe_unused]] const int& id,
                                     [[maybe_unused]] const std::vector<std::string>& input_vars,
                                     [[maybe_unused]] const std::vector<std::string>& output_vars) const override;
