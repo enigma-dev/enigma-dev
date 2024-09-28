@@ -456,28 +456,28 @@ std::string VisualShader::generate_preview_shader(const int& node_id, const int&
 
   switch (n->get_output_port_type(port)) {
 		case VisualShaderNode::PORT_TYPE_SCALAR: 
-			shader_code += std::string("\t") + output_var + " = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ");" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + "), 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_SCALAR_INT: 
-			shader_code += std::string("\t") + output_var + " = vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + "));" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ")), 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_SCALAR_UINT: 
-			shader_code += std::string("\t") + output_var + " = vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + "));" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(float(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ")), 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_BOOLEAN: 
-			shader_code += std::string("\t") + output_var + " = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + " ? 1.0 : 0.0);" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + " ? 1.0 : 0.0), 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_VECTOR_2D: 
-			shader_code += std::string("\t") + output_var + " = vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ", 0.0);" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ", 0.0), 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_VECTOR_3D: 
-			shader_code += std::string("\t") + output_var + " = var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ";" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ", 1.0);" + std::string("\n");
 		  break;
 		case VisualShaderNode::PORT_TYPE_VECTOR_4D: 
-			shader_code += std::string("\t") + output_var + " = var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ".xyz;" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(var_from_n" + std::to_string(node_id) + "_p" + std::to_string(port) + ".xyz, 1.0);" + std::string("\n");
 		  break;
 		default:
-			shader_code += std::string("\t") + output_var + " = vec3(0.0);" + std::string("\n");
+			shader_code += std::string("\t") + output_var + " = vec4(vec3(0.0), 1.0);" + std::string("\n");
 		  break;
 	}
 

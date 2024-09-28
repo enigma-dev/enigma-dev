@@ -322,7 +322,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\nvoid main() {\n"
     "// Input:1\n"
     "\tfloat var_from_n1_p0 = uTime;\n\n\n"
-    "\tFragColor = vec3(var_from_n1_p0);\n"
+    "\tFragColor = vec4(vec3(var_from_n1_p0), 1.0);\n"
     "}\n\n"
   };
 
@@ -338,7 +338,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\tfloat var_from_n1_p0 = uTime;\n\n\n"
     "// FloatFunc:2\n"
     "\tfloat var_from_n2_p0 = sin(var_from_n1_p0);\n\n\n"
-    "\tFragColor = vec3(var_from_n2_p0);\n"
+    "\tFragColor = vec4(vec3(var_from_n2_p0), 1.0);\n"
     "}\n\n";
 
   EXPECT_EQ(preview_shader, expected_code);
@@ -401,7 +401,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\tgenerate_value_noise_float(var_from_n4_p0, 100.000000, out_buffer);\n"
     "\tvec4 var_from_n5_p0 = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
     "\t\n\n\n"
-    "\tFragColor = var_from_n5_p0.xyz;\n"
+    "\tFragColor = vec4(var_from_n5_p0.xyz, 1.0);\n"
     "}\n\n";
 
   EXPECT_EQ(preview_shader, expected_code);
