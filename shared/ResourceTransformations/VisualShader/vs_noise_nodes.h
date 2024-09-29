@@ -31,7 +31,7 @@
 #include "visual_shader.h"
 
 /*************************************/
-/* Value Noise                       */
+/* Value (Simple) Noise              */
 /*************************************/
 
 class VisualShaderNodeValueNoise : public VisualShaderNode {
@@ -59,6 +59,72 @@ class VisualShaderNodeValueNoise : public VisualShaderNode {
 
  private:
   float scale;
+};
+
+/*************************************/
+/* Perlin (Gradient) Noise           */
+/*************************************/
+
+class VisualShaderNodePerlinNoise : public VisualShaderNode {
+ public:
+  VisualShaderNodePerlinNoise();
+
+  virtual std::string get_caption() const override;
+
+  virtual int get_input_port_count() const override;
+  virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+  virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+  virtual int get_output_port_count() const override;
+  virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+  virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+  virtual std::string generate_global([[maybe_unused]] const int& id) const override;
+  virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars,
+                                    const std::vector<std::string>& output_vars) const override;
+
+  void set_scale(const float& s);
+  float get_scale() const;
+
+  virtual std::vector<std::string> get_editable_properties() const override;
+
+ private:
+  float scale;
+};
+
+/*************************************/
+/* Voronoi (Worley) Noise            */
+/*************************************/
+
+class VisualShaderNodeVoronoiNoise : public VisualShaderNode {
+ public:
+  VisualShaderNodeVoronoiNoise();
+
+  virtual std::string get_caption() const override;
+
+  virtual int get_input_port_count() const override;
+  virtual VisualShaderNode::PortType get_input_port_type([[maybe_unused]] const int& port) const override;
+  virtual std::string get_input_port_name([[maybe_unused]] const int& port) const override;
+
+  virtual int get_output_port_count() const override;
+  virtual VisualShaderNode::PortType get_output_port_type([[maybe_unused]] const int& port) const override;
+  virtual std::string get_output_port_name([[maybe_unused]] const int& port) const override;
+
+  virtual std::string generate_global([[maybe_unused]] const int& id) const override;
+  virtual std::string generate_code([[maybe_unused]] const int& id, const std::vector<std::string>& input_vars,
+                                    const std::vector<std::string>& output_vars) const override;
+
+  void set_angle_offset(const float& a);
+  float get_angle_offset() const;
+
+  void set_cell_density(const float& c);
+  float get_cell_density() const;
+
+  virtual std::vector<std::string> get_editable_properties() const override;
+
+ private:
+  float angle_offset;
+  float cell_density;
 };
 
 #endif  // ENIGMA_VISUAL_SHADER_NOISE_NODES_H
