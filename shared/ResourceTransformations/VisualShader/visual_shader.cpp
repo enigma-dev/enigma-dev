@@ -252,8 +252,9 @@ bool VisualShader::can_connect_nodes(const int& from_node, const int& from_port,
     return false;
   }
 
+  // An input port can be connected to ONLY one connection.
   for (const Connection& c : g->connections) {
-    if (c.from_node == from_node && c.from_port == from_port && c.to_node == to_node && c.to_port == to_port) {
+    if (c.to_node == to_node && c.to_port == to_port) {
       return false;
     }
   }
