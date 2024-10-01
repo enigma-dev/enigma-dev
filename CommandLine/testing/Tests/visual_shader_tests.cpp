@@ -137,7 +137,7 @@ TEST(VisualShaderTest, Test_generate_shader) {
   EXPECT_EQ(status, true);
 
   // Get the shader.
-  std::string shader{vs.get_code()};
+  std::string generated_code{vs.get_code()};
   std::string expected_code{
     "in vec2 TexCoord;\n"
     "uniform float uTime;\n"
@@ -162,9 +162,9 @@ TEST(VisualShaderTest, Test_generate_shader) {
     "\tfloat r2 = noise_random_value(c2);\n"
     "\tfloat r3 = noise_random_value(c3);\n"
     "\t\n"
-    "\tfloat bottomOfGrid = noise_interpolate(r0, r1, f.x);\n"
-    "\tfloat topOfGrid = noise_interpolate(r2, r3, f.x);\n"
-    "\tfloat t = noise_interpolate(bottomOfGrid, topOfGrid, f.y);\n"
+    "\tfloat bottom_of_grid = noise_interpolate(r0, r1, f.x);\n"
+    "\tfloat top_of_grid = noise_interpolate(r2, r3, f.x);\n"
+    "\tfloat t = noise_interpolate(bottom_of_grid, top_of_grid, f.y);\n"
     "\treturn t;\n"
     "}\n\n"
     "void generate_value_noise_float(vec2 uv, float scale, out float "
@@ -209,7 +209,7 @@ TEST(VisualShaderTest, Test_generate_shader) {
     "// Output:0\n"
     "\tFragColor = vec3(var_from_n7_p0);\n\n\n"
     "}\n\n"};
-  EXPECT_EQ(shader, expected_code);
+  EXPECT_EQ(generated_code, expected_code);
 }
 
 TEST(VisualShaderTest, Test_generate_preview_shader) {
@@ -312,7 +312,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
   vs.connect_nodes(lookup_id1, 0, 0, 0);
 
   // Send the sin func node.
-  std::string preview_shader{vs.generate_preview_shader(vs.find_node_id(vsni_ptr), 0)};
+  std::string generated_code{vs.generate_preview_shader(vs.find_node_id(vsni_ptr), 0)};
   std::string expected_code {
     "in vec2 TexCoord;\n"
     "uniform float uTime;\n"
@@ -324,9 +324,9 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "}\n\n"
   };
 
-  EXPECT_EQ(preview_shader, expected_code);
+  EXPECT_EQ(generated_code, expected_code);
 
-  preview_shader = vs.generate_preview_shader(vs.find_node_id(vsnff_ptr), 0);
+  generated_code = vs.generate_preview_shader(vs.find_node_id(vsnff_ptr), 0);
   expected_code = 
     "in vec2 TexCoord;\n"
     "uniform float uTime;\n"
@@ -339,9 +339,9 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\tFragColor = vec4(vec3(var_from_n2_p0), 1.0);\n"
     "}\n\n";
 
-  EXPECT_EQ(preview_shader, expected_code);
+  EXPECT_EQ(generated_code, expected_code);
 
-  preview_shader = vs.generate_preview_shader(vs.find_node_id(vsnvn_ptr), 0);
+  generated_code = vs.generate_preview_shader(vs.find_node_id(vsnvn_ptr), 0);
   expected_code = 
     "in vec2 TexCoord;\n"
     "uniform float uTime;\n"
@@ -366,9 +366,9 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\tfloat r2 = noise_random_value(c2);\n"
     "\tfloat r3 = noise_random_value(c3);\n"
     "\t\n"
-    "\tfloat bottomOfGrid = noise_interpolate(r0, r1, f.x);\n"
-    "\tfloat topOfGrid = noise_interpolate(r2, r3, f.x);\n"
-    "\tfloat t = noise_interpolate(bottomOfGrid, topOfGrid, f.y);\n"
+    "\tfloat bottom_of_grid = noise_interpolate(r0, r1, f.x);\n"
+    "\tfloat top_of_grid = noise_interpolate(r2, r3, f.x);\n"
+    "\tfloat t = noise_interpolate(bottom_of_grid, top_of_grid, f.y);\n"
     "\treturn t;\n"
     "}\n\n"
     "void generate_value_noise_float(vec2 uv, float scale, out float "
@@ -402,7 +402,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "\tFragColor = vec4(var_from_n5_p0.xyz, 1.0);\n"
     "}\n\n";
 
-  EXPECT_EQ(preview_shader, expected_code);
+  EXPECT_EQ(generated_code, expected_code);
 }
 
 TEST(VisualShaderTest, Test_find_node_id) {

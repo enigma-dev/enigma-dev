@@ -369,14 +369,14 @@ bool VisualShader::generate_shader() const {
 
   for (const Connection& c : g->connections) {
     ConnectionKey from_key;
-    from_key.node = c.from_node;
-    from_key.port = c.from_port;
+    from_key.f_key.node = c.from_node;
+    from_key.f_key.port = c.from_port;
 
     output_connections[from_key] = &c;
 
     ConnectionKey to_key;
-    to_key.node = c.to_node;
-    to_key.port = c.to_port;
+    to_key.f_key.node = c.to_node;
+    to_key.f_key.port = c.to_port;
 
     input_connections[to_key] = &c;
   }
@@ -431,14 +431,14 @@ std::string VisualShader::generate_preview_shader(const int& node_id, const int&
 
   for (const Connection& c : g->connections) {
     ConnectionKey from_key;
-    from_key.node = c.from_node;
-    from_key.port = c.from_port;
+    from_key.f_key.node = c.from_node;
+    from_key.f_key.port = c.from_port;
 
     output_connections[from_key] = &c;
 
     ConnectionKey to_key;
-    to_key.node = c.to_node;
-    to_key.port = c.to_port;
+    to_key.f_key.node = c.to_node;
+    to_key.f_key.port = c.to_port;
 
     input_connections[to_key] = &c;
   }
@@ -505,8 +505,8 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
   int input_port_count{n->get_input_port_count()};
   for (int i{0}; i < input_port_count; i++) {
     ConnectionKey key;
-    key.node = node_id;
-    key.port = i;
+    key.f_key.node = node_id;
+    key.f_key.port = i;
 
     if (input_connections.find(key) == input_connections.end()) {
       continue;
@@ -551,8 +551,8 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
 
   for (int i{0}; i < input_port_count; i++) {
     ConnectionKey key;
-    key.node = node_id;
-    key.port = i;
+    key.f_key.node = node_id;
+    key.f_key.port = i;
 
     // Check if the input is not connected.
     if (input_connections.find(key) != input_connections.end()) {

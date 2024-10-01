@@ -138,15 +138,17 @@ class VisualShader {
     PORT_INDEX_INVALID = -1,
   };
 
+  /**
+   * @brief This union is a 64-bit integer that can be treated as
+   *        two 32-bit integers. The first 32 bits (first fragment) 
+   *        are for the node id and the second 32 bits (second fragment) 
+   *        are for the port id.
+   */
   union ConnectionKey {
-// Ignore the warning about the anonymous struct.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-    struct {
+    struct FragmentedKey {
       uint64_t node : 32;
       uint64_t port : 32;
-    };
-#pragma GCC diagnostic pop
+    } f_key;
     uint64_t key = 0;
     bool operator<(const ConnectionKey& key) const { return this->key < key.key; }
   };
