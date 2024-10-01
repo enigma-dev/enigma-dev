@@ -28,6 +28,7 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
+#include <chrono>  // For timing
 
 #include "ResourceTransformations/VisualShader/visual_shader.h"
 #include "ResourceTransformations/VisualShader/visual_shader_nodes.h"
@@ -132,9 +133,18 @@ TEST(VisualShaderTest, Test_generate_shader) {
   lookup_id1 = vs.find_node_id(vsnff2_ptr);
   vs.connect_nodes(lookup_id1, 0, 0, 0);
 
+  auto start_time {std::chrono::high_resolution_clock::now()};
+
   // Generate the shader.
   bool status{vs.generate_shader()};
   EXPECT_EQ(status, true);
+
+  auto end_time {std::chrono::high_resolution_clock::now()};
+    
+  // Calculate the duration in microseconds
+  auto duration {std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count()};
+  
+  EXPECT_LE(duration, 500);
 
   // Get the shader.
   std::string generated_code{vs.get_code()};
