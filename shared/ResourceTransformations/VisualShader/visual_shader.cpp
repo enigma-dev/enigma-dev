@@ -1076,7 +1076,7 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
                                                     const TVariant& prev_value) {
   TVariant v{value};
 
-  if (prev_value.index() != 0) {  // std::monostate
+  if (prev_value.index() != TVARIANT_MONOSTATE_INDEX) {  // std::monostate
     switch (value.index()) {
       case TVARIANT_FLOAT_INDEX: {  // float
         switch (prev_value.index()) {
@@ -1084,7 +1084,7 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
             v = prev_value;
           } break;
           case TVARIANT_INT_INDEX: {  // int
-            v = std::get<float>(prev_value);
+            v = (float)std::get<int>(prev_value);
           } break;
           case TVARIANT_VECTOR_2D_INDEX: {  // TVector2
             TVector2 pv{std::get<TVector2>(prev_value)};
@@ -1105,7 +1105,7 @@ void VisualShaderNode::set_input_port_default_value(const int& port, const TVari
       case TVARIANT_INT_INDEX: {  // int
         switch (prev_value.index()) {
           case TVARIANT_FLOAT_INDEX: {  // float
-            v = std::get<int>(prev_value);
+            v = (int)std::get<float>(prev_value);
           } break;
           case TVARIANT_INT_INDEX: {  // int
             v = prev_value;
