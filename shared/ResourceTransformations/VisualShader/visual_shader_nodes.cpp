@@ -2701,9 +2701,7 @@ std::vector<std::string> VisualShaderNodeMix::get_editable_properties() const {
 /*************************************/
 
 VisualShaderNodeVectorCompose::VisualShaderNodeVectorCompose() {
-  set_input_port_default_value(0, 0.0f);
-  set_input_port_default_value(1, 0.0f);
-  set_input_port_default_value(2, 0.0f);
+  set_op_type(OP_TYPE_VECTOR_3D);
 }
 
 std::string VisualShaderNodeVectorCompose::get_caption() const { return "VectorCompose"; }
@@ -2780,22 +2778,19 @@ void VisualShaderNodeVectorCompose::set_op_type(const OpType& op_type) {
     return;
   }
 
-  float p1{std::get<float>(get_input_port_default_value(0))};
-  float p2{std::get<float>(get_input_port_default_value(1))};
-
   switch (op_type) {
     case OP_TYPE_VECTOR_2D: {
-      set_input_port_default_value(0, p1);
-      set_input_port_default_value(1, p2);
+      set_input_port_default_value(0, 0.0f);
+      set_input_port_default_value(1, 0.0f);
     } break;
     case OP_TYPE_VECTOR_3D: {
-      set_input_port_default_value(0, p1);
-      set_input_port_default_value(1, p2);
+      set_input_port_default_value(0, 0.0f);
+      set_input_port_default_value(1, 0.0f);
       set_input_port_default_value(2, 0.0f);
     } break;
     case OP_TYPE_VECTOR_4D: {
-      set_input_port_default_value(0, p1);
-      set_input_port_default_value(1, p2);
+      set_input_port_default_value(0, 0.0f);
+      set_input_port_default_value(1, 0.0f);
       set_input_port_default_value(2, 0.0f);
       set_input_port_default_value(3, 0.0f);
     } break;
@@ -2834,7 +2829,7 @@ std::string VisualShaderNodeVectorCompose::generate_code([[maybe_unused]] const 
 /*************************************/
 
 VisualShaderNodeVectorDecompose::VisualShaderNodeVectorDecompose() {
-  set_input_port_default_value(0, TVector3(0.0f, 0.0f, 0.0f));
+  set_op_type(OP_TYPE_VECTOR_3D);
 }
 
 std::string VisualShaderNodeVectorDecompose::get_caption() const { return "VectorDecompose"; }
