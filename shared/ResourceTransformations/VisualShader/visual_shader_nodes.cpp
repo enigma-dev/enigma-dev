@@ -1902,8 +1902,7 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
   switch (func) {
     case FUNC_SUM:
       switch (precision) {
-        case PRECISION_NONE:  // Set to none in case of gl_compatibility
-                              // profile.
+        case PRECISION_NONE:
           code += std::string("\t") + output_vars.at(0) + " = fwidth(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
@@ -1920,8 +1919,7 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
       break;
     case FUNC_X:
       switch (precision) {
-        case PRECISION_NONE:  // Set to none in case of gl_compatibility
-                              // profile.
+        case PRECISION_NONE:
           code += std::string("\t") + output_vars.at(0) + " = dFdx(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
@@ -1937,8 +1935,7 @@ std::string VisualShaderNodeDerivativeFunc::generate_code([[maybe_unused]] const
       break;
     case FUNC_Y:
       switch (precision) {
-        case PRECISION_NONE:  // Set to none in case of gl_compatibility
-                              // profile.
+        case PRECISION_NONE:
           code += std::string("\t") + output_vars.at(0) + " = dFdy(" + input_vars.at(0) + ");" + std::string("\n");
           break;
         case PRECISION_COARSE:
@@ -2701,7 +2698,9 @@ std::vector<std::string> VisualShaderNodeMix::get_editable_properties() const {
 /*************************************/
 
 VisualShaderNodeVectorCompose::VisualShaderNodeVectorCompose() {
-  set_op_type(OP_TYPE_VECTOR_3D);
+  set_input_port_default_value(0, 0.0f);
+  set_input_port_default_value(1, 0.0f);
+  set_input_port_default_value(2, 0.0f);
 }
 
 std::string VisualShaderNodeVectorCompose::get_caption() const { return "VectorCompose"; }
@@ -2829,7 +2828,7 @@ std::string VisualShaderNodeVectorCompose::generate_code([[maybe_unused]] const 
 /*************************************/
 
 VisualShaderNodeVectorDecompose::VisualShaderNodeVectorDecompose() {
-  set_op_type(OP_TYPE_VECTOR_3D);
+  set_input_port_default_value(0, TVector3(), get_input_port_default_value(0));
 }
 
 std::string VisualShaderNodeVectorDecompose::get_caption() const { return "VectorDecompose"; }
