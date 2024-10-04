@@ -149,7 +149,7 @@ TEST(VisualShaderTest, Test_generate_shader) {
   // Get the shader.
   std::string generated_code{vs.get_code()};
   std::string expected_code{
-    "in vec2 TexCoord;\n"
+    "in vec2 FragCoord;\n"
     "uniform float uTime;\n"
     "float noise_random_value(vec2 uv) {\n"
     "\treturn fract(sin(dot(uv, vec2(12.9898, 78.233)))*43758.5453);\n"
@@ -198,7 +198,7 @@ TEST(VisualShaderTest, Test_generate_shader) {
     "out vec4 FragColor;\n"
     "\nvoid main() {\n"
     "// Input:4\n"
-    "\tvec2 var_from_n4_p0 = TexCoord;\n\n\n"
+    "\tvec2 var_from_n4_p0 = FragCoord;\n\n\n"
     "// ValueNoise:5\n"
     "\t// Value Noise\n"
     "\tfloat out_buffer = 0.0;\n"
@@ -324,7 +324,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
   // Send the sin func node.
   std::string generated_code{vs.generate_preview_shader(vs.find_node_id(vsni_ptr), 0)};
   std::string expected_code {
-    "in vec2 TexCoord;\n"
+    "in vec2 FragCoord;\n"
     "uniform float uTime;\n"
     "out vec4 FragColor;\n"
     "\nvoid main() {\n"
@@ -338,7 +338,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
 
   generated_code = vs.generate_preview_shader(vs.find_node_id(vsnff_ptr), 0);
   expected_code = 
-    "in vec2 TexCoord;\n"
+    "in vec2 FragCoord;\n"
     "uniform float uTime;\n"
     "out vec4 FragColor;\n"
     "\nvoid main() {\n"
@@ -353,7 +353,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
 
   generated_code = vs.generate_preview_shader(vs.find_node_id(vsnvn_ptr), 0);
   expected_code = 
-    "in vec2 TexCoord;\n"
+    "in vec2 FragCoord;\n"
     "uniform float uTime;\n"
     "float noise_random_value(vec2 uv) {\n"
     "\treturn fract(sin(dot(uv, vec2(12.9898, 78.233)))*43758.5453);\n"
@@ -402,7 +402,7 @@ TEST(VisualShaderTest, Test_generate_preview_shader) {
     "out vec4 FragColor;\n"
     "\nvoid main() {\n"
     "// Input:4\n"
-    "\tvec2 var_from_n4_p0 = TexCoord;\n\n\n"
+    "\tvec2 var_from_n4_p0 = FragCoord;\n\n\n"
     "// ValueNoise:5\n"
     "\t// Value Noise\n"
     "\tfloat out_buffer = 0.0;\n"

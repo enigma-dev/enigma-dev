@@ -1336,7 +1336,7 @@ VisualShaderNodeInput::VisualShaderNodeInput() : input_name("[None]") {
 
 const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "TexCoord"},
+    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "FragCoord"},
     {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "uTime"},
 
     {VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", ""},  // End of list.
@@ -1345,7 +1345,7 @@ const VisualShaderNodeInput::Port VisualShaderNodeInput::ports[] = {
 
 const VisualShaderNodeInput::Port VisualShaderNodeInput::preview_ports[] = {
 
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "TexCoord"},
+    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D, "uv", "FragCoord"},
     {VisualShaderNode::PortType::PORT_TYPE_SCALAR, "time", "uTime"},
 
     {VisualShaderNode::PORT_TYPE_ENUM_SIZE, "", ""},  // End of list.
