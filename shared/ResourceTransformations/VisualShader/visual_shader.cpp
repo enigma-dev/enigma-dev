@@ -1466,7 +1466,7 @@ VisualShaderNodeOutput::VisualShaderNodeOutput() {
 
 const VisualShaderNodeOutput::Port VisualShaderNodeOutput::ports[] = {
 
-    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D, "Color", "FragColor"},
+    {VisualShaderNode::PortType::PORT_TYPE_VECTOR_4D, "Color", "FragColor"},
 
     {VisualShaderNode::PortType::PORT_TYPE_ENUM_SIZE, "", ""},
 };
