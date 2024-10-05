@@ -734,10 +734,10 @@ bool VisualShader::generate_shader_for_each_node(std::string& global_code, std::
                 input_vars.at(i) = "vec4(" + from_var + " ? 1.0 : 0.0)";
               } break;
               case VisualShaderNode::PortType::PORT_TYPE_VECTOR_2D: {
-                input_vars.at(i) = "vec4(" + from_var + ", 0.0, 0.0)";
+                input_vars.at(i) = "vec4(" + from_var + ", 0.0, 1.0)";
               } break;
               case VisualShaderNode::PortType::PORT_TYPE_VECTOR_3D: {
-                input_vars.at(i) = "vec4(" + from_var + ", 0.0)";
+                input_vars.at(i) = "vec4(" + from_var + ", 1.0)";
               } break;
               default:
                 break;
