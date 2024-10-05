@@ -38,9 +38,9 @@ TEST(VisualShaderNoiseNodesTest, Test_VisualShaderNodeValueNoise_generate_code) 
   std::string code{node.generate_code(0, input_vars, output_vars)};
   std::string expected_code{
       "\t// Value Noise\n"
-      "\tfloat out_buffer = 0.0;\n"
-      "\tgenerate_value_noise_float(a, 100.000000, out_buffer);\n"
-      "\tb = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
+      "\tfloat out_buffer_n0 = 0.0;\n"
+      "\tgenerate_value_noise_float(a, 100.000000, out_buffer_n0);\n"
+      "\tb = vec4(out_buffer_n0, out_buffer_n0, out_buffer_n0, 1.0);\n"
       "\t\n"};
   EXPECT_EQ(code, expected_code);
 }
@@ -104,9 +104,9 @@ TEST(VisualShaderNoiseNodesTest, Test_VisualShaderNodePerlinNoise_generate_code)
   std::string code{node.generate_code(0, input_vars, output_vars)};
   std::string expected_code{
       "\t// Perlin Noise\n"
-      "\tfloat out_buffer = 0.0;\n"
-      "\tgenerate_perlin_noise_float(a, 10.000000, out_buffer);\n"
-      "\tb = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
+      "\tfloat out_buffer_n0 = 0.0;\n"
+      "\tgenerate_perlin_noise_float(a, 10.000000, out_buffer_n0);\n"
+      "\tb = vec4(out_buffer_n0, out_buffer_n0, out_buffer_n0, 1.0);\n"
       "\t\n"};
   EXPECT_EQ(code, expected_code);
 }
@@ -152,10 +152,10 @@ TEST(VisualShaderNoiseNodesTest, Test_VisualShaderNodeVoronoiNoise_generate_code
   std::string code{node.generate_code(0, input_vars, output_vars)};
   std::string expected_code{
       "\t// Voronoi Noise\n"
-      "\tfloat out_buffer = 0.0;\n"
-      "\tfloat cells = 0.0; // TODO: How we can use this?\n"
-      "\tgenerate_voronoi_noise_float(a, 10.000000, 10.000000, out_buffer, cells);\n"
-      "\tb = vec4(out_buffer, out_buffer, out_buffer, 1.0);\n"
+      "\tfloat out_buffer_n0 = 0.0;\n"
+      "\tfloat cells_n0 = 0.0; // TODO: How we can use this?\n"
+      "\tgenerate_voronoi_noise_float(a, 10.000000, 10.000000, out_buffer_n0, cells_n0);\n"
+      "\tb = vec4(out_buffer_n0, out_buffer_n0, out_buffer_n0, 1.0);\n"
       "\t\n"};
   EXPECT_EQ(code, expected_code);
 }
