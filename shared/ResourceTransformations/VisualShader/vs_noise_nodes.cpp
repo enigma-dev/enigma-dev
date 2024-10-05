@@ -121,10 +121,9 @@ std::string VisualShaderNodeValueNoise::generate_code([[maybe_unused]] const int
 
   code += std::string("\t") + "// Value Noise" + std::string("\n");
   code += std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
-  code += std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() +
-          ", out_buffer);" + std::string("\n");
-  code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" +
+  code += std::string("\t") + "generate_value_noise_float(" + input_vars[0] + ", " + oss.str() + ", out_buffer);" +
           std::string("\n");
+  code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" + std::string("\n");
   code += std::string("\t") + std::string("\n");
 
   return code;
@@ -170,7 +169,9 @@ VisualShaderNode::PortType VisualShaderNodePerlinNoise::get_output_port_type([[m
   return PORT_TYPE_VECTOR_4D;
 }
 
-std::string VisualShaderNodePerlinNoise::get_output_port_name([[maybe_unused]] const int& port) const { return "noise"; }
+std::string VisualShaderNodePerlinNoise::get_output_port_name([[maybe_unused]] const int& port) const {
+  return "noise";
+}
 
 std::string VisualShaderNodePerlinNoise::generate_global([[maybe_unused]] const int& id) const {
   std::string code;
@@ -191,9 +192,12 @@ std::string VisualShaderNodePerlinNoise::generate_global([[maybe_unused]] const 
   code += std::string("\t") + "vec2 ip = floor(p);" + std::string("\n");
   code += std::string("\t") + "vec2 fp = fract(p);" + std::string("\n");
   code += std::string("\t") + "float d00 = dot(perlin_noise_dir(ip), fp);" + std::string("\n");
-  code += std::string("\t") + "float d01 = dot(perlin_noise_dir(ip + vec2(0, 1)), fp - vec2(0, 1));" + std::string("\n");
-  code += std::string("\t") + "float d10 = dot(perlin_noise_dir(ip + vec2(1, 0)), fp - vec2(1, 0));" + std::string("\n");
-  code += std::string("\t") + "float d11 = dot(perlin_noise_dir(ip + vec2(1, 1)), fp - vec2(1, 1));" + std::string("\n");
+  code +=
+      std::string("\t") + "float d01 = dot(perlin_noise_dir(ip + vec2(0, 1)), fp - vec2(0, 1));" + std::string("\n");
+  code +=
+      std::string("\t") + "float d10 = dot(perlin_noise_dir(ip + vec2(1, 0)), fp - vec2(1, 0));" + std::string("\n");
+  code +=
+      std::string("\t") + "float d11 = dot(perlin_noise_dir(ip + vec2(1, 1)), fp - vec2(1, 1));" + std::string("\n");
   code += std::string("\t") + "fp = fp * fp * fp * (fp * (fp * 6.0 - 15.0) + 10.0);" + std::string("\n");
   code += std::string("\t") + std::string("\n");
   code += std::string("\t") + "return mix(mix(d00, d01, fp.y), mix(d10, d11, fp.y), fp.x);" + std::string("\n");
@@ -207,8 +211,8 @@ std::string VisualShaderNodePerlinNoise::generate_global([[maybe_unused]] const 
 }
 
 std::string VisualShaderNodePerlinNoise::generate_code([[maybe_unused]] const int& id,
-                                                      const std::vector<std::string>& input_vars,
-                                                      const std::vector<std::string>& output_vars) const {
+                                                       const std::vector<std::string>& input_vars,
+                                                       const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
   oss << std::fixed << std::setprecision(6) << scale;
 
@@ -216,10 +220,9 @@ std::string VisualShaderNodePerlinNoise::generate_code([[maybe_unused]] const in
 
   code += std::string("\t") + "// Perlin Noise" + std::string("\n");
   code += std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
-  code += std::string("\t") + "generate_perlin_noise_float(" + input_vars[0] + ", " + oss.str() +
-          ", out_buffer);" + std::string("\n");
-  code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" +
+  code += std::string("\t") + "generate_perlin_noise_float(" + input_vars[0] + ", " + oss.str() + ", out_buffer);" +
           std::string("\n");
+  code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" + std::string("\n");
   code += std::string("\t") + std::string("\n");
 
   return code;
@@ -265,7 +268,9 @@ VisualShaderNode::PortType VisualShaderNodeVoronoiNoise::get_output_port_type([[
   return PORT_TYPE_VECTOR_4D;
 }
 
-std::string VisualShaderNodeVoronoiNoise::get_output_port_name([[maybe_unused]] const int& port) const { return "noise"; }
+std::string VisualShaderNodeVoronoiNoise::get_output_port_name([[maybe_unused]] const int& port) const {
+  return "noise";
+}
 
 std::string VisualShaderNodeVoronoiNoise::generate_global([[maybe_unused]] const int& id) const {
   std::string code;
@@ -278,7 +283,10 @@ std::string VisualShaderNodeVoronoiNoise::generate_global([[maybe_unused]] const
   code += std::string("\t") + "return vec2(sin(uv.y*+offset)*0.5+0.5, cos(uv.x*offset)*0.5+0.5);" + std::string("\n");
   code += std::string("}") + "\n\n";
 
-  code += "void generate_voronoi_noise_float(vec2 uv, float angle_offset, float cell_density, out float out_buffer, out float cells) {" + std::string("\n");
+  code +=
+      "void generate_voronoi_noise_float(vec2 uv, float angle_offset, float cell_density, out float out_buffer, out "
+      "float cells) {" +
+      std::string("\n");
   code += std::string("\t") + "vec2 g = floor(uv * cell_density);" + std::string("\n");
   code += std::string("\t") + "vec2 f = fract(uv * cell_density);" + std::string("\n");
   code += std::string("\t") + "float t = 8.0;" + std::string("\n");
@@ -287,12 +295,17 @@ std::string VisualShaderNodeVoronoiNoise::generate_global([[maybe_unused]] const
   code += std::string("\t") + "for(int y=-1; y<=1; y++) {" + std::string("\n");
   code += std::string("\t") + std::string("\t") + "for(int x=-1; x<=1; x++) {" + std::string("\n");
   code += std::string("\t") + std::string("\t") + std::string("\t") + "vec2 lattice = vec2(x,y);" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + std::string("\t") + "vec2 offset = voronoi_noise_random_vector(lattice + g, angle_offset);" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + std::string("\t") + "float d = distance(lattice + offset, f);" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + std::string("\t") +
+          "vec2 offset = voronoi_noise_random_vector(lattice + g, angle_offset);" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + std::string("\t") + "float d = distance(lattice + offset, f);" +
+          std::string("\n");
   code += std::string("\t") + std::string("\t") + std::string("\t") + "if(d < res.x) {" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") + "res = vec3(d, offset.x, offset.y);" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") + "out_buffer = res.x;" + std::string("\n");
-  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") + "cells = res.y;" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") +
+          "res = vec3(d, offset.x, offset.y);" + std::string("\n");
+  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") + "out_buffer = res.x;" +
+          std::string("\n");
+  code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("\t") + "cells = res.y;" +
+          std::string("\n");
   code += std::string("\t") + std::string("\t") + std::string("\t") + std::string("}") + std::string("\n");
   code += std::string("\t") + std::string("\t") + std::string("}") + std::string("\n");
   code += std::string("\t") + std::string("}") + std::string("\n");
@@ -302,8 +315,8 @@ std::string VisualShaderNodeVoronoiNoise::generate_global([[maybe_unused]] const
 }
 
 std::string VisualShaderNodeVoronoiNoise::generate_code([[maybe_unused]] const int& id,
-                                                      const std::vector<std::string>& input_vars,
-                                                      const std::vector<std::string>& output_vars) const {
+                                                        const std::vector<std::string>& input_vars,
+                                                        const std::vector<std::string>& output_vars) const {
   std::ostringstream oss;
   oss << std::fixed << std::setprecision(6) << angle_offset;
   std::ostringstream oss2;
@@ -314,7 +327,8 @@ std::string VisualShaderNodeVoronoiNoise::generate_code([[maybe_unused]] const i
   code += std::string("\t") + "// Voronoi Noise" + std::string("\n");
   code += std::string("\t") + "float out_buffer = 0.0;" + std::string("\n");
   code += std::string("\t") + "float cells = 0.0; // TODO: How we can use this?" + std::string("\n");
-  code += std::string("\t") + "generate_voronoi_noise_float(" + input_vars[0] + ", " + oss.str() + ", " + oss2.str() + ", out_buffer, cells);" + std::string("\n");
+  code += std::string("\t") + "generate_voronoi_noise_float(" + input_vars[0] + ", " + oss.str() + ", " + oss2.str() +
+          ", out_buffer, cells);" + std::string("\n");
   code += std::string("\t") + output_vars[0] + " = vec4(out_buffer, out_buffer, out_buffer, 1.0);" + std::string("\n");
   code += std::string("\t") + std::string("\n");
 
@@ -329,9 +343,7 @@ void VisualShaderNodeVoronoiNoise::set_angle_offset(const float& a) {
   this->angle_offset = a;
 }
 
-float VisualShaderNodeVoronoiNoise::get_angle_offset() const {
-  return angle_offset;
-}
+float VisualShaderNodeVoronoiNoise::get_angle_offset() const { return angle_offset; }
 
 void VisualShaderNodeVoronoiNoise::set_cell_density(const float& c) {
   if (this->cell_density == c) {
@@ -341,9 +353,7 @@ void VisualShaderNodeVoronoiNoise::set_cell_density(const float& c) {
   this->cell_density = c;
 }
 
-float VisualShaderNodeVoronoiNoise::get_cell_density() const {
-  return cell_density;
-}
+float VisualShaderNodeVoronoiNoise::get_cell_density() const { return cell_density; }
 
 std::vector<std::string> VisualShaderNodeVoronoiNoise::get_editable_properties() const {
   std::vector<std::string> props;
