@@ -913,13 +913,12 @@ std::string memory_freeram(bool human_readable) {
   if (GlobalMemoryStatusEx(&statex))
     freeram = (long long)statex.ullAvailPhys;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  long page_s = sysconf(_SC_PAGESIZE);
-  mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
-  vm_statistics64_data_t vmstat;
-  if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) { 
-    if ((vmstat.free_count * (long long)page_s))
-      freeram = (long long)(vmstat.free_count * (long long)page_s);
-  }
+  std::string strtotal = memory_totalram(false);
+  std::string strused = memory_usedram(false);
+  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
+  long long used = ((strused != pointer_null()) ? strtoull(strused.c_str(), nullptr, 10) : -1);
+  if (total != -1 && used != -1)
+    freeram = total - used;
   #elif defined(__linux__)
   freeram = read_meminfo("MemFree");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -953,7 +952,15 @@ std::string memory_usedram(bool human_readable) {
   statex.dwLength = sizeof(statex);
   if (GlobalMemoryStatusEx(&statex))
     usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  long page_s = sysconf(_SC_PAGESIZE);
+  mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+  vm_statistics64_data_t vmstat;
+  if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) {
+    if (((long long)(vmstat.active_count + vmstat.wire_count) * (long long)page_s))
+      usedram = ((long long)(vmstat.active_count + vmstat.wire_count) * (long long)page_s);
+  }
+  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   std::string strtotal = memory_totalram(false);
   std::string stravail = memory_freeram(false);
   long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
