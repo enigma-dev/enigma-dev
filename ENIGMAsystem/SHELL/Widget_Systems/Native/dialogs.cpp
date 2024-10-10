@@ -25,8 +25,14 @@ using std::string;
 
 namespace enigma {
 
+  bool widgets_initialized = false;
   bool widget_system_initialize() {
-    return true;
+    if (!widgets_initialized) {
+      dialog_module::libdlgmod_init();
+      dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+      widgets_initialized = true;
+    }
+    return widgets_initialized;
   }
 
 }
@@ -38,7 +44,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 void show_info() { }
 
 void show_debug_message(string errortext, MESSAGE_TYPE type) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   #ifndef DEBUG_MODE
   errortext += "\n";
   fputs(errortext.c_str(), stderr);
@@ -61,146 +67,157 @@ void show_debug_message(string errortext, MESSAGE_TYPE type) {
 }
 
 int show_message(const string &message) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::show_message(message);
 }
 
 int show_message_cancelable(std::string str) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::show_message_cancelable(str);
 }
 
 bool show_question(std::string str) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return (bool)dialog_module::show_question(str);
 }
 
 int show_question_cancelable(std::string str) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::show_question_cancelable(str);
 }
 
 int show_attempt(std::string str) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::show_attempt(str);
 }
 
 std::string get_string(std::string str, std::string def) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_string(str, def);
 }
 
 std::string get_password(std::string str, std::string def) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_password(str, def);
 }
 
 double get_number(std::string str, double def) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_integer(str, def);
 }
 
 double get_integer(std::string str, double def) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_integer(str, def);
 }
 
 double get_passcode(std::string str, double def) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_passcode(str, def);
 }
 
 std::string get_open_filename(std::string filter, std::string fname) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_open_filename(filter, fname);
 }
 
 std::string get_open_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_open_filename_ext(filter, fname, dir, title);
 }
 
 std::string get_open_filenames(std::string filter, std::string fname) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_open_filenames(filter, fname);
 }
 
 std::string get_open_filenames_ext(std::string filter, std::string fname, std::string dir, std::string title) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_open_filenames_ext(filter, fname, dir, title);
 }
 
 std::string get_save_filename(std::string filter, std::string fname) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_save_filename(filter, fname);
 }
 
 std::string get_save_filename_ext(std::string filter, std::string fname, std::string dir, std::string title) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_save_filename_ext(filter, fname, dir, title);
 }
 
 std::string get_directory(std::string dname) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_directory(dname);
 }
 
 std::string get_directory_alt(std::string capt, std::string root) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_directory_alt(capt, root);
 }
 
 int get_color(int defcol) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_color(defcol);
 }
 
 int get_color_ext(int defcol, std::string title) {
-  dialog_module::widget_set_owner(std::to_string((unsigned long long)(void *)enigma_user::window_handle()));
+  enigma::widget_system_initialize();
   return dialog_module::get_color_ext(defcol, title);
 }
 
 std::string widget_get_caption() {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_caption();
 }
 
 void widget_set_caption(std::string str) {
+  enigma::widget_system_initialize();
   dialog_module::widget_set_caption(str);
 }
 
 std::string widget_get_owner() {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_owner();
 }
 
 void widget_set_owner(std::string hwnd) {
+  enigma::widget_system_initialize();
   dialog_module::widget_set_owner(hwnd);
 }
 
 std::string widget_get_icon() {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_icon();
 }
 
 void widget_set_icon(std::string icon) {
+  enigma::widget_system_initialize();
   dialog_module::widget_set_icon(icon);
 }
 
 std::string widget_get_system() {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_system();
 }
 
 void widget_set_system(std::string sys) {
+  enigma::widget_system_initialize();
   dialog_module::widget_set_system(sys);
 }
 
-void widget_set_button_name(int type, std::string name) {
-  dialog_module::widget_set_button_name(type, name);
-}
-
 std::string widget_get_button_name(int type) {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_button_name(type);
 }
 
+void widget_set_button_name(int type, std::string name) {
+  enigma::widget_system_initialize();
+  dialog_module::widget_set_button_name(type, name);
+}
+
 bool widget_get_canceled() {
+  enigma::widget_system_initialize();
   return dialog_module::widget_get_canceled();
 }
 

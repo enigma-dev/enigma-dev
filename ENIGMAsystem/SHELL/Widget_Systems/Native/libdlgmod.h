@@ -19,6 +19,7 @@
 
 namespace dialog_module {
 
+  void libdlgmod_init();
   int show_message(std::string str);
   int show_message_cancelable(std::string str);
   int show_question(std::string str);
