@@ -8,8 +8,8 @@ Target-platform: MacOSX
 Make-Vars:
   make: make
   makeflags:
-  cc: /opt/local/bin/gcc-mp-12
-  cxx: /opt/local/bin/g++-mp-12
+  cc: gcc-10
+  cxx: g++-10
   cppflags:
   cxxflags:
   cflags:
@@ -17,14 +17,14 @@ Make-Vars:
   links:
 
 Parser-Vars:
-  defines: /opt/local/bin/gcc-mp-12 -dM -x c++ --std=c++03 -E $blank
-  searchdirs: /opt/local/bin/gcc-mp-12 -E -x c++ --std=c++03 -v $blank 
+  defines: cpp-7 -dM -x c++ --std=c++03 -E $blank
+  searchdirs: gcc-7 -E -x c++ --std=c++03 -v $blank 
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: /tmp/stigma.res
-  Build-Extension:
-  Run-output: $tempfile
-  Run-Program: $game
+  resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
+  Build-Extension: .app
+  Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
+  Run-Program: open $game
   Run-Params:

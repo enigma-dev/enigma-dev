@@ -378,10 +378,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
 
   enigma::RawImage s(enigma::graphics_copy_texture_pixels(base.texture,x,y,w,h), w, h);
   
-  if (removeback) {
-    enigma::Color c = enigma::image_get_pixel_color(s, 0, h - 1);
-    enigma::image_swap_color(s, c, enigma::Color {0, 0, 0, 0});
-  }
+  if (removeback) enigma::image_remove_color(s);
   
   unsigned fullwidth, fullheight;
   int texID = enigma::graphics_create_texture(s, false, &fullwidth, &fullheight);

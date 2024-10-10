@@ -254,7 +254,6 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
     TreeNode* node = new TreeNode();
     nodes[key] = node;
     if (strcmp(resourceType, "GMFolder") == 0) {
-      node->set_folder(true);
       node->set_name(nodeDoc["folderName"].GetString());
       const auto filterType = nodeDoc["filterType"].GetString();
       if (strcmp(filterType, "root") == 0)
@@ -271,8 +270,8 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
       }
       parents.emplace_back(std::make_pair(node, childrenVector));
     } else {
-      node->set_folder(false);
       node->set_name(nodeDoc["name"].GetString());
+      node->mutable_folder();
 
       using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
       using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
@@ -295,6 +294,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         auto *res = createFunc->second(node);
         PackRes(resDir, idCount[node->type_case()]++, nodeDoc, res, 0);
       } else {
+        node->mutable_unknown();
         errStream << "Unsupported resource type: " << resourceType << " " << node->name() << std::endl;
       }
     }
@@ -316,7 +316,7 @@ std::unique_ptr<buffers::Project> YYPFileFormat::LoadProject(const fs::path& fPa
         continue;
       }
       TreeNode *childNode = childNodeIt->second;
-      node->mutable_child()->AddAllocated(childNode);
+      node->mutable_folder()->mutable_children()->AddAllocated(childNode);
     }
   }
 

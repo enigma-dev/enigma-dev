@@ -4,7 +4,7 @@
 Name: JSON
 Identifier: Json
 Author: Ssss
-Description: Adds support for json_decode and json_encode.
+Description: Adds support for json_decode, json_encode, short_json_decode, and short_json_encode.
 Default: false
 Icon: json.png
 

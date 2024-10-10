@@ -7,8 +7,8 @@ Description: Native, hardware-accelerated rendering on most graphics hardware us
 Author: Josh Ventura, serprex
 
 Depends:
-	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Windowing: xlib, Win32, Cocoa, SDL
 
 Represents:
-	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
   

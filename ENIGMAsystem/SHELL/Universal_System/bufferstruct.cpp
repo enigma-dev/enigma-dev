@@ -20,12 +20,8 @@
 #include "libEGMstd.h"
 
 #include "Resources/AssetArray.h" // TODO: start actually using for this resource
-
-#ifndef GRAPHICS_NONE
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsurface.h"
-#endif
-
 #include "Widget_Systems/widgets_mandatory.h"
 
 #include <cstring>
@@ -87,7 +83,7 @@ int get_free_buffer() {
   return buffers.size();
 }
 
-std::vector<unsigned char> valToBytes(evariant value, unsigned count) {
+std::vector<unsigned char> valToBytes(variant value, unsigned count) {
   std::vector<unsigned char> result(0);
   for (unsigned i = 0; i < count; i++) {
     result.push_back(value >> ((i)*8));
@@ -222,7 +218,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
   myfile.close();
 }
 
-void buffer_fill(int buffer, unsigned offset, int type, evariant value, unsigned size) {
+void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size) {
   get_buffer(binbuff, buffer);
   unsigned nsize = offset + size;
   if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
@@ -266,7 +262,6 @@ int buffer_get_type(int buffer) {
   return binbuff->type;
 }
 
-#ifndef GRAPHICS_NONE
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
   //get_buffer(binbuff, buffer);
   //TODO: Write this function
@@ -274,7 +269,6 @@ void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int 
 }
 
 void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-  //TODO: Add mode, offset, and modulo
   int tex = surface_get_texture(surface);
   int wid = surface_get_width(surface);
   int hgt = surface_get_height(surface);
@@ -284,25 +278,6 @@ void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int 
     DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
   }
 }
-
-void buffer_get_surface(int buffer, int surface, unsigned offset) {
-  //get_buffer(binbuff, buffer);
-  //TODO: Write this function
-  DEBUG_MESSAGE("Function unimplemented: buffer_get_surface", MESSAGE_TYPE::M_WARNING);
-}
-
-void buffer_set_surface(int buffer, int surface, unsigned offset) {
-  //TODO: Add offset
-  int tex = surface_get_texture(surface);
-  int wid = surface_get_width(surface);
-  int hgt = surface_get_height(surface);
-  if (buffer_get_size(buffer) == buffer_sizeof(buffer_u64) * wid * hgt) {
-    enigma::graphics_push_texture_pixels(tex, wid, hgt, (unsigned char *)buffer_get_address(buffer));
-  } else { // execution can not continue safely with wrong buffer size
-    DEBUG_MESSAGE("Buffer allocated with wrong length!", MESSAGE_TYPE::M_WARNING);
-  }
-}
-#endif
 
 void buffer_resize(int buffer, unsigned size) {
   get_buffer(binbuff, buffer);
@@ -345,7 +320,7 @@ int buffer_tell(int buffer) {
   return binbuff->position;
 }
 
-evariant buffer_peek(int buffer, unsigned offset, int type) {
+variant buffer_peek(int buffer, unsigned offset, int type) {
   get_bufferr(binbuff, buffer, -1);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -364,16 +339,16 @@ evariant buffer_peek(int buffer, unsigned offset, int type) {
       byte = binbuff->ReadByte();
       data.push_back(byte);
     }
-    return evariant(&data[0]);
+    return variant(&data[0]);
   }
 }
 
-evariant buffer_read(int buffer, int type) {
+variant buffer_read(int buffer, int type) {
   get_bufferr(binbuff, buffer, -1);
   return buffer_peek(buffer, binbuff->position, type);
 }
 
-void buffer_poke(int buffer, unsigned offset, int type, evariant value) {
+void buffer_poke(int buffer, unsigned offset, int type, variant value) {
   get_buffer(binbuff, buffer);
   binbuff->Seek(offset);
   if (type != buffer_string) {
@@ -399,7 +374,7 @@ void buffer_poke(int buffer, unsigned offset, int type, evariant value) {
   }
 }
 
-void buffer_write(int buffer, int type, evariant value) {
+void buffer_write(int buffer, int type, variant value) {
   get_buffer(binbuff, buffer);
   buffer_poke(buffer, binbuff->position, type, value);
 }

@@ -22,6 +22,7 @@
 #include "resources/Timeline.h"
 #include "resources/GmObject.h"
 #include "resources/Room.h"
+#include "resources/Polygon.h"
 
 #include "other/Trigger.h"
 #include "other/Constant.h"
@@ -58,6 +59,9 @@ struct EnigmaStruct
 	int gmObjectCount;
 	Room *rooms;
 	int roomCount;
+	// TODO(Nabeel): Add this when you have Proto for Polygons
+	// Polygon *polygons;
+	// int polygonCount;
 
 	Trigger *triggers;
 	int triggerCount;

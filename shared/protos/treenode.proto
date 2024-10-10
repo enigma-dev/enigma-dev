@@ -15,8 +15,14 @@ import "Include.proto";
 import "Settings.proto";
 
 message TreeNode {
+  message Folder {
+    repeated TreeNode children = 1;
+  }
+  message UnknownResource {
+  }
   oneof type {
-    bool folder = 100;
+    UnknownResource unknown = 999;
+    Folder folder = 100;
     // NOTE: these are all off by 1 cause protobutt don't allow you to set field number to 0
     resources.Object object = 1;
     resources.Sprite sprite = 2;
@@ -37,5 +43,4 @@ message TreeNode {
   }
 
   optional string name = 101;
-  repeated TreeNode child = 102;
 }

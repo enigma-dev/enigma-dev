@@ -42,14 +42,13 @@ using std::string;
 using std::vector;
 
 tstring widen(const string &str) {
-  if (str.empty()) return L"";
+  // Number of shorts will be <= number of bytes; add one for null terminator
   const size_t wchar_count = str.size() + 1;
   vector<WCHAR> buf(wchar_count);
   return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
 string shorten(tstring str) {
-  if (str.empty()) return "";
   int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
   vector<char> buf((size_t)nbytes);
   return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
@@ -165,7 +164,7 @@ string base64_decode(string const& str) {
   return ret;
 }
 
-double real(evariant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
+double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
 string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
@@ -363,8 +362,8 @@ string filename_ext(string fname)
 
 string filename_change_ext(string fname, string newext)
 {
-  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
-  if (fp == filename_path(fname).length() + string::npos)
+  size_t fp = fname.find_last_of(".");
+  if (fp == string::npos)
     return fname + newext;
   return fname.replace(fp,fname.length(),newext);
 }

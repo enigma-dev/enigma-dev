@@ -22,7 +22,6 @@
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/math_consts.h"
-#include "Platforms/platforms_mandatory.h"
 
 #include <list>
 #include <math.h>

@@ -1,0 +1,74 @@
+var json = '{"entries":{"entries":[{"name":"AlEw","score":196198,"rank":1,"userID":"1234"},{"name":"El Pice","score":58158,"rank":2,"userID":"12345"},{"name":"saif","score":505,"rank":3,"userID":"12346"},{"name":"Bucciarati (Couter55)","score":336,"rank":4,"userID":"12347"},{"name":"Haiyatin","score":236,"rank":5,"userID":"12348"},{"name":"Kaito","score":137,"rank":6,"userID":"12349"},{"name":"gamesadasteam","score":96,"rank":7,"userID":"123410"},{"name":"Bashkash2013","score":7,"rank":8,"userID":"123411"},{"name":"silveradagio","score":0,"rank":9,"userID":"123412"},{"name":"HappyStarXiXi","score":0,"rank":10,"userID":"123413"}]},"event_type":"leaderboard_download","id":0,"lb_name":"SteamLeaderboard","num_entries":10,"status":0}';
+
+var json_decoded = json_decode(json);
+
+gtest_assert_eq(ds_map_size(json_decoded), 6);
+gtest_assert_eq(ds_map_size(ds_map_find_value(json_decoded, "entries")), 1);
+
+gtest_assert_eq(ds_map_exists(json_decoded, "entries"), true);
+gtest_assert_eq(ds_map_exists(json_decoded, "lb_name"), true);
+gtest_assert_eq(ds_map_exists(json_decoded, "event_type"), true);
+gtest_assert_eq(ds_map_exists(json_decoded, "id"), true);
+gtest_assert_eq(ds_map_exists(json_decoded, "num_entries"), true);
+gtest_assert_eq(ds_map_exists(json_decoded, "status"), true);
+
+gtest_assert_eq(ds_map_find_value(json_decoded, "event_type"), "leaderboard_download");
+gtest_assert_eq(ds_map_find_value(json_decoded, "id"), 0);
+gtest_assert_eq(ds_map_find_value(json_decoded, "lb_name"), "SteamLeaderboard");
+gtest_assert_eq(ds_map_find_value(json_decoded, "num_entries"), 10);
+gtest_assert_eq(ds_map_find_value(json_decoded, "status"), 0);
+
+var entries = ds_map_find_value(json_decoded, "entries");
+var list = ds_map_find_value(entries, "entries");
+
+gtest_assert_eq(ds_list_size(list), 10);
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 0), "name"), "AlEw");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 0), "score"), 196198);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 0), "rank"), 1);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 0), "userID"), "1234");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 1), "name"), "El Pice");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 1), "score"), 58158);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 1), "rank"), 2);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 1), "userID"), "12345");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 2), "name"), "saif");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 2), "score"), 505);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 2), "rank"), 3);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 2), "userID"), "12346");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 3), "name"), "Bucciarati (Couter55)");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 3), "score"), 336);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 3), "rank"), 4);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 3), "userID"), "12347");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 4), "name"), "Haiyatin");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 4), "score"), 236);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 4), "rank"), 5);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 4), "userID"), "12348");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 5), "name"), "Kaito");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 5), "score"), 137);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 5), "rank"), 6);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 5), "userID"), "12349");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 6), "name"), "gamesadasteam");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 6), "score"), 96);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 6), "rank"), 7);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 6), "userID"), "123410");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 7), "name"), "Bashkash2013");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 7), "score"), 7);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 7), "rank"), 8);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 7), "userID"), "123411");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 8), "name"), "silveradagio");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 8), "score"), 0);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 8), "rank"), 9);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 8), "userID"), "123412");
+
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 9), "name"), "HappyStarXiXi");
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 9), "score"), 0);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 9), "rank"), 10);
+gtest_assert_eq(ds_map_find_value(ds_list_find_value(list, 9), "userID"), "123413");

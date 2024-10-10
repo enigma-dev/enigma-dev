@@ -30,7 +30,7 @@ namespace enigma {
 
 extern unsigned sdl_window_flags;
 
-SDL_GLContext sdl_gl_context;
+SDL_GLContext context;
 
 const static SDL_GLprofile profile_types[3] = {SDL_GL_CONTEXT_PROFILE_CORE,SDL_GL_CONTEXT_PROFILE_COMPATIBILITY,SDL_GL_CONTEXT_PROFILE_ES};
 
@@ -48,18 +48,18 @@ void init_sdl_window_bridge_attributes() {
 }
 
 void EnableDrawing(void*) {
-  sdl_gl_context = SDL_GL_CreateContext(windowHandle);
+  context = SDL_GL_CreateContext(windowHandle);
   
   #ifdef DEBUG_MODE
-  if (!sdl_gl_context) DEBUG_MESSAGE(std::string("Failed to intialize GL sdl_gl_context: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
+  if (!context) DEBUG_MESSAGE(std::string("Failed to intialize GL context: ") + SDL_GetError(), MESSAGE_TYPE::M_FATAL_ERROR);
   #endif
 
   gl_load_exts();
 }
 
 void DisableDrawing(void*) {
-  cleanup_shaders(); // delete shaders before sdl_gl_context
-  SDL_GL_DeleteContext(sdl_gl_context);
+  cleanup_shaders(); // delete shaders before context
+  SDL_GL_DeleteContext(context);
 }
 
 void ScreenRefresh() {

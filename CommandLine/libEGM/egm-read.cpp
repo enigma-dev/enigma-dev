@@ -149,7 +149,7 @@ void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
   const std::string formatStr = format.as<std::string>();
   if (formatStr == "svg-d") {
     std::stringstream details;
-    details << fPath.u8string() << ":" << yaml.Mark().line
+    details << fPath.string() << ":" << yaml.Mark().line
                               << ":" << yaml.Mark().column;
     if (tiles)
       svg_d::ParseTiles(data.as<std::string>(), room, details.str());
@@ -168,14 +168,14 @@ namespace egm_internal {
 
 buffers::resources::Script LoadScript(const fs::path& fPath) {
   buffers::resources::Script scr;
-  scr.set_code(FileToString(fPath.u8string()));
+  scr.set_code(FileToString(fPath));
   return scr;
 }
 
 buffers::resources::Shader LoadShader(const fs::path& fPath) {
   buffers::resources::Shader shdr;
 
-  const std::string p = fPath.parent_path().u8string() + "/" + fPath.stem().u8string();
+  const std::string p = fPath.parent_path().string() + "/" + fPath.stem().string();
   shdr.set_vertex_code(FileToString(p + ".vert"));
   shdr.set_fragment_code(p + ".frag");
 
@@ -188,7 +188,7 @@ buffers::resources::Timeline LoadTimeLine(const fs::path& fPath) {
   const std::string delim = "step[";
   for(auto& f : fs::directory_iterator(fPath)) {
 
-    const std::string stem = f.path().stem().u8string(); // base filename
+    const std::string stem = f.path().stem().string(); // base filename
 
     // If its not an edl file, the filename is too short to fit the naming scheme or the filename doesn't end with ]
     // exit here before doing any string cutting to prevent segfaults
@@ -210,7 +210,7 @@ buffers::resources::Timeline LoadTimeLine(const fs::path& fPath) {
     // If we made it this far we can add event to timeline
     buffers::resources::Timeline_Moment* m = tln.add_moments();
     m->set_step(step);
-    m->set_code(FileToString(f.path().u8string()));
+    m->set_code(FileToString(f.path()));
 
   }
 
@@ -224,7 +224,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
                               int depth) const {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
-  const std::string ext = fPath.extension().u8string();
+  const std::string ext = fPath.extension().string();
 
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
@@ -290,7 +290,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
 
         case CppType::CPPTYPE_STRING: {
           for (auto n : node) {
-            refl->AddString(m, field, (isFilePath) ? fPath.u8string() + "/" + n.as<std::string>() : n.as<std::string>());
+            refl->AddString(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           }
           break;
         }
@@ -318,7 +318,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
           break;
         }
         default: {
-          SetProtoField(m, field, (isFilePath) ? fPath.u8string() + "/" + n.as<std::string>() : n.as<std::string>());
+          SetProtoField(m, field, (isFilePath) ? fPath.string() + "/" + n.as<std::string>() : n.as<std::string>());
           break;
         }
       }
@@ -331,10 +331,10 @@ namespace {
 inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm) {
   for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
-      const std::string edlFile = f.path().stem().u8string();
+      const std::string edlFile = f.path().stem().string();
 
       if (edlFile == "roomcreate") {
-        rm->set_creation_code(FileToString(f.path().u8string()));
+        rm->set_creation_code(FileToString(f.path()));
         continue;
       }
 
@@ -357,7 +357,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
         });
 
       if (instItr != instances.end()) {
-        instItr->set_creation_code(FileToString(f.path().u8string()));
+        instItr->set_creation_code(FileToString(f.path()));
         continue;
       }
 
@@ -374,7 +374,7 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
         });
 
       if (instItr != instances.end()) {
-        instItr->set_creation_code(FileToString(f.path().u8string()));
+        instItr->set_creation_code(FileToString(f.path()));
       } else {
         errStream << "Error: Failed to set instance code. Could not find instance with the ID: " << id << " in " << fPath << std::endl;
       }
@@ -420,12 +420,12 @@ bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Messag
     return true;
   }
 
-  const fs::path yamlFile = fPath.u8string() + "/properties.yaml";
+  const fs::path yamlFile = fPath.string() + "/properties.yaml";
   if (!FileExists(yamlFile)) {
     errStream << "Error: missing the resource YAML " << yamlFile << std::endl;
   }
 
-  YAML::Node yaml = YAML::LoadFile(yamlFile.u8string());
+  YAML::Node yaml = YAML::LoadFile(yamlFile.string());
 
   RecursivePackBuffer(m, id, yaml, fPath, 0);
 
@@ -444,13 +444,13 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
   }
 
   for (auto n : yaml) {
-    buffers::TreeNode* b = buffer->add_child();
+    buffers::TreeNode* b = buffer->mutable_folder()->add_children();
 
     if (n["folder"]) {
       const std::string name = n["folder"].as<std::string>();
       b->set_name(name);
-      b->set_folder(true);
-      LoadTree(fPath.u8string() + "/" + name, n["contents"], b);
+      b->mutable_folder();
+      LoadTree(fPath.string() + "/" + name, n["contents"], b);
     } else {
       const std::string name = n["name"].as<std::string>();
       b->set_name(name);
@@ -467,10 +467,11 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
         if (maxID[factory->second.type] < id)
           maxID[factory->second.type] = id;
 
-        LoadResource(fPath.u8string() + "/" + name + factory->second.ext, factory->second.func(b), id);
-      }
-      else
+        LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
+      } else {
+        buffer->mutable_unknown();
         errStream << "Warning: Unsupported resource type: " << n["type"] << std::endl;
+      }
     }
   }
 
@@ -478,7 +479,7 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
 }
 
 static bool fsCompare(const fs::directory_entry& a, const fs::directory_entry& b) {
-  return a.path().stem().u8string() < b.path().stem().u8string();
+  return a.path().stem().string() < b.path().stem().string();
 }
 
 // Load EGM without a tree file
@@ -491,12 +492,12 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
   }
 
   for(auto& p: files) {
-    const std::string ext = p.path().extension().u8string();
+    const std::string ext = p.path().extension().string();
     if (p.is_directory()) {
 
-      buffers::TreeNode* c = n->add_child();
+      buffers::TreeNode* c = n->mutable_folder()->add_children();
 
-      c->set_name(p.path().stem().u8string());
+      c->set_name(p.path().stem().string());
 
       // If directory is resource
       auto factory = extFactoryMap.find(ext);
@@ -506,16 +507,14 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
       }
 
       // If directory is just a folder
-      c->set_folder(true);
       LoadDirectory(p, c, depth + 1);
     } else { // is a file
-
-      buffers::TreeNode* c = n->add_child();
-      c->set_name(p.path().stem().u8string());
+      buffers::TreeNode* c = n->mutable_folder()->add_children();
+      c->set_name(p.path().stem().string());
       if (ext == ".edl") { // script
         LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
       } else if (ext == ".vert") { // shader
-        LoadResource(p.path().parent_path().u8string() + ".shdr", extFactoryMap.at(".shdr").func(c), maxID.at(Type::kShader)++);
+        LoadResource(p.path().parent_path().string() + ".shdr", extFactoryMap.at(".shdr").func(c), maxID.at(Type::kShader)++);
       }
     }
   }
@@ -524,9 +523,12 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
+  // check if folder is present otherwise mutable_folder creates an unwanted folder
+  if(!n->has_folder())
+    return;
 
-  for (int i = 0; i < n->child_size(); ++i) {
-    buffers::TreeNode* c = n->mutable_child(i);
+  for (int i = 0; i < n->mutable_folder()->children_size(); ++i) {
+    buffers::TreeNode* c = n->mutable_folder()->mutable_children(i);
     RecursiveResourceSanityCheck(c, IDmap);
 
     google::protobuf::Message* m = nullptr;
@@ -625,7 +627,7 @@ bool EGMFileFormat::LoadEGM(const fs::path& yamlFile, buffers::Game* game) const
     return LoadDirectory(egm_root, game_root, 0);
   // Load EGM with a tree file
   } else {
-    YAML::Node tree = YAML::LoadFile(egm_root.u8string() + "/tree.yaml");
+    YAML::Node tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
     return LoadTree(egm_root, tree["contents"], game_root);
   }
 }

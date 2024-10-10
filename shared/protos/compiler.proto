@@ -90,4 +90,6 @@ message SystemInfo {
   optional string description = 3; ///< A friendly description of the system and what it does.
   optional string author = 4; ///< Name of the system author or maintainer (e.g, "John Doe")
   optional string target = 5; ///< The target-platform of the system. Only used by compiler descriptions presently.
+  repeated string represents = 6; ///< Is the default for these platforms
+  repeated string depends = 7; ///< Will build on these platforms
 }

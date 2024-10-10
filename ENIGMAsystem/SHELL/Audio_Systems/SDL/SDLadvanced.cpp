@@ -37,11 +37,6 @@ int audio_add(string fname) {
   return rid;
 }
 
-void audio_delete(int index) {
-  audio_stop_sound(index);
-  sounds.destroy(index);
-}
-
 int audio_play_sound(int index, double priority, bool loop) {
   const Sound& snd = sounds.get(index);
   if (sound_channels.empty() || sound_channels.size() <= AUDIO_CHANNEL_COUNT - 1) {

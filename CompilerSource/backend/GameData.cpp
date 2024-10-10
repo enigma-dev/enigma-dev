@@ -244,6 +244,14 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
   }
 }
 
+// TODO(Nabeel) : Add when you Add PROTO
+// PolygonData::PolygonData(const buffers::resources::Polygon &q, const std::string& name):
+//   BaseProtoWrapper(q), name(name) {}
+// PolygonData::PolygonData(const deprecated::JavaStruct::Polygon &polygon):
+//   name(polygon.name) {
+//     data.set_id(polygon.id);
+//   }
+
 ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
   BaseProtoWrapper(q), name(name) {}
 ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
@@ -286,6 +294,9 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
 
   if (object.spriteId >= 0)
     data.set_sprite_name(lookup.sprite[object.spriteId]);
+  // TODO(Nabeel): Add this when you have Proto for Polygons
+  // if (object.polygonId >= 0)
+  //   data.set_polygon_name(lookup.)
   data.set_solid(object.solid);
   data.set_visible(object.visible);
   data.set_depth(object.depth);
@@ -502,7 +513,7 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
     default: cout << "- Not transferring unknown " << root.name() << endl; break;
   }
 
-  for (auto child : root.child()) {
+  for (auto child : root.folder().children()) {
     int res = FlattenTree(child, gameData);
     if (res) return res;
   }

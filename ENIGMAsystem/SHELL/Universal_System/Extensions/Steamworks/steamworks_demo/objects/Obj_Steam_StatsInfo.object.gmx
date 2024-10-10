@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<object>
+  <spriteName>&lt;undefined&gt;</spriteName>
+  <solid>0</solid>
+  <visible>-1</visible>
+  <depth>0</depth>
+  <persistent>0</persistent>
+  <maskName>&lt;undefined&gt;</maskName>
+  <parentName>&lt;undefined&gt;</parentName>
+  <events>
+    <event enumb="0" eventtype="8">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>&#13;
+draw_set_font(Font_ENIGMA_20);&#13;
+draw_set_valign(fa_top);&#13;
+draw_set_halign(fa_left);&#13;
+&#13;
+var _i = 0;&#13;
+&#13;
+draw_text(50, 100 + _i++ * 30,"steam_stats_ready: " + string(steam_stats_ready()))&#13;
+&#13;
+draw_text(50, 100 + _i++ * 30,"NumGames: " + string(steam_get_stat_int("NumGames")))&#13;
+draw_text(50, 100 + _i++ * 30,"NumWins: " + string(steam_get_stat_int("NumWins")))&#13;
+draw_text(50, 100 + _i++ * 30,"NumLosses: " + string(steam_get_stat_int("NumLosses")))&#13;
+draw_text(50, 100 + _i++ * 30,"FeetTraveled: " + string(steam_get_stat_float("FeetTraveled")))&#13;
+draw_text(50, 100 + _i++ * 30,"AverageSpeed: " + string(steam_get_stat_float("AverageSpeed")))</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+  </events>
+  <PhysicsObject>0</PhysicsObject>
+  <PhysicsObjectSensor>0</PhysicsObjectSensor>
+  <PhysicsObjectShape>0</PhysicsObjectShape>
+  <PhysicsObjectDensity>0.5</PhysicsObjectDensity>
+  <PhysicsObjectRestitution>0.1</PhysicsObjectRestitution>
+  <PhysicsObjectGroup>0</PhysicsObjectGroup>
+  <PhysicsObjectLinearDamping>0.1</PhysicsObjectLinearDamping>
+  <PhysicsObjectAngularDamping>0.1</PhysicsObjectAngularDamping>
+  <PhysicsObjectFriction>0.2</PhysicsObjectFriction>
+  <PhysicsObjectAwake>-1</PhysicsObjectAwake>
+  <PhysicsObjectKinematic>0</PhysicsObjectKinematic>
+  <PhysicsShapePoints/>
+</object>

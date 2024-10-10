@@ -18,8 +18,17 @@
 #ifndef ENIGMA_GLSHADER_H
 #define ENIGMA_GLSHADER_H
 
+#include "Graphics_Systems/OpenGL-Common/GLSLshader.h"
+#include "Universal_System/Resources/AssetArray.h"
+
 #include <string>
 using std::string;
+
+namespace enigma
+{
+extern AssetArray<Shader> shaders;
+extern AssetArray<ShaderProgram> shaderprograms;
+} // namespace enigma
 
 namespace enigma_user
 {

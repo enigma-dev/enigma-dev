@@ -2,9 +2,16 @@
 
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
 
+namespace enigma {
+    void initialize_directory_globals() {
+    #ifdef __ANDROID__ //FIXME: this is wrong path but better to set it somewhere I guess
+      enigma_user::working_directory = SDL_AndroidGetInternalStoragePath();
+    #else
+      enigma_user::working_directory = SDL_GetBasePath();
+    #endif
+    }
+}
+
 int main(int argc, char** argv) {
-  SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-  SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
-  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
   return enigma::enigma_main(argc, argv);
 }

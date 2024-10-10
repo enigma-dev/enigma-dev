@@ -19,7 +19,7 @@ string StripPath(string fName) {
   return fName.substr(pos+1, fName.length());
 }
 
-bool CreateDirectoryRegular(const fs::path &directory) {
+bool CreateDirectory(const fs::path &directory) {
   errc ec;
   if (fs::create_directory(directory, ec) || !ec) return true;
   std::cerr << "Failed to create directory " << directory << std::endl;
@@ -34,7 +34,7 @@ bool CreateDirectoryRecursive(const fs::path &directory) {
     dirs.push(dir);
   }
   
-  while(!dirs.empty() && CreateDirectoryRegular(dirs.top())) {
+  while(!dirs.empty() && CreateDirectory(dirs.top())) {
     dirs.pop();
   }
     
@@ -48,7 +48,7 @@ fs::path InternalizeFile(const fs::path &file,
   if (StartsWith(demistified.string(), egm_root.string())) {
     return fs::relative(demistified, directory);
   }
-  if (!CreateDirectoryRegular(directory/data)) {
+  if (!CreateDirectory(directory/data)) {
     std::cerr << "Failed to copy \"" << file
               << "\" into EGM: could not create output directory." << std::endl;
     return "";
@@ -77,7 +77,7 @@ fs::path TempFileName(const string &pattern) {
   return (fs::temp_directory_path().string() + '/' + name);
 }
 
-void DeleteFileRegular(const fs::path &fName) {
+void DeleteFile(const fs::path &fName) {
   std::remove(fName.u8string().c_str());
 }
 

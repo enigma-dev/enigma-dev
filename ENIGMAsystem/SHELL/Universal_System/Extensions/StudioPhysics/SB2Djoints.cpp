@@ -56,11 +56,11 @@ void physics_joint_enable_motor(int id){
 
 }
 
-evariant physics_joint_get_value(int id, int field){
+variant physics_joint_get_value(int id, int field){
 
 }
 
-void physics_joint_set_value(int id, int field, evariant value){
+void physics_joint_set_value(int id, int field, variant value){
 
 }
 

@@ -27,7 +27,7 @@ Parser-Vars:
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: /tmp/stigma.res
+  resources: $exe
   Build-Extension:
   Run-output: $tempfile
   Run-Program: wine $game

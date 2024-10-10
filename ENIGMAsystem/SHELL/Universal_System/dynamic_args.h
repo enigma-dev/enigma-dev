@@ -37,10 +37,10 @@ namespace enigma {
     #ifndef JUST_DEFINE_IT_RUN
     void sort();
     void reverse();
-    evariant get(int) const;
-    varargs& operator,(evariant);
+    variant get(int) const;
+    varargs& operator,(variant);
     varargs();
-    varargs(evariant);
+    varargs(variant);
     varargs(varargs&);
     ~varargs();
     #endif

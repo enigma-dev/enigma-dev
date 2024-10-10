@@ -108,11 +108,13 @@ extern int view_enabled;
 
 }
 
-typedef var rvt;
+typedef var room_view_array_type;
 
 namespace enigma_user {
-extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
-           view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+extern room_view_array_type
+    view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
+    view_yport, view_yview, view_angle;
 }
 
 
@@ -160,8 +162,8 @@ namespace enigma
 
     int backcolor;
     bool drawbackcolor;
-    evariant(*createcode)();
-    evariant(*precreatecode)();
+    variant(*createcode)();
+    variant(*precreatecode)();
     int width, height, spd, persistent;
     int views_enabled;
     viewstruct views[10];
@@ -185,7 +187,7 @@ namespace enigma
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant<roomv> {
   INHERIT_OPERATORS(roomv)
-  void function(const evariant &oldval);
+  void function(const variant &oldval);
   roomv(): multifunction_variant<roomv>(0) {}
 }; }
 namespace enigma_user {

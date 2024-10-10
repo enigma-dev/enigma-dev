@@ -10,7 +10,6 @@
 namespace enigma
 {
   extern SDL_Window* windowHandle;
-  extern SDL_GLContext sdl_gl_context;
   namespace keyboard {
     extern std::unordered_map<SDL_Keycode,int> keymap;
     extern std::unordered_map<SDL_Keycode, int> inverse_keymap;

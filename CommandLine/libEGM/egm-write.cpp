@@ -129,7 +129,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
 }
 
 bool WriteYaml(const fs::path &egm_root, const fs::path &dir, proto::Message *m) {
-  if (!CreateDirectoryRegular(dir))
+  if (!CreateDirectory(dir))
     return false;
 
   YAML::Emitter yaml;
@@ -194,7 +194,7 @@ bool WriteRoomSnowflakes(const fs::path &egm_root, const fs::path &dir,
 
 bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
                buffers::resources::Room *room) {
-  if (!CreateDirectoryRegular(dir))
+  if (!CreateDirectory(dir))
     return false;
 
   buffers::resources::Room cleaned = *room;
@@ -284,7 +284,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
 bool WriteTimeline(const fs::path &/*egm_root*/, const fs::path &dir,
                    const buffers::resources::Timeline& timeline) {
-  if (!CreateDirectoryRegular(dir))
+  if (!CreateDirectory(dir))
     return false;
 
   for (auto &m : timeline.moments()) {
@@ -408,10 +408,10 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
   tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
 
-  if (folder->child_size() > 0) {
+  if (folder->folder().children_size() > 0) {
     tree << YAML::Key << "contents" << YAML::Value << YAML::BeginSeq;
-    for (int i = 0; i < folder->child_size(); i++) {
-      auto child = folder->mutable_child(i);
+    for (int i = 0; i < folder->mutable_folder()->children_size(); i++) {
+      auto child = folder->mutable_folder()->mutable_children(i);
 
       std::string type = type2name(child->type_case());
 
@@ -424,7 +424,7 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
       }
 
       if (child->has_folder()) {
-        if (!CreateDirectoryRegular(dir + "/" + child->name()))
+        if (!CreateDirectory(dir + "/" + child->name()))
           return false;
 
         string lastDir = dir;
@@ -453,7 +453,7 @@ bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const 
   if (fName.back() != '/')
     fName += '/';
 
-  if (!CreateDirectoryRegular(fName))
+  if (!CreateDirectory(fName))
     return false;
 
   // need to remove the '/' here

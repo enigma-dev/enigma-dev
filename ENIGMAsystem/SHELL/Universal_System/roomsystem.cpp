@@ -65,7 +65,8 @@ var background_visible, background_foreground, background_index, background_x, b
 
 int view_current = 0;
 int view_enabled = 0;
-rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
+room_view_array_type
+    view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
     view_yport, view_yview, view_angle;
 
@@ -194,7 +195,7 @@ namespace enigma
     //We may still be holding on to deactivated instances; they can interact badly with existing instances in certain cases.
     instance_deactivated_list.clear();
 
-    // Initialize background evariants so they do not throw uninitialized variable access errors.
+    // Initialize background variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++) {
       background_visible[i] = backs[i].visible;
       background_foreground[i] = backs[i].foreground;
@@ -219,7 +220,7 @@ namespace enigma
 
     view_enabled = views_enabled;
 
-    // Initialize view evariants so they do not throw uninitialized variable access errors.
+    // Initialize view variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++) {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
@@ -228,7 +229,13 @@ namespace enigma
       view_visible[i] = (bool)views[i].start_vis;
       view_angle[i] = 0;
     }
-
+    
+    // In pull request 1831, it was decided to adopt GMS behavior instead of GM8.
+    // The window is no longer moved, centered, or resized when switching rooms.
+    // This is always true, even if the room sizes are different.
+    enigma_user::window_default(false);
+    // window sized by first room, can make visible now
+    enigma_user::window_set_visible(true);
     enigma_user::io_clear();
     // we only initialize the screen and clear the window color during game start
     // NOTE: no version of GM has EVER reset the drawing color or alpha during room transition
@@ -310,7 +317,7 @@ namespace enigma
 
 
 //Implement the "room" global before we continue
-void enigma::roomv::function(const evariant &oldval) {
+void enigma::roomv::function(const variant &oldval) {
   enigma_user::room_goto((int)rval.d);
   rval.d = oldval.rval.d;
 }

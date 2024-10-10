@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<room>
+  <caption/>
+  <width>1280</width>
+  <height>720</height>
+  <hsnap>16</hsnap>
+  <vsnap>16</vsnap>
+  <isometric>0</isometric>
+  <speed>30</speed>
+  <persistent>0</persistent>
+  <colour>12632256</colour>
+  <showcolour>-1</showcolour>
+  <code/>
+  <enableViews>0</enableViews>
+  <clearViewBackground>-1</clearViewBackground>
+  <makerSettings>
+    <isSet>-1</isSet>
+    <w>1516</w>
+    <h>902</h>
+    <showGrid>-1</showGrid>
+    <showObjects>-1</showObjects>
+    <showTiles>-1</showTiles>
+    <showBackgrounds>-1</showBackgrounds>
+    <showForegrounds>-1</showForegrounds>
+    <showViews>0</showViews>
+    <deleteUnderlyingObj>0</deleteUnderlyingObj>
+    <deleteUnderlyingTiles>0</deleteUnderlyingTiles>
+    <page>0</page>
+    <xoffset>0</xoffset>
+    <yoffset>0</yoffset>
+  </makerSettings>
+  <backgrounds>
+    <background foreground="0" hspeed="0" htiled="-1" name="ENIGMA_background" stretch="0" visible="-1" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+    <background foreground="0" hspeed="0" htiled="-1" name="" stretch="0" visible="0" vspeed="0" vtiled="-1" x="0" y="0"/>
+  </backgrounds>
+  <views>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+    <view hborder="32" hport="480" hspeed="-1" hview="480" objName="&lt;undefined&gt;" vborder="32" visible="0" vspeed="-1" wport="640" wview="640" xport="0" xview="0" yport="0" yview="0"/>
+  </views>
+  <instances>
+    <instance code="" colour="4294967295" id="100164" locked="0" name="inst_7761EC12" objName="Obj_Steam_Overlay_Friends" rotation="0.0" scaleX="4.42" scaleY="1.0" x="96" y="214"/>
+    <instance code="&#13;&#10;text = &quot;Back&quot;&#13;&#10;targetRoom = Room_Steam_Main" colour="4294967295" id="100176" locked="0" name="inst_136576BF" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="880" y="592"/>
+    <instance code="&#13;&#10;text = &quot;Steamworks Extension&quot;;&#13;&#10;font = Font_ENIGMA_50;" colour="4294967295" id="100201" locked="0" name="inst_1481DE22" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="768" y="48"/>
+    <instance code="" colour="4294967295" id="100202" locked="0" name="inst_A682E7A0" objName="Obj_Steam_OverlayInfo" rotation="0.0" scaleX="1.0" scaleY="1.0" x="0" y="128"/>
+    <instance code="&#13;&#10;font = Font_ENIGMA_20;&#13;&#10;valign = fa_top;&#13;&#10;halign = fa_left;&#13;&#10;&#13;&#10;text = &quot;[NOTE] Overlays will not work on macOS and Ubuntu, when running from the IDE&quot;;" colour="4294967295" id="100263" locked="0" name="inst_F4F29FAF" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="96" y="512"/>
+    <instance code="" colour="4294967295" id="100269" locked="0" name="inst_9E9303AB" objName="Obj_Steam_Overlay_Setting" rotation="0.0" scaleX="4.42" scaleY="1.0" x="480" y="208"/>
+    <instance code="" colour="4294967295" id="100270" locked="0" name="inst_8EF69D0B" objName="Obj_Steam_Overlay_Browser" rotation="0.0" scaleX="4.42" scaleY="1.0" x="864" y="208"/>
+    <instance code="" colour="4294967295" id="100271" locked="0" name="inst_3A8B3DFC" objName="Obj_Steam_Overlay_Community" rotation="0.0" scaleX="4.42" scaleY="1.0" x="96" y="304"/>
+    <instance code="" colour="4294967295" id="100272" locked="0" name="inst_A0428C7F" objName="Obj_Steam_Overlay_GameGroup" rotation="0.0" scaleX="4.42" scaleY="1.0" x="480" y="304"/>
+    <instance code="" colour="4294967295" id="100273" locked="0" name="inst_F5048A83" objName="Obj_Steam_Overlay_User" rotation="0.0" scaleX="4.42" scaleY="1.0" x="864" y="304"/>
+    <instance code="" colour="4294967295" id="100274" locked="0" name="inst_A3DD1FAC" objName="Obj_Steam_Overlay_Players" rotation="0.0" scaleX="4.42" scaleY="1.0" x="96" y="400"/>
+    <instance code="" colour="4294967295" id="100275" locked="0" name="inst_E4DBB335" objName="Obj_Steam_Overlay_Achievements" rotation="0.0" scaleX="4.42" scaleY="1.0" x="480" y="400"/>
+    <instance code="" colour="4294967295" id="100276" locked="0" name="inst_294EC551" objName="Obj_Steam_Overlay_Store" rotation="0.0" scaleX="4.42" scaleY="1.0" x="864" y="400"/>
+  </instances>
+  <tiles/>
+  <PhysicsWorld>0</PhysicsWorld>
+  <PhysicsWorldTop>0</PhysicsWorldTop>
+  <PhysicsWorldLeft>0</PhysicsWorldLeft>
+  <PhysicsWorldRight>640</PhysicsWorldRight>
+  <PhysicsWorldBottom>480</PhysicsWorldBottom>
+  <PhysicsWorldGravityX>0.0</PhysicsWorldGravityX>
+  <PhysicsWorldGravityY>10.0</PhysicsWorldGravityY>
+  <PhysicsWorldPixToMeters>0.1</PhysicsWorldPixToMeters>
+</room>

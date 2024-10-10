@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<object>
+  <spriteName>&lt;undefined&gt;</spriteName>
+  <solid>0</solid>
+  <visible>-1</visible>
+  <depth>0</depth>
+  <persistent>0</persistent>
+  <maskName>&lt;undefined&gt;</maskName>
+  <parentName>Obj_ENIGMA_button</parentName>
+  <events>
+    <event enumb="0" eventtype="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>&#13;
+event_inherited();&#13;
+&#13;
+request = noone&#13;
+&#13;
+//async_load = ds_map_create();</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="7" eventtype="6">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>&#13;
+//steam_create_leaderboard(SteamLeaderboard, lb_sort_ascending, lb_disp_numeric);;&#13;
+&#13;
+request = steam_download_scores_around_user(SteamLeaderboard,-4,4)&#13;
+&#13;
+with(Obj_Steam_Leaderboard_Entry)&#13;
+	instance_destroy()</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event enumb="69" eventtype="7">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <useapplyto>-1</useapplyto>
+        <isquestion>0</isquestion>
+        <exetype>2</exetype>
+        <functionname/>
+        <codestring/>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>//show_debug_message("event_type: "+string(ds_map_find_value(async_load, "event_type")));&#13;
+//show_debug_message("request: "+string(request));&#13;
+//show_debug_message("id: "+string(ds_map_find_value(async_load, "id")));&#13;
+//show_debug_message("num_entries: "+string(ds_map_find_value(async_load, "num_entries")));&#13;
+&#13;
+if(string(ds_map_find_value(async_load, "event_type")) != "leaderboard_download") return 0;&#13;
+&#13;
+//show_debug_message("passed 1");&#13;
+&#13;
+//show_debug_message("performing request: "+string(ds_map_find_value(async_load, "id")));&#13;
+if(ds_map_find_value(async_load, "id") != request) return 0;&#13;
+&#13;
+//show_debug_message("passed 2");&#13;
+&#13;
+if(!ds_map_find_value(async_load, "num_entries")) return -1;&#13;
+&#13;
+//show_debug_message("passed 3");&#13;
+&#13;
+var entries = ds_map_find_value(async_load, "entries");&#13;
+var map = json_decode(entries);&#13;
+//show_debug_message("entries: "+string(entries));&#13;
+&#13;
+if ds_map_exists(map, "default")&#13;
+{&#13;
+    ds_map_destroy(map);&#13;
+    exit;&#13;
+}&#13;
+else&#13;
+{&#13;
+    var list = ds_map_find_value(map, "entries");&#13;
+    var len = ds_list_size(list);&#13;
+    //show_debug_message("len: "+string(len));&#13;
+    var entry;&#13;
+    for(var i = 0; i &lt; len; i++)&#13;
+    {&#13;
+        entry = ds_list_find_value(list, i);	&#13;
+        with(instance_create_depth(800, 110 + i*120, 0, Obj_Steam_Leaderboard_Entry))	&#13;
+		{&#13;
+			rank = ds_map_find_value(entry, "rank");&#13;
+			score_ = ds_map_find_value(entry, "score");&#13;
+			name = ds_map_find_value(entry, "name");&#13;
+			userID = ds_map_find_value(entry, "userID");&#13;
+		&#13;
+			if (!is_undefined(ds_map_find_value(entry, "data"))) {&#13;
+					var buff = buffer_base64_decode(ds_map_find_value(entry, "data"));&#13;
+					var level = buffer_read(buff, buffer_u8);&#13;
+					var str = buffer_read(buff, buffer_string);&#13;
+			&#13;
+					data = str + " (" + string(level) + ")";&#13;
+			}&#13;
+			else data = "";&#13;
+        }&#13;
+    }&#13;
+}&#13;
+ds_map_destroy(map)</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+  </events>
+  <PhysicsObject>0</PhysicsObject>
+  <PhysicsObjectSensor>0</PhysicsObjectSensor>
+  <PhysicsObjectShape>0</PhysicsObjectShape>
+  <PhysicsObjectDensity>0.5</PhysicsObjectDensity>
+  <PhysicsObjectRestitution>0.1</PhysicsObjectRestitution>
+  <PhysicsObjectGroup>0</PhysicsObjectGroup>
+  <PhysicsObjectLinearDamping>0.1</PhysicsObjectLinearDamping>
+  <PhysicsObjectAngularDamping>0.1</PhysicsObjectAngularDamping>
+  <PhysicsObjectFriction>0.2</PhysicsObjectFriction>
+  <PhysicsObjectAwake>-1</PhysicsObjectAwake>
+  <PhysicsObjectKinematic>0</PhysicsObjectKinematic>
+  <PhysicsShapePoints/>
+</object>

@@ -22,9 +22,8 @@
 #include <string>
 
 namespace enigma {
-  bool joystick_init();
-  void joystick_uninit();
-  void joystick_update();
+  void init_joysticks();
+  void handle_joysticks();
 }
 
 namespace enigma_user {

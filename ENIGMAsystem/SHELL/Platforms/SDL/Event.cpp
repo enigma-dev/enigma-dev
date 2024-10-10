@@ -146,7 +146,7 @@ int SDL_map_button_enum(const char button) {
 
 static void graphics_remove_garbage(float x, float y, float width, float height) {
   graphics_set_viewport(x,y,width,height);
-  //enigma_user::d3d_enable_scissor_test(false);
+  enigma_user::d3d_enable_scissor_test(false);
   enigma_user::draw_clear(enigma_user::window_get_color());
 }
 
@@ -220,7 +220,6 @@ void SDL_Event_Handler::windowResized(const SDL_Event *event) {
   enigma::windowWidth = enigma_user::window_get_width();
   enigma::windowHeight = enigma_user::window_get_height();
   enigma::compute_window_scaling();
-  enigma::compute_window_size();
 }
 
 // map of joystick instance ids to device indexes

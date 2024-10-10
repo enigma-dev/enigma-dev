@@ -8,7 +8,7 @@ API:
   target_graphics: OpenGL1
 
   # Audio System
-  target_audio: SDL
+  target_audio: OpenAL
 
   # Widgets System
   target_widgets: None
@@ -17,12 +17,18 @@ API:
   target_network: None
 
   # Collision System
-  target_collision: Precise
+  target_collision: BBox
 
   # Enabled Extensions
   extensions: 
    - Alarms
    - Paths
+   - libpng
+   - DataStructures
+   - Timelines
+   - MotionPlanning
+   - DateTime
+   - GTest
 
   # Platform default is OS specific and handled internally but can be overriden here
   # target_platform: xlib

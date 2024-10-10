@@ -85,7 +85,7 @@ public:
   int yoffset = 0;
   BoundingBox bbox = {0, 0, 0, 0};
   int bbox_mode = 0;  //Default is automatic
-  
+
   // AssArray mandatory
   static const char* getAssetTypeName() { return "Sprite"; }
   bool isDestroyed() const { return _destroyed; }

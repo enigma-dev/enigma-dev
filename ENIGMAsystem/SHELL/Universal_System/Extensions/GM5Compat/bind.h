@@ -39,10 +39,10 @@ public:
 
 public:
   //Retrieve based on index.
-  const evariant& operator[](int id) const {
+  const variant& operator[](int id) const {
     return orig[id];
   }
-  const evariant& operator()(int id) const {
+  const variant& operator()(int id) const {
     return orig(id);
   }
 
@@ -81,10 +81,10 @@ public:
   virtual ~BindArrayRW() {} //Good practice
 
   //Retrieve based on index.
-  evariant& operator[](int id) {
+  variant& operator[](int id) {
     return orig[id];
   }
-  evariant& operator()(int id) {
+  variant& operator()(int id) {
     return orig(id);
   }
 

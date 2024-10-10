@@ -130,6 +130,12 @@ struct RoomData : ProtoMessageInheritor<buffers::resources::Room> {
   RoomData(const BaseProtoClass &q, const std::string& name);
   RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup);
 };
+// TODO(Nabeel): Add this when you have Proto for Polygons
+// struct PolygonData : ProtoMessageInheritor<buffers::resources::Polygon> {
+//   std::string name;
+//   PolygonData(const BaseProtoClass &q, const std::string& name);
+//   PolygonData(const deprecated::JavaStruct::Polygon &polygon, const ESLookup &lookup);
+// };
 
 /// Flat view of a buffers::Project.
 struct GameData {
@@ -146,6 +152,8 @@ struct GameData {
   std::vector<TimelineData>   timelines;
   std::vector<ObjectData>     objects;
   std::vector<RoomData>       rooms;
+  // TODO(Nabeel): Add this when you have Proto for Polygons
+  // std::vector<PolygonData>    polygons;
 
   // TODO(Robert): Why do none of these have Proto equivalents?
   struct Extension {

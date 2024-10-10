@@ -3,9 +3,10 @@
 
 Name: Native Widgets
 Identifier: Native
-Description: Native Widgets. Uses standard Win32/WinAPI on Windows. AppKit on macOS. On targets besides Windows and macOS, this should be used with xlib platform and not SDL. Requires kdialog package in KDE Plasma Desktop for xlib-supported platforms. On non-KDE xlib-supported platforms, zenity package is required.
+Description: Native Widgets. Requires the "External Functions" ENIGMA Extension turned on. Uses standard Win32/WinAPI on Windows. AppKit on macOS. On all the other targets besides Windows and macOS, this should be used with X11 platform and not SDL. Requires kdialog package in KDE Plasma Desktop for X11-supported platforms. On non-KDE X11-supported platforms, zenity package is required. Also requires the "libdlgmod" library being built for your platform and being put in the working directory of your game executable or project file. The "libdlgmod" library source code is available for download and building for your use here - https://github.com/time-killer-games/libdlgmod - run "./build.sh" from the Terminal on Unix-likes or build using Visual Studio on Windows.
+
 Depends:
-	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD
 Represents:
-	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD
 Author: Samuel Venable

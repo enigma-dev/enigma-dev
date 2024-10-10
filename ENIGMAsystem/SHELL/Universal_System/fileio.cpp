@@ -1,465 +1,229 @@
-/*
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
- MIT License
- 
- Copyright © 2020-2021 Samuel Venable
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
- 
-*/
+// Simple, intuitive, integer based file I/O
 
-#include "fileio.h"
+#include "Platforms/General/fileio.h"
+#include "Resources/AssetArray.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
-namespace filesystem = ngs::fs;
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <iomanip>
+
+#ifdef DEBUG_MODE
+#define try_io_and_print(f) print_and_clear_fs_status(__FUNCTION__, f);
+#else
+#define try_io_and_print(f)
+#endif
+
+namespace enigma {
+  
+  struct file {
+    file() {}
+    file(const std::string& fName, std::ios_base::openmode mode) : fn(fName) { fs.open(fName, mode); }
+    file(file&& other) : fn(other.fn) { fs.swap(other.fs); }
+    std::string fn;
+    std::fstream fs;
+    // AssArray mandatory
+    static const char* getAssetTypeName() { return "FileHandle"; }
+    bool isDestroyed() const { return false; }
+    void destroy() { fs.close(); }
+  };
+  
+  AssetArray<file> files;
+  
+  static void print_and_clear_fs_status(const std::string& operation, file& f) {
+    if (!f.fs.good()) {
+      DEBUG_MESSAGE("Operation: " + operation + " failed on: " + f.fn + " Failbit: " + std::to_string(f.fs.fail())
+        + " Badbit: " +  std::to_string(f.fs.bad()) + " EOF: " + std::to_string(f.fs.eof()), MESSAGE_TYPE::M_USER_ERROR);
+    }
+    bool eof = f.fs.eof();
+    f.fs.clear();
+    if (eof) f.fs.setstate(std::ios::eofbit);
+  }
+  
+  static inline int file_open(const std::string& fname, std::ios_base::openmode mode) {
+    file f(fname, mode);
+    
+    try_io_and_print(f)
+    
+    if (f.fs.is_open()) {
+      files.add(std::move(f));
+      return files.size()-1;
+    } else return -1;
+  }
+} // NAMESPACE enigma
+
 
 namespace enigma_user {
 
-  std::string directory_get_current_working() {
-    return filesystem::directory_get_current_working();
-  }
- 
-  bool directory_set_current_working(std::string dname) {
-    return filesystem::directory_set_current_working(dname);
-  }
- 
-  std::string directory_get_temporary_path() {
-    return filesystem::directory_get_temporary_path();
-  }
- 
-  std::string directory_get_desktop_path() {
-    return filesystem::directory_get_desktop_path();
-  }
-  
-  std::string directory_get_documents_path() {
-    return filesystem::directory_get_documents_path();
-  }
-  
-  std::string directory_get_downloads_path() {
-    return filesystem::directory_get_downloads_path();
-  }
-  
-  std::string directory_get_music_path() {
-    return filesystem::directory_get_music_path();
-  }
-   
-  std::string directory_get_pictures_path() {
-    return filesystem::directory_get_pictures_path();
-  }
-   
-  std::string directory_get_videos_path() {
-    return filesystem::directory_get_videos_path();
-  }
- 
-  std::string executable_get_directory() {
-    return filesystem::executable_get_directory();
-  }
- 
-  std::string executable_get_filename() {
-    return filesystem::executable_get_filename();
-  }
- 
-  std::string executable_get_pathname() {
-    return filesystem::executable_get_pathname();
-  }
+// Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
+int file_text_open_read(const std::string& fname) {
+  return enigma::file_open(fname, std::ios::in);
+}
 
-  bool symlink_create(std::string fname, std::string newname) {
-    return filesystem::symlink_create(fname, newname);
-  }
+// Opens the indicated file for writing, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
+int file_text_open_write(const std::string& fname) {
+  return enigma::file_open(fname, std::ios::out);
+}
 
-  bool symlink_copy(std::string fname, std::string newname) {
-    return filesystem::symlink_copy(fname, newname);
-  }
+// Opens the indicated file for appending data at the end, creating it if it does not exist. The function returns the id of the file that must be used in the other functions.
+int file_text_open_append(const std::string& fname) {
+  return enigma::file_open(fname, std::ios::out | std::ios::app);
+}
 
-  bool symlink_exists(std::string fname) {
-    return filesystem::symlink_exists(fname);
-  }
+// Closes the file with the given file id
+void file_text_close(int fileid) {
+  if (fileid >= 0 && fileid < static_cast<int>(enigma::files.size())) {
+    enigma::files.get(fileid).fs.close();
+  } else DEBUG_MESSAGE("Cannot close an unopened file: " + std::to_string(fileid), MESSAGE_TYPE::M_USER_ERROR);
+}
 
-  bool hardlink_create(std::string fname, std::string newname) {
-    return filesystem::hardlink_create(fname, newname);
-  }
+// Writes the std::string to the file with the given file id.
+void file_text_write_string(int fileid, const std::string& str) {
+  enigma::files.get(fileid).fs << str;
+  try_io_and_print(enigma::files.get(fileid))
+}
 
-  std::uintmax_t file_numblinks(std::string fname) {
-    return filesystem::file_numblinks(fname);
-  }
+// Write the real value to the file with the given file id.
+void file_text_write_real(int fileid, double x) {
+  enigma::files.get(fileid).fs << " " << x << std::setprecision(16);
+  try_io_and_print(enigma::files.get(fileid))
+}
 
-  std::uintmax_t file_bin_numblinks(int fd) {
-    return filesystem::file_bin_numblinks(fd);
-  }
- 
-  std::string file_bin_hardlinks(int fd, std::string dnames, bool recursive) {
-    return filesystem::file_bin_hardlinks(fd, dnames, recursive);
-  }
- 
-  std::string filename_absolute(std::string fname) {
-    return filesystem::filename_absolute(fname);
-  }
- 
-  std::string filename_canonical(std::string fname) {
-    return filesystem::filename_canonical(fname);
-  }
+// Write a newline character to the file.
+void file_text_writeln(int fileid) {
+  enigma::files.get(fileid).fs << '\n';
+  try_io_and_print(enigma::files.get(fileid))
+}
 
-  bool filename_equivalent(std::string fname1, std::string fname2) {
-    return filesystem::filename_equivalent(fname1, fname2);
-  }
- 
-  bool file_exists(std::string fname) {
-    return filesystem::file_exists(fname);
-  }
- 
-  bool file_delete(std::string fname) {
-    return filesystem::file_delete(fname);
-  }
- 
-  bool file_rename(std::string oldname, std::string newname) {
-    return filesystem::file_rename(oldname, newname);
-  }
- 
-  bool file_copy(std::string fname, std::string newname) {
-    return filesystem::file_copy(fname, newname);
-  }
- 
-  std::uintmax_t file_size(std::string fname) {
-    return filesystem::file_size(fname);
-  }
- 
-  bool directory_exists(std::string dname) {
-    return filesystem::directory_exists(dname);
-  }
- 
-  bool directory_create(std::string dname) {
-    return filesystem::directory_create(dname);
-  }
- 
-  bool directory_destroy(std::string dname) {
-    return filesystem::directory_destroy(dname);
-  }
- 
-  bool directory_rename(std::string oldname, std::string newname) {
-    return filesystem::directory_rename(oldname, newname);
-  }
- 
-  bool directory_copy(std::string dname, std::string newname) {
-    return filesystem::directory_copy(dname, newname);
-  }
- 
-  std::uintmax_t directory_size(std::string dname) {
-    return filesystem::directory_size(dname);
-  }
- 
-  unsigned directory_contents_get_order() {
-    return filesystem::directory_contents_get_order();
-  }
+// Write a string and newline character to the file.
+void file_text_writeln(int fileid, const std::string& str) {
+  file_text_write_string(fileid, str);
+  file_text_writeln(fileid);
+}
 
-  void directory_contents_set_order(unsigned order) {
-    filesystem::directory_contents_set_order(order);
+// Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
+std::string file_text_read_string(int fileid) {
+  std::string line;
+  if (std::getline(enigma::files.get(fileid).fs, line)) {
+    enigma::files.get(fileid).fs.unget();
+    try_io_and_print(enigma::files.get(fileid))
   }
+  return line;
+}
 
-  unsigned directory_contents_get_cntfiles() {
-    return filesystem::directory_contents_get_cntfiles();
+std::string file_text_read_all(int fileid) {
+  std::string all, line;
+  while(std::getline(enigma::files.get(fileid).fs, line)) {
+    try_io_and_print(enigma::files.get(fileid))
+    all += line;
   }
+  return all;
+}
 
-  unsigned directory_contents_get_maxfiles() {
-    return filesystem::directory_contents_get_maxfiles();
-  }
+bool file_text_eoln(int fileid) {
+  return (static_cast<char>(enigma::files.get(fileid).fs.peek()) == '\n' || enigma::files.get(fileid).fs.eof());
+}
 
-  void directory_contents_set_maxfiles(unsigned maxfiles) {
-    filesystem::directory_contents_set_maxfiles(maxfiles);
-  }
+double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
+  double x = 0;
+  enigma::files.get(fileid).fs >> x;
+  try_io_and_print(enigma::files.get(fileid))
+  return x;
+}
 
-  std::string directory_contents_first(std::string dname, std::string pattern, bool includedirs, bool recursive) {
-    return filesystem::directory_contents_first(dname, pattern, includedirs, recursive);
-  }
+// Skips the rest of the line in the file and starts at the start of the next line.
+std::string file_text_readln(int fileid) {
+  std::string line;
+  std::getline(enigma::files.get(fileid).fs, line);
+  return line;
+}
 
-  void directory_contents_first_async(std::string dname, std::string pattern, bool includedirs, bool recursive) {
-    filesystem::directory_contents_first_async(dname, pattern, includedirs, recursive);
-  }
-   
-  unsigned directory_contents_get_length() {
-    return filesystem::directory_contents_get_length();
-  }
- 
-  bool directory_contents_get_completion_status() {
-    return filesystem::directory_contents_get_completion_status();
-  }
- 
-  void directory_contents_set_completion_status(bool complete) {
-    filesystem::directory_contents_set_completion_status(complete);
-  }
- 
-  std::string directory_contents_next() {
-    return filesystem::directory_contents_next();
-  }
- 
-  void directory_contents_close() {
-    return filesystem::directory_contents_close();
-  }
- 
-  std::string environment_get_variable(std::string name) {
-    return filesystem::environment_get_variable(name);
-  }
+bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
+  return (enigma::files.get(fileid).fs.eof());
+}
 
-  bool environment_get_variable_exists(std::string name) {
-    return filesystem::environment_get_variable_exists(name);
-  }
- 
-  bool environment_set_variable(std::string name, std::string value) {
-    return filesystem::environment_set_variable(name, value);
-  }
- 
-  bool environment_unset_variable(std::string name) {
-    return filesystem::environment_unset_variable(name);
-  }
- 
-  std::string environment_expand_variables(std::string str) {
-    return filesystem::environment_expand_variables(str);
-  }
- 
-  int file_datetime_accessed_year(std::string fname) {
-    return filesystem::file_datetime_accessed_year(fname);
-  }
- 
-  int file_datetime_accessed_month(std::string fname) {
-    return filesystem::file_datetime_accessed_month(fname);
-  }
- 
-  int file_datetime_accessed_day(std::string fname) {
-    return filesystem::file_datetime_accessed_day(fname);
-  }
- 
-  int file_datetime_accessed_hour(std::string fname) {
-    return filesystem::file_datetime_accessed_hour(fname);
-  }
- 
-  int file_datetime_accessed_minute(std::string fname) {
-    return filesystem::file_datetime_accessed_minute(fname);
-  }
- 
-  int file_datetime_accessed_second(std::string fname) {
-    return filesystem::file_datetime_accessed_second(fname);
-  }
- 
-  int file_datetime_modified_year(std::string fname) {
-    return filesystem::file_datetime_modified_year(fname);
-  }
- 
-  int file_datetime_modified_month(std::string fname) {
-    return filesystem::file_datetime_modified_month(fname);
-  }
- 
-  int file_datetime_modified_day(std::string fname) {
-    return filesystem::file_datetime_modified_day(fname);
-  }
- 
-  int file_datetime_modified_hour(std::string fname) {
-    return filesystem::file_datetime_modified_hour(fname);
-  }
- 
-  int file_datetime_modified_minute(std::string fname) {
-    return filesystem::file_datetime_modified_minute(fname);
-  }
- 
-  int file_datetime_modified_second(std::string fname) {
-    return filesystem::file_datetime_modified_second(fname);
-  }
- 
-  int file_datetime_created_year(std::string fname) {
-    return filesystem::file_datetime_created_year(fname);
-  }
- 
-  int file_datetime_created_month(std::string fname) {
-    return filesystem::file_datetime_created_month(fname);
-  }
- 
-  int file_datetime_created_day(std::string fname) {
-    return filesystem::file_datetime_created_day(fname);
-  }
- 
-  int file_datetime_created_hour(std::string fname) {
-    return filesystem::file_datetime_created_hour(fname);
-  }
- 
-  int file_datetime_created_minute(std::string fname) {
-    return filesystem::file_datetime_created_minute(fname);
-  }
- 
-  int file_datetime_created_second(std::string fname) {
-    return filesystem::file_datetime_created_second(fname);
-  }
- 
-  int file_bin_datetime_accessed_year(int fd) {
-    return filesystem::file_bin_datetime_accessed_year(fd);
-  }
- 
-  int file_bin_datetime_accessed_month(int fd) {
-    return filesystem::file_bin_datetime_accessed_month(fd);
-  }
- 
-  int file_bin_datetime_accessed_day(int fd) {
-    return filesystem::file_bin_datetime_accessed_day(fd);
-  }
- 
-  int file_bin_datetime_accessed_hour(int fd) {
-    return filesystem::file_bin_datetime_accessed_hour(fd);
-  }
- 
-  int file_bin_datetime_accessed_minute(int fd) {
-    return filesystem::file_bin_datetime_accessed_minute(fd);
-  }
- 
-  int file_bin_datetime_accessed_second(int fd) {
-    return filesystem::file_bin_datetime_accessed_second(fd);
-  }
- 
-  int file_bin_datetime_modified_year(int fd) {
-    return filesystem::file_bin_datetime_modified_year(fd);
-  }
- 
-  int file_bin_datetime_modified_month(int fd) {
-    return filesystem::file_bin_datetime_modified_month(fd);
-  }
- 
-  int file_bin_datetime_modified_day(int fd) {
-    return filesystem::file_bin_datetime_modified_day(fd);
-  }
- 
-  int file_bin_datetime_modified_hour(int fd) {
-    return filesystem::file_bin_datetime_modified_hour(fd);
-  }
- 
-  int file_bin_datetime_modified_minute(int fd) {
-    return filesystem::file_bin_datetime_modified_minute(fd);
-  }
- 
-  int file_bin_datetime_modified_second(int fd) {
-    return filesystem::file_bin_datetime_modified_second(fd);
-  }
- 
-  int file_bin_datetime_created_year(int fd) {
-    return filesystem::file_bin_datetime_created_year(fd);
-  }
- 
-  int file_bin_datetime_created_month(int fd) {
-    return filesystem::file_bin_datetime_created_month(fd);
-  }
- 
-  int file_bin_datetime_created_day(int fd) {
-    return filesystem::file_bin_datetime_created_day(fd);
-  }
- 
-  int file_bin_datetime_created_hour(int fd) {
-    return filesystem::file_bin_datetime_created_hour(fd);
-  }
- 
-  int file_bin_datetime_created_minute(int fd) {
-    return filesystem::file_bin_datetime_created_minute(fd);
-  }
- 
-  int file_bin_datetime_created_second(int fd) {
-    return filesystem::file_bin_datetime_created_second(fd);
-  }
- 
-  int file_bin_open(std::string fname, int mode) {
-    return filesystem::file_bin_open(fname, mode);
-  }
- 
-  int file_bin_rewrite(int fd) {
-    return filesystem::file_bin_rewrite(fd);
-  }
- 
-  int file_bin_close(int fd) {
-    return filesystem::file_bin_close(fd);
-  }
- 
-  long file_bin_size(int fd) {
-    return filesystem::file_bin_size(fd);
-  }
- 
-  long file_bin_position(int fd) {
-    return filesystem::file_bin_position(fd);
-  }
- 
-  long file_bin_seek(int fd, long pos) {
-    return filesystem::file_bin_seek(fd, pos);
-  }
- 
-  int file_bin_read_byte(int fd) {
-    return filesystem::file_bin_read_byte(fd);
-  }
- 
-  int file_bin_write_byte(int fd, int byte) {
-    return filesystem::file_bin_write_byte(fd, byte);
-  }
- 
-  int file_text_open_read(std::string fname) {
-    return filesystem::file_text_open_read(fname);
-  }
- 
-  int file_text_open_write(std::string fname) {
-    return filesystem::file_text_open_write(fname);
-  }
- 
-  int file_text_open_append(std::string fname) {
-    return filesystem::file_text_open_append(fname);
-  }
- 
-  long file_text_write_real(int fd, double val) {
-    return filesystem::file_text_write_real(fd, val);
-  }
- 
-  long file_text_write_string(int fd, std::string str) {
-    return filesystem::file_text_write_string(fd, str);
-  }
- 
-  int file_text_writeln(int fd) {
-    return filesystem::file_text_writeln(fd);
-  }
- 
-  bool file_text_eoln(int fd) {
-    return filesystem::file_text_eoln(fd);
-  }
- 
-  bool file_text_eof(int fd) {
-    return filesystem::file_text_eof(fd);
-  }
+void load_info(const std::string& fname) {
+	int file = file_text_open_read(fname);
+	enigma::gameInfoText = file_text_read_all(file);
+	file_text_close(file);
+}
 
-  double file_text_read_real(int fd) {
-    return filesystem::file_text_read_real(fd);
+// Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
+int file_bin_open(const std::string& fname, int mode) {
+  // TODO: add other modes like trunc / append?
+  switch (mode) {
+    case 0: return enigma::file_open(fname, std::ios::in  | std::ios::binary);
+    case 1: return enigma::file_open(fname, std::ios::out | std::ios::binary);
+    case 2: return enigma::file_open(fname, std::ios::in  | std::ios::out | std::ios::binary);
+    default: return -1;
   }
+}
 
-  std::string file_text_read_string(int fd) {
-    return filesystem::file_text_read_string(fd);
-  }
+// Rewrites the file with the given file id, that is, clears it and starts writing at the start.
+bool file_bin_rewrite(int fileid) {
+  enigma::files.get(fileid).fs.close();
+  enigma::files.get(fileid).fs.open(enigma::files.get(fileid).fn, std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+  try_io_and_print(enigma::files.get(fileid))
+  return enigma::files.get(fileid).fs.good();
+}
 
-  std::string file_text_readln(int fd) {
-    return filesystem::file_text_readln(fd);
-  }
- 
-  std::string file_text_read_all(int fd) {
-    return filesystem::file_text_read_all(fd);
-  }
- 
-  int file_text_open_from_string(std::string str) {
-    return filesystem::file_text_open_from_string(str);
-  }
- 
-  int file_text_close(int fd) {
-    return filesystem::file_text_close(fd);
-  }
+// Closes the file with the given file id.
+void file_bin_close(int fileid) {
+  enigma::files.get(fileid).fs.close();
+}
 
-} // namespace enigma_user
+// Returns the size (in bytes) of the file with the given file id.
+size_t file_bin_size(int fileid) {
+  size_t currPos = enigma::files.get(fileid).fs.tellg();
+  enigma::files.get(fileid).fs.seekg(0, enigma::files.get(fileid).fs.end);
+  size_t length = enigma::files.get(fileid).fs.tellg();
+  enigma::files.get(fileid).fs.seekg(currPos);
+  try_io_and_print(enigma::files.get(fileid))
+  return length;
+}
+
+// Returns the current position (in bytes; 0 is the first position) of the file with the given file id.
+size_t file_bin_position(int fileid) {
+  return enigma::files.get(fileid).fs.tellg();
+}
+
+// Moves the current position of the file to the indicated position. To append to a file move the position to the size of the file before writing.
+void file_bin_seek(int fileid, size_t pos) {
+  enigma::files.get(fileid).fs.seekg(pos);
+  try_io_and_print(enigma::files.get(fileid))
+}
+
+// Writes a byte of data to the file with the given file id.
+void file_bin_write_byte(int fileid, unsigned char byte) {
+  enigma::files.get(fileid).fs << byte;
+  try_io_and_print(enigma::files.get(fileid))
+}
+
+// Reads a byte of data from the file and returns this
+int file_bin_read_byte(int fileid) {
+  unsigned char byte = 0;
+  enigma::files.get(fileid).fs >> std::noskipws >> byte;
+  bool good = enigma::files.get(fileid).fs.good();
+  try_io_and_print(enigma::files.get(fileid))
+  return (!good) ? -1 : static_cast<int>(byte);
+}
+
+} // NAMESPACE enigma_user

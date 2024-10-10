@@ -6,6 +6,7 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstdint>
 
 namespace egm {
 namespace serialization {
