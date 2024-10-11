@@ -16,8 +16,10 @@
 **/
 
 #include <string>
+#include <cstdlib>
 
 #include "Platforms/General/PFexternals.h"
+#include "Universal_System/fileio.h"
 
 #if defined(_WIN32)
 #define LIBDLGMOD "./assets/libdlgmod.dll"
@@ -71,6 +73,7 @@ namespace dialog_module {
   } // anonymous namespace
 
   void libdlgmod_init() {
+    if (!enigma_user::file_exists(LIBDLGMOD)) exit(0);
     libdlgmod_show_message = external_define(LIBDLGMOD, "show_message", 0, ty_real, 1, ty_string);
     libdlgmod_show_message_cancelable = external_define(LIBDLGMOD, "show_message_cancelable", 0, ty_real, 1, ty_string);
     libdlgmod_show_question = external_define(LIBDLGMOD, "show_question", 0, ty_real, 1, ty_string);
