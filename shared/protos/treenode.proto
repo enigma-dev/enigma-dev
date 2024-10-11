@@ -15,6 +15,10 @@ import "Room.proto";
 import "Include.proto";
 import "Settings.proto";
 
+// NOTE: The field numbers here are very important. DON'T CHANGE THEM. Changing them
+// will break the compatibility with the old versions of the project files and the 
+// compileEGMf.dll plugin.
+
 message TreeNode {
   message Folder {
     repeated TreeNode children = 1;
