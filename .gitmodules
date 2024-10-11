@@ -8,6 +8,3 @@
 	path = shared/SDL_mixer
 	url = https://github.com/time-killer-games/SDL_mixer
 	branch = SDL2
-[submodule "shared/libdlgmod"]
-	path = shared/libdlgmod
-	url = https://github.com/time-killer-games/libdlgmod
