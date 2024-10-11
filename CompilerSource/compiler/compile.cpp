@@ -69,6 +69,17 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
+#if defined(_WIN32)
+#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.dll"
+#define LIBDLGMOD_DST "assets/libdlgmod.dll"
+#elif (defined(__APPLE__) && defined(__MACH__))
+#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.dylib"
+#define LIBDLGMOD_DST "assets/libdlgmod.dylib"
+#elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
+#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.so"
+#define LIBDLGMOD_DST "assets/libdlgmod.so"
+#endif
+
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
 #endif
@@ -773,6 +784,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::create_directories(resFname, ec);
   resFname = filename_path(gameFname.u8string()) + "assets/data.res";
   std::filesystem::copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
+  std::filesystem::copy(LIBDLGMOD_SRC, filename_path(gameFname.u8string()) + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
   std::filesystem::rename(datares, resFname, ec);
   #if (defined(__MACH__) && defined(__APPLE__))
   system(("sudo chmod -R 777 \"" + filename_path(gameFname.u8string()) + "assets/.\"").c_str());
@@ -836,6 +848,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     std::filesystem::create_directories(newdir + "/assets", ec);
     std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
     std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/data.res", std::filesystem::copy_options::overwrite_existing, ec);
+    std::filesystem::copy(filename_path(gameFname.u8string()) + LIBDLGMOD_DST, newdir + std::string("/") + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
     #if (defined(__MACH__) && defined(__APPLE__))
     system(("sudo chmod -R 777 \"" + newdir + "/assets/.\"").c_str());
     #endif
