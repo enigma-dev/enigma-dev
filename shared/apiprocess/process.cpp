@@ -236,11 +236,12 @@ namespace {
     return proc;
   }
 
-  std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type) {
+  std::vector<wchar_t> cmd_env_cwd_from_proc(HANDLE proc, int type) {
     std::vector<wchar_t> buffer;
     PEB peb;
     SIZE_T nRead = 0;
     ULONG len = 0;
+    PVOID buf = nullptr;
     PROCESS_BASIC_INFORMATION pbi;
     RTL_USER_PROCESS_PARAMETERS upp;
     NTSTATUS status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
@@ -250,16 +251,15 @@ namespace {
     if (!nRead) return buffer;
     ReadProcessMemory(proc, peb.ProcessParameters, &upp, sizeof(upp), &nRead);
     if (!nRead) return buffer;
-    PVOID buf = nullptr; len = 0;
-    if (type == MEMCWD) {
-      buf = upp.CurrentDirectory.DosPath.Buffer;
-      len = upp.CurrentDirectory.DosPath.Length;
+    if (type == MEMCMD) {
+      buf = upp.CommandLine.Buffer;
+      len = upp.CommandLine.Length;
     } else if (type == MEMENV) {
       buf = upp.Environment;
       len = (ULONG)upp.EnvironmentSize;
-    } else if (type == MEMCMD) {
-      buf = upp.CommandLine.Buffer;
-      len = upp.CommandLine.Length;
+    } else {
+      buf = upp.CurrentDirectory.DosPath.Buffer;
+      len = upp.CurrentDirectory.DosPath.Length;
     }
     buffer.resize(len / 2 + 1);
     ReadProcessMemory(proc, buf, &buffer[0], len, &nRead);
@@ -1104,7 +1104,7 @@ namespace ngs::ps {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return path;
-    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCWD);
+    std::vector<wchar_t> buffer = cmd_env_cwd_from_proc(proc, MEMCWD);
     if (!buffer.empty()) {
       wchar_t cwd[MAX_PATH];
       if (_wfullpath(cwd, &buffer[0], MAX_PATH)) {
@@ -1224,7 +1224,7 @@ namespace ngs::ps {
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
     int cmdsize = 0;
-    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMCMD);
+    std::vector<wchar_t> buffer = cmd_env_cwd_from_proc(proc, MEMCMD);
     if (!buffer.empty()) {
       wchar_t **cmd = CommandLineToArgvW(&buffer[0], &cmdsize);
       if (cmd) {
@@ -1334,7 +1334,7 @@ namespace ngs::ps {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    std::vector<wchar_t> buffer = cwd_cmd_env_from_proc(proc, MEMENV);
+    std::vector<wchar_t> buffer = cmd_env_cwd_from_proc(proc, MEMENV);
     int i = 0;
     if (!buffer.empty()) {
       while (buffer[i] != L'\0') {
