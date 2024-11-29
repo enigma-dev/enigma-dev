@@ -48,7 +48,7 @@ else
 	override CFLAGS += $(shell pkg-config --cflags sdl2)
 	override LDLIBS += -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
 	override LDFLAGS += -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
-	LDLGREPOS := $(shell chmod +x libdlgmod/build.sh;libdlgmod/build.sh;chmod 755 libdlgmod/libdlgmod.dll)
+	LDLGREPOS := $(shell if [ -f "libdlgmod/libdlgmod.dll" ]; then echo '"libdlgmod.dll" exists' else chmod +x libdlgmod/build.sh;libdlgmod/build.sh;chmod 755 libdlgmod/libdlgmod.dll; fi)
 endif
 
 override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
