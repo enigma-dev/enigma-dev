@@ -1,9 +1,47 @@
+###################################################################################
+##                                                                               ##
+##  Copyright (C) 2024 Saif Kandil (k0T0z)                                       ##
+##                                                                               ##
+##  This file is a part of the ENIGMA Development Environment.                   ##
+##                                                                               ##
+##                                                                               ##
+##  ENIGMA is free software: you can redistribute it and/or modify it under the  ##
+##  terms of the GNU General Public License as published by the Free Software    ##
+##  Foundation, version 3 of the license or any later version.                   ##
+##                                                                               ##
+##  This application and its source code is distributed AS-IS, WITHOUT ANY       ##
+##  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS    ##
+##  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more        ##
+##  details.                                                                     ##
+##                                                                               ##
+##  You should have recieved a copy of the GNU General Public License along      ##
+##  with this code. If not, see <http://www.gnu.org/licenses/>                   ##
+##                                                                               ##
+##  ENIGMA is an environment designed to create games and other programs with a  ##
+##  high-level, fully compilable language. Developers of ENIGMA or anything      ##
+##  associated with ENIGMA are in no way responsible for its users or            ##
+##  applications created by its users, or damages caused by the environment      ##
+##  or programs made in the environment.                                         ##
+##                                                                               ##
+###################################################################################
+
 cmake_minimum_required(VERSION 3.14)
 
+# Set default build type
+if(NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Build type not set - defaulting to Debug")
+  set(
+    CMAKE_BUILD_TYPE "Debug"
+    CACHE
+      STRING
+      "Choose the type of build from:  Debug Release MinSizeRel RelWithDebInfo."
+    FORCE)
+endif()
+
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-  set(CLI_TARGET "emake-debug")
+  set(CLI_TARGET "emake-debug" CACHE STRING "CLI target name")
 else()
-  set(CLI_TARGET "emake")
+  set(CLI_TARGET "emake" CACHE STRING "CLI target name")
 endif()
 
 set(CLI_TARGET_DESCRIPTION "ENIGMA CLI")
@@ -30,8 +68,8 @@ endif()
 target_include_directories(${CLI_TARGET} PRIVATE "${ENIGMA_DIR}/CompilerSource")
 
 # Our libs
-add_dependencies(${CLI_TARGET} "EGM" "compileEGMf" "Protocols")
-target_link_libraries(${CLI_TARGET} PRIVATE "EGM" "Protocols" "compileEGMf" "ENIGMAShared")
+add_dependencies(${CLI_TARGET} ${LIB_EGM} ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
+target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_EGM} ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
 
 # Find PugiXML
 find_library(LIB_PUGIXML NAMES pugixml)
@@ -46,21 +84,18 @@ find_package(yaml-cpp CONFIG REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp)
 
 #Find gRPC
-if (MSVC) # Windows actually does something right for once
-  find_package(gRPC CONFIG REQUIRED)
-  target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
-else() # https://tinyurl.com/arch-grpc-bug
-  find_library(LIB_GRPC_UNSECURE NAMES grpc++_unsecure)
-  find_library(LIB_GPR NAMES gpr)
-  find_library(LIB_CARES NAMES cares)
-  find_library(LIB_ADDRESS_SORTING NAMES address_sorting)
-  target_link_libraries(${CLI_TARGET} PRIVATE ${LIB_CARES} ${LIB_ADDRESS_SORTING} ${LIB_GPR} ${LIB_GRPC_UNSECURE})
-endif()
+find_package(gRPC CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 
 # Find Protobuf
-include(FindProtobuf)
-include_directories(${Protobuf_INCLUDE_DIRS})
-target_link_libraries(${CLI_TARGET} PRIVATE ${Protobuf_LIBRARIES})
+find_package(Protobuf CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE protobuf::libprotobuf)
+
+# Find absl
+find_package(absl CONFIG REQUIRED)
+target_link_libraries(${CLI_TARGET} PRIVATE absl::log_internal_check_op)
+# Use the one below if you installed abseil manually
+# target_link_libraries(${CLI_TARGET} PRIVATE abseil_dll)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -97,7 +132,8 @@ if(WIN32)
 endif(WIN32)
 
 # Find Boost
-find_package(Boost COMPONENTS system program_options filesystem REQUIRED)
+# https://cmake.org/cmake/help/latest/policy/CMP0167.html
+find_package(Boost CONFIG COMPONENTS system program_options filesystem REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE Boost::program_options)
 
 install(TARGETS ${CLI_TARGET} RUNTIME DESTINATION .)
