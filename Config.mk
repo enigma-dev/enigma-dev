@@ -60,6 +60,13 @@ ifeq ($(OS), DragonFly)
 	LDFLAGS  += -L/usr/local/lib
 endif
 
+# Which search priority to use for libraries (system or local)
+CUSTOM_LIB_SEARCH_PRIORITY := system
+
+ifeq ($(CUSTOM_LIB_SEARCH_PRIORITY), local)
+    LDFLAGS += -L/usr/local/lib
+endif
+
 # These will be relative to the file that includes this Makefile
 SRC_DIR := .
 OBJ_DIR := .eobjs
