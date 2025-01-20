@@ -7,12 +7,17 @@ import "Background.proto";
 import "Object.proto";
 import "Script.proto";
 import "Shader.proto";
+import "EVisualShader.proto";
 import "Path.proto";
 import "Font.proto";
 import "Timeline.proto";
 import "Room.proto";
 import "Include.proto";
 import "Settings.proto";
+
+// NOTE: The field numbers here are very important. DON'T CHANGE THEM. Changing them
+// will break the compatibility with the old versions of the project files and the 
+// compileEGMf.dll plugin.
 
 message TreeNode {
   message Folder {
@@ -35,11 +40,12 @@ message TreeNode {
     resources.Timeline timeline = 9;
     // NOTE: No idea what 9(+1) is in GM
     resources.Shader shader = 11;
+    resources.EVisualShader visual_shader = 12;
     // NOTE: these below don't exist in GM's map
-    resources.Include include = 12;
-    resources.Settings settings = 13;
-    //resources.Macros macros = 14;
-    //resources.Help help = 15;
+    resources.Include include = 13;
+    resources.Settings settings = 14;
+    //resources.Macros macros = 15;
+    //resources.Help help = 16;
   }
 
   optional string name = 101;

@@ -42,6 +42,9 @@ set(SHARED_SOURCES
    "rectpacker/rectpack.cpp"
    "libpng-util/libpng-util.cpp"
    "ProtoYaml/proto-yaml.cpp"
+   "ResourceTransformations/VisualShader/visual_shader.cpp"
+   "ResourceTransformations/VisualShader/visual_shader_nodes.cpp"
+   "ResourceTransformations/VisualShader/vs_noise_nodes.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
