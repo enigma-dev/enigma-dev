@@ -26,8 +26,8 @@
           <argument>
             <kind>1</kind>
             <string>&#13;
-draw_set_valign(fa_top)&#13;
-draw_set_halign(fa_left)&#13;
+draw_set_valign(valign)&#13;
+draw_set_halign(halign)&#13;
 draw_set_font(font)&#13;
 draw_set_color(color)&#13;
 &#13;

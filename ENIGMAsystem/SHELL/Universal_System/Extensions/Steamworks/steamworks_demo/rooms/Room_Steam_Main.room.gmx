@@ -15,7 +15,7 @@
   <clearViewBackground>-1</clearViewBackground>
   <makerSettings>
     <isSet>-1</isSet>
-    <w>1520</w>
+    <w>1692</w>
     <h>902</h>
     <showGrid>-1</showGrid>
     <showObjects>-1</showObjects>
@@ -51,8 +51,8 @@
   </views>
   <instances>
     <instance code="" colour="4294967295" id="100003" locked="0" name="inst_1F9605C1" objName="Obj_Steam_GeneralInfo" rotation="0.0" scaleX="1.0" scaleY="1.0" x="32" y="128"/>
-    <instance code="&#13;&#10;draw_set_valign(fa_middle);&#13;&#10;draw_set_halign(fa_center);&#13;&#10;&#13;&#10;text = &quot;Steamworks Extension&quot;;&#13;&#10;font = Font_ENIGMA_50;" colour="4294967295" id="100031" locked="0" name="inst_CA62D296" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="768" y="48"/>
-    <instance code="&#13;&#10;text = &quot;Overlays&quot;&#13;&#10;targetRoom = Room_Steam_Overlay&#13;&#10;" colour="4294967295" id="100134" locked="0" name="inst_E218270A" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="128"/>
+    <instance code="&#13;&#10;draw_set_valign(valign);&#13;&#10;draw_set_halign(halign);&#13;&#10;&#13;&#10;text = &quot;Steamworks Extension&quot;;&#13;&#10;font = Font_ENIGMA_50;" colour="4294967295" id="100031" locked="0" name="inst_CA62D296" objName="Obj_ENIGMA_text" rotation="0.0" scaleX="1.0" scaleY="1.0" x="768" y="48"/>
+    <instance code="&#13;&#10;text = &quot;Overlays&quot;&#13;&#10;targetRoom = Room_Steam_Overlay" colour="4294967295" id="100134" locked="0" name="inst_E218270A" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="128"/>
     <instance code="&#13;&#10;text = &quot;Remote Storage&quot;&#13;&#10;targetRoom = Room_Steam_Storage&#13;&#10;" colour="4294967295" id="100135" locked="0" name="inst_C2DC61CB" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="224"/>
     <instance code="&#13;&#10;text = &quot;UGC&quot;&#13;&#10;targetRoom = Room_Steam_UGC&#13;&#10;" colour="4294967295" id="100136" locked="0" name="inst_35174675" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="320"/>
     <instance code="&#13;&#10;text = &quot;Social&quot;&#13;&#10;targetRoom = Room_Steam_Social&#13;&#10;" colour="4294967295" id="100137" locked="0" name="inst_CA751EED" objName="Obj_Steam_Goto" rotation="0.0" scaleX="4.42" scaleY="1.0" x="912" y="416"/>
