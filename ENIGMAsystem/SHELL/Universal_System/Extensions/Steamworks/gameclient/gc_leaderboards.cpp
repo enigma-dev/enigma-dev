@@ -76,44 +76,50 @@ bool GCLeaderboards::create_leaderboard(const int& id, const std::string& leader
 
   if (steam_api_call != 0) {
     GCLeaderboardsCookies* gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
-
     gc_leaderboards_cookies_.push_back(gc_leaderboards_find_result);
+    
+    return false;
+
   } else {
     // TODO: Write more descriptive error message.
     DEBUG_MESSAGE("Calling FindOrCreateLeaderboard() failed for some reason.", M_ERROR);
     return false;
   }
-
-  return true;
+  
 }
 
-void GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderboard_name) {
+bool GCLeaderboards::match_leaderboard_name(const std::string& leaderboard_name) {
+  std::string leaderboard_name_buffer;
+  GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer, GCLeaderboards::current_leaderboard_);
+  return leaderboard_name_buffer == leaderboard_name;
+}
+
+bool GCLeaderboards::find_leaderboard(const int& id, const std::string& leaderboard_name) {
   deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ != INVALID_LEADERBOARD) {
     std::string leaderboard_name_buffer;
+    
+    GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer, GCLeaderboards::current_leaderboard_);
 
-    if (!GCLeaderboards::get_leaderboard_name(leaderboard_name_buffer, GCLeaderboards::current_leaderboard_)) {
-      return;
-    }
-
-    if (leaderboard_name_buffer == leaderboard_name) return;
-
-    GCLeaderboards::current_leaderboard_ = INVALID_LEADERBOARD;
+    if (leaderboard_name_buffer == leaderboard_name) return true;
+    else GCLeaderboards::current_leaderboard_ = INVALID_LEADERBOARD;
   }
 
-  SteamAPICall_t steam_api_call{0};
-
-  steam_api_call = steamworks_b::SteamBinder::ISteamUserStats_FindLeaderboard(
-      steamworks_b::SteamBinder::SteamUserStats_vXXX(), leaderboard_name.c_str());
+  SteamAPICall_t steam_api_call{steamworks_b::SteamBinder::ISteamUserStats_FindLeaderboard(
+      steamworks_b::SteamBinder::SteamUserStats_vXXX(), leaderboard_name.c_str())};
 
   if (steam_api_call != 0) {
     GCLeaderboardsCookies* gc_leaderboards_find_result{new GCLeaderboardsFindResultCookies(id, this, steam_api_call)};
-
+    
     gc_leaderboards_cookies_.push_back(gc_leaderboards_find_result);
+
+    return false;
+
   } else {
     // TODO: Write more descriptive error message.
     DEBUG_MESSAGE("Calling FindOrCreateLeaderboard() failed for some reason.", M_ERROR);
+    return false;
   }
 }
 
@@ -136,7 +142,6 @@ bool GCLeaderboards::upload_score(const int& id, const int& score,
 
 bool GCLeaderboards::download_scores(const int& id, const ELeaderboardDataRequest& leaderboard_data_request,
                                      const int& range_start, const int& range_end) {
-  deallocate_leaderboards_cookies_if_done();
 
   if (GCLeaderboards::current_leaderboard_ == INVALID_LEADERBOARD) return false;
 

@@ -71,8 +71,11 @@ class GCLeaderboards {
    *           AssetArray @c add() function.
    * 
    * @param leaderboard_name the name of the leaderboard.
+   * @return true If the leaderboard is successfully found.
    */
-  void find_leaderboard(const int& id, const std::string& leaderboard_name);
+  bool find_leaderboard(const int& id, const std::string& leaderboard_name);
+
+  bool match_leaderboard_name(const std::string& leaderboard_name);
 
   /**
    * @brief Uploads a user score to a specified leaderboard.
