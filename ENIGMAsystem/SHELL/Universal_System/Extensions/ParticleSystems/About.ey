@@ -1,0 +1,14 @@
+%e-yaml
+---
+
+Name: Particle Systems
+Identifier: ParticleSystems
+Author: forthevin
+Description: Adds particle systems functions.
+Default: true
+Icon: ps.png
+
+Depends: None
+Dependencies: None
+
+

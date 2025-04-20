@@ -1,0 +1,41 @@
+syntax = "proto2";
+package buffers;
+
+import "Sprite.proto";
+import "Sound.proto";
+import "Background.proto";
+import "Object.proto";
+import "Script.proto";
+import "Shader.proto";
+import "Path.proto";
+import "Font.proto";
+import "Timeline.proto";
+import "Room.proto";
+import "Include.proto";
+import "Settings.proto";
+
+message TreeNode {
+  oneof type {
+    bool folder = 100;
+    // NOTE: these are all off by 1 cause protobutt don't allow you to set field number to 0
+    resources.Object object = 1;
+    resources.Sprite sprite = 2;
+    resources.Sound sound = 3;
+    resources.Room room = 4;
+    resources.Background background = 5;
+    resources.Path path = 6;
+    resources.Script script = 7;
+    resources.Font font = 8;
+    resources.Timeline timeline = 9;
+    // NOTE: No idea what 9(+1) is in GM
+    resources.Shader shader = 11;
+    // NOTE: these below don't exist in GM's map
+    resources.Include include = 12;
+    resources.Settings settings = 13;
+    //resources.Macros macros = 14;
+    //resources.Help help = 15;
+  }
+
+  optional string name = 101;
+  repeated TreeNode child = 102;
+}

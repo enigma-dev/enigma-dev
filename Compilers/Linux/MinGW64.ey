@@ -1,0 +1,34 @@
+%e-yaml
+---
+Name: MinGW 64
+Native: No
+Maintainer: fundies
+Target-platform: Windows
+
+Make-Vars:
+  path:
+  make: make
+  makeflags:
+  cc: x86_64-w64-mingw32-gcc
+  cxx: x86_64-w64-mingw32-g++
+  cppflags:
+  cxxflags: -I/usr/lib/libffi-3.2.1/include/ -I../Additional/x86_64-w64-mingw32/include -I/mingw64/include/
+  cflags:
+  ldflags: -L../Additional/x86_64-w64-mingw32/lib -L/mingw64/lib -static-libgcc -static-libstdc++ -static
+  links:
+  windres: x86_64-w64-mingw32-windres
+  pkg-config: x86_64-w64-mingw32-pkg-config
+
+
+Parser-Vars:
+  defines: x86_64-w64-mingw32-cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: x86_64-w64-mingw32-gcc -E -x c++ --std=c++03 -v $blank
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+
+EXE-Vars:
+  resources: /tmp/stigma.res
+  Build-Extension:
+  Run-output: $tempfile
+  Run-Program: wine $game
+  Run-Params:

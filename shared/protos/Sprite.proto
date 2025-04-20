@@ -1,0 +1,39 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Sprite {
+  optional int32 id = 1 [(gmx) = "GMX_DEPRECATED"];
+
+  optional bool preload = 2 [(gmx) = "GMX_DEPRECATED"];
+  optional bool smooth_edges = 3 [(gmx) = "GMX_DEPRECATED"];
+
+  optional int32 alpha_tolerance = 4 [(gmx) = "coltolerance"];
+  optional bool separate_mask = 5 [(gmx) = "sepmasks"];
+  optional int32 origin_x = 6 [(gmx) = "xorig"];
+  optional int32 origin_y = 7 [(gmx) = "yorigin"];
+
+  enum Shape { PRECISE = 0; RECTANGLE = 1; DISK = 2; DIAMOND = 3; }
+
+  optional Shape shape = 8 [(gmx) = "colkind"];
+
+  enum BoundingBox { AUTOMATIC = 0; FULL_IMAGE = 1; MANUAL = 2; }
+
+  optional BoundingBox bbox_mode = 9 [(gmx) = "bboxmode"];
+
+  optional int32 bbox_left = 10;
+  optional int32 bbox_right = 11;
+  optional int32 bbox_top = 12;
+  optional int32 bbox_bottom = 13;
+
+  optional int32 type = 14;
+  optional int32 h_tile = 15 [(gmx) = "HTile"];
+  optional int32 v_tile = 16 [(gmx) = "VTile"];
+  optional int32 texture_group = 17 [(gmx) = "TextureGroups/TextureGroup0"];
+  optional bool for3D = 18 [(gmx) = "For3D"];
+  optional uint32 width = 19;
+  optional uint32 height = 20;
+
+  repeated string subimages = 21 [(gmx) = "frames/frame", (file_path) = true, (file_kind) = IMAGE];
+}

@@ -1,0 +1,43 @@
+/// BUFFER TYPE SIZES
+gtest_expect_eq(buffer_sizeof(buffer_string), 0);
+gtest_expect_eq(buffer_sizeof(buffer_text), 0);
+gtest_expect_eq(buffer_sizeof(buffer_u8), 1);
+gtest_expect_eq(buffer_sizeof(buffer_s8), 1);
+gtest_expect_eq(buffer_sizeof(buffer_bool), 1);
+gtest_expect_eq(buffer_sizeof(buffer_u16), 2);
+gtest_expect_eq(buffer_sizeof(buffer_s16), 2);
+gtest_expect_eq(buffer_sizeof(buffer_f16), 2);
+gtest_expect_eq(buffer_sizeof(buffer_u32), 4);
+gtest_expect_eq(buffer_sizeof(buffer_s32), 4);
+gtest_expect_eq(buffer_sizeof(buffer_f32), 4);
+gtest_expect_eq(buffer_sizeof(buffer_u64), 8);
+gtest_expect_eq(buffer_sizeof(buffer_f64), 8);
+
+/// NOTHING SHOULD EXIST YET
+gtest_expect_false(buffer_exists(-1));
+gtest_expect_false(buffer_exists(0));
+gtest_expect_false(buffer_exists(1));
+
+/// BEGIN FIXED BUFFER TEST
+var buffer_fixed_test;
+buffer_fixed_test = buffer_create(137, buffer_fixed, 4);
+gtest_assert_true(buffer_exists(buffer_fixed_test));
+
+gtest_expect_eq(buffer_get_size(buffer_fixed_test), 137);
+gtest_expect_eq(buffer_get_type(buffer_fixed_test), buffer_fixed);
+gtest_expect_eq(buffer_get_alignment(buffer_fixed_test), 4);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 0);
+gtest_expect_eq(buffer_read(buffer_fixed_test, buffer_u8), 0);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 1);
+buffer_seek(buffer_fixed_test, buffer_seek_end, 0);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 137);
+buffer_seek(buffer_fixed_test, buffer_seek_relative, -10);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 127);
+buffer_seek(buffer_fixed_test, buffer_seek_start, 23);
+gtest_expect_eq(buffer_tell(buffer_fixed_test), 23);
+
+buffer_delete(buffer_fixed_test);
+gtest_expect_false(buffer_exists(buffer_fixed_test));
+
+/// DONE!
+game_end();

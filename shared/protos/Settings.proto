@@ -1,0 +1,137 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Settings {
+  optional API api = 1;
+  optional Compiler compiler = 2;
+  optional General general = 3;
+  optional Graphics graphics = 4;
+  optional Windowing windowing = 8;
+  optional Info info = 5;
+  optional Installer installer = 6;
+  optional Deployment deployment = 7;
+  optional Shortcuts shortcuts = 9;
+}
+
+message API {
+  optional string target_audio = 1;
+  optional string target_platform = 2;
+  optional string target_compiler = 3;
+  optional string target_graphics = 4;
+  optional string target_widgets = 5;
+  optional string target_collision = 6;
+  optional string target_network = 7;
+  repeated string extensions = 8;
+}
+
+message Compiler {
+  optional uint32 inherit_strings = 1;
+  optional uint32 inherit_escapes = 2;
+  optional uint32 inherit_increment = 3;
+  optional uint32 inherit_equivalence = 4;
+  optional uint32 inherit_literals = 5;
+  optional uint32 inherit_negatives = 6;
+  optional uint32 compliance_mode = 7;
+  repeated string keyword_blacklist = 8;
+
+  optional string eobjs_directory = 9;
+  optional string codegen_directory = 10;
+  optional bool inherit_objects = 11;
+  optional bool automatic_semicolons = 12;
+
+  optional uint32 graphics_angular_unit = 13;
+  optional uint32 graphics_scalar_precision = 14;
+
+  optional uint32 collision_angular_unit = 15;
+  optional uint32 collision_scalar_precision = 16;
+
+  optional uint32 audio_angular_unit = 17;
+  optional uint32 audio_scalar_precision = 18;
+
+  optional bool treat_uninitialized_vars_as_zero = 19;
+}
+
+message General {
+  optional uint64 game_id = 1 [(gmx) = "option_gameid"];
+  optional string game_guid = 2 [(gmx) = "option_gameguid"];
+  optional string display_name = 4 [(gmx) = "option_display_name"];
+  optional uint32 version_major = 5 [(gmx) = "option_version_major"];
+  optional uint32 version_minor = 6 [(gmx) = "option_version_minor"];
+  optional uint32 version_release = 7 [(gmx) = "option_version_release"];
+  optional uint32 version_build = 8 [(gmx) = "option_version_build"];
+  optional string company = 9 [(gmx) = "option_version_company"];
+  optional string product = 10 [(gmx) = "option_version_product"];
+  optional string copyright = 11 [(gmx) = "option_version_copyright"];
+  optional string description = 12 [(gmx) = "option_version_description"];
+  optional bool show_cursor = 13 [default = true, (gmx) = "option_showcursor"];
+  optional string game_icon = 14 [(gmx) = "option_windows_game_icon"];
+  optional string splash_screen = 15 [(gmx) = "option_windows_splash_screen"];
+  optional bool show_splash_screen = 16 [(gmx) = "option_windows_use_splash"];
+  optional uint32 sleep_margin = 17 [(gmx) = "option_windows_sleep_margin"];
+  optional string save_data_location = 18 [(gmx) = "option_windows_save_location"];
+  optional bool menu_dock = 19 [(gmx) = "option_mac_menu_dock"];
+}
+
+message Graphics {
+  optional int32 color_outside_room_region = 1 [(gmx) = "option_windowcolor"];
+  optional bool allow_fullscreen_change = 2 [(gmx) = "option_screenkey"];
+  optional bool interpolate_textures = 3 [(gmx) = "option_interpolate"];
+  optional bool force_software_vertex_processing = 4 [(gmx) = ""];
+  optional bool use_synchronization = 6 [(gmx) = ""];
+  optional double view_scale = 11 [(gmx) = "option_scale"];
+  optional bool create_textures_on_demand = 12 [(gmx) = "option_windows_create_textures_on_demand"];
+  optional bool alternate_synchronization_method = 13 [(gmx) = "option_windows_alternate_sync_method"];
+
+  enum VertexBufferMethod { FAST = 0; COMPATIBLE = 1; MOST_COMPATIBLE = 2; }
+  optional VertexBufferMethod vertex_buffer_method = 14 [(gmx) = "option_windows_vertex_buffer_method2"];
+
+  optional uint32 texture_page_size = 15 [(gmx) = "option_windows_texture_page"];
+  optional bool enable_hidpi = 16 [(gmx) = "option_mac_enable_retina"];
+}
+
+message Windowing {
+  optional bool is_sizeable = 1 [(gmx) = "option_sizeable"];
+  optional bool start_in_fullscreen = 2 [(gmx) = "option_fullscreen"];
+  optional bool show_border = 3 [default = true, (gmx) = "option_noborder"];
+  optional bool show_icons = 4 [default = true, (gmx) = "option_nobuttons"];
+  optional bool stay_on_top = 5 [(gmx) = "option_stayontop"];
+  optional bool freeze_on_lose_focus = 6 [(gmx) = "option_freeze"];
+  optional bool treat_close_as_escape = 7 [default = true];
+}
+
+message Info {
+  optional string author_name = 1 [(gmx) = "option_author"];
+  optional string author_email = 2 [(gmx) = "option_linux_maintainer_email"];
+  optional string website = 3 [(gmx) = "option_linux_homepage"];
+  optional string version = 4 [(gmx) = "option_version"];
+  optional uint32 last_changed = 5 [(gmx) = "option_lastchanged"];
+  optional string information = 6 [(gmx) = "option_information"];
+}
+
+message Installer {
+  optional string finished_image = 1 [(gmx) = "option_windows_runner_finished"];
+  optional string header_image = 2 [(gmx) = "option_windows_runner_header"];
+  optional string script = 3 [(gmx) = "option_windows_nsis_file"];
+  optional string license_agreement = 4 [(gmx) = "option_windows_license"];
+}
+
+message Deployment {
+  optional string app_id = 1 [(gmx) = "option_mac_app_id"];
+  optional string app_output = 2 [(gmx) = "option_mac_output_dir"];
+  optional string team_identifier = 3 [(gmx) = "option_mac_team_id"];
+  optional bool enable_appstore_build = 4 [(gmx) = "option_mac_create_app_store"];
+  optional bool allow_incoming_connections = 5 [(gmx) = "option_mac_appstore_incoming_allow"];
+  optional bool allow_outgoing_connections = 6 [(gmx) = "option_mac_appstore_outgoing_allow"];
+  optional string app_category = 7 [(gmx) = "option_mac_app_category"];
+  optional string signing_identity = 8 [(gmx) = "option_mac_signing_identity"];
+}
+
+message Shortcuts {
+  optional bool let_escape_end_game = 1 [default = true];
+  optional bool let_f4_switch_fullscreen = 2;
+  optional bool let_f1_show_game_info = 3;
+  optional bool let_f9_screenshot = 4;
+  optional bool let_f5_save_f6_load = 5;
+}

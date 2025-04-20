@@ -1,0 +1,2 @@
+char int float  double
+unsigned signed long short

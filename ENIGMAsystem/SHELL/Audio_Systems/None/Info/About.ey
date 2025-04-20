@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: None
+Identifier: None
+Description: Do not include any sound libraries or codecs. Major space saver.
+Author: Josh Ventura
+
+

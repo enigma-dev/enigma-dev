@@ -1,0 +1,24 @@
+// Draw sprites
+draw_sprite(npow2_spr_gif, 0, 0, 0);
+draw_sprite(npow2_spr_gif, 1, 70, 0);
+
+draw_sprite(npow2_spr_bmp, 0, 0, 35);
+draw_sprite(npow2_spr_png, 1, 70, 35);
+
+draw_sprite(pow2_spr_gif, 0, 0, 70);
+draw_sprite(pow2_spr_gif, 1, 64, 70);
+
+draw_sprite(pow2_spr_bmp, 0, 0, 134);
+draw_sprite(pow2_spr_png, 1, 64, 134);
+
+for (int i = 0 i < 4; ++i)
+  draw_sprite(spr_strip, i, i*64, 198);
+
+// Draw backgrounds
+draw_background(npow2_bkg_gif, 0, 262);
+draw_background(npow2_bkg_bmp, 70, 262);
+draw_background(npow2_bkg_png, 140, 262);
+
+draw_background(pow2_bkg_gif, 0, 297);
+draw_background(pow2_bkg_bmp, 64, 297);
+draw_background(pow2_bkg_png, 128, 297);

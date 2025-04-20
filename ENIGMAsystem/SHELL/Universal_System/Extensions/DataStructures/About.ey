@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: Data Structures
+Identifier: DataStructures
+Author: TGMG & Polygone
+Description: Adds data structures using generic collections.
+Icon: datastructures.png
+
+Depends: None
+Dependencies: None

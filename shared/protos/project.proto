@@ -1,0 +1,9 @@
+syntax = "proto2";
+package buffers;
+
+import "game.proto";
+
+message Project {
+  optional Game game = 1;
+  //optional EditorMetaData = 2;
+}

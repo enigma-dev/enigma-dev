@@ -1,0 +1,51 @@
+# competition for Thundercleese
+notifications:
+  irc: "chat.freenode.net#enigma"
+# disable the depth option for git allowing us to merge multiple prs simultaneously
+git:
+  depth: false
+# don't build "feature" branches
+branches:
+  only:
+    - "master"
+    
+# by default most of our jobs will be run on a linux instance
+os: linux
+group: travis_latest
+compiler: gcc
+language: cpp
+dist: focal
+
+env:
+  global:
+    - OUTPUT=/tmp/test
+    # this is the default config each job in the matrix overrides a subset of
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+
+before_install: sudo dpkg --add-architecture i386;
+install: ./CI/install_emake_deps.sh && ./CI/split_jobs.sh install
+before_script: make -j4 && make -j4 emake
+script: ./CI/split_jobs.sh run
+    
+jobs:
+  # don't wait for OSX
+  fast_finish: true
+  allow_failures:
+    - os: osx
+  include:
+    - stage: ENIGMA CI
+      env: WORKER=0
+    - stage: ENIGMA CI
+      env: WORKER=1
+    - stage: ENIGMA CI
+      env: WORKER=2
+    - stage: ENIGMA CI
+      env: WORKER=3
+    - stage: ENIGMA CI
+      env: WORKER=4
+    - stage: ENIGMA CI
+      env: WORKER=0
+      os: osx
+      osx_image: xcode11.3
+      before_install:
+

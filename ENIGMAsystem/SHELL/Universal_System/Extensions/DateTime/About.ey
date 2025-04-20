@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Date Time
+Identifier: DateTime
+Author: Harri
+Description: Adds date and time functions.
+Icon: datetime.png
+
+Depends: None
+Dependencies: None
+

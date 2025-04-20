@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="JustDefineIt" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Documentation/;test/;" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DDEBUG_MODE" />
+				</Compiler>
+			</Target>
+			<Target title="Debug-Render">
+				<Option output="bin/Debug-Render/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug-Render/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-DDEBUG_MODE" />
+					<Add option="-DRENDER_ASTS" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Profile">
+				<Option output="bin/Profile/JustDefineIt" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Profile" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-pg" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-pg" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wshadow" />
+			<Add option="-Winit-self" />
+			<Add option="-Wredundant-decls" />
+			<Add option="-Wcast-align" />
+			<Add option="-Wundef" />
+			<Add option="-Wfloat-equal" />
+			<Add option="-Wunreachable-code" />
+			<Add option="-Wmissing-declarations" />
+			<Add option="-Wmissing-include-dirs" />
+			<Add option="-Wswitch-enum" />
+			<Add option="-Wswitch-default" />
+			<Add option="-Wmain" />
+			<Add option="-pedantic-errors" />
+			<Add option="-pedantic" />
+			<Add option="-Wextra" />
+			<Add option="-Wall" />
+			<Add option="-Werror" />
+			<Add directory="./src" />
+		</Compiler>
+		<Unit filename="dox/scope.dox">
+			<Option virtualFolder="Documentation/" />
+		</Unit>
+		<Unit filename="dox/token.dox">
+			<Option virtualFolder="Documentation/" />
+		</Unit>
+		<Unit filename="src/API/AST.cpp" />
+		<Unit filename="src/API/AST.h" />
+		<Unit filename="src/API/AST_Export.cpp" />
+		<Unit filename="src/API/AST_forward.h" />
+		<Unit filename="src/API/AST_operator.cpp" />
+		<Unit filename="src/API/AST_operator.h" />
+		<Unit filename="src/API/compile_settings.h" />
+		<Unit filename="src/API/context.cpp" />
+		<Unit filename="src/API/context.h" />
+		<Unit filename="src/API/error_context.h" />
+		<Unit filename="src/API/error_reporting.cpp" />
+		<Unit filename="src/API/error_reporting.h" />
+		<Unit filename="src/API/jdi.cpp" />
+		<Unit filename="src/API/jdi.h" />
+		<Unit filename="src/API/lexer_interface.cpp" />
+		<Unit filename="src/API/lexer_interface.h" />
+		<Unit filename="src/API/parse_config.h" />
+		<Unit filename="src/API/user_tokens.cpp" />
+		<Unit filename="src/API/user_tokens.h" />
+		<Unit filename="src/General/debug_macros.cpp" />
+		<Unit filename="src/General/debug_macros.h" />
+		<Unit filename="src/General/llreader.cpp" />
+		<Unit filename="src/General/llreader.h" />
+		<Unit filename="src/General/parse_basics.cpp" />
+		<Unit filename="src/General/parse_basics.h" />
+		<Unit filename="src/General/quickreference.h" />
+		<Unit filename="src/General/quickstack.h" />
+		<Unit filename="src/General/quickvector.h" />
+		<Unit filename="src/General/svg_simple.cpp" />
+		<Unit filename="src/General/svg_simple.h" />
+		<Unit filename="src/Parser/base.cpp" />
+		<Unit filename="src/Parser/cclass_base.h" />
+		<Unit filename="src/Parser/context_parser.cpp" />
+		<Unit filename="src/Parser/context_parser.h" />
+		<Unit filename="src/Parser/handlers/handle_class.cpp" />
+		<Unit filename="src/Parser/handlers/handle_declarators.cpp" />
+		<Unit filename="src/Parser/handlers/handle_enum.cpp" />
+		<Unit filename="src/Parser/handlers/handle_friend.cpp" />
+		<Unit filename="src/Parser/handlers/handle_function_impl.cpp" />
+		<Unit filename="src/Parser/handlers/handle_function_impl.h" />
+		<Unit filename="src/Parser/handlers/handle_hypothetical.cpp" />
+		<Unit filename="src/Parser/handlers/handle_namespace.cpp" />
+		<Unit filename="src/Parser/handlers/handle_operatorkw_cast.cpp" />
+		<Unit filename="src/Parser/handlers/handle_scope.cpp" />
+		<Unit filename="src/Parser/handlers/handle_templates.cpp" />
+		<Unit filename="src/Parser/handlers/handle_union.cpp" />
+		<Unit filename="src/Parser/is_potential_constructor.h" />
+		<Unit filename="src/Parser/readers/read_expression.cpp" />
+		<Unit filename="src/Parser/readers/read_next_token.cpp" />
+		<Unit filename="src/Parser/readers/read_operatorkw_name.cpp" />
+		<Unit filename="src/Parser/readers/read_qualified_definition.cpp" />
+		<Unit filename="src/Parser/readers/read_template_parameters.cpp" />
+		<Unit filename="src/Parser/readers/read_type.cpp" />
+		<Unit filename="src/Storage/arg_key.cpp" />
+		<Unit filename="src/Storage/arg_key.h" />
+		<Unit filename="src/Storage/definition.cpp" />
+		<Unit filename="src/Storage/definition.h" />
+		<Unit filename="src/Storage/definition_duplicate.cpp" />
+		<Unit filename="src/Storage/definition_forward.h" />
+		<Unit filename="src/Storage/full_type.cpp" />
+		<Unit filename="src/Storage/full_type.h" />
+		<Unit filename="src/Storage/references.cpp" />
+		<Unit filename="src/Storage/references.h" />
+		<Unit filename="src/Storage/value.cpp" />
+		<Unit filename="src/Storage/value.h" />
+		<Unit filename="src/Storage/value_funcs.cpp" />
+		<Unit filename="src/Storage/value_funcs.h" />
+		<Unit filename="src/System/builtins.cpp" />
+		<Unit filename="src/System/builtins.h" />
+		<Unit filename="src/System/lex_buffer.cpp" />
+		<Unit filename="src/System/lex_buffer.h" />
+		<Unit filename="src/System/lex_cpp.cpp" />
+		<Unit filename="src/System/lex_cpp.h" />
+		<Unit filename="src/System/macros.cpp" />
+		<Unit filename="src/System/macros.h" />
+		<Unit filename="src/System/symbols.cpp" />
+		<Unit filename="src/System/symbols.h" />
+		<Unit filename="src/System/token.cpp" />
+		<Unit filename="src/System/token.h" />
+		<Unit filename="src/System/type_usage_flags.h" />
+		<Unit filename="test/MAIN.cc">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/debug_lexer.cpp">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/debug_lexer.h">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/modifiers.txt">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/primitives.txt">
+			<Option virtualFolder="test/" />
+		</Unit>
+		<Unit filename="test/test.cc">
+			<Option compile="0" />
+			<Option link="0" />
+			<Option virtualFolder="test/" />
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Extensions>
+			<envvars />
+			<code_completion />
+			<lib_finder disable_auto="1" />
+			<debugger />
+			<DoxyBlocks>
+				<comment_style block="0" line="0" />
+				<doxyfile_project />
+				<doxyfile_build />
+				<doxyfile_warnings />
+				<doxyfile_output />
+				<doxyfile_dot />
+				<general />
+			</DoxyBlocks>
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Motion Planning
+Identifier: MotionPlanning
+Author: Harri
+Description: Adds motion planning functions.
+Icon: mp.png
+
+Depends: None
+Dependencies: Paths
+

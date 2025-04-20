@@ -1,0 +1,33 @@
+%e-yaml
+---
+Name: MinGW 32
+Native: No
+Maintainer: fundies
+Target-platform: Windows
+
+Make-Vars:
+  path:
+  make: make
+  makeflags:
+  cc: i686-w64-mingw32-gcc
+  cxx: i686-w64-mingw32-g++
+  cppflags:
+  cxxflags: -I../Additional/i686-w64-mingw32/include -I/mingw32/include/
+  cflags:
+  ldflags: -L../Additional/i686-w64-mingw32/lib -L/mingw32/lib -static-libgcc -static-libstdc++ -static
+  links:
+  windres: i686-w64-mingw32-windres
+  pkg-config: i686-w64-mingw32-pkg-config
+
+Parser-Vars:
+  defines: i686-w64-mingw32-cpp -dM -x c++ --std=c++03 -E $blank
+  searchdirs: i686-w64-mingw32-gcc -E -x c++ --std=c++03 -v $blank
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+  
+EXE-Vars:
+  resources: /tmp/stigma.res
+  Build-Extension:
+  Run-output: $tempfile
+  Run-Program: wine $game
+  Run-Params:

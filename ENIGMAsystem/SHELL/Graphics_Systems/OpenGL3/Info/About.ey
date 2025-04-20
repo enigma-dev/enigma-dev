@@ -1,0 +1,10 @@
+%e-yaml
+---
+
+Name: OpenGL 3.3
+Identifier: OpenGL3
+Description: High quality optimized rendering using OpenGL3.3 making full use of the latest features and the graphics pipeline, but may not be as compatible on very old hardware and graphics cards.
+Author: Harijs Grinbergs, Robert B. Colton et al.
+
+Depends:
+	Build-platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD

@@ -1,0 +1,16 @@
+syntax = "proto2";
+package buffers;
+
+import "compiler.proto";
+
+service Compiler {
+  rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
+  rpc GetResources (Empty) returns (stream Resource);
+  rpc GetSystems (Empty) returns (stream SystemType);
+
+  rpc SyntaxCheck(SyntaxCheckRequest) returns (SyntaxError);
+  rpc SetDefinitions(SetDefinitionsRequest) returns (SyntaxError);
+  rpc SetCurrentConfig(SetCurrentConfigRequest) returns (Empty);
+
+  rpc Teardown (Empty) returns (Empty);
+}

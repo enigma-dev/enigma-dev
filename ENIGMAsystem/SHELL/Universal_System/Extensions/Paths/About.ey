@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Paths
+Identifier: Paths
+Author: Harri
+Description: Adds path functions and local variables.
+Icon: path.png
+
+Depends: None
+Dependencies: None
+Implement: extension_path

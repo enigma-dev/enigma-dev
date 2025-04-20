@@ -1,0 +1,30 @@
+%e-yaml
+---
+Name: Clang
+Native: Yes
+Maintainer: fundies
+Target-platform: MacOSX
+
+Make-Vars:
+  make: make
+  makeflags:
+  cc: clang
+  cxx: clang++
+  cppflags:
+  cxxflags:
+  cflags:
+  ldflags:
+  links:
+
+Parser-Vars:
+  defines: clang -dM -x c++ --std=c++03 -E $blank
+  searchdirs: clang -E -x c++ --std=c++03 -v $blank
+  searchdirs-start: "#include <...> search starts here:"
+  searchdirs-end: "End of search list."
+
+EXE-Vars:
+  resources: /tmp/stigma.res
+  Build-Extension:
+  Run-output: $tempfile
+  Run-Program: $game
+  Run-Params:

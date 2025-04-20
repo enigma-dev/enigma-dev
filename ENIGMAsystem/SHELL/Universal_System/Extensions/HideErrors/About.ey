@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Hide Error Messages
+Identifier: HideErrors
+Author: Samuel Venable
+Description: Hide error messages from the user. (Recommended for complete, stable games).
+Default: false
+Icon: mofo.png
+
+Depends: None
+Dependencies: None

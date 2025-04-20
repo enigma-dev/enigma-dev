@@ -1,0 +1,91 @@
+# Latest image
+image: Visual Studio 2019
+# fetch repository as zip archive
+shallow_clone: true
+# disable automatic tests
+test: off
+# only increment the build number when building master
+pull_requests:
+  do_not_increment_build_number: true
+# don't build "feature" branches
+skip_branch_with_pr: true
+branches:
+  only:
+    - master
+
+environment:
+  OUTPUT: /tmp/test.exe
+  MSYS2_FC_CACHE_SKIP: yes
+
+  # These variables apply to all jobs in the matrix
+  # Each job overrides a subet of them to test
+  COMPILER: gcc
+  PLATFORM: Win32
+  MODE: Debug
+  GRAPHICS: Direct3D9
+  AUDIO: None
+  COLLISION: None
+  NETWORK: None
+  WIDGETS: None
+  EXTENSIONS: "None"
+  PACKAGES: ""
+
+  matrix:
+    # Game Modes 
+    # run mode covered in regular tests
+    - {MODE: Debug}
+    - {MODE: Compile}
+
+    # Catch-all
+    - {GRAPHICS: Direct3D11, AUDIO: DirectSound, WIDGETS: Win32, EXTENSIONS: "DirectShow,WindowsTouch,XInput,MediaControlInterface,FileDropper,IniFilesystem,Box2DPhysics,StudioPhysics,ExternalFuncs", PACKAGES: "mingw-w64-x86_64-box2d mingw-w64-x86_64-libffi"}
+    - {GRAPHICS: OpenGL1, AUDIO: OpenAL, PACKAGES: "mingw-w64-x86_64-glew mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-alure mingw-w64-x86_64-libmodplug mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme"}
+    - {GRAPHICS: OpenGLES3, PLATFORM: SDL, PACKAGES: "mingw-w64-x86_64-SDL2 mingw-w64-x86_64-libepoxy"}
+    #TODO: Fix GTK+ on Windows
+    #- {WIDGETS: GTK+, PACKAGES: "mingw-w64-x86_64-gtk2"}
+    #TODO: Fix Bullet Physics on Windows
+    #- {EXTENSIONS: "BulletDynamics", PACKAGES: "mingw-w64-x86_64-bullet"}
+
+init:
+  - echo "%APPVEYOR_JOB_ID%"
+  # store the name of the archive job in an environment variable
+  # this designates the first job of every build as the archive job
+  - ps: |
+      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+      $project = Invoke-RestMethod -Method Get -Uri $apiURL/build/$env:APPVEYOR_BUILD_VERSION
+      $env:ARCHIVE_JOB = $project.build.jobs[0].jobId
+  - echo "%ARCHIVE_JOB%"
+  - cd %APPVEYOR_BUILD_FOLDER%
+
+install:
+  - set PATH=C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
+  - bash -lc "pacman --noconfirm -Sy mingw-w64-x86_64-boost mingw-w64-x86_64-pugixml mingw-w64-x86_64-rapidjson mingw-w64-x86_64-yaml-cpp mingw-w64-x86_64-grpc mingw-w64-x86_64-protobuf mingw-w64-x86_64-glm mingw-w64-x86_64-libpng mingw-w64-x86_64-re2 %PACKAGES%"
+  - gcc -v
+  - ps: |
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+        # use our first job to build JDI and the CLI
+        C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "make -j 4; make -j 4 emake"
+
+        # create a daemon PowerShell "job" (not the same as an AppVeyor build job) to zip and upload
+        # the blobs artifact while we start building the engine
+        $archive = {
+          Set-Location $using:PWD
+          7z a -t7z -mm=lzma2 -mx=4 -mmt blobs.zip compileEGMf.dll libEGM.dll libProtocols.dll libENIGMAShared.dll emake.exe
+          appveyor PushArtifact blobs.zip -Type Zip
+        }
+        $daemon = Start-Job -ScriptBlock $archive
+
+        # register a callback so we can show the zip and upload output when it completes
+        $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
+          $result = Receive-Job -Job $daemon
+          Write-Host ('Artifact daemon has completed.') -foregroundcolor "Magenta"
+          Write-Host ($result | Out-String) -foregroundcolor "Gray"
+        }
+      } Else {
+        # simply restore JDI and the CLI from the archive artifact of this same build using REST API
+        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+        7z e -mmt blobs.zip
+      }
+build_script:
+  # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "export PLATFORM=%PLATFORM%; ./ci-build.sh && ./share_logs.sh"

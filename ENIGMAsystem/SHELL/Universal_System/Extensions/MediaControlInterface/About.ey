@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Media Control Interface
+Identifier: MediaControlInterface
+Author: Robert
+Description: CD playback on Windows using the MCI.
+Default: false
+Icon: mcilogo.png
+
+Depends: None
+Dependencies: None

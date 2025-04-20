@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Studio Physics
+Identifier: StudioPhysics
+Author: Robert
+Description: Physics compatibility with GameMaker: Studio
+Default: false
+Icon: spicon.png
+
+Depends: None
+Dependencies: None

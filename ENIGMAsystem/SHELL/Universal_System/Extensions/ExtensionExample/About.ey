@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: Extension Example
+Identifier: ExtensionExample
+Author: Samuel Venable
+Description: Extension example template showing how to create ENIGMA extensions.
+Icon: ExtensionExample.png
+
+Depends: None
+Dependencies: None
