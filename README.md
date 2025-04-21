@@ -17,10 +17,7 @@ Supported Platforms (Examples):
 
 - Windows i686 7/8/8.1/10/11
 - Windows x86-64 7/8/8.1/10/11
-- Mac OS X x86-64/ARM64 10.15+
-- Ubuntu/Debian/RPiOS/KDEneon
-- Arch-Linux/Manjaro/SteamOS
-- Fedora/CentOS/RedHat-Linux
+- Ubuntu 24.04 LTS Noble Numbat
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 
