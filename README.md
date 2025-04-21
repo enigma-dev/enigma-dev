@@ -1,6 +1,6 @@
 # STIGMA Development Environment
 
-![screenshot0](https://github.com/samuelvenable/stigma-dev/raw/master/Resources/screenshot0.png)
+![screenshot0](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot0.png)
 
 **GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
 
