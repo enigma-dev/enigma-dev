@@ -8,7 +8,7 @@ if [ -d "/Library/Java/JavaVirtualMachines/temurin-17.jdk" ]; then
     sudo port -N deactivate glew +x11
     sudo port -N install glew
     sudo port -N reclaim
-    git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /Applications/stigma-dev
+    git clone --recurse-submodules -j8 https://github.com/samuelvenable/stigma-dev /Applications/stigma-dev
     cd /Applications/stigma-dev
     env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ gmake && env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ gmake emake
     chmod +x ./install.sh
