@@ -1,13 +1,3 @@
 [submodule "shared/libwebm"]
 	path = shared/libwebm
 	url = https://github.com/webmproject/libwebm
-[submodule "shared/alure"]
-	path = shared/alure
-	url = https://github.com/time-killer-games/alure
-[submodule "shared/SDL_mixer"]
-	path = shared/SDL_mixer
-	url = https://github.com/time-killer-games/SDL_mixer
-	branch = SDL2
-[submodule "shared/libdlgmod"]
-	path = shared/libdlgmod
-	url = https://github.com/time-killer-games/libdlgmod

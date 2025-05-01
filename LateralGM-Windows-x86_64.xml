@@ -15,12 +15,10 @@
   <manifest></manifest>
   <icon>C:\stigma-dev-Windows-x86_64\lateralgm.ico</icon>
   <jre>
-    <path>openjdk</path>
-    <bundledJre64Bit>true</bundledJre64Bit>
-    <bundledJreAsFallback>false</bundledJreAsFallback>
+    <path>openjre</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>true</requires64Bit>
     <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
-    <jdkPreference>jreOnly</jdkPreference>
-    <runtimeBits>64</runtimeBits>
   </jre>
 </launch4jConfig>

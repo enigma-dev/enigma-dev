@@ -6,7 +6,7 @@ Summary: STIGMA Development Environment
 License: GPL
 Distribution: Fedora
 Group: games
-Requires: wget, curl, git, gcc, g++, make, cmake, protobuf-devel, protobuf-compiler, grpc-cli, grpc-devel, zlib-devel, libvpx-devel, glew-devel, glfw-devel, glm-devel, libpng-devel, mesa-libGLU-devel, openal-soft-devel, fluidsynth-devel, libogg-devel, alure-devel, libvorbis-devel, dumb-devel, SDL2-devel, libffi-devel, libX11-devel, libXrandr-devel, libXinerama-devel, java-17-openjdk, pkgconf, rapidjson-devel, yaml-cpp-devel, boost-devel, procps-ng-devel, boost-program-options, boost-iostreams, boost-system, boost-filesystem, grpc-cpp, libstdc++-static, libstdc++-devel, pugixml-devel, zenity, kdialog, libmodplug-devel, libsndfile-devel, SDL2_mixer-devel, freetype-devel, libXtst-devel, flac-devel, mpg123-devel, opusfile-devel, opus-devel, gtk3-devel, glib-devel
+Requires: wget, curl, git, gcc, g++, make, cmake, protobuf-devel, protobuf-compiler, grpc-cli, grpc-devel, zlib-devel, libvpx-devel, glew-devel, glfw-devel, glm-devel, libpng-devel, mesa-libGLU-devel, openal-soft-devel, fluidsynth-devel, libogg-devel, alure-devel, libvorbis-devel, dumb-devel, SDL2-devel, libffi-devel, libX11-devel, libXrandr-devel, libXinerama-devel, java-17-openjdk, pkgconf, rapidjson-devel, yaml-cpp-devel, boost-devel, boost-program-options, boost-iostreams, boost-system, boost-filesystem, grpc-cpp, libstdc++-static, libstdc++-devel, pugixml-devel, zenity, kdialog, libmodplug-devel, libsndfile-devel, SDL2_mixer-devel, freetype-devel, libXtst-devel, flac-devel, mpg123-devel, opusfile-devel, opus-devel, gtk3-devel, glib-devel
 
 %define _rpmdir ../
 %define _rpmfilename stigma-dev-1.0.0.0_all_fedora.rpm

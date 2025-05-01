@@ -5,7 +5,7 @@ SHARED_SRC_DIR := ../../shared
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Darwin)
-	OS_LIBS := -lboost_program_options-mt -lpthread -ldl
+	OS_LIBS := -lboost_program_options -lpthread -ldl
 else ifeq ($(UNIX_BASED), true)
 	OS_LIBS := -lboost_program_options -Wl,--no-as-needed -Wl,-rpath,./ -lpthread -ldl
 else
@@ -42,14 +42,14 @@ ifeq ($(OS), Darwin)
 endif
 
 AppleFixLinks:
-	sudo install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
-	sudo install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
-	sudo install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)compileEGMf.dylib
-	sudo install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)compileEGMf.dylib
-	sudo install_name_tool -change ../../$(LIB_PFX)EGM$(LIB_EXT) @loader_path/./$(LIB_PFX)EGM$(LIB_EXT) $(TARGET)
-	sudo install_name_tool -change ../$(LIB_PFX)compileEGMf$(LIB_EXT) @loader_path/./$(LIB_PFX)compileEGMf.dylib $(TARGET)
-	sudo install_name_tool -change ../$(LIB_PFX)compileEGMf.dylib @loader_path/./$(LIB_PFX)compileEGMf.dylib $(TARGET)
-	sudo install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) $(TARGET)
-	sudo install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)EGM$(LIB_EXT)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) ../../$(LIB_PFX)compileEGMf.dylib
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) ../../$(LIB_PFX)compileEGMf.dylib
+	install_name_tool -change ../../$(LIB_PFX)EGM$(LIB_EXT) @loader_path/./$(LIB_PFX)EGM$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)compileEGMf$(LIB_EXT) @loader_path/./$(LIB_PFX)compileEGMf.dylib $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)compileEGMf.dylib @loader_path/./$(LIB_PFX)compileEGMf.dylib $(TARGET)
+	install_name_tool -change ../$(LIB_PFX)ENIGMAShared$(LIB_EXT) @loader_path/./$(LIB_PFX)ENIGMAShared$(LIB_EXT) $(TARGET)
+	install_name_tool -change ../../$(LIB_PFX)Protocols$(LIB_EXT) @loader_path/./$(LIB_PFX)Protocols$(LIB_EXT) $(TARGET)
 
 include ../../Default.mk

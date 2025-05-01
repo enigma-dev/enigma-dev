@@ -15,7 +15,7 @@
   <manifest></manifest>
   <icon>C:\stigma-dev-Windows-i686\lateralgm.ico</icon>
   <jre>
-    <path>openjdk</path>
+    <path>openjre</path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
     <minVersion>1.8.0</minVersion>

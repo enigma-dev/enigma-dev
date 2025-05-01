@@ -541,7 +541,7 @@ namespace {
       } else if (ifd::FileDialog::Instance().IsDone("GetOpenFileNames")) {
         if (ifd::FileDialog::Instance().HasResult()) {
           const std::vector<ghc::filesystem::path>& res = ifd::FileDialog::Instance().GetResults();
-          for (const auto& r : res) result += r.string() + "\n";
+          for (const auto& r : res) { message_pump(); result += r.string() + "\n"; }
           if (!result.empty()) result.pop_back();
         }
         ifd::FileDialog::Instance().Close();
@@ -578,6 +578,10 @@ namespace {
         SetWindowPos(hWnd, ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ?  HWND_TOPMOST : HWND_TOP),
         0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+          if (IsIconic((HWND)(void *)(std::uintptr_t)strtoull(
+          ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)))
+          ShowWindow((HWND)(void *)(std::uintptr_t)strtoull(
+          ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), SW_RESTORE);
           SetWindowLongPtrW(hWnd, GWLP_HWNDPARENT, (LONG_PTR)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10));
           RECT parentFrame; GetWindowRect((HWND)(void *)(std::uintptr_t)strtoull(
@@ -655,6 +659,32 @@ namespace {
           }
         }
         #endif
+        SDL_Rect rect;
+        bool inside = false;
+        int x = 0, y = 0, w = 0, h = 0;
+        SDL_GetWindowPosition(window, &x, &y);
+        #if !defined(IFD_USE_OPENGL)
+        if (!SDL_GetRendererOutputSize(SDL_GetRenderer(window), &w, &h)) {
+        #else
+        SDL_GL_GetDrawableSize(window, &w, &h); {
+        #endif
+          int numDisplays = SDL_GetNumVideoDisplays();
+          if (numDisplays >= 1) {
+            for (int i = 0; i < numDisplays; i++) {
+              message_pump();
+              if (!SDL_GetDisplayBounds(i, &rect)) {
+                if (x >= rect.x && y >= rect.y &&
+                x + w <= rect.x + rect.w && y + h <= rect.y + rect.h) {
+                  inside = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (!inside) {
+          SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        }
         dialog = nullptr;
       }
       ImGui::Render();

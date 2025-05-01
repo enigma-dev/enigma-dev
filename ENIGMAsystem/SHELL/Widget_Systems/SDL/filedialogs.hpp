@@ -26,13 +26,9 @@
 
 #pragma once
 
-#if !defined(__ANDROID__)
-#include <SDL.h>
-#else
-#include <SDL2/SDL.h>
-#endif
-
 #include <string>
+
+#include <SDL.h>
 
 namespace ngs::imgui {
 

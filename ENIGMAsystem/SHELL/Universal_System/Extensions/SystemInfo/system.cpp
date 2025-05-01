@@ -895,7 +895,7 @@ std::string memory_totalram(bool human_readable) {
   if (!sysctl(mib, 2, &buf, &sz, nullptr, 0))
     totalram = buf.npages * sysconf(_SC_PAGESIZE);
   #elif defined(__sun)
-  totalram = strtoll(read_output("prtconf | grep 'Memory size:' | uniq | cut -d' ' -f3- | awk '{print $1 * 1024};'").c_str(), nullptr, 10) * 1024;
+  totalram = (sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGESIZE));
   #endif
   if (!totalram)
     totalram = -1;
@@ -913,12 +913,13 @@ std::string memory_freeram(bool human_readable) {
   if (GlobalMemoryStatusEx(&statex))
     freeram = (long long)statex.ullAvailPhys;
   #elif (defined(__APPLE__) && defined(__MACH__))
-  std::string strtotal = memory_totalram(false);
-  std::string strused = memory_usedram(false);
-  long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
-  long long used = ((strused != pointer_null()) ? strtoull(strused.c_str(), nullptr, 10) : -1);
-  if (total != -1 && used != -1)
-    freeram = total - used;
+  long page_s = sysconf(_SC_PAGESIZE);
+  mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+  vm_statistics64_data_t vmstat;
+  if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) {
+    if ((vmstat.free_count * (long long)page_s))
+      freeram = (long long)(vmstat.free_count * (long long)page_s);
+  }
   #elif defined(__linux__)
   freeram = read_meminfo("MemFree");
   #elif (defined(__FreeBSD__) || defined(__DragonFly__))
@@ -947,27 +948,12 @@ std::string memory_freeram(bool human_readable) {
 
 std::string memory_usedram(bool human_readable) {
   long long usedram = -1;
-  #if defined(_WIN32)
-  MEMORYSTATUSEX statex;
-  statex.dwLength = sizeof(statex);
-  if (GlobalMemoryStatusEx(&statex))
-    usedram = (long long)(statex.ullTotalPhys - statex.ullAvailPhys);
-  #elif (defined(__APPLE__) && defined(__MACH__))
-  long page_s = sysconf(_SC_PAGESIZE);
-  mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
-  vm_statistics64_data_t vmstat;
-  if (host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t)&vmstat, &count) == KERN_SUCCESS) {
-    if (((long long)(vmstat.active_count + vmstat.wire_count) * (long long)page_s))
-      usedram = ((long long)(vmstat.active_count + vmstat.wire_count) * (long long)page_s);
-  }
-  #elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   std::string strtotal = memory_totalram(false);
   std::string stravail = memory_freeram(false);
   long long total = ((strtotal != pointer_null()) ? strtoull(strtotal.c_str(), nullptr, 10) : -1);
   long long avail = ((stravail != pointer_null()) ? strtoull(stravail.c_str(), nullptr, 10) : -1);
   if (total != -1 && avail != -1)
     usedram = total - avail;
-  #endif
   if (usedram != -1)
     return human_readable ? make_hreadable(usedram) : std::to_string(usedram);
   return pointer_null();
@@ -1558,7 +1544,10 @@ std::string cpu_core_count() {
   numcores = (int)(strtol(read_output("echo `lscpu | awk '/^Socket\\(s\\)/{ print $2 }'`").c_str(), nullptr, 10) * 
     strtol(read_output("echo `lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }'`").c_str(), nullptr, 10));
   #elif defined(__FreeBSD__)
-  numcores = (int)strtol(read_output("sysctl -n kern.smp.cores").c_str(), nullptr, 10);
+  int buf = -1;
+  std::size_t sz = sizeof(int);
+  if (!sysctlbyname("kern.smp.cores", &buf, &sz, nullptr, 0))
+    numcores = buf;
   #elif (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
   hwloc_topology_t topology = nullptr;
   if (!hwloc_topology_init(&topology)) {

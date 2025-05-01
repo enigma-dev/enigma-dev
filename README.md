@@ -1,42 +1,23 @@
 # STIGMA Development Environment
 
-![screenshot0](https://github.com/time-killer-games/stigma-dev/raw/master/Resources/screenshot0.png)
-
-**Join our Discord:** https://discord.gg/f3WBpf2qQb
-
-**View on itch.io:** https://samuel-venable.itch.io/stigma-development-environment
+![screenshot0](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot0.png)
 
 **GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
 
 - **Create Games** for many supported Desktop Platforms.
 - **GPLv3 crap will be replaced** with permissive code over time.
-- **Build AppImages** with [GMAppImager](https://www.youtube.com/watch?v=5hWqH8Igh_U) (separate download).
+- **Build AppImages** with GMAppImager (separate download).
 - **WebM Video Playback** support (no patent issues or fees).
 - **Joystick Support** (cheated a little with using SDL2 library).
 - **Improved UTF-8 Support** on Windows (non-Latin support).
 - Expanded upon Shell and Process Execution (process info).
-- Improved upon Dialog Box and Graphical Widgets System.
+- Improved upon Dialog Box and Graphical Widgets Systems.
 
 Supported Platforms (Examples):
 
 - Windows i686 7/8/8.1/10/11
 - Windows x86-64 7/8/8.1/10/11
-- Mac OS X x86-64/ARM64 10.15+
-- Ubuntu/Debian/RPiOS/KDEneon
-- Arch-Linux/Manjaro/SteamOS
-- Fedora/CentOS/RedHat-Linux
-
-Completed Game:
-
-- https://github.com/time-killer-games/Key-to-Success
-
-Example Projects:
-
-- https://github.com/time-killer-games/ENIGMA-WebMPlayer-Demo
-- https://github.com/time-killer-games/ENIGMA-SystemInfo-Demo
-- https://github.com/time-killer-games/ENIGMA-xProcess-Demo
-- https://github.com/time-killer-games/ENIGMA-DialogModule-Demo
-- https://github.com/time-killer-games/ENIGMA-StockfishChess-Demo
+- Ubuntu 24.04 LTS Noble Numbat
 
 "**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
 

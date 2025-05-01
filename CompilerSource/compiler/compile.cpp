@@ -329,9 +329,6 @@ std::set<EventGroupKey> ListUsedEvents(
 }
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
-  #if (defined(__MACH__) && defined(__APPLE__))
-  system("sudo port -f deactivate libiconv");
-  #endif
   std::filesystem::path exename;
   if (exe_filename) {
     exename = exe_filename;
@@ -786,9 +783,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   std::filesystem::copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
   std::filesystem::copy(LIBDLGMOD_SRC, filename_path(gameFname.u8string()) + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
   std::filesystem::rename(datares, resFname, ec);
-  #if (defined(__MACH__) && defined(__APPLE__))
-  system(("sudo chmod -R 777 \"" + filename_path(gameFname.u8string()) + "assets/.\"").c_str());
-  #endif
  
   auto resname = resFname.u8string();
   gameModule = fopen(resname.c_str(),"wb");
@@ -849,9 +843,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
     std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/data.res", std::filesystem::copy_options::overwrite_existing, ec);
     std::filesystem::copy(filename_path(gameFname.u8string()) + LIBDLGMOD_DST, newdir + std::string("/") + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
-    #if (defined(__MACH__) && defined(__APPLE__))
-    system(("sudo chmod -R 777 \"" + newdir + "/assets/.\"").c_str());
-    #endif
  
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());
@@ -867,10 +858,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     chdir(prevdir.data());
     #endif
   }
-
-  #if (defined(__MACH__) && defined(__APPLE__))
-  system("sudo port -f activate libiconv");
-  #endif
 
   idpr("Done.", 100);
   return 0;
