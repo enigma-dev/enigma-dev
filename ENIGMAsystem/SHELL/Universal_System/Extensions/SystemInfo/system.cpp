@@ -1544,10 +1544,7 @@ std::string cpu_core_count() {
   numcores = (int)(strtol(read_output("echo `lscpu | awk '/^Socket\\(s\\)/{ print $2 }'`").c_str(), nullptr, 10) * 
     strtol(read_output("echo `lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }'`").c_str(), nullptr, 10));
   #elif defined(__FreeBSD__)
-  int buf = -1;
-  std::size_t sz = sizeof(int);
-  if (!sysctlbyname("kern.smp.cores", &buf, &sz, nullptr, 0))
-    numcores = buf;
+  numcores = (int)strtol(read_output("sysctl -n kern.smp.cores").c_str(), nullptr, 10);
   #elif (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
   hwloc_topology_t topology = nullptr;
   if (!hwloc_topology_init(&topology)) {
