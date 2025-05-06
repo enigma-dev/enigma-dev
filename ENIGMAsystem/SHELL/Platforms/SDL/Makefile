@@ -8,7 +8,6 @@ endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += $(wildcard Platforms/SDL/Win32/*.cpp)
-	RESOURCES += $(wildcard Platforms/SDL/Win32/*.rc)
 else
 	ifeq ($(TARGET-PLATFORM), MacOSX)
 		SOURCES += $(wildcard Platforms/SDL/MacOSX/*.cpp) 
@@ -25,5 +24,5 @@ else
 endif
 SOURCES += $(wildcard Platforms/SDL/*.cpp) 
 SOURCES += Platforms/General/POSIX/Utility.cpp
-override CFLAGS += -DENIGMA_PLATFORM_SDL
-override CXXFLAGS += -DENIGMA_PLATFORM_SDL
+override CFLAGS += -DENIGMA_PLATFORM_SDL $(shell pkg-config --cflags sdl2)
+override CXXFLAGS += -DENIGMA_PLATFORM_SDL $(shell pkg-config --cflags sdl2)
