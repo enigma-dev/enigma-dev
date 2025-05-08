@@ -271,7 +271,7 @@ std::vector<RawImage> image_load_bmp(const std::string &filename) {
   if (std::wifstream wbmp{wfilename.c_str(), std::ios::in | std::ios::binary}) {
     std::wstringstream wbuffer;
     wbuffer << wbmp.rdbuf();
-    std::string buffer = strings_util::narrow(wbuffer.str());
+    std::string buffer = strings_util::shorten(wbuffer.str());
     return image_decode_bmp(buffer);
   }
   #endif
