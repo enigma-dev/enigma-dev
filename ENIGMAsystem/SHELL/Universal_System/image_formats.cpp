@@ -447,15 +447,40 @@ int image_save_bmp(const std::string &filename, const unsigned char* data, unsig
   FILE *bmp = _wfopen(wfname.c_str(), L"wb");
   #endif
   if (!bmp) return -1;
+  
+  // Write BITMAP_FILE_HEADER
   fwrite("BM", 2, 1, bmp);
 
   sz <<= 2;
   fwrite(&sz,4,1,bmp);
-  fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
+  fwrite("\0\0", 2, 1, bmp);
+  fwrite("\0\0", 2, 1, bmp);
+  // 14 + 108 = 122 byte offset for bmp with transparency
+  fwrite("\x7A\0\0\0", 4, 1, bmp);
+
+  // Write BITMAP_INFO_HEADER
+  // x6C = 108 byte info_header indicates use of BITMAPV4HEADER to support transparency
+  fwrite("\x6C\0\0\0",4,1,bmp);
   fwrite(&width,4,1,bmp);
   fwrite(&height,4,1,bmp);
+  fwrite("\1\0", 2, 1, bmp);
   //NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-  fwrite("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
+  fwrite("\x20\0", 2, 1, bmp);
+  // x03 indicates compression method as BI_BITFIELDS
+  fwrite("\x03\0\0\0", 4, 1, bmp);
+  constexpr char k20Zeroes[20] = {};
+  fwrite(k20Zeroes, 20, 1, bmp);
+
+  // bit masks per channel in RGBA format (in big-endian)
+  fwrite("\0\0\xff\0", 4, 1, bmp);
+  fwrite("\0\xff\0\0", 4, 1, bmp);
+  fwrite("\xff\0\0\0", 4, 1, bmp);
+  fwrite("\0\0\0\xff", 4, 1, bmp);
+
+  // little-endian "Win"
+  fwrite("\x20\x6E\x69\x57", 4, 1, bmp);
+  constexpr char k48Zeroes[48] = {};
+  fwrite(k48Zeroes, 48, 1, bmp);
 
   unsigned bytes = 4;
 
