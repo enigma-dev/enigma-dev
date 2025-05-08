@@ -263,7 +263,8 @@ int image_save(const std::string &filename, const unsigned char* data, unsigned 
 
 std::vector<RawImage> image_load_bmp(const std::string &filename) {
   int w = 0, h = 0;
-  std::vector<RawImage> bmp.resize(1);
+  std::vector<RawImage> bmp; 
+  bmp.resize(1);
   unsigned char *src = nullptr;
   if (!loadBMP(filename.c_str(), &src, &w, &h)) {
     unsigned char *dst = new unsigned char[w * h * 4]();
