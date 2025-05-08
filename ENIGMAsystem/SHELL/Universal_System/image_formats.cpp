@@ -25,6 +25,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
 #include "strings_util.h"
+#include "rgbtorgba.h"
+#include "bmpformat.h"
 
 #include <map>
 #include <fstream>
