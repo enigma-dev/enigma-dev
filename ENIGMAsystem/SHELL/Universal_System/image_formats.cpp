@@ -450,7 +450,6 @@ int image_save_bmp(const std::string &filename, const unsigned char* data, unsig
   
   // Write BITMAP_FILE_HEADER
   fwrite("BM", 2, 1, bmp);
-
   sz <<= 2;
   fwrite(&sz,4,1,bmp);
   fwrite("\0\0", 2, 1, bmp);
