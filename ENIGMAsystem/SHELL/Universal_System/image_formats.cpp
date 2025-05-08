@@ -266,16 +266,12 @@ std::vector<RawImage> image_load_bmp(const std::string &filename) {
   std::vector<RawImage> bmp;
   unsigned char *src = nullptr;
   if (!loadBMP(filename.c_str(), &src, &w, &h)) {
-    unsigned char *dst = new unsigned char[w * h * 4]();
-    if (dst) {
-      rgb_to_rgba(src, &dst, w, h, true);
-      RawImage img;
-      img.pxdata = dst;
-      img.w = (unsigned)w;
-      img.h = (unsigned)h;
-      bmp.push_back(img);
-      delete[] dst;
-    }
+    RawImage img;
+    img.pxdata = new unsigned char[w * h * 4]();
+    rgb_to_rgba(src, &dst, w, h, true);
+    img.w = (unsigned)w;
+    img.h = (unsigned)h;
+    bmp.push_back(img);
     free(src);
     return bmp;
   }
