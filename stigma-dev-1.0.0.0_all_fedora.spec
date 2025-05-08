@@ -24,7 +24,7 @@ A fork of the ENIGMA Development Environment that strives to go a different dire
 "/usr/share/doc/stigma-dev/copyright"
 
 %pre
-sudo git clone --recurse-submodules -j8 https://github.com/time-killer-games/stigma-dev /usr/bin/stigma-dev
+sudo git clone --recurse-submodules -j8 https://github.com/samuelvenable/stigma-dev /usr/bin/stigma-dev
 [ -d "/usr/bin/stigma-dev" ] && cd /usr/bin/stigma-dev && sudo make clean && sudo make && sudo make emake && sudo chmod +x /usr/bin/stigma-dev/install.sh && sudo /usr/bin/stigma-dev/install.sh && sudo cp -f /usr/bin/stigma-dev/stigma-dev.desktop /usr/share/applications/stigma-dev.desktop && sudo chmod +x /usr/share/applications/stigma-dev.desktop
 echo "Installation Complete! You may now run the \"stigma-dev.desktop\" Desktop Entry!"
 
