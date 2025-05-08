@@ -260,11 +260,21 @@ int image_save(const std::string &filename, const unsigned char* data, unsigned 
 }
 
 std::vector<RawImage> image_load_bmp(const std::string &filename) {
+  #if !defined(_WIN32)
   if (std::ifstream bmp{filename.c_str(), std::ios::in | std::ios::binary}) {
     std::stringstream buffer;
     buffer << bmp.rdbuf();
     return image_decode_bmp(buffer.str());
   }
+  #else
+  std::wstring wfilename = strings_util::widen(filename);
+  if (std::wifstream wbmp{wfilename.c_str(), std::ios::in | std::ios::binary}) {
+    std::wstringstream wbuffer;
+    wbuffer << wbmp.rdbuf();
+    std::string buffer = strings_util::narrow(wbuffer.str());
+    return image_decode_bmp(buffer);
+  }
+  #endif
   return std::vector<RawImage>();
 }
 
