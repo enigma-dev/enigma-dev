@@ -269,7 +269,7 @@ std::vector<RawImage> image_load_bmp(const std::string &filename) {
   if (!loadBMP(filename.c_str(), &src, &w, &h)) {
     unsigned char *dst = new unsigned char[w * h * 4]();
     rgb_to_rgba(src, &dst, w, h, true);
-    bmp[0].RawImage(dst, (unsigned)w, (unsigned)h);
+    bmp[0](dst, (unsigned)w, (unsigned)h);
     free(src);
     return bmp;
   }
