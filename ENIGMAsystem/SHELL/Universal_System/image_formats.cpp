@@ -263,7 +263,7 @@ int image_save(const std::string &filename, const unsigned char* data, unsigned 
 
 std::vector<RawImage> image_load_bmp(const std::string &filename) {
   int w = 0, h = 0;
-  std::vector<RawImage> bmp(1);
+  std::vector<RawImage> bmp;
   unsigned char *src = nullptr;
   if (!loadBMP(filename.c_str(), &src, &w, &h)) {
     RawImage img;
@@ -271,7 +271,7 @@ std::vector<RawImage> image_load_bmp(const std::string &filename) {
     rgb_to_rgba(src, &img.pxdata, w, h, true);
     img.w = (unsigned)w;
     img.h = (unsigned)h;
-    bmp[0] = img;
+    bmp.push_back(img);
     free(src);
     return bmp;
   }
