@@ -55,9 +55,9 @@ void rgb_to_rgba(unsigned char *src, unsigned char **dst, int w, int h, bool fli
   offset = 0;
   for (int j = 0; j < h; j++) {
     for (int i = 0; i < w; i++) {
-      (*dst)[offset + 0] = data[offset + 1];
-      (*dst)[offset + 1] = data[offset + 0];
-      (*dst)[offset + 2] = data[offset + 2];
+      (*dst)[offset + 0] = data[offset + 2];
+      (*dst)[offset + 1] = data[offset + 1];
+      (*dst)[offset + 2] = data[offset + 0];
       (*dst)[offset + 3] = data[offset + 3];
       offset += 4;
     }
