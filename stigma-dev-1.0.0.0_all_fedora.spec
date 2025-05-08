@@ -1,4 +1,4 @@
-Buildroot: /home/asahi/stigma-dev-1.0.0.0
+Buildroot: /home/fedora/stigma-dev-1.0.0.0
 Name: stigma-dev
 Version: 1.0.0.0
 Release: 1
