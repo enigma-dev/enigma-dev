@@ -44,4 +44,4 @@ namespace shmem {
     return -1;
   }
 
-} // namespace macosshmem
+} // namespace shmem
