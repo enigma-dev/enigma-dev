@@ -28,5 +28,5 @@
 #if (defined(__APPLE__) && defined(__MACH__))
 namespace shmem { 
 long long getsharedmemory();
-} // namespace macosshmem
+} // namespace shmem
 #endif
