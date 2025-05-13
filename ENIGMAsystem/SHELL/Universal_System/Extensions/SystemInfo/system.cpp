@@ -62,6 +62,7 @@
 #include <mach/host_info.h>
 #include <mach/mach_host.h>
 #include <mach/mach_time.h>
+#include "shmem.hpp"
 #elif defined(__linux__)
 #include <sys/sysinfo.h>
 #endif
@@ -1377,6 +1378,9 @@ std::string memory_totalvram(bool human_readable) {
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   videomemory = strtoll(read_output("ioreg -r -d 1 -w 0 -c \"IOAccelerator\" | grep '\"VRAM,totalMB\"' | uniq | awk -F '= ' '{print $2}'").c_str(), nullptr, 10) * 1024 * 1024;
+  if (!videomemory) {
+    videomemory = shmem::getsharedmemory();
+  }
   #else
   #if defined(CREATE_CONTEXT)
   if (!create_context()) {
@@ -1544,10 +1548,7 @@ std::string cpu_core_count() {
   numcores = (int)(strtol(read_output("echo `lscpu | awk '/^Socket\\(s\\)/{ print $2 }'`").c_str(), nullptr, 10) * 
     strtol(read_output("echo `lscpu | awk '/^Core\\(s\\) per socket/{ print $4 }'`").c_str(), nullptr, 10));
   #elif defined(__FreeBSD__)
-  int buf = -1;
-  std::size_t sz = sizeof(int);
-  if (!sysctlbyname("kern.smp.cores", &buf, &sz, nullptr, 0))
-    numcores = buf;
+  numcores = (int)strtol(read_output("sysctl -n kern.smp.cores").c_str(), nullptr, 10);
   #elif (defined(__DragonFly__) || defined(__NetBSD__) || defined(__sun))
   hwloc_topology_t topology = nullptr;
   if (!hwloc_topology_init(&topology)) {
