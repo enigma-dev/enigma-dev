@@ -3,8 +3,9 @@ ifeq ($(UNIX_BASED), false)
 	override LDLIBS += -lws2_32 -ldxgi
 else
 	ifeq ($(OS), Darwin)
-		override LDFLAGS += -framework OpenGL
-		override LDLIBS += -framework OpenGL
+		override LDFLAGS += -framework OpenGL -framework Cocoa -framework CoreGraphics -framework Metal -framework Foundation
+		override LDLIBS += -framework OpenGL -framework Cocoa -framework CoreGraphics -framework Metal -framework Foundation
+		SOURCES += Universal_System/Extensions/SystemInfo/shmem.mm
 	else
 		ifeq ($(OS), FreeBSD)
 			override LDFLAGS += -lkvm
