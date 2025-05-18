@@ -7,12 +7,12 @@ set(CMAKE_DEBUG_POSTFIX d)
 project(${SHARED_LIB} DESCRIPTION ${SHARED_LIB_DESCRIPTION})
 
 set(SHARED_SOURCES
-   "../eyaml/eyaml.cpp"
-   "../event_reader/event_parser.cpp"
-   "../event_reader/egm_events.cpp"
-   "../rectpacker/rectpack.cpp"
-   "../libpng-util/libpng-util.cpp"
-   "../ProtoYaml/proto-yaml.cpp"
+   "eyaml/eyaml.cpp"
+   "event_reader/event_parser.cpp"
+   "event_reader/egm_events.cpp"
+   "rectpacker/rectpack.cpp"
+   "libpng-util/libpng-util.cpp"
+   "ProtoYaml/proto-yaml.cpp"
 )
 
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
