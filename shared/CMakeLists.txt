@@ -15,6 +15,8 @@ set(SHARED_SOURCES
    "ProtoYaml/proto-yaml.cpp"
 )
 
+set_source_files_properties(${SHARED_SOURCES} PROPERTIES HEADER_FILE_ONLY 1)
+
 add_library(${SHARED_LIB} ${LIB_TYPE} ${SHARED_SOURCES})
 
 target_include_directories(${SHARED_LIB} PRIVATE "${ENIGMA_DIR}/CompilerSource")
