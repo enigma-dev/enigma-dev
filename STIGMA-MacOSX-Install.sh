@@ -3,7 +3,7 @@ sudo xcode-select --install
 if [ -d "/Library/Java/JavaVirtualMachines/temurin-17.jdk" ]; then
   if [ -f "/opt/local/bin/port" ]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    env PATH=$PATH:/opt/homebrew/bin brew install gcc curl wget cmake pkg-config pugixml wavpack flac opusfile mpg123 libmodplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 openal-soft alure fluid-synth libxmp dumb boost
+    env PATH=$PATH:/opt/homebrew/bin brew install gcc curl wget cmake pkg-config pugixml wavpack flac opusfile mpg123 libmodplug libsndfile libogg libsndfile libvorbis vorbis-tools sdl2 fluid-synth libxmp dumb boost
     sudo port -N install gmake protobuf-c glfw glm libpng libvpx box2D freetype libffi rapidjson libyaml pugixml yaml-cpp grpc glew +x11 libGLU xorg-libX11 xorg-libXrandr xorg-libXinerama
     sudo port -N deactivate glew +x11
     sudo port -N install glew
