@@ -1,3 +1,6 @@
+[submodule "shared/libwebm"]
+	path = shared/libwebm
+	url = https://github.com/webmproject/libwebm
 [submodule "shared/SDL_mixer/external/flac"]
 	path = shared/SDL_mixer/external/flac
 	url = https://github.com/libsdl-org/flac.git
