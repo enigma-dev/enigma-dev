@@ -5,8 +5,8 @@ SHARED_SRC_DIR := .
 SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.cpp) $(call rwildcard,libpng-util,*.cpp) $(call rwildcard,rectpacker,*.cpp) $(call rwildcard,ProtoYaml,*.cpp)
 PROTO_DIR := ./protos/.eobjs
 
-override CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
-override LDFLAGS += -shared -lz -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
+CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
+LDFLAGS += -shared -lz -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
 ifeq ($(OS), Darwin)
 	SDLMIXERREPOS := $(shell cd SDL_mixer;mkdir build;cd build;../configure;make;make install;cd ../..;chmod -R 755 /usr/local)
