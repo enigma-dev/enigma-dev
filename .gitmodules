@@ -1,0 +1,2 @@
+[submodule "shared/SDL_mixer"]
+  path = shared/SDL_mixer
