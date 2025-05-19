@@ -29,7 +29,7 @@
 //Editing it is a sign of a certain medical condition. We're not sure which one.
 
 #include <windows.h>
-IDI_MAIN_ICON ICON          "./Key to Success.ico"
+IDI_MAIN_ICON ICON          "stigma/Preprocessor_Environment_Editable/Key to Success.ico"
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION 1,0,0,0
 PRODUCTVERSION 1,0,0,0
