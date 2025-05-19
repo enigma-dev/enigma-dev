@@ -12,7 +12,7 @@ if [ -d "/Library/Java/JavaVirtualMachines/temurin-17.jdk" ]; then
     cd /Applications/stigma-dev
     env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ sudo gmake && env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ sudo gmake emake
     chmod +x ./install.sh
-    ./install.sh
+    sudo ./install.sh
     chmod +x ./start.sh
     echo "Installation Complete! You may now run the \"/Applications/stigma-dev/start.sh\" script from the terminal app!"
   else
