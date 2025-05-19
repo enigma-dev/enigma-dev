@@ -10,7 +10,7 @@ if [ -d "/Library/Java/JavaVirtualMachines/temurin-17.jdk" ]; then
     sudo port -N reclaim
     git clone --recurse-submodules -j8 https://github.com/samuelvenable/stigma-dev /Applications/stigma-dev
     cd /Applications/stigma-dev
-    env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ gmake && env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ gmake emake
+    env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ sudo gmake && env PATH=$PATH:/opt/homebrew/bin CC=clang CXX=clang++ sudo gmake emake
     chmod +x ./install.sh
     ./install.sh
     chmod +x ./start.sh
