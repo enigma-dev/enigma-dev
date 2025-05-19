@@ -1,0 +1,35 @@
+Using built-in specs.
+COLLECT_GCC=gcc
+Target: i686-w64-mingw32
+Configured with: ../gcc-10.3.0/configure --prefix=/mingw32 --with-local-prefix=/mingw32/local --build=i686-w64-mingw32 --host=i686-w64-mingw32 --target=i686-w64-mingw32 --with-native-system-header-dir=/mingw32/i686-w64-mingw32/include --libexecdir=/mingw32/lib --enable-bootstrap --enable-checking=release --with-arch=i686 --with-tune=generic --enable-languages=c,lto,c++,fortran,ada,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-filesystem-ts=yes --enable-libstdcxx-time=yes --disable-libstdcxx-pch --disable-libstdcxx-debug --enable-lto --enable-libgomp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw32 --with-mpfr=/mingw32 --with-mpc=/mingw32 --with-isl=/mingw32 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-boot-ldflags='-pipe -Wl,--dynamicbase,--nxcompat,--no-seh -Wl,--large-address-aware -Wl,--disable-dynamicbase -static-libstdc++ -static-libgcc' 'LDFLAGS_FOR_TARGET=-pipe -Wl,--dynamicbase,--nxcompat,--no-seh -Wl,--large-address-aware' --enable-linker-plugin-flags='LDFLAGS=-static-libstdc++\ -static-libgcc\ -pipe\ -Wl,--dynamicbase,--nxcompat,--no-seh\ -Wl,--large-address-aware\ -Wl,--stack,12582912' --disable-sjlj-exceptions --with-dwarf2
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 10.3.0 (Rev5, Built by MSYS2 project) 
+COLLECT_GCC_OPTIONS='-E' '-std=c++98' '-v' '-mtune=generic' '-march=i686'
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/cc1plus.exe -E -quiet -v -iprefix C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/ -D_REENTRANT C:\Users\Windows\AppData\Local/ENIGMA/enigma_blank.txt -mtune=generic -march=i686 -std=c++98
+# 1 "C:\\Users\\Windows\\AppData\\Local/ENIGMA/enigma_blank.txt"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "C:\\Users\\Windows\\AppData\\Local/ENIGMA/enigma_blank.txt"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0/i686-w64-mingw32"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0/backward"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/include"
+ignoring nonexistent directory "D:/a/_temp/msys/msys64/mingw32/include"
+ignoring nonexistent directory "/mingw32/include"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/include-fixed"
+ignoring duplicate directory "C:/msys64/mingw32/lib/gcc/../../lib/gcc/i686-w64-mingw32/10.3.0/../../../../i686-w64-mingw32/include"
+ignoring nonexistent directory "D:/a/_temp/msys/msys64/mingw32/i686-w64-mingw32/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0/i686-w64-mingw32
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include/c++/10.3.0/backward
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/include
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../include
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/include-fixed
+ C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../i686-w64-mingw32/include
+End of search list.
+COMPILER_PATH=C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/;C:/msys64/mingw32/bin/../lib/gcc/;C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../i686-w64-mingw32/bin/
+LIBRARY_PATH=C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/;C:/msys64/mingw32/bin/../lib/gcc/;C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../i686-w64-mingw32/lib/../lib/;C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../lib/;C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../../i686-w64-mingw32/lib/;C:/msys64/mingw32/bin/../lib/gcc/i686-w64-mingw32/10.3.0/../../../
+COLLECT_GCC_OPTIONS='-E' '-std=c++98' '-v' '-mtune=generic' '-march=i686'
