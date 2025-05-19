@@ -1,0 +1,46 @@
+make: Entering directory '/c/stigma-dev-Windows-i686'
+make[1]: Entering directory '/c/stigma-dev-Windows-i686/ENIGMAsystem/SHELL'
+
+################ Compiler Info ################
+g++.exe (Rev5, Built by MSYS2 project) 10.3.0
+Copyright (C) 2020 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+CXXFLAGS="-fdiagnostics-color=always -I../Additional/i686-w64-mingw32/include -std=c++17 -I../../shared -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR -DPROCESS_GUIWINDOW_IMPL -Dmain=SDL_main -IC:/msys64/mingw32/include -IC:/msys64/mingw32/include/SDL2 -Wall -fno-pie -DENIGMA_PLATFORM_SDL -Dmain=SDL_main -IC:/msys64/mingw32/include -IC:/msys64/mingw32/include/SDL2 -IBridges/OpenGL -DGLEW_STATIC -IGraphics_Systems/OpenGL-Common/ -Dmain=SDL_main -IC:/msys64/mingw32/include/SDL2 -IC:/msys64/mingw32/include -IC:/msys64/mingw32/include/SDL2 -DHIDE_DEBUG_MESSAGES -DPATH_EXT_SET -std=c++17 -fexceptions -IPlatforms/SDL/Info -IGraphics_Systems/OpenGL1/Info -IAudio_Systems/SDL/Info -ICollision_Systems/Precise/Info -IWidget_Systems/None/Info -INetworking_Systems/None/Info -IUniversal_System/Info -I. -IC:/Users/Windows/AppData/Local/ENIGMA/ -I../../shared "
+CFLAGS="-I../../shared -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR -DPROCESS_GUIWINDOW_IMPL -Dmain=SDL_main -IC:/msys64/mingw32/include -IC:/msys64/mingw32/include/SDL2 -Wall -fno-pie -DENIGMA_PLATFORM_SDL -Dmain=SDL_main -IC:/msys64/mingw32/include -IC:/msys64/mingw32/include/SDL2 -DHIDE_DEBUG_MESSAGES -std=c++17 -IPlatforms/SDL/Info -IGraphics_Systems/OpenGL1/Info -IAudio_Systems/SDL/Info -ICollision_Systems/Precise/Info -IWidget_Systems/None/Info -INetworking_Systems/None/Info -IUniversal_System/Info -I. -IC:/Users/Windows/AppData/Local/ENIGMA/ -I../../shared"
+LDFLAGS="-L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll -LC:/msys64/mingw32/lib -lmingw32 -lSDL2main -lSDL2 -mwindows -lpng -lz -no-pie -lz"
+LDLIBS=""
+################################################
+
+[g++] SHELLmain.cpp
+[g++] Platforms/General/PFmain.cpp
+[g++] Widget_Systems/None/dialogs.cpp
+[g++] Universal_System/fileio.cpp
+[g++] Universal_System/image_formats.cpp
+[01m[KUniversal_System/image_formats.cpp:[m[K In function '[01m[Kstd::vector<enigma::RawImage> enigma::image_decode_bmp(const string&)[m[K':
+[01m[KUniversal_System/image_formats.cpp:376:44:[m[K [01;35m[Kwarning: [m[Kformat '[01m[K%lu[m[K' expects argument of type '[01m[Klong unsigned int[m[K', but argument 3 has type '[01m[Kstd::__cxx11::basic_string<char>::size_type[m[K' {aka '[01m[Kunsigned int[m[K'} [[01;35m[K-Wformat=[m[K]
+  376 |     fprintf(stderr, "Junk bitmap of size [01;35m[K%lu[m[K", [32m[Kimage_data.size()[m[K);
+      |                                          [01;35m[K~~^[m[K   [32m[K~~~~~~~~~~~~~~~~~[m[K
+      |                                            [01;35m[K|[m[K                  [32m[K|[m[K
+      |                                            [01;35m[Klong unsigned int[m[K  [32m[Kstd::__cxx11::basic_string<char>::size_type {aka unsigned int}[m[K
+      |                                          [32m[K%u[m[K
+[01m[KUniversal_System/image_formats.cpp:385:44:[m[K [01;35m[Kwarning: [m[Kformat '[01m[K%lu[m[K' expects argument of type '[01m[Klong unsigned int[m[K', but argument 3 has type '[01m[Kstd::__cxx11::basic_string<char>::size_type[m[K' {aka '[01m[Kunsigned int[m[K'} [[01;35m[K-Wformat=[m[K]
+  385 |     fprintf(stderr, "Junk bitmap of size [01;35m[K%lu[m[K", [32m[Kimage_data.size()[m[K);
+      |                                          [01;35m[K~~^[m[K   [32m[K~~~~~~~~~~~~~~~~~[m[K
+      |                                            [01;35m[K|[m[K                  [32m[K|[m[K
+      |                                            [01;35m[Klong unsigned int[m[K  [32m[Kstd::__cxx11::basic_string<char>::size_type {aka unsigned int}[m[K
+      |                                          [32m[K%u[m[K
+[g++] Universal_System/Object_Tiers/planar_object.cpp
+[g++] Universal_System/Resources/asset_index.cpp
+[g++] Universal_System/Resources/backgroundinit.cpp
+[g++] Universal_System/Resources/fontinit.cpp
+[g++] Universal_System/Resources/loading.cpp
+[g++] Universal_System/Resources/soundinit.cpp
+[g++] Universal_System/Resources/spriteinit.cpp
+echo // GENERATED RESOURCE FILE FRONTEND > C:/Users/Windows/AppData/Local/ENIGMA/.eobjs/Windows/Windows/Mingw_GCC_G++/Compile/resources.rc
+for res in Preprocessor_Environment_Editable/Resources.rc Platforms/SDL/Win32/resources.rc; do echo "#include \"$res\"" >> C:/Users/Windows/AppData/Local/ENIGMA/.eobjs/Windows/Windows/Mingw_GCC_G++/Compile/resources.rc; done
+Linking C:/Users/Windows/Desktop/Key to Success.exe
+Built to C:/Users/Windows/Desktop/Key to Success.exe
+make[1]: Leaving directory '/c/stigma-dev-Windows-i686/ENIGMAsystem/SHELL'
+make: Leaving directory '/c/stigma-dev-Windows-i686'
