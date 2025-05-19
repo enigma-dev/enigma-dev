@@ -6,7 +6,7 @@ Maintainer: fundies
 Target-platform: MacOSX
 
 Make-Vars:
-  make: gmake
+  make: make
   makeflags:
   cc: clang
   cxx: clang++
