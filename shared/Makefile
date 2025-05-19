@@ -9,7 +9,7 @@ CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) -fexceptions
 LDFLAGS += -shared -lz -lpng -lyaml-cpp -L../ -lProtocols$(SUFFIX) -lprotobuf -fexceptions
 
 ifeq ($(OS), Darwin)
-	SDLMIXERREPOS := $(shell cd SDL_mixer;mkdir build;cd build;../configure;make;make install;cd ../..;chmod -R 755 /usr/local)
+	SDLMIXERREPOS := $(shell cd SDL_mixer;mkdir build;cd build;../configure;make;sudo make install;cd ../..;sudo chmod -R 755 /usr/local)
 	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
 	override LDLIBS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
 	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -ObjC++
