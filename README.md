@@ -1,12 +1,15 @@
 # STIGMA Development Environment
 
 ![screenshot0](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot0.png)
+![screenshot1](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot1.png)
+![screenshot2](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot2.png)
+![screenshot3](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot3.png)
 
 **GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
 
 - **Create Games** for many supported Desktop Platforms.
 - **GPLv3 crap will be replaced** with permissive code over time.
-- **Build AppImages** with GMAppImager (separate download).
+- **Build AppImages** with [GMAppImager](https://samuel-venable.itch.io/gmappimager) (separate download).
 - **WebM Video Playback** support (no patent issues or fees).
 - **Joystick Support** (cheated a little with using SDL2 library).
 - **Improved UTF-8 Support** on Windows (non-Latin support).
