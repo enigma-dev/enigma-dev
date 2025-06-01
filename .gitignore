@@ -1,6 +1,7 @@
 /STIGMA/
 /openjre/
-/emake*
+/emake
+/emake-*
 /test-runner
 /emake-tests
 /gm2egm
