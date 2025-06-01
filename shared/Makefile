@@ -51,6 +51,11 @@ else
 	LDLGREPOS := $(shell if [ -f "libdlgmod/libdlgmod.dll" ]; then echo '"libdlgmod.dll" exists'; else chmod +x libdlgmod/build.sh;libdlgmod/build.sh;chmod 755 libdlgmod/libdlgmod.dll; fi)
 endif
 
+EMAKEGUI := $(shell ../emake.sh)
+ifeq ($(UNIX_BASED), true)
+else
+	STIGMA_LAUNCHER := $(shell ../STIGMA.sh)
+endif
 override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
 override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
 ifeq ($(UNIX_BASED), true)
