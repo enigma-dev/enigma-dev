@@ -8,8 +8,8 @@ ifeq ($(UNIX_BASED), true)
 			override LDFLAGS += -lc -lkvm
 			override LDLIBS += -lc -lkvm
 		endif
-		override LDFLAGS +=  -L"../../shared/lunasvg" -llunasvg `pkg-config --libs gtk+-3.0` `pkg-config --libs gio-2.0` `pkg-config --libs glib-2.0` -lX11 -lpthread -fPIC
-		override LDLIBS +=  -L"../../shared/lunasvg" -llunasvg `pkg-config --libs gtk+-3.0` `pkg-config --libs gio-2.0` `pkg-config --libs glib-2.0` -lX11 -lpthread -fPIC
+		override LDFLAGS +=  -L"../../shared/lunasvg" -llunasvg `pkg-config --libs x11` `pkg-config --libs gtk+-3.0` `pkg-config --libs gio-2.0` `pkg-config --libs glib-2.0` -lX11 -lpthread -fPIC
+		override LDLIBS +=  -L"../../shared/lunasvg" -llunasvg `pkg-config --libs x11` `pkg-config --libs gtk+-3.0` `pkg-config --libs gio-2.0` `pkg-config --libs glib-2.0` -lX11 -lpthread -fPIC
 		override CFLAGS += -I"../../shared/" `pkg-config --cflags gtk+-3.0` `pkg-config --cflags gio-2.0` `pkg-config --cflags glib-2.0` -fPIC
 		override CXXFLAGS += -I"../../shared/" `pkg-config --cflags gtk+-3.0` `pkg-config --cflags gio-2.0` `pkg-config --cflags glib-2.0` -fPIC
 	endif
