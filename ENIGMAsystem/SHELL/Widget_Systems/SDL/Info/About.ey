@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: ImGui Widgets
+Identifier: SDL
+Depends:
+	Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
+Description: Highly-customize-able and theme-able, custom-drawn, Dear ImGui Widgets powered by SDL Windowing, and SDL Renderer's OpenGL backend. Complete with custom localization and fonts support, using environment variables. This widget system is not compatible with the xlib platform and should be used with SDL instead.
+Author: Samuel Venable
