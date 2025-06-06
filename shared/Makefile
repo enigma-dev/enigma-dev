@@ -51,7 +51,6 @@ else
 	LDLGREPOS := $(shell if [ -f "libdlgmod/libdlgmod.dll" ]; then echo '"libdlgmod.dll" exists'; else chmod +x libdlgmod/build.sh;libdlgmod/build.sh;chmod 755 libdlgmod/libdlgmod.dll; fi)
 endif
 
-EMAKEGUI := $(shell chmod +x ../emake.sh;../emake.sh)
 ifeq ($(UNIX_BASED), true)
 else
 	STIGMA_LAUNCHER := $(shell chmod +x ../STIGMA.sh;../STIGMA.sh)
@@ -68,6 +67,7 @@ ifeq ($(UNIX_BASED), true)
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif
+EMAKEGUI := $(shell chmod +x ../emake.sh;../emake.sh)
 SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
