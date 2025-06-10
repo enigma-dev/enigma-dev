@@ -32,10 +32,12 @@ SOFTWARE.
 #endif
 
 #include "imguial_msgbox.h"
+
 #include <filedialogs.hpp>
 #include <filesystem.hpp>
-#include <imgui.h>
-#include <imgui_internal.h>
+
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
 
 bool init = false;
 extern SDL_Window *dialog;
