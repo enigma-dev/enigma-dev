@@ -36,15 +36,20 @@
 #include <vector>
 #include <map>
 
-#include <imgui.h>
-#include <ImFileDialog.h>
-#include <imgui_impl_sdl2.h>
-#include <imgui_impl_sdlrenderer2.h>
-#include <ImFileDialogMacros.h>
+#include <imgui/imgui.h>
+
+#include <imgui/backends/imgui_impl_sdl2.h>
+#include <imgui/backends/imgui_impl_sdlrenderer2.h>
+
+#include <ImFileDialog/ImFileDialog.h>
+#include <ImFileDialog/ImFileDialogMacros.h>
+
+#include <msgbox/imguial_msgbox.h>
+
 #include <ghc/filesystem.hpp>
-#include <imguial_msgbox.h>
-#include <filedialogs.hpp>
 #include <filesystem.hpp>
+
+#include "filedialogs.hpp"
 
 #include <SDL_syswm.h>
 #include <sys/stat.h>
