@@ -1800,7 +1800,7 @@ namespace ifd {
       if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0)
         ImGui::CloseCurrentPopup();
       else {
-        const FileData& data = m_content[m_selectedFileItem];
+        const FileData& data = m_content[m_content.size() - 1];
         ImGui::TextWrapped(IFD_ARE_YOU_SURE_YOU_WANT_TO_OVERWRITE, m_inputTextbox);
         if (ImGui::Button(IFD_YES)) {
           m_isOpen = false;
