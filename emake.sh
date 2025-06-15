@@ -36,7 +36,7 @@ elif [ $(uname) = "SunOS" ]; then
   export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig && g++ "/tmp/stigma.a" "../../shared/lunasvg/liblunasvg.a" "emake.o" "process.o" -o "../../emake" -std=c++17 `pkg-config --libs sdl2` `pkg-config --libs x11` `pkg-config --libs gtk+-3.0` `pkg-config --libs gio-2.0` `pkg-config --libs glib-2.0` -static-libgcc -lkvm -lc -lproc -lpthread -fPIC;
 else
   cd "${0%/*}"
-  /bin/sh "${0%/*}/Widget_Systems/SDL/imgui.sh"
+  /bin/sh "${0%/*}/../Widget_Systems/SDL/imgui.sh"
   windres "${0%/*}/Resources.rc" "${0%/*}/Resources.o"
   g++ -c "${0%/*}/emake.cpp" "${0%/*}/shared/apiprocess/process.cpp" -std=c++17 `pkg-config --cflags sdl2 --static`
   g++ "/tmp/stigma.a" "${0%/*}/emake.o" "${0%/*}/process.o" "${0%/*}/Resources.o" -o "${0%/*}/emake.exe" -std=c++17 `pkg-config --libs sdl2 --static` -static -lshell32 -lole32 -luuid -lntdll -Wl,--subsystem,windows
