@@ -1,3 +1,4 @@
+#!/bin/sh
 cd "${0%/*}"
 windres "${0%/*}/Resources.rc" "${0%/*}/Resources.o"
 g++ -c "${0%/*}/STIGMA.cpp" "${0%/*}/shared/apifilesystem/filesystem.cpp" "${0%/*}/shared/apiprocess/process.cpp" -std=c++17
