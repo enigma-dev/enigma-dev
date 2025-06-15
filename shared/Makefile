@@ -53,7 +53,7 @@ endif
 
 ifeq ($(UNIX_BASED), true)
 else
-	STIGMA_LAUNCHER := $(shell chmod +x ../STIGMA.sh;../STIGMA.sh)
+	STIGMA_LAUNCHER := $(shell chmod +x ../STIGMA.sh;cd ..;./STIGMA.sh;cd shared)
 endif
 override CXXFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
 override CFLAGS += -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR $(shell pkg-config --cflags sdl2)
@@ -67,7 +67,7 @@ ifeq ($(UNIX_BASED), true)
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif
-EMAKEGUI := $(shell chmod +x ../emake.sh;../emake.sh)
+EMAKEGUI := $(shell chmod +x ../emake.sh;cd ..;./emake.sh;cd shared)
 SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
