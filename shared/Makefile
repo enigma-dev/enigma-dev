@@ -67,7 +67,6 @@ ifeq ($(UNIX_BASED), true)
 else
 	LDFLAGS += -lshell32 -lole32 -luuid -lntdll
 endif
-EMAKEGUI := $(shell chmod +x ../emake.sh;cd ..;./emake.sh;cd shared)
 SHARED_SOURCES += $(call rwildcard,apiprocess,*.cpp) $(call rwildcard,apifilesystem,*.cpp) $(call rwildcard,tempdir,*.cpp)
 
 include ../Default.mk
