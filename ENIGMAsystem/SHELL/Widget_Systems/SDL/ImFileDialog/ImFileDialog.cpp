@@ -57,10 +57,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #endif
 
-#include <imgui/stb_image.h>
+#include <stb/stb_image.h>
 
 #if ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
-#include "lunasvg/include/lunasvg.h"
+#include <lunasvg.h>
 #endif
 
 #ifdef _WIN32
