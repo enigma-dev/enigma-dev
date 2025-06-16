@@ -84,9 +84,9 @@
 #endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
-#endif
 #if defined(USE_SDL_POLLEVENT)
 #pragma comment(lib, "SDL2.lib")
+#endif
 #endif
 
 namespace {
