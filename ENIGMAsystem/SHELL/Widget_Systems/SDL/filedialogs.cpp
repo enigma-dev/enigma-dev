@@ -70,7 +70,9 @@
 #endif
 #define DIGITS_MIN -999999999999999
 #define DIGITS_MAX  999999999999999
+#if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "SDL2.lib")
+#endif
 
 using std::string;
 using std::wstring;
