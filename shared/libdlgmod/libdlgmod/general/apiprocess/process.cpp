@@ -84,14 +84,8 @@
 #endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
-#endif
 #if defined(USE_SDL_POLLEVENT)
-#if defined(_MSC_VER)
-#if (defined(_WIN32) && !defined(_WIN64))
-#pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
-#elif (defined(_WIN32) && defined(_WIN64))
-#pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
-#endif
+#pragma comment(lib, "SDL2.lib")
 #endif
 #endif
 
