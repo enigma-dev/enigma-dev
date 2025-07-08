@@ -187,7 +187,7 @@ int enigma_main(int argc, char** argv) {
   }
 
   enigma_user::environment_set_variable("IMGUI_DIALOG_WIDTH", std::to_string(720));
-  enigma_user::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(360));
+  enigma_user::environment_set_variable("IMGUI_DIALOG_HEIGHT", std::to_string(382));
   enigma_user::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(2));
   enigma_user::environment_set_variable("IMGUI_TEXT_COLOR_0", std::to_string(1));
   enigma_user::environment_set_variable("IMGUI_TEXT_COLOR_1", std::to_string(1));

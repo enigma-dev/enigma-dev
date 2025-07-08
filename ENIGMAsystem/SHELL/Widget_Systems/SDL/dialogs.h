@@ -29,7 +29,7 @@
 namespace enigma_user {
 
 bool show_question(std::string message);
-int show_question_ext(std::string message);
+int show_message_ext(std::string message, std::string button1 = "", std::string button2 = "", std::string button3 = "");
 std::string get_string(std::string message, std::string defstr);
 double get_number(std::string message, double defnum);
 double get_integer(std::string message, double defint);

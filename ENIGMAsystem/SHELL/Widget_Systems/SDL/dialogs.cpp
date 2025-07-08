@@ -109,17 +109,36 @@ bool show_question(string message) {
   return ((result == yes) ? true : false);
 }
 
-int show_question_ext(string message) {
+int show_message_ext(string message, string button1, string button2, string button3) {
   enigma_user::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
-  string result = ::show_question_ext(message.c_str());
+  string orig_ok = environment_get_variable("IMGUI_OK");
+  string orig_yes = environment_get_variable("IMGUI_YES");
+  string orig_no = environment_get_variable("IMGUI_NO");
+  string orig_cancel = environment_get_variable("IMGUI_CANCEL");
+  environment_set_variable("IMGUI_OK", button1);
+  environment_set_variable("IMGUI_YES", button1);
+  environment_set_variable("IMGUI_NO", button2);
+  environment_set_variable("IMGUI_CANCEL", button3);
+  string result;
+  if (button1.empty() && button2.empty() && button3.empty()) {
+    environment_set_variable("IMGUI_OK", "OK");
+    result = ::show_message(message.c_str());
+  } else if (!button1.empty() && button2.empty() && button3.empty()) result = ::show_message(message.c_str());
+  else if (!button1.empty() && !button2.empty() && button3.empty()) result = ::show_question(message.c_str());
+  else if (!button1.empty() && !button2.empty() && !button3.empty()) result = ::show_question_ext(message.c_str());
+  environment_set_variable("IMGUI_OK", orig_ok);
+  environment_set_variable("IMGUI_YES", orig_yes);
+  environment_set_variable("IMGUI_NO", orig_no);
+  environment_set_variable("IMGUI_CANCEL", orig_cancel);
   SDL_GL_MakeCurrent(enigma::windowHandle, enigma::sdl_gl_context);
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT);
   SDL_GL_SwapWindow(enigma::windowHandle);
   SDL_RaiseWindow(enigma::windowHandle);
+  string ok = (environment_get_variable("IMGUI_OK").empty() ? "OK" : environment_get_variable("IMGUI_OK"));
   string yes = (environment_get_variable("IMGUI_YES").empty() ? "Yes" : environment_get_variable("IMGUI_YES"));
   string no = (environment_get_variable("IMGUI_NO").empty() ? "No" : environment_get_variable("IMGUI_YES"));
-  return ((result == yes) ? 1 : ((result == no) ? 0 : -1));
+  return ((result == ok || result == yes) ? 1 : ((result == no) ? 2 : 3));
 }
 
 std::string get_string(std::string message, std::string defstr) {
