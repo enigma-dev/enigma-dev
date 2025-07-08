@@ -532,6 +532,28 @@ namespace {
           PostMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)GetIcon((HWND)(void *)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)));
         }
+        SDL_Rect rect;
+        bool inside = false;
+        int x = 0, y = 0, w = 0, h = 0;
+        SDL_GetWindowPosition(window, &x, &y);
+        if (!SDL_GetRendererOutputSize(SDL_GetRenderer(window), &w, &h)) {
+          int numDisplays = SDL_GetNumVideoDisplays();
+          if (numDisplays >= 1) {
+            for (int i = 0; i < numDisplays; i++) {
+              message_pump();
+              if (!SDL_GetDisplayBounds(i, &rect)) {
+                if (x >= rect.x && y >= rect.y &&
+                x + w <= rect.x + rect.w && y + h <= rect.y + rect.h) {
+                  inside = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (!inside) {
+          SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+        }
         #elif (defined(__APPLE__) && defined(__MACH__))
         SDL_SysWMinfo system_info;
         SDL_VERSION(&system_info.version);
@@ -574,20 +596,7 @@ namespace {
       SDL_RenderClear(renderer);
       ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
       SDL_RenderPresent(renderer);
-      if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
-        SDL_ShowWindow(window);
-      }
-      #if defined(_WIN32)
-      GetWindowRect((HWND)(void *)(std::uintptr_t)strtoull(
-      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), &parentFrame);
-      parentFrameWidth = parentFrame.right - parentFrame.left;
-      parentFrameHeight = parentFrame.bottom - parentFrame.top;
-      GetWindowRect(hWnd, &childFrame);
-      childFrameWidth = childFrame.right - childFrame.left;
-      childFrameHeight = childFrame.bottom - childFrame.top;
-      MoveWindow(hWnd, (parentFrame.left + (parentFrameWidth / 2)) - (childFrameWidth / 2),
-      (parentFrame.top + (parentFrameHeight / 2)) - (childFrameHeight / 2), childFrameWidth, childFrameHeight, TRUE);
-      #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+      #if ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
       if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         Window xwindow = (Window)(std::uintptr_t)strtoull(
         ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
@@ -619,27 +628,8 @@ namespace {
         (parentWA.y + (parentFrameHeight / 2)) - (childFrameHeight / 2));
       }
       #endif
-      SDL_Rect rect;
-      bool inside = false;
-      int x = 0, y = 0, w = 0, h = 0;
-      SDL_GetWindowPosition(window, &x, &y);
-      if (!SDL_GetRendererOutputSize(SDL_GetRenderer(window), &w, &h)) {
-        int numDisplays = SDL_GetNumVideoDisplays();
-        if (numDisplays >= 1) {
-          for (int i = 0; i < numDisplays; i++) {
-            message_pump();
-            if (!SDL_GetDisplayBounds(i, &rect)) {
-              if (x >= rect.x && y >= rect.y &&
-              x + w <= rect.x + rect.w && y + h <= rect.y + rect.h) {
-                inside = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-      if (!inside) {
-        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+      if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
+        SDL_ShowWindow(window);
       }
     }
     finish:
