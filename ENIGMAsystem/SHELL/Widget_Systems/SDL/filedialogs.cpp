@@ -567,28 +567,6 @@ namespace {
           XSetTransientForHint(display, xWnd, xwindow);
         }
         #endif
-        SDL_Rect rect;
-        bool inside = false;
-        int x = 0, y = 0, w = 0, h = 0;
-        SDL_GetWindowPosition(window, &x, &y);
-        if (!SDL_GetRendererOutputSize(SDL_GetRenderer(window), &w, &h)) {
-          int numDisplays = SDL_GetNumVideoDisplays();
-          if (numDisplays >= 1) {
-            for (int i = 0; i < numDisplays; i++) {
-              message_pump();
-              if (!SDL_GetDisplayBounds(i, &rect)) {
-                if (x >= rect.x && y >= rect.y &&
-                x + w <= rect.x + rect.w && y + h <= rect.y + rect.h) {
-                  inside = true;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        if (!inside) {
-          SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-        }
         dialog = nullptr;
       }
       ImGui::Render();
@@ -641,6 +619,28 @@ namespace {
         (parentWA.y + (parentFrameHeight / 2)) - (childFrameHeight / 2));
       }
       #endif
+      SDL_Rect rect;
+      bool inside = false;
+      int x = 0, y = 0, w = 0, h = 0;
+      SDL_GetWindowPosition(window, &x, &y);
+      if (!SDL_GetRendererOutputSize(SDL_GetRenderer(window), &w, &h)) {
+        int numDisplays = SDL_GetNumVideoDisplays();
+        if (numDisplays >= 1) {
+          for (int i = 0; i < numDisplays; i++) {
+            message_pump();
+            if (!SDL_GetDisplayBounds(i, &rect)) {
+              if (x >= rect.x && y >= rect.y &&
+              x + w <= rect.x + rect.w && y + h <= rect.y + rect.h) {
+                inside = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+      if (!inside) {
+        SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+      }
     }
     finish:
     #if defined(_WIN32)
