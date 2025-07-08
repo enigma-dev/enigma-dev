@@ -613,8 +613,9 @@ namespace {
       if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         Window xwindow = (Window)(std::uintptr_t)strtoull(
         ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
-        int x = 0, y = 0;
-        Window child = 0;
+        Window parentFrameRoot = 0; int parentFrameX = 0, parentFrameY = 0;
+        unsigned parentFrameBorder = 0, parentFrameDepth = 0;
+        int x = 0, y = 0; Window child = 0;
         XTranslateCoordinates(display, xwindow, XDefaultRootWindow(display), 0, 0, &x, &y, &child);
         XGetWindowAttributes(display, xwindow, &parentWA);
         XGetGeometry(display, xwindow, &parentFrameRoot, &parentFrameX, &parentFrameY,
