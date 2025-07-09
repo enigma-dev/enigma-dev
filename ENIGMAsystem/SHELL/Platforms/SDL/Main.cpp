@@ -5,9 +5,9 @@
 
 namespace enigma {
     void initialize_directory_globals() {
-      enigma_user::working_directory = ngs::fs::directory_get_current_working();
-      enigma_user::program_directory = ngs::fs::executable_get_directory();
-      enigma_user::temp_directory = ngs::fs::directory_get_temporary_path();
+        enigma_user::working_directory = ngs::fs::directory_get_current_working();
+        enigma_user::program_directory = ngs::fs::executable_get_directory();
+        enigma_user::temp_directory = ngs::fs::directory_get_temporary_path();
     }
 
     void initialize_imgui_widgets_settings() {
@@ -39,6 +39,30 @@ namespace enigma {
         #endif
     }
 } // namespace enigma
+
+namespace enigma_user {
+
+    std::string filename_absolute(std::string fname) {
+        ngs::fs::filename_absolute(fname);
+    }
+
+    std::string environment_get_variable(std::string name){
+        ngs::fs::environment_get_variable(name);
+    }
+
+    std::string environment_unset_variable(std::string name){
+        ngs::fs::environment_unset_variable(name);
+    }
+
+    bool environment_set_variable(const std::string& name, const std::string& value){
+        ngs::fs::environment_set_variable(name, value);
+    }
+    
+    bool set_working_directory(std::string dname) {
+        ngs::fs::directory_set_current_working(dname);
+    }
+
+} // namespace enigma_user
 
 int main(int argc, char** argv) {
     // Disable high DPI scaling (remain pixel-exact):
