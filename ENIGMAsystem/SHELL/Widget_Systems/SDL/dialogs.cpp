@@ -1,0 +1,260 @@
+/*
+
+ MIT License
+
+ Copyright © 2021-2022 Samuel Venable
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+*/
+
+#include <string>
+#include <cstdlib>
+#include <cstdio>
+
+#include <apifilesystem/filesystem.hpp>
+#include "Widget_Systems/SDL/filedialogs.hpp"
+#include "Widget_Systems/SDL/dialogs.h"
+#include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFmain.h"
+#include "Universal_System/estring.h"
+#include "Platforms/SDL/Window.h"
+#include "OpenGLHeaders.h"
+
+using std::string;
+
+namespace enigma {
+
+  extern SDL_GLContext context;
+
+  bool widget_system_initialize() {
+    return true;
+  }
+
+}
+
+namespace enigma_user {
+
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { }
+
+void show_info() { }
+
+void show_debug_message(string errortext, MESSAGE_TYPE type) {
+  #ifndef DEBUG_MODE
+  errortext += "\n";
+  fputs(errortext.c_str(), stderr);
+  fflush(stderr);
+  #endif
+  if (type == MESSAGE_TYPE::M_FATAL_ERROR || 
+    type == MESSAGE_TYPE::M_FATAL_USER_ERROR) {
+    string ok = ngs::fs::environment_get_variable("IMGUI_YES");
+    string caption = ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION");
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", "Fatal Error");
+    ngs::fs::environment_set_variable("IMGUI_OK", "Abort");
+    enigma_user::show_message(errortext);
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", caption);
+    ngs::fs::environment_set_variable("IMGUI_OK", ok);
+    abort();
+  } else if (type == MESSAGE_TYPE::M_ERROR || 
+      type == MESSAGE_TYPE::M_USER_ERROR) {
+    string yes = ngs::fs::environment_get_variable("IMGUI_YES");
+    string no = ngs::fs::environment_get_variable("IMGUI_NO");
+    string caption = ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION");
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", "Error");
+    ngs::fs::environment_set_variable("IMGUI_YES", "Abort");
+    ngs::fs::environment_set_variable("IMGUI_NO", "Ignore");
+    bool question = enigma_user::show_question(errortext);
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", caption);
+    ngs::fs::environment_set_variable("IMGUI_YES", yes);
+    ngs::fs::environment_set_variable("IMGUI_NO", no);
+    if (question) abort();
+  }
+}
+
+int show_message(const string &message) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  ::show_message(message.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return 1;
+}
+
+bool show_question(string message) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::show_question(message.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  string yes = (ngs::fs::environment_get_variable("IMGUI_YES").empty() ? "Yes" : ngs::fs::environment_get_variable("IMGUI_YES"));
+  return ((result == yes) ? true : false);
+}
+
+int show_message_ext(string message, string button1, string button2, string button3) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string orig_ok = ngs::fs::environment_get_variable("IMGUI_OK");
+  string orig_yes = ngs::fs::environment_get_variable("IMGUI_YES");
+  string orig_no = ngs::fs::environment_get_variable("IMGUI_NO");
+  string orig_cancel = ngs::fs::environment_get_variable("IMGUI_CANCEL");
+  ngs::fs::environment_set_variable("IMGUI_OK", button1);
+  ngs::fs::environment_set_variable("IMGUI_YES", button1);
+  ngs::fs::environment_set_variable("IMGUI_NO", button2);
+  ngs::fs::environment_set_variable("IMGUI_CANCEL", button3);
+  string result;
+  if (button1.empty() && button2.empty() && button3.empty()) {
+    ngs::fs::environment_set_variable("IMGUI_OK", "OK");
+    result = ::show_message(message.c_str());
+  } else if (!button1.empty() && button2.empty() && button3.empty()) result = ::show_message(message.c_str());
+  else if (!button1.empty() && !button2.empty() && button3.empty()) result = ::show_question(message.c_str());
+  else if (!button1.empty() && !button2.empty() && !button3.empty()) result = ::show_question_ext(message.c_str());
+  ngs::fs::environment_set_variable("IMGUI_OK", orig_ok);
+  ngs::fs::environment_set_variable("IMGUI_YES", orig_yes);
+  ngs::fs::environment_set_variable("IMGUI_NO", orig_no);
+  ngs::fs::environment_set_variable("IMGUI_CANCEL", orig_cancel);
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  string ok = (ngs::fs::environment_get_variable("IMGUI_OK").empty() ? "OK" : ngs::fs::environment_get_variable("IMGUI_OK"));
+  string yes = (ngs::fs::environment_get_variable("IMGUI_YES").empty() ? "Yes" : ngs::fs::environment_get_variable("IMGUI_YES"));
+  string no = (ngs::fs::environment_get_variable("IMGUI_NO").empty() ? "No" : ngs::fs::environment_get_variable("IMGUI_YES"));
+  return ((result == ok || result == yes) ? 1 : ((result == no) ? 2 : 3));
+}
+
+std::string get_string(std::string message, std::string defstr) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  std::string result = ::get_string(message.c_str(), defstr.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+double get_number(std::string message, double defnum) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  double result = ::get_number(message.c_str(), defnum);
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+double get_integer(std::string message, double defint) {
+  return get_number(message, defint);
+}
+
+string get_open_filename(string filter, string fname) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_open_filename(filter.c_str(), fname.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_open_filename_ext(string filter, string fname, string title, string dir) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_open_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_open_filenames(string filter, string fname) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_open_filenames(filter.c_str(), fname.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_open_filenames_ext(string filter, string fname, string title, string dir) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_open_filenames_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_save_filename(string filter, string fname) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_save_filename(filter.c_str(), fname.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_save_filename_ext(string filter, string fname, string title, string dir) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_save_filename_ext(filter.c_str(), fname.c_str(), title.c_str(), dir.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_directory(string dname) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_directory(dname.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+string get_directory_alt(string capt, string root) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_PARENT", std::to_string((std::uint64_t)(void *)enigma_user::window_handle()));
+  string result = ::get_directory_alt(capt.c_str(), root.c_str());
+  SDL_GL_MakeCurrent(enigma::windowHandle, enigma::context);
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT);
+  SDL_GL_SwapWindow(enigma::windowHandle);
+  SDL_RaiseWindow(enigma::windowHandle);
+  return result;
+}
+
+} // namespace enigma_user
