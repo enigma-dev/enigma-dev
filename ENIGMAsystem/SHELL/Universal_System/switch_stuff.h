@@ -27,7 +27,7 @@
 
 namespace enigma
 {
-  static inline int switch_hash(evariant x) {
+  static inline int switch_hash(variant x) {
     if (!x.type)
       if (x == int(x))
         return int(x);

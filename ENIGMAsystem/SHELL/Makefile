@@ -1,5 +1,3 @@
-
-
 #################
 # configuration #
 #################
@@ -8,11 +6,13 @@
 # PLATFORM { Platforms/* }
 include ../../Config.mk
 
+ENIGMA_ROOT := ../../
+
 MAKE_TARGETS :=
 ifeq ($(TARGET-PLATFORM), Android)
+	CXXFLAGS += -fPIC
 	MAKE_TARGETS += android_game
 	BASENAME := $(shell basename $(OUTPUTNAME))
-	SDL_CSTDIO := TRUE
 	ifeq ($(GMODE), Compile)
 		GRADLE_TARGET := build
 		APK_OUT := $(WORKDIR)/android/enigma/outputs/apk/release
@@ -67,114 +67,26 @@ CXX := g++
 CC := gcc
 DEPENDENCIES :=
 override CXXFLAGS += -std=c++17
-
-
-SHARED_SRC_DIR := ../../shared
-SOURCES += $(SHARED_SRC_DIR)/xprocess.cpp
-override CXXFLAGS += -I$(SHARED_SRC_DIR) -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
-override CFLAGS += -I$(SHARED_SRC_DIR) -std=c++17 -DPROCESS_GUIWINDOW_IMPL -DUSE_SDL_POLLEVENT -DNULLIFY_STDERR
-SOURCES += xprocess.cpp
-
-ifeq ($(OS), Darwin)
-	override CXXFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
-	override CFLAGS += -I/usr/local/include -I/usr/local/include/SDL2 -I/opt/homebrew/include -I/opt/homebrew/include/SDL2 -DPROCESS_GUIWINDOW_IMPL -ObjC++
-	ifeq ($(shell uname -m), arm64)
- 		override LDFLAGS += "/opt/homebrew/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
- 		override LDLIBS += "/opt/homebrew/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
- 	else
- 		override LDFLAGS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
- 		override LDLIBS += "/usr/local/lib/libSDL2.a" "/opt/local/lib/libz.a" "/opt/local/lib/libpng.a" -liconv -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-weak_framework,CoreHaptics -Wl,-weak_framework,GameController -Wl,-framework,ForceFeedback -lobjc -Wl,-framework,CoreVideo -Wl,-framework,Cocoa -Wl,-framework,Carbon -Wl,-framework,IOKit -Wl,-weak_framework,QuartzCore -Wl,-weak_framework,Metal -framework CoreFoundation -framework CoreGraphics -framework AppKit -Xlinker -no_warn_duplicate_libraries
- 	endif
-else ifeq ($(OS), Linux)
-	override CXXFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override CFLAGS += $(shell pkg-config --cflags sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDLIBS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
-	override LDFLAGS += $(shell pkg-config --libs --static sdl2) -DPROCESS_GUIWINDOW_IMPL
-else ifeq ($(OS), FreeBSD)
-	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-else ifeq ($(OS), DragonFly)
-	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-else ifeq ($(OS), OpenBSD)
-	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL -I/usr/local/include
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -L/usr/local/lib
-else
-	override CXXFLAGS += -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2)
-	override CFLAGS += -DPROCESS_GUIWINDOW_IMPL $(shell pkg-config --cflags sdl2)
-	override LDLIBS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
-	override LDFLAGS += -DPROCESS_GUIWINDOW_IMPL -lmingw32 -lshell32 -lole32 -luuid -lsetupapi -lImm32 -lversion -loleaut32 -lwinmm -luser32 -lntdll $(shell pkg-config --libs sdl2)
-endif
-
-ifeq ($(OS), Darwin)
-	override LDFLAGS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
-	override LDLIBS += -framework CoreGraphics -framework CoreFoundation -framework AppKit
-	override CXXFLAGS += -ObjC++
-	override CFLAGS += -ObjC++
-else ifeq ($(OS), Linux)
-	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lpthread -lm -lpng -lxcb -lXrandr -lXinerama -lXext
-else ifeq ($(OS), FreeBSD)  
-	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lelf -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
-else ifeq ($(OS), DragonFly)
-	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -linotify -lm -lpng -lxcb -lXrandr -lXinerama -lXext
-else ifeq ($(OS), OpenBSD)
-	override CXXFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override CFLAGS += $(shell pkg-config --cflags x11) $(shell pkg-config --cflags sdl2)
-	override LDFLAGS += $(shell pkg-config --libs x11) $(shell pkg-config --libs sdl2) -lc -lpthread -lkvm -lm -lpng -lxcb -lXrandr -lXinerama -lXext
-else
-	override LDFLAGS += -lpng
-endif
-
-ifeq ($(OS), Darwin)
-else
-	override LDFLAGS += -lz
-	override LDLIBS += -lz
-endif
  
 ifeq ($(GMODE), Debug)
-	override CXXFLAGS += -Wall -g -ggdb -DDEBUG_MODE
-	override CFLAGS += -Wall -g -ggdb -DDEBUG_MODE
-	# Disable PIE when possible
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -no-pie
-		override LDFLAGS += -no-pie
-	endif
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -nopie
-		override LDFLAGS += -nopie
+	override CXXFLAGS += -Wall -g -DDEBUG_MODE
+	override CFLAGS += -Wall -g -DDEBUG_MODE
+else ifeq ($(GMODE), Compile)
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -s -O3
+	ifneq ($(TARGET-PLATFORM), Android)
+		# Disable PIE when possible
+		ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
+			override CXXFLAGS += -fno-pie
+			override CFLAGS += -fno-pie
+			override LDLIBS += -no-pie
+			override LDFLAGS += -no-pie
+		endif
 	endif
 else
-	override CXXFLAGS += -Wall
-	override CFLAGS += -Wall
-	# Disable PIE when possible
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -no-pie
-		override LDFLAGS += -no-pie
-	endif
-	ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-		override CXXFLAGS += -fno-pie
-		override CFLAGS += -fno-pie
-		override LDLIBS += -nopie
-		override LDFLAGS += -nopie
-	endif
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
+	override CFLAGS += -Wall -s -O3 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
@@ -209,15 +121,16 @@ SOURCES := $(wildcard *.cpp) $(wildcard Platforms/General/*.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
-ifeq ($(UNIX_BASED), false)
-	override CXXFLAGS += -std=c++17
-	override CFLAGS += -std=c++17
+# If Steamworks extension not enabled, enable Steamworks stub.
+# Else build the fake library.
+ifeq (,$(findstring Universal_System/Extensions/Steamworks, $(EXTENSIONS)))
+include Universal_System/StubExtensions/Steamworks/Makefile
 endif
 
-override CXXFLAGS += -fexceptions
-SOURCES += $(wildcard ../../shared/apiprocess/*.cpp)
-SOURCES += $(wildcard ../../shared/apifilesystem/*.cpp)
-SOURCES += $(wildcard ../../shared/tempdir/*.cpp)
+# If DataStructures extension not enabled, enable DataStructures stub.
+ifeq (,$(findstring Universal_System/Extensions/DataStructures, $(EXTENSIONS)))
+include Universal_System/StubExtensions/DataStructures/Makefile
+endif
 
 #This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
@@ -240,11 +153,18 @@ endif
 ############
 
 write_src_files:
-	@echo "$(SOURCES)" > $(WORKDIR)/sources.list
+	@echo "$(SOURCES)" > $(WORKDIR)/sources.in
+	@echo "$(CXXFLAGS) $(CPPFLAGS)" > $(WORKDIR)/cxxflags.in
+	@echo "$(CFLAGS)" > $(WORKDIR)/cflags.in
+	@echo "$(ANDROID_SHARED_LIBRARIES)" > $(WORKDIR)/libs.in
+	@echo "$(ANDROIS_LDLIBS)" > $(WORKDIR)/ldlibs.in
+	@echo "$(ANDROID_MAKEFILES)" > $(WORKDIR)/makefiles.in
+	@cat ../../android/enigma/build.gradle.template | sed -e 's/%ANDROID_API_LEVEL%/$(ANDROID_API_LEVEL)/g' | sed -e 's/%ANDROID_NDK_VERSION%/$(ANDROID_NDK_VERSION)/g' > ../../android/enigma/build.gradle
 
 android_game: write_src_files
 	@cd ../../android && BASENAME=$(BASENAME) CODEGEN=$(CODEGEN) ./gradlew $(GRADLE_TARGET)
 	@cp $(APK_OUT)/$(BASENAME) $(OUTPUTNAME)
+	@rm -rf ../../android/enigma/src/main/assets/*
 
 compile_game: print_flags $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	@echo "Linking $(OUTPUTNAME)"

@@ -36,13 +36,10 @@
 #include "general/parse_basics_old.h"
 #include "frontend.h"
 
-#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
-    #include <sys/types.h>
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY
     #include <sys/user.h>
-    #if CURRENT_PLATFORM_ID == OS_FREEBSD
     #include <libutil.h>
-    #endif
-    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD
+    #if CURRENT_PLATFORM_ID == OS_DRAGONFLY
         #include <sys/param.h>
         #include <sys/sysctl.h>
         #include <kvm.h>
@@ -50,6 +47,10 @@
 #endif
 
 using std::string;
+
+#if CURRENT_PLATFORM_ID == OS_DRAGONFLY
+kvm_t *kd = nullptr;
+#endif
 
 inline char* scopy(string& str)
 {
@@ -157,8 +158,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           parameters += " " + pcur;
         }
       }
-      myReplace(redirout, "\"", "");
-      myReplace(redirerr, "\"", "");
+    myReplace(redirout, "\"", "");
+    myReplace(redirerr, "\"", "");
 
 
       STARTUPINFO StartupInfo;
@@ -304,7 +305,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
     }
 #elif CURRENT_PLATFORM_ID == OS_DRAGONFLY
     vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
-      char errbuf[_POSIX2_LINE_MAX]; static kvm_t *kd = nullptr; 
+      char errbuf[_POSIX2_LINE_MAX];
       vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
       const char *nlistf, *memf; nlistf = memf = "/dev/null";
       kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return vec;
@@ -315,24 +316,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
             vec.push_back(proc_info[i].kp_pid);
           }
         }
+        free(proc_info);
       }
-      kvm_close(kd);
-      return vec;
-    }
-#elif CURRENT_PLATFORM_ID == OS_OPENBSD
-    vector<pid_t> ProcIdFromParentProcId(pid_t parentProcId) {
-      char errbuf[_POSIX2_LINE_MAX];
-      static kvm_t *kd = nullptr; vector<pid_t> vec; kinfo_proc *proc_info = nullptr; 
-      kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, errbuf); if (!kd) return vec;
-      if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
-        for (int i = cntp - 1; i >= 0; i--) {
-          if (proc_info[i].p_pid >= 0 && proc_info[i].p_ppid >= 0 && 
-            proc_info[i].p_ppid == parentProcId) {
-            vec.push_back(proc_info[i].p_pid);
-          }
-        }
-      }
-      kvm_close(kd);
       return vec;
     }
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
@@ -359,7 +344,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       return vec;
     }
 #endif
-#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_OPENBSD || CURRENT_PLATFORM_ID == OS_MACOSX
+#if CURRENT_PLATFORM_ID == OS_FREEBSD || CURRENT_PLATFORM_ID == OS_DRAGONFLY || CURRENT_PLATFORM_ID == OS_MACOSX
     void WaitForAllChildrenToDie(pid_t pid, int *status) {
       vector<pid_t> procId = ProcIdFromParentProcId(pid);
       if (procId.size()) {
@@ -472,7 +457,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         int infd = open("/dev/null", O_RDONLY);
         dup2(infd, STDIN_FILENO);
 
-        // Redirect STDOUTkvm_t *kd = nullptr;
+        // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
             if (flags != -1)

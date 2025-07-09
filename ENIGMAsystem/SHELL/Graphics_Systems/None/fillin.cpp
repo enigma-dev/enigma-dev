@@ -38,7 +38,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/fileio.h"
+#include "Platforms/General/fileio.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Object_Tiers/graphics_object.h"
@@ -130,6 +130,7 @@ namespace enigma_user
 
 	void draw_clear_alpha(int col,float alpha){}
 	void draw_clear(int col){}
+	void d3d_enable_scissor_test(bool enable) {}
 	void d3d_clear_depth(double value){}
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
@@ -137,8 +138,8 @@ namespace enigma_user
 	void screen_redraw() {}
 	void screen_refresh() {}
 	void screen_init() {}
-	unsigned int string_width(evariant str) { return 0; }
-	void draw_text(float, float, evariant) {}
+	unsigned int string_width(variant str) { return 0; }
+	void draw_text(float, float, variant) {}
 	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
 	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
   

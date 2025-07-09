@@ -2,11 +2,7 @@ SOURCES += $(wildcard Universal_System/*.cpp)\
            $(wildcard Universal_System/Object_Tiers/*.cpp)\
            $(wildcard Universal_System/Instances/*.cpp)\
            $(wildcard Universal_System/Resources/*.cpp)
-           
-ifeq ($(UNIX_BASED), false)
-	override LDFLAGS += -lz
-	override LDLIBS += -lz
-endif
+override LDLIBS += -lz
 
 $(OBJDIR)/Universal_System/Object_Tiers/planar_object.o: $(CODEGEN)/API_Switchboard.h
 $(OBJDIR)/Universal_System/Resources/loading.o: $(CODEGEN)/API_Switchboard.h

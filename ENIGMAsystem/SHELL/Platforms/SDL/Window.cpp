@@ -1,11 +1,10 @@
 #include "Window.h"
 #include "Event.h"
+#include "Joystick.h"
 #include "Gamepad.h"
 #include "Icon.h"
 
-#include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
-#include "Platforms/General/PFjoystick.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/estring.h" // ord
@@ -14,7 +13,6 @@
 #include <array>
 #include <string>
 #include <algorithm>
-#include <climits>
 
 template<typename K, typename V>
 static std::unordered_map<V,K> inverse_map(std::unordered_map<K,V> &map) {
@@ -262,65 +260,25 @@ int window_get_y() {
   return y;
 }
 
-void window_set_position(int x, int y) {
-  if (window_get_fullscreen()) return;
-  SDL_SetWindowPosition(windowHandle, x, y); 
-  enigma::windowX = x;
-  enigma::windowY = y;
-}
+void window_set_position(int x, int y) { SDL_SetWindowPosition(windowHandle, x, y); }
 
-void window_set_size(unsigned w, unsigned h) {
-  if (window_get_fullscreen()) return;
-  window_set_position(window_get_x(), window_get_y());
-  SDL_SetWindowSize(windowHandle, w, h);
-  enigma::windowWidth = w;
-  enigma::windowHeight = h;
-  enigma::compute_window_scaling();
-}
-    
 void window_set_rectangle(int x, int y, int w, int h) {
-  window_set_position(x, y);
   window_set_size(w, h);
-}
-
-void window_set_max_width(int w) {
-  if (enigma::window_max_width < 0) enigma::window_max_width = INT_MAX;
-  if (enigma::window_max_height < 0) enigma::window_max_height = INT_MAX;
-  SDL_SetWindowMaximumSize(windowHandle, w, enigma::window_max_height);
-  enigma::window_max_width = w;
-}
-
-void window_set_max_height(int h) {
-  if (enigma::window_max_width < 0) enigma::window_max_width = INT_MAX;
-  if (enigma::window_max_height < 0) enigma::window_max_height = INT_MAX;
-  SDL_SetWindowMaximumSize(windowHandle, enigma::window_max_width, h);
-  enigma::window_max_height = h;
-}
-
-void window_set_min_width(int w) {
-  if (enigma::window_min_width < 0) enigma::window_min_width = 0;
-  if (enigma::window_min_height < 0) enigma::window_min_height = 0;
-  SDL_SetWindowMinimumSize(windowHandle, w, enigma::window_min_height);
-  enigma::window_min_width = w;
-}
-
-void window_set_min_height(int h) {
-  if (enigma::window_min_width < 0) enigma::window_min_width = 0;
-  if (enigma::window_min_height < 0) enigma::window_min_height = 0;
-  SDL_SetWindowMinimumSize(windowHandle, enigma::window_min_width, h);
-  enigma::window_min_height = h;
+  window_set_position(x, y);
 }
 
 int window_get_width() {
   int viewportWidth, viewportHeight;
-  SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportWidth;
+
 }
 
 int window_get_height() {
   int viewportWidth, viewportHeight;
-  SDL_GetWindowSize(windowHandle, &viewportWidth, &viewportHeight);
+  SDL_GL_GetDrawableSize(windowHandle, &viewportWidth, &viewportHeight);
   return viewportHeight;
+
 }
 
 bool window_get_fullscreen() {
@@ -332,27 +290,16 @@ void window_set_fullscreen(bool fullscreen) {
   if (fullscreen) {
     int r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
+    if (r != 0) r = SDL_SetWindowFullscreen(windowHandle, SDL_WINDOW_FULLSCREEN);
+
     if (r != 0) DEBUG_MESSAGE(std::string("Could not set window to fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   } else {
     int r = SDL_SetWindowFullscreen(windowHandle, 0);
     if (r != 0) DEBUG_MESSAGE(std::string("Could not unset window fullscreen! SDL Error: ") + SDL_GetError(), MESSAGE_TYPE::M_WARNING);
   }
-  if (fullscreen) {
-    enigma::windowX = window_get_x();
-    enigma::windowY = window_get_y();
-    enigma::windowWidth = display_get_width();
-    enigma::windowHeight = display_get_height();
-    enigma::compute_window_scaling();
-    enigma::compute_window_size();
-  }
-}
-
-int window_get_cursor() {
-  return enigma::cursorInt;
 }
 
 int window_set_cursor(int cursorID) {
-  enigma::cursorInt = cursorID;
   if (cursorID == cr_none)
     SDL_ShowCursor(SDL_DISABLE);
   else

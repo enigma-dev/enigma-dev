@@ -1,52 +1,38 @@
-/*
-
- MIT License
- 
- Copyright © 2022 Samuel Venable
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
- 
-*/
+/** Copyright (C) 2011 Josh Ventura
+*** Copyright (C) 2013-2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #ifndef ENIGMA_PLATFORM_REGISTRY
 #define ENIGMA_PLATFORM_REGISTRY
 
-#include <string>
+namespace enigma_user
+{
 
-#include "Universal_System/var4.h"
-
-namespace enigma_user {
-
-  bool registry_write_string(std::string name, std::string str);
-  bool registry_write_real(std::string name, unsigned long val);
-  std::string registry_read_string(std::string name);
-  unsigned long registry_read_real(std::string name);
-  bool registry_exists(std::string name);
-  bool registry_write_string_ext(std::string subpath, std::string name, std::string str);
-  bool registry_write_real_ext(std::string subpath, std::string name, unsigned long val);
-  std::string registry_read_string_ext(std::string subpath, std::string name);
-  unsigned long registry_read_real_ext(std::string subpath, std::string name);
-  bool registry_exists_ext(std::string subpath, std::string name);
-  std::string registry_get_path();
-  bool registry_set_path(std::string subpath);
-  std::string registry_get_root();
-  bool registry_set_root(var root);
+void registry_write_string(std::string name, std::string str);
+void registry_write_real(std::string name, int x);
+std::string registry_read_string(std::string name);
+int registry_read_real(std::string name);
+bool registry_exists(std::string name);
+void registry_write_string_ext(std::string key, std::string name, std::string str);
+void registry_write_real_ext(std::string key, std::string name, int x);
+std::string registry_read_string_ext(std::string key, std::string name);
+int registry_read_real_ext(std::string key, std::string name);
+bool registry_exists_ext(std::string key, std::string name);
+void registry_set_root(int root);
 
 }
 

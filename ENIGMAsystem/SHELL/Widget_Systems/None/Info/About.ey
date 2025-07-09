@@ -3,6 +3,11 @@
 
 Name: None
 Identifier: None
-Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, OpenBSD
-Description: No widgets
-Author: Samuel Venable
+Build-Platforms: Windows, MacOSX, Linux, FreeBSD, DragonFlyBSD, SDL
+Represents: None
+Description: Console based output and filler functions.
+Author: Josh Ventura
+
+Represents:
+	Windowing: All
+

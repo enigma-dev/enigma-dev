@@ -18,10 +18,6 @@
 
 #define INCLUDED_FROM_SHELLMAIN 1
 
-#ifndef PROCESS_GUIWINDOW_IMPL
-#define PROCESS_GUIWINDOW_IMPL
-#endif
-
 // Simple Universal libraries
 ///////////////////////////////
 
@@ -38,12 +34,13 @@
 #include "Universal_System/random.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/buffers.h"
-#include "Universal_System/fileio.h"
+#include "Platforms/General/fileio.h"
 #include "Universal_System/terminal_io.h"
 
 #include "Universal_System/Resources/backgrounds.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
+#include "Universal_System/Resources/polygon.h"
 
 #include "Universal_System/Instances/callbacks_events.h"
 

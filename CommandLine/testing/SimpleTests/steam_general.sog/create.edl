@@ -1,0 +1,39 @@
+var steam_api = 0;
+
+if (steam_initialised())
+{
+    if (steam_stats_ready() && steam_is_overlay_enabled())
+    {
+        steam_api = 1;
+    }
+}
+
+gtest_assert_true(steam_api);
+
+var app_id = steam_get_app_id();
+gtest_assert_eq(app_id,  480);
+
+var steam_id = steam_get_user_steam_id();
+gtest_assert_eq(steam_id,  0);
+
+var account_id = steam_get_user_account_id();
+gtest_assert_eq(account_id,  0);
+
+var logged_in = steam_is_user_logged_on();
+gtest_assert_true(logged_in);
+
+var name = steam_get_persona_name();
+gtest_assert_eq(name, "FakeSteamUser");
+
+var user_name = steam_get_user_persona_name(0);
+gtest_assert_eq(user_name, "FakeSteamUser");
+
+var language = steam_current_game_language();
+gtest_assert_eq(language, "FakeLanguage");
+
+var languages = steam_available_languages();
+gtest_assert_eq(languages, "FakeLanguages");
+
+steam_shutdown();
+steam_api = steam_initialised();
+gtest_assert_false(steam_api);

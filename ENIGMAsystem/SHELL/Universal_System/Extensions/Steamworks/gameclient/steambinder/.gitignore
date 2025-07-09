@@ -1,0 +1,48 @@
+############################################################################
+# Copyright (C) 2023-2024 Saif Kandil (k0T0z)
+#
+# This file is a part of the ENIGMA Development Environment.
+#
+# ENIGMA is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, version 3 of the license or any later version.
+#
+# This application and its source code is distributed AS-IS, WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this code. If not, see <http://www.gnu.org/licenses/>
+############################################################################
+
+# Ignore everything.
+/**/*
+
+# Don't ignore me.
+!.gitignore
+
+# Don't ignore source and header files.
+!*.cpp
+!*.h
+
+# Don't ignore the SteamvXXX/ and SteamFake/ folders.
+!/Steamv*/
+!/SteamFake/
+!/Steamv*/sdk/
+!/SteamFake/sdk/
+
+# Don't ignore README files.
+!/Steamv*/sdk/Readme.txt
+!/SteamFake/sdk/README.md
+
+!/Steamv*/sdk/public/
+!/SteamFake/sdk/public/
+!/Steamv*/sdk/public/steam/
+!/SteamFake/sdk/public/steam/
+
+# Don't ignore files inside the SteamvXXX/sdk/public/steam/ folder.
+# Note that this ignores directories inside the SteamvXXX/sdk/public/steam/ folder. This
+# includes the SteamvXXX/sdk/public/steam/lib/ folder. This is intentional.
+!/Steamv*/sdk/public/steam/*
+!/SteamFake/sdk/public/steam/*

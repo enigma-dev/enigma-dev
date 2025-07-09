@@ -80,5 +80,6 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
 void instance_activate_region(int left, int top, int width, int height, bool inside = true);
 void instance_deactivate_circle(int x, int y, int r, bool inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, bool inside = true);
+var instance_get_mtv(int object);
 
 }

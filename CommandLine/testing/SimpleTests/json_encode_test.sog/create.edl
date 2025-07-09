@@ -1,0 +1,26 @@
+var async_load = ds_map_create();
+
+//ds_map_add(async_load, "entries", "{\n\"entries\":[\n{\"name\":\"TomasJPereyra\",\"score\":1,\"rank\":1,\"userID\":\"@i64@1234$i64$\"},\n{\"name\":\"Benal\",\"score\":254,\"rank\":10,\"userID\":\"@i64@12345$i64$\",\"data\":\"SEJlbmFsIHdhcyBoZXJlIDopAAA=\"}\n\n]\n}\n");
+ds_map_add(async_load, "entries", '{\n\"entries\":[\n{\"name\":\"TomasJPereyra\",\"score\":1,\"rank\":1,\"userID\":\"@i64@1234$i64$\"},\n{\"name\":\"Benal\",\"score\":254,\"rank\":10,\"userID\":\"@i64@12345$i64$\",\"data\":\"SEJlbmFsIHdhcyBoZXJlIDopAAA=\"}\n\n]\n}\n');
+ds_map_add(async_load, "lb_name", "YYLeaderboard_10\/29\/21--");
+ds_map_add(async_load, "event_type", "leaderboard_download");
+ds_map_add(async_load, "id", 5.0);
+ds_map_add(async_load, "num_entries", 2.0);
+ds_map_add(async_load, "status", 1.0);
+
+var decoded_string = json_encode(async_load);
+
+var ds_map = json_decode(decoded_string);
+
+gtest_assert_eq(ds_map_size(ds_map), 6);
+
+gtest_assert_eq(ds_map_exists(ds_map, "entries"), true);
+gtest_assert_eq(ds_map_exists(ds_map, "lb_name"), true);
+gtest_assert_eq(ds_map_exists(ds_map, "event_type"), true);
+gtest_assert_eq(ds_map_exists(ds_map, "id"), true);
+gtest_assert_eq(ds_map_exists(ds_map, "num_entries"), true);
+gtest_assert_eq(ds_map_exists(ds_map, "status"), true);
+
+gtest_assert_eq(ds_map_exists(ds_map, "test_not_exist"), false);
+
+

@@ -46,17 +46,17 @@ void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& 
   const auto& current_shader = enigma::shaderprograms[enigma::bound_shader];
 
   const float glAmbientColor[4] = {COL_GET_Rf(d3dLightingAmbient),COL_GET_Gf(d3dLightingAmbient),COL_GET_Bf(d3dLightingAmbient),1.0f};
-  enigma_user::glsl_uniform4fv(current_shader->uni_ambient_color, 1, glAmbientColor);
+  enigma_user::glsl_uniform4fv(current_shader.uni_ambient_color, 1, glAmbientColor);
 
   // these 4 are harri's material properties
   float material_ambient[4] = {0.0,0.0,0.0,1.0}; //This is default in GM
   float material_diffuse[4] = {0.8,0.8,0.8,1.0};
   float material_specular[4] = {0.0,0.0,0.0,0.0};
   float material_shininess = 0.0;
-  enigma_user::glsl_uniform4fv(current_shader->uni_material_ambient, 1, material_ambient);
-  enigma_user::glsl_uniform4fv(current_shader->uni_material_diffuse, 1, material_diffuse);
-  enigma_user::glsl_uniform4fv(current_shader->uni_material_specular, 1, material_specular);
-  enigma_user::glsl_uniformf(current_shader->uni_material_shininess, material_shininess);
+  enigma_user::glsl_uniform4fv(current_shader.uni_material_ambient, 1, material_ambient);
+  enigma_user::glsl_uniform4fv(current_shader.uni_material_diffuse, 1, material_diffuse);
+  enigma_user::glsl_uniform4fv(current_shader.uni_material_specular, 1, material_specular);
+  enigma_user::glsl_uniformf(current_shader.uni_material_shininess, material_shininess);
 
   for (int i = 0; i < d3dLightsActive; ++i) {
     const Light& light = get_active_light(i);
@@ -77,26 +77,26 @@ void graphics_state_flush_lighting(const glm::mat4& mv_matrix, const glm::mat3& 
     }
     tpos[3] = pos[3];
 
-    enigma_user::glsl_uniform4fv(current_shader->uni_light_diffuse[i], 1, diffuse);
-    enigma_user::glsl_uniform4fv(current_shader->uni_light_ambient[i], 1, ambient);
-    enigma_user::glsl_uniform4fv(current_shader->uni_light_specular[i], 1, specular);
-    enigma_user::glsl_uniform4fv(current_shader->uni_light_position[i], 1, tpos);
+    enigma_user::glsl_uniform4fv(current_shader.uni_light_diffuse[i], 1, diffuse);
+    enigma_user::glsl_uniform4fv(current_shader.uni_light_ambient[i], 1, ambient);
+    enigma_user::glsl_uniform4fv(current_shader.uni_light_specular[i], 1, specular);
+    enigma_user::glsl_uniform4fv(current_shader.uni_light_position[i], 1, tpos);
 
     if (light.directional) continue; // only point lights have range falloff and attenuation
-    enigma_user::glsl_uniformf(current_shader->uni_light_cAttenuation[i], 1.0);
-    enigma_user::glsl_uniformf(current_shader->uni_light_lAttenuation[i], 0.0);
-    enigma_user::glsl_uniformf(current_shader->uni_light_qAttenuation[i], 8.0f/(light.range*light.range));
+    enigma_user::glsl_uniformf(current_shader.uni_light_cAttenuation[i], 1.0);
+    enigma_user::glsl_uniformf(current_shader.uni_light_lAttenuation[i], 0.0);
+    enigma_user::glsl_uniformf(current_shader.uni_light_qAttenuation[i], 8.0f/(light.range*light.range));
   }
-  enigma_user::glsl_uniformi(current_shader->uni_lights_active, d3dLightsActive);
+  enigma_user::glsl_uniformi(current_shader.uni_lights_active, d3dLightsActive);
 }
 
 void graphics_state_flush_fog() {
   const auto& current_shader = enigma::shaderprograms[enigma::bound_shader];
 
   const float glFogColor[] = {COL_GET_Rf(d3dFogColor),COL_GET_Gf(d3dFogColor),COL_GET_Bf(d3dFogColor),1.0f};
-  enigma_user::glsl_uniform4fv(current_shader->uni_fogColor, 1, glFogColor);
-  enigma_user::glsl_uniformf(current_shader->uni_fogStart, d3dFogStart);
-  enigma_user::glsl_uniformf(current_shader->uni_fogRange, d3dFogEnd);
+  enigma_user::glsl_uniform4fv(current_shader.uni_fogColor, 1, glFogColor);
+  enigma_user::glsl_uniformf(current_shader.uni_fogStart, d3dFogStart);
+  enigma_user::glsl_uniformf(current_shader.uni_fogRange, d3dFogEnd);
 }
 
 void graphics_state_flush_stencil() {
@@ -124,8 +124,8 @@ void graphics_state_flush() {
   glColorMask(colorWriteEnable[0], colorWriteEnable[1], colorWriteEnable[2], colorWriteEnable[3]);
   glBlendFunc(blendequivs[(blendMode[0]-1)%11],blendequivs[(blendMode[1]-1)%11]);
   (alphaBlend?glEnable:glDisable)(GL_BLEND);
-  enigma_user::glsl_uniformi(current_shader->uni_alphaTestEnable, alphaTest);
-  enigma_user::glsl_uniformf(current_shader->uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
+  enigma_user::glsl_uniformi(current_shader.uni_alphaTestEnable, alphaTest);
+  enigma_user::glsl_uniformf(current_shader.uni_alphaTest, (gs_scalar)alphaTestRef/255.0);
 
   graphics_state_flush_samplers();
 
@@ -136,17 +136,17 @@ void graphics_state_flush() {
   const glm::mat4 mv_matrix = view * world;
   const glm::mat4 mvp_matrix = projection * mv_matrix;
   const glm::mat3 normal_matrix = glm::transpose(glm::inverse(glm::mat3(mv_matrix)));
-  glsl_uniform_matrix4fv_internal(current_shader->uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
-  glsl_uniform_matrix4fv_internal(current_shader->uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
-  glsl_uniform_matrix4fv_internal(current_shader->uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
+  glsl_uniform_matrix4fv_internal(current_shader.uni_modelMatrix,  1, glm::value_ptr(glm::transpose(world)));
+  glsl_uniform_matrix4fv_internal(current_shader.uni_viewMatrix,  1, glm::value_ptr(glm::transpose(view)));
+  glsl_uniform_matrix4fv_internal(current_shader.uni_projectionMatrix,  1, glm::value_ptr(glm::transpose(projection)));
 
-  glsl_uniform_matrix4fv_internal(current_shader->uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
-  glsl_uniform_matrix4fv_internal(current_shader->uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
-  glsl_uniform_matrix3fv_internal(current_shader->uni_normalMatrix,  1, glm::value_ptr(normal_matrix));
+  glsl_uniform_matrix4fv_internal(current_shader.uni_mvMatrix,  1, glm::value_ptr(glm::transpose(mv_matrix)));
+  glsl_uniform_matrix4fv_internal(current_shader.uni_mvpMatrix,  1, glm::value_ptr(glm::transpose(mvp_matrix)));
+  glsl_uniform_matrix3fv_internal(current_shader.uni_normalMatrix,  1, glm::value_ptr(normal_matrix));
 
-  enigma_user::glsl_uniformi(current_shader->uni_lightEnable, d3dLighting);
+  enigma_user::glsl_uniformi(current_shader.uni_lightEnable, d3dLighting);
   if (d3dLighting) graphics_state_flush_lighting(mv_matrix, normal_matrix);
-  enigma_user::glsl_uniformi(current_shader->uni_fogPSEnable, d3dFogEnabled);
+  enigma_user::glsl_uniformi(current_shader.uni_fogPSEnable, d3dFogEnabled);
   if (d3dFogEnabled) graphics_state_flush_fog();
 }
 

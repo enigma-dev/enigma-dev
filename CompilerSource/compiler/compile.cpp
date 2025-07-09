@@ -17,14 +17,13 @@
 **/
 
 #include "strings_util.h"
-#include "OS_Switchboard.h"
+#include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/GameData.h"
 #include "settings.h"
 #include "darray.h"
 #include "treenode.pb.h"
 
 #include <cstdio>
-#include <cstdlib>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
  #define DLLEXPORT extern "C" __declspec(dllexport)
@@ -58,7 +57,7 @@ using namespace std;
 #include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-
+#include "System/builtins.h"
 
 #include "settings-parse/crawler.h"
 
@@ -68,17 +67,6 @@ using namespace std;
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-
-#if defined(_WIN32)
-#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.dll"
-#define LIBDLGMOD_DST "assets/libdlgmod.dll"
-#elif (defined(__APPLE__) && defined(__MACH__))
-#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.dylib"
-#define LIBDLGMOD_DST "assets/libdlgmod.dylib"
-#elif (defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
-#define LIBDLGMOD_SRC "shared/libdlgmod/libdlgmod.so"
-#define LIBDLGMOD_DST "assets/libdlgmod.so"
-#endif
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
@@ -120,26 +108,6 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
   #endif
 }
 
-inline std::string filename_name(std::string fname)
-{
-  size_t fp = fname.find_last_of("/\\");
-  return fname.substr(fp+1);
-}
-
-inline std::string filename_path(std::string fname)
-{
-  size_t fp = fname.find_last_of("/\\");
-  return fname.substr(0,fp+1);
-}
-
-inline std::string filename_change_ext(std::string fname, std::string newext)
-{
-  size_t fp = filename_path(fname).length() + filename_name(fname).find_last_of(".");
-  if (fp == filename_path(fname).length() + std::string::npos)
-    return fname + newext;
-  return fname.replace(fp,fname.length(),newext);
-}
-
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
@@ -168,14 +136,49 @@ inline void write_exe_info(const std::filesystem::path& codegen_directory, const
       << "VALUE \"ProductName\",         \"" << gameSet.product() << "\"\n"
       << "VALUE \"ProductVersion\",      \"" << gloss_version << "\\0\"\n"
       << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright() << "\"\n"
-      << "VALUE \"OriginalFilename\",    \"" << filename_change_ext(filename_name(string_replace_all(game.filename,".project.gmx",".gmx")), ".exe") << "\"\n"
+      << "VALUE \"OriginalFilename\",    \"" << string_replace_all(game.filename,"\\","/") << "\"\n"
       << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n"
       << "VALUE \"Translation\", 0x409, 1252\n"
       << "END\nEND";
   wto.close();
 }
 
-#include "System/builtins.h"
+#define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
+
+static int write_res_helper(FILE* gameModule, int& resourceblock_start, const GameData &game) {
+  // Start by setting off our location with a DWord of NULLs
+  fwrite("\0\0\0",1,4,gameModule);
+
+  idpr("Adding Sprites",90);
+
+  int res = current_language->module_write_sprites(game, gameModule);
+  if (res) { 
+    idpr("Error occurred; see scrollback for details.",-1); 
+    return res;
+  }
+
+  edbg << "Finalized sprites." << flushl;
+  idpr("Adding Sounds",93);
+
+  current_language->module_write_sounds(game, gameModule);
+
+  current_language->module_write_backgrounds(game, gameModule);
+
+  current_language->module_write_fonts(game, gameModule);
+
+  current_language->module_write_paths(game, gameModule);
+
+  // Tell where the resources start
+  fwrite("\0\0\0\0res0",8,1,gameModule);
+  fwrite(&resourceblock_start,4,1,gameModule);
+
+  // Close the game module; we're done adding resources
+  idpr("Closing game module and running if requested.",99);
+  edbg << "Closing game module and running if requested." << flushl;
+  fclose(gameModule);
+
+  return res;
+}
 
 DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(GameData(es, &current_language->event_data()),
@@ -223,9 +226,8 @@ void wite_asset_enum(const std::filesystem::path& fName) {
   
   wto << "namespace enigma_user {\n\nenum AssetType : int {\n";
   
-  // "unknown" / "any" need to added manually
+  // ""any" needs to be added manually
   wto << "  asset_any = -2,\n";
-  wto << "  asset_unknown = -1,\n";
   
   buffers::TreeNode tn;
   google::protobuf::Message *m = &tn;
@@ -362,6 +364,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
   	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
     make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
+    make += "-j" + num_make_jobs + " ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -468,15 +471,12 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   used_funcs::zero();
 
-  int res;
-  #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
-
   //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
   std::set<std::string> script_names;
   for (size_t i = 0; i < game.scripts.size(); i++)
     script_names.insert(game.scripts[i].name);
 
-  res = current_language->compile_parseAndLink(game, state);
+  int res = current_language->compile_parseAndLink(game, state);
   irrr();
 
 
@@ -507,8 +507,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
   wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
-  if (mode == emode_compile)
-    wto << "#define COMPILE_MODE\n";
+  wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
   wto << '\n';
   wto.close();
 
@@ -681,6 +680,29 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     return 0;
   }
 
+  FILE *gameModule;
+  int resourceblock_start = 0;
+  std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
+  cout << "`" << resfile.u8string() << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
+
+  // need to write res file before compile for android
+  if (resfile != "$exe")
+  {
+    auto resname = resfile.u8string();
+    auto respath = resfile.parent_path().u8string();
+   
+    e_execs("mkdir -p " + respath);
+   
+    for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
+      resname.replace(p,4,gameFname.u8string());
+    gameModule = fopen(resname.c_str(),"wb");
+    if (!gameModule) {
+      user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
+      idpr("Failed to write resources.",-1); return 12;
+    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
+  }
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment two: Now that the game has been exported as C++ and raw
@@ -704,6 +726,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  make += "-j" + num_make_jobs + " ";
 
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
@@ -763,57 +786,25 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     linker sometime in the future.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
-  #ifdef OS_ANDROID
-    "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
-  #endif
+  if (resfile == "$exe")
+  {
+    gameModule = fopen(gameFname.u8string().c_str(),"ab");
+    if (!gameModule) {
+      user << "Failed to append resources to the game. Did compile actually succeed?" << flushl;
+      idpr("Failed to add resources.",-1); return 12;
+    }
 
-  FILE *gameModule;
-  std::filesystem::path resfile = compilerInfo.exe_vars["RESOURCES"];
-  #ifdef _WIN32
-  std::filesystem::path datares = "C:/Windows/Temp/stigma.res";
-  #else
-  std::filesystem::path datares = "/tmp/stigma.res";
-  #endif
-  cout << "`" << resfile.u8string() << "` == " << datares << ": " << (resfile == datares?"true":"FALSE") << endl;
+    fseek(gameModule,0,SEEK_END); //necessary on Windows for no reason.
+    resourceblock_start = ftell(gameModule);
 
-  std::error_code ec;
-  std::filesystem::path resFname = filename_path(gameFname.u8string()) + "assets";
-  std::filesystem::create_directories(resFname, ec);
-  resFname = filename_path(gameFname.u8string()) + "assets/data.res";
-  std::filesystem::copy("fonts", filename_path(gameFname.u8string()) + "assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
-  std::filesystem::copy(LIBDLGMOD_SRC, filename_path(gameFname.u8string()) + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
-  std::filesystem::rename(datares, resFname, ec);
- 
-  auto resname = resFname.u8string();
-  gameModule = fopen(resname.c_str(),"wb");
-  if (!gameModule) {
-    user << "Failed to write resources to compiler-specified file, `" << resname << "`. Write permissions to valid path?" << flushl;
-    idpr("Failed to write resources.",-1); return 12;
+    if (resourceblock_start < 128) {
+      user << "Compiled game is clearly not a working module; cannot continue" << flushl;
+      idpr("Failed to add resources.",-1); return 13;
+    }
+
+    write_res_helper(gameModule, resourceblock_start, game);
   }
 
-  // Start by setting off our location with a DWord of NULLs
-  fwrite("\0\0\0",1,4,gameModule);
-
-  idpr("Adding Sprites",90);
-
-  res = current_language->module_write_sprites(game, gameModule);
-  irrr();
-
-  edbg << "Finalized sprites." << flushl;
-  idpr("Adding Sounds",93);
-
-  current_language->module_write_sounds(game, gameModule);
-
-  current_language->module_write_backgrounds(game, gameModule);
-
-  current_language->module_write_fonts(game, gameModule);
-
-  current_language->module_write_paths(game, gameModule);
-
-  // Close the game module; we're done adding resources
-  idpr("Closing game module and running if requested.",99);
-  edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
@@ -839,11 +830,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     chdir(newdir.c_str());
     #endif
 
-    std::filesystem::create_directories(newdir + "/assets", ec);
-    std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/fonts", newdir + "/assets/fonts", std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, ec);
-    std::filesystem::copy(filename_path(gameFname.u8string()) + "assets/data.res", newdir + "/assets/data.res", std::filesystem::copy_options::overwrite_existing, ec);
-    std::filesystem::copy(filename_path(gameFname.u8string()) + LIBDLGMOD_DST, newdir + std::string("/") + LIBDLGMOD_DST, std::filesystem::copy_options::overwrite_existing, ec);
- 
     string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname.u8string());
     rparam = string_replace_all(rparam,"$game",gameFname.u8string());

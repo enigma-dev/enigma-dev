@@ -1,28 +1,20 @@
-/*
-
- MIT License
-
- Copyright © 2021-2022 Samuel Venable
-
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
-
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
-
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
-
-*/
+/** Copyright (C) 2008-2017 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #ifndef ENIGMA_WIDGETS_MANDATORY_H
 #define ENIGMA_WIDGETS_MANDATORY_H
@@ -31,11 +23,7 @@
 
 #include <string>
 
-#if !defined(HIDE_DEBUG_MESSAGES)
 #define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
-#else
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::lel(msg, severity)
-#endif
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -95,12 +83,6 @@ inline void show_error(std::string msg, const bool fatal) {
    show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
 }
 
-void show_error(string errortext, const bool fatal);
-
-#if defined(HIDE_DEBUG_MESSAGES)
-inline void lel(std::string msg, MESSAGE_TYPE severity) { }
-#endif
-
 int show_message(const std::string &msg);
 template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
 inline int action_show_message(string msg) {
@@ -111,6 +93,6 @@ void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBac
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 inline void action_show_info() { show_info(); }
 
-} // namespace enigma_user
+}
 
 #endif

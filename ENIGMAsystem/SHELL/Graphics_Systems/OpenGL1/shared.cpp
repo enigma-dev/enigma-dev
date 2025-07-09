@@ -5,3 +5,4 @@
 #include "Graphics_Systems/OpenGL-Common/profiler.cpp"
 #include "Graphics_Systems/OpenGL-Common/types.cpp"
 #include "Graphics_Systems/OpenGL-Common/texture_copy.cpp"
+#include "Graphics_Systems/OpenGL-Common/scissor.cpp"

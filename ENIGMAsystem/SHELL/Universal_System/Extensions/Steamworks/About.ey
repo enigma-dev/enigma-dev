@@ -1,0 +1,15 @@
+%e-yaml
+---
+
+Name: Steamworks
+Identifier: Steamworks
+Author: Saif Kandil (https://k0t0z.github.io)
+Description: Steamworks is a set of tools and services that help game developers and publishers build their games and get the most out of distributing on Steam.
+Default: false
+Icon: steam.svg
+
+Depends:
+	Extensions: DataStructures, Json
+Dependencies: None
+Implement: extension_steamworks
+Init: extension_steamworks_init

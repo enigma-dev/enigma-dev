@@ -77,24 +77,18 @@ void *buffer_get_address(int buffer);
 unsigned buffer_get_size(int buffer);
 unsigned buffer_get_alignment(int buffer);
 int buffer_get_type(int buffer);
-
-#ifndef GRAPHICS_NONE
-void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo);
-void buffer_set_surface(int buffer, int surface, int mode, unsigned offset, int modulo);
-void buffer_get_surface(int buffer, int surface, unsigned offset);
-void buffer_set_surface(int buffer, int surface, unsigned offset);
-#endif
-
+void buffer_get_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
+void buffer_set_surface(int buffer, int surface, int mode, unsigned offset = 0, int modulo = 0);
 void buffer_resize(int buffer, unsigned size);
 void buffer_seek(int buffer, int base, unsigned offset);
 unsigned buffer_sizeof(int type);
 int buffer_tell(int buffer);
 
-evariant buffer_peek(int buffer, unsigned offset, int type);
-evariant buffer_read(int buffer, int type);
-void buffer_fill(int buffer, unsigned offset, int type, evariant value, unsigned size);
-void buffer_poke(int buffer, unsigned offset, int type, evariant value);
-void buffer_write(int buffer, int type, evariant value);
+variant buffer_peek(int buffer, unsigned offset, int type);
+variant buffer_read(int buffer, int type);
+void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size);
+void buffer_poke(int buffer, unsigned offset, int type, variant value);
+void buffer_write(int buffer, int type, variant value);
 
 void game_save_buffer(int buffer);
 void game_load_buffer(int buffer);

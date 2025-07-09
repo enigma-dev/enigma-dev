@@ -38,7 +38,7 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_sdl2.h>
-#include <imgui/imgui_impl_sdlrenderer2.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include <ImFileDialog/ImFileDialog.h>
 #include <ImFileDialog/ImFileDialogMacros.h>
@@ -50,6 +50,17 @@
 
 #include "filedialogs.hpp"
 
+#if (defined(__APPLE__) || (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+#include <GL/glew.h>
+#endif
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+#if (defined(_WIN32) && defined(_MSC_VER))
+#pragma comment(lib, "opengl32.lib")
+#endif
 #include <SDL_syswm.h>
 #include <sys/stat.h>
 #if defined(_WIN32)
@@ -267,8 +278,6 @@ namespace {
   }
 
   vector<string> fonts;
-  SDL_Renderer *renderer = nullptr;
-  SDL_Surface *surf = nullptr;
   ImFontAtlas *shared_font_atlas = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "", string def = "") {
@@ -280,29 +289,30 @@ namespace {
     SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
-    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_WindowFlags windowFlags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL |
     ((ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) ? SDL_WINDOW_ALWAYS_ON_TOP : 0) |
-    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_RESIZE") ==
-    std::to_string(1)) ? SDL_WINDOW_RESIZABLE : 0) | SDL_WINDOW_BORDERLESS);
+    SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_HIDDEN | SDL_WINDOW_BORDERLESS);
     window = SDL_CreateWindow(title.c_str(),
     SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, IFD_DIALOG_WIDTH, IFD_DIALOG_HEIGHT, windowFlags);
     if (window == nullptr) return "";
+    SDL_GLContext glContext = SDL_GL_CreateContext(window);
+    SDL_GL_MakeCurrent(window, glContext);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
     dialog = window;
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") == std::to_string(1))
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr) return "";
-    SDL_RendererInfo rendererInfo;
-    int rendererInfoError = SDL_GetRendererInfo(renderer, &rendererInfo);
-    if (!rendererInfoError) {
-       const char *rendererName = rendererInfo.name;
-       if (rendererName) {
-         //printf("Renderer: %s\n", rendererName);
-       }
-    }
     IMGUI_CHECKVERSION();
     if (!shared_font_atlas)
       shared_font_atlas = new ImFontAtlas();
+    #if (defined(__APPLE__) || (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+    glewExperimental = true;
+    glewInit();
+    #endif
     ImGui::CreateContext(shared_font_atlas);
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.IniFilename = nullptr;
@@ -335,16 +345,28 @@ namespace {
     } else if (theme == 2) {
       SetupImGuiStyle2();
     }
-    ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer2_Init(renderer);
+    ImGui_ImplSDL2_InitForOpenGL(window, glContext);
+    ImGui_ImplOpenGL3_Init();
     ifd::FileDialog::Instance().CreateTexture = [](uint8_t *data, int w, int h, char fmt) -> void * {
-      if (surf) SDL_FreeSurface(surf);
-      surf = SDL_CreateRGBSurfaceFrom((void *)data, w, h, 32, w * 4, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-      SDL_Texture *tex = SDL_CreateTextureFromSurface(renderer, surf);
-      return (void *)tex;
+      GLuint tex = 0;
+      glGenTextures(1, &tex);
+      glBindTexture(GL_TEXTURE_2D, tex);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+      #if (defined(__APPLE__) || (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (fmt == 0) ? GL_BGRA : GL_RGBA, GL_UNSIGNED_BYTE, data);
+      glGenerateMipmap(GL_TEXTURE_2D);
+      #else
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+      #endif
+      glBindTexture(GL_TEXTURE_2D, 0);
+      return (void *)(uintptr_t)tex;
     };
     ifd::FileDialog::Instance().DeleteTexture = [](void *tex) {
-      SDL_DestroyTexture((SDL_Texture *)tex);
+      GLuint texID = (GLuint)(uintptr_t)tex;
+      glDeleteTextures(1, &texID);
     };
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder));
@@ -370,7 +392,7 @@ namespace {
       while (SDL_PollEvent(&e)) {
         ImGui_ImplSDL2_ProcessEvent(&e);
       }
-      ImGui_ImplSDLRenderer2_NewFrame();
+      ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplSDL2_NewFrame();
       ImGui::NewFrame();
       ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -591,11 +613,17 @@ namespace {
         #endif
         dialog = nullptr;
       }
+      #if (defined(__APPLE__) || (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      #endif
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+      glViewport(0, 0, 
+      strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").c_str(), nullptr, 10), 
+      strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").c_str(), nullptr, 10));
       ImGui::Render();
-      SDL_SetRenderDrawColor(renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
-      SDL_RenderClear(renderer);
-      ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), renderer);
-      SDL_RenderPresent(renderer);
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      SDL_GL_SwapWindow(window);
       #if ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
       if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         Window xwindow = (Window)(std::uintptr_t)strtoull(
@@ -639,7 +667,7 @@ namespace {
       ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), TRUE);
     }
     #endif
-    ImGui_ImplSDLRenderer2_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
     SDL_DestroyWindow(window);

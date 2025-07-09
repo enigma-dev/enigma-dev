@@ -17,26 +17,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "estring.h"
 #include "image_formats.h"
 #include "strings_util.h"
 #include "image_formats_exts.h"
 #include "Universal_System/estring.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/nlpo2.h"
-#include "strings_util.h"
-#include "rgbtorgba.h"
-#include "bmpformat.h"
+#include "Platforms/General/fileio.h"
 
 #include <map>
-#include <fstream>
+#include <fstream>      // std::ofstream
 #include <sstream>
 #include <algorithm>
 #include <string>
 #include <cstring>
 #include <cstdlib>
-#include <cstdio>
 #include <iostream>
+#include <cstdio>
 
 #include "nlpo2.h"
 
@@ -45,8 +42,8 @@ using namespace std;
 namespace enigma
 {
 
-std::map<std::string, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
-std::map<std::string, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
+std::map<std::filesystem::path, ImageLoadFunction> image_load_handlers = {{".bmp", image_load_bmp}, {".gif", image_load_gif}};
+std::map<std::filesystem::path, ImageSaveFunction> image_save_handlers = {{".bmp", image_save_bmp}};
 
 Color image_get_pixel_color(const RawImage& in, unsigned x, unsigned y) {
   Color c;
@@ -88,6 +85,56 @@ void image_swap_color(RawImage& in, Color oldColor, Color newColor) {
       index += 4;
     }
   }
+}
+
+void image_remove_color(RawImage& in, Color oldColor) {
+  #ifdef DEBUG_MODE
+  if (in.pxdata == nullptr) {
+    in.pxdata = new unsigned char[in.w * in.h * 4];
+    std::fill(in.pxdata, in.pxdata + (in.w * in.h * 4), 255);
+    DEBUG_MESSAGE("Attempt to access a null pointer" , MESSAGE_TYPE::M_ERROR);
+    return;
+  }
+  #endif
+
+  unsigned int ih, iw;
+  for (ih = 0; ih < in.h; ih++) {
+    int index = ih * in.w * 4;
+    
+    for (iw = 0; iw < in.w; iw++) {
+      if (
+           in.pxdata[index]     == oldColor.b
+        && in.pxdata[index + 1] == oldColor.g
+        && in.pxdata[index + 2] == oldColor.r
+        ) {
+          in.pxdata[index + 3] = 0;
+      } else {
+        unsigned int nw = (iw <= 0 ? iw : iw - 1),
+                     nh = (ih <= 0 ? ih : ih - 1);
+        float neighbors = 0, counted = 0;
+        for (; nh <= ih + 1 && nh < in.h; ++nh) {
+          for (; nw <= iw + 1 && nw < in.w; ++nw) {
+            ++counted;
+            int ni = (nh * in.w + nw) * 4;
+            if (
+                 in.pxdata[ni]     != oldColor.b
+              || in.pxdata[ni + 1] != oldColor.g
+              || in.pxdata[ni + 2] != oldColor.r
+              )
+              ++neighbors;
+          }
+        }
+        in.pxdata[index + 3] = static_cast<unsigned char>((neighbors/counted) * 255.0f);
+      }
+
+      index += 4;
+    }
+  }
+}
+
+void image_remove_color(RawImage& in) {
+  Color bottom_left = image_get_pixel_color(in, 0, in.h - 1);
+  image_remove_color(in, bottom_left);
 }
 
 std::vector<RawImage> image_split(const RawImage& in, unsigned imgcount) {
@@ -209,11 +256,11 @@ unsigned char* mono_to_rgba(unsigned char* pxdata, unsigned width, unsigned heig
   return rgba;
 }
 
-void image_add_loader(const std::string &extension, ImageLoadFunction fnc) {
+void image_add_loader(const std::filesystem::path& extension, ImageLoadFunction fnc) {
   image_load_handlers[extension] = fnc;
 }
 
-void image_add_saver(const std::string &extension, ImageSaveFunction fnc) {
+void image_add_saver(const std::filesystem::path& extension, ImageSaveFunction fnc) {
   image_save_handlers[extension] = fnc;
 }
 
@@ -233,46 +280,39 @@ void image_flip(RawImage& in) {
 }
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-std::vector<RawImage> image_load(const std::string &filename) {
-  std::string extension = enigma_user::filename_ext(filename);
+std::vector<RawImage> image_load(const std::filesystem::path& filename) {
+  std::filesystem::path extension = filename.extension();
   if (extension.empty()) {
-    DEBUG_MESSAGE("No extension in image filename: " + filename + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
+    DEBUG_MESSAGE("No extension in image filename: " + filename.u8string() + ". Assumimg .bmp", MESSAGE_TYPE::M_WARNING);
     extension = ".bmp";
   }
   
-  auto handler = image_load_handlers.find(ToLower(extension));
+  auto handler = image_load_handlers.find(ToLower(extension.u8string()));
   if (handler != image_load_handlers.end()) {
     return (*handler).second(filename);
   } else {
-    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename , MESSAGE_TYPE::M_ERROR);
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() , MESSAGE_TYPE::M_ERROR);
     return std::vector<RawImage>();
   }
 }
 
 /// Generic all-purpose image saving call.
-int image_save(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
-  std::string extension = enigma_user::filename_ext(filename);
-  auto handler = image_save_handlers.find(ToLower(extension));
+int image_save(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+  std::filesystem::path extension = filename.extension();
+  auto handler = image_save_handlers.find(ToLower(extension.u8string()));
   if (extension.empty() || handler != image_save_handlers.end()) {
     return (*handler).second(filename, data, width, height, fullwidth, fullheight, flipped);
   } else {
-    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
+    DEBUG_MESSAGE("Unsupported image format extension in image filename: " + filename.u8string() + " saving as BMP" , MESSAGE_TYPE::M_WARNING);
     return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
   }
 }
 
-std::vector<RawImage> image_load_bmp(const std::string &filename) {
-  int w = 0, h = 0;
-  std::vector<RawImage> bmp; 
-  bmp.resize(1);
-  unsigned char *src = nullptr;
-  if (!loadBMP(filename.c_str(), &src, &w, &h)) {
-    bmp[0].w = (unsigned)w;
-    bmp[0].h = (unsigned)h;
-    bmp[0].pxdata = new unsigned char[w * h * 4]();
-    rgb_to_rgba(src, &bmp[0].pxdata, w, h, true);
-    free(src);
-    return bmp;
+std::vector<RawImage> image_load_bmp(const std::filesystem::path& filename) {
+  if (std::ifstream bmp{filename.u8string(), ios::in | ios::binary}) {
+    std::stringstream buffer;
+    buffer << bmp.rdbuf();
+    return image_decode_bmp(buffer.str());
   }
   return std::vector<RawImage>();
 }
@@ -447,49 +487,44 @@ std::vector<RawImage> image_decode_bmp(const string& image_data) {
   return imgs;
 }
 
-int image_save_bmp(const std::string &filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
+int image_save_bmp(const std::filesystem::path& filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
   unsigned sz = width * height;
-  #if !defined(_WIN32)
-  FILE *bmp = fopen(filename.c_str(), "wb");
-  #else
-  std::wstring wfname = strings_util::widen(filename);
-  FILE *bmp = _wfopen(wfname.c_str(), L"wb");
-  #endif
+  FILE_t *bmp = fopen_wrapper(filename.u8string().c_str(), "wb");
   if (!bmp) return -1;
-  
+
   // Write BITMAP_FILE_HEADER
-  fwrite("BM", 2, 1, bmp);
+  fwrite_wrapper("BM", 2, 1, bmp);
   sz <<= 2;
-  fwrite(&sz,4,1,bmp);
-  fwrite("\0\0", 2, 1, bmp);
-  fwrite("\0\0", 2, 1, bmp);
+  fwrite_wrapper(&sz,4,1,bmp);
+  fwrite_wrapper("\0\0", 2, 1, bmp);
+  fwrite_wrapper("\0\0", 2, 1, bmp);
   // 14 + 108 = 122 byte offset for bmp with transparency
-  fwrite("\x7A\0\0\0", 4, 1, bmp);
+  fwrite_wrapper("\x7A\0\0\0", 4, 1, bmp);
 
   // Write BITMAP_INFO_HEADER
   // x6C = 108 byte info_header indicates use of BITMAPV4HEADER to support transparency
-  fwrite("\x6C\0\0\0",4,1,bmp);
-  fwrite(&width,4,1,bmp);
-  fwrite(&height,4,1,bmp);
-  fwrite("\1\0", 2, 1, bmp);
+  fwrite_wrapper("\x6C\0\0\0",4,1,bmp);
+  fwrite_wrapper(&width,4,1,bmp);
+  fwrite_wrapper(&height,4,1,bmp);
+  fwrite_wrapper("\1\0", 2, 1, bmp);
   //NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-  fwrite("\x20\0", 2, 1, bmp);
+  fwrite_wrapper("\x20\0", 2, 1, bmp);
   // x03 indicates compression method as BI_BITFIELDS
-  fwrite("\x03\0\0\0", 4, 1, bmp);
+  fwrite_wrapper("\x03\0\0\0", 4, 1, bmp);
   constexpr char k20Zeroes[20] = {};
-  fwrite(k20Zeroes, 20, 1, bmp);
+  fwrite_wrapper(k20Zeroes, 20, 1, bmp);
 
   // bit masks per channel in RGBA format (in big-endian)
-  fwrite("\0\0\xff\0", 4, 1, bmp);
-  fwrite("\0\xff\0\0", 4, 1, bmp);
-  fwrite("\xff\0\0\0", 4, 1, bmp);
-  fwrite("\0\0\0\xff", 4, 1, bmp);
+  fwrite_wrapper("\0\0\xff\0", 4, 1, bmp);
+  fwrite_wrapper("\0\xff\0\0", 4, 1, bmp);
+  fwrite_wrapper("\xff\0\0\0", 4, 1, bmp);
+  fwrite_wrapper("\0\0\0\xff", 4, 1, bmp);
 
   // little-endian "Win"
-  fwrite("\x20\x6E\x69\x57", 4, 1, bmp);
+  fwrite_wrapper("\x20\x6E\x69\x57", 4, 1, bmp);
   constexpr char k48Zeroes[48] = {};
-  fwrite(k48Zeroes, 48, 1, bmp);
-
+  fwrite_wrapper(k48Zeroes, 48, 1, bmp);
+  
   unsigned bytes = 4;
 
   width *= bytes;
@@ -502,14 +537,14 @@ int image_save_bmp(const std::string &filename, const unsigned char* data, unsig
       tmp = lastbyte - fullwidth - i;
     }
     for (unsigned ii = 0; ii < width; ii += bytes) {
-      fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
-      fwrite(&data[tmp + ii + 3],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 0],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 1],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 2],sizeof(char),1,bmp);
+      fwrite_wrapper(&data[tmp + ii + 3],sizeof(char),1,bmp);
     }
   }
 
-  fclose(bmp);
+  fclose_wrapper(bmp);
   return 0;
 }
 

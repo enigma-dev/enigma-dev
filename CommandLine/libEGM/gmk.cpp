@@ -55,7 +55,7 @@ static void atexit_tempdata_cleanup() {
   for (const std::filesystem::path &tempFile : tempFilesCreated) {
     if (tempFile.parent_path().u8string().find(gmk_data) != std::string::npos)
       DeleteFolder(tempFile.parent_path());
-    else if (std::filesystem::is_regular_file(tempFile)) DeleteFileRegular(tempFile);
+    else if (std::filesystem::is_regular_file(tempFile)) DeleteFile(tempFile);
   }
 }
 
@@ -1205,10 +1205,10 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   const std::string name = dec.readStr();
   const int children = dec.read4();
 
-  TreeNode *node = root->add_child();
+  TreeNode *node = root->mutable_folder()->add_children();
   node->set_name(name);
-  node->set_folder(status <= 2);
-  if (node->folder()) {
+  if (status <= 2) {
+    node->mutable_folder();
     for (int i = 0; i < children; i++) {
       LoadTree(dec, typeMap, node);
     }
@@ -1224,6 +1224,7 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
+      node->mutable_unknown();
       errStream << "No map of ids to protocol buffers for GMK kind '" << kind
           << "' so tree node with name '" << name << "' will not have "
           << "its protocol buffer set" << std::endl;

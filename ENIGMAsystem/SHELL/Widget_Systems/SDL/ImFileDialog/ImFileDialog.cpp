@@ -962,24 +962,19 @@ namespace ifd {
     uint8_t *data = (uint8_t *)malloc(byteSize);
     if (data) {
       GetBitmapBits(iconInfo.hbmColor, byteSize, data);
-      int sw = ds.dsBm.bmWidth * 16;
-      int sh = ds.dsBm.bmHeight * 16;
-      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-      for (int y = 0; y < sh; y++) {
-        for (int x = 0; x < sw; x++) {
-          int origX = x / 16;
-          int origY = y / 16;
-          int index = (origY * ds.dsBm.bmWidth + origX) * 4;
-          int scaledIndex = (y * sw + x) * 4;
-          sd[scaledIndex + 0] = data[index + 0];
-          sd[scaledIndex + 1] = data[index + 1];
-          sd[scaledIndex + 2] = data[index + 2];
-          sd[scaledIndex + 3] = data[index + 3];
+      unsigned char *invData = (unsigned char *)calloc(ds.dsBm.bmWidth * ds.dsBm.bmHeight * 4, sizeof(unsigned char));
+      for (int y = 0; y < ds.dsBm.bmHeight; y++) {
+        for (int x = 0; x < ds.dsBm.bmWidth; x++) {
+          int index = (y * ds.dsBm.bmWidth + x) * 4;
+          invData[index + 2] = data[index + 0];
+          invData[index + 1] = data[index + 1];
+          invData[index + 0] = data[index + 2];
+          invData[index + 3] = data[index + 3];
         }
       }
-      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+      m_icons[pathU8] = this->CreateTexture(invData, ds.dsBm.bmWidth, ds.dsBm.bmHeight, 0);
       free(data);
-      free(sd);
+      free(invData);
     }
 
     return m_icons[pathU8];
@@ -1050,24 +1045,8 @@ namespace ifd {
             invData[index + 3] = rawData[index + 3];
           }
         }
-        int sw = width * 16;
-        int sh = height * 16;
-        unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-        for (int y = 0; y < sh; y++) {
-          for (int x = 0; x < sw; x++) {
-            int origX = x / 16;
-            int origY = y / 16;
-            int index = (origY * width + origX) * 4;
-            int scaledIndex = (y * sw + x) * 4;
-            sd[scaledIndex + 0] = invData[index + 0];
-            sd[scaledIndex + 1] = invData[index + 1];
-            sd[scaledIndex + 2] = invData[index + 2];
-            sd[scaledIndex + 3] = invData[index + 3];
-          }
-        }
-        m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+        m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
         free(invData);
-        free(sd);
       }
       free(rawData);
     }
@@ -1155,44 +1134,9 @@ namespace ifd {
                 invData[index + 3] = image[index + 3];
               }
             }
-            int sw = width * 16;
-            int sh = height * 16;
-            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-            for (int y = 0; y < sh; y++) {
-              for (int x = 0; x < sw; x++) {
-                int origX = x / 16;
-                int origY = y / 16;
-                int index = (origY * width + origX) * 4;
-                int scaledIndex = (y * sw + x) * 4;
-                sd[scaledIndex + 0] = invData[index + 0];
-                sd[scaledIndex + 1] = invData[index + 1];
-                sd[scaledIndex + 2] = invData[index + 2];
-                sd[scaledIndex + 3] = invData[index + 3];
-              }
-            }
-            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+            m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
             free(invData);
             free(image);
-            free(sd);
-          } else {
-            int sw = width * 16;
-            int sh = height * 16;
-            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-            for (int y = 0; y < sh; y++) {
-              for (int x = 0; x < sw; x++) {
-                int origX = x / 16;
-                int origY = y / 16;
-                int index = (origY * width + origX) * 4;
-                int scaledIndex = (y * sw + x) * 4;
-                sd[scaledIndex + 0] = image[index + 0];
-                sd[scaledIndex + 1] = image[index + 1];
-                sd[scaledIndex + 2] = image[index + 2];
-                sd[scaledIndex + 3] = image[index + 3];
-              }
-            }
-            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
-            free(image);
-            free(sd);
           }
         }
       } else if (ext == ".svg") {
@@ -1202,23 +1146,7 @@ namespace ifd {
         if (document) {
           auto bitmap = document->renderToBitmap(width, height, bgColor);
           if (bitmap.valid()) {
-            int sw = width * 16;
-            int sh = height * 16;
-            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-            for (int y = 0; y < sh; y++) {
-              for (int x = 0; x < sw; x++) {
-                int origX = x / 16;
-                int origY = y / 16;
-                int index = (origY * width + origX) * 4;
-                int scaledIndex = (y * sw + x) * 4;
-                sd[scaledIndex + 0] = bitmap.data()[index + 0];
-                sd[scaledIndex + 1] = bitmap.data()[index + 1];
-                sd[scaledIndex + 2] = bitmap.data()[index + 2];
-                sd[scaledIndex + 3] = bitmap.data()[index + 3];
-              }
-            }
-            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
-            free(sd);
+            m_icons[pathU8] = this->CreateTexture(bitmap.data(), width, height, 0);
           }
         }
       }
@@ -1249,23 +1177,7 @@ namespace ifd {
       if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
       int w = 32;
       int h = 32;
-      int sw = w * 16;
-      int sh = h * 16;
-      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-      for (int y = 0; y < sh; y++) {
-        for (int x = 0; x < sw; x++) {
-          int origX = x / 16;
-          int origY = y / 16;
-          int index = (origY * w + origX) * 4;
-          int scaledIndex = (y * sw + x) * 4;
-          sd[scaledIndex + 0] = data[index + 0];
-          sd[scaledIndex + 1] = data[index + 1];
-          sd[scaledIndex + 2] = data[index + 2];
-          sd[scaledIndex + 3] = data[index + 3];
-        }
-      }
-      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
-      free(sd);
+      m_icons[pathU8] = this->CreateTexture(data, w, h, 0);
     } else {
       uint8_t *data = (uint8_t*)ifd::GetDefaultFileIcon();
       if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
@@ -1281,24 +1193,8 @@ namespace ifd {
           invData[index + 3] = data[index + 3];
         }
       }
-      int sw = w * 16;
-      int sh = h * 16;
-      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
-      for (int y = 0; y < sh; y++) {
-        for (int x = 0; x < sw; x++) {
-          int origX = x / 16;
-          int origY = y / 16;
-          int index = (origY * w + origX) * 4;
-          int scaledIndex = (y * sw + x) * 4;
-          sd[scaledIndex + 0] = invData[index + 0];
-          sd[scaledIndex + 1] = invData[index + 1];
-          sd[scaledIndex + 2] = invData[index + 2];
-          sd[scaledIndex + 3] = invData[index + 3];
-        }
-      }
-      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+      m_icons[pathU8] = this->CreateTexture(invData, w, h, 0);
       free(invData);
-      free(sd);
     }
     return m_icons[pathU8];
     #endif
@@ -1382,17 +1278,10 @@ namespace ifd {
               for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                   int index = (y * width + x) * 4;
-                  #if defined(IFD_USE_OPENGL)
                   invData[index + 0] = image[index + 0];
                   invData[index + 1] = image[index + 1];
                   invData[index + 2] = image[index + 2];
                   invData[index + 3] = image[index + 3];
-                  #else
-                  invData[index + 2] = image[index + 0];
-                  invData[index + 1] = image[index + 1];
-                  invData[index + 0] = image[index + 2];
-                  invData[index + 3] = image[index + 3];
-                  #endif
                 }
               }
               free(image);

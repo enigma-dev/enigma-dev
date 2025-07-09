@@ -30,12 +30,6 @@ include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/prot
 include(FindProtobuf)
 target_link_libraries(${LIB_EGM} PRIVATE ${Protobuf_LIBRARY})
 
-#Linux is a turd
-if(NOT WIN32)
-  find_library(LIB_FS NAMES stdc++fs)
-  target_link_libraries(${LIB_EGM} PRIVATE ${LIB_FS})
-endif()
-
 add_dependencies(${LIB_EGM} "Protocols" "ENIGMAShared")
 target_link_libraries(${LIB_EGM} PRIVATE "Protocols" "ENIGMAShared")
 

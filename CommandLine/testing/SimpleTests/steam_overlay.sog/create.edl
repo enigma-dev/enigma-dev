@@ -1,0 +1,23 @@
+var steam_api = 0;
+
+if (steam_initialised())
+{
+    if (steam_stats_ready() && steam_is_overlay_enabled())
+    {
+        steam_api = 1;
+    }
+}
+
+gtest_assert_true(steam_api);
+
+var is_enabled = steam_is_overlay_enabled();
+gtest_assert_true(is_enabled);
+
+steam_activate_overlay(ov_friends);
+
+var is_activated = steam_is_overlay_activated();
+gtest_assert_true(is_activated);
+
+steam_shutdown();
+steam_api = steam_initialised();
+gtest_assert_false(steam_api);

@@ -32,9 +32,9 @@
 
 namespace enigma_user
 {
-	evariant json_decode(std::string data);
+	variant json_decode(std::string data);
 
-	std::string json_encode(evariant ds_map);
+	std::string json_encode(variant ds_map);
 }
 
 

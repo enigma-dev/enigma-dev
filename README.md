@@ -1,35 +1,21 @@
-# STIGMA Development Environment
+# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![Build Status](https://dev.azure.com/enigma-dev/ENIGMA/_apis/build/status/enigma-dev.enigma-dev?branchName=master)](https://dev.azure.com/enigma-dev/ENIGMA/_build/latest?definitionId=6&branchName=master) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
 
-![screenshot0](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot0.png)
-![screenshot1](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot1.png)
-![screenshot2](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot2.png)
-![screenshot3](https://github.com/samuelvenable/stigma-dev/raw/main/Resources/screenshot3.png)
+If you find our tools useful, then please consider supporting ENIGMA on Patreon!
 
-**GameMaker clone**. Fork of enigma-dev. GameMaker-compatible.
+[![Patreon](https://enigma-dev.org/site/images/v4/patreon.png)](https://www.patreon.com/m/enigma_dev) 
 
-- **Create Games** for many supported Desktop Platforms.
-- **GPLv3 crap will be replaced** with permissive code over time.
-- **Build AppImages** with [GMAppImager](https://samuel-venable.itch.io/gmappimager) (separate download).
-- **WebM Video Playback** support (no patent issues or fees).
-- **Joystick Support** (cheated a little with using SDL2 library).
-- **Improved UTF-8 Support** on Windows (non-Latin support).
-- Expanded upon Shell and Process Execution (process info).
-- Improved upon Dialog Box and Graphical Widgets Systems.
+Official Website: https://enigma-dev.org
 
-Supported Platforms (Examples):
+ENIGMA, the Extensible Non-Interpreted Game Maker Augmentation, is an open-source, cross-platform game development environment based on the popular software, Game Maker. Its intent is to provide users with a quality game creation tool and a bridge between high- and low-level programming languages. It can be used either through an IDE, such as its sister project, [LateralGM](https://github.com/IsmAvatar/LateralGM), or its up-and-coming custom frontend, [RadialGM](https://github.com/enigma-dev/RadialGM), or also through its command line interface, [emake](CommandLine/emake).
 
-- Windows i686 7/8/8.1/10/11
-- Windows x86-64 7/8/8.1/10/11
-- Ubuntu 24.04 LTS Noble Numbat
+Like Game Maker, ENIGMA comprises an easy to use Drag & Drop system as well as its own programming language. This programming language, known as EDL, is essentially a mix between C++ and Game Maker's GML. Part of ENIGMA's goal is to remain backward-compatible with Game Maker, serving for some intents and purposes as a Game Maker compiler. However, EDL offers many very powerful features which simply aren't present in the alternative. Such features include the ability to compile DLLs and other C/C++ scripts right into the program, and direct access to C++ types, templates, and functions.
 
-"**STIGMA**" is a recursive acronym, which stands for, "**S**tigma **I**s **N**ot a **G**ame **M**aker **A**ugmentation"...
+Although EDL adopts GML's very lax syntax in its scripting, the inputted code is actually parsed and translated into valid C++. This compilation improves size and performance of the language by incredible amounts, while almost magically maintaining its simplicity of use.
 
-...that actually spells "**SINGMA**", because we are not very good at coming up with acronyms...
+## Install
+Please see https://enigma-dev.org/download.htm for installation instructions.
 
-A fork of the ENIGMA Development Environment that strives to go a different direction than that of the software it stemmed from, in hopes to provide a much more stable and appealing game dev software for desktop platorms. See the copyight comments in the headers and sources for the full list of past and current contributors. This fork is maintained by Samuel Venable. Special thanks to the original authors, most notably:
-
-- **Josh Ventura**, original project founder, JDI, and compiler author.
-- **Robert B. Colton**, Win32, RadialGM, emake, LGM, major contributor.
-- **Greg Williamson**, Linux, RadialGM, emake, SDL2, major contributor.
-- **Hugh Patrick Greene**, Wiki, games, tutorials, content contributor.
-- **Samuel Venable**, STIGMA, GUI widgets, SDL2 joystick contributor.
+## Documentation
+We have a community-led Wiki project hosted on our site where users contribute function and other API documentation. All you need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.
+* https://enigma-dev.org/forums/
+* https://enigma-dev.org/docs/Wiki/Main_Page

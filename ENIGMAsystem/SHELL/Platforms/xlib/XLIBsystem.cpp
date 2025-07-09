@@ -18,6 +18,7 @@
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
 #include "XLIBwindow.h"
+#include "XLIBsystem.h"
 
 namespace enigma_user {
 

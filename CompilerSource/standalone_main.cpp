@@ -61,7 +61,7 @@ extern  int ext_count;
 #include <languages/lang_CPP.h>
 
 extern int cfile_parse_main();
-extern jdi::definition *enigma_type__var, *enigma_type__evariant, *enigma_type__varargs;
+extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__varargs;
 
 inline string fc(const char* fn)
 {
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
   obj.mainEventCount = 1;
   obj.mainEvents = &mev;
   obj.name = "obj_boobs";
-  obj.spriteId = obj.parentId = obj.maskId = -1;
+  obj.spriteId = obj.parentId = obj.maskId = obj.polygonId = -1;
 
   es.gmObjects = &obj;
   es.gmObjectCount = 1;

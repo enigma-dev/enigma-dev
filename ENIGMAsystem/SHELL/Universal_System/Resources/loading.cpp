@@ -21,26 +21,16 @@
 #include "backgrounds_internal.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/Object_Tiers/object.h"
-#include "strings_util.h"
 #include "libEGMstd.h"
 
-#include "Platforms/General/PFmain.h"
-#include "Universal_System/directoryglobals.h"
-#include "Universal_System/fileio.h"
-#include "Universal_System/estring.h"
-#include "apifilesystem/filesystem.hpp"
-#include "Platforms/General/PFjoystick.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "apifilesystem/ghc/filesystem.hpp"
+#include "Platforms/General/fileio.h"
 
 #include <ctime>
-#include <cstdio>
-
-using enigma_user::get_program_pathname;
 
 namespace enigma_user
 {
@@ -77,21 +67,41 @@ namespace enigma
     event_system_initialize();
     timeline_system_initialize();
     input_initialize();
-    joystick_init();
+    widget_system_initialize();
 
     // Open the exe for resource load
     do { // Allows break
-      FILE* resfile = nullptr; 
-      #if !defined(_WIN32)
-      resfile = fopen((enigma_user::executable_get_directory() + "assets/data.res").c_str(),"rb");
-      #else
-      resfile = _wfopen(ghc::filesystem::path(enigma_user::executable_get_directory() + "assets/data.res").wstring().c_str(), L"rb");
-      #endif
-
-      if (!enigma_user::file_exists(enigma_user::executable_get_directory() + "assets/data.res") || !resfile) {
-        exit(0);
+      FILE_t* resfile;
+      if (resource_file_path != std::string("$exe")) {
+        if (!(resfile = fopen_wrapper(resource_file_path,"rb"))) {
+          DEBUG_MESSAGE("Resource load fail: exe unopenable", MESSAGE_TYPE::M_ERROR);
+          break;
+        }
+      } else {
+        char exename[4097];
+        windowsystem_write_exename(exename);
+        if (!(resfile = fopen_wrapper(exename,"rb"))) {
+          DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
+          break;
+        }
+      }
+      int nullhere;
+      // Read the magic number so we know we're looking at our own data
+      fseek_wrapper(resfile,-8,SEEK_END);
+      char str_quad[4];
+      if (!fread_wrapper(str_quad,4,1,resfile) or str_quad[0] != 'r' or str_quad[1] != 'e' or str_quad[2] != 's' or str_quad[3] != '0') {
+        DEBUG_MESSAGE("No resource data in exe", MESSAGE_TYPE::M_ERROR);
         break;
       }
+
+      // Get where our resources are located in the module
+      int pos;
+      if (!fread_wrapper(&pos,4,1,resfile)) break;
+
+      // Go to the start of the resource data
+      fseek_wrapper(resfile,pos,SEEK_SET);
+      if (!fread_wrapper(&nullhere,4,1,resfile)) break;
+      if(nullhere) break;
 
       enigma::exe_loadsprs(resfile);
       enigma::exe_loadsounds(resfile);
@@ -101,7 +111,7 @@ namespace enigma
       enigma::exe_loadpaths(resfile);
       #endif
 
-      fclose(resfile);
+      fclose_wrapper(resfile);
     } while (false);
 
     //Load object struct
@@ -116,9 +126,10 @@ namespace enigma
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
-
-    enigma_user::window_default(true);
-    enigma_user::window_set_visible(true);
+    else {
+      enigma_user::window_default(false);
+      enigma_user::window_set_visible(true);
+    }
 
     // resize and center window
     enigma_user::window_set_size(windowWidth, windowHeight);

@@ -1,11 +1,5 @@
 GCCVER := $(shell gcc -dumpversion | cut -c 1)
-
-# Define current OS, while treating MidnightBSD as FreeBSD
-ifeq ($(shell uname -s), MidnightBSD)
-	OS := FreeBSD
-else
-	OS := $(shell uname -s)
-endif
+OS := $(shell uname -s)
 
 # Determine whether Unix-based
 ifeq ($(OS), Darwin)
@@ -16,18 +10,8 @@ else ifeq ($(OS), FreeBSD)
 	UNIX_BASED := true
 else ifeq ($(OS), DragonFly)
 	UNIX_BASED := true
-else ifeq ($(OS), OpenBSD)
-	UNIX_BASED := true
 else 
 	UNIX_BASED := false
-endif
-
-ifeq ($(UNIX_BASED), true)
-	ARCH := $(shell uname -m)
-	SUFFIX := -$(OS)-$(ARCH)
-else
-	ARCH := $(shell gcc -dumpmachine | sed 's/-w.*//')
-	SUFFIX := -Windows-$(ARCH)
 endif
 
 # Determine current platform
@@ -35,32 +19,31 @@ ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := $(SUFFIX).dylib
-	BIN_EXT := $(SUFFIX)
+	LIB_EXT := .dylib
+	BIN_EXT :=
 else ifeq ($(UNIX_BASED), true)
 	PLATFORM := xlib
 	MKDIR := mkdir
 	LIB_PFX := lib
-	LIB_EXT := $(SUFFIX).so
-	BIN_EXT := $(SUFFIX)
+	LIB_EXT := .so
+	BIN_EXT :=
 else
 	PLATFORM := Win32
 	MKDIR := mkdir.exe
 	LIB_PFX := lib
-	LIB_EXT := $(SUFFIX).dll
-	BIN_EXT := $(SUFFIX).exe
+	LIB_EXT := .dll
+	BIN_EXT := .exe
 endif
 
 # Global g++ flags
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
 LDFLAGS := -g
 
-# MacPorts include and lib folders
+# macOS brew include and lib folders
 ifeq ($(OS), Darwin)
-	CXXFLAGS += -I/opt/local/include -I/usr/local/include -I/opt/homebrew/include
-	CFLAGS   += -I/opt/local/include -I/usr/local/include -I/opt/homebrew/include
-	LDFLAGS  += -L/opt/local/lib -L/usr/local/lib -L/opt/homebrew/lib
-	LDFLIBS  += -L/opt/local/lib -L/usr/local/lib -L/opt/homebrew/lib
+	CXXFLAGS += -I/usr/local/include
+	CFLAGS   += -I/usr/local/include
+	LDFLAGS  += -L/usr/local/lib
 endif
 
 # FreeBSD include and lib folders
@@ -68,7 +51,6 @@ ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
-	LDFLIBS  += -L/usr/local/lib
 endif
 
 # DragonFlyBSD include and lib folders
@@ -76,15 +58,6 @@ ifeq ($(OS), DragonFly)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
-	LDFLIBS  += -L/usr/local/lib
-endif
-
-# OpenBSD include and lib folders
-ifeq ($(OS), OpenBSD)
-	CXXFLAGS += -I/usr/local/include
-	CFLAGS   += -I/usr/local/include
-	LDFLAGS  += -L/usr/local/lib
-	LDFLIBS  += -L/usr/local/lib
 endif
 
 # These will be relative to the file that includes this Makefile

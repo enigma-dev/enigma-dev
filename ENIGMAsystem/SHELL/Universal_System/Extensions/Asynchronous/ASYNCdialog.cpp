@@ -23,7 +23,7 @@
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Instances/instance.h"
 
-// include after evariant
+// include after variant
 #include "implement.h"
 
 #include <future>

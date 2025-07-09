@@ -17,7 +17,6 @@
 
 #include "std.h"
 #include "shader.h"
-#include "GLSLshader.h"
 
 #include "Graphics_Systems/OpenGL-Common/version.h"
 #include "Graphics_Systems/OpenGL-Common/screen.h"
@@ -54,45 +53,42 @@ namespace enigma {
     for (size_t i = 0; i < shader_idmax; i++) {
       ShaderStruct* shaderstruct = shaderdata[i];
 
-      //if (string(shaderstruct->type) != string("GLSL")) { continue; }
+      //if (string(shaderstruct.type) != string("GLSL")) { continue; }
 
-      shaders.push_back(std::make_unique<Shader>(enigma_user::sh_vertex));
-      auto& vshader = shaders.back();
-      glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+      auto& vshader = shaders[shaders.add(Shader(enigma_user::sh_vertex))];
+      glShaderSource(vshader.shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
 
-      shaders.push_back(std::make_unique<Shader>(enigma_user::sh_fragment));
-      auto& fshader = shaders.back();
-      glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
+      auto& fshader = shaders[shaders.add(Shader(enigma_user::sh_fragment))];
+      glShaderSource(fshader.shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
 
-      shaderprograms.push_back(std::make_unique<ShaderProgram>());
-      auto& program = shaderprograms.back();
+      auto& program = shaderprograms[shaderprograms.add(ShaderProgram())];
 
       if (shaderstruct->precompile) {
-        glCompileShader(vshader->shader);
-        glCompileShader(fshader->shader);
+        glCompileShader(vshader.shader);
+        glCompileShader(fshader.shader);
 
         GLint blen = 0;
         GLsizei slen = 0;
 
-        glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+        glGetShaderiv(vshader.shader, GL_INFO_LOG_LENGTH , &blen);
 
         if (blen > 1)
         {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
-          glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+          glGetInfoLogARB(vshader.shader, blen, &slen, compiler_log);
           DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
           DEBUG_MESSAGE("Vertex shader compile log empty", MESSAGE_TYPE::M_ERROR);
         }
 
-        glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
+        glGetShaderiv(fshader.shader, GL_INFO_LOG_LENGTH , &blen);
 
         if (blen > 1)
         {
           GLchar* compiler_log = (GLchar*)malloc(blen);
 
-          glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+          glGetInfoLogARB(fshader.shader, blen, &slen, compiler_log);
           DEBUG_MESSAGE(compiler_log, MESSAGE_TYPE::M_ERROR);
         } else {
           DEBUG_MESSAGE("Fragment shader compile log empty", MESSAGE_TYPE::M_ERROR);
@@ -100,11 +96,11 @@ namespace enigma {
 
       }
 
-      glAttachShader(program->shaderprogram, vshader->shader);
-      glAttachShader(program->shaderprogram, fshader->shader);
+      glAttachShader(program.shaderprogram, vshader.shader);
+      glAttachShader(program.shaderprogram, fshader.shader);
 
-      glLinkProgram(program->shaderprogram);
-      glValidateProgram(program->shaderprogram);
+      glLinkProgram(program.shaderprogram);
+      glValidateProgram(program.shaderprogram);
     }
   }
 }

@@ -26,22 +26,22 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Platforms/General/fileio.h"
 
 #include <cstring>
-#include <cstdio>
 #include <string>
 
 namespace enigma {
 
-void exe_loadfonts(FILE* exe) {
+void exe_loadfonts(FILE_t* exe) {
   int nullhere, fntid;
   unsigned fontcount, twid, thgt, gwid, ghgt;
   float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
-  if (!fread(&nullhere, 4, 1, exe)) return;
+  if (!fread_wrapper(&nullhere, 4, 1, exe)) return;
   if (memcmp(&nullhere, "FNT ", sizeof(int)) != 0) return;
 
-  if (!fread(&fontcount, 4, 1, exe)) return;
+  if (!fread_wrapper(&fontcount, 4, 1, exe)) return;
   if ((int)fontcount != rawfontcount) {
     DEBUG_MESSAGE("Resource data does not match up with game metrics. Unable to improvise.", MESSAGE_TYPE::M_ERROR);
     return;
@@ -51,9 +51,9 @@ void exe_loadfonts(FILE* exe) {
 
   for (int rf = 0; rf < rawfontcount; rf++) {
     // int unpacked;
-    if (!fread(&fntid, 4, 1, exe)) return;
-    if (!fread(&twid, 4, 1, exe)) return;
-    if (!fread(&thgt, 4, 1, exe)) return;
+    if (!fread_wrapper(&fntid, 4, 1, exe)) return;
+    if (!fread_wrapper(&twid, 4, 1, exe)) return;
+    if (!fread_wrapper(&thgt, 4, 1, exe)) return;
 
     SpriteFont font;
 
@@ -67,14 +67,14 @@ void exe_loadfonts(FILE* exe) {
 
     const unsigned int size = twid * thgt;
     unsigned char* mono = new unsigned char[size];
-    if (!fread(&mono[0], sizeof(char), size, exe)) return;
+    if (!fread_wrapper(&mono[0], sizeof(char), size, exe)) return;
     
     unsigned char* pixels = mono_to_rgba(mono, twid, thgt);
     delete[] mono;
 
-    if (!fread(&nullhere, 4, 1, exe)) return;
+    if (!fread_wrapper(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
-      DEBUG_MESSAGE(std::string("Unexpected end; eof: ") + ((feof(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
+      DEBUG_MESSAGE(std::string("Unexpected end; eof: ") + ((feof_wrapper(exe) == 0) ? "true" : "false"), MESSAGE_TYPE::M_ERROR);
       return;
     }
 
@@ -83,21 +83,21 @@ void exe_loadfonts(FILE* exe) {
       fontglyphrange fgr;
 
       unsigned strt, cnt;
-      if (!fread(&strt, 4, 1, exe)) return;
-      if (!fread(&cnt, 4, 1, exe)) return;
+      if (!fread_wrapper(&strt, 4, 1, exe)) return;
+      if (!fread_wrapper(&cnt, 4, 1, exe)) return;
 
       fgr.glyphstart = strt;
 
       for (unsigned gi = 0; gi < cnt; gi++) {
-        if (!fread(&advance, 4, 1, exe)) return;
-        if (!fread(&baseline, 4, 1, exe)) return;
-        if (!fread(&origin, 4, 1, exe)) return;
-        if (!fread(&gwid, 4, 1, exe)) return;
-        if (!fread(&ghgt, 4, 1, exe)) return;
-        if (!fread(&gtx, 4, 1, exe)) return;
-        if (!fread(&gty, 4, 1, exe)) return;
-        if (!fread(&gtx2, 4, 1, exe)) return;
-        if (!fread(&gty2, 4, 1, exe)) return;
+        if (!fread_wrapper(&advance, 4, 1, exe)) return;
+        if (!fread_wrapper(&baseline, 4, 1, exe)) return;
+        if (!fread_wrapper(&origin, 4, 1, exe)) return;
+        if (!fread_wrapper(&gwid, 4, 1, exe)) return;
+        if (!fread_wrapper(&ghgt, 4, 1, exe)) return;
+        if (!fread_wrapper(&gtx, 4, 1, exe)) return;
+        if (!fread_wrapper(&gty, 4, 1, exe)) return;
+        if (!fread_wrapper(&gtx2, 4, 1, exe)) return;
+        if (!fread_wrapper(&gty2, 4, 1, exe)) return;
         fontglyph fg;
 
         fg.x = round(origin);
@@ -128,7 +128,7 @@ void exe_loadfonts(FILE* exe) {
 
     sprite_fonts[fntid] = std::move(font);
 
-    if (!fread(&nullhere, 4, 1, exe)) return;
+    if (!fread_wrapper(&nullhere, 4, 1, exe)) return;
     if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;
   }
 }

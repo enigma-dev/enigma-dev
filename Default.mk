@@ -21,7 +21,6 @@ endif
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
-	$(LINKING_TARGETS)
 
 clean:
 	rm -rf $(TARGET) $(OBJ_DIR)

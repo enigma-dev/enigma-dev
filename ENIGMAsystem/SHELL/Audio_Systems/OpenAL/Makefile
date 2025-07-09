@@ -1,16 +1,12 @@
 SOURCES += $(wildcard Audio_Systems/OpenAL/*.cpp)
 
-ifeq  ($(TARGET-PLATFORM), Windows)
+ifeq ($(TARGET-PLATFORM), MacOSX)
+	override LDLIBS += -framework OpenAL
+	SOURCES += $(wildcard ../additional/alure/enigma_alure/*.cpp)
+	include $(addsuffix /Makefile, ../additional/alure/Codecs)
+else ifeq ($(UNIX_BASED), true)
+	override LDLIBS += -lopenal -lalure -lvorbisfile -lvorbis -ldumb
+else ifeq ($(TARGET-PLATFORM), Windows)
 	override CXXFLAGS += $(shell pkg-config --cflags openal)
-	override CXXFLAGS += $(shell pkg-config --cflags openal)
-	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lssp -lwinmm -lole32 -lshlwapi -fstack-protector
-else ifeq  ($(TARGET-PLATFORM), Linux)
-	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
-else ifeq  ($(TARGET-PLATFORM), FreeBSD)
-	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
-else ifeq  ($(TARGET-PLATFORM), DragonFlyBSD)
-	override LDLIBS += -lalure -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth -lssp
-else ifeq  ($(TARGET-PLATFORM), OpenBSD)
-	override CXXFLAGS += -I../../shared/alure/include
-	override LDLIBS += ../../shared/alure/libalure-static.a -lopenal -lvorbisfile -lvorbisenc -lvorbis -lopusfile -lopus -logg -lFLAC -ldumb -lmodplug -lmpg123 -lsndfile -lfluidsynth
+	override LDLIBS += -lALURE32-static -lopenal.dll -lvorbisfile -lvorbis -logg -lFLAC -lsndfile -lmodplug -lmpg123 -lole32 -lwinmm
 endif
