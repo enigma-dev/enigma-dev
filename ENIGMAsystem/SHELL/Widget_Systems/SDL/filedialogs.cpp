@@ -397,10 +397,10 @@ namespace {
       ImGui::NewFrame();
       ImGui::SetNextWindowPos(ImVec2(0, 0));
       ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y)); dir = expand_without_trailing_slash(dir);
-      if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", "Open", filterNew.c_str(), false, fname.c_str(), dir.c_str());
-      else if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", "Open", filterNew.c_str(), true, fname.c_str(), dir.c_str());
-      else if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", "Select Directory", "", false, fname.c_str(), dir.c_str());
-      else if (type == saveFile) ifd::FileDialog::Instance().Save("GetSaveFileName", "Save As", filterNew.c_str(), fname.c_str(), dir.c_str());
+      if (type == openFile) ifd::FileDialog::Instance().Open("GetOpenFileName", (title.empty()) ? "Open File" : title.c_str(), filterNew.c_str(), false, fname.c_str(), dir.c_str());
+      else if (type == openFiles) ifd::FileDialog::Instance().Open("GetOpenFileNames", (title.empty()) ? "Open Files" : title.c_str(), filterNew.c_str(), true, fname.c_str(), dir.c_str());
+      else if (type == selectFolder) ifd::FileDialog::Instance().Open("GetDirectory", (title.empty()) ? "Select Directory" : title.c_str(), "", false, fname.c_str(), dir.c_str());
+      else if (type == saveFile) ifd::FileDialog::Instance().Save("GetSaveFileName", (title.empty()) ? "Save As" : title.c_str(), filterNew.c_str(), fname.c_str(), dir.c_str());
       else if (type == oneButton) {
         vector<string> buttons;
         buttons.push_back(IFD_OK);
