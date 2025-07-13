@@ -606,9 +606,11 @@ namespace {
         display = system_info.info.x11.display;
         if (display) {
           xWnd = system_info.info.x11.window;
-          Window xwindow = (Window)(std::uintptr_t)strtoull(
-          ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
-          XSetTransientForHint(display, xWnd, xwindow);
+          if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+            Window xwindow = (Window)(std::uintptr_t)strtoull(
+            ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
+            XSetTransientForHint(display, xWnd, xwindow);
+          }
         }
         #endif
         dialog = nullptr;
