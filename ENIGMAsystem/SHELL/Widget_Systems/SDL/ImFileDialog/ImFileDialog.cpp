@@ -581,6 +581,16 @@ namespace ifd {
     m_treeCache.clear();
   }
 
+  static bool colon_dir = false;
+
+  std::string with_colon() {
+    return ((colon_dir) ? IFD_DIRECTORY_NAME_WITH_COLON : IFD_FILE_NAME_WITH_COLON);
+  }
+
+  std::string without_colon() {
+    return ((colon_dir) ? IFD_DIRECTORY_NAME_WITHOUT_COLON : IFD_FILE_NAME_WITHOUT_COLON);
+  }
+
   bool FileDialog::Save(const std::string& key, const std::string& title, const std::string& filter, const std::string& startingFile, const std::string& startingDir) {
     if (!m_currentKey.empty())
       return false;
@@ -595,6 +605,7 @@ namespace ifd {
     m_selectedFileItem = -1;
     m_isMultiselect = false;
     m_type = IFD_DIALOG_SAVE;
+    colon_dir = false;
 
     strcpy(m_inputTextbox, startingFile.substr(0, 1023).c_str());
 
@@ -621,6 +632,7 @@ namespace ifd {
     m_selectedFileItem = -1;
     m_isMultiselect = isMultiselect;
     m_type = filter.empty() ? IFD_DIALOG_DIRECTORY : IFD_DIALOG_FILE;
+    colon_dir = filter.empty();
 
     strcpy(m_inputTextbox, startingFile.substr(0, 1023).c_str());
 
@@ -643,7 +655,8 @@ namespace ifd {
         m_calledOpenPopup = true;
       }
 
-      if (ImGui::BeginPopupModal(m_currentTitle.c_str(), &m_isOpen, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+      if (ImGui::BeginPopupModal(m_currentTitle.c_str(), &m_isOpen, ImGuiWindowFlags_NoScrollbar | 
+        ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") == std::to_string(1)) ? ImGuiWindowFlags_NoTitleBar : 0) | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         m_renderFileDialog();
         ImGui::EndPopup();
       }
@@ -962,19 +975,24 @@ namespace ifd {
     uint8_t *data = (uint8_t *)malloc(byteSize);
     if (data) {
       GetBitmapBits(iconInfo.hbmColor, byteSize, data);
-      unsigned char *invData = (unsigned char *)calloc(ds.dsBm.bmWidth * ds.dsBm.bmHeight * 4, sizeof(unsigned char));
-      for (int y = 0; y < ds.dsBm.bmHeight; y++) {
-        for (int x = 0; x < ds.dsBm.bmWidth; x++) {
-          int index = (y * ds.dsBm.bmWidth + x) * 4;
-          invData[index + 2] = data[index + 0];
-          invData[index + 1] = data[index + 1];
-          invData[index + 0] = data[index + 2];
-          invData[index + 3] = data[index + 3];
+      int sw = ds.dsBm.bmWidth * 16;
+      int sh = ds.dsBm.bmHeight * 16;
+      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+      for (int y = 0; y < sh; y++) {
+        for (int x = 0; x < sw; x++) {
+          int origX = x / 16;
+          int origY = y / 16;
+          int index = (origY * ds.dsBm.bmWidth + origX) * 4;
+          int scaledIndex = (y * sw + x) * 4;
+          sd[scaledIndex + 0] = data[index + 0];
+          sd[scaledIndex + 1] = data[index + 1];
+          sd[scaledIndex + 2] = data[index + 2];
+          sd[scaledIndex + 3] = data[index + 3];
         }
       }
-      m_icons[pathU8] = this->CreateTexture(invData, ds.dsBm.bmWidth, ds.dsBm.bmHeight, 0);
+      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
       free(data);
-      free(invData);
+      free(sd);
     }
 
     return m_icons[pathU8];
@@ -1045,8 +1063,24 @@ namespace ifd {
             invData[index + 3] = rawData[index + 3];
           }
         }
-        m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
+        int sw = width * 16;
+        int sh = height * 16;
+        unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+        for (int y = 0; y < sh; y++) {
+          for (int x = 0; x < sw; x++) {
+            int origX = x / 16;
+            int origY = y / 16;
+            int index = (origY * width + origX) * 4;
+            int scaledIndex = (y * sw + x) * 4;
+            sd[scaledIndex + 0] = invData[index + 0];
+            sd[scaledIndex + 1] = invData[index + 1];
+            sd[scaledIndex + 2] = invData[index + 2];
+            sd[scaledIndex + 3] = invData[index + 3];
+          }
+        }
+        m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
         free(invData);
+        free(sd);
       }
       free(rawData);
     }
@@ -1134,9 +1168,44 @@ namespace ifd {
                 invData[index + 3] = image[index + 3];
               }
             }
-            m_icons[pathU8] = this->CreateTexture(invData, width, height, 0);
+            int sw = width * 16;
+            int sh = height * 16;
+            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+            for (int y = 0; y < sh; y++) {
+              for (int x = 0; x < sw; x++) {
+                int origX = x / 16;
+                int origY = y / 16;
+                int index = (origY * width + origX) * 4;
+                int scaledIndex = (y * sw + x) * 4;
+                sd[scaledIndex + 0] = invData[index + 0];
+                sd[scaledIndex + 1] = invData[index + 1];
+                sd[scaledIndex + 2] = invData[index + 2];
+                sd[scaledIndex + 3] = invData[index + 3];
+              }
+            }
+            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
             free(invData);
             free(image);
+            free(sd);
+          } else {
+            int sw = width * 16;
+            int sh = height * 16;
+            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+            for (int y = 0; y < sh; y++) {
+              for (int x = 0; x < sw; x++) {
+                int origX = x / 16;
+                int origY = y / 16;
+                int index = (origY * width + origX) * 4;
+                int scaledIndex = (y * sw + x) * 4;
+                sd[scaledIndex + 0] = image[index + 0];
+                sd[scaledIndex + 1] = image[index + 1];
+                sd[scaledIndex + 2] = image[index + 2];
+                sd[scaledIndex + 3] = image[index + 3];
+              }
+            }
+            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+            free(image);
+            free(sd);
           }
         }
       } else if (ext == ".svg") {
@@ -1146,7 +1215,23 @@ namespace ifd {
         if (document) {
           auto bitmap = document->renderToBitmap(width, height, bgColor);
           if (bitmap.valid()) {
-            m_icons[pathU8] = this->CreateTexture(bitmap.data(), width, height, 0);
+            int sw = width * 16;
+            int sh = height * 16;
+            unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+            for (int y = 0; y < sh; y++) {
+              for (int x = 0; x < sw; x++) {
+                int origX = x / 16;
+                int origY = y / 16;
+                int index = (origY * width + origX) * 4;
+                int scaledIndex = (y * sw + x) * 4;
+                sd[scaledIndex + 0] = bitmap.data()[index + 0];
+                sd[scaledIndex + 1] = bitmap.data()[index + 1];
+                sd[scaledIndex + 2] = bitmap.data()[index + 2];
+                sd[scaledIndex + 3] = bitmap.data()[index + 3];
+              }
+            }
+            m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+            free(sd);
           }
         }
       }
@@ -1177,7 +1262,23 @@ namespace ifd {
       if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
       int w = 32;
       int h = 32;
-      m_icons[pathU8] = this->CreateTexture(data, w, h, 0);
+      int sw = w * 16;
+      int sh = h * 16;
+      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+      for (int y = 0; y < sh; y++) {
+        for (int x = 0; x < sw; x++) {
+          int origX = x / 16;
+          int origY = y / 16;
+          int index = (origY * w + origX) * 4;
+          int scaledIndex = (y * sw + x) * 4;
+          sd[scaledIndex + 0] = data[index + 0];
+          sd[scaledIndex + 1] = data[index + 1];
+          sd[scaledIndex + 2] = data[index + 2];
+          sd[scaledIndex + 3] = data[index + 3];
+        }
+      }
+      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
+      free(sd);
     } else {
       uint8_t *data = (uint8_t*)ifd::GetDefaultFileIcon();
       if (iconID == 0) data = (uint8_t *)ifd::GetDefaultFolderIcon();
@@ -1193,8 +1294,24 @@ namespace ifd {
           invData[index + 3] = data[index + 3];
         }
       }
-      m_icons[pathU8] = this->CreateTexture(invData, w, h, 0);
+      int sw = w * 16;
+      int sh = h * 16;
+      unsigned char *sd = (unsigned char *)calloc(sw * sh * 4, sizeof(unsigned char));
+      for (int y = 0; y < sh; y++) {
+        for (int x = 0; x < sw; x++) {
+          int origX = x / 16;
+          int origY = y / 16;
+          int index = (origY * w + origX) * 4;
+          int scaledIndex = (y * sw + x) * 4;
+          sd[scaledIndex + 0] = invData[index + 0];
+          sd[scaledIndex + 1] = invData[index + 1];
+          sd[scaledIndex + 2] = invData[index + 2];
+          sd[scaledIndex + 3] = invData[index + 3];
+        }
+      }
+      m_icons[pathU8] = this->CreateTexture(sd, sw, sh, 0);
       free(invData);
+      free(sd);
     }
     return m_icons[pathU8];
     #endif
@@ -1278,10 +1395,17 @@ namespace ifd {
               for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                   int index = (y * width + x) * 4;
+                  #if defined(IFD_USE_OPENGL)
                   invData[index + 0] = image[index + 0];
                   invData[index + 1] = image[index + 1];
                   invData[index + 2] = image[index + 2];
                   invData[index + 3] = image[index + 3];
+                  #else
+                  invData[index + 2] = image[index + 0];
+                  invData[index + 1] = image[index + 1];
+                  invData[index + 0] = image[index + 2];
+                  invData[index + 3] = image[index + 3];
+                  #endif
                 }
               }
               free(image);
@@ -1830,10 +1954,10 @@ namespace ifd {
     }
     
     /***** BOTTOM BAR *****/
-    ImGui::Text(IFD_FILE_NAME_WITH_COLON);
+    ImGui::Text(with_colon().c_str());
     ImGui::SameLine();
     ghc::filesystem::path pathToCheckExistenceFor = m_currentDirectory / m_inputTextbox;
-    if (ImGui::InputTextEx("##file_input", IFD_FILE_NAME_WITHOUT_COLON, m_inputTextbox, 1024,
+    if (ImGui::InputTextEx("##file_input", without_colon().c_str(), m_inputTextbox, 1024,
       ImVec2((m_type != IFD_DIALOG_DIRECTORY) ? -250.0f : -FLT_MIN, 0), ImGuiInputTextFlags_EnterReturnsTrue)) {
       std::string filename(m_inputTextbox);
       m_finalize(filename);
