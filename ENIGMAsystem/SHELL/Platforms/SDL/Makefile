@@ -25,6 +25,7 @@ endif
 ifeq ($(TARGET-PLATFORM), Windows)
 	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
+	override LDLIBS += -lshell32 -lole32 -luuid
 else
 	ifneq ($(TARGET-PLATFORM), Android)
 		SOURCES += Platforms/General/PFshell/PFshell.cpp
