@@ -2,7 +2,7 @@
 
  MIT License
 
- Copyright © 2021-2022 Samuel Venable
+ Copyright © 2021-2025 Samuel Venable
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,15 @@ namespace enigma {
 }
 
 namespace enigma_user {
+
+int widget_get_theme() {
+  return (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty() ? 2 : 
+  (int)strtol(ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").c_str(), nullptr, 10));
+}
+
+void widget_set_theme(int theme) {
+  ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(theme));
+}
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { }
 

@@ -2,7 +2,7 @@
 
  MIT License
 
- Copyright © 2021-2022 Samuel Venable
+ Copyright © 2021-2025 Samuel Venable
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
 
 namespace enigma_user {
 
+int widget_get_theme();
+void widget_set_theme(int theme);
 bool show_question(std::string message);
 int show_message_ext(std::string message, std::string button1 = "", std::string button2 = "", std::string button3 = "");
 std::string get_string(std::string message, std::string defstr);
