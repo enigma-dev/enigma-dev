@@ -15,8 +15,7 @@ endif
 CXXFLAGS  += -I../../CompilerSource -I$(PROTO_DIR) -I../libEGM -I../libEGM -I../../ENIGMAsystem/SHELL
 LDFLAGS   += $(OS_LIBS) -L../../ -lcompileEGMf -lEGM -lENIGMAShared -lProtocols -lgrpc++ -lgpr -lprotobuf -lyaml-cpp -lpng
 
-ifeq ($(CUSTOM_LIB_SEARCH_PRIORITY), system)
-else
+ifneq ($(CUSTOM_LIB_SEARCH_PRIORITY), system)
 	LDFLAGS += -labseil_dll
 endif
 
