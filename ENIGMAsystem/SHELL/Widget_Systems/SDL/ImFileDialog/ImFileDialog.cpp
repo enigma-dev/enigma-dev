@@ -1766,22 +1766,26 @@ namespace ifd {
     ImGui::PushStyleColor(ImGuiCol_Button, 0);
     if (noBackHistory) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     if (ImGui::ArrowButtonEx("##back", ImGuiDir_Left, ImVec2(GUI_ELEMENT_SIZE, GUI_ELEMENT_SIZE), m_backHistory.empty() * ImGuiItemFlags_Disabled)) {
-      ghc::filesystem::path newPath = m_backHistory.top();
-      m_backHistory.pop();
-      m_forwardHistory.push(m_currentDirectory);
+      if (!m_backHistory.empty()) {
+        ghc::filesystem::path newPath = m_backHistory.top();
+        m_backHistory.pop();
+        m_forwardHistory.push(m_currentDirectory);
 
-      m_setDirectory(newPath, false);
+        m_setDirectory(newPath, false);
+      }
     }
     if (noBackHistory) ImGui::PopStyleVar();
     ImGui::SameLine();
     
     if (noForwardHistory) ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
     if (ImGui::ArrowButtonEx("##forward", ImGuiDir_Right, ImVec2(GUI_ELEMENT_SIZE, GUI_ELEMENT_SIZE), m_forwardHistory.empty() * ImGuiItemFlags_Disabled)) {
-      ghc::filesystem::path newPath = m_forwardHistory.top();
-      m_forwardHistory.pop();
-      m_backHistory.push(m_currentDirectory);
+      if (!m_forwardHistory.empty()) {
+        ghc::filesystem::path newPath = m_forwardHistory.top();
+        m_forwardHistory.pop();
+        m_backHistory.push(m_currentDirectory);
 
-      m_setDirectory(newPath, false);
+        m_setDirectory(newPath, false);
+      }
     }
     if (noForwardHistory) ImGui::PopStyleVar();
     ImGui::SameLine();
