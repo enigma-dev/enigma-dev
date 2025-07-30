@@ -1124,7 +1124,10 @@ namespace ifd {
     GtkIconInfo *gtkicon_info = nullptr;
 
     static bool gtkinit;
-    if (!gtkinit) gtk_init(nullptr, nullptr);
+    if (!gtkinit) {
+      gtk_init(nullptr, nullptr);
+      setlocale(LC_NUMERIC, "C");
+    }
     gtkinit = true;
 
     gtkicon_info = gtk_icon_theme_choose_icon(gtk_icon_theme_get_default(), (const char **)fnames, 32, (GtkIconLookupFlags)0);
