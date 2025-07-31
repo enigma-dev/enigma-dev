@@ -5,5 +5,5 @@ Name: ImGui Widgets
 Identifier: SDL
 Build-Platforms: SDL
 Represents: SDL
-Description: Highly-customize-able and theme-able, custom-drawn, Dear ImGui Widgets powered by SDL Windowing, and SDL Renderer's OpenGL backend. Complete with custom localization and fonts support, using environment variables. This widget system must be used with the SDL Platform and with an OpenGL-based Graphics System. It will not behave properly with the other platforms and graphics systems.
+Description: Highly-customize-able and theme-able, custom-drawn, Dear ImGui Widgets powered by SDL windowing, and Dear ImGui's OpenGL 3.3 graphics backend. Complete with custom localization and fonts support, using environment variables. This widget system must be used with the SDL Platform and with an OpenGL-based Graphics System. It will not behave properly with the other platforms and graphics systems.
 Author: Samuel Venable
