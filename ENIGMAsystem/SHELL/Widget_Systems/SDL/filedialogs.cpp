@@ -451,7 +451,12 @@ namespace {
         if (selected) goto finish;
       } else if (type == stringInputBox) {
         vector<string> buttons;
-        buttons.push_back(IFD_OK);
+        if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CANCELABLE") == std::to_string(1)) {
+          buttons.push_back(IFD_OK);
+          buttons.push_back(IFD_CANCEL);
+        } else {
+          buttons.push_back(IFD_OK);
+        }
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
@@ -468,7 +473,12 @@ namespace {
         if (selected) goto finish;
       } else if (type == numberInputBox) {
         vector<string> buttons;
-        buttons.push_back(IFD_OK);
+        if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CANCELABLE") == std::to_string(1)) {
+          buttons.push_back(IFD_OK);
+          buttons.push_back(IFD_CANCEL);
+        } else {
+          buttons.push_back(IFD_OK);
+        }
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
         double defnum = strtod(def.c_str(), nullptr);
@@ -520,7 +530,7 @@ namespace {
         if (ngs::fs::environment_get_variable("IMGUI_DIALOG_WIDTH").empty() &&
           ngs::fs::environment_get_variable("IMGUI_DIALOG_HEIGHT").empty() &&
           (type == openFile || type == openFiles || type == saveFile || type == selectFolder)) {
-          SDL_SetWindowSize(window, 640, 360);
+          SDL_SetWindowSize(window, 720, 382);
           SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
         }
         #if defined(_WIN32)
@@ -588,6 +598,9 @@ namespace {
         [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
         [[nsWnd standardWindowButton:NSWindowZoomButton] setEnabled:NO];
         if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+          [[(NSWindow *)(void *)(std::uintptr_t)strtoull(
+          ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
+          standardWindowButton:NSWindowCloseButton] setEnabled:NO];
           [(NSWindow *)(void *)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
           addChildWindow:nsWnd ordered:NSWindowAbove];
@@ -667,6 +680,12 @@ namespace {
     if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
       EnableWindow((HWND)(void *)(std::uintptr_t)strtoull(
       ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), TRUE);
+    }
+    #elif (defined(__APPLE__) && defined(__MACH__))
+    if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+      [[(NSWindow *)(void *)(std::uintptr_t)strtoull(
+      ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
+      standardWindowButton:NSWindowCloseButton] setEnabled:YES];
     }
     #endif
     ImGui_ImplOpenGL3_Shutdown();
