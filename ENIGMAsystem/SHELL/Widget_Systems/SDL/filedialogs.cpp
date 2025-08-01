@@ -254,21 +254,21 @@ namespace {
   }
 
   void SetupImGuiStyle2() {
-    float text_0 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_0").c_str(), nullptr);
-    float text_1 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_1").c_str(), nullptr);
-    float text_2 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_2").c_str(), nullptr);
-    float head_0 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_0").c_str(), nullptr);
-    float head_1 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_1").c_str(), nullptr);
-    float head_2 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_2").c_str(), nullptr);
-    float area_0 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_0").c_str(), nullptr);
-    float area_1 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_1").c_str(), nullptr);
-    float area_2 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_2").c_str(), nullptr);
-    float body_0 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_0").c_str(), nullptr);
-    float body_1 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_1").c_str(), nullptr);
-    float body_2 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_2").c_str(), nullptr);
-    float pops_0 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_0").c_str(), nullptr);
-    float pops_1 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_1").c_str(), nullptr);
-    float pops_2 = (float)strtod(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_2").c_str(), nullptr);
+    float text_0 = strtof(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_0").c_str(), nullptr);
+    float text_1 = strtof(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_1").c_str(), nullptr);
+    float text_2 = strtof(ngs::fs::environment_get_variable("IMGUI_TEXT_COLOR_2").c_str(), nullptr);
+    float head_0 = strtof(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_0").c_str(), nullptr);
+    float head_1 = strtof(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_1").c_str(), nullptr);
+    float head_2 = strtof(ngs::fs::environment_get_variable("IMGUI_HEAD_COLOR_2").c_str(), nullptr);
+    float area_0 = strtof(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_0").c_str(), nullptr);
+    float area_1 = strtof(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_1").c_str(), nullptr);
+    float area_2 = strtof(ngs::fs::environment_get_variable("IMGUI_AREA_COLOR_2").c_str(), nullptr);
+    float body_0 = strtof(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_0").c_str(), nullptr);
+    float body_1 = strtof(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_1").c_str(), nullptr);
+    float body_2 = strtof(ngs::fs::environment_get_variable("IMGUI_BODY_COLOR_2").c_str(), nullptr);
+    float pops_0 = strtof(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_0").c_str(), nullptr);
+    float pops_1 = strtof(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_1").c_str(), nullptr);
+    float pops_2 = strtof(ngs::fs::environment_get_variable("IMGUI_POPS_COLOR_2").c_str(), nullptr);
     static ImVec3 color_for_text = ImVec3(text_0, text_1, text_2);
     static ImVec3 color_for_head = ImVec3(head_0, head_1, head_2);
     static ImVec3 color_for_area = ImVec3(area_0, area_1, area_2);
@@ -322,7 +322,7 @@ namespace {
       ngs::fs::environment_set_variable("IMGUI_FONT_SIZE", std::to_string(20));
       ImFontConfig config;
       config.MergeMode = true; ImFont *font = nullptr; ImWchar ranges[] = { 0x0020, 0xFFFF, 0 };
-      float fontSize = (float)strtod(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
+      float fontSize = strtof(ngs::fs::environment_get_variable("IMGUI_FONT_SIZE").c_str(), nullptr);
       for (unsigned i = 0; i < fonts.size(); i++) {
         message_pump();
         if (ngs::fs::file_exists(fonts[i])) {
