@@ -840,7 +840,10 @@ namespace ifd {
       }
     }
 
-    if (!m_result.empty() && m_type == IFD_DIALOG_SAVE &&
+    if (!m_result.empty() && m_type == IFD_DIALOG_SAVE && !exists(m_result.back().parent_path())) {
+      m_result.clear();
+      goto failure;
+    } else if (!m_result.empty() && m_type == IFD_DIALOG_SAVE &&
       !exists(m_result.back()) && !ghc::filesystem::is_directory(m_result.back(), ec)) {
       m_isOpen = false;
       return true;
