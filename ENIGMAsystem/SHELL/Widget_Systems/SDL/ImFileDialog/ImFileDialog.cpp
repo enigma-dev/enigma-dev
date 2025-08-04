@@ -798,10 +798,13 @@ namespace ifd {
     std::error_code ec;
     auto exists = [](ghc::filesystem::path path) {
       #if defined(_WIN32)
-      return (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(path.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND);
+      return (!path.wstring().empty() && path.is_absolute() && path.wstring().length() >= 2 &&
+      (!(path.wstring()[0] == L'\\' && path.wstring()[1] != L'\\')) && INVALID_FILE_ATTRIBUTES != 
+      GetFileAttributesW(path.wstring().c_str()) && GetLastError() != ERROR_FILE_NOT_FOUND);
       #else
       std::error_code ec;
-      return ghc::filesystem::exists(path, ec);
+      return (!path.u8string().empty() && path.is_absolute() && 
+      ghc::filesystem::exists(path, ec));
       #endif
     };
     
