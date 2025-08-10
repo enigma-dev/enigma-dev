@@ -375,8 +375,6 @@ namespace {
     int parentFrameHeight = 0;
     int childFrameWidth = 0;
     int childFrameHeight = 0;
-    #elif (defined(__APPLE__) && defined(__MACH__))
-    NSInteger windowNumber = 0;
     #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
     Display *display = nullptr;
     Window xWnd = 0;
@@ -588,7 +586,6 @@ namespace {
         SDL_VERSION(&system_info.version);
         if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
         NSWindow *nsWnd = system_info.info.cocoa.window;
-        windowNumber = [nsWnd windowNumber];
         [[nsWnd standardWindowButton:NSWindowCloseButton] setHidden:NO];
         [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
         [[nsWnd standardWindowButton:NSWindowZoomButton] setHidden:YES];
@@ -671,20 +668,6 @@ namespace {
       if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
         SDL_ShowWindow(window);
       }
-      #if (defined(__APPLE__) && defined(__MACH__))
-      if (windowNumber > 0) {
-        NSWindow *win = [NSApp windowWithWindowNumber:windowNumber];
-        if (win) {
-          [win makeKeyAndOrderFront:nullptr];
-          if (type != openFile && type != openFiles && type != saveFile && type != selectFolder) {
-            NSEvent *event = [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:NSMakePoint(1, 1) 
-            modifierFlags:0 timestamp:[NSDate timeIntervalSinceReferenceDate] windowNumber:windowNumber 
-            context:nullptr eventNumber:0 clickCount:1 pressure:0];
-            [NSApp sendEvent:event]; 
-          }
-        }
-      }
-      #endif
     }
     finish:
     #if defined(_WIN32)
