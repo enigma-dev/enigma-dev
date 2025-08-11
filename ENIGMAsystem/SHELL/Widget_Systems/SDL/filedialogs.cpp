@@ -375,6 +375,9 @@ namespace {
     int parentFrameHeight = 0;
     int childFrameWidth = 0;
     int childFrameHeight = 0;
+    #elif (defined(__APPLE__) && defined(__MACH__))
+    NSWindow *nsWnd = nullptr;
+    bool windowIDExists = false;
     #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
     Display *display = nullptr;
     Window xWnd = 0;
@@ -585,14 +588,28 @@ namespace {
         SDL_SysWMinfo system_info;
         SDL_VERSION(&system_info.version);
         if (!SDL_GetWindowWMInfo(window, &system_info)) return "";
-        NSWindow *nsWnd = system_info.info.cocoa.window;
+        nsWnd = system_info.info.cocoa.window;
         [[nsWnd standardWindowButton:NSWindowCloseButton] setHidden:NO];
         [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
         [[nsWnd standardWindowButton:NSWindowZoomButton] setHidden:YES];
         [[nsWnd standardWindowButton:NSWindowCloseButton] setEnabled:YES];
         [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
         [[nsWnd standardWindowButton:NSWindowZoomButton] setEnabled:NO];
-        if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+        std::uintptr_t windowID = (std::uintptr_t)strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
+        const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
+        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+        if (windowList) {
+          for (NSDictionary *windowInfo in (__bridge NSArray *)windowList) {
+            NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
+            if ([currentWindowID unsignedIntValue] == windowID) {
+              SDL_SetWindowAlwaysOnTop(window, SDL_TRUE);
+              windowIDExists = true;
+              break;
+            }
+          }
+          CFRelease(windowList);
+        }
+        if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty() && !windowIDExists) {
           [[(NSWindow *)(void *)(std::uintptr_t)strtoull(
           ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
           standardWindowButton:NSWindowCloseButton] setEnabled:NO];
@@ -633,7 +650,33 @@ namespace {
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       SDL_GL_SwapWindow(window);
-      #if ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
+      #if (defined(__APPLE__) && defined(__MACH__))
+      if (windowIDExists) {
+        CGWindowID windowID = (CGWindowID)(std::uintptr_t)strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
+        const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
+        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+        if (windowList) {
+          for (NSDictionary *windowInfo in (__bridge NSArray *)windowList) {
+            NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
+            if ([currentWindowID unsignedIntValue] == windowID) {
+              CGRect windowBounds = CGRectZero;
+              CFDictionaryRef boundsDict = (__bridge CFDictionaryRef)windowInfo[(__bridge NSString *)kCGWindowBounds];
+              if (boundsDict && CGRectMakeWithDictionaryRepresentation(boundsDict, &windowBounds)) {
+                CGFloat parentX = windowBounds.origin.x;
+                CGFloat parentY = windowBounds.origin.y;
+                CGFloat parentWidth = windowBounds.size.width;
+                CGFloat parentHeight = windowBounds.size.height;
+                NSRect childFrame = [nsWnd frame]; SDL_SetWindowPosition(window,
+                (parentX + (parentWidth / 2)) - (childFrame.size.width / 2), 
+                (parentY + (parentHeight / 2)) - (childFrame.size.height / 2));
+              }
+              break;
+            }
+          }
+          CFRelease(windowList);
+        }
+      }
+      #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
       if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         Window xwindow = (Window)(std::uintptr_t)strtoull(
         ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
@@ -676,7 +719,7 @@ namespace {
       ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10), TRUE);
     }
     #elif (defined(__APPLE__) && defined(__MACH__))
-    if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
+    if (!ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty() && !windowIDExists) {
       [[(NSWindow *)(void *)(std::uintptr_t)strtoull(
       ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10)
       standardWindowButton:NSWindowCloseButton] setEnabled:YES];
