@@ -378,6 +378,7 @@ namespace {
     #elif (defined(__APPLE__) && defined(__MACH__))
     NSWindow *nsWnd = nullptr;
     bool windowIDExists = false;
+    bool windowIDClosed = true;
     #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
     Display *display = nullptr;
     Window xWnd = 0;
@@ -656,6 +657,7 @@ namespace {
         const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
         CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
         if (windowList) {
+          windowIDClosed = true;
           for (NSDictionary *windowInfo in (__bridge NSArray *)windowList) {
             NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
             if ([currentWindowID unsignedIntValue] == windowID) {
@@ -670,10 +672,15 @@ namespace {
                 (parentX + (parentWidth / 2)) - (childFrame.size.width / 2), 
                 (parentY + (parentHeight / 2)) - (childFrame.size.height / 2));
               }
+              windowIDClosed = false;
               break;
             }
           }
           CFRelease(windowList);
+        }
+        if (windowIDClosed) {
+          result.clear();
+          goto finish;
         }
       }
       #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
