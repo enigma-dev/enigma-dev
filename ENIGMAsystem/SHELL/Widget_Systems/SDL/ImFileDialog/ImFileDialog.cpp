@@ -1717,8 +1717,8 @@ namespace ifd {
     if (ImGui::BeginPopupModal((IFD_ARE_YOU_SURE + std::string("##delete")).c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove)) {
       popupIsOpened = true;
       if (m_selectedFileItem >= static_cast<int>(m_content.size()) || m_content.size() == 0) {
-        ImGui::CloseCurrentPopup();
         popupIsOpened = false;
+        ImGui::CloseCurrentPopup();
       } else {
         const FileData& data = m_content[m_selectedFileItem];
         ImGui::TextWrapped(IFD_ARE_YOU_SURE_YOU_WANT_TO_DELETE, data.Path.filename().string().c_str());
