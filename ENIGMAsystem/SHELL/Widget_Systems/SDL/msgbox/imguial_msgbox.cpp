@@ -91,7 +91,7 @@ int ImGuiAl::MsgBox::Draw() {
     float avail = ImGui::GetContentRegionAvail().x;
     if (m_Input) {
       ImGui::SetNextItemWidth(avail);
-      ImGui::SetCursorPosY(ImGui::GetContentRegionMax().y - (2 * (ImGui::GetFontSize() + (ImGui::GetFontSize() / 2))));
+      ImGui::SetCursorPosY(ImGui::GetContentRegionMax().y - (4 * ImGui::GetFontSize()));
       if (!init && !ImGui::IsMouseClicked(0)) {
         strcpy(m_Value, Value);
         init = true;
