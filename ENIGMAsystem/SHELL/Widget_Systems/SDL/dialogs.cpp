@@ -53,7 +53,7 @@ namespace enigma {
 namespace enigma_user {
 
 int widget_get_theme() {
-  return (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty() ? 2 : 
+  return (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty() ? -2 : 
   (int)strtol(ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").c_str(), nullptr, 10));
 }
 
