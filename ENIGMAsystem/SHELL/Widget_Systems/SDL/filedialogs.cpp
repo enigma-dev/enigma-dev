@@ -277,6 +277,12 @@ namespace {
   ImFontAtlas *shared_font_atlas = nullptr;
 
   string file_dialog_helper(string filter, string fname, string dir, string title, int type, string message = "", string def = "") {
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER").empty()) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_NOBORDER", std::to_string(0));
+    }
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CANCELABLE").empty()) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_CANCELABLE", std::to_string(0));
+    }
     #if defined(SDL_VIDEO_DRIVER_X11)
     ngs::fs::environment_set_variable("SDL_VIDEODRIVER", "x11");
     #endif
@@ -397,6 +403,18 @@ namespace {
       GLuint texID = (GLuint)(uintptr_t)tex;
       glDeleteTextures(1, &texID);
     };
+    if (ngs::fs::environment_get_variable("IMGUI_FONT_LOADED") != std::to_string(0)) {
+      ngs::fs::environment_set_variable("IMGUI_FONT_LOADED", std::to_string(1));
+    }
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CANCELABLE") != std::to_string(0)) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_CANCELABLE", std::to_string(1));
+    }
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") != std::to_string(0)) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_NOBORDER", std::to_string(1));
+    }
+    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_FULLSCREEN") != std::to_string(0)) {
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_FULLSCREEN", std::to_string(1));
+    }
     ImVec4 clear_color = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
     string filterNew = imgui_filter(filter, (type == selectFolder));
     SDL_Event e; string result;
@@ -442,7 +460,8 @@ namespace {
         buttons.push_back(IFD_OK);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons, false);
+        if (title.empty()) title = "Information";
+        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -457,7 +476,8 @@ namespace {
         buttons.push_back(IFD_NO);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons, false);
+        if (title.empty()) title = "Question";
+        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -474,7 +494,8 @@ namespace {
         buttons.push_back(IFD_CANCEL);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init("##msgbox", message.c_str(), buttons, false);
+        if (title.empty()) title = "Question";
+        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -497,7 +518,8 @@ namespace {
         ImGui::PushID("##msgbox");
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
-        msgbox.Init("##msgbox", message.c_str(), buttons, true);
+        if (title.empty()) title = "Input Query";
+        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -523,13 +545,14 @@ namespace {
         def = remove_trailing_zeros(defnum);
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
-        msgbox.Init("##msgbox", message.c_str(), buttons, true);
+        if (title.empty()) title = "Input Query";
+        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
-          case 0: result = remove_trailing_zeros(0); break;
-          case 1: result = remove_trailing_zeros(strtod(msgbox.Result.c_str(), nullptr)); break;
-          case 2: result = remove_trailing_zeros(0); break;
+          case 0: result = ""; break;
+          case 1: result = msgbox.Result; break;
+          case 2: result = ""; break;
         }
         ImGui::PopID();
         if (selected) goto finish;
@@ -875,12 +898,13 @@ namespace ngs::imgui {
   }
 
   string get_string(string message, string defstr) {
-    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), stringInputBox, message, defstr);
+    string result = file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), stringInputBox, message, defstr);
+    return ((result.empty()) ? defstr : result);
   }
 
   double get_number(string message, double defnum) {
-    double result = strtod(file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), numberInputBox,
-    message, remove_trailing_zeros(defnum)).c_str(), nullptr);
+    string strres = file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), numberInputBox, message, remove_trailing_zeros(defnum));
+    double result = strtod(((strres.empty()) ? remove_trailing_zeros(defnum).c_str() : strres.c_str()), nullptr);
     if (result < DIGITS_MIN) result = DIGITS_MIN;
     if (result > DIGITS_MAX) result = DIGITS_MAX;
     return result;
