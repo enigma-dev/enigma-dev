@@ -63,7 +63,7 @@ bool ImGuiAl::MsgBox::Init(const char *title, const char *text, std::vector<std:
 
 int ImGuiAl::MsgBox::Draw() {
   int index = 0;
-  if (ImGui::BeginPopupModal(m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") == std::to_string(1)) ? ImGuiWindowFlags_NoTitleBar : 0) | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
+  if (ImGui::BeginPopupModal(m_Title, nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
     ImGui::TextWrapped(m_Text);
     int sw = 0, sh = 0;
     int dw = ImGui::CalcTextSize(m_Text, m_Text + strlen(m_Text), false, 100 * (0.25 * ImGui::GetFontSize())).x;
@@ -72,7 +72,7 @@ int ImGuiAl::MsgBox::Draw() {
     if (m_Input) dh += ((4.875f * ImGui::GetFontSize()) / 2);
     if (dialog) {
       SDL_GetWindowSize(dialog, &sw, &sh);
-      SDL_SetWindowSize(dialog, dw, dh + ((ngs::fs::environment_get_variable("IMGUI_DIALOG_NOBORDER") == std::to_string(1)) ? 0 : 30));
+      SDL_SetWindowSize(dialog, dw, dh);
       if (ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").empty()) {
         SDL_SetWindowPosition(dialog, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
       }
