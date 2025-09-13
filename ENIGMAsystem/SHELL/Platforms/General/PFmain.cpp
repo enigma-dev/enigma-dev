@@ -9,8 +9,6 @@
 
 #include "Universal_System/Extensions/Steamworks/steamworks.h"
 
-#include <apifilesystem/filesystem.hpp>
-
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
