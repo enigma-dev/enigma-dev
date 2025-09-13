@@ -286,9 +286,6 @@ namespace {
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CANCELABLE").empty()) {
       ngs::fs::environment_set_variable("IMGUI_DIALOG_CANCELABLE", std::to_string(0));
     }
-    if (ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION").empty()) {
-      ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", " ");
-    }
     #if defined(SDL_VIDEO_DRIVER_X11)
     ngs::fs::environment_set_variable("SDL_VIDEODRIVER", "x11");
     #endif
@@ -466,7 +463,7 @@ namespace {
         buttons.push_back(IFD_OK);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -481,7 +478,7 @@ namespace {
         buttons.push_back(IFD_NO);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -498,7 +495,7 @@ namespace {
         buttons.push_back(IFD_CANCEL);
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, false);
+        msgbox.Init("##msgbox", message.c_str(), buttons, false);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -521,7 +518,7 @@ namespace {
         ImGui::PushID("##msgbox");
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
-        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, true);
+        msgbox.Init("##msgbox", message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
@@ -547,7 +544,7 @@ namespace {
         def = remove_trailing_zeros(defnum);
         strcpy(msgbox.Default, def.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
-        msgbox.Init((title + "##msgbox").c_str(), message.c_str(), buttons, true);
+        msgbox.Init("##msgbox", message.c_str(), buttons, true);
         msgbox.Open();
         int selected = msgbox.Draw();
         switch (selected) {
