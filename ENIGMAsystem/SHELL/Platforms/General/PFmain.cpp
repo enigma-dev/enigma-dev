@@ -9,6 +9,8 @@
 
 #include "Universal_System/Extensions/Steamworks/steamworks.h"
 
+#include <apifilesystem/filesystem.hpp>
+
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
@@ -216,6 +218,7 @@ int enigma_main(int argc, char** argv) {
 
     if (!((std::string)enigma_user::room_caption).empty())
       enigma_user::window_set_caption(enigma_user::room_caption);
+    ngs::fs::environment_set_variable("IMGUI_DIALOG_CAPTION", enigma_user::window_get_caption());
     update_mouse_variables();
 
     if (updateTimer() != 0) continue;
