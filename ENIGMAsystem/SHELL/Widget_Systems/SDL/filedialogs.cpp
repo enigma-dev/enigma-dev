@@ -884,24 +884,24 @@ namespace ngs::imgui {
   }
   
   string show_message(string message) {
-    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), oneButton, message);
+    return file_dialog_helper("", "", "", "", oneButton, message);
   }
 
   string show_question(string message) {
-    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), twoButtons, message);
+    return file_dialog_helper("", "", "", "", twoButtons, message);
   }
 
   string show_question_ext(string message) {
-    return file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), threeButtons, message);
+    return file_dialog_helper("", "", "", "", threeButtons, message);
   }
 
   string get_string(string message, string defstr) {
-    string result = file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), stringInputBox, message, defstr);
+    string result = file_dialog_helper("", "", "", "", stringInputBox, message, defstr);
     return ((result.empty()) ? defstr : result);
   }
 
   double get_number(string message, double defnum) {
-    string strres = file_dialog_helper("", "", "", ngs::fs::environment_get_variable("IMGUI_DIALOG_CAPTION"), numberInputBox, message, remove_trailing_zeros(defnum));
+    string strres = file_dialog_helper("", "", "", "", numberInputBox, message, remove_trailing_zeros(defnum));
     double result = strtod(((strres.empty()) ? remove_trailing_zeros(defnum).c_str() : strres.c_str()), nullptr);
     if (result < DIGITS_MIN) result = DIGITS_MIN;
     if (result > DIGITS_MAX) result = DIGITS_MAX;
