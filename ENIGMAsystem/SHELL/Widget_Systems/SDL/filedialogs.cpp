@@ -329,7 +329,7 @@ namespace {
       ngs::fs::environment_set_variable("IMGUI_FONT_LOADED", std::to_string(1));
     }
     if (ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").empty()) {
-      ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(0));
+      ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(-2));
     }
     ImGui::StyleColorsDark();
     ImGuiStyle& style = ImGui::GetStyle();
@@ -412,6 +412,9 @@ namespace {
     NSWindow *nsWnd = nullptr;
     bool windowIDExists = false;
     bool windowIDClosed = true;
+    bool windowIDVisible = true;
+    std::uintptr_t windowID = (std::uintptr_t)strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
+    const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
     #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
     Display *display = nullptr;
     Window xWnd = 0;
@@ -629,9 +632,7 @@ namespace {
         [[nsWnd standardWindowButton:NSWindowCloseButton] setEnabled:YES];
         [[nsWnd standardWindowButton:NSWindowMiniaturizeButton] setEnabled:NO];
         [[nsWnd standardWindowButton:NSWindowZoomButton] setEnabled:NO];
-        std::uintptr_t windowID = (std::uintptr_t)strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
-        const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionAll | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
         if (windowList) {
           for (NSDictionary *windowInfo in (__bridge NSArray *)windowList) {
             NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
@@ -686,12 +687,26 @@ namespace {
       SDL_GL_SwapWindow(window);
       #if (defined(__APPLE__) && defined(__MACH__))
       if (windowIDExists) {
-        CGWindowID windowID = (CGWindowID)(std::uintptr_t)strtoull(ngs::fs::environment_get_variable("IMGUI_DIALOG_PARENT").c_str(), nullptr, 10);
-        const CGWindowLevel kScreensaverWindowLevel = CGWindowLevelForKey(kCGScreenSaverWindowLevelKey);
-        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+        CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionAll | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
         if (windowList) {
           windowIDClosed = true;
           for (NSDictionary *windowInfo in (__bridge NSArray *)windowList) {
+            NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
+            if ([currentWindowID unsignedIntValue] == windowID) {
+              windowIDClosed = false;
+              break;
+            }
+          }
+          CFRelease(windowList);
+        }
+        if (windowIDClosed) {
+          result.clear();
+          goto finish;
+        }
+        CFArrayRef visibleWindowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+        if (visibleWindowList) {
+          windowIDVisible = false;
+          for (NSDictionary *windowInfo in (__bridge NSArray *)visibleWindowList) {
             NSNumber *currentWindowID = windowInfo[(id)kCGWindowNumber];
             if ([currentWindowID unsignedIntValue] == windowID) {
               CGRect windowBounds = CGRectZero;
@@ -705,15 +720,19 @@ namespace {
                 (parentX + (parentWidth / 2)) - (childFrame.size.width / 2), 
                 (parentY + (parentHeight / 2)) - (childFrame.size.height / 2));
               }
-              windowIDClosed = false;
+              if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
+                SDL_ShowWindow(window);
+              }
+              windowIDVisible = true;
               break;
             }
           }
-          CFRelease(windowList);
+          CFRelease(visibleWindowList);
         }
-        if (windowIDClosed) {
-          result.clear();
-          goto finish;
+        if (!windowIDVisible) {
+          if (!(SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN)) {
+            SDL_HideWindow(window);
+          }
         }
       }
       #elif ((defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(__sun))
@@ -748,9 +767,15 @@ namespace {
         (parentWA.y + (parentFrameHeight / 2)) - (childFrameHeight / 2));
       }
       #endif
-      if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
-        SDL_ShowWindow(window);
+      #if (defined(__APPLE__) && defined(__MACH__))
+      if (windowIDVisible) {
+      #endif
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN) {
+          SDL_ShowWindow(window);
+        }
+      #if (defined(__APPLE__) && defined(__MACH__))
       }
+      #endif
     }
     finish:
     #if defined(_WIN32)
