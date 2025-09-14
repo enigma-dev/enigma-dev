@@ -517,7 +517,16 @@ namespace {
         }
         ImGuiAl::MsgBox msgbox;
         ImGui::PushID("##msgbox");
-        strcpy(msgbox.Default, def.substr(0, 1023).c_str());
+        string def2 = def;
+        string def3 = string_replace_all(def2, " ", "");
+        def3 = string_replace_all(def3, "\t", "");
+        def3 = string_replace_all(def3, "\n", "");
+        def3 = string_replace_all(def3, "\v", "");
+        def3 = string_replace_all(def3, "\f", "");
+        def3 = string_replace_all(def3, "\r", "");
+        def3 = string_replace_all(def3, "\a", "");
+        if (def3.empty()) def2 = def3;
+        strcpy(msgbox.Default, def2.substr(0, 1023).c_str());
         strcpy(msgbox.Value, msgbox.Default);
         msgbox.Init("##msgbox", message.c_str(), buttons, true);
         msgbox.Open();
