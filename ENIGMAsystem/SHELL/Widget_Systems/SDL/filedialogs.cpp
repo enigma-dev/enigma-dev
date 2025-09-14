@@ -30,6 +30,7 @@
 #endif
 #endif
 
+#include <cctype>
 #include <climits>
 #include <cstdlib>
 #include <sstream>
@@ -897,12 +898,20 @@ namespace ngs::imgui {
 
   string get_string(string message, string defstr) {
     string result = file_dialog_helper("", "", "", "", stringInputBox, message, defstr);
-    return ((result.empty()) ? defstr : result);
+    string result2 = string_replace_all(result, " ", "");
+    result2 = string_replace_all(result2, "\t", "");
+    result2 = string_replace_all(result2, "\n", "");
+    result2 = string_replace_all(result2, "\v", "");
+    result2 = string_replace_all(result2, "\f", "");
+    result2 = string_replace_all(result2, "\r", "");
+    result2 = string_replace_all(result2, "\a", "");
+    return ((result2.empty()) ? defstr : result);
   }
 
   double get_number(string message, double defnum) {
     string strres = file_dialog_helper("", "", "", "", numberInputBox, message, remove_trailing_zeros(defnum));
-    double result = strtod(((strres.empty()) ? remove_trailing_zeros(defnum).c_str() : strres.c_str()), nullptr);
+    bool isnumber = (!strres.empty() && ((strres.length() >= 2 && (strres[0] == '-' || strres[0] == '+') && isdigit(strres[1])) || isdigit(strres[0])));
+    double result = strtod(((strres.empty() || !isnumber) ? remove_trailing_zeros(defnum).c_str() : strres.c_str()), nullptr);
     if (result < DIGITS_MIN) result = DIGITS_MIN;
     if (result > DIGITS_MAX) result = DIGITS_MAX;
     return result;
