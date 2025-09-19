@@ -57,8 +57,8 @@ int widget_get_theme() {
   (int)strtol(ngs::fs::environment_get_variable("IMGUI_DIALOG_THEME").c_str(), nullptr, 10));
 }
 
-void widget_set_theme(int theme) {
-  ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(theme));
+bool widget_set_theme(int theme) {
+  return ngs::fs::environment_set_variable("IMGUI_DIALOG_THEME", std::to_string(theme));
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) { }
