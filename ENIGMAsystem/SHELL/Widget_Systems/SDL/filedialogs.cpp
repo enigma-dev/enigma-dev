@@ -813,7 +813,7 @@ namespace ngs::imgui {
   void ifd_load_fonts() {
     if (!fonts.empty()) fonts.clear();
     if (ngs::fs::environment_get_variable("IMGUI_FONT_PATH").empty() && ngs::fs::environment_get_variable("IMGUI_FONT_FILES").empty()) {
-      fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::executable_get_directory() + "fonts", "*.ttf;*.otf;*.ttc", false, false));
+      fonts.push_back(ngs::fs::directory_contents_first(ngs::fs::directory_get_current_working() + "fonts", "*.ttf;*.otf;*.ttc", false, false));
       while (!fonts[fonts.size() - 1].empty()) {
         message_pump();
         fonts.push_back(ngs::fs::directory_contents_next());
@@ -985,3 +985,4 @@ double get_number(const char *message, double defnum) {
   return ngs::imgui::get_number(message, defnum);
 }
 #endif
+
