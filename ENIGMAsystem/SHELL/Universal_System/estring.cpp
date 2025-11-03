@@ -42,16 +42,23 @@ using std::string;
 using std::vector;
 
 tstring widen(const string &str) {
+  if (str.empty()) return L"";
   // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchar_count = str.size() + 1;
-  vector<WCHAR> buf(wchar_count);
-  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
+  size_t wchar_count = str.size() + 1;
+  vector<wchar_t> buf(wchar_count);
+  wchar_count = (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count);
+  if (!wchar_count) return L"";
+  return tstring{buf.data(), wchar_count};
 }
 
 string shorten(tstring str) {
-  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
+  if (str.empty()) return "";
+  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), nullptr, 0, nullptr, nullptr);
+  if (!nbytes) return "";
   vector<char> buf((size_t)nbytes);
-  return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
+  nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, nullptr, nullptr);
+  if (!nbytes) return "";
+  return string{buf.data(), (size_t)nbytes};
 }
 
 #endif
