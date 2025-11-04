@@ -96,9 +96,9 @@ namespace {
   }
 
   wid_t window_id_from_native_window(window_t window) {
-    wid_t res;
-    res = std::to_string((unsigned long long)(void *)window);
-    return res;
+    wid_t result;
+    result = std::to_string((unsigned long long)(void *)window);
+    return result;
   }
 
   window_t native_window_from_window_id(wid_t win_id) {
@@ -214,10 +214,12 @@ namespace enigma_user {
     if (!IsWindow(hwnd) || !IsWindowVisible(hwnd)) return result;
     std::size_t length = GetWindowTextLengthW(hwnd) + 1;
     wchar_t *buffer = new wchar_t[length]();
-    if (GetWindowTextW(hwnd, buffer, (int)length)) {
-      result = shorten(buffer);
+    if (buffer) {
+      if (GetWindowTextW(hwnd, buffer, (int)length)) {
+        result = shorten(buffer);
+      }
+      delete[] buffer;
     }
-    delete[] buffer;
     return result;
   }
 
