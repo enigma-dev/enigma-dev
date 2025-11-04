@@ -209,16 +209,16 @@ namespace enigma_user {
   }
 
   std::string capture_get_window_caption(wid_t window) {
+    std::string result;
     HWND hwnd = (HWND)(void *)(unsigned long long)native_window_from_window_id(window);
-    if (!IsWindow(hwnd) || !IsWindowVisible(hwnd)) return "";
+    if (!IsWindow(hwnd) || !IsWindowVisible(hwnd)) return result;
     std::size_t length = GetWindowTextLengthW(hwnd) + 1;
     wchar_t *buffer = new wchar_t[length]();
     if (GetWindowTextW(hwnd, buffer, (int)length)) {
-      std::string result = shorten(buffer);
-      delete[] buffer;
-      return result;
+      result = shorten(buffer);
     }
-    return "";
+    delete[] buffer;
+    return result;
   }
 
   bool capture_get_fixedsize(int ind) {
