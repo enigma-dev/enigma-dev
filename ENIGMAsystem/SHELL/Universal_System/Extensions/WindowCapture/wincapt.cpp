@@ -53,7 +53,7 @@ namespace {
       (*width) = -1;
       (*height) = -1;
     }
-    if (!IsWindow(hwnd) || !hwnd) { 
+    if (!IsWindow(hwnd) && hwnd) { 
       return;
     }
     if (hwnd) {
