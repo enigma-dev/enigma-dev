@@ -53,12 +53,29 @@ namespace {
       (*width) = -1;
       (*height) = -1;
     }
-    if (!IsWindow(hwnd)) return; 
-    RECT rect; GetClientRect(hwnd, &rect);
-    if ((rect.right - rect.left) > 16384 || (rect.bottom - rect.top) > 16384) return;
-    if (!capture_fixedsize[ind]) {
-      (*width) = (rect.right - rect.left);
-      (*height) = (rect.bottom - rect.top);
+    if (!IsWindow(hwnd) || !hwnd) { 
+      return;
+    }
+    if (hwnd) {
+      if (!capture_fixedsize[ind]) {
+        RECT rect; 
+        GetClientRect(hwnd, &rect);
+        if ((rect.right - rect.left) > 16384 || (rect.bottom - rect.top) > 16384) {
+          return;
+        }
+        (*width) = (rect.right - rect.left);
+        (*height) = (rect.bottom - rect.top);
+      }
+    } else {
+      if (!capture_fixedsize[ind]) {
+        int w = GetSystemMetrics(SM_CXSCREEN);
+        int h = GetSystemMetrics(SM_CYSCREEN);
+        if (w > 16384 || h > 16384) {
+          return;
+        }
+        (*width) = w;
+        (*height) = h;
+      }
     }
     if (pixels) {
       HDC hdc_window = GetDC(hwnd);
