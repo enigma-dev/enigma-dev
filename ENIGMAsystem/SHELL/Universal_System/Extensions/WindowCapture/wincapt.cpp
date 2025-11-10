@@ -53,10 +53,10 @@ namespace {
       (*width) = -1;
       (*height) = -1;
     }
-    if (!IsWindow(hwnd) && hwnd) { 
-      return;
-    }
     if (hwnd) {
+      if (!IsWindow(hwnd)) { 
+        return;
+      }
       if (!capture_fixedsize[ind]) {
         RECT rect; 
         GetClientRect(hwnd, &rect);
