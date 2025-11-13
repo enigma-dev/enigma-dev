@@ -1,19 +1,28 @@
-/** Copyright (C) 2025 Samuel Venable
-***
-*** This file is a part of the ENIGMA Development Environment.
-***
-*** ENIGMA is free software: you can redistribute it and/or modify it under the
-*** terms of the GNU General Public License as published by the Free Software
-*** Foundation, version 3 of the license or any later version.
-***
-*** This application and its source code is distributed AS-IS, WITHOUT ANY
-*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-*** details.
-***
-*** You should have received a copy of the GNU General Public License along
-*** with this code. If not, see <http://www.gnu.org/licenses/>
-**/
+/*
+
+ MIT License
+
+ Copyright © 2025 Samuel Venable
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+*/
 
 #include <vector>
 #include <memory>
@@ -40,6 +49,7 @@ namespace {
   std::unordered_map<int, int>                monitor_y;
   std::unordered_map<int, int>                monitor_width;
   std::unordered_map<int, int>                monitor_height;
+  std::unordered_map<int, HDC>                monitor_hdc;
   int monitor_selected = 0;
 
   void rgb_to_rgba(const unsigned char *rgb, unsigned char **rgba, int width, int height) {
@@ -55,16 +65,17 @@ namespace {
     }
   }
 
-  BOOL CALLBACK monitor_enum_proc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+  BOOL CALLBACK monitor_enum_proc(HMONITOR hmonitor, HDC hdc_monitor, LPRECT lprc_monitor, LPARAM dw_data) {
     MONITORINFOEX mi;
     mi.cbSize = sizeof(mi);
-    if (GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi)) {
+    if (GetMonitorInfoW(hmonitor, (MONITORINFO *)&mi)) {
       mindex++;
       monitor_name[mindex]   = shorten(mi.szDevice);
       monitor_x[mindex]      = mi.rcMonitor.left;
       monitor_y[mindex]      = mi.rcMonitor.top;
       monitor_width[mindex]  = mi.rcMonitor.right  - mi.rcMonitor.left;
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
+      monitor_hdc[mindex]    = hdc_monitor;
     }
     return true;
   }
@@ -95,6 +106,7 @@ namespace {
         monitor_y.clear();
         monitor_width.clear();
         monitor_height.clear();
+        monitor_hdc.clear();
         if (EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0)) {
           if (monitor_selected > mindex) {
             monitor_selected = mindex;
@@ -113,7 +125,7 @@ namespace {
       }
     }
     if (pixels) {
-      HDC hdc_window = GetDC(hwnd);
+      HDC hdc_window = ((hwnd) ? GetDC(hwnd) : GetDC(monitor_hdc[monitor_selected]));
       HDC hdc_mem_dc = CreateCompatibleDC(hdc_window);
       if (!hdc_mem_dc) {
         ReleaseDC(hwnd, hdc_window);
@@ -329,6 +341,7 @@ namespace enigma_user {
     monitor_y.clear();
     monitor_width.clear();
     monitor_height.clear();
+    monitor_hdc.clear();
     EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0);
   }
 
