@@ -116,7 +116,7 @@ namespace {
       }
     }
     if (pixels) {
-      HDC hdc_window = ((hwnd) ? GetDC(hwnd) : GetDC(monitor_hdc[monitor_selected]));
+      HDC hdc_window = ((hwnd) ? GetDC(hwnd) : monitor_hdc[monitor_selected]);
       HDC hdc_mem_dc = CreateCompatibleDC(hdc_window);
       if (!hdc_mem_dc) {
         ReleaseDC(hwnd, hdc_window);
