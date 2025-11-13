@@ -68,7 +68,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        (std::unordered_map<int, HDC>)dw_data[mindex] = hdc;
+        reinterpret_cast<std::unordered_map<int, HDC> *>(dw_data[mindex]) = &hdc;
       }
     }
     return true;
@@ -78,6 +78,7 @@ namespace {
     HDC hdc_main = nullptr;
     HDC hdc_window = nullptr;
     HDC hdc_mem_dc = nullptr;
+    HBITMAP hbm_screen = nullptr;
     BITMAPINFO bmp_info;
     std::vector<unsigned char> src;
     RECT rect;
@@ -112,7 +113,7 @@ namespace {
         monitor_height.clear();
         monitor_hdc.clear();
         hdc_main = GetDC(nullptr);
-        if (EnumDisplayMonitors(hdc_main, nullptr, monitor_enum_proc, (LPARAM)&monitor_hdc)) {
+        if (EnumDisplayMonitors(hdc_main, nullptr, monitor_enum_proc, reinterpret_cast<LPARAM>(&monitor_hdc))) {
           if (monitor_selected > mindex) {
             monitor_selected = mindex;
           }
@@ -135,7 +136,7 @@ namespace {
       if (!hdc_mem_dc) {
         goto done;
       }
-      HBITMAP hbm_screen = CreateCompatibleBitmap(hdc_window, (*width), (*height));
+      hbm_screen = CreateCompatibleBitmap(hdc_window, (*width), (*height));
       if (!hbm_screen) {
         goto done;
       }
