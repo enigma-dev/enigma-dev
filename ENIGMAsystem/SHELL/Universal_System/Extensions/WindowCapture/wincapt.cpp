@@ -26,6 +26,8 @@
 
 namespace {
 
+  typedef std::vector<HDC> hdc_vector;
+
   int index            = -1;
   int windex           = -1;
   int mindex           = -1;
@@ -41,7 +43,7 @@ namespace {
   std::unordered_map<int, int>                monitor_y;
   std::unordered_map<int, int>                monitor_width;
   std::unordered_map<int, int>                monitor_height;
-  std::vector<HDC>                            monitor_hdc;
+  hdc_vector                                  monitor_hdc;
 
   void rgb_to_rgba(const unsigned char *rgb, unsigned char **rgba, int width, int height) {
     for (int y = 0; y < height; y++) {
@@ -68,7 +70,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        reinterpret_cast<std::vector<HDC> *>(dw_data)->push_back(hdc);
+        reinterpret_cast<hdc_vector *>(dw_data)->push_back(hdc);
       }
     }
     return true;
