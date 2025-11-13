@@ -68,7 +68,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        (unordered_map<int, HDC> *)dw_data->push_back(hdc);
+        (unordered_map<int, HDC> *)dw_data[mindex] = hdc;
       }
     }
     return true;
