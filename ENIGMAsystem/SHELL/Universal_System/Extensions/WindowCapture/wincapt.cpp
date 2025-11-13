@@ -359,7 +359,11 @@ namespace enigma_user {
     monitor_width.clear();
     monitor_height.clear();
     monitor_hdc.clear();
-    EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0);
+    hdc_main = GetDC(nullptr);
+    EnumDisplayMonitors(hdc_main, nullptr, monitor_enum_proc, 0);
+    if (hdc_main) {
+      ReleaseDC(nullptr, hdc_main);
+    }
   }
 
 } // namespace enigma_user
