@@ -68,7 +68,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        reinterpret_cast<std::vector<HDC> *>(dw_data[mindex])->push_back(hdc);
+        reinterpret_cast<std::vector<HDC> *>(dw_data)->push_back(hdc);
       }
     }
     return true;
