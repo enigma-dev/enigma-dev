@@ -68,7 +68,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        reinterpret_cast<std::unordered_map<int, HDC> *>(dw_data[mindex])->insert(std::make_pair(mindex, hdc);
+        reinterpret_cast<std::unordered_map<int, HDC> *>(dw_data[mindex])->insert(std::make_pair(mindex, hdc));
       }
     }
     return true;
