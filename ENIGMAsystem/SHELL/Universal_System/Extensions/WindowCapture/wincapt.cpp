@@ -118,7 +118,7 @@ namespace {
       }
     }
     if (pixels) {
-      hdc_window = ((hwnd) ? GetDC(hwnd) : CreateDC(TEXT("DISPLAY"), nullptr, nullptr, nullptr));
+      hdc_window = GetDC(hwnd);
       hdc_mem_dc = CreateCompatibleDC(hdc_window);
       if (!hdc_mem_dc) {
         goto done;
@@ -128,10 +128,9 @@ namespace {
         goto done;
       }
       SelectObject(hdc_mem_dc, hbm_screen);
-      if (!BitBlt(hdc_mem_dc, 
-        ((hwnd) ? 0 : monitor_x[monitor_selected]), 
-        ((hwnd) ? 0 : monitor_y[monitor_selected]),
-        (*width), (*height), hdc_window, 0, 0, SRCCOPY)) {
+      if (!BitBlt(hdc_mem_dc, 0, 0, (*width), (*height), 
+        hdc_window, ((hwnd) ? 0 : monitor_x[monitor_selected]), 
+        ((hwnd) ? 0 : monitor_y[monitor_selected]), SRCCOPY)) {
         goto done;
       }
       bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -153,11 +152,7 @@ namespace {
         DeleteDC(hdc_mem_dc);
       }
       if (hdc_window) {
-        if (hwnd) {
-          ReleaseDC(hwnd, hdc_window);
-        } else {
-          DeleteDC(hdc_window);
-        }
+        ReleaseDC(hwnd, hdc_window);
       }
     }
   }
