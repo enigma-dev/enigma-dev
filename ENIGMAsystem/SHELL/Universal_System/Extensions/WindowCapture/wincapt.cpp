@@ -100,11 +100,6 @@ namespace {
       }
     } else {
       if (!capture_fixedsize[ind]) {
-        for (int i = 0; i < monitor_hdc.size(); i++) {
-          if (monitor_hdc[i]) { 
-            DeleteDC(monitor_hdc[i]);
-          }
-        }
         mindex = -1;
         monitor_name.clear();
         monitor_x.clear();
@@ -170,6 +165,11 @@ namespace {
       }
       if (hdc_main) {
         ReleaseDC(nullptr, hdc_main);
+      }
+      for (int i = 0; i < monitor_hdc.size(); i++) {
+        if (monitor_hdc[i]) { 
+          DeleteDC(monitor_hdc[i]);
+        }
       }
     }
   }
@@ -347,11 +347,6 @@ namespace enigma_user {
   }
 
   void capture_monitor_init_info() {
-    for (int i = 0; i < monitor_hdc.size(); i++) {
-      if (monitor_hdc[i]) { 
-        DeleteDC(monitor_hdc[i]);
-      }
-    }
     mindex = -1;
     monitor_name.clear();
     monitor_x.clear();
@@ -363,6 +358,11 @@ namespace enigma_user {
     EnumDisplayMonitors(hdc_main, nullptr, monitor_enum_proc, 0);
     if (hdc_main) {
       ReleaseDC(nullptr, hdc_main);
+    }
+    for (int i = 0; i < monitor_hdc.size(); i++) {
+      if (monitor_hdc[i]) { 
+        DeleteDC(monitor_hdc[i]);
+      }
     }
   }
 
