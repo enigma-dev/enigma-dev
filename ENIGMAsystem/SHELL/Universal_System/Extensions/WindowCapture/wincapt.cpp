@@ -26,9 +26,10 @@
 
 namespace {
 
-  int index  = -1;
-  int windex = -1;
-  int mindex = -1;
+  int index            = -1;
+  int windex           = -1;
+  int mindex           = -1;
+  int monitor_selected =  0;
   std::unordered_map<int, window_t>           capture_window;
   std::unordered_map<int, int>                capture_width;
   std::unordered_map<int, int>                capture_height;
@@ -40,8 +41,7 @@ namespace {
   std::unordered_map<int, int>                monitor_y;
   std::unordered_map<int, int>                monitor_width;
   std::unordered_map<int, int>                monitor_height;
-  std::unordered_map<int, HDC>                monitor_hdc;
-  int monitor_selected = 0;
+  std::vector<HDC>                            monitor_hdc;
 
   void rgb_to_rgba(const unsigned char *rgb, unsigned char **rgba, int width, int height) {
     for (int y = 0; y < height; y++) {
@@ -68,7 +68,7 @@ namespace {
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
       HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
       if (hdc) {
-        reinterpret_cast<std::unordered_map<int, HDC> *>(dw_data[mindex])->insert(std::make_pair(mindex, hdc));
+        reinterpret_cast<std::vector<HDC> *>(dw_data[mindex])->push_back(hdc);
       }
     }
     return true;
@@ -100,7 +100,7 @@ namespace {
       }
     } else {
       if (!capture_fixedsize[ind]) {
-        for (int i = 0; i < mindex + 1; i++) {
+        for (int i = 0; i < monitor_hdc.size(); i++) {
           if (monitor_hdc[i]) { 
             DeleteDC(monitor_hdc[i]);
           }
@@ -347,7 +347,7 @@ namespace enigma_user {
   }
 
   void capture_monitor_init_info() {
-    for (int i = 0; i < mindex + 1; i++) {
+    for (int i = 0; i < monitor_hdc.size(); i++) {
       if (monitor_hdc[i]) { 
         DeleteDC(monitor_hdc[i]);
       }
