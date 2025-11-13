@@ -70,12 +70,12 @@ namespace {
   }
 
   void capture_window_pixels_and_size(int ind, HWND hwnd, unsigned char **pixels, int *width, int *height) {
+    RECT rect;
     HDC hdc_window = nullptr;
     HDC hdc_mem_dc = nullptr;
+    std::vector<unsigned char> src;
     HBITMAP hbm_screen = nullptr;
     BITMAPINFO bmp_info;
-    std::vector<unsigned char> src;
-    RECT rect;
     if (!capture_fixedsize[ind]) {
       (*width) = -1;
       (*height) = -1;
