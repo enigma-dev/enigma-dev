@@ -119,13 +119,17 @@ namespace {
       HDC hdc_window = ((hwnd) ? GetDC(hwnd) : monitor_hdc[monitor_selected]);
       HDC hdc_mem_dc = CreateCompatibleDC(hdc_window);
       if (!hdc_mem_dc) {
-        ReleaseDC(hwnd, hdc_window);
+        if (hwnd) { 
+          ReleaseDC(hwnd, hdc_window);
+        }
         return;
       }
       HBITMAP hbm_screen = CreateCompatibleBitmap(hdc_window, (*width), (*height));
       if (!hbm_screen) {
         DeleteDC(hdc_mem_dc);
-        ReleaseDC(hwnd, hdc_window);
+        if (hwnd) {
+          ReleaseDC(hwnd, hdc_window);
+        }
         return;
       }
       SelectObject(hdc_mem_dc, hbm_screen);
@@ -149,7 +153,9 @@ namespace {
       rgb_to_rgba(src.data(), pixels, (*width), (*height));
       DeleteObject(hbm_screen);
       DeleteDC(hdc_mem_dc);
-      ReleaseDC(hwnd, hdc_window);
+      if (hwnd) {
+        ReleaseDC(hwnd, hdc_window);
+      }
     }
   }
 
