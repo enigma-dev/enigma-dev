@@ -66,31 +66,44 @@ namespace {
       monitor_y[mindex]      = mi.rcMonitor.top;
       monitor_width[mindex]  = mi.rcMonitor.right  - mi.rcMonitor.left;
       monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
-      monitor_hdc[mindex]    = hdc_monitor;
+      HDC hdc = CreateDCW(nullptr, mi.szDevice, nullptr, nullptr);
+      if (hdc) {
+        (unordered_map<int, HDC> *)dw_data->push_back(hdc);
+      }
     }
     return true;
   }
 
   void capture_window_pixels_and_size(int ind, HWND hwnd, unsigned char **pixels, int *width, int *height) {
+    HDC hdc_main = nullptr;
+    HDC hdc_window = nullptr;
+    HDC hdc_mem_dc = nullptr;
+    BITMAPINFO bmp_info;
+    std::vector<unsigned char> src;
+    RECT rect;
     if (!capture_fixedsize[ind]) {
       (*width) = -1;
       (*height) = -1;
     }
     if (hwnd) {
       if (!IsWindow(hwnd)) { 
-        return;
+        goto done;
       }
       if (!capture_fixedsize[ind]) {
-        RECT rect; 
         GetClientRect(hwnd, &rect);
         if ((rect.right - rect.left) > 16384 || (rect.bottom - rect.top) > 16384) {
-          return;
+          goto done;
         }
         (*width) = (rect.right - rect.left);
         (*height) = (rect.bottom - rect.top);
       }
     } else {
       if (!capture_fixedsize[ind]) {
+        for (int i = 0; i < mindex + 1; i++) {
+          if (monitor_hdc[i]) { 
+            DeleteDC(monitor_hdc[i]);
+          }
+        }
         mindex = -1;
         monitor_name.clear();
         monitor_x.clear();
@@ -98,63 +111,63 @@ namespace {
         monitor_width.clear();
         monitor_height.clear();
         monitor_hdc.clear();
-        if (EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0)) {
+        hdc_main = GetDC(nullptr);
+        if (EnumDisplayMonitors(hdc_main, nullptr, monitor_enum_proc, (LPARAM)&monitor_hdc)) {
           if (monitor_selected > mindex) {
             monitor_selected = mindex;
           }
           if (monitor_selected < 0) {
-            return;
+            goto done;
           }
           if (monitor_width[monitor_selected] > 16384 || monitor_height[monitor_selected] > 16384) {
-            return;
+            goto done;
           }
           (*width) = monitor_width[monitor_selected];
           (*height) = monitor_height[monitor_selected];
         } else {
-          return;
+          goto done;
         }
       }
     }
     if (pixels) {
-      HDC hdc_window = ((hwnd) ? GetDC(hwnd) : monitor_hdc[monitor_selected]);
-      HDC hdc_mem_dc = CreateCompatibleDC(hdc_window);
+      hdc_window = ((hwnd) ? GetDC(hwnd) : monitor_hdc[monitor_selected]);
+      hdc_mem_dc = CreateCompatibleDC(hdc_window);
       if (!hdc_mem_dc) {
-        if (hwnd) { 
-          ReleaseDC(hwnd, hdc_window);
-        }
-        return;
+        goto done;
       }
       HBITMAP hbm_screen = CreateCompatibleBitmap(hdc_window, (*width), (*height));
       if (!hbm_screen) {
-        DeleteDC(hdc_mem_dc);
-        if (hwnd) {
-          ReleaseDC(hwnd, hdc_window);
-        }
-        return;
+        goto done;
       }
       SelectObject(hdc_mem_dc, hbm_screen);
       if (!BitBlt(hdc_mem_dc, 
         ((hwnd) ? 0 : monitor_x[monitor_selected]), 
         ((hwnd) ? 0 : monitor_y[monitor_selected]),
         (*width), (*height), hdc_window, 0, 0, SRCCOPY)) {
-        return;
+        goto done;
       }
-      BITMAPINFO bmp_info;
       bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
       bmp_info.bmiHeader.biWidth = (*width);
       bmp_info.bmiHeader.biHeight = -(*height);
       bmp_info.bmiHeader.biPlanes = 1;
       bmp_info.bmiHeader.biBitCount = 24;
       bmp_info.bmiHeader.biCompression = BI_RGB;
-      std::vector<unsigned char> src((*width) * (*height) * 3);
+      src.resize((*width) * (*height) * 3);
       if (!GetDIBits(hdc_mem_dc, hbm_screen, 0, (*height), src.data(), &bmp_info, DIB_RGB_COLORS)) {
-        return;
+        goto done;
       }
       rgb_to_rgba(src.data(), pixels, (*width), (*height));
-      DeleteObject(hbm_screen);
-      DeleteDC(hdc_mem_dc);
-      if (hwnd) {
+      if (hbm_screen) {
+        DeleteObject(hbm_screen);
+      }
+      if (hdc_mem_dc) {
+        DeleteDC(hdc_mem_dc);
+      }
+      if (hdc_window) {
         ReleaseDC(hwnd, hdc_window);
+      }
+      if (hdc_main) {
+        ReleaseDC(nullptr, hdc_main);
       }
     }
   }
@@ -332,6 +345,11 @@ namespace enigma_user {
   }
 
   void capture_monitor_init_info() {
+    for (int i = 0; i < mindex + 1; i++) {
+      if (monitor_hdc[i]) { 
+        DeleteDC(monitor_hdc[i]);
+      }
+    }
     mindex = -1;
     monitor_name.clear();
     monitor_x.clear();
