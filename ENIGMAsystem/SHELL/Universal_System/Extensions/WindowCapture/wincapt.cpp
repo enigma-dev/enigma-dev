@@ -26,8 +26,9 @@
 
 namespace {
 
-  int index = -1;
+  int index  = -1;
   int windex = -1;
+  int mindex = -1;
   std::unordered_map<int, window_t>           capture_window;
   std::unordered_map<int, int>                capture_width;
   std::unordered_map<int, int>                capture_height;
