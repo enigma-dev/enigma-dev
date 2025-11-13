@@ -57,7 +57,7 @@ namespace {
   }
 
   BOOL CALLBACK monitor_enum_proc(HMONITOR hmonitor, HDC hdc_monitor, LPRECT lprc_monitor, LPARAM dw_data) {
-    MONITORINFOEX mi;
+    MONITORINFOEXW mi;
     mi.cbSize = sizeof(mi);
     if (GetMonitorInfoW(hmonitor, (MONITORINFO *)&mi)) {
       mindex++;
