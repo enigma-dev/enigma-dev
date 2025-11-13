@@ -39,5 +39,10 @@ namespace enigma_user {
   bool capture_set_fixedsize(int ind, bool fixed);
   window_t capture_native_window_from_window_id(wid_t window);
   wid_t capture_window_id_from_native_window(enigma::rvt window);
+  int capture_monitor_get_count();
+  int capture_monitor_get_current();
+  void capture_monitor_set_current(int current);
+  std::string capture_monitor_get_name();
+  void capture_monitor_init_info();
 
 } // namespace enigma_user
