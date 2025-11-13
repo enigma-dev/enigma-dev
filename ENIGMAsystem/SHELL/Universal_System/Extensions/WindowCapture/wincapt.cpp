@@ -34,6 +34,12 @@ namespace {
   std::unordered_map<int, bool>               capture_fixedsize;
   std::unordered_map<int, std::vector<wid_t>> window_list;
   std::unordered_map<int, int>                window_list_length;
+  std::unordered_map<int, std::string>        monitor_name;
+  std::unordered_map<int, int>                monitor_x;
+  std::unordered_map<int, int>                monitor_y;
+  std::unordered_map<int, int>                monitor_width;
+  std::unordered_map<int, int>                monitor_height;
+  int monitor_selected = 0;
 
   void rgb_to_rgba(const unsigned char *rgb, unsigned char **rgba, int width, int height) {
     for (int y = 0; y < height; y++) {
@@ -46,6 +52,20 @@ namespace {
         (*rgba)[(y * width + x) * 4 + 3] = 255;
       }
     }
+  }
+
+  BOOL CALLBACK monitor_enum_proc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+    MONITORINFOEX mi;
+    mi.cbSize = sizeof(mi);
+    if (GetMonitorInfoW(hMonitor, (MONITORINFO *)&mi)) {
+      mindex++;
+      monitor_name[mindex]   = shorten(mi.szDevice);
+      monitor_x[mindex]      = mi.rcMonitor.left;
+      monitor_y[mindex]      = mi.rcMonitor.top;
+      monitor_width[mindex]  = mi.rcMonitor.right  - mi.rcMonitor.left;
+      monitor_height[mindex] = mi.rcMonitor.bottom - mi.rcMonitor.top;
+    }
+    return true;
   }
 
   void capture_window_pixels_and_size(int ind, HWND hwnd, unsigned char **pixels, int *width, int *height) {
@@ -68,13 +88,27 @@ namespace {
       }
     } else {
       if (!capture_fixedsize[ind]) {
-        int w = GetSystemMetrics(SM_CXSCREEN);
-        int h = GetSystemMetrics(SM_CYSCREEN);
-        if (w > 16384 || h > 16384) {
+        mindex = -1;
+        monitor_name.clear();
+        monitor_x.clear();
+        monitor_y.clear();
+        monitor_width.clear();
+        monitor_height.clear();
+        if (EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0)) {
+          if (monitor_selected > mindex) {
+            monitor_selected = mindex;
+          }
+          if (monitor_selected < 0) {
+            return;
+          }
+          if (monitor_width[monitor_selected] > 16384 || monitor_height[monitor_selected] > 16384) {
+            return;
+          }
+          (*width) = monitor_width[monitor_selected];
+          (*height) = monitor_height[monitor_selected];
+        } else {
           return;
         }
-        (*width) = w;
-        (*height) = h;
       }
     }
     if (pixels) {
@@ -91,7 +125,10 @@ namespace {
         return;
       }
       SelectObject(hdc_mem_dc, hbm_screen);
-      if (!BitBlt(hdc_mem_dc, 0, 0, (*width), (*height), hdc_window, 0, 0, SRCCOPY)) {
+      if (!BitBlt(hdc_mem_dc, 
+        ((hwnd) ? 0 : monitor_x[monitor_selected]), 
+        ((hwnd) ? 0 : monitor_y[monitor_selected]),
+        (*width), (*height), hdc_window, 0, 0, SRCCOPY)) {
         return;
       }
       BITMAPINFO bmp_info;
@@ -257,6 +294,41 @@ namespace enigma_user {
 
   wid_t capture_window_id_from_native_window(enigma::rvt window) {
     return window_id_from_native_window((window_t)(void *)window.p);
+  }
+
+  int capture_monitor_get_count() {
+    return mindex + 1;
+  }
+
+  int capture_monitor_get_current() {
+    return monitor_selected;
+  }
+
+  void capture_monitor_set_current(int current) {
+    if (current < -1) {
+      current = -1;
+    }
+    if (current > mindex) {
+      current = mindex;
+    }
+    monitor_selected = current;
+  }
+
+  std::string capture_monitor_get_name() {
+    if (monitor_selected >= 0 && monitor_selected <= mindex) {
+      return monitor_name[monitor_selected];
+    }
+    return "";
+  }
+
+  void capture_monitor_init_info() {
+    mindex = -1;
+    monitor_name.clear();
+    monitor_x.clear();
+    monitor_y.clear();
+    monitor_width.clear();
+    monitor_height.clear();
+    EnumDisplayMonitors(nullptr, nullptr, monitor_enum_proc, 0);
   }
 
 } // namespace enigma_user
