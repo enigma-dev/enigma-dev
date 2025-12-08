@@ -27,8 +27,9 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-set(LIB_PROTO "Protocols" CACHE STRING "Protobuf library name")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(LIB_PROTO_DESCRIPTION "Protobuf interface for ENIGMA and GameMaker files")
+set(LIB_PROTO "Protocols" CACHE INTERNAL ${LIB_PROTO_DESCRIPTION})
 
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -51,7 +52,7 @@ if (NOT GRPC_EXE)
   elseif(WIN32)
     set(GRPC_EXE "${MINGW_BIN}/grpc_cpp_plugin.exe")
   elseif(APPLE)
-    set(GRPC_EXE "/usr/local/opt/grpc/bin/grpc_cpp_plugin")
+    set(GRPC_EXE "/opt/homebrew/bin/grpc_cpp_plugin")
   else()
     set(GRPC_EXE "/usr/bin/grpc_cpp_plugin")
   endif()

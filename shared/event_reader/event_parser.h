@@ -71,10 +71,9 @@ struct EventDescriptor {
   int ParameterCount() const {
     return event->parameters_size();
   }
-  const std::string &ParameterKind(int n) const {
-    if (n < event->parameters_size()) return event->parameters(n);
-    static std::string BAD_PARAMETER_INDEX = "N/A";
-    return BAD_PARAMETER_INDEX;
+  std::string ParameterKind(int n) const {
+    if (n < event->parameters_size()) return std::string(event->parameters(n));
+    return "N/A";
   }
 
   // Returns human-readable examples of ID strings belonging to this event.
@@ -82,13 +81,13 @@ struct EventDescriptor {
 
   // Return the base ID of this event, such as "Collision" or "Draw."
   // Not to be confused with the IdString of an instance of this event.
-  const std::string &bare_id() const { return event->id(); }
+  std::string bare_id() const { return std::string(event->id()); }
 
   std::string HumanName() const;
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
-  std::string GroupName() const { return event->group(); }
-  std::string HumanDescription() const { return event->description(); }
+  std::string GroupName() const { return std::string(event->group()); }
+  std::string HumanDescription() const { return std::string(event->description()); }
 
   bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }

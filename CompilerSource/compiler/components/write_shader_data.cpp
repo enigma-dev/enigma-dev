@@ -67,8 +67,8 @@ int lang_CPP::compile_writeShaderData(const GameData &game, ParsedScope *EGMglob
     while (idmax < shader.id()) {
       ++idmax, wto << "ShaderStruct(),\n";
     }
-    string vertexcode  =  shader->vertex_code();
-    string fragmentcode = shader->fragment_code();
+    string vertexcode  =  std::string(shader->vertex_code());
+    string fragmentcode = std::string(shader->fragment_code());
     //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "

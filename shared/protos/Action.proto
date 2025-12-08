@@ -1,7 +1,8 @@
-syntax = "proto2";
+edition = "2024";
 package buffers.resources;
 
 import "options.proto";
+import "google/protobuf/cpp_features.proto";
 
 enum ArgumentKind {
   ARG_EXPRESSION = 0;
@@ -23,7 +24,7 @@ enum ArgumentKind {
 }
 
 message Argument {
-  optional ArgumentKind kind = 1;
+  ArgumentKind kind = 1;
   oneof value {
     string string = 2;
     string sprite = 3;
@@ -59,17 +60,17 @@ enum ActionExecution {
 }
 
 message Action {
-  optional int32 libid = 1;
-  optional int32 id = 2;
-  optional ActionKind kind = 3;
-  optional bool use_relative = 4 [(gmx) = "userelative"];
-  optional bool is_question = 5 [(gmx) = "isquestion"];
-  optional bool use_apply_to = 6 [(gmx) = "useapplyto"];
-  optional ActionExecution exe_type = 7 [(gmx) = "exetype"];
-  optional string function_name = 8 [(gmx) = "functionname"];
-  optional string code_string = 9 [(gmx) = "codestring"];
-  optional string who_name = 10 [(gmx) = "whoName"];
-  optional bool relative = 11;
-  optional bool is_not = 12 [(gmx) = "isnot"];
+  int32 libid = 1;
+  int32 id = 2;
+  ActionKind kind = 3;
+  bool use_relative = 4 [(gmx) = "userelative"];
+  bool is_question = 5 [(gmx) = "isquestion"];
+  bool use_apply_to = 6 [(gmx) = "useapplyto"];
+  ActionExecution exe_type = 7 [(gmx) = "exetype"];
+  string function_name = 8 [(gmx) = "functionname"];
+  string code_string = 9 [(gmx) = "codestring"];
+  string who_name = 10 [(gmx) = "whoName"];
+  bool relative = 11;
+  bool is_not = 12 [(gmx) = "isnot"];
   repeated Argument arguments = 13 [(gmx) = "arguments/argument"];
 }

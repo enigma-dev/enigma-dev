@@ -27,8 +27,8 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-set(SHARED_LIB "ENIGMAShared" CACHE STRING "Shared library name")
 set(SHARED_LIB_DESCRIPTION "Enigma Shared Utilities")
+set(SHARED_LIB "ENIGMAShared" CACHE INTERNAL ${SHARED_LIB_DESCRIPTION})
 set(CMAKE_DEBUG_POSTFIX d)
 
 project(${SHARED_LIB} DESCRIPTION ${SHARED_LIB_DESCRIPTION})
@@ -62,8 +62,8 @@ target_link_libraries(${SHARED_LIB} PRIVATE ${PNG_LIBRARY})
 add_dependencies(${SHARED_LIB} ${LIB_PROTO})
 
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
-target_link_libraries(${SHARED_LIB} PRIVATE ${LIB_PROTO})
+target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp::yaml-cpp)
+target_link_libraries(${SHARED_LIB} PRIVATE "Protocols")
 
 # Find Protobuf
 find_package(Protobuf CONFIG REQUIRED)

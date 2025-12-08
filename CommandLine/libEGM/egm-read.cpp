@@ -124,8 +124,8 @@ inline void invalidYAMLType(const YAML::Node& yaml, const fs::path& fPath, const
   errStream << "YAML parsing error" << std::endl;
   errStream << "Expected a " << expectedType << " but got " << yamlTypes.at(yaml.Type()) << std::endl;
   errStream << "File path: " << fPath << std::endl;
-  errStream << "Protobuf field: " << field->name() << std::endl;
-  yamlErrorPosition(yaml[field->name()].Mark());
+  errStream << "Protobuf field: " << std::string(field->name()) << std::endl;
+  yamlErrorPosition(yaml[std::string(field->name())].Mark());
 }
 
 void RepackLayers(buffers::resources::Room *room, bool tiles, YAML::Node& yaml,
@@ -232,7 +232,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     const google::protobuf::FieldOptions opts = field->options();
 
-    std::string key = field->name();
+    std::string key = std::string(field->name());
 
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
@@ -259,7 +259,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
 
     // YAML field not in properties.yaml
     if (!node) {
-      errStream << "Warning: could not locate YAML field " << field->name()
+      errStream << "Warning: could not locate YAML field " << std::string(field->name())
                 << " in " << fPath << std::endl;
       continue;
     }

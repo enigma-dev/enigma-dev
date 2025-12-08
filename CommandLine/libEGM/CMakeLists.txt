@@ -27,8 +27,8 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-set(LIB_EGM "EGM" CACHE STRING "EGM library name")
 set(LIB_EGM_DESCRIPTION "Interface for reading and writing ENIGMA and GameMaker files")
+set(LIB_EGM "EGM" CACHE INTERNAL ${LIB_EGM_DESCRIPTION})
 
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -50,11 +50,11 @@ find_package(RapidJSON REQUIRED)
 include_directories(${LIB_EGM} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${LIB_EGM} PRIVATE yaml-cpp)
+target_link_libraries(${LIB_EGM} PRIVATE yaml-cpp::yaml-cpp)
 
 include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/")
 
-# Find Protobuf
+# Find Protobuf first to ensure Abseil is available
 find_package(Protobuf CONFIG REQUIRED)
 target_link_libraries(${LIB_EGM} PRIVATE protobuf::libprotobuf)
 

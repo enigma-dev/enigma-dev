@@ -66,7 +66,7 @@ void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, 
         alias = gmxName;
       }
 
-      if (alias.empty()) alias = field->name();
+      if (alias.empty()) alias = std::string(field->name());
 
       // this is for 0,0 crap
       const std::string splitMarker = "YYP_SPLIT/";

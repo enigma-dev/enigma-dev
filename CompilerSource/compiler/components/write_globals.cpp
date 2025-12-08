@@ -110,7 +110,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << "  int viewScale = " << gsets.view_scale() << ";" << endl;
   wto << "  int windowColor = " << gsets.color_outside_room_region() << ";" << endl;
 
-  wto << "  string gameInfoText = \"" << esc(gameInfo.text()) << "\";" << endl;
+  wto << "  string gameInfoText = \"" << esc(std::string(gameInfo.text())) << "\";" << endl;
   wto << "  string gameInfoCaption = \"" << gameInfo.form_caption() << "\";" << endl;
   wto << "  int gameInfoBackgroundColor = " << gameInfo.background_color() << ";" << endl;
   wto << "  int gameInfoLeft = " << gameInfo.left() << ";" << endl;

@@ -371,6 +371,23 @@ class Decoder {
   void postponeName(std::string* name, int id, TypeCase type) {
     postponeds[type][id].push_back(name);
   }
+  
+  template<typename MessageType>
+  void postponeName(MessageType* msg, const char* field_name, int id, TypeCase type) {
+    const google::protobuf::Descriptor* desc = msg->GetDescriptor();
+    const google::protobuf::FieldDescriptor* field = desc->FindFieldByName(field_name);
+    if (field) {
+      // Store a lambda that will set the string value later
+      std::string* temp_str = new std::string();
+      postponeds[type][id].push_back(temp_str);
+      // Store the setter for later - capture by value to avoid lifetime issues
+      MessageType* msg_ptr = msg;
+      postponed_setters.push_back([msg_ptr, field, temp_str]() {
+        msg_ptr->GetReflection()->SetString(msg_ptr, field, *temp_str);
+        delete temp_str;
+      });
+    }
+  }
 
   void processPostoned(const std::string name, const int id, const TypeCase type) {
     auto idMapIt = postponeds.find(type);
@@ -384,6 +401,12 @@ class Decoder {
     }
     for (std::string *mutableName : mutableNameIt->second)
       mutableName->append(name.c_str(), name.size());
+    
+    // Execute all postponed setters after updating the strings
+    for (auto& setter : postponed_setters) {
+      setter();
+    }
+    postponed_setters.clear();
   }
 
   private:
@@ -392,6 +415,7 @@ class Decoder {
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
+  std::vector<std::function<void()>> postponed_setters;
   std::vector<std::pair<std::future<void>, std::filesystem::path> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
@@ -608,7 +632,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& name)
     sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
   
-  const std::filesystem::path fName = TempFileName(gmk_data)/(name + sound->file_extension());
+  const std::filesystem::path fName = TempFileName(gmk_data)/(name + std::string(sound->file_extension()));
 
   if (ver == 440) {
     //-1 = no sound
@@ -772,7 +796,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/, const std::string& /*n
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
+  dec.postponeName(path.get(), "background_room_name", dec.read4(), TypeCase::kRoom);
   path->set_hsnap(dec.read4());
   path->set_vsnap(dec.read4());
   int nopoints = dec.read4();
@@ -869,7 +893,7 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
         action->set_who_name("other");
         break;
       default:
-        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
+        dec.postponeName(action.get(), "who_name", applies_to, TypeCase::kObject);
     }
     action->set_relative(dec.readBool());
 
@@ -885,17 +909,34 @@ int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
 
       using ArgumentMutator = std::pair<std::function<std::string*(Argument*)>, TypeCase>;
       using MutatorMap = std::unordered_map<ArgumentKind, ArgumentMutator>;
+      
+      auto getMutableString = [](Argument* arg, const char* field_name) -> std::string* {
+        // Create a temporary string that will be set later
+        std::string* temp_str = new std::string();
+        const google::protobuf::Descriptor* desc = arg->GetDescriptor();
+        const google::protobuf::FieldDescriptor* field = desc->FindFieldByName(field_name);
+        if (field) {
+          // Store setter to be called later
+          Argument* arg_ptr = arg;
+          static thread_local std::vector<std::function<void()>> temp_setters;
+          temp_setters.push_back([arg_ptr, field, temp_str]() {
+            arg_ptr->GetReflection()->SetString(arg_ptr, field, *temp_str);
+            delete temp_str;
+          });
+        }
+        return temp_str;
+      };
 
       static const MutatorMap mutatorMap({
-        { ArgumentKind::ARG_SOUND,      {&Argument::mutable_sound,       TypeCase::kSound      }},
-        { ArgumentKind::ARG_BACKGROUND, {&Argument::mutable_background,  TypeCase::kBackground }},
-        { ArgumentKind::ARG_SPRITE,     {&Argument::mutable_sprite,      TypeCase::kSprite     }},
-        { ArgumentKind::ARG_SCRIPT,     {&Argument::mutable_script,      TypeCase::kScript     }},
-        { ArgumentKind::ARG_FONT,       {&Argument::mutable_font,        TypeCase::kFont       }},
-        { ArgumentKind::ARG_OBJECT,     {&Argument::mutable_object,      TypeCase::kObject     }},
-        { ArgumentKind::ARG_TIMELINE,   {&Argument::mutable_timeline,    TypeCase::kTimeline   }},
-        { ArgumentKind::ARG_ROOM,       {&Argument::mutable_room,        TypeCase::kRoom       }},
-        { ArgumentKind::ARG_PATH,       {&Argument::mutable_path,        TypeCase::kPath       }}
+        { ArgumentKind::ARG_SOUND,      {[getMutableString](Argument* a) { return getMutableString(a, "sound"); },       TypeCase::kSound      }},
+        { ArgumentKind::ARG_BACKGROUND, {[getMutableString](Argument* a) { return getMutableString(a, "background"); },  TypeCase::kBackground }},
+        { ArgumentKind::ARG_SPRITE,     {[getMutableString](Argument* a) { return getMutableString(a, "sprite"); },      TypeCase::kSprite     }},
+        { ArgumentKind::ARG_SCRIPT,     {[getMutableString](Argument* a) { return getMutableString(a, "script"); },      TypeCase::kScript     }},
+        { ArgumentKind::ARG_FONT,       {[getMutableString](Argument* a) { return getMutableString(a, "font"); },        TypeCase::kFont       }},
+        { ArgumentKind::ARG_OBJECT,     {[getMutableString](Argument* a) { return getMutableString(a, "object"); },      TypeCase::kObject     }},
+        { ArgumentKind::ARG_TIMELINE,   {[getMutableString](Argument* a) { return getMutableString(a, "timeline"); },    TypeCase::kTimeline   }},
+        { ArgumentKind::ARG_ROOM,       {[getMutableString](Argument* a) { return getMutableString(a, "room"); },        TypeCase::kRoom       }},
+        { ArgumentKind::ARG_PATH,       {[getMutableString](Argument* a) { return getMutableString(a, "path"); },       TypeCase::kPath       }}
       });
 
       const auto &mutator = mutatorMap.find(argument->kind());
@@ -922,7 +963,14 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/, const std::str
   for (int i = 0; i < nomoms; i++) {
     auto moment = timeline->add_moments();
     moment->set_step(dec.read4());
-    if (!LoadActions(dec, moment->mutable_code(), "step_" + std::to_string(moment->step()))) return nullptr;
+    std::string* code_ptr = new std::string();
+    const google::protobuf::FieldDescriptor* code_field = moment->GetDescriptor()->FindFieldByName("code");
+    if (!LoadActions(dec, code_ptr, "step_" + std::to_string(moment->step()))) {
+      delete code_ptr;
+      return nullptr;
+    }
+    moment->GetReflection()->SetString(moment, code_field, *code_ptr);
+    delete code_ptr;
   }
 
   return timeline;
@@ -931,13 +979,13 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/, const std::str
 std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string& /*name*/) {
   auto object = std::make_unique<Object>();
 
-  dec.postponeName(object->mutable_sprite_name(), dec.read4(), TypeCase::kSprite);
+  dec.postponeName(object.get(), "sprite_name", dec.read4(), TypeCase::kSprite);
   object->set_solid(dec.readBool());
   object->set_visible(dec.readBool());
   object->set_depth(dec.read4());
   object->set_persistent(dec.readBool());
-  dec.postponeName(object->mutable_parent_name(), dec.read4(), TypeCase::kObject);
-  dec.postponeName(object->mutable_mask_name(), dec.read4(), TypeCase::kSprite);
+  dec.postponeName(object.get(), "parent_name", dec.read4(), TypeCase::kObject);
+  dec.postponeName(object.get(), "mask_name", dec.read4(), TypeCase::kSprite);
 
   int noEvents = dec.read4() + 1;
   for (int i = 0; i < noEvents; i++) {
@@ -949,7 +997,14 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/, const std::string&
       event->set_type(i);
       event->set_number(second);
 
-      if (!LoadActions(dec, event->mutable_code(), event->name())) return nullptr;
+      std::string* code_ptr = new std::string();
+      const google::protobuf::FieldDescriptor* code_field = event->GetDescriptor()->FindFieldByName("code");
+      if (!LoadActions(dec, code_ptr, std::string(event->name()))) {
+        delete code_ptr;
+        return nullptr;
+      }
+      event->GetReflection()->SetString(event, code_field, *code_ptr);
+      delete code_ptr;
     }
   }
 
@@ -979,7 +1034,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     auto background = room->add_backgrounds();
     background->set_visible(dec.readBool());
     background->set_foreground(dec.readBool());
-    dec.postponeName(background->mutable_background_name(), dec.read4(), TypeCase::kBackground);
+    dec.postponeName(background, "background_name", dec.read4(), TypeCase::kBackground);
     background->set_x(dec.read4());
     background->set_y(dec.read4());
     background->set_htiled(dec.readBool());
@@ -1012,7 +1067,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     view->set_vborder(dec.read4());
     view->set_hspeed(dec.read4());
     view->set_vspeed(dec.read4());
-    dec.postponeName(view->mutable_object_following(), dec.read4(), TypeCase::kObject);
+    dec.postponeName(view, "object_following", dec.read4(), TypeCase::kObject);
   }
 
   int noinstances = dec.read4();
@@ -1020,7 +1075,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     auto instance = room->add_instances();
     instance->set_x(dec.read4());
     instance->set_y(dec.read4());
-    dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
+    dec.postponeName(instance, "object_type", dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
     instance->set_creation_code(dec.readStr());
     instance->mutable_editor_settings()->set_locked(dec.readBool());
@@ -1031,7 +1086,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     auto tile = room->add_tiles();
     tile->set_x(dec.read4());
     tile->set_y(dec.read4());
-    dec.postponeName(tile->mutable_background_name(), dec.read4(), TypeCase::kBackground);
+    dec.postponeName(tile, "background_name", dec.read4(), TypeCase::kBackground);
     tile->set_xoffset(dec.read4());
     tile->set_yoffset(dec.read4());
     tile->set_width(dec.read4());

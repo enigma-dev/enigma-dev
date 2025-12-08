@@ -1,8 +1,9 @@
-syntax = "proto2";
+edition = "2024";
 package buffers;
 
 import "treenode.proto";
+import "google/protobuf/cpp_features.proto";
 
 message Game {
-  optional TreeNode root = 1;
+  TreeNode root = 1;
 }

@@ -45,6 +45,7 @@ else()
 endif()
 
 set(CLI_TARGET_DESCRIPTION "ENIGMA CLI")
+set(CLI_TARGET ${CLI_TARGET} CACHE INTERNAL ${CLI_TARGET_DESCRIPTION})
 set(Boost_NO_BOOST_CMAKE ON)
 
 project(emake)
@@ -81,7 +82,7 @@ include_directories(${CLI_TARGET} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 
 # Find yaml-cpp
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp)
+target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp::yaml-cpp)
 
 #Find gRPC
 find_package(gRPC CONFIG REQUIRED)
@@ -90,12 +91,6 @@ target_link_libraries(${CLI_TARGET} PRIVATE gRPC::gpr gRPC::grpc gRPC::grpc++)
 # Find Protobuf
 find_package(Protobuf CONFIG REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE protobuf::libprotobuf)
-
-# Find absl
-find_package(absl CONFIG REQUIRED)
-target_link_libraries(${CLI_TARGET} PRIVATE absl::log_internal_check_op)
-# Use the one below if you installed abseil manually
-# target_link_libraries(${CLI_TARGET} PRIVATE abseil_dll)
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
@@ -133,7 +128,7 @@ endif(WIN32)
 
 # Find Boost
 # https://cmake.org/cmake/help/latest/policy/CMP0167.html
-find_package(Boost CONFIG COMPONENTS system program_options filesystem REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options filesystem REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE Boost::program_options)
 
 install(TARGETS ${CLI_TARGET} RUNTIME DESTINATION .)

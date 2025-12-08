@@ -1,4 +1,5 @@
-syntax = "proto2";
+// Using edition 2023 instead of 2024 because protoc-gen-grpc doesn't support edition 2024 yet
+edition = "2023";
 package buffers;
 
 import "compiler.proto";

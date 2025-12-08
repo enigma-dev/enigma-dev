@@ -10,9 +10,10 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
       auto evd = evdata->get_event(legacy_event.type(), 0);
       if (evd.IsValid()) {
         auto &egm_event = *obj->add_egm_events();
-        egm_event.set_id(evd.bare_id());
-        egm_event.add_arguments(legacy_event.name());
-        egm_event.set_code(legacy_event.code());
+        std::string event_id = evd.bare_id();
+        egm_event.set_id(event_id);
+        egm_event.add_arguments(std::string(legacy_event.name()));
+        egm_event.set_code(std::string(legacy_event.code()));
       } else {
         std::cerr << "Error: Event " << legacy_event.type()
                   << " cannot accept a string parameter." << std::endl;
@@ -21,8 +22,9 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
       auto evd = evdata->get_event(legacy_event.type(), legacy_event.number());
       if (evd.IsValid()) {
         auto &egm_event = *obj->add_egm_events();
-        egm_event.set_id(evd.bare_id());
-        egm_event.set_code(legacy_event.code());
+        std::string event_id = evd.bare_id();
+        egm_event.set_id(event_id);
+        egm_event.set_code(std::string(legacy_event.code()));
         for (size_t i = 0; i < evd.arguments.size(); ++i) {
           if (evd.ParameterKind(i) == "object") {
             auto it = objs.find(legacy_event.number());
@@ -57,7 +59,7 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
 // }
 
 void ListObjects(buffers::TreeNode *node, std::map<int, NamedObject> *out) {
-  if (node->has_object()) (*out)[node->object().id()] = NamedObject(node->name(), node->mutable_object());
+  if (node->has_object()) (*out)[node->object().id()] = NamedObject(std::string(node->name()), node->mutable_object());
   if (node->has_folder()) {
     for (buffers::TreeNode &c : *node->mutable_folder()->mutable_children())
       ListObjects(&c, out);
