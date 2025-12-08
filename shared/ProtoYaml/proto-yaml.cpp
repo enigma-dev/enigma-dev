@@ -56,21 +56,21 @@ struct FieldCache {
       message_name = "null";
       return;
     }
-    message_name = desc->name();
+    message_name = std::string(desc->name());
     const proto::FieldDescriptor *fd;
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[ToLower(Spaceify(fd->name()))] = fd;
-      fields[ToLower(Hyphenate(fd->name()))] = fd;
-      fields[ToLower(fd->camelcase_name())] = fd;
+      fields[ToLower(Spaceify(std::string(fd->name())))] = fd;
+      fields[ToLower(Hyphenate(std::string(fd->name())))] = fd;
+      fields[ToLower(std::string(fd->camelcase_name()))] = fd;
     }
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[Spaceify(fd->name())] = fd;
-      fields[Hyphenate(fd->name())] = fd;
-      fields[fd->camelcase_name()] = fd;
-      fields[Capitalize(fd->camelcase_name())] = fd;
+      fields[Spaceify(std::string(fd->name()))] = fd;
+      fields[Hyphenate(std::string(fd->name()))] = fd;
+      fields[std::string(fd->camelcase_name())] = fd;
+      fields[Capitalize(std::string(fd->camelcase_name()))] = fd;
     }
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[fd->name()] = fd;
+      fields[std::string(fd->name())] = fd;
     }
   }
 };
@@ -94,26 +94,26 @@ struct ConstantCache {
       enum_name = "null";
       return;
     }
-    enum_name = desc->name();
+    enum_name = std::string(desc->name());
     const proto::EnumValueDescriptor *vd;
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[ToLower(Spaceify(vd->name()))] = vd;
-      values[ToLower(Hyphenate(vd->name()))] = vd;
+      values[ToLower(Spaceify(std::string(vd->name())))] = vd;
+      values[ToLower(Hyphenate(std::string(vd->name())))] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[Spaceify(vd->name())] = vd;
-      values[Hyphenate(vd->name())] = vd;
-      values[ToPascalCase(vd->name())] = vd;
-      std::cout << " > " << ToPascalCase(vd->name()) << std::endl;
+      values[Spaceify(std::string(vd->name()))] = vd;
+      values[Hyphenate(std::string(vd->name()))] = vd;
+      values[ToPascalCase(std::string(vd->name()))] = vd;
+      std::cout << " > " << ToPascalCase(std::string(vd->name())) << std::endl;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[ToLower(vd->name())] = vd;
+      values[ToLower(std::string(vd->name()))] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
       values[std::to_string(vd->number())] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[vd->name()] = vd;
+      values[std::string(vd->name())] = vd;
     }
   }
 };
@@ -267,9 +267,9 @@ MessageIsKeyValue(const proto::Descriptor *desc) {
   if (!desc || desc->field_count() < 1) return {};
   const proto::FieldDescriptor *kfd = desc->field(0);
   if (kfd->is_repeated()) return {};
-  if (ToLower(kfd->name()) != "id"  &&
-      ToLower(kfd->name()) != "key" &&
-      ToLower(kfd->name()) != "name") {
+  if (ToLower(std::string(kfd->name())) != "id"  &&
+      ToLower(std::string(kfd->name())) != "key" &&
+      ToLower(std::string(kfd->name())) != "name") {
     return {};
   }
   const proto::FieldDescriptor *vfd =
@@ -334,7 +334,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
     case YAML::NodeType::Sequence: {
       if (!field->is_repeated()) {
         std::cerr << "Sequence value given for non-repeated field "
-                  << out->GetDescriptor()->name() << std::endl;
+                  << std::string(out->GetDescriptor()->name()) << std::endl;
         return false;
       }
       bool success_bit = true;
@@ -344,7 +344,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
           if (item.Type() != YAML::NodeType::Map) {
             std::cerr
                 << "Non-map was given for message entry in repeated field `"
-                << field->name()
+                << std::string(field->name())
                 << "`. Custom string transformers not currently supported.";
             success_bit = false;
             continue;
@@ -356,7 +356,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
           if (item.Type() != YAML::NodeType::Scalar) {
             std::cerr
                 << "Non-scalar was given for entry in repeated field `"
-                << field->name()
+                << std::string(field->name())
                 << "`. Custom transformers not currently supported.";
             success_bit = false;
             continue;
@@ -368,7 +368,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
     }
     case YAML::NodeType::Map: {
       if (field->cpp_type() != CppType::CPPTYPE_MESSAGE) {
-        std::cerr << "Map was given for non-message field `" << field->name()
+        std::cerr << "Map was given for non-message field `" << std::string(field->name())
                   << "`. Custom YAML transformers not currently supported.";
         return false;
       }
@@ -383,7 +383,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
         bool success_bit = true;
         for (const auto &kv_pair : yaml) {
           if (kv_pair.first.Type() != YAML::NodeType::Scalar) {
-            std::cerr << "YAML-Cpp error: map key for field `" << field->name()
+            std::cerr << "YAML-Cpp error: map key for field `" << std::string(field->name())
                       << "` is not a scalar!" << std::endl;
             success_bit = false;
             continue;
@@ -399,7 +399,7 @@ bool DecodeHelper::FitNodeToField(const YAML::Node &yaml,
             FitNodeToField(kv_pair.second, v_field, sub);
           } else if (kv_pair.second.Type() != YAML::NodeType::Map) {
             std::cerr << "Value of map entry `" << kv_key << "` for field `"
-                      << field->name() << "`is not a nested  map. This field "
+                      << std::string(field->name()) << "`is not a nested  map. This field "
                          "is repeated; if you meant for these values to appear "
                          "in the first entry, add a - before the mapping in "
                          "your YAML file." << std::endl;
@@ -444,12 +444,12 @@ bool egm::DecodeYaml(const YAML::Node &yaml, proto::Message *out) {
     }
     case YAML::NodeType::Scalar: {
       std::cerr << "Scalar value given for Message "
-                << out->GetDescriptor()->name() << std::endl;
+                << std::string(out->GetDescriptor()->name()) << std::endl;
       return false;
     }
     case YAML::NodeType::Sequence: {
       std::cerr << "Sequence value given for Message "
-                << out->GetDescriptor()->name() << std::endl;
+                << std::string(out->GetDescriptor()->name()) << std::endl;
       return false;
     }
     case YAML::NodeType::Map: {

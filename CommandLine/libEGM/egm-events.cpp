@@ -42,7 +42,12 @@ void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const
 
 void WriteObjectEvents(const fs::path& fPath, const google::protobuf::RepeatedPtrField<buffers::resources::Object_EgmEvent>& events, const EventData* event_data) {
   for (auto &e : events) {
-    auto event = event_data->get_event(e.id(), {e.arguments().begin(), e.arguments().end()});
+    std::vector<std::string> args;
+    args.reserve(e.arguments_size());
+    for (const auto& arg : e.arguments()) {
+      args.push_back(std::string(arg));
+    }
+    auto event = event_data->get_event(std::string(e.id()), args);
     auto edlFile = fPath/(event.IdString() + ".edl");
     std::ofstream fout{edlFile};
     fout << e.code();

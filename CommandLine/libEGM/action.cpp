@@ -20,7 +20,7 @@
 
 std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
-  std::string val = arg.string();
+  std::string val = std::string(arg.string());
 
   switch (arg.kind()) {
     case ArgumentKind::ARG_BOTH:
@@ -32,23 +32,23 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
     case ArgumentKind::ARG_BOOLEAN:
       return std::to_string(val != "0");
     case ArgumentKind::ARG_SPRITE:
-      return arg.has_sprite() ? arg.sprite() : "-1";
+      return arg.has_sprite() ? std::string(arg.sprite()) : "-1";
     case ArgumentKind::ARG_SOUND:
-      return arg.has_sound() ? arg.sound() : "-1";
+      return arg.has_sound() ? std::string(arg.sound()) : "-1";
     case ArgumentKind::ARG_BACKGROUND:
-      return arg.has_background() ? arg.background() : "-1";
+      return arg.has_background() ? std::string(arg.background()) : "-1";
     case ArgumentKind::ARG_PATH:
-      return arg.has_path() ? arg.path() : "-1";
+      return arg.has_path() ? std::string(arg.path()) : "-1";
     case ArgumentKind::ARG_SCRIPT:
-      return arg.has_script() ? arg.script() : "-1";
+      return arg.has_script() ? std::string(arg.script()) : "-1";
     case ArgumentKind::ARG_OBJECT:
-      return arg.has_object() ? arg.object() : "-1";
+      return arg.has_object() ? std::string(arg.object()) : "-1";
     case ArgumentKind::ARG_ROOM:
-      return arg.has_room() ? arg.room() : "-1";
+      return arg.has_room() ? std::string(arg.room()) : "-1";
     case ArgumentKind::ARG_FONT:
-      return arg.has_font() ? arg.font() : "-1";
+      return arg.has_font() ? std::string(arg.font()) : "-1";
     case ArgumentKind::ARG_TIMELINE:
-      return arg.has_timeline() ? arg.timeline() : "-1";
+      return arg.has_timeline() ? std::string(arg.timeline()) : "-1";
     case ArgumentKind::ARG_MENU:
     case ArgumentKind::ARG_COLOR:
     default:
@@ -129,8 +129,8 @@ bool PushIfRequired(std::string &code, std::stack<std::string> &who_name_stack, 
   // already being applied to, which is handled in the else-if branch
   if (action.use_apply_to() && action.who_name() != "self") {
     if (who_name_stack.empty() || who_name_stack.top() != action.who_name()) {
-      code += "with (" + action.who_name() + ")\n";
-      who_name_stack.push(action.who_name());
+      code += "with (" + std::string(action.who_name()) + ")\n";
+      who_name_stack.push(std::string(action.who_name()));
       return true;
     }
   } else if (!who_name_stack.empty() && who_name_stack.top() != "self") {
@@ -241,18 +241,18 @@ std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberO
         code += "exit ";
         break;
       case ActionKind::ACT_REPEAT:
-        code += "repeat (" + args.Get(0).string() + ")";
+        code += "repeat (" + std::string(args.Get(0).string()) + ")";
         break;
       case ActionKind::ACT_VARIABLE:
-        code += args.Get(0).string();
+        code += std::string(args.Get(0).string());
         if (action.relative())
           code += " += ";
         else
           code += " = ";
-        code += args.Get(1).string() + "\n";
+        code += std::string(args.Get(1).string()) + "\n";
         break;
       case ActionKind::ACT_CODE:
-        code += "{\n" + args.Get(0).string() + "\n/**/\n}";
+        code += "{\n" + std::string(args.Get(0).string()) + "\n/**/\n}";
         break;
       case ActionKind::ACT_NORMAL:
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;

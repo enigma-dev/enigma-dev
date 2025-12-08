@@ -486,28 +486,28 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
         if (error) return -1; // sprite load error
         subimages.emplace_back(data);
       }
-      gameData->sprites.emplace_back(sprite, root.name(), subimages);
+      gameData->sprites.emplace_back(sprite, std::string(root.name()), subimages);
       break;
     }
     case TypeCase::kSound: {
-      BinaryData data = loadBinaryData(root.sound().data(), error);
+      BinaryData data = loadBinaryData(std::string(root.sound().data()), error);
       if (error) return -2; // sound load error
-      gameData->sounds.emplace_back(root.sound(), root.name(), data);
+      gameData->sounds.emplace_back(root.sound(), std::string(root.name()), data);
       break;
     }
     case TypeCase::kBackground: {
-      ImageData data = loadImageData(root.background().image(), error);
+      ImageData data = loadImageData(std::string(root.background().image()), error);
       if (error) return -3; // background load error
-      gameData->backgrounds.emplace_back(root.background(), root.name(), data);
+      gameData->backgrounds.emplace_back(root.background(), std::string(root.name()), data);
       break;
     }
-    case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), root.name()); break;
-    case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), root.name()); break;
-    case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), root.name()); break;
-    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), root.name()); break;
-    case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), root.name()); break;
-    case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
-    case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
+    case TypeCase::kPath:     gameData->paths.emplace_back(root.path(), std::string(root.name())); break;
+    case TypeCase::kScript:   gameData->scripts.emplace_back(root.script(), std::string(root.name())); break;
+    case TypeCase::kShader:   gameData->shaders.emplace_back(root.shader(), std::string(root.name())); break;
+    case TypeCase::kFont:     gameData->fonts.emplace_back(root.font(), std::string(root.name())); break;
+    case TypeCase::kTimeline: gameData->timelines.emplace_back(root.timeline(), std::string(root.name())); break;
+    case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), std::string(root.name())); break;
+    case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), std::string(root.name())); break;
     case TypeCase::kInclude:  /*gameData->includes.emplace_back(root.include());*/ break;
     case TypeCase::kSettings: /*gameData->settings.emplace_back(root.settings());*/ break;
     default: cout << "- Not transferring unknown " << root.name() << endl; break;

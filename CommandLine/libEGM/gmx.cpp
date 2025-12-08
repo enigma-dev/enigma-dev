@@ -116,7 +116,7 @@ class gmx_root_walker {
         if (resType == "datafile") {
           std::string groupPath = gmxPath;
           for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
-            groupPath += (*parent)->name() + "/";
+            groupPath += std::string((*parent)->name()) + "/";
           }
           PackRes(idLookup, groupPath, idMap, xmlNode, res, 0);
         } else {
@@ -262,7 +262,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
     const google::protobuf::FieldOptions opts = field->options();
 
     if (field->name() == "id") {
-      int id = opts.GetExtension(buffers::id_start) + ids[m->GetTypeName()]++;
+      int id = opts.GetExtension(buffers::id_start) + ids[std::string(m->GetTypeName())]++;
       outStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else {
@@ -309,7 +309,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
       }
 
       // use the name the protobuf field uses unless there a (gmx) attr
-      if (alias.empty()) alias = field->name();
+      if (alias.empty()) alias = std::string(field->name());
 
       // this is for <point>0,0</point> crap
       const std::string splitMarker = "GMX_SPLIT/";
@@ -470,11 +470,11 @@ void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std:
 
   if (type == "script") {
     buffers::resources::Script script;
-    PackScript(fName, ids[script.GetTypeName()]++, &script);
+    PackScript(fName, ids[std::string(script.GetTypeName())]++, &script);
     m->CopyFrom(*static_cast<google::protobuf::Message *>(&script));
   } else if (type == "shader") {
     buffers::resources::Shader shader;
-    PackShader(fName, ids[shader.GetTypeName()]++, &shader);
+    PackShader(fName, ids[std::string(shader.GetTypeName())]++, &shader);
     m->CopyFrom(*static_cast<google::protobuf::Message *>(&shader));
   } else {
     std::string fileExt = type;

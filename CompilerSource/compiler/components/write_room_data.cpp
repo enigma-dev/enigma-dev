@@ -74,7 +74,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
     for (const auto &tile : room->tiles()) {
       wto << "{"
           << tile.id()      << ","
-          << resname(tile.background_name()) << ","
+          << resname(std::string(tile.background_name())) << ","
           << tile.xoffset() << ","
           << tile.yoffset() << ","
           << tile.depth()   << ","
@@ -142,7 +142,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
           << view.xport() << ", " << view.yport() << ",  "   // Xport and Yport
           << view.wport() << ", " << view.hport() << ",   "  // Wport and Hport
 
-          << resname(view.object_following()) << ",  " // Object2Follow
+          << resname(std::string(view.object_following())) << ",  " // Object2Follow
 
           << view.hborder() << ", " << view.vborder() << ",  "  // Hborder and Vborder
           << view.hspeed()<< ", " << view.vspeed()  // Hspeed and Vspeed
@@ -155,7 +155,7 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const ParsedRoomVec &p
         wto << "  { "
         << (background.visible() ? "true" : "false")    << ", "    // Visible
         << (background.foreground() ? "true" : "false") << ", "    // Foreground
-        <<  resname(background.background_name())       << ",  "   // Background
+        <<  resname(std::string(background.background_name()))       << ",  "   // Background
         <<  background.x()                              << ", "    // X
         <<  background.y()                              << ",   "  // Y
         <<  background.hspeed()                         << ", "    // HSpeed
