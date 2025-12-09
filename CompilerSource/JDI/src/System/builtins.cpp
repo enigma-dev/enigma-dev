@@ -237,7 +237,7 @@ void add_gnu_declarators() {
   builtin_flag__explicit = add_decflag("explicit");
 
   builtin->variadics.insert(builtin_type__va_list);
-  // builtin->add_macro("JUST_DEFINE_IT_RUN", {});
+  builtin->add_macro("JUST_DEFINE_IT_RUN", {});
 }
 
 void cleanup_declarators() {

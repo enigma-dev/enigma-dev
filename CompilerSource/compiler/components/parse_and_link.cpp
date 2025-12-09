@@ -70,7 +70,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     }
     // Keep a parsed record of this script
     scr_lookup[game.scripts[i].name] = scripts[i] =
-        new ParsedScript(std::move(ast));
+        new ParsedScript(std::move(ast), &state);
     edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
@@ -81,7 +81,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       // TODO: Looking at this now, I'm not sure if we actually want to throw
       // locals away; what if a script explicitly declares `local var foo;`?
       ParsedScope temporary_scope = *scripts[i]->code.my_scope;
-      scripts[i]->global_code = new ParsedCode(&temporary_scope, std::move(ast));
+      scripts[i]->global_code = new ParsedCode(&temporary_scope, std::move(ast), &state);
       scripts[i]->global_code->my_scope = nullptr;
     }
     fflush(stdout);
@@ -103,7 +103,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
       // Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
       // Note from 2019: yeah, we're not relying on that ordering anymore. Or at least, we're really gonna try not to.
-      auto *tline = new ParsedScript(std::move(ast));
+      auto *tline = new ParsedScript(std::move(ast), &state);
 
       // Two places to log this.
       tlines.push_back(tline);
@@ -120,7 +120,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         // At some point, timelines should just be refactored into collections of scripts and a controller to call them.
         // Or maybe into one big script made from a switch statement based on the current moment.
         ParsedScope temporary_object = *tline->code.my_scope;
-        tline->global_code = new ParsedCode(&temporary_object, std::move(ast));
+        tline->global_code = new ParsedCode(&temporary_object, std::move(ast), &state);
         tline->global_code->my_scope = NULL;
       }
       fflush(stdout);
@@ -265,7 +265,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
                << ast.ErrorString() << flushl;
         return E_ERROR_SYNTAX;
       }
-      pob->all_events.emplace_back(ParsedEvent(ev, pob, std::move(ast)));
+      pob->all_events.emplace_back(ParsedEvent(ev, pob, std::move(ast), &state));
       edbg << "Done parsing " << object.name << "::" << fn << flushl;
     }
   }
@@ -287,7 +287,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
            << " (`" << room.name << "'):\n" << create.ErrorString() << flushl;
       return E_ERROR_SYNTAX;
     }
-    pr->creation_code = new ParsedCode(&pr->pseudo_scope, std::move(create));
+    pr->creation_code = new ParsedCode(&pr->pseudo_scope, std::move(create), &state);
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
@@ -302,7 +302,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         ast.ApplyTo(instance.id());
         pr->instance_create_codes[instance.id()].object_name = instance.object_type();
         pr->instance_create_codes[instance.id()].code =
-            new ParsedCode(parsed_objects[instance.object_type()], std::move(ast));
+            new ParsedCode(parsed_objects[instance.object_type()], std::move(ast), &state);
       }
     }
 
@@ -320,7 +320,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         ast.ApplyTo(instance.id());
         pr->instance_precreate_codes[instance.id()].object_name = instance.object_type();
         pr->instance_precreate_codes[instance.id()].code =
-            new ParsedCode(parsed_objects[instance.object_type()], std::move(ast));
+            new ParsedCode(parsed_objects[instance.object_type()], std::move(ast), &state);
       }
     }
   }

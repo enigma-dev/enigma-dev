@@ -23,34 +23,135 @@ using namespace enigma::parsing;
 #define VISIT_AND_CHECK(node) \
   if (!Visit(node)) return false;
 
-bool AST::Visitor::VisitIdentifierAccess(IdentifierAccess &node) {
-  print(std::string(node.name.content));
+AST::CppPrettyPrinter::CppPrettyPrinter() {
+  of = new std::ofstream();
+  if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
+  print_type = false;
+  is_script = false;
+}
+
+AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPrettyPrinter() {
+  this->language_fe = lfe;
+  print_type = false;
+  is_script = false;
+}
+
+AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script)
+    : of(&ofs), is_script(is_script), language_fe(lfe) {
+  print_type = false;
+}
+
+void AST::CppPrettyPrinter::print(std::string code) { *of << code; }
+
+void AST::CppPrettyPrinter::PrintSemiColon(AST::PNode &node) {
+  if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
+      node->type != AST::NodeType::CASE && node->type != AST::NodeType::DEFAULT &&
+      node->type != AST::NodeType::SWITCH && node->type != AST::NodeType::WHILE && node->type != AST::NodeType::DO &&
+      node->type != AST::NodeType::WITH) {
+    print("; ");
+  }
+}
+
+std::string AST::CppPrettyPrinter::GetPrintedCode() {
+  of->close();
+  std::ifstream file("./CompilerSource/parsing/output.txt");
+  std::string code = "";
+
+  if (file.is_open()) {
+    std::string line = "";
+    while (getline(file, line)) {
+      code += line;
+    }
+  }
+
+  return code;
+}
+
+bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
+  if (print_type) print("auto ");
+  std::string name = node.name.content;
+  if (is_script && name != "self") {
+    if (language_fe->is_shared_local(name)) {
+      print("enigma::glaccess(int(self))->" + name);
+    } else if (language_fe->global_exists(name)) {
+      print(name);
+    } else if (std::holds_alternative<jdi::definition *>(node.type) && std::get<jdi::definition *>(node.type)) {
+      print(name);
+    } else if (name.substr(0, 8) == "argument") {
+      print(name);
+    } else {
+      print("enigma::varaccess_" + name + "(int(self))");
+    }
+  } else {
+    print(name);
+  }
   return true;
 }
 
-bool AST::Visitor::VisitLiteral(Literal &node) {
+bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
   std::string value = std::get<std::string>(node.value.value);
+  if (node.value.type != TT_CHARLIT && node.value.type != TT_STRINGLIT) {
+    if (node.value.type == TT_HEXLITERAL) {
+      print("0x");
+    }
+    print(value);
+    return true;
+  }
+  enigma::parsing::TokenType type = node.value.type;
+  if (type == TT_CHARLIT && value.size() > 1) {
+    type = TT_STRINGLIT;
+  }
+  print(type == TT_CHARLIT ? "'" : "\"");
+  std::string to_print;
+  for (char c : value) {
+    if (c == '\\') {
+      to_print += "\\\\";
+    } else if (c >= ' ' && c <= '~') {
+      to_print += c;
+    } else if (c == '\n') {
+      to_print += "\\n";
+    } else if (c == '\t') {
+      to_print += "\\t";
+    } else if (c == '\v') {
+      to_print += "\\v";
+    } else if (c == '\b') {
+      to_print += "\\b";
+    } else if (c == '\r') {
+      to_print += "\\r";
+    } else if (c == '\f') {
+      to_print += "\\f";
+    } else if (c == '\a') {
+      to_print += "\\a";
+    } else if (c == '\?') {
+      to_print += "\\?";
+    } else {
+      std::ostringstream oss;
+      oss << '\\' << std::oct << static_cast<int>(c);
+      to_print += oss.str();
+    }
+  }
+  print(to_print);
+  print(type == TT_CHARLIT ? "'" : "\"");
 
-  // TODO: Handle escape characters
-
-  print(value);
   return true;
 }
 
-bool AST::Visitor::VisitParenthetical(Parenthetical &node) {
+bool AST::CppPrettyPrinter::VisitParenthetical(AST::Parenthetical &node) {
   print("(");
-  VISIT_AND_CHECK(node.expression);
+  if (node.expression) {
+    VISIT_AND_CHECK(node.expression);
+  }
   print(")");
   return true;
 }
 
-bool AST::Visitor::VisitUnaryPostfixExpression(UnaryPostfixExpression &node) {
+bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) {
   VISIT_AND_CHECK(node.operand);
   print(node.operation.token);
   return true;
 }
 
-bool AST::Visitor::VisitUnaryPrefixExpression(UnaryPrefixExpression &node) {
+bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
   print(node.operation.token);
   if (node.operation.type == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
     print("(");
@@ -64,7 +165,7 @@ bool AST::Visitor::VisitUnaryPrefixExpression(UnaryPrefixExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitDeleteExpression(DeleteExpression &node) {
+bool AST::CppPrettyPrinter::VisitDeleteExpression(AST::DeleteExpression &node) {
   if (node.is_global) {
     print("::");
   }
@@ -78,7 +179,7 @@ bool AST::Visitor::VisitDeleteExpression(DeleteExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitBreakStatement(BreakStatement &node) {
+bool AST::CppPrettyPrinter::VisitBreakStatement(AST::BreakStatement &node) {
   print("break");
   if (node.count) {
     print(" ");
@@ -87,7 +188,7 @@ bool AST::Visitor::VisitBreakStatement(BreakStatement &node) {
   return true;
 }
 
-bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
+bool AST::CppPrettyPrinter::VisitContinueStatement(AST::ContinueStatement &node) {
   print("continue");
   if (node.count) {
     print(" ");
@@ -96,35 +197,109 @@ bool AST::Visitor::VisitContinueStatement(ContinueStatement &node) {
   return true;
 }
 
-bool AST::Visitor::VisitBinaryExpression(BinaryExpression &node) {
+bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
+  print("with");
+  if (node.object->type != AST::NodeType::PARENTHETICAL) {
+    print("(");
+  }
+  VISIT_AND_CHECK(node.object);
+  if (node.object->type != AST::NodeType::PARENTHETICAL) {
+    print(")");
+  }
+
+  VISIT_AND_CHECK(node.body);
+  PrintSemiColon(node.body);
+
+  return true;
+}
+
+bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
+  std::string left = node.left->As<AST::IdentifierAccess>()->name.content;
+  std::string right = node.right->As<AST::IdentifierAccess>()->name.content;
+  if (left == "local") {
+    print(right);
+    return true;
+  }
+
+  print("enigma::varaccess_");
+  print(right);
+  print("(");
+
+  if (left == "global") {
+    print("int(global)");
+  } else {
+    print(left);
+  }
+  print(")");
+  return true;
+}
+
+bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
+  if (node.operation.type == TT_DOT && node.left->type == AST::NodeType::IDENTIFIER &&
+      node.right->type == AST::NodeType::IDENTIFIER) {
+    return VisitDot(node);
+  }
+
   VISIT_AND_CHECK(node.left);
 
-  print(" " + node.operation.token + " ");
+  std::string operation = node.operation.token;
+  bool is_multi_dim = false;
+  if (node.operation.type == TT_BEGINBRACKET) {
+    if (node.right->type == AST::NodeType::BINARY_EXPRESSION) {
+      auto bin = node.right->As<AST::BinaryExpression>();
+      if (bin->operation.type == TT_COMMA) {
+        is_multi_dim = true;
+        operation = "(";
+      }
+    }
+  }
+
+  if (operation == ":=") operation = "=";
+  print(" " + operation + " ");
 
   VISIT_AND_CHECK(node.right);
 
-  if (node.operation.type == TT_BEGINBRACKET) {
+  if (is_multi_dim) {
+    print(")");
+  } else if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
   return true;
 }
 
-bool AST::Visitor::VisitFunctionCallExpression(FunctionCallExpression &node) {
+bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
   VISIT_AND_CHECK(node.function);
   print("(");
 
-  for (auto &arg : node.arguments) {
-    VISIT_AND_CHECK(arg);
-    if (&arg != &node.arguments.back()) {
+  bool is_variadic = false;
+  int variadic_index = 0;
+  if (node.function->type == AST::NodeType::IDENTIFIER && language_fe) {
+    auto fn = node.function->As<AST::IdentifierAccess>();
+    jdi::definition *def = nullptr;
+    if (std::holds_alternative<jdi::definition *>(fn->type)) def = std::get<jdi::definition *>(fn->type);
+    if (def && language_fe->is_variadic_function(def)) {
+      is_variadic = true;
+      variadic_index = language_fe->function_variadic_after((jdi::definition_function *)def);
+    }
+  }
+
+  for (std::size_t i = 0; i < node.arguments.size(); i++) {
+    if (is_variadic && i == std::size_t(variadic_index)) {
+      print("(enigma::varargs(),");
+    }
+    VISIT_AND_CHECK(node.arguments[i]);
+    if (i < node.arguments.size() - 1) {
       print(", ");
     }
   }
+
+  if (is_variadic) print(")");
 
   print(")");
   return true;
 }
 
-bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
+bool AST::CppPrettyPrinter::VisitTernaryExpression(AST::TernaryExpression &node) {
   VISIT_AND_CHECK(node.condition);
   print(" ? ");
 
@@ -135,15 +310,43 @@ bool AST::Visitor::VisitTernaryExpression(TernaryExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitReturnStatement(ReturnStatement &node) {
+bool AST::CppPrettyPrinter::VisitLambdaExpression(AST::LambdaExpression &node) {
+  print("[&]");
+
+  if (node.parameters->type == AST::NodeType::IDENTIFIER) {
+    print("(");
+  }
+  print_type = true;
+  VISIT_AND_CHECK(node.parameters);
+  print_type = false;
+  if (node.parameters->type == AST::NodeType::IDENTIFIER) {
+    print(")");
+  }
+
+  if (node.body->type != AST::NodeType::BLOCK) {
+    print("{");
+  }
+  VISIT_AND_CHECK(node.body);
+  PrintSemiColon(node.body);
+  if (node.body->type != AST::NodeType::BLOCK) {
+    print("}");
+  }
+
+  return true;
+}
+
+bool AST::CppPrettyPrinter::VisitReturnStatement(AST::ReturnStatement &node) {
   print("return ");
   if (node.expression) {
     VISIT_AND_CHECK(node.expression);
   }
+  if (node.is_exit) {
+    print("0");
+  }
   return true;
 }
 
-bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
+bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
   if (print_type) {
     std::vector<std::size_t> flags_values = {jdi::builtin_flag__const->value,    jdi::builtin_flag__static->value,
                                              jdi::builtin_flag__volatile->value, jdi::builtin_flag__mutable->value,
@@ -167,7 +370,7 @@ bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
 
     for (std::size_t i = 0; i < flags_values.size(); i++) {
       if ((ft.flags & flags_masks[i]) == flags_values[i]) {
-        if (i != 8 || (i == 8 && ft.def->name == "char")) {
+        if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
           print(flags_names[i] + " ");
         }
       }
@@ -234,7 +437,7 @@ bool AST::Visitor::VisitFullType(FullType &ft, bool print_type) {
   return true;
 }
 
-bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
+bool AST::CppPrettyPrinter::VisitSizeofExpression(AST::SizeofExpression &node) {
   print("sizeof");
 
   if (node.kind == AST::SizeofExpression::Kind::EXPR) {
@@ -257,14 +460,14 @@ bool AST::Visitor::VisitSizeofExpression(SizeofExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitAlignofExpression(AlignofExpression &node) {
+bool AST::CppPrettyPrinter::VisitAlignofExpression(AST::AlignofExpression &node) {
   print("alignof(");
   if (!VisitFullType(node.ft)) return false;
   print(")");
   return true;
 }
 
-bool AST::Visitor::VisitCastExpression(CastExpression &node) {
+bool AST::CppPrettyPrinter::VisitCastExpression(AST::CastExpression &node) {
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
     if (!VisitFullType(node.ft)) return false;
     print("(");
@@ -286,7 +489,9 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
     print(">(");
   }
 
-  VISIT_AND_CHECK(node.expr);
+  if (node.expr) {
+    VISIT_AND_CHECK(node.expr);
+  }
 
   if (node.kind == AST::CastExpression::Kind::FUNCTIONAL) {
     print(")");
@@ -297,7 +502,7 @@ bool AST::Visitor::VisitCastExpression(CastExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitArray(Array &node) {
+bool AST::CppPrettyPrinter::VisitArray(AST::Array &node) {
   print("[");
   if (node.elements.size()) {
     VISIT_AND_CHECK(node.elements[0]);
@@ -306,15 +511,15 @@ bool AST::Visitor::VisitArray(Array &node) {
   return true;
 }
 
-bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
-  if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
+bool AST::CppPrettyPrinter::VisitBraceOrParenInitializer(AST::BraceOrParenInitializer &node) {
+  if (node.kind == AST::BraceOrParenInitializer::Kind::PAREN_INIT) {
     print("(");
   } else {
     print("{");
   }
 
   for (auto &val : node.values) {
-    if (node.kind == BraceOrParenInitializer::Kind::DESIGNATED_INIT) {
+    if (node.kind == AST::BraceOrParenInitializer::Kind::DESIGNATED_INIT) {
       print(".");
     }
 
@@ -329,7 +534,7 @@ bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
     }
   }
 
-  if (node.kind == BraceOrParenInitializer::Kind::PAREN_INIT) {
+  if (node.kind == AST::BraceOrParenInitializer::Kind::PAREN_INIT) {
     print(")");
   } else {
     print("}");
@@ -338,9 +543,9 @@ bool AST::Visitor::VisitBraceOrParenInitializer(BraceOrParenInitializer &node) {
   return true;
 }
 
-bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
-  if (node.kind == AssignmentInitializer::Kind::BRACE_INIT) {
-    if (!VisitBraceOrParenInitializer(*std::get<BraceOrParenInitNode>(node.initializer))) return false;
+bool AST::CppPrettyPrinter::VisitAssignmentInitializer(AST::AssignmentInitializer &node) {
+  if (node.kind == AST::AssignmentInitializer::Kind::BRACE_INIT) {
+    if (!VisitBraceOrParenInitializer(*std::get<AST::BraceOrParenInitNode>(node.initializer))) return false;
   } else {
     auto &expr = std::get<AST::PNode>(node.initializer);
     VISIT_AND_CHECK(expr);
@@ -348,12 +553,12 @@ bool AST::Visitor::VisitAssignmentInitializer(AssignmentInitializer &node) {
   return true;
 }
 
-bool AST::Visitor::VisitInitializer(Initializer &node) {
-  if (node.kind == Initializer::Kind::BRACE_INIT || node.kind == Initializer::Kind::PLACEMENT_NEW) {
-    auto &init = std::get<BraceOrParenInitNode>(node.initializer);
+bool AST::CppPrettyPrinter::VisitInitializer(AST::Initializer &node) {
+  if (node.kind == AST::Initializer::Kind::BRACE_INIT || node.kind == AST::Initializer::Kind::PLACEMENT_NEW) {
+    auto &init = std::get<AST::BraceOrParenInitNode>(node.initializer);
     if (!VisitBraceOrParenInitializer(*init)) return false;
-  } else if (node.kind == Initializer::Kind::ASSIGN_EXPR) {
-    auto &init = std::get<AssignmentInitNode>(node.initializer);
+  } else if (node.kind == AST::Initializer::Kind::ASSIGN_EXPR) {
+    auto &init = std::get<AST::AssignmentInitNode>(node.initializer);
     if (!VisitAssignmentInitializer(*init)) return false;
   }
 
@@ -364,7 +569,7 @@ bool AST::Visitor::VisitInitializer(Initializer &node) {
   return true;
 }
 
-bool AST::Visitor::VisitNewExpression(NewExpression &node) {
+bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
   if (node.is_global) {
     print("::");
   }
@@ -387,7 +592,26 @@ bool AST::Visitor::VisitNewExpression(NewExpression &node) {
   return true;
 }
 
-bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
+bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
+  bool is_global = node.storage_class == DeclarationStatement::StorageClass::GLOBAL;
+  bool is_local = node.storage_class == DeclarationStatement::StorageClass::LOCAL;
+  if (is_global || is_local) {
+    bool printed = false;
+    for (std::size_t i = 0; i < node.declarations.size(); i++) {
+      if (node.declarations[i].init) {
+        if (printed) print(", ");
+        std::string name = node.declarations[i].declarator->decl.name.content;
+        if (is_global)
+          print("enigma::varaccess_" + name + "(int(global)) =");
+        else
+          print(name + " = ");
+        if (!VisitInitializer(*node.declarations[i].init)) return false;
+        printed = true;
+      }
+    }
+    return true;
+  }
+
   for (std::size_t i = 0; i < node.declarations.size(); i++) {
     if (!VisitFullType(*node.declarations[i].declarator, !i)) return false;
     if (node.declarations[i].init) {
@@ -401,23 +625,26 @@ bool AST::Visitor::VisitDeclarationStatement(DeclarationStatement &node) {
   return true;
 }
 
-bool AST::Visitor::VisitCode(CodeBlock &node) {
+bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
   for (auto &stmt : node.statements) {
+    print("    ");
     VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);
+    print("\n");
   }
   return true;
 }
 
-bool AST::Visitor::VisitCodeBlock(CodeBlock &node) {
-  print("{");
+bool AST::CppPrettyPrinter::VisitCodeBlock(AST::CodeBlock &node) {
+  print("{\n");
   if (!VisitCode(node)) return false;
   print("}");
   return true;
 }
 
-bool AST::Visitor::VisitIfStatement(IfStatement &node) {
+bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
   print("if");
+  if (node.not_condition) print("(!");
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
@@ -427,10 +654,15 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+  if (node.not_condition) print(")");
 
   print(" ");
-  VISIT_AND_CHECK(node.true_branch);
-  PrintSemiColon(node.true_branch);
+  if (node.true_branch) {
+    VISIT_AND_CHECK(node.true_branch);
+    PrintSemiColon(node.true_branch);
+  } else {
+    print(";");
+  }
   print(" ");
 
   if (node.false_branch) {
@@ -443,7 +675,7 @@ bool AST::Visitor::VisitIfStatement(IfStatement &node) {
   return true;
 }
 
-bool AST::Visitor::VisitForLoop(ForLoop &node) {
+bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
   print("for(");
 
   VISIT_AND_CHECK(node.assignment);
@@ -455,14 +687,18 @@ bool AST::Visitor::VisitForLoop(ForLoop &node) {
   VISIT_AND_CHECK(node.increment);
   print(") ");
 
-  VISIT_AND_CHECK(node.body);
-  PrintSemiColon(node.body);
+  if (node.body) {
+    VISIT_AND_CHECK(node.body);
+    PrintSemiColon(node.body);
+  } else {
+    print(";");
+  }
   print(" ");
 
   return true;
 }
 
-bool AST::Visitor::VisitCaseStatement(CaseStatement &node) {
+bool AST::CppPrettyPrinter::VisitCaseStatement(AST::CaseStatement &node) {
   print("case ");
   VISIT_AND_CHECK(node.value);
 
@@ -473,34 +709,25 @@ bool AST::Visitor::VisitCaseStatement(CaseStatement &node) {
   return true;
 }
 
-bool AST::Visitor::VisitDefaultStatement(DefaultStatement &node) {
+bool AST::CppPrettyPrinter::VisitDefaultStatement(AST::DefaultStatement &node) {
   print("default: ");
-  if (!VisitCodeBlock(*node.statements->As<CodeBlock>())) return false;
+  if (!VisitCodeBlock(*node.statements->As<AST::CodeBlock>())) return false;
   print(" ");
   return true;
 }
 
-bool AST::Visitor::VisitSwitchStatement(SwitchStatement &node) {
-  print("switch");
-  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
-    print("(");
-  }
-
+bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
+  print("switch(int(");
   VISIT_AND_CHECK(node.expression);
+  print(")) ");
 
-  if (node.expression->type != AST::NodeType::PARENTHETICAL) {
-    print(")");
-  }
-  print(" ");
-
-  if (!VisitCodeBlock(*node.body->As<CodeBlock>())) return false;
+  if (!VisitCodeBlock(*node.body->As<AST::CodeBlock>())) return false;
   print(" ");
 
   return true;
 }
 
-bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
-  // temp sol
+bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
   if (node.kind == AST::WhileLoop::Kind::REPEAT) {
     print("int strange_name = ");
   } else {
@@ -539,7 +766,7 @@ bool AST::Visitor::VisitWhileLoop(WhileLoop &node) {
   return true;
 }
 
-bool AST::Visitor::VisitDoLoop(DoLoop &node) {
+bool AST::CppPrettyPrinter::VisitDoLoop(AST::DoLoop &node) {
   print("do");
 
   if (node.body->type != AST::NodeType::BLOCK) {

@@ -413,6 +413,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   // First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
+  namespace_enigma_user->use_namespace(&globals_scope);
 
   idpr("Copying resources",1);
 

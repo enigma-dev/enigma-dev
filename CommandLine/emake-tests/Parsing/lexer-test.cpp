@@ -180,3 +180,34 @@ TEST(LexerTest, VariadicMacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+TEST(LexerTest, LambdaExpressions) {
+  LexerTester lex("y = x => x+10;", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_EQUALS);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_JS_ARROW);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_PLUS);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+TEST(LexerTest, Literals_1) {
+  LexerTester lex("y = \" \\n \" ", true);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_EQUALS);
+  Token t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_STRINGLIT);
+  EXPECT_EQ(t.content, " \n ");
+}
+
+TEST(LexerTest, Literals_2) {
+  LexerTester lex("y = \"#\" ", false);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_EQUALS);
+  Token t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_STRINGLIT);
+  EXPECT_EQ(t.content, "\n");
+}

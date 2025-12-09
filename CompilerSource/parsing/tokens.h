@@ -68,6 +68,7 @@ enum TokenType {
   TT_LESSEQUAL,       // The <= operator.
   TT_GREATEREQUAL,    // The >= operator.
   TT_THREEWAY,        // The <=> operator.
+  TT_JS_ARROW,        // The => operator.  // may need better name
   TT_LSH,             // The << operator.
   TT_RSH,             // The >> operator (or double closing angle bracket).
   TT_QMARK,           // ?
