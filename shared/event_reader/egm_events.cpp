@@ -7,16 +7,59 @@ void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,
       std::cerr << "Error: Legacy event missing type!" << std::endl;
     }
     if (legacy_event.has_name()) {
-      auto evd = evdata->get_event(legacy_event.type(), 0);
-      if (evd.IsValid()) {
-        auto &egm_event = *obj->add_egm_events();
-        egm_event.set_id(evd.bare_id());
-        egm_event.add_arguments(legacy_event.name());
-        egm_event.set_code(legacy_event.code());
-      } else {
-        std::cerr << "Error: Event " << legacy_event.type()
-                  << " cannot accept a string parameter." << std::endl;
+      // Try to get the event as a parameterized event by trying to find it in the events list
+      // We need to find an event that has a mapping for this type and accepts string parameters
+      const EventDescriptor* found_event = nullptr;
+      for (const auto& ev_desc : evdata->events()) {
+        // Check if this event has a reverse mapping to our legacy type
+        auto legacy_pair = evdata->reverse_get_event(ev_desc);
+        if (legacy_pair.mid == legacy_event.type() && ev_desc.IsParameterized()) {
+          // Check if it accepts string parameters (not just integers)
+          if (ev_desc.ParameterCount() > 0) {
+            std::string_view param_kind = ev_desc.ParameterKind(0);
+            if (param_kind != "integer") {
+              found_event = &ev_desc;
+              break;
+            }
+          }
+        }
       }
+      
+      if (found_event) {
+        // Use the string-based get_event to create the event with the name as argument
+        std::vector<std::string> args = {std::string(legacy_event.name())};
+        auto evd = evdata->get_event(found_event->bare_id(), args);
+        if (evd.IsValid()) {
+          auto &egm_event = *obj->add_egm_events();
+          egm_event.set_id(evd.bare_id());
+          egm_event.set_code(legacy_event.code());
+          for (const auto& arg : evd.arguments) {
+            egm_event.add_arguments(arg.name);
+          }
+          continue;
+        }
+      }
+      
+      // Fallback: try the original approach
+      auto evd = evdata->get_event(legacy_event.type(), 0);
+      if (evd.IsValid() && evd.IsParameterized()) {
+        // Check if first parameter accepts strings
+        if (evd.ParameterCount() > 0) {
+          std::string_view param_kind = evd.ParameterKind(0);
+          // Accept string parameters for any parameter type that isn't "integer"
+          if (param_kind != "integer") {
+            auto &egm_event = *obj->add_egm_events();
+            egm_event.set_id(evd.bare_id());
+            egm_event.add_arguments(std::string(legacy_event.name()));
+            egm_event.set_code(legacy_event.code());
+            continue;
+          }
+        }
+      }
+      
+      // If we get here, the event cannot accept a string parameter
+      std::cerr << "Error: Event " << legacy_event.type()
+                << " cannot accept a string parameter." << std::endl;
     } else if (legacy_event.has_number()) {
       auto evd = evdata->get_event(legacy_event.type(), legacy_event.number());
       if (evd.IsValid()) {

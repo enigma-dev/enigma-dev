@@ -1,8 +1,10 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers;
 
 import "treenode.proto";
 
 message Game {
-  optional TreeNode root = 1;
+  TreeNode root = 1;
 }

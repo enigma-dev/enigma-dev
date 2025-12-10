@@ -81,7 +81,7 @@ include_directories(${CLI_TARGET} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 
 # Find yaml-cpp
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp)
+target_link_libraries(${CLI_TARGET} PRIVATE yaml-cpp::yaml-cpp)
 
 #Find gRPC
 find_package(gRPC CONFIG REQUIRED)
@@ -133,7 +133,7 @@ endif(WIN32)
 
 # Find Boost
 # https://cmake.org/cmake/help/latest/policy/CMP0167.html
-find_package(Boost CONFIG COMPONENTS system program_options filesystem REQUIRED)
+find_package(Boost CONFIG COMPONENTS program_options filesystem REQUIRED)
 target_link_libraries(${CLI_TARGET} PRIVATE Boost::program_options)
 
 install(TARGETS ${CLI_TARGET} RUNTIME DESTINATION .)

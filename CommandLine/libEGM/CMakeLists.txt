@@ -50,7 +50,7 @@ find_package(RapidJSON REQUIRED)
 include_directories(${LIB_EGM} PRIVATE ${RAPIDJSON_INCLUDE_DIRS})
 
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${LIB_EGM} PRIVATE yaml-cpp)
+target_link_libraries(${LIB_EGM} PRIVATE yaml-cpp::yaml-cpp)
 
 include_directories(. ../ "${CMAKE_BINARY_DIR}/Submodules/enigma-dev/shared/protos/")
 

@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <string_view>
 
 using namespace std;
 
@@ -51,8 +52,8 @@ inline std::string format_color(uint32_t color) {
   return ss.str();
 }
 
-inline string resname(string name) {
-  return name.empty() ? "-1" : name;
+inline string resname(std::string_view name) {
+  return name.empty() ? "-1" : std::string(name);
 }
 
 int lang_CPP::compile_writeRoomData(const GameData &game, const CompileState &state, int mode)

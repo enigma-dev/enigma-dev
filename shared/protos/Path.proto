@@ -1,24 +1,27 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers.resources;
 
 import "options.proto";
+import "google/protobuf/cpp_features.proto";
 
 message Path {
   message Point {
-    optional int32 x = 1 [(gmx) = "GMX_SPLIT/0"];
-    optional int32 y = 2 [(gmx) = "GMX_SPLIT/1"];
-    optional int32 speed = 3 [(gmx) = "GMX_SPLIT/2"];
+    int32 x = 1 [(gmx) = "GMX_SPLIT/0"];
+    int32 y = 2 [(gmx) = "GMX_SPLIT/1"];
+    int32 speed = 3 [(gmx) = "GMX_SPLIT/2"];
   }
 
-  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+  int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
-  optional string background_room_name = 3 [(resource_ref)="room", (gmx) = "backroom"];
-  optional int32 hsnap= 4;
-  optional int32 vsnap = 5;
+  string background_room_name = 3 [(resource_ref)="room", (gmx) = "backroom", features.(pb.cpp).string_type = STRING];
+  int32 hsnap= 4;
+  int32 vsnap = 5;
 
-  optional bool smooth = 6 [(gmx) = "kind"];
-  optional bool closed = 7;
-  optional int32 precision = 8;
+  bool smooth = 6 [(gmx) = "kind"];
+  bool closed = 7;
+  int32 precision = 8;
 
   repeated Point points = 9 [(gmx) = "points/point"];
 }

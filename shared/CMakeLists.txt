@@ -62,7 +62,7 @@ target_link_libraries(${SHARED_LIB} PRIVATE ${PNG_LIBRARY})
 add_dependencies(${SHARED_LIB} ${LIB_PROTO})
 
 find_package(yaml-cpp CONFIG REQUIRED)
-target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp)
+target_link_libraries(${SHARED_LIB} PRIVATE yaml-cpp::yaml-cpp)
 target_link_libraries(${SHARED_LIB} PRIVATE ${LIB_PROTO})
 
 # Find Protobuf

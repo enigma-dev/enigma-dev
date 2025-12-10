@@ -17,6 +17,7 @@
 
 #include "sog.h"
 #include "egm-events.h"
+#include "proto_util.h"
 
 namespace egm {
 
@@ -71,6 +72,9 @@ std::unique_ptr<Project> SOGFileFormat::LoadProject(const fs::path& fName) const
   inst->set_x(0);
   inst->set_y(0);
   inst->set_object_type("test_object");
+  
+  // Apply default values from proto attributes
+  ApplyProtoDefaults(rm);
 
   return proj;
 

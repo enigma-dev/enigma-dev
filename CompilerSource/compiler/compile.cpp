@@ -109,7 +109,7 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
-  const string &gloss_version = game.settings.info().version();
+  std::string_view gloss_version = game.settings.info().version();
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
