@@ -164,7 +164,6 @@ void CompileState::add_dot_accessed_local(string name) {
   user << insd.first->second.prefix << " " << insd.first->second.type << " " << insd.first->second.suffix << flushl;
 }
 
-// DELETEME
-SharedLocalSet shared_object_locals;
+// TODO: DELETEME
 vector<string> requested_extensions_last_parse;
 ParsedExtensionVec parsed_extensions;

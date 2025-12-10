@@ -52,6 +52,8 @@ using std::string;
 kvm_t *kd = nullptr;
 #endif
 
+typedef size_t pt;
+
 inline char* scopy(string& str)
 {
   char *np = (char*)malloc(str.length()+1);
@@ -539,4 +541,3 @@ int e_execsp(string cmd, string path)                                        { r
 int e_execsp(string cmd, string cat1, string path)                           { return e_execp((cmd + " " + cat1).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string path)              { return e_execp((cmd + " " + cat1 + " " + cat2).c_str(), path); }
 int e_execsp(string cmd, string cat1, string cat2, string cat3, string path) { return e_execp((cmd + " " + cat1 + " " + cat2 + " " + cat3).c_str(), path); }
-

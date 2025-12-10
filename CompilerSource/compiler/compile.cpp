@@ -53,8 +53,6 @@
 using namespace std;
 
 #include "backend/JavaCallbacks.h"
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
 #include "System/builtins.h"
@@ -330,6 +328,12 @@ std::set<EventGroupKey> ListUsedEvents(
   return used_events;
 }
 
+static NameSet ScriptNames(const GameData &game) {
+  NameSet names;
+  for (auto &script : game.scripts) names.insert(script.name);
+  return names;
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
@@ -348,7 +352,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_open();
   cout << "Initialized." << endl;
 
-  CompileState state;
+  CompileState state(current_language, ScriptNames(game));
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
@@ -506,7 +510,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << "#define PRIMDEPTH2 6\n";
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
-  wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
+  wto << "#define GM_COMPATIBILITY_VERSION " << compatibility_opts_.compliance_mode << "\n";
   wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
   wto << '\n';
   wto.close();
@@ -648,7 +652,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(game, state.parsed_rooms, &state.global_object, mode);
+  res = current_language->compile_writeRoomData(game, state, mode);
   irrr();
 
   edbg << "Writing shader data" << flushl;

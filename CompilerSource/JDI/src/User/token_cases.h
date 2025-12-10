@@ -15,25 +15,6 @@
 #endif
 
 // Place your tokens here:
-handle_user_token(TT_IF,        "`if' token")
-handle_user_token(TT_THEN,      "`then' token")
-handle_user_token(TT_ELSE,      "`else' token")
-handle_user_token(TT_REPEAT,    "`repeat' token")
-handle_user_token(TT_DO,        "`do' token")
-handle_user_token(TT_WHILE,     "`while' token")
-handle_user_token(TT_UNTIL,     "`until' token")
-handle_user_token(TT_FOR,       "`for' token")
-handle_user_token(TT_SWITCH,    "`switch' token")
-handle_user_token(TT_CASE,      "`case' token")
-handle_user_token(TT_DEFAULT,   "`default' token")
-handle_user_token(TT_BREAK,     "`break' token")
-handle_user_token(TT_CONTINUE,  "`continue' token")
-handle_user_token(TT_RETURN,    "`return' token")
-handle_user_token(TT_WITH,      "`with' token")
-handle_user_token(TT_TRY,       "`try' token")
-handle_user_token(TT_CATCH,     "`catch' token")
-handle_user_token(TT_LOCAL,     "`local' keyword")
-handle_user_token(TT_GLOBAL,    "`global' keyword")
 
 // Do not remove this line
 #undef handle_user_token
