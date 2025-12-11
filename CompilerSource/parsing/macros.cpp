@@ -117,7 +117,12 @@ vector<Macro::FuncComponent> Macro::Componentize(
           if (e != i) res.push_back(FuncComponent::TokenSpan{e, i});
           res.push_back(FuncComponent::VAOpt{});
           e = i + 1;
+          continue;  // Skip argument handling for VA_OPT
         } else if (tokens[i].content == "__VA_ARGS__") {
+          if (params.empty()) {
+            // Error: __VA_ARGS__ used in non-variadic macro
+            continue;  // Skip this token to avoid invalid index
+          }
           arg_num = params.size() - 1;
         } else {
           continue;
@@ -209,15 +214,25 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
   TokenVector res;
   bool paste_next = false;
   if (args.size() != parameters->size()) {
-    if (!is_variadic || args.size() + 1 < parameters->size()) {
+    if (!is_variadic) {
+      // Non-variadic macro: exact argument count required
       errc.Error()
           << (args.size() > parameters->size()
                   ? "Too many arguments to macro "
                   : "Too few arguments to macro ")
           << NameAndPrototype() << ": wanted " << parameters->size()
           << ", got " << args.size();
-    } else if (args.size() > parameters->size()) {
-      errc.Error() << "Internal error: variadic macro passed too many arguments";
+    } else {
+      // Variadic macro: need at least (parameters->size() - 1) arguments
+      // (all required params before the variadic one)
+      if (args.size() + 1 < parameters->size()) {
+        errc.Error()
+            << "Too few arguments to variadic macro "
+            << NameAndPrototype() << ": wanted at least " << (parameters->size() - 1)
+            << ", got " << args.size();
+      }
+      // For variadic macros, having more args than parameters is allowed
+      // (extra args go into the variadic parameter)
     }
   }
   // Errors from here on out will concern tokens.
@@ -238,7 +253,8 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
       case FuncComponent::EXPANDED_ARGUMENT:
       case FuncComponent::STRINGIFY: {
         size_t ind = part.raw_expanded_or_stringify_argument.index;
-        if (ind >= args.size()) {
+        // Check for invalid index (e.g., -1 wrapped as unsigned, or out of bounds)
+        if (ind >= parameters->size() || ind >= args.size()) {
           if (ind >= parameters->size()) {
             errc.Error() << "Internal error: "
                 << "Macro function built with bad argument references. Index "
@@ -247,6 +263,9 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
             paste_next = false;
             continue;
           } else {
+            // Index is valid for parameters but we don't have that many args
+            // This can happen for variadic macros when no variadic args are provided
+            // Just skip this argument substitution
             paste_next = false;
             continue;
           }

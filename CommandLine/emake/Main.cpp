@@ -18,6 +18,7 @@ namespace fs = std::filesystem;
 #include <iostream>
 #include <streambuf>
 #include <cstdlib>
+#include <cstring>
 
 std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
@@ -55,6 +56,11 @@ int main(int argc, char* argv[])
   plugin.Load();
   CallBack ecb;
   plugin.Init(&ecb, options.EnigmaRoot());
+  
+  // Set environment variable for allow-syntax-errors flag
+  if (options.GetOption("allow-syntax-errors").as<bool>()) {
+    setenv("ENIGMA_ALLOW_SYNTAX_ERRORS", "1", 1);
+  }
   
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {

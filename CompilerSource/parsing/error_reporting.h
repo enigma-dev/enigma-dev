@@ -32,14 +32,44 @@ struct CodeSnippet {
   std::string content;
   size_t line;  ///< Line number at which this token appears.
   size_t position;  ///< Position within that line.
+  
+  /// Replace escape sequences (\r, \n) with actual newlines for display
+  std::string FormatForDisplay() const {
+    std::string result = content;
+    // Replace \r\n or \n\r with single newline
+    size_t pos = 0;
+    while ((pos = result.find("\\r\\n", pos)) != std::string::npos) {
+      result.replace(pos, 4, "\n");
+      pos += 1;
+    }
+    pos = 0;
+    while ((pos = result.find("\\n\\r", pos)) != std::string::npos) {
+      result.replace(pos, 4, "\n");
+      pos += 1;
+    }
+    // Replace standalone \r with newline
+    pos = 0;
+    while ((pos = result.find("\\r", pos)) != std::string::npos) {
+      result.replace(pos, 2, "\n");
+      pos += 1;
+    }
+    // Replace standalone \n with newline
+    pos = 0;
+    while ((pos = result.find("\\n", pos)) != std::string::npos) {
+      result.replace(pos, 2, "\n");
+      pos += 1;
+    }
+    return result;
+  }
 };
 
 struct CodeError : CodeSnippet {
   std::string message;
 
   std::string ToString() {
+    std::string formatted_content = FormatForDisplay();
     return std::to_string(line) + ":" + std::to_string(position) + ": "
-         + message;
+         + message + (formatted_content != content ? "\nCode:\n" + formatted_content : "");
   }
 
   CodeError(CodeSnippet snippet, std::string message_text):
@@ -121,11 +151,25 @@ struct ErrorCollector : ErrorHandler {
 class StdErrorHandler : public ErrorHandler {
   void ReportError(CodeSnippet snippet, std::string_view error) override {
     std::cerr << "Error on line " << snippet.line << ", position "
-              << snippet.position << ": " << error << std::endl;
+              << snippet.position << ": " << error;
+    if (!snippet.content.empty()) {
+      std::string formatted = snippet.FormatForDisplay();
+      if (formatted != snippet.content) {
+        std::cerr << "\nCode:\n" << formatted;
+      }
+    }
+    std::cerr << std::endl;
   }
   void ReportWarning(CodeSnippet snippet, std::string_view warning) override {
     std::cerr << "Warning on line " << snippet.line << ", position "
-              << snippet.position << ": " << warning << std::endl;
+              << snippet.position << ": " << warning;
+    if (!snippet.content.empty()) {
+      std::string formatted = snippet.FormatForDisplay();
+      if (formatted != snippet.content) {
+        std::cerr << "\nCode:\n" << formatted;
+      }
+    }
+    std::cerr << std::endl;
   }
 };
 

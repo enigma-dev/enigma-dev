@@ -17,7 +17,8 @@
 #ifndef ENIGMA_COMPILER_PARSING_DECLARATOR_h
 #define ENIGMA_COMPILER_PARSING_DECLARATOR_h
 
-#include <JDI/src/Storage/references.h>
+// JDI removed - reference types need to be reimplemented
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 #include "tokens.h"
 
@@ -211,14 +212,7 @@ struct Declarator {
 
   void *to_expression();
 
-  /**
-   * @brief Convert a @c Declarator to a <tt> jdi::ref_stack </tt>.
-   *
-   * This method ignores @c const and @c volatile modifiers present on pointers.
-   *
-   * @param result The @c ref_stack created from the @c Declarator
-   */
-  void to_jdi_refstack(jdi::ref_stack &result);
+  // JDI removed - to_jdi_refstack() no longer needed, Declarator is used directly
 };
 
 }

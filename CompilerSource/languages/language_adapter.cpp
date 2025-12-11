@@ -21,10 +21,12 @@
 **/
 
 #include "language_adapter.h"
+#include "clang_adapter.h"
+
 language_adapter::~language_adapter() {}
 
 map<string,language_adapter*> languages;
 language_adapter *current_language;
 string current_language_name;
 
-jdi::Context *main_context = nullptr;
+clang_adapter::ClangContext *main_context = nullptr;

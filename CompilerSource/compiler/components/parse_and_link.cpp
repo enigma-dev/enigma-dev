@@ -61,12 +61,14 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
     std::string wrapped_code =
-        "with (self) {\n" + game.scripts[i]->code() + "\n/* */}";
+        std::string("with (self) {\n") + std::string(game.scripts[i]->code()) + std::string("\n/* */}");
     AST ast = AST::Parse(wrapped_code, &state.parse_context);
     if (ast.HasError()) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
            << ast.ErrorString() << flushl;
-      return E_ERROR_SYNTAX;
+      if (!state.allow_syntax_errors) {
+        return E_ERROR_SYNTAX;
+      }
     }
     // Keep a parsed record of this script
     scr_lookup[game.scripts[i].name] = scripts[i] =
@@ -98,7 +100,9 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         user << "Syntax error in timeline `" << timeline.name
              << ", moment: " << moment.step() << "'\n"
              << ast.ErrorString() << flushl;
-        return E_ERROR_SYNTAX;
+        if (!state.allow_syntax_errors) {
+          return E_ERROR_SYNTAX;
+        }
       }
 
       // Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
@@ -258,12 +262,35 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       const string fn = ev.TrueFunctionName();
       edbg << "Parse `" << object.name << "::" << fn << "..."<< flushl;
 
-      AST ast = AST::Parse(event.code(), &state.parse_context);
+      AST ast = AST::Parse(std::string(event.code()), &state.parse_context);
       if (ast.HasError()) {
+          // Format DebugString output to replace escape sequences with newlines
+          std::string debug_str = event.DebugString();
+          std::string formatted_debug;
+          for (size_t i = 0; i < debug_str.length(); ++i) {
+            if (debug_str[i] == '\\' && i + 1 < debug_str.length()) {
+              if (debug_str[i+1] == 'n') {
+                formatted_debug += '\n';
+                ++i;  // Skip the 'n'
+                continue;
+              } else if (debug_str[i+1] == 'r') {
+                formatted_debug += '\n';  // Treat \r as newline
+                ++i;  // Skip the 'r'
+                continue;
+              } else if (debug_str[i+1] == 't') {
+                formatted_debug += '\t';
+                ++i;  // Skip the 't'
+                continue;
+              }
+            }
+            formatted_debug += debug_str[i];
+          }
           user << "Syntax error in object `" << object.name << "', "
-               << ev.HumanName() << " (" << event.DebugString() << "):\n"
+               << ev.HumanName() << " (" << formatted_debug << "):\n"
                << ast.ErrorString() << flushl;
-        return E_ERROR_SYNTAX;
+        if (!state.allow_syntax_errors) {
+          return E_ERROR_SYNTAX;
+        }
       }
       pob->all_events.emplace_back(ParsedEvent(ev, pob, std::move(ast), &state));
       edbg << "Done parsing " << object.name << "::" << fn << flushl;
@@ -281,22 +308,26 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     parsed_room *pr;
     state.parsed_rooms.push_back(pr = new parsed_room);
 
-    AST create = AST::Parse(room->creation_code(), &state.parse_context);
+    AST create = AST::Parse(std::string(room->creation_code()), &state.parse_context);
     if (create.HasError()) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n" << create.ErrorString() << flushl;
-      return E_ERROR_SYNTAX;
+      if (!state.allow_syntax_errors) {
+        return E_ERROR_SYNTAX;
+      }
     }
     pr->creation_code = new ParsedCode(&pr->pseudo_scope, std::move(create), &state);
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
-        AST ast = AST::Parse(instance.creation_code(), &state.parse_context);
+        AST ast = AST::Parse(std::string(instance.creation_code()), &state.parse_context);
         if (ast.HasError()) {
           user << "Syntax error in instance creation code for instance "
                << instance.id() << " in room " << room.id() << " (`" << room.name << "'):\n"
                << ast.ErrorString() << flushl;
-          return E_ERROR_SYNTAX;
+          if (!state.allow_syntax_errors) {
+            return E_ERROR_SYNTAX;
+          }
         }
 
         ast.ApplyTo(instance.id());
@@ -309,12 +340,14 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     //PreCreate code
     for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
-        AST ast = AST::Parse(instance.initialization_code(), &state.parse_context);
+        AST ast = AST::Parse(std::string(instance.initialization_code()), &state.parse_context);
         if (ast.HasError()) {
           cout << "Syntax error in instance initialization code for instance "
                << instance.id() <<" in room " << room.id() << " (`" << room.name
                << "'):\n" << ast.ErrorString() << flushl;
-          return E_ERROR_SYNTAX;
+          if (!state.allow_syntax_errors) {
+            return E_ERROR_SYNTAX;
+          }
         }
 
         ast.ApplyTo(instance.id());

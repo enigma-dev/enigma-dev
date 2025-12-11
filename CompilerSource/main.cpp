@@ -68,8 +68,7 @@ extern const char* establish_bearings(const char *compiler);
 
 #include "general/bettersystem.h"
 #include "languages/lang_CPP.h"
-#include <System/builtins.h>
-#include <API/context.h>
+#include "languages/clang_adapter.h"
 
 #include <cstdlib>
 
@@ -96,11 +95,8 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
 
-  cout << "Implementing JDI basics" << endl;
-  auto &builtin = jdi::builtin_context();
-  builtin.output_types();
-  builtin.add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
-  builtin.add_macro("false","0"); // Added because polygone is a bitch
+  cout << "Initializing clang-based parser" << endl;
+  // Macros will be handled by clang preprocessor
   cout << endl << endl;
 
   cout << "Choosing language: C++" << endl;
@@ -108,7 +104,7 @@ DLLEXPORT const char* libInit_path(EnigmaCallbacks* ecs, const char* enigma_path
   current_language = languages[current_language_name] = new lang_CPP();
 
   cout << "Creating parse context" << endl;
-  main_context = new jdi::Context;
+  main_context = new clang_adapter::ClangContext;
 
   return 0;
 }
@@ -121,7 +117,6 @@ DLLEXPORT const char* libInit(EnigmaCallbacks* ecs)
 DLLEXPORT void libFree() {
   delete main_context;
   delete current_language;
-  jdi::clean_up();
 }
 
 
@@ -145,13 +140,14 @@ DLLEXPORT syntax_error *syntaxCheck(int script_count, const char* *script_names,
   cout << "******** Compiling Initialized ********" << endl;
 
   //First, we make a space to put our scripts.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
+  // Note: using_scope functionality not needed with clang - scopes are handled directly
 
   cout << "Checkpoint." << endl;
   NameSet script_name_set;
   for (int i = 0; i < script_count; i++) {
     std::string name = script_names[i];
-    current_language->quickmember_script(&globals_scope, name);
+    jdi::definition_scope* globals_scope = main_context->get_global();
+    current_language->quickmember_script(globals_scope, name);
     script_name_set.insert(std::move(name));
   }
 

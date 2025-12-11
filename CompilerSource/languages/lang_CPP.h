@@ -23,13 +23,16 @@
 #define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include "event_reader/event_parser.h"
-#include <Storage/definition.h>
-#include <System/builtins.h>
-#include <API/context.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+// #include <System/builtins.h>
+// #include <API/context.h>
+#include "clang_definitions.h"  // Provides jdi:: typedefs for compatibility
 
 struct lang_CPP: language_adapter {
   /// The context of all parsed definitions.
-  jdi::Context definitions;
+  // JDI removed - using main_context (clang_adapter::ClangContext) instead
+  // jdi::Context definitions;
 
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
@@ -95,7 +98,12 @@ struct lang_CPP: language_adapter {
   void quickmember_script(jdi::definition_scope* scope, string name) final;
   /// Create a standard integer variable member in the given scope.
   void quickmember_integer(jdi::definition_scope* scope, string name) final {
-    return quickmember_variable(scope, jdi::builtin_type__int, name);
+    // Use builtin_type__int if available, otherwise look it up
+    jdi::definition* int_type = jdi::builtin_type__int;
+    if (!int_type) {
+      int_type = look_up("int");
+    }
+    return quickmember_variable(scope, int_type, name);
   }
   /// Look up an enigma_user definition by its name.
   jdi::definition* look_up(std::string_view name) const final;

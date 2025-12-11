@@ -704,15 +704,48 @@ static enigma::parsing::TokenVector tokens_from_clang(CXTranslationUnit tu, CXSo
   for (unsigned i = 0; i < num_tokens; ++i) {
     CXString spelling = clang_getTokenSpelling(tu, tokens[i]);
     std::string token_str = clang_getCString(spelling);
+    CXTokenKind kind = clang_getTokenKind(tokens[i]);
     clang_disposeString(spelling);
     
-    // Create token - simplified for now
-    // TODO: Map clang token kinds to enigma token types properly
+    // Map clang token kinds to enigma token types
+    enigma::parsing::TokenType token_type = enigma::parsing::TT_IDENTIFIER;
+    switch (kind) {
+      case CXToken_Identifier:
+        token_type = enigma::parsing::TT_IDENTIFIER;
+        break;
+      case CXToken_Keyword:
+        // Keywords need to be mapped individually based on spelling
+        // For now, treat as identifier - full keyword mapping would require
+        // checking token_str against keyword list
+        token_type = enigma::parsing::TT_IDENTIFIER;
+        break;
+      case CXToken_Literal:
+        // Literals need to be classified further (numeric, string, char)
+        // For now, use a generic literal type
+        if (!token_str.empty() && (token_str.front() == '"' || token_str.front() == '\'')) {
+          token_type = (token_str.front() == '"') ? 
+              enigma::parsing::TT_STRINGLIT : enigma::parsing::TT_CHARLIT;
+        } else {
+          // Numeric literal - could be further classified
+          token_type = enigma::parsing::TT_DECLITERAL;
+        }
+        break;
+      case CXToken_Punctuation:
+        // Punctuation needs to be mapped based on spelling
+        // This is a simplified mapping - full implementation would check token_str
+        token_type = enigma::parsing::TT_IDENTIFIER;  // Placeholder
+        break;
+      case CXToken_Comment:
+        // Comments are typically filtered out, but if present, treat as whitespace
+        token_type = enigma::parsing::TT_IDENTIFIER;  // Placeholder
+        break;
+    }
+    
     enigma::parsing::CodeSnippet snippet;
     snippet.content = token_str;
     snippet.line = 0;
     snippet.position = 0;
-    enigma::parsing::Token token(enigma::parsing::TT_IDENTIFIER, snippet);
+    enigma::parsing::Token token(token_type, snippet);
     result.push_back(token);
   }
   
@@ -897,4 +930,55 @@ std::string ClangDefinition::qualified_id() const {
   return result;
 }
 
+std::string ClangDefinition::toString() const {
+  // For now, return qualified name
+  // Can be enhanced later for function signatures, type representations, etc.
+  return qualified_id();
+}
+
 } // namespace clang_adapter
+
+// Initialize builtin flag constants
+namespace jdi {
+  // Define static instances with bit positions for each modifier
+  // Using unique bit positions: 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, etc.
+  flag_placeholder flag_const(1, 1);
+  flag_placeholder flag_static(2, 2);
+  flag_placeholder flag_volatile(4, 4);
+  flag_placeholder flag_mutable(8, 8);
+  flag_placeholder flag_register(16, 16);
+  flag_placeholder flag_inline(32, 32);
+  flag_placeholder flag_Complex(64, 64);
+  flag_placeholder flag_unsigned(128, 128);
+  flag_placeholder flag_signed(256, 256);
+  flag_placeholder flag_short(512, 512);
+  flag_placeholder flag_long(1024, 1024);
+  flag_placeholder flag_long_long(2048, 2048);
+  flag_placeholder flag_restrict(4096, 4096);
+  flag_placeholder typeflag_override(8192, 8192);
+  flag_placeholder typeflag_final(16384, 16384);
+  flag_placeholder flag_virtual(32768, 32768);
+  flag_placeholder flag_explicit(65536, 65536);
+  
+  // Pointers to static instances for backward compatibility
+  flag_placeholder* builtin_flag__const = &flag_const;
+  flag_placeholder* builtin_flag__static = &flag_static;
+  flag_placeholder* builtin_flag__volatile = &flag_volatile;
+  flag_placeholder* builtin_flag__mutable = &flag_mutable;
+  flag_placeholder* builtin_flag__register = &flag_register;
+  flag_placeholder* builtin_flag__inline = &flag_inline;
+  flag_placeholder* builtin_flag__Complex = &flag_Complex;
+  flag_placeholder* builtin_flag__unsigned = &flag_unsigned;
+  flag_placeholder* builtin_flag__signed = &flag_signed;
+  flag_placeholder* builtin_flag__short = &flag_short;
+  flag_placeholder* builtin_flag__long = &flag_long;
+  flag_placeholder* builtin_flag__long_long = &flag_long_long;
+  flag_placeholder* builtin_flag__restrict = &flag_restrict;
+  flag_placeholder* builtin_typeflag__override = &typeflag_override;
+  flag_placeholder* builtin_typeflag__final = &typeflag_final;
+  flag_placeholder* builtin_flag__virtual = &flag_virtual;
+  flag_placeholder* builtin_flag__explicit = &flag_explicit;
+  
+  // Type definitions - initialized later in lang_CPP constructor
+  definition* builtin_type__int = nullptr;
+}

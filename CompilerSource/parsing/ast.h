@@ -558,6 +558,7 @@ class AST {
     virtual bool VisitDeleteExpression(DeleteExpression &node){ return DefaultVisit(node); }
     virtual bool VisitDeclarationStatement(DeclarationStatement &node){ return DefaultVisit(node); }
     virtual bool Visit(PNode &node) {
+      if (!node) return true;  // Skip null nodes
       return node->accept(*this);
     }
   };

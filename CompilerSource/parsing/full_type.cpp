@@ -22,9 +22,5 @@ FullType::FullType(jdi::definition *def, Declarator decl, std::size_t flags):
 
 FullType::FullType(jdi::definition *def): FullType(def, {}, 0) {}
 
-jdi::full_type FullType::to_jdi_fulltype() {
-  jdi::ref_stack rt;
-  decl.to_jdi_refstack(rt);
-  return {def, rt, static_cast<int>(flags)};
-}
+// JDI removed - to_jdi_fulltype() no longer needed, FullType is used directly
 }

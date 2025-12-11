@@ -25,7 +25,9 @@
 #include <string_view>
 
 // TODO: Delete. Replace with ENIGMA-specific wrapper class.
-namespace jdi { struct definition; }
+// JDI removed - using clang_adapter typedefs instead
+// namespace jdi { struct definition; }
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 namespace enigma {
 namespace parsing {

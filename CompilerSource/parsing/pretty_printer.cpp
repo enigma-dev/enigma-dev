@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <JDI/src/System/builtins.h>
+// JDI removed - builtin flags/types need to be reimplemented
 #include "ast.h"
 
 using namespace enigma::parsing;
@@ -379,57 +379,62 @@ bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
     print(ft.def->name + " ");
   }
 
-  std::string name = std::string(ft.decl.name.content);
-  if (name != "" && !ft.decl.components.size()) {
-    print(name + " ");
+  std::string decl_name_str = std::string(ft.decl.name.content);
+  if (decl_name_str != "" && !ft.decl.components.size()) {
+    print(decl_name_str + " ");
   }
 
-  jdi::ref_stack stack;
-  ft.decl.to_jdi_refstack(stack);
-  auto first = stack.begin();
-
+  // Build the declarator string with pointer/reference/array modifiers
   std::string ref;
-  bool flag = false;
-  bool print_name = true;
-
-  for (auto it = first; it != stack.end(); it++) {
-    if (it->type == jdi::ref_stack::RT_POINTERTO) {
-      flag = true;
-      ref = '*' + ref;
-    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
-      flag = true;
-      ref = '&' + ref;
-    } else {
-      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-        if (flag) {
-          ref = '(' + ref + ')';
-        }
-
-        std::size_t arr_size = it->arraysize();
-        if (arr_size != 0) {
-          ref += '[' + std::to_string(arr_size) + ']';
-        } else {
-          ref += "[]";
-        }
-      } else {
-        print("RT_MEMBER_POINTER");
+  if (!decl_name_str.empty()) {
+    ref = decl_name_str;
+  }
+  
+  // Add pointer/reference/array modifiers from Declarator structure
+  // Process components in reverse order (right-to-left associativity for C++ declarators)
+  for (auto it = ft.decl.components.rbegin(); it != ft.decl.components.rend(); ++it) {
+    const auto& node = *it;
+    switch (node.kind) {
+      case enigma::parsing::DeclaratorNode::Kind::POINTER_TO: {
+        const auto& ptr = std::get<enigma::parsing::PointerNode>(node.value);
+        std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                 (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+        ref = "*" + qualifiers + " " + ref;
+        break;
       }
-
-      // TODO: RT_MEMBER_POINTER
-
-      flag = false;
-    }
-
-    if (print_name) {
-      std::string name = std::string(ft.decl.name.content);
-      if (name != "") {
-        if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-          ref = name + ref;
-        } else {
-          ref += name;
-        }
+      case enigma::parsing::DeclaratorNode::Kind::MEMBER_POINTER: {
+        const auto& ptr = std::get<enigma::parsing::PointerNode>(node.value);
+        std::string class_name = ptr.class_def ? ptr.class_def->name : "";
+        std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                 (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+        ref = class_name + "::*" + qualifiers + " " + ref;
+        break;
       }
-      print_name = false;
+      case enigma::parsing::DeclaratorNode::Kind::REFERENCE:
+        ref = "&" + ref;
+        break;
+      case enigma::parsing::DeclaratorNode::Kind::RVAL_REFERENCE:
+        ref = "&&" + ref;
+        break;
+      case enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND: {
+        const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(node.value);
+        if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
+          ref = ref + "[]";
+        } else {
+          ref = ref + "[" + std::to_string(arr.size) + "]";
+        }
+        break;
+      }
+      case enigma::parsing::DeclaratorNode::Kind::FUNCTION: {
+        // Function parameters - format as (params)
+        ref = ref + "()";  // Simplified - full implementation would format parameters
+        break;
+      }
+      case enigma::parsing::DeclaratorNode::Kind::NESTED: {
+        // Nested declarator - would need recursive handling
+        ref = "(" + ref + ")";
+        break;
+      }
     }
   }
 
@@ -627,6 +632,7 @@ bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement 
 
 bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
   for (auto &stmt : node.statements) {
+    if (!stmt) continue;  // Skip null statements
     print("    ");
     VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);

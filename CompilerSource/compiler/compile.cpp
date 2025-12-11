@@ -55,7 +55,8 @@ using namespace std;
 #include "backend/JavaCallbacks.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-#include "System/builtins.h"
+// JDI removed - using clang_adapter instead
+// #include "System/builtins.h"
 
 #include "settings-parse/crawler.h"
 
@@ -65,6 +66,7 @@ using namespace std;
 #include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
+#include "languages/clang_definitions.h"  // For ClangDefinitionScope and ClangDefinitionFunction
 
 #ifdef WRITE_UNIMPLEMENTED_TXT
 std::map <string, char> unimplemented_function_list;
@@ -109,7 +111,7 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
-  const string &gloss_version = game.settings.info().version();
+  const string gloss_version = std::string(game.settings.info().version());
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
@@ -336,12 +338,14 @@ static NameSet ScriptNames(const GameData &game) {
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
+  std::string exe_filename_str;  // Store the modified filename to keep it alive
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
-      exe_filename = exename.u8string().c_str();
+      exe_filename_str = exename.u8string();
+      exe_filename = exe_filename_str.c_str();
     }
   }
 
@@ -352,7 +356,14 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_open();
   cout << "Initialized." << endl;
 
-  CompileState state(current_language, ScriptNames(game));
+  // Check for allow-syntax-errors flag (set via environment variable)
+  bool allow_syntax_errors = false;
+  const char* env_flag = std::getenv("ENIGMA_ALLOW_SYNTAX_ERRORS");
+  if (env_flag && (std::string(env_flag) == "1" || std::string(env_flag) == "true" || std::string(env_flag) == "TRUE")) {
+    allow_syntax_errors = true;
+  }
+  
+  CompileState state(current_language, ScriptNames(game), allow_syntax_errors);
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
@@ -412,8 +423,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
-  namespace_enigma_user->use_namespace(&globals_scope);
+  // Note: using_scope functionality not needed with clang - scopes are handled directly
+  jdi::definition_scope* globals_scope = namespace_enigma_user;
 
   idpr("Copying resources",1);
 
@@ -422,48 +433,94 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
   for (size_t i = 0; i < game.sprites.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
+    current_language->quickmember_integer(globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
+    current_language->quickmember_integer(globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(globals_scope,game.scripts[i].name);
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
+    current_language->quickmember_integer(globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
+    current_language->quickmember_integer(globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
+    current_language->quickmember_integer(globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
+    current_language->quickmember_integer(globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
+    current_language->quickmember_integer(globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
+    current_language->quickmember_integer(globals_scope, game.constants[i].name);
 
+  // Print all functions in enigma_user namespace after resources are added
+  cerr << "\n*** === Functions in enigma_user namespace (after resource copy) === ***" << endl;
+  if (namespace_enigma_user) {
+    clang_adapter::ClangDefinitionScope* cscope = 
+        dynamic_cast<clang_adapter::ClangDefinitionScope*>(namespace_enigma_user);
+    if (cscope) {
+      int function_count = 0;
+      int total_members = 0;
+      for (const auto& member_pair : cscope->members) {
+        total_members++;
+        const std::string& name = member_pair.first;
+        const auto& member = member_pair.second;
+        if (!member) continue;
+        
+        if (member->flags & jdi::DEF_FUNCTION) {
+          function_count++;
+          clang_adapter::ClangDefinitionFunction* func = 
+              dynamic_cast<clang_adapter::ClangDefinitionFunction*>(member.get());
+          if (func) {
+            cerr << "  Function: " << name 
+                 << " (overloads: " << func->overloads.size() 
+                 << ", template overloads: " << func->template_overloads.size() << ")";
+            for (const auto& overload_pair : func->overloads) {
+              const auto& overload = overload_pair.second;
+              if (overload) {
+                cerr << " [" << overload->params.size() << " params";
+                if (overload->is_variadic) cerr << ", variadic";
+                cerr << "]";
+              }
+            }
+            cerr << endl;
+          } else {
+            cerr << "  Function: " << name << " (NOT ClangDefinitionFunction - flags: 0x" 
+                 << std::hex << member->flags << std::dec << ")" << endl;
+          }
+        }
+      }
+      cerr << "Total members: " << total_members << ", Functions found: " << function_count << endl;
+    } else {
+      cerr << "*** WARNING: enigma_user is not a ClangDefinitionScope! ***" << endl;
+    }
+  } else {
+    cerr << "*** ERROR: enigma_user scope is null! ***" << endl;
+  }
+  cerr << "*** === End enigma_user functions === ***\n" << endl;
+  cerr.flush();
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
 

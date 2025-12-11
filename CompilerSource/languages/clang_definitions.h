@@ -60,6 +60,7 @@ struct ClangDefinition {
   bool has_all_flags(unsigned flgs) const { return (flags & flgs) == flgs; }
   
   std::string qualified_id() const;
+  std::string toString() const;
 };
 
 // Forward declaration
@@ -133,6 +134,55 @@ namespace jdi {
   typedef clang_adapter::ClangDefinitionFunction definition_function;
   typedef clang_adapter::ClangDefinitionOverload definition_overload;
   typedef clang_adapter::ClangDefinitionTyped definition_typed;
+  
+  // Flag constants for type modifiers (JDI removed - using static instances)
+  // These are used for type modifiers and flags
+  struct flag_placeholder {
+    unsigned int value;
+    unsigned int mask;
+    flag_placeholder(unsigned int v, unsigned int m) : value(v), mask(m) {}
+  };
+  
+  // Builtin flag constants - defined in clang_adapter.cpp
+  extern flag_placeholder flag_const;
+  extern flag_placeholder flag_static;
+  extern flag_placeholder flag_volatile;
+  extern flag_placeholder flag_mutable;
+  extern flag_placeholder flag_register;
+  extern flag_placeholder flag_inline;
+  extern flag_placeholder flag_Complex;
+  extern flag_placeholder flag_unsigned;
+  extern flag_placeholder flag_signed;
+  extern flag_placeholder flag_short;
+  extern flag_placeholder flag_long;
+  extern flag_placeholder flag_long_long;
+  extern flag_placeholder flag_restrict;
+  extern flag_placeholder typeflag_override;
+  extern flag_placeholder typeflag_final;
+  extern flag_placeholder flag_virtual;
+  extern flag_placeholder flag_explicit;
+  
+  // Pointers to the static instances for backward compatibility
+  extern flag_placeholder* builtin_flag__const;
+  extern flag_placeholder* builtin_flag__static;
+  extern flag_placeholder* builtin_flag__volatile;
+  extern flag_placeholder* builtin_flag__mutable;
+  extern flag_placeholder* builtin_flag__register;
+  extern flag_placeholder* builtin_flag__inline;
+  extern flag_placeholder* builtin_flag__Complex;
+  extern flag_placeholder* builtin_flag__unsigned;
+  extern flag_placeholder* builtin_flag__signed;
+  extern flag_placeholder* builtin_flag__short;
+  extern flag_placeholder* builtin_flag__long;
+  extern flag_placeholder* builtin_flag__long_long;
+  extern flag_placeholder* builtin_flag__restrict;
+  extern flag_placeholder* builtin_typeflag__override;
+  extern flag_placeholder* builtin_typeflag__final;
+  extern flag_placeholder* builtin_flag__virtual;
+  extern flag_placeholder* builtin_flag__explicit;
+  
+  // Type definitions - will be initialized from clang context
+  extern definition* builtin_type__int;
 }
 
 #endif // ENIGMA_CLANG_DEFINITIONS_H

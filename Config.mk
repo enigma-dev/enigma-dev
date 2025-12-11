@@ -100,7 +100,7 @@ ifeq ($(OS),Linux)
 
 else ifeq ($(OS),Darwin)
   BREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo /usr/local)
-  FALLBACK_INC := -I$(BREW_PREFIX)/include
+  FALLBACK_INC := -I$(BREW_PREFIX)/opt/llvm/include -I$(BREW_PREFIX)/include
   FALLBACK_LIB_PATH := -L$(BREW_PREFIX)/lib
   FALLBACK_LIBS_GRPC := -lgrpc++ -lgrpc -lssl -lcrypto -lcares -lpthread
   FALLBACK_LIBS_PROTOBUF := -lprotobuf

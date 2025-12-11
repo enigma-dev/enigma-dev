@@ -133,6 +133,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("codegen-only", opt::bool_switch()->default_value(false), "Only generate code and exit")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
     ("jobs,j", opt::value<int>()->default_value(1), "The number of compile jobs to run simultaneously")
+    ("allow-syntax-errors", opt::bool_switch()->default_value(false), "Continue compilation even if syntax errors are found")
   ;
 
   _positional.add("input", 1);

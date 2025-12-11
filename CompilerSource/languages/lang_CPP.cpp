@@ -22,6 +22,7 @@
 #include <ctime>
 #include <cstdio>
 #include "languages/lang_CPP.h"
+#include "languages/clang_adapter.h"  // For ClangContext full definition
 
 string lang_CPP::get_name() { return "C++"; }
 
@@ -44,7 +45,8 @@ void lang_CPP::load_extension_locals() {
       cout << "WARNING! Extension implements non-class " << parsed_extensions[i].implements << "!" << endl;
     }
     jdi::definition_scope *const iscope = (jdi::definition_scope*) implements;
-    for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it) {
+    // JDI removed - defiter is now std::map iterator
+    for (auto it = iscope->members.begin(); it != iscope->members.end(); ++it) {
       if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
         shared_object_locals_.insert(it->second->name);
     }
@@ -72,30 +74,18 @@ void lang_CPP::load_extension_locals() {
 #include "settings-parse/parse_ide_settings.h"
 #include "settings-parse/crawler.h"
 
-#include <System/builtins.h>
+// JDI removed - using clang_adapter instead
+// #include <System/builtins.h>
 
 namespace {
 
-std::string TranscribeTokens(const jdi::token_vector &tokens) {
-  std::string result;
-  for (const jdi::token_t &token : tokens) {
-    if (result.length()) result.push_back(' ');
-    result += token.content.toString();
-  }
-  return result;
-}
-
-enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
+// JDI removed - macro_type doesn't exist
+// clang_adapter already returns enigma::parsing::Macro, so just return it as-is
+// This function may no longer be needed, but keeping for compatibility
+enigma::parsing::Macro TranslateMacro(const enigma::parsing::Macro &macro,
                                       enigma::parsing::ErrorHandler *herr) {
-  using namespace enigma::parsing;
-  if (macro.is_function) {
-    auto copy = macro.params;
-    return enigma::parsing::Macro(
-        macro.name, std::move(copy), macro.is_variadic,
-        TranscribeTokens(macro.raw_value), herr);
-  }
-  return enigma::parsing::Macro(
-      macro.name, TranscribeTokens(macro.raw_value), herr);
+  // Macros from clang_adapter are already in the correct format
+  return macro;
 }
 
 }  // namespace
@@ -109,22 +99,22 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
 
   cout << "Creating swap." << endl;
   delete main_context;
-  main_context = new jdi::Context();
+  main_context = new clang_adapter::ClangContext();
 
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
 
   cout << "Opening ENIGMA for parse..." << endl;
+  cout.flush();
 
-  llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
+  // JDI removed - llreader and parse_stream don't exist in clang_adapter
+  // Use parse_file instead
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
-  if (f.is_open()) {
-    CURRENT_TIME(ts);
-    res = main_context->parse_stream(f);
-    CURRENT_TIME(te);
-  }
+  CURRENT_TIME(ts);
+  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string());
+  CURRENT_TIME(te);
 
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
@@ -154,11 +144,75 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
   namespace_enigma_user = main_context->get_global();
+  cerr << "\n*** DEBUG: Looking up enigma_user namespace... ***" << endl;
+  cerr.flush();  // Use cerr and flush to ensure it appears
   if ((d = main_context->get_global()->look_up("enigma_user"))) {
+    cerr << "*** DEBUG: Found enigma_user definition, flags: 0x" << std::hex << d->flags << std::dec << " ***" << endl;
     if (d->flags & jdi::DEF_NAMESPACE) {
       namespace_enigma_user = (jdi::definition_scope*) d;
-    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
-  } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
+      
+      // Print all functions in enigma_user namespace
+      cerr << "\n*** === Functions in enigma_user namespace === ***" << endl;
+      clang_adapter::ClangDefinitionScope* enigma_user_scope = 
+          dynamic_cast<clang_adapter::ClangDefinitionScope*>(namespace_enigma_user);
+      if (enigma_user_scope) {
+        cerr << "*** DEBUG: Successfully cast to ClangDefinitionScope, members count: " 
+             << enigma_user_scope->members.size() << " ***" << endl;
+        int function_count = 0;
+        int total_members = 0;
+        for (const auto& member_pair : enigma_user_scope->members) {
+          total_members++;
+          const std::string& name = member_pair.first;
+          const auto& member = member_pair.second;
+          if (!member) continue;
+          
+          if (member->flags & jdi::DEF_FUNCTION) {
+            function_count++;
+            clang_adapter::ClangDefinitionFunction* func = 
+                dynamic_cast<clang_adapter::ClangDefinitionFunction*>(member.get());
+            if (func) {
+              cerr << "  Function: " << name 
+                   << " (overloads: " << func->overloads.size() 
+                   << ", template overloads: " << func->template_overloads.size() << ")";
+              for (const auto& overload_pair : func->overloads) {
+                const auto& overload = overload_pair.second;
+                if (overload) {
+                  cerr << " [" << overload->params.size() << " params";
+                  if (overload->is_variadic) cerr << ", variadic";
+                  cerr << "]";
+                }
+              }
+              cerr << endl;
+              cerr.flush();
+            } else {
+              cerr << "  Function: " << name << " (NOT ClangDefinitionFunction - flags: 0x" 
+                   << std::hex << member->flags << std::dec << ")" << endl;
+            }
+          }
+        }
+        cerr << "Total members: " << total_members << ", Functions found: " << function_count << endl;
+        cerr << "*** === End enigma_user functions === ***\n" << endl;
+        cerr.flush();  // Use cerr and flush to ensure it appears
+      } else {
+        cerr << "*** WARNING: enigma_user is not a ClangDefinitionScope! Type: " 
+             << typeid(*namespace_enigma_user).name() << endl;
+      }
+    } else {
+      cerr << "ERROR! Namespace enigma_user is... not a namespace! Flags: 0x" 
+           << std::hex << d->flags << std::dec << endl;
+    }
+  } else {
+    cerr << "ERROR! Namespace enigma_user not found!" << endl;
+    cerr << "*** DEBUG: Available top-level definitions: ***" << endl;
+    clang_adapter::ClangDefinitionScope* global_scope = 
+        dynamic_cast<clang_adapter::ClangDefinitionScope*>(main_context->get_global());
+    if (global_scope) {
+      for (const auto& member_pair : global_scope->members) {
+        cerr << "  " << member_pair.first << " (flags: 0x" << std::hex 
+             << (member_pair.second ? member_pair.second->flags : 0) << std::dec << ")" << endl;
+      }
+    }
+  }
   if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
     if (dstd->flags & jdi::DEF_NAMESPACE) {
       jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
@@ -184,8 +238,13 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   }
 
   cout << "Creating dummy primitives for old ENIGMA" << endl;
-  for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
-    main_context->get_global()->members[it->first] = std::make_unique<jdi::definition>(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+  // Initialize builtin type constants from clang context
+  if (main_context) {
+    jdi::definition* d;
+    if ((d = main_context->get_global()->look_up("int"))) {
+      jdi::builtin_type__int = d;
+    }
+    // Can add more builtin types here as needed: char, void, float, double, bool, etc.
   }
 
   enigma::parsing::StdErrorHandler hack;  // TODO: FIXME: This should be using a central error handler...
@@ -237,10 +296,13 @@ int lang_CPP::load_shared_locals() {
   shared_object_locals_.clear();
 
   //Iterate the tiers of the parent object
-  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
+  // JDI removed - ancestors structure changed in clang_adapter
+  // ancestors is now vector<pair<ClangDefinitionClass*, int>>, not with .def
+  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].first : NULL) )
   {
     cout << " >> Checking ancestor " << cs->name << endl;
-    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
+    // JDI removed - defiter is now std::map iterator
+    for (auto mem = cs->members.begin(); mem != cs->members.end(); ++mem)
       shared_object_locals_.insert(mem->first);
   }
 
@@ -251,9 +313,14 @@ int lang_CPP::load_shared_locals() {
 jdi::definition* lang_CPP::look_up(std::string_view n) const {
   // TODO: FIXME: slow-ass conversion still exists...
   std::string name(n);
-  auto builtin = jdi::builtin_declarators.find(name);
-  if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
-  return namespace_enigma_user->find_local(name);
+  // JDI removed - builtin_declarators no longer exists, use main_context lookup instead
+  // auto builtin = jdi::builtin_declarators.find(name);
+  // if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
+  if (main_context) {
+    jdi::definition* found = main_context->look_up(name);
+    if (found) return found;
+  }
+  return namespace_enigma_user ? namespace_enigma_user->find_local(name) : nullptr;
 }
 
 // TODO: This could use better plumbing.

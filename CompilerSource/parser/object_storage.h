@@ -407,10 +407,13 @@ struct CompileState {
   // Set of all events used in the game.
   std::set<EventGroupKey> used_events;
 
+  // Flag to allow syntax errors to be non-fatal
+  bool allow_syntax_errors;
+
   void add_dot_accessed_local(string name);
 
-  CompileState(LanguageFrontend *lang, const NameSet &script_names):
-      parse_context(lang, script_names) {}
+  CompileState(LanguageFrontend *lang, const NameSet &script_names, bool allow_syntax_errors = false):
+      parse_context(lang, script_names), allow_syntax_errors(allow_syntax_errors) {}
 };
 
 #endif

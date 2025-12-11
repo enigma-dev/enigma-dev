@@ -70,7 +70,10 @@ void AST::Node::RVF(AST::Visitor &visitor, const PNode &single_node) {
 }
 void AST::Node::RVF(AST::Visitor &visitor,
                     const std::vector<PNode> &node_list) {
-  for (const PNode &node : node_list) node->RecurusiveVisit(visitor);
+  for (const PNode &node : node_list) {
+    if (!node) continue;  // Skip null nodes
+    node->RecurusiveVisit(visitor);
+  }
 }
 
 void AST::CodeBlock::RecursiveSubVisit(AST::Visitor &visitor) {
