@@ -808,14 +808,14 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
   edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
 
+  // Create required directories directly instead of relying on make
+  // This must be done before the make command runs
+  std::filesystem::create_directories(eobjs_directory);
+  std::filesystem::create_directories(codegen_directory / "Preprocessor_Environment_Editable");
+
   string flags = "";
 
   if (redirect_make) {
-
-    std::string dirs = "CODEGEN=" + codegen_directory.u8string() + " ";
-    dirs += "WORKDIR=" + eobjs_directory.u8string() + " ";
-    e_execs("make", dirs, "required-directories");
-
     // Pick a file and flush it
     const std::filesystem::path redirfile = (eobjs_directory/"enigma_compile.log");
     fclose(fopen(redirfile.u8string().c_str(),"wb"));

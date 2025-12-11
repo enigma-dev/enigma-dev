@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <filesystem>
 
 #ifdef _WIN32
   #define byte __windows_byte_workaround
@@ -134,9 +135,9 @@ const char* establish_bearings(const char *compiler)
 
   std::string MAKE_paths = compilerInfo.make_vars["PATH"];
   
-  std::string dirs = "CODEGEN=" + unixfy_path(codegen_directory) + " ";
-  dirs += "WORKDIR=" + unixfy_path(eobjs_directory) + " ";
-  e_execs("make", dirs, "required-directories");
+  // Create required directories directly instead of relying on make
+  std::filesystem::create_directories(eobjs_directory);
+  std::filesystem::create_directories(codegen_directory / "Preprocessor_Environment_Editable");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

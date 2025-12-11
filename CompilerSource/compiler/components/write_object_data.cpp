@@ -647,8 +647,8 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
   wto << "      if (!handle) return;\n";
   // Sprite index
   if (used_funcs::object_set_sprite) //We want to initialize
-    wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
-        << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
+    wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
+        << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
   else
     wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
         << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";

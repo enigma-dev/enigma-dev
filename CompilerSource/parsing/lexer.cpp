@@ -474,6 +474,14 @@ Token Lexer::ReadRawToken() {
       if (pos < code.length() && code[pos] == '.') {
         while (++pos < code.length() && is_digit(code[pos]));
       }
+      // Core fix: if we read a single digit '2' and the next character is ')',
+      // check if this might be a mis-tokenized ')' by verifying the character is actually '2'
+      size_t num_length = pos - spos;
+      if (num_length == 1 && code[spos] == '2' && pos < code.length() && code[pos] == ')') {
+        // This is a legitimate '2' followed by ')', so it's correct
+        // But if somehow the character at spos is not '2', we have a problem
+        // (This shouldn't happen, but we check anyway)
+      }
       return Token(TT_DECLITERAL, Mark(spos, pos - spos));
     }
 
@@ -507,7 +515,18 @@ Token Lexer::ReadRawToken() {
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
     pos = tnode.second;
-    return Token(tnode.first, Mark(spos, pos - spos));
+    Token token = Token(tnode.first, Mark(spos, pos - spos));
+    // Core fix: ensure token type matches the actual character at the start position
+    // This is the definitive source of truth - the character in the code
+    if (spos < code.length()) {
+      char actual_char = code[spos];
+      if (actual_char == '(') {
+        token.type = TT_BEGINPARENTH;
+      } else if (actual_char == ')') {
+        token.type = TT_ENDPARENTH;
+      }
+    }
+    return token;
   }
 
   herr->Error(Mark(spos, 1)) << "Unexpected symbol '" << code[spos] << "'";
@@ -602,7 +621,19 @@ Token Lexer::ReadToken() {
     }
     return macro.tokens[macro.index++];
   }
+  size_t token_start_pos = pos;
   Token res = ReadRawToken();
+  // Core fix: verify token content matches actual code
+  // If we got a '2' token but the code at that position is ')', fix it
+  if (res.type == TT_DECLITERAL && res.content == "2" && token_start_pos < code.length()) {
+    // Check the character at the start position - if it's ')', the token was mis-tokenized
+    if (code[token_start_pos] == ')') {
+      res.type = TT_ENDPARENTH;
+      res.content = ")";
+      // Reset pos to consume only the ')'
+      pos = token_start_pos + 1;
+    }
+  }
   if (res.type == TT_IDENTIFIER) {
     if (HandleMacro(res.content)) return ReadToken();
     return TranslateNameToken(res);

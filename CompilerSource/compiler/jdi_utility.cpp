@@ -25,6 +25,7 @@
 // #include <Storage/definition.h>
 #include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 #include <languages/lang_CPP.h>
+#include <clang-c/Index.h>
 
 using namespace jdi;
 
@@ -49,9 +50,39 @@ int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
   for (const auto& overload_pair : cfunc->overloads) {
     const auto& overload = overload_pair.second;
     if (!overload) continue;  // Skip null overloads
+    
+    // Check for C-style variadic (e.g., printf)
     if (overload->is_variadic) {
       // Return the index of the variadic parameter (last parameter index)
       return overload->params.size() - 1;
+    }
+    
+    // Check for varargs parameter (e.g., choose(const enigma::varargs& args))
+    for (size_t i = 0; i < overload->params.size(); ++i) {
+      const auto& param = overload->params[i];
+      if (!param) continue;
+      
+      // Check parameter name
+      if (param->name.find("varargs") != std::string::npos) {
+        return i;  // Return the index of the varargs parameter
+      }
+      
+      // Check parameter type
+      if (auto typed_param = dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param)) {
+        if (typed_param->type && typed_param->type->name.find("varargs") != std::string::npos) {
+          return i;
+        }
+        // If type pointer is null, try to get type from cursor
+        if (!typed_param->type && !clang_Cursor_isNull(param->cursor)) {
+          CXType type = clang_getCursorType(param->cursor);
+          CXString type_spelling = clang_getTypeSpelling(type);
+          std::string type_name = clang_getCString(type_spelling);
+          clang_disposeString(type_spelling);
+          if (type_name.find("varargs") != std::string::npos) {
+            return i;
+          }
+        }
+      }
     }
   }
   
@@ -60,6 +91,22 @@ int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
     if (!overload) continue;  // Skip null overloads
     if (overload->is_variadic) {
       return overload->params.size() - 1;
+    }
+    
+    // Check for varargs parameter in template overloads
+    for (size_t i = 0; i < overload->params.size(); ++i) {
+      const auto& param = overload->params[i];
+      if (!param) continue;
+      
+      if (param->name.find("varargs") != std::string::npos) {
+        return i;
+      }
+      
+      if (auto typed_param = dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param)) {
+        if (typed_param->type && typed_param->type->name.find("varargs") != std::string::npos) {
+          return i;
+        }
+      }
     }
   }
   
@@ -75,8 +122,10 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
     return;
   }
   
+  std::string func_name = d->name;
+  
   if (!(d->flags & DEF_FUNCTION)) {
-    cout << "Attempt to use " << d->name << " as function" << endl;
+    cout << "Attempt to use " << func_name << " as function" << endl;
     // Keep max as SIZE_MAX to allow any arguments
     return;
   }
@@ -104,6 +153,8 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
       // For now, allow any number of arguments to avoid false errors
       // TODO: Ensure all functions are registered as ClangDefinitionFunction instances
       // TODO: Consider adding parameter info to base ClangDefinition for functions
+      std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
+                << "' not found as ClangDefinitionFunction, allowing unlimited args" << std::endl;
       return;
     }
   }
@@ -111,14 +162,83 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
   bool found_any_overload = false;
   max = 0;  // Reset max - we'll calculate it from overloads
   
+  std::cerr << "[DEBUG] definition_parameter_bounds: Checking function '" << func_name 
+            << "', overloads.size()=" << cfunc->overloads.size() 
+            << ", template_overloads.size()=" << cfunc->template_overloads.size() << std::endl;
+  
   // Iterate all overloads to find min/max parameter counts
   for (const auto& overload_pair : cfunc->overloads) {
     const auto& overload = overload_pair.second;
     if (!overload) continue;  // Skip null overloads
     found_any_overload = true;
     unsigned param_count = overload->params.size();
-    if (overload->is_variadic) {
+    
+    // Check if any parameter type contains "varargs" (functions taking enigma::varargs& should be treated as variadic)
+    bool has_varargs_param = false;
+    for (size_t i = 0; i < overload->params.size(); ++i) {
+      const auto& param = overload->params[i];
+      if (!param) {
+        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is null" << std::endl;
+        continue;
+      }
+      
+      std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " name: '" << param->name 
+                << "', flags: 0x" << std::hex << param->flags << std::dec << std::endl;
+      
+      // Check parameter name first
+      if (param->name.find("varargs") != std::string::npos) {
+        has_varargs_param = true;
+        std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter name: '" << param->name << "'" << std::endl;
+        break;
+      }
+      
+      // Check if parameter is typed and check its type name
+      clang_adapter::ClangDefinitionTyped* typed_param = 
+          dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param);
+      if (typed_param) {
+        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is ClangDefinitionTyped" << std::endl;
+        
+        // Try to get type from the stored type pointer first
+        if (typed_param->type) {
+          std::string type_name = typed_param->type->name;
+          std::cerr << "[DEBUG] definition_parameter_bounds: Parameter '" << param->name 
+                    << "' has type (from type ptr): '" << type_name << "'" << std::endl;
+          if (type_name.find("varargs") != std::string::npos) {
+            has_varargs_param = true;
+            std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter type: '" << type_name << "'" << std::endl;
+            break;
+          }
+        } else {
+          // Type pointer is null, try to get type from cursor
+          CXCursor param_cursor = param->cursor;
+          if (!clang_Cursor_isNull(param_cursor)) {
+            CXType param_type = clang_getCursorType(param_cursor);
+            CXString type_str = clang_getTypeSpelling(param_type);
+            std::string type_name = clang_getCString(type_str);
+            clang_disposeString(type_str);
+            std::cerr << "[DEBUG] definition_parameter_bounds: Parameter '" << param->name 
+                      << "' has type (from cursor): '" << type_name << "'" << std::endl;
+            if (type_name.find("varargs") != std::string::npos) {
+              has_varargs_param = true;
+              std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter type from cursor: '" << type_name << "'" << std::endl;
+              break;
+            }
+          } else {
+            std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " cursor is null" << std::endl;
+          }
+        }
+      } else {
+        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is NOT ClangDefinitionTyped" << std::endl;
+      }
+    }
+    
+    std::cerr << "[DEBUG] definition_parameter_bounds: Overload for '" << func_name 
+              << "' has " << param_count << " params, is_variadic=" << overload->is_variadic 
+              << ", has_varargs_param=" << has_varargs_param << std::endl;
+    if (overload->is_variadic || has_varargs_param) {
       max = (unsigned) SIZE_MAX;  // Variadic means unlimited
+      std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
+                << "' is variadic, setting max=unlimited" << std::endl;
       break;  // Once we find variadic, we're done
     } else {
       if (param_count > max) max = param_count;
@@ -134,8 +254,39 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
       if (!overload) continue;  // Skip null overloads
       found_any_overload = true;
       unsigned param_count = overload->params.size();
-      if (overload->is_variadic) {
+      
+      // Check if any parameter type contains "varargs"
+      bool has_varargs_param = false;
+      for (const auto& param : overload->params) {
+        if (!param) continue;
+        
+        // Check parameter name first
+        if (param->name.find("varargs") != std::string::npos) {
+          has_varargs_param = true;
+          std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter name: '" << param->name << "'" << std::endl;
+          break;
+        }
+        
+        // Check if parameter is typed and check its type name
+        clang_adapter::ClangDefinitionTyped* typed_param = 
+            dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param);
+        if (typed_param && typed_param->type) {
+          std::string type_name = typed_param->type->name;
+          if (type_name.find("varargs") != std::string::npos) {
+            has_varargs_param = true;
+            std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter type: '" << type_name << "'" << std::endl;
+            break;
+          }
+        }
+      }
+      
+      std::cerr << "[DEBUG] definition_parameter_bounds: Template overload for '" << func_name 
+                << "' has " << param_count << " params, is_variadic=" << overload->is_variadic 
+                << ", has_varargs_param=" << has_varargs_param << std::endl;
+      if (overload->is_variadic || has_varargs_param) {
         max = (unsigned) SIZE_MAX;
+        std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
+                  << "' is variadic (template), setting max=unlimited" << std::endl;
         break;  // Once we find variadic, we're done
       } else {
         if (param_count > max) max = param_count;
@@ -146,6 +297,8 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
   // If no overloads found, set max back to unlimited to be safe
   if (!found_any_overload) {
     max = (unsigned) SIZE_MAX;
+    std::cerr << "[DEBUG] definition_parameter_bounds: No overloads found for '" << func_name 
+              << "', setting max=unlimited" << std::endl;
   }
 }
 

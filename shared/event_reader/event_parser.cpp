@@ -539,7 +539,11 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
       }
       auto iv = SafeAtoL(arg);
       if (iv.first) return LegacyEventPair{amap.main_id, iv.second};
-      std::cerr << "EVENT ERROR: Unknown " << arg_kind << " parameter value " << arg
-                << ": cannot map argument to event sub-ID\n";
+      // For object parameters, it's expected that object names may not be in parameter_ids_
+      // if they're defined in the game but not in events.ey. This is non-fatal - we'll use 0.
+      if (arg_kind != "object") {
+        std::cerr << "EVENT WARNING: Unknown " << arg_kind << " parameter value " << arg
+                  << ": cannot map argument to event sub-ID, using 0\n";
+      }
   return LegacyEventPair{amap.main_id, 0};
 }

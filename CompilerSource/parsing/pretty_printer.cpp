@@ -70,8 +70,34 @@ std::string AST::CppPrettyPrinter::GetPrintedCode() {
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
   if (print_type) print("auto ");
   std::string name = node.name.content;
+  
+  // Core fix: Common instance variables that are always available on objects
+  // These should be accessed directly in event context (as member variables)
+  // or through glaccess in script context
+  // Note: sprite_xoffset, sprite_yoffset, sprite_width, sprite_height are macros
+  // that expand to method calls, so they should NOT be in this list
+  static const std::set<std::string> instance_vars = {
+    "x", "y", "xprevious", "yprevious", "xstart", "ystart",
+    "hspeed", "vspeed", "speed", "direction",
+    "gravity", "gravity_direction", "friction",
+    "sprite_index", "image_index", "image_speed", "image_angle",
+    "image_xscale", "image_yscale", "visible", "solid", "persistent",
+    "depth", "mask_index", "image_number"
+  };
+  
   if (is_script && name != "self") {
-    if (language_fe->is_shared_local(name)) {
+    // Check instance variables FIRST, before checking globals
+    // This ensures x, y, etc. are always converted to glaccess calls
+    if (instance_vars.find(name) != instance_vars.end()) {
+      // These are standard instance variables - access through glaccess in script context
+      // Scripts are wrapped in with(self), so we access through the instance
+      print("enigma::glaccess(int(self))->" + name);
+    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+               name == "sprite_width" || name == "sprite_height") {
+      // These are macros that expand to $name() - use $name directly to avoid double expansion
+      // Don't use the macro name, use $name directly
+      print("enigma::glaccess(int(self))->$" + name + "()");
+    } else if (language_fe->is_shared_local(name)) {
       print("enigma::glaccess(int(self))->" + name);
     } else if (language_fe->global_exists(name)) {
       print(name);
@@ -79,11 +105,30 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
       print(name);
     } else if (name.substr(0, 8) == "argument") {
       print(name);
+    } else if (name[0] == '$') {
+      // Core fix: identifiers starting with $ are object methods (e.g., $sprite_xoffset)
+      // They should be called on the instance through glaccess
+      // Remove the $ prefix and call the method on the instance
+      std::string method_name = name.substr(1);  // Remove $ prefix
+      print("enigma::glaccess(int(self))->" + method_name + "()");
     } else {
       print("enigma::varaccess_" + name + "(int(self))");
     }
   } else {
-    print(name);
+    // Not in script context - could be in event or other context
+    // For instance variables, access directly (they're member variables in event context)
+    // For sprite accessors, use the macro name (it will expand to $name())
+    if (instance_vars.find(name) != instance_vars.end()) {
+      // In event context, these are member variables - use directly
+      // Note: x, y, etc. are accessible as member variables in event methods
+      print(name);
+    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+               name == "sprite_width" || name == "sprite_height") {
+      // These are macros that expand to $name() - use $name directly to avoid double expansion
+      print("$" + name + "()");
+    } else {
+      print(name);
+    }
   }
   return true;
 }
@@ -206,8 +251,16 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+  print("{\n");
 
+  // Core fix: Inside a with block, instance variables like x, y, hspeed, vspeed
+  // should be accessible directly. We need to track this context.
+  // For now, we'll handle common instance variables in VisitIdentifierAccess
+  // by checking if they're standard instance variables that should be accessible directly.
   VISIT_AND_CHECK(node.body);
+  
+  print("}");
+
   PrintSemiColon(node.body);
 
   return true;
@@ -268,11 +321,34 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+  // Check if this is a sprite accessor function call (sprite_xoffset(), etc.)
+  // These are macros that expand to $name(), so we need to handle them specially
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    auto fn = node.function->As<AST::IdentifierAccess>();
+    std::string name = fn->name.content;
+    // Check for both sprite_xoffset and $sprite_xoffset (macro may have expanded)
+    if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+        name == "sprite_width" || name == "sprite_height" ||
+        name == "$sprite_xoffset" || name == "$sprite_yoffset" || 
+        name == "$sprite_width" || name == "$sprite_height") {
+      // Remove $ prefix if present
+      if (name[0] == '$') {
+        name = name.substr(1);
+      }
+      // These are macros - generate $name() directly instead of name()
+      if (is_script) {
+        print("enigma::glaccess(int(self))->$" + name + "()");
+      } else {
+        print("$" + name + "()");
+      }
+      return true; // Skip the normal function call handling
+    }
+  }
   VISIT_AND_CHECK(node.function);
   print("(");
 
   bool is_variadic = false;
-  int variadic_index = 0;
+  int variadic_index = -1;
   if (node.function->type == AST::NodeType::IDENTIFIER && language_fe) {
     auto fn = node.function->As<AST::IdentifierAccess>();
     jdi::definition *def = nullptr;
@@ -283,8 +359,18 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
     }
   }
 
+  // If function takes varargs as the first parameter (variadic_index == 0),
+  // use the comma operator pattern: (enigma::varargs(), arg1, arg2, ...)
+  if (is_variadic && variadic_index == 0 && node.arguments.size() > 0) {
+    print("(enigma::varargs()");
+    if (node.arguments.size() > 0) {
+      print(", ");
+    }
+  }
+
   for (std::size_t i = 0; i < node.arguments.size(); i++) {
-    if (is_variadic && i == std::size_t(variadic_index)) {
+    if (is_variadic && i == std::size_t(variadic_index) && variadic_index > 0) {
+      // C-style variadic function - wrap arguments starting from variadic_index
       print("(enigma::varargs(),");
     }
     VISIT_AND_CHECK(node.arguments[i]);
@@ -293,7 +379,15 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
     }
   }
 
-  if (is_variadic) print(")");
+  if (is_variadic) {
+    if (variadic_index == 0 && node.arguments.size() > 0) {
+      // Function takes varargs as first parameter - close the comma operator expression
+      print(")");
+    } else if (variadic_index > 0) {
+      // C-style variadic - close the outer parentheses
+      print(")");
+    }
+  }
 
   print(")");
   return true;
