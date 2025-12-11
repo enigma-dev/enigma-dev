@@ -25,7 +25,8 @@
 #include <string_view>
 
 // TODO: Delete. Replace with ENIGMA-specific wrapper class.
-namespace jdi { struct definition; }
+// Forward declaration removed - using typedef from clang_definitions.h instead
+#include "languages/clang_definitions.h"
 
 namespace enigma {
 namespace parsing {
@@ -131,7 +132,7 @@ struct TokenTypeWrapperStruct {
 struct Token:
     internal::useless::TokenTypeWrapperStruct,
     CodeSnippet {
-  jdi::definition *ext = nullptr;
+  clang_adapter::ClangDefinition *ext = nullptr;
 
   bool PreprocessesAway() const { return type == TTM_WHITESPACE; }
 
@@ -142,7 +143,7 @@ struct Token:
   Token(TokenType t, jdi::definition *ex, CodeSnippet snippet):
       internal::useless::TokenTypeWrapperStruct(t),
       CodeSnippet(snippet),
-      ext(ex) {}
+      ext(static_cast<clang_adapter::ClangDefinition*>(ex)) {}
   std::string ToString() const;
 };
 

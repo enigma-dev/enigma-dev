@@ -2,7 +2,7 @@
 #define ENIGMA_COMPILER_PARSING_LANGUAGE_FRONTEND_h
 
 #include <frontend.h>
-#include <Storage/definition.h>
+#include "languages/clang_definitions.h"
 #include <settings.h>
 
 #include <string>

@@ -47,8 +47,8 @@ typedef map<string,char>::iterator tokiter;
 int scope_braceid = 0;
 extern string tostring(int);
 
-#include <Storage/definition.h>
-static jdi::definition_scope *current_scope;
+#include "languages/clang_definitions.h"
+static clang_adapter::ClangDefinitionScope *current_scope;
 
 int dropscope()
 {
@@ -58,7 +58,7 @@ int dropscope()
 }
 int quickscope()
 {
-  jdi::definition_scope* ns = new jdi::definition_scope("{}",current_scope,jdi::DEF_NAMESPACE);
+  clang_adapter::ClangDefinitionScope* ns = new clang_adapter::ClangDefinitionScope("{}",current_scope,jdi::DEF_NAMESPACE, clang_getNullCursor());
   current_scope->members["{}"+tostring(scope_braceid++)].reset(ns);
   current_scope = ns;
   return 0;
@@ -66,19 +66,19 @@ int quickscope()
 int initscope(string name)
 {
   scope_braceid = 0;
-  main_context->get_global()->members[name] = std::make_unique<jdi::definition_scope>(name,main_context->get_global(),jdi::DEF_NAMESPACE);
-  current_scope = reinterpret_cast<jdi::definition_scope*>(main_context->get_global()->members[name].get());
+  auto ns = std::make_unique<clang_adapter::ClangDefinitionScope>(name,main_context->get_global(),jdi::DEF_NAMESPACE, clang_getNullCursor());
+  current_scope = ns.get();
+  main_context->get_global()->members[name] = std::move(ns);
   return 0;
 }
 int quicktype(unsigned flags, string name)
 {
-  current_scope->members[name] = std::make_unique<jdi::definition>(name,current_scope,flags | jdi::DEF_TYPENAME);
+  auto def = std::make_unique<clang_adapter::ClangDefinition>(name,current_scope,flags | jdi::DEF_TYPENAME, clang_getNullCursor());
+  current_scope->members[name] = std::move(def);
   return 0;
 }
 
-#include <API/context.h>
-#include <System/macros.h>
-#include <System/lex_cpp.h>
+#include "languages/clang_adapter.h"
 
 ///Remove whitespace, unfold macros,
 ///And lex code into synt.
@@ -936,44 +936,9 @@ int parser_fix_templates(string &code,pt pos,pt spos,string *synt)
   
   if (a->flags & jdi::DEF_TEMPLATE)
   {
-    jdi::definition_template *tmp = (jdi::definition_template*)a;
-    int tmc = tmp->params.size() - 1;
-    for (int i = tmc; i >= 0; i--)
-      if (tmp->params[i]->default_assignment) tmc = i;
-    a2i = tmc - a2i;
-    string iseg;
-    for (int i = 0; i < a2i;)
-      iseg += (++i < a2i) ? "variant," : "variant";
-    if (code[pos-1] == '>')
-    {
-      if (code[pos-2] == ',' or code[pos-2] == '<')
-      {
-        if (iseg.length())
-        {
-          code.insert(pos-1, iseg);
-          synt && (synt->insert(pos-1, string(iseg.length(),'t')),   true);
-          return iseg.length();
-        }
-        else if (code[pos-2] == ',')
-        {
-          code.erase(pos-2,1);
-          synt->erase(pos-2,1);
-          return -1;
-        }
-      }
-      else if (iseg.length())
-      {
-        code.insert(pos-1, ","+iseg),
-        synt && (synt->insert(pos-1, string(iseg.length()+1,'t')), true);
-        return iseg.length() + 1;
-      }
-    }
-    else
-    {
-      code.insert(pos, "<"+iseg+">"),
-      synt && (synt->insert(pos,   string(iseg.length()+2,'t')),   true);
-      return iseg.length() + 2;
-    }
+    // Template definitions not fully implemented in clang adapter yet
+    // Skip template parameter handling for now
+    return 0;
   }
   return 0;
 }

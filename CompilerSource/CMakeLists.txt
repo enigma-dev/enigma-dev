@@ -37,12 +37,67 @@ add_definitions(-DNOMINMAX)
 
 file(GLOB_RECURSE COMPILER_SOURCES *.cpp)
 list(REMOVE_ITEM COMPILER_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/standalone_main.cpp")
+# Exclude JDI directory (replaced with clang)
+list(FILTER COMPILER_SOURCES EXCLUDE REGEX ".*JDI/.*")
 
 get_filename_component(ENIGMA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" PATH)
 
 add_library(${COMPILER_LIB} ${LIB_TYPE} ${COMPILER_SOURCES})
 
-target_include_directories(${COMPILER_LIB} PRIVATE "JDI/src")
+# Find libclang
+# Try CMake's FindClang module first
+find_package(Clang QUIET)
+
+if(Clang_FOUND)
+  # Use CMake's FindClang module
+  target_include_directories(${COMPILER_LIB} PRIVATE ${Clang_INCLUDE_DIRS})
+  target_link_libraries(${COMPILER_LIB} PRIVATE ${Clang_LIBRARIES})
+else()
+  # Fallback: find libclang manually (for macOS CommandLineTools)
+  find_library(LIBCLANG_LIBRARY
+    NAMES clang
+    PATHS
+      /Library/Developer/CommandLineTools/usr/lib
+      /opt/homebrew/opt/llvm/lib
+      /usr/local/opt/llvm/lib
+      /usr/lib
+    NO_DEFAULT_PATH
+  )
+  
+  find_path(LIBCLANG_INCLUDE_DIR
+    NAMES clang-c/Index.h
+    PATHS
+      /opt/homebrew/opt/llvm/include
+      /usr/local/opt/llvm/include
+      /Library/Developer/CommandLineTools/usr/include
+      /usr/include
+  )
+  
+  if(LIBCLANG_LIBRARY AND LIBCLANG_INCLUDE_DIR)
+    target_include_directories(${COMPILER_LIB} PRIVATE ${LIBCLANG_INCLUDE_DIR})
+    target_link_libraries(${COMPILER_LIB} PRIVATE ${LIBCLANG_LIBRARY})
+    
+    # Set rpath so the library can be found at runtime
+    get_filename_component(LIBCLANG_DIR ${LIBCLANG_LIBRARY} DIRECTORY)
+    set_target_properties(${COMPILER_LIB} PROPERTIES
+      INSTALL_RPATH "${LIBCLANG_DIR}"
+      BUILD_WITH_INSTALL_RPATH TRUE
+    )
+    if(APPLE)
+      # Fix the library reference after building
+      add_custom_command(TARGET ${COMPILER_LIB} POST_BUILD
+        COMMAND install_name_tool -change @rpath/libclang.dylib ${LIBCLANG_LIBRARY} $<TARGET_FILE:${COMPILER_LIB}>
+        COMMENT "Fixing libclang library path for macOS"
+      )
+    endif()
+    
+    message(STATUS "Found libclang: ${LIBCLANG_LIBRARY}")
+    message(STATUS "Found clang headers: ${LIBCLANG_INCLUDE_DIR}")
+    message(STATUS "Setting rpath to: ${LIBCLANG_DIR}")
+  else()
+    message(FATAL_ERROR "libclang not found. Please install Xcode Command Line Tools or LLVM via Homebrew.")
+  endif()
+endif()
 
 if(MSVC)
   # Default MSVC warnings are overkill. Set to Lvl 1
@@ -68,4 +123,16 @@ find_package(ZLIB)
 target_link_libraries(${COMPILER_LIB} PRIVATE ZLIB::ZLIB)
 
 install(TARGETS ${COMPILER_LIB} DESTINATION .)
+
+# Fix libclang path for macOS after installation
+if(APPLE AND LIBCLANG_LIBRARY)
+  install(CODE "
+    execute_process(
+      COMMAND install_name_tool -change @rpath/libclang.dylib ${LIBCLANG_LIBRARY} \$<TARGET_FILE:${COMPILER_LIB}>
+      WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX}
+      ERROR_QUIET
+    )
+  ")
+endif()
+
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${COMPILER_LIB}.dir/Debug/${COMPILER_LIB}.pdb" DESTINATION . OPTIONAL)

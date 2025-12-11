@@ -54,8 +54,7 @@ using namespace std; //More ease //To interface with externally defined types an
 #include "settings.h"
 #include "parser.h"
 
-#include "Storage/definition.h"
-#include "System/builtins.h"
+#include "languages/clang_definitions.h"
 
 //This adds all keywords to a tree structure for quick lookup of their token.
 void parser_init()

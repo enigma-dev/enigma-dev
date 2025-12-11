@@ -1,2 +1,0 @@
-volatile static const register
-unsigned signed long short

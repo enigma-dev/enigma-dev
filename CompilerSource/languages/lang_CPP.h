@@ -23,9 +23,8 @@
 #define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include "event_reader/event_parser.h"
-#include <Storage/definition.h>
-#include <System/builtins.h>
-#include <API/context.h>
+#include "clang_definitions.h"
+#include "clang_adapter.h"
 
 struct lang_CPP: language_adapter {
   /// The context of all parsed definitions.
@@ -95,7 +94,19 @@ struct lang_CPP: language_adapter {
   void quickmember_script(jdi::definition_scope* scope, string name) final;
   /// Create a standard integer variable member in the given scope.
   void quickmember_integer(jdi::definition_scope* scope, string name) final {
-    return quickmember_variable(scope, jdi::builtin_type__int, name);
+    // Create a simple int type definition if it doesn't exist
+    jdi::definition* int_type = scope->find_local("int");
+    if (!int_type && main_context && main_context->get_global()) {
+      int_type = main_context->get_global()->find_local("int");
+    }
+    if (!int_type) {
+      // Create a temporary int type
+      auto temp_int = std::make_unique<clang_adapter::ClangDefinition>(
+        "int", scope, jdi::DEF_TYPENAME, clang_getNullCursor());
+      int_type = temp_int.get();
+      scope->members["int"] = std::move(temp_int);
+    }
+    return quickmember_variable(scope, int_type, name);
   }
   /// Look up an enigma_user definition by its name.
   jdi::definition* look_up(std::string_view name) const final;

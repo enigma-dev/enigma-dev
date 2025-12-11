@@ -55,7 +55,7 @@ using namespace std;
 #include "backend/JavaCallbacks.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-#include "System/builtins.h"
+// JDI builtins.h removed - using clang instead
 
 #include "settings-parse/crawler.h"
 
@@ -416,7 +416,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
+  // Note: using_scope not needed with clang - scopes handled directly
+  jdi::definition_scope* globals_scope = main_context->get_global();
 
   idpr("Copying resources",1);
 
@@ -425,47 +426,47 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
   for (size_t i = 0; i < game.sprites.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
+    current_language->quickmember_integer(globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
+    current_language->quickmember_integer(globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(globals_scope,game.scripts[i].name);
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
+    current_language->quickmember_integer(globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
+    current_language->quickmember_integer(globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
+    current_language->quickmember_integer(globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
+    current_language->quickmember_integer(globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
+    current_language->quickmember_integer(globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
+    current_language->quickmember_integer(globals_scope, game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.

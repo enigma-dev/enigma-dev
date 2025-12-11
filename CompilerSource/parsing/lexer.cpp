@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <Storage/definition.h>
+#include "languages/clang_definitions.h"
 
 #include "general/parse_basics_old.h"
 #include "lexer.h"
@@ -466,10 +466,10 @@ Token &Lexer::TranslateNameToken(Token &token) {
   }
 
   if (!context->language_fe->is_shared_local(name)) {
-    jdi::definition *d = context->language_fe->look_up(name);
+    clang_adapter::ClangDefinition *d = static_cast<clang_adapter::ClangDefinition*>(context->language_fe->look_up(name));
     if (d) {
       token.ext = d;
-      if (d->flags & jdi::DEF_TYPENAME) {
+      if (d && (d->flags & jdi::DEF_TYPENAME)) {
         token.type = TT_TYPE_NAME;
         return token;
       }

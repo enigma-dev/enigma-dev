@@ -24,7 +24,7 @@
 #ifndef ENIGMA_COMPILE_INCLUDES_H
 #define ENIGMA_COMPILE_INCLUDES_H
 
-#include <JDI/src/Storage/definition.h>
+#include "languages/clang_definitions.h"
 
 extern string tostring(int val);
 

@@ -27,7 +27,7 @@
 #include <map>
 #include <set>
 
-#include <Storage/definition.h>
+#include "languages/clang_definitions.h"
 #include "backend/GameData.h"
 #include "parsing/macros.h"
 #include "parser/object_storage.h"
@@ -72,7 +72,7 @@ extern map<string, language_adapter*> languages;
 extern language_adapter *current_language;
 extern string current_language_name;
 
-#include <API/context.h>
-extern jdi::Context *main_context;
+#include "languages/clang_adapter.h"
+extern clang_adapter::ClangContext *main_context;
 
 #endif
