@@ -55,7 +55,7 @@ using namespace std;
 #include "backend/JavaCallbacks.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-// JDI builtins.h removed - using clang instead
+#include "System/builtins.h"
 
 #include "settings-parse/crawler.h"
 
@@ -109,7 +109,7 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
-  std::string_view gloss_version = game.settings.info().version();
+  const string &gloss_version = game.settings.info().version();
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
@@ -336,15 +336,12 @@ static NameSet ScriptNames(const GameData &game) {
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
-  std::string exe_filename_str; // Persistent storage for modified filename
-  const char* exe_filename_ptr = exe_filename; // Pointer to use throughout function
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
-      exe_filename_str = exename.u8string(); // Store in persistent string
-      exe_filename_ptr = exe_filename_str.c_str(); // Update pointer to persistent storage
+      exe_filename = exename.u8string().c_str();
     }
   }
 
@@ -371,7 +368,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   	make += "COMPILEPATH=\"" + unixfy_path(compilepath) + "\" ";
   	make += "WORKDIR=\"" + unixfy_path(eobjs_directory) + "\" ";
     make += "CODEGEN=\"" + unixfy_path(codegen_directory) + "\" ";
-    make += "-j" + num_make_jobs + " ";
 
   	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
     e_execs(compilerInfo.MAKE_location,make);
@@ -416,8 +412,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  // Note: using_scope not needed with clang - scopes handled directly
-  jdi::definition_scope* globals_scope = main_context->get_global();
+  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
+  namespace_enigma_user->use_namespace(&globals_scope);
 
   idpr("Copying resources",1);
 
@@ -426,47 +422,47 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
   for (size_t i = 0; i < game.sprites.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.sprites[i].name);
+    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.sounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.backgrounds[i].name);
+    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.paths[i].name);
+    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    current_language->quickmember_script(globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.shaders[i].name);
+    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.fonts[i].name);
+    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.timelines[i].name);
+    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.objects[i].name);
+    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.rooms[i].name);
+    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    current_language->quickmember_integer(globals_scope, game.constants[i].name);
+    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -498,7 +494,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   idpr("Adding resources...",90);
   std::filesystem::path desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
-  std::filesystem::path gameFname = mode == emode_design ? desstr.u8string().c_str() : (desstr = exe_filename_ptr, exe_filename_ptr); // We will be using this first to write, then to run
+  std::filesystem::path gameFname = mode == emode_design ? desstr.u8string().c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   edbg << "Writing executable information and resources." << flushl;
   if (compilerInfo.target_platform == "Windows")
@@ -734,7 +730,6 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
   make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
   make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
-  make += "-j" + num_make_jobs + " ";
 
   for (const auto& key : compilerInfo.make_vars) {
     if (key.second != "")
@@ -822,7 +817,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
     std::vector<char> prevdir(size_t(4096));
-    string newdir = game.filename.empty() ? (exe_filename_ptr ? exe_filename_ptr : "") : game.filename;
+    string newdir = game.filename.empty() ? exe_filename : game.filename;
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
       if (newdir[0] == '/' || newdir[0] == '\\') {
         newdir = newdir.substr(1, newdir.size());

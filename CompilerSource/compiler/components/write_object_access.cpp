@@ -33,9 +33,6 @@
 
 using namespace std;
 
-
-#include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "languages/clang_definitions.h"
+#include <Storage/definition.h>
 
 #include "general/parse_basics_old.h"
 #include "lexer.h"
@@ -71,6 +71,7 @@ static TokenTrie token_lookup {
   { "+",   TT_PLUS         },
   { "++",  TT_INCREMENT    },
   { "+=",  TT_ASSOP        },
+  { "^=",  TT_ASSOP        },
   { ",",   TT_COMMA        },
   { "-",   TT_MINUS        },
   { "--",  TT_DECREMENT    },
@@ -80,6 +81,10 @@ static TokenTrie token_lookup {
   { "/",   TT_SLASH        },
   { "/=",  TT_ASSOP        },
   { ".",   TT_DOT          },
+  { "...", TT_ELLIPSES     },
+  { "->",  TT_ARROW        },
+  { ".*",  TT_DOT_STAR     },
+  { "->*", TT_ARROW_STAR   },
   { ":",   TT_COLON,       },
   { "::",  TT_SCOPEACCESS  },
   { ":=",  TT_ASSIGN,      },
@@ -89,6 +94,8 @@ static TokenTrie token_lookup {
   { "<<=", TT_ASSOP        },
   { "<=",  TT_LESSEQUAL    },
   { "<>",  TT_NOTEQUAL     },
+  { "<=>", TT_THREEWAY     },
+  { "=>",  TT_JS_ARROW     },
   { "=",   TT_EQUALS,      },
   { "==",  TT_EQUALTO,     },
   { ">",   TT_GREATER      },
@@ -108,23 +115,35 @@ static TokenTrie token_lookup {
 };
 
 static std::map<std::string, TokenType, std::less<>> keyword_lookup {
+  { "alignof",  TT_ALIGNOF   },
   { "break",    TT_BREAK     },
   { "case",     TT_S_CASE    },
   { "catch",    TT_S_CATCH   },
+  { "co_await", TT_CO_AWAIT  },
   { "continue", TT_CONTINUE  },
+  { "decltype", TT_DECLTYPE  },
   { "default",  TT_S_DEFAULT },
+  { "delete",   TT_S_DELETE  },
   { "do",       TT_S_DO      },
   { "else",     TT_S_ELSE    },
+  { "enum",     TT_ENUM      },
   { "exit",     TT_EXIT      },
   { "for",      TT_S_FOR     },
   { "if",       TT_S_IF      },
+  { "new",      TT_S_NEW     },
+  { "noexcept", TT_NOEXCEPT  },
+  { "operator", TT_OPERATOR  },
   { "return",   TT_RETURN    },
   { "repeat",   TT_S_REPEAT  },
+  { "sizeof",   TT_SIZEOF    },
   { "switch",   TT_S_SWITCH  },
   { "try",      TT_S_TRY     },
+  { "typedef",  TT_TYPEDEF   },
+  { "typename", TT_TYPENAME  },
   { "until",    TT_S_UNTIL   },
   { "while",    TT_S_WHILE   },
   { "with",     TT_S_WITH    },
+  { "then",     TT_S_THEN    },
 
   { "and", TT_AND },
   { "div", TT_DIV },
@@ -132,6 +151,37 @@ static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "not", TT_NOT },
   { "or",  TT_OR  },
   { "xor", TT_XOR },
+
+  { "dynamic_cast",     TT_DYNAMIC_CAST     },
+  { "static_cast",      TT_STATIC_CAST      },
+  { "reinterpret_cast", TT_REINTERPRET_CAST },
+  { "const_cast",       TT_CONST_CAST       },
+
+  { "const",        TT_CONST        },
+  { "constexpr",    TT_CONSTEXPR    },
+  { "constinit",    TT_CONSTINIT    },
+  { "consteval",    TT_CONSTEVAL    },
+  { "extern",       TT_EXTERN       },
+  { "inline",       TT_INLINE       },
+  { "mutable",      TT_MUTABLE      },
+  { "signed",       TT_SIGNED       },
+  { "static",       TT_STATIC       },
+  { "thread_local", TT_THREAD_LOCAL },
+  { "unsigned",     TT_UNSIGNED     },
+  { "volatile",     TT_VOLATILE     },
+
+  { "char",     TT_TYPE_NAME },
+  { "char8_t",  TT_TYPE_NAME },
+  { "char16_t", TT_TYPE_NAME },
+  { "char32_t", TT_TYPE_NAME },
+  { "wchar_t",  TT_TYPE_NAME },
+  { "bool",     TT_TYPE_NAME },
+  { "short",    TT_TYPE_NAME },
+  { "int",      TT_TYPE_NAME },
+  { "long",     TT_TYPE_NAME },
+  { "float",    TT_TYPE_NAME },
+  { "double",   TT_TYPE_NAME },
+  { "void",     TT_TYPE_NAME }
 };
 
 #define PURE_VIRTUAL(t, x) t x final { \
@@ -261,8 +311,7 @@ size_t Lexer::ComputeLineNumber(size_t lpos) {
 
 CodeSnippet Lexer::Mark(size_t pos, size_t length) {
   ComputeLineNumber(pos);
-  return CodeSnippet{std::string_view{code}.substr(pos, length),
-                     line_number, pos - last_line_position};
+  return CodeSnippet{code.substr(pos, length), line_number, pos - last_line_position};
 }
 
 TokenType Lexer::LookUpOperator(std::string_view op) {
@@ -271,14 +320,67 @@ TokenType Lexer::LookUpOperator(std::string_view op) {
   return tnode.first;
 }
 
+std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
+  std::string str_value;
+  str_value.reserve(lit.length() - 2);
+  if (options.use_escapes) {
+    for (size_t i = 1; i < lit.length() - 1; ++i) {
+      if (lit[i] == '\\') {
+        if (++i >= lit.length()) {
+          herr->Error(Mark(spos, 1)) << "Internal error: lexer stopped parsing string literal early";
+          return lit;
+        }
+        switch (lit[i]) {
+          case '\\':
+            str_value += '\\';
+            break;
+          case 'n':
+            str_value += '\n';
+            break;
+          case 't':
+            str_value += '\t';
+            break;
+          case 'v':
+            str_value += '\v';
+            break;
+          case 'b':
+            str_value += '\b';
+            break;
+          case 'r':
+            str_value += '\r';
+            break;
+          case 'f':
+            str_value += '\f';
+            break;
+          case 'a':
+            str_value += '\a';
+            break;
+          case '?':
+            str_value += '\?';
+            break;
+          default: 
+            herr->Error(Mark(spos, 1)) << "Unkown escape";
+            return lit;
+          
+        }
+      } else {
+        str_value += lit[i];
+      }
+    }
+  } else {
+    for (size_t i = 1; i < lit.length() - 1; ++i) {
+      str_value += lit[i] == '#' ? '\n' : lit[i];
+    }
+  }
+  return str_value;
+}
+
 Token Lexer::ReadRawToken() {
   if (pos >= code.length()) {
     // We need custom logic for this because string_view::substr checks bounds
     // even for zero-width views.
     ComputeLineNumber(pos);
-    return Token(TT_ENDOFCODE, CodeSnippet{
-                     std::string_view{code.data() + pos, 0},
-                     line_number, pos - last_line_position});
+    return Token(TT_ENDOFCODE, CodeSnippet{std::string{code.data() + pos, 0}, line_number, pos - last_line_position});
   }
 
   if (isspace(code[pos])) {
@@ -294,8 +396,8 @@ Token Lexer::ReadRawToken() {
           herr->Error(Mark(spos, 1)) << "GML-style hex literal is trunucated";
           return ReadRawToken();
         }
-        while (!is_nybble(code[++pos]));
-        return Token(TT_HEXLITERAL, Mark(pos, pos - spos));
+        while (is_nybble(code[++pos]));
+        return Token(TT_HEXLITERAL, Mark(spos + 1, pos - spos - 1));
       } else [[fallthrough]];
     }
 
@@ -321,7 +423,11 @@ Token Lexer::ReadRawToken() {
         }
         if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '"') {
-          return Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          std::string raw_value = code.substr(spos, pos - spos + 1);
+          std::string value = ProcessLiteral(raw_value, spos);
+          Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
+          token.content = value;
+          return token;
         }
       }
     }
@@ -336,7 +442,11 @@ Token Lexer::ReadRawToken() {
         }
         if (options.use_escapes && code[pos] == '\\') ++pos;
         if (code[pos] == '\'') {
-          return Token(token_type, Mark(spos, ++pos - spos));
+          std::string raw_value = code.substr(spos, pos - spos + 1);
+          std::string value = ProcessLiteral(raw_value, spos);
+          Token token = Token(token_type, Mark(spos, ++pos - spos));
+          token.content = value;
+          return token;
         }
       }
     }
@@ -466,10 +576,10 @@ Token &Lexer::TranslateNameToken(Token &token) {
   }
 
   if (!context->language_fe->is_shared_local(name)) {
-    clang_adapter::ClangDefinition *d = static_cast<clang_adapter::ClangDefinition*>(context->language_fe->look_up(name));
+    jdi::definition *d = context->language_fe->look_up(name);
     if (d) {
       token.ext = d;
-      if (d && (d->flags & jdi::DEF_TYPENAME)) {
+      if (d->flags & jdi::DEF_TYPENAME) {
         token.type = TT_TYPE_NAME;
         return token;
       }

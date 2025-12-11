@@ -53,6 +53,8 @@ namespace enigma
   };
   struct object_graphics: object_timelines
   {
+    static constexpr unsigned char objtype = 0xAD;
+
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
       gs_scalar image_index;
@@ -96,6 +98,11 @@ namespace enigma
       object_graphics();
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize() override;
+      std::size_t deserialize_self(std::byte *iter) override;
+      static std::pair<object_graphics, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma
 

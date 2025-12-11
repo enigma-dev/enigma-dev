@@ -26,7 +26,9 @@
 
 #include "languages/lang_CPP.h"
 
-#include "languages/clang_adapter.h"
+#include "System/builtins.h"
+
+#include "API/context.h"
 
 #include <time.h>
 #include <iostream>
@@ -172,12 +174,10 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
 
-    // Add search directories to main context if it exists
-    if (main_context) {
-      main_context->add_include_dir((enigma_root/"ENIGMAsystem/SHELL").u8string());
-      main_context->add_include_dir((enigma_root/"shared").u8string());
-      main_context->add_include_dir(codegen_directory.u8string());
-    }
+    auto &builtin = jdi::builtin_context();
+    builtin.add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    builtin.add_search_directory((enigma_root/"shared").u8string().c_str());
+    builtin.add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -190,40 +190,24 @@ const char* establish_bearings(const char *compiler)
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        std::string dir = idirs.substr(spos,pos-spos+(idirs[pos-1] != '/'));
-        if (main_context) {
-          main_context->add_include_dir(dir);
-        }
+        builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned search directories (added to clang context)\n";
+    cout << "Toolchain returned " << builtin.search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
-    // Read defines from file and add to context
-    std::ifstream defines_file((codegen_directory/"enigma_defines.txt").u8string());
-    if (!defines_file.is_open())
+    llreader macro_reader((codegen_directory/"enigma_defines.txt").u8string().c_str());
+    if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    std::string line;
-    while (std::getline(defines_file, line)) {
-      // Parse define line and add to context
-      if (main_context && !line.empty()) {
-        size_t eq = line.find('=');
-        if (eq != std::string::npos) {
-          main_context->add_define(line.substr(0, eq), line.substr(eq + 1));
-        } else {
-          main_context->add_define(line);
-        }
-      }
-    }
-    
-    if (main_context) {
-      main_context->add_define("_GLIBCXX_USE_CXX11_ABI", "0");
-    }
+    int res = builtin.parse_stream(macro_reader);
+    builtin.add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
+    if (res)
+      return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 
   /* Note `make` location
   *****************************/

@@ -25,8 +25,7 @@
 #include <string_view>
 
 // TODO: Delete. Replace with ENIGMA-specific wrapper class.
-// Forward declaration removed - using typedef from clang_definitions.h instead
-#include "languages/clang_definitions.h"
+namespace jdi { struct definition; }
 
 namespace enigma {
 namespace parsing {
@@ -37,9 +36,13 @@ enum TokenType {
   TT_COLON,           // A colon.
   TT_COMMA,           // A comma.
   TT_ASSIGN,          // The strict := assignment operator. Not to be confused with EQUALS.
-  TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>=
+  TT_ASSOP,           // Relative assignment operators += -= *= /= %= <<= >>= &= ^= |=
   TT_EQUALS,          // The = operator, which raises warnings in conditional expressions.
   TT_DOT,             // A dot ('.'). Is neither preceeded nor followed by a numeral.
+  TT_ELLIPSES,        // Three dots in a row ('...')
+  TT_ARROW,           // The -> operator.
+  TT_DOT_STAR,        // The .* operator (pointer-to-member).
+  TT_ARROW_STAR,      // The ->* operator (pointer-to-pointer-member).
   TT_PLUS,            // The + operator.
   TT_MINUS,           // The - operator.
   TT_STAR,            // The * operator.
@@ -64,6 +67,8 @@ enum TokenType {
   TT_GREATER,         // The > operator (or closing angle bracket).
   TT_LESSEQUAL,       // The <= operator.
   TT_GREATEREQUAL,    // The >= operator.
+  TT_THREEWAY,        // The <=> operator.
+  TT_JS_ARROW,        // The => operator.  // may need better name
   TT_LSH,             // The << operator.
   TT_RSH,             // The >> operator (or double closing angle bracket).
   TT_QMARK,           // ?
@@ -73,8 +78,6 @@ enum TokenType {
   TT_ENDBRACKET,      // ]
   TT_BEGINBRACE,      // {
   TT_ENDBRACE,        // }
-  TT_BEGINTRIANGLE,   // <
-  TT_ENDTRIANGLE,     // >
   TT_DECLITERAL,      // 0 1 2... 9 10 11... 9876543210...
   TT_BINLITERAL,      // 0b0 0b1 0b10 0b11 0b100 0b101 0b110 ...
   TT_OCTLITERAL,      // 0o0 0o1 0o2... 0o6 0o7 0o10 0o11... 0o76543210 ...
@@ -82,13 +85,33 @@ enum TokenType {
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::
-  TT_TYPE_NAME,       // int, double, var; any baked-in primitive type (includes C++ types in namespace enigma_user).
+  TT_TYPE_NAME,       // var, char, char8_t, char16_t, char32_t, wchar_t, bool, short, int, long, float, double, void; any baked-in primitive type (includes C++ types in namespace enigma_user).
   TT_LOCAL,           // `local` storage specifier
   TT_GLOBAL,          // `global` storage specifier
   TT_RETURN,          // The `return` keyword
   TT_EXIT,            // Legacy `exit` keyword (return void)
   TT_BREAK,           // The `break` keyword
   TT_CONTINUE,        // The `continue` keyword
+  TT_ENUM,            // enum
+  TT_TYPEDEF,         // typedef
+  TT_TYPENAME,        // typename
+  TT_OPERATOR,        // operator
+  TT_CONSTEXPR,       // constexpr
+  TT_CONSTINIT,       // constinit
+  TT_CONSTEVAL,       // consteval
+  TT_INLINE,          // inline
+  TT_STATIC,          // static
+  TT_THREAD_LOCAL,    // thread_local
+  TT_EXTERN,          // extern
+  TT_MUTABLE,         // mutable
+  TT_CO_AWAIT,        // co_await
+  TT_NOEXCEPT,        // noexcept
+  TT_ALIGNOF,         // alignof
+  TT_SIZEOF,          // sizeof
+  TT_STATIC_CAST,     // static_cast
+  TT_DYNAMIC_CAST,    // dynamic_cast
+  TT_REINTERPRET_CAST,// reinterpret_cast
+  TT_CONST_CAST,      // const_cast
   TT_S_SWITCH,        // switch
   TT_S_REPEAT,        // repeat
   TT_S_CASE,          // case
@@ -107,11 +130,15 @@ enum TokenType {
   TT_S_DELETE,        // C++ memory management `delete` keyword
   TT_CLASS,           // class declaration keyword
   TT_STRUCT,          // struct declaration keyword
-
+  TT_UNION,           // union declaration keyword
+  TT_SIGNED,          // signed
+  TT_UNSIGNED,        // unsigned
+  TT_CONST,           // const
+  TT_VOLATILE,        // volatile
+  TT_DECLTYPE,        // decltype
   TTM_WHITESPACE,     // Preprocessing token: whitespace
   TTM_CONCAT,         // Preprocessing token: ##
   TTM_STRINGIFY,      // Preprocessing token: #
-
   TT_ERROR,
   TT_ENDOFCODE
 };
@@ -132,7 +159,7 @@ struct TokenTypeWrapperStruct {
 struct Token:
     internal::useless::TokenTypeWrapperStruct,
     CodeSnippet {
-  clang_adapter::ClangDefinition *ext = nullptr;
+  jdi::definition *ext = nullptr;
 
   bool PreprocessesAway() const { return type == TTM_WHITESPACE; }
 
@@ -143,7 +170,7 @@ struct Token:
   Token(TokenType t, jdi::definition *ex, CodeSnippet snippet):
       internal::useless::TokenTypeWrapperStruct(t),
       CodeSnippet(snippet),
-      ext(static_cast<clang_adapter::ClangDefinition*>(ex)) {}
+      ext(ex) {}
   std::string ToString() const;
 };
 

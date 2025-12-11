@@ -40,7 +40,7 @@ using namespace std;
 
 #include "darray.h"
 
-#include "languages/clang_adapter.h"
+#include <API/context.h>
 #include "languages/language_adapter.h"
 
 string fc(const char* fn);
@@ -58,7 +58,8 @@ int m_prog_loop_cfp();
 #endif
 
 namespace dll_ext_iteration {
-  std::map<std::string, std::shared_ptr<clang_adapter::ClangDefinition>>::iterator rit;
+  jdi::definition_scope::defiter rit;
+  jdi::definition_scope::defrefiter uit;
   jdi::definition_scope* searching_in;
   jdi::definition* current_resource;
   string its_name;
@@ -69,9 +70,8 @@ DLLEXPORT const char* next_available_resource();
 /// Returns the name of the first resource on the list, or "" otherwise.
 DLLEXPORT const char* first_available_resource() {
   searching_in = (jdi::definition_scope*) main_context->get_global()->look_up("enigma_user");
-  if (searching_in) {
-    rit = static_cast<clang_adapter::ClangDefinitionScope*>(searching_in)->members.begin();
-  }
+  rit = searching_in->members.begin();
+  uit = searching_in->using_general.begin();
   return next_available_resource();
 }
 /// Returns whether the resource can be called as a function
@@ -98,7 +98,7 @@ DLLEXPORT int resource_overloadCount() {
 /// The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
 DLLEXPORT const char* resource_parameters(int /*i*/) {
   static string res;
-  res = current_resource->qualified_id();
+  res = current_resource->toString();
   return res.c_str();
 }
 /// Returns whether the resource can be used as a typename.
@@ -113,20 +113,21 @@ DLLEXPORT int resource_isGlobal() {
 
 /// Returns the name of the next resource on the list, or "" otherwise.
 DLLEXPORT const char* next_available_resource() {
-  if (!searching_in) return NULL;
-  clang_adapter::ClangDefinitionScope* scope = static_cast<clang_adapter::ClangDefinitionScope*>(searching_in);
-  if (rit == scope->members.end()) {
-    return NULL;
+  if (rit == searching_in->members.end()) {
+    if (uit == searching_in->using_general.end()) {
+      return NULL;
+    }
+    current_resource = uit->second;
+    ++uit;
+  } else {
+    current_resource = rit->second.get();
+    ++rit;
   }
-  current_resource = rit->second.get();
-  ++rit;
   
   its_name = current_resource->name;
   return its_name.c_str();
 }
 /// Returns whether we're really done iterating the list
 DLLEXPORT bool resources_atEnd() {
-  if (!searching_in) return true;
-  clang_adapter::ClangDefinitionScope* scope = static_cast<clang_adapter::ClangDefinitionScope*>(searching_in);
-  return (rit == scope->members.end());
+  return (rit == searching_in->members.end() && uit == searching_in->using_general.end());
 }

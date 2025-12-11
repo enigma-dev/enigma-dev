@@ -35,6 +35,8 @@ namespace enigma
 {
   struct object_planar: object_basic
   {
+    static constexpr unsigned char objtype = 0xAB;
+
     //Position
       cs_scalar x, y;
       cs_scalar  xprevious, yprevious;
@@ -60,6 +62,11 @@ namespace enigma
       object_planar();
       object_planar(unsigned, int);
       virtual ~object_planar();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize() override;
+      std::size_t deserialize_self(std::byte *iter) override;
+      static std::pair<object_planar, std::size_t> deserialize(std::byte *iter);
   };
 
   void propagate_locals(object_planar*);

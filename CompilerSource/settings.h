@@ -65,6 +65,10 @@ enum COMPLIANCE_LVL {
   COMPL_STANDARD = 65535,    //Standard (enigma) compliance. Default and recommended. High so we can do things like compliance_mode<=8
 };
 
+enum class SyntaxMode {
+  STRICT, QUIRKS, GML
+};
+
 //Compatibility / Progess options
 struct CompatibilityOptions {
   bool use_cpp_strings =  0; //< Defines what language single-quote strings are inherited from.     0 = GML, 1 = C++
@@ -75,6 +79,7 @@ struct CompatibilityOptions {
   bool inherit_objects =  0; //< Determines whether objects should automatically inherit locals and events from their parents
   bool strict_syntax =    0; //< Determines whether semicolons and parentheses should be inferred or if the user prefers strict syntax.
   COMPLIANCE_LVL compliance_mode  = COMPL_STANDARD; //< How to resolve differences between GM versions.
+  SyntaxMode syntax_mode = SyntaxMode::QUIRKS;
   std::string keyword_blacklist;  //< Words to blacklist from user scripts, separated by commas.
 };
 
@@ -107,7 +112,6 @@ extern bool codegen_only;
 extern std::filesystem::path enigma_root;
 extern std::filesystem::path eobjs_directory;
 extern std::filesystem::path codegen_directory;
-extern std::string num_make_jobs;
 
 inline std::string escapeEnv(std::string str) {
   size_t i = str.find_first_of('%');

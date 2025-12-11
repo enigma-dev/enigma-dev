@@ -20,7 +20,7 @@ using NameMap = map<string, string>;
 const char *const kSimpleTestDirectory = "CommandLine/testing/SimpleTests";
 const char *const kDrivenTestDirectory = "CommandLine/testing/Tests";
 
-void read_files(string directory,
+void read_files(const string &directory, const string &base,
                 NameMap *games, NameMap *sources, NameMap *others) {
   fs::path targetDir(directory);
   fs::directory_iterator iter(targetDir);
@@ -35,7 +35,12 @@ void read_files(string directory,
     }
     if (!games && others) games = others;
     if (!sources && others) sources = others;
-    if (games && (ext == ".sog" || ext == ".gmx" || ext == ".gm81" || ext == ".gmk" || ext == ".gm6" || ext == ".gmd")) {
+    if (directory != base) {
+      fullname = fs::relative(directory, base).string() + "/" + std::move(fullname);
+    }
+    if (games && (ext == ".multi")) {
+      read_files(p.path(), base, games, sources, others);
+    } else if (games && (ext == ".sog" || ext == ".gmx" || ext == ".gm81" || ext == ".gmk" || ext == ".gm6" || ext == ".gmd")) {
       games->insert(NameMap::value_type(fullname, filename));
     } else if (sources && (ext == ".cpp" || ext == ".cc")) {
       sources->insert(NameMap::value_type(fullname, filename));
@@ -47,7 +52,7 @@ void read_files(string directory,
 
 TEST(GTestHarness, SanityCheck) {
   NameMap games, sources, others;
-  read_files(kDrivenTestDirectory, &games, &sources, &others);
+  read_files(kDrivenTestDirectory, kDrivenTestDirectory, &games, &sources, &others);
 
   for (auto &game : games) {
     auto match = sources.find(game.second + ".cpp");
@@ -90,7 +95,7 @@ void bitch_about_junk_files(const NameMap &junk) {
 
 vector<string> enumerate_simple_games() {
   NameMap games, others;
-  read_files(kSimpleTestDirectory, &games, nullptr, &others);
+  read_files(kSimpleTestDirectory, kSimpleTestDirectory, &games, nullptr, &others);
   bitch_about_junk_files(others);
   vector<string> result;
   for (auto &kv : games) {

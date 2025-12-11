@@ -67,9 +67,9 @@ inline char* scopy(string& str)
   #define cut_beginning_string(x) ((x)+1)
   #define cut_termining_string(x) ((x)-1)
 #endif
-inline string cutout_block(const char* source, pt& pos, bool& qed)
+inline string cutout_block(const char* source, size_t& pos, bool& qed)
 {
-  pt spos = pos;
+  size_t spos = pos;
   qed = false;
   string ret;
 
@@ -129,7 +129,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
         return 0;
 
       DWORD result;
-      bool qued; pt pos = 0;
+      bool qued; size_t pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;
@@ -395,7 +395,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       if (!*fcmd)
         return 0;
 
-      bool qued; pt pos = 0;
+      bool qued; size_t pos = 0;
       string ename = cutout_block(fcmd, pos, qued);
       if (ename == "")
         return 0;

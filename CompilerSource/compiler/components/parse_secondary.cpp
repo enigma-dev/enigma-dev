@@ -32,8 +32,6 @@
 
 using namespace std;
 
-#include "parser/parser.h"
-
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
@@ -42,16 +40,8 @@ using namespace std;
 #include "languages/lang_CPP.h"
 int lang_CPP::compile_parseSecondary(CompileState &state) {
   // Index things
-  const auto &scripts = state.parsed_scripts;
-  const auto &tlines = state.parsed_tlines;
   map<string, parsed_object*> po_by_name;
   for (parsed_object* po : state.parsed_objects) po_by_name[po->name] = po;
-
-  // Give all objects and events a second pass
-  for (parsed_object *oto : state.parsed_objects) {
-    for (auto &pev : oto->all_events)
-      parser_secondary(state, &pev);
-  }
 
   // Build an inheritance tree
   for (parsed_object *obj : state.parsed_objects) {
@@ -61,30 +51,6 @@ int lang_CPP::compile_parseSecondary(CompileState &state) {
       parent_it->second->children.push_back(obj);
       printf("Object %s (%d) is a child of %s (%d)\n", obj->name.c_str(),
              obj->id, obj->parent->name.c_str(), obj->parent->id);
-    }
-  }
-
-  // Give all scripts a second pass
-  for (ParsedScript *scr : scripts) {
-    parser_secondary(state, &scr->code);
-    if (scr->global_code) parser_secondary(state, scr->global_code);
-  }
-
-  // Give all timelines a second pass
-  // Apparently they're still individual moments, at this point(?)
-  for (ParsedScript *tline : tlines) {
-    parser_secondary(state, &tline->code);
-    if (tline->global_code) parser_secondary(state, tline->global_code);
-  }
-
-  // Give all room creation codes a second pass
-  for (auto room : state.parsed_rooms) {
-    if (room->creation_code) parser_secondary(state, room->creation_code);
-    for (const auto &icc : room->instance_create_codes) {
-      parser_secondary(state, icc.second.code);
-    }
-    for (const auto &icc : room->instance_precreate_codes) {
-      parser_secondary(state, icc.second.code);
     }
   }
 

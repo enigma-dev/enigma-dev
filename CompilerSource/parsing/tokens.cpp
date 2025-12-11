@@ -31,11 +31,11 @@ using std::string;
 static const std::vector<std::string> kTokenNames = [](){
   std::vector<std::string> res;
   res.resize(TT_ENDOFCODE + 1);
+  // Use a switch statement to enforce all values being defined.
   #define REGISTER(name) [[fallthrough]]; case name: res[name] = #name
-  switch (TT_ENDOFCODE) {
-    default:
-    REGISTER(TT_ENDOFCODE);
-    REGISTER(TT_ERROR);
+  switch (TT_ERROR) {
+    // Note that TT_ERROR must be named first as it is the switch value.
+    case TT_ERROR: res[TT_ERROR] = "<ERROR>";
 
     REGISTER(TT_IDENTIFIER);
     REGISTER(TT_SEMICOLON);
@@ -45,6 +45,10 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_ASSOP);
     REGISTER(TT_EQUALS);
     REGISTER(TT_DOT);
+    REGISTER(TT_ELLIPSES);
+    REGISTER(TT_ARROW);
+    REGISTER(TT_DOT_STAR);
+    REGISTER(TT_ARROW_STAR);
     REGISTER(TT_PLUS);
     REGISTER(TT_MINUS);
     REGISTER(TT_STAR);
@@ -69,6 +73,8 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_GREATER);
     REGISTER(TT_LESSEQUAL);
     REGISTER(TT_GREATEREQUAL);
+    REGISTER(TT_THREEWAY);
+    REGISTER(TT_JS_ARROW);
     REGISTER(TT_LSH);
     REGISTER(TT_RSH);
     REGISTER(TT_QMARK);
@@ -78,8 +84,6 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_ENDBRACKET);
     REGISTER(TT_BEGINBRACE);
     REGISTER(TT_ENDBRACE);
-    REGISTER(TT_BEGINTRIANGLE);
-    REGISTER(TT_ENDTRIANGLE);
     REGISTER(TT_DECLITERAL);
     REGISTER(TT_BINLITERAL);
     REGISTER(TT_OCTLITERAL);
@@ -94,6 +98,26 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_EXIT);
     REGISTER(TT_BREAK);
     REGISTER(TT_CONTINUE);
+    REGISTER(TT_ENUM);
+    REGISTER(TT_TYPEDEF);
+    REGISTER(TT_TYPENAME);
+    REGISTER(TT_OPERATOR);
+    REGISTER(TT_CONSTEXPR);
+    REGISTER(TT_CONSTINIT);
+    REGISTER(TT_CONSTEVAL);
+    REGISTER(TT_INLINE);
+    REGISTER(TT_STATIC);
+    REGISTER(TT_THREAD_LOCAL);
+    REGISTER(TT_EXTERN);
+    REGISTER(TT_MUTABLE);
+    REGISTER(TT_CO_AWAIT);
+    REGISTER(TT_NOEXCEPT);
+    REGISTER(TT_ALIGNOF);
+    REGISTER(TT_SIZEOF);
+    REGISTER(TT_STATIC_CAST);
+    REGISTER(TT_DYNAMIC_CAST);
+    REGISTER(TT_REINTERPRET_CAST);
+    REGISTER(TT_CONST_CAST);
     REGISTER(TT_S_SWITCH);
     REGISTER(TT_S_REPEAT);
     REGISTER(TT_S_CASE);
@@ -112,10 +136,16 @@ static const std::vector<std::string> kTokenNames = [](){
     REGISTER(TT_S_DELETE);
     REGISTER(TT_CLASS);
     REGISTER(TT_STRUCT);
-
+    REGISTER(TT_UNION);
+    REGISTER(TT_SIGNED);
+    REGISTER(TT_UNSIGNED);
+    REGISTER(TT_CONST);
+    REGISTER(TT_VOLATILE);
+    REGISTER(TT_DECLTYPE);
     REGISTER(TTM_WHITESPACE);
     REGISTER(TTM_CONCAT);
     REGISTER(TTM_STRINGIFY);
+    REGISTER(TT_ENDOFCODE);
   }
   return res;
 }();
@@ -125,6 +155,7 @@ static const std::vector<std::string> kTokenNames = [](){
 std::string ToString(TokenType tt) {
   return kTokenNames[tt];
 }
+
 string Token::ToString() const {
   std::stringstream str;
   str << kTokenNames[type] << "(\"" << content << "\")";
@@ -134,6 +165,7 @@ string Token::ToString() const {
 std::ostream &operator<<(std::ostream &os, TokenType tt) {
   return os << kTokenNames[tt];
 }
+
 std::ostream &operator<<(std::ostream &os, const Token &t) {
   return os << t.ToString();
 }

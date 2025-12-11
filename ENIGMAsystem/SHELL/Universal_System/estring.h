@@ -44,6 +44,7 @@ bool is_base64(unsigned char byte);
 std::string ansi_char(char byte);
 std::string chr(char val);
 int ord(std::string str);
+int ord(char c);
 
 double real(variant str);
 
@@ -58,7 +59,7 @@ std::string string_format(double val, unsigned tot, unsigned dec);
 std::string string_copy(std::string str, int index, int count);
 std::string string_set_byte_at(std::string str, int pos, char byte);
 char string_byte_at(std::string str, int index);
-std::string string_char_at(std::string str, int index);
+char string_char_at(std::string str, int index);
 std::string string_delete(std::string str, int index, int count);
 std::string string_insert(std::string substr, std::string str, int index);
 std::string string_replace(std::string str, std::string substr, std::string newstr);
@@ -88,6 +89,15 @@ std::string filename_change_ext(std::string fname, std::string newext);
 var string_split(const std::string &str, const std::string &delim,
                  bool skip_empty = false);
 
+std::string md5_string_utf8(std::string str);
+std::string md5_string_unicode(std::string str);
+std::string md5_string_unicode(std::u16string str);
+std::string md5_file(std::string filename);
+
+std::string sha1_string_utf8(std::string str);
+std::string sha1_string_unicode(std::string str);
+std::string sha1_string_unicode(std::u16string str);
+std::string sha1_file(std::string filename);
 }  //namespace enigma_user
 
 #endif  //ENIGMA_ESTRING_H
