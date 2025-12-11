@@ -225,6 +225,12 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
 
   for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
     bool writeit = true; // Whether this "local" should be declared such
+    
+    // Skip qualified names (containing ::) as they cannot be declared as class members
+    if (ii->first.find("::") != string::npos) {
+      continue;
+    }
+    
     if (parent_declares(object->parent, ii)) {
       continue;
     }

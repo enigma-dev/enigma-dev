@@ -35,12 +35,15 @@
 #include <boost/container/small_vector.hpp>
 
 #include <string>
+#include <string_view>
 
 struct NamedObject {
   std::string_view name;
   buffers::resources::Object* obj;
   NamedObject(): obj(nullptr) {}
   NamedObject(const std::string& obj_name, buffers::resources::Object* obj):
+    name(obj_name), obj(obj) {}
+  NamedObject(std::string_view obj_name, buffers::resources::Object* obj):
     name(obj_name), obj(obj) {}
 };
 
@@ -71,10 +74,9 @@ struct EventDescriptor {
   int ParameterCount() const {
     return event->parameters_size();
   }
-  const std::string &ParameterKind(int n) const {
+  std::string_view ParameterKind(int n) const {
     if (n < event->parameters_size()) return event->parameters(n);
-    static std::string BAD_PARAMETER_INDEX = "N/A";
-    return BAD_PARAMETER_INDEX;
+    return "N/A";
   }
 
   // Returns human-readable examples of ID strings belonging to this event.
@@ -82,13 +84,13 @@ struct EventDescriptor {
 
   // Return the base ID of this event, such as "Collision" or "Draw."
   // Not to be confused with the IdString of an instance of this event.
-  const std::string &bare_id() const { return event->id(); }
+  std::string_view bare_id() const { return event->id(); }
 
   std::string HumanName() const;
   std::string BaseFunctionName() const;
   std::string LocalDeclarations() const;
-  std::string GroupName() const { return event->group(); }
-  std::string HumanDescription() const { return event->description(); }
+  std::string_view GroupName() const { return event->group(); }
+  std::string HumanDescription() const { return std::string(event->description()); }
 
   bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
@@ -145,6 +147,8 @@ struct Event : EventDescriptor {
     Argument() = default;
     Argument(std::string name_, std::string spelling_):
         name(std::move(name_)), spelling(std::move(spelling_)) {}
+    Argument(std::string_view name_, std::string_view spelling_):
+        name(name_), spelling(spelling_) {}
   };
   // Any arguments to this event, using EGM spelling.
   boost::container::small_vector<Argument, 4> arguments;
@@ -186,16 +190,16 @@ struct Event : EventDescriptor {
 
  private:
   // Replaces %1 with the EDL spelling of parameter 1, %2 with parameter 2, etc.
-  std::string ParamSubst(const std::string &str) const {
+  std::string ParamSubst(std::string_view str) const {
     return ParamSubstImpl(str, true);
   }
   // Replaces %1 with the human-readable parameter 1, %2 with parameter 2, etc.
-  std::string NameSubst(const std::string &str) const {
+  std::string NameSubst(std::string_view str) const {
     return ParamSubstImpl(str, false);
   }
   // Kernel for the above two routines. When "code" is set to true, uses the EDL
   // spelling. When false, uses the human name.
-  std::string ParamSubstImpl(const std::string &str, bool code) const;
+  std::string ParamSubstImpl(std::string_view str, bool code) const;
 };
 
 struct EventGroupKey : Event {
@@ -212,6 +216,7 @@ class EventData {
   const Event get_event(int mid, int sid) const;
   // Retrieves an Event with the given ID and arguments.
   Event get_event(const std::string &id, const std::vector<std::string> &args) const;
+  Event get_event(std::string_view id, const std::vector<std::string> &args) const;
   // Retrieves an Event from the proto representation.
   Event get_event(const buffers::resources::Object::EgmEvent &event) const;
   // Look up a legacy ID pair for a non-parameterized event.
@@ -227,6 +232,7 @@ class EventData {
 
   // Decodes an Event ID string, such as Keyboard[Left], into an Event object.
   Event DecodeEventString(const std::string &evstring) const;
+  Event DecodeEventString(std::string_view evstring) const;
 
   EventData(buffers::config::EventFile&&);
 

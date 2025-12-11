@@ -27,7 +27,7 @@
 \********************************************************************************/
 
 #define with(x) \
-  for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); \
+  for (enigma::iterator::with $E_with(enigma::fetch_inst_iter_by_int(x)); \
       enigma::instance_event_iterator; \
       enigma::instance_event_iterator = enigma::instance_event_iterator->next)
 

@@ -1,14 +1,16 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers.resources;
 
 import "options.proto";
 
 message Shader {
-  optional int32 id = 2;
+  int32 id = 2;
 
-  optional string type = 3;
-  optional bool precompile = 4;
+  string type = 3;
+  bool precompile = 4;
 
-  optional string vertex_code = 5;
-  optional string fragment_code = 6;
+  string vertex_code = 5;
+  string fragment_code = 6;
 }

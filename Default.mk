@@ -21,6 +21,7 @@ endif
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(DYLIB_FIX_COMMANDS)
 
 clean:
 	rm -rf $(TARGET) $(OBJ_DIR)

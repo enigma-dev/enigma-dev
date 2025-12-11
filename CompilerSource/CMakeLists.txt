@@ -56,7 +56,8 @@ target_link_libraries(${COMPILER_LIB} PRIVATE ${LIB_PROTO} ${SHARED_LIB})
 
 # Find Protobuf
 find_package(Protobuf CONFIG REQUIRED)
-target_link_libraries(${LIB_PROTO} PRIVATE protobuf::libprotobuf)
+target_include_directories(${COMPILER_LIB} PRIVATE "${Protobuf_INCLUDE_DIRS}")
+target_link_libraries(${COMPILER_LIB} PRIVATE protobuf::libprotobuf)
 
 # Find libpng
 find_package(PNG REQUIRED)

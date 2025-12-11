@@ -1,13 +1,15 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers.config;
 
 message EventDescriptor {
   // The internal ID of the event. Used in filenames and function names.
-  optional string id = 1;
+  string id = 1;
   // The human-readable name of the event.
-  optional string name = 2;
+  string name = 2;
   // A human-readable description of the event included FYI and for editors.
-  optional string description = 3;
+  string description = 3;
 
   enum ExecutionStrategy {
     // A normal event. A container will be emitted so that instances can
@@ -40,10 +42,10 @@ message EventDescriptor {
   }
 
   // The type of this event, in terms of its ExecutionStrategy. See above.
-  optional ExecutionStrategy type = 4;
+  ExecutionStrategy type = 4;
 
   // A hint to editors that this event is similar to others in a group.
-  optional string group = 5;
+  string group = 5;
 
   // If type is parameterized, this is a list of the types of each parameter.
   // The type can be "integer", the name of a resource (e.g. "object"), or
@@ -53,7 +55,7 @@ message EventDescriptor {
   // Any local variables that this event requires.
   // This is specified as a declaration block to be inserted directly into the
   // class definition for objects having this event.
-  optional string locals = 7;
+  string locals = 7;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow augmenting user code for events in various ways.     ┃
@@ -62,17 +64,17 @@ message EventDescriptor {
   // This allows supplying default code for an event. This code will only be
   // executed if the user has not provided their own implementation
   // (similar to virtual code that has been overridden).
-  optional string default = 10;
+  string default = 10;
   // Similar to `default`, except the given code will always appear in the event
   // (even if the user supplies an implementation). In other words, this field
   // behaves like `prefix` in the presence of a user-defined implementation,
   // or like `default` in the absence of one.
-  optional string constant = 11;
+  string constant = 11;
   // Describes logic that will be baked into the object as a separate method
   // intended to invoke the main event method under certain conditions.
   // This is a generalization of the subcheck and allows the event to fire
   // multiple times.
-  optional string dispatcher = 12;
+  string dispatcher = 12;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow tuning event execution.                              ┃
@@ -80,14 +82,14 @@ message EventDescriptor {
   // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
   // This check is performed for each instance, before invoking the event.
-  optional string sub_check = 21;
+  string sub_check = 21;
   // This check is performed once for each event, to skip event iteration in
   // cases where the event is inapplicable (or to optimize by performing the
   // check once up front rather than repeatedly in each instance).
-  optional string super_check = 22;
+  string super_check = 22;
   // Specifies that a given block of code should be executed instead of an
   // ordinary event loop. When specified, sub_check and super_check are ignored.
-  optional string instead = 23;
+  string instead = 23;
 
   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
   // ┃ These fields allow tuning event registration.                           ┃
@@ -97,40 +99,40 @@ message EventDescriptor {
   // This declaration allows instances to manage their registration with the
   // event handler for this particular event. By default, a stable event
   // iterator will be declared here.
-  optional string iterator_declare = 30;
+  string iterator_declare = 30;
   // This snippet is executed in the object's constrcutor. By default, it
   // initializes the iterator declared in the block above to the result of an
   // insert, registering the event for later execution.
-  optional string iterator_initialize = 31;
+  string iterator_initialize = 31;
   // This is the tear-down logic corresponding to the initialize logic above.
   // By default, this unregisters this instance's event from the event loop upon
   // object destruction.
-  optional string iterator_remove = 32;
+  string iterator_remove = 32;
   // This is additional logic to finalize the iterator after it has been
   // unlinked and all references to it have been purged.
-  optional string iterator_delete = 33;
+  string iterator_delete = 33;
 }
 
 message ParameterAlias {
   // The ID as it will appear in filenames or XML IDs.
-  optional string id = 1;
+  string id = 1;
   // The EDL spelling. Should be a constant or literal, but can technically
   // be anything that appears in the final codegen.
-  optional string spelling = 2;
+  string spelling = 2;
   // The value of this constant, as it would appear in binaries.
-  optional int32 value = 3;
+  int32 value = 3;
 }
 
 message AliasSet {
   // Identifies the type of this alias. Used in the rest of the file.
-  optional string id = 1;
+  string id = 1;
   // Individual aliases.
   repeated ParameterAlias aliases = 2;
 }
 
 message IntegerMapping {
   // The main event ID.
-  optional int32 id = 1;
+  int32 id = 1;
 
   // Information on how to map sub IDs.
   oneof SubId {

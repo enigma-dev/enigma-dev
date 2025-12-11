@@ -18,6 +18,7 @@
 #include "gmx.h"
 #include "action.h"
 #include "strings_util.h"
+#include "proto_util.h"
 
 #include <pugixml.hpp>
 
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -35,8 +37,8 @@ using namespace buffers::resources;
 
 namespace egm {
 
-void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath);
-void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
+void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string_view, int>& ids, google::protobuf::Message *m, std::string gmxPath);
+void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string_view, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
 
@@ -86,7 +88,7 @@ class gmx_root_walker {
   std::vector<buffers::TreeNode *> nodes;
   std::string lastName;
   std::string gmxPath;
-  std::unordered_map<std::string, int> idMap;
+  std::unordered_map<std::string_view, int> idMap;
   LookupMap idLookup;
 
   void AddResource(buffers::TreeNode *node, std::string resType, pugi::xml_node &xmlNode) {
@@ -116,7 +118,7 @@ class gmx_root_walker {
         if (resType == "datafile") {
           std::string groupPath = gmxPath;
           for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
-            groupPath += (*parent)->name() + "/";
+            groupPath += std::string((*parent)->name()) + "/";
           }
           PackRes(idLookup, groupPath, idMap, xmlNode, res, 0);
         } else {
@@ -252,7 +254,7 @@ void PackShader(const fs::path& fName, int id, buffers::resources::Shader *shade
   }
 }
 
-void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
+void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::string_view, int>& ids, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -462,7 +464,7 @@ void PackRes(const LookupMap& resMap, std::string &dir, std::unordered_map<std::
   }
 }
 
-void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string, int>& ids, google::protobuf::Message *m, std::string gmxPath) {
+void PackBuffer(const LookupMap& resMap, std::string type, std::string res, std::unordered_map<std::string_view, int>& ids, google::protobuf::Message *m, std::string gmxPath) {
   // Scripts and Shaders are plain text not xml
   std::string fName = gmxPath + string_replace_all(res, "\\", "/");
   std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
@@ -549,8 +551,11 @@ bool GMXFileFormat::PackResource(const fs::path& fPath, google::protobuf::Messag
   if (resName.empty())
     return false;
 
-  std::unordered_map<std::string, int> ids;
+  std::unordered_map<std::string_view, int> ids;
   PackBuffer(LookupMap(), resType, resName, ids, m, dir);
+  
+  // Apply default values from proto attributes
+  ApplyProtoDefaults(m);
 
   return true;
 }

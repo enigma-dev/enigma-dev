@@ -63,6 +63,10 @@ namespace enigma {
     glEnable(GL_SCISSOR_TEST); // constrain clear to viewport like D3D9
     glDepthFunc(GL_LEQUAL); // to match GM8's D3D8 default
 
+    //In GL3.3 Core VAO is mandatory. So we create one and never change it
+    //Must be done before shader validation which requires a bound VAO
+    init_vao();
+
     init_shaders();
     // read shaders into graphics system structure and compile and link them if needed
     for (size_t i = 0; i < shader_idmax; ++i) {
@@ -110,8 +114,5 @@ namespace enigma {
 
     enigma_user::glsl_program_reset(); //Set the default program
     //END DEFAULT SHADER
-
-    //In GL3.3 Core VAO is mandatory. So we create one and never change it
-    init_vao();
   }
 }

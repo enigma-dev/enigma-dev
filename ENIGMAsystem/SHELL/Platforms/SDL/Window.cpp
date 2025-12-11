@@ -43,12 +43,25 @@ void init_sdl_window_bridge_attributes();
 bool initGameWindow() {
   SDL_Init(SDL_INIT_VIDEO);
   if (isSizeable) sdl_window_flags |= SDL_WINDOW_RESIZABLE;
-  if (!showBorder) sdl_window_flags |= SDL_WINDOW_BORDERLESS;
+  // Don't set SDL_WINDOW_BORDERLESS during creation - control it via SDL_SetWindowBordered() instead
+  // This is more reliable on macOS where BORDERLESS flag can't be overridden
   if (isFullScreen) sdl_window_flags |= SDL_WINDOW_FULLSCREEN;
   init_sdl_window_bridge_attributes();
   windowHandle = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, sdl_window_flags);
   bool notnull = (windowHandle != nullptr);
-  if (notnull) window_init();
+  if (notnull) {
+    window_init();
+    // Explicitly set border state to ensure it matches showBorder (important on macOS)
+    // On macOS, we may need to show the window first for border setting to work
+    if (!isFullScreen) {
+      // Temporarily show window to set border (required on macOS)
+      SDL_ShowWindow(windowHandle);
+      SDL_SetWindowBordered(windowHandle, showBorder ? SDL_TRUE : SDL_FALSE);
+      SDL_PumpEvents(); // Process events to ensure border is applied
+      // Hide window again (it will be shown later in roomsystem.cpp)
+      SDL_HideWindow(windowHandle);
+    }
+  }
   return notnull;
 }
 namespace keyboard {

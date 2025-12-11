@@ -27,8 +27,9 @@
 #include <fstream>
 #include <type_traits>
 #include <typeinfo>
-#include <map>
+#include <unordered_map>
 #include <set>
+#include <vector>
 
 namespace {
 
@@ -39,13 +40,38 @@ using std::string;
 
 struct FieldCache {
   string message_name;
-  map<string, const proto::FieldDescriptor*> fields;
+  map<std::string, const proto::FieldDescriptor*> fields;  // Use std::string instead of string_view
 
   const proto::FieldDescriptor* field(const std::string &n) {
     auto it = fields.find(n);
     if (it != fields.end()) return it->second;
-    if ((it = fields.find(ToLower(n))) != fields.end()) {
-      fields.insert({n, it->second});
+    // Try various transformations
+    std::string lower_n = ToLower(n);
+    if ((it = fields.find(lower_n)) != fields.end()) {
+      fields[n] = it->second;  // Cache the original for future lookups
+      return it->second;
+    }
+    // Try converting PascalCase to snake_case (e.g., "SubCheck" -> "sub_check")
+    std::string snake_case;
+    bool prev_lower = false;
+    for (size_t i = 0; i < n.length(); ++i) {
+      char c = n[i];
+      if (c >= 'A' && c <= 'Z') {
+        if (i > 0 && prev_lower) {
+          snake_case += '_';
+        }
+        snake_case += c - 'A' + 'a';
+        prev_lower = false;
+      } else if (c >= 'a' && c <= 'z') {
+        snake_case += c;
+        prev_lower = true;
+      } else {
+        snake_case += c;
+        prev_lower = false;
+      }
+    }
+    if ((it = fields.find(snake_case)) != fields.end()) {
+      fields[n] = it->second;  // Cache the original for future lookups
       return it->second;
     }
     return nullptr;
@@ -57,33 +83,50 @@ struct FieldCache {
       return;
     }
     message_name = desc->name();
+    fields.clear();
     const proto::FieldDescriptor *fd;
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[ToLower(Spaceify(fd->name()))] = fd;
-      fields[ToLower(Hyphenate(fd->name()))] = fd;
-      fields[ToLower(fd->camelcase_name())] = fd;
+      std::string field_name = std::string(fd->name());
+      std::string camel_name = std::string(fd->camelcase_name());
+      
+      // Store all transformations
+      fields[ToLower(Spaceify(field_name))] = fd;
+      fields[ToLower(Hyphenate(field_name))] = fd;
+      fields[ToLower(camel_name)] = fd;
     }
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[Spaceify(fd->name())] = fd;
-      fields[Hyphenate(fd->name())] = fd;
-      fields[fd->camelcase_name()] = fd;
-      fields[Capitalize(fd->camelcase_name())] = fd;
+      std::string field_name = std::string(fd->name());
+      std::string camel_name = std::string(fd->camelcase_name());
+      
+      fields[Spaceify(field_name)] = fd;
+      fields[Hyphenate(field_name)] = fd;
+      fields[camel_name] = fd;
+      fields[Capitalize(camel_name)] = fd;
+      fields[ToPascalCase(field_name)] = fd;
     }
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[fd->name()] = fd;
+      std::string field_name = std::string(fd->name());
+      std::string camel_name = std::string(fd->camelcase_name());
+      
+      fields[ToUpper(field_name)] = fd;
+      fields[ToUpper(camel_name)] = fd;
+    }
+    for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
+      // Store the original field name
+      fields[std::string(fd->name())] = fd;
     }
   }
 };
 
 struct ConstantCache {
   string enum_name;
-  map<string, const proto::EnumValueDescriptor*> values;
+  map<std::string, const proto::EnumValueDescriptor*> values;  // Use std::string instead of string_view
 
   const proto::EnumValueDescriptor* value(const std::string &n) {
     auto it = values.find(n);
     if (it != values.end()) return it->second;
     if ((it = values.find(ToLower(n))) != values.end()) {
-      values.insert({n, it->second});
+      values[n] = it->second;  // Cache the original for future lookups
       return it->second;
     }
     return nullptr;
@@ -95,25 +138,31 @@ struct ConstantCache {
       return;
     }
     enum_name = desc->name();
+    values.clear();
     const proto::EnumValueDescriptor *vd;
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[ToLower(Spaceify(vd->name()))] = vd;
-      values[ToLower(Hyphenate(vd->name()))] = vd;
+      std::string vd_name = std::string(vd->name());
+      values[ToLower(Spaceify(vd_name))] = vd;
+      values[ToLower(Hyphenate(vd_name))] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[Spaceify(vd->name())] = vd;
-      values[Hyphenate(vd->name())] = vd;
-      values[ToPascalCase(vd->name())] = vd;
-      std::cout << " > " << ToPascalCase(vd->name()) << std::endl;
+      std::string vd_name = std::string(vd->name());
+      values[Spaceify(vd_name)] = vd;
+      values[Hyphenate(vd_name)] = vd;
+      values[ToPascalCase(vd_name)] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[ToLower(vd->name())] = vd;
+      std::string vd_name = std::string(vd->name());
+      values[ToLower(vd_name)] = vd;
+      // Add uppercase version (proto enums are typically UPPER_CASE)
+      values[ToUpper(vd_name)] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
       values[std::to_string(vd->number())] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[vd->name()] = vd;
+      // Store the original enum value name
+      values[std::string(vd->name())] = vd;
     }
   }
 };
@@ -211,7 +260,31 @@ bool DecodeHelper::PutScalarToField(const YAML::Node &yaml_scalar,
     }
     case CppType::CPPTYPE_ENUM: {
       auto &cache = cache_for(field->enum_type());
-      if (const auto *ev = cache.value(yaml_scalar.Scalar())) {
+      std::string enum_val = yaml_scalar.Scalar();
+      const auto *ev = cache.value(enum_val);
+      if (!ev) {
+        // Try PascalCase to UPPER_CASE conversion (e.g., "TriggerAll" -> "TRIGGER_ALL")
+        std::string upper_underscore;
+        bool prev_lower = false;
+        for (size_t i = 0; i < enum_val.length(); ++i) {
+          char c = enum_val[i];
+          if (c >= 'A' && c <= 'Z') {
+            if (i > 0 && prev_lower) {
+              upper_underscore += '_';
+            }
+            upper_underscore += c;
+            prev_lower = false;
+          } else if (c >= 'a' && c <= 'z') {
+            upper_underscore += c - 'a' + 'A';
+            prev_lower = true;
+          } else {
+            upper_underscore += c;
+            prev_lower = false;
+          }
+        }
+        ev = cache.value(upper_underscore);
+      }
+      if (ev) {
         const proto::Reflection* refl = to->GetReflection();
         if (field->is_repeated()) {
           refl->AddEnum(to, field, ev);

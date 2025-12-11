@@ -16,6 +16,7 @@
 #include <memory>
 #include <future>
 #include <vector>
+#include <string_view>
 
 namespace fs = std::filesystem;
 
@@ -32,7 +33,7 @@ class CompilerServiceImpl final : public Compiler::Service {
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
     auto fnc = [&] {
-      plugin.BuildGame(request->game(), emode_run, request->name().c_str());
+      plugin.BuildGame(request->game(), emode_run, std::string(request->name()).c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
@@ -172,7 +173,7 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SetDefinitions(ServerContext* /*context*/, const SetDefinitionsRequest* request, SyntaxError* reply) override {
-    syntax_error* err = plugin.SetDefinitions(request->code().c_str(), request->yaml().c_str());
+    syntax_error* err = plugin.SetDefinitions(std::string(request->code()).c_str(), std::string(request->yaml()).c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
@@ -186,8 +187,13 @@ class CompilerServiceImpl final : public Compiler::Service {
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
     std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
-    for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
-    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());
+    std::vector<std::string> script_names_str;
+    script_names_str.reserve(request->script_names().size());
+    for (std::string_view str : request->script_names()) {
+      script_names_str.push_back(std::string(str));
+      script_names.push_back(script_names_str.back().c_str());
+    }
+    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), std::string(request->code()).c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
