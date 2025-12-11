@@ -65,9 +65,12 @@ struct ClangDefinition {
 // Forward declaration
 struct ClangDefinitionScope;
 
+// Forward declaration for shared_ptr
+struct ClangDefinitionScope;
+
 // Scope definition (namespace, class, struct, union)
 struct ClangDefinitionScope : public ClangDefinition {
-  std::map<std::string, std::unique_ptr<ClangDefinition>> members;
+  std::map<std::string, std::shared_ptr<ClangDefinition>> members;
   
   ClangDefinitionScope(const std::string& n, ClangDefinitionScope* p, unsigned int f, CXCursor c)
     : ClangDefinition(n, p, f, c) {}
@@ -88,6 +91,8 @@ struct ClangDefinitionClass : public ClangDefinitionScope {
 struct ClangDefinitionOverload : public ClangDefinition {
   // Parameters stored as type definitions
   std::vector<ClangDefinition*> params;
+  // Storage for parameter shared_ptrs to keep them alive
+  std::vector<std::shared_ptr<ClangDefinition>> owned_params_storage;
   bool is_variadic;
   
   ClangDefinitionOverload(const std::string& n, ClangDefinitionScope* p, unsigned int f, CXCursor c)
@@ -96,8 +101,8 @@ struct ClangDefinitionOverload : public ClangDefinition {
 
 // Function definition (contains overloads)
 struct ClangDefinitionFunction : public ClangDefinition {
-  std::map<std::string, std::unique_ptr<ClangDefinitionOverload>> overloads;
-  std::vector<std::unique_ptr<ClangDefinitionOverload>> template_overloads;
+  std::map<std::string, std::shared_ptr<ClangDefinitionOverload>> overloads;
+  std::vector<std::shared_ptr<ClangDefinitionOverload>> template_overloads;
   
   ClangDefinitionFunction(const std::string& n, ClangDefinitionScope* p, unsigned int f, CXCursor c)
     : ClangDefinition(n, p, f, c) {}

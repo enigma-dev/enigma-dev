@@ -15,6 +15,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <functional>
 
 // Forward declare for macro translation
 namespace enigma {
@@ -43,6 +44,9 @@ public:
   // Get global scope (replaces get_global())
   ClangDefinitionScope* get_global() { return global_scope_.get(); }
   
+  // Get global scope as shared_ptr (for use with TraversalState)
+  std::shared_ptr<ClangDefinitionScope> get_global_shared() { return global_scope_; }
+  
   // Look up a definition by name in global scope
   ClangDefinition* look_up(const std::string& name);
   
@@ -54,15 +58,20 @@ public:
   
   // Add preprocessor define
   void add_define(const std::string& name, const std::string& value = "");
+  
+  // Set namespace filter for function printing (empty string = print all)
+  void set_namespace_filter(const std::string& namespace_name) { namespace_filter_ = namespace_name; }
 
 private:
   CXIndex index_;
   CXTranslationUnit tu_;
-  std::unique_ptr<ClangDefinitionScope> global_scope_;
+  std::shared_ptr<ClangDefinitionScope> global_scope_;
   std::vector<std::string> include_dirs_;
   std::vector<std::string> defines_;
   // Store shared strings to keep them alive for string_view references in macro tokens
   std::vector<std::shared_ptr<std::string>> macro_token_strings_storage_;
+  // Namespace filter for function printing (empty = print all)
+  std::string namespace_filter_;
   
   // Build command line arguments for clang
   std::vector<const char*> build_args();
@@ -74,17 +83,18 @@ private:
   static enum CXChildVisitResult visit_cursor(CXCursor cursor, CXCursor parent, CXClientData client_data);
   
   // Process a cursor and add to scope
-  void process_cursor(CXCursor cursor, ClangDefinitionScope* scope);
+  // Takes a function to re-fetch the scope as shared_ptr to avoid use-after-free
+  void process_cursor(CXCursor cursor, std::function<std::shared_ptr<ClangDefinitionScope>()> get_scope);
   
   // Extract macros from translation unit
   void extract_macros();
   
   // Storage for extracted macros
   std::map<std::string, std::unique_ptr<enigma::parsing::Macro>> macros_;
-  
-  // Helper to get qualified name from cursor
-  std::string get_qualified_name(CXCursor cursor);
 };
+
+// Helper to get qualified name from cursor (free function)
+std::string get_qualified_name(CXCursor cursor);
 
 } // namespace clang_adapter
 

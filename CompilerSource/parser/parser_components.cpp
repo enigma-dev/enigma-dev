@@ -331,17 +331,18 @@ struct stackif
 };
 
 //Check if semicolon is needed here
+// c1 and c2 are syntax characters from the synt string
 inline bool needs_semi(char c1,char c2)
 {
   if (c1 == c2) return 0; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
-  and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
+  and (c2 == 'n' or c2 == '0' or c2 == '"' or c2 == '{' or c2 == '}');
 }
 inline bool needs_semi_sepd(char c1,char c2)
 {
   if (c1 == c2) return 1; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
-  and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
+  and (c2 == 'n' or c2 == '0' or c2 == '"' or c2 == '{' or c2 == '}');
 }
 
 
@@ -483,8 +484,34 @@ void parser_add_semicolons(string &code,string &synt)
     }
     else
     {
+      // Check if we need a semicolon BEFORE writing the current character
+      // Skip whitespace to find the actual previous token
+      pt prev_pos = pos - 1;
+      while (prev_pos > 0 && synt[prev_pos] == ' ') {
+        prev_pos--;
+      }
+      // Also check if previous was ')' and current is identifier/number/string/brace
+      bool need_semi_before = false;
+      if (prev_pos >= 0) {
+        if (needs_semi(synt[prev_pos], synt[pos])) {
+          need_semi_before = true;
+        }
+      }
+      
       codebuf[bufpos]=code[pos];
       syntbuf[bufpos++]=synt[pos];
+      
+      // If we need a semicolon, insert it before the character we just wrote
+      if (need_semi_before)
+      {
+        // Move the character we just wrote forward, insert semicolon before it
+        codebuf[bufpos] = codebuf[bufpos-1];
+        syntbuf[bufpos] = syntbuf[bufpos-1];
+        codebuf[bufpos-1] = *sy_semi;
+        syntbuf[bufpos-1] = *sy_semi;
+        bufpos++;
+        sy_semi=sy_semi->popif('s');
+      }
       
       if (synt[pos]=='(') {
         if (pos and (synt[pos-1]=='0' or synt[pos-1] == '\'' or synt[pos-1] == '"')) {
@@ -497,7 +524,28 @@ void parser_add_semicolons(string &code,string &synt)
           sy_semi=sy_semi->push(',','(');
         continue;
       }
-      if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
+      if (synt[pos]==')') { 
+        sy_semi=sy_semi->popif('(');
+        // Check if semicolon is needed after this ')'
+        // Look ahead to find the next non-whitespace syntax character
+        pt next_pos = pos + 1;
+        while (next_pos < synt.length() && synt[next_pos] == ' ') {
+          next_pos++;
+        }
+        // Check if next token needs a semicolon after ')'
+        if (next_pos < synt.length()) {
+          char next_synt = synt[next_pos];
+          // Check if we need a semicolon: ')' followed by identifier, number, string, or brace
+          if (needs_semi(')', next_synt))
+          {
+            // Insert semicolon right after the ')'
+            codebuf[bufpos] = *sy_semi;
+            syntbuf[bufpos++] = *sy_semi;
+            sy_semi=sy_semi->popif('s');
+          }
+        }
+        continue; 
+      }
       if (synt[pos]==';')
       {
         /*if (synt[pos+1] == ')') {
@@ -538,14 +586,6 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (pos and needs_semi(synt[pos-1],synt[pos]))
-      {
-        codebuf[bufpos-1] = *sy_semi;
-        syntbuf[bufpos-1] = *sy_semi;
-        codebuf[bufpos  ] = code[pos];
-        syntbuf[bufpos++] = synt[pos];
-        sy_semi=sy_semi->popif('s');
-      }
       if((pos>2 and synt[pos] == '+' and synt[pos-1] == '+' and synt[pos-2] == 'n' and needs_semi_sepd('n',synt[pos+1]))
       or (pos>2 and synt[pos] == '-' and synt[pos-1] == '-' and synt[pos-2] == 'n' and needs_semi_sepd('n',synt[pos+1])))
       {
@@ -855,7 +895,11 @@ void print_to_file(const enigma::parsing::ParseContext &ctex, string code,string
           break;
         }
         if (tind) tind = 0;
-        case ':':
+        of << code[pos];
+        of << '\n';
+        of.write(indent_chars,indentmin+indc+tind);
+        break;
+      case ':':
           of << code[pos];
           of.write(indent_chars,indentmin+indc+tind);
         break;

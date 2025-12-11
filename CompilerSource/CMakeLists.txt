@@ -99,6 +99,50 @@ else()
   endif()
 endif()
 
+# Simple test executable for clang adapter (mirrors emake setup)
+# Note: This must be built from the parent CMakeLists.txt where LIB_PROTO and SHARED_LIB are defined
+if(DEFINED LIB_PROTO AND DEFINED SHARED_LIB)
+  SET(CMAKE_SKIP_BUILD_RPATH ON)
+  set(CMAKE_INSTALL_RPATH $ORIGIN)
+
+  add_executable(test_clang languages/test_clang.cpp)
+
+  if(MSVC)
+    target_compile_options(test_clang PRIVATE /W1)
+  endif()
+
+  target_include_directories(test_clang PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+
+  # Link against the same libraries as emake
+  add_dependencies(test_clang ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
+  target_link_libraries(test_clang PRIVATE ${COMPILER_LIB} ${LIB_PROTO} ${SHARED_LIB})
+
+  # Clang libraries
+  if(Clang_FOUND)
+    target_include_directories(test_clang PRIVATE ${Clang_INCLUDE_DIRS})
+    target_link_libraries(test_clang PRIVATE ${Clang_LIBRARIES})
+  else()
+    target_include_directories(test_clang PRIVATE ${LIBCLANG_INCLUDE_DIR})
+    target_link_libraries(test_clang PRIVATE ${LIBCLANG_LIBRARY})
+    
+    # Fix libclang path for macOS (same as compiler library)
+    if(APPLE AND LIBCLANG_LIBRARY)
+      get_filename_component(LIBCLANG_DIR ${LIBCLANG_LIBRARY} DIRECTORY)
+      set_target_properties(test_clang PROPERTIES
+        INSTALL_RPATH "${LIBCLANG_DIR}"
+        BUILD_WITH_INSTALL_RPATH TRUE
+      )
+      # Fix the library reference after building
+      add_custom_command(TARGET test_clang POST_BUILD
+        COMMAND install_name_tool -change @rpath/libclang.dylib ${LIBCLANG_LIBRARY} $<TARGET_FILE:test_clang>
+        COMMENT "Fixing libclang library path for test_clang on macOS"
+      )
+    endif()
+  endif()
+
+  install(TARGETS test_clang RUNTIME DESTINATION .)
+endif()
+
 if(MSVC)
   # Default MSVC warnings are overkill. Set to Lvl 1
   target_compile_options(${COMPILER_LIB} PRIVATE /W1)

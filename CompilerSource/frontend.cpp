@@ -58,7 +58,7 @@ int m_prog_loop_cfp();
 #endif
 
 namespace dll_ext_iteration {
-  std::map<std::string, std::unique_ptr<clang_adapter::ClangDefinition>>::iterator rit;
+  std::map<std::string, std::shared_ptr<clang_adapter::ClangDefinition>>::iterator rit;
   jdi::definition_scope* searching_in;
   jdi::definition* current_resource;
   string its_name;

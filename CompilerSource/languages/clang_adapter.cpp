@@ -9,6 +9,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
 
 namespace clang_adapter {
 
@@ -70,10 +72,35 @@ std::string get_qualified_name(CXCursor cursor) {
   return result;
 }
 
+// Get type spelling (string representation of a type)
+std::string get_type_spelling(CXType type) {
+  CXString type_str = clang_getTypeSpelling(type);
+  std::string result = clang_getCString(type_str);
+  clang_disposeString(type_str);
+  return result;
+}
+
+// Helper function to check if a scope is in a specific namespace
+static bool is_in_namespace(ClangDefinitionScope* scope, const std::string& namespace_name) {
+  if (namespace_name.empty()) {
+    return true;  // Empty filter means print all
+  }
+  
+  // Traverse up the parent chain to find the namespace
+  ClangDefinitionScope* current = scope;
+  while (current) {
+    if (current->name == namespace_name && (current->flags & jdi::DEF_NAMESPACE)) {
+      return true;
+    }
+    current = current->parent;
+  }
+  return false;
+}
+
 // ClangContext implementation
-ClangContext::ClangContext() : index_(nullptr), tu_(nullptr) {
+ClangContext::ClangContext() : index_(nullptr), tu_(nullptr), namespace_filter_("") {
   index_ = clang_createIndex(0, 0);
-  global_scope_ = std::make_unique<ClangDefinitionScope>("", nullptr, jdi::DEF_SCOPE, clang_getNullCursor());
+  global_scope_ = std::make_shared<ClangDefinitionScope>("", nullptr, jdi::DEF_SCOPE, clang_getNullCursor());
 }
 
 ClangContext::~ClangContext() {
@@ -88,7 +115,7 @@ ClangContext::~ClangContext() {
 }
 
 void ClangContext::add_include_dir(const std::string& dir) {
-  include_dirs_.push_back("-I" + dir);
+  include_dirs_.push_back(dir);
 }
 
 void ClangContext::add_define(const std::string& name, const std::string& value) {
@@ -100,13 +127,67 @@ void ClangContext::add_define(const std::string& name, const std::string& value)
 }
 
 std::vector<const char*> ClangContext::build_args() {
+  static std::vector<std::string> system_include_strings;
+  static std::vector<const char*> system_include_args;
+  
+  // Add C++ standard and explicitly use libc++
   std::vector<const char*> args;
-  
-  // Add C++ standard
   args.push_back("-std=c++17");
+  args.push_back("-stdlib=libc++");
   
-  // Add include directories
+  // Get system include paths (only compute once)
+  if (system_include_strings.empty()) {
+    #ifdef __APPLE__
+      // Try to get SDK path
+      std::string sdk_path = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk";
+      FILE* pipe = popen("xcrun --show-sdk-path 2>/dev/null", "r");
+      if (pipe) {
+        char buffer[512];
+        if (fgets(buffer, sizeof(buffer), pipe)) {
+          std::string result = buffer;
+          // Remove trailing newline
+          if (!result.empty() && result.back() == '\n') {
+            result.pop_back();
+          }
+          if (!result.empty()) {
+            sdk_path = result;
+          }
+        }
+        pclose(pipe);
+      }
+      
+      // Set the SDK root - this is the key to making clang find the right headers
+      // Clang will automatically add include paths in the correct order:
+      // 1. C++ headers (from SDK/usr/include/c++/v1)
+      // 2. Clang builtin includes
+      // 3. C headers (from SDK/usr/include)
+      // This order is exactly what libc++ needs
+      system_include_strings.push_back("-isysroot");
+      system_include_strings.push_back(sdk_path);
+      
+      // Build the args vector from strings (strings persist in static storage)
+      for (const auto& str : system_include_strings) {
+        system_include_args.push_back(str.c_str());
+      }
+    #elif __linux__
+      system_include_strings.push_back("-isystem");
+      system_include_strings.push_back("/usr/include/c++/11");
+      system_include_strings.push_back("-isystem");
+      system_include_strings.push_back("/usr/include");
+      for (const auto& str : system_include_strings) {
+        system_include_args.push_back(str.c_str());
+      }
+    #elif _WIN32
+      // Windows paths would go here
+    #endif
+  }
+  
+  // Add system includes to args (pointers are valid because strings are static)
+  args.insert(args.end(), system_include_args.begin(), system_include_args.end());
+  
+  // Add include directories (as separate -I and path arguments)
   for (const auto& dir : include_dirs_) {
+    args.push_back("-I");
     args.push_back(dir.c_str());
   }
   
@@ -121,6 +202,30 @@ std::vector<const char*> ClangContext::build_args() {
 int ClangContext::parse_file(const std::string& filepath,
                               const std::vector<std::string>& include_dirs,
                               const std::vector<std::string>& defines) {
+  // Add the directory containing the file being parsed as an include directory
+  // This allows relative includes (like "rect.h") to be found
+  size_t last_slash = filepath.find_last_of("/\\");
+  if (last_slash != std::string::npos) {
+    std::string file_dir = filepath.substr(0, last_slash);
+    add_include_dir(file_dir);
+    
+    // Also add parent directories up to ENIGMAsystem level
+    // This allows includes from sibling directories
+    std::string current = file_dir;
+    while (current.length() > 0) {
+      size_t slash = current.find_last_of("/\\");
+      if (slash == std::string::npos) break;
+      std::string parent = current.substr(0, slash);
+      add_include_dir(parent);
+      // Stop when we reach ENIGMAsystem directory
+      if (parent.find("ENIGMAsystem") != std::string::npos && 
+          parent.find_last_of("/\\") < parent.find("ENIGMAsystem") + 12) {
+        break;
+      }
+      current = parent;
+    }
+  }
+  
   // Add provided include dirs and defines
   for (const auto& dir : include_dirs) {
     add_include_dir(dir);
@@ -170,20 +275,35 @@ int ClangContext::parse_file(const std::string& filepath,
 }
 
 // Helper structure to track scope during traversal
+// Use weak_ptr to avoid use-after-free issues
 struct TraversalState {
   ClangContext* ctx;
-  std::vector<ClangDefinitionScope*> scope_stack;
+  std::vector<std::weak_ptr<ClangDefinitionScope>> scope_stack;  // Stack of weak pointers to scopes
   
   TraversalState(ClangContext* c) : ctx(c) {
-    scope_stack.push_back(c->get_global());
+    // Start with global scope
+    if (auto global = ctx->get_global_shared()) {
+      scope_stack.push_back(global);
+    }
   }
   
-  ClangDefinitionScope* current_scope() {
-    return scope_stack.empty() ? ctx->get_global() : scope_stack.back();
+  std::shared_ptr<ClangDefinitionScope> current_scope() {
+    if (scope_stack.empty()) {
+      return ctx->get_global_shared();
+    }
+    
+    // Try to lock the weak_ptr - if it's expired, return global
+    auto locked = scope_stack.back().lock();
+    if (!locked) {
+      return ctx->get_global_shared();
+    }
+    return locked;
   }
   
-  void push_scope(ClangDefinitionScope* scope) {
-    scope_stack.push_back(scope);
+  void push_scope(std::shared_ptr<ClangDefinitionScope> scope) {
+    if (scope) {
+      scope_stack.push_back(scope);
+    }
   }
   
   void pop_scope() {
@@ -209,10 +329,15 @@ enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor par
   TraversalState* state = static_cast<TraversalState*>(client_data);
   ClangContext* ctx = state->ctx;
   
-  ClangDefinitionScope* target_scope = state->current_scope();
+  auto target_scope = state->current_scope();
   
-  // Process the cursor
-  ctx->process_cursor(cursor, target_scope);
+  // Safety check: ensure scope is valid
+  if (!target_scope) {
+    return CXChildVisit_Continue;
+  }
+  
+  // Process the cursor - pass a lambda that re-fetches the scope to avoid use-after-free
+  ctx->process_cursor(cursor, [state]() { return state->current_scope(); });
   
   // If this cursor creates a new scope, push it
   CXCursorKind kind = clang_getCursorKind(cursor);
@@ -221,16 +346,22 @@ enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor par
   if (flags & jdi::DEF_SCOPE) {
     std::string name = get_cursor_name(cursor);
     if (!name.empty()) {
-      auto it = target_scope->members.find(name);
-      if (it != target_scope->members.end()) {
-        ClangDefinitionScope* new_scope = static_cast<ClangDefinitionScope*>(it->second.get());
-        state->push_scope(new_scope);
-        
-        // Visit children in this scope
-        clang_visitChildren(cursor, visit_cursor, client_data);
-        
-        state->pop_scope();
-        return CXChildVisit_Continue;  // Don't recurse again
+      // Re-fetch scope to ensure it's valid
+      target_scope = state->current_scope();
+      if (target_scope) {
+        auto it = target_scope->members.find(name);
+        if (it != target_scope->members.end() && it->second) {
+          auto new_scope = std::dynamic_pointer_cast<ClangDefinitionScope>(it->second);
+          if (new_scope) {
+            state->push_scope(new_scope);
+            
+            // Visit children in this scope
+            clang_visitChildren(cursor, visit_cursor, client_data);
+            
+            state->pop_scope();
+            return CXChildVisit_Continue;  // Don't recurse again
+          }
+        }
       }
     }
   }
@@ -239,7 +370,15 @@ enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor par
   return CXChildVisit_Recurse;
 }
 
-void ClangContext::process_cursor(CXCursor cursor, ClangDefinitionScope* scope) {
+void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr<ClangDefinitionScope>()> get_scope) {
+  // Re-fetch scope right before use to avoid use-after-free
+  auto scope = get_scope();
+  
+  // Safety check: scope must be valid
+  if (!scope) {
+    return;
+  }
+  
   CXCursorKind kind = clang_getCursorKind(cursor);
   
   // Skip certain cursor kinds
@@ -259,36 +398,117 @@ void ClangContext::process_cursor(CXCursor cursor, ClangDefinitionScope* scope) 
     return;  // Not a definition we care about
   }
   
-  // Check if already exists
-  if (scope->members.find(name) != scope->members.end()) {
-    return;  // Already added
+  // Re-fetch scope again right before accessing members to ensure it's still valid
+  scope = get_scope();
+  if (!scope) {
+    return;
   }
   
   // Create appropriate definition type
-  std::unique_ptr<ClangDefinition> def;
+  std::shared_ptr<ClangDefinition> def;
   
   if (flags & jdi::DEF_SCOPE) {
+    // For scopes, check if already exists (don't create duplicates)
+    if (scope->members.find(name) != scope->members.end()) {
+      return;  // Already added
+    }
+    
     if (flags & jdi::DEF_CLASS) {
-      def = std::make_unique<ClangDefinitionClass>(name, scope, flags, cursor);
+      def = std::make_shared<ClangDefinitionClass>(name, scope.get(), flags, cursor);
     } else {
-      def = std::make_unique<ClangDefinitionScope>(name, scope, flags, cursor);
+      def = std::make_shared<ClangDefinitionScope>(name, scope.get(), flags, cursor);
+    }
+    
+    // Re-fetch scope before insertion in case it changed
+    scope = get_scope();
+    if (!scope) {
+      return;
     }
     
     // Add to scope
-    ClangDefinitionScope* def_scope = static_cast<ClangDefinitionScope*>(def.get());
-    scope->members[name] = std::move(def);
+    scope->members[name] = def;
     
     // Visit children to populate this scope (will be handled by visitor)
     
   } else if (flags & jdi::DEF_FUNCTION) {
-    def = std::make_unique<ClangDefinitionFunction>(name, scope, flags, cursor);
+    // For functions, check if function already exists (for overload detection)
+    // If it exists, we'll add this as a new overload instead of creating a new function
+    // Re-fetch scope to ensure it's valid
+    scope = get_scope();
+    if (!scope) {
+      return;
+    }
+    
+    // Check if a function with this EXACT name already exists in this scope
+    bool function_exists = (scope->members.find(name) != scope->members.end());
+    
+    // Debug: if function_exists is true, verify it's actually the same name
+    if (function_exists) {
+      auto check_it = scope->members.find(name);
+      if (check_it != scope->members.end() && check_it->first != name) {
+        // This shouldn't happen - the key should match the name
+        std::cerr << "ERROR: Scope member key '" << check_it->first 
+                  << "' doesn't match function name '" << name << "'" << std::endl;
+        function_exists = false;  // Treat as new function
+      }
+    }
+    
+    std::shared_ptr<ClangDefinitionFunction> func_def;
+    
+    if (function_exists) {
+      // Function with this name already exists - get the existing one to add overload
+      auto existing_it = scope->members.find(name);
+      if (existing_it != scope->members.end()) {
+        func_def = std::dynamic_pointer_cast<ClangDefinitionFunction>(existing_it->second);
+        if (!func_def) {
+          // Name collision with non-function - skip
+          return;
+        }
+        def = existing_it->second;  // Reuse existing definition
+      } else {
+        // Shouldn't happen, but handle it
+        function_exists = false;
+      }
+    }
+    
+    if (!func_def) {
+      // Create new function definition - this is a NEW function name
+      // Ensure overloads map is empty for a new function
+      def = std::make_shared<ClangDefinitionFunction>(name, scope.get(), flags, cursor);
+      func_def = std::static_pointer_cast<ClangDefinitionFunction>(def);
+      // Verify overloads is empty for a new function
+      if (!func_def->overloads.empty()) {
+        std::cerr << "WARNING: New function '" << name << "' has non-empty overloads map!" << std::endl;
+        func_def->overloads.clear();  // Clear it to be safe
+      }
+    }
     
     // Extract function parameters
-    ClangDefinitionFunction* func_def = static_cast<ClangDefinitionFunction*>(def.get());
     int num_args = clang_Cursor_getNumArguments(cursor);
     
+    // Handle -1 return value (function templates, invalid cursors, etc.)
+    if (num_args < 0) {
+      num_args = 0;
+    }
+    
+    // Get function type for variadic check (needed both for printing and overload creation)
+    CXType func_type = clang_getCursorType(cursor);
+    
+    // Check if this is a template function
+    bool is_template = (kind == CXCursor_FunctionTemplate || kind == CXCursor_ClassTemplate);
+    std::vector<std::string> template_params;
+    if (is_template) {
+      // Get template parameters by visiting template parameter children
+      // We'll collect them during traversal, but for now just mark as template
+      // The actual template parameters are handled as separate cursors during AST traversal
+    }
+    
     // Create overload
-    auto overload = std::make_unique<ClangDefinitionOverload>(name, scope, flags | jdi::DEF_OVERLOAD, cursor);
+    auto overload = std::make_shared<ClangDefinitionOverload>(name, scope.get(), flags | jdi::DEF_OVERLOAD, cursor);
+    
+    // Collect parameter types for printing
+    std::vector<std::string> param_types;
+    std::vector<std::string> param_names;
     
     for (int i = 0; i < num_args; ++i) {
       CXCursor arg_cursor = clang_Cursor_getArgument(cursor, i);
@@ -297,33 +517,153 @@ void ClangContext::process_cursor(CXCursor cursor, ClangDefinitionScope* scope) 
         arg_name = "arg" + std::to_string(i);
       }
       
+      // Get parameter type
+      CXType arg_type = clang_getArgType(func_type, i);
+      std::string arg_type_str = get_type_spelling(arg_type);
+      param_types.push_back(arg_type_str);
+      param_names.push_back(arg_name);
+      
+      // Re-fetch scope before creating parameter (to ensure it's valid)
+      scope = get_scope();
+      if (!scope) {
+        return;
+      }
+      
       // Create typed definition for parameter
       unsigned arg_flags = jdi::DEF_TYPED;
-      auto param_def = std::make_unique<ClangDefinitionTyped>(
-        arg_name, scope, arg_flags, arg_cursor, nullptr);
+      auto param_def = std::make_shared<ClangDefinitionTyped>(
+        arg_name, scope.get(), arg_flags, arg_cursor, nullptr);
       
+      // Store the shared_ptr to keep it alive, and add raw pointer to params
       overload->params.push_back(param_def.get());
+      overload->owned_params_storage.push_back(param_def);
       // Don't add params to scope members - they're part of the function
     }
     
-    // Check if variadic
-    CXType func_type = clang_getCursorType(cursor);
     if (clang_isFunctionTypeVariadic(func_type)) {
       overload->is_variadic = true;
     }
     
-    func_def->overloads[name] = std::move(overload);
-    scope->members[name] = std::move(def);
+    // Generate a unique key for this overload based on parameter types
+    // This allows us to store multiple overloads with the same name
+    std::string overload_key = name;
+    for (const auto& param_type : param_types) {
+      overload_key += "_" + param_type;
+    }
+    
+    // Check if this exact overload already exists
+    bool overload_exists = (func_def->overloads.find(overload_key) != func_def->overloads.end());
+    if (overload_exists) {
+      // This exact overload already exists, skip it
+      return;
+    }
+    
+    // Count existing overloads BEFORE adding this one
+    // For a new function (!function_exists), this should be 0, so overload_count will be 1
+    // For an existing function (function_exists), this will be the number of existing overloads
+    size_t overload_count;
+    if (!function_exists) {
+      // This is a new function, so this is the first overload
+      overload_count = 1;
+      // Verify overloads is empty
+      if (!func_def->overloads.empty()) {
+        std::cerr << "WARNING: New function '" << name << "' has " << func_def->overloads.size() 
+                  << " existing overloads!" << std::endl;
+      }
+    } else {
+      // This is an existing function, count existing overloads
+      overload_count = func_def->overloads.size() + 1;
+    }
+    
+    // Add the overload
+    func_def->overloads[overload_key] = overload;
+    
+    // Only add to scope members if this is a new function (not just a new overload)
+    if (!function_exists) {
+      // Re-fetch scope before insertion
+      scope = get_scope();
+      if (!scope) {
+        return;
+      }
+      scope->members[name] = def;
+    }
+    
+    // Print function information (only if namespace filter matches)
+    if (namespace_filter_.empty() || is_in_namespace(scope.get(), namespace_filter_)) {
+      std::string scope_name = scope ? (scope->name.empty() ? "global" : scope->name) : "global";
+      
+      // Check if there are multiple overloads (after adding this one)
+      // If function_exists is true, we know there was at least one overload before this one
+      // If function_exists is false but overloads.size() > 1, we've added multiple in one go (shouldn't happen)
+      bool has_multiple_overloads = function_exists || (func_def->overloads.size() > 1);
+      
+      // Print function header
+      if (!function_exists) {
+        std::cout << "Found function: " << scope_name << "::" << name;
+        std::cout << std::endl;
+      }
+      
+      // Only print "Overload X:" if there are multiple overloads
+      // For single overloads, just print the signature directly
+      if (has_multiple_overloads) {
+        std::cout << "  Overload " << overload_count << ": ";
+      } else {
+        std::cout << "  ";
+      }
+      
+      // Print return type
+      CXType return_type = clang_getResultType(func_type);
+      std::string return_type_str = get_type_spelling(return_type);
+      std::cout << return_type_str << " ";
+      std::cout << name << "(";
+      
+      // Print parameters with types
+      if (param_types.empty()) {
+        std::cout << "void";
+      } else {
+        for (size_t i = 0; i < param_types.size(); ++i) {
+          if (i > 0) std::cout << ", ";
+          std::cout << param_types[i] << " " << param_names[i];
+        }
+      }
+      
+      if (clang_isFunctionTypeVariadic(func_type)) {
+        if (num_args > 0) std::cout << ", ";
+        std::cout << "...";
+      }
+      
+      std::cout << ")";
+      
+      if (clang_isFunctionTypeVariadic(func_type)) {
+        std::cout << " [variadic]";
+      }
+      if (is_template) {
+        std::cout << " [template]";
+      }
+      std::cout << std::endl;
+    }
     
   } else if (flags & jdi::DEF_TYPED) {
+    // Re-fetch scope before insertion
+    scope = get_scope();
+    if (!scope) {
+      return;
+    }
+    
     // Create typed definition
-    def = std::make_unique<ClangDefinitionTyped>(name, scope, flags, cursor, nullptr);
-    scope->members[name] = std::move(def);
+    def = std::make_shared<ClangDefinitionTyped>(name, scope.get(), flags, cursor, nullptr);
+    scope->members[name] = def;
     
   } else {
+    // Re-fetch scope before insertion
+    scope = get_scope();
+    if (!scope) {
+      return;
+    }
+    
     // Generic definition
-    def = std::make_unique<ClangDefinition>(name, scope, flags, cursor);
-    scope->members[name] = std::move(def);
+    def = std::make_shared<ClangDefinition>(name, scope.get(), flags, cursor);
+    scope->members[name] = def;
   }
 }
 
