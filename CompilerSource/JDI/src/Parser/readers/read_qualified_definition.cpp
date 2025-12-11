@@ -69,9 +69,19 @@ definition* jdi::context_parser::read_qualified_definition(token_t &token, defin
       abort();
     }
     #endif
+    if (!token.def) {
+      // token.def became null, likely due to an error in tokenization
+      // Break out of the loop and return what we have so far
+      break;
+    }
     definition* tdef = token.def; // Reduce the type; full_type::reduce is more work than we need
-    while (((tdef->flags & (DEF_TYPED | DEF_TYPENAME)) == (DEF_TYPED | DEF_TYPENAME)) && ((definition_typed*)tdef)->type)
+    while (tdef && (((tdef->flags & (DEF_TYPED | DEF_TYPENAME)) == (DEF_TYPED | DEF_TYPENAME)) && ((definition_typed*)tdef)->type))
       tdef = ((definition_typed*)tdef)->type;
+
+    if (!tdef) {
+      // tdef became null during type reduction, break out of the loop
+      break;
+    }
 
     if (tdef->flags & DEF_TEMPLATE)
     {

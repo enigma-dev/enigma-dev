@@ -8,6 +8,8 @@
 
 #include "GameData.h"
 #include "event_reader/event_parser.h"
+#include "Settings.pb.h"  // For Settings message
+#include "options.pb.h"   // For default_value extension accessor (required for ApplyProtoDefaults)
 #include "proto_util.h"
 
 #include "libpng-util/libpng-util.h"
@@ -530,6 +532,12 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
 
 int FlattenProto(const buffers::Project &proj, GameData *gameData) {
   cout << "Flattening tree." << endl;
+
+  // Settings are not part of the Project proto, so initialize with defaults
+  // ApplyProtoDefaults will use the generated extension accessor since options.pb.h is included above
+  ApplyProtoDefaults(&gameData->settings);
+  
+  // Game info is also not part of the proto, so it will use its defaults
 
   int ret = FlattenTree(proj.game().root(), gameData);
 

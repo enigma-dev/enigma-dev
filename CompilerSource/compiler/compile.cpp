@@ -336,12 +336,15 @@ static NameSet ScriptNames(const GameData &game) {
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
+  std::string exe_filename_str; // Persistent storage for modified filename
+  const char* exe_filename_ptr = exe_filename; // Pointer to use throughout function
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
-      exe_filename = exename.u8string().c_str();
+      exe_filename_str = exename.u8string(); // Store in persistent string
+      exe_filename_ptr = exe_filename_str.c_str(); // Update pointer to persistent storage
     }
   }
 
@@ -494,7 +497,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   idpr("Adding resources...",90);
   std::filesystem::path desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
-  std::filesystem::path gameFname = mode == emode_design ? desstr.u8string().c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
+  std::filesystem::path gameFname = mode == emode_design ? desstr.u8string().c_str() : (desstr = exe_filename_ptr, exe_filename_ptr); // We will be using this first to write, then to run
 
   edbg << "Writing executable information and resources." << flushl;
   if (compilerInfo.target_platform == "Windows")
@@ -818,7 +821,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
     // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
     std::vector<char> prevdir(size_t(4096));
-    string newdir = game.filename.empty() ? exe_filename : game.filename;
+    string newdir = game.filename.empty() ? (exe_filename_ptr ? exe_filename_ptr : "") : game.filename;
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
       if (newdir[0] == '/' || newdir[0] == '\\') {
         newdir = newdir.substr(1, newdir.size());

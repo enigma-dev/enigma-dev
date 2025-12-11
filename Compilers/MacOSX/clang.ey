@@ -11,8 +11,8 @@ Make-Vars:
   cc: clang
   cxx: clang++
   cppflags:
-  cxxflags:
-  cflags:
+  cxxflags: -fcolor-diagnostics -I/opt/homebrew/include/
+  cflags: -fcolor-diagnostics -I/opt/homebrew/include/
   ldflags:
   links:
 

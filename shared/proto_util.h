@@ -6,9 +6,7 @@
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/message.h>
 #include <google/protobuf/reflection.h>
-
-// Forward declaration - the generated options.pb.h will be included by files that use this
-// The extension access will work once the proto files are regenerated
+#include "options.pb.h"  // For default_value extension accessor
 
 inline void SetProtoField(google::protobuf::Message* msg,
                           const google::protobuf::FieldDescriptor* field,
@@ -152,44 +150,55 @@ inline void ApplyProtoDefaults(google::protobuf::Message* msg) {
   const google::protobuf::Reflection* refl = msg->GetReflection();
   using CppType = google::protobuf::FieldDescriptor::CppType;
   
+  // First pass: Create nested messages (this marks them as set with explicit field presence)
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor* field = desc->field(i);
+    
+    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      if (field->is_repeated()) {
+        // For repeated fields, apply defaults to each element
+        for (int j = 0; j < refl->FieldSize(*msg, field); j++) {
+          ApplyProtoDefaults(refl->MutableRepeatedMessage(msg, field, j));
+        }
+      } else {
+        // For singular message fields, create the message if it doesn't exist
+        // With explicit field presence, MutableMessage creates the message and marks the field as set
+        google::protobuf::Message* nestedMsg = refl->MutableMessage(msg, field);
+        if (nestedMsg) {
+          // Recursively apply defaults to the nested message
+          ApplyProtoDefaults(nestedMsg);
+        }
+      }
+    }
+  }
+  
+  // Second pass: Apply default_value options to primitive fields in this message
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor* field = desc->field(i);
     const google::protobuf::FieldOptions& opts = field->options();
     
-    // Check if field has default_value custom option (extension field number 50008)
-    const google::protobuf::FieldDescriptor* extField = 
-        google::protobuf::FieldOptions::descriptor()->FindFieldByNumber(50008);
-    if (extField) {
-      const google::protobuf::Reflection* extRefl = opts.GetReflection();
-      if (extRefl->HasField(opts, extField)) {
-        std::string defaultVal = extRefl->GetString(opts, extField);
-        
-        // With explicit field presence, check if field is not set
-        // For repeated fields, we still apply defaults to each element
-        if (field->is_repeated()) {
-          // For repeated fields, apply defaults recursively to each element
-          for (int j = 0; j < refl->FieldSize(*msg, field); j++) {
-            ApplyProtoDefaults(refl->MutableRepeatedMessage(msg, field, j));
-          }
-        } else if (!refl->HasField(*msg, field)) {
-          // Field is not set, apply the custom default value
-          SetProtoField(msg, field, defaultVal);
-        } else if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-          // Field is set and is a message type, recursively apply defaults
-          ApplyProtoDefaults(refl->MutableMessage(msg, field));
-        }
-      }
+    // Skip message and repeated fields
+    if (field->is_repeated() || field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      continue;
     }
     
-    // Recursively process nested messages (even if they don't have default_value)
-    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
-      if (field->is_repeated()) {
-        for (int j = 0; j < refl->FieldSize(*msg, field); j++) {
-          ApplyProtoDefaults(refl->MutableRepeatedMessage(msg, field, j));
-        }
-      } else if (refl->HasField(*msg, field)) {
-        ApplyProtoDefaults(refl->MutableMessage(msg, field));
+    // Skip if field is already set
+    if (refl->HasField(*msg, field)) {
+      continue;
+    }
+    
+    // Get default_value extension using generated accessor
+    std::string defaultVal = opts.GetExtension(buffers::default_value);
+    if (!defaultVal.empty()) {
+      std::cerr << "[ApplyProtoDefaults] Applying default to field: " << field->name() 
+                << " = " << defaultVal << std::endl;
+      SetProtoField(msg, field, defaultVal);
+      // Verify it was set
+      if (!refl->HasField(*msg, field)) {
+        std::cerr << "[ApplyProtoDefaults] WARNING: Field was not set after SetProtoField: " << field->name() << std::endl;
       }
+    } else {
+      std::cerr << "[ApplyProtoDefaults] No default_value extension for field: " << field->name() << std::endl;
     }
   }
 }
