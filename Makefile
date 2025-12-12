@@ -20,7 +20,7 @@ clean: .FORCE
 
 all: libENIGMAShared libProtocols libEGM ENIGMA gm2egm emake emake-tests test-runner .FORCE
 
-Game: .FORCE
+Game: required-directories .FORCE
 	@$(RM) -f logs/enigma_compile.log
 	@$(MAKE) -C ENIGMAsystem/SHELL > >(tee -a /tmp/enigma_compile.log) 2> >(tee -a /tmp/enigma_compile.log >&2)
 
