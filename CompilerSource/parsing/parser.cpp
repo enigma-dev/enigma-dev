@@ -454,7 +454,7 @@ std::unique_ptr<AST::Node> TryParseArrayBoundsExpression(Declarator *decl, bool 
 
   // TODO: Check that expression is constant, then evaluate it
   // for handling new expressions we need to support also non-constant expressions, like `new int[x]`
-  std::size_t arr_size = 0;
+  std::size_t arr_size = ArrayBoundNode::nsize;  // Default to unsized array
   if (expr) {
     if (expr->type == AST::NodeType::LITERAL) {
       auto *lit = expr->As<AST::Literal>();
@@ -858,15 +858,20 @@ jdi::definition *get_builtin(std::string_view name) {
   std::string name_str(name);
   
   // Check builtin_type__int for "int" first (fast path)
-  // This allows the parser to work even with NullLanguageFrontend if jdi::builtin_type__int is set
   if (name_str == "int" && jdi::builtin_type__int) {
     return jdi::builtin_type__int;
   }
   
-  // Use frontend lookup for other types (or if builtin_type__int wasn't set)
-  // For NullLanguageFrontend, this will return nullptr, which is the expected behavior
-  // for tests using CreateWithCpp
-  return frontend->look_up(name_str);
+  // Try frontend lookup first
+  jdi::definition *def = frontend->look_up(name_str);
+  
+  // If frontend lookup failed (e.g., NullLanguageFrontend), fall back to main_context
+  // This ensures builtin types are available even when using minimal frontend for tests
+  if (def == nullptr && main_context) {
+    def = main_context->get_global()->look_up(name_str);
+  }
+  
+  return def;
 }
 
 void TryParseTypeSpecifier(FullType *type) {

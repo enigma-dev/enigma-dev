@@ -26,15 +26,18 @@ static const NameSet kNoNames;
 // 3. After a SetUp() test runs, subsequent CreateWithCpp tests can still pass if they
 //    compare against jdi::builtin_type__int (which is now set)
 //
-// The issue is that CreateWithSetUp tests pollute the global state for CreateWithCpp tests.
-// We fix this by resetting jdi::builtin_type__int to nullptr for CreateWithCpp tests.
+// Initialize main_context at startup so builtin types are always available.
+// This ensures both ParserTests and PrinterTests work correctly:
+// - ParserTests can find types via main_context fallback
+// - PrinterTests can access type names via ft.def->name
 
 class BuiltinTypesEnvironment : public ::testing::Environment {
  public:
   void SetUp() override {
-    // Ensure jdi::builtin_type__int starts as nullptr
-    // This ensures tests using CreateWithCpp work consistently
-    jdi::builtin_type__int = nullptr;
+    // Initialize main_context with builtin types so they're always available
+    if (!main_context) {
+      main_context = new clang_adapter::ClangContext();
+    }
   }
   
   void TearDown() override {
@@ -80,15 +83,10 @@ struct ParserTester {
   }
 
   static ParserTester CreateWithCpp(std::string code) { 
-    // Reset jdi::builtin_type__int to nullptr to ensure tests using NullLanguageFrontend
-    // work consistently regardless of what previous tests did
-    jdi::builtin_type__int = nullptr;
     return ParserTester(std::move(code), true); 
   }
 
   static ParserTester CreateWithoutCpp(std::string code) { 
-    // Reset jdi::builtin_type__int to nullptr for consistency
-    jdi::builtin_type__int = nullptr;
     return ParserTester(std::move(code), false); 
   }
 

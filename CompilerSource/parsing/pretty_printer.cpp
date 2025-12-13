@@ -17,6 +17,7 @@
 
 // JDI removed - builtin flags/types need to be reimplemented
 #include "ast.h"
+#include <functional>
 
 using namespace enigma::parsing;
 
@@ -243,7 +244,7 @@ bool AST::CppPrettyPrinter::VisitContinueStatement(AST::ContinueStatement &node)
 }
 
 bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
-  print("with");
+  print("with ");  // Add space after with
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
@@ -251,15 +252,13 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
-  print("{\n");
+  print(" ");
 
   // Core fix: Inside a with block, instance variables like x, y, hspeed, vspeed
   // should be accessible directly. We need to track this context.
   // For now, we'll handle common instance variables in VisitIdentifierAccess
   // by checking if they're standard instance variables that should be accessible directly.
   VISIT_AND_CHECK(node.body);
-  
-  print("}");
 
   PrintSemiColon(node.body);
 
@@ -308,7 +307,17 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   }
 
   if (operation == ":=") operation = "=";
-  print(" " + operation + " ");
+  
+  // Handle operators - don't add spaces around array subscript
+  if (node.operation.type == TT_BEGINBRACKET) {
+    if (is_multi_dim) {
+      print("(");  // Multi-dim arrays use () syntax: arr(x, y)
+    } else {
+      print("[");  // Regular arrays: arr[x]
+    }
+  } else {
+    print(" " + operation + " ");
+  }
 
   VISIT_AND_CHECK(node.right);
 
@@ -464,30 +473,114 @@ bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
 
     for (std::size_t i = 0; i < flags_values.size(); i++) {
       if ((ft.flags & flags_masks[i]) == flags_values[i]) {
-        if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
+        // Skip "signed" for char types - we handle it specially below
+        // For int/short/long, "signed" is implicit and shouldn't be printed
+        bool should_print = true;
+        if (flags_names[i] == "signed") {
+          // Only print "signed" from flags if def is nullptr (can't determine type)
+          // For char types, we handle it specially below
+          should_print = !ft.def;
+        }
+        if (should_print) {
           print(flags_names[i] + " ");
         }
       }
     }
 
     if (ft.def) {
+      // For char type, always print "signed char" unless unsigned flag is set
+      // This is the expected GML behavior
+      if (ft.def->name == "char" && 
+          !((ft.flags & jdi::builtin_flag__unsigned->mask) == jdi::builtin_flag__unsigned->value)) {
+        print("signed ");
+      }
       print(ft.def->name + " ");
     }
   }
 
   std::string decl_name_str = std::string(ft.decl.name.content);
-  if (decl_name_str != "" && !ft.decl.components.size()) {
-    print(decl_name_str + " ");
-  }
-
+  
   // Build the declarator string with pointer/reference/array modifiers
   std::string ref;
   if (!decl_name_str.empty()) {
     ref = decl_name_str;
   }
   
-  // Add pointer/reference/array modifiers from Declarator structure
-  // Process components in reverse order (right-to-left associativity for C++ declarators)
+  // Separate pointers (process in reverse, prepend to left) from arrays (process forward, append to right)
+  std::string array_suffix;
+  
+  // First pass: collect array bounds in forward order
+  for (const auto& node : ft.decl.components) {
+    if (node.kind == enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND) {
+      const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(node.value);
+      if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
+        array_suffix += "[]";
+      } else {
+        array_suffix += "[" + std::to_string(arr.size) + "]";
+      }
+    } else if (node.kind == enigma::parsing::DeclaratorNode::Kind::FUNCTION) {
+      array_suffix += "()";
+    }
+  }
+  
+  // Recursive lambda to format nested declarators
+  // Returns pair: (inner part to wrap in parens, suffix to go outside parens)
+  std::function<std::pair<std::string, std::string>(const std::vector<enigma::parsing::DeclaratorNode>&, const std::string&)> 
+    formatNested = [&](const std::vector<enigma::parsing::DeclaratorNode>& components, 
+                       const std::string& inner) -> std::pair<std::string, std::string> {
+    std::string nested_ref = inner;
+    std::string suffix;
+    
+    // Collect arrays in forward order for suffix
+    for (const auto& nnode : components) {
+      if (nnode.kind == enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND) {
+        const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(nnode.value);
+        if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
+          suffix += "[]";
+        } else {
+          suffix += "[" + std::to_string(arr.size) + "]";
+        }
+      } else if (nnode.kind == enigma::parsing::DeclaratorNode::Kind::FUNCTION) {
+        suffix += "()";
+      }
+    }
+    
+    // Process pointers in reverse for nested_ref
+    for (auto nit = components.rbegin(); nit != components.rend(); ++nit) {
+      const auto& nnode = *nit;
+      switch (nnode.kind) {
+        case enigma::parsing::DeclaratorNode::Kind::POINTER_TO: {
+          const auto& ptr = std::get<enigma::parsing::PointerNode>(nnode.value);
+          std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                   (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+          nested_ref = "*" + qualifiers + nested_ref;
+          break;
+        }
+        case enigma::parsing::DeclaratorNode::Kind::REFERENCE:
+          nested_ref = "&" + nested_ref;
+          break;
+        case enigma::parsing::DeclaratorNode::Kind::RVAL_REFERENCE:
+          nested_ref = "&&" + nested_ref;
+          break;
+        case enigma::parsing::DeclaratorNode::Kind::NESTED: {
+          // Recursively process inner nested declarator
+          const auto& inner_nested = std::get<enigma::parsing::NestedNode>(nnode.value);
+          if (inner_nested.is<std::unique_ptr<enigma::parsing::Declarator>>()) {
+            const auto& inner_decl = std::get<std::unique_ptr<enigma::parsing::Declarator>>(inner_nested.contained);
+            auto [inner_part, inner_suffix] = formatNested(inner_decl->components, nested_ref);
+            nested_ref = "(" + inner_part + ")" + inner_suffix;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    
+    return {nested_ref, suffix};
+  };
+  
+  // Second pass: process pointers and nested in reverse order
   for (auto it = ft.decl.components.rbegin(); it != ft.decl.components.rend(); ++it) {
     const auto& node = *it;
     switch (node.kind) {
@@ -512,28 +605,28 @@ bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
       case enigma::parsing::DeclaratorNode::Kind::RVAL_REFERENCE:
         ref = "&&" + ref;
         break;
-      case enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND: {
-        const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(node.value);
-        if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
-          ref = ref + "[]";
-        } else {
-          ref = ref + "[" + std::to_string(arr.size) + "]";
-        }
+      case enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND:
+      case enigma::parsing::DeclaratorNode::Kind::FUNCTION:
+        // Handled in first pass
         break;
-      }
-      case enigma::parsing::DeclaratorNode::Kind::FUNCTION: {
-        // Function parameters - format as (params)
-        ref = ref + "()";  // Simplified - full implementation would format parameters
-        break;
-      }
       case enigma::parsing::DeclaratorNode::Kind::NESTED: {
-        // Nested declarator - would need recursive handling
-        ref = "(" + ref + ")";
+        // Nested declarator - use the recursive helper
+        const auto& nested = std::get<enigma::parsing::NestedNode>(node.value);
+        if (nested.is<std::unique_ptr<enigma::parsing::Declarator>>()) {
+          const auto& nested_decl = std::get<std::unique_ptr<enigma::parsing::Declarator>>(nested.contained);
+          auto [inner_part, suffix] = formatNested(nested_decl->components, ref);
+          ref = "(" + inner_part + ")" + suffix;
+        } else {
+          ref = "(" + ref + ")";
+        }
         break;
       }
     }
   }
 
+  // Append array suffix to ref
+  ref += array_suffix;
+  
   print(ref);
   return true;
 }
