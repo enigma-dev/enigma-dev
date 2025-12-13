@@ -180,8 +180,6 @@ TEST(LexerTest, VariadicMacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
-<<<<<<< HEAD
-=======
 
 TEST(LexerTest, LambdaExpressions) {
   LexerTester lex("y = x => x+10;", true);
@@ -213,4 +211,3 @@ TEST(LexerTest, Literals_2) {
   EXPECT_EQ(t.type, TT_STRINGLIT);
   EXPECT_EQ(t.content, "\n");
 }
->>>>>>> origin/AST-Generation-2024
