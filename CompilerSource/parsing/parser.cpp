@@ -1164,6 +1164,7 @@ std::unique_ptr<AST::Node> TryParseNoPtrDeclarator(FullType *type, AST::Declarat
       type->decl.add_nested(reinterpret_cast<void *>(inner_decl_expr.release()));
       inner_decl_expr = std::unique_ptr<AST::Node>(reinterpret_cast<AST::Node *>(type->decl.to_expression()));
     } else {
+      // No flattening - preserve nested declarator structure
       type->decl.add_nested(std::make_unique<Declarator>(std::move(inner.decl)));
     }
 

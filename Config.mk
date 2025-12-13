@@ -36,14 +36,16 @@ else
 endif
 
 # Global g++ flags
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
-LDFLAGS := -g
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I. -fsanitize=address
+LDFLAGS := -g -fsanitize=address
 
 # macOS brew include and lib folders
 ifeq ($(OS), Darwin)
 	CXXFLAGS += -I/usr/local/include
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
+	# ASan with shared libraries on macOS needs dynamic symbol resolution
+	SHARED_LDFLAGS := -Wl,-undefined,dynamic_lookup
 endif
 
 # FreeBSD include and lib folders

@@ -6,6 +6,6 @@ SHARED_SOURCES := $(call rwildcard,event_reader,*.cpp) $(call rwildcard,eyaml,*.
 PROTO_DIR := ./protos/.eobjs
 
 CXXFLAGS += -fPIC -I../CompilerSource -I$(PROTO_DIR) $(PROTOBUF_CFLAGS) $(FALLBACK_INC) $(YAML_CFLAGS) $(PNG_CFLAGS)
-LDFLAGS += -shared -L../ -lProtocols $(PROTOBUF_LDFLAGS) $(PROTOBUF_LIBS) $(YAML_LDFLAGS) $(YAML_LIBS) $(PNG_LDFLAGS) $(PNG_LIBS)
+LDFLAGS += -shared -L../ $(SHARED_LDFLAGS) -lProtocols $(PROTOBUF_LDFLAGS) $(PROTOBUF_LIBS) $(YAML_LDFLAGS) $(YAML_LIBS) $(PNG_LDFLAGS) $(PNG_LIBS)
 
 include ../Default.mk

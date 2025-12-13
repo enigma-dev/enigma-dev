@@ -470,7 +470,9 @@ bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
       }
     }
 
-    print(ft.def->name + " ");
+    if (ft.def) {
+      print(ft.def->name + " ");
+    }
   }
 
   std::string decl_name_str = std::string(ft.decl.name.content);

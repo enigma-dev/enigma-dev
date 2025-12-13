@@ -122,7 +122,7 @@ GameMakerEventMappings:
 TEST(EventReaderTest, RealEventFileIsReadable) {
   std::ifstream file("events.ey");
   EventData events(ParseEventFile(file));
-  Event ev = events.DecodeEventString("Create");
+  Event ev = events.DecodeEventString(std::string("Create"));
   EXPECT_TRUE(ev.IsValid());
 }
 
@@ -145,7 +145,7 @@ TEST(EventReaderTest, ReadsEventFile) {
 TEST(EventReaderTest, KeyboardUp) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("Keyboard[Up]");
+  Event ev = events.DecodeEventString(std::string("Keyboard[Up]"));
   EXPECT_EQ(ev.HumanName(), "Keyboard Up");
   EXPECT_EQ(ev.IdString(), "Keyboard[Up]");
   EXPECT_EQ(ev.BaseFunctionName(), "keyboard");
@@ -164,7 +164,7 @@ TEST(EventReaderTest, KeyboardUp) {
 TEST(EventReaderTest, EndStep) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("EndStep");
+  Event ev = events.DecodeEventString(std::string("EndStep"));
   EXPECT_EQ(ev.HumanName(), "End Step");
   EXPECT_EQ(ev.IdString(), "EndStep");
   EXPECT_EQ(ev.BaseFunctionName(), "endstep");
@@ -188,7 +188,7 @@ TEST(EventReaderTest, EndStepById) {
 TEST(EventReaderTest, Collision) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("Collision[1337]");
+  Event ev = events.DecodeEventString(std::string("Collision[1337]"));
   EXPECT_EQ(ev.HumanName(), "Collision 1337");
   EXPECT_EQ(ev.IdString(), "Collision[1337]");
   EXPECT_EQ(ev.BaseFunctionName(), "collision");
@@ -212,7 +212,7 @@ TEST(EventReaderTest, CollisionById) {
 TEST(EventReaderTest, Alarm) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("Alarm[12]");
+  Event ev = events.DecodeEventString(std::string("Alarm[12]"));
   EXPECT_EQ(ev.HumanName(), "Alarm 12");
   EXPECT_EQ(ev.IdString(), "Alarm[12]");
   EXPECT_EQ(ev.BaseFunctionName(), "alarm");
@@ -236,7 +236,7 @@ TEST(EventReaderTest, AlarmById) {
 TEST(EventReaderTest, Joystick) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("JoystickButton[1][2]");
+  Event ev = events.DecodeEventString(std::string("JoystickButton[1][2]"));
   EXPECT_EQ(ev.HumanName(), "Joystick 1 Button 2");
   EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
   EXPECT_EQ(ev.BaseFunctionName(), "joystickbutton");
@@ -248,15 +248,15 @@ TEST(EventReaderTest, Joystick) {
 TEST(EventReaderTest, CaseInsensitivity) {
   std::istringstream str(kTestEvents);
   EventData events(ParseEventFile(str));
-  Event ev = events.DecodeEventString("JoyStickButton[1][2]");
+  Event ev = events.DecodeEventString(std::string("JoyStickButton[1][2]"));
   EXPECT_EQ(events.reverse_get_event(ev).mid, 6);
   EXPECT_EQ(events.reverse_get_event(ev).id, 22);
   EXPECT_EQ(ev.IdString(), "Joystick[1]Button[2]");
-  ev = events.DecodeEventString("AlArM[1]");
+  ev = events.DecodeEventString(std::string("AlArM[1]"));
   EXPECT_EQ(events.reverse_get_event(ev).mid, 2);
   EXPECT_EQ(events.reverse_get_event(ev).id, 1);
   EXPECT_EQ(ev.IdString(), "Alarm[1]");
-  ev = events.DecodeEventString("kEyBoArD[lEFt]");
+  ev = events.DecodeEventString(std::string("kEyBoArD[lEFt]"));
   EXPECT_EQ(events.reverse_get_event(ev).mid, 5);
   EXPECT_EQ(events.reverse_get_event(ev).id, 37);
   EXPECT_EQ(ev.IdString(), "Keyboard[Left]");

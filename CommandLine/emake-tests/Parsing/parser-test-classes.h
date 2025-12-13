@@ -3,6 +3,7 @@
 
 #include <gtest/gtest.h>
 #include <languages/lang_CPP.h>
+#include <languages/clang_adapter.h>
 #include <parsing/ast.h>
 #include <parsing/parser.h>
 #include "../../../CompilerSource/OS_Switchboard.h"
@@ -53,6 +54,15 @@ struct ParserTester {
     static bool initialized = false;
 
     if (!initialized) {
+      // Initialize global context and language
+      if (!main_context) {
+        main_context = new clang_adapter::ClangContext();
+      }
+      if (!current_language) {
+        current_language = &cpp;
+      }
+      
+      // Parse headers to load type definitions
       cpp.definitionsModified(NULL, ((string) "%e-yaml\n"
       "---\n"
       "target-windowing: " +  (CURRENT_PLATFORM_ID==OS_WINDOWS ? "Win32" : CURRENT_PLATFORM_ID==OS_MACOSX ? "Cocoa" : "xlib")  + "\n"
@@ -75,6 +85,11 @@ struct ParserTester {
       "target-networking: None\n"
       ).c_str());
 
+      // Initialize builtin types
+      if (main_context && main_context->get_global()) {
+        jdi::builtin_type__int = main_context->get_global()->look_up("int");
+      }
+
       initialized = true;
     }
     static ParseContext context(&cpp, kNoNames);
@@ -85,7 +100,7 @@ struct ParserTester {
     delete main_context;
     delete builder;
     delete current_language;
-    jdi::clean_up();
+    // jdi::clean_up(); // TODO: Fix after JDI restoration
   }
 };
 
