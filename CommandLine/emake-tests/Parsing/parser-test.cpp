@@ -197,7 +197,7 @@ bool contains_flag(FullType *ft, std::size_t decflag) { return (ft->flags & decf
 bool def_type_is(FullType *ft, std::size_t dectype) { return ft && ft->def && (ft->def->flags & dectype) == dectype; }
 
 TEST(ParserTest, TypeSpecifierAndDeclarator) {
-  ParserTester test = ParserTester::CreateWithCpp("const unsigned int ****(***)[10]");
+  ParserTester test = ParserTester::CreateWithSetUp("const unsigned int ****(***)[10]");
   FullType ft = test->TryParseTypeID();
   EXPECT_TRUE(def_type_is(&ft, jdi::DEF_TYPENAME));
   EXPECT_TRUE(contains_flag(&ft, jdi::builtin_flag__const->value));
@@ -386,7 +386,7 @@ TEST(ParserTest, Declarator_4_NoSemicolon) {
 
   // TODO: Fix typeflag lambda
 TEST(ParserTest, Declaration) {
-  ParserTester test = ParserTester::CreateWithCpp("const unsigned *(*x)[10] = nullptr;");
+  ParserTester test = ParserTester::CreateWithSetUp("const unsigned *(*x)[10] = nullptr;");
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -395,7 +395,7 @@ TEST(ParserTest, Declaration) {
 }
 
 TEST(ParserTest, Declaration_NoSemicolon) {
-  ParserTester test = ParserTester::CreateWithCpp("const unsigned *(*x)[10] = nullptr");
+  ParserTester test = ParserTester::CreateWithSetUp("const unsigned *(*x)[10] = nullptr");
   auto node = test->TryParseStatement();
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
   EXPECT_EQ(test.lexer.ReadToken().type, TT_ENDOFCODE);
@@ -1101,7 +1101,7 @@ TEST(ParserTest, SwitchStatement_5_NoSemicolon) {
 }
 
 TEST(ParserTest, CodeBlock_1) {
-  ParserTester test = ParserTester::CreateWithCpp("{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }");
+  ParserTester test = ParserTester::CreateWithSetUp("{ int x = 5 const int y = 6 float *(*z)[10] = nullptr foo(bar) }");
   auto node = test->ParseCodeBlock();
   ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
 

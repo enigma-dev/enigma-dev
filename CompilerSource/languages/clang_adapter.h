@@ -76,6 +76,9 @@ private:
   // Build command line arguments for clang
   std::vector<const char*> build_args();
   
+  // Initialize builtin primitive types (int, float, etc.)
+  void init_builtin_types();
+  
   // Traverse AST and build definition tree
   void build_definitions();
   

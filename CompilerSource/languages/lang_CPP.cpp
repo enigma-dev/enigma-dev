@@ -113,7 +113,10 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
   CURRENT_TIME(ts);
-  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string());
+  // Include the codegen_directory where generated headers like API_Switchboard.h are placed
+  std::vector<std::string> extra_include_dirs;
+  extra_include_dirs.push_back(codegen_directory.u8string());
+  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string(), extra_include_dirs);
   CURRENT_TIME(te);
 
   jdi::definition *d;

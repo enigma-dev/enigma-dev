@@ -101,6 +101,30 @@ static bool is_in_namespace(ClangDefinitionScope* scope, const std::string& name
 ClangContext::ClangContext() : index_(nullptr), tu_(nullptr), namespace_filter_("") {
   index_ = clang_createIndex(0, 0);
   global_scope_ = std::make_shared<ClangDefinitionScope>("", nullptr, jdi::DEF_SCOPE, clang_getNullCursor());
+  
+  // Initialize builtin primitive types - these are fundamental to C++ and must always be available
+  // They're added to the global scope so they can be looked up by the parser
+  init_builtin_types();
+}
+
+void ClangContext::init_builtin_types() {
+  // Create definitions for all fundamental C++ types
+  // These are always available in C++ and should never be missing
+  static const char* builtin_type_names[] = {
+    "void", "bool", "char", "short", "int", "long", "float", "double",
+    "signed", "unsigned", "wchar_t", "char16_t", "char32_t", "nullptr_t"
+  };
+  
+  for (const char* type_name : builtin_type_names) {
+    auto type_def = std::make_shared<ClangDefinition>(
+      type_name, global_scope_.get(), jdi::DEF_TYPENAME, clang_getNullCursor());
+    global_scope_->members[type_name] = type_def;
+    
+    // Set the global builtin_type__int pointer so the parser can use it
+    if (std::string(type_name) == "int") {
+      jdi::builtin_type__int = type_def.get();
+    }
+  }
 }
 
 ClangContext::~ClangContext() {
@@ -157,13 +181,32 @@ std::vector<const char*> ClangContext::build_args() {
       }
       
       // Set the SDK root - this is the key to making clang find the right headers
-      // Clang will automatically add include paths in the correct order:
-      // 1. C++ headers (from SDK/usr/include/c++/v1)
-      // 2. Clang builtin includes
-      // 3. C headers (from SDK/usr/include)
-      // This order is exactly what libc++ needs
       system_include_strings.push_back("-isysroot");
       system_include_strings.push_back(sdk_path);
+      
+      // Find the clang resource directory which contains builtin headers (stdarg.h, etc.)
+      // This needs to be set via -resource-dir so clang looks there automatically
+      std::vector<std::string> clang_resource_dirs = {
+        "/Library/Developer/CommandLineTools/usr/lib/clang/17.0.0",
+        "/Library/Developer/CommandLineTools/usr/lib/clang/17",
+        "/Library/Developer/CommandLineTools/usr/lib/clang/16.0.0",
+        "/Library/Developer/CommandLineTools/usr/lib/clang/16",
+        "/Library/Developer/CommandLineTools/usr/lib/clang/15.0.0",
+        "/Library/Developer/CommandLineTools/usr/lib/clang/15",
+        "/opt/homebrew/opt/llvm/lib/clang/19",
+        "/opt/homebrew/opt/llvm/lib/clang/18",
+        "/opt/homebrew/opt/llvm/lib/clang/17"
+      };
+      
+      for (const auto& dir : clang_resource_dirs) {
+        FILE* check = fopen((dir + "/include/stdarg.h").c_str(), "r");
+        if (check) {
+          fclose(check);
+          system_include_strings.push_back("-resource-dir");
+          system_include_strings.push_back(dir);
+          break;
+        }
+      }
       
       // Build the args vector from strings (strings persist in static storage)
       for (const auto& str : system_include_strings) {
@@ -212,17 +255,24 @@ int ClangContext::parse_file(const std::string& filepath,
     // Also add parent directories up to ENIGMAsystem level
     // This allows includes from sibling directories
     std::string current = file_dir;
+    std::string enigma_root;
     while (current.length() > 0) {
       size_t slash = current.find_last_of("/\\");
       if (slash == std::string::npos) break;
       std::string parent = current.substr(0, slash);
       add_include_dir(parent);
-      // Stop when we reach ENIGMAsystem directory
+      // Stop when we reach ENIGMAsystem directory, but remember the root
       if (parent.find("ENIGMAsystem") != std::string::npos && 
           parent.find_last_of("/\\") < parent.find("ENIGMAsystem") + 12) {
+        enigma_root = parent.substr(0, parent.find("ENIGMAsystem"));
         break;
       }
       current = parent;
+    }
+    
+    // Also add the shared directory which contains common headers like rect.h
+    if (!enigma_root.empty()) {
+      add_include_dir(enigma_root + "shared");
     }
   }
   
@@ -241,6 +291,13 @@ int ClangContext::parse_file(const std::string& filepath,
   
   auto args = build_args();
   
+  // Dispose of previous translation unit if it exists
+  // This ensures we start fresh, but we need to preserve the global scope
+  if (tu_) {
+    clang_disposeTranslationUnit(tu_);
+    tu_ = nullptr;
+  }
+  
   // Parse the translation unit
   tu_ = clang_parseTranslationUnit(
     index_,
@@ -256,19 +313,30 @@ int ClangContext::parse_file(const std::string& filepath,
     return 1;
   }
   
-  // Check for errors
+  // Check for errors (but don't fail on warnings)
   unsigned num_diagnostics = clang_getNumDiagnostics(tu_);
+  bool has_errors = false;
   if (num_diagnostics > 0) {
     for (unsigned i = 0; i < num_diagnostics; ++i) {
       CXDiagnostic diag = clang_getDiagnostic(tu_, i);
-      CXString diag_str = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
-      std::cerr << "Diagnostic: " << clang_getCString(diag_str) << std::endl;
-      clang_disposeString(diag_str);
+      CXDiagnosticSeverity severity = clang_getDiagnosticSeverity(diag);
+      if (severity >= CXDiagnostic_Error) {
+        has_errors = true;
+        CXString diag_str = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
+        std::cerr << "Error: " << clang_getCString(diag_str) << std::endl;
+        clang_disposeString(diag_str);
+      }
       clang_disposeDiagnostic(diag);
     }
   }
   
+  if (has_errors) {
+    return 1;
+  }
+  
   // Build definition tree from AST
+  // This will process all declarations and extract builtin types from variable declarations
+  // The global scope persists across multiple parses, so types extracted here will be available
   build_definitions();
   
   return 0;
@@ -389,13 +457,16 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
   }
   
   std::string name = get_cursor_name(cursor);
-  if (name.empty()) {
-    return;
-  }
   
   unsigned int flags = cursor_kind_to_flags(kind);
   if (flags == 0) {
     return;  // Not a definition we care about
+  }
+  
+  // For variable declarations, we need to extract builtin types even if name is empty
+  // (though typically variable declarations have names)
+  if (name.empty() && !(flags & jdi::DEF_TYPED)) {
+    return;
   }
   
   // Re-fetch scope again right before accessing members to ensure it's still valid
@@ -648,6 +719,50 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
     scope = get_scope();
     if (!scope) {
       return;
+    }
+    
+    // Extract builtin type from type information and add it to global scope if it's a builtin
+    // This ensures builtin types like int, float, etc. are always available
+    CXType var_type = clang_getCursorType(cursor);
+    CXType canonical_type = clang_getCanonicalType(var_type);
+    enum CXTypeKind type_kind = canonical_type.kind;
+    
+    // Check if this is a builtin type
+    // Builtin types have kind values between CXType_FirstBuiltin and CXType_LastBuiltin
+    if (type_kind >= CXType_FirstBuiltin && type_kind <= CXType_LastBuiltin) {
+      // For builtin types, get the spelling directly
+      std::string type_name = get_type_spelling(canonical_type);
+      // For builtin types, the spelling might include qualifiers like "const int" or "unsigned int"
+      // Extract just the base type name (the last word, which is the actual type)
+      // For "int", "unsigned int", "const int", etc., we want to extract "int"
+      size_t last_space = type_name.find_last_of(" \t");
+      if (last_space != std::string::npos && last_space + 1 < type_name.length()) {
+        type_name = type_name.substr(last_space + 1);
+      }
+      
+      // Add builtin type to global scope if it doesn't exist
+      // We check for common builtin type names, but don't hardcode a full list
+      // The type_name should be a valid C++ builtin type name
+      if (!type_name.empty() && this->global_scope_) {
+        auto global_scope = this->global_scope_;
+        // Only add if it's not already there and looks like a builtin type name
+        // (single word, all lowercase or common C++ type names)
+        if (global_scope->members.find(type_name) == global_scope->members.end() &&
+            (type_name == "int" || type_name == "float" || type_name == "double" || 
+             type_name == "char" || type_name == "bool" || type_name == "void" ||
+             type_name == "short" || type_name == "long")) {
+          // Create a type definition for the builtin type
+          // Use a null cursor since builtin types don't have a cursor
+          auto type_def = std::make_shared<ClangDefinition>(
+            type_name, global_scope.get(), jdi::DEF_TYPENAME, clang_getNullCursor());
+          global_scope->members[type_name] = type_def;
+          
+          // If this is "int", also update the builtin_type__int global variable
+          if (type_name == "int") {
+            jdi::builtin_type__int = type_def.get();
+          }
+        }
+      }
     }
     
     // Create typed definition
