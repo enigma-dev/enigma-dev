@@ -27,6 +27,7 @@ using namespace enigma::parsing;
 AST::CppPrettyPrinter::CppPrettyPrinter() {
   of = new std::ofstream();
   if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
+  owns_ofstream = true;
   print_type = false;
   is_script = false;
 }
@@ -38,8 +39,14 @@ AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPretty
 }
 
 AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script)
-    : of(&ofs), is_script(is_script), language_fe(lfe) {
+    : of(&ofs), owns_ofstream(false), is_script(is_script), language_fe(lfe) {
   print_type = false;
+}
+
+AST::CppPrettyPrinter::~CppPrettyPrinter() {
+  if (owns_ofstream && of) {
+    delete of;
+  }
 }
 
 void AST::CppPrettyPrinter::print(std::string code) { *of << code; }

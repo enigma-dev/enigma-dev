@@ -56,6 +56,9 @@ public:
   // Add include directory
   void add_include_dir(const std::string& dir);
   
+  // Add quote include directory (for -iquote, searched before -I for "" includes)
+  void add_quote_include_dir(const std::string& dir);
+  
   // Add preprocessor define
   void add_define(const std::string& name, const std::string& value = "");
   
@@ -67,6 +70,7 @@ private:
   CXTranslationUnit tu_;
   std::shared_ptr<ClangDefinitionScope> global_scope_;
   std::vector<std::string> include_dirs_;
+  std::vector<std::string> quote_include_dirs_;  // For -iquote (quote includes)
   std::vector<std::string> defines_;
   // Store shared strings to keep them alive for string_view references in macro tokens
   std::vector<std::shared_ptr<std::string>> macro_token_strings_storage_;

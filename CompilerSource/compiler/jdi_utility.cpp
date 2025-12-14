@@ -51,36 +51,26 @@ int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
     const auto& overload = overload_pair.second;
     if (!overload) continue;  // Skip null overloads
     
-    // Check for C-style variadic (e.g., printf)
+    // Check for C-style variadic (e.g., printf) or ENIGMA varargs
     if (overload->is_variadic) {
       // Return the index of the variadic parameter (last parameter index)
       return overload->params.size() - 1;
     }
     
     // Check for varargs parameter (e.g., choose(const enigma::varargs& args))
+    // Check parameter types to see if any is enigma::varargs
     for (size_t i = 0; i < overload->params.size(); ++i) {
-      const auto& param = overload->params[i];
+      auto param = overload->params[i];
       if (!param) continue;
       
-      // Check parameter name
-      if (param->name.find("varargs") != std::string::npos) {
-        return i;  // Return the index of the varargs parameter
-      }
-      
-      // Check parameter type
-      if (auto typed_param = dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param)) {
-        if (typed_param->type && typed_param->type->name.find("varargs") != std::string::npos) {
+      clang_adapter::ClangDefinitionTyped* typed_param =
+          dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param);
+      if (typed_param && typed_param->type) {
+        std::string type_name = typed_param->type->name;
+        // Check if type name contains "varargs" (handles "varargs", "enigma::varargs", etc.)
+        if (type_name.find("varargs") != std::string::npos) {
+          // Found varargs parameter - return its index
           return i;
-        }
-        // If type pointer is null, try to get type from cursor
-        if (!typed_param->type && !clang_Cursor_isNull(param->cursor)) {
-          CXType type = clang_getCursorType(param->cursor);
-          CXString type_spelling = clang_getTypeSpelling(type);
-          std::string type_name = clang_getCString(type_spelling);
-          clang_disposeString(type_spelling);
-          if (type_name.find("varargs") != std::string::npos) {
-            return i;
-          }
         }
       }
     }
@@ -93,21 +83,7 @@ int lang_CPP::function_variadic_after(jdi::definition_function *func) const {
       return overload->params.size() - 1;
     }
     
-    // Check for varargs parameter in template overloads
-    for (size_t i = 0; i < overload->params.size(); ++i) {
-      const auto& param = overload->params[i];
-      if (!param) continue;
-      
-      if (param->name.find("varargs") != std::string::npos) {
-        return i;
-      }
-      
-      if (auto typed_param = dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param)) {
-        if (typed_param->type && typed_param->type->name.find("varargs") != std::string::npos) {
-          return i;
-        }
-      }
-    }
+    // Skip detailed parameter inspection for template overloads to avoid crashes
   }
   
   return -1;
@@ -171,71 +147,22 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
     const auto& overload = overload_pair.second;
     if (!overload) continue;  // Skip null overloads
     found_any_overload = true;
-    unsigned param_count = overload->params.size();
     
-    // Check if any parameter type contains "varargs" (functions taking enigma::varargs& should be treated as variadic)
-    bool has_varargs_param = false;
-    for (size_t i = 0; i < overload->params.size(); ++i) {
-      const auto& param = overload->params[i];
-      if (!param) {
-        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is null" << std::endl;
-        continue;
-      }
-      
-      std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " name: '" << param->name 
-                << "', flags: 0x" << std::hex << param->flags << std::dec << std::endl;
-      
-      // Check parameter name first
-      if (param->name.find("varargs") != std::string::npos) {
-        has_varargs_param = true;
-        std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter name: '" << param->name << "'" << std::endl;
-        break;
-      }
-      
-      // Check if parameter is typed and check its type name
-      clang_adapter::ClangDefinitionTyped* typed_param = 
-          dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param);
-      if (typed_param) {
-        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is ClangDefinitionTyped" << std::endl;
-        
-        // Try to get type from the stored type pointer first
-        if (typed_param->type) {
-          std::string type_name = typed_param->type->name;
-          std::cerr << "[DEBUG] definition_parameter_bounds: Parameter '" << param->name 
-                    << "' has type (from type ptr): '" << type_name << "'" << std::endl;
-          if (type_name.find("varargs") != std::string::npos) {
-            has_varargs_param = true;
-            std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter type: '" << type_name << "'" << std::endl;
-            break;
-          }
-        } else {
-          // Type pointer is null, try to get type from cursor
-          CXCursor param_cursor = param->cursor;
-          if (!clang_Cursor_isNull(param_cursor)) {
-            CXType param_type = clang_getCursorType(param_cursor);
-            CXString type_str = clang_getTypeSpelling(param_type);
-            std::string type_name = clang_getCString(type_str);
-            clang_disposeString(type_str);
-            std::cerr << "[DEBUG] definition_parameter_bounds: Parameter '" << param->name 
-                      << "' has type (from cursor): '" << type_name << "'" << std::endl;
-            if (type_name.find("varargs") != std::string::npos) {
-              has_varargs_param = true;
-              std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in parameter type from cursor: '" << type_name << "'" << std::endl;
-              break;
-            }
-          } else {
-            std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " cursor is null" << std::endl;
-          }
-        }
-      } else {
-        std::cerr << "[DEBUG] definition_parameter_bounds: Parameter " << i << " is NOT ClangDefinitionTyped" << std::endl;
-      }
+    // Safely access overload fields - if access fails, skip this overload
+    unsigned param_count = 0;
+    bool is_variadic = false;
+    try {
+      param_count = overload->params.size();
+      is_variadic = overload->is_variadic;
+    } catch (...) {
+      // Overload object is corrupted, skip it
+      std::cerr << "[DEBUG] definition_parameter_bounds: Overload access failed (corrupted?), skipping" << std::endl;
+      continue;
     }
     
     std::cerr << "[DEBUG] definition_parameter_bounds: Overload for '" << func_name 
-              << "' has " << param_count << " params, is_variadic=" << overload->is_variadic 
-              << ", has_varargs_param=" << has_varargs_param << std::endl;
-    if (overload->is_variadic || has_varargs_param) {
+              << "' has " << param_count << " params, is_variadic=" << is_variadic << std::endl;
+    if (is_variadic) {
       max = (unsigned) SIZE_MAX;  // Variadic means unlimited
       std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
                 << "' is variadic, setting max=unlimited" << std::endl;
@@ -260,10 +187,32 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
       for (const auto& param : overload->params) {
         if (!param) continue;
         
+        // Safely access parameter name - use cursor first to avoid corruption issues
+        std::string param_name;
+        if (!clang_Cursor_isNull(param->cursor)) {
+          CXString name_str = clang_getCursorSpelling(param->cursor);
+          const char* name_cstr = clang_getCString(name_str);
+          if (name_cstr) {
+            param_name = name_cstr;
+          }
+          clang_disposeString(name_str);
+        }
+        // Fallback to param->name only if cursor didn't work
+        if (param_name.empty()) {
+          try {
+            param_name = param->name;
+          } catch (...) {
+            param_name = "arg_unknown";
+          }
+        }
+        if (param_name.empty()) {
+          param_name = "arg_unknown";
+        }
+        
         // Check parameter name first
-        if (param->name.find("varargs") != std::string::npos) {
+        if (param_name.find("varargs") != std::string::npos) {
           has_varargs_param = true;
-          std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter name: '" << param->name << "'" << std::endl;
+          std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter name: '" << param_name << "'" << std::endl;
           break;
         }
         

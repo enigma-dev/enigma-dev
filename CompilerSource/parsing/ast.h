@@ -565,6 +565,7 @@ class AST {
 
   class CppPrettyPrinter : public AST::Visitor {
     std::ofstream *of;
+    bool owns_ofstream = false;
     bool print_type;
     bool is_script;
     const LanguageFrontend *language_fe = nullptr;
@@ -573,6 +574,7 @@ class AST {
     CppPrettyPrinter();
     CppPrettyPrinter(const LanguageFrontend *lfe);
     CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script);
+    ~CppPrettyPrinter();
     void print(std::string code);
     void PrintSemiColon(PNode &node);
     std::string GetPrintedCode();

@@ -98,6 +98,15 @@ struct ClangDefinitionOverload : public ClangDefinition {
   
   ClangDefinitionOverload(const std::string& n, ClangDefinitionScope* p, unsigned int f, CXCursor c)
     : ClangDefinition(n, p, f, c), is_variadic(false) {}
+  
+  // Delete copy constructor and assignment to prevent invalidating raw pointers in params
+  // The raw pointers in params depend on owned_params_storage, and copying would break this relationship
+  ClangDefinitionOverload(const ClangDefinitionOverload&) = delete;
+  ClangDefinitionOverload& operator=(const ClangDefinitionOverload&) = delete;
+  
+  // Allow move constructor - when moved, both vectors move together, so raw pointers remain valid
+  ClangDefinitionOverload(ClangDefinitionOverload&&) = default;
+  ClangDefinitionOverload& operator=(ClangDefinitionOverload&&) = default;
 };
 
 // Function definition (contains overloads)

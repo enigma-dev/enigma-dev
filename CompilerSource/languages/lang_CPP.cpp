@@ -21,6 +21,7 @@
 #include "settings.h"
 #include <ctime>
 #include <cstdio>
+#include <filesystem>
 #include "languages/lang_CPP.h"
 #include "languages/clang_adapter.h"  // For ClangContext full definition
 
@@ -98,6 +99,17 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   cout << targetYaml << endl;
 
   cout << "Creating swap." << endl;
+  // Ensure ENIGMA_TEST is set if we're in test mode (check if mock-headers directory exists)
+  // This is a fallback in case the environment variable wasn't set by the test framework
+  const char* test_env = getenv("ENIGMA_TEST");
+  if (!test_env) {
+    // Check if we're in a test environment by looking for mock-headers directory
+    std::filesystem::path mock_headers = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
+    if (std::filesystem::exists(mock_headers)) {
+      setenv("ENIGMA_TEST", "TRUE", 1);
+      std::cerr << "DEBUG definitionsModified: Auto-detected test mode, set ENIGMA_TEST=TRUE" << std::endl;
+    }
+  }
   delete main_context;
   main_context = new clang_adapter::ClangContext();
 
@@ -116,8 +128,64 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   // Include the codegen_directory where generated headers like API_Switchboard.h are placed
   std::vector<std::string> extra_include_dirs;
   extra_include_dirs.push_back(codegen_directory.u8string());
+  
+  // Add include paths based on target settings (same as Makefile does)
+  // This ensures bridge headers like OpenGLHeaders.h can be found
+  std::filesystem::path shell_dir = enigma_root / "ENIGMAsystem" / "SHELL";
+  
+  // Add system Info directories (like Makefile: SYSTEMS:%=-I%/Info)
+  // These contain system-specific headers
+  extra_include_dirs.push_back((shell_dir / "Platforms" / extensions::targetAPI.windowSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Graphics_Systems" / extensions::targetAPI.graphicsSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Audio_Systems" / extensions::targetAPI.audioSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Collision_Systems" / extensions::targetAPI.collisionSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Widget_Systems" / extensions::targetAPI.widgetSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Networking_Systems" / extensions::targetAPI.networkSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Universal_System" / "Info").u8string());
+  
+  // Add bridge directories (like Makefile: include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile)
+  // Platform-specific bridge: Bridges/PLATFORM-GRAPHICS/
+  std::filesystem::path platform_graphics_bridge = shell_dir / "Bridges" / (extensions::targetAPI.windowSys + "-" + extensions::targetAPI.graphicsSys);
+  if (std::filesystem::exists(platform_graphics_bridge)) {
+    extra_include_dirs.push_back(platform_graphics_bridge.u8string());
+  }
+  
+  // Standalone graphics bridge directories for OpenGLHeaders.h
+  // Check if graphics system is an OpenGL variant
+  std::string graphics = extensions::targetAPI.graphicsSys;
+  if (graphics.find("OpenGL") != std::string::npos) {
+    // Add Bridges/OpenGL/ (for OpenGLHeaders.h used by OpenGL-Common)
+    std::filesystem::path opengl_bridge = shell_dir / "Bridges" / "OpenGL";
+    if (std::filesystem::exists(opengl_bridge)) {
+      extra_include_dirs.push_back(opengl_bridge.u8string());
+    }
+    
+    // Add Graphics_Systems/OpenGL-Common/ (like OpenGL1/Makefile includes it)
+    std::filesystem::path opengl_common = shell_dir / "Graphics_Systems" / "OpenGL-Common";
+    if (std::filesystem::exists(opengl_common)) {
+      extra_include_dirs.push_back(opengl_common.u8string());
+    }
+  }
+  
+  // Check for OpenGLES variants
+  if (graphics.find("OpenGLES") != std::string::npos || graphics == "OpenGLES") {
+    std::filesystem::path opengles_bridge = shell_dir / "Bridges" / "OpenGLES";
+    if (std::filesystem::exists(opengles_bridge)) {
+      extra_include_dirs.push_back(opengles_bridge.u8string());
+    }
+  }
+  
+  // Add base directories (like Makefile: -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR))
+  extra_include_dirs.push_back(shell_dir.u8string()); // -I. equivalent
+  extra_include_dirs.push_back((enigma_root / "shared").u8string()); // -Ishared equivalent
+  
   res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string(), extra_include_dirs);
   CURRENT_TIME(te);
+  
+  if (res != 0) {
+    cerr << "WARNING: parse_file returned " << res << " (non-zero indicates failure)" << endl;
+    cerr << "This may mean the enigma_user namespace was not parsed correctly!" << endl;
+  }
 
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {

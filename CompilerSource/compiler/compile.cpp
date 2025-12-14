@@ -477,10 +477,32 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   // Print all functions in enigma_user namespace after resources are added
   cerr << "\n*** === Functions in enigma_user namespace (after resource copy) === ***" << endl;
+  cerr << "*** DEBUG: namespace_enigma_user pointer: " << (void*)namespace_enigma_user << " ***" << endl;
+  
   if (namespace_enigma_user) {
     clang_adapter::ClangDefinitionScope* cscope = 
         dynamic_cast<clang_adapter::ClangDefinitionScope*>(namespace_enigma_user);
     if (cscope) {
+      cerr << "*** DEBUG: cscope->members.size() = " << cscope->members.size() << " ***" << endl;
+      
+      // Check if this scope has motion_set (should have it if it's the right scope)
+      auto motion_set_it = cscope->members.find("motion_set");
+      if (motion_set_it == cscope->members.end()) {
+        cerr << "*** WARNING: motion_set NOT found in this scope! This suggests the wrong scope! ***" << endl;
+        cerr << "*** Checking what members ARE in this scope (first 20): ***" << endl;
+        int shown = 0;
+        for (const auto& member_pair : cscope->members) {
+          cerr << "  " << member_pair.first;
+          if (member_pair.second) {
+            cerr << " (flags: 0x" << std::hex << member_pair.second->flags << std::dec << ")";
+          }
+          cerr << endl;
+          if (++shown >= 20) break;
+        }
+        cerr << "*** If only resources are shown, namespace_enigma_user is pointing to wrong scope! ***" << endl;
+      } else {
+        cerr << "*** DEBUG: motion_set found in scope (good) ***" << endl;
+      }
       int function_count = 0;
       int total_members = 0;
       for (const auto& member_pair : cscope->members) {

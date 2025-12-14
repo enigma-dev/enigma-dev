@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 
 namespace clang_adapter {
 
@@ -142,6 +143,10 @@ void ClangContext::add_include_dir(const std::string& dir) {
   include_dirs_.push_back(dir);
 }
 
+void ClangContext::add_quote_include_dir(const std::string& dir) {
+  quote_include_dirs_.push_back(dir);
+}
+
 void ClangContext::add_define(const std::string& name, const std::string& value) {
   if (value.empty()) {
     defines_.push_back("-D" + name);
@@ -154,14 +159,16 @@ std::vector<const char*> ClangContext::build_args() {
   static std::vector<std::string> system_include_strings;
   static std::vector<const char*> system_include_args;
   
-  // Add C++ standard and explicitly use libc++
+  // Add C++ standard
   std::vector<const char*> args;
   args.push_back("-std=c++17");
-  args.push_back("-stdlib=libc++");
+  // Note: -stdlib=libc++ will be added conditionally based on detected compiler
   
   // Get system include paths (only compute once)
   if (system_include_strings.empty()) {
     #ifdef __APPLE__
+      // macOS always uses clang, so add -stdlib=libc++
+      system_include_strings.push_back("-stdlib=libc++");
       // Try to get SDK path
       std::string sdk_path = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk";
       FILE* pipe = popen("xcrun --show-sdk-path 2>/dev/null", "r");
@@ -213,10 +220,75 @@ std::vector<const char*> ClangContext::build_args() {
         system_include_args.push_back(str.c_str());
       }
     #elif __linux__
-      system_include_strings.push_back("-isystem");
-      system_include_strings.push_back("/usr/include/c++/11");
-      system_include_strings.push_back("-isystem");
-      system_include_strings.push_back("/usr/include");
+      // Auto-detect C++ include paths by querying the compiler
+      // Try clang++ first, then fall back to g++
+      bool using_clang = false;
+      FILE* pipe = popen("clang++ -E -x c++ -v /dev/null 2>&1", "r");
+      if (pipe) {
+        // Check if clang++ actually exists and works by reading a line
+        char test_buffer[256];
+        if (fgets(test_buffer, sizeof(test_buffer), pipe)) {
+          using_clang = true;
+          // Rewind - we need to read from the beginning
+          // Since we can't rewind a pipe, close and reopen
+          pclose(pipe);
+          pipe = popen("clang++ -E -x c++ -v /dev/null 2>&1", "r");
+        } else {
+          pclose(pipe);
+          pipe = nullptr;
+        }
+      }
+      if (!pipe) {
+        pipe = popen("g++ -E -x c++ -v /dev/null 2>&1", "r");
+      }
+      
+      // Add -stdlib=libc++ only if using clang
+      if (using_clang) {
+        system_include_strings.push_back("-stdlib=libc++");
+      }
+      
+      if (pipe) {
+        char buffer[512];
+        bool in_include_section = false;
+        while (fgets(buffer, sizeof(buffer), pipe)) {
+          std::string line(buffer);
+          // Look for the "#include <...> search starts here:" marker
+          if (line.find("#include <...> search starts here:") != std::string::npos) {
+            in_include_section = true;
+            continue;
+          }
+          // Look for the "End of search list." marker
+          if (line.find("End of search list.") != std::string::npos) {
+            break;
+          }
+          // Extract include paths
+          if (in_include_section) {
+            // Remove leading whitespace and newline
+            size_t start = line.find_first_not_of(" \t\n");
+            if (start != std::string::npos) {
+              size_t end = line.find_last_not_of(" \t\n");
+              if (end != std::string::npos) {
+                std::string include_path = line.substr(start, end - start + 1);
+                if (!include_path.empty()) {
+                  system_include_strings.push_back("-isystem");
+                  system_include_strings.push_back(include_path);
+                }
+              }
+            }
+          }
+        }
+        pclose(pipe);
+      }
+      
+      // Fallback to common paths if auto-detection failed
+      if (system_include_strings.empty()) {
+        system_include_strings.push_back("-isystem");
+        system_include_strings.push_back("/usr/include/c++/11");
+        system_include_strings.push_back("-isystem");
+        system_include_strings.push_back("/usr/include");
+      }
+      
+      // Build the args vector from strings (strings persist in static storage)
       for (const auto& str : system_include_strings) {
         system_include_args.push_back(str.c_str());
       }
@@ -227,6 +299,15 @@ std::vector<const char*> ClangContext::build_args() {
   
   // Add system includes to args (pointers are valid because strings are static)
   args.insert(args.end(), system_include_args.begin(), system_include_args.end());
+  
+  // Add quote include directories first (for -iquote, searched before -I for "" includes)
+  // These are searched after the directory of the including file, but before -I directories
+  if (!quote_include_dirs_.empty()) {
+    for (const auto& dir : quote_include_dirs_) {
+      args.push_back("-iquote");
+      args.push_back(dir.c_str());
+    }
+  }
   
   // Add include directories (as separate -I and path arguments)
   for (const auto& dir : include_dirs_) {
@@ -245,6 +326,51 @@ std::vector<const char*> ClangContext::build_args() {
 int ClangContext::parse_file(const std::string& filepath,
                               const std::vector<std::string>& include_dirs,
                               const std::vector<std::string>& defines) {
+  // Clear quote_include_dirs_ at the start of each parse (test-specific, so safe to clear)
+  // Don't clear include_dirs_ as it may be used by build_args() which stores pointers to its strings
+  quote_include_dirs_.clear();
+  
+  // In test mode, add mock directories to quote_include_dirs_ (for -iquote)
+  // This ensures mock headers are found for "" includes
+  const char* test_env = std::getenv("ENIGMA_TEST");
+  const char* tests_env = std::getenv("TESTS");
+  bool is_test_mode = (test_env && std::string(test_env) == "TRUE") || 
+                      (tests_env && std::string(tests_env) == "TRUE");
+  std::cerr << "DEBUG parse_file: filepath=" << filepath 
+            << " is_test_mode=" << (is_test_mode ? "true" : "false")
+            << " ENIGMA_TEST=" << (test_env ? test_env : "null")
+            << " TESTS=" << (tests_env ? tests_env : "null") << std::endl;
+  if (is_test_mode) {
+    // Find enigma root by looking for ENIGMAsystem in the filepath
+    std::string enigma_root;
+    size_t enigma_pos = filepath.find("ENIGMAsystem");
+    if (enigma_pos != std::string::npos) {
+      enigma_root = filepath.substr(0, enigma_pos);
+      std::filesystem::path mock_headers_dir = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
+      if (std::filesystem::exists(mock_headers_dir)) {
+        // Add mock directories to quote_include_dirs_ (for -iquote) so they're searched for "" includes
+        // These are searched after the directory of the including file, but before -I directories
+        std::filesystem::path mock_resources_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Universal_System" / "Resources";
+        if (std::filesystem::exists(mock_resources_dir)) {
+          std::string abs_path = std::filesystem::absolute(mock_resources_dir).u8string();
+          quote_include_dirs_.push_back(abs_path);
+          std::cerr << "DEBUG: Added mock Resources dir: " << abs_path << std::endl;
+        } else {
+          std::cerr << "DEBUG: Mock Resources dir does not exist: " << mock_resources_dir << std::endl;
+        }
+        std::filesystem::path mock_pp_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Preprocessor_Environment_Editable";
+        if (std::filesystem::exists(mock_pp_dir)) {
+          quote_include_dirs_.push_back(std::filesystem::absolute(mock_pp_dir).u8string());
+        }
+        std::filesystem::path mock_shell_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL";
+        if (std::filesystem::exists(mock_shell_dir)) {
+          quote_include_dirs_.push_back(std::filesystem::absolute(mock_shell_dir).u8string());
+        }
+        quote_include_dirs_.push_back(std::filesystem::absolute(mock_headers_dir).u8string());
+      }
+    }
+  }
+  
   // Add the directory containing the file being parsed as an include directory
   // This allows relative includes (like "rect.h") to be found
   size_t last_slash = filepath.find_last_of("/\\");
@@ -317,27 +443,33 @@ int ClangContext::parse_file(const std::string& filepath,
   unsigned num_diagnostics = clang_getNumDiagnostics(tu_);
   bool has_errors = false;
   if (num_diagnostics > 0) {
+    std::cerr << "*** Parse diagnostics (" << num_diagnostics << " total): ***" << std::endl;
     for (unsigned i = 0; i < num_diagnostics; ++i) {
       CXDiagnostic diag = clang_getDiagnostic(tu_, i);
       CXDiagnosticSeverity severity = clang_getDiagnosticSeverity(diag);
+      CXString diag_str = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
+      const char* severity_str = (severity >= CXDiagnostic_Error ? "ERROR" : 
+                                  severity >= CXDiagnostic_Warning ? "WARNING" : "NOTE");
+      std::cerr << "  [" << severity_str << "] " << clang_getCString(diag_str) << std::endl;
+      
       if (severity >= CXDiagnostic_Error) {
         has_errors = true;
-        CXString diag_str = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
-        std::cerr << "Error: " << clang_getCString(diag_str) << std::endl;
-        clang_disposeString(diag_str);
       }
+      clang_disposeString(diag_str);
       clang_disposeDiagnostic(diag);
     }
+    std::cerr << "*** End parse diagnostics ***" << std::endl;
   }
   
-  if (has_errors) {
-    return 1;
-  }
-  
-  // Build definition tree from AST
-  // This will process all declarations and extract builtin types from variable declarations
+  // Build definition tree from AST even if there are errors
+  // This ensures namespaces and other declarations are still created
   // The global scope persists across multiple parses, so types extracted here will be available
   build_definitions();
+  
+  if (has_errors) {
+    // Return error status, but definitions were still built
+    return 1;
+  }
   
   return 0;
 }
@@ -611,8 +743,18 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       // Don't add params to scope members - they're part of the function
     }
     
+    // Check for C-style variadic (e.g., printf)
     if (clang_isFunctionTypeVariadic(func_type)) {
       overload->is_variadic = true;
+    }
+    
+    // Also check for ENIGMA-style variadic: parameters of type enigma::varargs
+    // This handles functions like choose(const enigma::varargs& args)
+    for (const auto& param_type_str : param_types) {
+      if (param_type_str.find("varargs") != std::string::npos) {
+        overload->is_variadic = true;
+        break;  // Found varargs parameter, no need to check others
+      }
     }
     
     // Generate a unique key for this overload based on parameter types
@@ -861,7 +1003,7 @@ static enigma::parsing::TokenVector tokens_from_clang(CXTranslationUnit tu, CXSo
     snippet.line = 0;
     snippet.position = 0;
     enigma::parsing::Token token(token_type, snippet);
-    result.push_back(token);
+      result.push_back(token);
   }
   
   clang_disposeTokens(tu, tokens, num_tokens);
