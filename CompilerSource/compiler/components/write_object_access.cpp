@@ -102,7 +102,11 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   }
 
   for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-    const string& pmember = dait->first;
+    // Rename reserved identifier __VA_ARGS__ to __va_args_var__ (valid identifier)
+    string pmember = dait->first;
+    if (pmember == "__VA_ARGS__") {
+      pmember = "__va_args_var__";
+    }
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;
 

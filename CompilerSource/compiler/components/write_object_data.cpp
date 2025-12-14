@@ -28,10 +28,73 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <set>
+#include <unistd.h>
+#include <cstdlib>
 
 using namespace std;
+
+// Helper function to replace __VA_ARGS__ with a valid identifier in generated code
+static string replace_va_args_identifier(const string& code) {
+  string result = code;
+  // Replace __VA_ARGS__ with __va_args_var__ (valid identifier) when used as a variable
+  // This handles the case where users incorrectly use __VA_ARGS__ as a variable name
+  size_t pos = 0;
+  while ((pos = result.find("__VA_ARGS__", pos)) != string::npos) {
+    // Check if it's in a string literal or comment (basic check)
+    bool in_string = false;
+    bool in_comment = false;
+    for (size_t i = 0; i < pos; ++i) {
+      if (i < result.length() - 1) {
+        if (result[i] == '"' && (i == 0 || result[i-1] != '\\')) {
+          in_string = !in_string;
+        } else if (result[i] == '/' && result[i+1] == '/') {
+          in_comment = true;
+          break;
+        } else if (result[i] == '/' && result[i+1] == '*') {
+          in_comment = true;
+        } else if (result[i] == '*' && result[i+1] == '/' && in_comment) {
+          in_comment = false;
+          i++;
+        }
+      }
+    }
+    if (!in_string && !in_comment) {
+      result.replace(pos, 11, "__va_args_var__");
+      pos += 15; // Length of "__va_args_var__"
+    } else {
+      pos += 11;
+    }
+  }
+  return result;
+}
+
+// Helper to write AST to string by using a temporary file
+static string write_ast_to_string(const enigma::parsing::AST& ast, int base_indent, bool is_script) {
+  // Use a temporary file approach since WriteCppToStream requires ofstream
+  char tmpname[] = "/tmp/enigma_ast_XXXXXX";
+  int fd = mkstemp(tmpname);
+  if (fd == -1) {
+    return ""; // Fallback: return empty string
+  }
+  close(fd);
+  
+  ofstream tmp_file(tmpname);
+  ast.WriteCppToStream(tmp_file, base_indent, is_script);
+  tmp_file.close();
+  
+  ifstream read_file(tmpname);
+  stringstream buffer;
+  buffer << read_file.rdbuf();
+  read_file.close();
+  unlink(tmpname);
+  
+  return buffer.str();
+}
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -290,8 +353,13 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
       }
     }
     if (writeit) {
-      locals.emplace_back(ii->first, ii->second);
-      wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first
+      // Rename reserved identifier __VA_ARGS__ to __va_args_var__ (valid identifier)
+      string var_name = ii->first;
+      if (var_name == "__VA_ARGS__") {
+        var_name = "__va_args_var__";
+      }
+      locals.emplace_back(var_name, ii->second);
+      wto << tdefault(ii->second.type) << " " << ii->second.prefix << var_name
           << ii->second.suffix << ";\n    ";
     }
   }
@@ -641,8 +709,27 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
     wto << ": object_locals(id,enigma_genericobjid) ";
   }
 
+  // Sort initializers to match member declaration order to avoid -Wreorder warnings
+  // Members are declared in locals map order, so we need to match that
+  std::map<std::string, std::string> initializer_map;
   for (size_t ii = 0; ii < object->initializers.size(); ii++)
-    wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    initializer_map[object->initializers[ii].first] = object->initializers[ii].second;
+  
+  // Write initializers in the order members are declared (locals order)
+  std::set<std::string> written_initializers;
+  for (deciter ii = object->locals.begin(); ii != object->locals.end(); ii++) {
+    auto it = initializer_map.find(ii->first);
+    if (it != initializer_map.end() && written_initializers.find(ii->first) == written_initializers.end()) {
+      wto << ", " << it->first << "(" << it->second << ")";
+      written_initializers.insert(it->first);
+    }
+  }
+  // Write any remaining initializers not in locals (shouldn't happen, but be safe)
+  for (size_t ii = 0; ii < object->initializers.size(); ii++) {
+    if (written_initializers.find(object->initializers[ii].first) == written_initializers.end()) {
+      wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    }
+  }
   wto << "\n    {\n";
   wto << "      if (!handle) return;\n";
   // Sprite index
@@ -885,7 +972,9 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
     wto << "  ";
     // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
     auto &ast = (scr->code).ast;
-    ast.WriteCppToStream(wto, 2, true);
+    // Write AST to a string first, then replace __VA_ARGS__ and write to stream
+    string ast_code = write_ast_to_string(ast, 2, true);
+    wto << replace_va_args_identifier(ast_code);
     wto << "\n  return 0;\n}\n\n";
   }
 }
@@ -900,7 +989,9 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
       auto& ast = (moment.script->global_code
           ? *moment.script->global_code : moment.script->code).ast;
 
-      ast.WriteCppToStream(wto, 2);
+      // Write AST to a string first, then replace __VA_ARGS__ and write to stream
+      string ast_code = write_ast_to_string(ast, 2, false);
+      wto << replace_va_args_identifier(ast_code);
       wto << "\n}\n\n";
     }
   }
@@ -982,7 +1073,11 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
     PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
-  event.ast.WriteCppToStream(wto, 2);
+  
+  // Write AST to a string first, then replace __VA_ARGS__ and write to stream
+  string ast_code = write_ast_to_string(event.ast, 2, false);
+  wto << replace_va_args_identifier(ast_code);
+  
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -1000,7 +1095,9 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      subscr->second->code.ast.WriteCppToStream(wto, 2, true);
+      // Write AST to a string first, then replace __VA_ARGS__ and write to stream
+      string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true);
+      wto << replace_va_args_identifier(ast_code);
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -1017,7 +1114,9 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        scr->code.ast.WriteCppToStream(wto);
+        // Write AST to a string first, then replace __VA_ARGS__ and write to stream
+        string ast_code = write_ast_to_string(scr->code.ast, 0, false);
+        wto << replace_va_args_identifier(ast_code);
         wto << "}\n";
       }
       wto << "\n";

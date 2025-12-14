@@ -140,12 +140,12 @@ template <class T> struct lua_table {
     return *this;
   }
 
-  lua_table<T>(): mx_size(0) {}
-  lua_table<T>(const T &v, size_t len): dense(len, v), mx_size(len) {}
-  lua_table<T>(const lua_table<T> &x) {
+  lua_table(): mx_size(0) {}
+  lua_table(const T &v, size_t len): dense(len, v), mx_size(len) {}
+  lua_table(const lua_table<T> &x) {
     pick_up(x);
   }
-  ~lua_table<T>() {}
+  ~lua_table() {}
 };
 
 #endif // ENIGMA_H_LUA_TABLE

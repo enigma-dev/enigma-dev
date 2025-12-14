@@ -131,8 +131,14 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << endl;
 
   wto << "namespace enigma" << endl << "{" << endl << "  struct ENIGMA_global_structure: object_locals" << endl << "  {" << endl;
-  for (decciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) // Dots are vars that are accessed as something.varname.
-    wto << "    " << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
+  for (decciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) { // Dots are vars that are accessed as something.varname.
+    // Rename reserved identifier __VA_ARGS__ to __va_args_var__ (valid identifier)
+    string var_name = i->first;
+    if (var_name == "__VA_ARGS__") {
+      var_name = "__va_args_var__";
+    }
+    wto << "    " << i->second.type << " " << i->second.prefix << var_name << i->second.suffix << ";" << endl;
+  }
 
   wto << "    ENIGMA_global_structure(const int _x, const int _y): object_locals(_x,_y) {}" << endl << "  };" << endl << "  object_basic *ENIGMA_global_instance = new ENIGMA_global_structure(global,global);" << endl << "}";
   wto << endl;
