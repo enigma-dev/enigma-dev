@@ -41,7 +41,7 @@ struct language_adapter : LanguageFrontend {
   virtual int link_ambiguous(const GameData &game, CompileState &state) = 0;
   virtual int compile_parseSecondary(CompileState &state) = 0;
 
-  virtual int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) = 0;
+  virtual int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals, const ParsedObjectVec &parsed_objects) = 0;
   virtual int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) = 0;
   virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) = 0;
   virtual int compile_writeFontInfo(const GameData &game) = 0;

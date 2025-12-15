@@ -17,6 +17,7 @@
 
 #include "macros.h"
 
+#include <cstddef>  // For SIZE_MAX
 #include <cstring>
 #include <map>
 #include <string>
@@ -119,11 +120,17 @@ vector<Macro::FuncComponent> Macro::Componentize(
           e = i + 1;
           continue;  // Skip argument handling for VA_OPT
         } else if (tokens[i].content == "__VA_ARGS__") {
+          // For pure variadic macros (no named params), __VA_ARGS__ maps to index 0
+          // For variadic macros with named params, __VA_ARGS__ maps to the last param index
+          // Note: This is called during Componentize, so we need to check if the macro is variadic
+          // We can infer this from params - if params is empty but __VA_ARGS__ is used, it's a pure variadic macro
           if (params.empty()) {
-            // Error: __VA_ARGS__ used in non-variadic macro
-            continue;  // Skip this token to avoid invalid index
+            // Pure variadic macro: __VA_ARGS__ maps to argument index 0
+            // We'll use a special marker value that will be handled in SubstituteAndUnroll
+            arg_num = SIZE_MAX;  // Special marker for pure variadic __VA_ARGS__
+          } else {
+            arg_num = params.size() - 1;
           }
-          arg_num = params.size() - 1;
         } else {
           continue;
         }
@@ -181,7 +188,7 @@ static string TokContentCat(const Token &left, const Token &right) {
 static Token PasteTokens(
     const Token &left, const Token &right, const ErrorContext &errc) {
   static const MacroMap no_macros;
-  Lexer l(std::move(TokContentCat(left, right)),
+  Lexer l(TokContentCat(left, right),
           &ParseContext::ForPreprocessorEvaluation(), errc.herr);
   Token res = l.ReadRawToken();
   Token end = l.ReadRawToken();
@@ -253,22 +260,53 @@ TokenVector Macro::SubstituteAndUnroll(const vector<TokenVector> &args, const ve
       case FuncComponent::EXPANDED_ARGUMENT:
       case FuncComponent::STRINGIFY: {
         size_t ind = part.raw_expanded_or_stringify_argument.index;
-        // Check for invalid index (e.g., -1 wrapped as unsigned, or out of bounds)
-        if (ind >= parameters->size() || ind >= args.size()) {
-          if (ind >= parameters->size()) {
-            errc.Error() << "Internal error: "
-                << "Macro function built with bad argument references. Index "
-                << ind << " out of bounds (only " << parameters->size()
-                << " params defined).";
-            paste_next = false;
-            continue;
-          } else {
-            // Index is valid for parameters but we don't have that many args
-            // This can happen for variadic macros when no variadic args are provided
-            // Just skip this argument substitution
+        
+        // Handle pure variadic macro (no named parameters, __VA_ARGS__ maps to all args)
+        if (ind == SIZE_MAX) {
+          // This is __VA_ARGS__ in a pure variadic macro (like string(...))
+          // All arguments go into __VA_ARGS__
+          if (args.empty()) {
+            // No arguments provided - __VA_ARGS__ expands to empty
             paste_next = false;
             continue;
           }
+          // For pure variadic macros, all args are in args[0]
+          // But actually, for string(score), args.size() == 1 and args[0] contains score
+          // We need to expand all variadic args
+          if (args.size() == 1) {
+            // Single argument - use it directly
+            ind = 0;
+          } else {
+            // Multiple arguments - this shouldn't happen for pure variadic with single call,
+            // but handle it by using the last arg which should contain all variadic args
+            ind = args.size() - 1;
+          }
+        } else if (ind >= parameters->size()) {
+          // Check for invalid index (e.g., -1 wrapped as unsigned, or out of bounds)
+          errc.Error() << "Internal error: "
+              << "Macro function built with bad argument references. Index "
+              << ind << " out of bounds (only " << parameters->size()
+              << " params defined).";
+          paste_next = false;
+          continue;
+        } else if (is_variadic && ind == parameters->size() - 1) {
+          // This is the variadic parameter (__VA_ARGS__) in a macro with named params
+          // args.size() can be:
+          // - parameters->size() - 1: no variadic args provided, __VA_ARGS__ expands to empty
+          // - parameters->size() or more: variadic args provided, use args[ind] which contains all variadic args
+          if (args.size() < parameters->size()) {
+            // No variadic arguments provided - __VA_ARGS__ expands to empty
+            paste_next = false;
+            continue;
+          }
+          // Variadic arguments provided - use the last argument which contains all variadic args
+          // The argument parsing logic in lexer.cpp already collects all variadic args into args.back()
+          ind = args.size() - 1;  // Use the last argument which contains variadic args
+        } else if (ind >= args.size()) {
+          // Index is valid for parameters but we don't have that many args
+          // This shouldn't happen for non-variadic parameters, but handle gracefully
+          paste_next = false;
+          continue;
         }
         if (part.tag == FuncComponent::STRINGIFY) {
           string str;

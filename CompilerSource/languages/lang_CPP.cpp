@@ -22,6 +22,8 @@
 #include <ctime>
 #include <cstdio>
 #include <filesystem>
+#include <set>
+#include <functional>
 #include "languages/lang_CPP.h"
 #include "languages/clang_adapter.h"  // For ClangContext full definition
 
@@ -366,18 +368,110 @@ int lang_CPP::load_shared_locals() {
 
   shared_object_locals_.clear();
 
-  //Iterate the tiers of the parent object
-  // JDI removed - ancestors structure changed in clang_adapter
-  // ancestors is now vector<pair<ClangDefinitionClass*, int>>, not with .def
-  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].first : NULL) )
-  {
-    cout << " >> Checking ancestor " << cs->name << endl;
-    // JDI removed - defiter is now std::map iterator
-    for (auto mem = cs->members.begin(); mem != cs->members.end(); ++mem)
-      shared_object_locals_.insert(mem->first);
+  // Debug: Show what we're starting with
+  cout << "DEBUG: Starting traversal from " << pclass->name << endl;
+  cout << "DEBUG: Ancestors count: " << pclass->ancestors.size() << endl;
+  for (size_t i = 0; i < pclass->ancestors.size(); ++i) {
+    if (pclass->ancestors[i].first) {
+      cout << "DEBUG:   Ancestor[" << i << "]: " << pclass->ancestors[i].first->name << endl;
+    } else {
+      cout << "DEBUG:   Ancestor[" << i << "]: NULL" << endl;
+    }
   }
 
+  // Recursively traverse all ancestors to discover all member variables
+  // Use a visited set to prevent cycles (though shouldn't exist in single inheritance)
+  std::set<jdi::definition_class*> visited;
+  int tier_count = 0;
+  
+  std::function<void(jdi::definition_class*)> traverse = [&](jdi::definition_class* cls) {
+    if (!cls) return;
+    
+    // Prevent cycles
+    if (visited.count(cls)) {
+      cout << "DEBUG:   Skipping already visited: " << cls->name << endl;
+      return;
+    }
+    visited.insert(cls);
+    
+    tier_count++;
+    cout << " >> Checking ancestor " << cls->name << " (tier " << tier_count << ")" << endl;
+    cout << "DEBUG:   Members in " << cls->name << ": " << cls->members.size() << endl;
+    
+    int members_added = 0;
+    int members_skipped = 0;
+    // Process members of this class
+    for (auto mem = cls->members.begin(); mem != cls->members.end(); ++mem) {
+      bool is_variable = false;
+      
+      if (mem->second) {
+        // Filter: Only include actual member variables, not functions, types, etc.
+        // A variable has DEF_TYPED but not DEF_FUNCTION
+        // Also exclude: functions, types, templates, namespaces, classes, enums
+        bool is_function = (mem->second->flags & jdi::DEF_FUNCTION) != 0;
+        bool is_type = (mem->second->flags & jdi::DEF_TYPENAME) != 0;
+        bool is_template = (mem->second->flags & jdi::DEF_TEMPLATE) != 0;
+        bool is_namespace = (mem->second->flags & jdi::DEF_NAMESPACE) != 0;
+        bool is_class = (mem->second->flags & jdi::DEF_CLASS) != 0;
+        bool is_enum = (mem->second->flags & jdi::DEF_ENUM) != 0;
+        bool is_scope = (mem->second->flags & jdi::DEF_SCOPE) != 0 && !is_class && !is_namespace;
+        
+        // Include if it's typed (has a type) and is not a function, type, template, etc.
+        bool has_type = (mem->second->flags & jdi::DEF_TYPED) != 0;
+        is_variable = has_type && !is_function && !is_type && !is_template && 
+                      !is_namespace && !is_class && !is_enum && !is_scope;
+        
+        cout << "DEBUG:     Member: " << mem->first;
+        cout << " (flags: 0x" << std::hex << mem->second->flags << std::dec << ")";
+        if (is_function) cout << " [FUNCTION]";
+        if (is_type) cout << " [TYPE]";
+        if (is_template) cout << " [TEMPLATE]";
+        if (has_type && !is_function) cout << " [VARIABLE]";
+      } else {
+        // If no definition, skip it
+        is_variable = false;
+        cout << "DEBUG:     Member: " << mem->first << " (no definition)";
+      }
+      
+      if (is_variable) {
+        shared_object_locals_.insert(mem->first);
+        members_added++;
+        cout << " -> ADDED" << endl;
+      } else {
+        members_skipped++;
+        cout << " -> SKIPPED" << endl;
+      }
+    }
+    cout << "DEBUG:   Added " << members_added << " variable(s), skipped " << members_skipped << " non-variable(s) from " << cls->name << endl;
+    cout << "DEBUG:   Total shared_locals so far: " << shared_object_locals_.size() << endl;
+    
+    // Recursively process all ancestors (not just the first one)
+    cout << "DEBUG:   Processing " << cls->ancestors.size() << " ancestor(s)" << endl;
+    for (const auto& ancestor_pair : cls->ancestors) {
+      if (ancestor_pair.first) {
+        cout << "DEBUG:     Traversing to ancestor: " << ancestor_pair.first->name << endl;
+        traverse(ancestor_pair.first);
+      } else {
+        cout << "DEBUG:     Ancestor is NULL" << endl;
+      }
+    }
+  };
+  
+  // Start traversal from the uppermost tier
+  traverse(pclass);
+  
+  cout << "DEBUG: Traversal complete. Total tiers visited: " << tier_count << endl;
+  cout << "DEBUG: Total shared_object_locals discovered: " << shared_object_locals_.size() << endl;
+
+  // Note: color was previously added here, but it's actually a user variable, not a built-in
+  // If color needs to be a built-in in the future, it should be added to the object hierarchy headers
+
   load_extension_locals();
+  
+  // Note: Enum constants (like c_blue, c_white, self) are NOT added to shared_object_locals_
+  // because they are namespace constants, not object hierarchy members.
+  // They are filtered in codegen using is_enigma_user_constant() instead.
+  
   return 0;
 }
 
@@ -392,6 +486,34 @@ jdi::definition* lang_CPP::look_up(std::string_view n) const {
     if (found) return found;
   }
   return namespace_enigma_user ? namespace_enigma_user->find_local(name) : nullptr;
+}
+
+bool lang_CPP::is_enigma_user_constant(std::string_view name) const {
+  if (!namespace_enigma_user) return false;
+  
+  std::string name_str(name);
+  jdi::definition* found = namespace_enigma_user->find_local(name_str);
+  
+  if (!found) {
+    // If find_local didn't find it, try look_up() as fallback
+    // (look_up searches globally first, then enigma_user)
+    jdi::definition* lookup_found = look_up(name_str);
+    if (lookup_found && lookup_found->parent && 
+        lookup_found->parent->name == "enigma_user" &&
+        !(lookup_found->flags & jdi::DEF_FUNCTION)) {
+      // Found via look_up, and it's a non-function in enigma_user namespace
+      return true;
+    }
+    return false;
+  }
+  
+  // Verify it's not a function
+  if (found->flags & jdi::DEF_FUNCTION) return false;
+  
+  // Verify parent is enigma_user (should always be true if found via find_local, but check anyway)
+  if (!found->parent || found->parent->name != "enigma_user") return false;
+  
+  return true;
 }
 
 // TODO: This could use better plumbing.

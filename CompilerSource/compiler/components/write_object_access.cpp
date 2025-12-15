@@ -102,36 +102,87 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   }
 
   for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-    // Rename reserved identifier __VA_ARGS__ to __va_args_var__ (valid identifier)
-    string pmember = dait->first;
-    if (pmember == "__VA_ARGS__") {
-      pmember = "__va_args_var__";
+    // Note: __VA_ARGS__ is a preprocessor macro, but if user code incorrectly uses it,
+    // it will be in object->locals and renamed to __va_args_var__ in write_object_data.cpp.
+    // If it's only in dot_accessed_locals (not in object->locals), skip it.
+    // But if it's in object->locals, it will be declared there, so we don't need varaccess here.
+    // For now, skip __VA_ARGS__ in dot_accessed_locals - if it's actually used, it will be in object->locals.
+    if (dait->first == "__VA_ARGS__") {
+      continue;
     }
+    
+    // Skip built-in instance variables (discovered by clang parser) - they're accessible as member variables
+    // These should not have varaccess functions generated since they're part of the object hierarchy
+    if (this->is_shared_local(dait->first)) {
+      continue;
+    }
+    
+    // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
+    // Use is_enigma_user_constant() which directly checks enigma_user namespace
+    if (this->is_enigma_user_constant(dait->first)) {
+      // It's a built-in constant in enigma_user namespace, don't generate varaccess function for it
+      continue;
+    }
+    
+    // Use the variable name as-is (no rename needed since we filtered __VA_ARGS__ above)
+    string pmember = dait->first;
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;
 
     wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
     wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
-    for (parsed_object *const obj : parsed_objects) {
-      for (parsed_object *parent = obj; parent;) {
-        map<string,dectrip>::iterator x = parent->locals.find(pmember);
-        if (x != parent->locals.end())
-        {
-          string tot = x->second.type != "" ? x->second.type : "var";
-          if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
+    // Only generate object-specific cases if the variable is actually declared in that object's locals
+    // Variables in dot_accessed_locals should only be accessed via ENIGMA_global_instance (case global:)
+    // Only generate object-specific cases if the variable is actually declared in that object's locals
+    // AND it's not in dot_accessed_locals (variables in dot_accessed_locals are global, not object members)
+    // Note: We check object->locals, but if the variable is in dot_accessed_locals, it won't be declared
+    // in the object struct (we filter it in write_object_data.cpp), so we shouldn't generate these cases.
+    // However, we still check object->locals here because the parser may have added it, but we filter it
+    // during declaration. So we need to check if it would actually be declared (not filtered).
+    // For now, we'll generate the cases - if the variable isn't declared, the compiler will error,
+    // but that's better than generating incorrect code. Actually, let's be smarter:
+    // If a variable is in dot_accessed_locals, it's a global variable and should only be accessed via
+    // ENIGMA_global_instance, not as object members. So skip object-specific cases for dot_accessed_locals.
+    bool is_dot_accessed = (dot_accessed_locals.find(pmember) != dot_accessed_locals.end());
+    
+    if (!is_dot_accessed) {
+      // Only generate object-specific cases if variable is NOT in dot_accessed_locals
+      // (variables in dot_accessed_locals are global, accessed via ENIGMA_global_instance)
+      for (parsed_object *const obj : parsed_objects) {
+        for (parsed_object *parent = obj; parent;) {
+          map<string,dectrip>::iterator x = parent->locals.find(pmember);
+          if (x != parent->locals.end())
           {
-            wto << "      case " << obj->name << ": return ((OBJ_" << obj->name << "*)inst)->" << pmember << ";" << endl;
-            break;
+            string tot = x->second.type != "" ? x->second.type : "var";
+            if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
+            {
+              wto << "      case " << obj->name << ": return ((OBJ_" << obj->name << "*)inst)->" << pmember << ";" << endl;
+              break;
+            }
           }
+          parent = parent->parent;
         }
-        parent = parent->parent;
       }
     }
 
-    if (global->globals.find(pmember) != global->globals.end())
+    // Check if variable is declared in any object (in object->locals but not in object->globals).
+    // Only generate case global: for ENIGMA_global_structure if variable is not declared in objects.
+    bool declared_in_any_object = false;
+    for (parsed_object *const obj : parsed_objects) {
+      bool in_locals = (obj->locals.find(pmember) != obj->locals.end());
+      bool in_globals = (obj->globals.find(pmember) != obj->globals.end());
+      if (in_locals && !in_globals) {
+        declared_in_any_object = true;
+        break;
+      }
+    }
+    
+    // Generate case global: for standalone globals or variables in ENIGMA_global_structure.
+    if (global->globals.find(pmember) != global->globals.end() && 
+        dot_accessed_locals.find(pmember) == dot_accessed_locals.end())
       wto << "      case global: return " << pmember << ";" << endl;
-    else
+    else if (!declared_in_any_object)
       wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
     if (dait->second.type == "var")
       wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;

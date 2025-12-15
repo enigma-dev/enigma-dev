@@ -46,6 +46,10 @@ unsigned int cursor_kind_to_flags(CXCursorKind kind) {
     case CXCursor_FieldDecl:
       flags |= jdi::DEF_TYPED;
       break;
+    case CXCursor_EnumConstantDecl:
+      // Enum constants are typed values (they have integer values)
+      flags |= jdi::DEF_TYPED;
+      break;
     case CXCursor_TemplateTypeParameter:
     case CXCursor_NonTypeTemplateParameter:
       flags |= jdi::DEF_TEMPLATE | jdi::DEF_TEMPPARAM;
@@ -513,6 +517,103 @@ struct TraversalState {
   }
 };
 
+// Helper function to recursively find a class definition by name
+static std::shared_ptr<ClangDefinitionClass> find_class_in_scope(
+    const std::string& class_name, 
+    std::shared_ptr<ClangDefinitionScope> scope) {
+  if (!scope) return nullptr;
+  
+  // Check if this scope has the class
+  auto it = scope->members.find(class_name);
+  if (it != scope->members.end()) {
+    auto class_def = std::dynamic_pointer_cast<ClangDefinitionClass>(it->second);
+    if (class_def) {
+      return class_def;
+    }
+  }
+  
+  // Recursively search in child scopes
+  for (const auto& member : scope->members) {
+    auto child_scope = std::dynamic_pointer_cast<ClangDefinitionScope>(member.second);
+    if (child_scope) {
+      auto found = find_class_in_scope(class_name, child_scope);
+      if (found) return found;
+    }
+  }
+  
+  return nullptr;
+}
+
+// Helper struct to track current class during traversal
+struct AncestorTraversalState {
+  std::string current_class;
+  std::shared_ptr<ClangDefinitionScope> global_scope;
+};
+
+// Helper function to populate ancestors for all classes (second pass)
+// Visits CXXBaseSpecifier cursors to find base classes
+static enum CXChildVisitResult populate_ancestors_visitor(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
+  auto* state = static_cast<AncestorTraversalState*>(client_data);
+  
+  CXCursorKind kind = clang_getCursorKind(cursor);
+  
+  // Track current class being processed
+  if (kind == CXCursor_StructDecl || kind == CXCursor_ClassDecl) {
+    std::string name = get_cursor_name(cursor);
+    if (!name.empty()) {
+      state->current_class = name;
+      if (name.find("object_") == 0) {  // Only log object_* classes
+        std::cout << "DEBUG populate_ancestors: Processing class '" << name << "'" << std::endl;
+      }
+    }
+  }
+  
+  // Process base class specifiers
+  if (kind == CXCursor_CXXBaseSpecifier) {
+    // Get the type of the base class
+    CXType base_type = clang_getCursorType(cursor);
+    std::string base_name = get_type_spelling(base_type);
+    
+    // Use the tracked current class name
+    std::string class_name = state->current_class;
+    
+    if (!class_name.empty() && class_name.find("object_") == 0) {
+      std::cout << "DEBUG populate_ancestors: Found base specifier for class '" << class_name 
+                << "' with base '" << base_name << "'" << std::endl;
+    }
+    
+    // Remove namespace prefix if present (e.g., "enigma::object_transform" -> "object_transform")
+    std::string base_name_short = base_name;
+    size_t ns_pos = base_name_short.find_last_of("::");
+    if (ns_pos != std::string::npos && ns_pos + 1 < base_name_short.length()) {
+      base_name_short = base_name_short.substr(ns_pos + 1);
+    }
+    
+    if (!class_name.empty() && !base_name_short.empty()) {
+      auto class_def = find_class_in_scope(class_name, state->global_scope);
+      auto base_class = find_class_in_scope(base_name_short, state->global_scope);
+      
+      if (class_name.find("object_") == 0) {
+        std::cout << "DEBUG populate_ancestors: Looking for class '" << class_name 
+                  << "' and base '" << base_name_short << "'" << std::endl;
+        std::cout << "DEBUG populate_ancestors: class_def=" << (class_def ? "found" : "NOT FOUND")
+                  << ", base_class=" << (base_class ? "found" : "NOT FOUND") << std::endl;
+      }
+      
+      if (class_def && base_class) {
+        int access = clang_getCXXAccessSpecifier(cursor);
+        class_def->ancestors.push_back(std::make_pair(base_class.get(), access));
+        if (class_name.find("object_") == 0) {
+          std::cout << "DEBUG populate_ancestors: Added ancestor '" << base_name_short 
+                    << "' to class '" << class_name << "'" << std::endl;
+        }
+      }
+    }
+  }
+  
+  return CXChildVisit_Recurse;
+}
+
 void ClangContext::build_definitions() {
   if (!tu_) return;
   
@@ -521,11 +622,18 @@ void ClangContext::build_definitions() {
   // Create traversal state
   TraversalState state(this);
   
-  // Visit all children of the translation unit
+  // First pass: Visit all children of the translation unit to create definitions
   clang_visitChildren(root, visit_cursor, &state);
+  
+  // Second pass: Populate ancestors by visiting base class specifiers
+  std::cout << "DEBUG: Starting second pass to populate ancestors" << std::endl;
+  AncestorTraversalState pass2_state;
+  pass2_state.global_scope = global_scope_;
+  clang_visitChildren(root, populate_ancestors_visitor, &pass2_state);
+  std::cout << "DEBUG: Second pass complete" << std::endl;
 }
 
-enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
   TraversalState* state = static_cast<TraversalState*>(client_data);
   ClangContext* ctx = state->ctx;
   
@@ -856,7 +964,34 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       std::cout << std::endl;
     }
     
-  } else if (flags & jdi::DEF_TYPED) {
+  } else if (flags & jdi::DEF_TYPED || kind == CXCursor_EnumConstantDecl) {
+    // Handle typed definitions (variables, fields, enum constants)
+    // For enum constants, ensure they get DEF_TYPED flag
+    if (kind == CXCursor_EnumConstantDecl && !(flags & jdi::DEF_TYPED)) {
+      flags |= jdi::DEF_TYPED;
+    }
+    
+    // Special handling for enum constants from anonymous enums
+    // If the enum constant is from an anonymous enum in enigma_user namespace,
+    // we need to ensure it's stored as a direct member of the namespace, not inside the enum type
+    if (kind == CXCursor_EnumConstantDecl) {
+      CXCursor parent_cursor = clang_getCursorSemanticParent(cursor);
+      CXCursorKind parent_kind = clang_getCursorKind(parent_cursor);
+      
+      if (parent_kind == CXCursor_EnumDecl) {
+        std::string enum_name = get_cursor_name(parent_cursor);
+        // If enum is anonymous (empty name), we need to check the current scope
+        // Re-fetch scope to get current context
+        scope = get_scope();
+        if (scope && enum_name.empty() && scope->name == "enigma_user") {
+          // This is an enum constant from an anonymous enum in enigma_user namespace
+          // Store it as a direct member of the namespace (current scope)
+          // The scope is already correct (enigma_user namespace), so we can proceed
+          // with storing it directly in the namespace members
+        }
+      }
+    }
+    
     // Re-fetch scope before insertion
     scope = get_scope();
     if (!scope) {
@@ -951,7 +1086,7 @@ ClangDefinition* ClangDefinitionScope::find_local(const std::string& name) {
 }
 
 // Helper to convert clang tokens to enigma tokens
-static enigma::parsing::TokenVector tokens_from_clang(CXTranslationUnit tu, CXSourceRange range) {
+[[maybe_unused]] static enigma::parsing::TokenVector tokens_from_clang(CXTranslationUnit tu, CXSourceRange range) {
   enigma::parsing::TokenVector result;
   
   CXToken* tokens = nullptr;
@@ -1047,7 +1182,7 @@ void ClangContext::extract_macros() {
     ClangContext* ctx;
     CXTranslationUnit tu;
     
-    static enum CXChildVisitResult visit(CXCursor cursor, CXCursor parent, CXClientData client_data) {
+    static enum CXChildVisitResult visit(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
       MacroVisitor* visitor = static_cast<MacroVisitor*>(client_data);
       
       CXCursorKind kind = clang_getCursorKind(cursor);
@@ -1093,9 +1228,25 @@ void ClangContext::extract_macros() {
                 if (token == "," || token == "(") {
                   continue;
                 }
-                if (token == "...") {
-                  is_variadic = true;
-                  break;
+                // Check for variadic parameter: "..." or three consecutive "." tokens
+                if (token == "..." || token == ".") {
+                  // Check if this is actually "..." (three dots)
+                  if (token == "." && i + 2 < num_tokens) {
+                    CXString next1 = clang_getTokenSpelling(visitor->tu, tokens[i+1]);
+                    CXString next2 = clang_getTokenSpelling(visitor->tu, tokens[i+2]);
+                    std::string next1_str = clang_getCString(next1);
+                    std::string next2_str = clang_getCString(next2);
+                    clang_disposeString(next1);
+                    clang_disposeString(next2);
+                    if (next1_str == "." && next2_str == ".") {
+                      is_variadic = true;
+                      i += 2; // Skip the next two tokens
+                      break;
+                    }
+                  } else if (token == "...") {
+                    is_variadic = true;
+                    break;
+                  }
                 }
                 params.push_back(token);
               }
@@ -1163,6 +1314,19 @@ void ClangContext::extract_macros() {
           }
           
           visitor->ctx->macros_[name] = std::move(macro);
+          
+          // Debug logging for macro extraction (especially for "string" macro)
+          if (name == "string" || getenv("ENIGMA_DEBUG_MACROS")) {
+            std::cerr << "DEBUG: Extracted macro: " << name 
+                      << " (function-like: " << (is_function ? "yes" : "no")
+                      << ", variadic: " << (is_variadic ? "yes" : "no")
+                      << ", params: [";
+            for (size_t i = 0; i < params.size(); ++i) {
+              std::cerr << params[i];
+              if (i < params.size() - 1) std::cerr << ", ";
+            }
+            std::cerr << "], body: " << macro_content << std::endl;
+          }
         }
       }
       

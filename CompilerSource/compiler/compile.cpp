@@ -740,7 +740,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // Write the global variables to their own file to be included before any of the objects
-  res = current_language->compile_writeGlobals(game, &state.global_object, state.dot_accessed_locals);
+  res = current_language->compile_writeGlobals(game, &state.global_object, state.dot_accessed_locals, state.parsed_objects);
   irrr();
 
 #ifdef WRITE_UNIMPLEMENTED_TXT

@@ -47,7 +47,7 @@ struct lang_CPP: language_adapter {
   int link_ambiguous(const GameData &game, CompileState &state) final;
   int compile_parseSecondary(CompileState &state) final;
 
-  int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) final;
+  int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals, const ParsedObjectVec &parsed_objects) final;
   int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) final;
   int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) final;
   int compile_writeFontInfo(const GameData &game) final;
@@ -107,6 +107,10 @@ struct lang_CPP: language_adapter {
   }
   /// Look up an enigma_user definition by its name.
   jdi::definition* look_up(std::string_view name) const final;
+  
+  /// Check if a name is a built-in constant in enigma_user namespace (not a function)
+  /// This is used to filter out enum constants like c_blue, c_white, self, etc.
+  bool is_enigma_user_constant(std::string_view name) const;
 
   // Reads in event data automatically. This isn't great, but is better than
   // accessing everything statically (for future refactors).
