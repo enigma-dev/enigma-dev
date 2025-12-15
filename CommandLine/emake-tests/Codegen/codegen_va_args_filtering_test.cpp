@@ -55,32 +55,14 @@ TEST_F(CodegenVAArgsFilteringTest, VAArgsNotInEnigmaUserNamespace) {
                 << "__VA_ARGS__ should not be in enigma_user namespace";
         }
     }
-    
-    // Also check the renamed version
-    jdi::definition* va_args_var = lang_->look_up("__va_args_var__");
-    if (va_args_var) {
-        if (va_args_var->parent) {
-            ASSERT_NE(va_args_var->parent->name, "enigma_user") 
-                << "__va_args_var__ should not be in enigma_user namespace";
-        }
-    }
 }
 
-// Test that __VA_ARGS__ is correctly identified as something that should be filtered
-// This test verifies the logic that should filter it in codegen
-TEST_F(CodegenVAArgsFilteringTest, VAArgsShouldBeFiltered) {
-    // __VA_ARGS__ is a preprocessor macro and should never be treated as a user variable
-    // It should be filtered in write_globals.cpp and write_object_access.cpp
-    
-    // Verify it's not in enigma_user namespace (so is_enigma_user_constant returns false)
+// Test that __VA_ARGS__ is not treated as an enigma_user constant
+TEST_F(CodegenVAArgsFilteringTest, VAArgsNotEnigmaUserConstant) {
+    // __VA_ARGS__ is a preprocessor macro handled by the macro system
+    // It should not be identified as an enigma_user constant
     ASSERT_FALSE(lang_->is_enigma_user_constant("__VA_ARGS__")) 
         << "__VA_ARGS__ should not be identified as enigma_user constant";
-    
-    // The actual filtering logic in codegen should check for "__VA_ARGS__" explicitly
-    // This test documents that expectation
-    std::string va_args = "__VA_ARGS__";
-    ASSERT_EQ(va_args, "__VA_ARGS__") 
-        << "Test that we can identify __VA_ARGS__ for filtering";
 }
 
 // Note: Full integration test would require running actual codegen,

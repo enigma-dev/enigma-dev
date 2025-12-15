@@ -1079,7 +1079,6 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
     // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
     auto &ast = (scr->code).ast;
       // Write AST to a string and write to stream
-      // Note: __VA_ARGS__ is filtered at the parser level and should not appear in the AST.
       string ast_code = write_ast_to_string(ast, 2, true);
       wto << ast_code;
     wto << "\n  return 0;\n}\n\n";
@@ -1097,7 +1096,6 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
           ? *moment.script->global_code : moment.script->code).ast;
 
       // Write AST to a string and write to stream
-      // Note: __VA_ARGS__ is filtered at the parser level and should not appear in the AST.
       string ast_code = write_ast_to_string(ast, 2, false);
       wto << ast_code;
       wto << "\n}\n\n";
@@ -1183,7 +1181,6 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
   
   // Write AST to a string and write to stream
-  // Note: __VA_ARGS__ is filtered at the parser level and should not appear in the AST.
   string ast_code = write_ast_to_string(event.ast, 2, false);
   wto << ast_code;
   
@@ -1205,7 +1202,6 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
 
       wto << ")\n{\n  ";
       // Write AST to a string and write to stream
-      // Note: __VA_ARGS__ is filtered at the parser level and should not appear in the AST.
       string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true);
       wto << ast_code;
       wto << "\n  return 0;\n}\n\n";
@@ -1225,7 +1221,6 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
         // Write AST to a string and write to stream
-        // Note: __VA_ARGS__ is filtered at the parser level and should not appear in the AST.
         string ast_code = write_ast_to_string(scr->code.ast, 0, false);
         wto << ast_code;
         wto << "}\n";

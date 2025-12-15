@@ -102,15 +102,6 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   }
 
   for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-    // Note: __VA_ARGS__ is a preprocessor macro, but if user code incorrectly uses it,
-    // it will be in object->locals and renamed to __va_args_var__ in write_object_data.cpp.
-    // If it's only in dot_accessed_locals (not in object->locals), skip it.
-    // But if it's in object->locals, it will be declared there, so we don't need varaccess here.
-    // For now, skip __VA_ARGS__ in dot_accessed_locals - if it's actually used, it will be in object->locals.
-    if (dait->first == "__VA_ARGS__") {
-      continue;
-    }
-    
     // Skip built-in instance variables (discovered by clang parser) - they're accessible as member variables
     // These should not have varaccess functions generated since they're part of the object hierarchy
     if (this->is_shared_local(dait->first)) {
@@ -124,7 +115,6 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
       continue;
     }
     
-    // Use the variable name as-is (no rename needed since we filtered __VA_ARGS__ above)
     string pmember = dait->first;
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;

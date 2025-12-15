@@ -221,12 +221,6 @@ class DeclGatheringVisitor : public AST::Visitor {
     std::string name = CheckIfIdentifier(node);
     if (name == "") return;
     
-    // Filter out __VA_ARGS__ - it's a preprocessor macro identifier, not a variable
-    // It should only appear in variadic macro definitions, not as a variable reference
-    if (name == "__VA_ARGS__") {
-      return;  // Skip - don't treat as a variable
-    }
-    
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
       return;
@@ -246,10 +240,6 @@ class DeclGatheringVisitor : public AST::Visitor {
       auto left = node.left->As<AST::IdentifierAccess>();
       if (left->name.content == "global" && node.operation.type == enigma::parsing::TokenType::TT_DOT) {
         auto right = node.right->As<AST::IdentifierAccess>();
-        // Filter out __VA_ARGS__ - it's a preprocessor macro identifier, not a variable
-        if (right->name.content == "__VA_ARGS__") {
-          return false;  // Skip - don't treat as a variable
-        }
         parsed_scope->globals[right->name.content] = dectrip("var");
         parsed_scope->locals[right->name.content] = dectrip("var");
         cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
@@ -263,10 +253,6 @@ class DeclGatheringVisitor : public AST::Visitor {
     if (!node) return;
     std::string name = CheckIfIdentifier(node);
     if (name == "") return;
-    // Filter out __VA_ARGS__ - it's a preprocessor macro identifier, not a variable
-    if (name == "__VA_ARGS__") {
-      return;  // Skip - don't treat as a variable
-    }
     parsed_scope->dots[name] = 0;
     cs->add_dot_accessed_local(name);
   }

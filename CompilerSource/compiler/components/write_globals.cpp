@@ -143,12 +143,6 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
 
   wto << "namespace enigma" << endl << "{" << endl << "  struct ENIGMA_global_structure: object_locals" << endl << "  {" << endl;
   for (decciter i = dot_accessed_locals.begin(); i != dot_accessed_locals.end(); i++) { // Dots are vars that are accessed as something.varname.
-    // Skip __VA_ARGS__ - it's a preprocessor macro, not a variable
-    // It should never be treated as a user variable
-    if (i->first == "__VA_ARGS__") {
-      continue;
-    }
-    
     // Skip built-in instance variables (discovered by clang parser from C++ class hierarchy)
     // These are already part of the object tier system and should not be declared in global structure
     if (this->is_shared_local(i->first)) {

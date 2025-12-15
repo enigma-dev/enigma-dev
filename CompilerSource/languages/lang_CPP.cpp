@@ -87,6 +87,7 @@ namespace {
 // This function may no longer be needed, but keeping for compatibility
 enigma::parsing::Macro TranslateMacro(const enigma::parsing::Macro &macro,
                                       enigma::parsing::ErrorHandler *herr) {
+  (void)herr;  // Unused parameter, kept for compatibility with callers
   // Macros from clang_adapter are already in the correct format
   return macro;
 }
