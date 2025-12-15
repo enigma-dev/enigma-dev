@@ -590,7 +590,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
   wto << "#define GM_COMPATIBILITY_VERSION " << compatibility_opts_.compliance_mode << "\n";
-  wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
+  wto << "inline void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
   wto << '\n';
   wto.close();
 

@@ -36,8 +36,15 @@ else
 endif
 
 # Global g++ flags
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I. -fsanitize=address
-LDFLAGS := -g -fsanitize=address
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -g -I.
+LDFLAGS := -g
+
+# Enable ASAN only if ENABLE_ASAN=1
+# On Mac, ASAN is disabled by default unless explicitly enabled
+ifeq ($(ENABLE_ASAN), 1)
+	CXXFLAGS += -fsanitize=address
+	LDFLAGS += -fsanitize=address
+endif
 
 # macOS brew include and lib folders
 ifeq ($(OS), Darwin)
@@ -45,7 +52,9 @@ ifeq ($(OS), Darwin)
 	CFLAGS   += -I/usr/local/include
 	LDFLAGS  += -L/usr/local/lib
 	# ASan with shared libraries on macOS needs dynamic symbol resolution
-	SHARED_LDFLAGS := -Wl,-undefined,dynamic_lookup
+	ifeq ($(ENABLE_ASAN), 1)
+		SHARED_LDFLAGS := -Wl,-undefined,dynamic_lookup
+	endif
 endif
 
 # FreeBSD include and lib folders

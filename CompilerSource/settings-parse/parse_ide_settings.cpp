@@ -90,7 +90,7 @@ static void reset_ide_editables()
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << "inline void ABORT_ON_ALL_ERRORS() { }\n";
     wto << '\n';
   wto.close();
 }
