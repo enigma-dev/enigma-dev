@@ -17,7 +17,8 @@
 #ifndef ENIGMA_COMPILER_PARSING_FULL_TYPE_h
 #define ENIGMA_COMPILER_PARSING_FULL_TYPE_h
 
-#include <JDI/src/Storage/definition.h>
+// JDI removed - definition types need to be reimplemented
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 #include "declarator.h"
 
@@ -34,7 +35,7 @@ struct FullType {
   FullType(jdi::definition *def, Declarator decl, std::size_t flags);
   FullType(jdi::definition *def);
 
-  jdi::full_type to_jdi_fulltype();
+  // JDI removed - to_jdi_fulltype() no longer needed, FullType is used directly
 };
 }
 

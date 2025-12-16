@@ -181,6 +181,72 @@ TEST(LexerTest, VariadicMacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
+// Test that verifies token type correction for tokens from macro expansion
+// This tests the CorrectTokenTypeFromContent function directly
+TEST(LexerTest, TokenTypeCorrection_FromMacroExpansion) {
+  // Create a macro that expands to operators and punctuation
+  LexerTester lex("MACRO_TEST(5);", true);
+  
+  // Create a macro that expands to: for (int x = (5); x > 0; x--)
+  // This contains operators that were being mis-categorized: =, ;, >, --
+  std::string macro_body = "for (int x = (5); x > 0; x--)";
+  AddMacro(lex, Macro("MACRO_TEST", {"arg"}, false, macro_body, &lex.herr));
+  
+  // Read tokens and verify they have correct types
+  // The macro should expand and tokens should have proper types, not TT_IDENTIFIER
+  Token t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_S_FOR) << "Expected 'for' keyword, got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_BEGINPARENTH) << "Expected '(', got type " << (int)t.type << " content '" << t.content << "'";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_TYPE_NAME) << "Expected 'int' type, got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_IDENTIFIER) << "Expected identifier 'x', got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_EQUALS) << "Expected '=' operator (TT_EQUALS), got type " << (int)t.type << " content '" << t.content << "'";
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token '=' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_BEGINPARENTH) << "Expected '(', got type " << (int)t.type;
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token '(' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_DECLITERAL) << "Expected literal '5', got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_ENDPARENTH) << "Expected ')', got type " << (int)t.type;
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token ')' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_SEMICOLON) << "Expected ';' (TT_SEMICOLON), got type " << (int)t.type << " content '" << t.content << "'";
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token ';' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_IDENTIFIER) << "Expected identifier 'x', got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_GREATER) << "Expected '>' operator (TT_GREATER), got type " << (int)t.type << " content '" << t.content << "'";
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token '>' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_DECLITERAL) << "Expected literal '0', got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_SEMICOLON) << "Expected ';', got type " << (int)t.type;
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token ';' should not be TT_IDENTIFIER";
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_IDENTIFIER) << "Expected identifier 'x', got type " << (int)t.type;
+  
+  t = lex->ReadToken();
+  ASSERT_EQ(t.type, TT_DECREMENT) << "Expected '--' operator (TT_DECREMENT), got type " << (int)t.type << " content '" << t.content << "'";
+  ASSERT_NE(t.type, TT_IDENTIFIER) << "Token '--' should not be TT_IDENTIFIER";
+}
+
 TEST(LexerTest, LambdaExpressions) {
   LexerTester lex("y = x => x+10;", true);
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);

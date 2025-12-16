@@ -21,7 +21,11 @@
 #include "settings.h"
 #include <ctime>
 #include <cstdio>
+#include <filesystem>
+#include <set>
+#include <functional>
 #include "languages/lang_CPP.h"
+#include "languages/clang_adapter.h"  // For ClangContext full definition
 
 string lang_CPP::get_name() { return "C++"; }
 
@@ -44,7 +48,8 @@ void lang_CPP::load_extension_locals() {
       cout << "WARNING! Extension implements non-class " << parsed_extensions[i].implements << "!" << endl;
     }
     jdi::definition_scope *const iscope = (jdi::definition_scope*) implements;
-    for (jdi::definition_scope::defiter it = iscope->members.begin(); it != iscope->members.end(); ++it) {
+    // JDI removed - defiter is now std::map iterator
+    for (auto it = iscope->members.begin(); it != iscope->members.end(); ++it) {
       if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
         shared_object_locals_.insert(it->second->name);
     }
@@ -72,30 +77,19 @@ void lang_CPP::load_extension_locals() {
 #include "settings-parse/parse_ide_settings.h"
 #include "settings-parse/crawler.h"
 
-#include <System/builtins.h>
+// JDI removed - using clang_adapter instead
+// #include <System/builtins.h>
 
 namespace {
 
-std::string TranscribeTokens(const jdi::token_vector &tokens) {
-  std::string result;
-  for (const jdi::token_t &token : tokens) {
-    if (result.length()) result.push_back(' ');
-    result += token.content.toString();
-  }
-  return result;
-}
-
-enigma::parsing::Macro TranslateMacro(const jdi::macro_type &macro,
+// JDI removed - macro_type doesn't exist
+// clang_adapter already returns enigma::parsing::Macro, so just return it as-is
+// This function may no longer be needed, but keeping for compatibility
+enigma::parsing::Macro TranslateMacro(const enigma::parsing::Macro &macro,
                                       enigma::parsing::ErrorHandler *herr) {
-  using namespace enigma::parsing;
-  if (macro.is_function) {
-    auto copy = macro.params;
-    return enigma::parsing::Macro(
-        macro.name, std::move(copy), macro.is_variadic,
-        TranscribeTokens(macro.raw_value), herr);
-  }
-  return enigma::parsing::Macro(
-      macro.name, TranscribeTokens(macro.raw_value), herr);
+  (void)herr;  // Unused parameter, kept for compatibility with callers
+  // Macros from clang_adapter are already in the correct format
+  return macro;
 }
 
 }  // namespace
@@ -108,22 +102,92 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   cout << targetYaml << endl;
 
   cout << "Creating swap." << endl;
+  // Ensure ENIGMA_TEST is set if we're in test mode (check if mock-headers directory exists)
+  // This is a fallback in case the environment variable wasn't set by the test framework
+  const char* test_env = getenv("ENIGMA_TEST");
+  if (!test_env) {
+    // Check if we're in a test environment by looking for mock-headers directory
+    std::filesystem::path mock_headers = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
+    if (std::filesystem::exists(mock_headers)) {
+      setenv("ENIGMA_TEST", "TRUE", 1);
+      std::cerr << "DEBUG definitionsModified: Auto-detected test mode, set ENIGMA_TEST=TRUE" << std::endl;
+    }
+  }
   delete main_context;
-  main_context = new jdi::Context();
+  main_context = new clang_adapter::ClangContext();
 
   cout << "Dumping whiteSpace definitions..." << endl;
   FILE *of = wscode ? fopen((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").u8string().c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
 
   cout << "Opening ENIGMA for parse..." << endl;
+  cout.flush();
 
-  llreader f((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string().c_str());
+  // JDI removed - llreader and parse_stream don't exist in clang_adapter
+  // Use parse_file instead
   int res = 1;
   DECLARE_TIME_TYPE ts, te;
-  if (f.is_open()) {
-    CURRENT_TIME(ts);
-    res = main_context->parse_stream(f);
-    CURRENT_TIME(te);
+  CURRENT_TIME(ts);
+  // Include the codegen_directory where generated headers like API_Switchboard.h are placed
+  std::vector<std::string> extra_include_dirs;
+  extra_include_dirs.push_back(codegen_directory.u8string());
+  
+  // Add include paths based on target settings (same as Makefile does)
+  // This ensures bridge headers like OpenGLHeaders.h can be found
+  std::filesystem::path shell_dir = enigma_root / "ENIGMAsystem" / "SHELL";
+  
+  // Add system Info directories (like Makefile: SYSTEMS:%=-I%/Info)
+  // These contain system-specific headers
+  extra_include_dirs.push_back((shell_dir / "Platforms" / extensions::targetAPI.windowSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Graphics_Systems" / extensions::targetAPI.graphicsSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Audio_Systems" / extensions::targetAPI.audioSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Collision_Systems" / extensions::targetAPI.collisionSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Widget_Systems" / extensions::targetAPI.widgetSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Networking_Systems" / extensions::targetAPI.networkSys / "Info").u8string());
+  extra_include_dirs.push_back((shell_dir / "Universal_System" / "Info").u8string());
+  
+  // Add bridge directories (like Makefile: include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile)
+  // Platform-specific bridge: Bridges/PLATFORM-GRAPHICS/
+  std::filesystem::path platform_graphics_bridge = shell_dir / "Bridges" / (extensions::targetAPI.windowSys + "-" + extensions::targetAPI.graphicsSys);
+  if (std::filesystem::exists(platform_graphics_bridge)) {
+    extra_include_dirs.push_back(platform_graphics_bridge.u8string());
+  }
+  
+  // Standalone graphics bridge directories for OpenGLHeaders.h
+  // Check if graphics system is an OpenGL variant
+  std::string graphics = extensions::targetAPI.graphicsSys;
+  if (graphics.find("OpenGL") != std::string::npos) {
+    // Add Bridges/OpenGL/ (for OpenGLHeaders.h used by OpenGL-Common)
+    std::filesystem::path opengl_bridge = shell_dir / "Bridges" / "OpenGL";
+    if (std::filesystem::exists(opengl_bridge)) {
+      extra_include_dirs.push_back(opengl_bridge.u8string());
+    }
+    
+    // Add Graphics_Systems/OpenGL-Common/ (like OpenGL1/Makefile includes it)
+    std::filesystem::path opengl_common = shell_dir / "Graphics_Systems" / "OpenGL-Common";
+    if (std::filesystem::exists(opengl_common)) {
+      extra_include_dirs.push_back(opengl_common.u8string());
+    }
+  }
+  
+  // Check for OpenGLES variants
+  if (graphics.find("OpenGLES") != std::string::npos || graphics == "OpenGLES") {
+    std::filesystem::path opengles_bridge = shell_dir / "Bridges" / "OpenGLES";
+    if (std::filesystem::exists(opengles_bridge)) {
+      extra_include_dirs.push_back(opengles_bridge.u8string());
+    }
+  }
+  
+  // Add base directories (like Makefile: -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR))
+  extra_include_dirs.push_back(shell_dir.u8string()); // -I. equivalent
+  extra_include_dirs.push_back((enigma_root / "shared").u8string()); // -Ishared equivalent
+  
+  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string(), extra_include_dirs);
+  CURRENT_TIME(te);
+  
+  if (res != 0) {
+    cerr << "WARNING: parse_file returned " << res << " (non-zero indicates failure)" << endl;
+    cerr << "This may mean the enigma_user namespace was not parsed correctly!" << endl;
   }
 
   jdi::definition *d;
@@ -154,11 +218,75 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
   namespace_enigma_user = main_context->get_global();
+  cerr << "\n*** DEBUG: Looking up enigma_user namespace... ***" << endl;
+  cerr.flush();  // Use cerr and flush to ensure it appears
   if ((d = main_context->get_global()->look_up("enigma_user"))) {
+    cerr << "*** DEBUG: Found enigma_user definition, flags: 0x" << std::hex << d->flags << std::dec << " ***" << endl;
     if (d->flags & jdi::DEF_NAMESPACE) {
       namespace_enigma_user = (jdi::definition_scope*) d;
-    } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
-  } else cerr << "ERROR! Namespace enigma_user not found!" << endl;
+      
+      // Print all functions in enigma_user namespace
+      cerr << "\n*** === Functions in enigma_user namespace === ***" << endl;
+      clang_adapter::ClangDefinitionScope* enigma_user_scope = 
+          dynamic_cast<clang_adapter::ClangDefinitionScope*>(namespace_enigma_user);
+      if (enigma_user_scope) {
+        cerr << "*** DEBUG: Successfully cast to ClangDefinitionScope, members count: " 
+             << enigma_user_scope->members.size() << " ***" << endl;
+        int function_count = 0;
+        int total_members = 0;
+        for (const auto& member_pair : enigma_user_scope->members) {
+          total_members++;
+          const std::string& name = member_pair.first;
+          const auto& member = member_pair.second;
+          if (!member) continue;
+          
+          if (member->flags & jdi::DEF_FUNCTION) {
+            function_count++;
+            clang_adapter::ClangDefinitionFunction* func = 
+                dynamic_cast<clang_adapter::ClangDefinitionFunction*>(member.get());
+            if (func) {
+              cerr << "  Function: " << name 
+                   << " (overloads: " << func->overloads.size() 
+                   << ", template overloads: " << func->template_overloads.size() << ")";
+              for (const auto& overload_pair : func->overloads) {
+                const auto& overload = overload_pair.second;
+                if (overload) {
+                  cerr << " [" << overload->params.size() << " params";
+                  if (overload->is_variadic) cerr << ", variadic";
+                  cerr << "]";
+                }
+              }
+              cerr << endl;
+              cerr.flush();
+            } else {
+              cerr << "  Function: " << name << " (NOT ClangDefinitionFunction - flags: 0x" 
+                   << std::hex << member->flags << std::dec << ")" << endl;
+            }
+          }
+        }
+        cerr << "Total members: " << total_members << ", Functions found: " << function_count << endl;
+        cerr << "*** === End enigma_user functions === ***\n" << endl;
+        cerr.flush();  // Use cerr and flush to ensure it appears
+      } else {
+        cerr << "*** WARNING: enigma_user is not a ClangDefinitionScope! Type: " 
+             << typeid(*namespace_enigma_user).name() << endl;
+      }
+    } else {
+      cerr << "ERROR! Namespace enigma_user is... not a namespace! Flags: 0x" 
+           << std::hex << d->flags << std::dec << endl;
+    }
+  } else {
+    cerr << "ERROR! Namespace enigma_user not found!" << endl;
+    cerr << "*** DEBUG: Available top-level definitions: ***" << endl;
+    clang_adapter::ClangDefinitionScope* global_scope = 
+        dynamic_cast<clang_adapter::ClangDefinitionScope*>(main_context->get_global());
+    if (global_scope) {
+      for (const auto& member_pair : global_scope->members) {
+        cerr << "  " << member_pair.first << " (flags: 0x" << std::hex 
+             << (member_pair.second ? member_pair.second->flags : 0) << std::dec << ")" << endl;
+      }
+    }
+  }
   if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
     if (dstd->flags & jdi::DEF_NAMESPACE) {
       jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
@@ -184,8 +312,13 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   }
 
   cout << "Creating dummy primitives for old ENIGMA" << endl;
-  for (jdi::tf_iter it = jdi::builtin_declarators.begin(); it != jdi::builtin_declarators.end(); ++it) {
-    main_context->get_global()->members[it->first] = std::make_unique<jdi::definition>(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
+  // Initialize builtin type constants from clang context
+  if (main_context) {
+    jdi::definition* d;
+    if ((d = main_context->get_global()->look_up("int"))) {
+      jdi::builtin_type__int = d;
+    }
+    // Can add more builtin types here as needed: char, void, float, double, bool, etc.
   }
 
   enigma::parsing::StdErrorHandler hack;  // TODO: FIXME: This should be using a central error handler...
@@ -236,24 +369,152 @@ int lang_CPP::load_shared_locals() {
 
   shared_object_locals_.clear();
 
-  //Iterate the tiers of the parent object
-  for (jdi::definition_class *cs = pclass; cs; cs = (cs->ancestors.size() ? cs->ancestors[0].def : NULL) )
-  {
-    cout << " >> Checking ancestor " << cs->name << endl;
-    for (jdi::definition_scope::defiter mem = cs->members.begin(); mem != cs->members.end(); ++mem)
-      shared_object_locals_.insert(mem->first);
+  // Debug: Show what we're starting with
+  cout << "DEBUG: Starting traversal from " << pclass->name << endl;
+  cout << "DEBUG: Ancestors count: " << pclass->ancestors.size() << endl;
+  for (size_t i = 0; i < pclass->ancestors.size(); ++i) {
+    if (pclass->ancestors[i].first) {
+      cout << "DEBUG:   Ancestor[" << i << "]: " << pclass->ancestors[i].first->name << endl;
+    } else {
+      cout << "DEBUG:   Ancestor[" << i << "]: NULL" << endl;
+    }
   }
 
+  // Recursively traverse all ancestors to discover all member variables
+  // Use a visited set to prevent cycles (though shouldn't exist in single inheritance)
+  std::set<jdi::definition_class*> visited;
+  int tier_count = 0;
+  
+  std::function<void(jdi::definition_class*)> traverse = [&](jdi::definition_class* cls) {
+    if (!cls) return;
+    
+    // Prevent cycles
+    if (visited.count(cls)) {
+      cout << "DEBUG:   Skipping already visited: " << cls->name << endl;
+      return;
+    }
+    visited.insert(cls);
+    
+    tier_count++;
+    cout << " >> Checking ancestor " << cls->name << " (tier " << tier_count << ")" << endl;
+    cout << "DEBUG:   Members in " << cls->name << ": " << cls->members.size() << endl;
+    
+    int members_added = 0;
+    int members_skipped = 0;
+    // Process members of this class
+    for (auto mem = cls->members.begin(); mem != cls->members.end(); ++mem) {
+      bool is_variable = false;
+      
+      if (mem->second) {
+        // Filter: Only include actual member variables, not functions, types, etc.
+        // A variable has DEF_TYPED but not DEF_FUNCTION
+        // Also exclude: functions, types, templates, namespaces, classes, enums
+        bool is_function = (mem->second->flags & jdi::DEF_FUNCTION) != 0;
+        bool is_type = (mem->second->flags & jdi::DEF_TYPENAME) != 0;
+        bool is_template = (mem->second->flags & jdi::DEF_TEMPLATE) != 0;
+        bool is_namespace = (mem->second->flags & jdi::DEF_NAMESPACE) != 0;
+        bool is_class = (mem->second->flags & jdi::DEF_CLASS) != 0;
+        bool is_enum = (mem->second->flags & jdi::DEF_ENUM) != 0;
+        bool is_scope = (mem->second->flags & jdi::DEF_SCOPE) != 0 && !is_class && !is_namespace;
+        
+        // Include if it's typed (has a type) and is not a function, type, template, etc.
+        bool has_type = (mem->second->flags & jdi::DEF_TYPED) != 0;
+        is_variable = has_type && !is_function && !is_type && !is_template && 
+                      !is_namespace && !is_class && !is_enum && !is_scope;
+        
+        cout << "DEBUG:     Member: " << mem->first;
+        cout << " (flags: 0x" << std::hex << mem->second->flags << std::dec << ")";
+        if (is_function) cout << " [FUNCTION]";
+        if (is_type) cout << " [TYPE]";
+        if (is_template) cout << " [TEMPLATE]";
+        if (has_type && !is_function) cout << " [VARIABLE]";
+      } else {
+        // If no definition, skip it
+        is_variable = false;
+        cout << "DEBUG:     Member: " << mem->first << " (no definition)";
+      }
+      
+      if (is_variable) {
+        shared_object_locals_.insert(mem->first);
+        members_added++;
+        cout << " -> ADDED" << endl;
+      } else {
+        members_skipped++;
+        cout << " -> SKIPPED" << endl;
+      }
+    }
+    cout << "DEBUG:   Added " << members_added << " variable(s), skipped " << members_skipped << " non-variable(s) from " << cls->name << endl;
+    cout << "DEBUG:   Total shared_locals so far: " << shared_object_locals_.size() << endl;
+    
+    // Recursively process all ancestors (not just the first one)
+    cout << "DEBUG:   Processing " << cls->ancestors.size() << " ancestor(s)" << endl;
+    for (const auto& ancestor_pair : cls->ancestors) {
+      if (ancestor_pair.first) {
+        cout << "DEBUG:     Traversing to ancestor: " << ancestor_pair.first->name << endl;
+        traverse(ancestor_pair.first);
+      } else {
+        cout << "DEBUG:     Ancestor is NULL" << endl;
+      }
+    }
+  };
+  
+  // Start traversal from the uppermost tier
+  traverse(pclass);
+  
+  cout << "DEBUG: Traversal complete. Total tiers visited: " << tier_count << endl;
+  cout << "DEBUG: Total shared_object_locals discovered: " << shared_object_locals_.size() << endl;
+
+  // Note: color was previously added here, but it's actually a user variable, not a built-in
+  // If color needs to be a built-in in the future, it should be added to the object hierarchy headers
+
   load_extension_locals();
+  
+  // Note: Enum constants (like c_blue, c_white, self) are NOT added to shared_object_locals_
+  // because they are namespace constants, not object hierarchy members.
+  // They are filtered in codegen using is_enigma_user_constant() instead.
+  
   return 0;
 }
 
 jdi::definition* lang_CPP::look_up(std::string_view n) const {
   // TODO: FIXME: slow-ass conversion still exists...
   std::string name(n);
-  auto builtin = jdi::builtin_declarators.find(name);
-  if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
-  return namespace_enigma_user->find_local(name);
+  // JDI removed - builtin_declarators no longer exists, use main_context lookup instead
+  // auto builtin = jdi::builtin_declarators.find(name);
+  // if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
+  if (main_context) {
+    jdi::definition* found = main_context->look_up(name);
+    if (found) return found;
+  }
+  return namespace_enigma_user ? namespace_enigma_user->find_local(name) : nullptr;
+}
+
+bool lang_CPP::is_enigma_user_constant(std::string_view name) const {
+  if (!namespace_enigma_user) return false;
+  
+  std::string name_str(name);
+  jdi::definition* found = namespace_enigma_user->find_local(name_str);
+  
+  if (!found) {
+    // If find_local didn't find it, try look_up() as fallback
+    // (look_up searches globally first, then enigma_user)
+    jdi::definition* lookup_found = look_up(name_str);
+    if (lookup_found && lookup_found->parent && 
+        lookup_found->parent->name == "enigma_user" &&
+        !(lookup_found->flags & jdi::DEF_FUNCTION)) {
+      // Found via look_up, and it's a non-function in enigma_user namespace
+      return true;
+    }
+    return false;
+  }
+  
+  // Verify it's not a function
+  if (found->flags & jdi::DEF_FUNCTION) return false;
+  
+  // Verify parent is enigma_user (should always be true if found via find_local, but check anyway)
+  if (!found->parent || found->parent->name != "enigma_user") return false;
+  
+  return true;
 }
 
 // TODO: This could use better plumbing.

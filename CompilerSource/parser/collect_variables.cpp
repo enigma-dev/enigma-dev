@@ -32,7 +32,6 @@
 
 #include "event_reader/event_parser.h"
 
-#include <JDI/src/System/builtins.h>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -41,7 +40,16 @@
 #include <string>
 #include <unordered_set>
 
+#include "../parsing/tokens.h"
+#include "../parsing/declarator.h"
+#include "../parsing/full_type.h"
+#include "collect_variables.h"
+#include "languages/language_adapter.h"
+#include "object_storage.h"
+
 using namespace std;
+using namespace enigma::parsing;
+using enigma::parsing::AST;
 
 extern int global_script_argument_count;
 
@@ -54,12 +62,88 @@ struct scope_ignore {
   scope_ignore(int x) : is_with(x) {}
 };
 
-#include "../parsing/tokens.h"
-#include "collect_variables.h"
-#include "languages/language_adapter.h"
-#include "object_storage.h"
-
-using enigma::parsing::AST;
+// Helper function to convert Declarator to string representation  
+static std::string declarator_to_string(const FullType& ft) {
+  const Declarator& decl = ft.decl;
+  std::string result;
+  std::string name = std::string(decl.name.content);
+  bool need_parens = false;
+  
+  // Track if we've printed the name yet
+  bool name_printed = false;
+  
+  // Process components in reverse order for correct C++ declarator syntax
+  // We need to handle: base_type *name[10] -> name[10]*
+  // So we process arrays/functions first, then pointers/references
+  
+  // Separate components into pre-name (arrays, functions) and post-name (pointers, references)
+  std::vector<const DeclaratorNode*> post_name_ops;
+  std::vector<const DeclaratorNode*> pre_name_ops;
+  
+  for (const auto& component : decl.components) {
+    if (component.kind == DeclaratorNode::Kind::ARRAY_BOUND ||
+        component.kind == DeclaratorNode::Kind::FUNCTION) {
+      pre_name_ops.push_back(&component);
+    } else {
+      post_name_ops.push_back(&component);
+    }
+  }
+  
+  // Build string: post_name_ops (pointers/references) + name + pre_name_ops (arrays/functions)
+  for (const auto* comp : post_name_ops) {
+    switch (comp->kind) {
+      case DeclaratorNode::Kind::POINTER_TO:
+        result += '*';
+        need_parens = true;
+        break;
+      case DeclaratorNode::Kind::REFERENCE:
+        result += '&';
+        need_parens = true;
+        break;
+      case DeclaratorNode::Kind::RVAL_REFERENCE:
+        result += "&&";
+        need_parens = true;
+        break;
+      case DeclaratorNode::Kind::MEMBER_POINTER:
+        // Member pointer - would need class name
+        result += "::*";
+        need_parens = true;
+        break;
+      default:
+        break;
+    }
+  }
+  
+  // Add name with parentheses if needed
+  if (need_parens && (pre_name_ops.size() > 0 || name_printed)) {
+    result = "(" + result + name;
+    name_printed = true;
+  } else if (!name_printed && !name.empty()) {
+    result += name;
+    name_printed = true;
+  }
+  
+  // Add pre-name operations (arrays, functions)
+  for (const auto* comp : pre_name_ops) {
+    if (comp->kind == DeclaratorNode::Kind::ARRAY_BOUND) {
+      const auto& arr = std::get<ArrayBoundNode>(const_cast<DeclaratorNode*>(comp)->value);
+      if (arr.size == 0 || arr.size == static_cast<size_t>(-1)) {
+        result += "[]";
+      } else {
+        result += "[" + std::to_string(arr.size) + "]";
+      }
+    } else if (comp->kind == DeclaratorNode::Kind::FUNCTION) {
+      result += "()";  // Simplified - full parameter list would be complex
+    }
+  }
+  
+  // Close parentheses if we opened them
+  if (need_parens && pre_name_ops.size() > 0) {
+    result += ")";
+  }
+  
+  return result;
+}
 
 std::string GetFullType(enigma::parsing::FullType &ft) {
   std::string type;
@@ -91,56 +175,14 @@ std::string GetFullType(enigma::parsing::FullType &ft) {
 
   // type += ft.def->name + " ";
 
-  std::string name = std::string(ft.decl.name.content);
-  if (name != "" && !ft.decl.components.size()) {
-    type += name + " ";
+  std::string decl_name = std::string(ft.decl.name.content);
+  if (decl_name != "" && !ft.decl.components.size()) {
+    type += decl_name + " ";
   }
 
-  jdi::ref_stack stack;
-  ft.decl.to_jdi_refstack(stack);
-  auto first = stack.begin();
-
-  std::string ref;
-  bool flag = false;
-  bool print_name = true;
-
-  for (auto it = first; it != stack.end(); it++) {
-    if (it->type == jdi::ref_stack::RT_POINTERTO) {
-      flag = true;
-      ref = '*' + ref;
-    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
-      flag = true;
-      ref = '&' + ref;
-    } else {
-      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-        if (flag) {
-          ref = '(' + ref + ')';
-        }
-
-        std::size_t arr_size = it->arraysize();
-        if (arr_size != 0) {
-          ref += '[' + std::to_string(arr_size) + ']';
-        } else {
-          ref += "[]";
-        }
-      }
-      // TODO: RT_MEMBER_POINTER
-      flag = false;
-    }
-
-    if (print_name) {
-      std::string name = std::string(ft.decl.name.content);
-      if (name != "") {
-        if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-          ref = name + ref;
-        } else {
-          ref += name;
-        }
-      }
-      print_name = false;
-    }
-  }
-
+  // Convert Declarator directly to string representation (replaces ref_stack conversion)
+  std::string ref = declarator_to_string(ft);
+  
   type += ref;
   return type;
 }
@@ -177,7 +219,23 @@ class DeclGatheringVisitor : public AST::Visitor {
   void AddLocal(AST::PNode &node) {
     if (!node) return;
     std::string name = CheckIfIdentifier(node);
+    
+    // If CheckIfIdentifier returned empty, it might be because the variable is in declarations
+    // (declared in a parent object or globally). But if it's being used here and not in locals,
+    // we should still add it to locals so it's available in this object.
+    if (name == "" && node->type == AST::NodeType::IDENTIFIER) {
+      std::string node_content = node->As<AST::IdentifierAccess>()->name.content;
+      // Check if it's in declarations but not in locals - if so, add it to locals
+      if (parsed_scope->declarations.find(node_content) != parsed_scope->declarations.end() &&
+          parsed_scope->locals.find(node_content) == parsed_scope->locals.end()) {
+        name = node_content;
+      } else {
+        return;  // It's a script name or something else we can't handle
+      }
+    }
+    
     if (name == "") return;
+    
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
       return;
@@ -209,7 +267,8 @@ class DeclGatheringVisitor : public AST::Visitor {
   void AddDot(AST::PNode &node) {
     if (!node) return;
     std::string name = CheckIfIdentifier(node);
-    if (name != "") parsed_scope->dots[name] = 0;
+    if (name == "") return;
+    parsed_scope->dots[name] = 0;
     cs->add_dot_accessed_local(name);
   }
 

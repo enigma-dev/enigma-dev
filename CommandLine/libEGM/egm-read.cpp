@@ -232,7 +232,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     const google::protobuf::FieldOptions opts = field->options();
 
-    std::string key = field->name();
+    std::string_view key = field->name();
 
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";
@@ -386,7 +386,12 @@ inline void LoadInstanceEDL(const fs::path& fPath, buffers::resources::Room* rm)
 
 
 bool EGMFileFormat::PackResource(const fs::path& fPath, google::protobuf::Message *m) const {
-  return LoadResource(fPath, m, 0);
+  bool result = LoadResource(fPath, m, 0);
+  if (result) {
+    // Apply default values from proto attributes after loading
+    ApplyProtoDefaults(m);
+  }
+  return result;
 }
 
 bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Message *m,
@@ -523,6 +528,9 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
 }
 
 void RecursiveResourceSanityCheck(buffers::TreeNode* n, std::map<Type, std::map<int, std::string>>& IDmap) {
+  // check if folder is present otherwise mutable_folder creates an unwanted folder
+  if(!n->has_folder())
+    return;
 
   for (int i = 0; i < n->mutable_folder()->children_size(); ++i) {
     buffers::TreeNode* c = n->mutable_folder()->mutable_children(i);

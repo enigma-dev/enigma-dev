@@ -2,7 +2,9 @@
 #define ENIGMA_COMPILER_PARSING_LANGUAGE_FRONTEND_h
 
 #include <frontend.h>
-#include <Storage/definition.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 #include <settings.h>
 
 #include <string>

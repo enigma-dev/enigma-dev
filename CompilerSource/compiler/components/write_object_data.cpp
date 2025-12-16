@@ -24,14 +24,43 @@
 #include "general/parse_basics_old.h"
 #include "settings.h"
 #include "languages/lang_CPP.h"
+#include "languages/clang_adapter.h"
 
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <set>
+#include <unistd.h>
+#include <cstdlib>
 
 using namespace std;
+
+// Helper to write AST to string by using a temporary file
+static string write_ast_to_string(const enigma::parsing::AST& ast, int base_indent, bool is_script) {
+  // Use a temporary file approach since WriteCppToStream requires ofstream
+  char tmpname[] = "/tmp/enigma_ast_XXXXXX";
+  int fd = mkstemp(tmpname);
+  if (fd == -1) {
+    return ""; // Fallback: return empty string
+  }
+  close(fd);
+  
+  ofstream tmp_file(tmpname);
+  ast.WriteCppToStream(tmp_file, base_indent, is_script);
+  tmp_file.close();
+  
+  ifstream read_file(tmpname);
+  stringstream buffer;
+  buffer << read_file.rdbuf();
+  read_file.close();
+  unlink(tmpname);
+  
+  return buffer.str();
+}
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -180,20 +209,88 @@ static inline void write_extension_casts(std::ostream &wto,
 }
 
 // TODO(JoshDreamland): Burn this function into ash and launch the ashes into space
-static inline void compute_locals(language_adapter *lang, parsed_object *object, const string addls) {
+static inline void compute_locals(language_adapter *lang, parsed_object *object, ParsedScope* global, const string addls) {
   size_t pos;
   string type, name, pres, sufs;
+  bool is_global_scope = false;  // Track whether we're in a global declaration
+  
   for (pos = 0; pos < addls.length(); pos++)
   {
     if (is_useless(addls[pos])) continue;
-    if (addls[pos] == ';') { object->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
-    if (addls[pos] == ',') { object->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
+    if (addls[pos] == ';') { 
+      // End of declaration - add to appropriate scope
+      if (name.length() > 0) {
+        if (is_global_scope) {
+          global->globals[name] = dectrip(type, pres, sufs);
+        } else {
+          object->locals[name] = dectrip(type, pres, sufs);
+        }
+      }
+      type = pres = sufs = name = ""; 
+      is_global_scope = false;  // Reset scope for next declaration
+      continue; 
+    }
+    if (addls[pos] == ',') { 
+      // Multiple variables in one declaration - add current one
+      if (name.length() > 0) {
+        if (is_global_scope) {
+          global->globals[name] = dectrip(type, pres, sufs);
+        } else {
+          object->locals[name] = dectrip(type, pres, sufs);
+        }
+      }
+      pres = sufs = name = ""; 
+      // Keep is_global_scope and type for next variable in same declaration
+      continue; 
+    }
     if (is_letter(addls[pos]) or addls[pos] == '$') {
       const size_t spos = pos;
-      while (is_letterdd(addls[++pos]));
-      string tn = addls.substr(spos,pos-spos);
+      while (pos + 1 < addls.length() && is_letterdd(addls[pos + 1])) pos++;
+      string tn = addls.substr(spos, pos - spos + 1);
+      
+      // Check if this is a scope keyword
+      if (tn == "global" || tn == "globalvar") {
+        is_global_scope = true;
+        // If "global", check if next token is "var"
+        if (tn == "global") {
+          // Skip whitespace
+          size_t check_pos = pos + 1;
+          while (check_pos < addls.length() && is_useless(addls[check_pos])) check_pos++;
+          // Check if next is "var"
+          if (check_pos < addls.length() && is_letter(addls[check_pos])) {
+            size_t var_start = check_pos;
+            while (check_pos + 1 < addls.length() && is_letterdd(addls[check_pos + 1])) check_pos++;
+            string next_word = addls.substr(var_start, check_pos - var_start + 1);
+            if (next_word == "var") {
+              // "global var" - consume "var" token
+              pos = check_pos;
+            }
+            // else: "global" is followed by a type, not "var", so reset to parse as type
+          }
+        }
+        // "globalvar" is already consumed, is_global_scope is set
+        continue;
+      } else if (tn == "local") {
+        is_global_scope = false;
+        // Check if next token is "var"
+        size_t check_pos = pos + 1;
+        while (check_pos < addls.length() && is_useless(addls[check_pos])) check_pos++;
+        if (check_pos < addls.length() && is_letter(addls[check_pos])) {
+          size_t var_start = check_pos;
+          while (check_pos + 1 < addls.length() && is_letterdd(addls[check_pos + 1])) check_pos++;
+          string next_word = addls.substr(var_start, check_pos - var_start + 1);
+          if (next_word == "var") {
+            // "local var" - consume "var" token
+            pos = check_pos;
+          }
+          // else: "local" is followed by a type, not "var", so reset to parse as type
+        }
+        continue;
+      }
+      
+      // Not a scope keyword - treat as type or name
       (lang->find_typename(tn) ? type : name) = tn;
-      pos--; continue;
+      continue;
     }
     if (addls[pos] == '*') { pres += '*'; continue; }
     if (addls[pos] == '[') {
@@ -241,6 +338,15 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
       }
       pos--; continue;
     }
+    // Handle parentheses - skip them unless they're part of a type declaration
+    // Parentheses in variable declarations should be skipped (they're not valid variable names)
+    if (addls[pos] == '(' || addls[pos] == ')') {
+      // Skip standalone parentheses - they're not valid in variable declarations
+      // unless they're part of a type like int *(x)[3], which is handled by the array bracket logic
+      continue;
+    }
+    // Any other unhandled character should be skipped to avoid creating invalid variable names
+    continue;
   }
 }
 
@@ -259,19 +365,52 @@ static inline bool parent_declares(parsed_object *parent, const deciter decl) {
 }
 
 static std::vector<std::pair<std::string, dectrip>> write_object_locals(language_adapter *lang, std::ostream &wto,
-                                const ParsedScope *global,
-                                parsed_object *object) {
+                                ParsedScope *global,
+                                parsed_object *object,
+                                const DotLocalMap &dot_accessed_locals) {
   wto << "    // Local variables\n    ";
   for (const ParsedEvent &pev : object->all_events) {
     string addls = pev.ev_id.LocalDeclarations();
     if (addls.length()) {
-      compute_locals(lang, object, addls);
+      // Validate that LocalDeclarations() doesn't contain invalid characters
+      // If it does, something went wrong upstream - log a warning
+      if (addls.find('(') != string::npos || addls.find(')') != string::npos) {
+        std::cerr << "WARNING: LocalDeclarations() for event '" 
+                  << pev.ev_id.HumanName() << "' in object '" 
+                  << object->name << "' contains parentheses. "
+                  << "This suggests invalid data upstream. "
+                  << "LocalDeclarations should only contain variable declarations, not code expressions.\n";
+        std::cerr << "  LocalDeclarations content: '" << addls << "'\n";
+      }
+      compute_locals(lang, object, global, addls);
     }
   }
 
   std::vector<std::pair<std::string, dectrip>> locals;
   for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
     bool writeit = true; // Whether this "local" should be declared such
+    
+    // Skip if it's a built-in instance variable (discovered by clang parser from C++ class hierarchy)
+    // These are already part of the object tier system and should not be declared as locals
+    if (lang->is_shared_local(ii->first)) {
+      continue;
+    }
+    
+    // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
+    // Use is_enigma_user_constant() which directly checks enigma_user namespace
+    lang_CPP* lang_cpp = dynamic_cast<lang_CPP*>(lang);
+    if (lang_cpp && lang_cpp->is_enigma_user_constant(ii->first)) {
+      // It's a built-in constant in enigma_user namespace, don't declare it as a local variable
+      continue;
+    }
+    
+    // Skip if this variable is explicitly declared as global (global foo, global var foo, global int foo, globalvar foo)
+    // Variables declared as global are added to global->globals by compute_locals() and should NOT be declared in objects
+    if (global->globals.find(ii->first) != global->globals.end()) {
+      // Variable is explicitly declared as global, skip from object locals
+      continue;
+    }
+    
     if (parent_declares(object->parent, ii)) {
       continue;
     }
@@ -283,15 +422,68 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
       if (ve != global->globals.end()) {  // If a global by this name is indeed found,
         if (ve->second.defined()) // And this global is explicitly defined, not just accessed with a dot,
           writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
-        cout << "enigma: scopedebug: variable `" << ii->first
-             << "' from object `" << object->name
-             << "' will be used from the " << (writeit ? "object" : "global")
-             << " scope." << endl;
       }
     }
+    
+    string var_name = ii->first;
+    
+    // Variables in dot_accessed_locals are accessed via global.varname or used directly.
+    // If explicitly declared in LocalDeclarations(), declare in object even if in dot_accessed_locals.
+    // Otherwise, check if accessed via global.varname (in object->globals) vs used directly.
+    bool in_dot_accessed = (dot_accessed_locals.find(ii->first) != dot_accessed_locals.end());
+    if (in_dot_accessed) {
+      // Check if explicitly declared in LocalDeclarations()
+      bool explicitly_declared = false;
+      for (const ParsedEvent &pev : object->all_events) {
+        string addls = pev.ev_id.LocalDeclarations();
+        if (addls.length() > 0) {
+          // Simple check: does the LocalDeclarations string contain this variable name?
+          // This is not perfect but should work for most cases
+          // The format is typically "var varname;" or "var varname1, varname2;"
+          // We need to check if the variable name appears as a whole word
+          size_t pos = 0;
+          while ((pos = addls.find(ii->first, pos)) != string::npos) {
+            // Check if it's a whole word (not part of another identifier)
+            // Before the name: should be start of string, whitespace, comma, semicolon, or 'var'
+            bool valid_before = (pos == 0);
+            if (!valid_before) {
+              char before = addls[pos - 1];
+              valid_before = (is_useless(before) || before == ',' || before == ';' || 
+                             (pos >= 4 && addls.substr(pos - 4, 4) == "var "));
+            }
+            // After the name: should be end of string, whitespace, comma, semicolon, or assignment
+            bool valid_after = (pos + ii->first.length() >= addls.length());
+            if (!valid_after) {
+              char after = addls[pos + ii->first.length()];
+              valid_after = (is_useless(after) || after == ',' || after == ';' || after == '=');
+            }
+            if (valid_before && valid_after) {
+              explicitly_declared = true;
+              break;
+            }
+            pos += ii->first.length();
+          }
+          if (explicitly_declared) break;
+        }
+      }
+      
+      if (!explicitly_declared) {
+        // Variables accessed via 'global.varname' are in both object->locals and object->globals.
+        // Variables used directly are only in object->locals.
+        // If in object->globals, it was accessed via 'global.varname' - don't declare in object.
+        if (object->globals.find(ii->first) != object->globals.end()) {
+          continue;  // Only declare in ENIGMA_global_structure
+        }
+        // Variable is in object->locals but not in object->globals, so it was used directly.
+        // Declare it in this object.
+      }
+    } else {
+      // Not in dot_accessed_locals, so declare it normally
+    }
+    
     if (writeit) {
-      locals.emplace_back(ii->first, ii->second);
-      wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first
+      locals.emplace_back(var_name, ii->second);
+      wto << tdefault(ii->second.type) << " " << ii->second.prefix << var_name
           << ii->second.suffix << ";\n    ";
     }
   }
@@ -641,14 +833,33 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
     wto << ": object_locals(id,enigma_genericobjid) ";
   }
 
+  // Sort initializers to match member declaration order to avoid -Wreorder warnings
+  // Members are declared in locals map order, so we need to match that
+  std::map<std::string, std::string> initializer_map;
   for (size_t ii = 0; ii < object->initializers.size(); ii++)
-    wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    initializer_map[object->initializers[ii].first] = object->initializers[ii].second;
+  
+  // Write initializers in the order members are declared (locals order)
+  std::set<std::string> written_initializers;
+  for (deciter ii = object->locals.begin(); ii != object->locals.end(); ii++) {
+    auto it = initializer_map.find(ii->first);
+    if (it != initializer_map.end() && written_initializers.find(ii->first) == written_initializers.end()) {
+      wto << ", " << it->first << "(" << it->second << ")";
+      written_initializers.insert(it->first);
+    }
+  }
+  // Write any remaining initializers not in locals (shouldn't happen, but be safe)
+  for (size_t ii = 0; ii < object->initializers.size(); ii++) {
+    if (written_initializers.find(object->initializers[ii].first) == written_initializers.end()) {
+      wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    }
+  }
   wto << "\n    {\n";
   wto << "      if (!handle) return;\n";
   // Sprite index
   if (used_funcs::object_set_sprite) //We want to initialize
-    wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
-        << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
+    wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
+        << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
   else
     wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
         << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
@@ -734,7 +945,8 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   }
   wto << "\n  {\n";
 
-  auto locals = write_object_locals(lang, wto, &state.global_object, object);
+  // const_cast is safe here - we only modify global->globals, not the ParsedScope structure itself
+  auto locals = write_object_locals(lang, wto, const_cast<ParsedScope*>(&state.global_object), object, state.dot_accessed_locals);
   write_object_scripts(wto, object, state);
   write_object_timelines(wto, game, object, state.timeline_lookup);
   write_object_events(wto, object);
@@ -885,7 +1097,9 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
     wto << "  ";
     // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
     auto &ast = (scr->code).ast;
-    ast.WriteCppToStream(wto, 2, true);
+      // Write AST to a string and write to stream
+      string ast_code = write_ast_to_string(ast, 2, true);
+      wto << ast_code;
     wto << "\n  return 0;\n}\n\n";
   }
 }
@@ -900,7 +1114,9 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
       auto& ast = (moment.script->global_code
           ? *moment.script->global_code : moment.script->code).ast;
 
-      ast.WriteCppToStream(wto, 2);
+      // Write AST to a string and write to stream
+      string ast_code = write_ast_to_string(ast, 2, false);
+      wto << ast_code;
       wto << "\n}\n\n";
     }
   }
@@ -982,7 +1198,11 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
     PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
-  event.ast.WriteCppToStream(wto, 2);
+  
+  // Write AST to a string and write to stream
+  string ast_code = write_ast_to_string(event.ast, 2, false);
+  wto << ast_code;
+  
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -1000,7 +1220,9 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      subscr->second->code.ast.WriteCppToStream(wto, 2, true);
+      // Write AST to a string and write to stream
+      string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true);
+      wto << ast_code;
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -1017,7 +1239,9 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        scr->code.ast.WriteCppToStream(wto);
+        // Write AST to a string and write to stream
+        string ast_code = write_ast_to_string(scr->code.ast, 0, false);
+        wto << ast_code;
         wto << "}\n";
       }
       wto << "\n";

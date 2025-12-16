@@ -15,8 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <JDI/src/System/builtins.h>
+// JDI removed - builtin flags/types need to be reimplemented
 #include "ast.h"
+#include <functional>
 
 using namespace enigma::parsing;
 
@@ -26,6 +27,7 @@ using namespace enigma::parsing;
 AST::CppPrettyPrinter::CppPrettyPrinter() {
   of = new std::ofstream();
   if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
+  owns_ofstream = true;
   print_type = false;
   is_script = false;
 }
@@ -37,8 +39,14 @@ AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPretty
 }
 
 AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script)
-    : of(&ofs), is_script(is_script), language_fe(lfe) {
+    : of(&ofs), owns_ofstream(false), is_script(is_script), language_fe(lfe) {
   print_type = false;
+}
+
+AST::CppPrettyPrinter::~CppPrettyPrinter() {
+  if (owns_ofstream && of) {
+    delete of;
+  }
 }
 
 void AST::CppPrettyPrinter::print(std::string code) { *of << code; }
@@ -70,8 +78,34 @@ std::string AST::CppPrettyPrinter::GetPrintedCode() {
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
   if (print_type) print("auto ");
   std::string name = node.name.content;
+  
+  // Core fix: Common instance variables that are always available on objects
+  // These should be accessed directly in event context (as member variables)
+  // or through glaccess in script context
+  // Note: sprite_xoffset, sprite_yoffset, sprite_width, sprite_height are macros
+  // that expand to method calls, so they should NOT be in this list
+  static const std::set<std::string> instance_vars = {
+    "x", "y", "xprevious", "yprevious", "xstart", "ystart",
+    "hspeed", "vspeed", "speed", "direction",
+    "gravity", "gravity_direction", "friction",
+    "sprite_index", "image_index", "image_speed", "image_angle",
+    "image_xscale", "image_yscale", "visible", "solid", "persistent",
+    "depth", "mask_index", "image_number"
+  };
+  
   if (is_script && name != "self") {
-    if (language_fe->is_shared_local(name)) {
+    // Check instance variables FIRST, before checking globals
+    // This ensures x, y, etc. are always converted to glaccess calls
+    if (instance_vars.find(name) != instance_vars.end()) {
+      // These are standard instance variables - access through glaccess in script context
+      // Scripts are wrapped in with(self), so we access through the instance
+      print("enigma::glaccess(int(self))->" + name);
+    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+               name == "sprite_width" || name == "sprite_height") {
+      // These are macros that expand to $name() - use $name directly to avoid double expansion
+      // Don't use the macro name, use $name directly
+      print("enigma::glaccess(int(self))->$" + name + "()");
+    } else if (language_fe->is_shared_local(name)) {
       print("enigma::glaccess(int(self))->" + name);
     } else if (language_fe->global_exists(name)) {
       print(name);
@@ -79,11 +113,30 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
       print(name);
     } else if (name.substr(0, 8) == "argument") {
       print(name);
+    } else if (name[0] == '$') {
+      // Core fix: identifiers starting with $ are object methods (e.g., $sprite_xoffset)
+      // They should be called on the instance through glaccess
+      // Remove the $ prefix and call the method on the instance
+      std::string method_name = name.substr(1);  // Remove $ prefix
+      print("enigma::glaccess(int(self))->" + method_name + "()");
     } else {
       print("enigma::varaccess_" + name + "(int(self))");
     }
   } else {
-    print(name);
+    // Not in script context - could be in event or other context
+    // For instance variables, access directly (they're member variables in event context)
+    // For sprite accessors, use the macro name (it will expand to $name())
+    if (instance_vars.find(name) != instance_vars.end()) {
+      // In event context, these are member variables - use directly
+      // Note: x, y, etc. are accessible as member variables in event methods
+      print(name);
+    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+               name == "sprite_width" || name == "sprite_height") {
+      // These are macros that expand to $name() - use $name directly to avoid double expansion
+      print("$" + name + "()");
+    } else {
+      print(name);
+    }
   }
   return true;
 }
@@ -198,7 +251,7 @@ bool AST::CppPrettyPrinter::VisitContinueStatement(AST::ContinueStatement &node)
 }
 
 bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
-  print("with");
+  print("with ");  // Add space after with
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
@@ -206,8 +259,14 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print(")");
   }
+  print(" ");
 
+  // Core fix: Inside a with block, instance variables like x, y, hspeed, vspeed
+  // should be accessible directly. We need to track this context.
+  // For now, we'll handle common instance variables in VisitIdentifierAccess
+  // by checking if they're standard instance variables that should be accessible directly.
   VISIT_AND_CHECK(node.body);
+
   PrintSemiColon(node.body);
 
   return true;
@@ -255,7 +314,17 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   }
 
   if (operation == ":=") operation = "=";
-  print(" " + operation + " ");
+  
+  // Handle operators - don't add spaces around array subscript
+  if (node.operation.type == TT_BEGINBRACKET) {
+    if (is_multi_dim) {
+      print("(");  // Multi-dim arrays use () syntax: arr(x, y)
+    } else {
+      print("[");  // Regular arrays: arr[x]
+    }
+  } else {
+    print(" " + operation + " ");
+  }
 
   VISIT_AND_CHECK(node.right);
 
@@ -268,11 +337,34 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+  // Check if this is a sprite accessor function call (sprite_xoffset(), etc.)
+  // These are macros that expand to $name(), so we need to handle them specially
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    auto fn = node.function->As<AST::IdentifierAccess>();
+    std::string name = fn->name.content;
+    // Check for both sprite_xoffset and $sprite_xoffset (macro may have expanded)
+    if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+        name == "sprite_width" || name == "sprite_height" ||
+        name == "$sprite_xoffset" || name == "$sprite_yoffset" || 
+        name == "$sprite_width" || name == "$sprite_height") {
+      // Remove $ prefix if present
+      if (name[0] == '$') {
+        name = name.substr(1);
+      }
+      // These are macros - generate $name() directly instead of name()
+      if (is_script) {
+        print("enigma::glaccess(int(self))->$" + name + "()");
+      } else {
+        print("$" + name + "()");
+      }
+      return true; // Skip the normal function call handling
+    }
+  }
   VISIT_AND_CHECK(node.function);
   print("(");
 
   bool is_variadic = false;
-  int variadic_index = 0;
+  int variadic_index = -1;
   if (node.function->type == AST::NodeType::IDENTIFIER && language_fe) {
     auto fn = node.function->As<AST::IdentifierAccess>();
     jdi::definition *def = nullptr;
@@ -283,8 +375,18 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
     }
   }
 
+  // If function takes varargs as the first parameter (variadic_index == 0),
+  // use the comma operator pattern: (enigma::varargs(), arg1, arg2, ...)
+  if (is_variadic && variadic_index == 0 && node.arguments.size() > 0) {
+    print("(enigma::varargs()");
+    if (node.arguments.size() > 0) {
+      print(", ");
+    }
+  }
+
   for (std::size_t i = 0; i < node.arguments.size(); i++) {
-    if (is_variadic && i == std::size_t(variadic_index)) {
+    if (is_variadic && i == std::size_t(variadic_index) && variadic_index > 0) {
+      // C-style variadic function - wrap arguments starting from variadic_index
       print("(enigma::varargs(),");
     }
     VISIT_AND_CHECK(node.arguments[i]);
@@ -293,7 +395,15 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
     }
   }
 
-  if (is_variadic) print(")");
+  if (is_variadic) {
+    if (variadic_index == 0 && node.arguments.size() > 0) {
+      // Function takes varargs as first parameter - close the comma operator expression
+      print(")");
+    } else if (variadic_index > 0) {
+      // C-style variadic - close the outer parentheses
+      print(")");
+    }
+  }
 
   print(")");
   return true;
@@ -370,69 +480,160 @@ bool AST::CppPrettyPrinter::VisitFullType(FullType &ft, bool print_type) {
 
     for (std::size_t i = 0; i < flags_values.size(); i++) {
       if ((ft.flags & flags_masks[i]) == flags_values[i]) {
-        if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
+        // Skip "signed" for char types - we handle it specially below
+        // For int/short/long, "signed" is implicit and shouldn't be printed
+        bool should_print = true;
+        if (flags_names[i] == "signed") {
+          // Only print "signed" from flags if def is nullptr (can't determine type)
+          // For char types, we handle it specially below
+          should_print = !ft.def;
+        }
+        if (should_print) {
           print(flags_names[i] + " ");
         }
       }
     }
 
-    print(ft.def->name + " ");
+    if (ft.def) {
+      // For char type, always print "signed char" unless unsigned flag is set
+      // This is the expected GML behavior
+      if (ft.def->name == "char" && 
+          !((ft.flags & jdi::builtin_flag__unsigned->mask) == jdi::builtin_flag__unsigned->value)) {
+        print("signed ");
+      }
+      print(ft.def->name + " ");
+    }
   }
 
-  std::string name = std::string(ft.decl.name.content);
-  if (name != "" && !ft.decl.components.size()) {
-    print(name + " ");
-  }
-
-  jdi::ref_stack stack;
-  ft.decl.to_jdi_refstack(stack);
-  auto first = stack.begin();
-
+  std::string decl_name_str = std::string(ft.decl.name.content);
+  
+  // Build the declarator string with pointer/reference/array modifiers
   std::string ref;
-  bool flag = false;
-  bool print_name = true;
-
-  for (auto it = first; it != stack.end(); it++) {
-    if (it->type == jdi::ref_stack::RT_POINTERTO) {
-      flag = true;
-      ref = '*' + ref;
-    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
-      flag = true;
-      ref = '&' + ref;
-    } else {
-      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-        if (flag) {
-          ref = '(' + ref + ')';
-        }
-
-        std::size_t arr_size = it->arraysize();
-        if (arr_size != 0) {
-          ref += '[' + std::to_string(arr_size) + ']';
-        } else {
-          ref += "[]";
-        }
+  if (!decl_name_str.empty()) {
+    ref = decl_name_str;
+  }
+  
+  // Separate pointers (process in reverse, prepend to left) from arrays (process forward, append to right)
+  std::string array_suffix;
+  
+  // First pass: collect array bounds in forward order
+  for (const auto& node : ft.decl.components) {
+    if (node.kind == enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND) {
+      const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(node.value);
+      if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
+        array_suffix += "[]";
       } else {
-        print("RT_MEMBER_POINTER");
+        array_suffix += "[" + std::to_string(arr.size) + "]";
       }
-
-      // TODO: RT_MEMBER_POINTER
-
-      flag = false;
+    } else if (node.kind == enigma::parsing::DeclaratorNode::Kind::FUNCTION) {
+      array_suffix += "()";
     }
-
-    if (print_name) {
-      std::string name = std::string(ft.decl.name.content);
-      if (name != "") {
-        if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
-          ref = name + ref;
+  }
+  
+  // Recursive lambda to format nested declarators
+  // Returns pair: (inner part to wrap in parens, suffix to go outside parens)
+  std::function<std::pair<std::string, std::string>(const std::vector<enigma::parsing::DeclaratorNode>&, const std::string&)> 
+    formatNested = [&](const std::vector<enigma::parsing::DeclaratorNode>& components, 
+                       const std::string& inner) -> std::pair<std::string, std::string> {
+    std::string nested_ref = inner;
+    std::string suffix;
+    
+    // Collect arrays in forward order for suffix
+    for (const auto& nnode : components) {
+      if (nnode.kind == enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND) {
+        const auto& arr = std::get<enigma::parsing::ArrayBoundNode>(nnode.value);
+        if (arr.size == enigma::parsing::ArrayBoundNode::nsize) {
+          suffix += "[]";
         } else {
-          ref += name;
+          suffix += "[" + std::to_string(arr.size) + "]";
         }
+      } else if (nnode.kind == enigma::parsing::DeclaratorNode::Kind::FUNCTION) {
+        suffix += "()";
       }
-      print_name = false;
+    }
+    
+    // Process pointers in reverse for nested_ref
+    for (auto nit = components.rbegin(); nit != components.rend(); ++nit) {
+      const auto& nnode = *nit;
+      switch (nnode.kind) {
+        case enigma::parsing::DeclaratorNode::Kind::POINTER_TO: {
+          const auto& ptr = std::get<enigma::parsing::PointerNode>(nnode.value);
+          std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                   (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+          nested_ref = "*" + qualifiers + nested_ref;
+          break;
+        }
+        case enigma::parsing::DeclaratorNode::Kind::REFERENCE:
+          nested_ref = "&" + nested_ref;
+          break;
+        case enigma::parsing::DeclaratorNode::Kind::RVAL_REFERENCE:
+          nested_ref = "&&" + nested_ref;
+          break;
+        case enigma::parsing::DeclaratorNode::Kind::NESTED: {
+          // Recursively process inner nested declarator
+          const auto& inner_nested = std::get<enigma::parsing::NestedNode>(nnode.value);
+          if (inner_nested.is<std::unique_ptr<enigma::parsing::Declarator>>()) {
+            const auto& inner_decl = std::get<std::unique_ptr<enigma::parsing::Declarator>>(inner_nested.contained);
+            auto [inner_part, inner_suffix] = formatNested(inner_decl->components, nested_ref);
+            nested_ref = "(" + inner_part + ")" + inner_suffix;
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
+    
+    return {nested_ref, suffix};
+  };
+  
+  // Second pass: process pointers and nested in reverse order
+  for (auto it = ft.decl.components.rbegin(); it != ft.decl.components.rend(); ++it) {
+    const auto& node = *it;
+    switch (node.kind) {
+      case enigma::parsing::DeclaratorNode::Kind::POINTER_TO: {
+        const auto& ptr = std::get<enigma::parsing::PointerNode>(node.value);
+        std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                 (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+        ref = "*" + qualifiers + " " + ref;
+        break;
+      }
+      case enigma::parsing::DeclaratorNode::Kind::MEMBER_POINTER: {
+        const auto& ptr = std::get<enigma::parsing::PointerNode>(node.value);
+        std::string class_name = ptr.class_def ? ptr.class_def->name : "";
+        std::string qualifiers = (ptr.is_const ? std::string(" const") : std::string("")) + 
+                                 (ptr.is_volatile ? std::string(" volatile") : std::string(""));
+        ref = class_name + "::*" + qualifiers + " " + ref;
+        break;
+      }
+      case enigma::parsing::DeclaratorNode::Kind::REFERENCE:
+        ref = "&" + ref;
+        break;
+      case enigma::parsing::DeclaratorNode::Kind::RVAL_REFERENCE:
+        ref = "&&" + ref;
+        break;
+      case enigma::parsing::DeclaratorNode::Kind::ARRAY_BOUND:
+      case enigma::parsing::DeclaratorNode::Kind::FUNCTION:
+        // Handled in first pass
+        break;
+      case enigma::parsing::DeclaratorNode::Kind::NESTED: {
+        // Nested declarator - use the recursive helper
+        const auto& nested = std::get<enigma::parsing::NestedNode>(node.value);
+        if (nested.is<std::unique_ptr<enigma::parsing::Declarator>>()) {
+          const auto& nested_decl = std::get<std::unique_ptr<enigma::parsing::Declarator>>(nested.contained);
+          auto [inner_part, suffix] = formatNested(nested_decl->components, ref);
+          ref = "(" + inner_part + ")" + suffix;
+        } else {
+          ref = "(" + ref + ")";
+        }
+        break;
+      }
     }
   }
 
+  // Append array suffix to ref
+  ref += array_suffix;
+  
   print(ref);
   return true;
 }
@@ -627,6 +828,7 @@ bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement 
 
 bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
   for (auto &stmt : node.statements) {
+    if (!stmt) continue;  // Skip null statements
     print("    ");
     VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);

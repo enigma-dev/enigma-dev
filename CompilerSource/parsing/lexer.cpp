@@ -15,7 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <Storage/definition.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 #include "general/parse_basics_old.h"
 #include "lexer.h"

@@ -1,7 +1,10 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers.resources;
 
 import "options.proto";
+import "google/protobuf/cpp_features.proto";
 
 enum ArgumentKind {
   ARG_EXPRESSION = 0;
@@ -23,18 +26,18 @@ enum ArgumentKind {
 }
 
 message Argument {
-  optional ArgumentKind kind = 1;
+  ArgumentKind kind = 1;
   oneof value {
-    string string = 2;
-    string sprite = 3;
-    string sound = 4;
-    string background = 5;
-    string path = 6;
-    string script = 7;
-    string object = 8;
-    string room = 9;
-    string font = 10;
-    string timeline = 11;
+    string string = 2 [features.(pb.cpp).string_type = STRING];
+    string sprite = 3 [features.(pb.cpp).string_type = STRING];
+    string sound = 4 [features.(pb.cpp).string_type = STRING];
+    string background = 5 [features.(pb.cpp).string_type = STRING];
+    string path = 6 [features.(pb.cpp).string_type = STRING];
+    string script = 7 [features.(pb.cpp).string_type = STRING];
+    string object = 8 [features.(pb.cpp).string_type = STRING];
+    string room = 9 [features.(pb.cpp).string_type = STRING];
+    string font = 10 [features.(pb.cpp).string_type = STRING];
+    string timeline = 11 [features.(pb.cpp).string_type = STRING];
   }
 }
 
@@ -59,17 +62,17 @@ enum ActionExecution {
 }
 
 message Action {
-  optional int32 libid = 1;
-  optional int32 id = 2;
-  optional ActionKind kind = 3;
-  optional bool use_relative = 4 [(gmx) = "userelative"];
-  optional bool is_question = 5 [(gmx) = "isquestion"];
-  optional bool use_apply_to = 6 [(gmx) = "useapplyto"];
-  optional ActionExecution exe_type = 7 [(gmx) = "exetype"];
-  optional string function_name = 8 [(gmx) = "functionname"];
-  optional string code_string = 9 [(gmx) = "codestring"];
-  optional string who_name = 10 [(gmx) = "whoName"];
-  optional bool relative = 11;
-  optional bool is_not = 12 [(gmx) = "isnot"];
+  int32 libid = 1;
+  int32 id = 2;
+  ActionKind kind = 3;
+  bool use_relative = 4 [(gmx) = "userelative"];
+  bool is_question = 5 [(gmx) = "isquestion"];
+  bool use_apply_to = 6 [(gmx) = "useapplyto"];
+  ActionExecution exe_type = 7 [(gmx) = "exetype"];
+  string function_name = 8 [(gmx) = "functionname"];
+  string code_string = 9 [(gmx) = "codestring"];
+  string who_name = 10 [(gmx) = "whoName", features.(pb.cpp).string_type = STRING];
+  bool relative = 11;
+  bool is_not = 12 [(gmx) = "isnot"];
   repeated Argument arguments = 13 [(gmx) = "arguments/argument"];
 }

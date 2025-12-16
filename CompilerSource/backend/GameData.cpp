@@ -8,11 +8,15 @@
 
 #include "GameData.h"
 #include "event_reader/event_parser.h"
+#include "Settings.pb.h"  // For Settings message
+#include "options.pb.h"   // For default_value extension accessor (required for ApplyProtoDefaults)
+#include "proto_util.h"
 
 #include "libpng-util/libpng-util.h"
 
 #include <map>
 #include <string>
+#include <string_view>
 #include <iostream>
 
 #include <zlib.h>
@@ -40,8 +44,9 @@ static unsigned char* zlib_compress(unsigned char* inbuffer, int &actualsize)
   return (unsigned char*)outbytef;
 }
 
-BinaryData loadBinaryData(const std::string &filePath, int &errorc) {
-  FILE *afile = fopen(filePath.c_str(),"rb");
+BinaryData loadBinaryData(std::string_view filePath, int &errorc) {
+  std::string path(filePath);
+  FILE *afile = fopen(path.c_str(),"rb");
   if (!afile) {
     errorc = -1;
     return BinaryData();
@@ -59,12 +64,13 @@ BinaryData loadBinaryData(const std::string &filePath, int &errorc) {
   return BinaryData(fdata, fdata + flen);
 }
 
-ImageData loadImageData(const std::string &filePath, int &errorc) {
+ImageData loadImageData(std::string_view filePath, int &errorc) {
+  std::string path(filePath);
   unsigned error;
   unsigned char* image;
   unsigned pngwidth, pngheight;
 
-  error = libpng_decode32_file(&image, &pngwidth, &pngheight, filePath.c_str());
+  error = libpng_decode32_file(&image, &pngwidth, &pngheight, path.c_str());
   if (error) {
     errorc = -1;
     printf("libpng-util error %u\n", error);
@@ -115,7 +121,7 @@ struct ESLookup {
     object(es->gmObjects, es->gmObjectCount, "object") {}
 };
 
-SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name, const std::vector<ImageData>& subimages):
+SpriteData::SpriteData(const buffers::resources::Sprite &q, std::string_view name, const std::vector<ImageData>& subimages):
   BaseProtoWrapper(q), name(name), image_data(subimages) {}
 SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
   name(sprite.name) {
@@ -142,7 +148,7 @@ SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
     image_data.emplace_back(sprite.subImages[i].image);
 }
 
-SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name, const BinaryData& data):
+SoundData::SoundData(const buffers::resources::Sound &q, std::string_view name, const BinaryData& data):
   BaseProtoWrapper(q), name(name), audio(data) {}
 SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   name(sound.name),
@@ -163,7 +169,7 @@ SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   data.set_preload(sound.preload);
 }
 
-BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name, const ImageData& image):
+BackgroundData::BackgroundData(const buffers::resources::Background &q, std::string_view name, const ImageData& image):
   BaseProtoWrapper(q), name(name), image_data(image) {}
 BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &background):
   name(background.name),
@@ -184,7 +190,7 @@ BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &backgro
   data.set_vertical_spacing(background.vSep);
 }
 
-FontData::FontData(const buffers::resources::Font &q, const std::string& name):
+FontData::FontData(const buffers::resources::Font &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 FontData::FontData(const deprecated::JavaStruct::Font &font):
   name(font.name) {
@@ -222,7 +228,7 @@ FontData::GlyphData::GlyphData(const deprecated::JavaStruct::Glyph &glyph):
   metrics.set_height(glyph.height);
 }
 
-PathData::PathData(const buffers::resources::Path &q, const std::string& name):
+PathData::PathData(const buffers::resources::Path &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 PathData::PathData(const deprecated::JavaStruct::Path &path):
   name(path.name) {
@@ -252,7 +258,7 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
 //     data.set_id(polygon.id);
 //   }
 
-ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
+ScriptData::ScriptData(const buffers::resources::Script &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   name(script.name) {
@@ -260,7 +266,7 @@ ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   data.set_code(script.code);
 }
 
-ShaderData::ShaderData(const buffers::resources::Shader &q, const std::string& name):
+ShaderData::ShaderData(const buffers::resources::Shader &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
   name(shader.name) {
@@ -273,7 +279,7 @@ ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
 
 }
 
-TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
+TimelineData::TimelineData(const buffers::resources::Timeline &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   name(timeline.name) {
@@ -286,7 +292,7 @@ TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   }
 }
 
-ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
+ObjectData::ObjectData(const buffers::resources::Object &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup):
   name(object.name) {
@@ -316,7 +322,7 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
   }
 }
 
-RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
+RoomData::RoomData(const buffers::resources::Room &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {
@@ -471,6 +477,9 @@ void ImportSettings(const deprecated::JavaStruct::GameSettings &settings,
   //TODO: do keyboard mapping
   buffers::resources::Shortcuts *sht = set.mutable_shortcuts();
   sht->set_let_escape_end_game(settings.letEscEndGame);
+  
+  // Apply default values from proto attributes
+  ApplyProtoDefaults(&set);
 }
 
 
@@ -523,6 +532,12 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
 
 int FlattenProto(const buffers::Project &proj, GameData *gameData) {
   cout << "Flattening tree." << endl;
+
+  // Settings are not part of the Project proto, so initialize with defaults
+  // ApplyProtoDefaults will use the generated extension accessor since options.pb.h is included above
+  ApplyProtoDefaults(&gameData->settings);
+  
+  // Game info is also not part of the proto, so it will use its defaults
 
   int ret = FlattenTree(proj.game().root(), gameData);
 

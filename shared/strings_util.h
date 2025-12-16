@@ -2,6 +2,7 @@
 #define STRINGS_UTIL_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <sstream>
 #include <fstream>
@@ -13,14 +14,35 @@ inline std::string ToLower(std::string str) {
   return str;
 }
 
+inline std::string ToLower(std::string_view str) {
+  return ToLower(std::string(str));
+}
+
+inline std::string ToUpper(std::string str) {
+  for (char &c : str) if (c >= 'a' && c <= 'z') c -= 'a' - 'A';
+  return str;
+}
+
+inline std::string ToUpper(std::string_view str) {
+  return ToUpper(std::string(str));
+}
+
 inline std::string Hyphenate(std::string snake) {
   for (char &c : snake) if (c == '_') c = '-';
   return snake;
 }
 
+inline std::string Hyphenate(std::string_view snake) {
+  return Hyphenate(std::string(snake));
+}
+
 inline std::string Spaceify(std::string snake) {
   for (char &c : snake) if (c == '_') c = ' ';
   return snake;
+}
+
+inline std::string Spaceify(std::string_view snake) {
+  return Spaceify(std::string(snake));
 }
 
 inline std::string ToCamelCase(std::string snake, bool upper = false) {
@@ -43,13 +65,25 @@ inline std::string ToCamelCase(std::string snake, bool upper = false) {
   return snake;
 }
 
+inline std::string ToCamelCase(std::string_view snake, bool upper = false) {
+  return ToCamelCase(std::string(snake), upper);
+}
+
 inline std::string ToPascalCase(std::string snake) {
   return ToCamelCase(snake, true);
+}
+
+inline std::string ToPascalCase(std::string_view snake) {
+  return ToPascalCase(std::string(snake));
 }
 
 inline std::string Capitalize(std::string str) {
   if (str[0] >= 'a' && str[0] <= 'z') str[0] -= 'a' - 'A';
   return str;
+}
+
+inline std::string Capitalize(std::string_view str) {
+  return Capitalize(std::string(str));
 }
 
 inline bool ParseBool(const std::string &b) {
@@ -86,6 +120,10 @@ inline std::string StripChar(std::string str, char c) {
   return str;
 }
 
+inline std::string StripChar(std::string_view str, char c) {
+  return StripChar(std::string(str), c);
+}
+
 inline bool string_ends_with(std::string const &fullString, std::string const &ending) {
     if (fullString.length() < ending.length())
       return false;
@@ -102,6 +140,11 @@ inline std::string string_replace_all(std::string str, std::string_view substr,
     pos += nstr.length();
   }
   return str;
+}
+
+inline std::string string_replace_all(std::string_view str, std::string_view substr,
+                                      std::string_view nstr) {
+  return string_replace_all(std::string(str), substr, nstr);
 }
 
 inline std::vector<std::string> split_string(const std::string &str, char delimiter) {

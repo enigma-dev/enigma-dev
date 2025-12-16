@@ -26,9 +26,12 @@
 
 #include "languages/lang_CPP.h"
 
-#include "System/builtins.h"
+// JDI removed - builtins handled by clang adapter
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
-#include "API/context.h"
+// JDI removed - using clang_adapter instead
+// #include "API/context.h"
+#include "languages/clang_adapter.h"  // For ClangContext
 
 #include <time.h>
 #include <iostream>
@@ -174,10 +177,13 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
 
-    auto &builtin = jdi::builtin_context();
-    builtin.add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
-    builtin.add_search_directory((enigma_root/"shared").u8string().c_str());
-    builtin.add_search_directory(codegen_directory.u8string().c_str());
+    // JDI removed - builtin_context() no longer exists
+    // auto &builtin = jdi::builtin_context();
+    // JDI removed - builtin_context() no longer exists
+    // Search directories should be handled by clang_adapter::ClangContext
+    // builtin.add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    // builtin.add_search_directory((enigma_root/"shared").u8string().c_str());
+    // builtin.add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -190,24 +196,24 @@ const char* establish_bearings(const char *compiler)
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
+        // JDI removed - builtin no longer exists
+        // builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned " << builtin.search_dir_count() << " search directories:\n";
+    // JDI removed - builtin no longer exists
+    // cout << "Toolchain returned " << builtin.search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader((codegen_directory/"enigma_defines.txt").u8string().c_str());
-    if (!macro_reader.is_open())
-      return "Call to `defines' toolchain executable returned no data.\n";
-
-    int res = builtin.parse_stream(macro_reader);
-    builtin.add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
-    if (res)
-      return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
+    // JDI removed - builtin and llreader no longer exist
+    // Macros are now handled through clang_adapter::ClangContext::get_macros()
+    // which extracts macros from the clang translation unit. If compiler-specific
+    // built-in macros (like "_GLIBCXX_USE_CXX11_ABI") need to be added, they should
+    // be added through ClangContext initialization or command-line arguments to clang.
+    // The old file-based approach (enigma_defines.txt) is no longer used.
 
   /* Note `make` location
   *****************************/
