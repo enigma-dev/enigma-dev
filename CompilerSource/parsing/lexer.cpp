@@ -600,7 +600,13 @@ Token Lexer::ReadToken() {
       PopMacro();
       return ReadToken();
     }
-    return macro.tokens[macro.index++];
+    Token res = macro.tokens[macro.index++];
+    // Check if this token from the macro expansion is itself a macro
+    if (res.type == TT_IDENTIFIER) {
+      if (HandleMacro(res.content)) return ReadToken();
+      return TranslateNameToken(res);
+    }
+    return res;
   }
   Token res = ReadRawToken();
   if (res.type == TT_IDENTIFIER) {

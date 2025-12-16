@@ -5,6 +5,7 @@
 
 #include "clang_adapter.h"
 #include "parsing/macros.h"
+#include "parsing/lexer.h"
 #include <clang-c/Index.h>
 #include <iostream>
 #include <sstream>
@@ -1263,22 +1264,26 @@ void ClangContext::extract_macros() {
           
           for (unsigned i = start_idx; i < num_tokens; ++i) {
             CXString token_str = clang_getTokenSpelling(visitor->tu, tokens[i]);
-            std::string token = clang_getCString(token_str);
-            clang_disposeString(token_str);
-            
-            // Skip whitespace/newline tokens
-            if (token.empty() || token == "\n" || token == " ") {
+            const char* token_cstr = clang_getCString(token_str);
+            if (!token_cstr) {
+              clang_disposeString(token_str);
               continue;
             }
+            std::string token(token_cstr);
+            clang_disposeString(token_str);
             
-            // Record position and add to content string
-            size_t start = macro_content.length();
-            if (!macro_content.empty()) {
-              macro_content += " ";
-              start++;
+            // Only skip truly empty tokens - keep all punctuation, identifiers, etc.
+            // Clang tokenizes operators like % as separate tokens, so we need to keep them
+            if (!token.empty() && token != "\n" && token != "\r") {
+              // Record position and add to content string
+              size_t start = macro_content.length();
+              if (!macro_content.empty()) {
+                macro_content += " ";
+                start++;
+              }
+              macro_content += token;
+              token_positions.push_back({start, token.length()});
             }
-            macro_content += token;
-            token_positions.push_back({start, token.length()});
           }
           
           clang_disposeTokens(visitor->tu, tokens, num_tokens);
@@ -1288,18 +1293,15 @@ void ClangContext::extract_macros() {
           std::unique_ptr<enigma::parsing::Macro> macro;
           
           if (is_function) {
-            // For function-like macros, create a shared string to own the content
-            // and create tokens with string_views into it
+            // For function-like macros, tokenize the content string properly
+            // This ensures parentheses and operators get correct token types
             auto owned_string = std::make_shared<std::string>(std::move(macro_content));
+            // Tokenize using the lexer to get correct token types (like ParseTokens does)
             enigma::parsing::TokenVector value_tokens;
-            
-            for (const auto& pos : token_positions) {
-              enigma::parsing::CodeSnippet snippet;
-              snippet.content = std::string_view(owned_string->data() + pos.first, pos.second);
-              snippet.line = 0;
-              snippet.position = 0;
-              enigma::parsing::Token enigma_token(enigma::parsing::TT_IDENTIFIER, snippet);
-              value_tokens.push_back(enigma_token);
+            enigma::parsing::Lexer lex(owned_string, &enigma::parsing::ParseContext::ForPreprocessorEvaluation(), &err_handler);
+            lex.UseCppOptions();
+            for (auto t = lex.ReadToken(); t.type != enigma::parsing::TT_ENDOFCODE; t = lex.ReadToken()) {
+              value_tokens.push_back(t);
             }
             
             // Store the shared string in context to keep it alive
@@ -1314,19 +1316,6 @@ void ClangContext::extract_macros() {
           }
           
           visitor->ctx->macros_[name] = std::move(macro);
-          
-          // Debug logging for macro extraction (especially for "string" macro)
-          if (name == "string" || getenv("ENIGMA_DEBUG_MACROS")) {
-            std::cerr << "DEBUG: Extracted macro: " << name 
-                      << " (function-like: " << (is_function ? "yes" : "no")
-                      << ", variadic: " << (is_variadic ? "yes" : "no")
-                      << ", params: [";
-            for (size_t i = 0; i < params.size(); ++i) {
-              std::cerr << params[i];
-              if (i < params.size() - 1) std::cerr << ", ";
-            }
-            std::cerr << "], body: " << macro_content << std::endl;
-          }
         }
       }
       
