@@ -29,7 +29,8 @@
 #include <vector>
 #include <cmath>
 #include <map>
-using namespace std;
+using std::vector;
+using std::multimap;
 
 //#include "Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
 #include "../Paths/pathstruct.h"

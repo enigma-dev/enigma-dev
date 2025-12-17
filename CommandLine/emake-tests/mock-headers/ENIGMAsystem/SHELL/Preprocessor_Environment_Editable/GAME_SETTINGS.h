@@ -1,9 +1,13 @@
 // Mock header for testing
+#ifndef ENIGMA_GAME_SETTINGS_H
+#define ENIGMA_GAME_SETTINGS_H
+
 #define ASSUMEZERO 0
 #define PRIMBUFFER 0
 #define PRIMDEPTH2 6
 #define AUTOLOCALS 0
 #define MODE3DVARS 0
 #define GM_COMPATIBILITY_VERSION 0
-void ABORT_ON_ALL_ERRORS() { }
+inline void ABORT_ON_ALL_ERRORS() { }
 
+#endif // ENIGMA_GAME_SETTINGS_H

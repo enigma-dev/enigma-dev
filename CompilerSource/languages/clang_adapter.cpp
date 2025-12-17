@@ -795,16 +795,20 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       }
     }
     
+    // Get function type for variadic check (needed both for printing and overload creation)
+    CXType func_type = clang_getCursorType(cursor);
+    
     // Extract function parameters
     int num_args = clang_Cursor_getNumArguments(cursor);
     
     // Handle -1 return value (function templates, invalid cursors, etc.)
+    // For template functions, we can get the parameter count from the function type
     if (num_args < 0) {
-      num_args = 0;
+      num_args = clang_getNumArgTypes(func_type);
+      if (num_args < 0) {
+        num_args = 0;
+      }
     }
-    
-    // Get function type for variadic check (needed both for printing and overload creation)
-    CXType func_type = clang_getCursorType(cursor);
     
     // Check if this is a template function
     bool is_template = (kind == CXCursor_FunctionTemplate || kind == CXCursor_ClassTemplate);
@@ -823,15 +827,17 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
     std::vector<std::string> param_names;
     
     for (int i = 0; i < num_args; ++i) {
+      // Get parameter type from function type (works for both regular and template functions)
+      CXType arg_type = clang_getArgType(func_type, i);
+      std::string arg_type_str = get_type_spelling(arg_type);
+      
+      // Try to get argument cursor (may fail for template functions)
       CXCursor arg_cursor = clang_Cursor_getArgument(cursor, i);
       std::string arg_name = get_cursor_name(arg_cursor);
       if (arg_name.empty()) {
         arg_name = "arg" + std::to_string(i);
       }
       
-      // Get parameter type
-      CXType arg_type = clang_getArgType(func_type, i);
-      std::string arg_type_str = get_type_spelling(arg_type);
       param_types.push_back(arg_type_str);
       param_names.push_back(arg_name);
       
@@ -842,9 +848,14 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       }
       
       // Create typed definition for parameter
+      // For template functions, arg_cursor might be invalid, so use null cursor if needed
       unsigned arg_flags = jdi::DEF_TYPED;
+      CXCursor param_cursor = arg_cursor;
+      if (clang_Cursor_isNull(arg_cursor)) {
+        param_cursor = clang_getNullCursor();
+      }
       auto param_def = std::make_shared<ClangDefinitionTyped>(
-        arg_name, scope.get(), arg_flags, arg_cursor, nullptr);
+        arg_name, scope.get(), arg_flags, param_cursor, nullptr);
       
       // Store the shared_ptr to keep it alive, and add raw pointer to params
       overload->params.push_back(param_def.get());

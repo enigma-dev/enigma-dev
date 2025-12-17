@@ -629,6 +629,8 @@ jdi::definition *TryParseIdExpression(Declarator *decl) {
         return TryParsePrefixIdentifier(decl);
       } else {
         Token name = token;
+        // Prefer enigma_user namespace over global namespace
+        // Use frontend->look_up which should check enigma_user first
         auto def = frontend->look_up(token.content);
         token = lexer->ReadToken();
         const bool is_declarator = decl;
@@ -1616,7 +1618,7 @@ std::unique_ptr<AST::Node> TryParseOperand() {
     }
 
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
-    case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT: {
+    case TT_HEXLITERAL: case TT_BOOLLITERAL: case TT_STRINGLIT: case TT_CHARLIT: {
       Token res = token;
       token = lexer->ReadToken();
       return std::make_unique<AST::Literal>(std::move(res));
@@ -2151,7 +2153,7 @@ std::unique_ptr<AST::Node> TryParseStatement() {
     case TT_INCREMENT: case TT_DECREMENT:
     case TT_BEGINPARENTH: case TT_BEGINBRACKET:
     case TT_DECLITERAL: case TT_BINLITERAL: case TT_OCTLITERAL:
-    case TT_HEXLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
+    case TT_HEXLITERAL: case TT_BOOLLITERAL: case TT_STRINGLIT: case TT_CHARLIT:
     case TT_SCOPEACCESS: case TT_CO_AWAIT:
     case TT_NOEXCEPT: case TT_ALIGNOF: case TT_SIZEOF:
     case TT_STATIC_CAST: case TT_DYNAMIC_CAST:

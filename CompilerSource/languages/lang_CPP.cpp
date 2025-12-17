@@ -113,6 +113,12 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
       std::cerr << "DEBUG definitionsModified: Auto-detected test mode, set ENIGMA_TEST=TRUE" << std::endl;
     }
   }
+  // Reset namespace pointers before deleting old context to avoid dangling pointers
+  namespace_enigma = nullptr;
+  namespace_enigma_user = nullptr;
+  enigma_type__var = nullptr;
+  enigma_type__variant = nullptr;
+  enigma_type__varargs = nullptr;
   delete main_context;
   main_context = new clang_adapter::ClangContext();
 
@@ -482,18 +488,36 @@ jdi::definition* lang_CPP::look_up(std::string_view n) const {
   // JDI removed - builtin_declarators no longer exists, use main_context lookup instead
   // auto builtin = jdi::builtin_declarators.find(name);
   // if (builtin != jdi::builtin_declarators.end()) return builtin->second->def;
+  
+  // Prefer enigma_user namespace over global namespace
+  // Check enigma_user first, then fall back to global lookup
+  // Always get namespace from current main_context to avoid stale pointers when context is recreated
+  if (main_context && main_context->get_global()) {
+    jdi::definition* enigma_user_ns = main_context->get_global()->look_up("enigma_user");
+    if (enigma_user_ns && (enigma_user_ns->flags & jdi::DEF_NAMESPACE)) {
+      jdi::definition* found = static_cast<jdi::definition_scope*>(enigma_user_ns)->find_local(name);
+      if (found) return found;
+    }
+  }
+  
+  // Fall back to global lookup if not found in enigma_user
   if (main_context) {
     jdi::definition* found = main_context->look_up(name);
     if (found) return found;
   }
-  return namespace_enigma_user ? namespace_enigma_user->find_local(name) : nullptr;
+  
+  return nullptr;
 }
 
 bool lang_CPP::is_enigma_user_constant(std::string_view name) const {
-  if (!namespace_enigma_user) return false;
+  // Always get namespace from current main_context to avoid stale pointers
+  if (!main_context || !main_context->get_global()) return false;
+  
+  jdi::definition* enigma_user_ns = main_context->get_global()->look_up("enigma_user");
+  if (!enigma_user_ns || !(enigma_user_ns->flags & jdi::DEF_NAMESPACE)) return false;
   
   std::string name_str(name);
-  jdi::definition* found = namespace_enigma_user->find_local(name_str);
+  jdi::definition* found = static_cast<jdi::definition_scope*>(enigma_user_ns)->find_local(name_str);
   
   if (!found) {
     // If find_local didn't find it, try look_up() as fallback

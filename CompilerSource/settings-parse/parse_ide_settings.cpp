@@ -85,13 +85,15 @@ static void reset_ide_editables()
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
+    wto << "#ifndef ENIGMA_GAME_SETTINGS_H\n";
+    wto << "#define ENIGMA_GAME_SETTINGS_H\n\n";
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
-    wto << '\n';
+    wto << "inline void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << "\n#endif // ENIGMA_GAME_SETTINGS_H\n";
   wto.close();
 }
 

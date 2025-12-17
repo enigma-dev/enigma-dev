@@ -572,6 +572,12 @@ Token &Lexer::TranslateNameToken(Token &token) {
 
   // TODO(new parser): C++ keyword conflict handling deleted from here
 
+  // Check for boolean literals first
+  if (name == "true" || name == "false") {
+    token.type = TT_BOOLLITERAL;
+    return token;
+  }
+
   if (auto kw = keyword_lookup.find(name); kw != keyword_lookup.end()) {
     token.type = kw->second;
     return token;

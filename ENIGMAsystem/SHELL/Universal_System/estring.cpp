@@ -45,16 +45,23 @@ using std::string;
 using std::vector;
 
 tstring widen(const string &str) {
+  if (str.empty()) return L"";
   // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchar_count = str.size() + 1;
-  vector<WCHAR> buf(wchar_count);
-  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
+  size_t wchar_count = str.size() + 1;
+  vector<wchar_t> buf(wchar_count);
+  wchar_count = (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count);
+  if (!wchar_count) return L"";
+  return tstring{buf.data(), wchar_count};
 }
 
 string shorten(tstring str) {
-  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
+  if (str.empty()) return "";
+  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), nullptr, 0, nullptr, nullptr);
+  if (!nbytes) return "";
   vector<char> buf((size_t)nbytes);
-  return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
+  nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, nullptr, nullptr);
+  if (!nbytes) return "";
+  return string{buf.data(), (size_t)nbytes};
 }
 
 #endif
@@ -417,8 +424,54 @@ std::string md5_string_utf8(std::string str) {
   return result;
 }
 
+// Helper function to convert UTF-8 to UTF-16
+static std::u16string utf8_to_utf16(const std::string& utf8) {
+  std::u16string utf16;
+  utf16.reserve(utf8.size());
+  
+  for (size_t i = 0; i < utf8.size(); ) {
+    unsigned char c = utf8[i];
+    char16_t code_point = 0;
+    
+    if ((c & 0x80) == 0) {
+      // Single byte (ASCII)
+      code_point = c;
+      i += 1;
+    } else if ((c & 0xE0) == 0xC0) {
+      // Two bytes
+      if (i + 1 >= utf8.size()) break;
+      code_point = ((c & 0x1F) << 6) | (utf8[i + 1] & 0x3F);
+      i += 2;
+    } else if ((c & 0xF0) == 0xE0) {
+      // Three bytes
+      if (i + 2 >= utf8.size()) break;
+      code_point = ((c & 0x0F) << 12) | ((utf8[i + 1] & 0x3F) << 6) | (utf8[i + 2] & 0x3F);
+      i += 3;
+    } else if ((c & 0xF8) == 0xF0) {
+      // Four bytes - encode as surrogate pair
+      if (i + 3 >= utf8.size()) break;
+      uint32_t cp = ((c & 0x07) << 18) | ((utf8[i + 1] & 0x3F) << 12) | 
+                    ((utf8[i + 2] & 0x3F) << 6) | (utf8[i + 3] & 0x3F);
+      if (cp > 0x10FFFF) break;
+      cp -= 0x10000;
+      utf16.push_back(static_cast<char16_t>(0xD800 + (cp >> 10)));
+      utf16.push_back(static_cast<char16_t>(0xDC00 + (cp & 0x3FF)));
+      i += 4;
+      continue;
+    } else {
+      // Invalid UTF-8 sequence
+      i += 1;
+      continue;
+    }
+    
+    utf16.push_back(code_point);
+  }
+  
+  return utf16;
+}
+
 std::string md5_string_unicode(std::string str) {
-  return md5_string_unicode(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(str.data()));
+  return md5_string_unicode(utf8_to_utf16(str));
 }
 
 std::string md5_string_unicode(std::u16string str) {
@@ -500,7 +553,7 @@ std::string sha1_string_utf8(std::string str) {
 }
 
 std::string sha1_string_unicode(std::string str) {
-  return sha1_string_unicode(std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t>{}.from_bytes(str.data()));
+  return sha1_string_unicode(utf8_to_utf16(str));
 }
 
 std::string sha1_string_unicode(std::u16string str) {

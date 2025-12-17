@@ -1251,9 +1251,10 @@ TEST(ParserTest, IfStatement_3) {
   auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
-  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  auto *expr = cond->expression->As<AST::Literal>();
   ASSERT_TRUE(expr);
-  ASSERT_EQ(expr->name.content, "true");
+  ASSERT_EQ(expr->value.type, TT_BOOLLITERAL);
+  ASSERT_EQ(std::get<std::string>(expr->value.value), "true");
 
   auto *true_branch = if_stmt->true_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(true_branch);
@@ -1286,9 +1287,10 @@ TEST(ParserTest, IfStatement_3_NoSemicolon) {
   auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
-  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  auto *expr = cond->expression->As<AST::Literal>();
   ASSERT_TRUE(expr);
-  ASSERT_EQ(expr->name.content, "true");
+  ASSERT_EQ(expr->value.type, TT_BOOLLITERAL);
+  ASSERT_EQ(std::get<std::string>(expr->value.value), "true");
 
   auto *true_branch = if_stmt->true_branch->As<AST::CodeBlock>();
   ASSERT_TRUE(true_branch);
@@ -1322,9 +1324,10 @@ TEST(ParserTest, IfStatement_4) {
   auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
-  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  auto *expr = cond->expression->As<AST::Literal>();
   ASSERT_TRUE(expr);
-  ASSERT_EQ(expr->name.content, "false");
+  ASSERT_EQ(expr->value.type, TT_BOOLLITERAL);
+  ASSERT_EQ(std::get<std::string>(expr->value.value), "false");
 
   auto *true_branch = if_stmt->true_branch->As<AST::ForLoop>();
   ASSERT_TRUE(true_branch);
@@ -1381,9 +1384,10 @@ TEST(ParserTest, IfStatement_4_NoSemicolon) {
   auto *cond = if_stmt->condition->As<AST::Parenthetical>();
   ASSERT_TRUE(cond);
 
-  auto *expr = cond->expression->As<AST::IdentifierAccess>();
+  auto *expr = cond->expression->As<AST::Literal>();
   ASSERT_TRUE(expr);
-  ASSERT_EQ(expr->name.content, "false");
+  ASSERT_EQ(expr->value.type, TT_BOOLLITERAL);
+  ASSERT_EQ(std::get<std::string>(expr->value.value), "false");
 
   auto *true_branch = if_stmt->true_branch->As<AST::ForLoop>();
   ASSERT_TRUE(true_branch);

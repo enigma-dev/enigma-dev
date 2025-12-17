@@ -28,6 +28,7 @@
 #include "Universal_System/scalar.h"
 
 #include <string>
+#include <cstdint>
 using std::string;
 
 namespace enigma {
