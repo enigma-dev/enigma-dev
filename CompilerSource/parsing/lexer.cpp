@@ -61,60 +61,65 @@ class TokenTrie {
   std::unique_ptr<std::array<TokenTrie, 256>> children_;
 };
 
-static TokenTrie token_lookup {
-  { "!",   TT_BANG         },
-  { "!=",  TT_NOTEQUAL     },
-  { "%",   TT_PERCENT      },
-  { "%=",  TT_ASSOP        },
-  { "&",   TT_AMPERSAND    },
-  { "&&",  TT_AND          },
-  { "(",   TT_BEGINPARENTH },
-  { ")",   TT_ENDPARENTH   },
-  { "+",   TT_PLUS         },
-  { "++",  TT_INCREMENT    },
-  { "+=",  TT_ASSOP        },
-  { "^=",  TT_ASSOP        },
-  { ",",   TT_COMMA        },
-  { "-",   TT_MINUS        },
-  { "--",  TT_DECREMENT    },
-  { "-=",  TT_ASSOP        },
-  { "*",   TT_STAR         },
-  { "*=",  TT_ASSOP        },
-  { "/",   TT_SLASH        },
-  { "/=",  TT_ASSOP        },
-  { ".",   TT_DOT          },
-  { "...", TT_ELLIPSES     },
-  { "->",  TT_ARROW        },
-  { ".*",  TT_DOT_STAR     },
-  { "->*", TT_ARROW_STAR   },
-  { ":",   TT_COLON,       },
-  { "::",  TT_SCOPEACCESS  },
-  { ":=",  TT_ASSIGN,      },
-  { ";",   TT_SEMICOLON    },
-  { "<",   TT_LESS         },
-  { "<<",  TT_LSH          },
-  { "<<=", TT_ASSOP        },
-  { "<=",  TT_LESSEQUAL    },
-  { "<>",  TT_NOTEQUAL     },
-  { "<=>", TT_THREEWAY     },
-  { "=>",  TT_JS_ARROW     },
-  { "=",   TT_EQUALS,      },
-  { "==",  TT_EQUALTO,     },
-  { ">",   TT_GREATER      },
-  { ">=",  TT_GREATEREQUAL },
-  { ">>",  TT_RSH          },
-  { ">>=", TT_ASSOP        },
-  { "?",   TT_QMARK        },
-  { "[",   TT_BEGINBRACKET },
-  { "]",   TT_ENDBRACKET   },
-  { "^",   TT_CARET        },
-  { "^^",  TT_XOR          },
-  { "{",   TT_BEGINBRACE   },
-  { "|",   TT_PIPE         },
-  { "||",  TT_OR           },
-  { "}",   TT_ENDBRACE     },
-  { "~",   TT_TILDE        },
-};
+static TokenTrie &get_token_lookup() {
+  static TokenTrie token_lookup {
+    { "!",   TT_BANG         },
+    { "!=",  TT_NOTEQUAL     },
+    { "%",   TT_PERCENT      },
+    { "%=",  TT_ASSOP        },
+    { "&",   TT_AMPERSAND    },
+    { "&&",  TT_AND          },
+    { "(",   TT_BEGINPARENTH },
+    { ")",   TT_ENDPARENTH   },
+    { "+",   TT_PLUS         },
+    { "++",  TT_INCREMENT    },
+    { "+=",  TT_ASSOP        },
+    { "^=",  TT_ASSOP        },
+    { ",",   TT_COMMA        },
+    { "-",   TT_MINUS        },
+    { "--",  TT_DECREMENT    },
+    { "-=",  TT_ASSOP        },
+    { "*",   TT_STAR         },
+    { "*=",  TT_ASSOP        },
+    { "/",   TT_SLASH        },
+    { "/=",  TT_ASSOP        },
+    { ".",   TT_DOT          },
+    { "...", TT_ELLIPSES     },
+    { "->",  TT_ARROW        },
+    { ".*",  TT_DOT_STAR     },
+    { "->*", TT_ARROW_STAR   },
+    { ":",   TT_COLON,       },
+    { "::",  TT_SCOPEACCESS  },
+    { ":=",  TT_ASSIGN,      },
+    { ";",   TT_SEMICOLON    },
+    { "<",   TT_LESS         },
+    { "<<",  TT_LSH          },
+    { "<<=", TT_ASSOP        },
+    { "<=",  TT_LESSEQUAL    },
+    { "<>",  TT_NOTEQUAL     },
+    { "<=>", TT_THREEWAY     },
+    { "=>",  TT_JS_ARROW     },
+    { "=",   TT_EQUALS,      },
+    { "==",  TT_EQUALTO,     },
+    { ">",   TT_GREATER      },
+    { ">=",  TT_GREATEREQUAL },
+    { ">>",  TT_RSH          },
+    { ">>=", TT_ASSOP        },
+    { "?",   TT_QMARK        },
+    { "[",   TT_BEGINBRACKET },
+    { "]",   TT_ENDBRACKET   },
+    { "^",   TT_CARET        },
+    { "^^",  TT_XOR          },
+    { "{",   TT_BEGINBRACE   },
+    { "|",   TT_PIPE         },
+    { "||",  TT_OR           },
+    { "}",   TT_ENDBRACE     },
+    { "~",   TT_TILDE        },
+  };
+  return token_lookup;
+}
+static TokenTrie &token_lookup = get_token_lookup();
+static TokenTrie &token_lookup_from_TT_DOT = get_token_lookup().Child('.');
 
 static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "alignof",  TT_ALIGNOF   },
@@ -467,6 +472,17 @@ Token Lexer::ReadRawToken() {
       if (code[pos] == 'o' && options.use_oct_literals) {
         while (++pos < code.length() && is_octal(code[pos]));
         return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
+      }
+      if (false) {
+        [[fallthrough]]; case '.':
+        if (code[pos] >= '0' && code[pos] < '9') {
+          // Fallthrough
+        } else {
+          auto tnode = token_lookup_from_TT_DOT.Get(code, pos); // FIXME: this should read pos, not spos. spos will make it hang.
+          if (tnode.first == TT_ERROR) break;
+          pos = tnode.second;
+          return Token(tnode.first, Mark(spos, pos - spos));
+        }
       }
       [[fallthrough]]; case '1': case '2': case '3': case '4': case '5':
                        case '6': case '7': case '8': case '9':

@@ -55,12 +55,12 @@ static ::testing::Environment* const builtin_types_env =
 class TestFailureErrorHandler : public ErrorHandler {
  public:
   void ReportError(CodeSnippet snippet, std::string_view error) final {
-    ADD_FAILURE() << "Test reported an error at line " << snippet.line << ", position " << snippet.position << ": "
-                  << error;
+    ADD_FAILURE() << "Test reported an error at line " << snippet.line
+                  << ", position " << snippet.position << ": " << error;
   }
   void ReportWarning(CodeSnippet snippet, std::string_view warning) final {
-    ADD_FAILURE() << "Test reported a warning at line " << snippet.line << ", position " << snippet.position << ": "
-                  << warning;
+    ADD_FAILURE() << "Test reported a warning at line " << snippet.line
+                  << ", position " << snippet.position << ": " << warning;
   }
 };
 
