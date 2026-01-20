@@ -46,9 +46,7 @@ namespace enigma_user {
 
 namespace enigma
 {
-  #ifndef JUST_DEFINE_IT_RUN // no functional in c++03
   extern std::vector<std::function<void()> > extension_update_hooks;
-  #endif
   
   bool initGameWindow();
 

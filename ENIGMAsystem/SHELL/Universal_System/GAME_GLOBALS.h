@@ -33,9 +33,7 @@ GM Global variables
 #define ENIGMA_GAME_GLOBALS_H
 
 #include <string>
-#ifndef JUST_DEFINE_IT_RUN
 #include <deque>
-#endif
 
 namespace enigma_user {
 std::string caption_score = "Score:", caption_lives = "Lives:", caption_health = "Health:";
@@ -43,11 +41,7 @@ bool argument_relative = false;
 double health = 100;
 
 // TODO: MOVEME: Who put this here?
-#ifndef JUST_DEFINE_IT_RUN
 std::deque<int> instance_id;
-#else
-int *instance_id;
-#endif
 
 double score = 0;
 bool secure_mode = false;

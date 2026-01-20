@@ -34,7 +34,6 @@ namespace enigma {
   struct varargs {
     int argc;
     void *argv;
-    #ifndef JUST_DEFINE_IT_RUN
     void sort();
     void reverse();
     ::variant get(int) const;
@@ -43,7 +42,6 @@ namespace enigma {
     varargs(::variant);
     varargs(varargs&);
     ~varargs();
-    #endif
   };
 }
 #endif

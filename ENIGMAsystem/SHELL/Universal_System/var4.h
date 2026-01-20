@@ -24,16 +24,9 @@
 #include <limits>
 #include <string>
 
-#ifdef JUST_DEFINE_IT_RUN
-#  include <stdint.h>
-#  define constexpr const
-#  define decltype(x) double
-#  define rvalue_ref &
-#else
-#  include <cstdint>
-#  include <type_traits>
+#include <cstdint>
+#include <type_traits>
 #  define rvalue_ref &&
-#endif
 
 namespace enigma {
 
@@ -154,8 +147,6 @@ ACCEPT_TYPE(StringTypeEnabler, const char*);
 
 #undef ACCEPT_TYPE
 
-#ifndef JUST_DEFINE_IT_RUN
-
 #define RLY_INLINE __attribute__((always_inline))
 
 template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
@@ -187,31 +178,6 @@ template<typename T> using NonStringNumber =
     typename enigma::NonVariantTypeEnabler<T>::EN = 0
 #define REQUIRE_VARIANT_TYPE(T) \
     typename enigma::VariantTypeEnabler<T>::EN = 0
-
-#else
-
-template<typename T> struct SIntType {};
-template<typename T> struct UIntType {};
-template<typename T> struct IntType  {};
-template<typename T> struct FloatType   {};
-template<typename T> struct NumericType {};
-template<typename T> struct ArithmeticType {};
-template<typename T> struct StringType  {};
-
-#define REQUIRE_NON_STRING_NUMBER(T) bool non_string_number = true
-#define REQUIRE_STRING_TYPE(T)       bool is_string_type = true
-#define REQUIRE_NON_VARIANT_TYPE(T)  bool is_not_variant_type = true
-#define REQUIRE_VARIANT_TYPE(T)      bool is_variant_type = true
-
-template<typename T, typename U, typename V = decltype(+*(T*)0 | +*(U*)0)>
-struct EnumAndNumericBinaryFuncEnabler {};
-
-template<typename T, typename U> struct NumericFunc {};
-template<typename T, typename U> struct NSNumberFunc {};
-template<typename T, typename U> struct StringFunc {};
-
-#define RLY_INLINE
-#endif  // JUST_DEFINE_IT_RUN
 
 union rvt {
   double d;
@@ -262,7 +228,7 @@ enum {
 std::string toString(const void*);
 std::string toString(double);
 
-#if defined(INCLUDED_FROM_SHELLMAIN) && !defined(JUST_DEFINE_IT_RUN)
+#if defined(INCLUDED_FROM_SHELLMAIN)
 #define string(...) toString(__VA_ARGS__)
 #endif
 
@@ -708,7 +674,6 @@ struct var : variant {
   using variant::operator!;   using variant::operator!=;
   using variant::operator~;
 
-  #ifndef JUST_DEFINE_IT_RUN // These confuse JDI for some reason
   var &operator=(const var &v) {
     *(variant*) this = v;
     return *this;
@@ -718,7 +683,6 @@ struct var : variant {
   variant operator+(const T &v) {
     return *(variant*) this + v;
   }
-  #endif
 
   ~var() {}
 };
@@ -771,14 +735,10 @@ VARBINOP long long operator^(T a, const U &b) {
 // We need to disallow these operators for variants or Clang will decide
 // that the global version is equally preferable with the FULLY-SPECIFIED
 // match in the actual variant class.
-#ifndef JUST_DEFINE_IT_RUN
 #define PRIMITIVE_OP                                                           \
     template<class T, typename U,                                              \
         REQUIRE_NON_VARIANT_TYPE(T), REQUIRE_VARIANT_TYPE(U)>                  \
         static inline
-#else
-#define PRIMITIVE_OP template<typename T, typename U>
-#endif
 
 PRIMITIVE_OP bool operator==(const T &a, const U &b) { return b == a; }
 PRIMITIVE_OP bool operator!=(const T &a, const U &b) { return b != a; }

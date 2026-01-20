@@ -3,40 +3,6 @@
 
 #include "libEGMstd.h"
 
-#ifdef JUST_DEFINE_IT_RUN
-namespace enigma_user {
-
-void gtest_assert_true(bool exp,  std::string message = "");
-void gtest_assert_false(bool exp, std::string message = "");
-
-void gtest_assert_eq_eps(var a, var b, std::string message = "");
-
-void gtest_assert_eq(var a, var b, std::string message = "");
-void gtest_assert_eq(var a, var b, std::string message = "");
-void gtest_assert_ne(var a, var b, std::string message = "");
-void gtest_assert_lt(var a, var b, std::string message = "");
-void gtest_assert_le(var a, var b, std::string message = "");
-void gtest_assert_gt(var a, var b, std::string message = "");
-void gtest_assert_ge(var a, var b, std::string message = "");
-
-
-void gtest_expect_true(bool exp,  std::string message = "");
-void gtest_expect_false(bool exp, std::string message = "");
-
-void gtest_expect_eq_eps(var a, var b, std::string message = "");
-
-void gtest_expect_eq(var a, var b, std::string message = "");
-void gtest_expect_eq(var a, var b, std::string message = "");
-void gtest_expect_ne(var a, var b, std::string message = "");
-void gtest_expect_lt(var a, var b, std::string message = "");
-void gtest_expect_le(var a, var b, std::string message = "");
-void gtest_expect_gt(var a, var b, std::string message = "");
-void gtest_expect_ge(var a, var b, std::string message = "");
-
-} //enigma_user
-
-#else
-
 namespace enigma {
 
 void gtest_binary(std::string expression, std::string left_value, std::string right_value,
@@ -126,6 +92,5 @@ static inline void gtest_check_false(bool exp, std::string message, std::string 
 # define gtest_expect_true(exp, m...)    gtest_check_true  (exp,  std::string{m}, #exp,   false)
 # define gtest_expect_false(exp, m...)   gtest_check_false (exp,  std::string{m}, #exp,   false)
 #endif  // Included from SHELLmain
-#endif  // Not JDI
 
 #endif  // ENIGMA_EXTENSION_GTEST_h
