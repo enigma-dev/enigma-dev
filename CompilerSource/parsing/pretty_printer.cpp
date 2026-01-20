@@ -280,6 +280,21 @@ bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
     return true;
   }
 
+  // Check if the member is a shared local - if so, access it directly as a member variable
+  // instead of using varaccess_ function
+  if (language_fe && language_fe->is_shared_local(right)) {
+    // Shared locals are member variables, access them directly through the instance
+    if (left == "global") {
+      print("enigma::glaccess(int(global))->" + right);
+    } else if (left == "self") {
+      print("enigma::glaccess(int(self))->" + right);
+    } else {
+      // For other instances, cast to object_locals and access the member
+      print("((enigma::object_locals*)enigma::fetch_instance_by_int(" + left + "))->" + right);
+    }
+    return true;
+  }
+
   print("enigma::varaccess_");
   print(right);
   print("(");

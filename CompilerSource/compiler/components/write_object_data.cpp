@@ -25,6 +25,7 @@
 #include "settings.h"
 #include "languages/lang_CPP.h"
 #include "languages/clang_adapter.h"
+#include "backend/ideprint.h"
 
 #include <stdio.h>
 #include <iostream>
@@ -420,8 +421,9 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
     if (!ii->second.defined()) {
       parsed_object::cglobit ve = global->globals.find(ii->first); // So, we look for a global by this name
       if (ve != global->globals.end()) {  // If a global by this name is indeed found,
-        if (ve->second.defined()) // And this global is explicitly defined, not just accessed with a dot,
+        if (ve->second.defined()) { // And this global is explicitly defined, not just accessed with a dot,
           writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
+        }
       }
     }
     

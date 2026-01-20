@@ -1593,11 +1593,6 @@ std::unique_ptr<AST::Node> TryParseOperand() {
         return std::make_unique<AST::CastExpression>(paren, std::move(type), std::move(expr), TT_BEGINPARENTH);
       } else {
         auto exp = TryParseExpression(Precedence::kAll);
-        // Debug: check what token we have before requiring closing paren
-        if (token.type != TT_ENDPARENTH) {
-          std::cerr << "[DEBUG] TryParseOperand: Before require_token, token.type=" << (int)token.type 
-                    << ", token.content='" << token.content << "', expecting TT_ENDPARENTH" << std::endl;
-        }
         require_token(TT_ENDPARENTH, "Expected closing parenthesis before '", token.content, "'");
         return std::make_unique<AST::Parenthetical>(std::move(exp));
       }
@@ -1947,14 +1942,10 @@ std::unique_ptr<AST::BinaryExpression> TryParseSubscriptExpression(int precedenc
 
 std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int precedence, std::unique_ptr<AST::Node> operand) {
   (void)precedence;
-  std::cerr << "[DEBUG] TryParseFunctionCallExpression: Entering, token.type=" << (int)token.type 
-            << ", token.content='" << token.content << "'" << std::endl;
   
   while (token.type == TT_BEGINPARENTH) {
     // Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
-    std::cerr << "[DEBUG] TryParseFunctionCallExpression: After consuming '(', token.type=" << (int)token.type 
-              << ", token.content='" << token.content << "'" << std::endl;
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
     int arg_count = 0;
@@ -1963,24 +1954,14 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       return tok.type == TT_ENDPARENTH || (tok.type == TT_IDENTIFIER && tok.content == ")");
     };
     while (!is_end_paren(token) && token.type != TT_ENDOFCODE) {
-      std::cerr << "[DEBUG] TryParseFunctionCallExpression: Parsing argument #" << arg_count 
-                << ", current token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
-      
       auto expr = TryParseExpression(Precedence::kTernary, nullptr);
-      
-      std::cerr << "[DEBUG] TryParseFunctionCallExpression: After TryParseExpression, expr=" 
-                << (expr ? "non-null" : "nullptr") << ", token.type=" << (int)token.type 
-                << ", token.content='" << token.content << "'" << std::endl;
       
       // If expression parsing failed (returned nullptr), check if we're at the end
       // of arguments (empty argument list) or break if there was an error
       if (expr == nullptr) {
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: Expression is nullptr, checking token.type=" 
-                  << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
         // If we're at closing paren, this is an empty argument list - break normally
         // Check both type and content for closing paren
         if (is_end_paren(token)) {
-          std::cerr << "[DEBUG] TryParseFunctionCallExpression: nullptr expr at closing paren, breaking (empty arg list)" << std::endl;
           // Fix token type if needed
           if (token.type == TT_IDENTIFIER && token.content == ")") {
             token.type = TT_ENDPARENTH;
@@ -1988,7 +1969,6 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
           break;
         }
         // Otherwise, expression parsing already reported an error, so break
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: nullptr expr but not at closing paren, breaking (error already reported)" << std::endl;
         break;
       }
       
@@ -1997,24 +1977,17 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       // Note: We check both token.type and token.content because there may be a tokenization issue
       // where '(' gets tokenized as TT_IDENTIFIER with content '('
       if (token.type == TT_BEGINPARENTH || (token.type == TT_IDENTIFIER && token.content == "(")) {
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: Found '(' after expression (type=" 
-                  << (int)token.type << ", content='" << token.content << "'), parsing as function call" << std::endl;
         // If token type is wrong, we need to fix it or handle it specially
         if (token.type == TT_IDENTIFIER && token.content == "(") {
           // Force the token type to be correct
           token.type = TT_BEGINPARENTH;
         }
         expr = TryParseFunctionCallExpression(Precedence::kFuncCall, std::move(expr));
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: After parsing function call, token.type=" 
-                  << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
       }
       
       // Only add successfully parsed expressions to the arguments vector
       arguments.emplace_back(std::move(expr));
       arg_count++;
-      std::cerr << "[DEBUG] TryParseFunctionCallExpression: Added argument #" << arg_count 
-                << ", now checking for comma/paren, token.type=" << (int)token.type 
-                << ", token.content='" << token.content << "'" << std::endl;
       
       // Check for comma or closing paren after a successfully parsed expression
       // Note: We check both token.type and token.content because there may be a tokenization issue
@@ -2022,15 +1995,11 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       bool is_closing_paren = (token.type == TT_ENDPARENTH) || (token.type == TT_IDENTIFIER && token.content == ")");
       
       if (token.type == TT_COMMA) {
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: Found comma, consuming it" << std::endl;
         token = lexer->ReadToken();
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: After consuming comma, token.type=" << (int)token.type 
-                  << ", token.content='" << token.content << "'" << std::endl;
         // Allow trailing comma (comma followed immediately by closing paren)
         // Check both type and content for closing paren
         bool is_closing_after_comma = (token.type == TT_ENDPARENTH) || (token.type == TT_IDENTIFIER && token.content == ")");
         if (is_closing_after_comma) {
-          std::cerr << "[DEBUG] TryParseFunctionCallExpression: Trailing comma detected, breaking" << std::endl;
           // Fix token type if needed
           if (token.type == TT_IDENTIFIER && token.content == ")") {
             token.type = TT_ENDPARENTH;
@@ -2038,12 +2007,9 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
           break;
         }
       } else if (!is_closing_paren) {
-        std::cerr << "[ERROR] TryParseFunctionCallExpression: Expected comma or closing paren but got token.type=" 
-                  << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
         herr->Error(token) << "Expected ',' or ')' after function argument";
         break;
       } else {
-        std::cerr << "[DEBUG] TryParseFunctionCallExpression: Found closing paren, breaking normally" << std::endl;
         // Fix token type if needed
         if (token.type == TT_IDENTIFIER && token.content == ")") {
           token.type = TT_ENDPARENTH;
@@ -2051,8 +2017,6 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       }
     }
 
-    std::cerr << "[DEBUG] TryParseFunctionCallExpression: Exited argument loop, token.type=" << (int)token.type 
-              << ", token.content='" << token.content << "', arguments.size()=" << arguments.size() << std::endl;
     // Fix token type if closing paren was mis-tokenized
     if (token.type == TT_IDENTIFIER && token.content == ")") {
       token.type = TT_ENDPARENTH;
@@ -2061,7 +2025,6 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
     operand = std::make_unique<AST::FunctionCallExpression>(std::move(operand), std::move(arguments));
   }
 
-  std::cerr << "[DEBUG] TryParseFunctionCallExpression: Returning" << std::endl;
   return dynamic_unique_pointer_cast<AST::FunctionCallExpression>(std::move(operand));
 }
 
@@ -2633,14 +2596,6 @@ class SyntaxChecker : public AST::Visitor {
       Token tok;
       tok.content = func->name.content;
       tok.type = TT_IDENTIFIER;
-      std::cerr << "[DEBUG] SyntaxChecker::VisitFunctionCallExpression: Function '" << func->name.content 
-                << "' called with " << node.arguments.size() << " arguments, min=" << min << ", max=";
-      if (max == unsigned(-1)) {
-        std::cerr << "unlimited";
-      } else {
-        std::cerr << max;
-      }
-      std::cerr << std::endl;
       if (max != unsigned(-1)) {
         if (node.arguments.size() < min) {
           std::cerr << "[ERROR] SyntaxChecker: Too few arguments for '" << func->name.content << "'" << std::endl;

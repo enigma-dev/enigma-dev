@@ -46,6 +46,7 @@
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 #include "object_storage.h"
+#include "backend/ideprint.h"
 
 using namespace std;
 using namespace enigma::parsing;
@@ -210,14 +211,16 @@ class DeclGatheringVisitor : public AST::Visitor {
           parsed_scope->funcs[name] = node->As<AST::FunctionCallExpression>()->arguments.size();
         }
         return "";
-      } else
+      } else {
         return name;
+      }
     }
     return "";
   }
 
   void AddLocal(AST::PNode &node) {
     if (!node) return;
+    
     std::string name = CheckIfIdentifier(node);
     
     // If CheckIfIdentifier returned empty, it might be because the variable is in declarations
@@ -234,7 +237,9 @@ class DeclGatheringVisitor : public AST::Visitor {
       }
     }
     
-    if (name == "") return;
+    if (name == "") {
+      return;
+    }
     
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
@@ -244,7 +249,9 @@ class DeclGatheringVisitor : public AST::Visitor {
       parsed_scope->tlines[name] = 0;
       return;
     }
-    if (!lang->global_exists(name)) {
+    
+    bool global_exists_result = lang->global_exists(name);
+    if (!global_exists_result) {
       parsed_scope->locals[name] = dectrip("var");
       cs->add_dot_accessed_local(name);
     }
@@ -269,7 +276,10 @@ class DeclGatheringVisitor : public AST::Visitor {
     std::string name = CheckIfIdentifier(node);
     if (name == "") return;
     parsed_scope->dots[name] = 0;
-    cs->add_dot_accessed_local(name);
+    // Don't add shared locals to dot_accessed_locals - they're accessed directly as member variables
+    if (!lang->is_shared_local(name)) {
+      cs->add_dot_accessed_local(name);
+    }
   }
 
   void AddFunction(AST::FunctionCallExpression &node) {

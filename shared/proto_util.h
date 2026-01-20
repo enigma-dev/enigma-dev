@@ -190,15 +190,11 @@ inline void ApplyProtoDefaults(google::protobuf::Message* msg) {
     // Get default_value extension using generated accessor
     std::string defaultVal = opts.GetExtension(buffers::default_value);
     if (!defaultVal.empty()) {
-      std::cerr << "[ApplyProtoDefaults] Applying default to field: " << field->name() 
-                << " = " << defaultVal << std::endl;
       SetProtoField(msg, field, defaultVal);
       // Verify it was set
       if (!refl->HasField(*msg, field)) {
-        std::cerr << "[ApplyProtoDefaults] WARNING: Field was not set after SetProtoField: " << field->name() << std::endl;
       }
     } else {
-      std::cerr << "[ApplyProtoDefaults] No default_value extension for field: " << field->name() << std::endl;
     }
   }
 }

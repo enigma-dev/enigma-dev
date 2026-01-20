@@ -70,33 +70,7 @@ int main(int argc, char* argv[])
     std::cerr.rdbuf(elog.rdbuf());
   }
   
-  plugin.SetDefinitions(options.APIyaml().c_str());
-  std::string output_file;
-
-  if (ENIGMA_DEBUG != "TRUE") {
-    //Restore cout/cerr
-    std::cout.rdbuf(cout_rdbuf);
-    std::cerr.rdbuf(cerr_rdbuf);
-  }
-
-  if (!options.GetOption("output").empty())
-    output_file = options.GetOption("output").as<std::string>();
-
-  if (options.HasOption("list")) {
-    plugin.PrintBuiltins(output_file);
-    return result;
-  }
-
-  bool run = options.GetOption("run").as<bool>();
-  if (!run) plugin.HandleGameLaunch();
-
-  bool server = options.GetOption("server").as<bool>();
-  if (server) {
-    int port = options.GetOption("port").as<int>();
-    string ip = options.GetOption("ip").as<std::string>();
-    return RunServer(ip + ":" + std::to_string(port), plugin, options, ecb);
-  }
-
+  // Get mode early so we can pass it to APIyaml for DEBUG_MODE define
   GameMode mode;
   std::string _mode = options.GetOption("mode").as<std::string>();
 
@@ -116,6 +90,41 @@ int main(int argc, char* argv[])
   if (mode == emode_invalid) {
     std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
+  }
+  
+  syntax_error* def_err = plugin.SetDefinitions(options.APIyaml(_mode).c_str());
+
+  std::string output_file;
+
+  if (ENIGMA_DEBUG != "TRUE") {
+    //Restore cout/cerr
+    std::cout.rdbuf(cout_rdbuf);
+    std::cerr.rdbuf(cerr_rdbuf);
+  }
+
+  // Check if there's an actual error (err_str is set)
+  // def_err should be nullptr on success, or non-null with err_str set on error
+  if (def_err && def_err->err_str) {
+    std::cerr << "Definitions parse failed. Check ENIGMA compiler log or run with ENIGMA_DEBUG=TRUE to see more details." << std::endl;
+    return 1;
+  }
+
+  if (!options.GetOption("output").empty())
+    output_file = options.GetOption("output").as<std::string>();
+
+  if (options.HasOption("list")) {
+    plugin.PrintBuiltins(output_file);
+    return result;
+  }
+
+  bool run = options.GetOption("run").as<bool>();
+  if (!run) plugin.HandleGameLaunch();
+
+  bool server = options.GetOption("server").as<bool>();
+  if (server) {
+    int port = options.GetOption("port").as<int>();
+    string ip = options.GetOption("ip").as<std::string>();
+    return RunServer(ip + ":" + std::to_string(port), plugin, options, ecb);
   }
   
   std::string input_file = options.GetOption("input").as<std::string>();

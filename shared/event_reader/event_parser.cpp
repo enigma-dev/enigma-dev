@@ -205,7 +205,6 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
     }
   }
   // Start numbering internal IDs in the new system from 1000, for good measure.
-  std::cerr << "EventData: Processing " << event_file_.events_size() << " event descriptors\n";
   for (long i = 0; i < event_file_.events_size(); ++i) {
     event_wrappers_.emplace_back(&event_file_.events(i), kMinInternalID + i);
   }
@@ -223,11 +222,8 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   }
 
   // Now that our index is built, we can populate the legacy maps.
-  std::cerr << "EventData: Loading " << event_file_.game_maker_event_mappings_size() 
-            << " Game Maker event mappings from events.ey\n";
   for (const auto &mapping : event_file_.game_maker_event_mappings()) {
     int main_id = mapping.id();
-    std::cerr << "EventData: Processing mapping for event ID " << main_id << "\n";
     if (mapping.has_single()) {
       Event cev = DecodeEventString(std::string(mapping.single()));
       cev.arguments.clear();
@@ -263,8 +259,6 @@ EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
       }
     }
   }
-  std::cerr << "EventData: Built compatibility mapping with " << compatability_mapping_.size() 
-            << " entries\n";
 }
 
 const Event EventData::get_event(int mid, int sid) const {

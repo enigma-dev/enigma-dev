@@ -26,6 +26,7 @@
 #include <functional>
 #include "languages/lang_CPP.h"
 #include "languages/clang_adapter.h"  // For ClangContext full definition
+#include "eyaml/eyaml.h"  // For parse_eyaml_str
 
 string lang_CPP::get_name() { return "C++"; }
 
@@ -102,17 +103,6 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   cout << targetYaml << endl;
 
   cout << "Creating swap." << endl;
-  // Ensure ENIGMA_TEST is set if we're in test mode (check if mock-headers directory exists)
-  // This is a fallback in case the environment variable wasn't set by the test framework
-  const char* test_env = getenv("ENIGMA_TEST");
-  if (!test_env) {
-    // Check if we're in a test environment by looking for mock-headers directory
-    std::filesystem::path mock_headers = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
-    if (std::filesystem::exists(mock_headers)) {
-      setenv("ENIGMA_TEST", "TRUE", 1);
-      std::cerr << "DEBUG definitionsModified: Auto-detected test mode, set ENIGMA_TEST=TRUE" << std::endl;
-    }
-  }
   // Reset namespace pointers before deleting old context to avoid dangling pointers
   namespace_enigma = nullptr;
   namespace_enigma_user = nullptr;
@@ -187,13 +177,31 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   // Add base directories (like Makefile: -I. -I$(CODEGEN) -I$(SHARED_SRC_DIR))
   extra_include_dirs.push_back(shell_dir.u8string()); // -I. equivalent
   extra_include_dirs.push_back((enigma_root / "shared").u8string()); // -Ishared equivalent
+
+  extra_include_dirs.push_back("/opt/homebrew/include/"); // for macoshomebrew
   
-  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string(), extra_include_dirs);
+  // Only define DEBUG_MODE if we're in Debug mode
+  // Check the mode from the YAML settings
+  std::vector<std::string> defines;
+  {
+    ey_data settree = parse_eyaml_str(targetYaml);
+    std::string mode_str = settree.get("target-mode").toString();
+    bool is_debug_mode = (mode_str == "Debug");
+    
+    if (is_debug_mode) {
+      defines.push_back("DEBUG_MODE");
+    }
+  }
+  
+  res = main_context->parse_file((enigma_root/"ENIGMAsystem/SHELL/SHELLmain.cpp").u8string(), extra_include_dirs, defines);
   CURRENT_TIME(te);
   
   if (res != 0) {
-    cerr << "WARNING: parse_file returned " << res << " (non-zero indicates failure)" << endl;
-    cerr << "This may mean the enigma_user namespace was not parsed correctly!" << endl;
+    cout << "ERROR: parse_file returned " << res << " (non-zero indicates failure)" << endl;
+    cout << "This may mean the enigma_user namespace was not parsed correctly!" << endl;
+    error_sstring = "Failed to parse engine files. Check compiler log for details.";
+    ide_passback_error.set(0, 0, 0, error_sstring);
+    return &ide_passback_error;
   }
 
   jdi::definition *d;
@@ -251,7 +259,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
             clang_adapter::ClangDefinitionFunction* func = 
                 dynamic_cast<clang_adapter::ClangDefinitionFunction*>(member.get());
             if (func) {
-              cerr << "  Function: " << name 
+              /*cerr << "  Function: " << name 
                    << " (overloads: " << func->overloads.size() 
                    << ", template overloads: " << func->template_overloads.size() << ")";
               for (const auto& overload_pair : func->overloads) {
@@ -263,7 +271,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
                 }
               }
               cerr << endl;
-              cerr.flush();
+              cerr.flush();*/
             } else {
               cerr << "  Function: " << name << " (NOT ClangDefinitionFunction - flags: 0x" 
                    << std::hex << member->flags << std::dec << ")" << endl;
@@ -296,12 +304,14 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
   if (jdi::definition *dstd = main_context->get_global()->look_up("std")) {
     if (dstd->flags & jdi::DEF_NAMESPACE) {
       jdi::definition_scope *j_std = (jdi::definition_scope*) dstd;
+      
+      
       jdi::definition *j_string = j_std->look_up("string");
-      if (!j_string) cerr << "Error! std::string was not detected! The parse output probably sucks.";
+      if (!j_string) cerr << "Error! std::string was not detected! The parse output probably sucks. ";
       else if (!(j_string->flags & jdi::DEF_TYPENAME))
-        cerr << "Error! std::string is not a type! The parse output probably sucks.";
+        cerr << "Error! std::string is not a type! The parse output probably sucks. ";
       else
-        cout << "Successfully parsed std::string, so data is probably good.";
+        cout << "Successfully parsed std::string, so data is probably good. ";
     } else cerr << "ERROR! Namespace enigma_user is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace std not found!" << endl;
 
@@ -309,8 +319,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
     cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
 
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    cout << "Continuing anyway." << endl;
-    // return &ide_passback_error;
+    //cout << "Continuing anyway." << endl;
+    return &ide_passback_error;
   } else {
     cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME(ts,te) << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
@@ -343,7 +353,9 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode,
 
   cout << " Done.\n";
 
-  return &ide_passback_error;
+  // Return nullptr on success (no error)
+  // ide_passback_error is only set when there's an actual error (see lines 357, 199)
+  return nullptr;
 }
 
 #include "compiler/compile_common.h"
@@ -375,17 +387,6 @@ int lang_CPP::load_shared_locals() {
 
   shared_object_locals_.clear();
 
-  // Debug: Show what we're starting with
-  cout << "DEBUG: Starting traversal from " << pclass->name << endl;
-  cout << "DEBUG: Ancestors count: " << pclass->ancestors.size() << endl;
-  for (size_t i = 0; i < pclass->ancestors.size(); ++i) {
-    if (pclass->ancestors[i].first) {
-      cout << "DEBUG:   Ancestor[" << i << "]: " << pclass->ancestors[i].first->name << endl;
-    } else {
-      cout << "DEBUG:   Ancestor[" << i << "]: NULL" << endl;
-    }
-  }
-
   // Recursively traverse all ancestors to discover all member variables
   // Use a visited set to prevent cycles (though shouldn't exist in single inheritance)
   std::set<jdi::definition_class*> visited;
@@ -396,14 +397,11 @@ int lang_CPP::load_shared_locals() {
     
     // Prevent cycles
     if (visited.count(cls)) {
-      cout << "DEBUG:   Skipping already visited: " << cls->name << endl;
       return;
     }
     visited.insert(cls);
     
     tier_count++;
-    cout << " >> Checking ancestor " << cls->name << " (tier " << tier_count << ")" << endl;
-    cout << "DEBUG:   Members in " << cls->name << ": " << cls->members.size() << endl;
     
     int members_added = 0;
     int members_skipped = 0;
@@ -427,48 +425,29 @@ int lang_CPP::load_shared_locals() {
         bool has_type = (mem->second->flags & jdi::DEF_TYPED) != 0;
         is_variable = has_type && !is_function && !is_type && !is_template && 
                       !is_namespace && !is_class && !is_enum && !is_scope;
-        
-        cout << "DEBUG:     Member: " << mem->first;
-        cout << " (flags: 0x" << std::hex << mem->second->flags << std::dec << ")";
-        if (is_function) cout << " [FUNCTION]";
-        if (is_type) cout << " [TYPE]";
-        if (is_template) cout << " [TEMPLATE]";
-        if (has_type && !is_function) cout << " [VARIABLE]";
       } else {
         // If no definition, skip it
         is_variable = false;
-        cout << "DEBUG:     Member: " << mem->first << " (no definition)";
       }
       
       if (is_variable) {
         shared_object_locals_.insert(mem->first);
         members_added++;
-        cout << " -> ADDED" << endl;
       } else {
         members_skipped++;
-        cout << " -> SKIPPED" << endl;
       }
     }
-    cout << "DEBUG:   Added " << members_added << " variable(s), skipped " << members_skipped << " non-variable(s) from " << cls->name << endl;
-    cout << "DEBUG:   Total shared_locals so far: " << shared_object_locals_.size() << endl;
     
     // Recursively process all ancestors (not just the first one)
-    cout << "DEBUG:   Processing " << cls->ancestors.size() << " ancestor(s)" << endl;
     for (const auto& ancestor_pair : cls->ancestors) {
       if (ancestor_pair.first) {
-        cout << "DEBUG:     Traversing to ancestor: " << ancestor_pair.first->name << endl;
         traverse(ancestor_pair.first);
-      } else {
-        cout << "DEBUG:     Ancestor is NULL" << endl;
       }
     }
   };
   
   // Start traversal from the uppermost tier
   traverse(pclass);
-  
-  cout << "DEBUG: Traversal complete. Total tiers visited: " << tier_count << endl;
-  cout << "DEBUG: Total shared_object_locals discovered: " << shared_object_locals_.size() << endl;
 
   // Note: color was previously added here, but it's actually a user variable, not a built-in
   // If color needs to be a built-in in the future, it should be added to the object hierarchy headers

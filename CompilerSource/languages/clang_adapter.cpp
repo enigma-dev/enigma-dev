@@ -41,7 +41,12 @@ unsigned int cursor_kind_to_flags(CXCursorKind kind) {
       flags |= jdi::DEF_FUNCTION;
       break;
     case CXCursor_TypedefDecl:
+    case CXCursor_TypeAliasDecl:
       flags |= jdi::DEF_TYPENAME | jdi::DEF_TYPED;
+      break;
+    case CXCursor_TypeAliasTemplateDecl:
+      // Template type aliases (like std::string might be in some implementations)
+      flags |= jdi::DEF_TYPENAME | jdi::DEF_TYPED | jdi::DEF_TEMPLATE;
       break;
     case CXCursor_VarDecl:
     case CXCursor_FieldDecl:
@@ -72,9 +77,36 @@ std::string get_cursor_name(CXCursor cursor) {
 
 // Get qualified name
 std::string get_qualified_name(CXCursor cursor) {
-  CXString name = clang_getCursorDisplayName(cursor);
-  std::string result = clang_getCString(name);
-  clang_disposeString(name);
+  // Try to get the USR (Unified Symbol Resolution) which gives us the fully qualified name
+  CXString usr = clang_getCursorUSR(cursor);
+  const char* usr_str = clang_getCString(usr);
+  std::string result;
+  
+  if (usr_str && strlen(usr_str) > 0) {
+    // USR format is like "c:@N@std@N@__1@T@string" for std::__1::string
+    // Parse it to extract the qualified name
+    // For now, fall back to display name, but we can improve this later
+    result = clang_getCString(clang_getCursorDisplayName(cursor));
+  } else {
+    // Fall back to display name
+    CXString name = clang_getCursorDisplayName(cursor);
+    result = clang_getCString(name);
+    clang_disposeString(name);
+  }
+  
+  clang_disposeString(usr);
+  
+  // If we still don't have a qualified name, try getting the type spelling
+  if (result.empty() || result.find("::") == std::string::npos) {
+    CXType type = clang_getCursorType(cursor);
+    CXString type_str = clang_getTypeSpelling(type);
+    const char* type_cstr = clang_getCString(type_str);
+    if (type_cstr && strlen(type_cstr) > 0) {
+      result = type_cstr;
+    }
+    clang_disposeString(type_str);
+  }
+  
   return result;
 }
 
@@ -220,6 +252,10 @@ std::vector<const char*> ClangContext::build_args() {
         }
       }
       
+      // Add Homebrew include path for MacOSX
+      system_include_strings.push_back("-isystem");
+      system_include_strings.push_back("/opt/homebrew/include/");
+      
       // Build the args vector from strings (strings persist in static storage)
       for (const auto& str : system_include_strings) {
         system_include_args.push_back(str.c_str());
@@ -335,47 +371,35 @@ int ClangContext::parse_file(const std::string& filepath,
   // Don't clear include_dirs_ as it may be used by build_args() which stores pointers to its strings
   quote_include_dirs_.clear();
   
-  // In test mode, add mock directories to quote_include_dirs_ (for -iquote)
-  // This ensures mock headers are found for "" includes
-  const char* test_env = std::getenv("ENIGMA_TEST");
-  const char* tests_env = std::getenv("TESTS");
-  bool is_test_mode = (test_env && std::string(test_env) == "TRUE") || 
-                      (tests_env && std::string(tests_env) == "TRUE");
-  std::cerr << "DEBUG parse_file: filepath=" << filepath 
-            << " is_test_mode=" << (is_test_mode ? "true" : "false")
-            << " ENIGMA_TEST=" << (test_env ? test_env : "null")
-            << " TESTS=" << (tests_env ? tests_env : "null") << std::endl;
-  if (is_test_mode) {
-    // Find enigma root by looking for ENIGMAsystem in the filepath
-    std::string enigma_root;
-    size_t enigma_pos = filepath.find("ENIGMAsystem");
-    if (enigma_pos != std::string::npos) {
-      enigma_root = filepath.substr(0, enigma_pos);
-      std::filesystem::path mock_headers_dir = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
-      if (std::filesystem::exists(mock_headers_dir)) {
-        // Add mock directories to quote_include_dirs_ (for -iquote) so they're searched for "" includes
-        // These are searched after the directory of the including file, but before -I directories
-        std::filesystem::path mock_resources_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Universal_System" / "Resources";
-        if (std::filesystem::exists(mock_resources_dir)) {
-          std::string abs_path = std::filesystem::absolute(mock_resources_dir).u8string();
-          quote_include_dirs_.push_back(abs_path);
-          std::cerr << "DEBUG: Added mock Resources dir: " << abs_path << std::endl;
-        } else {
-          std::cerr << "DEBUG: Mock Resources dir does not exist: " << mock_resources_dir << std::endl;
-        }
-        std::filesystem::path mock_pp_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Preprocessor_Environment_Editable";
-        if (std::filesystem::exists(mock_pp_dir)) {
-          quote_include_dirs_.push_back(std::filesystem::absolute(mock_pp_dir).u8string());
-        }
-        std::filesystem::path mock_shell_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL";
-        if (std::filesystem::exists(mock_shell_dir)) {
-          quote_include_dirs_.push_back(std::filesystem::absolute(mock_shell_dir).u8string());
-        }
-        quote_include_dirs_.push_back(std::filesystem::absolute(mock_headers_dir).u8string());
+  // Find enigma root by looking for ENIGMAsystem in the filepath
+  // Always use mock-headers directory for parse
+  std::string enigma_root;
+  size_t enigma_pos = filepath.find("ENIGMAsystem");
+  if (enigma_pos != std::string::npos) {
+    enigma_root = filepath.substr(0, enigma_pos);
+    std::filesystem::path mock_headers_dir = std::filesystem::path(enigma_root) / "CommandLine" / "emake-tests" / "mock-headers";
+    if (std::filesystem::exists(mock_headers_dir)) {
+      // Add mock directories to quote_include_dirs_ (for -iquote) so they're searched for "" includes
+      // These are searched after the directory of the including file, but before -I directories
+      std::filesystem::path mock_resources_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Universal_System" / "Resources";
+      if (std::filesystem::exists(mock_resources_dir)) {
+        std::string abs_path = std::filesystem::absolute(mock_resources_dir).u8string();
+        quote_include_dirs_.push_back(abs_path);
+        std::cerr << "DEBUG: Added mock Resources dir: " << abs_path << std::endl;
+      } else {
+        std::cerr << "DEBUG: Mock Resources dir does not exist: " << mock_resources_dir << std::endl;
       }
+      std::filesystem::path mock_pp_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Preprocessor_Environment_Editable";
+      if (std::filesystem::exists(mock_pp_dir)) {
+        quote_include_dirs_.push_back(std::filesystem::absolute(mock_pp_dir).u8string());
+      }
+      std::filesystem::path mock_shell_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL";
+      if (std::filesystem::exists(mock_shell_dir)) {
+        quote_include_dirs_.push_back(std::filesystem::absolute(mock_shell_dir).u8string());
+      }
+      quote_include_dirs_.push_back(std::filesystem::absolute(mock_headers_dir).u8string());
     }
   }
-  
   // Add the directory containing the file being parsed as an include directory
   // This allows relative includes (like "rect.h") to be found
   size_t last_slash = filepath.find_last_of("/\\");
@@ -551,6 +575,241 @@ struct AncestorTraversalState {
   std::shared_ptr<ClangDefinitionScope> global_scope;
 };
 
+// Helper struct and function for processing using declarations in a second pass
+struct UsingDeclState {
+  ClangContext* ctx;
+  TraversalState* traversal_state;
+};
+
+static enum CXChildVisitResult process_using_declarations_visitor(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
+  UsingDeclState* using_state = static_cast<UsingDeclState*>(client_data);
+  CXCursorKind kind = clang_getCursorKind(cursor);
+  
+  if (kind == CXCursor_UsingDeclaration) {
+    std::string using_name = get_cursor_name(cursor);
+    CXCursor referenced = clang_getCursorReferenced(cursor);
+    
+      // Debug: log all using declarations, especially for "string" and those in system headers
+      CXSourceLocation loc = clang_getCursorLocation(cursor);
+      CXFile file;
+      unsigned line, column;
+      clang_getExpansionLocation(loc, &file, &line, &column, nullptr);
+      CXString filename = clang_getFileName(file);
+      const char* filename_str = clang_getCString(filename);
+      bool is_system = clang_Location_isInSystemHeader(loc);
+      
+      
+      clang_disposeString(filename);
+    
+    if (!using_name.empty() && !clang_Cursor_isNull(referenced)) {
+      // Get the qualified name of what's being referenced to help determine the target namespace
+      // Try multiple methods to get the full qualified name
+      std::string ref_qualified = get_qualified_name(referenced);
+      
+      // If that didn't work, try getting the type spelling
+      if (ref_qualified.empty() || ref_qualified == using_name) {
+        CXType ref_type = clang_getCursorType(referenced);
+        CXString type_spelling = clang_getTypeSpelling(ref_type);
+        const char* type_str = clang_getCString(type_spelling);
+        if (type_str) {
+          ref_qualified = type_str;
+        }
+        clang_disposeString(type_spelling);
+      }
+      
+      // Also try getting the display name
+      if (ref_qualified.empty() || ref_qualified == using_name) {
+        CXString display_name = clang_getCursorDisplayName(referenced);
+        const char* display_str = clang_getCString(display_name);
+        if (display_str) {
+          ref_qualified = display_str;
+        }
+        clang_disposeString(display_name);
+      }
+      
+      // Check if the referenced name contains "std::" to infer we're in std namespace
+      bool likely_in_std = (ref_qualified.find("std::") == 0) || 
+                           (ref_qualified.find("::std::") != std::string::npos);
+      // Find the scope where this using declaration is by traversing up the parent chain
+      // Check both semantic and lexical parents to find the namespace
+      std::string target_namespace;
+      
+      // Get source location for debug
+      CXSourceLocation loc = clang_getCursorLocation(cursor);
+      CXFile file;
+      unsigned line, column;
+      clang_getExpansionLocation(loc, &file, &line, &column, nullptr);
+      CXString filename = clang_getFileName(file);
+      const char* filename_str = clang_getCString(filename);
+      bool is_system = clang_Location_isInSystemHeader(loc);
+      
+      CXCursor walk = cursor;
+      std::vector<std::string> parent_chain;
+      for (int i = 0; i < 10; ++i) {  // Limit depth
+        CXCursor semantic_parent = clang_getCursorSemanticParent(walk);
+        CXCursor lexical_parent = clang_getCursorLexicalParent(walk);
+        
+        // Try semantic parent first
+        if (!clang_Cursor_isNull(semantic_parent)) {
+          CXCursorKind parent_kind = clang_getCursorKind(semantic_parent);
+          std::string parent_name = get_cursor_name(semantic_parent);
+          CXString kind_str = clang_getCursorKindSpelling(parent_kind);
+          const char* kind_cstr = clang_getCString(kind_str);
+          parent_chain.push_back(std::string(kind_cstr ? kind_cstr : "unknown") + ":" + parent_name);
+          clang_disposeString(kind_str);
+          
+          if (parent_kind == CXCursor_Namespace || parent_kind == CXCursor_NamespaceAlias) {
+            if (!parent_name.empty() && parent_name != target_namespace) {
+              target_namespace = parent_name;
+              break;
+            }
+          }
+        }
+        
+        // Try lexical parent
+        if (!clang_Cursor_isNull(lexical_parent)) {
+          CXCursorKind parent_kind = clang_getCursorKind(lexical_parent);
+          std::string parent_name = get_cursor_name(lexical_parent);
+          CXString kind_str = clang_getCursorKindSpelling(parent_kind);
+          const char* kind_cstr = clang_getCString(kind_str);
+          std::string chain_entry = std::string(kind_cstr ? kind_cstr : "unknown") + ":" + parent_name;
+          clang_disposeString(kind_str);
+          if (parent_chain.empty() || parent_chain.back() != chain_entry) {
+            parent_chain.push_back(chain_entry);
+          }
+          
+          if (parent_kind == CXCursor_Namespace || parent_kind == CXCursor_NamespaceAlias) {
+            if (!parent_name.empty() && parent_name != target_namespace) {
+              target_namespace = parent_name;
+              break;
+            }
+          }
+        }
+        
+        // If we found a namespace, stop
+        if (!target_namespace.empty()) break;
+        
+        // Move up the chain
+        if (!clang_Cursor_isNull(semantic_parent)) {
+          walk = semantic_parent;
+        } else if (!clang_Cursor_isNull(lexical_parent)) {
+          walk = lexical_parent;
+        } else {
+          break;
+        }
+      }
+      
+      clang_disposeString(filename);
+      
+      // Try to find the scope in our definition tree
+      ClangDefinitionScope* target_scope = nullptr;
+      auto global_scope = using_state->ctx->get_global_shared();
+      
+      if (global_scope) {
+        // If we found a namespace, use it
+        if (!target_namespace.empty()) {
+          ClangDefinition* ns_def = global_scope->look_up(target_namespace);
+          if (ns_def && (ns_def->flags & jdi::DEF_NAMESPACE)) {
+            target_scope = dynamic_cast<ClangDefinitionScope*>(ns_def);
+          }
+        }
+        
+        // If namespace detection failed but we're in a system header and the referenced
+        // name suggests it's from std, try to infer the namespace from the qualified name
+        if (!target_scope && is_system && likely_in_std) {
+          // Try "std" namespace as a fallback
+          ClangDefinition* std_def = global_scope->look_up("std");
+          if (std_def && (std_def->flags & jdi::DEF_NAMESPACE)) {
+            target_scope = dynamic_cast<ClangDefinitionScope*>(std_def);
+          }
+        }
+      }
+      
+      if (target_scope && target_scope->members.find(using_name) == target_scope->members.end()) {
+        // Try to find the referenced definition (ref_qualified was already computed above)
+        ClangDefinition* ref_def = nullptr;
+        auto global_scope = using_state->ctx->get_global_shared();
+        if (global_scope) {
+          // First try direct lookup with the qualified name
+          if (!ref_qualified.empty()) {
+            ref_def = global_scope->look_up(ref_qualified);
+          }
+          
+          // If not found, try parsing the qualified name and traversing nested namespaces
+          if (!ref_def && !ref_qualified.empty()) {
+            // Split the qualified name by "::" and traverse namespaces
+            std::vector<std::string> parts;
+            size_t start = 0;
+            while (start < ref_qualified.length()) {
+              size_t colon = ref_qualified.find("::", start);
+              if (colon == std::string::npos) {
+                parts.push_back(ref_qualified.substr(start));
+                break;
+              }
+              parts.push_back(ref_qualified.substr(start, colon - start));
+              start = colon + 2;
+            }
+            
+            // Traverse the namespace path
+            if (parts.size() >= 2) {
+              ClangDefinition* current_scope = global_scope.get();
+              bool found_path = true;
+              
+              // Traverse all namespace parts except the last one
+              for (size_t i = 0; i < parts.size() - 1; ++i) {
+                if (!current_scope || !(current_scope->flags & jdi::DEF_NAMESPACE)) {
+                  found_path = false;
+                  break;
+                }
+                ClangDefinitionScope* scope = dynamic_cast<ClangDefinitionScope*>(current_scope);
+                if (!scope) {
+                  found_path = false;
+                  break;
+                }
+                ClangDefinition* next = scope->look_up(parts[i]);
+                if (!next) {
+                  found_path = false;
+                  break;
+                }
+                current_scope = next;
+              }
+              
+              // If we found the namespace path, look up the final name
+              if (found_path && current_scope && (current_scope->flags & jdi::DEF_NAMESPACE)) {
+                ClangDefinitionScope* final_scope = dynamic_cast<ClangDefinitionScope*>(current_scope);
+                if (final_scope) {
+                  ref_def = final_scope->look_up(parts.back());
+                }
+              }
+            } else if (parts.size() == 1) {
+              // Unqualified name - try looking it up in the target scope
+              if (target_scope) {
+                ref_def = target_scope->look_up(parts[0]);
+              }
+            }
+          }
+          
+        }
+        
+        if (ref_def) {
+          // Add the definition to the target scope
+          std::shared_ptr<ClangDefinition> using_def;
+          if (ref_def->flags & jdi::DEF_TYPENAME) {
+            using_def = std::make_shared<ClangDefinitionTyped>(
+              using_name, target_scope, ref_def->flags, clang_getNullCursor(), nullptr);
+          } else {
+            using_def = std::make_shared<ClangDefinition>(
+              using_name, target_scope, ref_def->flags, clang_getNullCursor());
+          }
+          target_scope->members[using_name] = using_def;
+        }
+      }
+    }
+  }
+  
+  return CXChildVisit_Recurse;
+}
+
 // Helper function to populate ancestors for all classes (second pass)
 // Visits CXXBaseSpecifier cursors to find base classes
 static enum CXChildVisitResult populate_ancestors_visitor(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
@@ -563,9 +822,6 @@ static enum CXChildVisitResult populate_ancestors_visitor(CXCursor cursor, CXCur
     std::string name = get_cursor_name(cursor);
     if (!name.empty()) {
       state->current_class = name;
-      if (name.find("object_") == 0) {  // Only log object_* classes
-        std::cout << "DEBUG populate_ancestors: Processing class '" << name << "'" << std::endl;
-      }
     }
   }
   
@@ -578,10 +834,6 @@ static enum CXChildVisitResult populate_ancestors_visitor(CXCursor cursor, CXCur
     // Use the tracked current class name
     std::string class_name = state->current_class;
     
-    if (!class_name.empty() && class_name.find("object_") == 0) {
-      std::cout << "DEBUG populate_ancestors: Found base specifier for class '" << class_name 
-                << "' with base '" << base_name << "'" << std::endl;
-    }
     
     // Remove namespace prefix if present (e.g., "enigma::object_transform" -> "object_transform")
     std::string base_name_short = base_name;
@@ -594,20 +846,10 @@ static enum CXChildVisitResult populate_ancestors_visitor(CXCursor cursor, CXCur
       auto class_def = find_class_in_scope(class_name, state->global_scope);
       auto base_class = find_class_in_scope(base_name_short, state->global_scope);
       
-      if (class_name.find("object_") == 0) {
-        std::cout << "DEBUG populate_ancestors: Looking for class '" << class_name 
-                  << "' and base '" << base_name_short << "'" << std::endl;
-        std::cout << "DEBUG populate_ancestors: class_def=" << (class_def ? "found" : "NOT FOUND")
-                  << ", base_class=" << (base_class ? "found" : "NOT FOUND") << std::endl;
-      }
       
       if (class_def && base_class) {
         int access = clang_getCXXAccessSpecifier(cursor);
         class_def->ancestors.push_back(std::make_pair(base_class.get(), access));
-        if (class_name.find("object_") == 0) {
-          std::cout << "DEBUG populate_ancestors: Added ancestor '" << base_name_short 
-                    << "' to class '" << class_name << "'" << std::endl;
-        }
       }
     }
   }
@@ -627,11 +869,14 @@ void ClangContext::build_definitions() {
   clang_visitChildren(root, visit_cursor, &state);
   
   // Second pass: Populate ancestors by visiting base class specifiers
-  std::cout << "DEBUG: Starting second pass to populate ancestors" << std::endl;
   AncestorTraversalState pass2_state;
   pass2_state.global_scope = global_scope_;
   clang_visitChildren(root, populate_ancestors_visitor, &pass2_state);
-  std::cout << "DEBUG: Second pass complete" << std::endl;
+  
+  // Third pass: Process using declarations now that all definitions are built
+  // This ensures that referenced definitions exist when we process using declarations
+  UsingDeclState using_state = {this, &state};
+  clang_visitChildren(root, process_using_declarations_visitor, &using_state);
 }
 
 enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
@@ -697,6 +942,12 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
     return;
   }
   
+  // Handle using declarations - these are now processed in a third pass after all definitions are built
+  // Skip them here to avoid processing them before referenced definitions exist
+  if (kind == CXCursor_UsingDeclaration) {
+    return;  // Don't process using declarations as regular definitions - handled in third pass
+  }
+  
   std::string name = get_cursor_name(cursor);
   
   unsigned int flags = cursor_kind_to_flags(kind);
@@ -706,8 +957,13 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
   
   // For variable declarations, we need to extract builtin types even if name is empty
   // (though typically variable declarations have names)
-  if (name.empty() && !(flags & jdi::DEF_TYPED)) {
-    return;
+  // Type aliases and typedefs with DEF_TYPENAME must have a name to be useful
+  if (name.empty()) {
+    // Allow through only if it's a typed definition that might have special handling
+    // But type aliases and typedefs (DEF_TYPENAME) must have names
+    if (!(flags & jdi::DEF_TYPED) || (flags & jdi::DEF_TYPENAME)) {
+      return;
+    }
   }
   
   // Re-fetch scope again right before accessing members to ensure it's still valid
@@ -931,7 +1187,7 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       bool has_multiple_overloads = function_exists || (func_def->overloads.size() > 1);
       
       // Print function header
-      if (!function_exists) {
+      /*if (!function_exists) {
         std::cout << "Found function: " << scope_name << "::" << name;
         std::cout << std::endl;
       }
@@ -973,7 +1229,7 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
       if (is_template) {
         std::cout << " [template]";
       }
-      std::cout << std::endl;
+      std::cout << std::endl;*/
     }
     
   } else if (flags & jdi::DEF_TYPED || kind == CXCursor_EnumConstantDecl) {
@@ -1000,6 +1256,65 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
           // Store it as a direct member of the namespace (current scope)
           // The scope is already correct (enigma_user namespace), so we can proceed
           // with storing it directly in the namespace members
+        }
+      }
+    }
+    
+    // Filter out function-local variable declarations
+    // These should not be added to namespace or class scopes as they are only visible within the function
+    // Note: We only filter CXCursor_VarDecl, not CXCursor_FieldDecl (struct/class members)
+    if (kind == CXCursor_VarDecl) {
+      CXCursor parent_cursor = clang_getCursorSemanticParent(cursor);
+      
+      // Check if parent cursor is valid before using it
+      if (clang_Cursor_isNull(parent_cursor)) {
+        // If parent is null, we can't determine if it's function-local, so don't filter it
+        // This is safer than potentially filtering something incorrectly
+      } else {
+        CXCursorKind parent_kind = clang_getCursorKind(parent_cursor);
+        
+        // Check if the variable is declared inside a function body
+        // We check for function declarations, but also need to ensure we're not filtering
+        // variables that are actually struct/class members (which use CXCursor_FieldDecl, not VarDecl)
+        if (parent_kind == CXCursor_FunctionDecl || 
+            parent_kind == CXCursor_CXXMethod || 
+            parent_kind == CXCursor_FunctionTemplate) {
+          // This is a function-local variable (including loop variables), skip it
+          return;
+        }
+        
+        // Also check if parent is a compound statement (function body) to catch cases
+        // where the semantic parent might be different
+        // But be careful: compound statements can also be in other contexts (namespaces, etc.)
+        // So we only filter if we're sure it's in a function context
+        if (parent_kind == CXCursor_CompoundStmt) {
+          // Walk up to find if this compound statement is inside a function
+          CXCursor walk_cursor = parent_cursor;
+          bool is_in_function = false;
+          for (int i = 0; i < 10; ++i) { // Limit depth to avoid infinite loops
+            CXCursor walk_parent = clang_getCursorSemanticParent(walk_cursor);
+            if (clang_Cursor_isNull(walk_parent)) break;
+            
+            CXCursorKind walk_parent_kind = clang_getCursorKind(walk_parent);
+            if (walk_parent_kind == CXCursor_FunctionDecl || 
+                walk_parent_kind == CXCursor_CXXMethod || 
+                walk_parent_kind == CXCursor_FunctionTemplate) {
+              is_in_function = true;
+              break;
+            }
+            if (walk_parent_kind == CXCursor_TranslationUnit || 
+                walk_parent_kind == CXCursor_Namespace ||
+                walk_parent_kind == CXCursor_ClassDecl ||
+                walk_parent_kind == CXCursor_StructDecl) {
+              // Reached a scope boundary, not in a function
+              break;
+            }
+            walk_cursor = walk_parent;
+          }
+          if (is_in_function) {
+            // This variable is in a function body, skip it
+            return;
+          }
         }
       }
     }
@@ -1055,8 +1370,57 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<std::shared_ptr
     }
     
     // Create typed definition
+    // For type aliases and typedefs, ensure they're added to the correct scope
     def = std::make_shared<ClangDefinitionTyped>(name, scope.get(), flags, cursor, nullptr);
-    scope->members[name] = def;
+    
+    // Ensure the name is not empty before adding (should have been checked earlier, but double-check)
+    if (!name.empty()) {
+      // Debug output for string typedefs
+      if (name == "string" && (flags & jdi::DEF_TYPENAME)) {
+        CXSourceLocation location = clang_getCursorLocation(cursor);
+        CXFile file;
+        unsigned line, column, offset;
+        clang_getExpansionLocation(location, &file, &line, &column, &offset);
+        if (file) {
+          CXString filename = clang_getFileName(file);
+          const char* filename_str = clang_getCString(filename);
+          if (filename_str) {
+            std::string scope_name = scope ? scope->name : "unknown";
+            std::string scope_hierarchy = scope_name;
+            if (scope) {
+              ClangDefinitionScope* walk = scope->parent;
+              while (walk) {
+                scope_hierarchy = walk->name + "::" + scope_hierarchy;
+                walk = walk->parent;
+              }
+            }
+          }
+          clang_disposeString(filename);
+        }
+      }
+      scope->members[name] = def;
+      
+      // Handle inline namespaces: if the current scope is an inline namespace,
+      // also add the definition to the parent namespace
+      if (scope && scope->parent && (scope->flags & jdi::DEF_NAMESPACE)) {
+        // Check if current scope is an inline namespace using clang API
+        if (clang_Cursor_isInlineNamespace(scope->cursor)) {
+          // This is an inline namespace - add definition to parent as well
+          if (scope->parent->members.find(name) == scope->parent->members.end()) {
+            // Create a copy of the definition pointing to the parent scope
+            std::shared_ptr<ClangDefinition> parent_def;
+            if (flags & jdi::DEF_TYPENAME) {
+              parent_def = std::make_shared<ClangDefinitionTyped>(
+                name, scope->parent, flags, clang_getNullCursor(), nullptr);
+            } else {
+              parent_def = std::make_shared<ClangDefinition>(
+                name, scope->parent, flags, clang_getNullCursor());
+            }
+            scope->parent->members[name] = parent_def;
+          }
+        }
+      }
+    }
     
   } else {
     // Re-fetch scope before insertion

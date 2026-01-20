@@ -236,7 +236,7 @@ int OptionsParser::HandleArgs()
   return OPTIONS_SUCCESS;
 }
 
-std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
+std::string OptionsParser::APIyaml(const std::string& mode, const buffers::resources::Settings* currentConfig)
 {
   std::string audio = _rawArgs["audio"].as<std::string>();
   std::string platform = _rawArgs["platform"].as<std::string>();
@@ -297,6 +297,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
   yaml += " \n";
   yaml += "target-audio: " + audio + "\n";
+  yaml += "target-mode: " + mode + "\n";
   yaml += "target-windowing: " + platform + "\n";
   yaml += "target-compiler: " + compiler + "\n";
   yaml += "target-graphics: " + graphics + "\n";

@@ -26,6 +26,9 @@
 #include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 #include <languages/lang_CPP.h>
 #include <clang-c/Index.h>
+#include "backend/ideprint.h"
+#include <sstream>
+#include <iomanip>
 
 using namespace jdi;
 
@@ -129,18 +132,12 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
       // For now, allow any number of arguments to avoid false errors
       // TODO: Ensure all functions are registered as ClangDefinitionFunction instances
       // TODO: Consider adding parameter info to base ClangDefinition for functions
-      std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
-                << "' not found as ClangDefinitionFunction, allowing unlimited args" << std::endl;
       return;
     }
   }
   
   bool found_any_overload = false;
   max = 0;  // Reset max - we'll calculate it from overloads
-  
-  std::cerr << "[DEBUG] definition_parameter_bounds: Checking function '" << func_name 
-            << "', overloads.size()=" << cfunc->overloads.size() 
-            << ", template_overloads.size()=" << cfunc->template_overloads.size() << std::endl;
   
   // Iterate all overloads to find min/max parameter counts
   for (const auto& overload_pair : cfunc->overloads) {
@@ -156,16 +153,11 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
       is_variadic = overload->is_variadic;
     } catch (...) {
       // Overload object is corrupted, skip it
-      std::cerr << "[DEBUG] definition_parameter_bounds: Overload access failed (corrupted?), skipping" << std::endl;
       continue;
     }
     
-    std::cerr << "[DEBUG] definition_parameter_bounds: Overload for '" << func_name 
-              << "' has " << param_count << " params, is_variadic=" << is_variadic << std::endl;
     if (is_variadic) {
       max = (unsigned) SIZE_MAX;  // Variadic means unlimited
-      std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
-                << "' is variadic, setting max=unlimited" << std::endl;
       break;  // Once we find variadic, we're done
     } else {
       if (param_count > max) max = param_count;
@@ -212,7 +204,6 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
         // Check parameter name first
         if (param_name.find("varargs") != std::string::npos) {
           has_varargs_param = true;
-          std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter name: '" << param_name << "'" << std::endl;
           break;
         }
         
@@ -221,21 +212,15 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
             dynamic_cast<clang_adapter::ClangDefinitionTyped*>(param);
         if (typed_param && typed_param->type) {
           std::string type_name = typed_param->type->name;
-          if (type_name.find("varargs") != std::string::npos) {
-            has_varargs_param = true;
-            std::cerr << "[DEBUG] definition_parameter_bounds: Found varargs in template parameter type: '" << type_name << "'" << std::endl;
-            break;
-          }
+            if (type_name.find("varargs") != std::string::npos) {
+              has_varargs_param = true;
+              break;
+            }
         }
       }
       
-      std::cerr << "[DEBUG] definition_parameter_bounds: Template overload for '" << func_name 
-                << "' has " << param_count << " params, is_variadic=" << overload->is_variadic 
-                << ", has_varargs_param=" << has_varargs_param << std::endl;
       if (overload->is_variadic || has_varargs_param) {
         max = (unsigned) SIZE_MAX;
-        std::cerr << "[DEBUG] definition_parameter_bounds: Function '" << func_name 
-                  << "' is variadic (template), setting max=unlimited" << std::endl;
         break;  // Once we find variadic, we're done
       } else {
         if (param_count > max) max = param_count;
@@ -246,8 +231,6 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
   // If no overloads found, set max back to unlimited to be safe
   if (!found_any_overload) {
     max = (unsigned) SIZE_MAX;
-    std::cerr << "[DEBUG] definition_parameter_bounds: No overloads found for '" << func_name 
-              << "', setting max=unlimited" << std::endl;
   }
 }
 
