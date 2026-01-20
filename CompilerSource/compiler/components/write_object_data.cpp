@@ -610,7 +610,7 @@ static inline void write_object_timelines(std::ostream &wto, const GameData &/*g
   //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
   if (hasKnownTlines) {
     wto << "    // Dispatch timelines properly for this object..\n";
-    wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
+    wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) override;\n\n";
   }
 }
 
@@ -664,10 +664,22 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
 static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
     string evname = pev.ev_id.TrueFunctionName();
+    string base_fname = pev.ev_id.BaseFunctionName();
+    // Only add override for base events (not parameterized/stacked events like alarm_0, collision_obj_fin)
+    // Base events are those that exist in event_parent and match base class functions
+    bool is_base_event = (base_fname == "gamestart" || base_fname == "roomstart" || 
+                          base_fname == "draw" ||
+                          base_fname == "create" || base_fname == "step" || 
+                          base_fname == "destroy" || base_fname == "gameend" ||
+                          base_fname == "roomend" || base_fname == "closebutton");
+    bool is_subcheck_base = (base_fname == "draw"); // draw_subcheck is a subcheck of draw
+    bool is_stacked = pev.ev_id.IsStacked();
+    bool has_override = is_base_event && !is_stacked;
+    bool has_subcheck_override = is_subcheck_base && !is_stacked;
     if (!pev.ast.empty() || pev.ev_id.HasDefaultCode()) {
-      wto << "    variant myevent_" << evname << "();\n";
+      wto << "    virtual variant myevent_" << evname << "()" << (has_override ? " override" : "") << ";\n";
       if (pev.ev_id.HasSubCheck()) {
-        wto << "    inline bool myevent_" << evname << "_subcheck();\n";
+        wto << "    virtual bool myevent_" << evname << "_subcheck()" << (has_subcheck_override ? " override" : "") << ";\n";
       }
     }
   }
@@ -779,7 +791,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   }
 
   //This is the actual call to remove the current instance from all linked records before destroying it.
-  wto << "\n    void unlink() {\n";
+  wto << "\n    virtual void unlink() override {\n";
   wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
   wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
   wto << "        // If it's not in the deactivated list, then it's active (so deactivate it).\n";
@@ -790,7 +802,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   // Write out the unlink code in a deactivate routine that does not schedule
   // garbage collection of the instance. This is used to implement the
   // `instance_deactivate` family of functions.
-  wto << "    void deactivate() {\n";
+  wto << "    virtual void deactivate() override {\n";
 
   // Unlink ourself. The rootmost parent unlinks the instance list entry.
   // Each object then unlinks its respective object list entry.
@@ -877,7 +889,7 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
   wto << "      enigma::constructor(this);\n";
   wto << "    }\n\n";
 
-  wto << "    void activate()\n    {\n";
+  wto << "    virtual void activate() override\n    {\n";
   if (object->parent) {
       wto << "      OBJ_" << object->parent->name << "::activate();\n";
       // Have to remove the one the parent added so we can add our own
@@ -935,7 +947,7 @@ static void write_object_destructor(std::ostream &wto, parsed_object *object) {
   wto << "    }\n";
 
   //We'll sneak this in here.
-  wto << "    virtual bool can_cast(int obj) const;\n";
+  wto << "    virtual bool can_cast(int obj) const override;\n";
 }
 
 static void write_object_class_body(parsed_object* object, language_adapter *lang, std::ostream &wto, const GameData &game, const CompileState &state) {

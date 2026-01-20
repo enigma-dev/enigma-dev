@@ -200,13 +200,16 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   int max = 0;
   stringstream swb;  // switch body
   wto << "namespace enigma_user {\n"
+         "#pragma clang diagnostic push\n"
+         "#pragma clang diagnostic ignored \"-Wmissing-declarations\"\n"
          "  enum {  // " << kind << " names\n\n";
   for (const T &res : resources) {
     if (res.id() >= max) max = res.id() + 1;
     wto << "    " << res.name << " = " << res.id() << ",\n";
     swb << "      case " << res.id() << ": return \""  << res.name << "\";\n";
   }
-  wto << "  };\n\n";
+  wto << "  };\n"
+         "#pragma clang diagnostic pop\n\n";
   if (gen_names) {
     wto << "  string " << kind << "_get_name(int i) {\n"
            "    switch (i) {\n";

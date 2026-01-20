@@ -1,4 +1,7 @@
 // Mock header for testing - minimal version
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-declarations"
+
 namespace enigma {
   const char *resource_file_path = "";
 }
@@ -42,3 +45,4 @@ namespace enigma_user {
   std::string shader_get_name(int i) { return "<undefined>"; }
 }
 
+#pragma clang diagnostic pop

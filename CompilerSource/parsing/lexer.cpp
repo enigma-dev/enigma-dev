@@ -366,8 +366,11 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
             str_value += '\?';
             break;
           default: 
-            herr->Error(Mark(spos, 1)) << "Unkown escape";
-            return lit;
+            // Unknown escape sequence - treat as literal backslash followed by the character
+            // This handles cases like Windows paths (C:\path) where \p is not a valid escape
+            str_value += '\\';
+            str_value += lit[i];
+            break;
           
         }
       } else {
@@ -519,6 +522,25 @@ Token Lexer::ReadRawToken() {
         return Token(TTM_STRINGIFY, Mark(spos, 1));
       }
       break;
+
+    case '\\': {
+      // Handle backslash - could be line continuation in macros or an error
+      // Check if followed by newline (line continuation in preprocessor)
+      if (pos < code.length()) {
+        if (code[pos] == '\n' || code[pos] == '\r') {
+          // Line continuation - skip the backslash and newline
+          ++pos;
+          if (pos < code.length() && code[pos-1] == '\r' && code[pos] == '\n') {
+            ++pos; // Skip \r\n
+          }
+          return ReadRawToken(); // Continue reading after the line continuation
+        }
+      }
+      // Standalone backslash not followed by newline - skip it silently
+      // This handles cases where backslashes appear in macro values or other contexts
+      // where they shouldn't be (like unquoted Windows paths). Just skip and continue.
+      return ReadRawToken();
+    }
   }
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
