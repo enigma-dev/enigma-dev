@@ -6,7 +6,7 @@
   <depth>0</depth>
   <persistent>0</persistent>
   <maskName>&lt;undefined&gt;</maskName>
-  <parentName>&lt;undefined&gt;</parentName>
+  <parentName>Obj_ENIGMA_text</parentName>
   <events>
     <event enumb="0" eventtype="0">
       <action>
@@ -25,13 +25,10 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>&#13;
-text = "";&#13;
-font = Font_ENIGMA_18;&#13;
-color = c_white;&#13;
+            <string>event_inherited()&#13;
 &#13;
-halign = fa_center;&#13;
-valign = fa_center;</string>
+width = 192&#13;
+pixel_per_char = 10</string>
           </argument>
         </arguments>
       </action>
@@ -53,15 +50,11 @@ valign = fa_center;</string>
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>&#13;
-draw_set_valign(valign);&#13;
-draw_set_halign(halign);&#13;
-draw_set_font(font);&#13;
-draw_set_color(color);&#13;
+            <string>x += (width - pixel_per_char*string_length(text))/2&#13;
 &#13;
+event_inherited() // inherit the parent event , the text is available now&#13;
 &#13;
-draw_text(x, y, text);&#13;
-</string>
+x -= (width - pixel_per_char*string_length(text))/2</string>
           </argument>
         </arguments>
       </action>

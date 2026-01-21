@@ -15,6 +15,7 @@
     <font>fonts\Font_ENIGMA_20</font>
     <font>fonts\Font_ENIGMA_30</font>
     <font>fonts\Font_ENIGMA_50</font>
+    <font>fonts\Font_ENIGMA_18</font>
   </fonts>
   <objects name="objects">
     <object>objects\Obj_Steam</object>
@@ -41,6 +42,7 @@
       <object>objects\Obj_ENIGMA_button</object>
       <object>objects\Obj_ENIGMA_textbox</object>
       <object>objects\Obj_ENIGMA_text</object>
+      <object>objects\Obj_ENIGMA_text_Mid_Anchor</object>
     </objects>
     <objects name="Social">
       <objects name="Achievement">
