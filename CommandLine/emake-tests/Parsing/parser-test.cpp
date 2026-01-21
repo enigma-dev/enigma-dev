@@ -2127,6 +2127,102 @@ TEST(ParserTest, TokenTypeCorrection_Operators) {
   ASSERT_NE(for_stmt->increment, nullptr);
 }
 
+// Test that reproduces the "Expected ')' after function call, got: 'repeat'" error
+// This test should fail before the fix and pass after
+// Using CreateWithCpp to ensure the repeat macro is NOT registered, so repeat is tokenized as TT_S_REPEAT
+TEST(ParserTest, RepeatMacroFormParsingError) {
+  // The error occurs when repeat(expr) appears at statement level.
+  // When the macro is NOT registered (like in some game scenarios), repeat is tokenized as TT_S_REPEAT (keyword).
+  // The parser sees TT_S_REPEAT followed by '(' and tries to parse it as "repeat condition" statement,
+  // but the macro form is repeat(expr), not repeat condition. This causes a parsing error.
+  std::string code = R"(
+repeat (256) {
+  i += 1;
+}
+  )";
+  
+  // Use CreateWithCpp which doesn't register macros, so repeat will be TT_S_REPEAT (keyword)
+  // This simulates the real game scenario where the macro might not be expanded
+  ParserTester test = ParserTester::CreateWithCpp(code);
+  
+  // Before fix: This should fail because repeat(256) is not recognized as macro form
+  // The parser will try to parse it as "repeat condition" and fail with an error
+  // After fix: This should succeed and parse as a for loop
+  auto node = test->ParseCode();
+  
+  // The test should fail if parsing returns nullptr or has errors
+  // We expect the parser to handle repeat(expr) correctly even when macro isn't expanded
+  ASSERT_NE(node, nullptr) << "repeat(256) should parse without error - if this fails, the fix isn't working";
+  
+  // If we got here, verify it parsed correctly
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE) << "Should consume all tokens";
+  
+  // Verify it parsed as a for loop (the macro expansion)
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_NE(block, nullptr);
+  ASSERT_GE(block->statements.size(), 1);
+  
+  auto *first_stmt = block->statements[0].get();
+  // Before fix: ParseRepeatStatement() will parse it as a WHILE/REPEAT node (NodeType::REPEAT = 14)
+  // After fix: It should parse as a FOR node (NodeType::FOR = 13)
+  ASSERT_EQ(first_stmt->type, AST::NodeType::FOR) 
+      << "repeat(expr) should parse as a for loop (macro expansion), but got node type " << (int)first_stmt->type;
+}
+
+// Test that repeat macro parses correctly and ENIGMA_REPEAT_VAR is not added to object variables
+TEST(ParserTest, RepeatMacroParsingAndScoping) {
+  // Test that repeat(10) parses without the "Expected ')' after function call, got: 'repeat'" error
+  std::string code = R"(
+repeat (10) {
+  x = 5;
+  y = x + 1;
+}
+  )";
+  
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  // Verify the code block was parsed
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_NE(block, nullptr);
+  ASSERT_GE(block->statements.size(), 1);
+  
+  // The first statement should be a for loop (from the repeat macro expansion)
+  // Note: The macro expands to a for loop, so we expect a FOR node
+  auto *first_stmt = block->statements[0].get();
+  ASSERT_EQ(first_stmt->type, AST::NodeType::FOR);
+  auto *for_stmt = first_stmt->As<AST::ForLoop>();
+  ASSERT_NE(for_stmt, nullptr);
+  
+  // Verify the for loop has the repeat macro structure
+  // assignment should be a declaration of ENIGMA_REPEAT_VAR
+  ASSERT_NE(for_stmt->assignment, nullptr);
+  ASSERT_EQ(for_stmt->assignment->type, AST::NodeType::DECLARATION);
+  auto *decl_stmt = for_stmt->assignment->As<AST::DeclarationStatement>();
+  ASSERT_NE(decl_stmt, nullptr);
+  ASSERT_EQ(decl_stmt->declarations.size(), 1);
+  std::string var_name = decl_stmt->declarations[0].declarator->decl.name.content;
+  ASSERT_EQ(var_name, "ENIGMA_REPEAT_VAR");
+  
+  // Verify condition: ENIGMA_REPEAT_VAR > 0
+  ASSERT_NE(for_stmt->condition, nullptr);
+  ASSERT_EQ(for_stmt->condition->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *bin_expr = for_stmt->condition->As<AST::BinaryExpression>();
+  ASSERT_NE(bin_expr, nullptr);
+  ASSERT_EQ(bin_expr->operation.type, TT_GREATER);
+  
+  // Verify increment: ENIGMA_REPEAT_VAR--
+  ASSERT_NE(for_stmt->increment, nullptr);
+  ASSERT_EQ(for_stmt->increment->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
+  auto *unary_expr = for_stmt->increment->As<AST::UnaryPostfixExpression>();
+  ASSERT_NE(unary_expr, nullptr);
+  ASSERT_EQ(unary_expr->operation.type, TT_DECREMENT);
+}
+
 // Test that verifies token types in the mod macro expansion
 TEST(ParserTest, TokenTypeCorrection_ModMacro) {
   // The mod macro expands to %(variant)

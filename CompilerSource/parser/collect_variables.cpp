@@ -241,6 +241,12 @@ class DeclGatheringVisitor : public AST::Visitor {
       return;
     }
     
+    // Skip variables that are declared in block scope (for loop init, if-with-init, etc.)
+    // These should not be added to object variables
+    if (Declared(name)) {
+      return;
+    }
+    
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
       return;
@@ -373,6 +379,25 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitIfStatement(AST::IfStatement &node) {
+    // Track variables declared in if condition (C++17 if-with-init syntax)
+    // They should not be added to parsed_scope->locals
+    if (node.condition && node.condition->type == AST::NodeType::DECLARATION) {
+      auto *decl_stmt = node.condition->As<AST::DeclarationStatement>();
+      if (decl_stmt) {
+        // Extract variable names from the declaration and add to decls_ set
+        // This marks them as block-scoped, preventing them from being added to object variables
+        for (const auto &decl : decl_stmt->declarations) {
+          std::string var_name = decl.declarator->decl.name.content;
+          decls_.insert(var_name);
+          // Also add to parsed_scope->declarations so they're recognized as declared
+          if (decl_stmt->def) {
+            parsed_scope->declarations[var_name] = decl_stmt->def;
+          }
+        }
+      }
+    }
+    
+    // Visit condition, true_branch, false_branch - but AddLocal will skip variables in decls_
     AddLocal(node.condition);
     AddLocal(node.true_branch);
     AddLocal(node.false_branch);
@@ -434,6 +459,25 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitForLoop(AST::ForLoop &node) {
+    // Track variables declared in for loop init as block-scoped
+    // They should not be added to parsed_scope->locals
+    if (node.assignment && node.assignment->type == AST::NodeType::DECLARATION) {
+      auto *decl_stmt = node.assignment->As<AST::DeclarationStatement>();
+      if (decl_stmt) {
+        // Extract variable names from the declaration and add to decls_ set
+        // This marks them as block-scoped, preventing them from being added to object variables
+        for (const auto &decl : decl_stmt->declarations) {
+          std::string var_name = decl.declarator->decl.name.content;
+          decls_.insert(var_name);
+          // Also add to parsed_scope->declarations so they're recognized as declared
+          if (decl_stmt->def) {
+            parsed_scope->declarations[var_name] = decl_stmt->def;
+          }
+        }
+      }
+    }
+    
+    // Visit assignment, condition, increment - but AddLocal will skip variables in decls_
     AddLocal(node.assignment);
     AddLocal(node.condition);
     AddLocal(node.increment);

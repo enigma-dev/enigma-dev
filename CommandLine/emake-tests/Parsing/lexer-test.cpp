@@ -178,6 +178,19 @@ TEST(LexerTest, DoubleThenComment) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
+TEST(LexerTest, NotKeywordWithSpace) {
+  // Test that "not" keyword is correctly tokenized when followed by a space
+  // e.g., "not sleeping" should tokenize as "not" (TT_NOT) + "sleeping" (TT_IDENTIFIER)
+  LexerTester lex("not sleeping");
+  Token tok1 = lex->ReadToken();
+  EXPECT_EQ(tok1.type, TT_NOT) << "Expected 'not' keyword, got type " << (int)tok1.type;
+  EXPECT_EQ(tok1.content, "not");
+  Token tok2 = lex->ReadToken();
+  EXPECT_EQ(tok2.type, TT_IDENTIFIER) << "Expected 'sleeping' identifier";
+  EXPECT_EQ(tok2.content, "sleeping");
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
 TEST(LexerTest, HexThenComment) {
   LexerTester lex("{0x1234ABC/**/}", true);
   lex->UseCppOptions();

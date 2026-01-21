@@ -1959,6 +1959,18 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       // If expression parsing failed (returned nullptr), check if we're at the end
       // of arguments (empty argument list) or break if there was an error
       if (expr == nullptr) {
+        // Special case: if we encounter 'repeat' followed by '(', this is a statement
+        // and can't be used as a function argument. Give a helpful error.
+        if (token.type == TT_S_REPEAT) {
+          Token next = lexer->ReadToken();
+          if (next.type == TT_BEGINPARENTH) {
+            herr->Error(token) << "'repeat(expr)' is a statement and cannot be used as a function argument. Did you forget a semicolon before 'repeat'?";
+            break;
+          }
+          // Not repeat(expr) form, let the normal error handling deal with it
+          token = next; // Restore token to what we read
+        }
+        
         // If we're at closing paren, this is an empty argument list - break normally
         // Check both type and content for closing paren
         if (is_end_paren(token)) {
@@ -2443,11 +2455,67 @@ std::unique_ptr<AST::DoLoop> ParseDoLoop() {
   return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }
 
-std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
-  token = lexer->ReadToken();
+AST::PNode ParseRepeatStatement() {
+  Token repeat_token = token; // Store for error reporting
+  token = lexer->ReadToken(); // Consume 'repeat'
+  
+  // Check if this is repeat(expr) macro form
+  if (token.type == TT_BEGINPARENTH) {
+    // Parse repeat(expr) as: for (int ENIGMA_REPEAT_VAR = (expr); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
+    auto expr = TryParseExpression(Precedence::kAll);
+    if (!expr) {
+      herr->Error(repeat_token) << "Expected expression for repeat macro";
+      return nullptr;
+    }
+    
+    auto body = ParseCFStmtBody();
+    
+    // Get int type
+    jdi::definition *int_type = jdi::builtin_type__int;
+    if (!int_type && main_context) {
+      int_type = main_context->get_global()->look_up("int");
+    }
+    if (!int_type) {
+      herr->Error(repeat_token) << "Cannot find 'int' type for repeat macro";
+      return nullptr;
+    }
+    
+    // Build: int ENIGMA_REPEAT_VAR = (expr)
+    FullType int_var_type;
+    int_var_type.def = int_type;
+    int_var_type.decl.name = Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token));
+    int_var_type.decl.name.content = "ENIGMA_REPEAT_VAR";
+    auto paren_expr = std::make_unique<AST::Parenthetical>(std::move(expr));
+    auto init = AST::Initializer::from(std::move(paren_expr));
+    std::vector<AST::DeclarationStatement::Declaration> decls;
+    decls.emplace_back(std::move(int_var_type), std::move(init));
+    auto decl_stmt = std::make_unique<AST::DeclarationStatement>(
+        AST::DeclarationStatement::StorageClass::TEMPORARY, int_type, std::move(decls));
+    
+    // Build: ENIGMA_REPEAT_VAR > 0
+    auto var_id = std::make_unique<AST::IdentifierAccess>(int_type, 
+        Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token)));
+    var_id->name.content = "ENIGMA_REPEAT_VAR";
+    auto zero = std::make_unique<AST::Literal>(Token(TT_DECLITERAL, static_cast<CodeSnippet>(repeat_token)));
+    zero->value.value = (long long)0;
+    zero->value.type = TT_DECLITERAL;
+    auto condition = std::make_unique<AST::BinaryExpression>(
+        std::move(var_id), std::move(zero), AST::Operation(TT_GREATER, ">"));
+    
+    // Build: ENIGMA_REPEAT_VAR--
+    auto var_id2 = std::make_unique<AST::IdentifierAccess>(int_type,
+        Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token)));
+    var_id2->name.content = "ENIGMA_REPEAT_VAR";
+    auto increment = std::make_unique<AST::UnaryPostfixExpression>(
+        std::move(var_id2), AST::Operation(TT_DECREMENT, "--"));
+    
+    return std::make_unique<AST::ForLoop>(
+        std::move(decl_stmt), std::move(condition), std::move(increment), std::move(body));
+  }
+  
+  // Normal repeat condition { body } form
   auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
-
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
 }
 
@@ -2577,9 +2645,17 @@ std::unique_ptr<AST::WithStatement> ParseWithStatement() {
 class SyntaxChecker : public AST::Visitor {
   ErrorHandler *herr;
   const LanguageFrontend * frontend;
+  bool in_conditional_context = false;  // Track if we're in a conditional expression
 
  public:
   SyntaxChecker(ErrorHandler *herr, const LanguageFrontend *fe) : herr(herr), frontend(fe) {}
+  
+  bool VisitCodeBlock(AST::CodeBlock &node) {
+    // Recursively visit all statements in the block
+    node.RecursiveSubVisit(*this);
+    return false;  // Already visited children manually
+  }
+  
   bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
     if (node.function->type == AST::NodeType::IDENTIFIER) {
       auto func = node.function->As<AST::IdentifierAccess>();
@@ -2670,33 +2746,34 @@ class SyntaxChecker : public AST::Visitor {
     return false;
   }
 
-  bool VisitIfStatement(AST::IfStatement &node) {
-    if (node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
-      if (node.condition->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
-        node.condition->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
-        node.condition->As<AST::BinaryExpression>()->operation.token = "==";
-      }
-    } else if (node.condition->type == AST::NodeType::PARENTHETICAL) {
-      auto paren = node.condition->As<AST::Parenthetical>();
-      if (paren->expression->type == AST::NodeType::BINARY_EXPRESSION) {
-        if (paren->expression->As<AST::BinaryExpression>()->operation.type == TT_EQUALS) {
-          paren->expression->As<AST::BinaryExpression>()->operation.type = TT_EQUALTO;
-          paren->expression->As<AST::BinaryExpression>()->operation.token = "==";
-        }
-      }
-    }
-    node.RecursiveSubVisit(*this);
-    return false;
-  }
-
-  bool VisitCodeBlock(AST::CodeBlock &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
-  }
-
   bool VisitBinaryExpression(AST::BinaryExpression &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Convert = to == in binary expressions within control flow conditions
+    // This handles GameMaker-style = in conditionals (should be ==)
+    if (in_conditional_context && node.operation.type == TT_EQUALS) {
+      node.operation.type = TT_EQUALTO;
+      node.operation.token = "==";
+    }
+    // Return true to allow RecursiveSubVisit to be called automatically,
+    // which will visit nested BinaryExpressions recursively
+    return true;
+  }
+
+  bool VisitIfStatement(AST::IfStatement &node) {
+    // Visit condition in conditional context - use RecurusiveVisit to visit nested expressions
+    if (node.condition) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.condition->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    // Visit branches (not in conditional context)
+    if (node.true_branch) {
+      node.true_branch->RecurusiveVisit(*this);
+    }
+    if (node.false_branch) {
+      node.false_branch->RecurusiveVisit(*this);
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
@@ -2710,8 +2787,21 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitTernaryExpression(AST::TernaryExpression &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Visit condition in conditional context
+    if (node.condition) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.condition->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    // Visit expressions normally
+    if (node.true_expression) {
+      node.true_expression->RecurusiveVisit(*this);
+    }
+    if (node.false_expression) {
+      node.false_expression->RecurusiveVisit(*this);
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitLambdaExpression(AST::LambdaExpression &node) {
@@ -2755,18 +2845,51 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitForLoop(AST::ForLoop &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Visit assignment, increment normally; condition in conditional context
+    if (node.assignment) {
+      node.assignment->RecurusiveVisit(*this);
+    }
+    if (node.condition) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.condition->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    if (node.increment) {
+      node.increment->RecurusiveVisit(*this);
+    }
+    if (node.body) {
+      node.body->RecurusiveVisit(*this);
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitWhileLoop(AST::WhileLoop &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Visit condition in conditional context, body normally
+    if (node.condition) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.condition->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    if (node.body) {
+      node.body->RecurusiveVisit(*this);
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitDoLoop(AST::DoLoop &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Visit condition in conditional context, body normally
+    if (node.body) {
+      node.body->RecurusiveVisit(*this);
+    }
+    if (node.condition) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.condition->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitCaseStatement(AST::CaseStatement &node) {
@@ -2780,8 +2903,18 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitSwitchStatement(AST::SwitchStatement &node) {
-    node.RecursiveSubVisit(*this);
-    return false;
+    // Visit expression in conditional context (switch expressions are condition-like)
+    if (node.expression) {
+      bool saved_context = in_conditional_context;
+      in_conditional_context = true;
+      node.expression->RecurusiveVisit(*this);
+      in_conditional_context = saved_context;
+    }
+    // Visit body normally
+    if (node.body) {
+      node.body->RecurusiveVisit(*this);
+    }
+    return false;  // Don't call RecursiveSubVisit to avoid double-visiting
   }
 
   bool VisitReturnStatement(AST::ReturnStatement &node) {

@@ -151,10 +151,13 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
     return true;
   }
   enigma::parsing::TokenType type = node.value.type;
+  // In GameMaker, all strings use double quotes, even single-character strings
+  // Convert char literals to string literals for consistency
   if (type == TT_CHARLIT && value.size() > 1) {
     type = TT_STRINGLIT;
   }
-  print(type == TT_CHARLIT ? "'" : "\"");
+  // Always use double quotes for strings (GameMaker convention)
+  print("\"");
   std::string to_print;
   for (char c : value) {
     if (c == '\\') {
@@ -184,7 +187,7 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
     }
   }
   print(to_print);
-  print(type == TT_CHARLIT ? "'" : "\"");
+  print("\"");  // Always use double quotes for strings
 
   return true;
 }
@@ -206,6 +209,12 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
   print(node.operation.token);
+  // Add space after keyword operators like "not", "and", "or", etc. for readability
+  if (node.operation.type == TT_NOT || node.operation.type == TT_AND || 
+      node.operation.type == TT_OR || node.operation.type == TT_XOR ||
+      node.operation.type == TT_DIV || node.operation.type == TT_MOD) {
+    print(" ");
+  }
   if (node.operation.type == TT_STAR && node.operand->type != AST::NodeType::PARENTHETICAL) {
     print("(");
   }
@@ -893,6 +902,106 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
+  // Check if this for loop matches the repeat macro pattern:
+  // for (int ENIGMA_REPEAT_VAR = (x); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
+  bool is_repeat_pattern = false;
+  AST::PNode* repeat_expr_ptr = nullptr;  // Pointer to the PNode, not the Node itself
+
+  if (node.assignment && node.assignment->type == AST::NodeType::DECLARATION) {
+    auto *decl_stmt = node.assignment->As<AST::DeclarationStatement>();
+    if (decl_stmt && decl_stmt->declarations.size() == 1) {
+      const auto &decl = decl_stmt->declarations[0];
+      std::string var_name = decl.declarator->decl.name.content;
+      
+      // Check if it's ENIGMA_REPEAT_VAR of type int
+      if (var_name == "ENIGMA_REPEAT_VAR" && decl.declarator->def && 
+          decl.declarator->def->name == "int") {
+        // Check condition: ENIGMA_REPEAT_VAR > 0
+        if (node.condition && node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
+          auto *bin_expr = node.condition->As<AST::BinaryExpression>();
+          if (bin_expr && bin_expr->operation.type == TT_GREATER) {
+            // Check left side is ENIGMA_REPEAT_VAR
+            if (bin_expr->left && bin_expr->left->type == AST::NodeType::IDENTIFIER) {
+              auto *left_id = bin_expr->left->As<AST::IdentifierAccess>();
+              if (left_id && left_id->name.content == "ENIGMA_REPEAT_VAR") {
+                // Check right side is 0
+                if (bin_expr->right && bin_expr->right->type == AST::NodeType::LITERAL) {
+                  auto *right_lit = bin_expr->right->As<AST::Literal>();
+                  // Check if it's a numeric literal with value 0
+                  bool is_zero = false;
+                  if (right_lit && (right_lit->value.type == TT_DECLITERAL || 
+                                    right_lit->value.type == TT_BINLITERAL || 
+                                    right_lit->value.type == TT_OCTLITERAL || 
+                                    right_lit->value.type == TT_HEXLITERAL)) {
+                    // Check if the value is 0
+                    try {
+                      if (std::holds_alternative<long long>(right_lit->value.value)) {
+                        is_zero = (std::get<long long>(right_lit->value.value) == 0);
+                      } else if (std::holds_alternative<std::string>(right_lit->value.value)) {
+                        std::string str_val = std::get<std::string>(right_lit->value.value);
+                        is_zero = (str_val == "0");
+                      }
+                    } catch (...) {
+                      is_zero = false;
+                    }
+                  }
+                  if (is_zero) {
+                    // Check increment: ENIGMA_REPEAT_VAR--
+                    if (node.increment && node.increment->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
+                      auto *unary_expr = node.increment->As<AST::UnaryPostfixExpression>();
+                      if (unary_expr && unary_expr->operation.type == TT_DECREMENT) {
+                        if (unary_expr->operand && unary_expr->operand->type == AST::NodeType::IDENTIFIER) {
+                          auto *incr_id = unary_expr->operand->As<AST::IdentifierAccess>();
+                          if (incr_id && incr_id->name.content == "ENIGMA_REPEAT_VAR") {
+                            // Pattern matches! Extract the initializer expression
+                            if (decl.init) {
+                              // The initializer might be wrapped in parentheses from the macro
+                              // We need to extract the actual expression
+                              if (decl.init->kind == AST::Initializer::Kind::ASSIGN_EXPR) {
+                                auto &init_node = std::get<AST::AssignmentInitNode>(decl.init->initializer);
+                                if (init_node->kind == AST::AssignmentInitializer::Kind::EXPR) {
+                                  auto &expr = std::get<AST::PNode>(init_node->initializer);
+                                  // Extract the actual expression, unwrapping parentheses if present
+                                  if (expr && expr->type == AST::NodeType::PARENTHETICAL) {
+                                    repeat_expr_ptr = &expr->As<AST::Parenthetical>()->expression;
+                                  } else {
+                                    repeat_expr_ptr = &expr;
+                                  }
+                                  is_repeat_pattern = true;
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (is_repeat_pattern && repeat_expr_ptr) {
+    // Output as repeat(expr) instead of the full for loop
+    print("repeat(");
+    VISIT_AND_CHECK(*repeat_expr_ptr);
+    print(") ");
+    
+    if (node.body) {
+      VISIT_AND_CHECK(node.body);
+      PrintSemiColon(node.body);
+    } else {
+      print(";");
+    }
+    print(" ");
+    return true;
+  }
+
+  // Normal for loop output
   print("for(");
 
   VISIT_AND_CHECK(node.assignment);

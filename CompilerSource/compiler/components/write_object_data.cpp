@@ -397,6 +397,12 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
       continue;
     }
     
+    // Skip block-scoped variables from for loop init and if-with-init (like ENIGMA_REPEAT_VAR)
+    // These should never be declared as object variables
+    if (ii->first == "ENIGMA_REPEAT_VAR") {
+      continue;
+    }
+    
     // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
     // Use is_enigma_user_constant() which directly checks enigma_user namespace
     lang_CPP* lang_cpp = dynamic_cast<lang_CPP*>(lang);
@@ -1105,6 +1111,13 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       comma = ", ";
     }
     wto << ")\n{\n";
+    // Create argument array for GameMaker-style argument[0], argument[1], etc.
+    wto << "  variant argument[16] = {";
+    for (int argn = 0; argn < 16; argn++) {
+      if (argn > 0) wto << ", ";
+      wto << "argument" << argn;
+    }
+    wto << "};\n";
     if (mode == emode_debug) {
       wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
@@ -1233,7 +1246,15 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
         comma = ", ";
       }
 
-      wto << ")\n{\n  ";
+      wto << ")\n{\n";
+      // Create argument array for GameMaker-style argument[0], argument[1], etc.
+      wto << "  variant argument[16] = {";
+      for (int argn = 0; argn < 16; argn++) {
+        if (argn > 0) wto << ", ";
+        wto << "argument" << argn;
+      }
+      wto << "};\n";
+      wto << "  ";
       // Write AST to a string and write to stream
       string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true);
       wto << ast_code;

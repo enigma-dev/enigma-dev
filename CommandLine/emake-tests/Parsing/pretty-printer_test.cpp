@@ -1425,3 +1425,24 @@ TEST(PrinterTest, test73) {
 
   ASSERT_TRUE(compare(code, printed));
 }
+
+TEST(PrinterTest, NotKeywordWithSpace) {
+  // Test that "not" keyword is printed with a space after it
+  // e.g., "not sleeping" should be printed as "not sleeping" (not "notsleeping")
+  std::string code = "if(not sleeping){}";
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
+
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+
+  AST::CppPrettyPrinter v(test.lexer.GetContext().language_fe);
+  ASSERT_TRUE(v.VisitCode(*block));
+  std::string printed = v.GetPrintedCode();
+
+  // Verify that "not" is followed by a space
+  size_t not_pos = printed.find("not");
+  ASSERT_NE(not_pos, std::string::npos) << "Printed code should contain 'not'";
+  ASSERT_LT(not_pos + 3, printed.length()) << "Printed code should have characters after 'not'";
+  ASSERT_EQ(printed[not_pos + 3], ' ') << "Printed code should have a space after 'not', but got: '" << printed.substr(not_pos, 10) << "'";
+}
