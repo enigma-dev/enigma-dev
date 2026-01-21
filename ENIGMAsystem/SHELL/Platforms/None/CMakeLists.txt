@@ -1,0 +1,19 @@
+set(NONE_PLATFORM_LIB "none_platform_lib")
+set(NONE_PLATFORM_LIB_DESCRIPTION "None Plaform")
+
+project(${NONE_PLATFORM_LIB} DESCRIPTION ${NONE_PLATFORM_LIB_DESCRIPTION})
+
+if (OS MATCHES LINUX-PLATFORM)
+    file(GLOB_RECURSE NONE_PLATFORM_LIB_SOURCES 
+        ../General/POSIX/Linux/*.cpp)
+elseif(OS MATCHES FREEBSD-PLATFORM) 
+    file(GLOB_RECURSE NONE_PLATFORM_LIB_SOURCES 
+        ../General/POSIX/BSD/*.cpp)
+endif()
+
+file(GLOB_RECURSE NONE_PLATFORM_LIB_SOURCES 
+    *.cpp 
+    ../General/POSIX/*.cpp
+    ../General/PFshell/PFshell.cpp)
+
+add_library(${NONE_PLATFORM_LIB} ${NONE_PLATFORM_LIB_SOURCES})

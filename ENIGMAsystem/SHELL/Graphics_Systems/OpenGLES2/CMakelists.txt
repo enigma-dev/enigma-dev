@@ -1,0 +1,13 @@
+set(OPENGLES2_GRAPHICS_SYS_LIB "opengles2_graphics_sys_lib")
+set(OPENGLES2_GRAPHICS_SYS_LIB_DESCRIPTION "OpenGLES2 Graphics System")
+
+project(${OPENGLES2_GRAPHICS_SYS_LIB} DESCRIPTION ${OPENGLES2_GRAPHICS_SYS_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE OPENGLES2_GRAPHICS_SYS_LIB_SOURCES 
+    *.cpp
+    ../OpenGLES2/wrappers/*.cpp
+    $(ENIGMA_ROOT)/android/external/gles2/src/gles2.c)
+
+# todo: review makefile again
+
+add_library(${OPENGLES2_GRAPHICS_SYS_LIB} ${OPENGLES2_GRAPHICS_SYS_LIB_SOURCES})

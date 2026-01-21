@@ -1,0 +1,13 @@
+set(OPENAL_AUDIO_SYS_LIB "openal_audio_sys_lib")
+set(OPENAL_AUDIO_SYS_LIB_DESCRIPTION "OpenAL Audio System")
+
+project(${OPENAL_AUDIO_SYS_LIB} DESCRIPTION ${OPENAL_AUDIO_SYS_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE OPENAL_AUDIO_SYS_LIB_SOURCES 
+    *.cpp)
+
+# todo: check makefile
+
+#message("Audio_Systems/OpenAL Sources: ${OPENAL_AUDIO_SYS_LIB_SOURCES}")
+
+add_library(${OPENAL_AUDIO_SYS_LIB} ${OPENAL_AUDIO_SYS_LIB_SOURCES})

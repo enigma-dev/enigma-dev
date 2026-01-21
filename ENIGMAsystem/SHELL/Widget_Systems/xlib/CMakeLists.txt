@@ -1,0 +1,12 @@
+set(WIDGETS_SYS_XLIB_LIB "widgets_sys_xlib_lib")
+set(WIDGETS_SYS_XLIB_LIB_DESCRIPTION "Universal System XLib")
+
+project(${WIDGETS_SYS_XLIB_LIB} DESCRIPTION ${WIDGETS_SYS_XLIB_LIB_DESCRIPTION})
+
+file(GLOB_RECURSE WIDGETS_SYS_XLIB_LIB_SOURCES 
+    *.cpp
+    ../General/WSdialogs.cpp)
+
+add_library(${WIDGETS_SYS_XLIB_LIB} ${WIDGETS_SYS_XLIB_LIB_SOURCES})
+
+target_include_directories(${WIDGETS_SYS_XLIB_LIB} PUBLIC ${CMAKE_SOURCE_DIR}/../${GENERAL})
