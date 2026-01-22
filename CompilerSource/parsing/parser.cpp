@@ -4,6 +4,10 @@
 #include <iostream>
 
 namespace enigma::parsing {
+// Forward declarations
+class SyntaxChecker;
+void RunSyntaxChecker(AST::Node *node, ErrorHandler *herr, const LanguageFrontend *fe);
+
 class AstBuilder: public AstBuilderTestAPI {
 public:
 
@@ -1959,18 +1963,6 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
       // If expression parsing failed (returned nullptr), check if we're at the end
       // of arguments (empty argument list) or break if there was an error
       if (expr == nullptr) {
-        // Special case: if we encounter 'repeat' followed by '(', this is a statement
-        // and can't be used as a function argument. Give a helpful error.
-        if (token.type == TT_S_REPEAT) {
-          Token next = lexer->ReadToken();
-          if (next.type == TT_BEGINPARENTH) {
-            herr->Error(token) << "'repeat(expr)' is a statement and cannot be used as a function argument. Did you forget a semicolon before 'repeat'?";
-            break;
-          }
-          // Not repeat(expr) form, let the normal error handling deal with it
-          token = next; // Restore token to what we read
-        }
-        
         // If we're at closing paren, this is an empty argument list - break normally
         // Check both type and content for closing paren
         if (is_end_paren(token)) {
@@ -2046,14 +2038,76 @@ std::unique_ptr<AST::Node> TryParseControlExpression(SyntaxMode mode_) {
                        << " unknown to system";
   }
 
+  bool had_opening_paren = false;
+  Token opening_paren_token;
   if (mode_ == SyntaxMode::STRICT) {
     require_token(TT_BEGINPARENTH, "Expected '(' before control expression");
+    had_opening_paren = true;
+    opening_paren_token = token;
+    token = lexer->ReadToken();
+  } else if (token.type == TT_BEGINPARENTH) {
+    // In non-strict mode, don't consume the '(' - let TryParseExpression handle it
+    // This allows expressions like (x * 2)> s(12) to parse correctly
+    had_opening_paren = true;
+    opening_paren_token = token;
+    // Don't consume it - let TryParseExpression see it and parse the full expression
   }
 
   auto expr = TryParseExpression(Precedence::kAll);
 
   if (mode_ == SyntaxMode::STRICT) {
     require_token(TT_ENDPARENTH, "Expected ')' after control expression");
+    // In strict mode, wrap the expression in a Parenthetical node
+    return std::make_unique<AST::Parenthetical>(std::move(expr));
+  } else if (had_opening_paren && token.type == TT_ENDPARENTH) {
+    // In non-strict mode, we didn't consume the opening '(', so TryParseExpression
+    // should have parsed the full expression including any binary operators.
+    // If we see a ')' here, it means TryParseExpression stopped at a ')' that was
+    // part of the expression (like the ')' in (x * 2)), not an outer wrapper.
+    // Check the next token to see if the expression continues
+    token = lexer->ReadToken();
+    
+    // Check if the next token suggests the expression continues (binary operator, etc.)
+    // If so, the '(' was part of the expression, not an outer wrapper
+    bool expression_continues = (token.type == TT_PLUS || token.type == TT_MINUS || 
+                                token.type == TT_STAR || token.type == TT_SLASH ||
+                                token.type == TT_PERCENT || token.type == TT_EQUALTO ||
+                                token.type == TT_NOTEQUAL || token.type == TT_LESS ||
+                                token.type == TT_GREATER || token.type == TT_LESSEQUAL ||
+                                token.type == TT_GREATEREQUAL || token.type == TT_AND ||
+                                token.type == TT_OR || token.type == TT_XOR ||
+                                token.type == TT_DOT || token.type == TT_ARROW ||
+                                token.type == TT_BEGINBRACKET || token.type == TT_BEGINPARENTH ||
+                                token.type == TT_IDENTIFIER || token.type == TT_DECLITERAL ||
+                                token.type == TT_STRINGLIT || token.type == TT_CHARLIT ||
+                                token.type == TT_BOOLLITERAL || token.type == TT_HEXLITERAL ||
+                                token.type == TT_BINLITERAL || token.type == TT_OCTLITERAL);
+    
+    if (expression_continues) {
+      // The expression continues - the '(' was part of the expression, not an outer wrapper
+      // We've already consumed the ')' and the next token (the operator)
+      // We need to continue parsing to build the complete binary expression
+      // Check if the current token is a binary operator
+      if (token.type == TT_GREATER || token.type == TT_LESS || token.type == TT_EQUALTO ||
+          token.type == TT_NOTEQUAL || token.type == TT_LESSEQUAL || token.type == TT_GREATEREQUAL ||
+          token.type == TT_PLUS || token.type == TT_MINUS || token.type == TT_STAR ||
+          token.type == TT_SLASH || token.type == TT_PERCENT || token.type == TT_AND ||
+          token.type == TT_OR || token.type == TT_XOR) {
+        // We have a binary operator - parse the right side and create a binary expression
+        Token op_token = token;
+        token = lexer->ReadToken();
+        auto right_expr = TryParseExpression(Precedence::kAll);
+        if (right_expr) {
+          AST::Operation op(op_token.type, std::string(op_token.content));
+          return std::make_unique<AST::BinaryExpression>(std::move(expr), std::move(right_expr), op);
+        }
+      }
+      // If it's not a binary operator or parsing failed, just return the expression as-is
+      return expr;
+    }
+    
+    // The ')' ends the expression - these are outer parentheses, wrap it
+    return std::make_unique<AST::Parenthetical>(std::move(expr));
   }
 
   return expr;
@@ -2080,7 +2134,19 @@ std::unique_ptr<AST::Node> TryParseDeclOrTypeExpression() {
 std::unique_ptr<AST::Node> TryParseStatement() {
   auto decl_node = TryParseDeclOrTypeExpression();
   if (decl_node != nullptr) {
-    MaybeConsumeSemicolon();
+    // In automatic mode, semicolon is optional and will be handled in ParseCode
+    // In strict mode, semicolon is required
+    bool strict_syntax = frontend ? frontend->compatibility_opts().strict_syntax : true;
+    if (strict_syntax) {
+      // Strict mode: require semicolon
+      if (!require_token(TT_SEMICOLON, "Expected semicolon (';') after declaration")) {
+        // Missing semicolon - return what we have
+        return decl_node;
+      }
+    } else {
+      // Automatic mode: consume semicolon if present, but don't require it
+      MaybeConsumeSemicolon();
+    }
     return decl_node;
   }
   switch (token.type) {
@@ -2241,32 +2307,126 @@ std::unique_ptr<AST::Node> TryParseStatement() {
 }
 
 // Parse control flow statement body
-std::unique_ptr<AST::Node> ParseCFStmtBody() { return ParseStatementOrBlock(); }
+std::unique_ptr<AST::Node> ParseCFStmtBody() { 
+  std::cerr << "[DEBUG] ParseCFStmtBody: token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
+  return ParseStatementOrBlock(); 
+}
 
 bool next_is_decl_specifier() {
   return is_decl_specifier(token);
 }
 
 std::unique_ptr<AST::Node> ParseStatementOrBlock() {
+  std::cerr << "[DEBUG] ParseStatementOrBlock: token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type == TT_BEGINBRACE) {
+    std::cerr << "[DEBUG] ParseStatementOrBlock: Parsing code block" << std::endl;
     return ParseCodeBlock();
   } else {
-    return TryParseStatement();
+    std::cerr << "[DEBUG] ParseStatementOrBlock: Calling TryParseStatement()" << std::endl;
+    auto result = TryParseStatement();
+    std::cerr << "[DEBUG] ParseStatementOrBlock: TryParseStatement() returned " << (result ? "non-null" : "null") << std::endl;
+    return result;
   }
 }
 
 std::unique_ptr<AST::CodeBlock> ParseCode() {
   std::vector<std::unique_ptr<AST::Node>> statements{};
+  bool strict_syntax = frontend ? frontend->compatibility_opts().strict_syntax : true;
 
   while (token.type != TT_ENDBRACE && token.type != TT_ENDOFCODE) {
     auto stmt = ParseStatementOrBlock();
     if (stmt) {
+      // Validate before move
+      AST::Node* raw_ptr_before = stmt.get();
+      size_t index_before = statements.size();
+      
+      std::cerr << "[DEBUG] ParseCode: About to emplace_back, stmt.get()=" << (void*)stmt.get() 
+                << ", statements.size()=" << statements.size() 
+                << ", &statements=" << (void*)&statements << std::endl;
       statements.emplace_back(std::move(stmt));
+      std::cerr << "[DEBUG] ParseCode: After emplace_back, statements[" << index_before << "]=" 
+                << (void*)statements[index_before].get() 
+                << ", statements.size()=" << statements.size() << std::endl;
+      
+      // Validate after move: moved stmt should be null, new entry should have valid pointer
+#ifdef AST_DEBUG_TRACKING
+      if (stmt) {
+        std::cerr << "[AST_DEBUG] WARNING: Statement at index " << index_before 
+                  << " was not properly moved (still non-null after move)!" << std::endl;
+      }
+      if (statements.back() && statements.back().get() != raw_ptr_before) {
+        std::cerr << "[AST_DEBUG] WARNING: Statement pointer changed during move at index " 
+                  << index_before << "!" << std::endl;
+      }
+      if (!statements.back()) {
+        std::cerr << "[AST_DEBUG] ERROR: Statement at index " << index_before 
+                  << " is null after emplace_back!" << std::endl;
+      } else {
+        std::cerr << "[AST_DEBUG] Added statement at index " << index_before 
+                  << " type=" << (int)statements.back()->type << std::endl;
+      }
+#endif
+      
+      // Handle semicolon consumption/insertion
+      if (strict_syntax) {
+        // Strict mode: require semicolon - if missing, report error and stop parsing
+        if (token.type != TT_SEMICOLON) {
+          herr->Error(token) << "Expected semicolon (';') after statement";
+          // Stop parsing more statements after reporting the error
+          break;
+        }
+        token = lexer->ReadToken();
+      } else {
+        // Automatic mode: consume semicolon if present, otherwise continue
+        // (automatic semicolon insertion - just continue parsing)
+        MaybeConsumeSemicolon();
+      }
     }
     // If stmt is null, it means we hit an error or end of block - continue parsing
   }
 
-  return std::make_unique<AST::CodeBlock>(std::move(statements));
+  std::cerr << "[DEBUG] ParseCode: About to create CodeBlock, statements.size()=" << statements.size() 
+            << ", &statements=" << (void*)&statements << std::endl;
+  for (size_t i = 0; i < statements.size(); ++i) {
+    std::cerr << "[DEBUG] ParseCode: statements[" << i << "]=" << (void*)statements[i].get() 
+              << ", &statements[" << i << "]=" << (void*)&statements[i] << std::endl;
+  }
+  
+  auto block = std::make_unique<AST::CodeBlock>(std::move(statements));
+  std::cerr << "[DEBUG] ParseCode: Created CodeBlock, block.get()=" << (void*)block.get() 
+            << ", block->statements.size()=" << block->statements.size() 
+            << ", &block->statements=" << (void*)&block->statements << std::endl;
+  
+  // ASAN: Check if block is poisoned
+  #ifdef __has_feature
+  #if __has_feature(address_sanitizer)
+  if (__asan_address_is_poisoned(block.get())) {
+    std::cerr << "[DEBUG] ParseCode: ERROR - block is ASAN poisoned!" << std::endl;
+  }
+  if (__asan_address_is_poisoned(&block->statements)) {
+    std::cerr << "[DEBUG] ParseCode: ERROR - block->statements is ASAN poisoned!" << std::endl;
+  }
+  #endif
+  #endif
+  
+  for (size_t i = 0; i < block->statements.size(); ++i) {
+    std::cerr << "[DEBUG] ParseCode: block->statements[" << i << "]=" << (void*)block->statements[i].get() 
+              << ", &block->statements[" << i << "]=" << (void*)&block->statements[i] << std::endl;
+  }
+  
+  std::cerr << "[DEBUG] ParseCode: About to return, block.get()=" << (void*)block.get() << std::endl;
+  
+  // Run syntax checker to apply compatibility transformations (e.g., = to == in conditionals)
+  // Note: We'll call a helper function defined after SyntaxChecker
+  const LanguageFrontend *fe = lexer->GetContext().language_fe;
+  if (fe) {
+    RunSyntaxChecker(block.get(), herr, fe);
+  }
+  
+  auto result = std::move(block);
+  std::cerr << "[DEBUG] ParseCode: After move, result.get()=" << (void*)result.get() 
+            << ", result->statements.size()=" << result->statements.size() << std::endl;
+  return result;
 }
 
 std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
@@ -2289,6 +2449,7 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 
   auto condition = TryParseControlExpression(mode);
+  std::cerr << "[DEBUG] ParseIfStatement: After TryParseControlExpression, token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type == TT_S_THEN) {
     if (mode == SyntaxMode::STRICT) {
       herr->Warning(token) << "Use of `then` keyword in if statement";
@@ -2297,8 +2458,10 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 
   AST::PNode true_branch = nullptr;
+  std::cerr << "[DEBUG] ParseIfStatement: Before ParseCFStmtBody, token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type != TT_SEMICOLON) {
     true_branch = ParseCFStmtBody();
+    std::cerr << "[DEBUG] ParseIfStatement: After ParseCFStmtBody, true_branch.get()=" << (void*)true_branch.get() << std::endl;
   } else {
     token = lexer->ReadToken();
   }
@@ -2402,12 +2565,22 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     is_conventional = false;
     token = lexer->ReadToken();
   }
-  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
+  // Consume semicolon after initializer (init may be empty, indicated by semicolon)
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+  
+  // Parse condition: if semicolon immediately follows, condition is empty
   if (token.type != TT_SEMICOLON) {
     cond = TryParseControlExpression(SyntaxMode::GML);
   }
-  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
-  if (token.type != TT_SEMICOLON) {
+  // Consume semicolon after condition
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  }
+  
+  // Parse increment: if closing paren immediately follows, increment is empty
+  if (token.type != TT_ENDPARENTH && token.type != TT_ENDOFCODE) {
     incr = TryParseExpression(Precedence::kAll);
   }
 
@@ -2455,67 +2628,11 @@ std::unique_ptr<AST::DoLoop> ParseDoLoop() {
   return std::make_unique<AST::DoLoop>(std::move(body), std::move(condition), kind.type == TT_S_UNTIL);
 }
 
-AST::PNode ParseRepeatStatement() {
-  Token repeat_token = token; // Store for error reporting
-  token = lexer->ReadToken(); // Consume 'repeat'
-  
-  // Check if this is repeat(expr) macro form
-  if (token.type == TT_BEGINPARENTH) {
-    // Parse repeat(expr) as: for (int ENIGMA_REPEAT_VAR = (expr); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
-    auto expr = TryParseExpression(Precedence::kAll);
-    if (!expr) {
-      herr->Error(repeat_token) << "Expected expression for repeat macro";
-      return nullptr;
-    }
-    
-    auto body = ParseCFStmtBody();
-    
-    // Get int type
-    jdi::definition *int_type = jdi::builtin_type__int;
-    if (!int_type && main_context) {
-      int_type = main_context->get_global()->look_up("int");
-    }
-    if (!int_type) {
-      herr->Error(repeat_token) << "Cannot find 'int' type for repeat macro";
-      return nullptr;
-    }
-    
-    // Build: int ENIGMA_REPEAT_VAR = (expr)
-    FullType int_var_type;
-    int_var_type.def = int_type;
-    int_var_type.decl.name = Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token));
-    int_var_type.decl.name.content = "ENIGMA_REPEAT_VAR";
-    auto paren_expr = std::make_unique<AST::Parenthetical>(std::move(expr));
-    auto init = AST::Initializer::from(std::move(paren_expr));
-    std::vector<AST::DeclarationStatement::Declaration> decls;
-    decls.emplace_back(std::move(int_var_type), std::move(init));
-    auto decl_stmt = std::make_unique<AST::DeclarationStatement>(
-        AST::DeclarationStatement::StorageClass::TEMPORARY, int_type, std::move(decls));
-    
-    // Build: ENIGMA_REPEAT_VAR > 0
-    auto var_id = std::make_unique<AST::IdentifierAccess>(int_type, 
-        Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token)));
-    var_id->name.content = "ENIGMA_REPEAT_VAR";
-    auto zero = std::make_unique<AST::Literal>(Token(TT_DECLITERAL, static_cast<CodeSnippet>(repeat_token)));
-    zero->value.value = (long long)0;
-    zero->value.type = TT_DECLITERAL;
-    auto condition = std::make_unique<AST::BinaryExpression>(
-        std::move(var_id), std::move(zero), AST::Operation(TT_GREATER, ">"));
-    
-    // Build: ENIGMA_REPEAT_VAR--
-    auto var_id2 = std::make_unique<AST::IdentifierAccess>(int_type,
-        Token(TT_IDENTIFIER, static_cast<CodeSnippet>(repeat_token)));
-    var_id2->name.content = "ENIGMA_REPEAT_VAR";
-    auto increment = std::make_unique<AST::UnaryPostfixExpression>(
-        std::move(var_id2), AST::Operation(TT_DECREMENT, "--"));
-    
-    return std::make_unique<AST::ForLoop>(
-        std::move(decl_stmt), std::move(condition), std::move(increment), std::move(body));
-  }
-  
-  // Normal repeat condition { body } form
+std::unique_ptr<AST::WhileLoop> ParseRepeatStatement() {
+  token = lexer->ReadToken();
   auto condition = TryParseControlExpression(mode);
   auto body = ParseCFStmtBody();
+
   return std::make_unique<AST::WhileLoop>(std::move(condition), std::move(body), AST::WhileLoop::Kind::REPEAT);
 }
 
@@ -2666,20 +2783,25 @@ class SyntaxChecker : public AST::Visitor {
         node.RecursiveSubVisit(*this);
         return false;
       }
-      unsigned int min = 0;
-      unsigned int max = 0;
-      frontend->definition_parameter_bounds(def, min, max);
-      Token tok;
-      tok.content = func->name.content;
-      tok.type = TT_IDENTIFIER;
-      if (max != unsigned(-1)) {
-        if (node.arguments.size() < min) {
-          std::cerr << "[ERROR] SyntaxChecker: Too few arguments for '" << func->name.content << "'" << std::endl;
-          herr->Error(tok) << "Too few arguments to function call";
-        } else if (node.arguments.size() > max) {
-          std::cerr << "[ERROR] SyntaxChecker: Too many arguments for '" << func->name.content << "' (got " 
-                    << node.arguments.size() << ", max=" << max << ")" << std::endl;
-          herr->Error(tok) << "Too many arguments to function call";
+      // Only check parameter bounds if we have a valid definition and frontend
+      // NullLanguageFrontend::look_up always returns nullptr, so def should be null when using it
+      // This check prevents calling the pure virtual definition_parameter_bounds on NullLanguageFrontend
+      if (def != nullptr && frontend != nullptr) {
+        unsigned int min = 0;
+        unsigned int max = 0;
+        frontend->definition_parameter_bounds(def, min, max);
+        Token tok;
+        tok.content = func->name.content;
+        tok.type = TT_IDENTIFIER;
+        if (max != unsigned(-1)) {
+          if (node.arguments.size() < min) {
+            std::cerr << "[ERROR] SyntaxChecker: Too few arguments for '" << func->name.content << "'" << std::endl;
+            herr->Error(tok) << "Too few arguments to function call";
+          } else if (node.arguments.size() > max) {
+            std::cerr << "[ERROR] SyntaxChecker: Too many arguments for '" << func->name.content << "' (got " 
+                      << node.arguments.size() << ", max=" << max << ")" << std::endl;
+            herr->Error(tok) << "Too many arguments to function call";
+          }
         }
       }
     }
@@ -2747,11 +2869,22 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitBinaryExpression(AST::BinaryExpression &node) {
+    std::cerr << "[DEBUG] SyntaxChecker::VisitBinaryExpression: in_conditional_context=" << in_conditional_context 
+              << ", operation.type=" << (int)node.operation.type << " (TT_EQUALS=" << (int)TT_EQUALS << ")" << std::endl;
     // Convert = to == in binary expressions within control flow conditions
     // This handles GameMaker-style = in conditionals (should be ==)
+    // Only do this if use_gml_equals is true (GML mode)
     if (in_conditional_context && node.operation.type == TT_EQUALS) {
-      node.operation.type = TT_EQUALTO;
-      node.operation.token = "==";
+      // Check compatibility options - only convert in GML mode
+      if (frontend && frontend->compatibility_opts().use_gml_equals) {
+        std::cerr << "[DEBUG] SyntaxChecker: Converting = to == in conditional context" << std::endl;
+        node.operation.type = TT_EQUALTO;
+        node.operation.token = "==";
+      } else {
+        std::cerr << "[DEBUG] SyntaxChecker: NOT converting = to == (frontend=" << (void*)frontend 
+                  << ", use_gml_equals=" << (frontend ? frontend->compatibility_opts().use_gml_equals : false) << ")" << std::endl;
+      }
+      // In C++ mode (use_gml_equals false), keep = as assignment
     }
     // Return true to allow RecursiveSubVisit to be called automatically,
     // which will visit nested BinaryExpressions recursively
@@ -2957,8 +3090,16 @@ std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
   AstBuilder ab(lexer, herr);
   auto root = ab.ParseCode();
   SyntaxChecker sc(herr, lexer->GetContext().language_fe);
+  std::cerr << "[DEBUG] Parse: About to call root->accept(sc), root type=" << (int)root->type << std::endl;
   root->accept(sc);
+  std::cerr << "[DEBUG] Parse: After root->accept(sc)" << std::endl;
   return root;
+}
+
+// Helper function to run syntax checker (defined after SyntaxChecker class)
+void RunSyntaxChecker(AST::Node *node, ErrorHandler *herr, const LanguageFrontend *fe) {
+  SyntaxChecker sc(herr, fe);
+  node->accept(sc);
 }
 
 AstBuilderTestAPI *CreateBuilder() {

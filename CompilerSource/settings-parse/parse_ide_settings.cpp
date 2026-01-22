@@ -117,7 +117,12 @@ void parse_ide_settings(const char* eyaml, setting::CompatibilityOptions *out)
   
   // Read settings info
   out->use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  out->use_cpp_literals  = settree.get("inherit-literals-from").toInt();
+  // Support both "inherit-literals-from" and "treat-literals-as" (they mean the same thing)
+  if (settree.exists("treat-literals-as")) {
+    out->use_cpp_literals = settree.get("treat-literals-as").toInt();
+  } else {
+    out->use_cpp_literals = settree.get("inherit-literals-from").toInt();
+  }
   out->use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
   out->use_incrementals  = settree.get("inherit-increment-from").toInt();
   out->use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();

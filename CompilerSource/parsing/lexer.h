@@ -78,13 +78,54 @@ class Lexer {
 
   std::string ProcessLiteral(std::string lit, size_t spos);
   
+  // Get ignored backslash positions for a GML-mode string literal
+  static std::set<size_t> GetIgnoredBackslashes(const std::string& value);
+  
   Lexer(std::string code_, const ParseContext *ctx, ErrorHandler *herr_):
       owned_code(std::make_shared<std::string>(std::move(code_))),
-      code(*owned_code), context(ctx), herr(herr_), options(ctx) {}
+      code(*owned_code), context(ctx), herr(herr_), options(ctx) {
+    std::cerr << "[DEBUG] Lexer constructor (string): code_ length=" << code_.length() 
+              << ", owned_code->length()=" << owned_code->length() 
+              << ", code.length()=" << code.length() << std::endl;
+  }
   Lexer(std::shared_ptr<const std::string> code_, const ParseContext *ctx,
         ErrorHandler *herr_):
       owned_code(code_), code(*owned_code), context(ctx), herr(herr_),
-      options(ctx) {}
+      options(ctx) {
+    std::cerr << "[DEBUG] Lexer constructor (shared_ptr): code_->length()=" << code_->length() 
+              << ", code.length()=" << code.length() << std::endl;
+  }
+  // Copy constructor - ensure code reference is valid
+  Lexer(const Lexer& other)
+      : owned_code(other.owned_code), code(*owned_code), 
+        pos(other.pos), line_number(other.line_number),
+        line_last_evaluated_at_(other.line_last_evaluated_at_),
+        last_line_position(other.last_line_position),
+        context(other.context), open_macros(other.open_macros),
+        herr(other.herr), stringified_macros(other.stringified_macros),
+        options(other.options) {
+    std::cerr << "[DEBUG] Lexer copy constructor: other.owned_code->length()=" << (other.owned_code ? other.owned_code->length() : 0)
+              << ", other.code.length()=" << other.code.length() 
+              << ", this->owned_code->length()=" << (owned_code ? owned_code->length() : 0)
+              << ", this->code.length()=" << code.length() << std::endl;
+  }
+  
+  // Move constructor
+  Lexer(Lexer&& other) noexcept
+      : owned_code(std::move(other.owned_code)), code(*owned_code),
+        pos(other.pos), line_number(other.line_number),
+        line_last_evaluated_at_(other.line_last_evaluated_at_),
+        last_line_position(other.last_line_position),
+        context(other.context), open_macros(std::move(other.open_macros)),
+        herr(other.herr), stringified_macros(std::move(other.stringified_macros)),
+        options(other.options) {
+    std::cerr << "[DEBUG] Lexer move constructor: this->owned_code->length()=" << (owned_code ? owned_code->length() : 0)
+              << ", this->code.length()=" << code.length() << std::endl;
+    other.pos = 0;
+    other.line_number = 1;
+    other.line_last_evaluated_at_ = 0;
+    other.last_line_position = (size_t)-1;
+  }
   Lexer(TokenVector tokens, const ParseContext *ctx, ErrorHandler *herr_);
 
  private:

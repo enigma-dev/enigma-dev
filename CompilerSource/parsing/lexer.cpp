@@ -26,6 +26,8 @@
 #include <array>
 #include <memory>
 #include <initializer_list>
+#include <unordered_map>
+#include <set>
 
 namespace enigma {
 namespace parsing {
@@ -204,6 +206,7 @@ static const setting::CompatibilityOptions kCppCompatibility {
   .use_cpp_literals = true,
   .use_cpp_escapes = true,
   .use_gml_equals = false,
+  .use_incrementals = true,
   .keyword_blacklist = "",
 };
 
@@ -327,7 +330,20 @@ TokenType Lexer::LookUpOperator(std::string_view op) {
   return tnode.first;
 }
 
+// Structure to hold processed literal and ignored backslash information
+struct ProcessedLiteral {
+  std::string value;
+  std::set<size_t> ignored_backslash_positions; // Positions in value where ignored backslashes occurred
+  bool was_gml_mode;
+};
+
+// Global map to store ignored backslash information for strings processed in GML mode
+// Key: processed string value, Value: set of positions where ignored backslashes occurred
+static std::unordered_map<std::string, std::set<size_t>> gml_ignored_backslashes;
+
 std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
+  ProcessedLiteral result;
+  result.was_gml_mode = !options.use_escapes;
   std::string str_value;
   str_value.reserve(lit.length() - 2);
   if (options.use_escapes) {
@@ -378,27 +394,72 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
       }
     }
   } else {
+    // GML mode: # becomes \n, \# becomes #
+    // Track ignored backslashes (like \', \\, \#) for C++ output
     for (size_t i = 1; i < lit.length() - 1; ++i) {
-      str_value += lit[i] == '#' ? '\n' : lit[i];
+      if (lit[i] == '\\' && i + 1 < lit.length() - 1) {
+        char next_char = lit[i + 1];
+        if (next_char == '#') {
+          // \# sequence: output # (no extra escaping needed in C++ output)
+          str_value += '#';
+          ++i; // Skip the # after the backslash
+        } else if (next_char == '\'' || next_char == '\\') {
+          // \' or \\: these are ignored in GML, track for C++ output
+          // Output the character and mark position for extra escaping
+          str_value += next_char;
+          result.ignored_backslash_positions.insert(str_value.length() - 1);
+          ++i; // Skip the character after the backslash
+        } else {
+          // Other backslash sequences: just output the character
+          str_value += next_char;
+          ++i;
+        }
+      } else if (lit[i] == '#') {
+        str_value += '\n';
+      } else {
+        str_value += lit[i];
+      }
     }
   }
+  result.value = str_value;
+  
+  // Store ignored backslash positions for GML mode strings
+  if (result.was_gml_mode && !result.ignored_backslash_positions.empty()) {
+    gml_ignored_backslashes[str_value] = result.ignored_backslash_positions;
+  }
+  
   return str_value;
 }
 
+std::set<size_t> Lexer::GetIgnoredBackslashes(const std::string& value) {
+  auto it = gml_ignored_backslashes.find(value);
+  if (it != gml_ignored_backslashes.end()) {
+    return it->second;
+  }
+  return std::set<size_t>();
+}
+
 Token Lexer::ReadRawToken() {
+  std::cerr << "[DEBUG] ReadRawToken: pos=" << pos << ", code.length()=" << code.length() 
+            << ", owned_code.get()=" << (void*)owned_code.get() 
+            << ", code.data()=" << (void*)code.data()
+            << ", code='" << (code.length() > 0 ? std::string(code.data(), std::min(code.length(), size_t(20))) : std::string("")) << "'" << std::endl;
   if (pos >= code.length()) {
     // We need custom logic for this because string_view::substr checks bounds
     // even for zero-width views.
     ComputeLineNumber(pos);
+    std::cerr << "[DEBUG] ReadRawToken: pos >= code.length(), returning TT_ENDOFCODE (pos=" << pos << ", code.length()=" << code.length() << ")" << std::endl;
     return Token(TT_ENDOFCODE, CodeSnippet{std::string{code.data() + pos, 0}, line_number, pos - last_line_position});
   }
 
   if (isspace(code[pos])) {
+    std::cerr << "[DEBUG] ReadRawToken: Skipping whitespace at pos=" << pos << std::endl;
     while (++pos < code.length() && isspace(code[pos]));
     return ReadRawToken();
   }
 
   const size_t spos = pos;
+  std::cerr << "[DEBUG] ReadRawToken: Starting at spos=" << spos << ", char='" << (pos < code.length() ? code[pos] : '?') << "'" << std::endl;
   switch (code[pos++]) {
     case '$': {
       if (options.use_gml_style_hex) {
@@ -426,17 +487,25 @@ Token Lexer::ReadRawToken() {
     }
 
     case '"': {
+      std::cerr << "[DEBUG] ReadRawToken: Found double quote, use_escapes=" << options.use_escapes << std::endl;
       for (;; ++pos) {
         if (pos >= code.length()) {
+          std::cerr << "[DEBUG] ReadRawToken: Unclosed double quote" << std::endl;
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
           return Token(TT_STRINGLIT, Mark(spos, pos - spos));
         }
-        if (options.use_escapes && code[pos] == '\\') ++pos;
+        if (options.use_escapes && code[pos] == '\\') {
+          std::cerr << "[DEBUG] ReadRawToken: Skipping backslash in C++ mode at pos=" << pos << std::endl;
+          ++pos;
+        }
         if (code[pos] == '"') {
           std::string raw_value = code.substr(spos, pos - spos + 1);
+          std::cerr << "[DEBUG] ReadRawToken: Found closing quote, raw_value='" << raw_value << "'" << std::endl;
           std::string value = ProcessLiteral(raw_value, spos);
+          std::cerr << "[DEBUG] ReadRawToken: Processed value='" << value << "'" << std::endl;
           Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
           token.content = value;
+          std::cerr << "[DEBUG] ReadRawToken: Returning TT_STRINGLIT token, content='" << token.content << "', type=" << (int)token.type << std::endl;
           return token;
         }
       }
@@ -444,7 +513,7 @@ Token Lexer::ReadRawToken() {
 
     case '\'': {
       const TokenType token_type =
-          options.use_char_literals ? TT_STRINGLIT : TT_CHARLIT;
+          options.use_char_literals ? TT_CHARLIT : TT_STRINGLIT;
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
@@ -464,17 +533,44 @@ Token Lexer::ReadRawToken() {
     case '0': {
       if (pos >= code.length())
         return Token(TT_DECLITERAL, Mark(spos, pos - spos));
-      if (code[pos] == 'x' && options.use_hex_literals) {
-        while (++pos < code.length() && is_nybble(code[pos]));
-        return Token(TT_HEXLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'x' && options.use_hex_literals) {
+        ++pos; // Skip 'x'
+        if (pos >= code.length() || !is_nybble(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Hex literal is truncated";
+          return ReadRawToken();
+        }
+        size_t hex_start = pos;
+        while (pos < code.length() && is_nybble(code[pos])) ++pos;
+        Token token = Token(TT_HEXLITERAL, Mark(spos, pos - spos));
+        size_t hex_len = (pos > hex_start) ? (pos - hex_start) : 0;
+        token.content = code.substr(hex_start, hex_len);
+        return token;
       }
-      if (code[pos] == 'b' && options.use_bin_literals) {
-        while (++pos < code.length() && is_bit(code[pos]));
-        return Token(TT_BINLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'b' && options.use_bin_literals) {
+        ++pos; // Skip 'b'
+        if (pos >= code.length() || !is_bit(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Binary literal is truncated";
+          return ReadRawToken();
+        }
+        size_t bin_start = pos;
+        while (pos < code.length() && is_bit(code[pos])) ++pos;
+        Token token = Token(TT_BINLITERAL, Mark(spos, pos - spos));
+        size_t bin_len = (pos > bin_start) ? (pos - bin_start) : 0;
+        token.content = code.substr(bin_start, bin_len);
+        return token;
       }
-      if (code[pos] == 'o' && options.use_oct_literals) {
-        while (++pos < code.length() && is_octal(code[pos]));
-        return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'o' && options.use_oct_literals) {
+        ++pos; // Skip 'o'
+        if (pos >= code.length() || !is_octal(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Octal literal is truncated";
+          return ReadRawToken();
+        }
+        size_t oct_start = pos;
+        while (pos < code.length() && is_octal(code[pos])) ++pos;
+        Token token = Token(TT_OCTLITERAL, Mark(spos, pos - spos));
+        size_t oct_len = (pos > oct_start) ? (pos - oct_start) : 0;
+        token.content = code.substr(oct_start, oct_len);
+        return token;
       }
       if (false) {
         [[fallthrough]]; case '.':
@@ -545,14 +641,32 @@ Token Lexer::ReadRawToken() {
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
     pos = tnode.second;
-    return Token(tnode.first, Mark(spos, pos - spos));
+    std::cerr << "[DEBUG] ReadRawToken: Found token type=" << (int)tnode.first << " from lookup" << std::endl;
+    // Check for increment/decrement operators and reject them in GML mode
+    if ((tnode.first == TT_INCREMENT || tnode.first == TT_DECREMENT) && 
+        context && !context->compatibility_opts.use_incrementals) {
+      std::cerr << "[DEBUG] ReadRawToken: Rejecting increment/decrement in GML mode" << std::endl;
+      // In GML mode, return just the first character as a plus or minus
+      pos = spos + 1;
+      return Token(tnode.first == TT_INCREMENT ? TT_PLUS : TT_MINUS, Mark(spos, 1));
+    }
+    Token result = Token(tnode.first, Mark(spos, pos - spos));
+    std::cerr << "[DEBUG] ReadRawToken: Returning token type=" << (int)result.type << ", content='" << result.content << "'" << std::endl;
+    return result;
   }
 
+  std::cerr << "[DEBUG] ReadRawToken: No token found in lookup, reporting error for char='" << (spos < code.length() ? code[spos] : '?') << "'" << std::endl;
   herr->Error(Mark(spos, 1)) << "Unexpected symbol '" << code[spos] << "'";
   return ReadRawToken();
 }
 
 bool Lexer::HandleMacro(std::string_view name) {
+  // Don't expand 'repeat' as a macro - it's a keyword that should be parsed as a statement
+  // The macro expansion will happen during C++ compilation, not during EDL parsing
+  if (name == "repeat") {
+    return false;
+  }
+  
   auto itm = context->macro_map.find(name);
   if (itm == context->macro_map.end() || MacroRecurses(name))
     return false;
@@ -672,7 +786,7 @@ Lexer::Options::Options(const ParseContext *ctex):
     use_hex_literals(ctex->compatibility_opts.use_cpp_literals),
     use_oct_literals(ctex->compatibility_opts.use_cpp_literals),
     use_bin_literals(ctex->compatibility_opts.use_cpp_literals),
-    use_gml_style_hex(true),
+    use_gml_style_hex(!ctex->compatibility_opts.use_cpp_literals),
     use_preprocessor_tokens(false) {}
 
 void Lexer::Options::SetAsCpp() {

@@ -35,13 +35,156 @@ void AST::ApplyTo(int instance_id) {
   apply_to_ = instance_id;
 }
 
-void AST::WriteCppToStream(std::ofstream &of, int base_indent, bool is_script) const {
-  CppPrettyPrinter visitor(of, lexer->GetContext().language_fe, is_script);
+void AST::WriteCppToStream(std::ofstream &of, int base_indent, bool is_script, bool is_object_script) const {
+  CppPrettyPrinter visitor(of, lexer->GetContext().language_fe, is_script, is_object_script);
+  
+  // For scripts, unwrap with(self) wrapper if present (old codegen didn't include it)
+  if (is_script && root_) {
+    // Check if root is a WithStatement with self
+    if (root_->type == NodeType::WITH) {
+      auto* with_stmt = root_->As<WithStatement>();
+      if (with_stmt && with_stmt->object) {
+        bool is_self = false;
+        if (with_stmt->object->type == NodeType::IDENTIFIER) {
+          auto* ident = with_stmt->object->As<IdentifierAccess>();
+          if (ident && ident->name.content == "self") {
+            is_self = true;
+          }
+        } else if (with_stmt->object->type == NodeType::PARENTHETICAL) {
+          auto* paren = with_stmt->object->As<Parenthetical>();
+          if (paren && paren->expression && paren->expression->type == NodeType::IDENTIFIER) {
+            auto* ident = paren->expression->As<IdentifierAccess>();
+            if (ident && ident->name.content == "self") {
+              is_self = true;
+            }
+          }
+        }
+        if (is_self) {
+          // Unwrap: just write the body, not the with(self) wrapper
+          // The body might be a CodeBlock - if so, write its statements directly using VisitCode
+          if (with_stmt->body) {
+            if (with_stmt->body->type == NodeType::BLOCK) {
+              auto* body_block = with_stmt->body->As<CodeBlock>();
+              std::cerr << "[DEBUG] WriteCppToStream: body_block=" << (void*)body_block 
+                        << ", &(*body_block)=" << (void*)&(*body_block) 
+                        << ", body_block->statements.size()=" << (body_block ? body_block->statements.size() : 0) << std::endl;
+              if (body_block) {
+                std::cerr << "[DEBUG] WriteCppToStream: About to call VisitCode(*body_block), body_block=" << (void*)body_block << std::endl;
+                // Use VisitCode to write statements directly without outer block braces
+                // (old codegen didn't have the block wrapper)
+                visitor.VisitCode(*body_block);
+              }
+            } else {
+              with_stmt->body->accept(visitor);
+              // Add semicolon if needed (VisitReturnStatement doesn't add one automatically)
+              if (with_stmt->body->type != NodeType::BLOCK && 
+                  with_stmt->body->type != NodeType::IF && 
+                  with_stmt->body->type != NodeType::FOR &&
+                  with_stmt->body->type != NodeType::CASE && 
+                  with_stmt->body->type != NodeType::DEFAULT &&
+                  with_stmt->body->type != NodeType::SWITCH && 
+                  with_stmt->body->type != NodeType::WHILE && 
+                  with_stmt->body->type != NodeType::DO &&
+                  with_stmt->body->type != NodeType::WITH) {
+                of << ";";
+              }
+            }
+          }
+          return;
+        }
+      }
+    }
+    // Check if root is a CodeBlock containing a single WithStatement with self
+    else if (root_->type == NodeType::BLOCK) {
+      auto* code_block = root_->As<CodeBlock>();
+      if (code_block && code_block->statements.size() == 1) {
+        auto& stmt = code_block->statements[0];
+        if (stmt && stmt->type == NodeType::WITH) {
+          auto* with_stmt = stmt->As<WithStatement>();
+          if (with_stmt && with_stmt->object) {
+            // Check if object is "self" - could be IdentifierAccess or wrapped in parentheses
+            bool is_self = false;
+            if (with_stmt->object->type == NodeType::IDENTIFIER) {
+              auto* ident = with_stmt->object->As<IdentifierAccess>();
+              if (ident && ident->name.content == "self") {
+                is_self = true;
+              }
+            } else if (with_stmt->object->type == NodeType::PARENTHETICAL) {
+              // Unwrap parentheses and check inner expression
+              auto* paren = with_stmt->object->As<Parenthetical>();
+              if (paren && paren->expression && paren->expression->type == NodeType::IDENTIFIER) {
+                auto* ident = paren->expression->As<IdentifierAccess>();
+                if (ident && ident->name.content == "self") {
+                  is_self = true;
+                }
+              }
+            }
+            if (is_self) {
+              // Unwrap: just write the body, not the with(self) wrapper
+              // The body might be a CodeBlock - if so, write its statements directly using VisitCode
+              if (with_stmt->body) {
+                if (with_stmt->body->type == NodeType::BLOCK) {
+                  auto* body_block = with_stmt->body->As<CodeBlock>();
+              if (body_block) {
+                // Use VisitCode to write statements directly without outer block braces
+                // (old codegen didn't have the block wrapper)
+                visitor.VisitCode(*body_block);
+              }
+            } else {
+                  with_stmt->body->accept(visitor);
+                  // Add semicolon if needed (VisitReturnStatement doesn't add one automatically)
+                  if (with_stmt->body->type != NodeType::BLOCK && 
+                      with_stmt->body->type != NodeType::IF && 
+                      with_stmt->body->type != NodeType::FOR &&
+                      with_stmt->body->type != NodeType::CASE && 
+                      with_stmt->body->type != NodeType::DEFAULT &&
+                      with_stmt->body->type != NodeType::SWITCH && 
+                      with_stmt->body->type != NodeType::WHILE && 
+                      with_stmt->body->type != NodeType::DO &&
+                      with_stmt->body->type != NodeType::WITH) {
+                    of << ";";
+                  }
+                }
+              }
+              return;
+            }
+          }
+        }
+      }
+    }
+  }
+  
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "with (" << *apply_to_ << ") {\n";
   }
 
-  if (root_) root_->accept(visitor);
+  if (root_) {
+    // For events (is_script=false), if root is a CodeBlock, check if it's a single nested CodeBlock
+    // and unwrap it to avoid double braces
+    if (!is_script && root_->type == NodeType::BLOCK) {
+      auto* code_block = root_->As<CodeBlock>();
+      if (code_block && code_block->statements.size() == 1 && 
+          code_block->statements[0] && code_block->statements[0]->type == NodeType::BLOCK) {
+        // Unwrap: the root is a CodeBlock containing a single CodeBlock - use the inner one
+        auto* inner_block = code_block->statements[0]->As<CodeBlock>();
+        if (inner_block) {
+          // Add opening brace with proper indentation
+          of << std::string(base_indent, ' ') << "{\n";
+          // Use VisitCode to write statements from the inner block
+          visitor.VisitCode(*inner_block);
+          // Add closing brace with proper indentation
+          of << std::string(base_indent, ' ') << "}\n";
+        }
+      } else if (code_block) {
+        // Normal case: root is a CodeBlock, add braces manually and use VisitCode
+        of << std::string(base_indent, ' ') << "{\n";
+        visitor.VisitCode(*code_block);
+        of << std::string(base_indent, ' ') << "}\n";
+      }
+    } else {
+      root_->accept(visitor);
+    }
+  }
   
   if (apply_to_) {
     of << std::string(base_indent, ' ') << "}\n";
@@ -54,10 +197,10 @@ AST AST::Parse(std::string code, const ParseContext* ctex) {
   return res;
 }
 
-void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs) {
+void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs, bool is_script) {
   std::cout << "collecting variables..." << std::flush;
   const ParseContext &ctex = lexer->GetContext();
-  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs);
+  collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs, is_script);
   std::cout << " done." << std::endl;
 }
 

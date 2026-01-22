@@ -51,9 +51,11 @@ struct ParsedCode {
   // Allows us to add to locals when parsing the code.
   ParsedScope *my_scope;
 
-  ParsedCode(ParsedScope *scope, enigma::parsing::AST &&ast_, CompileState *cs)
+  // is_script: true if this is a script, false for object events.
+  // Scripts need their variables added to dot_accessed_locals because they can be called by any object.
+  ParsedCode(ParsedScope *scope, enigma::parsing::AST &&ast_, CompileState *cs, bool is_script = false)
       : ast(std::move(ast_)), my_scope(scope) {
-    ast.ExtractDeclarations(scope, cs);
+    ast.ExtractDeclarations(scope, cs, is_script);
   }
 };
 
@@ -336,7 +338,7 @@ struct ParsedScript {
   int globargs; // The maximum number of arguments with which this was invoked from all contexts.
   // Automatically link our event to our object.
   ParsedScript(enigma::parsing::AST &&ast, CompileState *cs)
-      : scope(), code(&scope, std::move(ast), cs), global_code(nullptr), globargs(0) {}
+      : scope(), code(&scope, std::move(ast), cs, true), global_code(nullptr), globargs(0) {}  // is_script=true
 };
 
 struct parsed_moment {

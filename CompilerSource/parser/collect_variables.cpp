@@ -199,6 +199,7 @@ class DeclGatheringVisitor : public AST::Visitor {
   ParsedScope *const parsed_scope;
   const NameSet &script_names;
   CompileState *cs;
+  bool is_script_;  // True if parsing a script, false for object events
 
   std::string CheckIfIdentifier(AST::PNode &node) {
     if (node->type == AST::NodeType::IDENTIFIER) {
@@ -247,6 +248,48 @@ class DeclGatheringVisitor : public AST::Visitor {
       return;
     }
     
+    // Skip variables that were declared with TEMPORARY storage class (var x; int x; etc.)
+    // These are block-local and should NOT become instance variables.
+    // The DeclarationCollector pass populates this map before we run.
+    // However, if we're in an event (not a script) and the variable is not in locals,
+    // it might be a variable declared in another event that should be an instance variable.
+    // In GML, var declarations at the top level of events create instance variables.
+    if (parsed_scope->declarations.find(name) != parsed_scope->declarations.end()) {
+      // If it's already in locals, don't add it again
+      if (parsed_scope->locals.find(name) != parsed_scope->locals.end()) {
+        return;
+      }
+      // If we're in an event (not a script), and the variable is used but not in locals,
+      // it should be an instance variable (declared in another event with var)
+      if (!is_script_) {
+        // Add it to locals as an instance variable
+        parsed_scope->locals[name] = dectrip("var");
+        return;
+      }
+      // For scripts, TEMPORARY variables should remain TEMPORARY
+      return;
+    }
+    
+    // Skip script arguments (argument0 through argument15).
+    // These are function parameters, not instance variables.
+    if (name.length() >= 8 && name.substr(0, 8) == "argument" &&
+        name.length() <= 10) {  // "argument" + up to 2 digits
+      std::string suffix = name.substr(8);
+      bool is_argument = true;
+      for (char c : suffix) {
+        if (!std::isdigit(c)) {
+          is_argument = false;
+          break;
+        }
+      }
+      if (is_argument && suffix.length() > 0) {
+        int arg_num = std::stoi(suffix);
+        if (arg_num >= 0 && arg_num <= 15) {
+          return;  // Skip argument0-argument15
+        }
+      }
+    }
+    
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
       return;
@@ -259,7 +302,12 @@ class DeclGatheringVisitor : public AST::Visitor {
     bool global_exists_result = lang->global_exists(name);
     if (!global_exists_result) {
       parsed_scope->locals[name] = dectrip("var");
-      cs->add_dot_accessed_local(name);
+      // Only add to dot_accessed_locals if this is a script.
+      // Scripts can be called by any object, so their variables need varaccess_* functions.
+      // Object event variables are instance variables of that specific object, not global.
+      if (is_script_) {
+        cs->add_dot_accessed_local(name);
+      }
     }
   }
 
@@ -289,8 +337,15 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   void AddFunction(AST::FunctionCallExpression &node) {
-    std::string name = CheckIfIdentifier(node.function);
-    if (name != "") parsed_scope->funcs[name] = node.arguments.size();
+    // Get the function name directly, not through CheckIfIdentifier,
+    // because CheckIfIdentifier returns "" for known scripts
+    if (node.function && node.function->type == AST::NodeType::IDENTIFIER) {
+      std::string name = node.function->As<AST::IdentifierAccess>()->name.content;
+      // If it's a known script, add it to funcs
+      if (script_names.find(name) != script_names.end()) {
+        parsed_scope->funcs[name] = node.arguments.size();
+      }
+    }
   }
 
   bool VisitCodeBlock(AST::CodeBlock &node) {
@@ -302,6 +357,7 @@ class DeclGatheringVisitor : public AST::Visitor {
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
     bool is_global = node.storage_class == AST::DeclarationStatement::StorageClass::GLOBAL;
     bool is_local = node.storage_class == AST::DeclarationStatement::StorageClass::LOCAL;
+    bool is_temporary = node.storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY;
     for (const auto &decl : node.declarations) {
       std::string name = decl.declarator->decl.name.content;
       std::string ftype = GetFullType(*decl.declarator);
@@ -318,7 +374,13 @@ class DeclGatheringVisitor : public AST::Visitor {
       dectrip dtrip(type, prefix, suffix);
       if (is_global) parsed_scope->globals[name] = dtrip;
       if (is_local) parsed_scope->locals[name] = dtrip;
-      cs->add_dot_accessed_local(name);
+      // Only add to dot_accessed_locals if NOT a TEMPORARY declaration.
+      // TEMPORARY = block-local (var x; int x;) - should NOT become instance variable
+      // LOCAL = instance variable (local var x;) - SHOULD become instance variable
+      // GLOBAL = global variable (global var x;) - handled separately
+      if (!is_temporary) {
+        cs->add_dot_accessed_local(name);
+      }
       parsed_scope->declarations[name] = node.def;
     }
 
@@ -363,15 +425,22 @@ class DeclGatheringVisitor : public AST::Visitor {
     node.RecursiveSubVisit(*this);
 
     for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
-      if (it->first.substr(0, 8) == "argument") {
+      const std::string& name = it->first;
+      // Check if it's argumentN (argument0-argument15) - these are function parameters
+      // that should be removed. But NOT the 'argument' array itself.
+      bool is_argument_param = false;
+      if (name.length() > 8 && name.substr(0, 8) == "argument") {
+        std::string suffix = name.substr(8);
+        is_argument_param = !suffix.empty() && std::all_of(suffix.begin(), suffix.end(), ::isdigit);
+      }
+      
+      if (is_argument_param) {
+        it = parsed_scope->locals.erase(it);
+      } else if (std::find(prev_locals.begin(), prev_locals.end(), name) == prev_locals.end()) {
+        parsed_scope->ambiguous[name] = dectrip();
         it = parsed_scope->locals.erase(it);
       } else {
-        if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end()) {
-          parsed_scope->ambiguous[it->first] = dectrip();
-          it = parsed_scope->locals.erase(it);
-        } else {
-          it++;
-        }
+        it++;
       }
     }
 
@@ -565,8 +634,8 @@ class DeclGatheringVisitor : public AST::Visitor {
 
  public:
   DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts,
-                       CompileState *cs)
-      : lang(language_fe), parsed_scope(pscope), script_names(scripts), cs(cs) {}
+                       CompileState *cs, bool is_script = false)
+      : lang(language_fe), parsed_scope(pscope), script_names(scripts), cs(cs), is_script_(is_script) {}
 
  private:
   DeclGatheringVisitor *parent_ = nullptr;
@@ -588,11 +657,94 @@ class DeclGatheringVisitor : public AST::Visitor {
       : lang(parent_->lang),
         parsed_scope(parent_->parsed_scope),
         script_names(parent_->script_names),
+        cs(parent_->cs),
+        is_script_(parent_->is_script_),
         parent_(parent) {}
 };
 
+/**
+  Declaration-only visitor that collects all 'var' declarations BEFORE
+  the main variable collector runs. This ensures that variables declared
+  with 'var' are known before they're encountered in expressions, preventing
+  them from being incorrectly added to dot_accessed_locals.
+**/
+class DeclarationCollector : public AST::Visitor {
+  ParsedScope *const parsed_scope;
+  
+public:
+  DeclarationCollector(ParsedScope *pscope) : parsed_scope(pscope) {}
+  
+  // We need to manually handle recursion because VisitNodes calls accept(),
+  // which doesn't automatically recurse into children
+  bool VisitCodeBlock(AST::CodeBlock &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) override {
+    // Collect TEMPORARY declarations (no storage modifier = block-local).
+    // These should NOT become instance variables.
+    // - StorageClass::TEMPORARY = block-local (var x; int x; etc.)
+    // - StorageClass::LOCAL = instance variable (local var x;)
+    // - StorageClass::GLOBAL = global variable (global var x;)
+    bool is_temporary = node.storage_class == AST::DeclarationStatement::StorageClass::TEMPORARY;
+    if (is_temporary) {
+      for (const auto &decl : node.declarations) {
+        std::string name = decl.declarator->decl.name.content;
+        // Add to declarations map so the main visitor knows this is block-local
+        parsed_scope->declarations[name] = node.def;
+      }
+    }
+    // Continue to visit nested declarations (e.g., for loop with var decl in body)
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  // Handle containers that might have nested declarations
+  bool VisitIfStatement(AST::IfStatement &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitForLoop(AST::ForLoop &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitWhileLoop(AST::WhileLoop &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitDoLoop(AST::DoLoop &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitWithStatement(AST::WithStatement &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+  
+  bool VisitSwitchStatement(AST::SwitchStatement &node) override {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+};
+
 void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast, ParsedScope *parsed_scope,
-                       const NameSet &script_names, CompileState *cs) {
-  DeclGatheringVisitor visitor(lang, parsed_scope, script_names, cs);
+                       const NameSet &script_names, CompileState *cs, bool is_script) {
+  // Pass 1: Collect all 'var' declarations first, so they're known before
+  // we encounter variable usages in expressions
+  DeclarationCollector decl_collector(parsed_scope);
+  ast->VisitNodes(decl_collector);
+  
+  // Pass 2: Collect all variable usages (will skip declared vars)
+  // Pass is_script flag to control whether variables are added to dot_accessed_locals.
+  // For scripts: variables need varaccess_* functions because scripts can be called by any object.
+  // For events: variables are instance variables of that specific object, not global.
+  DeclGatheringVisitor visitor(lang, parsed_scope, script_names, cs, is_script);
   ast->VisitNodes(visitor);
+  
+  std::cout << " " << parsed_scope->locals.size() << " (scope=" << (void*)parsed_scope << ") " << std::flush;
 }

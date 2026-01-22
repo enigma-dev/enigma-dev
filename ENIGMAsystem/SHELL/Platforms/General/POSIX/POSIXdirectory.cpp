@@ -74,4 +74,8 @@ bool environment_set_variable(const string &name, const string &value) {
   return (setenv(name.c_str(), value.c_str(), 1) == 0);
 }
 
+std::string get_working_directory() {
+  return working_directory;
+}
+
 } // namespace enigma_user

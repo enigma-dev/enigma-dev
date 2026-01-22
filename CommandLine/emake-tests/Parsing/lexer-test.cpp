@@ -38,7 +38,7 @@ struct LexerTester {
   }
 
 TEST(LexerTest, GreedyTokenization) {
-  LexerTester lex("cool+++beans");
+  LexerTester lex("cool+++beans", true);  // Use C++ mode to test increment operator
   EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
   EXPECT_EQ(lex->ReadToken().type, TT_INCREMENT);
   EXPECT_EQ(lex->ReadToken().type, TT_PLUS);

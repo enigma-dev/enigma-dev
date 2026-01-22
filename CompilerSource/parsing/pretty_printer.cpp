@@ -17,7 +17,12 @@
 
 // JDI removed - builtin flags/types need to be reimplemented
 #include "ast.h"
+#include "lexer.h"
 #include <functional>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <set>
 
 using namespace enigma::parsing;
 
@@ -25,8 +30,15 @@ using namespace enigma::parsing;
   if (!Visit(node)) return false;
 
 AST::CppPrettyPrinter::CppPrettyPrinter() {
-  of = new std::ofstream();
-  if (!of->is_open()) of->open("./CompilerSource/parsing/output.txt");
+  // Use default file path - tests should run sequentially so conflicts are unlikely
+  // If conflicts occur, the file will be truncated on open
+  temp_file_path = "./CompilerSource/parsing/output.txt";
+  of = new std::ofstream(temp_file_path, std::ios::out | std::ios::trunc);
+  if (!of->is_open()) {
+    // If file can't be opened, set to null to avoid crashes
+    delete of;
+    of = nullptr;
+  }
   owns_ofstream = true;
   print_type = false;
   is_script = false;
@@ -36,20 +48,25 @@ AST::CppPrettyPrinter::CppPrettyPrinter(const LanguageFrontend *lfe) : CppPretty
   this->language_fe = lfe;
   print_type = false;
   is_script = false;
+  // temp_file_path is already set by CppPrettyPrinter() constructor
 }
 
-AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script)
-    : of(&ofs), owns_ofstream(false), is_script(is_script), language_fe(lfe) {
+AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script, bool is_object_script)
+    : of(&ofs), owns_ofstream(false), is_script(is_script), is_object_script(is_object_script), language_fe(lfe), temp_file_path("") {
   print_type = false;
 }
 
 AST::CppPrettyPrinter::~CppPrettyPrinter() {
   if (owns_ofstream && of) {
+    if (of->is_open()) {
+      of->close();
+    }
     delete of;
+    of = nullptr;
   }
 }
 
-void AST::CppPrettyPrinter::print(std::string code) { *of << code; }
+void AST::CppPrettyPrinter::print(std::string code) { if (of) *of << code; }
 
 void AST::CppPrettyPrinter::PrintSemiColon(AST::PNode &node) {
   if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
@@ -61,8 +78,18 @@ void AST::CppPrettyPrinter::PrintSemiColon(AST::PNode &node) {
 }
 
 std::string AST::CppPrettyPrinter::GetPrintedCode() {
+  if (!of) return "";
+  if (!of->is_open()) return "";
+  
+  of->flush();
   of->close();
-  std::ifstream file("./CompilerSource/parsing/output.txt");
+  
+  // Use the stored temp file path, or fallback to default
+  // Defensive: always use the default path to avoid issues with corrupted temp_file_path
+  // The temp_file_path member may have been corrupted during AST traversal
+  std::string file_path = "./CompilerSource/parsing/output.txt";
+  
+  std::ifstream file(file_path);
   std::string code = "";
 
   if (file.is_open()) {
@@ -70,6 +97,7 @@ std::string AST::CppPrettyPrinter::GetPrintedCode() {
     while (getline(file, line)) {
       code += line;
     }
+    file.close();
   }
 
   return code;
@@ -93,7 +121,8 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
     "depth", "mask_index", "image_number"
   };
   
-  if (is_script && name != "self") {
+  if (is_script && !is_object_script && name != "self") {
+    // Global script context - use glaccess/varaccess
     // Check instance variables FIRST, before checking globals
     // This ensures x, y, etc. are always converted to glaccess calls
     if (instance_vars.find(name) != instance_vars.end()) {
@@ -105,9 +134,13 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
       // These are macros that expand to $name() - use $name directly to avoid double expansion
       // Don't use the macro name, use $name directly
       print("enigma::glaccess(int(self))->$" + name + "()");
-    } else if (language_fe->is_shared_local(name)) {
+    } else if (language_fe && language_fe->is_shared_local(name)) {
       print("enigma::glaccess(int(self))->" + name);
-    } else if (language_fe->global_exists(name)) {
+    } else if (name == "working_directory") {
+      // Convert working_directory variable to get_working_directory() function call
+      // to match old codegen behavior
+      print("get_working_directory()");
+    } else if (language_fe && language_fe->global_exists(name)) {
       print(name);
     } else if (std::holds_alternative<jdi::definition *>(node.type) && std::get<jdi::definition *>(node.type)) {
       print(name);
@@ -134,6 +167,10 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
                name == "sprite_width" || name == "sprite_height") {
       // These are macros that expand to $name() - use $name directly to avoid double expansion
       print("$" + name + "()");
+    } else if (name == "working_directory") {
+      // Convert working_directory variable to get_working_directory() function call
+      // to match old codegen behavior
+      print("get_working_directory()");
     } else {
       print(name);
     }
@@ -159,9 +196,38 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
   // Always use double quotes for strings (GameMaker convention)
   print("\"");
   std::string to_print;
-  for (char c : value) {
+  
+  // Check for ignored backslashes from GML mode
+  std::set<size_t> ignored_backslashes = Lexer::GetIgnoredBackslashes(value);
+  
+  for (size_t i = 0; i < value.length(); ++i) {
+    char c = value[i];
+    bool had_ignored_backslash = ignored_backslashes.count(i) > 0;
+    
+    // If this position had an ignored backslash in GML mode, we need to escape it
+    // The character itself also needs escaping if it's a special character
+    if (had_ignored_backslash) {
+      // Add escaped backslash (\\)
+      to_print += "\\\\";
+      // Then escape the character itself if needed
+      if (c == '\'') {
+        to_print += "\\'";
+      } else if (c == '\\') {
+        to_print += "\\\\";
+      } else if (c == '"') {
+        to_print += "\\\"";
+      } else {
+        // For other characters (like #), just output them as-is
+        to_print += c;
+      }
+      continue; // Skip normal escaping logic
+    }
+    
+    // Normal escaping for characters without ignored backslashes
     if (c == '\\') {
       to_print += "\\\\";
+    } else if (c == '"') {
+      to_print += "\\\"";
     } else if (c >= ' ' && c <= '~') {
       to_print += c;
     } else if (c == '\n') {
@@ -298,8 +364,8 @@ bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
     } else if (left == "self") {
       print("enigma::glaccess(int(self))->" + right);
     } else {
-      // For other instances, cast to object_locals and access the member
-      print("((enigma::object_locals*)enigma::fetch_instance_by_int(" + left + "))->" + right);
+      // For other instances, use glaccess which is null-safe (returns dummy object if instance doesn't exist)
+      print("enigma::glaccess(int(" + left + "))->" + right);
     }
     return true;
   }
@@ -310,8 +376,11 @@ bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
 
   if (left == "global") {
     print("int(global)");
+  } else if (left == "self") {
+    print("int(self)");
   } else {
-    print(left);
+    // Wrap object IDs in int() to match old codegen
+    print("int(" + left + ")");
   }
   print(")");
   return true;
@@ -321,6 +390,25 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   if (node.operation.type == TT_DOT && node.left->type == AST::NodeType::IDENTIFIER &&
       node.right->type == AST::NodeType::IDENTIFIER) {
     return VisitDot(node);
+  }
+
+  // Special handling for argument[N] access
+  if (node.operation.type == TT_BEGINBRACKET && node.left->type == AST::NodeType::IDENTIFIER) {
+    auto left_id = node.left->As<AST::IdentifierAccess>();
+    if (left_id && left_id->name.content == "argument") {
+      // For global scripts: use varaccess_argument(int(self))[int(N)]
+      // For object scripts: use argument[int(N)] (member variable)
+      if (is_script && !is_object_script) {
+        print("enigma::varaccess_argument(int(self))[int(");
+        VISIT_AND_CHECK(node.right);
+        print(")]");
+      } else {
+        print("argument[int(");
+        VISIT_AND_CHECK(node.right);
+        print(")]");
+      }
+      return true;
+    }
   }
 
   VISIT_AND_CHECK(node.left);
@@ -338,16 +426,25 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   }
 
   if (operation == ":=") operation = "=";
+  // Don't convert mod to % - keep as mod for old codegen compatibility
+  // (GML uses mod keyword which old codegen preserved)
   
   // Handle operators - don't add spaces around array subscript
   if (node.operation.type == TT_BEGINBRACKET) {
     if (is_multi_dim) {
       print("(");  // Multi-dim arrays use () syntax: arr(x, y)
     } else {
-      print("[");  // Regular arrays: arr[x]
+      print("[int(");  // Regular arrays: arr[int(x)] - add int() cast for old codegen compatibility
     }
   } else {
     print(" " + operation + " ");
+  }
+
+  // Add (double) cast for division to ensure floating-point division
+  // This is critical for physics, collision detection, and coordinate calculations
+  // Only add for GML code (scripts), not for C++ code
+  if (node.operation.type == TT_SLASH && is_script) {
+    print("(double) ");
   }
 
   VISIT_AND_CHECK(node.right);
@@ -355,7 +452,7 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   if (is_multi_dim) {
     print(")");
   } else if (node.operation.type == TT_BEGINBRACKET) {
-    print("]");
+    print(")]");  // Close int( and ]
   }
   return true;
 }
@@ -383,8 +480,17 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
       }
       return true; // Skip the normal function call handling
     }
+    // Add :: prefix for certain engine functions in global script context
+    // This ensures the global version is called, matching old codegen behavior
+    if (is_script && !is_object_script) {
+      if (name == "d3d_vector_subtract" || name == "d3d_vector_normalize") {
+        print("::" + name);
+        goto print_args;
+      }
+    }
   }
   VISIT_AND_CHECK(node.function);
+print_args:
   print("(");
 
   bool is_variadic = false;
@@ -470,6 +576,7 @@ bool AST::CppPrettyPrinter::VisitLambdaExpression(AST::LambdaExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitReturnStatement(AST::ReturnStatement &node) {
+  has_return_encountered = true;  // Mark that we've encountered a return
   print("return ");
   if (node.expression) {
     VISIT_AND_CHECK(node.expression);
@@ -850,14 +957,168 @@ bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement 
   return true;
 }
 
+// Helper function to check if a node is or contains a return statement
+static bool ContainsReturnStatement(AST::PNode &node) {
+  if (!node) return false;
+  if (node->type == AST::NodeType::RETURN) {
+    return true;
+  }
+  // Check if it's a block that might contain a return
+  if (node->type == AST::NodeType::BLOCK) {
+    auto *block = node->As<AST::CodeBlock>();
+    if (block) {
+      // Use index-based iteration to avoid potential iterator invalidation
+      size_t num_statements = block->statements.size();
+      for (size_t i = 0; i < num_statements; ++i) {
+        if (i >= block->statements.size()) break;  // Safety check
+        auto &stmt = block->statements[i];
+        if (stmt && ContainsReturnStatement(stmt)) {
+          return true;
+        }
+      }
+    }
+  }
+  // Check if it's an if statement - we need to check both branches
+  if (node->type == AST::NodeType::IF) {
+    auto *if_stmt = node->As<AST::IfStatement>();
+    if (if_stmt) {
+      if (if_stmt->true_branch && ContainsReturnStatement(if_stmt->true_branch)) {
+        return true;
+      }
+      if (if_stmt->false_branch && ContainsReturnStatement(if_stmt->false_branch)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
-  for (auto &stmt : node.statements) {
+  // DEBUG: Log entry with full object state
+  std::cerr << "[DEBUG] VisitCode: Entering, &node=" << (void*)&node 
+            << ", node.type=" << (int)node.type 
+            << ", &node.statements=" << (void*)&node.statements 
+            << ", node.statements.size()=" << node.statements.size() 
+            << ", sizeof(node)=" << sizeof(node) << std::endl;
+  
+  // Check if the node address looks suspicious (corrupted)
+  if ((int)node.type != 1 && (int)node.type != 0) {
+    std::cerr << "[DEBUG] VisitCode: WARNING - node.type is corrupted! Expected 1 (BLOCK) or 0 (ERROR), got " 
+              << (int)node.type << " (0x" << std::hex << (int)node.type << std::dec << ")" << std::endl;
+    std::cerr << "[DEBUG] VisitCode: This suggests the node object is at the wrong address or corrupted" << std::endl;
+    std::cerr << "[DEBUG] VisitCode: &node=" << std::hex << (uintptr_t)&node << std::dec << std::endl;
+    
+    // Check if there's a valid CodeBlock 0x40 bytes before this address (the original location)
+    void* potential_original = (char*)&node - 0x40;
+    std::cerr << "[DEBUG] VisitCode: Checking potential original address " << std::hex << (uintptr_t)potential_original << std::dec << std::endl;
+    
+    // Use ASAN to check if the address is valid before accessing
+    #ifdef __has_feature
+    #if __has_feature(address_sanitizer)
+    if (!__asan_address_is_poisoned(potential_original)) {
+      AST::CodeBlock* potential_block = reinterpret_cast<AST::CodeBlock*>(potential_original);
+      if (potential_block->type == AST::NodeType::BLOCK) {
+        std::cerr << "[DEBUG] VisitCode: FOUND valid CodeBlock 0x40 bytes before! This suggests object slicing or copy issue" << std::endl;
+        std::cerr << "[DEBUG] VisitCode: Original block at " << std::hex << (uintptr_t)potential_block 
+                  << ", statements.size()=" << potential_block->statements.size() << std::dec << std::endl;
+      }
+    } else {
+      std::cerr << "[DEBUG] VisitCode: Potential original address is ASAN poisoned" << std::endl;
+    }
+    #else
+    // Without ASAN, try to check more carefully
+    AST::CodeBlock* potential_block = reinterpret_cast<AST::CodeBlock*>(potential_original);
+    if (potential_block->type == AST::NodeType::BLOCK) {
+      std::cerr << "[DEBUG] VisitCode: FOUND valid CodeBlock 0x40 bytes before! This suggests object slicing or copy issue" << std::endl;
+    }
+    #endif
+    #endif
+  }
+  
+  // ASAN: Check if node is poisoned
+  #ifdef __has_feature
+  #if __has_feature(address_sanitizer)
+  if (__asan_address_is_poisoned(&node)) {
+    std::cerr << "[DEBUG] VisitCode: ERROR - node is ASAN poisoned!" << std::endl;
+  }
+  if (__asan_address_is_poisoned(&node.statements)) {
+    std::cerr << "[DEBUG] VisitCode: ERROR - node.statements is ASAN poisoned!" << std::endl;
+  }
+  #endif
+  #endif
+  
+  // Save previous state for nested blocks
+  bool prev_return_state = has_return_encountered;
+  has_return_encountered = false;
+  
+  // Store size to avoid issues if vector is modified during iteration
+  size_t num_statements = node.statements.size();
+  std::cerr << "[DEBUG] VisitCode: num_statements=" << num_statements << std::endl;
+  
+  for (size_t i = 0; i < num_statements; ++i) {
+    std::cerr << "[DEBUG] VisitCode: Loop iteration i=" << i 
+              << ", node.statements.size()=" << node.statements.size() << std::endl;
+    
+    // ASAN: Check if the vector element address is poisoned before accessing
+    #ifdef __has_feature
+    #if __has_feature(address_sanitizer)
+    void *elem_addr = &node.statements[i];
+    if (__asan_address_is_poisoned(elem_addr)) {
+      std::cerr << "[DEBUG] VisitCode: ERROR - statements[" << i << "] address is ASAN poisoned at " << elem_addr << std::endl;
+      break;
+    }
+    #endif
+    #endif
+    
+    std::cerr << "[DEBUG] VisitCode: About to access statements[" << i << "] at " << (void*)&node.statements[i] << std::endl;
+    auto &stmt = node.statements[i];
+    std::cerr << "[DEBUG] VisitCode: Got reference to statements[" << i << "], &stmt=" << (void*)&stmt << std::endl;
+    
+    // This is where it crashes - the unique_ptr object itself is corrupted
+    std::cerr << "[DEBUG] VisitCode: About to check if stmt is null, stmt.get()=" << (void*)stmt.get() << std::endl;
     if (!stmt) continue;  // Skip null statements
+    
+    // Check if we've already encountered a return in this block
+    // Exception: In switch statements, case/default labels are independent execution paths
+    // so we should not skip them even if a previous case had a return
+    if (has_return_encountered) {
+      // Check if this is a case or default statement (independent execution paths in switch)
+      AST::NodeType stmt_type = stmt->type;
+      if (stmt_type == AST::NodeType::CASE || stmt_type == AST::NodeType::DEFAULT) {
+        // For case/default, reset the flag since they're independent execution paths
+        has_return_encountered = false;
+      } else {
+        // Skip unreachable code after return statement
+        continue;
+      }
+    }
+    
     print("    ");
     VISIT_AND_CHECK(stmt);
     PrintSemiColon(stmt);
     print("\n");
+    
+    // Check if this statement is or contains a return AFTER visiting
+    // We check after so we print the return statement itself, but skip subsequent ones
+    // Store the node type before it might become invalid
+    AST::NodeType stmt_type = stmt->type;
+    bool is_return = (stmt_type == AST::NodeType::RETURN);
+    if (!is_return) {
+      // Check recursively for nested returns (e.g., in if statements)
+      is_return = ContainsReturnStatement(stmt);
+    }
+    
+    if (is_return) {
+      has_return_encountered = true;
+    }
   }
+  
+  // If we encountered a return in this block, keep the flag set for parent blocks
+  // Otherwise restore previous state
+  if (!has_return_encountered) {
+    has_return_encountered = prev_return_state;
+  }
+  
   return true;
 }
 
@@ -902,105 +1163,6 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
-  // Check if this for loop matches the repeat macro pattern:
-  // for (int ENIGMA_REPEAT_VAR = (x); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
-  bool is_repeat_pattern = false;
-  AST::PNode* repeat_expr_ptr = nullptr;  // Pointer to the PNode, not the Node itself
-
-  if (node.assignment && node.assignment->type == AST::NodeType::DECLARATION) {
-    auto *decl_stmt = node.assignment->As<AST::DeclarationStatement>();
-    if (decl_stmt && decl_stmt->declarations.size() == 1) {
-      const auto &decl = decl_stmt->declarations[0];
-      std::string var_name = decl.declarator->decl.name.content;
-      
-      // Check if it's ENIGMA_REPEAT_VAR of type int
-      if (var_name == "ENIGMA_REPEAT_VAR" && decl.declarator->def && 
-          decl.declarator->def->name == "int") {
-        // Check condition: ENIGMA_REPEAT_VAR > 0
-        if (node.condition && node.condition->type == AST::NodeType::BINARY_EXPRESSION) {
-          auto *bin_expr = node.condition->As<AST::BinaryExpression>();
-          if (bin_expr && bin_expr->operation.type == TT_GREATER) {
-            // Check left side is ENIGMA_REPEAT_VAR
-            if (bin_expr->left && bin_expr->left->type == AST::NodeType::IDENTIFIER) {
-              auto *left_id = bin_expr->left->As<AST::IdentifierAccess>();
-              if (left_id && left_id->name.content == "ENIGMA_REPEAT_VAR") {
-                // Check right side is 0
-                if (bin_expr->right && bin_expr->right->type == AST::NodeType::LITERAL) {
-                  auto *right_lit = bin_expr->right->As<AST::Literal>();
-                  // Check if it's a numeric literal with value 0
-                  bool is_zero = false;
-                  if (right_lit && (right_lit->value.type == TT_DECLITERAL || 
-                                    right_lit->value.type == TT_BINLITERAL || 
-                                    right_lit->value.type == TT_OCTLITERAL || 
-                                    right_lit->value.type == TT_HEXLITERAL)) {
-                    // Check if the value is 0
-                    try {
-                      if (std::holds_alternative<long long>(right_lit->value.value)) {
-                        is_zero = (std::get<long long>(right_lit->value.value) == 0);
-                      } else if (std::holds_alternative<std::string>(right_lit->value.value)) {
-                        std::string str_val = std::get<std::string>(right_lit->value.value);
-                        is_zero = (str_val == "0");
-                      }
-                    } catch (...) {
-                      is_zero = false;
-                    }
-                  }
-                  if (is_zero) {
-                    // Check increment: ENIGMA_REPEAT_VAR--
-                    if (node.increment && node.increment->type == AST::NodeType::UNARY_POSTFIX_EXPRESSION) {
-                      auto *unary_expr = node.increment->As<AST::UnaryPostfixExpression>();
-                      if (unary_expr && unary_expr->operation.type == TT_DECREMENT) {
-                        if (unary_expr->operand && unary_expr->operand->type == AST::NodeType::IDENTIFIER) {
-                          auto *incr_id = unary_expr->operand->As<AST::IdentifierAccess>();
-                          if (incr_id && incr_id->name.content == "ENIGMA_REPEAT_VAR") {
-                            // Pattern matches! Extract the initializer expression
-                            if (decl.init) {
-                              // The initializer might be wrapped in parentheses from the macro
-                              // We need to extract the actual expression
-                              if (decl.init->kind == AST::Initializer::Kind::ASSIGN_EXPR) {
-                                auto &init_node = std::get<AST::AssignmentInitNode>(decl.init->initializer);
-                                if (init_node->kind == AST::AssignmentInitializer::Kind::EXPR) {
-                                  auto &expr = std::get<AST::PNode>(init_node->initializer);
-                                  // Extract the actual expression, unwrapping parentheses if present
-                                  if (expr && expr->type == AST::NodeType::PARENTHETICAL) {
-                                    repeat_expr_ptr = &expr->As<AST::Parenthetical>()->expression;
-                                  } else {
-                                    repeat_expr_ptr = &expr;
-                                  }
-                                  is_repeat_pattern = true;
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if (is_repeat_pattern && repeat_expr_ptr) {
-    // Output as repeat(expr) instead of the full for loop
-    print("repeat(");
-    VISIT_AND_CHECK(*repeat_expr_ptr);
-    print(") ");
-    
-    if (node.body) {
-      VISIT_AND_CHECK(node.body);
-      PrintSemiColon(node.body);
-    } else {
-      print(";");
-    }
-    print(" ");
-    return true;
-  }
-
   // Normal for loop output
   print("for(");
 
@@ -1055,7 +1217,12 @@ bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
 
 bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
   if (node.kind == AST::WhileLoop::Kind::REPEAT) {
-    print("int strange_name = ");
+    // repeat is a macro, so output it as-is (not converted to for/while loop)
+    // The macro will be expanded by the C++ preprocessor at build time
+    print("repeat");
+    if (node.condition->type != AST::NodeType::PARENTHETICAL) {
+      print("(");
+    }
   } else {
     print("while");
     if (node.condition->type != AST::NodeType::PARENTHETICAL) {
@@ -1073,7 +1240,11 @@ bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
 
   VISIT_AND_CHECK(node.condition);
 
-  if (node.kind != AST::WhileLoop::Kind::REPEAT) {
+  if (node.kind == AST::WhileLoop::Kind::REPEAT) {
+    if (node.condition->type != AST::NodeType::PARENTHETICAL) {
+      print(")");
+    }
+  } else {
     if (node.kind == AST::WhileLoop::Kind::UNTIL) {
       print(")");
     }
@@ -1081,8 +1252,6 @@ bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
     if (node.condition->type != AST::NodeType::PARENTHETICAL) {
       print(")");
     }
-  } else {
-    print("; while(strange_name--)");
   }
 
   print(" ");

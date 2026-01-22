@@ -13,6 +13,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <unordered_set>
+#include <cctype>
 
 namespace clang_adapter {
 
@@ -1563,6 +1565,12 @@ void ClangContext::extract_macros() {
       
       CXCursorKind kind = clang_getCursorKind(cursor);
       
+      // Note: CXCursor_PreprocessingDirective does NOT include #undef in libclang
+      // We handle undefs separately after visiting all cursors
+      if (kind == CXCursor_PreprocessingDirective) {
+        return CXChildVisit_Continue;
+      }
+      
       // Look for macro definitions
       if (kind == CXCursor_MacroDefinition) {
         std::string name = get_cursor_name(cursor);
@@ -1703,6 +1711,78 @@ void ClangContext::extract_macros() {
   visitor.tu = tu_;
   
   clang_visitChildren(root, MacroVisitor::visit, &visitor);
+  
+  // libclang doesn't expose #undef as cursors, so we need to scan included files
+  // for #undef directives and remove those macros from our map
+  struct UndefCollector {
+    CXTranslationUnit tu;
+    std::unordered_set<std::string> undefined_macros;
+    std::unordered_set<std::string> scanned_files;
+    
+    static enum CXChildVisitResult visit(CXCursor cursor, CXCursor /* parent */, CXClientData client_data) {
+      UndefCollector* collector = static_cast<UndefCollector*>(client_data);
+      CXCursorKind kind = clang_getCursorKind(cursor);
+      
+      // Visit #include directives to scan their files for #undef
+      if (kind == CXCursor_InclusionDirective) {
+        CXFile included_file = clang_getIncludedFile(cursor);
+        if (included_file) {
+          CXString filename = clang_getFileName(included_file);
+          std::string filename_str = clang_getCString(filename);
+          clang_disposeString(filename);
+          
+          // Only scan each file once
+          if (collector->scanned_files.find(filename_str) == collector->scanned_files.end()) {
+            collector->scanned_files.insert(filename_str);
+            
+            size_t size = 0;
+            const char* contents = clang_getFileContents(collector->tu, included_file, &size);
+            if (contents && size > 0) {
+              std::string file_contents(contents, size);
+              collector->scan_for_undefs(file_contents);
+            }
+          }
+        }
+      }
+      
+      return CXChildVisit_Recurse;
+    }
+    
+    void scan_for_undefs(const std::string& contents) {
+      size_t pos = 0;
+      while ((pos = contents.find("#undef", pos)) != std::string::npos) {
+        // Skip "#undef"
+        pos += 6;
+        
+        // Skip whitespace
+        while (pos < contents.size() && (contents[pos] == ' ' || contents[pos] == '\t')) {
+          pos++;
+        }
+        
+        // Extract macro name
+        size_t name_start = pos;
+        while (pos < contents.size() && (std::isalnum(contents[pos]) || contents[pos] == '_')) {
+          pos++;
+        }
+        
+        if (pos > name_start) {
+          std::string macro_name = contents.substr(name_start, pos - name_start);
+          undefined_macros.insert(macro_name);
+        }
+      }
+    }
+  };
+  
+  UndefCollector undef_collector;
+  undef_collector.tu = tu_;
+  
+  // Visit all includes to scan their files for undefs
+  clang_visitChildren(root, UndefCollector::visit, &undef_collector);
+  
+  // Remove undefined macros from our map
+  for (const auto& undef_name : undef_collector.undefined_macros) {
+    macros_.erase(undef_name);
+  }
 }
 
 std::string ClangDefinition::qualified_id() const {

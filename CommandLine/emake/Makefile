@@ -48,3 +48,10 @@ ifeq ($(OS),Darwin)
 endif
 
 include ../../Default.mk
+
+# Clean object files from emake-tests directory when cleaning tests
+ifeq ($(TESTS), TRUE)
+clean: .FORCE
+	rm -rf $(TARGET) $(OBJ_DIR)
+	find ../emake-tests -name "*.o" -type f -delete 2>/dev/null || true
+endif

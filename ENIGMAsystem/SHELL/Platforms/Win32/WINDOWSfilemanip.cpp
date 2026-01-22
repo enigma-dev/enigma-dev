@@ -244,4 +244,8 @@ time_t file_modified_time(std::string fname)
     return sb.st_mtime;
 }
 
+std::string get_working_directory() {
+  return working_directory;
+}
+
 }

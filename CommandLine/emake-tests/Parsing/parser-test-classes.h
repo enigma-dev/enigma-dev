@@ -2,6 +2,7 @@
 #define PARSER_TESTING_UTILS
 
 #include <gtest/gtest.h>
+#include <memory>
 #include <languages/lang_CPP.h>
 #include <languages/clang_adapter.h>
 #include <parsing/ast.h>
@@ -70,6 +71,9 @@ struct ParserTester {
   Lexer lexer;
   lang_CPP cpp{};
   AstBuilderTestAPI* builder = CreateBuilder();
+  // Store lang_CPP instance for custom settings to manage lifetime
+  std::unique_ptr<lang_CPP> custom_cpp;
+  std::unique_ptr<ParseContext> custom_context;
 
   AstBuilderTestAPI* operator->() { return builder; }
 
@@ -82,6 +86,23 @@ struct ParserTester {
     builder->initialize(&lexer, &herr);
   }
 
+  // Private constructor for CreateWithSettings
+  explicit ParserTester(std::string code, const ParseContext* ctx)
+      : context(ctx), lexer(std::move(code), context, &herr) {
+    std::cerr << "[DEBUG] ParserTester constructor: code length=" << code.length() 
+              << ", lexer.GetCode().length()=" << lexer.GetCode().length() << std::endl;
+    builder->initialize(&lexer, &herr);
+    std::cerr << "[DEBUG] ParserTester constructor: After initialize, lexer.GetCode().length()=" << lexer.GetCode().length() << std::endl;
+  }
+  
+  // Copy constructor - ensure lexer is copied correctly
+  // Note: Lexer has a reference member, so we need to be careful when copying
+  // The default copy should work since owned_code is a shared_ptr
+  ParserTester(const ParserTester& other) = default;
+  
+  // Move constructor
+  ParserTester(ParserTester&& other) noexcept = default;
+
   static ParserTester CreateWithCpp(std::string code) { 
     return ParserTester(std::move(code), true); 
   }
@@ -91,6 +112,83 @@ struct ParserTester {
   }
 
   static ParserTester CreateWithSetUp(std::string code) { return ParserTester(std::move(code)); }
+
+  static ParserTester CreateWithSettings(std::string code, std::string yaml_settings) {
+    std::cerr << "[DEBUG] CreateWithSettings: code='" << code << "', yaml_settings='" << yaml_settings << "'" << std::endl;
+    // Build full YAML with required fields
+    std::string full_yaml = "%e-yaml\n---\n";
+    full_yaml += "target-windowing: None\n";
+    full_yaml += "target-audio: None\n";
+    full_yaml += "target-compiler: gcc\n";
+    full_yaml += "target-graphics: None\n";
+    full_yaml += "target-widget: None\n";
+    full_yaml += "target-collision: None\n";
+    full_yaml += "target-networking: None\n";
+    
+    // Add default values for settings not specified
+    if (yaml_settings.find("inherit-strings-from") == std::string::npos) {
+      full_yaml += "inherit-strings-from: 0\n";
+    }
+    if (yaml_settings.find("inherit-escapes-from") == std::string::npos) {
+      full_yaml += "inherit-escapes-from: 0\n";
+    }
+    if (yaml_settings.find("inherit-literals-from") == std::string::npos) {
+      full_yaml += "inherit-literals-from: 0\n";
+    }
+    if (yaml_settings.find("inherit-increment-from") == std::string::npos) {
+      full_yaml += "inherit-increment-from: 0\n";
+    }
+    if (yaml_settings.find("inherit-equivalence-from") == std::string::npos) {
+      full_yaml += "inherit-equivalence-from: 0\n";
+    }
+    if (yaml_settings.find("automatic-semicolons") == std::string::npos) {
+      full_yaml += "automatic-semicolons: true\n";
+    }
+    
+    // Append user-provided settings (they will override defaults)
+    full_yaml += yaml_settings;
+    
+    std::cerr << "[DEBUG] CreateWithSettings: Full YAML:\n" << full_yaml << std::endl;
+    
+    // Initialize context if needed
+    if (!main_context) {
+      std::cerr << "[DEBUG] CreateWithSettings: Creating main_context" << std::endl;
+      main_context = new clang_adapter::ClangContext();
+    }
+    
+    // Create a new lang_CPP instance for this test
+    std::cerr << "[DEBUG] CreateWithSettings: Creating lang_CPP instance" << std::endl;
+    auto custom_cpp = std::make_unique<lang_CPP>();
+    
+    // Apply settings to the language frontend
+    std::cerr << "[DEBUG] CreateWithSettings: Calling definitionsModified" << std::endl;
+    syntax_error* err = custom_cpp->definitionsModified(NULL, full_yaml.c_str());
+    if (err) {
+      std::cerr << "[DEBUG] CreateWithSettings: definitionsModified returned error (non-null)" << std::endl;
+    } else {
+      std::cerr << "[DEBUG] CreateWithSettings: definitionsModified succeeded" << std::endl;
+    }
+    
+    // Create ParseContext with the configured language frontend
+    std::cerr << "[DEBUG] CreateWithSettings: Creating ParseContext" << std::endl;
+    auto custom_context = std::make_unique<ParseContext>(custom_cpp.get(), kNoNames);
+    const ParseContext* ctx = custom_context.get();
+    std::cerr << "[DEBUG] CreateWithSettings: ParseContext created, use_escapes=" << ctx->compatibility_opts.use_cpp_escapes 
+              << ", use_incrementals=" << ctx->compatibility_opts.use_incrementals << std::endl;
+    
+    // Create ParserTester with the custom context
+    std::cerr << "[DEBUG] CreateWithSettings: Creating ParserTester with code='" << code << "', length=" << code.length() << std::endl;
+    // Make a copy of code before moving it, for debugging
+    std::string code_copy = code;
+    ParserTester tester(std::move(code), ctx);
+    std::cerr << "[DEBUG] CreateWithSettings: After move, code_copy='" << code_copy << "', tester.lexer.GetCode()='" << tester.lexer.GetCode() << "', length=" << tester.lexer.GetCode().length() << std::endl;
+    tester.custom_cpp = std::move(custom_cpp);
+    tester.custom_context = std::move(custom_context);
+    
+    std::cerr << "[DEBUG] CreateWithSettings: ParserTester created, lexer code='" << tester.lexer.GetCode() << "', length=" << tester.lexer.GetCode().length() << std::endl;
+    
+    return tester;
+  }
 
   const ParseContext& SetUp() {
     static lang_CPP cpp{};
@@ -111,7 +209,7 @@ struct ParserTester {
       cpp.definitionsModified(NULL, ((string) "%e-yaml\n"
       "---\n"
       "target-windowing: None\n"
-      "treat-literals-as: 0\n"
+      "inherit-literals-from: 0\n"
       "sample-lots-of-radios: 0\n"
       "inherit-equivalence-from: 0\n"
       "sample-checkbox: on\n"

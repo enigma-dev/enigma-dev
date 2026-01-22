@@ -32,10 +32,35 @@
 #include <variant>
 #include <vector>
 
+#ifdef AST_DEBUG_TRACKING
+#include <unordered_set>
+#include <mutex>
+#include <iostream>
+#include <iomanip>
+#endif
+
+#ifdef __has_feature
+#if __has_feature(address_sanitizer)
+extern "C" int __asan_address_is_poisoned(void const volatile *addr);
+#endif
+#endif
+
 struct ParsedScope;  // object_storage.h
 struct CompileState;
 
 namespace enigma::parsing {
+
+#ifdef AST_DEBUG_TRACKING
+// Debug tracking infrastructure for AST nodes
+namespace ast_debug {
+  // Track node creation and destruction
+  void TrackNodeCreation(Node* node, const char* type_name);
+  void TrackNodeDestruction(Node* node);
+  bool ValidateNode(Node* node);
+  void DumpNodeTracking();
+  void ClearTracking();
+}
+#endif
 
 class AST {
  public:
@@ -71,13 +96,39 @@ class AST {
     /// Cast the node to a given type
     template <typename T>
     T* As() {
-        return dynamic_cast<T*>(this);
+        std::cerr << "[DEBUG] Node::As<>() called on node at " << (void*)this 
+                  << ", type=" << (int)type << std::endl;
+        T* result = dynamic_cast<T*>(this);
+        std::cerr << "[DEBUG] Node::As<>() returned " << (void*)result << std::endl;
+        if (result && type == NodeType::BLOCK) {
+          // Check if result is actually a CodeBlock
+          CodeBlock* cb = dynamic_cast<CodeBlock*>(result);
+          if (cb) {
+            std::cerr << "[DEBUG] Node::As<>() CodeBlock, statements.size()=" 
+                      << cb->statements.size() << ", &statements=" << (void*)&cb->statements << std::endl;
+          }
+        }
+        return result;
     }
     // Helper function that calls the appropriate Visitor function for this node type
     virtual bool accept(Visitor& visitor) = 0;
 
-    Node(NodeType t = NodeType::ERROR): type(t) {}
-    virtual ~Node() = default;
+    Node(NodeType t = NodeType::ERROR): type(t) {
+#ifdef AST_DEBUG_TRACKING
+      ast_debug::TrackNodeCreation(this, "Node");
+#endif
+    }
+    // Explicit move constructor/assignment to ensure proper movement of type field
+    Node(Node&& other) noexcept : type(other.type) {}
+    Node& operator=(Node&& other) noexcept {
+      type = other.type;
+      return *this;
+    }
+    virtual ~Node() {
+#ifdef AST_DEBUG_TRACKING
+      ast_debug::TrackNodeDestruction(this);
+#endif
+    }
 
    protected:
     template<typename... SubNodes>
@@ -90,6 +141,12 @@ class AST {
 
   template<NodeType kType> struct TypedNode : Node {
     TypedNode(): Node(kType) {}
+    // Explicit move constructor/assignment to ensure proper base class movement
+    TypedNode(TypedNode&& other) noexcept : Node(std::move(other)) {}
+    TypedNode& operator=(TypedNode&& other) noexcept {
+      Node::operator=(std::move(other));
+      return *this;
+    }
   };
 
   struct ConstValue {
@@ -126,7 +183,39 @@ class AST {
     BASIC_NODE_ROUTINES(CodeBlock);
 
     CodeBlock() noexcept = default;
-    CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {}
+    CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {
+      std::cerr << "[DEBUG] CodeBlock constructor: this=" << (void*)this 
+                << ", statements.size()=" << this->statements.size() 
+                << ", &statements=" << (void*)&this->statements 
+                << ", this->type=" << (int)this->type << std::endl;
+    }
+    // Explicit move constructor to ensure proper base class movement
+    CodeBlock(CodeBlock&& other) noexcept 
+        : TypedNode<NodeType::BLOCK>(std::move(other)), 
+          statements{std::move(other.statements)} {
+      std::cerr << "[DEBUG] CodeBlock move constructor: this=" << (void*)this 
+                << ", &other=" << (void*)&other 
+                << ", this->statements.size()=" << this->statements.size() 
+                << ", other.statements.size()=" << other.statements.size() 
+                << ", this->type=" << (int)this->type 
+                << ", other.type=" << (int)other.type << std::endl;
+    }
+    CodeBlock& operator=(CodeBlock&& other) noexcept {
+      std::cerr << "[DEBUG] CodeBlock move assignment: this=" << (void*)this 
+                << ", &other=" << (void*)&other << std::endl;
+      TypedNode<NodeType::BLOCK>::operator=(std::move(other));
+      statements = std::move(other.statements);
+      std::cerr << "[DEBUG] CodeBlock move assignment: after move, this->statements.size()=" 
+                << this->statements.size() << std::endl;
+      return *this;
+    }
+    // Delete copy constructor/assignment to prevent object slicing
+    CodeBlock(const CodeBlock&) = delete;
+    CodeBlock& operator=(const CodeBlock&) = delete;
+    ~CodeBlock() {
+      std::cerr << "[DEBUG] CodeBlock destructor: this=" << (void*)this 
+                << ", statements.size()=" << this->statements.size() << std::endl;
+    }
   };
 
   struct Operation{
@@ -558,6 +647,11 @@ class AST {
     virtual bool VisitDeleteExpression(DeleteExpression &node){ return DefaultVisit(node); }
     virtual bool VisitDeclarationStatement(DeclarationStatement &node){ return DefaultVisit(node); }
     virtual bool Visit(PNode &node) {
+      // Check if the unique_ptr itself is valid
+      if (!node) return false;
+      // Call accept directly - if the object has been freed, this will crash
+      // but that's better than silently failing. The unique_ptr should prevent
+      // the object from being freed while we have a reference to it.
       return node->accept(*this);
     }
   };
@@ -567,12 +661,15 @@ class AST {
     bool owns_ofstream;
     bool print_type;
     bool is_script;
+    bool is_object_script;
     const LanguageFrontend *language_fe = nullptr;
+    bool has_return_encountered = false;  // Track if return statement encountered in current block
+    std::string temp_file_path;  // Path to temporary file (for test mode)
 
    public:
     CppPrettyPrinter();
     CppPrettyPrinter(const LanguageFrontend *lfe);
-    CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script);
+    CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script, bool is_object_script = false);
     ~CppPrettyPrinter();
     void print(std::string code);
     void PrintSemiColon(PNode &node);
@@ -635,7 +732,9 @@ class AST {
   void ApplyTo(int instance_id);
 
   // Extract declarations from this AST into the specified scope.
-  void ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs);
+  // is_script: true if this is a script, false for object events.
+  // Scripts need their variables added to dot_accessed_locals because they can be called by any object.
+  void ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs, bool is_script = false);
 
   // Pretty-prints this code to a stream with the given base indentation.
   // void PrettyPrint(std::ofstream &of, int base_indent = 2) const;
@@ -647,7 +746,7 @@ class AST {
   // The caller is responsible for having already printed applicable
   // function declarations and opening braces, statements, etc, and for
   // printing the closing statements and braces afterward.
-  void WriteCppToStream(std::ofstream &of, int base_indent = 2, bool is_script = false) const;
+  void WriteCppToStream(std::ofstream &of, int base_indent = 2, bool is_script = false, bool is_object_script = false) const;
 
   // Parses the given code, returning an AST*. The resulting AST* is never null.
   // If syntax errors were encountered, they are stored within the AST.

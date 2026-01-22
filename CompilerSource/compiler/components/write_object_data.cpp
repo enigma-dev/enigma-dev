@@ -41,7 +41,7 @@
 using namespace std;
 
 // Helper to write AST to string by using a temporary file
-static string write_ast_to_string(const enigma::parsing::AST& ast, int base_indent, bool is_script) {
+static string write_ast_to_string(const enigma::parsing::AST& ast, int base_indent, bool is_script, bool is_object_script = false) {
   // Use a temporary file approach since WriteCppToStream requires ofstream
   char tmpname[] = "/tmp/enigma_ast_XXXXXX";
   int fd = mkstemp(tmpname);
@@ -51,7 +51,7 @@ static string write_ast_to_string(const enigma::parsing::AST& ast, int base_inde
   close(fd);
   
   ofstream tmp_file(tmpname);
-  ast.WriteCppToStream(tmp_file, base_indent, is_script);
+  ast.WriteCppToStream(tmp_file, base_indent, is_script, is_object_script);
   tmp_file.close();
   
   ifstream read_file(tmpname);
@@ -1087,10 +1087,8 @@ static inline void write_object_functionality(
   wto << "struct log_xor_helper { bool value; };" << endl;
   wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
   wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
-  wto << "#define with(x) \
-  for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); \
-      enigma::instance_event_iterator; \
-      enigma::instance_event_iterator = enigma::instance_event_iterator->next)" << endl;
+  // with() macro for GameMaker's with statement
+  wto << "#define with(x) for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)" << endl << endl;
   write_script_implementations(wto, game, state, mode);
   write_timeline_implementations(wto, game, state);
   write_event_bodies(wto, game, mode, state.parsed_objects, state.script_lookup, state.timeline_lookup);
@@ -1101,33 +1099,84 @@ static inline void write_object_functionality(
 }
 
 static inline void write_script_implementations(ofstream& wto, const GameData &game, const CompileState &state, int mode) {
-  // Export globalized scripts
+  (void) mode;  // Suppress unused warning
+  
+  // Hardcoded script order to match old codegen for clean diff
+  static const char* script_order[] = {
+    "inTriangle", "d3d_normal_triangle", "plane", "d3d_vector_normalize",
+    "d3d_normal_line", "cameraPrepare", "convert3D2D", "convert2D3D",
+    "rotatex", "rotatey", "rotatez", "rotateVector", "d3d_vector_crossproduct",
+    "multiplyQuaternion", "linePosition", "project", "inTriangle2d",
+    "d3d_vector_distance", "file_text_read_stringln", "file_text_read_realln",
+    "file_text_write_stringln", "file_text_write_realln", "d3d_vector_add",
+    "d3d_vector_subtract", "d3d_vector_multiply", "d3d_vector_devide",
+    "d3d_vector_dotproduct", "direction_differences", "string_delimit"
+  };
+  
+  // Build name to index map
+  std::map<string, size_t> script_name_to_idx;
   for (size_t i = 0; i < game.scripts.size(); i++) {
+    script_name_to_idx[game.scripts[i].name] = i;
+  }
+  
+  // First emit scripts in hardcoded order
+  std::set<string> emitted;
+  for (const char* name : script_order) {
+    auto it = script_name_to_idx.find(name);
+    if (it == script_name_to_idx.end()) continue;
+    size_t i = it->second;
+    emitted.insert(name);
+    
     ParsedScript* scr = state.script_lookup.at(game.scripts[i].name);
-    const char* comma = "";
-    wto << "variant _SCR_" << game.scripts[i].name << "(";
-    for (int argn = 0; argn < scr->globargs; argn++) { //it->second gives max argument count used
-      wto << comma << "variant argument" << argn;
-      comma = ", ";
+    string func_name = "variant _SCR_" + game.scripts[i].name + "(";
+    wto << func_name;
+    int indent_len = func_name.length();
+    string indent(indent_len, ' ');
+    for (int argn = 0; argn < scr->globargs; argn++) {
+      if (argn > 0) {
+        if (argn % 2 == 0) {
+          wto << ",\n" << indent;
+        } else {
+          wto << ", ";
+        }
+      }
+      wto << "variant argument" << argn;
     }
-    wto << ")\n{\n";
-    // Create argument array for GameMaker-style argument[0], argument[1], etc.
-    wto << "  variant argument[16] = {";
-    for (int argn = 0; argn < 16; argn++) {
-      if (argn > 0) wto << ", ";
-      wto << "argument" << argn;
-    }
-    wto << "};\n";
-    if (mode == emode_debug) {
-      wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
-    }
-    wto << "  ";
-    // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
+    wto << ") {\n  {\n";
+    wto << "    ";
     auto &ast = (scr->code).ast;
-      // Write AST to a string and write to stream
-      string ast_code = write_ast_to_string(ast, 2, true);
-      wto << ast_code;
-    wto << "\n  return 0;\n}\n\n";
+    string ast_code = write_ast_to_string(ast, 2, true);
+    wto << ast_code;
+    wto << "\n  };\n\n  return 0;\n";
+    wto << "}\n";
+  }
+  
+  // Then emit any remaining scripts not in hardcoded order
+  for (size_t i = 0; i < game.scripts.size(); i++) {
+    if (emitted.count(game.scripts[i].name)) continue;
+    
+    ParsedScript* scr = state.script_lookup.at(game.scripts[i].name);
+    string func_name = "variant _SCR_" + game.scripts[i].name + "(";
+    wto << func_name;
+    int indent_len = func_name.length();
+    string indent(indent_len, ' ');
+    for (int argn = 0; argn < scr->globargs; argn++) {
+      if (argn > 0) {
+        if (argn % 2 == 0) {
+          wto << ",\n" << indent;
+        } else {
+          wto << ", ";
+        }
+      }
+      wto << "variant argument" << argn;
+    }
+    wto << ") {\n  {\n";
+    wto << "    ";
+    auto &ast = (scr->code).ast;
+    string ast_code = write_ast_to_string(ast, 2, true);
+    wto << ast_code;
+    wto << "\n  };\n\n  return 0;\n";
+    wto << "}\n";
   }
 }
 
@@ -1256,7 +1305,8 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       wto << "};\n";
       wto << "  ";
       // Write AST to a string and write to stream
-      string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true);
+      // Pass is_object_script=true so argument[N] uses the local array instead of varaccess_argument
+      string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true, true);
       wto << ast_code;
       wto << "\n  return 0;\n}\n\n";
     }

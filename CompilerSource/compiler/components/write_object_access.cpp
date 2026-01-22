@@ -122,37 +122,30 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
     wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
     wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
-    // Only generate object-specific cases if the variable is actually declared in that object's locals
-    // Variables in dot_accessed_locals should only be accessed via ENIGMA_global_instance (case global:)
-    // Only generate object-specific cases if the variable is actually declared in that object's locals
-    // AND it's not in dot_accessed_locals (variables in dot_accessed_locals are global, not object members)
-    // Note: We check object->locals, but if the variable is in dot_accessed_locals, it won't be declared
-    // in the object struct (we filter it in write_object_data.cpp), so we shouldn't generate these cases.
-    // However, we still check object->locals here because the parser may have added it, but we filter it
-    // during declaration. So we need to check if it would actually be declared (not filtered).
-    // For now, we'll generate the cases - if the variable isn't declared, the compiler will error,
-    // but that's better than generating incorrect code. Actually, let's be smarter:
-    // If a variable is in dot_accessed_locals, it's a global variable and should only be accessed via
-    // ENIGMA_global_instance, not as object members. So skip object-specific cases for dot_accessed_locals.
-    bool is_dot_accessed = (dot_accessed_locals.find(pmember) != dot_accessed_locals.end());
-    
-    if (!is_dot_accessed) {
-      // Only generate object-specific cases if variable is NOT in dot_accessed_locals
-      // (variables in dot_accessed_locals are global, accessed via ENIGMA_global_instance)
-      for (parsed_object *const obj : parsed_objects) {
-        for (parsed_object *parent = obj; parent;) {
-          map<string,dectrip>::iterator x = parent->locals.find(pmember);
-          if (x != parent->locals.end())
-          {
-            string tot = x->second.type != "" ? x->second.type : "var";
-            if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
-            {
-              wto << "      case " << obj->name << ": return ((OBJ_" << obj->name << "*)inst)->" << pmember << ";" << endl;
-              break;
-            }
-          }
+    // Generate object-specific cases for objects that have this variable as a local member
+    // (but NOT as a global - globals are accessed via ENIGMA_global_structure)
+    for (parsed_object *const obj : parsed_objects) {
+      // Skip if this variable is in the object's globals (it's a global, not an instance variable)
+      if (obj->globals.find(pmember) != obj->globals.end()) {
+        continue;
+      }
+      for (parsed_object *parent = obj; parent;) {
+        // Also skip if the variable is in the parent's globals
+        if (parent->globals.find(pmember) != parent->globals.end()) {
           parent = parent->parent;
+          continue;
         }
+        map<string,dectrip>::iterator x = parent->locals.find(pmember);
+        if (x != parent->locals.end())
+        {
+          string tot = x->second.type != "" ? x->second.type : "var";
+          if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
+          {
+            wto << "      case " << obj->name << ": return ((OBJ_" << obj->name << "*)inst)->" << pmember << ";" << endl;
+            break;
+          }
+        }
+        parent = parent->parent;
       }
     }
 
