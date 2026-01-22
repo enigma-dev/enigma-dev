@@ -1,0 +1,148 @@
+var buf = buffer_create(8, buffer_grow, 1);
+const char *cont = "Many hands make light work.";
+var str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
+
+buffer_write(buf, buffer_string, cont);
+var buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "Many hands make light work";
+str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcms=";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "Many hands make light wor";
+str = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcg==";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "";
+str = "";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "f";
+str = "Zg==";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "fo";
+str = "Zm8=";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "foo";
+str = "Zm9v";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "foob";
+str = "Zm9vYg==";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "fooba";
+str = "Zm9vYmE=";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, 1);
+cont = "foobar";
+str = "Zm9vYmFy";
+
+buffer_write(buf, buffer_string, cont);
+buf2 = buffer_base64_decode(buffer_base64_encode(buf, 0, strlen(cont) + 1));
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 2);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+cont = "light w";
+str = "bGlnaHQgdw";
+
+buf2 = buffer_base64_decode(str);
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 1);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+
+cont = "light wo";
+str = "bGlnaHQgd28";
+
+buf2 = buffer_base64_decode(str);
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 1);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+
+cont = "light wor";
+str = "bGlnaHQgd29y";
+
+buf2 = buffer_base64_decode(str);
+gtest_assert_eq(buffer_get_size(buf2), strlen(cont) + 1);
+gtest_assert_eq(buffer_read(buf2, buffer_string), cont);
+
+buffer_delete(buf2);
+
+game_end();

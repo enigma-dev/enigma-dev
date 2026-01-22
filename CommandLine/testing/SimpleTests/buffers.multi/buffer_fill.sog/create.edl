@@ -1,0 +1,197 @@
+for var offset = 0; offset < 8; ++offset {
+    show_debug_message("offset is: " + string(offset));
+    show_debug_message("Testing buffer_u8");
+    var buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_u8, 255, buffer_get_size(buf));
+    var len = buffer_get_size(buf);
+    // Create the mapping 0 -> 0, `n` -> closest multiple of 4
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    var times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_u8));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_s8");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_s8, -127, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_s8), -127);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_s8));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_u16");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_u16, 65535, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_u16), 65535);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_u16));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_s16");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_s16, -32768, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_s16), -32768);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_s16));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_u32");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_u32, 4294967295, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_u32), 4294967295);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_u32));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_s32");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_s32, -2147483648, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_s32), -2147483648);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_s32));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_f32");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_f32, 1.25, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 4));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_f32), 1.25);
+        gtest_assert_eq(buffer_tell(buf), i * 4 + buffer_sizeof(buffer_f32));
+    }
+    buffer_delete(buf);
+
+    show_debug_message("Testing buffer_f64");
+    buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+    buffer_fill(buf, offset, buffer_f64, 200.651, buffer_get_size(buf));
+    len = buffer_get_size(buf);
+    for var i = 0; i < int(offset != 0) * ceil(offset / 4) * 4; i += 4 {
+        gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+        gtest_assert_eq(buffer_tell(buf), i + buffer_sizeof(buffer_u8));
+    }
+    gtest_assert_eq(buffer_get_size(buf), 8);
+    times = ceil(len / (offset + 8));
+    for var i = buffer_tell(buf); i < times; i++ {
+        gtest_assert_eq(buffer_read(buf, buffer_f64), 200.651);
+        gtest_assert_eq(buffer_tell(buf), i * 8 + buffer_sizeof(buffer_f64));
+    }
+    buffer_delete(buf);
+}
+
+var buf = buffer_create(8, buffer_wrap, buffer_sizeof(buffer_f32));
+buffer_fill(buf, 0, buffer_u8, 14, buffer_get_size(buf) + 400);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 14);
+gtest_assert_eq(buffer_tell(buf), 1);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 14);
+gtest_assert_eq(buffer_tell(buf), 5);
+gtest_assert_eq(buffer_get_size(buf), 8);
+
+buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+buffer_fill(buf, 1, buffer_u16, 65535, buffer_get_size(buf));
+gtest_assert_eq(buffer_read(buf, buffer_u16), 0);
+gtest_assert_eq(buffer_tell(buf), 2);
+gtest_assert_eq(buffer_read(buf, buffer_u16), 65535);
+gtest_assert_eq(buffer_tell(buf), 6);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+buffer_fill(buf, 4, buffer_u8, 255, 1);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+gtest_assert_eq(buffer_tell(buf), 1);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+gtest_assert_eq(buffer_tell(buf), 5);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_f32));
+buffer_fill(buf, 3, buffer_u8, 1, 1);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+gtest_assert_eq(buffer_tell(buf), 1);
+gtest_assert_eq(buffer_read(buf, buffer_u8), 1);
+gtest_assert_eq(buffer_tell(buf), 5);
+buffer_delete(buf);
+
+for var offset = 0; offset < 10; ++offset {
+    var buf = buffer_create(20, buffer_grow, buffer_sizeof(buffer_u8));
+    const char *str = "this is a string";
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_string, str);
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_string), str);
+    var len = strlen(str);
+    gtest_assert_eq(buffer_tell(buf), offset + len + 1);
+    if ((offset + len) > 20) {
+        // The reason it needs +2 is: +1 for the null terminator of the string,
+        // and +1 for the extra byte automatically allocated to store the next
+        // byte of (possibly) incoming data.
+        gtest_assert_eq(buffer_get_size(buf), len + offset + 2);
+    }
+    buffer_delete(buf);
+}
+
+for var offset = 0; offset < 10; ++offset {
+    var buf = buffer_create(20, buffer_wrap, buffer_sizeof(buffer_u8));
+    const char *str = "this is a string";
+    buffer_seek(buf, buffer_seek_start, offset);
+    buffer_write(buf, buffer_string, str);
+    buffer_seek(buf, buffer_seek_start, offset);
+    gtest_assert_eq(buffer_read(buf, buffer_string), str);
+    var len = strlen(str);
+    int off = offset + len + 1;
+    gtest_assert_eq(buffer_tell(buf), off % 20);
+    gtest_assert_eq(buffer_get_size(buf), 20);
+    buffer_delete(buf);
+}
+
+game_end();

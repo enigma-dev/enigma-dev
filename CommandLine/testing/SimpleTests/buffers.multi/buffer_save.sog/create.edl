@@ -1,0 +1,51 @@
+var buf = buffer_create(8, buffer_fixed, buffer_sizeof(buffer_u8));
+buffer_fill(buf, 0, buffer_u8, 24, buffer_get_size(buf));
+buffer_save(buf, "buf.bin");
+var buf2 = buffer_load("buf.bin");
+
+for var i = 0; i < 8; i++ {
+    gtest_assert_eq(buffer_read(buf2, buffer_u8), 24);
+}
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_fast, buffer_sizeof(buffer_u16));
+buffer_fill(buf, 0, buffer_u16, 65535, buffer_get_size(buf));
+buffer_save(buf, "buf.bin");
+buf2 = buffer_load("buf.bin");
+
+for var i = 0; i < 8; i += 2 {
+    gtest_assert_eq(buffer_read(buf2, buffer_u16), 65535);
+}
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_grow, buffer_sizeof(buffer_u32));
+buffer_fill(buf, 0, buffer_u32, 4294967295, 200);
+buffer_save(buf, "buf.bin");
+buf2 = buffer_load("buf.bin");
+
+for var i = 0; i < 8; i += 4 {
+    gtest_assert_eq(buffer_read(buf2, buffer_u32), 4294967295);
+}
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, buffer_sizeof(buffer_u16));
+buffer_fill(buf, 1, buffer_u16, 65535, buffer_get_size(buf));
+buffer_save(buf, "buf.bin");
+buf2 = buffer_load("buf.bin");
+
+gtest_assert_eq(buffer_read(buf2, buffer_u16), 0);
+gtest_assert_eq(buffer_tell(buf2), 2);
+for var i = buffer_tell(buf2); i < 8; i += 2 {
+    gtest_assert_eq(buffer_read(buf2, buffer_u16), 65535);
+}
+
+buffer_delete(buf2);
+buffer_delete(buf);
+
+game_end();

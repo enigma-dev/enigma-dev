@@ -1,0 +1,57 @@
+show_debug_message("Testing buffer_wrap");
+for var i = 0; i < 8; i += 2 {
+    var buf = buffer_create(8, buffer_wrap, 2);
+
+    buffer_poke(buf, i, buffer_u16, 4096);
+    buffer_save_ext(buf, "buf.bin", i, 8);
+    var buf2 = buffer_load("buf.bin");
+    gtest_assert_eq(buffer_peek(buf2, 0, buffer_u16), 4096);
+    gtest_assert_eq(buffer_get_size(buf2), 8 - i);
+
+    buffer_delete(buf2);
+    buffer_delete(buf);
+}
+
+show_debug_message("Testing buffer_grow");
+for var i = 0; i < 8; i += 2 {
+    var buf = buffer_create(8, buffer_grow, 2);
+
+    buffer_poke(buf, i, buffer_u16, 4096);
+    buffer_save_ext(buf, "buf.bin", i, 8);
+    var buf2 = buffer_load("buf.bin");
+    gtest_assert_eq(buffer_peek(buf2, 0, buffer_u16), 4096);
+    gtest_assert_eq(buffer_get_size(buf2), 8 - i);
+
+    buffer_delete(buf2);
+    buffer_delete(buf);
+}
+
+show_debug_message("Testing buffer_fixed");
+for var i = 0; i < 8; i += 2 {
+    var buf = buffer_create(8, buffer_fixed, 2);
+
+    buffer_poke(buf, i, buffer_u16, 4096);
+    buffer_save_ext(buf, "buf.bin", i, 8);
+    var buf2 = buffer_load("buf.bin");
+    gtest_assert_eq(buffer_peek(buf2, 0, buffer_u16), 4096);
+    gtest_assert_eq(buffer_get_size(buf2), 8 - i);
+
+    buffer_delete(buf2);
+    buffer_delete(buf);
+}
+
+show_debug_message("Testing buffer_fast");
+for var i = 0; i < 8; i += 2 {
+    var buf = buffer_create(8, buffer_fast, 2);
+
+    buffer_poke(buf, i, buffer_u16, 4096);
+    buffer_save_ext(buf, "buf.bin", i, 8);
+    var buf2 = buffer_load("buf.bin");
+    gtest_assert_eq(buffer_peek(buf2, 0, buffer_u16), 4096);
+    gtest_assert_eq(buffer_get_size(buf2), 8 - i);
+
+    buffer_delete(buf2);
+    buffer_delete(buf);
+}
+
+game_end();
