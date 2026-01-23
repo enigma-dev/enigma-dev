@@ -440,26 +440,19 @@ std::set<size_t> Lexer::GetIgnoredBackslashes(const std::string& value) {
 }
 
 Token Lexer::ReadRawToken() {
-  std::cerr << "[DEBUG] ReadRawToken: pos=" << pos << ", code.length()=" << code.length() 
-            << ", owned_code.get()=" << (void*)owned_code.get() 
-            << ", code.data()=" << (void*)code.data()
-            << ", code='" << (code.length() > 0 ? std::string(code.data(), std::min(code.length(), size_t(20))) : std::string("")) << "'" << std::endl;
   if (pos >= code.length()) {
     // We need custom logic for this because string_view::substr checks bounds
     // even for zero-width views.
     ComputeLineNumber(pos);
-    std::cerr << "[DEBUG] ReadRawToken: pos >= code.length(), returning TT_ENDOFCODE (pos=" << pos << ", code.length()=" << code.length() << ")" << std::endl;
     return Token(TT_ENDOFCODE, CodeSnippet{std::string{code.data() + pos, 0}, line_number, pos - last_line_position});
   }
 
   if (isspace(code[pos])) {
-    std::cerr << "[DEBUG] ReadRawToken: Skipping whitespace at pos=" << pos << std::endl;
     while (++pos < code.length() && isspace(code[pos]));
     return ReadRawToken();
   }
 
   const size_t spos = pos;
-  std::cerr << "[DEBUG] ReadRawToken: Starting at spos=" << spos << ", char='" << (pos < code.length() ? code[pos] : '?') << "'" << std::endl;
   switch (code[pos++]) {
     case '$': {
       if (options.use_gml_style_hex) {
@@ -487,25 +480,19 @@ Token Lexer::ReadRawToken() {
     }
 
     case '"': {
-      std::cerr << "[DEBUG] ReadRawToken: Found double quote, use_escapes=" << options.use_escapes << std::endl;
       for (;; ++pos) {
         if (pos >= code.length()) {
-          std::cerr << "[DEBUG] ReadRawToken: Unclosed double quote" << std::endl;
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
           return Token(TT_STRINGLIT, Mark(spos, pos - spos));
         }
         if (options.use_escapes && code[pos] == '\\') {
-          std::cerr << "[DEBUG] ReadRawToken: Skipping backslash in C++ mode at pos=" << pos << std::endl;
           ++pos;
         }
         if (code[pos] == '"') {
           std::string raw_value = code.substr(spos, pos - spos + 1);
-          std::cerr << "[DEBUG] ReadRawToken: Found closing quote, raw_value='" << raw_value << "'" << std::endl;
           std::string value = ProcessLiteral(raw_value, spos);
-          std::cerr << "[DEBUG] ReadRawToken: Processed value='" << value << "'" << std::endl;
           Token token = Token(TT_STRINGLIT, Mark(spos, ++pos - spos));
           token.content = value;
-          std::cerr << "[DEBUG] ReadRawToken: Returning TT_STRINGLIT token, content='" << token.content << "', type=" << (int)token.type << std::endl;
           return token;
         }
       }
@@ -641,21 +628,16 @@ Token Lexer::ReadRawToken() {
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
     pos = tnode.second;
-    std::cerr << "[DEBUG] ReadRawToken: Found token type=" << (int)tnode.first << " from lookup" << std::endl;
     // Check for increment/decrement operators and reject them in GML mode
     if ((tnode.first == TT_INCREMENT || tnode.first == TT_DECREMENT) && 
         context && !context->compatibility_opts.use_incrementals) {
-      std::cerr << "[DEBUG] ReadRawToken: Rejecting increment/decrement in GML mode" << std::endl;
       // In GML mode, return just the first character as a plus or minus
       pos = spos + 1;
       return Token(tnode.first == TT_INCREMENT ? TT_PLUS : TT_MINUS, Mark(spos, 1));
     }
-    Token result = Token(tnode.first, Mark(spos, pos - spos));
-    std::cerr << "[DEBUG] ReadRawToken: Returning token type=" << (int)result.type << ", content='" << result.content << "'" << std::endl;
-    return result;
+    return Token(tnode.first, Mark(spos, pos - spos));
   }
 
-  std::cerr << "[DEBUG] ReadRawToken: No token found in lookup, reporting error for char='" << (spos < code.length() ? code[spos] : '?') << "'" << std::endl;
   herr->Error(Mark(spos, 1)) << "Unexpected symbol '" << code[spos] << "'";
   return ReadRawToken();
 }

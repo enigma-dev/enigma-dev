@@ -89,10 +89,7 @@ struct ParserTester {
   // Private constructor for CreateWithSettings
   explicit ParserTester(std::string code, const ParseContext* ctx)
       : context(ctx), lexer(std::move(code), context, &herr) {
-    std::cerr << "[DEBUG] ParserTester constructor: code length=" << code.length() 
-              << ", lexer.GetCode().length()=" << lexer.GetCode().length() << std::endl;
     builder->initialize(&lexer, &herr);
-    std::cerr << "[DEBUG] ParserTester constructor: After initialize, lexer.GetCode().length()=" << lexer.GetCode().length() << std::endl;
   }
   
   // Copy constructor - ensure lexer is copied correctly
@@ -114,7 +111,6 @@ struct ParserTester {
   static ParserTester CreateWithSetUp(std::string code) { return ParserTester(std::move(code)); }
 
   static ParserTester CreateWithSettings(std::string code, std::string yaml_settings) {
-    std::cerr << "[DEBUG] CreateWithSettings: code='" << code << "', yaml_settings='" << yaml_settings << "'" << std::endl;
     // Build full YAML with required fields
     std::string full_yaml = "%e-yaml\n---\n";
     full_yaml += "target-windowing: None\n";
@@ -148,44 +144,25 @@ struct ParserTester {
     // Append user-provided settings (they will override defaults)
     full_yaml += yaml_settings;
     
-    std::cerr << "[DEBUG] CreateWithSettings: Full YAML:\n" << full_yaml << std::endl;
-    
     // Initialize context if needed
     if (!main_context) {
-      std::cerr << "[DEBUG] CreateWithSettings: Creating main_context" << std::endl;
       main_context = new clang_adapter::ClangContext();
     }
     
     // Create a new lang_CPP instance for this test
-    std::cerr << "[DEBUG] CreateWithSettings: Creating lang_CPP instance" << std::endl;
     auto custom_cpp = std::make_unique<lang_CPP>();
     
     // Apply settings to the language frontend
-    std::cerr << "[DEBUG] CreateWithSettings: Calling definitionsModified" << std::endl;
-    syntax_error* err = custom_cpp->definitionsModified(NULL, full_yaml.c_str());
-    if (err) {
-      std::cerr << "[DEBUG] CreateWithSettings: definitionsModified returned error (non-null)" << std::endl;
-    } else {
-      std::cerr << "[DEBUG] CreateWithSettings: definitionsModified succeeded" << std::endl;
-    }
+    custom_cpp->definitionsModified(NULL, full_yaml.c_str());
     
     // Create ParseContext with the configured language frontend
-    std::cerr << "[DEBUG] CreateWithSettings: Creating ParseContext" << std::endl;
     auto custom_context = std::make_unique<ParseContext>(custom_cpp.get(), kNoNames);
     const ParseContext* ctx = custom_context.get();
-    std::cerr << "[DEBUG] CreateWithSettings: ParseContext created, use_escapes=" << ctx->compatibility_opts.use_cpp_escapes 
-              << ", use_incrementals=" << ctx->compatibility_opts.use_incrementals << std::endl;
     
     // Create ParserTester with the custom context
-    std::cerr << "[DEBUG] CreateWithSettings: Creating ParserTester with code='" << code << "', length=" << code.length() << std::endl;
-    // Make a copy of code before moving it, for debugging
-    std::string code_copy = code;
     ParserTester tester(std::move(code), ctx);
-    std::cerr << "[DEBUG] CreateWithSettings: After move, code_copy='" << code_copy << "', tester.lexer.GetCode()='" << tester.lexer.GetCode() << "', length=" << tester.lexer.GetCode().length() << std::endl;
     tester.custom_cpp = std::move(custom_cpp);
     tester.custom_context = std::move(custom_context);
-    
-    std::cerr << "[DEBUG] CreateWithSettings: ParserTester created, lexer code='" << tester.lexer.GetCode() << "', length=" << tester.lexer.GetCode().length() << std::endl;
     
     return tester;
   }

@@ -179,14 +179,31 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
-  std::string value = std::get<std::string>(node.value.value);
-  if (node.value.type != TT_CHARLIT && node.value.type != TT_STRINGLIT) {
-    if (node.value.type == TT_HEXLITERAL) {
-      print("0x");
+  try {
+    std::string value;
+    // Handle different value types in the variant
+    if (std::holds_alternative<std::string>(node.value.value)) {
+      value = std::get<std::string>(node.value.value);
+    } else if (std::holds_alternative<long long>(node.value.value)) {
+      value = std::to_string(std::get<long long>(node.value.value));
+    } else if (std::holds_alternative<long double>(node.value.value)) {
+      // Use literal_representation if available to preserve precision
+      if (node.value.literal_representation.has_value()) {
+        value = *node.value.literal_representation;
+      } else {
+        value = std::to_string(std::get<long double>(node.value.value));
+      }
+    } else {
+      return false;
     }
-    print(value);
-    return true;
-  }
+    
+    if (node.value.type != TT_CHARLIT && node.value.type != TT_STRINGLIT) {
+      if (node.value.type == TT_HEXLITERAL) {
+        print("0x");
+      }
+      print(value);
+      return true;
+    }
   enigma::parsing::TokenType type = node.value.type;
   // In GameMaker, all strings use double quotes, even single-character strings
   // Convert char literals to string literals for consistency
@@ -256,6 +273,13 @@ bool AST::CppPrettyPrinter::VisitLiteral(AST::Literal &node) {
   print("\"");  // Always use double quotes for strings
 
   return true;
+  } catch (const std::bad_variant_access& e) {
+    return false;
+  } catch (const std::exception& e) {
+    return false;
+  } catch (...) {
+    return false;
+  }
 }
 
 bool AST::CppPrettyPrinter::VisitParenthetical(AST::Parenthetical &node) {
@@ -387,6 +411,14 @@ bool AST::CppPrettyPrinter::VisitDot(AST::BinaryExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
+  // Check for null operands
+  if (!node.left) {
+    return false;
+  }
+  if (!node.right) {
+    return false;
+  }
+
   if (node.operation.type == TT_DOT && node.left->type == AST::NodeType::IDENTIFIER &&
       node.right->type == AST::NodeType::IDENTIFIER) {
     return VisitDot(node);
@@ -411,14 +443,16 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
     }
   }
 
-  VISIT_AND_CHECK(node.left);
+  if (!Visit(node.left)) {
+    return false;
+  }
 
   std::string operation = node.operation.token;
   bool is_multi_dim = false;
   if (node.operation.type == TT_BEGINBRACKET) {
     if (node.right->type == AST::NodeType::BINARY_EXPRESSION) {
       auto bin = node.right->As<AST::BinaryExpression>();
-      if (bin->operation.type == TT_COMMA) {
+      if (bin && bin->operation.type == TT_COMMA) {
         is_multi_dim = true;
         operation = "(";
       }
@@ -447,7 +481,12 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
     print("(double) ");
   }
 
-  VISIT_AND_CHECK(node.right);
+  if (!node.right) {
+    return false;
+  }
+  if (!Visit(node.right)) {
+    return false;
+  }
 
   if (is_multi_dim) {
     print(")");
@@ -979,103 +1018,34 @@ static bool ContainsReturnStatement(AST::PNode &node) {
     }
   }
   // Check if it's an if statement - we need to check both branches
+  // Only return true if BOTH branches return (making code after unreachable)
   if (node->type == AST::NodeType::IF) {
     auto *if_stmt = node->As<AST::IfStatement>();
     if (if_stmt) {
-      if (if_stmt->true_branch && ContainsReturnStatement(if_stmt->true_branch)) {
+      bool true_returns = if_stmt->true_branch && ContainsReturnStatement(if_stmt->true_branch);
+      bool false_returns = if_stmt->false_branch && ContainsReturnStatement(if_stmt->false_branch);
+      // Only mark as always returning if both branches return
+      // If there's no else branch, the code after is still reachable
+      if (true_returns && false_returns) {
         return true;
       }
-      if (if_stmt->false_branch && ContainsReturnStatement(if_stmt->false_branch)) {
-        return true;
-      }
+      // If there's no else branch, the if statement doesn't always return
+      // so we return false to indicate code after is still reachable
     }
   }
   return false;
 }
 
 bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
-  // DEBUG: Log entry with full object state
-  std::cerr << "[DEBUG] VisitCode: Entering, &node=" << (void*)&node 
-            << ", node.type=" << (int)node.type 
-            << ", &node.statements=" << (void*)&node.statements 
-            << ", node.statements.size()=" << node.statements.size() 
-            << ", sizeof(node)=" << sizeof(node) << std::endl;
-  
-  // Check if the node address looks suspicious (corrupted)
-  if ((int)node.type != 1 && (int)node.type != 0) {
-    std::cerr << "[DEBUG] VisitCode: WARNING - node.type is corrupted! Expected 1 (BLOCK) or 0 (ERROR), got " 
-              << (int)node.type << " (0x" << std::hex << (int)node.type << std::dec << ")" << std::endl;
-    std::cerr << "[DEBUG] VisitCode: This suggests the node object is at the wrong address or corrupted" << std::endl;
-    std::cerr << "[DEBUG] VisitCode: &node=" << std::hex << (uintptr_t)&node << std::dec << std::endl;
-    
-    // Check if there's a valid CodeBlock 0x40 bytes before this address (the original location)
-    void* potential_original = (char*)&node - 0x40;
-    std::cerr << "[DEBUG] VisitCode: Checking potential original address " << std::hex << (uintptr_t)potential_original << std::dec << std::endl;
-    
-    // Use ASAN to check if the address is valid before accessing
-    #ifdef __has_feature
-    #if __has_feature(address_sanitizer)
-    if (!__asan_address_is_poisoned(potential_original)) {
-      AST::CodeBlock* potential_block = reinterpret_cast<AST::CodeBlock*>(potential_original);
-      if (potential_block->type == AST::NodeType::BLOCK) {
-        std::cerr << "[DEBUG] VisitCode: FOUND valid CodeBlock 0x40 bytes before! This suggests object slicing or copy issue" << std::endl;
-        std::cerr << "[DEBUG] VisitCode: Original block at " << std::hex << (uintptr_t)potential_block 
-                  << ", statements.size()=" << potential_block->statements.size() << std::dec << std::endl;
-      }
-    } else {
-      std::cerr << "[DEBUG] VisitCode: Potential original address is ASAN poisoned" << std::endl;
-    }
-    #else
-    // Without ASAN, try to check more carefully
-    AST::CodeBlock* potential_block = reinterpret_cast<AST::CodeBlock*>(potential_original);
-    if (potential_block->type == AST::NodeType::BLOCK) {
-      std::cerr << "[DEBUG] VisitCode: FOUND valid CodeBlock 0x40 bytes before! This suggests object slicing or copy issue" << std::endl;
-    }
-    #endif
-    #endif
-  }
-  
-  // ASAN: Check if node is poisoned
-  #ifdef __has_feature
-  #if __has_feature(address_sanitizer)
-  if (__asan_address_is_poisoned(&node)) {
-    std::cerr << "[DEBUG] VisitCode: ERROR - node is ASAN poisoned!" << std::endl;
-  }
-  if (__asan_address_is_poisoned(&node.statements)) {
-    std::cerr << "[DEBUG] VisitCode: ERROR - node.statements is ASAN poisoned!" << std::endl;
-  }
-  #endif
-  #endif
-  
   // Save previous state for nested blocks
   bool prev_return_state = has_return_encountered;
   has_return_encountered = false;
   
   // Store size to avoid issues if vector is modified during iteration
   size_t num_statements = node.statements.size();
-  std::cerr << "[DEBUG] VisitCode: num_statements=" << num_statements << std::endl;
   
   for (size_t i = 0; i < num_statements; ++i) {
-    std::cerr << "[DEBUG] VisitCode: Loop iteration i=" << i 
-              << ", node.statements.size()=" << node.statements.size() << std::endl;
-    
-    // ASAN: Check if the vector element address is poisoned before accessing
-    #ifdef __has_feature
-    #if __has_feature(address_sanitizer)
-    void *elem_addr = &node.statements[i];
-    if (__asan_address_is_poisoned(elem_addr)) {
-      std::cerr << "[DEBUG] VisitCode: ERROR - statements[" << i << "] address is ASAN poisoned at " << elem_addr << std::endl;
-      break;
-    }
-    #endif
-    #endif
-    
-    std::cerr << "[DEBUG] VisitCode: About to access statements[" << i << "] at " << (void*)&node.statements[i] << std::endl;
     auto &stmt = node.statements[i];
-    std::cerr << "[DEBUG] VisitCode: Got reference to statements[" << i << "], &stmt=" << (void*)&stmt << std::endl;
-    
-    // This is where it crashes - the unique_ptr object itself is corrupted
-    std::cerr << "[DEBUG] VisitCode: About to check if stmt is null, stmt.get()=" << (void*)stmt.get() << std::endl;
     if (!stmt) continue;  // Skip null statements
     
     // Check if we've already encountered a return in this block
@@ -1094,21 +1064,17 @@ bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
     }
     
     print("    ");
-    VISIT_AND_CHECK(stmt);
+    if (!Visit(stmt)) {
+      return false;
+    }
     PrintSemiColon(stmt);
     print("\n");
     
-    // Check if this statement is or contains a return AFTER visiting
-    // We check after so we print the return statement itself, but skip subsequent ones
-    // Store the node type before it might become invalid
+    // Check if this statement is a direct return (not nested in if/switch)
+    // Only mark direct returns as unreachable - don't propagate from nested structures
+    // This allows all code to be printed as-is, which is what the tests expect
     AST::NodeType stmt_type = stmt->type;
-    bool is_return = (stmt_type == AST::NodeType::RETURN);
-    if (!is_return) {
-      // Check recursively for nested returns (e.g., in if statements)
-      is_return = ContainsReturnStatement(stmt);
-    }
-    
-    if (is_return) {
+    if (stmt_type == AST::NodeType::RETURN) {
       has_return_encountered = true;
     }
   }
@@ -1124,12 +1090,19 @@ bool AST::CppPrettyPrinter::VisitCode(AST::CodeBlock &node) {
 
 bool AST::CppPrettyPrinter::VisitCodeBlock(AST::CodeBlock &node) {
   print("{\n");
-  if (!VisitCode(node)) return false;
+  if (!VisitCode(node)) {
+    return false;
+  }
   print("}");
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
+  // Save the current has_return_encountered state before visiting branches
+  // We'll only set it if both branches return (making code after unreachable)
+  bool saved_return_state = has_return_encountered;
+  has_return_encountered = false;
+  
   print("if");
   if (node.not_condition) print("(!");
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
@@ -1144,20 +1117,35 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
   if (node.not_condition) print(")");
 
   print(" ");
+  bool true_returns = false;
   if (node.true_branch) {
+    bool prev_return = has_return_encountered;
+    has_return_encountered = false;
     VISIT_AND_CHECK(node.true_branch);
+    true_returns = has_return_encountered;
+    has_return_encountered = prev_return;
     PrintSemiColon(node.true_branch);
   } else {
     print(";");
   }
   print(" ");
 
+  bool false_returns = false;
   if (node.false_branch) {
     print("else ");
+    bool prev_return = has_return_encountered;
+    has_return_encountered = false;
     VISIT_AND_CHECK(node.false_branch);
+    false_returns = has_return_encountered;
+    has_return_encountered = prev_return;
     PrintSemiColon(node.false_branch);
     print(" ");
   }
+  
+  // Don't propagate has_return_encountered from if statements to parent blocks
+  // Even if both branches return, subsequent statements in the parent block should still be printed
+  // (the printer should print all code as-is, not skip "unreachable" code)
+  has_return_encountered = saved_return_state;
 
   return true;
 }
@@ -1166,17 +1154,36 @@ bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
   // Normal for loop output
   print("for(");
 
-  VISIT_AND_CHECK(node.assignment);
+  if (node.assignment) {
+    if (!Visit(node.assignment)) {
+      return false;
+    }
+  }
   print("; ");
 
-  VISIT_AND_CHECK(node.condition);
+  if (node.condition) {
+    if (!Visit(node.condition)) {
+      return false;
+    }
+  }
   print("; ");
 
-  VISIT_AND_CHECK(node.increment);
+  if (node.increment) {
+    if (!Visit(node.increment)) {
+      return false;
+    }
+  }
   print(") ");
 
   if (node.body) {
-    VISIT_AND_CHECK(node.body);
+    // Save and restore has_return_encountered to prevent nested returns from affecting parent block
+    bool saved_return_state = has_return_encountered;
+    has_return_encountered = false;
+    if (!Visit(node.body)) {
+      return false;
+    }
+    // Don't propagate return state from loop body to parent - loops are control flow, not unconditional returns
+    has_return_encountered = saved_return_state;
     PrintSemiColon(node.body);
   } else {
     print(";");
@@ -1209,7 +1216,15 @@ bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
   VISIT_AND_CHECK(node.expression);
   print(")) ");
 
-  if (!VisitCodeBlock(*node.body->As<AST::CodeBlock>())) return false;
+  // Save and restore has_return_encountered to prevent nested returns from affecting parent block
+  bool saved_return_state = has_return_encountered;
+  has_return_encountered = false;
+  if (!VisitCodeBlock(*node.body->As<AST::CodeBlock>())) {
+    has_return_encountered = saved_return_state;
+    return false;
+  }
+  // Don't propagate return state from switch body to parent - switches are control flow, not unconditional returns
+  has_return_encountered = saved_return_state;
   print(" ");
 
   return true;

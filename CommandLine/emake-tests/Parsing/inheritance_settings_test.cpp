@@ -31,39 +31,27 @@ std::string ParseAndPrint(const std::string& code, const std::string& yaml_setti
 
 // Helper function to parse code and get tokens
 std::vector<Token> ParseTokens(const std::string& code, const std::string& yaml_settings) {
-  std::cerr << "[DEBUG] ParseTokens: code='" << code << "', yaml_settings='" << yaml_settings << "'" << std::endl;
-  std::cerr << "[DEBUG] ParseTokens: About to call CreateWithSettings" << std::endl;
   ParserTester test = ParserTester::CreateWithSettings(code, yaml_settings);
-  std::cerr << "[DEBUG] ParseTokens: After CreateWithSettings, test.lexer.GetCode()='" << test.lexer.GetCode() 
-            << "', length=" << test.lexer.GetCode().length() << std::endl;
-  std::cerr << "[DEBUG] ParseTokens: builder->initialize() consumed first token, current token type=" << (int)test.builder->current_token().type << std::endl;
   // builder->initialize() already consumed the first token, so we need to get tokens starting from the current one
   std::vector<Token> tokens;
   // Add the current token if it's not TT_ENDOFCODE
   Token tok = test.builder->current_token();
-  std::cerr << "[DEBUG] ParseTokens: Current token from builder type=" << (int)tok.type << ", content='" << tok.content << "'" << std::endl;
-  std::cerr << "[DEBUG] ParseTokens: First token type=" << (int)tok.type << " (TT_ENDOFCODE=" << (int)TT_ENDOFCODE << ", TT_ERROR=" << (int)TT_ERROR << ")" << std::endl;
-  std::cerr << "[DEBUG] ParseTokens: First token content='" << tok.content << "'" << std::endl;
   int token_count = 0;
   if (tok.type != TT_ENDOFCODE && tok.type != TT_ERROR) {
-    std::cerr << "[DEBUG] ParseTokens: Adding current token " << token_count << " type=" << (int)tok.type << ", content='" << tok.content << "'" << std::endl;
     tokens.push_back(tok);
     token_count++;
   }
   // Continue reading tokens
   while (tok.type != TT_ENDOFCODE && tok.type != TT_ERROR) {
     tok = test.lexer.ReadToken();
-    std::cerr << "[DEBUG] ParseTokens: Token " << token_count << " type=" << (int)tok.type << ", content='" << tok.content << "'" << std::endl;
     if (tok.type != TT_ENDOFCODE && tok.type != TT_ERROR) {
       tokens.push_back(tok);
       token_count++;
     }
     if (token_count > 100) {
-      std::cerr << "[DEBUG] ParseTokens: WARNING - too many tokens, breaking" << std::endl;
       break;
     }
   }
-  std::cerr << "[DEBUG] ParseTokens: Final token type=" << (int)tok.type << ", total tokens=" << tokens.size() << std::endl;
   return tokens;
 }
 

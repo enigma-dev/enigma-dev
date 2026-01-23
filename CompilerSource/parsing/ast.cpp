@@ -65,11 +65,7 @@ void AST::WriteCppToStream(std::ofstream &of, int base_indent, bool is_script, b
           if (with_stmt->body) {
             if (with_stmt->body->type == NodeType::BLOCK) {
               auto* body_block = with_stmt->body->As<CodeBlock>();
-              std::cerr << "[DEBUG] WriteCppToStream: body_block=" << (void*)body_block 
-                        << ", &(*body_block)=" << (void*)&(*body_block) 
-                        << ", body_block->statements.size()=" << (body_block ? body_block->statements.size() : 0) << std::endl;
               if (body_block) {
-                std::cerr << "[DEBUG] WriteCppToStream: About to call VisitCode(*body_block), body_block=" << (void*)body_block << std::endl;
                 // Use VisitCode to write statements directly without outer block braces
                 // (old codegen didn't have the block wrapper)
                 visitor.VisitCode(*body_block);

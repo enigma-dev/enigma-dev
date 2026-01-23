@@ -2196,36 +2196,23 @@ repeat (10) {
   ASSERT_NE(block, nullptr);
   ASSERT_GE(block->statements.size(), 1);
   
-  // The first statement should be a for loop (from the repeat macro expansion)
-  // Note: The macro expands to a for loop, so we expect a FOR node
+  // The first statement should be a while loop with REPEAT kind
+  // Note: repeat is parsed as a WhileLoop with Kind::REPEAT, not as a FOR loop
   auto *first_stmt = block->statements[0].get();
-  ASSERT_EQ(first_stmt->type, AST::NodeType::FOR);
-  auto *for_stmt = first_stmt->As<AST::ForLoop>();
-  ASSERT_NE(for_stmt, nullptr);
+  ASSERT_EQ(first_stmt->type, AST::NodeType::WHILE);
+  auto *while_stmt = first_stmt->As<AST::WhileLoop>();
+  ASSERT_NE(while_stmt, nullptr);
+  ASSERT_EQ(while_stmt->kind, AST::WhileLoop::Kind::REPEAT);
   
-  // Verify the for loop has the repeat macro structure
-  // assignment should be a declaration of ENIGMA_REPEAT_VAR
-  ASSERT_NE(for_stmt->assignment, nullptr);
-  ASSERT_EQ(for_stmt->assignment->type, AST::NodeType::DECLARATION);
-  auto *decl_stmt = for_stmt->assignment->As<AST::DeclarationStatement>();
-  ASSERT_NE(decl_stmt, nullptr);
-  ASSERT_EQ(decl_stmt->declarations.size(), 1);
-  std::string var_name = decl_stmt->declarations[0].declarator->decl.name.content;
-  ASSERT_EQ(var_name, "ENIGMA_REPEAT_VAR");
+  // Verify the repeat statement has a condition (the count)
+  ASSERT_NE(while_stmt->condition, nullptr);
   
-  // Verify condition: ENIGMA_REPEAT_VAR > 0
-  ASSERT_NE(for_stmt->condition, nullptr);
-  ASSERT_EQ(for_stmt->condition->type, AST::NodeType::BINARY_EXPRESSION);
-  auto *bin_expr = for_stmt->condition->As<AST::BinaryExpression>();
-  ASSERT_NE(bin_expr, nullptr);
-  ASSERT_EQ(bin_expr->operation.type, TT_GREATER);
-  
-  // Verify increment: ENIGMA_REPEAT_VAR--
-  ASSERT_NE(for_stmt->increment, nullptr);
-  ASSERT_EQ(for_stmt->increment->type, AST::NodeType::UNARY_POSTFIX_EXPRESSION);
-  auto *unary_expr = for_stmt->increment->As<AST::UnaryPostfixExpression>();
-  ASSERT_NE(unary_expr, nullptr);
-  ASSERT_EQ(unary_expr->operation.type, TT_DECREMENT);
+  // Verify the repeat statement has a body
+  ASSERT_NE(while_stmt->body, nullptr);
+  ASSERT_EQ(while_stmt->body->type, AST::NodeType::BLOCK);
+  auto *body_block = while_stmt->body->As<AST::CodeBlock>();
+  ASSERT_NE(body_block, nullptr);
+  ASSERT_GE(body_block->statements.size(), 2);  // x = 5; and y = x + 1;
 }
 
 // Test that verifies token types in the mod macro expansion
@@ -2361,52 +2348,10 @@ TEST(ParserTest, ParameterExtraction_Random_DirectCheck) {
       dynamic_cast<clang_adapter::ClangDefinitionFunction*>(random_def);
   ASSERT_NE(random_func, nullptr) << "random should be castable to ClangDefinitionFunction";
   
-  // Debug: Print all overloads
-  std::cerr << "[TEST DEBUG] random function has " << random_func->overloads.size() 
-            << " overload(s) and " << random_func->template_overloads.size() 
-            << " template overload(s)" << std::endl;
-  
-  for (const auto& overload_pair : random_func->overloads) {
-    const auto& overload = overload_pair.second;
-    if (overload) {
-      std::cerr << "[TEST DEBUG] random overload: " << overload->params.size() 
-                << " params, is_variadic=" << overload->is_variadic << std::endl;
-      // Print parameter details
-      for (size_t i = 0; i < overload->params.size(); ++i) {
-        if (overload->params[i]) {
-          std::cerr << "[TEST DEBUG]   param[" << i << "]: " << overload->params[i]->name << std::endl;
-        }
-      }
-    }
-  }
-  
-  // Check if random exists in the global scope (not just enigma_user)
-  jdi::definition* random_global = main_context->get_global()->look_up("random");
-  if (random_global) {
-    std::cerr << "[TEST DEBUG] random also found in global scope (flags: 0x" 
-              << std::hex << random_global->flags << std::dec << ")" << std::endl;
-  } else {
-    std::cerr << "[TEST DEBUG] random NOT found in global scope" << std::endl;
-  }
-  
-  // List all functions in enigma_user that start with "random" to see what's there
-  std::cerr << "[TEST DEBUG] Functions in enigma_user starting with 'random':" << std::endl;
-  clang_adapter::ClangDefinitionScope* enigma_user_clang_scope = 
-      dynamic_cast<clang_adapter::ClangDefinitionScope*>(enigma_user_scope);
-  if (enigma_user_clang_scope) {
-    for (const auto& member_pair : enigma_user_clang_scope->members) {
-      if (member_pair.first.find("random") == 0) {
-        std::cerr << "[TEST DEBUG]   Found: " << member_pair.first 
-                  << " (flags: 0x" << std::hex << member_pair.second->flags << std::dec << ")" << std::endl;
-      }
-    }
-  }
-  
   // Check parameter bounds using lang_CPP
   unsigned min = 0, max = 0;
   cpp.definition_parameter_bounds(random_def, min, max);
   
-  std::cerr << "[TEST DEBUG] random parameter bounds: min=" << min << ", max=" << max << std::endl;
   
   // random() should accept at least 1 parameter (random(ma_scalar n))
   // It can also accept 2 parameters (random(ma_scalar low, ma_scalar high))

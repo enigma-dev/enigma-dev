@@ -2308,7 +2308,6 @@ std::unique_ptr<AST::Node> TryParseStatement() {
 
 // Parse control flow statement body
 std::unique_ptr<AST::Node> ParseCFStmtBody() { 
-  std::cerr << "[DEBUG] ParseCFStmtBody: token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   return ParseStatementOrBlock(); 
 }
 
@@ -2317,15 +2316,10 @@ bool next_is_decl_specifier() {
 }
 
 std::unique_ptr<AST::Node> ParseStatementOrBlock() {
-  std::cerr << "[DEBUG] ParseStatementOrBlock: token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type == TT_BEGINBRACE) {
-    std::cerr << "[DEBUG] ParseStatementOrBlock: Parsing code block" << std::endl;
     return ParseCodeBlock();
   } else {
-    std::cerr << "[DEBUG] ParseStatementOrBlock: Calling TryParseStatement()" << std::endl;
-    auto result = TryParseStatement();
-    std::cerr << "[DEBUG] ParseStatementOrBlock: TryParseStatement() returned " << (result ? "non-null" : "null") << std::endl;
-    return result;
+    return TryParseStatement();
   }
 }
 
@@ -2340,30 +2334,20 @@ std::unique_ptr<AST::CodeBlock> ParseCode() {
       AST::Node* raw_ptr_before = stmt.get();
       size_t index_before = statements.size();
       
-      std::cerr << "[DEBUG] ParseCode: About to emplace_back, stmt.get()=" << (void*)stmt.get() 
-                << ", statements.size()=" << statements.size() 
-                << ", &statements=" << (void*)&statements << std::endl;
       statements.emplace_back(std::move(stmt));
-      std::cerr << "[DEBUG] ParseCode: After emplace_back, statements[" << index_before << "]=" 
-                << (void*)statements[index_before].get() 
-                << ", statements.size()=" << statements.size() << std::endl;
       
       // Validate after move: moved stmt should be null, new entry should have valid pointer
 #ifdef AST_DEBUG_TRACKING
       if (stmt) {
-        std::cerr << "[AST_DEBUG] WARNING: Statement at index " << index_before 
-                  << " was not properly moved (still non-null after move)!" << std::endl;
+        // Statement was not properly moved
       }
       if (statements.back() && statements.back().get() != raw_ptr_before) {
-        std::cerr << "[AST_DEBUG] WARNING: Statement pointer changed during move at index " 
-                  << index_before << "!" << std::endl;
+        // Statement pointer changed during move
       }
       if (!statements.back()) {
-        std::cerr << "[AST_DEBUG] ERROR: Statement at index " << index_before 
-                  << " is null after emplace_back!" << std::endl;
+        // Statement is null after emplace_back
       } else {
-        std::cerr << "[AST_DEBUG] Added statement at index " << index_before 
-                  << " type=" << (int)statements.back()->type << std::endl;
+        // Statement added successfully
       }
 #endif
       
@@ -2385,36 +2369,7 @@ std::unique_ptr<AST::CodeBlock> ParseCode() {
     // If stmt is null, it means we hit an error or end of block - continue parsing
   }
 
-  std::cerr << "[DEBUG] ParseCode: About to create CodeBlock, statements.size()=" << statements.size() 
-            << ", &statements=" << (void*)&statements << std::endl;
-  for (size_t i = 0; i < statements.size(); ++i) {
-    std::cerr << "[DEBUG] ParseCode: statements[" << i << "]=" << (void*)statements[i].get() 
-              << ", &statements[" << i << "]=" << (void*)&statements[i] << std::endl;
-  }
-  
   auto block = std::make_unique<AST::CodeBlock>(std::move(statements));
-  std::cerr << "[DEBUG] ParseCode: Created CodeBlock, block.get()=" << (void*)block.get() 
-            << ", block->statements.size()=" << block->statements.size() 
-            << ", &block->statements=" << (void*)&block->statements << std::endl;
-  
-  // ASAN: Check if block is poisoned
-  #ifdef __has_feature
-  #if __has_feature(address_sanitizer)
-  if (__asan_address_is_poisoned(block.get())) {
-    std::cerr << "[DEBUG] ParseCode: ERROR - block is ASAN poisoned!" << std::endl;
-  }
-  if (__asan_address_is_poisoned(&block->statements)) {
-    std::cerr << "[DEBUG] ParseCode: ERROR - block->statements is ASAN poisoned!" << std::endl;
-  }
-  #endif
-  #endif
-  
-  for (size_t i = 0; i < block->statements.size(); ++i) {
-    std::cerr << "[DEBUG] ParseCode: block->statements[" << i << "]=" << (void*)block->statements[i].get() 
-              << ", &block->statements[" << i << "]=" << (void*)&block->statements[i] << std::endl;
-  }
-  
-  std::cerr << "[DEBUG] ParseCode: About to return, block.get()=" << (void*)block.get() << std::endl;
   
   // Run syntax checker to apply compatibility transformations (e.g., = to == in conditionals)
   // Note: We'll call a helper function defined after SyntaxChecker
@@ -2423,10 +2378,7 @@ std::unique_ptr<AST::CodeBlock> ParseCode() {
     RunSyntaxChecker(block.get(), herr, fe);
   }
   
-  auto result = std::move(block);
-  std::cerr << "[DEBUG] ParseCode: After move, result.get()=" << (void*)result.get() 
-            << ", result->statements.size()=" << result->statements.size() << std::endl;
-  return result;
+  return std::move(block);
 }
 
 std::unique_ptr<AST::CodeBlock> ParseCodeBlock() {
@@ -2449,7 +2401,6 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 
   auto condition = TryParseControlExpression(mode);
-  std::cerr << "[DEBUG] ParseIfStatement: After TryParseControlExpression, token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type == TT_S_THEN) {
     if (mode == SyntaxMode::STRICT) {
       herr->Warning(token) << "Use of `then` keyword in if statement";
@@ -2458,10 +2409,8 @@ std::unique_ptr<AST::IfStatement> ParseIfStatement() {
   }
 
   AST::PNode true_branch = nullptr;
-  std::cerr << "[DEBUG] ParseIfStatement: Before ParseCFStmtBody, token.type=" << (int)token.type << ", token.content='" << token.content << "'" << std::endl;
   if (token.type != TT_SEMICOLON) {
     true_branch = ParseCFStmtBody();
-    std::cerr << "[DEBUG] ParseIfStatement: After ParseCFStmtBody, true_branch.get()=" << (void*)true_branch.get() << std::endl;
   } else {
     token = lexer->ReadToken();
   }
@@ -2869,20 +2818,14 @@ class SyntaxChecker : public AST::Visitor {
   }
 
   bool VisitBinaryExpression(AST::BinaryExpression &node) {
-    std::cerr << "[DEBUG] SyntaxChecker::VisitBinaryExpression: in_conditional_context=" << in_conditional_context 
-              << ", operation.type=" << (int)node.operation.type << " (TT_EQUALS=" << (int)TT_EQUALS << ")" << std::endl;
     // Convert = to == in binary expressions within control flow conditions
     // This handles GameMaker-style = in conditionals (should be ==)
     // Only do this if use_gml_equals is true (GML mode)
     if (in_conditional_context && node.operation.type == TT_EQUALS) {
       // Check compatibility options - only convert in GML mode
       if (frontend && frontend->compatibility_opts().use_gml_equals) {
-        std::cerr << "[DEBUG] SyntaxChecker: Converting = to == in conditional context" << std::endl;
         node.operation.type = TT_EQUALTO;
         node.operation.token = "==";
-      } else {
-        std::cerr << "[DEBUG] SyntaxChecker: NOT converting = to == (frontend=" << (void*)frontend 
-                  << ", use_gml_equals=" << (frontend ? frontend->compatibility_opts().use_gml_equals : false) << ")" << std::endl;
       }
       // In C++ mode (use_gml_equals false), keep = as assignment
     }
@@ -3090,9 +3033,7 @@ std::unique_ptr<AST::Node> Parse(Lexer *lexer, ErrorHandler *herr) {
   AstBuilder ab(lexer, herr);
   auto root = ab.ParseCode();
   SyntaxChecker sc(herr, lexer->GetContext().language_fe);
-  std::cerr << "[DEBUG] Parse: About to call root->accept(sc), root type=" << (int)root->type << std::endl;
   root->accept(sc);
-  std::cerr << "[DEBUG] Parse: After root->accept(sc)" << std::endl;
   return root;
 }
 

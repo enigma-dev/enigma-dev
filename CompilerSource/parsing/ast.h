@@ -96,18 +96,7 @@ class AST {
     /// Cast the node to a given type
     template <typename T>
     T* As() {
-        std::cerr << "[DEBUG] Node::As<>() called on node at " << (void*)this 
-                  << ", type=" << (int)type << std::endl;
         T* result = dynamic_cast<T*>(this);
-        std::cerr << "[DEBUG] Node::As<>() returned " << (void*)result << std::endl;
-        if (result && type == NodeType::BLOCK) {
-          // Check if result is actually a CodeBlock
-          CodeBlock* cb = dynamic_cast<CodeBlock*>(result);
-          if (cb) {
-            std::cerr << "[DEBUG] Node::As<>() CodeBlock, statements.size()=" 
-                      << cb->statements.size() << ", &statements=" << (void*)&cb->statements << std::endl;
-          }
-        }
         return result;
     }
     // Helper function that calls the appropriate Visitor function for this node type
@@ -184,37 +173,21 @@ class AST {
 
     CodeBlock() noexcept = default;
     CodeBlock(std::vector<PNode> statements): statements{std::move(statements)} {
-      std::cerr << "[DEBUG] CodeBlock constructor: this=" << (void*)this 
-                << ", statements.size()=" << this->statements.size() 
-                << ", &statements=" << (void*)&this->statements 
-                << ", this->type=" << (int)this->type << std::endl;
     }
     // Explicit move constructor to ensure proper base class movement
     CodeBlock(CodeBlock&& other) noexcept 
         : TypedNode<NodeType::BLOCK>(std::move(other)), 
           statements{std::move(other.statements)} {
-      std::cerr << "[DEBUG] CodeBlock move constructor: this=" << (void*)this 
-                << ", &other=" << (void*)&other 
-                << ", this->statements.size()=" << this->statements.size() 
-                << ", other.statements.size()=" << other.statements.size() 
-                << ", this->type=" << (int)this->type 
-                << ", other.type=" << (int)other.type << std::endl;
     }
     CodeBlock& operator=(CodeBlock&& other) noexcept {
-      std::cerr << "[DEBUG] CodeBlock move assignment: this=" << (void*)this 
-                << ", &other=" << (void*)&other << std::endl;
       TypedNode<NodeType::BLOCK>::operator=(std::move(other));
       statements = std::move(other.statements);
-      std::cerr << "[DEBUG] CodeBlock move assignment: after move, this->statements.size()=" 
-                << this->statements.size() << std::endl;
       return *this;
     }
     // Delete copy constructor/assignment to prevent object slicing
     CodeBlock(const CodeBlock&) = delete;
     CodeBlock& operator=(const CodeBlock&) = delete;
     ~CodeBlock() {
-      std::cerr << "[DEBUG] CodeBlock destructor: this=" << (void*)this 
-                << ", statements.size()=" << this->statements.size() << std::endl;
     }
   };
 
