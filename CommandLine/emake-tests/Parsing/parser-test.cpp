@@ -3338,6 +3338,44 @@ TEST(ParserTest, ScriptArgumentIdentifierForm) {
   }
 }
 
+TEST(ParserTest, ScriptArgumentCount) {
+  // Test that argument_count is recognized as a valid identifier
+  // This is used in scripts to get the number of arguments passed
+  // Enable increment operators since the test uses index++
+  ParserTester test = ParserTester::CreateWithSettings(
+    "var hit = false; for (var index=0; index<argument_count; index++) { hit = hit || round(image_index) == argument[index]; } return hit;",
+    "inherit-increment-from: 1\n");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_GE(block->statements.size(), 1);
+}
+
+TEST(ParserTest, ScriptArgumentCountSimple) {
+  // Test that argument_count is recognized as a valid identifier in a simple expression
+  ParserTester test = ParserTester::CreateWithSetUp("x = argument_count;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+}
+
+TEST(ParserTest, ScriptArgumentCountInCondition) {
+  // Test argument_count in a simple conditional expression
+  ParserTester test = ParserTester::CreateWithSetUp("if (argument_count > 0) { x = argument[0]; }");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+}
+
 TEST(ParserTest, VaraccessFunctionsNotTreatedAsFunctions) {
   // Test that varaccess_x, varaccess_y, varaccess_direction are parsed correctly
   // These should be treated as function calls that translate to enigma::varaccess_*
@@ -3525,4 +3563,63 @@ TEST(ParserTest, ModMacroExpansion) {
     // Just verify the operation type is correct
     ASSERT_EQ(bin->operation.type, TT_PERCENT);
   }
+}
+
+// Test decimal literals starting with . in expressions (the bug we fixed)
+TEST(ParserTest, DecimalLiteralsStartingWithDot) {
+  // Test *.95 in an expression - should parse as multiplication, not member access
+  ParserTester test = ParserTester::CreateWithSetUp("x = y * .95;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 1);
+  
+  auto *stmt = block->statements[0].get();
+  ASSERT_EQ(stmt->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *assign = stmt->As<AST::BinaryExpression>();
+  ASSERT_EQ(assign->operation.type, TT_EQUALS);
+  
+  // Right side should be a binary expression (multiplication)
+  auto *right = assign->right.get();
+  ASSERT_EQ(right->type, AST::NodeType::BINARY_EXPRESSION);
+  auto *mult = right->As<AST::BinaryExpression>();
+  ASSERT_EQ(mult->operation.type, TT_STAR);
+  
+  // The right operand of multiplication should be a literal .95
+  auto *lit = mult->right->As<AST::Literal>();
+  ASSERT_NE(lit, nullptr);
+  ASSERT_EQ(std::get<std::string>(lit->value.value), ".95");
+}
+
+TEST(ParserTest, DecimalLiteralsInComplexExpressions) {
+  // Test the exact pattern from the bug report: (view_xview[view_current]-320)*.95
+  ParserTester test = ParserTester::CreateWithSetUp("x = (view_xview[view_current]-320)*.95;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  
+  // Test another pattern: abs(hspd/maxspd*.3)
+  ParserTester test2 = ParserTester::CreateWithSetUp("image_speed = abs(hspd/maxspd*.3);");
+  auto node2 = test2->ParseCode();
+  ASSERT_NE(node2, nullptr);
+  ASSERT_EQ(test2->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node2->type, AST::NodeType::BLOCK);
+}
+
+TEST(ParserTest, DecimalLiteralsVariousValues) {
+  // Test various decimal literal values starting with .
+  ParserTester test = ParserTester::CreateWithSetUp("a = .1; b = .25; c = .3; d = .95; e = .123;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 5);
 }

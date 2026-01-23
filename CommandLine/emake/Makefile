@@ -2,6 +2,7 @@ include ../../Config.mk
 
 SHARED_SRC_DIR := ../../shared
 
+# PROTO_DIR should use the shared/protos OBJ_DIR, which is .eobjs (protos don't use ASAN-specific dirs)
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Darwin)
@@ -52,6 +53,6 @@ include ../../Default.mk
 # Clean object files from emake-tests directory when cleaning tests
 ifeq ($(TESTS), TRUE)
 clean: .FORCE
-	rm -rf $(TARGET) $(OBJ_DIR)
+	rm -rf $(TARGET) $(OBJ_DIR) .eobjs-asan
 	find ../emake-tests -name "*.o" -type f -delete 2>/dev/null || true
 endif

@@ -142,6 +142,66 @@ TEST(LexerTest, DecimalOnlyNumbers) {
   ExpectToken(lex->ReadToken(), TT_DECLITERAL, 1, 1, ".1");
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
+
+// Test decimal literals starting with . in various contexts
+TEST(LexerTest, DecimalLiteralsStartingWithDot) {
+  // Test .95
+  {
+    LexerTester lex(".95", false);
+    ExpectToken(lex->ReadToken(), TT_DECLITERAL, 1, 1, ".95");
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  }
+  
+  // Test .3
+  {
+    LexerTester lex(".3", false);
+    ExpectToken(lex->ReadToken(), TT_DECLITERAL, 1, 1, ".3");
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  }
+  
+  // Test .25
+  {
+    LexerTester lex(".25", false);
+    ExpectToken(lex->ReadToken(), TT_DECLITERAL, 1, 1, ".25");
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  }
+  
+  // Test that . followed by non-digit is still a dot operator
+  {
+    LexerTester lex(".x", false);
+    EXPECT_EQ(lex->ReadToken().type, TT_DOT);
+    EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  }
+}
+
+// Test decimal literals in multiplication expressions (the bug we fixed)
+TEST(LexerTest, DecimalLiteralsInExpressions) {
+  // Test *.95 (multiplication followed by decimal literal)
+  LexerTester lex("x*.95", false);
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_STAR);
+  ExpectToken(lex->ReadToken(), TT_DECLITERAL, 1, 3, ".95");
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  
+  // Test *.3
+  LexerTester lex2("y*.3", false);
+  EXPECT_EQ(lex2->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex2->ReadToken().type, TT_STAR);
+  ExpectToken(lex2->ReadToken(), TT_DECLITERAL, 1, 3, ".3");
+  EXPECT_EQ(lex2->ReadToken().type, TT_ENDOFCODE);
+  
+  // Test (expression)*.95
+  LexerTester lex3("(x-320)*.95", false);
+  EXPECT_EQ(lex3->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex3->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex3->ReadToken().type, TT_MINUS);
+  EXPECT_EQ(lex3->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex3->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex3->ReadToken().type, TT_STAR);
+  ExpectToken(lex3->ReadToken(), TT_DECLITERAL, 1, 9, ".95");
+  EXPECT_EQ(lex3->ReadToken().type, TT_ENDOFCODE);
+}
 // Make sure a.b is an expression
 TEST(LexerTest, DotOperatorLexing) {
   LexerTester lex("a.b = c . d\nd .* e = e.*f", false);

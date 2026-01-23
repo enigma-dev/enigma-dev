@@ -415,6 +415,7 @@ bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Messag
 
   if (!FolderExists(fPath)) {
     errStream << "Error: the resource folder " << fPath << " referenced in the project tree does not exist" << std::endl;
+    return false;
   }
 
   // Timelines are folders but do not have a properties.yaml so we exit here
@@ -428,9 +429,16 @@ bool EGMFileFormat::LoadResource(const fs::path& fPath, google::protobuf::Messag
   const fs::path yamlFile = fPath.string() + "/properties.yaml";
   if (!FileExists(yamlFile)) {
     errStream << "Error: missing the resource YAML " << yamlFile << std::endl;
+    return false;
   }
 
-  YAML::Node yaml = YAML::LoadFile(yamlFile.string());
+  YAML::Node yaml;
+  try {
+    yaml = YAML::LoadFile(yamlFile.string());
+  } catch (const YAML::Exception& e) {
+    errStream << "Error: Failed to parse YAML file " << yamlFile << ": " << e.what() << std::endl;
+    return false;
+  }
 
   RecursivePackBuffer(m, id, yaml, fPath, 0);
 
@@ -448,6 +456,13 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
     errStream << "Error: the folder " << fPath << " referenced in the project tree does not exist" << std::endl;
   }
 
+  // Guard against null or non-sequence contents (e.g. empty folder has no "contents" key)
+  if (!yaml || !yaml.IsSequence()) {
+    errStream << "EGM LoadTree: empty or invalid \"contents\" at " << fPath
+              << " (missing key or not a sequence); no resources loaded from this branch" << std::endl;
+    return true;
+  }
+
   for (auto n : yaml) {
     buffers::TreeNode* b = buffer->mutable_folder()->add_children();
 
@@ -455,7 +470,8 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
       const std::string name = n["folder"].as<std::string>();
       b->set_name(name);
       b->mutable_folder();
-      LoadTree(fPath.string() + "/" + name, n["contents"], b);
+      // Empty folders omit "contents"; pass null, LoadTree will no-op
+      LoadTree(fPath.string() + "/" + name, n["contents"] ? n["contents"] : YAML::Node(), b);
     } else {
       const std::string name = n["name"].as<std::string>();
       b->set_name(name);
@@ -472,9 +488,13 @@ bool EGMFileFormat::LoadTree(const fs::path& fPath, YAML::Node yaml,
         if (maxID[factory->second.type] < id)
           maxID[factory->second.type] = id;
 
-        LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id);
+        if (!LoadResource(fPath.string() + "/" + name + factory->second.ext, factory->second.func(b), id)) {
+          // LoadResource failed, mark as unknown and remove the resource field
+          b->mutable_unknown();
+          errStream << "Warning: Failed to load resource " << name << " of type " << type << std::endl;
+        }
       } else {
-        buffer->mutable_unknown();
+        b->mutable_unknown();
         errStream << "Warning: Unsupported resource type: " << n["type"] << std::endl;
       }
     }
@@ -507,7 +527,11 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
       // If directory is resource
       auto factory = extFactoryMap.find(ext);
       if (factory != extFactoryMap.end()) {
-        LoadResource(p.path(), factory->second.func(c), maxID.at(factory->second.type)++);
+        if (!LoadResource(p.path(), factory->second.func(c), maxID.at(factory->second.type)++)) {
+          // LoadResource failed, mark as unknown
+          c->mutable_unknown();
+          errStream << "Warning: Failed to load resource " << p.path() << std::endl;
+        }
         continue;
       }
 
@@ -517,9 +541,15 @@ bool EGMFileFormat::LoadDirectory(const fs::path& fPath, buffers::TreeNode* n,
       buffers::TreeNode* c = n->mutable_folder()->add_children();
       c->set_name(p.path().stem().string());
       if (ext == ".edl") { // script
-        LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++);
+        if (!LoadResource(p.path(), extFactoryMap.at(".edl").func(c), maxID.at(Type::kScript)++)) {
+          c->mutable_unknown();
+          errStream << "Warning: Failed to load script " << p.path() << std::endl;
+        }
       } else if (ext == ".vert") { // shader
-        LoadResource(p.path().parent_path().string() + ".shdr", extFactoryMap.at(".shdr").func(c), maxID.at(Type::kShader)++);
+        if (!LoadResource(p.path().parent_path().string() + ".shdr", extFactoryMap.at(".shdr").func(c), maxID.at(Type::kShader)++)) {
+          c->mutable_unknown();
+          errStream << "Warning: Failed to load shader " << p.path() << std::endl;
+        }
       }
     }
   }
@@ -621,7 +651,13 @@ void ResourceSanityCheck(buffers::TreeNode* n) {
 }
 
 bool EGMFileFormat::LoadEGM(const fs::path& yamlFile, buffers::Game* game) const {
-  YAML::Node project = YAML::LoadFile(yamlFile.u8string());
+  YAML::Node project;
+  try {
+    project = YAML::LoadFile(yamlFile.u8string());
+  } catch (const YAML::Exception& e) {
+    errStream << "Error: Failed to parse project YAML file " << yamlFile << ": " << e.what() << std::endl;
+    return false;
+  }
 
   const fs::path egm_root = yamlFile.parent_path();
   buffers::TreeNode* game_root = game->mutable_root();
@@ -629,10 +665,18 @@ bool EGMFileFormat::LoadEGM(const fs::path& yamlFile, buffers::Game* game) const
 
   // Load EGM without a tree file
   if (!project["tree"] || project["tree"].as<std::string>() == "autogen") {
+    errStream << "EGM LoadEGM: using LoadDirectory (autogen); root=" << egm_root << std::endl;
     return LoadDirectory(egm_root, game_root, 0);
   // Load EGM with a tree file
   } else {
-    YAML::Node tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
+    errStream << "EGM LoadEGM: using LoadTree (tree.yaml); root=" << egm_root << std::endl;
+    YAML::Node tree;
+    try {
+      tree = YAML::LoadFile(egm_root.string() + "/tree.yaml");
+    } catch (const YAML::Exception& e) {
+      errStream << "Error: Failed to parse tree YAML file " << egm_root.string() << "/tree.yaml: " << e.what() << std::endl;
+      return false;
+    }
     return LoadTree(egm_root, tree["contents"], game_root);
   }
 }

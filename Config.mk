@@ -80,7 +80,12 @@ endif
 
 # These will be relative to the file that includes this Makefile
 SRC_DIR := .
+# Use separate object directories for ASAN and non-ASAN builds to avoid conflicts
+ifeq ($(ENABLE_ASAN), 1)
+OBJ_DIR := .eobjs-asan
+else
 OBJ_DIR := .eobjs
+endif
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))

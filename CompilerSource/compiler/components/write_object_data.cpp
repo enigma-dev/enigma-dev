@@ -90,6 +90,10 @@ void PrintIndentedCode(std::ostream &wto, std::string_view code, int indent) {
 
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
+  // Undefine move macro to avoid conflict with std::move
+  wto << "#ifdef move\n";
+  wto << "#undef move\n";
+  wto << "#endif\n";
   for (size_t i = 0; i < game.scripts.size(); i++)
     wto << "#define " << game.scripts[i].name << "(...) _SCR_" << game.scripts[i].name << "(__VA_ARGS__)\n";
   wto << "\n\n";
@@ -176,7 +180,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "          var value;\n"
          "          enigma_internal_deserialize(key, iter, len);\n"
          "          enigma_internal_deserialize(value, iter, len);\n"
-         "          vmap->emplace(std::move(key), std::move(value));\n"
+         "          vmap->emplace(((std::move))(key), ((std::move))(value));\n"
          "        }\n"
          "      }\n"
          "\n"
@@ -186,7 +190,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::pair<object_locals, std::size_t> deserialize(std::byte *iter) {\n"
          "      object_locals result;\n"
          "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
+         "      return {(std::move)(result), len};\n"
          "    }\n\n";
 
   wto << "  };\n";
@@ -567,7 +571,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
          "      OBJ_" << object->name << " result;\n"
          "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
+         "      return {(std::move)(result), len};\n"
          "    }\n";
 
   return locals;
@@ -1143,6 +1147,15 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "variant argument" << argn;
     }
     wto << ") {\n  {\n";
+    // Create argument array for GameMaker-style argument[0], argument[1], etc.
+    wto << "    variant argument[16] = {";
+    for (int argn = 0; argn < 16; argn++) {
+      if (argn > 0) wto << ", ";
+      wto << "argument" << argn;
+    }
+    wto << "};\n";
+    // Declare argument_count variable for scripts that use it
+    wto << "    [[maybe_unused]] int argument_count = " << scr->globargs << ";\n";
     wto << "    ";
     auto &ast = (scr->code).ast;
     string ast_code = write_ast_to_string(ast, 2, true);
@@ -1171,6 +1184,15 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "variant argument" << argn;
     }
     wto << ") {\n  {\n";
+    // Create argument array for GameMaker-style argument[0], argument[1], etc.
+    wto << "    variant argument[16] = {";
+    for (int argn = 0; argn < 16; argn++) {
+      if (argn > 0) wto << ", ";
+      wto << "argument" << argn;
+    }
+    wto << "};\n";
+    // Declare argument_count variable for scripts that use it
+    wto << "    [[maybe_unused]] int argument_count = " << scr->globargs << ";\n";
     wto << "    ";
     auto &ast = (scr->code).ast;
     string ast_code = write_ast_to_string(ast, 2, true);
@@ -1303,6 +1325,8 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
         wto << "argument" << argn;
       }
       wto << "};\n";
+      // Declare argument_count variable for scripts that use it
+      wto << "  [[maybe_unused]] int argument_count = " << it->second << ";\n";
       wto << "  ";
       // Write AST to a string and write to stream
       // Pass is_object_script=true so argument[N] uses the local array instead of varaccess_argument

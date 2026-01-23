@@ -25,30 +25,30 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
   switch (arg.kind()) {
     case ArgumentKind::ARG_BOTH:
       // treat as literal if starts with quote (")
-      if (val[0] == '"' || val[0] == '\'') return val;
+      if (!val.empty() && (val[0] == '"' || val[0] == '\'')) return val;
       // else fall through
     case ArgumentKind::ARG_STRING:
       return '\"' + string_replace_all(string_replace_all(val, "\\", "\\\\"), "\"", "\"+'\"'+\"") + '\"';
     case ArgumentKind::ARG_BOOLEAN:
       return std::to_string(val != "0");
     case ArgumentKind::ARG_SPRITE:
-      return arg.has_sprite() ? arg.sprite() : "-1";
+      return (arg.has_sprite() && !arg.sprite().empty()) ? arg.sprite() : "-1";
     case ArgumentKind::ARG_SOUND:
-      return arg.has_sound() ? arg.sound() : "-1";
+      return (arg.has_sound() && !arg.sound().empty()) ? arg.sound() : "-1";
     case ArgumentKind::ARG_BACKGROUND:
-      return arg.has_background() ? arg.background() : "-1";
+      return (arg.has_background() && !arg.background().empty()) ? arg.background() : "-1";
     case ArgumentKind::ARG_PATH:
-      return arg.has_path() ? arg.path() : "-1";
+      return (arg.has_path() && !arg.path().empty()) ? arg.path() : "-1";
     case ArgumentKind::ARG_SCRIPT:
-      return arg.has_script() ? arg.script() : "-1";
+      return (arg.has_script() && !arg.script().empty()) ? arg.script() : "-1";
     case ArgumentKind::ARG_OBJECT:
-      return arg.has_object() ? arg.object() : "-1";
+      return (arg.has_object() && !arg.object().empty()) ? arg.object() : "-1";
     case ArgumentKind::ARG_ROOM:
-      return arg.has_room() ? arg.room() : "-1";
+      return (arg.has_room() && !arg.room().empty()) ? arg.room() : "-1";
     case ArgumentKind::ARG_FONT:
-      return arg.has_font() ? arg.font() : "-1";
+      return (arg.has_font() && !arg.font().empty()) ? arg.font() : "-1";
     case ArgumentKind::ARG_TIMELINE:
-      return arg.has_timeline() ? arg.timeline() : "-1";
+      return (arg.has_timeline() && !arg.timeline().empty()) ? arg.timeline() : "-1";
     case ArgumentKind::ARG_MENU:
     case ArgumentKind::ARG_COLOR:
     default:
@@ -140,10 +140,17 @@ std::string Actions2Code(const std::vector< buffers::resources::Action >& action
 
         if (action.exe_type() == ActionExecution::EXEC_FUNCTION) {
           code += '(';
+          bool first_arg = true;
           for (int i = 0; i < args.size(); i++) {
-            if (i != 0)
+            std::string arg_code = Argument2Code(args.Get(i));
+            if (arg_code.empty()) {
+              continue; // Skip empty arguments
+            }
+            if (!first_arg) {
               code += ',';
-            code += Argument2Code(args.Get(i));
+            }
+            code += arg_code;
+            first_arg = false;
           }
           code += ')';
         }

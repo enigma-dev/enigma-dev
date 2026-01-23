@@ -74,7 +74,9 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
     wto << "variant argument0 = 0";
     for (int i = 1; i < global_script_argument_count; i++)
       wto << ", argument" << i << " = 0";
-    wto << ";\n\n";
+    wto << ";\n";
+    // Declare argument_count for scripts that use it
+    wto << "int argument_count = " << global_script_argument_count << ";\n\n";
   }
 
   wto << "namespace enigma_user { " << endl;

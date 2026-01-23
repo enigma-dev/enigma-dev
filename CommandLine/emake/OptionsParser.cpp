@@ -131,6 +131,14 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("enigma-root", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("codegen-only", opt::bool_switch()->default_value(false), "Only generate code and exit")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
+    ("inherit-increment-from", opt::value<int>(), "Inherit ++/-- from: 0=GML, 1=C++")
+    ("inherit-strings-from", opt::value<int>(), "Inherit strings from: 0=GML, 1=C++")
+    ("inherit-escapes-from", opt::value<int>(), "Inherit escape sequences: 0=GML, 1=C++")
+    ("inherit-equivalence-from", opt::value<int>(), "Inherit a=b=c from: 0=GML, 1=C++")
+    ("inherit-literals-from", opt::value<int>(), "Treat literals as: 0=EDL (variant), 1=C++ (scalar)")
+    ("inherit-negatives-as", opt::value<int>(), "Treat negatives as: 0=GML (true > 0), 1=C++ (true != 0)")
+    ("inherit-objects", opt::value<bool>(), "Object Inheritance: true/false")
+    ("automatic-semicolons", opt::value<bool>(), "Automatic Semicolons: true/false")
   ;
 
   _positional.add("input", 1);
@@ -269,14 +277,42 @@ std::string OptionsParser::APIyaml(const std::string& mode, const buffers::resou
   if (currentConfig == nullptr) currentConfig = &_loadedSettings;
   
   const auto &compilerSettings = currentConfig->compiler();
+  
+  // Get values from config, but allow command-line overrides
   int inherit_strings = compilerSettings.has_inherit_strings() ? compilerSettings.inherit_strings() : 0;
   int inherit_escapes = compilerSettings.inherit_escapes() ? compilerSettings.inherit_escapes() : 0;
-  int inherit_increment = compilerSettings.has_inherit_increment() ? compilerSettings.inherit_increment() : 0;
+  int inherit_increment = compilerSettings.has_inherit_increment() ? compilerSettings.inherit_increment() : 1; // Default to 1 (C++ mode)
   int inherit_equivalence = compilerSettings.inherit_equivalence() ? compilerSettings.inherit_equivalence() : 0;
   int inherit_literals = compilerSettings.has_inherit_literals() ? compilerSettings.inherit_literals() : 0;
   int inherit_negatives = compilerSettings.has_inherit_negatives() ? compilerSettings.inherit_negatives() : 0;
-  bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : 0;
-  bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : 0;
+  bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : false;
+  bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : true;
+  
+  // Override with command-line options if provided
+  if (_rawArgs.count("inherit-increment-from")) {
+    inherit_increment = _rawArgs["inherit-increment-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-strings-from")) {
+    inherit_strings = _rawArgs["inherit-strings-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-escapes-from")) {
+    inherit_escapes = _rawArgs["inherit-escapes-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-equivalence-from")) {
+    inherit_equivalence = _rawArgs["inherit-equivalence-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-literals-from")) {
+    inherit_literals = _rawArgs["inherit-literals-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-negatives-as")) {
+    inherit_negatives = _rawArgs["inherit-negatives-as"].as<int>();
+  }
+  if (_rawArgs.count("inherit-objects")) {
+    inherit_objects = _rawArgs["inherit-objects"].as<bool>();
+  }
+  if (_rawArgs.count("automatic-semicolons")) {
+    automatic_semicolons = _rawArgs["automatic-semicolons"].as<bool>();
+  }
 
   std::string yaml;
   yaml += "%e-yaml\n";

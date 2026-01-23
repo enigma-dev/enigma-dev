@@ -45,6 +45,7 @@
 #include "../parsing/full_type.h"
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
+#include "languages/lang_CPP.h"
 #include "object_storage.h"
 #include "backend/ideprint.h"
 
@@ -222,6 +223,15 @@ class DeclGatheringVisitor : public AST::Visitor {
   void AddLocal(AST::PNode &node) {
     if (!node) return;
     
+    // Handle dot expressions specially - they need AddDot to be called
+    if (node->type == AST::NodeType::BINARY_EXPRESSION) {
+      auto bin = node->As<AST::BinaryExpression>();
+      if (bin && bin->operation.type == enigma::parsing::TokenType::TT_DOT) {
+        AddDot(bin->right);
+        return;  // Don't process as a regular identifier
+      }
+    }
+    
     std::string name = CheckIfIdentifier(node);
     
     // If CheckIfIdentifier returned empty, it might be because the variable is in declarations
@@ -272,20 +282,32 @@ class DeclGatheringVisitor : public AST::Visitor {
     
     // Skip script arguments (argument0 through argument15).
     // These are function parameters, not instance variables.
-    if (name.length() >= 8 && name.substr(0, 8) == "argument" &&
-        name.length() <= 10) {  // "argument" + up to 2 digits
-      std::string suffix = name.substr(8);
-      bool is_argument = true;
-      for (char c : suffix) {
-        if (!std::isdigit(c)) {
-          is_argument = false;
-          break;
-        }
+    // Also handle special script variables: argument (the array) and argument_count
+    if (name.length() >= 8 && name.substr(0, 8) == "argument") {
+      if (name == "argument" || name == "argument_count") {
+        // These are special script variables, not instance variables.
+        // Add them to locals so the parser recognizes them as valid identifiers,
+        // but mark them as declared so they don't become instance variables.
+        parsed_scope->locals[name] = dectrip("var");
+        parsed_scope->declarations[name] = nullptr;  // Mark as declared to prevent instance variable generation
+        // argument is a local array in script functions, not an instance variable.
+        // It should NOT be added to dot_accessed_locals - it's accessed directly as argument[N].
+        return;
       }
-      if (is_argument && suffix.length() > 0) {
-        int arg_num = std::stoi(suffix);
-        if (arg_num >= 0 && arg_num <= 15) {
-          return;  // Skip argument0-argument15
+      if (name.length() <= 10) {  // "argument" + up to 2 digits
+        std::string suffix = name.substr(8);
+        bool is_argument = true;
+        for (char c : suffix) {
+          if (!std::isdigit(c)) {
+            is_argument = false;
+            break;
+          }
+        }
+        if (is_argument && suffix.length() > 0) {
+          int arg_num = std::stoi(suffix);
+          if (arg_num >= 0 && arg_num <= 15) {
+            return;  // Skip argument0-argument15
+          }
         }
       }
     }
@@ -300,7 +322,34 @@ class DeclGatheringVisitor : public AST::Visitor {
     }
     
     bool global_exists_result = lang->global_exists(name);
+    bool should_add_local = false;
+    
     if (!global_exists_result) {
+      // No global exists, safe to add as local variable
+      should_add_local = true;
+    } else {
+      // Global exists - check if it's a function
+      // Functions don't conflict with instance variables in C++ (different syntax: fn() vs var)
+      // Only skip if it's a variable or something else that would conflict
+      const lang_CPP* lang_cpp = dynamic_cast<const lang_CPP*>(lang);
+      if (lang_cpp) {
+        jdi::definition* global_def = lang_cpp->look_up(name);
+        if (global_def) {
+          // If it's a function, allow the instance variable (no conflict)
+          // Only skip if it's NOT a function (i.e., it's a variable or type)
+          bool is_function = lang->definition_is_function(global_def);
+          should_add_local = is_function;  // Allow if it's a function
+        } else {
+          // Definition lookup failed, but global_exists returned true - be conservative
+          should_add_local = false;
+        }
+      } else {
+        // Not lang_CPP, can't check - be conservative and skip
+        should_add_local = false;
+      }
+    }
+    
+    if (should_add_local) {
       parsed_scope->locals[name] = dectrip("var");
       // Only add to dot_accessed_locals if this is a script.
       // Scripts can be called by any object, so their variables need varaccess_* functions.
@@ -327,12 +376,33 @@ class DeclGatheringVisitor : public AST::Visitor {
 
   void AddDot(AST::PNode &node) {
     if (!node) return;
-    std::string name = CheckIfIdentifier(node);
+    std::string name;
+    // For dot access like object.creator, we need to get the identifier name
+    // even if it's already declared as a local variable, because it's being
+    // accessed as an instance variable via dot notation
+    if (node->type == AST::NodeType::IDENTIFIER) {
+      name = node->As<AST::IdentifierAccess>()->name.content;
+    } else {
+      // Try CheckIfIdentifier first, but if it returns empty, try to get the name directly
+      name = CheckIfIdentifier(node);
+      if (name == "" && node->type == AST::NodeType::IDENTIFIER) {
+        name = node->As<AST::IdentifierAccess>()->name.content;
+      }
+    }
     if (name == "") return;
     parsed_scope->dots[name] = 0;
     // Don't add shared locals to dot_accessed_locals - they're accessed directly as member variables
+    // Don't add functions to dot_accessed_locals - they're called directly, not accessed as variables
     if (!lang->is_shared_local(name)) {
-      cs->add_dot_accessed_local(name);
+      // Check if this is a function - functions should not be in dot_accessed_locals
+      // Functions are tracked in parsed_scope->funcs, not dot_accessed_locals
+      if (parsed_scope->funcs.find(name) == parsed_scope->funcs.end() && 
+          !lang->global_exists(name)) {
+        // Only add if it's not a function (not in funcs and not a global function)
+        // Even if the variable is declared locally, if it's accessed via dot notation
+        // (like damage_object.creator), it needs varaccess_* function
+        cs->add_dot_accessed_local(name);
+      }
     }
   }
 
@@ -345,6 +415,8 @@ class DeclGatheringVisitor : public AST::Visitor {
       if (script_names.find(name) != script_names.end()) {
         parsed_scope->funcs[name] = node.arguments.size();
       }
+      // Functions should never be added to dot_accessed_locals - they're called directly, not accessed as variables.
+      // Functions are already tracked in parsed_scope->funcs.
     }
   }
 
@@ -398,6 +470,10 @@ class DeclGatheringVisitor : public AST::Visitor {
       AddLocal(node.left);
       if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
         AddDot(node.right);
+      } else if (node.operation.type == enigma::parsing::TokenType::TT_BEGINBRACKET) {
+        // Array access: argument[N] is a local array access, not an instance variable access.
+        // argument should NOT be added to dot_accessed_locals - it's local to the script function.
+        AddLocal(node.right);
       } else {
         AddLocal(node.right);
       }

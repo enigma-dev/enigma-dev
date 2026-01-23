@@ -29,6 +29,57 @@ using namespace enigma::parsing;
 #define VISIT_AND_CHECK(node) \
   if (!Visit(node)) return false;
 
+// Helper function to check if a macro expands to a function call pattern like $name()
+static bool is_macro_function_call(const enigma::parsing::MacroMap &macros, const std::string &name) {
+  auto it = macros.find(name);
+  if (it == macros.end()) {
+    return false;
+  }
+  
+  const auto &value = it->second.value;
+  if (value.empty()) {
+    return false;
+  }
+  
+  // Check if macro expands to pattern: $identifier(...)
+  // Pattern: starts with $ (or identifier starting with $), followed by parentheses
+  size_t idx = 0;
+  
+  // Skip whitespace tokens
+  while (idx < value.size() && value[idx].PreprocessesAway()) {
+    idx++;
+  }
+  
+  if (idx >= value.size()) {
+    return false;
+  }
+  
+  // Check if first token is $identifier or identifier starting with $
+  const auto &first_token = value[idx];
+  if (first_token.type == TT_IDENTIFIER) {
+    std::string content = first_token.content;
+    if (content.length() > 0 && content[0] == '$') {
+      // Found $identifier, now check for parentheses
+      idx++;
+      while (idx < value.size() && value[idx].PreprocessesAway()) {
+        idx++;
+      }
+      if (idx < value.size() && value[idx].type == TT_BEGINPARENTH) {
+        // Check for closing paren
+        idx++;
+        while (idx < value.size() && value[idx].PreprocessesAway()) {
+          idx++;
+        }
+        if (idx < value.size() && value[idx].type == TT_ENDPARENTH) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
+}
+
 AST::CppPrettyPrinter::CppPrettyPrinter() {
   // Use default file path - tests should run sequentially so conflicts are unlikely
   // If conflicts occur, the file will be truncated on open
@@ -110,30 +161,57 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
   // Core fix: Common instance variables that are always available on objects
   // These should be accessed directly in event context (as member variables)
   // or through glaccess in script context
-  // Note: sprite_xoffset, sprite_yoffset, sprite_width, sprite_height are macros
-  // that expand to method calls, so they should NOT be in this list
+  // Note: Variables that are macros expanding to function calls (like $name())
+  // should NOT be in this list - they are handled separately via macro detection
   static const std::set<std::string> instance_vars = {
     "x", "y", "xprevious", "yprevious", "xstart", "ystart",
     "hspeed", "vspeed", "speed", "direction",
     "gravity", "gravity_direction", "friction",
     "sprite_index", "image_index", "image_speed", "image_angle",
     "image_xscale", "image_yscale", "visible", "solid", "persistent",
-    "depth", "mask_index", "image_number"
+    "depth", "mask_index"
   };
   
   if (is_script && !is_object_script && name != "self") {
     // Global script context - use glaccess/varaccess
     // Check instance variables FIRST, before checking globals
     // This ensures x, y, etc. are always converted to glaccess calls
-    if (instance_vars.find(name) != instance_vars.end()) {
+    
+    // Check if this is a macro that expands to a function call (like $name())
+    bool is_macro_func = false;
+    std::string macro_expansion;
+    if (language_fe) {
+      const auto &macros = language_fe->builtin_macros();
+      if (is_macro_function_call(macros, name)) {
+        is_macro_func = true;
+        // Extract the $name part from the macro expansion
+        auto it = macros.find(name);
+        if (it != macros.end() && !it->second.value.empty()) {
+          // Find the first identifier starting with $
+          for (const auto &token : it->second.value) {
+            if (token.type == TT_IDENTIFIER && !token.content.empty() && token.content[0] == '$') {
+              macro_expansion = token.content;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
+    // Check for sprite/image accessor macros (sprite_width, sprite_height, image_number, etc.)
+    // These are macros that expand to $name() method calls
+    if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
+        name == "sprite_width" || name == "sprite_height" ||
+        name == "image_number") {
+      // These are macros - generate $name() directly
+      print("enigma::glaccess(int(self))->$" + name + "()");
+    } else if (instance_vars.find(name) != instance_vars.end()) {
       // These are standard instance variables - access through glaccess in script context
       // Scripts are wrapped in with(self), so we access through the instance
       print("enigma::glaccess(int(self))->" + name);
-    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
-               name == "sprite_width" || name == "sprite_height") {
-      // These are macros that expand to $name() - use $name directly to avoid double expansion
-      // Don't use the macro name, use $name directly
-      print("enigma::glaccess(int(self))->$" + name + "()");
+    } else if (is_macro_func && !macro_expansion.empty()) {
+      // This is a macro that expands to $name() - use $name directly to avoid double expansion
+      print("enigma::glaccess(int(self))->" + macro_expansion + "()");
     } else if (language_fe && language_fe->is_shared_local(name)) {
       print("enigma::glaccess(int(self))->" + name);
     } else if (name == "working_directory") {
@@ -143,7 +221,13 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
     } else if (language_fe && language_fe->global_exists(name)) {
       print(name);
     } else if (std::holds_alternative<jdi::definition *>(node.type) && std::get<jdi::definition *>(node.type)) {
-      print(name);
+      jdi::definition *def = std::get<jdi::definition *>(node.type);
+      // Check if this is a function - functions should be called directly, not via varaccess_*
+      if (language_fe && language_fe->definition_is_function(def)) {
+        print(name);
+      } else {
+        print(name);
+      }
     } else if (name.substr(0, 8) == "argument") {
       print(name);
     } else if (name[0] == '$') {
@@ -153,20 +237,52 @@ bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
       std::string method_name = name.substr(1);  // Remove $ prefix
       print("enigma::glaccess(int(self))->" + method_name + "()");
     } else {
-      print("enigma::varaccess_" + name + "(int(self))");
+      // Before generating varaccess_*, check if this might be a function in enigma_user namespace
+      // Functions should never generate varaccess_* - they're called directly
+      if (language_fe && std::holds_alternative<jdi::definition *>(node.type)) {
+        jdi::definition *def = std::get<jdi::definition *>(node.type);
+        if (def && language_fe->definition_is_function(def)) {
+          print(name);
+        } else {
+          print("enigma::varaccess_" + name + "(int(self))");
+        }
+      } else {
+        print("enigma::varaccess_" + name + "(int(self))");
+      }
     }
   } else {
     // Not in script context - could be in event or other context
     // For instance variables, access directly (they're member variables in event context)
-    // For sprite accessors, use the macro name (it will expand to $name())
+    // For macros that expand to function calls, use the macro expansion directly
+    
+    // Check if this is a macro that expands to a function call (like $name())
+    bool is_macro_func = false;
+    std::string macro_expansion;
+    if (language_fe) {
+      const auto &macros = language_fe->builtin_macros();
+      if (is_macro_function_call(macros, name)) {
+        is_macro_func = true;
+        // Extract the $name part from the macro expansion
+        auto it = macros.find(name);
+        if (it != macros.end() && !it->second.value.empty()) {
+          // Find the first identifier starting with $
+          for (const auto &token : it->second.value) {
+            if (token.type == TT_IDENTIFIER && !token.content.empty() && token.content[0] == '$') {
+              macro_expansion = token.content;
+              break;
+            }
+          }
+        }
+      }
+    }
+    
     if (instance_vars.find(name) != instance_vars.end()) {
       // In event context, these are member variables - use directly
       // Note: x, y, etc. are accessible as member variables in event methods
       print(name);
-    } else if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
-               name == "sprite_width" || name == "sprite_height") {
-      // These are macros that expand to $name() - use $name directly to avoid double expansion
-      print("$" + name + "()");
+    } else if (is_macro_func && !macro_expansion.empty()) {
+      // This is a macro that expands to $name() - use $name directly to avoid double expansion
+      print(macro_expansion + "()");
     } else if (name == "working_directory") {
       // Convert working_directory variable to get_working_directory() function call
       // to match old codegen behavior
@@ -424,24 +540,10 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
     return VisitDot(node);
   }
 
-  // Special handling for argument[N] access
-  if (node.operation.type == TT_BEGINBRACKET && node.left->type == AST::NodeType::IDENTIFIER) {
-    auto left_id = node.left->As<AST::IdentifierAccess>();
-    if (left_id && left_id->name.content == "argument") {
-      // For global scripts: use varaccess_argument(int(self))[int(N)]
-      // For object scripts: use argument[int(N)] (member variable)
-      if (is_script && !is_object_script) {
-        print("enigma::varaccess_argument(int(self))[int(");
-        VISIT_AND_CHECK(node.right);
-        print(")]");
-      } else {
-        print("argument[int(");
-        VISIT_AND_CHECK(node.right);
-        print(")]");
-      }
-      return true;
-    }
-  }
+  // argument[N] is a local array access in script functions.
+  // argument is declared as a local array in each script function body, so it should
+  // always be accessed directly as argument[int(N)], regardless of script type.
+  // No special handling needed - let it fall through to normal array access handling.
 
   if (!Visit(node.left)) {
     return false;
@@ -463,6 +565,37 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // Don't convert mod to % - keep as mod for old codegen compatibility
   // (GML uses mod keyword which old codegen preserved)
   
+  // Handle TT_DIV (div operator) specially - it needs INTEGER_DIVISION wrapper
+  if (node.operation.type == TT_DIV) {
+    // The div operator should generate: / INTEGER_DIVISION(value)
+    // Note: INTEGER_DIVISION is a struct, so we need INTEGER_DIVISION(value) not (INTEGER_DIVISION)(value)
+    // If the right-hand side is a cast expression, unwrap it to get the inner expression
+    print(" / INTEGER_DIVISION(");
+    if (!node.right) {
+      return false;
+    }
+    // Unwrap cast expressions - INTEGER_DIVISION constructor takes int, so we don't need the cast
+    if (node.right->type == AST::NodeType::CAST) {
+      auto* cast_expr = node.right->As<AST::CastExpression>();
+      if (cast_expr && cast_expr->expr) {
+        // Visit the inner expression without the cast
+        if (!Visit(cast_expr->expr)) {
+          return false;
+        }
+      } else {
+        if (!Visit(node.right)) {
+          return false;
+        }
+      }
+    } else {
+      if (!Visit(node.right)) {
+        return false;
+      }
+    }
+    print(")");
+    return true;
+  }
+  
   // Handle operators - don't add spaces around array subscript
   if (node.operation.type == TT_BEGINBRACKET) {
     if (is_multi_dim) {
@@ -477,7 +610,10 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // Add (double) cast for division to ensure floating-point division
   // This is critical for physics, collision detection, and coordinate calculations
   // Only add for GML code (scripts), not for C++ code
-  if (node.operation.type == TT_SLASH && is_script) {
+  // NOTE: TT_DIV (div operator) is handled above and returns early, so this should never be reached for div.
+  // The explicit check here is defensive to ensure TT_DIV never gets the (double) cast,
+  // since div uses INTEGER_DIVISION struct which cannot be cast to double.
+  if (node.operation.type == TT_SLASH && node.operation.type != TT_DIV && is_script) {
     print("(double) ");
   }
 
@@ -503,10 +639,13 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
     auto fn = node.function->As<AST::IdentifierAccess>();
     std::string name = fn->name.content;
     // Check for both sprite_xoffset and $sprite_xoffset (macro may have expanded)
+    // Also check for image_number which is a macro expanding to $image_number()
     if (name == "sprite_xoffset" || name == "sprite_yoffset" || 
         name == "sprite_width" || name == "sprite_height" ||
+        name == "image_number" ||
         name == "$sprite_xoffset" || name == "$sprite_yoffset" || 
-        name == "$sprite_width" || name == "$sprite_height") {
+        name == "$sprite_width" || name == "$sprite_height" ||
+        name == "$image_number") {
       // Remove $ prefix if present
       if (name[0] == '$') {
         name = name.substr(1);
@@ -527,6 +666,24 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
         goto print_args;
       }
     }
+    // For function calls, always print the function name directly - don't generate varaccess_*
+    // Functions should be called directly, not accessed as variables
+    // Check if it's a global function first
+    if (language_fe && language_fe->global_exists(name)) {
+      print(name);
+      goto print_args;
+    }
+    // Check if it's a function definition
+    if (std::holds_alternative<jdi::definition *>(fn->type)) {
+      jdi::definition *def = std::get<jdi::definition *>(fn->type);
+      if (def && language_fe && language_fe->definition_is_function(def)) {
+        print(name);
+        goto print_args;
+      }
+    }
+    // If we can't determine it's a function, print it directly anyway (it's in a function call context)
+    print(name);
+    goto print_args;
   }
   VISIT_AND_CHECK(node.function);
 print_args:

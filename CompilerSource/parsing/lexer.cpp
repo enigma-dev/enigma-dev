@@ -559,25 +559,34 @@ Token Lexer::ReadRawToken() {
         token.content = code.substr(oct_start, oct_len);
         return token;
       }
-      if (false) {
-        [[fallthrough]]; case '.':
-        if (code[pos] >= '0' && code[pos] < '9') {
-          // Fallthrough
-        } else {
-          auto tnode = token_lookup_from_TT_DOT.Get(code, pos); // FIXME: this should read pos, not spos. spos will make it hang.
-          if (tnode.first == TT_ERROR) break;
-          pos = tnode.second;
-          return Token(tnode.first, Mark(spos, pos - spos));
-        }
-      }
-      [[fallthrough]]; case '1': case '2': case '3': case '4': case '5':
-                       case '6': case '7': case '8': case '9':
+      // Fall through to handle regular decimal numbers starting with 0
+      [[fallthrough]];
+      case '1': case '2': case '3': case '4': case '5':
+      case '6': case '7': case '8': case '9':
       while (pos < code.length() && is_digit(code[pos])) ++pos;
       if (pos < code.length() && code[pos] == '.') {
         while (++pos < code.length() && is_digit(code[pos]));
       }
       return Token(TT_DECLITERAL, Mark(spos, pos - spos));
     }
+
+    case '.':
+      // Check if this is a decimal literal starting with . (e.g., .95, .1, .3)
+      if (pos < code.length() && code[pos] >= '0' && code[pos] <= '9') {
+        // This is a decimal literal starting with . (e.g., .95)
+        while (pos < code.length() && is_digit(code[pos])) ++pos;
+        return Token(TT_DECLITERAL, Mark(spos, pos - spos));
+      }
+      // Not a decimal literal - check for operators like .*, ->, etc.
+      {
+        auto tnode = token_lookup_from_TT_DOT.Get(code, pos); // FIXME: this should read pos, not spos. spos will make it hang.
+        if (tnode.first != TT_ERROR) {
+          pos = tnode.second;
+          return Token(tnode.first, Mark(spos, pos - spos));
+        }
+      }
+      // Just a dot operator
+      return Token(TT_DOT, Mark(spos, 1));
 
     case '/': {
       if (pos < code.length() && code[pos] == '/') { // Two-slash comments
@@ -646,6 +655,12 @@ bool Lexer::HandleMacro(std::string_view name) {
   // Don't expand 'repeat' as a macro - it's a keyword that should be parsed as a statement
   // The macro expansion will happen during C++ compilation, not during EDL parsing
   if (name == "repeat") {
+    return false;
+  }
+  // Don't expand 'div' as a macro - it's a keyword (TT_DIV) that should be parsed as an operator
+  // The macro expansion would convert it to /(INTEGER_DIVISION)(int), but we want to handle it
+  // specially in the codegen to generate / INTEGER_DIVISION(...) correctly
+  if (name == "div") {
     return false;
   }
   

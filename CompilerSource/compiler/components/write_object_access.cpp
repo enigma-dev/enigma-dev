@@ -34,6 +34,7 @@
 using namespace std;
 
 #include "backend/GameData.h"
+#include "backend/ideprint.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 #include "parser/object_storage.h"
@@ -102,20 +103,46 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   }
 
   for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
+    string pmember = dait->first;
+    
+    // Debug output to track filtering
+    user << "Processing dot_accessed_local: " << pmember << flushl;
+    
     // Skip built-in instance variables (discovered by clang parser) - they're accessible as member variables
     // These should not have varaccess functions generated since they're part of the object hierarchy
-    if (this->is_shared_local(dait->first)) {
+    if (this->is_shared_local(pmember)) {
+      user << "  Skipped " << pmember << " (is_shared_local)" << flushl;
       continue;
     }
     
     // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
     // Use is_enigma_user_constant() which directly checks enigma_user namespace
-    if (this->is_enigma_user_constant(dait->first)) {
+    if (this->is_enigma_user_constant(pmember)) {
       // It's a built-in constant in enigma_user namespace, don't generate varaccess function for it
+      user << "  Skipped " << pmember << " (is_enigma_user_constant)" << flushl;
       continue;
     }
     
-    string pmember = dait->first;
+    // argument is a local array in script functions, not an instance variable.
+    // It should never be in dot_accessed_locals, but if it somehow is, skip it.
+    // argument[N] is accessed directly in the script function body, not via varaccess_*.
+    if (pmember == "argument") {
+      user << "  Skipped " << pmember << " (local array, not instance variable)" << flushl;
+      continue;
+    }
+    
+    // Functions should never be in dot_accessed_locals - they're called directly, not accessed as variables.
+    // Check if this is a function in enigma_user namespace.
+    // Functions like part_type_create, part_type_size, etc. should not generate varaccess_* functions.
+    if (namespace_enigma_user) {
+      jdi::definition *def = namespace_enigma_user->look_up(pmember);
+      if (def && (def->flags & jdi::DEF_FUNCTION)) {
+        user << "  Skipped " << pmember << " (global function, not instance variable)" << flushl;
+        continue;
+      }
+    }
+    
+    user << "  Generating varaccess_" << pmember << flushl;
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;
 

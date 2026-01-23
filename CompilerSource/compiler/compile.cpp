@@ -445,6 +445,14 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   for (size_t i = 0; i < game.scripts.size(); i++)
     current_language->quickmember_script(globals_scope,game.scripts[i].name);
 
+  // Add special script variables: argument (array), argument_count, and argument0-argument15
+  // These are available in all scripts and need to be recognized by the parser
+  current_language->quickmember_integer(globals_scope, "argument");
+  current_language->quickmember_integer(globals_scope, "argument_count");
+  for (int i = 0; i < 16; i++) {
+    current_language->quickmember_integer(globals_scope, "argument" + std::to_string(i));
+  }
+
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
     current_language->quickmember_integer(globals_scope, game.shaders[i].name);

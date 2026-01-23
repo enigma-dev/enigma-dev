@@ -645,8 +645,16 @@ jdi::definition *TryParseIdExpression(Declarator *decl) {
           return TryParseNestedNameSpecifier(def, decl);
         } else if (map_contains(declarations, name.content)) {
           return declarations[name.content]->def;
-        } else if (def == nullptr) {
+        } else if (def == nullptr && is_declarator) {
+          // Only error if we're parsing a type/declarator, not an expression
+          // In expressions, unknown identifiers are allowed (they'll be instance variables or locals)
           herr->Error(token) << "No such name exists in global scope";
+        }
+        // Always set decl->name so TryParseIdExpression() can create an IdentifierAccess node
+        // even if the definition is not found (for expression parsing)
+        if (decl && decl->name.content.empty()) {
+          decl->name = name;
+          decl->ndef = def;
         }
 
         return def;

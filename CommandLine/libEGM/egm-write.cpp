@@ -417,9 +417,9 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
 
       if (type != "folder") {
         tree << YAML::BeginMap;
-        tree << YAML::Key << "name" << std::string(child->name());
-        tree << YAML::Key << "type" << type;
-        tree << YAML::Key << "id" << getResID(child);
+        tree << YAML::Key << "name" << YAML::Value << std::string(child->name());
+        tree << YAML::Key << "type" << YAML::Value << type;
+        tree << YAML::Key << "id" << YAML::Value << getResID(child);
         tree << YAML::EndMap;
       }
 
@@ -462,9 +462,9 @@ bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const 
   if (std::ofstream out{projectFile.string()}) { // egm settings
     YAML::Emitter projYAML;
     projYAML << YAML::BeginMap;
-    projYAML << YAML::Key << "version" << EGM_VERSION;
-    projYAML << YAML::Key << "tree" << "tree.yaml";
-    projYAML << YAML::Key << "backup" << "protobuf.bin";
+    projYAML << YAML::Key << "version" << YAML::Value << EGM_VERSION;
+    projYAML << YAML::Key << "tree" << YAML::Value << "tree.yaml";
+    projYAML << YAML::Key << "backup" << YAML::Value << "protobuf.bin";
     projYAML << YAML::EndMap;
     out << projYAML.c_str();
   } else {
