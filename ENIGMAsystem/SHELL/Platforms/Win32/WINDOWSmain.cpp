@@ -88,6 +88,10 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+bool set_working_directory() {
+  return set_working_directory(program_directory);
+}
+
 } // enigma_user
 
 namespace enigma {

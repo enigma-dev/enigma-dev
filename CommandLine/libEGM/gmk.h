@@ -18,6 +18,7 @@
 #ifndef EGM_GMK_H
 #define EGM_GMK_H
 
+#include "action.h"
 #include "file-format.h"
 
 namespace egm {
@@ -27,6 +28,8 @@ public:
   GMKFileFormat(const EventData* event_data) : FileFormat(event_data) {}
   virtual std::unique_ptr<Project> LoadProject(const fs::path& fName) const override;
 };
+
+void GetDndCodeStats(DndCodeStats* out);
 
 }  //namespace egm
 

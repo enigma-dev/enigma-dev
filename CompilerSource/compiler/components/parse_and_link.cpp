@@ -478,9 +478,7 @@ static void link_ambigous(ParsedScope* t, ParsedScope *global, string desc) {
   for (parsed_object::ambit it = t->ambiguous.begin(); it != t->ambiguous.end(); it++) {
     parsed_object::globit g = global->globals.find(it->first);
     if (g == global->globals.end())
-      t->locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for " << desc << endl;
-    else
-      cout << "Determined `" << it->first << "' to be global for " << desc << "'" << endl;
+      t->locals[it->first] = it->second;
   }
 }
 

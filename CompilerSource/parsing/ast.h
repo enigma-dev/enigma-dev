@@ -683,6 +683,139 @@ class AST {
     bool VisitDeclarationStatement(DeclarationStatement &node);
   };
 
+  // AST Dumper for debugging - prints the AST structure to stderr
+  class ASTDumper : public Visitor {
+    int indent_level = 0;
+    std::ostream &out;
+    
+    void PrintIndent() {
+      for (int i = 0; i < indent_level; ++i) out << "  ";
+    }
+    
+   public:
+    explicit ASTDumper(std::ostream &os = std::cerr) : out(os) {}
+    
+    bool DefaultVisit(Node &node) override {
+      PrintIndent();
+      out << "[" << AST::NodeToString(node.type) << "]\n";
+      return true;
+    }
+    
+    bool VisitCodeBlock(CodeBlock &node) override {
+      PrintIndent();
+      out << "CodeBlock (" << node.statements.size() << " statements)\n";
+      indent_level++;
+      for (auto &stmt : node.statements) {
+        if (stmt) stmt->accept(*this);
+      }
+      indent_level--;
+      return false;
+    }
+    
+    bool VisitBinaryExpression(BinaryExpression &node) override {
+      PrintIndent();
+      out << "BinaryExpr: " << node.operation.token << "\n";
+      indent_level++;
+      PrintIndent(); out << "left:\n";
+      indent_level++;
+      if (node.left) node.left->accept(*this);
+      indent_level--;
+      PrintIndent(); out << "right:\n";
+      indent_level++;
+      if (node.right) node.right->accept(*this);
+      indent_level--;
+      indent_level--;
+      return false;
+    }
+    
+    bool VisitFunctionCallExpression(FunctionCallExpression &node) override {
+      PrintIndent();
+      out << "FunctionCall (" << node.arguments.size() << " args)\n";
+      indent_level++;
+      PrintIndent(); out << "function:\n";
+      indent_level++;
+      if (node.function) node.function->accept(*this);
+      indent_level--;
+      for (size_t i = 0; i < node.arguments.size(); ++i) {
+        PrintIndent(); out << "arg[" << i << "]:\n";
+        indent_level++;
+        if (node.arguments[i]) node.arguments[i]->accept(*this);
+        indent_level--;
+      }
+      indent_level--;
+      return false;
+    }
+    
+    bool VisitParenthetical(Parenthetical &node) override {
+      PrintIndent();
+      out << "Parenthetical\n";
+      indent_level++;
+      if (node.expression) node.expression->accept(*this);
+      indent_level--;
+      return false;
+    }
+    
+    bool VisitIdentifierAccess(IdentifierAccess &node) override {
+      PrintIndent();
+      out << "Identifier: " << node.name.content << "\n";
+      return false;
+    }
+    
+    bool VisitLiteral(Literal &node) override {
+      PrintIndent();
+      out << "Literal: ";
+      if (auto *d = std::get_if<long double>(&node.value.value)) {
+        out << *d;
+      } else if (auto *i = std::get_if<long long>(&node.value.value)) {
+        out << *i;
+      } else if (auto *s = std::get_if<std::string>(&node.value.value)) {
+        out << "\"" << *s << "\"";
+      }
+      out << "\n";
+      return false;
+    }
+    
+    bool VisitIfStatement(IfStatement &node) override {
+      PrintIndent();
+      out << "IfStatement" << (node.not_condition ? " (NOT)" : "") << "\n";
+      indent_level++;
+      PrintIndent(); out << "condition:\n";
+      indent_level++;
+      if (node.condition) node.condition->accept(*this);
+      indent_level--;
+      PrintIndent(); out << "true_branch:\n";
+      indent_level++;
+      if (node.true_branch) node.true_branch->accept(*this);
+      indent_level--;
+      if (node.false_branch) {
+        PrintIndent(); out << "false_branch:\n";
+        indent_level++;
+        node.false_branch->accept(*this);
+        indent_level--;
+      }
+      indent_level--;
+      return false;
+    }
+    
+    bool VisitUnaryPrefixExpression(UnaryPrefixExpression &node) override {
+      PrintIndent();
+      out << "UnaryPrefix: " << node.operation.token << "\n";
+      indent_level++;
+      if (node.operand) node.operand->accept(*this);
+      indent_level--;
+      return false;
+    }
+    
+    static void Dump(Node *node, std::ostream &os = std::cerr) {
+      if (!node) {
+        os << "(null node)\n";
+        return;
+      }
+      ASTDumper dumper(os);
+      node->accept(dumper);
+    }
+  };
+
   // Used to adapt to current single-error syntax checking interface.
   ErrorCollector herr;
   // A lexed (tokenized) view of the code.

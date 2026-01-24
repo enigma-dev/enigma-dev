@@ -415,10 +415,12 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
       continue;
     }
     
-    // Skip if this variable is explicitly declared as global (global foo, global var foo, global int foo, globalvar foo)
-    // Variables declared as global are added to global->globals by compute_locals() and should NOT be declared in objects
-    if (global->globals.find(ii->first) != global->globals.end()) {
-      // Variable is explicitly declared as global, skip from object locals
+    // Skip if this variable is explicitly declared as global IN THIS OBJECT (global foo, global var foo, globalvar foo)
+    // Variables accessed via global.varname in this object are in object->globals
+    // We should NOT skip based on global->globals, because scripts may have added variables there
+    // that are still instance variables in this object
+    if (object->globals.find(ii->first) != object->globals.end()) {
+      // Variable is explicitly accessed via global.varname in this object, skip from object locals
       continue;
     }
     

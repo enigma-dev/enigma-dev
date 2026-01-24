@@ -16,6 +16,7 @@
 **/
 
 #include "file-format.h"
+#include "gmk.h"
 #include "event_reader/event_parser.h"
 #include "strings_util.h"
 #include "treenode.pb.h"
@@ -733,12 +734,15 @@ static void SetResourceId(TreeNode* node, const std::string& type_name, int new_
 
 int main(int argc, char *argv[]) {
   bool repair = false;
+  bool dnd_code_stats = false;
   std::string output_path;
   std::string gmk_path;
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
     if (a == "--repair" || a == "-r") {
       repair = true;
+    } else if (a == "--dnd-code-stats") {
+      dnd_code_stats = true;
     } else if ((a == "--output" || a == "-o") && i + 1 < argc) {
       output_path = argv[++i];
     } else if (!a.empty() && a[0] != '-') {
@@ -751,10 +755,11 @@ int main(int argc, char *argv[]) {
     }
   }
   if (gmk_path.empty()) {
-    std::cerr << "Usage: " << argv[0] << " [--repair|-r] [--output|-o PATH] <gmk_file> [output_path]\n"
-              << "  --repair    Fix invalid names, duplicates, and duplicate IDs; write EGM to --output.\n"
-              << "  --output    Output path for repaired project (EGM directory). Default: <stem>_repaired.egm\n"
-              << "  output_path Optional second positional argument for output path (alternative to --output)\n";
+    std::cerr << "Usage: " << argv[0] << " [--repair|-r] [--dnd-code-stats] [--output|-o PATH] <gmk_file> [output_path]\n"
+              << "  --repair         Fix invalid names, duplicates, and duplicate IDs; write EGM to --output.\n"
+              << "  --dnd-code-stats Print DnD vs code action stats (DnD=action_*, code=ACT_CODE/EXEC_CODE) and exit.\n"
+              << "  --output         Output path for repaired project (EGM directory). Default: <stem>_repaired.egm\n"
+              << "  output_path      Optional second positional argument for output path (alternative to --output)\n";
     return 1;
   }
 
@@ -781,6 +786,20 @@ int main(int argc, char *argv[]) {
   if (project == nullptr) {
     std::cerr << "Error: Failed to load GMK file \"" << gmkFile << "\"" << std::endl;
     return 1;
+  }
+
+  if (dnd_code_stats) {
+    DndCodeStats stats;
+    GetDndCodeStats(&stats);
+    int total = stats.n_dnd + stats.n_code;
+    const char* primary = (total == 0)
+        ? "empty"
+        : (stats.n_dnd >= stats.n_code)
+            ? "primarily DnD"
+            : "primarily code";
+    std::cout << "n_dnd=" << stats.n_dnd << " n_code=" << stats.n_code
+              << " code_chars=" << stats.code_chars << " " << primary << std::endl;
+    return 0;
   }
   
   // Collect all resources

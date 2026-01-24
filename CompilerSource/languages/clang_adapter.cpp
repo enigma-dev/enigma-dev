@@ -387,9 +387,6 @@ int ClangContext::parse_file(const std::string& filepath,
       if (std::filesystem::exists(mock_resources_dir)) {
         std::string abs_path = std::filesystem::absolute(mock_resources_dir).u8string();
         quote_include_dirs_.push_back(abs_path);
-        std::cerr << "DEBUG: Added mock Resources dir: " << abs_path << std::endl;
-      } else {
-        std::cerr << "DEBUG: Mock Resources dir does not exist: " << mock_resources_dir << std::endl;
       }
       std::filesystem::path mock_pp_dir = mock_headers_dir / "ENIGMAsystem" / "SHELL" / "Preprocessor_Environment_Editable";
       if (std::filesystem::exists(mock_pp_dir)) {
@@ -1591,6 +1588,7 @@ void ClangContext::extract_macros() {
           bool is_function = false;
           bool is_variadic = false;
           std::vector<std::string> params;
+          unsigned param_end_idx = 1;  // Default: start after name for object-like macros
           
           // Look for '(' after macro name
           if (num_tokens > 1) {
@@ -1600,13 +1598,15 @@ void ClangContext::extract_macros() {
             
             if (second_str == "(") {
               is_function = true;
-              // Extract parameters
+              // Extract parameters and track where ')' is found
+              param_end_idx = 2;  // Start after '('
               for (unsigned i = 2; i < num_tokens; ++i) {
                 CXString token_str = clang_getTokenSpelling(visitor->tu, tokens[i]);
                 std::string token = clang_getCString(token_str);
                 clang_disposeString(token_str);
                 
                 if (token == ")") {
+                  param_end_idx = i;  // Track where ')' was found
                   break;
                 }
                 if (token == "," || token == "(") {
@@ -1624,12 +1624,14 @@ void ClangContext::extract_macros() {
                     clang_disposeString(next2);
                     if (next1_str == "." && next2_str == ".") {
                       is_variadic = true;
-                      i += 2; // Skip the next two tokens
-                      break;
+                      param_end_idx = i + 2;  // Track past the "..."
+                      // Continue to find the ')'
+                      continue;
                     }
                   } else if (token == "...") {
                     is_variadic = true;
-                    break;
+                    // Continue to find the ')'
+                    continue;
                   }
                 }
                 params.push_back(token);
@@ -1638,7 +1640,9 @@ void ClangContext::extract_macros() {
           }
           
           // Extract macro value (everything after name and params)
-          unsigned start_idx = is_function ? 2 + params.size() + (is_variadic ? 1 : 0) + 1 : 1;
+          // For function-like macros, start after the ')' that closes the parameter list
+          // For object-like macros, start after the name
+          unsigned start_idx = is_function ? param_end_idx + 1 : 1;
           
           // Build a single string containing all token content, separated by spaces
           // This string will be owned by the Macro via owned_raw_string

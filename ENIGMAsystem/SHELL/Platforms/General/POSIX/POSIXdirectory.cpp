@@ -47,6 +47,10 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+bool set_working_directory() {
+  return set_working_directory(program_directory);
+}
+
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";

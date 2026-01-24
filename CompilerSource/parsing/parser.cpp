@@ -1956,7 +1956,6 @@ std::unique_ptr<AST::FunctionCallExpression> TryParseFunctionCallExpression(int 
   (void)precedence;
   
   while (token.type == TT_BEGINPARENTH) {
-    // Token oper = token;
     token = lexer->ReadToken(); // Consume the operator
 
     std::vector<std::unique_ptr<AST::Node>> arguments{};
@@ -2752,11 +2751,8 @@ class SyntaxChecker : public AST::Visitor {
         tok.type = TT_IDENTIFIER;
         if (max != unsigned(-1)) {
           if (node.arguments.size() < min) {
-            std::cerr << "[ERROR] SyntaxChecker: Too few arguments for '" << func->name.content << "'" << std::endl;
             herr->Error(tok) << "Too few arguments to function call";
           } else if (node.arguments.size() > max) {
-            std::cerr << "[ERROR] SyntaxChecker: Too many arguments for '" << func->name.content << "' (got " 
-                      << node.arguments.size() << ", max=" << max << ")" << std::endl;
             herr->Error(tok) << "Too many arguments to function call";
           }
         }

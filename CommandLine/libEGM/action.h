@@ -20,9 +20,17 @@
 
 #include "Action.pb.h"
 
+#include <cstddef>
 #include <vector>
+
+struct DndCodeStats {
+  int n_dnd = 0;
+  int n_code = 0;
+  std::size_t code_chars = 0;
+};
 
 std::string Argument2Code(const buffers::resources::Argument& arg);
 std::string Actions2Code(const std::vector< buffers::resources::Action >& actions);
+void AccumulateDndCodeStats(const std::vector< buffers::resources::Action >& actions, DndCodeStats* acc);
 
 #endif

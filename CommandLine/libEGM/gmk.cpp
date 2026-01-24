@@ -818,6 +818,7 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/, const std::string& /*n
   return font;
 }
 
+static DndCodeStats _dndCodeStats;
 
 struct PostponedAction {
   PostponedAction(std::string* field, std::vector<std::unique_ptr<Action>>&& actions) : _field(field), _actions(std::move(actions)) {}
@@ -839,6 +840,7 @@ struct PostponedAction {
       // #endregion
       actions.emplace_back(*action);
     }
+    AccumulateDndCodeStats(actions, &_dndCodeStats);
     std::string generated_code = Actions2Code(actions);
     // #region agent log
     {
@@ -1389,6 +1391,7 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
     }
   }
   // #endregion
+  _dndCodeStats = DndCodeStats{};
   for(auto&& a : postponedActions) {
     // #region agent log
     {
@@ -1414,6 +1417,10 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   LegacyEventsToEGM(proj.get(), _event_data);
 
   return proj;
+}
+
+void GetDndCodeStats(DndCodeStats* out) {
+  if (out) *out = _dndCodeStats;
 }
 
 }  //namespace egm

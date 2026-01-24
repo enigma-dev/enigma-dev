@@ -382,6 +382,34 @@ std::string Action2Code(ActionVectorSpan span, int &numberOfBraces, int &numberO
   return code;
 }
 
+void AccumulateDndCodeStats(const std::vector< buffers::resources::Action >& actions, DndCodeStats* acc) {
+  using buffers::resources::ActionKind;
+  using buffers::resources::ActionExecution;
+  if (!acc) return;
+  for (const auto& a : actions) {
+    if (a.kind() == ActionKind::ACT_CODE ||
+        (a.exe_type() == ActionExecution::EXEC_CODE && !a.code_string().empty())) {
+      acc->n_code++;
+      acc->code_chars += a.code_string().size();
+      continue;
+    }
+    if (a.kind() == ActionKind::ACT_BEGIN || a.kind() == ActionKind::ACT_END ||
+        a.kind() == ActionKind::ACT_ELSE || a.kind() == ActionKind::ACT_REPEAT ||
+        a.kind() == ActionKind::ACT_VARIABLE || a.kind() == ActionKind::ACT_EXIT ||
+        a.is_question()) {
+      acc->n_dnd++;
+      continue;
+    }
+    if (a.kind() == ActionKind::ACT_NORMAL) {
+      auto fn = a.function_name();
+      if (fn.size() >= 7 && fn.substr(0, 7) == "action_") {
+        acc->n_dnd++;
+        continue;
+      }
+    }
+  }
+}
+
 std::string Actions2Code(const std::vector< buffers::resources::Action >& actions) {
   using buffers::resources::ActionKind;
   using buffers::resources::ActionExecution;

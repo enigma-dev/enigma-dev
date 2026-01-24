@@ -3623,3 +3623,33 @@ TEST(ParserTest, DecimalLiteralsVariousValues) {
   auto *block = node->As<AST::CodeBlock>();
   ASSERT_EQ(block->statements.size(), 5);
 }
+
+// Test case reproducing the "Unmatched closing parenthesis" error from check_keys.gml
+// The issue occurs with nested if statements and complex boolean expressions
+TEST(ParserTest, NestedIfWithComplexBooleanExpressions) {
+  // This pattern from check_keys.gml was causing "Unmatched closing parenthesis" at line 275
+  // The code has balanced parentheses but the parser was getting confused
+  std::string code = R"(
+if (global.joydetected && global.openablejoy && !gamepad_is_connected(global.gamepadIndex)) {
+    if (is_past_deadzone(joyx, joyy, 0)) {
+        if ((ctrl_Up == 0) && (ctrl_Down == 0) && (joyy > 0)) {
+            ctrl_Down = 1;
+            global.controltype = 1;
+        }
+    }
+    if(global.dpad_rebind) {
+        if ((ctrl_Left == 0) && (ctrl_Right == false) && joystick_check_button(global.opjoyid, global.opjoybtn_padl)) {
+            ctrl_Left = 1;
+            global.controltype = 1;
+            walk_zone = 0;
+        }
+    }
+}
+)";
+  
+  ParserTester test = ParserTester::CreateWithSetUp(code);
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr) << "Parser should successfully parse nested if statements with complex boolean expressions";
+  ASSERT_EQ(test->current_token().type, TT_ENDOFCODE);
+  ASSERT_EQ(node->type, AST::NodeType::BLOCK);
+}
