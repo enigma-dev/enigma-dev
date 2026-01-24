@@ -742,14 +742,19 @@ int main(int argc, char *argv[]) {
     } else if ((a == "--output" || a == "-o") && i + 1 < argc) {
       output_path = argv[++i];
     } else if (!a.empty() && a[0] != '-') {
-      gmk_path = a;
-      break;
+      if (gmk_path.empty()) {
+        gmk_path = a;
+      } else if (output_path.empty()) {
+        // Second positional argument is the output path
+        output_path = a;
+      }
     }
   }
   if (gmk_path.empty()) {
-    std::cerr << "Usage: " << argv[0] << " [--repair|-r] [--output|-o PATH] <gmk_file>\n"
+    std::cerr << "Usage: " << argv[0] << " [--repair|-r] [--output|-o PATH] <gmk_file> [output_path]\n"
               << "  --repair    Fix invalid names, duplicates, and duplicate IDs; write EGM to --output.\n"
-              << "  --output    Output path for repaired project (EGM directory). Default: <stem>_repaired.egm\n";
+              << "  --output    Output path for repaired project (EGM directory). Default: <stem>_repaired.egm\n"
+              << "  output_path Optional second positional argument for output path (alternative to --output)\n";
     return 1;
   }
 

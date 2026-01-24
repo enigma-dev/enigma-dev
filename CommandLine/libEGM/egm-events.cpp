@@ -24,6 +24,10 @@ void LoadObjectEvents(const fs::path& fPath, google::protobuf::Message *m, const
     for(auto& f : fs::directory_iterator(fPath)) {
     if (f.path().extension() == ".edl") {
       const std::string eventIdString = f.path().stem().string();
+      // Skip macOS resource fork files (._*)
+      if (eventIdString.length() >= 2 && eventIdString[0] == '.' && eventIdString[1] == '_') {
+        continue;
+      }
       auto event = event_data->DecodeEventString(eventIdString);
 
       buffers::resources::Object::EgmEvent event_proto;

@@ -30,6 +30,8 @@
 #include <vector>
 #include <set>
 #include <string_view>
+#include <sstream>
+#include <chrono>
 
 #include <cstdlib>     /* srand, rand */
 #include <ctime>       /* time */
@@ -384,7 +386,7 @@ class Decoder {
       return; // no postponeds for this id
     }
     for (std::string *mutableName : mutableNameIt->second)
-      mutableName->append(name.c_str(), name.size());
+      *mutableName = name;
   }
 
   private:
@@ -823,9 +825,33 @@ struct PostponedAction {
   std::vector<std::unique_ptr<Action>> _actions;
   void Parse() {
     std::vector<Action> actions;
-    for (std::unique_ptr<Action>& action : _actions)
+    for (std::unique_ptr<Action>& action : _actions) {
+      // #region agent log
+      {
+        std::ofstream log("/Users/gregwilliamson/RadialGM/Submodules/enigma-dev/.cursor/debug.log", std::ios::app);
+        if (log.is_open()) {
+          auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+          std::stringstream ss;
+          ss << "{\"id\":\"log_" << now << "_postact\",\"timestamp\":" << now << ",\"location\":\"gmk.cpp:826\",\"message\":\"Processing postponed action\",\"data\":{\"who_name\":\"" << action->who_name() << "\",\"function_name\":\"" << action->function_name() << "\",\"kind\":" << static_cast<int>(action->kind()) << "},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n";
+          log << ss.str();
+        }
+      }
+      // #endregion
       actions.emplace_back(*action);
-    _field->append(Actions2Code(actions)); 
+    }
+    std::string generated_code = Actions2Code(actions);
+    // #region agent log
+    {
+      std::ofstream log("/Users/gregwilliamson/RadialGM/Submodules/enigma-dev/.cursor/debug.log", std::ios::app);
+      if (log.is_open()) {
+        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        std::stringstream ss;
+        ss << "{\"id\":\"log_" << now << "_postret\",\"timestamp\":" << now << ",\"location\":\"gmk.cpp:828\",\"message\":\"PostponedAction::Parse complete\",\"data\":{\"code_length\":" << generated_code.length() << ",\"code_preview\":\"" << (generated_code.length() > 200 ? generated_code.substr(0, 200) : generated_code) << "\"},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n";
+        log << ss.str();
+      }
+    }
+    // #endregion
+    _field->append(generated_code); 
     _actions.clear();
   }
 };
@@ -1193,6 +1219,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
     auto &resMap = typeMap[type];
     resMap[i] = std::move(res);
+    dec.processPostoned(name, i, type);
     dec.endInflate();
   }
 
@@ -1220,7 +1247,6 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     const TypeCase type = RESOURCE_KIND[kind];
 
-    // Handle postponed id->name references
     dec.processPostoned(name, id, type);
 
     auto typeMapIt = typeMap.find(type);
@@ -1352,7 +1378,31 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   }
   
   // Handle postponed DnD conversion
-  for(auto&& a : postponedActions) a.Parse();
+  // #region agent log
+  {
+    std::ofstream log("/Users/gregwilliamson/RadialGM/Submodules/enigma-dev/.cursor/debug.log", std::ios::app);
+    if (log.is_open()) {
+      auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+      std::stringstream ss;
+      ss << "{\"id\":\"log_" << now << "_postponed\",\"timestamp\":" << now << ",\"location\":\"gmk.cpp:1354\",\"message\":\"Starting postponed DnD conversion\",\"data\":{\"postponed_count\":" << postponedActions.size() << "},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n";
+      log << ss.str();
+    }
+  }
+  // #endregion
+  for(auto&& a : postponedActions) {
+    // #region agent log
+    {
+      std::ofstream log("/Users/gregwilliamson/RadialGM/Submodules/enigma-dev/.cursor/debug.log", std::ios::app);
+      if (log.is_open()) {
+        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        std::stringstream ss;
+        ss << "{\"id\":\"log_" << now << "_parse\",\"timestamp\":" << now << ",\"location\":\"gmk.cpp:1355\",\"message\":\"Parsing postponed action\",\"data\":{\"action_count\":" << a._actions.size() << "},\"sessionId\":\"debug-session\",\"runId\":\"run1\",\"hypothesisId\":\"A\"}\n";
+        log << ss.str();
+      }
+    }
+    // #endregion
+    a.Parse();
+  }
   postponedActions.clear();
 
   auto proj = std::make_unique<buffers::Project>();
