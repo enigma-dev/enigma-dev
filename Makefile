@@ -19,7 +19,7 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/gm2egm/ clean
 	$(MAKE) -C CommandLine/gmk-checker/ clean
 
-all: libENIGMAShared libProtocols libEGM ENIGMA gm2egm emake emake-tests test-runner .FORCE
+all: libENIGMAShared libProtocols libEGM ENIGMA emake emake-tests .FORCE
 
 Game: .FORCE
 	@$(RM) -f logs/enigma_compile.log

@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/make-wrapper.sh",
+      "args": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        {
+          "base": "$gcc",
+          "fileLocation": ["relative", "${workspaceFolder}"]
+        }
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "echo": true,
+        "focus": false,
+        "clear": false
+      },
+      "isBackground": false
+    },
+    {
+      "label": "make clean",
+      "type": "shell",
+      "command": "make",
+      "args": ["clean"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build"
+    },
+    {
+      "label": "make all",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/make-wrapper.sh",
+      "args": ["all"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        {
+          "base": "$gcc",
+          "fileLocation": ["relative", "${workspaceFolder}"]
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "make ENIGMA",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/make-wrapper.sh",
+      "args": ["ENIGMA"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        {
+          "base": "$gcc",
+          "fileLocation": ["relative", "${workspaceFolder}"]
+        }
+      ],
+      "group": "build"
+    },
+    {
+      "label": "make emake",
+      "type": "shell",
+      "command": "${workspaceFolder}/.vscode/make-wrapper.sh",
+      "args": ["emake"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        {
+          "base": "$gcc",
+          "fileLocation": ["relative", "${workspaceFolder}"]
+        }
+      ],
+      "group": "build"
+    }
+  ]
+}

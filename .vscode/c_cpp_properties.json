@@ -1,0 +1,63 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "compileCommands": "${workspaceFolder}/compile_commands.json",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}",
+                "${workspaceFolder}/CompilerSource",
+                "${workspaceFolder}/shared",
+                "${workspaceFolder}/shared/libpng-util",
+                "${workspaceFolder}/shared/protos/.eobjs",
+                "${workspaceFolder}/shared/event_reader",
+                "${workspaceFolder}/shared/eyaml",
+                "${workspaceFolder}/shared/rectpacker",
+                "${workspaceFolder}/shared/ProtoYaml",
+                "${workspaceFolder}/CommandLine/libEGM",
+                "${workspaceFolder}/CommandLine/emake",
+                "${workspaceFolder}/ENIGMAsystem/SHELL",
+                "/opt/homebrew/include",
+                "/opt/homebrew/opt/llvm/include",
+                "/opt/homebrew/Cellar/abseil/20250814.1/include",
+                "/opt/homebrew/Cellar/c-ares/1.34.5/include",
+                "/opt/homebrew/Cellar/grpc/1.76.0_1/include",
+                "/opt/homebrew/Cellar/openssl@3/3.6.0/include",
+                "/opt/homebrew/Cellar/protobuf/33.1/include",
+                "/opt/homebrew/Cellar/pugixml/1.15/include",
+                "/opt/homebrew/Cellar/re2/20251105/include",
+                "/opt/homebrew/Cellar/yaml-cpp/0.8.0/include",
+                "/opt/homebrew/opt/libpng/include/libpng16",
+                "/usr/local/include",
+                "/Library/Developer/CommandLineTools/usr/lib/clang/*/include",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/*/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-x64",
+            "compilerArgs": [
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-g",
+                "-fPIC"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/**"
+                ],
+                "limitSymbolsToIncludedHeaders": false
+            }
+        }
+    ],
+    "version": 4
+}
