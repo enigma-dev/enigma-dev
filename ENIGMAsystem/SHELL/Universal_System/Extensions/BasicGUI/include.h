@@ -21,9 +21,7 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
 
-#ifndef JUST_DEFINE_IT_RUN
 #include "elements.h"
-#endif
 
 namespace enigma_user {
 ///NOTE: CALLBACKS AND STYLES CAN BE A SECURITY RISK IF STATE IS NOT THE DEFINED ENUM's. NO CHECKING TAKES PLACE DURING RUNTIME

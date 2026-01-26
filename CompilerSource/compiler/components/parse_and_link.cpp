@@ -26,7 +26,10 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <parsing/ast.h>
+#include "parsing/ast.h"
+#include <numeric>
+#include <algorithm>
+#include <functional>
 
 #include <cstdio>
 #include <iostream>
@@ -58,30 +61,54 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   auto &tline_lookup = state.timeline_lookup;
 
   // First we just parse the scripts to add semicolons and collect variable names
+  // Sort scripts by ID to ensure deterministic ordering regardless of file reader
+  std::vector<size_t> script_indices(game.scripts.size());
+  std::iota(script_indices.begin(), script_indices.end(), 0);
+  std::sort(script_indices.begin(), script_indices.end(),
+    [&game](size_t a, size_t b) { return game.scripts[a].id() < game.scripts[b].id(); });
+  
   scripts.resize(game.scripts.size());
-  for (size_t i = 0; i < game.scripts.size(); i++) {
+  for (size_t idx : script_indices) {
+    size_t i = idx;
     std::string wrapped_code =
-        "with (self) {\n" + game.scripts[i]->code() + "\n/* */}";
+        std::string("with (self) {\n") + std::string(game.scripts[i]->code()) + std::string("\n/* */}");
     AST ast = AST::Parse(wrapped_code, &state.parse_context);
     if (ast.HasError()) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
            << ast.ErrorString() << flushl;
+      // Note: syntax errors always cause failure (allow_syntax_errors removed)
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
     scr_lookup[game.scripts[i].name] = scripts[i] =
         new ParsedScript(std::move(ast), &state);
-    edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals" << flushl;
+    edbg << "Parsed `" << game.scripts[i].name << "': " << scripts[i]->scope.locals.size() << " locals, " << scripts[i]->scope.globals.size() << " globals, " << scripts[i]->scope.ambiguous.size() << " ambiguous" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
-    if (scripts[i]->scope.locals.size() or scripts[i]->scope.globallocals.size() or scripts[i]->scope.ambiguous.size()) {
+    // Create global_code if there are instance variables being accessed
+    // (variables in locals that are NOT explicitly declared with var).
+    // This triggers object method generation for scripts that access instance vars.
+    bool has_instance_vars = false;
+    for (const auto& local : scripts[i]->scope.locals) {
+      if (scripts[i]->scope.declarations.find(local.first) == scripts[i]->scope.declarations.end()) {
+        has_instance_vars = true;
+        break;
+      }
+    }
+    if (has_instance_vars || scripts[i]->scope.ambiguous.size()) {
+      std::cout << "Creating global_code for script " << game.scripts[i].name << " (has_instance_vars=" << has_instance_vars << ", ambiguous=" << scripts[i]->scope.ambiguous.size() << ")" << std::endl;
       // This is a neat hack to treat everything in the script as with().
       // We make a temporary scope so that anything local to it is ignored, then
       // ultimately throw it away.
       // TODO: Looking at this now, I'm not sure if we actually want to throw
       // locals away; what if a script explicitly declares `local var foo;`?
+      // 
+      // FIX: Parse the code again for global_code since the original ast was moved above.
+      // The global_code version is used for global script calls, while the object method
+      // version (in scripts[i]->code) is used when the script is called from within an object.
+      AST global_ast = AST::Parse(wrapped_code, &state.parse_context);
       ParsedScope temporary_scope = *scripts[i]->code.my_scope;
-      scripts[i]->global_code = new ParsedCode(&temporary_scope, std::move(ast), &state);
+      scripts[i]->global_code = new ParsedCode(&temporary_scope, std::move(global_ast), &state);
       scripts[i]->global_code->my_scope = nullptr;
     }
     fflush(stdout);
@@ -98,6 +125,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         user << "Syntax error in timeline `" << timeline.name
              << ", moment: " << moment.step() << "'\n"
              << ast.ErrorString() << flushl;
+        // Note: syntax errors always cause failure (allow_syntax_errors removed)
         return E_ERROR_SYNTAX;
       }
 
@@ -137,7 +165,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   edbg << "`Linking' " << game.scripts.size() << " scripts and " <<game.timelines.size() <<" timelines in " << nec_iters << " passes...\n";
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {
-    for (size_t _im = 0; _im < game.scripts.size(); _im++) {  // For each script
+    for (size_t _im : script_indices) {  // For each script (in sorted order by ID)
       ParsedScript* curscript = scripts[_im];  // At this point, what we have is this:     for each script as curscript
       for (parsed_object::funcit it = curscript->scope.funcs.begin(); it != curscript->scope.funcs.end(); it++) //For each function called by each script
       {
@@ -181,7 +209,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
 
   edbg << "Completing script \"Link\"" << flushl;
 
-  for (size_t script_ind = 0; script_ind < game.scripts.size(); ++script_ind) {
+  for (size_t script_ind : script_indices) {  // Iterate in sorted order by ID
     ParsedScript* curscript = scripts[script_ind];
     string curscrname = game.scripts[script_ind].name;
     edbg << "Linking `" << curscrname << "':\n";
@@ -226,11 +254,19 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   // Index object ids by name for lookup for collision event name->integer
   //TODO: could be merged with parsed_objects lookup below
   map<string, int> object_name_ids;
-  for (const auto &object : game.objects)
+  
+  // Sort objects by ID to ensure deterministic ordering regardless of file reader
+  std::vector<std::reference_wrapper<const ObjectData>> sorted_objects;
+  for (const auto &object : game.objects) {
+    sorted_objects.push_back(std::cref(object));
     object_name_ids[object.name] = object.id();
+  }
+  std::sort(sorted_objects.begin(), sorted_objects.end(),
+    [](const auto &a, const auto &b) { return a.get().id() < b.get().id(); });
 
   edbg << game.objects.size() << " Objects:\n";
-  for (const auto &object : game.objects) {
+  for (const auto &object_ref : sorted_objects) {
+    const auto &object = object_ref.get();
     //For every object in Ism's struct, make our own
     state.parsed_objects.push_back(
       new parsed_object(
@@ -258,11 +294,33 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
       const string fn = ev.TrueFunctionName();
       edbg << "Parse `" << object.name << "::" << fn << "..."<< flushl;
 
-      AST ast = AST::Parse(event.code(), &state.parse_context);
+      AST ast = AST::Parse(std::string(event.code()), &state.parse_context);
       if (ast.HasError()) {
+          // Format DebugString output to replace escape sequences with newlines
+          std::string debug_str = event.DebugString();
+          std::string formatted_debug;
+          for (size_t i = 0; i < debug_str.length(); ++i) {
+            if (debug_str[i] == '\\' && i + 1 < debug_str.length()) {
+              if (debug_str[i+1] == 'n') {
+                formatted_debug += '\n';
+                ++i;  // Skip the 'n'
+                continue;
+              } else if (debug_str[i+1] == 'r') {
+                formatted_debug += '\n';  // Treat \r as newline
+                ++i;  // Skip the 'r'
+                continue;
+              } else if (debug_str[i+1] == 't') {
+                formatted_debug += '\t';
+                ++i;  // Skip the 't'
+                continue;
+              }
+            }
+            formatted_debug += debug_str[i];
+          }
           user << "Syntax error in object `" << object.name << "', "
-               << ev.HumanName() << " (" << event.DebugString() << "):\n"
+               << ev.HumanName() << " (" << formatted_debug << "):\n"
                << ast.ErrorString() << flushl;
+        // Note: syntax errors always cause failure (allow_syntax_errors removed)
         return E_ERROR_SYNTAX;
       }
       pob->all_events.emplace_back(ParsedEvent(ev, pob, std::move(ast), &state));
@@ -281,22 +339,26 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     parsed_room *pr;
     state.parsed_rooms.push_back(pr = new parsed_room);
 
-    AST create = AST::Parse(room->creation_code(), &state.parse_context);
+    AST create = AST::Parse(std::string(room->creation_code()), &state.parse_context);
     if (create.HasError()) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n" << create.ErrorString() << flushl;
+      // Note: syntax errors always cause failure (allow_syntax_errors removed)
       return E_ERROR_SYNTAX;
     }
     pr->creation_code = new ParsedCode(&pr->pseudo_scope, std::move(create), &state);
 
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
-        AST ast = AST::Parse(instance.creation_code(), &state.parse_context);
+        AST ast = AST::Parse(std::string(instance.creation_code()), &state.parse_context);
         if (ast.HasError()) {
           user << "Syntax error in instance creation code for instance "
                << instance.id() << " in room " << room.id() << " (`" << room.name << "'):\n"
                << ast.ErrorString() << flushl;
-          return E_ERROR_SYNTAX;
+          // Note: allow_syntax_errors removed - syntax errors always cause failure
+          {
+            return E_ERROR_SYNTAX;
+          }
         }
 
         ast.ApplyTo(instance.id());
@@ -309,12 +371,15 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     //PreCreate code
     for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
-        AST ast = AST::Parse(instance.initialization_code(), &state.parse_context);
+        AST ast = AST::Parse(std::string(instance.initialization_code()), &state.parse_context);
         if (ast.HasError()) {
           cout << "Syntax error in instance initialization code for instance "
                << instance.id() <<" in room " << room.id() << " (`" << room.name
                << "'):\n" << ast.ErrorString() << flushl;
-          return E_ERROR_SYNTAX;
+          // Note: allow_syntax_errors removed - syntax errors always cause failure
+          {
+            return E_ERROR_SYNTAX;
+          }
         }
 
         ast.ApplyTo(instance.id());
@@ -413,9 +478,7 @@ static void link_ambigous(ParsedScope* t, ParsedScope *global, string desc) {
   for (parsed_object::ambit it = t->ambiguous.begin(); it != t->ambiguous.end(); it++) {
     parsed_object::globit g = global->globals.find(it->first);
     if (g == global->globals.end())
-      t->locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for " << desc << endl;
-    else
-      cout << "Determined `" << it->first << "' to be global for " << desc << "'" << endl;
+      t->locals[it->first] = it->second;
   }
 }
 

@@ -45,6 +45,7 @@ namespace enigma_user
 {
 
 enigma::instance_t instance_create(int x,int y,int object);
+enigma::instance_t instance_create_depth(int x,int y,int depth,int object);
 void instance_deactivate_all(bool notme);
 void instance_activate_all();
 void instance_activate_object(int obj);

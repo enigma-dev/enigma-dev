@@ -25,7 +25,9 @@
 #include <string_view>
 
 // TODO: Delete. Replace with ENIGMA-specific wrapper class.
-namespace jdi { struct definition; }
+// JDI removed - using clang_adapter typedefs instead
+// namespace jdi { struct definition; }
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 namespace enigma {
 namespace parsing {
@@ -82,6 +84,7 @@ enum TokenType {
   TT_BINLITERAL,      // 0b0 0b1 0b10 0b11 0b100 0b101 0b110 ...
   TT_OCTLITERAL,      // 0o0 0o1 0o2... 0o6 0o7 0o10 0o11... 0o76543210 ...
   TT_HEXLITERAL,      // 0x0 $1 0x2... 0x9 0xA... $F $10... $FEDCBA9876543210...
+  TT_BOOLLITERAL,     // true, false
   TT_STRINGLIT,       // "", ''
   TT_CHARLIT,         // '' when in C++ Strings mode (or translating a macro).
   TT_SCOPEACCESS,     // ::

@@ -28,6 +28,7 @@
 #include "Universal_System/scalar.h"
 
 #include <string>
+#include <cstdint>
 using std::string;
 
 namespace enigma {
@@ -75,7 +76,7 @@ namespace enigma_user
 
   void texture_set_repeat(bool repeat);
   void texture_set_repeat_ext(int sampler, bool repeat);
-  #define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
+  #define texture_set_repeat(rpt) texture_set_repeat_ext(0, rpt)
   void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw);
   void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
   #define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)

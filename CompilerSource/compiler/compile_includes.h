@@ -24,7 +24,8 @@
 #ifndef ENIGMA_COMPILE_INCLUDES_H
 #define ENIGMA_COMPILE_INCLUDES_H
 
-#include <JDI/src/Storage/definition.h>
+// JDI removed - definition types need to be reimplemented
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 extern string tostring(int val);
 

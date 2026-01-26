@@ -1,4 +1,6 @@
-syntax = "proto2";
+edition = "2024";
+option features.field_presence = EXPLICIT;
+option features.enforce_naming_style = STYLE_LEGACY;
 package buffers;
 
 import "Sprite.proto";
@@ -42,5 +44,5 @@ message TreeNode {
     //resources.Help help = 15;
   }
 
-  optional string name = 101;
+  string name = 101;
 }

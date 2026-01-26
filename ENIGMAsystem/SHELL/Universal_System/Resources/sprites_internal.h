@@ -17,10 +17,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//FIXME: this should be ifdef shellmain but enigmas in a sorry state
-#ifdef JUST_DEFINE_IT_RUN
-#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
-#endif
 
 #ifndef ENIGMA_SPRITESTRUCT
 #define ENIGMA_SPRITESTRUCT

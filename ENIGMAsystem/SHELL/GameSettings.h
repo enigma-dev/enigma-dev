@@ -15,5 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// these are to be implemented by the game
-extern void ABORT_ON_ALL_ERRORS();
+#ifndef ENIGMA_GAMESETTINGS_H
+#define ENIGMA_GAMESETTINGS_H
+
+// Include the generated GAME_SETTINGS.h which defines ABORT_ON_ALL_ERRORS()
+// If it doesn't exist (e.g., during initial compilation), the stub will be used
+#include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
+
+#endif // ENIGMA_GAMESETTINGS_H

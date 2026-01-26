@@ -3,6 +3,10 @@
 
 #include "strings_util.h"
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/reflection.h>
+#include "options.pb.h"  // For default_value extension accessor
 
 inline void SetProtoField(google::protobuf::Message* msg,
                           const google::protobuf::FieldDescriptor* field,
@@ -137,6 +141,62 @@ inline double GetNumericProtoField(
 
 inline double GetNumericProtoField(const google::protobuf::Message &msg, int field) {
   return GetNumericProtoField(msg, msg.GetDescriptor()->FindFieldByNumber(field));
+}
+
+inline void ApplyProtoDefaults(google::protobuf::Message* msg) {
+  if (!msg) return;
+  
+  const google::protobuf::Descriptor* desc = msg->GetDescriptor();
+  const google::protobuf::Reflection* refl = msg->GetReflection();
+  using CppType = google::protobuf::FieldDescriptor::CppType;
+  
+  // First pass: Create nested messages (this marks them as set with explicit field presence)
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor* field = desc->field(i);
+    
+    if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      if (field->is_repeated()) {
+        // For repeated fields, apply defaults to each element
+        for (int j = 0; j < refl->FieldSize(*msg, field); j++) {
+          ApplyProtoDefaults(refl->MutableRepeatedMessage(msg, field, j));
+        }
+      } else {
+        // For singular message fields, create the message if it doesn't exist
+        // With explicit field presence, MutableMessage creates the message and marks the field as set
+        google::protobuf::Message* nestedMsg = refl->MutableMessage(msg, field);
+        if (nestedMsg) {
+          // Recursively apply defaults to the nested message
+          ApplyProtoDefaults(nestedMsg);
+        }
+      }
+    }
+  }
+  
+  // Second pass: Apply default_value options to primitive fields in this message
+  for (int i = 0; i < desc->field_count(); i++) {
+    const google::protobuf::FieldDescriptor* field = desc->field(i);
+    const google::protobuf::FieldOptions& opts = field->options();
+    
+    // Skip message and repeated fields
+    if (field->is_repeated() || field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
+      continue;
+    }
+    
+    // Skip if field is already set
+    if (refl->HasField(*msg, field)) {
+      continue;
+    }
+    
+    // Get default_value extension using generated accessor
+    std::string defaultVal = opts.GetExtension(buffers::default_value);
+    if (!defaultVal.empty()) {
+      SetProtoField(msg, field, defaultVal);
+      // Verify it was set
+      if (!refl->HasField(*msg, field)) {
+      }
+    } else {
+    }
+  }
 }
 
 #endif

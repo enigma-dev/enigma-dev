@@ -27,7 +27,9 @@
 #include <map>
 #include <set>
 
-#include <Storage/definition.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+#include "clang_definitions.h"  // Provides jdi:: typedefs
 #include "backend/GameData.h"
 #include "parsing/macros.h"
 #include "parser/object_storage.h"
@@ -42,7 +44,7 @@ struct language_adapter : LanguageFrontend {
   virtual int link_ambiguous(const GameData &game, CompileState &state) = 0;
   virtual int compile_parseSecondary(CompileState &state) = 0;
 
-  virtual int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) = 0;
+  virtual int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals, const ParsedObjectVec &parsed_objects) = 0;
   virtual int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) = 0;
   virtual int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) = 0;
   virtual int compile_writeFontInfo(const GameData &game) = 0;
@@ -72,7 +74,9 @@ extern map<string, language_adapter*> languages;
 extern language_adapter *current_language;
 extern string current_language_name;
 
-#include <API/context.h>
+// JDI removed - using clang_adapter instead
+// #include <API/context.h>
+#include "languages/clang_adapter.h"  // For ClangContext
 extern jdi::Context *main_context;
 
 #endif

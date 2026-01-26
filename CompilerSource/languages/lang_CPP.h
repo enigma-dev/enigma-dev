@@ -23,13 +23,16 @@
 #define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include "event_reader/event_parser.h"
-#include <Storage/definition.h>
-#include <System/builtins.h>
-#include <API/context.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+// #include <System/builtins.h>
+// #include <API/context.h>
+#include "clang_definitions.h"  // Provides jdi:: typedefs for compatibility
 
 struct lang_CPP: language_adapter {
   /// The context of all parsed definitions.
-  jdi::Context definitions;
+  // JDI removed - using main_context (clang_adapter::ClangContext) instead
+  // jdi::Context definitions;
 
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma, *namespace_enigma_user;
@@ -44,7 +47,7 @@ struct lang_CPP: language_adapter {
   int link_ambiguous(const GameData &game, CompileState &state) final;
   int compile_parseSecondary(CompileState &state) final;
 
-  int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals) final;
+  int compile_writeGlobals(const GameData &game, const ParsedScope* global, const DotLocalMap &dot_accessed_locals, const ParsedObjectVec &parsed_objects) final;
   int compile_writeObjectData(const GameData &game, const CompileState &state, int mode) final;
   int compile_writeObjAccess(const ParsedObjectVec &parsed_objects, const DotLocalMap &dot_accessed_locals, const ParsedScope* global, bool treatUninitAs0) final;
   int compile_writeFontInfo(const GameData &game) final;
@@ -95,10 +98,19 @@ struct lang_CPP: language_adapter {
   void quickmember_script(jdi::definition_scope* scope, string name) final;
   /// Create a standard integer variable member in the given scope.
   void quickmember_integer(jdi::definition_scope* scope, string name) final {
-    return quickmember_variable(scope, jdi::builtin_type__int, name);
+    // Use builtin_type__int if available, otherwise look it up
+    jdi::definition* int_type = jdi::builtin_type__int;
+    if (!int_type) {
+      int_type = look_up("int");
+    }
+    return quickmember_variable(scope, int_type, name);
   }
   /// Look up an enigma_user definition by its name.
   jdi::definition* look_up(std::string_view name) const final;
+  
+  /// Check if a name is a built-in constant in enigma_user namespace (not a function)
+  /// This is used to filter out enum constants like c_blue, c_white, self, etc.
+  bool is_enigma_user_constant(std::string_view name) const;
 
   // Reads in event data automatically. This isn't great, but is better than
   // accessing everything statically (for future refactors).

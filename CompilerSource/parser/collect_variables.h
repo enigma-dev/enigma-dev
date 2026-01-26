@@ -33,6 +33,7 @@
 #include "languages/language_adapter.h"
 
 void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast,
-                       ParsedScope *parsed_scope, const NameSet &script_names, CompileState *cs);
+                       ParsedScope *parsed_scope, const NameSet &script_names, CompileState *cs,
+                       bool is_script = false);
 
 #endif

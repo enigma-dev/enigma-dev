@@ -15,7 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <Storage/definition.h>
+// JDI removed - using clang_adapter instead
+// #include <Storage/definition.h>
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 
 #include "general/parse_basics_old.h"
 #include "lexer.h"
@@ -24,6 +26,8 @@
 #include <array>
 #include <memory>
 #include <initializer_list>
+#include <unordered_map>
+#include <set>
 
 namespace enigma {
 namespace parsing {
@@ -59,60 +63,65 @@ class TokenTrie {
   std::unique_ptr<std::array<TokenTrie, 256>> children_;
 };
 
-static TokenTrie token_lookup {
-  { "!",   TT_BANG         },
-  { "!=",  TT_NOTEQUAL     },
-  { "%",   TT_PERCENT      },
-  { "%=",  TT_ASSOP        },
-  { "&",   TT_AMPERSAND    },
-  { "&&",  TT_AND          },
-  { "(",   TT_BEGINPARENTH },
-  { ")",   TT_ENDPARENTH   },
-  { "+",   TT_PLUS         },
-  { "++",  TT_INCREMENT    },
-  { "+=",  TT_ASSOP        },
-  { "^=",  TT_ASSOP        },
-  { ",",   TT_COMMA        },
-  { "-",   TT_MINUS        },
-  { "--",  TT_DECREMENT    },
-  { "-=",  TT_ASSOP        },
-  { "*",   TT_STAR         },
-  { "*=",  TT_ASSOP        },
-  { "/",   TT_SLASH        },
-  { "/=",  TT_ASSOP        },
-  { ".",   TT_DOT          },
-  { "...", TT_ELLIPSES     },
-  { "->",  TT_ARROW        },
-  { ".*",  TT_DOT_STAR     },
-  { "->*", TT_ARROW_STAR   },
-  { ":",   TT_COLON,       },
-  { "::",  TT_SCOPEACCESS  },
-  { ":=",  TT_ASSIGN,      },
-  { ";",   TT_SEMICOLON    },
-  { "<",   TT_LESS         },
-  { "<<",  TT_LSH          },
-  { "<<=", TT_ASSOP        },
-  { "<=",  TT_LESSEQUAL    },
-  { "<>",  TT_NOTEQUAL     },
-  { "<=>", TT_THREEWAY     },
-  { "=>",  TT_JS_ARROW     },
-  { "=",   TT_EQUALS,      },
-  { "==",  TT_EQUALTO,     },
-  { ">",   TT_GREATER      },
-  { ">=",  TT_GREATEREQUAL },
-  { ">>",  TT_RSH          },
-  { ">>=", TT_ASSOP        },
-  { "?",   TT_QMARK        },
-  { "[",   TT_BEGINBRACKET },
-  { "]",   TT_ENDBRACKET   },
-  { "^",   TT_CARET        },
-  { "^^",  TT_XOR          },
-  { "{",   TT_BEGINBRACE   },
-  { "|",   TT_PIPE         },
-  { "||",  TT_OR           },
-  { "}",   TT_ENDBRACE     },
-  { "~",   TT_TILDE        },
-};
+static TokenTrie &get_token_lookup() {
+  static TokenTrie token_lookup {
+    { "!",   TT_BANG         },
+    { "!=",  TT_NOTEQUAL     },
+    { "%",   TT_PERCENT      },
+    { "%=",  TT_ASSOP        },
+    { "&",   TT_AMPERSAND    },
+    { "&&",  TT_AND          },
+    { "(",   TT_BEGINPARENTH },
+    { ")",   TT_ENDPARENTH   },
+    { "+",   TT_PLUS         },
+    { "++",  TT_INCREMENT    },
+    { "+=",  TT_ASSOP        },
+    { "^=",  TT_ASSOP        },
+    { ",",   TT_COMMA        },
+    { "-",   TT_MINUS        },
+    { "--",  TT_DECREMENT    },
+    { "-=",  TT_ASSOP        },
+    { "*",   TT_STAR         },
+    { "*=",  TT_ASSOP        },
+    { "/",   TT_SLASH        },
+    { "/=",  TT_ASSOP        },
+    { ".",   TT_DOT          },
+    { "...", TT_ELLIPSES     },
+    { "->",  TT_ARROW        },
+    { ".*",  TT_DOT_STAR     },
+    { "->*", TT_ARROW_STAR   },
+    { ":",   TT_COLON,       },
+    { "::",  TT_SCOPEACCESS  },
+    { ":=",  TT_ASSIGN,      },
+    { ";",   TT_SEMICOLON    },
+    { "<",   TT_LESS         },
+    { "<<",  TT_LSH          },
+    { "<<=", TT_ASSOP        },
+    { "<=",  TT_LESSEQUAL    },
+    { "<>",  TT_NOTEQUAL     },
+    { "<=>", TT_THREEWAY     },
+    { "=>",  TT_JS_ARROW     },
+    { "=",   TT_EQUALS,      },
+    { "==",  TT_EQUALTO,     },
+    { ">",   TT_GREATER      },
+    { ">=",  TT_GREATEREQUAL },
+    { ">>",  TT_RSH          },
+    { ">>=", TT_ASSOP        },
+    { "?",   TT_QMARK        },
+    { "[",   TT_BEGINBRACKET },
+    { "]",   TT_ENDBRACKET   },
+    { "^",   TT_CARET        },
+    { "^^",  TT_XOR          },
+    { "{",   TT_BEGINBRACE   },
+    { "|",   TT_PIPE         },
+    { "||",  TT_OR           },
+    { "}",   TT_ENDBRACE     },
+    { "~",   TT_TILDE        },
+  };
+  return token_lookup;
+}
+static TokenTrie &token_lookup = get_token_lookup();
+static TokenTrie &token_lookup_from_TT_DOT = get_token_lookup().Child('.');
 
 static std::map<std::string, TokenType, std::less<>> keyword_lookup {
   { "alignof",  TT_ALIGNOF   },
@@ -197,6 +206,7 @@ static const setting::CompatibilityOptions kCppCompatibility {
   .use_cpp_literals = true,
   .use_cpp_escapes = true,
   .use_gml_equals = false,
+  .use_incrementals = true,
   .keyword_blacklist = "",
 };
 
@@ -320,7 +330,20 @@ TokenType Lexer::LookUpOperator(std::string_view op) {
   return tnode.first;
 }
 
+// Structure to hold processed literal and ignored backslash information
+struct ProcessedLiteral {
+  std::string value;
+  std::set<size_t> ignored_backslash_positions; // Positions in value where ignored backslashes occurred
+  bool was_gml_mode;
+};
+
+// Global map to store ignored backslash information for strings processed in GML mode
+// Key: processed string value, Value: set of positions where ignored backslashes occurred
+static std::unordered_map<std::string, std::set<size_t>> gml_ignored_backslashes;
+
 std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
+  ProcessedLiteral result;
+  result.was_gml_mode = !options.use_escapes;
   std::string str_value;
   str_value.reserve(lit.length() - 2);
   if (options.use_escapes) {
@@ -359,8 +382,11 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
             str_value += '\?';
             break;
           default: 
-            herr->Error(Mark(spos, 1)) << "Unkown escape";
-            return lit;
+            // Unknown escape sequence - treat as literal backslash followed by the character
+            // This handles cases like Windows paths (C:\path) where \p is not a valid escape
+            str_value += '\\';
+            str_value += lit[i];
+            break;
           
         }
       } else {
@@ -368,11 +394,49 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
       }
     }
   } else {
+    // GML mode: # becomes \n, \# becomes #
+    // Track ignored backslashes (like \', \\, \#) for C++ output
     for (size_t i = 1; i < lit.length() - 1; ++i) {
-      str_value += lit[i] == '#' ? '\n' : lit[i];
+      if (lit[i] == '\\' && i + 1 < lit.length() - 1) {
+        char next_char = lit[i + 1];
+        if (next_char == '#') {
+          // \# sequence: output # (no extra escaping needed in C++ output)
+          str_value += '#';
+          ++i; // Skip the # after the backslash
+        } else if (next_char == '\'' || next_char == '\\') {
+          // \' or \\: these are ignored in GML, track for C++ output
+          // Output the character and mark position for extra escaping
+          str_value += next_char;
+          result.ignored_backslash_positions.insert(str_value.length() - 1);
+          ++i; // Skip the character after the backslash
+        } else {
+          // Other backslash sequences: just output the character
+          str_value += next_char;
+          ++i;
+        }
+      } else if (lit[i] == '#') {
+        str_value += '\n';
+      } else {
+        str_value += lit[i];
+      }
     }
   }
+  result.value = str_value;
+  
+  // Store ignored backslash positions for GML mode strings
+  if (result.was_gml_mode && !result.ignored_backslash_positions.empty()) {
+    gml_ignored_backslashes[str_value] = result.ignored_backslash_positions;
+  }
+  
   return str_value;
+}
+
+std::set<size_t> Lexer::GetIgnoredBackslashes(const std::string& value) {
+  auto it = gml_ignored_backslashes.find(value);
+  if (it != gml_ignored_backslashes.end()) {
+    return it->second;
+  }
+  return std::set<size_t>();
 }
 
 Token Lexer::ReadRawToken() {
@@ -421,7 +485,9 @@ Token Lexer::ReadRawToken() {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
           return Token(TT_STRINGLIT, Mark(spos, pos - spos));
         }
-        if (options.use_escapes && code[pos] == '\\') ++pos;
+        if (options.use_escapes && code[pos] == '\\') {
+          ++pos;
+        }
         if (code[pos] == '"') {
           std::string raw_value = code.substr(spos, pos - spos + 1);
           std::string value = ProcessLiteral(raw_value, spos);
@@ -434,7 +500,7 @@ Token Lexer::ReadRawToken() {
 
     case '\'': {
       const TokenType token_type =
-          options.use_char_literals ? TT_STRINGLIT : TT_CHARLIT;
+          options.use_char_literals ? TT_CHARLIT : TT_STRINGLIT;
       for (;; ++pos) {
         if (pos >= code.length()) {
           herr->Error(Mark(spos, 1)) << "Unclosed double quote at this point";
@@ -454,26 +520,73 @@ Token Lexer::ReadRawToken() {
     case '0': {
       if (pos >= code.length())
         return Token(TT_DECLITERAL, Mark(spos, pos - spos));
-      if (code[pos] == 'x' && options.use_hex_literals) {
-        while (++pos < code.length() && is_nybble(code[pos]));
-        return Token(TT_HEXLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'x' && options.use_hex_literals) {
+        ++pos; // Skip 'x'
+        if (pos >= code.length() || !is_nybble(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Hex literal is truncated";
+          return ReadRawToken();
+        }
+        size_t hex_start = pos;
+        while (pos < code.length() && is_nybble(code[pos])) ++pos;
+        Token token = Token(TT_HEXLITERAL, Mark(spos, pos - spos));
+        size_t hex_len = (pos > hex_start) ? (pos - hex_start) : 0;
+        token.content = code.substr(hex_start, hex_len);
+        return token;
       }
-      if (code[pos] == 'b' && options.use_bin_literals) {
-        while (++pos < code.length() && is_bit(code[pos]));
-        return Token(TT_BINLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'b' && options.use_bin_literals) {
+        ++pos; // Skip 'b'
+        if (pos >= code.length() || !is_bit(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Binary literal is truncated";
+          return ReadRawToken();
+        }
+        size_t bin_start = pos;
+        while (pos < code.length() && is_bit(code[pos])) ++pos;
+        Token token = Token(TT_BINLITERAL, Mark(spos, pos - spos));
+        size_t bin_len = (pos > bin_start) ? (pos - bin_start) : 0;
+        token.content = code.substr(bin_start, bin_len);
+        return token;
       }
-      if (code[pos] == 'o' && options.use_oct_literals) {
-        while (++pos < code.length() && is_octal(code[pos]));
-        return Token(TT_OCTLITERAL, Mark(spos, pos - spos));
+      if (pos < code.length() && code[pos] == 'o' && options.use_oct_literals) {
+        ++pos; // Skip 'o'
+        if (pos >= code.length() || !is_octal(code[pos])) {
+          herr->Error(Mark(spos, 1)) << "Octal literal is truncated";
+          return ReadRawToken();
+        }
+        size_t oct_start = pos;
+        while (pos < code.length() && is_octal(code[pos])) ++pos;
+        Token token = Token(TT_OCTLITERAL, Mark(spos, pos - spos));
+        size_t oct_len = (pos > oct_start) ? (pos - oct_start) : 0;
+        token.content = code.substr(oct_start, oct_len);
+        return token;
       }
-      [[fallthrough]]; case '1': case '2': case '3': case '4': case '5':
-                       case '6': case '7': case '8': case '9':
+      // Fall through to handle regular decimal numbers starting with 0
+      [[fallthrough]];
+      case '1': case '2': case '3': case '4': case '5':
+      case '6': case '7': case '8': case '9':
       while (pos < code.length() && is_digit(code[pos])) ++pos;
       if (pos < code.length() && code[pos] == '.') {
         while (++pos < code.length() && is_digit(code[pos]));
       }
       return Token(TT_DECLITERAL, Mark(spos, pos - spos));
     }
+
+    case '.':
+      // Check if this is a decimal literal starting with . (e.g., .95, .1, .3)
+      if (pos < code.length() && code[pos] >= '0' && code[pos] <= '9') {
+        // This is a decimal literal starting with . (e.g., .95)
+        while (pos < code.length() && is_digit(code[pos])) ++pos;
+        return Token(TT_DECLITERAL, Mark(spos, pos - spos));
+      }
+      // Not a decimal literal - check for operators like .*, ->, etc.
+      {
+        auto tnode = token_lookup_from_TT_DOT.Get(code, pos); // FIXME: this should read pos, not spos. spos will make it hang.
+        if (tnode.first != TT_ERROR) {
+          pos = tnode.second;
+          return Token(tnode.first, Mark(spos, pos - spos));
+        }
+      }
+      // Just a dot operator
+      return Token(TT_DOT, Mark(spos, 1));
 
     case '/': {
       if (pos < code.length() && code[pos] == '/') { // Two-slash comments
@@ -501,10 +614,36 @@ Token Lexer::ReadRawToken() {
         return Token(TTM_STRINGIFY, Mark(spos, 1));
       }
       break;
+
+    case '\\': {
+      // Handle backslash - could be line continuation in macros or an error
+      // Check if followed by newline (line continuation in preprocessor)
+      if (pos < code.length()) {
+        if (code[pos] == '\n' || code[pos] == '\r') {
+          // Line continuation - skip the backslash and newline
+          ++pos;
+          if (pos < code.length() && code[pos-1] == '\r' && code[pos] == '\n') {
+            ++pos; // Skip \r\n
+          }
+          return ReadRawToken(); // Continue reading after the line continuation
+        }
+      }
+      // Standalone backslash not followed by newline - skip it silently
+      // This handles cases where backslashes appear in macro values or other contexts
+      // where they shouldn't be (like unquoted Windows paths). Just skip and continue.
+      return ReadRawToken();
+    }
   }
 
   if (auto tnode = token_lookup.Get(code, spos); tnode.first != TT_ERROR) {
     pos = tnode.second;
+    // Check for increment/decrement operators and reject them in GML mode
+    if ((tnode.first == TT_INCREMENT || tnode.first == TT_DECREMENT) && 
+        context && !context->compatibility_opts.use_incrementals) {
+      // In GML mode, return just the first character as a plus or minus
+      pos = spos + 1;
+      return Token(tnode.first == TT_INCREMENT ? TT_PLUS : TT_MINUS, Mark(spos, 1));
+    }
     return Token(tnode.first, Mark(spos, pos - spos));
   }
 
@@ -513,6 +652,18 @@ Token Lexer::ReadRawToken() {
 }
 
 bool Lexer::HandleMacro(std::string_view name) {
+  // Don't expand 'repeat' as a macro - it's a keyword that should be parsed as a statement
+  // The macro expansion will happen during C++ compilation, not during EDL parsing
+  if (name == "repeat") {
+    return false;
+  }
+  // Don't expand 'div' as a macro - it's a keyword (TT_DIV) that should be parsed as an operator
+  // The macro expansion would convert it to /(INTEGER_DIVISION)(int), but we want to handle it
+  // specially in the codegen to generate / INTEGER_DIVISION(...) correctly
+  if (name == "div") {
+    return false;
+  }
+  
   auto itm = context->macro_map.find(name);
   if (itm == context->macro_map.end() || MacroRecurses(name))
     return false;
@@ -570,6 +721,12 @@ Token &Lexer::TranslateNameToken(Token &token) {
 
   // TODO(new parser): C++ keyword conflict handling deleted from here
 
+  // Check for boolean literals first
+  if (name == "true" || name == "false") {
+    token.type = TT_BOOLLITERAL;
+    return token;
+  }
+
   if (auto kw = keyword_lookup.find(name); kw != keyword_lookup.end()) {
     token.type = kw->second;
     return token;
@@ -598,7 +755,13 @@ Token Lexer::ReadToken() {
       PopMacro();
       return ReadToken();
     }
-    return macro.tokens[macro.index++];
+    Token res = macro.tokens[macro.index++];
+    // Check if this token from the macro expansion is itself a macro
+    if (res.type == TT_IDENTIFIER) {
+      if (HandleMacro(res.content)) return ReadToken();
+      return TranslateNameToken(res);
+    }
+    return res;
   }
   Token res = ReadRawToken();
   if (res.type == TT_IDENTIFIER) {
@@ -620,7 +783,7 @@ Lexer::Options::Options(const ParseContext *ctex):
     use_hex_literals(ctex->compatibility_opts.use_cpp_literals),
     use_oct_literals(ctex->compatibility_opts.use_cpp_literals),
     use_bin_literals(ctex->compatibility_opts.use_cpp_literals),
-    use_gml_style_hex(true),
+    use_gml_style_hex(!ctex->compatibility_opts.use_cpp_literals),
     use_preprocessor_tokens(false) {}
 
 void Lexer::Options::SetAsCpp() {

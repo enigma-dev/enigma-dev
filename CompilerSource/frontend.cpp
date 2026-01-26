@@ -40,7 +40,10 @@ using namespace std;
 
 #include "darray.h"
 
-#include <API/context.h>
+// JDI removed - using clang_adapter instead
+// #include <API/context.h>
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
+#include "languages/clang_adapter.h"  // For ClangContext full definition
 #include "languages/language_adapter.h"
 
 string fc(const char* fn);
@@ -58,8 +61,10 @@ int m_prog_loop_cfp();
 #endif
 
 namespace dll_ext_iteration {
-  jdi::definition_scope::defiter rit;
-  jdi::definition_scope::defrefiter uit;
+  // JDI removed - defiter/defrefiter replaced with std::map iterator
+  std::map<std::string, std::shared_ptr<clang_adapter::ClangDefinition>>::iterator rit;
+  // defrefiter doesn't exist in clang_adapter - using_general not supported
+  // jdi::definition_scope::defrefiter uit;
   jdi::definition_scope* searching_in;
   jdi::definition* current_resource;
   string its_name;
@@ -69,9 +74,14 @@ using namespace dll_ext_iteration;
 DLLEXPORT const char* next_available_resource();
 /// Returns the name of the first resource on the list, or "" otherwise.
 DLLEXPORT const char* first_available_resource() {
-  searching_in = (jdi::definition_scope*) main_context->get_global()->look_up("enigma_user");
+  if (!main_context) return "";
+  jdi::definition* enigma_user_def = main_context->get_global()->look_up("enigma_user");
+  if (!enigma_user_def) return "";
+  searching_in = dynamic_cast<jdi::definition_scope*>(enigma_user_def);
+  if (!searching_in) return "";
   rit = searching_in->members.begin();
-  uit = searching_in->using_general.begin();
+  // JDI removed - using_general doesn't exist in clang_adapter
+  // uit = searching_in->using_general.begin();
   return next_available_resource();
 }
 /// Returns whether the resource can be called as a function
@@ -98,7 +108,11 @@ DLLEXPORT int resource_overloadCount() {
 /// The returned pointer to the string is INVALIDATED upon the next call to definitionsModified().
 DLLEXPORT const char* resource_parameters(int /*i*/) {
   static string res;
-  res = current_resource->toString();
+  if (current_resource) {
+    res = current_resource->toString();
+  } else {
+    res = "";
+  }
   return res.c_str();
 }
 /// Returns whether the resource can be used as a typename.
@@ -113,21 +127,28 @@ DLLEXPORT int resource_isGlobal() {
 
 /// Returns the name of the next resource on the list, or "" otherwise.
 DLLEXPORT const char* next_available_resource() {
+  if (!searching_in) return NULL;
   if (rit == searching_in->members.end()) {
-    if (uit == searching_in->using_general.end()) {
-      return NULL;
-    }
-    current_resource = uit->second;
-    ++uit;
+    // JDI removed - using_general doesn't exist in clang_adapter
+    // if (uit == searching_in->using_general.end()) {
+    return NULL;
+    // }
+    // current_resource = uit->second;
+    // ++uit;
   } else {
     current_resource = rit->second.get();
     ++rit;
   }
   
-  its_name = current_resource->name;
-  return its_name.c_str();
+  if (current_resource) {
+    its_name = current_resource->name;
+    return its_name.c_str();
+  }
+  return NULL;
 }
 /// Returns whether we're really done iterating the list
 DLLEXPORT bool resources_atEnd() {
-  return (rit == searching_in->members.end() && uit == searching_in->using_general.end());
+  if (!searching_in) return true;
+  // JDI removed - using_general doesn't exist in clang_adapter
+  return (rit == searching_in->members.end());
 }

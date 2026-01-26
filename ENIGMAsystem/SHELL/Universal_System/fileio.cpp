@@ -59,7 +59,19 @@ namespace enigma {
   }
   
   static inline int file_open(const std::string& fname, std::ios_base::openmode mode) {
-    file f(fname, mode);
+    // Normalize path separators (Windows backslashes to Unix forward slashes)
+    std::string normalized = fname;
+    for (char& c : normalized) {
+      if (c == '\\') c = '/';
+    }
+    
+    // Collapse double slashes (but preserve leading // for UNC paths on Windows)
+    size_t pos = (normalized.size() > 1 && normalized[0] == '/' && normalized[1] == '/') ? 2 : 0;
+    while ((pos = normalized.find("//", pos)) != std::string::npos) {
+      normalized.erase(pos, 1);
+    }
+    
+    file f(normalized, mode);
     
     try_io_and_print(f)
     
@@ -143,8 +155,36 @@ bool file_text_eoln(int fileid) {
 }
 
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
+  // Check for invalid file IDs
+  if (fileid < 0 || fileid >= static_cast<int>(enigma::files.size()) || !enigma::files.get(fileid).fs.is_open()) {
+    return 0;  // Safe default for invalid handles
+  }
+  
+  // Check for EOF before attempting read
+  if (enigma::files.get(fileid).fs.eof() || enigma::files.get(fileid).fs.peek() == EOF) {
+    return 0;  // Silent return at EOF
+  }
+  
   double x = 0;
   enigma::files.get(fileid).fs >> x;
+  
+  if (enigma::files.get(fileid).fs.fail()) {
+    if (enigma::files.get(fileid).fs.eof()) {
+      // Reached EOF during read - this is normal
+      enigma::files.get(fileid).fs.clear();
+      return 0;
+    }
+    if (enigma::files.get(fileid).fs.bad()) {
+      // Actual I/O error
+      DEBUG_MESSAGE("file_text_read_real: I/O error", MESSAGE_TYPE::M_USER_ERROR);
+    } else {
+      // Parse failure - non-numeric data
+      DEBUG_MESSAGE("file_text_read_real: Parse failure - non-numeric data", MESSAGE_TYPE::M_USER_ERROR);
+    }
+    enigma::files.get(fileid).fs.clear();
+    return 0;
+  }
+  
   try_io_and_print(enigma::files.get(fileid))
   return x;
 }
@@ -157,6 +197,10 @@ std::string file_text_readln(int fileid) {
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
+  // Check for invalid file IDs
+  if (fileid < 0 || fileid >= static_cast<int>(enigma::files.size()) || !enigma::files.get(fileid).fs.is_open()) {
+    return true;  // Treat invalid handles as EOF to break loops safely
+  }
   return (enigma::files.get(fileid).fs.eof());
 }
 

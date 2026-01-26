@@ -55,7 +55,9 @@ using namespace std;
 #include "backend/JavaCallbacks.h"
 #include "compile_includes.h"
 #include "compile_common.h"
-#include "System/builtins.h"
+// JDI removed - using clang_adapter instead
+// #include "System/builtins.h"
+#include "languages/clang_definitions.h"  // For ClangDefinitionScope and ClangDefinitionFunction
 
 #include "settings-parse/crawler.h"
 
@@ -109,7 +111,7 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
-  const string &gloss_version = game.settings.info().version();
+  const string gloss_version = std::string(game.settings.info().version());
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
@@ -198,13 +200,16 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
   int max = 0;
   stringstream swb;  // switch body
   wto << "namespace enigma_user {\n"
+         "#pragma clang diagnostic push\n"
+         "#pragma clang diagnostic ignored \"-Wmissing-declarations\"\n"
          "  enum {  // " << kind << " names\n\n";
   for (const T &res : resources) {
     if (res.id() >= max) max = res.id() + 1;
     wto << "    " << res.name << " = " << res.id() << ",\n";
     swb << "      case " << res.id() << ": return \""  << res.name << "\";\n";
   }
-  wto << "  };\n\n";
+  wto << "  };\n"
+         "#pragma clang diagnostic pop\n\n";
   if (gen_names) {
     wto << "  string " << kind << "_get_name(int i) {\n"
            "    switch (i) {\n";
@@ -412,8 +417,8 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // First, we make a space to put our globals.
-  jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
-  namespace_enigma_user->use_namespace(&globals_scope);
+  // Note: using_scope functionality not needed with clang - scopes are handled directly
+  jdi::definition_scope* globals_scope = namespace_enigma_user;
 
   idpr("Copying resources",1);
 
@@ -422,47 +427,55 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   edbg << "Copying sprite names [" << game.sprites.size() << "]" << flushl;
   for (size_t i = 0; i < game.sprites.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sprites[i].name);
+    current_language->quickmember_integer(globals_scope, game.sprites[i].name);
 
   edbg << "Copying sound names [" << game.sounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.sounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.sounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.sounds[i].name);
 
   edbg << "Copying background names [" << game.backgrounds.size() << "]" << flushl;
   for (size_t i = 0; i < game.backgrounds.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.backgrounds[i].name);
+    current_language->quickmember_integer(globals_scope, game.backgrounds[i].name);
 
   edbg << "Copying path names [" << game.paths.size() << "]" << flushl;
   for (size_t i = 0; i < game.paths.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.paths[i].name);
+    current_language->quickmember_integer(globals_scope, game.paths[i].name);
 
   edbg << "Copying script names [" << game.scripts.size() << "]" << flushl;
   for (size_t i = 0; i < game.scripts.size(); i++)
-    current_language->quickmember_script(&globals_scope,game.scripts[i].name);
+    current_language->quickmember_script(globals_scope,game.scripts[i].name);
+
+  // Add special script variables: argument (array), argument_count, and argument0-argument15
+  // These are available in all scripts and need to be recognized by the parser
+  current_language->quickmember_integer(globals_scope, "argument");
+  current_language->quickmember_integer(globals_scope, "argument_count");
+  for (int i = 0; i < 16; i++) {
+    current_language->quickmember_integer(globals_scope, "argument" + std::to_string(i));
+  }
 
   edbg << "Copying shader names [" << game.shaders.size() << "]" << flushl;
   for (size_t i = 0; i < game.shaders.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.shaders[i].name);
+    current_language->quickmember_integer(globals_scope, game.shaders[i].name);
 
   edbg << "Copying font names [" << game.fonts.size() << "]" << flushl;
   for (size_t i = 0; i < game.fonts.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.fonts[i].name);
+    current_language->quickmember_integer(globals_scope, game.fonts[i].name);
 
   edbg << "Copying timeline names [" << game.timelines.size() << "]" << flushl;
   for (size_t i = 0; i < game.timelines.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.timelines[i].name);
+    current_language->quickmember_integer(globals_scope, game.timelines[i].name);
 
   edbg << "Copying object names [" << game.objects.size() << "]" << flushl;
   for (size_t i = 0; i < game.objects.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.objects[i].name);
+    current_language->quickmember_integer(globals_scope, game.objects[i].name);
 
   edbg << "Copying room names [" << game.rooms.size() << "]" << flushl;
   for (size_t i = 0; i < game.rooms.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.rooms[i].name);
+    current_language->quickmember_integer(globals_scope, game.rooms[i].name);
 
   edbg << "Copying constant names [" << game.constants.size() << "]" << flushl;
   for (size_t i = 0; i < game.constants.size(); i++)
-    current_language->quickmember_integer(&globals_scope, game.constants[i].name);
+    current_language->quickmember_integer(globals_scope, game.constants[i].name);
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -505,14 +518,16 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   edbg << "Writing modes and settings" << flushl;
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").u8string().c_str(),ios_base::out);
   wto << license;
+  wto << "#ifndef ENIGMA_GAME_SETTINGS_H\n";
+  wto << "#define ENIGMA_GAME_SETTINGS_H\n\n";
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
   wto << "#define PRIMDEPTH2 6\n";
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
   wto << "#define GM_COMPATIBILITY_VERSION " << compatibility_opts_.compliance_mode << "\n";
-  wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
-  wto << '\n';
+  wto << "inline void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
+  wto << "\n#endif // ENIGMA_GAME_SETTINGS_H\n";
   wto.close();
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").u8string().c_str(),ios_base::out);
@@ -661,7 +676,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
 
   // Write the global variables to their own file to be included before any of the objects
-  res = current_language->compile_writeGlobals(game, &state.global_object, state.dot_accessed_locals);
+  res = current_language->compile_writeGlobals(game, &state.global_object, state.dot_accessed_locals, state.parsed_objects);
   irrr();
 
 #ifdef WRITE_UNIMPLEMENTED_TXT

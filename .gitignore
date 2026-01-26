@@ -1,3 +1,6 @@
+/.cursor/
+/gmk-checker
+/emake-debug
 /ENIGMA/
 /emake
 /test-runner
@@ -61,7 +64,6 @@ hs_err_pid*.log
 *.layout
 *.epackage
 *~
-.vscode
 
 # it is a file for testing the output of the pretty printer
 output.txt

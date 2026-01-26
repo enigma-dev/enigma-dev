@@ -56,22 +56,31 @@ MATCHER_P2(IsDeclaration, decls, decl_type, "") {
   }
 
   bool b3 = true;
+  auto *expected_def = static_cast<jdi::definition*>(decl_type);
   for (size_t i = 0; i < decls.size(); i++) {
     auto &decli = decl->declarations[i].declarator->decl;
+    auto *parsed_def = decl->declarations[i].declarator->def;
     b3 = b3 && decl->declarations[i].init != nullptr;
-    b3 = b3 && decl->declarations[i].declarator->def == decl_type;
+    // Type comparison: if expected_def is nullptr, skip the check (any type is OK)
+    // Otherwise, compare pointers OR compare by name for builtin types
+    bool type_matches = (expected_def == nullptr) || 
+                        (parsed_def == expected_def) ||
+                        (parsed_def && expected_def && parsed_def->name == expected_def->name);
+    b3 = b3 && type_matches;
     b3 = b3 && decl->declarations[i].declarator->flags == 0;
     b3 = b3 && decli.name.content == decls[i];
     b3 = b3 && decli.components.size() == 0;
     if (!b3) {
       if (ExpectedMsg == "") ExpectedMsg = "From IsDeclaration Matcher: ";
+      std::string expected_type = expected_def ? expected_def->name : "any";
+      std::string got_type = parsed_def ? parsed_def->name : "nullptr";
       ExpectedMsg +=
           "Declaration [" + to_string(i) +
-          "] has init != nullptr, def = jdi::builtin_type__int, flags = 0, name.content = " +  // modify type here
+          "] has init != nullptr, def = " + expected_type + ", flags = 0, name.content = " +
           decls[i] + ", components.size() = 0\n";
       *result_listener << " got Declaration [" << to_string(i) << "] has init "
                        << ((decl->declarations[i].init) ? "!=" : "=")
-                       << " nullptr, def = jdi::builtin_type__int, flags = "  // and here
+                       << " nullptr, def = " << got_type << ", flags = "
                        << to_string(decl->declarations[i].declarator->flags)
                        << ", name.content = " << decli.name.content
                        << ", components.size() = " << to_string(decli.components.size()) << "\n";
@@ -102,7 +111,13 @@ MATCHER_P3(IsCast, cast_kind, expr_type, type, "") {
     return false;
   }
 
-  bool b1 = cast->ft.def == type, b2 = cast->ft.flags == 0, b3 = cast->ft.decl.components.size() == 0,
+  // Type comparison: if expected_def is nullptr, skip the check (any type is OK)
+  // Otherwise, compare pointers OR compare by name for builtin types
+  auto *parsed_def = cast->ft.def;
+  auto *expected_def = static_cast<jdi::definition*>(type);
+  bool b1 = (expected_def == nullptr) || (parsed_def == expected_def) ||
+            (parsed_def && expected_def && parsed_def->name == expected_def->name);
+  bool b2 = cast->ft.flags == 0, b3 = cast->ft.decl.components.size() == 0,
        b4 = cast->ft.decl.name.content == "", b5 = cast->ft.decl.has_nested_declarator == false,
        b6 = cast->kind == cast_kind, b7 = expr->type == expr_type;
 

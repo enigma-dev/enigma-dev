@@ -43,7 +43,8 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "#include <vector>\n";
   wto << "#include <cstddef>\n";
-  wto << "#include \"Universal_System/Object_Tiers/serialization.h\"\n";
+  // Serialization header removed to minimize diff with old codegen
+  // wto << "#include \"Universal_System/Object_Tiers/serialization.h\"\n";
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
   for (size_t i = 0; i < game.timelines.size(); i++) {
@@ -61,24 +62,22 @@ int lang_CPP::compile_writeDefraggedEvents(
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
-  wto << "    std::vector<std::byte> serialize() override { return " << system_get_uppermost_tier() << "::serialize(); }\n\n";
-  wto << "    std::size_t deserialize_self(std::byte *iter) override { return " << system_get_uppermost_tier() << "::deserialize_self(iter); }\n\n";
-  wto << "    std::pair<event_parent, std::size_t> deserialize(std::byte *iter) {\n"
-         "      event_parent result;\n"
-         "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
-         "    }\n\n";
+  // Serialization code removed to minimize diff with old codegen
 
   for (const auto &event : used_events) {
     const string fname = event.FunctionName();
+    const string base_fname = event.BaseFunctionName();
     const bool e_is_inst = event.IsStacked();
     const bool e_has_dispatch = event.HasDispatcher();
+    // Check if this is a base class function that needs override
+    bool is_base_function = (base_fname == "gamestart" || base_fname == "roomstart" || base_fname == "draw");
+    bool is_subcheck_base = (base_fname == "draw"); // draw_subcheck is a subcheck of draw
     if (event.HasSubCheck() && !e_is_inst) {
       if (event.HasLocalDeclarations()) {
         wto << "    virtual bool myevent_" << fname
-            << "_subcheck() { return false; }";
+            << "_subcheck()" << (is_subcheck_base ? " override" : "") << " { return false; }";
       } else {
-        wto << "    bool myevent_" << fname << "_subcheck() ";
+        wto << "    bool myevent_" << fname << "_subcheck()" << (is_subcheck_base ? " override" : "") << " ";
         if (event.HasSubCheckFunction()) {
           wto << event.SubCheckFunction() << "\n";
         } else {
@@ -88,7 +87,8 @@ int lang_CPP::compile_writeDefraggedEvents(
     }
     const bool e_is_void = e_is_inst || e_has_dispatch;
     wto << "    virtual " << (e_is_void ? "void" : "variant")
-        << " myevent_" << fname << (e_has_dispatch ? "_dispatcher()" : "()");
+        << " myevent_" << fname << (e_has_dispatch ? "_dispatcher()" : "()")
+        << (is_base_function ? " override" : "");
     if (event.HasDefaultCode()) {
       wto << " {" << endl << "  " << event.DefaultCode() << endl
           << (e_is_void ? "    }" : "      return 0;\n    }") << endl;
@@ -99,7 +99,7 @@ int lang_CPP::compile_writeDefraggedEvents(
   }
 
   //The event_parent also contains the definitive lookup table for all timelines, as a fail-safe in case localized instances can't find their own timelines.
-  wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+  wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) override {\n";
   wto << "      switch (timeline_index) {\n";
   for (size_t i = 0; i < game.timelines.size(); i++) {
     wto << "        case " << game.timelines[i].id() <<": {\n";

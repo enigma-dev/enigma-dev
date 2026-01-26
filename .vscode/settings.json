@@ -1,0 +1,34 @@
+{
+  "kiroAgent.configureMCP": "Enabled",
+  "C_Cpp.errorSquiggles": "enabled",
+  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.default.browse.limitSymbolsToIncludedHeaders": false,
+  "C_Cpp.default.configurationProvider": "",
+  "C_Cpp.workspaceParsingPriority": "highest",
+  "cmake.configureOnOpen": false,
+  "cmake.showOptionsMovedNotification": false,
+  "cmake.autoSelectActiveFolder": false,
+  "files.associations": {
+    "*.h": "cpp",
+    "*.cpp": "cpp"
+  },
+  "makefile.extensionOutputFolder": "./.vscode",
+  "terminal.integrated.env.osx": {
+    "PATH": "${env:PATH}:/opt/homebrew/bin"
+  },
+  "problems.showCurrentInStatus": true,
+  "problems.autoReveal": true,
+  "problems.exclude": {
+    "**/opt/homebrew/**": true,
+    "**/usr/local/**": true,
+    "**/Library/Developer/**": true,
+    "**/Applications/Xcode/**": true
+  },
+  "task.problemMatchers.neverPrompt": false,
+  "task.quickOpen.history": 10,
+  "task.quickOpen.detail": true,
+  "terminal.integrated.showExitAlert": false,
+  "task.allowAutomaticTasks": "on",
+  "task.problemMatchers.enabled": true,
+  "task.autoDetect": "on"
+}

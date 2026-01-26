@@ -32,7 +32,8 @@ class CompilerServiceImpl final : public Compiler::Service {
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
     auto fnc = [&] {
-      plugin.BuildGame(request->game(), emode_run, request->name().c_str());
+      std::string name_str(request->name());
+      plugin.BuildGame(request->game(), emode_run, name_str.c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
@@ -172,13 +173,16 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SetDefinitions(ServerContext* /*context*/, const SetDefinitionsRequest* request, SyntaxError* reply) override {
-    syntax_error* err = plugin.SetDefinitions(request->code().c_str(), request->yaml().c_str());
+    std::string code_str(request->code());
+    std::string yaml_str(request->yaml());
+    syntax_error* err = plugin.SetDefinitions(code_str.c_str(), yaml_str.c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
 
   Status SetCurrentConfig(ServerContext* /*context*/, const SetCurrentConfigRequest* request, Empty* /*reply*/) override {
-    std::string yaml = this->options.APIyaml(&request->settings());
+    // Default to "Run" mode if not specified
+    std::string yaml = this->options.APIyaml("Run", &request->settings());
     /*syntax_error* err = */plugin.SetDefinitions("", yaml.c_str());
     return Status::OK;
   }
@@ -187,7 +191,8 @@ class CompilerServiceImpl final : public Compiler::Service {
     std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
     for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
-    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());
+    std::string code_str(request->code());
+    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), code_str.c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }

@@ -83,7 +83,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
     const proto::FieldOptions opts = field->options();
     const bool isFilePath = opts.GetExtension(buffers::file_path);
 
-    yaml << YAML::Key << field->name();
+    yaml << YAML::Key << std::string(field->name());
     if (field->is_repeated()) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         yaml << YAML::BeginSeq;
@@ -236,7 +236,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
   for (auto &inst : room->instances()) {
   if (!inst.creation_code().empty()) {
-    string name = inst.name();
+    std::string name(inst.name());
     if (name.empty()) name = std::to_string(inst.id());
     string edlFile = dir.string() + "/create[" + name + "].edl";
 
@@ -406,7 +406,7 @@ inline int getResID(buffers::TreeNode* res) {
 
 bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
-  tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
+  tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << std::string(folder->name());
 
   if (folder->folder().children_size() > 0) {
     tree << YAML::Key << "contents" << YAML::Value << YAML::BeginSeq;
@@ -417,18 +417,18 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
 
       if (type != "folder") {
         tree << YAML::BeginMap;
-        tree << YAML::Key << "name" << child->name();
-        tree << YAML::Key << "type" << type;
-        tree << YAML::Key << "id" << getResID(child);
+        tree << YAML::Key << "name" << YAML::Value << std::string(child->name());
+        tree << YAML::Key << "type" << YAML::Value << type;
+        tree << YAML::Key << "id" << YAML::Value << getResID(child);
         tree << YAML::EndMap;
       }
 
       if (child->has_folder()) {
-        if (!CreateDirectory(dir + "/" + child->name()))
+        if (!CreateDirectory(dir + "/" + std::string(child->name())))
           return false;
 
         string lastDir = dir;
-        string newDir = dir + child->name() + "/";
+        string newDir = dir + std::string(child->name()) + "/";
 
         if (!WriteNode(child, newDir, egm_root, tree))
           return false;
@@ -462,9 +462,9 @@ bool EGMFileFormat::WriteProject(Project* project, const fs::path& fPath) const 
   if (std::ofstream out{projectFile.string()}) { // egm settings
     YAML::Emitter projYAML;
     projYAML << YAML::BeginMap;
-    projYAML << YAML::Key << "version" << EGM_VERSION;
-    projYAML << YAML::Key << "tree" << "tree.yaml";
-    projYAML << YAML::Key << "backup" << "protobuf.bin";
+    projYAML << YAML::Key << "version" << YAML::Value << EGM_VERSION;
+    projYAML << YAML::Key << "tree" << YAML::Value << "tree.yaml";
+    projYAML << YAML::Key << "backup" << YAML::Value << "protobuf.bin";
     projYAML << YAML::EndMap;
     out << projYAML.c_str();
   } else {

@@ -21,10 +21,6 @@
   @brief Adds a timelines tier following the main tier.
 */
 
-//FIXME: this should be ifdef shellmain but enigmas in a sorry state
-#ifdef JUST_DEFINE_IT_RUN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
-#endif
 
 #ifndef ENIGMA_TIMELINES_OBJECT_H
 #define ENIGMA_TIMELINES_OBJECT_H

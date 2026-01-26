@@ -48,3 +48,11 @@ extern unsigned game_id;
 extern string working_directory;
 extern string program_directory;
 extern string temp_directory;
+
+namespace enigma_user {
+
+std::string get_working_directory() {
+  return working_directory;
+}
+
+} // namespace enigma_user

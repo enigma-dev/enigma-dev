@@ -46,7 +46,6 @@
 
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
-#include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 
 #include "Universal_System/Object_Tiers/collisions_object.h"
 
@@ -89,11 +88,8 @@ namespace enigma_user {}
 
 using namespace enigma_user;
 
-#ifndef JUST_DEFINE_IT_RUN
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
-#endif
 #include "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h"
-  #ifndef JUST_DEFINE_IT_RUN
   #include "Universal_System/syntax_quirks.h"
 
   #include "Universal_System/Instances/with.h"
@@ -114,7 +110,6 @@ using namespace enigma_user;
   #endif
 
   #include "Universal_System/Instances/instance_create.h"
-#endif
 
 namespace enigma
 {

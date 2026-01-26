@@ -47,6 +47,10 @@ bool set_working_directory(string dname) {
   return false;
 }
 
+bool set_working_directory() {
+  return set_working_directory(program_directory);
+}
+
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
   if (string_replace_all(fname, " ", "") == "") fname = ".";
@@ -72,6 +76,10 @@ string environment_get_variable(string name) {
 bool environment_set_variable(const string &name, const string &value) {
   if (value == "") return (unsetenv(name.c_str()) == 0);
   return (setenv(name.c_str(), value.c_str(), 1) == 0);
+}
+
+std::string get_working_directory() {
+  return working_directory;
 }
 
 } // namespace enigma_user

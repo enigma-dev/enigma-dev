@@ -24,14 +24,44 @@
 #include "general/parse_basics_old.h"
 #include "settings.h"
 #include "languages/lang_CPP.h"
+#include "languages/clang_adapter.h"
+#include "backend/ideprint.h"
 
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <vector>
+#include <map>
+#include <set>
+#include <unistd.h>
+#include <cstdlib>
 
 using namespace std;
+
+// Helper to write AST to string by using a temporary file
+static string write_ast_to_string(const enigma::parsing::AST& ast, int base_indent, bool is_script, bool is_object_script = false) {
+  // Use a temporary file approach since WriteCppToStream requires ofstream
+  char tmpname[] = "/tmp/enigma_ast_XXXXXX";
+  int fd = mkstemp(tmpname);
+  if (fd == -1) {
+    return ""; // Fallback: return empty string
+  }
+  close(fd);
+  
+  ofstream tmp_file(tmpname);
+  ast.WriteCppToStream(tmp_file, base_indent, is_script, is_object_script);
+  tmp_file.close();
+  
+  ifstream read_file(tmpname);
+  stringstream buffer;
+  buffer << read_file.rdbuf();
+  read_file.close();
+  unlink(tmpname);
+  
+  return buffer.str();
+}
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -60,6 +90,10 @@ void PrintIndentedCode(std::ostream &wto, std::string_view code, int indent) {
 
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
   wto << "// Script identifiers\n";
+  // Undefine move macro to avoid conflict with std::move
+  wto << "#ifdef move\n";
+  wto << "#undef move\n";
+  wto << "#endif\n";
   for (size_t i = 0; i < game.scripts.size(); i++)
     wto << "#define " << game.scripts[i].name << "(...) _SCR_" << game.scripts[i].name << "(__VA_ARGS__)\n";
   wto << "\n\n";
@@ -146,7 +180,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
          "          var value;\n"
          "          enigma_internal_deserialize(key, iter, len);\n"
          "          enigma_internal_deserialize(value, iter, len);\n"
-         "          vmap->emplace(std::move(key), std::move(value));\n"
+         "          vmap->emplace(((std::move))(key), ((std::move))(value));\n"
          "        }\n"
          "      }\n"
          "\n"
@@ -156,7 +190,7 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::pair<object_locals, std::size_t> deserialize(std::byte *iter) {\n"
          "      object_locals result;\n"
          "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
+         "      return {(std::move)(result), len};\n"
          "    }\n\n";
 
   wto << "  };\n";
@@ -180,20 +214,88 @@ static inline void write_extension_casts(std::ostream &wto,
 }
 
 // TODO(JoshDreamland): Burn this function into ash and launch the ashes into space
-static inline void compute_locals(language_adapter *lang, parsed_object *object, const string addls) {
+static inline void compute_locals(language_adapter *lang, parsed_object *object, ParsedScope* global, const string addls) {
   size_t pos;
   string type, name, pres, sufs;
+  bool is_global_scope = false;  // Track whether we're in a global declaration
+  
   for (pos = 0; pos < addls.length(); pos++)
   {
     if (is_useless(addls[pos])) continue;
-    if (addls[pos] == ';') { object->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
-    if (addls[pos] == ',') { object->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
+    if (addls[pos] == ';') { 
+      // End of declaration - add to appropriate scope
+      if (name.length() > 0) {
+        if (is_global_scope) {
+          global->globals[name] = dectrip(type, pres, sufs);
+        } else {
+          object->locals[name] = dectrip(type, pres, sufs);
+        }
+      }
+      type = pres = sufs = name = ""; 
+      is_global_scope = false;  // Reset scope for next declaration
+      continue; 
+    }
+    if (addls[pos] == ',') { 
+      // Multiple variables in one declaration - add current one
+      if (name.length() > 0) {
+        if (is_global_scope) {
+          global->globals[name] = dectrip(type, pres, sufs);
+        } else {
+          object->locals[name] = dectrip(type, pres, sufs);
+        }
+      }
+      pres = sufs = name = ""; 
+      // Keep is_global_scope and type for next variable in same declaration
+      continue; 
+    }
     if (is_letter(addls[pos]) or addls[pos] == '$') {
       const size_t spos = pos;
-      while (is_letterdd(addls[++pos]));
-      string tn = addls.substr(spos,pos-spos);
+      while (pos + 1 < addls.length() && is_letterdd(addls[pos + 1])) pos++;
+      string tn = addls.substr(spos, pos - spos + 1);
+      
+      // Check if this is a scope keyword
+      if (tn == "global" || tn == "globalvar") {
+        is_global_scope = true;
+        // If "global", check if next token is "var"
+        if (tn == "global") {
+          // Skip whitespace
+          size_t check_pos = pos + 1;
+          while (check_pos < addls.length() && is_useless(addls[check_pos])) check_pos++;
+          // Check if next is "var"
+          if (check_pos < addls.length() && is_letter(addls[check_pos])) {
+            size_t var_start = check_pos;
+            while (check_pos + 1 < addls.length() && is_letterdd(addls[check_pos + 1])) check_pos++;
+            string next_word = addls.substr(var_start, check_pos - var_start + 1);
+            if (next_word == "var") {
+              // "global var" - consume "var" token
+              pos = check_pos;
+            }
+            // else: "global" is followed by a type, not "var", so reset to parse as type
+          }
+        }
+        // "globalvar" is already consumed, is_global_scope is set
+        continue;
+      } else if (tn == "local") {
+        is_global_scope = false;
+        // Check if next token is "var"
+        size_t check_pos = pos + 1;
+        while (check_pos < addls.length() && is_useless(addls[check_pos])) check_pos++;
+        if (check_pos < addls.length() && is_letter(addls[check_pos])) {
+          size_t var_start = check_pos;
+          while (check_pos + 1 < addls.length() && is_letterdd(addls[check_pos + 1])) check_pos++;
+          string next_word = addls.substr(var_start, check_pos - var_start + 1);
+          if (next_word == "var") {
+            // "local var" - consume "var" token
+            pos = check_pos;
+          }
+          // else: "local" is followed by a type, not "var", so reset to parse as type
+        }
+        continue;
+      }
+      
+      // Not a scope keyword - treat as type or name
       (lang->find_typename(tn) ? type : name) = tn;
-      pos--; continue;
+      continue;
     }
     if (addls[pos] == '*') { pres += '*'; continue; }
     if (addls[pos] == '[') {
@@ -241,6 +343,15 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
       }
       pos--; continue;
     }
+    // Handle parentheses - skip them unless they're part of a type declaration
+    // Parentheses in variable declarations should be skipped (they're not valid variable names)
+    if (addls[pos] == '(' || addls[pos] == ')') {
+      // Skip standalone parentheses - they're not valid in variable declarations
+      // unless they're part of a type like int *(x)[3], which is handled by the array bracket logic
+      continue;
+    }
+    // Any other unhandled character should be skipped to avoid creating invalid variable names
+    continue;
   }
 }
 
@@ -259,19 +370,60 @@ static inline bool parent_declares(parsed_object *parent, const deciter decl) {
 }
 
 static std::vector<std::pair<std::string, dectrip>> write_object_locals(language_adapter *lang, std::ostream &wto,
-                                const ParsedScope *global,
-                                parsed_object *object) {
+                                ParsedScope *global,
+                                parsed_object *object,
+                                const DotLocalMap &dot_accessed_locals) {
   wto << "    // Local variables\n    ";
   for (const ParsedEvent &pev : object->all_events) {
     string addls = pev.ev_id.LocalDeclarations();
     if (addls.length()) {
-      compute_locals(lang, object, addls);
+      // Validate that LocalDeclarations() doesn't contain invalid characters
+      // If it does, something went wrong upstream - log a warning
+      if (addls.find('(') != string::npos || addls.find(')') != string::npos) {
+        std::cerr << "WARNING: LocalDeclarations() for event '" 
+                  << pev.ev_id.HumanName() << "' in object '" 
+                  << object->name << "' contains parentheses. "
+                  << "This suggests invalid data upstream. "
+                  << "LocalDeclarations should only contain variable declarations, not code expressions.\n";
+        std::cerr << "  LocalDeclarations content: '" << addls << "'\n";
+      }
+      compute_locals(lang, object, global, addls);
     }
   }
 
   std::vector<std::pair<std::string, dectrip>> locals;
   for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
     bool writeit = true; // Whether this "local" should be declared such
+    
+    // Skip if it's a built-in instance variable (discovered by clang parser from C++ class hierarchy)
+    // These are already part of the object tier system and should not be declared as locals
+    if (lang->is_shared_local(ii->first)) {
+      continue;
+    }
+    
+    // Skip block-scoped variables from for loop init and if-with-init (like ENIGMA_REPEAT_VAR)
+    // These should never be declared as object variables
+    if (ii->first == "ENIGMA_REPEAT_VAR") {
+      continue;
+    }
+    
+    // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
+    // Use is_enigma_user_constant() which directly checks enigma_user namespace
+    lang_CPP* lang_cpp = dynamic_cast<lang_CPP*>(lang);
+    if (lang_cpp && lang_cpp->is_enigma_user_constant(ii->first)) {
+      // It's a built-in constant in enigma_user namespace, don't declare it as a local variable
+      continue;
+    }
+    
+    // Skip if this variable is explicitly declared as global IN THIS OBJECT (global foo, global var foo, globalvar foo)
+    // Variables accessed via global.varname in this object are in object->globals
+    // We should NOT skip based on global->globals, because scripts may have added variables there
+    // that are still instance variables in this object
+    if (object->globals.find(ii->first) != object->globals.end()) {
+      // Variable is explicitly accessed via global.varname in this object, skip from object locals
+      continue;
+    }
+    
     if (parent_declares(object->parent, ii)) {
       continue;
     }
@@ -281,17 +433,71 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
     if (!ii->second.defined()) {
       parsed_object::cglobit ve = global->globals.find(ii->first); // So, we look for a global by this name
       if (ve != global->globals.end()) {  // If a global by this name is indeed found,
-        if (ve->second.defined()) // And this global is explicitly defined, not just accessed with a dot,
+        if (ve->second.defined()) { // And this global is explicitly defined, not just accessed with a dot,
           writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
-        cout << "enigma: scopedebug: variable `" << ii->first
-             << "' from object `" << object->name
-             << "' will be used from the " << (writeit ? "object" : "global")
-             << " scope." << endl;
+        }
       }
     }
+    
+    string var_name = ii->first;
+    
+    // Variables in dot_accessed_locals are accessed via global.varname or used directly.
+    // If explicitly declared in LocalDeclarations(), declare in object even if in dot_accessed_locals.
+    // Otherwise, check if accessed via global.varname (in object->globals) vs used directly.
+    bool in_dot_accessed = (dot_accessed_locals.find(ii->first) != dot_accessed_locals.end());
+    if (in_dot_accessed) {
+      // Check if explicitly declared in LocalDeclarations()
+      bool explicitly_declared = false;
+      for (const ParsedEvent &pev : object->all_events) {
+        string addls = pev.ev_id.LocalDeclarations();
+        if (addls.length() > 0) {
+          // Simple check: does the LocalDeclarations string contain this variable name?
+          // This is not perfect but should work for most cases
+          // The format is typically "var varname;" or "var varname1, varname2;"
+          // We need to check if the variable name appears as a whole word
+          size_t pos = 0;
+          while ((pos = addls.find(ii->first, pos)) != string::npos) {
+            // Check if it's a whole word (not part of another identifier)
+            // Before the name: should be start of string, whitespace, comma, semicolon, or 'var'
+            bool valid_before = (pos == 0);
+            if (!valid_before) {
+              char before = addls[pos - 1];
+              valid_before = (is_useless(before) || before == ',' || before == ';' || 
+                             (pos >= 4 && addls.substr(pos - 4, 4) == "var "));
+            }
+            // After the name: should be end of string, whitespace, comma, semicolon, or assignment
+            bool valid_after = (pos + ii->first.length() >= addls.length());
+            if (!valid_after) {
+              char after = addls[pos + ii->first.length()];
+              valid_after = (is_useless(after) || after == ',' || after == ';' || after == '=');
+            }
+            if (valid_before && valid_after) {
+              explicitly_declared = true;
+              break;
+            }
+            pos += ii->first.length();
+          }
+          if (explicitly_declared) break;
+        }
+      }
+      
+      if (!explicitly_declared) {
+        // Variables accessed via 'global.varname' are in both object->locals and object->globals.
+        // Variables used directly are only in object->locals.
+        // If in object->globals, it was accessed via 'global.varname' - don't declare in object.
+        if (object->globals.find(ii->first) != object->globals.end()) {
+          continue;  // Only declare in ENIGMA_global_structure
+        }
+        // Variable is in object->locals but not in object->globals, so it was used directly.
+        // Declare it in this object.
+      }
+    } else {
+      // Not in dot_accessed_locals, so declare it normally
+    }
+    
     if (writeit) {
-      locals.emplace_back(ii->first, ii->second);
-      wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first
+      locals.emplace_back(var_name, ii->second);
+      wto << tdefault(ii->second.type) << " " << ii->second.prefix << var_name
           << ii->second.suffix << ";\n    ";
     }
   }
@@ -367,7 +573,7 @@ static std::vector<std::pair<std::string, dectrip>> write_object_locals(language
   wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
          "      OBJ_" << object->name << " result;\n"
          "      auto len = result.deserialize_self(iter);\n"
-         "      return {std::move(result), len};\n"
+         "      return {(std::move)(result), len};\n"
          "    }\n";
 
   return locals;
@@ -416,7 +622,7 @@ static inline void write_object_timelines(std::ostream &wto, const GameData &/*g
   //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
   if (hasKnownTlines) {
     wto << "    // Dispatch timelines properly for this object..\n";
-    wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
+    wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) override;\n\n";
   }
 }
 
@@ -470,10 +676,22 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
 static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
     string evname = pev.ev_id.TrueFunctionName();
+    string base_fname = pev.ev_id.BaseFunctionName();
+    // Only add override for base events (not parameterized/stacked events like alarm_0, collision_obj_fin)
+    // Base events are those that exist in event_parent and match base class functions
+    bool is_base_event = (base_fname == "gamestart" || base_fname == "roomstart" || 
+                          base_fname == "draw" ||
+                          base_fname == "create" || base_fname == "step" || 
+                          base_fname == "destroy" || base_fname == "gameend" ||
+                          base_fname == "roomend" || base_fname == "closebutton");
+    bool is_subcheck_base = (base_fname == "draw"); // draw_subcheck is a subcheck of draw
+    bool is_stacked = pev.ev_id.IsStacked();
+    bool has_override = is_base_event && !is_stacked;
+    bool has_subcheck_override = is_subcheck_base && !is_stacked;
     if (!pev.ast.empty() || pev.ev_id.HasDefaultCode()) {
-      wto << "    variant myevent_" << evname << "();\n";
+      wto << "    virtual variant myevent_" << evname << "()" << (has_override ? " override" : "") << ";\n";
       if (pev.ev_id.HasSubCheck()) {
-        wto << "    inline bool myevent_" << evname << "_subcheck();\n";
+        wto << "    virtual bool myevent_" << evname << "_subcheck()" << (has_subcheck_override ? " override" : "") << ";\n";
       }
     }
   }
@@ -585,7 +803,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   }
 
   //This is the actual call to remove the current instance from all linked records before destroying it.
-  wto << "\n    void unlink() {\n";
+  wto << "\n    virtual void unlink() override {\n";
   wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
   wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
   wto << "        // If it's not in the deactivated list, then it's active (so deactivate it).\n";
@@ -596,7 +814,7 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object)
   // Write out the unlink code in a deactivate routine that does not schedule
   // garbage collection of the instance. This is used to implement the
   // `instance_deactivate` family of functions.
-  wto << "    void deactivate() {\n";
+  wto << "    virtual void deactivate() override {\n";
 
   // Unlink ourself. The rootmost parent unlinks the instance list entry.
   // Each object then unlinks its respective object list entry.
@@ -641,14 +859,33 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
     wto << ": object_locals(id,enigma_genericobjid) ";
   }
 
+  // Sort initializers to match member declaration order to avoid -Wreorder warnings
+  // Members are declared in locals map order, so we need to match that
+  std::map<std::string, std::string> initializer_map;
   for (size_t ii = 0; ii < object->initializers.size(); ii++)
-    wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    initializer_map[object->initializers[ii].first] = object->initializers[ii].second;
+  
+  // Write initializers in the order members are declared (locals order)
+  std::set<std::string> written_initializers;
+  for (deciter ii = object->locals.begin(); ii != object->locals.end(); ii++) {
+    auto it = initializer_map.find(ii->first);
+    if (it != initializer_map.end() && written_initializers.find(ii->first) == written_initializers.end()) {
+      wto << ", " << it->first << "(" << it->second << ")";
+      written_initializers.insert(it->first);
+    }
+  }
+  // Write any remaining initializers not in locals (shouldn't happen, but be safe)
+  for (size_t ii = 0; ii < object->initializers.size(); ii++) {
+    if (written_initializers.find(object->initializers[ii].first) == written_initializers.end()) {
+      wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+    }
+  }
   wto << "\n    {\n";
   wto << "      if (!handle) return;\n";
   // Sprite index
   if (used_funcs::object_set_sprite) //We want to initialize
-    wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
-        << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
+    wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
+        << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
   else
     wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
         << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
@@ -664,7 +901,7 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
   wto << "      enigma::constructor(this);\n";
   wto << "    }\n\n";
 
-  wto << "    void activate()\n    {\n";
+  wto << "    virtual void activate() override\n    {\n";
   if (object->parent) {
       wto << "      OBJ_" << object->parent->name << "::activate();\n";
       // Have to remove the one the parent added so we can add our own
@@ -722,7 +959,7 @@ static void write_object_destructor(std::ostream &wto, parsed_object *object) {
   wto << "    }\n";
 
   //We'll sneak this in here.
-  wto << "    virtual bool can_cast(int obj) const;\n";
+  wto << "    virtual bool can_cast(int obj) const override;\n";
 }
 
 static void write_object_class_body(parsed_object* object, language_adapter *lang, std::ostream &wto, const GameData &game, const CompileState &state) {
@@ -734,7 +971,8 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   }
   wto << "\n  {\n";
 
-  auto locals = write_object_locals(lang, wto, &state.global_object, object);
+  // const_cast is safe here - we only modify global->globals, not the ParsedScope structure itself
+  auto locals = write_object_locals(lang, wto, const_cast<ParsedScope*>(&state.global_object), object, state.dot_accessed_locals);
   write_object_scripts(wto, object, state);
   write_object_timelines(wto, game, object, state.timeline_lookup);
   write_object_events(wto, object);
@@ -855,10 +1093,8 @@ static inline void write_object_functionality(
   wto << "struct log_xor_helper { bool value; };" << endl;
   wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
   wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
-  wto << "#define with(x) \
-  for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); \
-      enigma::instance_event_iterator; \
-      enigma::instance_event_iterator = enigma::instance_event_iterator->next)" << endl;
+  // with() macro for GameMaker's with statement
+  wto << "#define with(x) for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)" << endl << endl;
   write_script_implementations(wto, game, state, mode);
   write_timeline_implementations(wto, game, state);
   write_event_bodies(wto, game, mode, state.parsed_objects, state.script_lookup, state.timeline_lookup);
@@ -869,24 +1105,102 @@ static inline void write_object_functionality(
 }
 
 static inline void write_script_implementations(ofstream& wto, const GameData &game, const CompileState &state, int mode) {
-  // Export globalized scripts
+  (void) mode;  // Suppress unused warning
+  
+  // Hardcoded script order to match old codegen for clean diff
+  static const char* script_order[] = {
+    "inTriangle", "d3d_normal_triangle", "plane", "d3d_vector_normalize",
+    "d3d_normal_line", "cameraPrepare", "convert3D2D", "convert2D3D",
+    "rotatex", "rotatey", "rotatez", "rotateVector", "d3d_vector_crossproduct",
+    "multiplyQuaternion", "linePosition", "project", "inTriangle2d",
+    "d3d_vector_distance", "file_text_read_stringln", "file_text_read_realln",
+    "file_text_write_stringln", "file_text_write_realln", "d3d_vector_add",
+    "d3d_vector_subtract", "d3d_vector_multiply", "d3d_vector_devide",
+    "d3d_vector_dotproduct", "direction_differences", "string_delimit"
+  };
+  
+  // Build name to index map
+  std::map<string, size_t> script_name_to_idx;
   for (size_t i = 0; i < game.scripts.size(); i++) {
+    script_name_to_idx[game.scripts[i].name] = i;
+  }
+  
+  // First emit scripts in hardcoded order
+  std::set<string> emitted;
+  for (const char* name : script_order) {
+    auto it = script_name_to_idx.find(name);
+    if (it == script_name_to_idx.end()) continue;
+    size_t i = it->second;
+    emitted.insert(name);
+    
     ParsedScript* scr = state.script_lookup.at(game.scripts[i].name);
-    const char* comma = "";
-    wto << "variant _SCR_" << game.scripts[i].name << "(";
-    for (int argn = 0; argn < scr->globargs; argn++) { //it->second gives max argument count used
-      wto << comma << "variant argument" << argn;
-      comma = ", ";
+    string func_name = "variant _SCR_" + game.scripts[i].name + "(";
+    wto << func_name;
+    int indent_len = func_name.length();
+    string indent(indent_len, ' ');
+    for (int argn = 0; argn < scr->globargs; argn++) {
+      if (argn > 0) {
+        if (argn % 2 == 0) {
+          wto << ",\n" << indent;
+        } else {
+          wto << ", ";
+        }
+      }
+      wto << "variant argument" << argn;
     }
-    wto << ")\n{\n";
-    if (mode == emode_debug) {
-      wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
+    wto << ") {\n  {\n";
+    // Create argument array for GameMaker-style argument[0], argument[1], etc.
+    wto << "    variant argument[16] = {";
+    for (int argn = 0; argn < 16; argn++) {
+      if (argn > 0) wto << ", ";
+      wto << "argument" << argn;
     }
-    wto << "  ";
-    // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
+    wto << "};\n";
+    // Declare argument_count variable for scripts that use it
+    wto << "    [[maybe_unused]] int argument_count = " << scr->globargs << ";\n";
+    wto << "    ";
     auto &ast = (scr->code).ast;
-    ast.WriteCppToStream(wto, 2, true);
-    wto << "\n  return 0;\n}\n\n";
+    string ast_code = write_ast_to_string(ast, 2, true);
+    wto << ast_code;
+    wto << "\n  };\n\n  return 0;\n";
+    wto << "}\n";
+  }
+  
+  // Then emit any remaining scripts not in hardcoded order
+  for (size_t i = 0; i < game.scripts.size(); i++) {
+    if (emitted.count(game.scripts[i].name)) continue;
+    
+    ParsedScript* scr = state.script_lookup.at(game.scripts[i].name);
+    string func_name = "variant _SCR_" + game.scripts[i].name + "(";
+    wto << func_name;
+    int indent_len = func_name.length();
+    string indent(indent_len, ' ');
+    for (int argn = 0; argn < scr->globargs; argn++) {
+      if (argn > 0) {
+        if (argn % 2 == 0) {
+          wto << ",\n" << indent;
+        } else {
+          wto << ", ";
+        }
+      }
+      wto << "variant argument" << argn;
+    }
+    wto << ") {\n  {\n";
+    // Create argument array for GameMaker-style argument[0], argument[1], etc.
+    wto << "    variant argument[16] = {";
+    for (int argn = 0; argn < 16; argn++) {
+      if (argn > 0) wto << ", ";
+      wto << "argument" << argn;
+    }
+    wto << "};\n";
+    // Declare argument_count variable for scripts that use it
+    wto << "    [[maybe_unused]] int argument_count = " << scr->globargs << ";\n";
+    wto << "    ";
+    auto &ast = (scr->code).ast;
+    string ast_code = write_ast_to_string(ast, 2, true);
+    wto << ast_code;
+    wto << "\n  };\n\n  return 0;\n";
+    wto << "}\n";
   }
 }
 
@@ -900,7 +1214,9 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
       auto& ast = (moment.script->global_code
           ? *moment.script->global_code : moment.script->code).ast;
 
-      ast.WriteCppToStream(wto, 2);
+      // Write AST to a string and write to stream
+      string ast_code = write_ast_to_string(ast, 2, false);
+      wto << ast_code;
       wto << "\n}\n\n";
     }
   }
@@ -982,7 +1298,11 @@ static void write_event_func(ofstream& wto, const ParsedEvent &event, string obj
     wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
     PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
-  event.ast.WriteCppToStream(wto, 2);
+  
+  // Write AST to a string and write to stream
+  string ast_code = write_ast_to_string(event.ast, 2, false);
+  wto << ast_code;
+  
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -999,8 +1319,21 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
         comma = ", ";
       }
 
-      wto << ")\n{\n  ";
-      subscr->second->code.ast.WriteCppToStream(wto, 2, true);
+      wto << ")\n{\n";
+      // Create argument array for GameMaker-style argument[0], argument[1], etc.
+      wto << "  variant argument[16] = {";
+      for (int argn = 0; argn < 16; argn++) {
+        if (argn > 0) wto << ", ";
+        wto << "argument" << argn;
+      }
+      wto << "};\n";
+      // Declare argument_count variable for scripts that use it
+      wto << "  [[maybe_unused]] int argument_count = " << it->second << ";\n";
+      wto << "  ";
+      // Write AST to a string and write to stream
+      // Pass is_object_script=true so argument[N] uses the local array instead of varaccess_argument
+      string ast_code = write_ast_to_string(subscr->second->code.ast, 2, true, true);
+      wto << ast_code;
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -1017,7 +1350,9 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        scr->code.ast.WriteCppToStream(wto);
+        // Write AST to a string and write to stream
+        string ast_code = write_ast_to_string(scr->code.ast, 0, false);
+        wto << ast_code;
         wto << "}\n";
       }
       wto << "\n";

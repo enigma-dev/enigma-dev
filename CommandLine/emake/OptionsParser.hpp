@@ -26,7 +26,7 @@ public:
   OptionsParser();
   int ReadArgs(int argc, char* argv[]);
   int HandleArgs();
-  std::string APIyaml(const buffers::resources::Settings* currentConfig = nullptr);
+  std::string APIyaml(const std::string& mode = "Run", const buffers::resources::Settings* currentConfig = nullptr);
   opt::variable_value GetOption(std::string option);
   bool HasOption(std::string option);
   const APIMap& GetAPI() const;

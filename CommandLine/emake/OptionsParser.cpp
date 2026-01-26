@@ -117,20 +117,28 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
     ("output,o", opt::value<std::string>(), "Output executable file")
-    ("platform,p", opt::value<std::string>()->default_value(defAPI.has_target_platform() ? defAPI.target_platform() : def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
-    ("workdir,d", opt::value<std::string>()->default_value(defComp.has_eobjs_directory() ? defComp.eobjs_directory() : def_workdir), "Working Directory")
-    ("codegen,k", opt::value<std::string>()->default_value(defComp.has_codegen_directory() ? defComp.codegen_directory() : def_workdir), "Codegen Directory")
+    ("platform,p", opt::value<std::string>()->default_value(defAPI.has_target_platform() ? std::string(defAPI.target_platform()) : def_platform), "Target Platform (Win32, xlib, Cocoa, SDL, None)")
+    ("workdir,d", opt::value<std::string>()->default_value(defComp.has_eobjs_directory() ? std::string(defComp.eobjs_directory()) : def_workdir), "Working Directory")
+    ("codegen,k", opt::value<std::string>()->default_value(defComp.has_codegen_directory() ? std::string(defComp.codegen_directory()) : def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Compile, Debug, Design)")
-    ("graphics,g", opt::value<std::string>()->default_value(defAPI.has_target_graphics() ? defAPI.target_graphics() : "OpenGL3"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
-    ("audio,a", opt::value<std::string>()->default_value(defAPI.has_target_audio() ? defAPI.target_audio() : "None"), "Audio System (DirectSound, OpenAL, XAudio2, None)")
-    ("widgets,w", opt::value<std::string>()->default_value(defAPI.has_target_widgets() ? defAPI.target_widgets() : "None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
-    ("network,n", opt::value<std::string>()->default_value(defAPI.has_target_network() ? defAPI.target_network() : "None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
-    ("collision,c", opt::value<std::string>()->default_value(defAPI.has_target_collision() ? defAPI.target_collision() : "None"), "Collision System (Precise, BBox, None)")
+    ("graphics,g", opt::value<std::string>()->default_value(defAPI.has_target_graphics() ? std::string(defAPI.target_graphics()) : "OpenGL3"), "Graphics System (Direct3D9, Direct3D11, OpenGL1, OpenGL3, OpenGLES2, OpenGLES3, None)")
+    ("audio,a", opt::value<std::string>()->default_value(defAPI.has_target_audio() ? std::string(defAPI.target_audio()) : "None"), "Audio System (DirectSound, OpenAL, XAudio2, None)")
+    ("widgets,w", opt::value<std::string>()->default_value(defAPI.has_target_widgets() ? std::string(defAPI.target_widgets()) : "None"), "Widget System (Win32, xlib, Cocoa, GTK+, None)")
+    ("network,n", opt::value<std::string>()->default_value(defAPI.has_target_network() ? std::string(defAPI.target_network()) : "None"), "Networking System (DirectPlay, Asynchronous, BerkeleySockets, None)")
+    ("collision,c", opt::value<std::string>()->default_value(defAPI.has_target_collision() ? std::string(defAPI.target_collision()) : "None"), "Collision System (Precise, BBox, None)")
     ("extensions,e", opt::value<std::string>()->default_value(defAPI.extensions_size() > 0 ? repeatedStringToDelimit(defAPI.extensions()) : "None"), "Extensions (Alarms, Paths, Timelines, Particles, MotionPlanning, ttf, libpng, IniFilesystem, RegistrySpoof, Asynchronous, StudioPhysics, VirtualKeys, XRandR, XTEST, FileDropper, None)")
-    ("compiler,x", opt::value<std::string>()->default_value(defAPI.has_target_compiler() ? defAPI.target_compiler() : def_compiler), "Compiler.ey Descriptor")
+    ("compiler,x", opt::value<std::string>()->default_value(defAPI.has_target_compiler() ? std::string(defAPI.target_compiler()) : def_compiler), "Compiler.ey Descriptor")
     ("enigma-root", opt::value<std::string>()->default_value(fs::current_path().string()), "Path to ENIGMA's sources")
     ("codegen-only", opt::bool_switch()->default_value(false), "Only generate code and exit")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
+    ("inherit-increment-from", opt::value<int>(), "Inherit ++/-- from: 0=GML, 1=C++")
+    ("inherit-strings-from", opt::value<int>(), "Inherit strings from: 0=GML, 1=C++")
+    ("inherit-escapes-from", opt::value<int>(), "Inherit escape sequences: 0=GML, 1=C++")
+    ("inherit-equivalence-from", opt::value<int>(), "Inherit a=b=c from: 0=GML, 1=C++")
+    ("inherit-literals-from", opt::value<int>(), "Treat literals as: 0=EDL (variant), 1=C++ (scalar)")
+    ("inherit-negatives-as", opt::value<int>(), "Treat negatives as: 0=GML (true > 0), 1=C++ (true != 0)")
+    ("inherit-objects", opt::value<bool>(), "Object Inheritance: true/false")
+    ("automatic-semicolons", opt::value<bool>(), "Automatic Semicolons: true/false")
   ;
 
   _positional.add("input", 1);
@@ -236,7 +244,7 @@ int OptionsParser::HandleArgs()
   return OPTIONS_SUCCESS;
 }
 
-std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentConfig)
+std::string OptionsParser::APIyaml(const std::string& mode, const buffers::resources::Settings* currentConfig)
 {
   std::string audio = _rawArgs["audio"].as<std::string>();
   std::string platform = _rawArgs["platform"].as<std::string>();
@@ -269,14 +277,42 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   if (currentConfig == nullptr) currentConfig = &_loadedSettings;
   
   const auto &compilerSettings = currentConfig->compiler();
+  
+  // Get values from config, but allow command-line overrides
   int inherit_strings = compilerSettings.has_inherit_strings() ? compilerSettings.inherit_strings() : 0;
   int inherit_escapes = compilerSettings.inherit_escapes() ? compilerSettings.inherit_escapes() : 0;
-  int inherit_increment = compilerSettings.has_inherit_increment() ? compilerSettings.inherit_increment() : 0;
+  int inherit_increment = compilerSettings.has_inherit_increment() ? compilerSettings.inherit_increment() : 1; // Default to 1 (C++ mode)
   int inherit_equivalence = compilerSettings.inherit_equivalence() ? compilerSettings.inherit_equivalence() : 0;
   int inherit_literals = compilerSettings.has_inherit_literals() ? compilerSettings.inherit_literals() : 0;
   int inherit_negatives = compilerSettings.has_inherit_negatives() ? compilerSettings.inherit_negatives() : 0;
-  bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : 0;
-  bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : 0;
+  bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : false;
+  bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : true;
+  
+  // Override with command-line options if provided
+  if (_rawArgs.count("inherit-increment-from")) {
+    inherit_increment = _rawArgs["inherit-increment-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-strings-from")) {
+    inherit_strings = _rawArgs["inherit-strings-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-escapes-from")) {
+    inherit_escapes = _rawArgs["inherit-escapes-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-equivalence-from")) {
+    inherit_equivalence = _rawArgs["inherit-equivalence-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-literals-from")) {
+    inherit_literals = _rawArgs["inherit-literals-from"].as<int>();
+  }
+  if (_rawArgs.count("inherit-negatives-as")) {
+    inherit_negatives = _rawArgs["inherit-negatives-as"].as<int>();
+  }
+  if (_rawArgs.count("inherit-objects")) {
+    inherit_objects = _rawArgs["inherit-objects"].as<bool>();
+  }
+  if (_rawArgs.count("automatic-semicolons")) {
+    automatic_semicolons = _rawArgs["automatic-semicolons"].as<bool>();
+  }
 
   std::string yaml;
   yaml += "%e-yaml\n";
@@ -297,6 +333,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
   yaml += " \n";
   yaml += "target-audio: " + audio + "\n";
+  yaml += "target-mode: " + mode + "\n";
   yaml += "target-windowing: " + platform + "\n";
   yaml += "target-compiler: " + compiler + "\n";
   yaml += "target-graphics: " + graphics + "\n";

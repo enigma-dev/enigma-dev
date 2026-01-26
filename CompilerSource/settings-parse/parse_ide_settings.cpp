@@ -85,13 +85,15 @@ static void reset_ide_editables()
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
+    wto << "#ifndef ENIGMA_GAME_SETTINGS_H\n";
+    wto << "#define ENIGMA_GAME_SETTINGS_H\n\n";
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
-    wto << '\n';
+    wto << "inline void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << "\n#endif // ENIGMA_GAME_SETTINGS_H\n";
   wto.close();
 }
 
@@ -115,7 +117,12 @@ void parse_ide_settings(const char* eyaml, setting::CompatibilityOptions *out)
   
   // Read settings info
   out->use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  out->use_cpp_literals  = settree.get("inherit-literals-from").toInt();
+  // Support both "inherit-literals-from" and "treat-literals-as" (they mean the same thing)
+  if (settree.exists("treat-literals-as")) {
+    out->use_cpp_literals = settree.get("treat-literals-as").toInt();
+  } else {
+    out->use_cpp_literals = settree.get("inherit-literals-from").toInt();
+  }
   out->use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
   out->use_incrementals  = settree.get("inherit-increment-from").toInt();
   out->use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();

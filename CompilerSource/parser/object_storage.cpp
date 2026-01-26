@@ -26,6 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <stdio.h>
@@ -35,7 +36,7 @@ using namespace std;
 
 #include "darray.h"
 
-#include <Storage/definition.h>
+#include "languages/clang_definitions.h"
 #include "object_storage.h"
 #include "settings-parse/crawler.h"
 #include "compiler/compile_common.h"
@@ -76,19 +77,42 @@ void ParsedScope::copy_from(const ParsedScope &source,
   //Copy
   for (auto vit = source.dots.begin(); vit != source.dots.end(); vit++)
     dest.dots[vit->first] = 0;
+  // Copy locals that are NOT declared with 'var' (instance variables).
+  // Skip variables declared with 'var' to avoid transitive pollution.
+  // Also skip argument parameters (argument0-argument15) but NOT the argument array.
   for (auto vit = source.locals.begin(); vit != source.locals.end(); vit++)
   {
+    // Skip variables that were explicitly declared with 'var' in the source scope
+    if (source.declarations.find(vit->first) != source.declarations.end()) {
+      continue;
+    }
+    // Skip script parameters (argument0, argument1, ..., argument15) but NOT 'argument' array
+    const std::string& name = vit->first;
+    if (name.length() > 8 && name.substr(0, 8) == "argument") {
+      std::string suffix = name.substr(8);
+      bool is_arg_param = !suffix.empty() && std::all_of(suffix.begin(), suffix.end(), ::isdigit);
+      if (is_arg_param) continue;
+    }
     dectrip &t = dest.locals[vit->first];
     if (!t.defined())
-      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+      t = vit->second;
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
+  // Copy ambiguous variables (used in with blocks in scripts)
+  // These need to be declared as object members so object methods can access them directly
   for (auto vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
   {
-    dectrip &t = dest.ambiguous[vit->first];
+    // Skip argument parameters
+    const std::string& name = vit->first;
+    if (name.length() > 8 && name.substr(0, 8) == "argument") {
+      std::string suffix = name.substr(8);
+      bool is_arg_param = !suffix.empty() && std::all_of(suffix.begin(), suffix.end(), ::isdigit);
+      if (is_arg_param) continue;
+    }
+    dectrip &t = dest.locals[vit->first];
     if (!t.defined())
-      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+      t = vit->second.defined() ? vit->second : dectrip("var");
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
@@ -96,7 +120,7 @@ void ParsedScope::copy_from(const ParsedScope &source,
   {
     dectrip &t = dest.globals[vit->first];
     if (!t.defined())
-      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+      t = vit->second;
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
@@ -104,7 +128,7 @@ void ParsedScope::copy_from(const ParsedScope &source,
   {
     decquad &t = dest.consts[vit->first];
     if (!t.defined())
-      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+      t = vit->second;
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
@@ -137,8 +161,6 @@ void CompileState::add_dot_accessed_local(string name) {
   pair<msi::iterator, bool> insd = dot_accessed_locals.insert(msi::value_type(name,dectrip()));
   if (!insd.second) // If we didn't insert new,
     return; // all this figuring has been done already
-
-  user << "Add dot accessed local " << name << flushl;
 
   map<string,useinfo> uses;
   insd.first->second.type = "var"; // Default, just in case of stupidity.

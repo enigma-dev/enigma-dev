@@ -3,7 +3,7 @@ include Config.mk
 PATH := $(eTCpath)$(PATH)
 SHELL=/bin/bash
 
-.PHONY: ENIGMA all clean Game clean-game clean-protos emake emake-tests gm2egm libpng-util libProtocols libEGM required-directories .FORCE
+.PHONY: ENIGMA all clean Game clean-game clean-protos emake emake-tests gm2egm gmk-checker libpng-util libProtocols libEGM required-directories .FORCE
 
 $(LIB_PFX)compileEGMf$(LIB_EXT): ENIGMA
 ENIGMA: .FORCE libProtocols$(LIB_EXT) libENIGMAShared$(LIB_EXT)
@@ -17,8 +17,9 @@ clean: .FORCE
 	$(MAKE) -C shared/ clean
 	$(MAKE) -C shared/protos/ clean
 	$(MAKE) -C CommandLine/gm2egm/ clean
+	$(MAKE) -C CommandLine/gmk-checker/ clean
 
-all: libENIGMAShared libProtocols libEGM ENIGMA gm2egm emake emake-tests test-runner .FORCE
+all: libENIGMAShared libProtocols libEGM ENIGMA emake emake-tests .FORCE
 
 Game: .FORCE
 	@$(RM) -f logs/enigma_compile.log
@@ -55,6 +56,9 @@ emake-tests: .FORCE libEGM$(LIB_EXT) $(LIB_PFX)compileEGMf$(LIB_EXT)
 
 gm2egm: libEGM$(LIB_EXT) .FORCE
 	$(MAKE) -C CommandLine/gm2egm/
+
+gmk-checker: libEGM$(LIB_EXT) .FORCE
+	$(MAKE) -C CommandLine/gmk-checker/
 
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/

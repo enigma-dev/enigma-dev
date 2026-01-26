@@ -9,7 +9,8 @@
 #include "settings.h"
 #include "tokens.h"
 
-#include <JDI/src/System/builtins.h>
+// JDI removed - builtins handled by clang adapter
+#include "languages/clang_definitions.h"  // Provides jdi:: typedefs
 #include <memory>
 
 namespace enigma::parsing {

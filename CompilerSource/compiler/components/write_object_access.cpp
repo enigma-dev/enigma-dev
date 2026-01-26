@@ -34,6 +34,7 @@
 using namespace std;
 
 #include "backend/GameData.h"
+#include "backend/ideprint.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
 #include "parser/object_storage.h"
@@ -102,15 +103,65 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   }
 
   for (auto dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-    const string& pmember = dait->first;
+    string pmember = dait->first;
+    
+    // Debug output to track filtering
+    user << "Processing dot_accessed_local: " << pmember << flushl;
+    
+    // Skip built-in instance variables (discovered by clang parser) - they're accessible as member variables
+    // These should not have varaccess functions generated since they're part of the object hierarchy
+    if (this->is_shared_local(pmember)) {
+      user << "  Skipped " << pmember << " (is_shared_local)" << flushl;
+      continue;
+    }
+    
+    // Also skip if it's a built-in constant from enigma_user namespace (like self, c_blue, c_white, etc.)
+    // Use is_enigma_user_constant() which directly checks enigma_user namespace
+    if (this->is_enigma_user_constant(pmember)) {
+      // It's a built-in constant in enigma_user namespace, don't generate varaccess function for it
+      user << "  Skipped " << pmember << " (is_enigma_user_constant)" << flushl;
+      continue;
+    }
+    
+    // argument is a local array in script functions, not an instance variable.
+    // It should never be in dot_accessed_locals, but if it somehow is, skip it.
+    // argument[N] is accessed directly in the script function body, not via varaccess_*.
+    if (pmember == "argument") {
+      user << "  Skipped " << pmember << " (local array, not instance variable)" << flushl;
+      continue;
+    }
+    
+    // Functions should never be in dot_accessed_locals - they're called directly, not accessed as variables.
+    // Check if this is a function in enigma_user namespace.
+    // Functions like part_type_create, part_type_size, etc. should not generate varaccess_* functions.
+    if (namespace_enigma_user) {
+      jdi::definition *def = namespace_enigma_user->look_up(pmember);
+      if (def && (def->flags & jdi::DEF_FUNCTION)) {
+        user << "  Skipped " << pmember << " (global function, not instance variable)" << flushl;
+        continue;
+      }
+    }
+    
+    user << "  Generating varaccess_" << pmember << flushl;
     wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
     wto << "  {" << endl;
 
     wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
     wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
+    // Generate object-specific cases for objects that have this variable as a local member
+    // (but NOT as a global - globals are accessed via ENIGMA_global_structure)
     for (parsed_object *const obj : parsed_objects) {
+      // Skip if this variable is in the object's globals (it's a global, not an instance variable)
+      if (obj->globals.find(pmember) != obj->globals.end()) {
+        continue;
+      }
       for (parsed_object *parent = obj; parent;) {
+        // Also skip if the variable is in the parent's globals
+        if (parent->globals.find(pmember) != parent->globals.end()) {
+          parent = parent->parent;
+          continue;
+        }
         map<string,dectrip>::iterator x = parent->locals.find(pmember);
         if (x != parent->locals.end())
         {
@@ -125,9 +176,23 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
       }
     }
 
-    if (global->globals.find(pmember) != global->globals.end())
+    // Check if variable is declared in any object (in object->locals but not in object->globals).
+    // Only generate case global: for ENIGMA_global_structure if variable is not declared in objects.
+    bool declared_in_any_object = false;
+    for (parsed_object *const obj : parsed_objects) {
+      bool in_locals = (obj->locals.find(pmember) != obj->locals.end());
+      bool in_globals = (obj->globals.find(pmember) != obj->globals.end());
+      if (in_locals && !in_globals) {
+        declared_in_any_object = true;
+        break;
+      }
+    }
+    
+    // Generate case global: for standalone globals or variables in ENIGMA_global_structure.
+    if (global->globals.find(pmember) != global->globals.end() && 
+        dot_accessed_locals.find(pmember) == dot_accessed_locals.end())
       wto << "      case global: return " << pmember << ";" << endl;
-    else
+    else if (!declared_in_any_object)
       wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
     if (dait->second.type == "var")
       wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;

@@ -86,6 +86,7 @@ std::string filename_join(std::string prefix, std::string suffix);
 std::string environment_get_variable(std::string name);
 bool environment_set_variable(const std::string &name, const std::string &value);
 bool set_working_directory(std::string dname);
+bool set_working_directory();  // Resets to program_directory
 
 } // namespace enigma_user
 
