@@ -35,12 +35,13 @@
 #include <boost/container/small_vector.hpp>
 
 #include <string>
+#include <string_view>
 
 struct NamedObject {
   std::string_view name;
   buffers::resources::Object* obj;
   NamedObject(): obj(nullptr) {}
-  NamedObject(const std::string& obj_name, buffers::resources::Object* obj):
+  NamedObject(std::string_view obj_name, buffers::resources::Object* obj):
     name(obj_name), obj(obj) {}
 };
 
@@ -71,7 +72,7 @@ struct EventDescriptor {
   int ParameterCount() const {
     return event->parameters_size();
   }
-  const std::string &ParameterKind(int n) const {
+  std::string_view ParameterKind(int n) const {
     if (n < event->parameters_size()) return event->parameters(n);
     static std::string BAD_PARAMETER_INDEX = "N/A";
     return BAD_PARAMETER_INDEX;
@@ -82,21 +83,21 @@ struct EventDescriptor {
 
   // Return the base ID of this event, such as "Collision" or "Draw."
   // Not to be confused with the IdString of an instance of this event.
-  const std::string &bare_id() const { return event->id(); }
+  std::string_view bare_id() const { return event->id(); }
 
-  std::string HumanName() const;
   std::string BaseFunctionName() const;
-  std::string LocalDeclarations() const;
-  std::string GroupName() const { return event->group(); }
-  std::string HumanDescription() const { return event->description(); }
+  std::string_view HumanName() const { return event->name(); }
+  std::string_view LocalDeclarations() const { return event->locals(); }
+  std::string_view GroupName() const { return event->group(); }
+  std::string_view HumanDescription() const { return event->description(); }
 
   bool HasLocalDeclarations() const { return event->has_locals(); }
   bool HasDefaultCode() const { return event->has_default_() || HasConstantCode(); }
   bool HasConstantCode() const { return event->has_constant(); }
   bool HasDispatcher() const { return event->has_dispatcher(); }
 
-  std::string DefaultCode() const;
-  std::string ConstantCode() const;
+  std::string_view DefaultCode() const;
+  std::string_view ConstantCode() const;
 
   bool HasSubCheck() const { return event->has_sub_check(); }
   bool HasSubCheckFunction() const;
@@ -106,7 +107,7 @@ struct EventDescriptor {
   bool HasSuperCheckExpression() const;
   bool HasInsteadCode() const { return event->has_instead(); }
 
-  std::string InsteadCode() const;
+  std::string_view InsteadCode() const;
 
   bool HasIteratorDeclareCode()    const { return event->has_iterator_declare(); }
   bool HasIteratorInitializeCode() const { return event->has_iterator_initialize(); }
@@ -120,10 +121,10 @@ struct EventDescriptor {
         || HasDispatcher();
   }
 
-  std::string IteratorDeclareCode() const;
-  std::string IteratorInitializeCode() const;
-  std::string IteratorRemoveCode() const;
-  std::string IteratorDeleteCode() const;
+  std::string_view IteratorDeclareCode() const;
+  std::string_view IteratorInitializeCode() const;
+  std::string_view IteratorRemoveCode() const;
+  std::string_view IteratorDeleteCode() const;
 
   // Returns whether this event will be included in the main event loop.
   // This will be true for all events not marked as triggered manually.
@@ -143,8 +144,8 @@ struct Event : EventDescriptor {
 
     // TODO: Delete these... use {.name = name, .spelling = spelling}
     Argument() = default;
-    Argument(std::string name_, std::string spelling_):
-        name(std::move(name_)), spelling(std::move(spelling_)) {}
+    Argument(std::string_view name_, std::string_view spelling_):
+        name(name_), spelling(spelling_) {}
   };
   // Any arguments to this event, using EGM spelling.
   boost::container::small_vector<Argument, 4> arguments;
@@ -186,16 +187,16 @@ struct Event : EventDescriptor {
 
  private:
   // Replaces %1 with the EDL spelling of parameter 1, %2 with parameter 2, etc.
-  std::string ParamSubst(const std::string &str) const {
-    return ParamSubstImpl(str, true);
+  std::string ParamSubst(std::string_view str) const {
+    return ParamSubstImpl(std::string(str), true);
   }
   // Replaces %1 with the human-readable parameter 1, %2 with parameter 2, etc.
-  std::string NameSubst(const std::string &str) const {
-    return ParamSubstImpl(str, false);
+  std::string NameSubst(std::string_view str) const {
+    return ParamSubstImpl(std::string(str), false);
   }
   // Kernel for the above two routines. When "code" is set to true, uses the EDL
   // spelling. When false, uses the human name.
-  std::string ParamSubstImpl(const std::string &str, bool code) const;
+  std::string ParamSubstImpl(std::string_view str, bool code) const;
 };
 
 struct EventGroupKey : Event {
@@ -206,12 +207,23 @@ struct EventGroupKey : Event {
   }
 };
 
+class heterogenous_pair_less {
+ public:
+  using is_transparent = void;
+  template<class A, class B, class C, class D>
+  bool operator()(const std::pair<A, B> &a, const std::pair<C, D> &b) const {
+    if (a.first < b.first) return true;
+    if (b.first < a.first) return false;
+    return a.second < b.second;
+  }
+};
+
 class EventData {
  public:
   // Look up an event by its legacy ID pair.
   const Event get_event(int mid, int sid) const;
   // Retrieves an Event with the given ID and arguments.
-  Event get_event(const std::string &id, const std::vector<std::string> &args) const;
+  Event get_event(std::string_view id, const std::vector<std::string> &args) const;
   // Retrieves an Event from the proto representation.
   Event get_event(const buffers::resources::Object::EgmEvent &event) const;
   // Look up a legacy ID pair for a non-parameterized event.
@@ -223,10 +235,10 @@ class EventData {
   // Get all named values for an event parameter type, by the type's name.
   // For example, returns all named keys when passed "key".
   const std::map<std::string, const buffers::config::ParameterAlias*>
-      &value_names_for_type(const std::string &type) const;
+      &value_names_for_type(std::string_view type) const;
 
   // Decodes an Event ID string, such as Keyboard[Left], into an Event object.
-  Event DecodeEventString(const std::string &evstring) const;
+  Event DecodeEventString(std::string_view evstring) const;
 
   EventData(buffers::config::EventFile&&);
 
@@ -236,20 +248,22 @@ class EventData {
   // Map of type and constant name pair (eg, {"key", "enter"}) to alias info.
   // Note that "key" is not a generalization, here; it means keyboard key.
   std::map<std::pair<std::string, std::string>,
-           const buffers::config::ParameterAlias*> parameter_ids_;
+           const buffers::config::ParameterAlias*,
+           heterogenous_pair_less> parameter_ids_;
   // Map of type and constant value pair (eg, {"key", 10}) to alias info.
   // Note that "key" is not a generalization, here; it means keyboard key.
   std::map<std::pair<std::string, int>,
-           const buffers::config::ParameterAlias*> parameter_vals_;
+           const buffers::config::ParameterAlias*,
+           heterogenous_pair_less> parameter_vals_;
   // Wraps the `EventDescriptor`s read in from the events file.
   std::vector<EventDescriptor> event_wrappers_;
   // Index over event ID strings.
-  std::map<std::string, const EventDescriptor*> event_index_;
+  std::map<std::string, const EventDescriptor*, std::less<void>> event_index_;
   // Index over event Internal IDs.
   std::map<int, const EventDescriptor*> event_iid_index_;
   std::map<std::string,
-          std::map<std::string, const buffers::config::ParameterAlias*>>
-      parameter_index_;
+           std::map<std::string, const buffers::config::ParameterAlias*>,
+           std::less<void>> parameter_index_;
 
   // Legacy shit.
 
@@ -269,7 +283,7 @@ buffers::config::EventFile ParseEventFile(std::istream &file);
 
 // Reads the given file in as an EventFile proto.
 // This is just a convenience method around ReadYamlFileAs<EventFile>().
-buffers::config::EventFile ParseEventFile(const std::string &filename);
+buffers::config::EventFile ParseEventFile(std::string_view filename);
 
 void LegacyEventsToEGM(buffers::Project *project, const EventData* evdata);
 void LegacyEventsToEGM(buffers::resources::Object *obj, const EventData* evdata,

@@ -31,8 +31,9 @@ class CompilerServiceImpl final : public Compiler::Service {
 
   Status CompileBuffer(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
     // use lambda capture to contain compile logic
+    const std::string request_name{request->name()};
     auto fnc = [&] {
-      plugin.BuildGame(request->game(), emode_run, request->name().c_str());
+      plugin.BuildGame(request->game(), emode_run, request_name.c_str());
     };
     // asynchronously launch the compile request
     std::future<void> future = std::async(fnc);
@@ -172,7 +173,8 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SetDefinitions(ServerContext* /*context*/, const SetDefinitionsRequest* request, SyntaxError* reply) override {
-    syntax_error* err = plugin.SetDefinitions(request->code().c_str(), request->yaml().c_str());
+    // TODO: Don't copy. But ENIGMA plugin is a C API (DLL) right now, so little choice. Need a C++ interface.
+    syntax_error* err = plugin.SetDefinitions(std::string{request->code()}.c_str(), std::string{request->yaml()}.c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
@@ -187,7 +189,8 @@ class CompilerServiceImpl final : public Compiler::Service {
     std::vector<const char*> script_names;
     script_names.reserve(request->script_names().size());
     for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
-    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());
+    std::string code_copy{request->code()}; // TODO: Don't copy
+    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), code_copy.c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }

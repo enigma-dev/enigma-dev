@@ -232,7 +232,7 @@ void EGMFileFormat::RecursivePackBuffer(google::protobuf::Message *m, int id,
     if (oneof && refl->HasOneof(*m, oneof)) continue;
     const google::protobuf::FieldOptions opts = field->options();
 
-    std::string key = field->name();
+    std::string key{field->name()};
 
     if (ext == ".rm" && depth == 0) {
       if (key == "instances") key = "instance-layers";

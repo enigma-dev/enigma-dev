@@ -39,9 +39,10 @@ Proto ReadYamlAs(std::istream &file) {
 
 template<typename Proto, typename std::enable_if<
     std::is_base_of<google::protobuf::Message, Proto>::value, int>::type = 0>
-Proto ReadYamlFileAs(const std::string &file) {
+Proto ReadYamlFileAs(std::string_view file) {
   Proto result;
-  DecodeYaml(YAML::LoadFile(file), &result);
+  std::string file_copy{file}; // TODO: Remove when YAML API is modernized
+  DecodeYaml(YAML::LoadFile(file_copy), &result);
   return result;
 }
 

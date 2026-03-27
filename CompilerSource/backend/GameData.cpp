@@ -14,6 +14,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <string_view>
 
 #include <zlib.h>
 
@@ -41,7 +42,7 @@ static unsigned char* zlib_compress(unsigned char* inbuffer, int &actualsize)
 }
 
 BinaryData loadBinaryData(const std::string &filePath, int &errorc) {
-  FILE *afile = fopen(filePath.c_str(),"rb");
+  FILE *afile = fopen(filePath.c_str(),"rb");  // TODO: Recode this to use C++ streams...
   if (!afile) {
     errorc = -1;
     return BinaryData();
@@ -57,6 +58,9 @@ BinaryData loadBinaryData(const std::string &filePath, int &errorc) {
 
   errorc = 0;
   return BinaryData(fdata, fdata + flen);
+}
+BinaryData loadBinaryData(std::string_view filePath, int &errorc) {
+  return loadBinaryData(std::string(filePath), errorc);
 }
 
 ImageData loadImageData(const std::string &filePath, int &errorc) {
@@ -89,6 +93,9 @@ ImageData loadImageData(const std::string &filePath, int &errorc) {
   errorc = 0;
   return ImageData(pngwidth, pngheight, data, dataSize);;
 }
+ImageData loadImageData(std::string_view filePath, int &errorc) {
+  return loadImageData(std::string(filePath), errorc);
+}
 
 struct ESLookup {
   struct Lookup {
@@ -115,7 +122,7 @@ struct ESLookup {
     object(es->gmObjects, es->gmObjectCount, "object") {}
 };
 
-SpriteData::SpriteData(const buffers::resources::Sprite &q, const std::string& name, const std::vector<ImageData>& subimages):
+SpriteData::SpriteData(const buffers::resources::Sprite &q, std::string_view name, const std::vector<ImageData>& subimages):
   BaseProtoWrapper(q), name(name), image_data(subimages) {}
 SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
   name(sprite.name) {
@@ -142,7 +149,7 @@ SpriteData::SpriteData(const deprecated::JavaStruct::Sprite &sprite):
     image_data.emplace_back(sprite.subImages[i].image);
 }
 
-SoundData::SoundData(const buffers::resources::Sound &q, const std::string& name, const BinaryData& data):
+SoundData::SoundData(const buffers::resources::Sound &q, std::string_view name, const BinaryData& data):
   BaseProtoWrapper(q), name(name), audio(data) {}
 SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   name(sound.name),
@@ -163,7 +170,7 @@ SoundData::SoundData(const deprecated::JavaStruct::Sound &sound):
   data.set_preload(sound.preload);
 }
 
-BackgroundData::BackgroundData(const buffers::resources::Background &q, const std::string& name, const ImageData& image):
+BackgroundData::BackgroundData(const buffers::resources::Background &q, std::string_view name, const ImageData& image):
   BaseProtoWrapper(q), name(name), image_data(image) {}
 BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &background):
   name(background.name),
@@ -184,7 +191,7 @@ BackgroundData::BackgroundData(const deprecated::JavaStruct::Background &backgro
   data.set_vertical_spacing(background.vSep);
 }
 
-FontData::FontData(const buffers::resources::Font &q, const std::string& name):
+FontData::FontData(const buffers::resources::Font &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 FontData::FontData(const deprecated::JavaStruct::Font &font):
   name(font.name) {
@@ -222,7 +229,7 @@ FontData::GlyphData::GlyphData(const deprecated::JavaStruct::Glyph &glyph):
   metrics.set_height(glyph.height);
 }
 
-PathData::PathData(const buffers::resources::Path &q, const std::string& name):
+PathData::PathData(const buffers::resources::Path &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 PathData::PathData(const deprecated::JavaStruct::Path &path):
   name(path.name) {
@@ -245,14 +252,14 @@ PathData::PathData(const deprecated::JavaStruct::Path &path):
 }
 
 // TODO(Nabeel) : Add when you Add PROTO
-// PolygonData::PolygonData(const buffers::resources::Polygon &q, const std::string& name):
+// PolygonData::PolygonData(const buffers::resources::Polygon &q, std::string_view name):
 //   BaseProtoWrapper(q), name(name) {}
 // PolygonData::PolygonData(const deprecated::JavaStruct::Polygon &polygon):
 //   name(polygon.name) {
 //     data.set_id(polygon.id);
 //   }
 
-ScriptData::ScriptData(const buffers::resources::Script &q, const std::string& name):
+ScriptData::ScriptData(const buffers::resources::Script &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   name(script.name) {
@@ -260,7 +267,7 @@ ScriptData::ScriptData(const deprecated::JavaStruct::Script &script):
   data.set_code(script.code);
 }
 
-ShaderData::ShaderData(const buffers::resources::Shader &q, const std::string& name):
+ShaderData::ShaderData(const buffers::resources::Shader &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
   name(shader.name) {
@@ -273,7 +280,7 @@ ShaderData::ShaderData(const deprecated::JavaStruct::Shader &shader):
 
 }
 
-TimelineData::TimelineData(const buffers::resources::Timeline &q, const std::string& name):
+TimelineData::TimelineData(const buffers::resources::Timeline &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   name(timeline.name) {
@@ -286,7 +293,7 @@ TimelineData::TimelineData(const deprecated::JavaStruct::Timeline &timeline):
   }
 }
 
-ObjectData::ObjectData(const buffers::resources::Object &q, const std::string& name):
+ObjectData::ObjectData(const buffers::resources::Object &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup):
   name(object.name) {
@@ -316,7 +323,7 @@ ObjectData::ObjectData(const deprecated::JavaStruct::GmObject &object, const ESL
   }
 }
 
-RoomData::RoomData(const buffers::resources::Room &q, const std::string& name):
+RoomData::RoomData(const buffers::resources::Room &q, std::string_view name):
   BaseProtoWrapper(q), name(name) {}
 RoomData::RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup):
   name(room.name) {

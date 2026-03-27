@@ -44,7 +44,7 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
-static string esc(const string &str) {
+static string esc(std::string_view str) {
   string res;
   res.reserve(str.length());
   for (size_t i = 0; i < str.length(); ++i) {

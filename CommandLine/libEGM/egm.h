@@ -53,7 +53,7 @@ class EGMFileFormat : public FileFormat {
   virtual bool PackResource(const fs::path& fPath, google::protobuf::Message *m) const override;
 
   // Writing ===================================================================
-  bool WriteNode(buffers::TreeNode* folder, std::string dir,
+  bool WriteNode(buffers::TreeNode* folder, fs::path dir,
                  const fs::path &egm_root, YAML::Emitter& tree) const;
   bool WriteRes(buffers::TreeNode* res, const fs::path &dir,
                 const fs::path &egm_root) const;

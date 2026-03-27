@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>     // std::string, std::to_string (C++11)
+#include <sstream>
 #include "backend/ideprint.h"
 
 using namespace std;
@@ -64,7 +65,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
   scripts.resize(game.scripts.size());
   for (size_t i = 0; i < game.scripts.size(); i++) {
     std::string newcode;
-    int a = syncheck::syntaxcheck(game.scripts[i]->code(), newcode);
+    int a = syncheck::syntaxcheck(std::string{game.scripts[i]->code()}, newcode);
     if (a != -1) {
       user << "Syntax error in script `" << game.scripts[i].name << "'\n"
            << format_error(game.scripts[i]->code(), syncheck::syerr, a) << flushl;
@@ -268,7 +269,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         ParsedEvent &pev = pob->all_events.emplace_back(evdata_.get_event(event), pob);
 
         //Copy the code into a string, and its attributes elsewhere
-        string newcode = event.code();
+        string newcode{event.code()};
 
         //Syntax check the code
 
@@ -276,7 +277,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
         edbg << "Check `" << object.name << "::" << pev.ev_id.TrueFunctionName() << "...";
 
         // Check the code
-        int sc = syncheck::syntaxcheck(event.code(), newcode);
+        int sc = syncheck::syntaxcheck(std::string{event.code()}, newcode);
         if (sc != -1) {
           // Error. Report it.
           user << "Syntax error in object `" << object.name << "', "
@@ -308,7 +309,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     pr->creation_code = new ParsedCode(&pr->pseudo_scope);
 
     std::string newcode;
-    int sc = syncheck::syntaxcheck(room->creation_code(), newcode);
+    int sc = syncheck::syntaxcheck(std::string{room->creation_code()}, newcode);
     if (sc != -1) {
       user << "Syntax error in room creation code for room " << room.id()
            << " (`" << room.name << "'):\n"
@@ -321,7 +322,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     for (const auto &instance : room->instances()) {
       if (!instance.creation_code().empty()) {
         newcode = "";
-        int a = syncheck::syntaxcheck(instance.creation_code(), newcode);
+        int a = syncheck::syntaxcheck(std::string{instance.creation_code()}, newcode);
         if (a != -1) {
           user << "Syntax error in instance creation code for instance "
                << instance.id() << " in room " << room.id() << " (`" << room.name << "'):\n"
@@ -341,7 +342,7 @@ int lang_CPP::compile_parseAndLink(const GameData &game, CompileState &state) {
     for (const auto &instance : room->instances()) {
       if (!instance.initialization_code().empty()) {
         std::string newcode;
-        int a = syncheck::syntaxcheck(instance.initialization_code(), newcode);
+        int a = syncheck::syntaxcheck(std::string{instance.initialization_code()}, newcode);
         if (a != -1) {
           cout << "Syntax error in instance initialization code for instance "
                << instance.id() <<" in room " << room.id() << " (`" << room.name

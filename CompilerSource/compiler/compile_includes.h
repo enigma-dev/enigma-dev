@@ -24,11 +24,12 @@
 #ifndef ENIGMA_COMPILE_INCLUDES_H
 #define ENIGMA_COMPILE_INCLUDES_H
 
+#include <string_view>
 #include <JDI/src/Storage/definition.h>
 
 extern string tostring(int val);
 
-inline string format_error(string code,string err,int pos)
+inline string format_error(std::string_view code,string err,int pos)
 {
   if (pos == -1)
     return err;

@@ -44,7 +44,7 @@ constexpr int kParameterizedSubId = -1;
 
 // Checks if the given string is an "Expression," which is defined, for the
 // purpose of the events file, as anything not starting with a brace.
-static bool IsExpression(const std::string &str) {
+static bool IsExpression(std::string_view str) {
   return !str.empty() && str[0] != '{';
 }
 
@@ -84,7 +84,7 @@ EventFile ParseEventFile(std::istream &file) {
   legacy_events = new EventData(EventFile(res));
   return res;
 }
-EventFile ParseEventFile(const std::string &filename) {
+EventFile ParseEventFile(std::string_view filename) {
   EventFile res =  egm::ReadYamlFileAs<EventFile>(filename);
   delete legacy_events;
   legacy_events = new EventData(EventFile(res));
@@ -101,7 +101,7 @@ void event_parse_resourcefile() {
 // -----------------------------------------------------------------------------
 // Begin class method implementations ------------------------------------------
 
-Event EventData::DecodeEventString(const std::string &evstring) const {
+Event EventData::DecodeEventString(std::string_view evstring) const {
   std::string id;
   std::vector<std::string> args;
   size_t at = 0, lbracket;
@@ -109,7 +109,7 @@ Event EventData::DecodeEventString(const std::string &evstring) const {
     id += evstring.substr(at, lbracket - at);
     size_t rbracket = evstring.find_first_of(']', ++lbracket);
     if (rbracket != std::string::npos) {
-      args.push_back(evstring.substr(lbracket, rbracket - lbracket));
+      args.emplace_back(evstring.substr(lbracket, rbracket - lbracket));
       at = rbracket + 1;
     } else {
       at = evstring.length();
@@ -120,9 +120,9 @@ Event EventData::DecodeEventString(const std::string &evstring) const {
   return get_event(id, args);
 }
 
-Event EventData::get_event(const std::string &id,
+Event EventData::get_event(std::string_view id,
                            const std::vector<std::string> &args) const {
-  auto evi = event_index_.find(ToLower(id));
+  auto evi = event_index_.find(ToLower(std::string(id)));
   if (evi == event_index_.end() || !evi->second) {
     std::cerr << "EVENT ERROR: Event `" << id << "` is not known to the system\n";
     return Event(kSentinelEvent);
@@ -139,8 +139,8 @@ Event EventData::get_event(const std::string &id,
   std::string defv = "0";
   for (size_t argn = 0; argn < correct_arg_count; ++argn) {
     const std::string &arg = argn < correct_arg_count ? args[argn] : defv;
-    const std::string &arg_kind = base_event.event->parameters(argn);
-    auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+    std::string_view arg_kind = base_event.event->parameters(argn);
+    auto pv = parameter_ids_.find(std::make_pair(arg_kind, ToLower(arg)));
     if (pv == parameter_ids_.end()) {
       // Assume that spelling == name (this is the case for resource names/ints)
       res.arguments.emplace_back(arg, arg);
@@ -152,18 +152,18 @@ Event EventData::get_event(const std::string &id,
 }
 
 const std::map<std::string, const cb::ParameterAlias*>
-    &EventData::value_names_for_type(const std::string &type) const {
+    &EventData::value_names_for_type(std::string_view type) const {
   static const std::map<std::string, const cb::ParameterAlias*> kUnknown;
   auto res_it = parameter_index_.find(type);
   if (res_it != parameter_index_.end()) return res_it->second;
   return kUnknown;
 }
 
-std::string Event::ParamSubstImpl(const std::string &str, bool code) const {
+std::string Event::ParamSubstImpl(std::string_view str, bool code) const {
   std::string res;
   size_t start = 0;
   size_t pc = str.find_first_of('%');
-  if (pc == std::string::npos) return str;
+  if (pc == std::string::npos) return res = str;
   while (pc != std::string::npos) {
     if (++pc < str.length() && str[pc] >= '1' && str[pc] <= '9' &&
         str[pc] <= '0' + (int) arguments.size()) {
@@ -183,9 +183,10 @@ std::string Event::ParamSubstImpl(const std::string &str, bool code) const {
 EventData::EventData(EventFile &&events): event_file_(std::move(events)) {
   for (const auto &aliases : event_file_.aliases()) {
     for (const buffers::config::ParameterAlias &alias : aliases.aliases()) {
-      parameter_ids_.insert({{aliases.id(), ToLower(alias.id())}, &alias});
-      parameter_vals_.insert({{aliases.id(), alias.value()}, &alias});
-      parameter_index_[aliases.id()].insert({ToLower(alias.id()), &alias});
+      std::string alias_id{aliases.id()}, lower_id = ToLower(alias.id());
+      parameter_ids_.insert({{alias_id, lower_id}, &alias});
+      parameter_vals_.insert({{alias_id, alias.value()}, &alias});
+      parameter_index_[alias_id].insert({lower_id, &alias});
     }
   }
   // Start numbering internal IDs in the new system from 1000, for good measure.
@@ -268,8 +269,8 @@ const Event EventData::get_event(int mid, int sid) const {
 
   Event res = it->second;
   std::string value, spelling;
-  const std::string &kind = res.ParameterKind(0);
-  auto pit = parameter_vals_.find({kind, sid});
+  std::string_view kind = res.ParameterKind(0);
+  auto pit = parameter_vals_.find(std::make_pair(kind, sid));
   if (pit != parameter_vals_.end()) {
     value = pit->second->id();
     spelling = pit->second->spelling();
@@ -301,29 +302,22 @@ bool EventDescriptor::IsStacked() const {
 
 std::string EventDescriptor::ExampleIDStrings() const {
   Event example(*this);
-  for (const std::string &p : event->parameters()) {
+  for (std::string_view p : event->parameters()) {
     example.arguments.push_back({p, p});
   }
   return example.IdString();
 }
 
-std::string EventDescriptor::HumanName() const {
-  return event->name();
-}
 std::string Event::HumanName() const {
   return NameSubst(event->name());
 }
 std::string EventDescriptor::BaseFunctionName() const {
   return ToLower(StripChar(event->id(), '.'));
 }
-std::string EventDescriptor::LocalDeclarations() const {
-  return event->locals();
-}
-
-std::string EventDescriptor::DefaultCode() const {
+std::string_view EventDescriptor::DefaultCode() const {
   return event->has_default_() ? event->default_() : event->constant();
 }
-std::string EventDescriptor::ConstantCode() const {
+std::string_view EventDescriptor::ConstantCode() const {
   return event->constant();
 }
 std::string Event::DispatcherCode(std::string_view funcname) const {
@@ -344,21 +338,21 @@ bool EventDescriptor::HasSuperCheckExpression() const {
   return HasSuperCheck() && IsExpression(event->super_check());
 }
 
-std::string EventDescriptor::InsteadCode() const {
+std::string_view EventDescriptor::InsteadCode() const {
   return event->instead();
 }
 
 
-std::string EventDescriptor::IteratorDeclareCode() const {
+std::string_view EventDescriptor::IteratorDeclareCode() const {
   return event->iterator_declare();
 }
-std::string EventDescriptor::IteratorInitializeCode() const {
+std::string_view EventDescriptor::IteratorInitializeCode() const {
   return event->iterator_initialize();
 }
-std::string EventDescriptor::IteratorRemoveCode() const {
+std::string_view EventDescriptor::IteratorRemoveCode() const {
   return event->iterator_remove();
 }
-std::string EventDescriptor::IteratorDeleteCode() const {
+std::string_view EventDescriptor::IteratorDeleteCode() const {
   return event->iterator_delete();
 }
 
@@ -390,7 +384,7 @@ std::string Event::SuperCheckExpression() const {
 
 std::string Event::TrueFunctionName() const {
   std::string res;
-  std::string ntempl = event->id();
+  std::string_view ntempl = event->id();
   size_t arg = 0, at = 0, dot;
   while (arg < arguments.size() &&
          (dot = ntempl.find_first_of('.', at)) != std::string::npos) {
@@ -406,7 +400,7 @@ std::string Event::TrueFunctionName() const {
 }
 std::string Event::IdString() const {
   std::string res;
-  std::string ntempl = event->id();
+  std::string ntempl{event->id()};
   size_t arg = 0, at = 0, dot;
   while (arg < arguments.size() &&
          (dot = ntempl.find_first_of('.', at)) != std::string::npos) {
@@ -503,8 +497,8 @@ LegacyEventPair EventData::reverse_get_event(const Event &ev) const {
               << " (" << ev.HumanName() << ") missing from subevent map\n";
   }
   const std::string &arg = ev.arguments[0].name;
-  const std::string &arg_kind = ev.event->parameters(0);
-  auto pv = parameter_ids_.find({arg_kind, ToLower(arg)});
+  std::string_view arg_kind = ev.event->parameters(0);
+  auto pv = parameter_ids_.find(std::make_pair(arg_kind, ToLower(arg)));
   if (pv != parameter_ids_.end()) {
     return LegacyEventPair{amap.main_id, pv->second->value()};
   }

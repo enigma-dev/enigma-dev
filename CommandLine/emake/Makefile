@@ -2,6 +2,7 @@ include ../../Config.mk
 
 SHARED_SRC_DIR := ../../shared
 
+# PROTO_DIR should use the shared/protos OBJ_DIR, which is .eobjs (protos don't use ASAN-specific dirs)
 PROTO_DIR := $(SHARED_SRC_DIR)/protos/.eobjs
 
 ifeq ($(OS), Darwin)
@@ -28,4 +29,30 @@ else
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 endif
 
+ifeq ($(OS),Darwin)
+  # List the dynamic libraries that need their paths fixed
+  DYLIBS_TO_FIX = \
+    ../libcompileEGMf.dylib \
+    ../../libEGM.dylib \
+    ../libENIGMAShared.dylib \
+    ../../libProtocols.dylib
+
+  # Build the command string, using foreach to loop through the list
+  # Note: The backslashes (\) and semicolon (;) are needed to make this one single shell command.
+  DYLIB_FIX_COMMANDS = $(foreach lib,$(DYLIBS_TO_FIX),\
+    install_name_tool -change "$(lib)" "@executable_path/$(notdir $(lib))" $@ \
+    || ( rm -f $@ && false ) ; \
+  )
+
+  # (Optional) Add a message for clarity during the build process
+  DYLIB_FIX_COMMANDS += echo "Successfully fixed dylib paths for $@"
+endif
+
 include ../../Default.mk
+
+# Clean object files from emake-tests directory when cleaning tests
+ifeq ($(TESTS), TRUE)
+clean: .FORCE
+	rm -rf $(TARGET) $(OBJ_DIR) .eobjs-asan
+	find ../emake-tests -name "*.o" -type f -delete 2>/dev/null || true
+endif

@@ -66,11 +66,11 @@ struct FieldCache {
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
       fields[Spaceify(fd->name())] = fd;
       fields[Hyphenate(fd->name())] = fd;
-      fields[fd->camelcase_name()] = fd;
+      fields[string(fd->camelcase_name())] = fd;
       fields[Capitalize(fd->camelcase_name())] = fd;
     }
     for (int i = 0; i < desc->field_count() && (fd = desc->field(i)); ++i) {
-      fields[fd->name()] = fd;
+      fields[string(fd->name())] = fd;
     }
   }
 };
@@ -113,7 +113,7 @@ struct ConstantCache {
       values[std::to_string(vd->number())] = vd;
     }
     for (int i = 0; i < desc->value_count() && (vd = desc->value(i)); ++i) {
-      values[vd->name()] = vd;
+      values[std::string(vd->name())] = vd;
     }
   }
 };
