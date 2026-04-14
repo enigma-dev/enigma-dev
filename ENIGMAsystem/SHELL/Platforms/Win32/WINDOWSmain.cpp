@@ -31,6 +31,7 @@
 #include "Universal_System/var4.h"
 
 #include <mmsystem.h>
+#include <cstring>
 #include <thread>
 #include <algorithm>
 #include <filesystem>
