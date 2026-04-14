@@ -36,7 +36,7 @@ namespace enigma {
     enigma_user::program_directory = enigma_user::filename_path(get_executable_path());
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
-      string(".config/") + add_slash(std::to_string(enigma_user::game_id));
+      string(".config/") + add_slash(enigma_user::filename_name(get_executable_path()));
     std::filesystem::create_directories(enigma_user::game_save_id, ec);
   }
 } // namespace enigma
