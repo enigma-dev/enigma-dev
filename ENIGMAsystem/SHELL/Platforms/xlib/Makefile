@@ -2,17 +2,14 @@ include Platforms/General/Makefile
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	SOURCES += Platforms/General/PFprogdir.cpp
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/Linux/
 	override CFLAGS += -IPlatforms/xlib/Linux/
 else ifeq ($(OS), FreeBSD)
-	SOURCES += Platforms/General/PFprogdir.cpp
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/
 	override CFLAGS += -IPlatforms/xlib/BSD/
 else ifeq ($(OS), DragonFly)
-	SOURCES += Platforms/General/PFprogdir.cpp
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/
 	override CFLAGS += -IPlatforms/xlib/BSD/

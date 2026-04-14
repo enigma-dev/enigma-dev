@@ -46,4 +46,3 @@ else
 		SOURCES += Platforms/SDL/xlib/Window.cpp
 	endif
 endif
-SOURCES += Platforms/General/PFprogdir.cpp
