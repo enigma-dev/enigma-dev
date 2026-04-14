@@ -22,7 +22,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
-
+#include "Platforms/General/PFprogdir.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp

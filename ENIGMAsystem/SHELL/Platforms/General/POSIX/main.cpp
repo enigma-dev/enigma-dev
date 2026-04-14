@@ -1,6 +1,6 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/POSIX/POSIXprogdir.h"
+#include "Platforms/General/PFprogdir.h"
 #include "Universal_System/estring.h"
 
 #include <unistd.h>
