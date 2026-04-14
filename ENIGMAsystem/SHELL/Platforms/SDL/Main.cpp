@@ -34,7 +34,7 @@ namespace enigma {
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     #if defined(_WIN32)
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-      add_slash(enigma_user::filename_name(get_executable_path()));
+      add_slash(enigma_user::filename_name(enigma_user::filename_change_ext(get_executable_path(), "")));
     #else
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
       string(".config/") + add_slash(enigma_user::filename_name(get_executable_path()));
