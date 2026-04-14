@@ -6,7 +6,8 @@ endif
 
 SOURCES += $(wildcard Platforms/SDL/*.cpp) Platforms/General/POSIX/Utility.cpp
 
-override CXXFLAGS += -DENIGMA_PLATFORM_SDL
+override CXXFLAGS += -DENIGMA_PLATFORM_SDL -std=c++17
+override CFLAGS += -DENIGMA_PLATFORM_SDL -std=c++17
 
 ifneq ($(TARGET-PLATFORM), Android)
 	override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2)
@@ -45,3 +46,4 @@ else
 		SOURCES += Platforms/SDL/xlib/Window.cpp
 	endif
 endif
+SOURCES += Platforms/General/PFprogdir.cpp

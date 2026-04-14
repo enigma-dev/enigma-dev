@@ -4,4 +4,5 @@ ifeq ($(TARGET-PLATFORM), Android)
 else
   override CXXFLAGS += -IPlatforms/General/fileio
   SOURCES += Platforms/General/fileio/fileio.cpp
-endif 
+endif
+SOURCES += Platforms/General/exe/exe.cpp

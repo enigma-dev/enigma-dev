@@ -22,6 +22,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
+
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
@@ -32,6 +33,7 @@
 #include <mmsystem.h>
 #include <thread>
 #include <algorithm>
+#include <filesystem>
 #include <cstdio>
 #include <sstream>
 #include <string>
@@ -59,7 +61,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
-void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exenamehere, 1024); }
+void windowsystem_write_exename(char *exenamehere) {
+  std::string exe = get_executable_path();
+  strncpy(exenamehere, exe.c_str(), exe.length() + 1);
+  exenamehere[exe.length() + 1] = '\0';
+}
 
 void Sleep(int ms) { ::Sleep(ms); }
 
@@ -68,27 +74,23 @@ void initInput(){};
 } // namespace enigma
 
 static inline string add_slash(const string& dir) {
-  if (dir.empty() || dir.back() != '\\') return dir + '\\';
+  if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
   return dir;
 }
 
 namespace enigma_user {
 
 bool set_working_directory(string dname) {
-  tstring tstr_dname = widen(dname);
-  replace(tstr_dname.begin(), tstr_dname.end(), '/', '\\');
-  if (SetCurrentDirectoryW(tstr_dname.c_str()) != 0) {
-    WCHAR wstr_buffer[MAX_PATH];
-    if (GetCurrentDirectoryW(MAX_PATH, wstr_buffer) != 0) {
-      working_directory = add_slash(shorten(wstr_buffer));
-      return true;
-    }
+  std::error_code ec;
+  std::filesystem::current_path(dname, ec);
+  if (ec.value() == 0) {
+    working_direcory = add_slash(std::filesystem::current_path(ec).u8string());
+    return (ec.value() == 0);
   }
-
   return false;
 }
 
-} // enigma_user
+} // namespace enigma_user
 
 namespace enigma {
 
@@ -173,29 +175,19 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
+namespace enigma {
+
 void initialize_directory_globals() {
-  // Set the working_directory
-  WCHAR buffer[MAX_PATH];
-  GetCurrentDirectoryW(MAX_PATH, buffer);
-  enigma_user::working_directory = add_slash(shorten(buffer));
-
-  // Set the program_directory
-  buffer[0] = 0;
-  GetModuleFileNameW(NULL, buffer, MAX_PATH);
-  enigma_user::program_directory = shorten(buffer);
-  enigma_user::program_directory = enigma_user::filename_path(enigma_user::program_directory);
-
-  // Set the temp_directory
-  buffer[0] = 0;
-  GetTempPathW(MAX_PATH, buffer);
-  enigma_user::temp_directory = add_slash(shorten(buffer));
-  
-  // Set the game_save_id
+  std::error_code ec;
+  enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
+  enigma_user::program_directory = enigma_user::filename_path(get_executable_path());
+  enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
     add_slash(std::to_string(enigma_user::game_id));
+  std::filesystem::create_directories(enigma_user::game_save_id, ec);
 }
 
-}  // namespace enigma
+} // namespace enigma
 
 namespace enigma_user {
 
