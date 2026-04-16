@@ -46,8 +46,8 @@ using enigma_user::file_exists;
 using enigma_user::directory_exists;
 
 namespace enigma_user {
-
 const int os_type = os_windows;
+extern int game_id;
 }  // namespace enigma_user
 
 namespace enigma
@@ -184,8 +184,7 @@ void initialize_directory_globals() {
   enigma_user::program_directory = enigma_user::filename_path(get_executable_path());
   enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-    add_slash(enigma_user::filename_name(enigma_user::filename_change_ext(get_executable_path(), "")));
-  std::filesystem::create_directories(enigma_user::game_save_id, ec);
+    add_slash(std::to_string(enigma_user::game_id));
 }
 
 } // namespace enigma
