@@ -62,11 +62,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 void (*touch_extension_register)(HWND hWnd);
 
-void windowsystem_write_exename(char *exenamehere) {
-  std::string exe = get_executable_path();
-  strncpy(exenamehere, exe.c_str(), exe.length() + 1);
-  exenamehere[exe.length() + 1] = '\0';
-}
+void windowsystem_write_exename(char *exenamehere) { GetModuleFileName(NULL, exenamehere, 1024); }
 
 void Sleep(int ms) { ::Sleep(ms); }
 
