@@ -5,6 +5,10 @@
 
 #include <filesystem>
 
+namespace enigma_user {
+  extern int game_id;
+} // namespace enigma_user
+
 static inline string add_slash(const string& dir) {
   #if defined(_WIN32)
   if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
@@ -34,12 +38,11 @@ namespace enigma {
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     #if defined(_WIN32)
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-      add_slash(enigma_user::filename_name(enigma_user::filename_change_ext(get_executable_path(), "")));
+      add_slash(std::to_string(enigma_user::game_id));
     #else
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
-      string(".config/") + add_slash(enigma_user::filename_name(get_executable_path()));
+      string(".config/") + add_slash(std::to_string(enigma_user::game_id));
     #endif
-    std::filesystem::create_directories(enigma_user::game_save_id, ec);
   }
 } // namespace enigma
 
