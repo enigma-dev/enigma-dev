@@ -12,10 +12,6 @@
 
 using std::string;
 
-namespace enigma_user {
-  extern int game_id;
-} // namespace enigma_user
-
 static inline string add_slash(const string& dir) {
   if (!dir.empty() && *dir.rbegin() != '/') return dir + '/';
   return dir;
