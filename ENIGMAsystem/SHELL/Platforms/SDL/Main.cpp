@@ -3,6 +3,10 @@
 #include "Platforms/General/PFprogdir.h"
 #include "Universal_System/estring.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
 
 #include <filesystem>
