@@ -80,7 +80,7 @@ bool set_working_directory(string dname) {
   std::error_code ec;
   std::filesystem::current_path(dname, ec);
   if (ec.value() == 0) {
-    working_direcory = add_slash(std::filesystem::current_path(ec).u8string());
+    working_directory = add_slash(std::filesystem::current_path(ec).u8string());
     return (ec.value() == 0);
   }
   return false;
