@@ -1,13 +1,10 @@
 #include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFfilemanip.h"
 #include "Platforms/General/PFprogdir.h"
 
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
 
 #include <filesystem>
-
-namespace enigma_user {
-  extern int game_id;
-} // namespace enigma_user
 
 static inline string add_slash(const string& dir) {
   #if defined(_WIN32)
