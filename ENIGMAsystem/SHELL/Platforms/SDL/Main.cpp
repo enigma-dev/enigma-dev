@@ -1,6 +1,7 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFfilemanip.h"
 #include "Platforms/General/PFprogdir.h"
+#include "Universal_System/estring.h"
 
 #include <SDL2/SDL.h> //sdl does a #define main SDL_main...
 
@@ -16,6 +17,25 @@ static inline std::string add_slash(const std::string& dir) {
 }
 
 namespace enigma_user {
+  // This function is defined elsewhere for POSIX on the SDL platform
+  #if defined(_WIN32)
+  std::string environment_get_variable(std::string name) {
+    std::string value; 
+    DWORD length = 0;
+    tstring u8name = widen(name);
+    if ((length = GetEnvironmentVariableW(u8name.c_str(), nullptr, 0)) != 0) {
+      wchar_t *buffer = new wchar_t[length]();
+      if (buffer) {
+        if (GetEnvironmentVariableW(u8name.c_str(), buffer, length) != 0) {
+          value = shorten(buffer);
+        }
+        delete[] buffer;
+      }
+    }
+    return value;
+  }
+  #endif
+
   bool set_working_directory(std::string dname) {
     std::error_code ec;
     std::filesystem::current_path(dname, ec);
