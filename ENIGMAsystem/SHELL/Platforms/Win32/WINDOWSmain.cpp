@@ -237,7 +237,7 @@ void set_program_priority(int value) {
 
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
-  if (enigma_user::string_replace_all(fname, " ", "") == "") fname = ".";
+  if (string_replace_all(fname, " ", "") == "") fname = ".";
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
   tstring result(rpath, GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL));
