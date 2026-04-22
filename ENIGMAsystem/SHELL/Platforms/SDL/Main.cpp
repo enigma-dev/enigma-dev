@@ -6,7 +6,7 @@
 
 #include <filesystem>
 
-static inline string add_slash(const string& dir) {
+static inline std::string add_slash(const std::string& dir) {
   #if defined(_WIN32)
   if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
   #else
@@ -16,7 +16,7 @@ static inline string add_slash(const string& dir) {
 }
 
 namespace enigma_user {
-  bool set_working_directory(string dname) {
+  bool set_working_directory(std::string dname) {
     std::error_code ec;
     std::filesystem::current_path(dname, ec);
     if (ec.value() == 0) {
@@ -38,7 +38,7 @@ namespace enigma {
       add_slash(std::to_string(enigma_user::game_id));
     #else
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
-      string(".config/") + add_slash(std::to_string(enigma_user::game_id));
+      std::string(".config/") + add_slash(std::to_string(enigma_user::game_id));
     #endif
   }
 } // namespace enigma
