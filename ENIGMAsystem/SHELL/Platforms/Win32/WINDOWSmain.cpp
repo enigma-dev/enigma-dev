@@ -171,8 +171,6 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
-namespace enigma {
-
 void initialize_directory_globals() {
   std::error_code ec;
   enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
@@ -239,7 +237,7 @@ void set_program_priority(int value) {
 
 // converts a relative path to absolute if the path exists
 std::string filename_absolute(std::string fname) {
-  if (string_replace_all(fname, " ", "") == "") fname = ".";
+  if (enigma_user::string_replace_all(fname, " ", "") == "") fname = ".";
   wchar_t rpath[MAX_PATH];
   tstring tstr_fname = widen(fname);
   tstring result(rpath, GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL));
