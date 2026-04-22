@@ -255,9 +255,17 @@ std::string get_executable_path() {
   }
   #elif defined(__sun)
   char exe[PATH_MAX];
+  const char *execname = getexecname();
+  if (execname) {
+    if (realpath(execname, exe)) {
+      path = exe;
+      goto finish;
+    }
+  }
   if (realpath("/proc/self/path/a.out", exe)) {
     path = exe;
   }
+  finish:
   #endif
   return path;
 }
