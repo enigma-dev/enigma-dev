@@ -22,9 +22,7 @@
 #include <cstdlib>
 #include <stringapiset.h>
 #include <libloaderapi.h>
-#if !defined(MAX_PATH) 
-#define MAX_PATH 260
-#endif
+#include <windef.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <climits>
 #include <cstdlib>
