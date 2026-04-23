@@ -90,9 +90,9 @@ std::string get_executable_path() {
   }
   #elif (defined(__APPLE__) && defined(__MACH__) && defined(TARGET_OS_OSX) && TARGET_OS_OSX)
   char exe[PATH_MAX];
-  char buffer[PATH_MAX];
   std::uint32_t size = sizeof(exe);
   if (!_NSGetExecutablePath(exe, &size)) {
+    char buffer[PATH_MAX];
     if (realpath(exe, buffer)) {
       path = buffer;
     }
@@ -100,6 +100,7 @@ std::string get_executable_path() {
   if (path.empty()) {
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(getpid(), exe, sizeof(exe)) > 0) {
+      char buffer[PATH_MAX];
       if (realpath(exe, buffer)) {
         path = buffer;
       }
