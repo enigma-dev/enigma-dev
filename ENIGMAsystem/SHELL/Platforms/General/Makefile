@@ -5,4 +5,4 @@ else
   override CXXFLAGS += -IPlatforms/General/fileio
   SOURCES += Platforms/General/fileio/fileio.cpp
 endif
-SOURCES += Platforms/General/exe/exe.cpp
+SOURCES += Platforms/General/exepath/exepath.cpp
