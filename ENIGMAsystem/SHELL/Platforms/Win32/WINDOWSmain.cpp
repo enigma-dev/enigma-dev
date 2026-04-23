@@ -174,7 +174,7 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 void initialize_directory_globals() {
   std::error_code ec;
   enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
-  enigma_user::program_directory = enigma_user::filename_path(get_executable_path());
+  enigma_user::program_directory = enigma_user::filename_path(exepath::get_executable_path());
   enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
     add_slash(std::to_string(enigma_user::game_id));
