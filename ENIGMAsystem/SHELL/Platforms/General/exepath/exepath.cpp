@@ -163,7 +163,7 @@ std::string get_executable_path() {
           fallback:
           char buffer[PATH_MAX];
           if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) &&
-            (st.st_mode & S_IFREG) && realpath(exe.c_str(), buffer) &&
+            S_ISREG(st.st_mode) && realpath(exe.c_str(), buffer) &&
             st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
             res = buffer;
           }
