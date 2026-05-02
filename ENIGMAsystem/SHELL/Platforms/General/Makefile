@@ -10,4 +10,3 @@ else
 	override CFLAGS += -IPlatforms/General/fileio
 	SOURCES += Platforms/General/fileio/fileio.cpp
 endif
-SOURCES += Platforms/General/exepath/exepath.cpp
