@@ -54,8 +54,9 @@ namespace enigma_user {
 namespace enigma {
   void initialize_directory_globals() {
     std::error_code ec;
+    const char *execname = __getexecname();
+    enigma_user::program_directory = enigma_user::filename_path(execname ? execname : "");
     enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
-    enigma_user::program_directory = enigma_user::filename_path(exepath::get_executable_path());
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     #if defined(_WIN32)
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 

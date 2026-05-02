@@ -14,6 +14,7 @@
 /libProtocols.*
 /app
 /runtime
+/openjre/
 /shared/protos/build/
 /shared/protos/codegen
 /CommandLine/libEGM/build/
