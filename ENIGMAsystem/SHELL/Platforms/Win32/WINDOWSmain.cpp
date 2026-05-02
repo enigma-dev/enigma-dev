@@ -177,8 +177,11 @@ void initialize_directory_globals() {
   enigma_user::program_directory = enigma_user::filename_path(execname ? execname : "");
   enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
   enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
+  std::string localappdata = enigma_user::environment_get_variable("LOCALAPPDATA");
+  while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) 
+  { localappdata.pop_back(); } std::filesystem::create_directories(localappdata, ec);
   enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-    add_slash(std::to_string(enigma_user::game_id));
+  add_slash(std::to_string(enigma_user::game_id));
 }
 
 } // namespace enigma
