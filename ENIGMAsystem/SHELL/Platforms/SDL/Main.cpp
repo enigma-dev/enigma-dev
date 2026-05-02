@@ -59,11 +59,15 @@ namespace enigma {
     enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     #if defined(_WIN32)
+    std::string localappdata = enigma_user::environment_get_variable("LOCALAPPDATA");
+    while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) 
+    { localappdata.pop_back(); } filesystem::create_directories(localappdata, ec);
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-      add_slash(std::to_string(enigma_user::game_id));
+    add_slash(std::to_string(enigma_user::game_id));
     #else
+    filesystem::create_directories(add_slash(enigma_user::environment_get_variable("HOME")) + std::string(".config"), ec);
     enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("HOME")) + 
-      std::string(".config/") + add_slash(std::to_string(enigma_user::game_id));
+    std::string(".config/") + add_slash(std::to_string(enigma_user::game_id));
     #endif
   }
 } // namespace enigma
