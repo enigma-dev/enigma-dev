@@ -85,7 +85,7 @@ const char *__getexecname(void) {
     HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, 
     FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 
     nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (hFile && hFile != INVALID_HANDLE_VALUE) {
+    if (hFile != INVALID_HANDLE_VALUE) {
       DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
       if (len) {
         if (wcslen(path) >= 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
