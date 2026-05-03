@@ -71,7 +71,7 @@ SOFTWARE.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <kvm.h>
-#elif defined(__sun)
+#elif (defined(__sun) && defined(__SVR4))
 #include <climits>
 #include <cstdlib>
 #endif
@@ -279,7 +279,7 @@ const char *__getexecname(void) {
       }
     }
   }
-  #elif defined(__sun)
+  #elif (defined(__sun) && defined(__SVR4))
   const char *execname = getexecname();
   if (execname) {
     char exe[PATH_MAX];
@@ -294,6 +294,6 @@ const char *__getexecname(void) {
     }
   }
   #endif
-  static std::string result = path;
+  static std::string result; result = path;
   return ((!result.empty()) ? result.c_str() : nullptr);
 }

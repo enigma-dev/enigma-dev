@@ -84,7 +84,7 @@ SOFTWARE.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <kvm.h>
-#elif defined(__sun)
+#elif (defined(__sun) && defined(__SVR4))
 #include <climits>
 #include <cstdlib>
 #include <libproc.h>
@@ -418,7 +418,7 @@ const char *__getexecname(int pid) {
       }
     }
   }
-  #elif defined(__sun)
+  #elif (defined(__sun) && defined(__SVR4))
   if (pid == -1 || pid == getpid()) {
     const char *execname = getexecname();
     if (execname) {
@@ -458,6 +458,6 @@ const char *__getexecname(int pid) {
     }
   }
   #endif
-  static std::string result = path;
+  static std::string result; result = path;
   return ((!result.empty()) ? result.c_str() : nullptr);
 }
