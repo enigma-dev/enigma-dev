@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include "external.h"
 #include <string>
-#if defined(_WIN32)
+#if (defined(_WIN32) || defined(_WIN64))
 #include <vector>
 #include <cwchar>
 #include <cstddef>
@@ -43,23 +43,25 @@ SOFTWARE.
 #include <winnt.h>
 #include <ntdef.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
-#include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/types.h>
 #include <mach-o/dyld.h>
 #include <TargetConditionals.h>
 #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
 #include <libproc.h>
 #endif
-#elif defined(__linux__)
+#elif (defined(__linux__) || defined(__ANDROID__))
 #include <climits>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/types.h>
 #elif defined(__FreeBSD__)
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #elif defined(__DragonFly__)
 #include <cstddef>
@@ -72,6 +74,7 @@ SOFTWARE.
 #include <climits>
 #include <cstdlib>
 #include <sys/param.h>
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #elif defined(__OpenBSD__)
 #include <vector>
@@ -87,16 +90,31 @@ SOFTWARE.
 #elif (defined(__sun) && defined(__SVR4))
 #include <climits>
 #include <cstdlib>
-#include <libproc.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <libproc.h>
+#elif defined(__HAIKU__)
+#include <climits>
+#include <cstdlib>
+#include <image.h>
+#include <OS.h>
 #endif
 
-const char *__getexecname(int pid) {
+const char *__getexecname(int64_t pid) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  DWORD processid = (DWORD)pid;
+  #elif ((defined(__APPLE__) && defined(__MACH__)) || (defined(__linux__) || defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || (defined(__sun) && defined(__SVR4)))
+  pid_t processid = (pid_t)pid;
+  #elif defined(__HAIKU__)
+  team_id processid = (team_id)pid;
+  #else
+  int64_t processid = pid;
+  #endif
   std::string path;
-  if (pid < -1) {
+  if (processid < -1) {
     return nullptr;
   }
-  #if defined(_WIN32)
+  #if (defined(_WIN32) || defined(_WIN64))
   auto resolve_symbolic_links = [](std::wstring wstr) {
     std::wstring result;
     wchar_t path[MAX_PATH];
@@ -120,9 +138,9 @@ const char *__getexecname(int pid) {
     if (wstr.empty()) return std::string("");
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
     std::vector<char> buf(nbytes);
-    return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
+    return std::string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   };
-  auto open_process_with_debug_privilege = [](int pid) {
+  auto open_process_with_debug_privilege = [](DWORD processid) {
     HANDLE process = nullptr;
     HANDLE hToken = nullptr;
     LUID luid;
@@ -133,17 +151,17 @@ const char *__getexecname(int pid) {
         tkp.Privileges[0].Luid = luid;
         tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         if (AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), nullptr, nullptr)) {
-          process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)pid);
+          process = OpenProcess(PROCESS_ALL_ACCESS, false, processid);
         }
       }
       CloseHandle(hToken);
     }
     if (!process) {
-      process = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)pid);
+      process = OpenProcess(PROCESS_ALL_ACCESS, false, processid);
     }
     return process;
   };
-  if (pid == -1 || pid == (int)GetCurrentProcessId()) {
+  if (processid == -1 || processid == GetCurrentProcessId()) {
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
       wchar_t exe[MAX_PATH];
@@ -153,7 +171,7 @@ const char *__getexecname(int pid) {
       }
     }
   } else {
-    HANDLE process = open_process_with_debug_privilege(pid);
+    HANDLE process = open_process_with_debug_privilege(processid);
     if (!process) { 
       return nullptr;
     }
@@ -169,9 +187,9 @@ const char *__getexecname(int pid) {
     CloseHandle(process);
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
-  if (pid == -1 || pid == getpid()) {
+  if (processid == -1 || processid == getpid()) {
     char exe[PATH_MAX];
-    std::uint32_t size = sizeof(exe);
+    uint32_t size = sizeof(exe);
     if (!_NSGetExecutablePath(exe, &size)) {
       char buffer[PATH_MAX];
       if (realpath(exe, buffer)) {
@@ -181,7 +199,7 @@ const char *__getexecname(int pid) {
   #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
   } else {
     char exe[PROC_PIDPATHINFO_MAXSIZE];
-    if (proc_pidpath(pid, exe, sizeof(exe)) > 0) {
+    if (proc_pidpath(processid, exe, sizeof(exe)) > 0) {
       char buffer[PATH_MAX];
       if (realpath(exe, buffer)) {
         path = buffer;
@@ -189,25 +207,25 @@ const char *__getexecname(int pid) {
     }
   #endif
   }
-  #elif defined(__linux__)
+  #elif (defined(__linux__) || defined(__ANDROID__))
   char exe[PATH_MAX];
-  if (pid == -1 || pid == getpid()) {
+  if (processid == -1 || processid == getpid()) {
     if (realpath("/proc/self/exe", exe)) {
       path = exe;
     }
   } else {
-    if (realpath((std::string("/proc/") + std::to_string(pid) + 
+    if (realpath((std::string("/proc/") + std::to_string(processid) + 
       std::string("/exe")).c_str(), exe)) {
       path = exe;
     }
   }
   #elif defined(__FreeBSD__) || defined(__DragonFly__)
   int mib[4]; 
-  std::size_t len = 0;
+  size_t len = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
-  mib[3] = pid;
+  mib[3] = processid;
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
     strbuff.resize(len, '\0');
@@ -221,10 +239,10 @@ const char *__getexecname(int pid) {
   }
   #elif defined(__NetBSD__)
   int mib[4]; 
-  std::size_t len = 0;
+  size_t len = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC_ARGS;
-  mib[2] = pid;
+  mib[2] = processid;
   mib[3] = KERN_PROC_PATHNAME;
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
@@ -238,7 +256,7 @@ const char *__getexecname(int pid) {
     }
   }
   #elif defined(__OpenBSD__)
-  auto verifyexeex = [](std::string exe, int pid) {
+  auto verifyexeex = [](std::string exe, pid_t processid) {
     int cntp = 0;
     std::string res;
     kvm_t *kd = nullptr;
@@ -246,7 +264,7 @@ const char *__getexecname(int pid) {
     bool error = false;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
     if (!kd) return res;
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, (pid == -1) ? getpid() : pid, sizeof(struct kinfo_file), &cntp))) {
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, (processid == -1) ? getpid() : processid, sizeof(struct kinfo_file), &cntp))) {
       for (int i = 0; i < cntp && kif[i].fd_fd < 0; i++) {
         if (kif[i].fd_fd == KERN_FILE_TEXT) {
           struct stat st;
@@ -259,7 +277,7 @@ const char *__getexecname(int pid) {
           }
           if (res.empty() && !error) {
             error = true;
-            std::size_t last_slash_pos = exe.find_last_of("/");
+            size_t last_slash_pos = exe.find_last_of("/");
             if (last_slash_pos != std::string::npos) {
               exe = exe.substr(0, last_slash_pos + 1) + kif[i].p_comm;
               goto fallback;
@@ -272,12 +290,12 @@ const char *__getexecname(int pid) {
     kvm_close(kd);
     return res;
   };
-  auto cppgetenvex = [](std::string name, int pid) {
-    if (pid == -1 || pid == getpid()) {
+  auto cppgetenvex = [](std::string name, pid_t processid) {
+    if (processid == -1 || processid == getpid()) {
       const char *cvalue = getenv(name.c_str());
       return std::string(cvalue ? cvalue : "");
     }
-    auto cppenvironex = [](int pid) {
+    auto cppenvironex = [](pid_t processid) {
       std::vector<std::string> vec;
       int cntp = 0;
       kvm_t *kd = nullptr;
@@ -286,7 +304,7 @@ const char *__getexecname(int pid) {
       if (!kd) {
         return vec;
       }
-      if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &cntp))) {
+      if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, processid, sizeof(struct kinfo_proc), &cntp))) {
         char **env = kvm_getenvv(kd, process_info, 0);
         if (env) {
           for (int i = 0; env[i]; i++) {
@@ -298,7 +316,7 @@ const char *__getexecname(int pid) {
       return vec;
     };
     auto string_split_by_first_equals_sign = [](std::string str) {
-      std::size_t pos = 0;
+      size_t pos = 0;
       std::vector<std::string> vec;
       if ((pos = str.find_first_of("=")) != std::string::npos) {
         vec.push_back(str.substr(0, pos));
@@ -310,9 +328,9 @@ const char *__getexecname(int pid) {
     if (name.empty()) {
       return value;
     }
-    std::vector<std::string> vec = cppenvironex(pid);
+    std::vector<std::string> vec = cppenvironex(processid);
     if (!vec.empty()) {
-      for (std::size_t i = 0; i < vec.size(); i++) {
+      for (size_t i = 0; i < vec.size(); i++) {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
         if (equalssplit.size() == 2) {
           if (equalssplit[0] == name) {
@@ -333,7 +351,7 @@ const char *__getexecname(int pid) {
   if (!kd) {
     return nullptr;
   }
-  if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, (pid == -1) ? getpid() : pid, sizeof(struct kinfo_proc), &cntp))) {
+  if ((process_info = kvm_getprocs(kd, KERN_PROC_PID, (processid == -1) ? getpid() : processid, sizeof(struct kinfo_proc), &cntp))) {
     char **cmd = kvm_getargv(kd, process_info, 0);
     if (cmd) {
       if (cmd[0]) {
@@ -345,24 +363,24 @@ const char *__getexecname(int pid) {
   if (!buffer.empty()) {
     std::string argv0;
     fallback:
-    std::size_t slash_pos = buffer.find('/');
-    std::size_t colon_pos = buffer.find(':');
+    size_t slash_pos = buffer.find('/');
+    size_t colon_pos = buffer.find(':');
     if (slash_pos == 0) {
       argv0 = buffer;
-      path = verifyexeex(argv0, pid);
+      path = verifyexeex(argv0, processid);
     } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
-      std::string penv = cppgetenvex("PATH", pid);
+      std::string penv = cppgetenvex("PATH", processid);
       if (!penv.empty()) {
         retry:
         std::string tmp;
         std::stringstream sstr(penv);
         while (std::getline(sstr, tmp, ':')) {
           argv0 = tmp + "/" + buffer;
-          path = verifyexeex(argv0, pid);
+          path = verifyexeex(argv0, processid);
           if (!path.empty()) break;
           if (slash_pos > colon_pos) {
             argv0 = tmp + "/" + buffer.substr(0, colon_pos);
-            path = verifyexeex(argv0, pid);
+            path = verifyexeex(argv0, processid);
             if (!path.empty()) break;
           }
         }
@@ -370,7 +388,7 @@ const char *__getexecname(int pid) {
       if (path.empty() && !retried) {
         retried = true;
         penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
-        std::string home = cppgetenvex("HOME", pid);
+        std::string home = cppgetenvex("HOME", processid);
         if (!home.empty()) {
           penv = home + "/bin:" + penv;
         }
@@ -378,31 +396,31 @@ const char *__getexecname(int pid) {
       }
     }
     if (path.empty() && slash_pos > 0) {
-      std::string pwd = cppgetenvex("PWD", pid);
+      std::string pwd = cppgetenvex("PWD", processid);
       if (!pwd.empty()) {
         argv0 = pwd + "/" + buffer;
-        path = verifyexeex(argv0, pid);
+        path = verifyexeex(argv0, processid);
       }
       if (path.empty()) {
-        if (pid == -1 || pid == getpid()) {
+        if (processid == -1 || processid == getpid()) {
           char cwd[PATH_MAX];
           if (getcwd(cwd, PATH_MAX)) {
             argv0 = std::string(cwd) + "/" + buffer;
-            path = verifyexeex(argv0, pid);
+            path = verifyexeex(argv0, processid);
           }
         } else {
           int mib[3];
-          std::size_t len = 0;
+          size_t len = 0;
           mib[0] = CTL_KERN;
           mib[1] = KERN_PROC_CWD;
-          mib[2] = pid;
+          mib[2] = processid;
           if (!sysctl(mib, 3, nullptr, &len, nullptr, 0)) {
             std::vector<char> vecbuff;
             vecbuff.resize(len);
             char *cwd = &vecbuff[0];
             if (!sysctl(mib, 3, cwd, &len, nullptr, 0)) {
               argv0 = std::string(cwd) + "/" + buffer;
-              path = verifyexeex(argv0, pid);
+              path = verifyexeex(argv0, processid);
             }
           }
         }
@@ -411,7 +429,7 @@ const char *__getexecname(int pid) {
     if (path.empty() && !error) {
       error = true;
       buffer.clear();
-      std::string underscore = cppgetenvex("_", pid);
+      std::string underscore = cppgetenvex("_", processid);
       if (!underscore.empty()) {
         buffer = underscore;
         goto fallback;
@@ -419,7 +437,7 @@ const char *__getexecname(int pid) {
     }
   }
   #elif (defined(__sun) && defined(__SVR4))
-  if (pid == -1 || pid == getpid()) {
+  if (processid == -1 || processid == getpid()) {
     const char *execname = getexecname();
     if (execname) {
       char exe[PATH_MAX];
@@ -431,7 +449,7 @@ const char *__getexecname(int pid) {
     int err = 0;
     char buffer[PATH_MAX];
     struct ps_prochandle *P = nullptr;
-    P = Pgrab(pid, PGRAB_RDONLY, &err);
+    P = Pgrab(processid, PGRAB_RDONLY, &err);
     if (P) {
       if (!err) {
         if (Pexecname(P, buffer, sizeof(buffer))) {
@@ -446,13 +464,24 @@ const char *__getexecname(int pid) {
   }
   if (path.empty()) {
     char exe[PATH_MAX];
-    if (pid == -1 || pid == getpid()) {
+    if (processid == -1 || processid == getpid()) {
       if (realpath("/proc/self/path/a.out", exe)) {
         path = exe;
       }
     } else {
-      if (realpath((std::string("/proc/") + std::to_string(pid) + 
+      if (realpath((std::string("/proc/") + std::to_string(processid) + 
         std::string("/path/a.out")).c_str(), exe)) {
+        path = exe;
+      }
+    }
+  }
+  #elif defined(__HAIKU__)
+  image_info info;
+  int32_t cookie = 0;
+  while (get_next_image_info((processid == -1) ? B_CURRENT_TEAM : processid, &cookie, &info) == B_OK) {
+    if (info.type == B_APP_IMAGE) {
+      char exe[PATH_MAX];
+      if (realpath(info.name, exe)) {
         path = exe;
       }
     }

@@ -26,7 +26,7 @@ SOFTWARE.
 
 #include "internal.h"
 #include <string>
-#if defined(_WIN32)
+#if (defined(_WIN32) || defined(_WIN64))
 #include <vector>
 #include <cwchar>
 #include <cstddef>
@@ -41,7 +41,7 @@ SOFTWARE.
 #include <climits>
 #include <cstdlib>
 #include <mach-o/dyld.h>
-#elif defined(__linux__)
+#elif (defined(__linux__) || defined(__ANDROID__))
 #include <climits>
 #include <cstdlib>
 #elif defined(__FreeBSD__)
@@ -74,11 +74,17 @@ SOFTWARE.
 #elif (defined(__sun) && defined(__SVR4))
 #include <climits>
 #include <cstdlib>
+#elif defined(__HAIKU__)
+#include <cstdint>
+#include <climits>
+#include <cstdlib>
+#include <image.h>
+#include <OS.h>
 #endif
 
 const char *__getexecname(void) {
   std::string path;
-  #if defined(_WIN32)
+  #if (defined(_WIN32) || defined(_WIN64))
   auto resolve_symbolic_links = [](std::wstring wstr) {
     std::wstring result;
     wchar_t path[MAX_PATH];
@@ -102,7 +108,7 @@ const char *__getexecname(void) {
     if (wstr.empty()) return std::string("");
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
     std::vector<char> buf(nbytes);
-    return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
+    return std::string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   };
   wchar_t buffer[MAX_PATH];
   if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
@@ -114,21 +120,21 @@ const char *__getexecname(void) {
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char exe[PATH_MAX];
-  std::uint32_t size = sizeof(exe);
+  uint32_t size = sizeof(exe);
   if (!_NSGetExecutablePath(exe, &size)) {
     char buffer[PATH_MAX];
     if (realpath(exe, buffer)) {
       path = buffer;
     }
   }
-  #elif defined(__linux__)
+  #elif (defined(__linux__) || defined(__ANDROID__))
   char exe[PATH_MAX];
   if (realpath("/proc/self/exe", exe)) {
     path = exe;
   }
   #elif defined(__FreeBSD__) || defined(__DragonFly__)
   int mib[4]; 
-  std::size_t len = 0;
+  size_t len = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
@@ -146,7 +152,7 @@ const char *__getexecname(void) {
   }
   #elif defined(__NetBSD__)
   int mib[4]; 
-  std::size_t len = 0;
+  size_t len = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC_ARGS;
   mib[2] = -1;
@@ -184,7 +190,7 @@ const char *__getexecname(void) {
           }
           if (res.empty() && !error) {
             error = true;
-            std::size_t last_slash_pos = exe.find_last_of("/");
+            size_t last_slash_pos = exe.find_last_of("/");
             if (last_slash_pos != std::string::npos) {
               exe = exe.substr(0, last_slash_pos + 1) + kif[i].p_comm;
               goto fallback;
@@ -223,8 +229,8 @@ const char *__getexecname(void) {
   if (!buffer.empty()) {
     std::string argv0;
     fallback:
-    std::size_t slash_pos = buffer.find('/');
-    std::size_t colon_pos = buffer.find(':');
+    size_t slash_pos = buffer.find('/');
+    size_t colon_pos = buffer.find(':');
     if (slash_pos == 0) {
       argv0 = buffer;
       path = verifyexe(argv0);
@@ -291,6 +297,17 @@ const char *__getexecname(void) {
     char exe[PATH_MAX];
     if (realpath("/proc/self/path/a.out", exe)) {
       path = exe;
+    }
+  }
+  #elif defined(__HAIKU__)
+  image_info info;
+  int32_t cookie = 0;
+  while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+    if (info.type == B_APP_IMAGE) {
+      char exe[PATH_MAX];
+      if (realpath(info.name, exe)) {
+        path = exe;
+      }
     }
   }
   #endif

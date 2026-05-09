@@ -24,4 +24,6 @@ SOFTWARE.
 
 */
 
-const char *__getexecname(int pid = -1);
+#pragma once
+#include <stdint.h>
+const char *__getexecname(int64_t pid = -1);
