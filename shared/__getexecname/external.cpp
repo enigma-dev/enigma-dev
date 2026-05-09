@@ -101,20 +101,12 @@ SOFTWARE.
 #endif
 
 const char *__getexecname(int64_t pid) {
-  #if (defined(_WIN32) || defined(_WIN64))
-  DWORD processid = (DWORD)pid;
-  #elif ((defined(__APPLE__) && defined(__MACH__)) || (defined(__linux__) || defined(__ANDROID__)) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || (defined(__sun) && defined(__SVR4)))
-  pid_t processid = (pid_t)pid;
-  #elif defined(__HAIKU__)
-  team_id processid = (team_id)pid;
-  #else
-  int64_t processid = pid;
-  #endif
   std::string path;
-  if (processid < -1) {
+  if (pid < -1) {
     return nullptr;
   }
   #if (defined(_WIN32) || defined(_WIN64))
+  DWORD processid = (DWORD)pid;
   auto resolve_symbolic_links = [](std::wstring wstr) {
     std::wstring result;
     wchar_t path[MAX_PATH];
@@ -161,7 +153,7 @@ const char *__getexecname(int64_t pid) {
     }
     return process;
   };
-  if (processid == -1 || processid == GetCurrentProcessId()) {
+  if (pid == -1 || processid == GetCurrentProcessId()) {
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
       wchar_t exe[MAX_PATH];
@@ -187,6 +179,7 @@ const char *__getexecname(int64_t pid) {
     CloseHandle(process);
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
+  pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
     char exe[PATH_MAX];
     uint32_t size = sizeof(exe);
@@ -208,6 +201,7 @@ const char *__getexecname(int64_t pid) {
   #endif
   }
   #elif (defined(__linux__) || defined(__ANDROID__))
+  pid_t processid = (pid_t)pid;
   char exe[PATH_MAX];
   if (processid == -1 || processid == getpid()) {
     if (realpath("/proc/self/exe", exe)) {
@@ -220,6 +214,7 @@ const char *__getexecname(int64_t pid) {
     }
   }
   #elif defined(__FreeBSD__) || defined(__DragonFly__)
+  pid_t processid = (pid_t)pid;
   int mib[4]; 
   size_t len = 0;
   mib[0] = CTL_KERN;
@@ -238,6 +233,7 @@ const char *__getexecname(int64_t pid) {
     }
   }
   #elif defined(__NetBSD__)
+  pid_t processid = (pid_t)pid;
   int mib[4]; 
   size_t len = 0;
   mib[0] = CTL_KERN;
@@ -256,6 +252,7 @@ const char *__getexecname(int64_t pid) {
     }
   }
   #elif defined(__OpenBSD__)
+  pid_t processid = (pid_t)pid;
   auto verifyexeex = [](std::string exe, pid_t processid) {
     int cntp = 0;
     std::string res;
@@ -437,6 +434,7 @@ const char *__getexecname(int64_t pid) {
     }
   }
   #elif (defined(__sun) && defined(__SVR4))
+  pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
     const char *execname = getexecname();
     if (execname) {
@@ -476,6 +474,7 @@ const char *__getexecname(int64_t pid) {
     }
   }
   #elif defined(__HAIKU__)
+  team_id processid = (team_id)pid;
   image_info info;
   int32_t cookie = 0;
   while (get_next_image_info((processid == -1) ? B_CURRENT_TEAM : processid, &cookie, &info) == B_OK) {
