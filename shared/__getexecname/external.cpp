@@ -57,7 +57,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
-#elif (defined(__FreeBSD__) ||  defined(__DragonFly__))
+#elif (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
