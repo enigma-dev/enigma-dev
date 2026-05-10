@@ -110,7 +110,7 @@ const char *__getexecname(int64_t pid) {
     if (hFile != INVALID_HANDLE_VALUE) {
       DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
       if (len) {
-        if (wcslen(path) >= 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
+        if (wcslen(path) > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
           result = path + 4;
         } else {
           result = path;
@@ -123,8 +123,11 @@ const char *__getexecname(int64_t pid) {
   auto narrow = [](std::wstring wstr) {
     if (wstr.empty()) return std::string("");
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
-    std::vector<char> buf(nbytes);
-    return std::string { buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
+    if (!nbytes) return std::string("");
+    std::vector<char> buf((size_t)nbytes);
+    nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr);
+    if (!nbytes) return std::string("");
+    return std::string { buf.data(), (size_t)nbytes };
   };
   auto open_process_with_debug_privilege = [](DWORD processid) {
     HANDLE process = nullptr;
