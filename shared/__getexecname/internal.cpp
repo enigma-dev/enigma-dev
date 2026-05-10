@@ -128,7 +128,7 @@ const char *__getexecname(void) {
   if (realpath("/proc/self/exe", exe)) {
     path = exe;
   }
-  #elif defined(__FreeBSD__) || defined(__DragonFly__)
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   int mib[4]; 
   size_t len = 0;
   mib[0] = CTL_KERN;

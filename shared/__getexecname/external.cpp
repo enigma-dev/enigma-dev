@@ -207,7 +207,7 @@ const char *__getexecname(int64_t pid) {
       path = exe;
     }
   }
-  #elif defined(__FreeBSD__) || defined(__DragonFly__)
+  #elif (defined(__FreeBSD__) || defined(__DragonFly__))
   pid_t processid = (pid_t)pid;
   int mib[4]; 
   size_t len = 0;
