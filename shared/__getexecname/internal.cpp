@@ -307,6 +307,7 @@ const char *__getexecname(void) {
       char exe[PATH_MAX];
       if (realpath(info.name, exe)) {
         path = exe;
+        break;
       }
     }
   }

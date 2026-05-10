@@ -482,6 +482,7 @@ const char *__getexecname(int64_t pid) {
       char exe[PATH_MAX];
       if (realpath(info.name, exe)) {
         path = exe;
+        break;
       }
     }
   }
