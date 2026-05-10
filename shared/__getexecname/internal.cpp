@@ -44,12 +44,7 @@ SOFTWARE.
 #elif (defined(__linux__) || defined(__ANDROID__))
 #include <climits>
 #include <cstdlib>
-#elif defined(__FreeBSD__)
-#include <cstddef>
-#include <climits>
-#include <cstdlib>
-#include <sys/sysctl.h>
-#elif defined(__DragonFly__)
+#elif (defined(__FreeBSD__) || defined(__DragonFly__))
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
@@ -60,6 +55,7 @@ SOFTWARE.
 #include <climits>
 #include <cstdlib>
 #include <sys/param.h>
+#include <sys/types.h>
 #include <sys/sysctl.h>
 #elif defined(__OpenBSD__)
 #include <sstream>
