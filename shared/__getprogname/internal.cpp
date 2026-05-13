@@ -1,0 +1,317 @@
+/*
+
+MIT License
+
+Copyright © 2026 Samuel Venable
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+*/
+
+#include "internal.h"
+#include <string>
+#if (defined(_WIN32) || defined(_WIN64))
+#include <vector>
+#include <cwchar>
+#include <cstddef>
+#include <cstdlib>
+#include <windef.h>
+#include <fileapi.h>
+#include <stringapiset.h>
+#include <libloaderapi.h>
+#include <handleapi.h>
+#elif (defined(__APPLE__) && defined(__MACH__))
+#include <cstdint>
+#include <climits>
+#include <cstdlib>
+#include <mach-o/dyld.h>
+#elif (defined(__linux__) || defined(__ANDROID__))
+#include <climits>
+#include <cstdlib>
+#elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__))
+#include <cstddef>
+#include <climits>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#elif defined(__NetBSD__)
+#include <cstddef>
+#include <climits>
+#include <cstdlib>
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#elif defined(__OpenBSD__)
+#include <sstream>
+#include <cstddef>
+#include <climits>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <kvm.h>
+#elif (defined(__sun) && defined(__SVR4))
+#include <climits>
+#include <cstdlib>
+#elif defined(__HAIKU__)
+#include <cstdint>
+#include <climits>
+#include <cstdlib>
+#include <image.h>
+#include <OS.h>
+#endif
+
+const char *__getprogname(void) {
+  std::string path;
+  #if (defined(_WIN32) || defined(_WIN64))
+  auto resolve_symbolic_links = [](std::wstring wstr) {
+    std::wstring result;
+    wchar_t path[MAX_PATH];
+    HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, 
+    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 
+    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (hFile != INVALID_HANDLE_VALUE) {
+      DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
+      if (len) {
+        if (wcslen(path) > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
+          result = path + 4;
+        } else {
+          result = path;
+        }
+      }
+      CloseHandle(hFile);
+    }
+    return result;
+  };
+  auto narrow = [](std::wstring wstr) {
+    if (wstr.empty()) return std::string("");
+    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr);
+    if (!nbytes) return std::string("");
+    std::vector<char> buf((size_t)nbytes);
+    nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr);
+    if (!nbytes) return std::string("");
+    return std::string { buf.data(), (size_t)nbytes };
+  };
+  wchar_t buffer[MAX_PATH];
+  if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
+    wchar_t exe[MAX_PATH];
+    if (_wfullpath(exe, buffer, MAX_PATH)) {
+      std::wstring resolved = resolve_symbolic_links(exe);
+      path = narrow(resolved);
+    }
+  }
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  char exe[PATH_MAX];
+  uint32_t size = sizeof(exe);
+  if (!_NSGetExecutablePath(exe, &size)) {
+    char buffer[PATH_MAX];
+    if (realpath(exe, buffer)) {
+      path = buffer;
+    }
+  }
+  #elif (defined(__linux__) || defined(__ANDROID__))
+  char exe[PATH_MAX];
+  if (realpath("/proc/self/exe", exe)) {
+    path = exe;
+  }
+  #elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__))
+  int mib[4]; 
+  size_t len = 0;
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PATHNAME;
+  mib[3] = -1;
+  if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
+    std::string strbuff;
+    strbuff.resize(len, '\0');
+    char *exe = strbuff.data();
+    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
+    }
+  }
+  #elif defined(__NetBSD__)
+  int mib[4]; 
+  size_t len = 0;
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC_ARGS;
+  mib[2] = -1;
+  mib[3] = KERN_PROC_PATHNAME;
+  if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
+    std::string strbuff;
+    strbuff.resize(len, '\0');
+    char *exe = strbuff.data();
+    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
+    }
+  }
+  #elif defined(__OpenBSD__)
+  auto verifyexe = [](std::string exe) {
+    int cntp = 0;
+    std::string res;
+    kvm_t *kd = nullptr;
+    kinfo_file *kif = nullptr;
+    bool error = false;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+    if (!kd) return res;
+    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, getpid(), sizeof(struct kinfo_file), &cntp))) {
+      for (int i = 0; i < cntp && kif[i].fd_fd < 0; i++) {
+        if (kif[i].fd_fd == KERN_FILE_TEXT) {
+          struct stat st;
+          fallback:
+          char buffer[PATH_MAX];
+          if (!stat(exe.c_str(), &st) && (st.st_mode & S_IXUSR) &&
+            S_ISREG(st.st_mode) && realpath(exe.c_str(), buffer) &&
+            st.st_dev == (dev_t)kif[i].va_fsid && st.st_ino == (ino_t)kif[i].va_fileid) {
+            res = buffer;
+          }
+          if (res.empty() && !error) {
+            error = true;
+            size_t last_slash_pos = exe.find_last_of("/");
+            if (last_slash_pos != std::string::npos) {
+              exe = exe.substr(0, last_slash_pos + 1) + kif[i].p_comm;
+              goto fallback;
+            }
+          }
+          break;
+        }
+      }
+    }
+    kvm_close(kd);
+    return res;
+  };
+  auto cppgetenv = [](std::string name) {
+    const char *cresult = getenv(name.c_str());
+    std::string result = cresult ? cresult : "";
+    return result;
+  };
+  int cntp = 0;
+  std::string buffer;
+  kvm_t *kd = nullptr;
+  kinfo_proc *proc_info = nullptr;
+  bool error = false, retried = false;
+  kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr);
+  if (!kd) {
+    return nullptr;
+  }
+  if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, getpid(), sizeof(struct kinfo_proc), &cntp))) {
+    char **cmd = kvm_getargv(kd, proc_info, 0);
+    if (cmd) {
+      if (cmd[0]) {
+        buffer = cmd[0];
+      }
+    }
+  }
+  kvm_close(kd);
+  if (!buffer.empty()) {
+    std::string argv0;
+    fallback:
+    size_t slash_pos = buffer.find('/');
+    size_t colon_pos = buffer.find(':');
+    if (slash_pos == 0) {
+      argv0 = buffer;
+      path = verifyexe(argv0);
+    } else if (slash_pos == std::string::npos || slash_pos > colon_pos) { 
+      std::string penv = cppgetenv("PATH");
+      if (!penv.empty()) {
+        retry:
+        std::string tmp;
+        std::stringstream sstr(penv);
+        while (std::getline(sstr, tmp, ':')) {
+          argv0 = tmp + "/" + buffer;
+          path = verifyexe(argv0);
+          if (!path.empty()) break;
+          if (slash_pos > colon_pos) {
+            argv0 = tmp + "/" + buffer.substr(0, colon_pos);
+            path = verifyexe(argv0);
+            if (!path.empty()) break;
+          }
+        }
+      }
+      if (path.empty() && !retried) {
+        retried = true;
+        penv = "/usr/bin:/bin:/usr/sbin:/sbin:/usr/X11R6/bin:/usr/local/bin:/usr/local/sbin";
+        std::string home = cppgetenv("HOME");
+        if (!home.empty()) {
+          penv = home + "/bin:" + penv;
+        }
+        goto retry;
+      }
+    }
+    if (path.empty() && slash_pos > 0) {
+      std::string pwd = cppgetenv("PWD");
+      if (!pwd.empty()) {
+        argv0 = pwd + "/" + buffer;
+        path = verifyexe(argv0);
+      }
+      if (path.empty()) {
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, PATH_MAX)) {
+          argv0 = std::string(cwd) + "/" + buffer;
+          path = verifyexe(argv0);
+        }
+      }
+    }
+    if (path.empty() && !error) {
+      error = true;
+      buffer.clear();
+      std::string underscore = cppgetenv("_");
+      if (!underscore.empty()) {
+        buffer = underscore;
+        goto fallback;
+      }
+    }
+  }
+  #elif (defined(__sun) && defined(__SVR4))
+  const char *execname = getexecname();
+  if (execname) {
+    char exe[PATH_MAX];
+    if (realpath(execname, exe)) {
+      path = exe;
+    }
+  }
+  if (path.empty()) {
+    char exe[PATH_MAX];
+    if (realpath("/proc/self/path/a.out", exe)) {
+      path = exe;
+    }
+  }
+  #elif defined(__HAIKU__)
+  image_info info;
+  int32_t cookie = 0;
+  while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+    if (info.type == B_APP_IMAGE) {
+      char exe[PATH_MAX];
+      if (realpath(info.name, exe)) {
+        path = exe;
+        break;
+      }
+    }
+  }
+  #endif
+  size_t pos = path.find_last_of("/\\");
+  static std::string result; result = path.substr(pos + 1);
+  return ((!result.empty()) ? result.c_str() : nullptr);
+}
