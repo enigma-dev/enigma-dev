@@ -25,5 +25,4 @@ SOFTWARE.
 */
 
 #pragma once
-#include <stdint.h>
-const char *__getprogname(int64_t pid = -1);
+const char *__getprogname(long long pid = -1);

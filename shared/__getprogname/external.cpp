@@ -43,6 +43,7 @@ SOFTWARE.
 #include <winnt.h>
 #include <ntdef.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <unistd.h>
@@ -88,6 +89,7 @@ SOFTWARE.
 #include <sys/types.h>
 #include <libproc.h>
 #elif defined(__HAIKU__)
+#include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <image.h>
@@ -99,7 +101,7 @@ SOFTWARE.
 #include <sys/types.h>
 #endif
 
-const char *__getprogname(int64_t pid) {
+const char *__getprogname(long long pid) {
   std::string path;
   if (pid < -1) {
     return nullptr;

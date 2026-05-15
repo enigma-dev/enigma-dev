@@ -25,5 +25,4 @@ SOFTWARE.
 */
 
 #pragma once
-#include <stdint.h>
-const char *__getexecname(int64_t pid = -1);
+const char *__getexecname(long long pid = -1);
