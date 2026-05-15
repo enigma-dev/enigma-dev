@@ -8,7 +8,7 @@ const char *internal = __getexecname(void);
 ```c
 // Pseudocode for executable path from PID:
 #include <__getexecname/external.h>
-const char *external = __getexecname(int64_t pid = -1);
+const char *external = __getexecname(long long pid = -1);
 ```
 
 ```c
@@ -20,7 +20,7 @@ const char *internal = __getprogname(void);
 ```c
 // Pseudocode for executable name from PID:
 #include <__getprogname/external.h>
-const char *external = __getprogname(int64_t pid = -1);
+const char *external = __getprogname(long long pid = -1);
 ```
 
 `__getexecname()` is a reimplementation of the Solaris and illumos [getexecname()](https://man.omnios.org/man3c/getexecname.3c) function for a wide variety of platforms. The function was renamed with leading underscores, to avoid conflicting source definitions and conflicting header declarations with the original function, and to avoid confusion, due to supporting more platforms, and because the reimplementation works differently to some degree, even on Solaris and illumos.
