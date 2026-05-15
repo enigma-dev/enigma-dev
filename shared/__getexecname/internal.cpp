@@ -76,6 +76,10 @@ SOFTWARE.
 #include <cstdlib>
 #include <image.h>
 #include <OS.h>
+#elif (defined(__QNX__) && defined(__QNXNTO__))
+#include <cstdio>
+#include <climits>
+#include <cstdlib>
 #endif
 
 const char *__getexecname(void) {
@@ -309,6 +313,18 @@ const char *__getexecname(void) {
         break;
       }
     }
+  }
+  #elif (defined(__QNX__) && defined(__QNXNTO__))
+  FILE *fp = fopen("/proc/self/exefile", "r");
+  if (fp) {
+    char buffer[PATH_MAX];
+    if (fgets(buffer, sizeof(buffer), fp)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
+      }
+    }
+    fclose(fp);
   }
   #endif
   static std::string result; result = path;

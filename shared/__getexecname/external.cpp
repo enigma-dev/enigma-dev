@@ -92,6 +92,11 @@ SOFTWARE.
 #include <cstdlib>
 #include <image.h>
 #include <OS.h>
+#elif (defined(__QNX__) && defined(__QNXNTO__))
+#include <cstdio>
+#include <climits>
+#include <cstdlib>
+#include <sys/types.h>
 #endif
 
 const char *__getexecname(int64_t pid) {
@@ -481,6 +486,34 @@ const char *__getexecname(int64_t pid) {
         path = exe;
         break;
       }
+    }
+  }
+  #elif (defined(__QNX__) && defined(__QNXNTO__))
+  pid_t processid = (pid_t)pid;
+  if (processid == -1 || processid == getpid()) {
+    FILE *fp = fopen("/proc/self/exefile", "r");
+    if (fp) {
+      char buffer[PATH_MAX];
+      if (fgets(buffer, sizeof(buffer), fp)) {
+        char exe[PATH_MAX];
+        if (realpath(buffer, exe)) {
+          path = exe;
+        }
+      }
+      fclose(fp);
+    }
+  } else {
+    FILE *fp = fopen((std::string("/proc/") + std::to_string(processid) + 
+      std::string("/exefile")).c_str(), "r");
+    if (fp) {
+      char buffer[PATH_MAX];
+      if (fgets(buffer, sizeof(buffer), fp)) {
+        char exe[PATH_MAX];
+        if (realpath(buffer, exe)) {
+          path = exe;
+        }
+      }
+      fclose(fp);
     }
   }
   #endif
