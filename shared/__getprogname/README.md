@@ -45,4 +45,14 @@ If the executable file has mulitple hard links pointing to it on disk, and `argv
 
 On all platforms, when successful, the executable path name returned by this function is a case-sensitive, absolute, and normalized path name, with no dot, no dot-dot, and no consecutive path separators; on Windows, backward slashes are used for all path separators, where on Unix-likes, forward slashes are used. All symbolic links to the executable path name are resolved, and the process's executable path name will be guaranteed to end in a null terminator.
 
-`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful.
+`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful. `__getprogname()` is inspired by the `getprogname()` function that first appeared in NetBSD 1.6, and is available on most other modern Unix-likes, even macOS. 
+
+As the documentation for the original `getprogname()` function points out, some platforms set the return value of `getprogname()` automatically to be the base name of the current executable file, and it sets this return value on process startup, before the `main()` function is called.
+
+However, this behavior can not be relied on portably, because some platforms do not have any string return value set for the function, at least not until after a call to `setprogname()` is made, to set that string to a valid base name, and something besides an empty string. If a relative or absolute path name is used instead of a base name for the argument of `setprogname()`, only the base name contained within that path name will be used for setting the return value of `getprogname()`. 
+
+For platforms that do not have a default string return value set, for `getprogname()` on startup, before the call to `main()`, one may call the `__getprogname()` function, on the platforms it supports, to retrieve the executable base name, and that can then be passed to `setprogname()` for use with further calls to `getprogname()`.
+
+Calls to `__getprogname()` are slow, due to relying on the same underlying code logic as `__getexecname()`, so saving its return value with `setprogname()`, on platforms where it is possible, and then later calling `getprogname()` to retrieve that return value, that instead is preferred over calling `__getprogname()` multiple times within the life of your program. 
+
+Alternatively, for platforms which do not have a built-in `setprogname()` and `getprogname()` function, copying the return value of `__getprogname()` to a global string is preferable for later use. When including `__getprogname/external.h` and `__getexecname/external.h`, passing a PID argument to the `__getprogname()` and `__getexecname()` functions is particularly useful when writing process monitoring software.
