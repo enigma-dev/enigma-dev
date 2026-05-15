@@ -33,7 +33,7 @@ If on Windows, the function's C-string return value is limited to a byte length 
 
 The return value, whenever it succeeds, and is not equal to a null pointer, it is guaranteed to stay the same value for the specified process, whether for the current process, or an external PID. If the associated executable file was moved or deleted from its original location, at any point in time, between the time the executable file spawned its process, until the time of this function being called, the function will fail and return a null pointer. 
 
-When returning the path name to the current executable file, it is recommended to call this function at the very beginning of your program, and save its return value into a global for later use. If the first time you call the function is not at the very beginning of your program, that allows the executable to potentially be moved or deleted first, thus causing the function to fail and return a null pointer, which is undesirable behavior.
+When returning the path name to the current executable file, it is recommended to call this function at the very beginning of your program, and save its return value into a global string for later use. If the first time you call the function is not at the very beginning of your program, that allows the executable to potentially be moved or deleted first, thus causing the function to fail and return a null pointer, which is undesirable behavior.
 
 On Solaris and illumos, there are certain conditions where you may need a process filesystem mounted in the current session in order for the function to not fail and return a null pointer. Linux requires the process filesystem mounted in the current session for this function to not fail and return a null pointer, under all circumstances. 
 
@@ -51,7 +51,7 @@ As the documentation for the original `getprogname()` function points out, some 
 
 However, this behavior can not be relied on portably, because some platforms do not have any string return value set for the function, at least not until after a call to `setprogname()` is made, to set that string to a valid base name, and something besides an empty string. If a relative or absolute path name is used instead of a base name for the argument of `setprogname()`, only the base name contained within that path name will be used for setting the return value of `getprogname()`. 
 
-For platforms that do not have a default string return value set, for `getprogname()` on startup, before the call to `main()`, one may call the `__getprogname()` function, on the platforms it supports, to retrieve the executable base name, and that can then be passed to `setprogname()` for use with further calls to `getprogname()`.
+For platforms that do not have a default string return value set, for `getprogname()` on startup, before the call to `main()`, one may call the `__getprogname()` function, on the platforms it supports, to retrieve the current executable file's base name, and that can then be passed to `setprogname()` for use with further calls to `getprogname()`.
 
 Calls to `__getprogname()` are slow, due to relying on the same underlying code logic as `__getexecname()`, so saving its return value with `setprogname()`, on platforms where it is possible, and then later calling `getprogname()` to retrieve that return value, that instead is preferred over calling `__getprogname()` multiple times within the life of your program. 
 
