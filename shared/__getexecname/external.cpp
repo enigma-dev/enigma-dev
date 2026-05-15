@@ -98,6 +98,7 @@ SOFTWARE.
 #include <cstdio>
 #include <climits>
 #include <cstdlib>
+#include <unistd.h>
 #include <sys/types.h>
 #endif
 
