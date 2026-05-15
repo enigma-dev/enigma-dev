@@ -94,7 +94,7 @@ const char *__getprogname(void) {
     if (hFile != INVALID_HANDLE_VALUE) {
       DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
       if (len) {
-        if (wcslen(path) > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
+        if (std::wstring(path).length() > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
           result = path + 4;
         } else {
           result = path;
@@ -115,11 +115,8 @@ const char *__getprogname(void) {
   };
   wchar_t buffer[MAX_PATH];
   if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
-    wchar_t exe[MAX_PATH];
-    if (_wfullpath(exe, buffer, MAX_PATH)) {
-      std::wstring resolved = resolve_symbolic_links(exe);
-      path = narrow(resolved);
-    }
+    std::wstring exe = resolve_symbolic_links(buffer);
+    path = narrow(exe);
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
   char exe[PATH_MAX];

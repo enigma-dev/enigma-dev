@@ -115,7 +115,7 @@ const char *__getprogname(int64_t pid) {
     if (hFile != INVALID_HANDLE_VALUE) {
       DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
       if (len) {
-        if (wcslen(path) > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
+        if (std::wstring(path).length() > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
           result = path + 4;
         } else {
           result = path;
@@ -158,11 +158,8 @@ const char *__getprogname(int64_t pid) {
   if (pid == -1 || processid == GetCurrentProcessId()) {
     wchar_t buffer[MAX_PATH];
     if (GetModuleFileNameW(nullptr, buffer, sizeof(buffer))) {
-      wchar_t exe[MAX_PATH];
-      if (_wfullpath(exe, buffer, MAX_PATH)) {
-        std::wstring resolved = resolve_symbolic_links(exe);
-        path = narrow(resolved);
-      }
+      std::wstring exe = resolve_symbolic_links(buffer);
+      path = narrow(exe);
     }
   } else {
     HANDLE process = open_process_with_debug_privilege(processid);
@@ -172,11 +169,8 @@ const char *__getprogname(int64_t pid) {
     wchar_t buffer[MAX_PATH];
     DWORD size = sizeof(buffer);
     if (QueryFullProcessImageNameW(process, 0, buffer, &size)) {
-      wchar_t exe[MAX_PATH];
-      if (_wfullpath(exe, buffer, MAX_PATH)) {
-        std::wstring resolved = resolve_symbolic_links(exe);
-        path = narrow(resolved);
-      }
+      std::wstring exe = resolve_symbolic_links(buffer);
+      path = narrow(exe);
     }
     CloseHandle(process);
   }
