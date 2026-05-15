@@ -76,7 +76,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <image.h>
 #include <OS.h>
-#elif (defined(__QNX__) && defined(__QNXNTO__))
+#elif (defined(__QNX__) || defined(__QNXNTO__))
 #include <cstdio>
 #include <climits>
 #include <cstdlib>
@@ -311,7 +311,7 @@ const char *__getprogname(void) {
       }
     }
   }
-  #elif (defined(__QNX__) && defined(__QNXNTO__))
+  #elif (defined(__QNX__) || defined(__QNXNTO__))
   FILE *fp = fopen("/proc/self/exefile", "r");
   if (fp) {
     char buffer[PATH_MAX];

@@ -92,7 +92,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <image.h>
 #include <OS.h>
-#elif (defined(__QNX__) && defined(__QNXNTO__))
+#elif (defined(__QNX__) || defined(__QNXNTO__))
 #include <cstdio>
 #include <climits>
 #include <cstdlib>
@@ -482,7 +482,7 @@ const char *__getexecname(int64_t pid) {
       }
     }
   }
-  #elif (defined(__QNX__) && defined(__QNXNTO__))
+  #elif (defined(__QNX__) || defined(__QNXNTO__))
   pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
     FILE *fp = fopen("/proc/self/exefile", "r");
