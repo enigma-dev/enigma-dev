@@ -23,9 +23,11 @@ const char *internal = __getprogname(void);
 const char *external = __getprogname(int64_t pid = -1);
 ```
 
-`__getexecname()` is a reimplementation of the Solaris and illumos `getexecname()` function for a wide variety of platforms. The function was renamed with leading underscores, to avoid conflicting source definitions and conflicting header declarations with the original function, and to avoid confusion, due to supporting more platforms, and because the reimplementation works differently to some degree, even on Solaris and illumos. 
+`__getexecname()` is a reimplementation of the Solaris and illumos [getexecname()](https://man.omnios.org/man3c/getexecname.3c) function for a wide variety of platforms. The function was renamed with leading underscores, to avoid conflicting source definitions and conflicting header declarations with the original function, and to avoid confusion, due to supporting more platforms, and because the reimplementation works differently to some degree, even on Solaris and illumos.
 
 It supports Windows, macOS, Linux, FreeBSD, DragonFly BSD, NetBSD, OpenBSD, Solaris, illumos, Haiku, QNX Neutrino, and Android. iOS, iPadOS, tvOS, watchOS, and visionOS are supported platforms as well, though to a limited extent, because only getting the executable path name from the current process is supported on those platforms, and not the executable path name of an external PID; iOS, iPadOS, tvOS, watchOS, and visionOS are the only targets with this issue.
+
+`__getexecname()` has more features, is more accurate, less erroneous, and more reliable, than most of its alternatives, ones such as [ibara/getexecname](https://github.com/ibara/getexecname)'s [getexecname()](https://github.com/ibara/getexecname) function for OpenBSD, [gpakosz/whereami](https://github.com/gpakosz/whereami)'s cross-platform function [wai_getExecutablePath()](https://github.com/gpakosz/whereami/tree/master/src), [libsdl-org/SDL](https://github.com/libsdl-org/SDL)'s cross-platform function [SDL_GetBasePath()](https://github.com/libsdl-org/SDL/tree/main/src/filesystem). Feel free to compare source code and run various tests if you are in any doubt.
 
 If `__getexecname/internal.h` is included to provide the function, the function returns the executable path name of the current process. If `__getexecname/external.h` is included to provide the function, the function is given an optional PID argument for returning an executable path name based on the given PID. If the PID argument is equal to negative one, or omitted completely, the executable path name to the current process is returned.
 
@@ -45,7 +47,7 @@ If the executable file has mulitple hard links pointing to it on disk, and `argv
 
 On all platforms, when successful, the executable path name returned by this function is a case-sensitive, absolute, and normalized path name, with no dot, no dot-dot, and no consecutive path separators; on Windows, backward slashes are used for all path separators, where on Unix-likes, forward slashes are used. All symbolic links to the executable path name are resolved, and the process's executable path name will be guaranteed to end in a null terminator.
 
-`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful. `__getprogname()` is inspired by the `getprogname()` function that first appeared in NetBSD 1.6, and is available on most other modern Unix-likes, even macOS. 
+`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful. `__getprogname()` is inspired by the [getprogname()](https://man.netbsd.org/getprogname.3) function that first appeared in NetBSD 1.6, and is available on most other modern Unix-likes, even macOS. 
 
 As the documentation for the original `getprogname()` function points out, some platforms set the return value of `getprogname()` automatically to be the base name of the current executable file, and it sets this return value on process startup, before the `main()` function is called.
 
