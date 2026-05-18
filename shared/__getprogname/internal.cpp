@@ -266,7 +266,7 @@ const char *__getprogname(void) {
         goto retry_without_leading_dash;
       }
     }
-    if (path.empty() && slash_pos > 0) {
+    if (path.empty() && slash_pos != std::string::npos && slash_pos > 0) {
       std::string pwd = cppgetenv("PWD");
       if (!pwd.empty()) {
         argv0 = pwd + "/" + buffer;

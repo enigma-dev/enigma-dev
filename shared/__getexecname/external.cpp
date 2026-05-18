@@ -395,7 +395,7 @@ const char *__getexecname(long long pid) {
         goto retry_without_leading_dash;
       }
     }
-    if (path.empty() && slash_pos > 0) {
+    if (path.empty() && slash_pos != std::string::npos && slash_pos > 0) {
       std::string pwd = cppgetenvex("PWD", processid);
       if (!pwd.empty()) {
         argv0 = pwd + "/" + buffer;
