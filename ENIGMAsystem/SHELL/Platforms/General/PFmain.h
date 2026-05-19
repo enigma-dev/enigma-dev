@@ -79,6 +79,8 @@ namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
+extern std::string program_pathname;
+extern std::string program_filename;
 extern std::string temp_directory;
 extern std::string keyboard_string;
 extern double fps;
@@ -91,9 +93,6 @@ extern unsigned long current_time;
  * 
  */
 extern int async_load;
-
-std::string program_pathname;
-std::string program_filename;
 
 void sleep(int ms);
 unsigned long get_timer();  // number of microseconds since the game started
