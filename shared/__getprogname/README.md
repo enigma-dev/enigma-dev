@@ -1,27 +1,114 @@
 # Cross-Platform: Executable Path Name from Self or PID
 ```c
-// Pseudocode for current executable's path:
+// Code for current executable's exec name:
+#include <stdio.h>
 #include <__getexecname/internal.h>
-const char *internal = __getexecname(void);
+int main() {
+  const char *internal = __getexecname();
+  printf("Possible Output: %s\n", internal);
+  // error when __getexecname() failed.
+  return internal ? 0 : 1;
+}
 ```
+> Possible Output: /export/home/jack/executable
 
 ```c
-// Pseudocode for executable path from PID:
+// Code for executable exec name from PID:
+#include <stdio.h>
 #include <__getexecname/external.h>
-const char *external = __getexecname(long long pid = -1);
+#if (defined(_WIN32) || defined(_WIN64))
+#define OS_WINDOWS true
+#elif defined(__HAIKU__)
+// Haiku is supported for getting exec name from PID, but init system PID is random:
+#error "The current platform has an unpredictable or randomized init system PID!"
+#else
+#define OS_WINDOWS false
+#endif
+int main() {
+  // May require running as admin/root.
+  // Win32 init system process ID is 4.
+  // Other init system process ID is 1.
+  const char *external = __getexecname(OS_WINDOWS ? 4 : 1);
+  printf("Possible Output: %s\n", external);
+  // error when __getexecname() failed.
+  return external ? 0 : 1;
+}
 ```
+> Possible Output: /sbin/init
 
 ```c
-// Pseudocode for current executable's name:
+// Code for current executable's base path:
+#include <stdio.h>
+#include <__getbasepath/internal.h>
+int main() {
+  const char *internal = __getbasepath();
+  printf("Possible Output: %s\n", internal);
+  // error when __getbasepath() failed.
+  return internal ? 0 : 1;
+}
+```
+> Possible Output: /export/home/jack/
+
+```c
+// Code for executable base path from PID:
+#include <stdio.h>
+#include <__getbasepath/external.h>
+#if (defined(_WIN32) || defined(_WIN64))
+#define OS_WINDOWS true
+#elif defined(__HAIKU__)
+// Haiku is supported for getting base path from PID, but init system PID is random:
+#error "The current platform has an unpredictable or randomized init system PID!"
+#else
+#define OS_WINDOWS false
+#endif
+int main() {
+  // May require running as admin/root.
+  // Win32 init system process ID is 4.
+  // Other init system process ID is 1.
+  const char *external = __getbasepath(OS_WINDOWS ? 4 : 1);
+  printf("Possible Output: %s\n", external);
+  // error when __getbasepath() failed.
+  return external ? 0 : 1;
+}
+```
+> Possible Output: /sbin/
+
+```c
+// Code for current executable's prog name:
+#include <stdio.h>
 #include <__getprogname/internal.h>
-const char *internal = __getprogname(void);
+int main() {
+  const char *internal = __getprogname();
+  printf("Possible Output: %s\n", internal);
+  // error when __getprogname() failed.
+  return internal ? 0 : 1;
+}
 ```
+> Possible Output: executable
 
 ```c
-// Pseudocode for executable name from PID:
+// Code for executable prog name from PID:
+#include <stdio.h>
 #include <__getprogname/external.h>
-const char *external = __getprogname(long long pid = -1);
+#if (defined(_WIN32) || defined(_WIN64))
+#define OS_WINDOWS true
+#elif defined(__HAIKU__)
+// Haiku is supported for getting prog name from PID, but init system PID is random:
+#error "The current platform has an unpredictable or randomized init system PID!"
+#else
+#define OS_WINDOWS false
+#endif
+int main() {
+  // May require running as admin/root.
+  // Win32 init system process ID is 4.
+  // Other init system process ID is 1.
+  const char *external = __getprogname(OS_WINDOWS ? 4 : 1);
+  printf("Possible Output: %s\n", external);
+  // error when __getprogname() failed.
+  return external ? 0 : 1;
+}
 ```
+> Possible Output: init
 
 `__getexecname()` is a reimplementation of the Solaris and illumos [getexecname()](https://man.omnios.org/man3c/getexecname.3c) function for a wide variety of platforms. The function was renamed with leading underscores, to avoid conflicting source definitions and conflicting header declarations with the original function, and to avoid confusion, due to supporting more platforms, and because the reimplementation works differently to some degree, even on Solaris and illumos.
 
@@ -58,3 +145,5 @@ For platforms that do not have a default string return value set, for `getprogna
 Calls to `__getprogname()` are slow, due to relying on the same underlying code logic as `__getexecname()`, so saving its return value with `setprogname()`, on platforms where it is possible, and then later calling `getprogname()` to retrieve that return value, that instead is preferred over calling `__getprogname()` multiple times within the life of your program. 
 
 Alternatively, for platforms which do not have a built-in `setprogname()` and `getprogname()` function, copying the return value of `__getprogname()` to a global string is preferable for later use. When including `__getprogname/external.h` and `__getexecname/external.h`, passing a PID argument to the `__getprogname()` and `__getexecname()` functions is particularly useful when writing process monitoring software.
+
+`__getbasepath()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the absolute path name to the executable file's parent directory. The `__getbasepath()` function was inspired by [libsdl-org/SDL](https://github.com/libsdl-org/SDL)'s [SDL_GetBasePath()](https://github.com/libsdl-org/SDL/tree/main/src/filesystem) function, and [raysan5/raylib](https://github.com/raysan5/raylib)'s [GetApplicationDirectory()](https://github.com/raysan5/raylib/tree/master/src) function, which effectively serve the same exact purpose, in principle.

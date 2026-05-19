@@ -82,7 +82,7 @@ SOFTWARE.
 #include <cstdlib>
 #endif
 
-const char *__getprogname(void) {
+const char *__getbasepath(void) {
   std::string path;
   #if (defined(_WIN32) || defined(_WIN64))
   auto resolve_symbolic_links = [](std::wstring wstr) {
@@ -334,6 +334,6 @@ const char *__getprogname(void) {
   if (path.empty()) return nullptr;
   size_t pos = path.find_last_of("/\\");
   static std::string result; 
-  result = path.substr(pos + 1);
+  result = path.substr(0, pos + 1);
   return result.c_str();
 }

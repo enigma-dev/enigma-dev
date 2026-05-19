@@ -520,7 +520,9 @@ const char *__getprogname(long long pid) {
     }
   }
   #endif
+  if (path.empty()) return nullptr;
   size_t pos = path.find_last_of("/\\");
-  static std::string result; result = path.substr(pos + 1);
-  return ((!result.empty()) ? result.c_str() : nullptr);
+  static std::string result; 
+  result = path.substr(pos + 1);
+  return result.c_str();
 }
