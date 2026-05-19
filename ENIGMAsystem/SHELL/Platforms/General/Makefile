@@ -1,6 +1,4 @@
 SHARED_SRC_DIR := ../../shared
-override CXXFLAGS += -I$(SHARED_SRC_DIR)/__getexecname -I$(SHARED_SRC_DIR)/__getbasepath -I$(SHARED_SRC_DIR)/__getprogname
-override CFLAGS += -I$(SHARED_SRC_DIR)/__getexecname -I$(SHARED_SRC_DIR)/__getbasepath -I$(SHARED_SRC_DIR)/__getprogname
 SOURCES += $(SHARED_SRC_DIR)/__getexecname/internal.cpp
 SOURCES += $(SHARED_SRC_DIR)/__getbasepath/internal.cpp
 SOURCES += $(SHARED_SRC_DIR)/__getprogname/internal.cpp
