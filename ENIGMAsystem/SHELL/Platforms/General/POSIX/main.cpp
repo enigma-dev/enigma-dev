@@ -33,7 +33,11 @@ namespace enigma {
   void initialize_directory_globals() {
     std::error_code ec;
     const char *basepath = __getbasepath();
-    enigma_user::program_directory = basepath ? basepath : "";
+    const char *execname = __getexecname();
+    const char *progname = __getprogname();
+    enigma_user::program_directory = basepath ? basepath : ""; // /path/to/executable
+    enigma_user::program_pathname  = execname ? execname : ""; // /path/to/
+    enigma_user::program_filename  = progname ? progname : ""; // executable
     enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     std::filesystem::create_directories(add_slash(enigma_user::environment_get_variable("HOME")) + std::string(".config"), ec);
