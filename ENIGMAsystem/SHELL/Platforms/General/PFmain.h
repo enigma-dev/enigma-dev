@@ -92,6 +92,9 @@ extern unsigned long current_time;
  */
 extern int async_load;
 
+std::string program_pathname;
+std::string program_filename;
+
 void sleep(int ms);
 unsigned long get_timer();  // number of microseconds since the game started
 void game_end();
