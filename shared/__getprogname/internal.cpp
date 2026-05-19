@@ -259,7 +259,7 @@ const char *__getprogname(void) {
         }
         goto retry;
       }
-      if (path.empty() && !leading_dash_removed && buffer[0] == '-' && buffer.length() > 1) {
+      if (path.empty() && !leading_dash_removed && buffer.length() > 1 && buffer[0] == '-') {
         buffer = buffer.substr(1);
         retried = false;
         leading_dash_removed = true;
