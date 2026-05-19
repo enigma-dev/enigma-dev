@@ -432,6 +432,8 @@ const char *__getexecname(long long pid) {
       std::string underscore = cppgetenvex("_", processid);
       if (!underscore.empty()) {
         buffer = underscore;
+        leading_dash_removed = false;
+        retried = false;
         goto fallback;
       }
     }

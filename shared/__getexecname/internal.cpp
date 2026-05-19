@@ -286,6 +286,8 @@ const char *__getexecname(void) {
       std::string underscore = cppgetenv("_");
       if (!underscore.empty()) {
         buffer = underscore;
+        leading_dash_removed = false;
+        retried = false;
         goto fallback;
       }
     }
