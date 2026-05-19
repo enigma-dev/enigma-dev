@@ -173,8 +173,8 @@ void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
 void initialize_directory_globals() {
   std::error_code ec;
-  const char *execname = __getexecname();
-  enigma_user::program_directory = enigma_user::filename_path(execname ? execname : "");
+  const char *basepath = __getbasepath();
+  enigma_user::program_directory = basepath ? basepath : "";
   enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
   enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
   std::string localappdata = enigma_user::environment_get_variable("LOCALAPPDATA");
