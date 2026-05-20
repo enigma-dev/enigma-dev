@@ -134,7 +134,7 @@ If the executable file has mulitple hard links pointing to it on disk, and `argv
 
 On all platforms, when successful, the executable path name returned by this function is a case-sensitive, absolute, and normalized path name, with no dot, no dot-dot, and no consecutive path separators; on Windows, backward slashes are used for all path separators, where on Unix-likes, forward slashes are used. All symbolic links to the executable path name are resolved, and the process's executable path name will be guaranteed to end in a null terminator.
 
-`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful. `__getprogname()` is inspired by the [getprogname()](https://man.netbsd.org/getprogname.3) function that first appeared in NetBSD 1.6, and is available on most other modern Unix-likes, even macOS. 
+`__getprogname()` follows the same exact code logic as `__getexecname()`, except instead of returning the absolute path name to the executable file, it only returns the executable file's base name when successful. `__getprogname()` was inspired by the [getprogname()](https://man.netbsd.org/getprogname.3) function that first appeared in NetBSD 1.6, and is available on most other modern Unix-likes, even macOS. 
 
 As the documentation for the original `getprogname()` function points out, some platforms set the return value of `getprogname()` automatically to be the base name of the current executable file, and it sets this return value on process startup, before the `main()` function is called.
 
