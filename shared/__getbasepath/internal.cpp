@@ -80,6 +80,7 @@ SOFTWARE.
 #include <cstdio>
 #include <climits>
 #include <cstdlib>
+#include <process.h>
 #endif
 
 const char *__getbasepath(void) {
@@ -319,16 +320,25 @@ const char *__getbasepath(void) {
     }
   }
   #elif (defined(__QNX__) || defined(__QNXNTO__))
-  FILE *fp = fopen("/proc/self/exefile", "r");
-  if (fp) {
-    char buffer[PATH_MAX];
-    if (fgets(buffer, sizeof(buffer), fp)) {
-      char exe[PATH_MAX];
-      if (realpath(buffer, exe)) {
-        path = exe;
-      }
+  char buffer[PATH_MAX];
+  if(_cmdname(buffer)) {
+    char exe[PATH_MAX];
+    if (realpath(buffer, exe)) {
+      path = exe;
     }
-    fclose(fp);
+  }
+  if (path.empty()) {
+    FILE *fp = fopen("/proc/self/exefile", "r");
+    if (fp) {
+      char buffer[PATH_MAX];
+      if (fgets(buffer, sizeof(buffer), fp)) {
+        char exe[PATH_MAX];
+        if (realpath(buffer, exe)) {
+          path = exe;
+        }
+      }
+      fclose(fp);
+    }
   }
   #endif
   if (path.empty()) return nullptr;

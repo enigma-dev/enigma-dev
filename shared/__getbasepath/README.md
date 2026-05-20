@@ -124,7 +124,7 @@ The return value, whenever it succeeds, and is not equal to a null pointer, it i
 
 When returning the path name to the current executable file, it is recommended to call this function at the very beginning of your program, and save its return value into a global string for later use. If the first time you call the function is not at the very beginning of your program, that allows the executable to potentially be moved or deleted first, thus causing the function to fail and return a null pointer, which is undesirable behavior.
 
-On Solaris and illumos, there are certain conditions where you may need a process filesystem mounted in the current session in order for the function to not fail and return a null pointer. Linux requires the process filesystem mounted in the current session for this function to not fail and return a null pointer, under all circumstances. 
+On Solaris, illumos, QNX, and QNX Neutrino, there are certain conditions where you may need a process filesystem mounted in the current session in order for the function to not fail and return a null pointer. Linux requires the process filesystem mounted in the current session for this function to not fail and return a null pointer, under all circumstances. 
 
 OpenBSD relies on `libkvm` calls to make an attempt at guessing the executable path name, and be aware this platform has the most failure cases, where the function will return a null poiner; OpenBSD is the least reliable platform, due to not having a platform-provided API, thus causing the need to write one ourselves using workarounds.
 

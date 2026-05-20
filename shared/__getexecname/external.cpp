@@ -100,6 +100,7 @@ SOFTWARE.
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
+#include <process.h>
 #endif
 
 const char *__getexecname(long long pid) {
@@ -494,16 +495,25 @@ const char *__getexecname(long long pid) {
   #elif (defined(__QNX__) || defined(__QNXNTO__))
   pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
-    FILE *fp = fopen("/proc/self/exefile", "r");
-    if (fp) {
-      char buffer[PATH_MAX];
-      if (fgets(buffer, sizeof(buffer), fp)) {
-        char exe[PATH_MAX];
-        if (realpath(buffer, exe)) {
-          path = exe;
-        }
+    char buffer[PATH_MAX];
+    if(_cmdname(buffer)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
-      fclose(fp);
+    }
+    if (path.empty()) {
+      FILE *fp = fopen("/proc/self/exefile", "r");
+      if (fp) {
+        char buffer[PATH_MAX];
+        if (fgets(buffer, sizeof(buffer), fp)) {
+          char exe[PATH_MAX];
+          if (realpath(buffer, exe)) {
+            path = exe;
+          }
+        }
+        fclose(fp);
+      }
     }
   } else {
     FILE *fp = fopen((std::string("/proc/") + std::to_string(processid) + 
