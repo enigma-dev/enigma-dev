@@ -380,7 +380,7 @@ const char *__getbasepath(long long pid) {
     if (slash_pos == 0) {
       argv0 = buffer;
       path = verifyexeex(argv0, processid);
-    } else if (slash_pos == std::string::npos || slash_pos > colon_pos) {
+    } else if (slash_pos == std::string::npos || (colon_pos != std::string::npos && colon_pos > 0 && slash_pos > colon_pos)) {
       path_lookup:
       retry_without_leading_dash:
       std::string penv = cppgetenvex("PATH", processid);
@@ -392,7 +392,7 @@ const char *__getbasepath(long long pid) {
           argv0 = tmp + "/" + buffer;
           path = verifyexeex(argv0, processid);
           if (!path.empty()) break;
-          if (slash_pos > colon_pos) {
+          if (!argv0_does_not_exist && colon_pos != std::string::npos && colon_pos > 0 && slash_pos > colon_pos) {
             argv0 = tmp + "/" + buffer.substr(0, colon_pos);
             path = verifyexeex(argv0, processid);
             if (!path.empty()) break;
