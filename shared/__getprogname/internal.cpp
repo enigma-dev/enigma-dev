@@ -44,7 +44,7 @@ SOFTWARE.
 #elif (defined(__linux__) || defined(__ANDROID__))
 #include <climits>
 #include <cstdlib>
-#elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__))
+#elif ((defined(__FreeBSD__) || defined(__FreeBSD_kernel__)) || defined(__DragonFly__))
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
@@ -134,7 +134,7 @@ const char *__getprogname(void) {
   if (realpath("/proc/self/exe", exe)) {
     path = exe;
   }
-  #elif (defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__))
+  #elif ((defined(__FreeBSD__) || defined(__FreeBSD_kernel__)) || defined(__DragonFly__))
   int mib[4]; 
   size_t len = 0;
   mib[0] = CTL_KERN;
@@ -203,7 +203,7 @@ const char *__getprogname(void) {
               size_t last_slash_pos = exe.find_last_of("/");
               if (last_slash_pos != std::string::npos) {
                 const char *progname = getprogname();
-                if (!progname) {
+                if (progname) {
                   exe = exe.substr(0, last_slash_pos + 1) + progname;
                   goto fallback;
                 }
