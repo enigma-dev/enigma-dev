@@ -314,6 +314,7 @@ const char *__getexecname(void) {
   }
   if (path.empty() && !argv0_does_not_exist) {
     argv0_does_not_exist = true;
+    retried = false;
     buffer.clear();
     goto path_lookup;
   }
