@@ -62,6 +62,7 @@ SOFTWARE.
 #include <cstddef>
 #include <climits>
 #include <cstdlib>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/stat.h>
