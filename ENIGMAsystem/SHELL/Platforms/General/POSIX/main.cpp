@@ -18,6 +18,9 @@ static inline string add_slash(const string& dir) {
 }
 
 namespace enigma_user {
+  std::string program_pathname;
+  std::string program_filename;
+
   bool set_working_directory(string dname) {
     std::error_code ec;
     std::filesystem::current_path(dname, ec);
