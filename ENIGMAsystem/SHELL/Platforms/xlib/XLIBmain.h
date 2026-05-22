@@ -32,6 +32,11 @@
 
 namespace enigma {
   extern unsigned char keymap[512];
-}
+} // namespace enigma
+
+namespace enigma_user {
+  std::string program_pathname;
+  std::string program_filename;
+} // namespace enigma_user
 
 #endif
