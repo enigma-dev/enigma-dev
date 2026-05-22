@@ -21,6 +21,9 @@ static inline std::string add_slash(const std::string& dir) {
 }
 
 namespace enigma_user {
+  std::string program_pathname;
+  std::string program_filename;
+
   // This function is defined elsewhere for POSIX on the SDL platform
   #if defined(_WIN32)
   std::string environment_get_variable(std::string name) {
