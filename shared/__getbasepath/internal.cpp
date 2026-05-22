@@ -71,17 +71,17 @@ SOFTWARE.
 #elif (defined(__sun) && defined(__SVR4))
 #include <climits>
 #include <cstdlib>
+#elif (defined(__QNX__) || defined(__QNXNTO__))
+#include <cstdio>
+#include <climits>
+#include <cstdlib>
+#include <process.h>
 #elif defined(__HAIKU__)
 #include <cstdint>
 #include <climits>
 #include <cstdlib>
 #include <image.h>
 #include <OS.h>
-#elif (defined(__QNX__) || defined(__QNXNTO__))
-#include <cstdio>
-#include <climits>
-#include <cstdlib>
-#include <process.h>
 #endif
 
 const char *__getbasepath(void) {
@@ -332,18 +332,6 @@ const char *__getbasepath(void) {
       path = exe;
     }
   }
-  #elif defined(__HAIKU__)
-  image_info info;
-  int32_t cookie = 0;
-  while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
-    if (info.type == B_APP_IMAGE) {
-      char exe[PATH_MAX];
-      if (realpath(info.name, exe)) {
-        path = exe;
-        break;
-      }
-    }
-  }
   #elif (defined(__QNX__) || defined(__QNXNTO__))
   char buffer[PATH_MAX];
   if(_cmdname(buffer)) {
@@ -363,6 +351,18 @@ const char *__getbasepath(void) {
         }
       }
       fclose(fp);
+    }
+  }
+  #elif defined(__HAIKU__)
+  image_info info;
+  int32_t cookie = 0;
+  while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+    if (info.type == B_APP_IMAGE) {
+      char exe[PATH_MAX];
+      if (realpath(info.name, exe)) {
+        path = exe;
+      }
+      break;
     }
   }
   #endif

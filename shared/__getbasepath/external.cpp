@@ -89,12 +89,6 @@ SOFTWARE.
 #include <unistd.h>
 #include <sys/types.h>
 #include <libproc.h>
-#elif defined(__HAIKU__)
-#include <cstdint>
-#include <climits>
-#include <cstdlib>
-#include <image.h>
-#include <OS.h>
 #elif (defined(__QNX__) || defined(__QNXNTO__))
 #include <cstdio>
 #include <climits>
@@ -102,6 +96,12 @@ SOFTWARE.
 #include <unistd.h>
 #include <sys/types.h>
 #include <process.h>
+#elif defined(__HAIKU__)
+#include <cstdint>
+#include <climits>
+#include <cstdlib>
+#include <image.h>
+#include <OS.h>
 #endif
 
 const char *__getbasepath(long long pid) {
@@ -504,19 +504,6 @@ const char *__getbasepath(long long pid) {
       }
     }
   }
-  #elif defined(__HAIKU__)
-  team_id processid = (team_id)pid;
-  image_info info;
-  int32_t cookie = 0;
-  while (get_next_image_info((processid == -1) ? B_CURRENT_TEAM : processid, &cookie, &info) == B_OK) {
-    if (info.type == B_APP_IMAGE) {
-      char exe[PATH_MAX];
-      if (realpath(info.name, exe)) {
-        path = exe;
-        break;
-      }
-    }
-  }
   #elif (defined(__QNX__) || defined(__QNXNTO__))
   pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
@@ -552,6 +539,19 @@ const char *__getbasepath(long long pid) {
         }
       }
       fclose(fp);
+    }
+  }
+  #elif defined(__HAIKU__)
+  team_id processid = (team_id)pid;
+  image_info info;
+  int32_t cookie = 0;
+  while (get_next_image_info((processid == -1) ? B_CURRENT_TEAM : processid, &cookie, &info) == B_OK) {
+    if (info.type == B_APP_IMAGE) {
+      char exe[PATH_MAX];
+      if (realpath(info.name, exe)) {
+        path = exe;
+      }
+      break;
     }
   }
   #endif
