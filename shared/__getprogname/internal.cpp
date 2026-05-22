@@ -36,6 +36,7 @@ SOFTWARE.
 #include <stringapiset.h>
 #include <libloaderapi.h>
 #include <handleapi.h>
+#include <winbase.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <cstdint>
 #include <climits>
