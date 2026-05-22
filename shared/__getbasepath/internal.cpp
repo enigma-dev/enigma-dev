@@ -90,7 +90,7 @@ const char *__getbasepath(void) {
   auto resolve_symbolic_links = [](std::wstring wstr) {
     std::wstring result;
     wchar_t path[MAX_PATH];
-    HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, nullptr);
     if (hFile != INVALID_HANDLE_VALUE) {
       DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
       if (len) {
