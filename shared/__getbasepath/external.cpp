@@ -182,21 +182,21 @@ const char *__getbasepath(long long pid) {
   #elif (defined(__APPLE__) && defined(__MACH__))
   pid_t processid = (pid_t)pid;
   if (processid == -1 || processid == getpid()) {
-    char exe[PATH_MAX];
-    uint32_t size = sizeof(exe);
-    if (!_NSGetExecutablePath(exe, &size)) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char buffer[PATH_MAX];
+    uint32_t size = sizeof(buffer);
+    if (!_NSGetExecutablePath(buffer, &size)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
   } else {
-    char exe[PROC_PIDPATHINFO_MAXSIZE];
-    if (proc_pidpath(processid, exe, sizeof(exe)) > 0) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char buffer[PROC_PIDPATHINFO_MAXSIZE];
+    if (proc_pidpath(processid, buffer, sizeof(buffer)) > 0) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   #endif
@@ -225,11 +225,11 @@ const char *__getbasepath(long long pid) {
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
     strbuff.resize(len, '\0');
-    char *exe = strbuff.data();
-    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char *buffer = strbuff.data();
+    if (!sysctl(mib, 4, buffer, &len, nullptr, 0)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   }
@@ -244,11 +244,11 @@ const char *__getbasepath(long long pid) {
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
     strbuff.resize(len, '\0');
-    char *exe = strbuff.data();
-    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char *buffer = strbuff.data();
+    if (!sysctl(mib, 4, buffer, &len, nullptr, 0)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   }

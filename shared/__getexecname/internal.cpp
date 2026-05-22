@@ -121,12 +121,12 @@ const char *__getexecname(void) {
     path = narrow(exe);
   }
   #elif (defined(__APPLE__) && defined(__MACH__))
-  char exe[PATH_MAX];
-  uint32_t size = sizeof(exe);
-  if (!_NSGetExecutablePath(exe, &size)) {
-    char buffer[PATH_MAX];
-    if (realpath(exe, buffer)) {
-      path = buffer;
+  char buffer[PATH_MAX];
+  uint32_t size = sizeof(buffer);
+  if (!_NSGetExecutablePath(buffer, &size)) {
+    char exe[PATH_MAX];
+    if (realpath(buffer, exe)) {
+      path = exe;
     }
   }
   #elif (defined(__linux__) || defined(__ANDROID__))
@@ -144,11 +144,11 @@ const char *__getexecname(void) {
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
     strbuff.resize(len, '\0');
-    char *exe = strbuff.data();
-    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char *buffer = strbuff.data();
+    if (!sysctl(mib, 4, buffer, &len, nullptr, 0)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   }
@@ -162,11 +162,11 @@ const char *__getexecname(void) {
   if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
     std::string strbuff;
     strbuff.resize(len, '\0');
-    char *exe = strbuff.data();
-    if (!sysctl(mib, 4, exe, &len, nullptr, 0)) {
-      char buffer[PATH_MAX];
-      if (realpath(exe, buffer)) {
-        path = buffer;
+    char *buffer = strbuff.data();
+    if (!sysctl(mib, 4, buffer, &len, nullptr, 0)) {
+      char exe[PATH_MAX];
+      if (realpath(buffer, exe)) {
+        path = exe;
       }
     }
   }
