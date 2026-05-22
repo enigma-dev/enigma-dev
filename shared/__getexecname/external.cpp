@@ -114,16 +114,15 @@ const char *__getexecname(long long pid) {
   auto resolve_symbolic_links = [](std::wstring wstr) {
     std::wstring result;
     wchar_t path[MAX_PATH];
-    HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, 
-    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 
-    nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile = CreateFileW(wstr.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (hFile != INVALID_HANDLE_VALUE) {
-      DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, 0);
+      DWORD len = GetFinalPathNameByHandleW(hFile, path, MAX_PATH, FILE_NAME_OPENED);
       if (len) {
-        if (std::wstring(path).length() > 4 && path[0] == '\\' && path[1] == '\\' && path[2] == '?' && path[3] == '\\') {
-          result = path + 4;
-        } else {
-          result = path;
+        result = path;
+        if (!result.substr(0, 8).compare("\\\\?\\UNC\\")) {
+          result = "\\" + result.substr(7);
+        } else if (!result.substr(0, 4).compare("\\\\?\\")) {
+          result = result.substr(4);
         }
       }
       CloseHandle(hFile);
