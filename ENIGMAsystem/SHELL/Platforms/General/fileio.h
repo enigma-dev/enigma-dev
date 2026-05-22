@@ -37,6 +37,8 @@ size_t fwrite_wrapper(const void *ptr, size_t size, size_t count, FILE_t* contex
 #include <string>
 
 namespace enigma_user {
+std::string program_pathname;
+std::string program_filename;
 int file_text_open_read(const std::string& fname);
 int file_text_open_write(const std::string& fname);
 int file_text_open_append(const std::string& fname);
