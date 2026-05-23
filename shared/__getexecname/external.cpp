@@ -53,7 +53,7 @@ SOFTWARE.
 #if (defined(TARGET_OS_OSX) && TARGET_OS_OSX)
 #include <libproc.h>
 #endif
-#elif (defined(__linux__) || defined(__ANDROID__))
+#elif ((defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__) || defined(__CYGWIN__))
 #include <climits>
 #include <cstdlib>
 #include <unistd.h>
@@ -200,7 +200,7 @@ const char *__getexecname(long long pid) {
     }
   #endif
   }
-  #elif (defined(__linux__) || defined(__ANDROID__))
+  #elif ((defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__) || defined(__CYGWIN__))
   pid_t processid = (pid_t)pid;
   char exe[PATH_MAX];
   if (processid == -1 || processid == getpid()) {

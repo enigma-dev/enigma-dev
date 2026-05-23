@@ -42,7 +42,7 @@ SOFTWARE.
 #include <climits>
 #include <cstdlib>
 #include <mach-o/dyld.h>
-#elif (defined(__linux__) || defined(__ANDROID__))
+#elif ((defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__) || defined(__CYGWIN__))
 #include <climits>
 #include <cstdlib>
 #elif ((defined(__FreeBSD__) || defined(__FreeBSD_kernel__)) || defined(__DragonFly__))
@@ -129,7 +129,7 @@ const char *__getprogname(void) {
       path = exe;
     }
   }
-  #elif (defined(__linux__) || defined(__ANDROID__))
+  #elif ((defined(__linux__) || defined(__ANDROID__)) || defined(__gnu_hurd__) || defined(__CYGWIN__))
   char exe[PATH_MAX];
   if (realpath("/proc/self/exe", exe)) {
     path = exe;
