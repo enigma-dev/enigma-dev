@@ -207,11 +207,13 @@ const char *__getprogname(long long pid) {
     if (realpath("/proc/self/exe", exe)) {
       path = exe;
     }
+  #if !defined(__CYGWIN__)
   } else {
     if (realpath((std::string("/proc/") + std::to_string(processid) + 
       std::string("/exe")).c_str(), exe)) {
       path = exe;
     }
+  #endif
   }
   #elif ((defined(__FreeBSD__) || defined(__FreeBSD_kernel__)) || defined(__DragonFly__))
   pid_t processid = (pid_t)pid;
