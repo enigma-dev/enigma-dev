@@ -288,7 +288,6 @@ void initialize_directory_globals() {
     *_ename = extension name - includes everything in bname at and following the period if one exists
   */
 
-  bool success = false; 
   const string exe_pname = enigma_user::program_directory;                  // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
   const string macos_dname = enigma_user::filename_dir(exe_pname);          // = "/Path/To/YourAppBundle.app/Contents/MacOS";
   const string macos_bname = enigma_user::filename_name(macos_dname);       // = "MacOS";
@@ -302,7 +301,7 @@ void initialize_directory_globals() {
   // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
   if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
     // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
-    success = enigma_user::set_working_directory(enigma_user::filename_absolute(resources_pname));
+    enigma_user::set_working_directory(enigma_user::filename_absolute(resources_pname));
   }
 
   #endif
