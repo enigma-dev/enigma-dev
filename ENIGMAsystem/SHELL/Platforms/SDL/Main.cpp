@@ -57,12 +57,10 @@ namespace enigma_user {
 namespace enigma {
   void initialize_directory_globals() {
     std::error_code ec;
-    const char *basepath = __getbasepath();
     const char *execname = __getexecname();
-    const char *progname = __getprogname();
-    enigma_user::program_directory = basepath ? basepath : ""; // C:/Path/To/Executable.exe, /path/to/executable
-    enigma_user::program_pathname  = execname ? execname : ""; // C:/Path/To/, /path/to/
-    enigma_user::program_filename  = progname ? progname : ""; // Executable.exe, executable
+    enigma_user::program_pathname  = ((execname) ? execname : "");
+    enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
+    enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
     enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
     enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
     #if defined(_WIN32)
