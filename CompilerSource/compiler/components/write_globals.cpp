@@ -33,7 +33,9 @@
 
 using namespace std;
 
+#include "syntax/syncheck.h"
 #include "general/estring.h"
+#include "parser/parser.h"
 
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
@@ -42,7 +44,7 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
-static string esc(std::string_view str) {
+static string esc(const string &str) {
   string res;
   res.reserve(str.length());
   for (size_t i = 0; i < str.length(); ++i) {

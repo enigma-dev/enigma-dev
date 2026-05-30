@@ -1,11 +1,9 @@
-edition = "2024";
-option features.field_presence = EXPLICIT;
-option features.enforce_naming_style = STYLE_LEGACY;
+syntax = "proto2";
 package buffers;
 
 import "game.proto";
 
 message Project {
-  Game game = 1;
-  //EditorMetaData = 2;
+  optional Game game = 1;
+  //optional EditorMetaData = 2;
 }

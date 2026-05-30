@@ -10,17 +10,10 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 /coverage_*.info
-/coverage-arch.info
-/coverage-macos.info
-/coverage-windows.info
-/CI/github/out/*.xml
-*.gcda
-*.gcno
 /libEGM.*
 /libProtocols.*
 /app
 /runtime
-/openjre/
 /shared/protos/build/
 /shared/protos/codegen
 /CommandLine/libEGM/build/
@@ -31,7 +24,7 @@
 /ENIGMAsystem/additional/
 /ENIGMAsystem/Additional/
 .deps
-.eobjs*/
+.eobjs/
 /plugins/
 /CompilerSource/bin/
 /CompilerSource/JDI/dox/
@@ -73,7 +66,3 @@ hs_err_pid*.log
 *.layout
 *.epackage
 *~
-.vscode
-
-# it is a file for testing the output of the pretty printer
-output.txt

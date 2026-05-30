@@ -29,10 +29,11 @@ using namespace std;
 #include "darray.h"
 
 
-#include "parser/parser.h"
-#include "parser/object_storage.h"
-#include "compiler/compile_common.h"
-// #include "syntax/checkfile.h"
+#include "syntax/syncheck.h"
+  #include "parser/parser.h"
+  #include "parser/object_storage.h"
+  #include "compiler/compile_common.h"
+  // #include "syntax/checkfile.h"
 
 
 int m_prog_loop_cfp();

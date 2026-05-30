@@ -1,12 +1,10 @@
-edition = "2024";
-option features.field_presence = EXPLICIT;
-option features.enforce_naming_style = STYLE_LEGACY;
+syntax = "proto2";
 package buffers.resources;
 
 import "options.proto";
 
 message Script {
-  int32 id = 2;
+  optional int32 id = 2;
 
-  string code = 3;
+  optional string code = 3;
 }

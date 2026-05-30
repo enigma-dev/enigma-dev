@@ -11,8 +11,8 @@ Make-Vars:
   cc: clang
   cxx: clang++
   cppflags:
-  cxxflags: -fcolor-diagnostics -I/opt/homebrew/include/
-  cflags: -fcolor-diagnostics -I/opt/homebrew/include/
+  cxxflags:
+  cflags:
   ldflags:
   links:
 
@@ -23,8 +23,8 @@ Parser-Vars:
   searchdirs-end: "End of search list."
 
 EXE-Vars:
-  resources: $exe
-  Build-Extension:
-  Run-output: $tempfile
-  Run-Program: $game
+  resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
+  Build-Extension: .app
+  Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
+  Run-Program: open $game
   Run-Params:

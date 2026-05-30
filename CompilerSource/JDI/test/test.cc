@@ -1,4 +1,4 @@
-/* Simple C test case */
+/* Simple C test case * /
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -14,8 +14,7 @@
 #include <png.h>
 /* */
 
-
-/* */
+/* * /
 #include <cassert>
 #include <cctype>
 #include <cerrno>
@@ -57,7 +56,7 @@
 #include <bitset>
 /* */
 
-/* */
+/* * /
 #include <iomanip>    // 2
 #include <streambuf>  // 13
 #include <ios>        // 27

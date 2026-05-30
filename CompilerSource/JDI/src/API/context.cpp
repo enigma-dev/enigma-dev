@@ -1,23 +1,23 @@
 /**
  * @file  context.cpp
  * @brief Source implementing methods for creating contexts of parsed code.
- *
+ * 
  * In general, the implementation is unremarkable. See the header documentation
  * for details on behavior and usage.
- *
+ * 
  * @section License
- *
+ * 
  * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
- *
+ * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- *
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY
+ * 
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -30,13 +30,11 @@ using namespace std;
 #include "context.h"
 #include <System/macros.h>
 #include <System/builtins.h>
-#include <System/lex_cpp.h>
 
 using namespace jdi;
+using namespace jdip;
 
-#define new_macro std::make_shared<const macro_type>
-
-void Context::read_macros(const char* filename)
+void context::read_macros(const char* filename)
 {
   ifstream in(filename);
   if (!in.is_open())
@@ -44,66 +42,50 @@ void Context::read_macros(const char* filename)
   // TODO: IMPLEMENT
   in.close();
 }
-inline vector<token_t> parse_macro(const string &definiendum, const string &definiens, ErrorHandler *herr) {
-  llreader str_reader(definiendum, definiens, false);
-  vector<token_t> tokens;
-  for (token_t t;
-      (t = read_token(str_reader, herr)).type != TT_ENDOFCODE; )
-    tokens.push_back(t);
-  return tokens;
+void context::add_macro(string definiendum, string definiens) {
+  macros[definiendum] = (macro_type*)new macro_scalar(definiendum, definiens);
 }
-void Context::add_macro(string definiendum, string definiens) {
-  macros[definiendum] = new_macro(definiendum,
-                                  parse_macro(definiendum, definiens, herr),
-                                  herr);
+void context::add_macro_func(string definiendum, string definiens) {
+  macros[definiendum] = (macro_type*)new macro_function(definiens);
 }
-void Context::add_macro_func(string definiendum, string definiens) {
-  macros[definiendum] = new_macro(definiendum,
-                                  parse_macro(definiendum, definiens, herr),
-                                  herr);
-}
-void Context::add_macro_func(string definiendum, string p1, string definiens, bool variadic) {
+void context::add_macro_func(string definiendum, string p1, string definiens, bool variadic)
+{
   vector<string> arglist;
   arglist.push_back(p1);
-  macros[definiendum] = new_macro(definiendum, std::move(arglist), variadic,
-                                  parse_macro(definiendum, definiens, herr),
-                                  herr);
+  macros[definiendum] = (macro_type*)new macro_function(definiendum, arglist, definiens, variadic);
 }
-void Context::add_macro_func(string definiendum, string p1, string p2, string definiens, bool variadic) {
+void context::add_macro_func(string definiendum, string p1, string p2, string definiens, bool variadic)
+{
   vector<string> arglist;
   arglist.push_back(p1);
   arglist.push_back(p2);
-  macros[definiendum] = new_macro(definiendum,  std::move(arglist), variadic,
-                                  parse_macro(definiendum, definiens, herr),
-                                  herr);
+  macros[definiendum] = (macro_type*)new macro_function(definiendum, arglist, definiens, variadic);
 }
-void Context::add_macro_func(string definiendum, string p1, string p2, string p3, string definiens, bool variadic)
+void context::add_macro_func(string definiendum, string p1, string p2, string p3, string definiens, bool variadic)
 {
   vector<string> arglist;
   arglist.push_back(p1);
   arglist.push_back(p2);
   arglist.push_back(p3);
-  macros[definiendum] = new_macro(definiendum,  std::move(arglist), variadic,
-                                  parse_macro(definiendum, definiens, herr),
-                                  herr);
+  macros[definiendum] = (macro_type*)new macro_function(definiendum, arglist, definiens, variadic);
 }
 
 #ifndef MAX_PATH
 #define MAX_PATH 512
 #endif
 
-void Context::read_search_directories(const char* filename) {
-  read_search_directories_gnu(filename,nullptr,nullptr);
+void context::read_search_directories(const char* filename) {
+  read_search_directories_gnu(filename,NULL,NULL);
 }
-void Context::read_search_directories_gnu(const char* filename, const char* begin_line, const char* end_line)
+void context::read_search_directories_gnu(const char* filename, const char* begin_line, const char* end_line)
 {
   ifstream in(filename);
   if (!in.is_open()) return;
-
+  
   const size_t ln = strlen(filename) + MAX_PATH;
   const size_t bll = begin_line ? strlen(begin_line) : size_t(-1), ell = end_line ? strlen(end_line) : size_t(-1);
   char *sdir = new char[ln];
-
+  
   while (!in.eof())
   {
     *sdir = 0;
@@ -124,11 +106,11 @@ void Context::read_search_directories_gnu(const char* filename, const char* begi
         break;
     add_search_directory(dir);
   }
-
+  
   delete[] sdir;
   in.close();
 }
-void Context::add_search_directory(string dir)
+void context::add_search_directory(string dir)
 {
   search_directories.push_back(dir);
 }
@@ -141,137 +123,98 @@ static definition* find_mirror(definition *x, definition_scope* root) {
   return root;
 }
 
-void Context::reset()
+void context::reset()
 {
-
+  
 }
-void Context::reset_all()
+void context::reset_all()
 {
-
+  
 }
-void Context::copy(const Context &ct)
+void context::copy(const context &ct)
 {
   remap_set n;
-  ct.global->copy(global.get(), n);
-  ct.global->remap(n, ErrorContext(herr, {"Internal Copy Operation", 0, 0}));
-
+  ct.global->copy(global, n);
+  ct.global->remap(n, error_context(def_error_handler, "Internal Copy Operation", 0, 0));
+  
   for (macro_iter_c mi = ct.macros.begin(); mi != ct.macros.end(); ++mi){
-    pair<macro_iter,bool> dest = macros.insert(pair<string,macro_type*>(mi->first,nullptr));
+    pair<macro_iter,bool> dest = macros.insert(pair<string,macro_type*>(mi->first,NULL));
     if (dest.second) {
-      dest.first->second = new_macro(*mi->second);
+      dest.first->second = mi->second;
+      ++mi->second->refc;
     }
   }
-  for (definition* var : ct.variadics) {
-    if (var->parent)
-      variadics.insert(find_mirror(var, global.get()));
+  for (set<definition*>::iterator it = ct.variadics.begin(); it != ct.variadics.end(); ++it) {
+    if ((*it)->parent)
+      variadics.insert(find_mirror(*it, global));
     else
-      variadics.insert(var);
+      variadics.insert(*it);
   }
 }
-void Context::swap(Context &ct) {
+void context::swap(context &ct) {
   if (!parse_open and !ct.parse_open) {
-    ct.global.swap(global);
+    { definition_scope* gs = ct.global;
+      ct.global = global; global = gs; }
     macros.swap(ct.macros);
     variadics.swap(ct.variadics);
-  } else {
-    herr->error({"Internal Swap Operation", 0, 0})
-        << "ERROR! Cannot swap context while parse is active!";
   }
+  else cerr << "ERROR! Cannot swap context while parse is active" << endl;
 }
 
-macro_map &Context::global_macros() {
-  return builtin_context().macros;
+macro_map &context::global_macros() {
+  return builtin->macros;
 }
 
-void Context::load_standard_builtins()
+void context::load_standard_builtins()
 {
-  keywords["asm"] = TT_ASM;
-  keywords["__asm"] = TT_ASM;
-  keywords["__asm__"] = TT_ASM;
-  keywords["class"] = TT_CLASS;
-  keywords["decltype"] = TT_DECLTYPE;
-  keywords["typeid"] = TT_TYPEID;
-  keywords["enum"] = TT_ENUM;
-  keywords["extern"] = TT_EXTERN;
-  keywords["namespace"] = TT_NAMESPACE;
-  keywords["operator"] = TT_OPERATORKW;
-  keywords["private"] = TT_PRIVATE;
-  keywords["protected"] = TT_PROTECTED;
-  keywords["public"] = TT_PUBLIC;
-  keywords["friend"] = TT_FRIEND;
-  keywords["sizeof"] = TT_SIZEOF;
-  keywords["__is_empty"] = TT_ISEMPTY;
-  // keywords["__is_pod"] = TT_ISEMPTY;
-  keywords["struct"] = TT_STRUCT;
-  keywords["template"] = TT_TEMPLATE;
-  keywords["typedef"] = TT_TYPEDEF;
-  keywords["typename"] = TT_TYPENAME;
-  keywords["union"] = TT_UNION;
-  keywords["using"] = TT_USING;
-  keywords["new"] = TT_NEW;
-  keywords["delete"] = TT_DELETE;
-
-  keywords["const_cast"] = TT_CONST_CAST;
-  keywords["static_cast"] = TT_STATIC_CAST;
-  keywords["dynamic_cast"] = TT_DYNAMIC_CAST;
-  keywords["reinterpret_cast"] = TT_REINTERPRET_CAST;
-
-  keywords["auto"] = TT_AUTO;
-  keywords["alignas"] = TT_ALIGNAS;
-  keywords["alignof"] = TT_ALIGNOF;
-  keywords["constexpr"] = TT_CONSTEXPR;
-  keywords["noexcept"] = TT_NOEXCEPT;
-  keywords["static_assert"] = TT_STATIC_ASSERT;
-
-  // GNU Extensions - These are all rolled into the standard in some form.
-  keywords["__attribute__"] = TT_ATTRIBUTE;
-  keywords["__extension__"] = TT_EXTENSION;
-  keywords["__typeof__"] = TT_TYPEOF;
-  keywords["__typeof"] = TT_TYPEOF;
-
-  // MinGW Fuckery
-  keywords["__MINGW_IMPORT"] = TT_INVALID;
-
-  // C++ Extensions
-  keywords["false"] = TT_FALSE;
-  keywords["true"] = TT_TRUE;
+  // Nothing to load
 }
-void Context::load_gnu_builtins()
+void context::load_gnu_builtins()
 {
-
+  
 }
 
 #include <iostream>
 #include <General/parse_basics.h>
 
-void Context::output_types(ostream &out) {
+void context::output_types(ostream &out) {
   out << "Unimplemented";
 }
 static inline void print_macro(macro_iter it, ostream &out)
 {
   out << it->second->toString();
 }
-void Context::output_macro(string macroname, ostream &out)
+void context::output_macro(string macroname, ostream &out)
 {
   macro_iter it = macros.find(macroname);
   if (it == macros.end()) out << "Macro `" << macroname << "' has not been defined." << endl;
   else print_macro(it, out);
 }
-void Context::output_macros(ostream &out)
+void context::output_macros(ostream &out) 
 {
   for (macro_iter it = macros.begin(); it != macros.end(); it++)
     print_macro(it, out);
 }
 
-void Context::output_definitions(ostream &out) {
+void context::output_definitions(ostream &out) {
   out << global->toString();
 }
 
-Context::Context(ErrorHandler *herr_):
-    parse_open(false), global(new definition_scope()), herr(herr_) {
-  copy(builtin_context());
+context::context(): parse_open(false), global(new definition_scope()) {
+  copy(*builtin);
 }
-Context::Context(int): parse_open(false), global(new definition_scope()) { }
+context::context(int): parse_open(false), global(new definition_scope()) { }
 
-size_t Context::search_dir_count() const { return search_directories.size(); }
-string Context::search_dir(size_t index) const { return search_directories[index]; }
+size_t context::search_dir_count() { return search_directories.size(); }
+string context::search_dir(size_t index) { return search_directories[index]; }
+
+void context::dump_macros() {
+  // Clean up macros
+  for (macro_iter it = macros.begin(); it != macros.end(); it++)
+    macro_type::free(it->second);
+}
+
+context::~context() {
+  delete global;
+  dump_macros();
+}
