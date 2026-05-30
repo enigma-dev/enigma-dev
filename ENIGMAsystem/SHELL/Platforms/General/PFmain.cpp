@@ -21,6 +21,7 @@
 #if (defined(_WIN32) || defined(_WIN64))
 #include <windows.h>
 #include <shlobj.h>
+#include <knownfolders.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <sysdir.h>
 #include <climits>
