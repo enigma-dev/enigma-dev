@@ -1,5 +1,3 @@
 #include "__getexecname/internal.h"
-#include "__getbasepath/internal.h"
-#include "__getprogname/internal.h"
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/estring.h"
