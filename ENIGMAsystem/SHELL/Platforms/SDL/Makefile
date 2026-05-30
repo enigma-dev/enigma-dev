@@ -33,7 +33,6 @@ else
 	endif
 
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
-	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread
 
 	ifeq ($(TARGET-PLATFORM), MacOSX)
