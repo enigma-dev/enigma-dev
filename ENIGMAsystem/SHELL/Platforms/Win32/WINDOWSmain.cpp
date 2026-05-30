@@ -70,11 +70,6 @@ void initInput(){};
 
 } // namespace enigma
 
-static inline string add_slash(const string& dir) {
-  if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
-  return dir;
-}
-
 namespace enigma {
 
 static LONG_PTR ComputeInitialWindowStyle() {
@@ -211,21 +206,6 @@ void set_program_priority(int value) {
     priorityValue = REALTIME_PRIORITY_CLASS;
 
   SetPriorityClass(GetCurrentThread(), priorityValue);
-}
-
-// converts a relative path to absolute if the path exists
-std::string filename_absolute(std::string fname) {
-  if (string_replace_all(fname, " ", "") == "") fname = ".";
-  wchar_t rpath[MAX_PATH];
-  tstring tstr_fname = widen(fname);
-  tstring result(rpath, GetFullPathNameW(tstr_fname.c_str(), MAX_PATH, rpath, NULL));
-  if (directory_exists(shorten(result))) return add_slash(shorten(result));
-  if (file_exists(shorten(result))) return shorten(result);
-  return "";
-}
-
-std::string filename_join(std::string prefix, std::string suffix) {
-  return add_slash(prefix) + suffix;
 }
 
 }  // namespace enigma_user
