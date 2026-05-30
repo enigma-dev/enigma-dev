@@ -12,6 +12,7 @@ gtest_assert_ne(downloads_directory, "");
 gtest_assert_ne(music_directory, "");
 gtest_assert_ne(pictures_directory, "");
 gtest_assert_ne(videos_directory, "");
+gtest_assert_ne(public_directory, "");
 gtest_assert_ne(temp_directory, "");
 directory_create(working_directory + "poop");
 if (os_type == os_windows) {
