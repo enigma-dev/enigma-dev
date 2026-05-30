@@ -311,11 +311,11 @@ void initialize_directory_globals() {
   std::string localappdata = enigma_user::filename_absolute(enigma_user::environment_get_variable("LOCALAPPDATA"));
   if (localappdata.empty()) return; while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) { localappdata.pop_back(); } 
   std::filesystem::create_directories(localappdata, ec); enigma_user::game_save_id = enigma_user::filename_addslash(localappdata) + 
-    enigma_user::filename_addslash(std::to_string(enigma_user::game_id)));
+    enigma_user::filename_addslash(std::to_string(enigma_user::game_id));
   #else
   std::string home = enigma_user::filename_addslash(enigma_user::filename_absolute(enigma_user::environment_get_variable("HOME"))); if (home.empty()) return; 
   std::filesystem::create_directories(home + std::string(".config"), ec); enigma_user::game_save_id = home + std::string(".config/") + 
-    enigma_user::filename_addslash(std::to_string(enigma_user::game_id)));
+    enigma_user::filename_addslash(std::to_string(enigma_user::game_id));
   #endif
 }
 
