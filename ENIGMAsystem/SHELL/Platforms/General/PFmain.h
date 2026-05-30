@@ -81,6 +81,12 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string program_pathname;
 extern std::string program_filename;
+extern std::string desktop_directory;
+extern std::string documents_directory;
+extern std::string downloads_directory;
+extern std::string music_directory;
+extern std::string pictures_directory;
+extern std::string videos_directory;
 extern std::string temp_directory;
 
 extern std::string keyboard_string;
@@ -98,16 +104,7 @@ extern int async_load;
 std::string filename_addslash(const std::string& dir);
 std::string filename_join(std::string prefix, std::string suffix);
 std::string filename_absolute(std::string fname);
-
 bool set_working_directory(std::string dname);
-
-std::string directory_get_desktop_path();
-std::string directory_get_documents_path();
-std::string directory_get_downloads_path();
-std::string directory_get_music_path();
-std::string directory_get_pictures_path();
-std::string directory_get_videos_path();
-
 std::string environment_get_variable(std::string name);
 bool environment_get_variable_exists(std::string name);
 bool environment_set_variable(std::string name, std::string value);
