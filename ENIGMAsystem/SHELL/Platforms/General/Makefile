@@ -5,6 +5,9 @@ ifeq ($(TARGET-PLATFORM), Android)
 	override CFLAGS += -IPlatforms/SDL/fileio
 	SOURCES += Platforms/SDL/fileio/fileio.cpp
 else
+	ifeq ($(TARGET-PLATFORM), Windows)
+		override LDFLAGS += -lshell32 -lole32 -luuid
+	endif
 	override CXXFLAGS += -IPlatforms/General/fileio
 	override CFLAGS += -IPlatforms/General/fileio
 	SOURCES += Platforms/General/fileio/fileio.cpp
