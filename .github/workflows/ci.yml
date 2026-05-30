@@ -1,0 +1,219 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  COVERAGE: "1"
+
+jobs:
+  arch:
+    name: Arch Linux (GCC)
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux/archlinux:latest
+      options: --security-opt seccomp=unconfined
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Make CI scripts executable
+        run: chmod +x CI/github/*.sh
+
+      - name: Install dependencies
+        run: CI/github/ci-setup.sh arch
+
+      - name: Build emake
+        run: CI/github/build-emake.sh
+
+      - name: Run emake-tests
+        run: |
+          mkdir -p CI/github/out
+          CI/github/run-emake-tests.sh
+
+      - name: Test summary
+        if: always() && !env.ACT
+        uses: test-summary/action@v2
+        with:
+          paths: CI/github/out/emake-tests-arch.xml
+          folded: true
+          show: all
+
+      - name: Build empty game
+        run: CI/github/build-empty-game.sh
+
+      - name: Collect coverage
+        env:
+          COVERAGE_OUTPUT: coverage-arch.info
+        run: CI/github/collect-coverage.sh coverage-arch.info arch
+
+      - uses: actions/upload-artifact@v7
+        if: always() && !env.ACT
+        with:
+          name: coverage-arch
+          path: coverage-arch.info
+
+  macos:
+    name: Mac OS (Clang)
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Make CI scripts executable
+        run: chmod +x CI/github/*.sh
+
+      - name: Install dependencies
+        run: CI/github/ci-setup.sh macos
+
+      - name: Build emake
+        run: CI/github/build-emake.sh
+
+      - name: Run emake-tests
+        env:
+          TEST_XML: ${{ runner.temp }}/emake-tests.xml
+        run: CI/github/run-emake-tests.sh
+
+      - uses: ./.github/actions/enigma-test
+        if: always()
+        with:
+          test-xml-path: ${{ runner.temp }}/emake-tests.xml
+
+      # Broken 
+      #- name: Build empty game
+      #  run: CI/github/build-empty-game.sh
+
+      - name: Collect coverage
+        run: CI/github/collect-coverage.sh coverage-macos.info macos
+
+      - uses: actions/upload-artifact@v7
+        if: always() && !env.ACT
+        with:
+          name: coverage-macos
+          path: coverage-macos.info
+
+  windows:
+    name: Windows (MinGW64)
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Read MSYS2 packages
+        id: msys2_deps
+        shell: bash
+        run: |
+          packages=$(grep -v '^[[:space:]]*#' CI/deps/msys2.packages.txt | grep -v '^[[:space:]]*$' | tr '\n' ' ')
+          echo "packages=${packages}" >> "$GITHUB_OUTPUT"
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: ${{ steps.msys2_deps.outputs.packages }}
+
+      - name: Make CI scripts executable
+        shell: msys2 {0}
+        run: chmod +x CI/github/*.sh
+
+      - name: Install dependencies
+        shell: msys2 {0}
+        env:
+          ENIGMA_CI_SKIP_INSTALL: "1"
+        run: CI/github/ci-setup.sh windows
+
+      - name: Build emake
+        shell: msys2 {0}
+        run: CI/github/build-emake.sh
+
+      - name: Run emake-tests
+        shell: msys2 {0}
+        env:
+          TEST_XML: ${{ runner.temp }}/emake-tests.xml
+        run: CI/github/run-emake-tests.sh
+
+      - uses: ./.github/actions/enigma-test
+        if: always()
+        with:
+          test-xml-path: ${{ runner.temp }}/emake-tests.xml
+
+      - name: Build empty game
+        shell: msys2 {0}
+        run: CI/github/build-empty-game.sh
+
+      - name: Collect coverage
+        shell: msys2 {0}
+        run: CI/github/collect-coverage.sh coverage-windows.info windows
+
+      - uses: actions/upload-artifact@v7
+        if: always() && !env.ACT
+        with:
+          name: coverage-windows
+          path: coverage-windows.info
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    needs: [arch, macos, windows]
+    if: >-
+      !cancelled() &&
+      needs.arch.result == 'success' &&
+      needs.macos.result == 'success' &&
+      needs.windows.result == 'success'
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          pattern: coverage-*
+          merge-multiple: true
+
+      - name: Install lcov
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+          lcov --version
+
+      - name: Coverage summary
+        run: |
+          echo "Coverage artifacts in workspace:"
+          find . -maxdepth 3 -name 'coverage-*.info' -type f 2>/dev/null || true
+          chmod +x CI/github/write-coverage-summary.sh
+          CI/github/write-coverage-summary.sh | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: List coverage artifacts for Codecov
+        id: codecov_files
+        run: |
+          files=()
+          flags=()
+          for pair in arch:coverage-arch.info macos:coverage-macos.info windows:coverage-windows.info; do
+            flag="${pair%%:*}"
+            path="${pair##*:}"
+            if [[ -f "$path" ]]; then
+              files+=("$path")
+              flags+=("$flag")
+            fi
+          done
+          echo "files=$(IFS=,; echo "${files[*]}")" >> "$GITHUB_OUTPUT"
+          echo "flags=$(IFS=,; echo "${flags[*]}")" >> "$GITHUB_OUTPUT"
+
+      - uses: codecov/codecov-action@v6
+        if: ${{ !env.ACT && steps.codecov_files.outputs.files != '' }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ steps.codecov_files.outputs.files }}
+          flags: ${{ steps.codecov_files.outputs.flags }}
+          name: enigma-${{ github.event.pull_request.number || github.sha }}
+          verbose: true
+          fail_ci_if_error: true

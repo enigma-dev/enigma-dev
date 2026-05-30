@@ -83,7 +83,7 @@ bool WriteYaml(const fs::path &egm_root, const fs::path &dir,
     const proto::FieldOptions opts = field->options();
     const bool isFilePath = opts.GetExtension(buffers::file_path);
 
-    yaml << YAML::Key << field->name();
+    yaml << YAML::Key << std::string(field->name());  // TODO: remove string cast when YAML API is modernized
     if (field->is_repeated()) {
       if (field->cpp_type() == CppType::CPPTYPE_MESSAGE) {
         yaml << YAML::BeginSeq;
@@ -236,7 +236,7 @@ bool WriteRoom(const fs::path &egm_root, const fs::path &dir,
 
   for (auto &inst : room->instances()) {
   if (!inst.creation_code().empty()) {
-    string name = inst.name();
+    string name{inst.name()};
     if (name.empty()) name = std::to_string(inst.id());
     string edlFile = dir.string() + "/create[" + name + "].edl";
 
@@ -404,9 +404,9 @@ inline int getResID(buffers::TreeNode* res) {
 
 }  // namespace
 
-bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
+bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, fs::path dir,
                     const fs::path &egm_root, YAML::Emitter& tree) const {
-  tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << folder->name();
+  tree << YAML::BeginMap << YAML::Key << "folder" << YAML::Value << std::string(folder->name());  // TODO: remove string instantiation
 
   if (folder->folder().children_size() > 0) {
     tree << YAML::Key << "contents" << YAML::Value << YAML::BeginSeq;
@@ -417,18 +417,18 @@ bool EGMFileFormat::WriteNode(buffers::TreeNode* folder, string dir,
 
       if (type != "folder") {
         tree << YAML::BeginMap;
-        tree << YAML::Key << "name" << child->name();
+        tree << YAML::Key << "name" << std::string(child->name());  // TODO: remove string instantiation
         tree << YAML::Key << "type" << type;
         tree << YAML::Key << "id" << getResID(child);
         tree << YAML::EndMap;
       }
 
       if (child->has_folder()) {
-        if (!CreateDirectory(dir + "/" + child->name()))
+        if (!CreateDirectory(dir / child->name()))
           return false;
 
-        string lastDir = dir;
-        string newDir = dir + child->name() + "/";
+        fs::path lastDir = dir;
+        fs::path newDir = dir / child->name();
 
         if (!WriteNode(child, newDir, egm_root, tree))
           return false;

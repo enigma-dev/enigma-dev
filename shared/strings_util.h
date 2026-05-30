@@ -2,28 +2,33 @@
 #define STRINGS_UTIL_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
 #include <filesystem>
 
-inline std::string ToLower(std::string str) {
+inline std::string ToLower(std::string_view str_v) {
+  std::string str(str_v);
   for (char &c : str) if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
   return str;
 }
 
-inline std::string Hyphenate(std::string snake) {
+inline std::string Hyphenate(std::string_view snakev) {
+  std::string snake{snakev};
   for (char &c : snake) if (c == '_') c = '-';
   return snake;
 }
 
-inline std::string Spaceify(std::string snake) {
+inline std::string Spaceify(std::string_view snakev) {
+  std::string snake{snakev};
   for (char &c : snake) if (c == '_') c = ' ';
   return snake;
 }
 
-inline std::string ToCamelCase(std::string snake, bool upper = false) {
+inline std::string ToCamelCase(std::string_view snakev, bool upper = false) {
+  std::string snake{snakev};
   size_t out = 0;
   for (char &c : snake) {
     if (c == '_') {
@@ -43,16 +48,18 @@ inline std::string ToCamelCase(std::string snake, bool upper = false) {
   return snake;
 }
 
-inline std::string ToPascalCase(std::string snake) {
+inline std::string ToPascalCase(std::string_view snakev) {
+  std::string snake{snakev};
   return ToCamelCase(snake, true);
 }
 
-inline std::string Capitalize(std::string str) {
+inline std::string Capitalize(std::string_view strv) {
+  std::string str{strv};
   if (str[0] >= 'a' && str[0] <= 'z') str[0] -= 'a' - 'A';
   return str;
 }
 
-inline bool ParseBool(const std::string &b) {
+inline bool ParseBool(std::string_view b) {
   const std::string bl = ToLower(b);
   if (bl == "yes" || bl == "true" || bl == "y") return true;
   return std::stod(bl);
@@ -61,7 +68,7 @@ inline bool ParseBool(const std::string &b) {
 // Parses the given string as an integer, returning nullopt if any character in
 // the given string is not a digit (Does not support negatives).
 // TODO: Replace result type with optional<int>.
-inline std::pair<bool, int> SafeAtoL(const std::string &str) {
+inline std::pair<bool, int> SafeAtoL(std::string_view str) {
   int res = 0;
   for (char c : str) {
     if (c < '0' || c > '9' || res > 429496729) return {false, 0};
@@ -71,37 +78,46 @@ inline std::pair<bool, int> SafeAtoL(const std::string &str) {
 }
 
 // Returns the first argument that isn't empty, or empty if all are empty.
-inline const std::string &FirstNotEmpty(const std::string &a,
-                                        const std::string &b) {
+inline std::string_view FirstNotEmpty(std::string_view a,
+                                      std::string_view b) {
   return a.empty() ? b : a;
 }
 
 // Removes all occurrences of the given character from the given string.
-inline std::string StripChar(std::string str, char c) {
-  size_t i = 0;
+inline std::string StripChar(std::string_view str, char c) {
+  std::string res;
+  res.reserve(str.length());
   for (size_t j = 0; j < str.length(); ++j) {
-    if (str[j] != c) str[i++] = str[j];
+    if (str[j] != c) res += str[j];
   }
-  str.resize(i);
-  return str;
+  return res;
 }
 
-inline bool string_ends_with(std::string const &fullString, std::string const &ending) {
-    if (fullString.length() < ending.length())
-      return false;
+inline bool string_ends_with(std::string_view fullString, std::string const &ending) {
+  if (fullString.length() < ending.length())
+    return false;
 
-    return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
+  return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
 }
 
 
-inline std::string string_replace_all(std::string str, std::string_view substr,
+inline std::string string_replace_all(std::string_view strv, std::string_view substr,
                                       std::string_view nstr) {
+  std::string str(strv);
   size_t pos = 0;
   while ((pos = str.find(substr, pos)) != std::string::npos) {
     str.replace(pos, substr.length(), nstr);
     pos += nstr.length();
   }
   return str;
+}
+
+inline std::string StrCat(std::string_view a, std::string_view b) {
+  std::string res;
+  res.reserve(a.length() + b.length());
+  res.append(a);
+  res.append(b);
+  return res;
 }
 
 inline std::vector<std::string> split_string(const std::string &str, char delimiter) {

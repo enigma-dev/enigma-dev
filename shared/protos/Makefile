@@ -2,8 +2,8 @@ include ../../Config.mk
 
 PROTO_SOURCES := $(wildcard *.proto) $(wildcard Configuration/*.proto)
 SOURCES_GRPC := server.proto
-LDFLAGS += -shared -lgrpc++ -lprotobuf
-CXXFLAGS += -D_WIN32_WINNT=0x0600 -I$(OBJ_DIR) -fPIC
+LDFLAGS += -shared $(GRPC_LDFLAGS) $(GRPC_LIBS) $(PROTOBUF_LDFLAGS) $(PROTOBUF_LIBS)
+CXXFLAGS += -D_WIN32_WINNT=0x0600 -I$(OBJ_DIR) -fPIC $(GRPC_CFLAGS) $(PROTOBUF_CFLAGS)
 GRPC_CPP_PLUGIN_PATH ?= $(shell which grpc_cpp_plugin)$(BIN_EXT)
 
 TARGET := ../../libProtocols$(LIB_EXT)
@@ -12,5 +12,3 @@ GENERATED := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.cc) $(PROTO_SOUR
 OBJECTS := $(addprefix $(OBJ_DIR)/,$(PROTO_SOURCES:.proto=.pb.o) $(SOURCES_GRPC:.proto=.grpc.pb.o))
 
 include ../../Default.mk
-
-

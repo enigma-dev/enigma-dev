@@ -1,0 +1,26 @@
+name: ENIGMA test results
+description: Summarize emake-tests JUnit XML in the job log (test-summary)
+
+inputs:
+  test-xml-path:
+    description: Path to gtest JUnit XML output
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Verify JUnit XML exists
+      shell: bash
+      run: |
+        if [[ ! -f "${{ inputs.test-xml-path }}" ]]; then
+          echo "Missing test XML: ${{ inputs.test-xml-path }}" >&2
+          exit 1
+        fi
+
+    - name: Test summary
+      if: ${{ !env.ACT }}
+      uses: test-summary/action@v2
+      with:
+        paths: ${{ inputs.test-xml-path }}
+        folded: true
+        show: all

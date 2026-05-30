@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+ARG TARGETPLATFORM=linux/amd64
+FROM archlinux/archlinux:latest
+
+COPY CI/deps/arch.packages.txt /tmp/arch.packages.txt
+
+RUN set -eux; \
+  sed -i 's/^[[:space:]]*#DisableSandboxSyscalls/DisableSandboxSyscalls/' /etc/pacman.conf; \
+  pacman -Sy --noconfirm; \
+  packages="$(grep -v '^[[:space:]]*#' /tmp/arch.packages.txt | grep -v '^[[:space:]]*$' | tr '\n' ' ')"; \
+  # shellcheck disable=SC2086
+  yes | pacman -S --noconfirm --needed ${packages}; \
+  pacman -Scc --noconfirm
+
+WORKDIR /workspaces/enigma-dev
+ENV ENIGMA_CI_SKIP_INSTALL=1

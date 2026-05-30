@@ -1,4 +1,4 @@
-# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![Build Status](https://dev.azure.com/enigma-dev/ENIGMA/_apis/build/status/enigma-dev.enigma-dev?branchName=master)](https://dev.azure.com/enigma-dev/ENIGMA/_build/latest?definitionId=6&branchName=master) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
+# ENIGMA [![CI](https://github.com/enigma-dev/enigma-dev/actions/workflows/ci.yml/badge.svg)](https://github.com/enigma-dev/enigma-dev/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/enigma-dev/enigma-dev/branch/master/graph/badge.svg)](https://codecov.io/gh/enigma-dev/enigma-dev)
 
 If you find our tools useful, then please consider supporting ENIGMA on Patreon!
 
@@ -14,6 +14,16 @@ Although EDL adopts GML's very lax syntax in its scripting, the inputted code is
 
 ## Install
 Please see https://enigma-dev.org/download.htm for installation instructions.
+
+## Continuous integration
+
+GitHub Actions: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Run the same checks locally:
+
+```bash
+./ci.sh help
+```
+
+See [`CI/github/README.md`](CI/github/README.md) for platform commands (`docker arch`, `macos`, `windows`, `act arch`, etc.).
 
 ## Documentation
 We have a community-led Wiki project hosted on our site where users contribute function and other API documentation. All you need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.

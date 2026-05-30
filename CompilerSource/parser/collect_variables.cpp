@@ -2,6 +2,7 @@
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
+**  Copyright (C) 2024 Fares Atef                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -29,426 +30,456 @@
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
 //...No, it's not really that simple.
 
-#include <map>
-#include <string>
-#include <sstream>
-#include <iostream>
-#include <stdio.h>
-using namespace std;
-
-#include "config.h"
 #include "event_reader/event_parser.h"
+
+#include <JDI/src/System/builtins.h>
+#include <cstdio>
+#include <iostream>
+#include <map>
+#include <regex>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+
+using namespace std;
 
 extern int global_script_argument_count;
 
 struct scope_ignore {
-  map<string,int> ignore;
+  map<string, int> ignore;
   bool is_with;
-  
-  scope_ignore(scope_ignore*x): is_with(x->is_with) {}
-  scope_ignore(bool x): is_with(x) {}
-  scope_ignore(int x): is_with(x) {}
+
+  scope_ignore(scope_ignore *x) : is_with(x->is_with) {}
+  scope_ignore(bool x) : is_with(x) {}
+  scope_ignore(int x) : is_with(x) {}
 };
 
-#include "object_storage.h"
+#include "../parsing/tokens.h"
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
+#include "object_storage.h"
 
-void collect_variables(language_adapter *lang, ParsedCode *parsed_code,
-                       const std::set<std::string> &script_names,
-                       bool trackGotos) {
-  int igpos = 0;
-  darray<scope_ignore*> igstack;
-  igstack[igpos] = new scope_ignore(0);
+using enigma::parsing::AST;
 
-  std::string &code = parsed_code->code;
-  std::string &synt = parsed_code->synt;
+std::string GetFullType(enigma::parsing::FullType &ft) {
+  std::string type;
+  std::vector<std::size_t> flags_values = {
+      jdi::builtin_flag__const->value,    jdi::builtin_flag__static->value,       jdi::builtin_flag__volatile->value,
+      jdi::builtin_flag__mutable->value,  jdi::builtin_flag__register->value,     jdi::builtin_flag__inline->value,
+      jdi::builtin_flag__Complex->value,  jdi::builtin_flag__unsigned->value,     jdi::builtin_flag__signed->value,
+      jdi::builtin_flag__short->value,    jdi::builtin_flag__long->value,         jdi::builtin_flag__long_long->value,
+      jdi::builtin_flag__restrict->value, jdi::builtin_typeflag__override->value, jdi::builtin_typeflag__final->value};
 
-  cout << "\nCollecting some variables...\n";
-  pt dec_start_pos = 0;
-  
-  int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
-  string dec_prefixes, dec_type, dec_suffixes; //Unary referencers, type names and flags, and unary-postfix array subscripts
-  int dec_initializing = false; //This tells us we've passed an = in our initialization
-  pt dec_equals_at = 0;
-  int bracklevel = 0; //This will help us make sure not to add unwanted unary symbols or miss variables/scripts.
-  int parenlevel = 0; //Prevent inner vars from being ignored
-  
-  bool dec_name_givn = false; //Has an identifier been named in this declaration?
-  string dec_name; //Identifier being declared
-  
-  int  with_after_parenths = 0;
-  bool with_until_semi = false;
+  std::vector<std::size_t> flags_masks = {
+      jdi::builtin_flag__const->mask,    jdi::builtin_flag__static->mask,       jdi::builtin_flag__volatile->mask,
+      jdi::builtin_flag__mutable->mask,  jdi::builtin_flag__register->mask,     jdi::builtin_flag__inline->mask,
+      jdi::builtin_flag__Complex->mask,  jdi::builtin_flag__unsigned->mask,     jdi::builtin_flag__signed->mask,
+      jdi::builtin_flag__short->mask,    jdi::builtin_flag__long->mask,         jdi::builtin_flag__long_long->mask,
+      jdi::builtin_flag__restrict->mask, jdi::builtin_typeflag__override->mask, jdi::builtin_typeflag__final->mask};
 
-  bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
+  std::vector<std::string> flags_names = {"const",  "static",    "volatile", "mutable",  "register",
+                                          "inline", "complex",   "unsigned", "signed",   "short",
+                                          "long",   "long long", "restrict", "override", "final"};
 
-  //Tracking for "exit" commands
-  int currGotoBlock = 0;
-  bool foundGoto = false;
-  for (pt pos = 0; pos < code.length(); pos++)
-  {
-    //Stop grabbing the timeline index?
-    if (grab_tline_index) {
-      grab_tline_index = (synt[pos]=='n') || (synt[pos]=='=') || (synt[pos]=='(');
-    }
-
-    if (synt[pos] == '{') {
-      bool isw = igstack[igpos]->is_with | with_until_semi; with_until_semi = 0;
-      igstack[++igpos] = new scope_ignore(isw);
-      continue;
-    }
-    if (synt[pos] == '}') {
-      delete igstack[igpos--];
-
-      //Have we completed a new block?
-      if (igpos==0 && foundGoto) {
-        stringstream newName;
-        newName <<"enigma_block_end_" <<currGotoBlock++ <<":";
-        code.insert(pos+1, newName.str());
-        synt.insert(pos+1, string(newName.str().size(), 'X'));
-        pos += newName.str().size();
-        foundGoto = false;
-      }
-
-      continue;
-    }
-    
-    if (synt[pos] == '(' and with_after_parenths) with_after_parenths++;
-    if (synt[pos] == ')' and with_after_parenths and --with_after_parenths == 1)
-      with_until_semi = with_after_parenths--;
-    
-    with_until_semi &= (synt[pos] != ';');
-    
-    if (synt[pos] == '(' and dec_initializing) parenlevel++;
-    if (synt[pos] == ')' and dec_initializing) parenlevel--;
-    
-    if (bracklevel == 0 and parenlevel == 0 and in_decl)
-    {
-      if (synt[pos] == ';' or synt[pos] == ',')
-      {
-        const bool was_a_semicolon = synt[pos] == ';';
-        
-        if (dec_name_givn)
-        {
-          if (dec_out_of_scope) //Designated for a different scope: global or local
-          {
-            //Declare this as a specific type
-            cout << "Declared " << dec_type << " " << dec_prefixes << dec_name << dec_suffixes << " as " << (dec_out_of_scope-1 ? "global" : "local") << endl;
-            if (dec_out_of_scope - 1) //to be placed at global scope
-              parsed_code->my_scope->globals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
-            else
-              parsed_code->my_scope->locals[dec_name] = dectrip(dec_type,dec_prefixes,dec_suffixes);
-
-            if (!dec_initializing) //If this statement does nothing other than declare, remove it
-            {
-              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,pos+1-dec_start_pos) << endl;
-              code.erase(dec_start_pos,pos+1-dec_start_pos);
-              synt.erase(dec_start_pos,pos+1-dec_start_pos);
-              pos = dec_start_pos;
-            }
-            else
-            {
-              cout << "ERASE FROM CODE: " << code.substr(dec_start_pos,dec_equals_at-dec_start_pos) << endl;
-              code.replace(dec_start_pos,dec_equals_at-dec_start_pos, dec_name);
-              synt.replace(dec_start_pos,dec_equals_at-dec_start_pos, string(dec_name.length(),'n'));
-              pos -= dec_equals_at - dec_start_pos - 1 - dec_name.length();
-            }
-            dec_start_pos = pos;
-          }
-          else //Add to this scope
-          {
-            igstack[igpos]->ignore[dec_name] = pos;
-            //pos++; //cout << "Added `" << dec_name << "' to ig\n";
-          }
-        }
-        
-        if (was_a_semicolon)
-          dec_out_of_scope = in_decl = 0, dec_type = "";
-        
-        dec_prefixes = dec_suffixes = "";
-        dec_initializing = false;
-        dec_name_givn = false;
-        continue;
-      }
-      if (!dec_initializing)
-      {
-        if (synt[pos] == '*') {
-          dec_prefixes += "*";
-          continue;
-        }
-        if (synt[pos] == '&') {
-          dec_prefixes += "&";
-          continue;
-        }
-        if (synt[pos] == '=') {
-          dec_initializing = true;
-          dec_equals_at = pos;
-          continue;
-        }
-        if (synt[pos] == '(') {
-          ((dec_name_givn)?dec_suffixes:dec_prefixes) += '(';
-          continue;
-        }
-        if (synt[pos] == ')') {
-          ((dec_name_givn)?dec_suffixes:dec_prefixes) += ')';
-          continue;
-        }
-      }
-    }
-    if (synt[pos] == '[')
-    {
-      if (in_decl and !dec_initializing)
-      {
-        pt ep = pos + 1;
-        for (int bc = 1; bc > 0; ep++)
-          if (synt[ep] == '[') bc++;
-          else if (synt[ep] == ']') bc--;
-        dec_suffixes += code.substr(pos,ep - pos);
-      }
-      bracklevel++;
-      continue;
-    }
-    if (synt[pos] == ']') {
-      bracklevel--;
-      continue;
-    }
-    
-    if (synt[pos] == 'L') //Double meaning.
-    {
-      //Bookmark this spot
-      const int sp = pos;
-      
-      //Determine which meaning it is.
-      pos += 5; //Skip "L-O-C-A-L" or "G-L-O-B-A"
-      if (synt[pos] == 'L') pos++;
-      if (synt[pos] != 't')
-      {
-        for (pt i = sp; i < pos; i++)
-          synt[i] = 'n'; //convert to regular identifier; in this case marking a constant.
-        continue;
-      }
-      //We're at either global declarator or local declarator: record which scope it is.
-      dec_out_of_scope = 1 + (code[sp] == 'g'); //If the first character of this token is 'g', it's global. Otherwise we assume it's local.
-      
-      //Remove the keyword from the code
-      code.erase(sp,pos-sp);
-      synt.erase(sp,pos-sp);
-      pos = sp;
-      
-      fflush(stdout);
-      goto past_this_if;
-    }
-    if (synt[pos] == 't')
-    {
-      past_this_if:
-      
-      //Skip to the end of the typename, remember where we started
-      const int tsp = pos;
-      while (synt[++pos] == 't');
-      
-      //Copy the type
-      dec_type = code.substr(tsp,pos-tsp);
-      
-      if (dec_out_of_scope)
-      {
-        //Remove the keyword from the code
-        code.erase(tsp,pos-tsp);
-        synt.erase(tsp,pos-tsp);
-        pos = tsp;
-      }
-      
-      // Indicate that we're in a declaration and should start
-      // Ignoring shit rather than adding it to the local list
-      in_decl = true;
-      
-      // Log this position
-      dec_start_pos = pos--;
-      continue;
-    }
-    if (synt[pos] == 'n')
-    {
-      bool nts = !pos or synt[pos-1] != '.';
-      
-      const pt spos = pos;
-      while (synt[++pos] == 'n');
-      
-      //Looking at a straight identifier. Make sure it actually needs declared.
-      string nname = code.substr(spos,pos-spos);
-
-      //Special case; "exit"
-      if (nname=="exit") {
-        stringstream newName;
-        if (trackGotos) {
-          newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
-          foundGoto = true;
-        } else {
-          newName <<"return 0;";
-        }
-        code.replace(spos, 4, newName.str());
-        synt.replace(spos, 4, string(newName.str().size(), 'X'));
-        pos += (newName.str().size()-4 - 1);
-        continue;
-      }
-      
-      if (!nts)
-        { pos--; continue; }
-      
-      //Decrement pos to avoid skipping a char on continue
-      if (synt[pos--] != '(') // If it isn't a function (we assume it's nothing other than a function or varname)
-      {
-        if (in_decl and !dec_initializing)
-        {
-          if (!dec_name_givn) {
-            dec_name_givn = true;
-            dec_name = nname;
-          } continue;
-        }
-
-        //If we're currently looking for a timeline variable, check if this is it.
-        if (grab_tline_index) {
-          cout << "  Potentially calls timeline `" << nname << "'\n";
-          parsed_code->my_scope->tlines.insert(pair<string,int>(nname,1));
-          grab_tline_index = false;
-        }
-
-        //Before ignoring globals/locals, check if we're setting the timeline index.
-        if (nname == "timeline_index") {
-          grab_tline_index = true;
-        }
-        
-        //First, check shared locals to see if we already have one
-        if (shared_object_locals.find(nname) != shared_object_locals.end()) {
-          parsed_code->my_scope->globallocals[nname]++;
-          if (with_until_semi or igstack[igpos]->is_with) {
-            pos += 5;
-            cout << "Add a self. before " << nname;
-            code.insert(spos,"self.");
-            synt.insert(spos,"nnnn.");
-          }
-          cout << "Ignoring `" << nname << "' because it's a shared local.\n"; continue;
-        }
-        
-        //Second, check that it's not a global
-        if (lang->global_exists(nname) or parsed_code->my_scope->globals.find(nname) != parsed_code->my_scope->globals.end()) {
-          cout << "Ignoring `" << nname << "' because it's a global.\n";
-          continue;
-        }
-        
-        //Next, make sure we're not specifically ignoring it
-        map<string,int>::iterator ex;
-        for (int i = igpos; i >= 0; i--)
-          if ((ex = igstack[i]->ignore.find(nname)) != igstack[i]->ignore.end()) {
-            cout << "Ignoring `" << nname << "' because it's on the ignore stack for level " << i << " since position " << ex->second << ".\n";
-            goto continue_2;
-          }
-        
-        int argnum, iscr;
-        iscr = sscanf(nname.c_str(),"argument%d",&argnum);
-        if (iscr == 1)
-        { //  not in a script or are but have exceeded arg number
-          if (global_script_argument_count < argnum + 1)
-            global_script_argument_count = argnum + 1;
-          continue;
-        }
-        
-        //Of course, we also don't want to risk overwriting a typed version
-        if (parsed_code->my_scope->locals.find(nname) != parsed_code->my_scope->locals.end()) {
-          if (with_until_semi or igstack[igpos]->is_with) {
-            pos += 5;
-            cout << "Add a self. before " << nname;
-            code.insert(spos,"self.");
-            synt.insert(spos,"nnnn.");
-          }
-          cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
-        }
-        
-        //We want to add "ambi." before every ambiguous reference, not just new references
-        if (with_until_semi or igstack[igpos]->is_with)
-        {
-          pos += 5;
-          code.insert(spos,"ambi.");
-          synt.insert(spos,"aaaa.");
-        }
-        
-        //Make sure it's not already an ambiguous usage
-        if (parsed_code->my_scope->ambiguous.find(nname) != parsed_code->my_scope->ambiguous.end()) {
-          cout << "Ignoring `" << nname << "' because it's already ambiguous.\n"; continue;
-        }
-        
-        cout << "Delaying `" << nname << "' because it's either a local or a global.\n";
-        parsed_code->my_scope->ambiguous[nname] = dectrip();
-        continue_2: continue;
-      }
-      else //Since a syntax check already completed, we assume this is a valid function
-      {
-        bool contented = false;
-        unsigned pars = 1, args = 0;
-
-        //If this is a specific action, we can actually grab timeline indices.
-        if (nname == "action_set_timeline") {
-            size_t nextSep = synt.find_first_not_of("n", pos+2);
-            if (nextSep != std::string::npos) {
-              const string pname = code.substr(pos+2,nextSep-(pos+2));
-              cout << "  Potentially calls timeline `" << pname << "'\n";
-              parsed_code->my_scope->tlines.insert(pair<string,int>(pname,1));
-            }
-        }
-
-        //Another special case: try to inline script_execute().
-        if (nname == "script_execute") {
-            size_t nextSep = synt.find_first_not_of("n", pos+2);
-            if (nextSep != std::string::npos) {
-              const string pname = code.substr(pos+2,nextSep-(pos+2));
-              if (script_names.find(pname)!=script_names.end()) {
-                cout << "  script_execute() inlining `" << pname << "'\n";
-                int off = synt[nextSep]==')' ? 0 : 1;
-                code.replace(spos, nextSep-spos+off, pname+"(");
-                synt.replace(spos, nextSep-spos+off, std::string(pname.size(),'n')+"(");
-                pos = spos + pname.size() - 1;
-                nname = pname;
-              }
-            }
-        }
-        
-        for (pt i = pos+2; pars; i++) //Start after parenthesis at pos+1, loop until that parenthesis is closed
-        {
-          if (synt[i] == ',' and pars == 1) {
-            args += contented;
-            contented = false; continue;
-          }
-          if (synt[i] == ')') { //TODO: if (a,) is one arg according to ISO, move this before contented = true;
-            pars--; continue;
-          }
-          contented = true;
-          if (synt[i] == '(') {
-            pars++; continue;
-          }
-        }
-        args += contented; //Final arg for closing parentheses
-        pair<parsed_object::funcit,bool> a = parsed_code->my_scope->funcs.insert(pair<string,int>(nname,args));
-        if (!a.second and a.first->second < signed(args))
-          a.first->second = args;
-        cout << "  Calls script `" << nname << "'\n";
-      }
-    }
-    else if (synt[pos] == 's')
-    {
-      const size_t sp = pos;
-      while (synt[++pos] == 's');
-      if (code.substr(sp,(pos--)-sp) == "with") {
-        with_after_parenths = 1;
-        continue;
+  for (std::size_t i = 0; i < flags_values.size(); i++) {
+    if ((ft.flags & flags_masks[i]) == flags_values[i]) {
+      if (flags_names[i] != "signed" || (flags_names[i] == "signed" && ft.def->name == "char")) {
+        type += flags_names[i] + " ";
       }
     }
   }
 
-  //There's sometimes a trailing block specifier; we do our best to catch these.
-  if (foundGoto) {
-    stringstream newName;
-    newName <<"enigma_block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
-    code.insert(code.size(), newName.str());
-    synt.insert(synt.size(), string(newName.str().size(), 'X'));
-  } 
- 
-  //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : parsed_code->my_scope->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
+  // type += ft.def->name + " ";
+
+  std::string name = std::string(ft.decl.name.content);
+  if (name != "" && !ft.decl.components.size()) {
+    type += name + " ";
+  }
+
+  jdi::ref_stack stack;
+  ft.decl.to_jdi_refstack(stack);
+  auto first = stack.begin();
+
+  std::string ref;
+  bool flag = false;
+  bool print_name = true;
+
+  for (auto it = first; it != stack.end(); it++) {
+    if (it->type == jdi::ref_stack::RT_POINTERTO) {
+      flag = true;
+      ref = '*' + ref;
+    } else if (it->type == jdi::ref_stack::RT_REFERENCE) {
+      flag = true;
+      ref = '&' + ref;
+    } else {
+      if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
+        if (flag) {
+          ref = '(' + ref + ')';
+        }
+
+        std::size_t arr_size = it->arraysize();
+        if (arr_size != 0) {
+          ref += '[' + std::to_string(arr_size) + ']';
+        } else {
+          ref += "[]";
+        }
+      }
+      // TODO: RT_MEMBER_POINTER
+      flag = false;
+    }
+
+    if (print_name) {
+      std::string name = std::string(ft.decl.name.content);
+      if (name != "") {
+        if (it->type == jdi::ref_stack::RT_ARRAYBOUND) {
+          ref = name + ref;
+        } else {
+          ref += name;
+        }
+      }
+      print_name = false;
+    }
+  }
+
+  type += ref;
+  return type;
+}
+
+/**
+  AST Node Visitor that mines a piece of code for variables declared,
+  functions called, and variables dot-accessed or used in with() blocks.
+  The legacy implementation also grabbed timeline indices used through
+  direct timeline_index assignment, though I'm baffled as to why.
+**/
+class DeclGatheringVisitor : public AST::Visitor {
+  const LanguageFrontend *const lang;
+  ParsedScope *const parsed_scope;
+  const NameSet &script_names;
+  CompileState *cs;
+
+  std::string CheckIfIdentifier(AST::PNode &node) {
+    if (node->type == AST::NodeType::IDENTIFIER) {
+      std::string name = node->As<AST::IdentifierAccess>()->name.content;
+      if (parsed_scope->declarations.find(name) != parsed_scope->declarations.end()) {
+        node->As<AST::IdentifierAccess>()->type = parsed_scope->declarations[name];
+        return "";
+      } else if (script_names.find(name) != script_names.end()) {
+        if (node->type == AST::NodeType::FUNCTION_CALL) {
+          parsed_scope->funcs[name] = node->As<AST::FunctionCallExpression>()->arguments.size();
+        }
+        return "";
+      } else
+        return name;
+    }
+    return "";
+  }
+
+  void AddLocal(AST::PNode &node) {
+    if (!node) return;
+    std::string name = CheckIfIdentifier(node);
+    if (name == "") return;
+    if (lang->is_shared_local(name)) {
+      parsed_scope->globallocals[name] = 0;
+      return;
+    }
+    if (cs->timeline_lookup.find(name) != cs->timeline_lookup.end()) {
+      parsed_scope->tlines[name] = 0;
+      return;
+    }
+    if (!lang->global_exists(name)) {
+      parsed_scope->locals[name] = dectrip("var");
+      cs->add_dot_accessed_local(name);
+    }
+  }
+
+  bool AddGlobal(AST::BinaryExpression &node) {
+    if (node.left->type == AST::NodeType::IDENTIFIER) {
+      auto left = node.left->As<AST::IdentifierAccess>();
+      if (left->name.content == "global" && node.operation.type == enigma::parsing::TokenType::TT_DOT) {
+        auto right = node.right->As<AST::IdentifierAccess>();
+        parsed_scope->globals[right->name.content] = dectrip("var");
+        parsed_scope->locals[right->name.content] = dectrip("var");
+        cs->add_dot_accessed_local(right->As<AST::IdentifierAccess>()->name.content);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void AddDot(AST::PNode &node) {
+    if (!node) return;
+    std::string name = CheckIfIdentifier(node);
+    if (name != "") parsed_scope->dots[name] = 0;
+    cs->add_dot_accessed_local(name);
+  }
+
+  void AddFunction(AST::FunctionCallExpression &node) {
+    std::string name = CheckIfIdentifier(node.function);
+    if (name != "") parsed_scope->funcs[name] = node.arguments.size();
+  }
+
+  bool VisitCodeBlock(AST::CodeBlock &node) {
+    for (auto &stmt : node.statements) AddLocal(stmt);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
+    bool is_global = node.storage_class == AST::DeclarationStatement::StorageClass::GLOBAL;
+    bool is_local = node.storage_class == AST::DeclarationStatement::StorageClass::LOCAL;
+    for (const auto &decl : node.declarations) {
+      std::string name = decl.declarator->decl.name.content;
+      std::string ftype = GetFullType(*decl.declarator);
+      std::string type = decl.declarator->def->name;
+      size_t pos = ftype.find(name);
+      std::string prefix;
+      std::string suffix;
+      if (pos != std::string::npos) {
+        prefix = ftype.substr(0, pos);
+        suffix = ftype.substr(pos + name.length());
+      }
+      prefix = std::regex_replace(prefix, std::regex("^ +| +$|( ) +"), "$1");
+      suffix = std::regex_replace(suffix, std::regex("^ +| +$|( ) +"), "$1");
+      dectrip dtrip(type, prefix, suffix);
+      if (is_global) parsed_scope->globals[name] = dtrip;
+      if (is_local) parsed_scope->locals[name] = dtrip;
+      cs->add_dot_accessed_local(name);
+      parsed_scope->declarations[name] = node.def;
+    }
+
+    for (const auto &decl : node.declarations) {
+      if (decl.init) {
+        VisitInitializer(*decl.init);
+      }
+    }
+    return false;
+  }
+
+  bool VisitBinaryExpression(AST::BinaryExpression &node) {
+    bool added = AddGlobal(node);
+    if (!added) {
+      AddLocal(node.left);
+      if (node.operation.type == enigma::parsing::TokenType::TT_DOT) {
+        AddDot(node.right);
+      } else {
+        AddLocal(node.right);
+      }
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+    AddFunction(node);
+    for (auto &arg : node.arguments) AddLocal(arg);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWithStatement(AST::WithStatement &node) {
+    AddLocal(node.object);
+
+    vector<std::string> prev_locals;
+    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end(); ++it) {
+      prev_locals.push_back(it->first);
+    }
+
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+
+    for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
+      if (it->first.substr(0, 8) == "argument") {
+        it = parsed_scope->locals.erase(it);
+      } else {
+        if (std::find(prev_locals.begin(), prev_locals.end(), it->first) == prev_locals.end()) {
+          parsed_scope->ambiguous[it->first] = dectrip();
+          it = parsed_scope->locals.erase(it);
+        } else {
+          it++;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool VisitIfStatement(AST::IfStatement &node) {
+    AddLocal(node.condition);
+    AddLocal(node.true_branch);
+    AddLocal(node.false_branch);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
+    AddLocal(node.operand);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) {
+    AddLocal(node.operand);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitTernaryExpression(AST::TernaryExpression &node) {
+    AddLocal(node.condition);
+    AddLocal(node.true_expression);
+    AddLocal(node.false_expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitLambdaExpression(AST::LambdaExpression &node) {
+    // I think no need to add locals for the arguments, because we give them `auto` in the pretty printer
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  virtual bool VisitSizeofExpression(AST::SizeofExpression &node) {
+    if (node.kind == AST::SizeofExpression::Kind::EXPR) {
+      AddLocal(std::get<AST::PNode>(node.argument));
+    }
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCastExpression(AST::CastExpression &node) {
+    AddLocal(node.expr);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitParenthetical(AST::Parenthetical &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitArray(AST::Array &node) {
+    for (auto &elem : node.elements) AddLocal(elem);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitForLoop(AST::ForLoop &node) {
+    AddLocal(node.assignment);
+    AddLocal(node.condition);
+    AddLocal(node.increment);
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitWhileLoop(AST::WhileLoop &node) {
+    AddLocal(node.condition);
+    AddLocal(node.body);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  virtual bool VisitDoLoop(AST::DoLoop &node) {
+    AddLocal(node.body);
+    AddLocal(node.condition);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitCaseStatement(AST::CaseStatement &node) {
+    AddLocal(node.value);
+    // CaseStatement::statements is code block, no need to add locals here
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitDefaultStatement(AST::DefaultStatement &node) {
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitSwitchStatement(AST::SwitchStatement &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitReturnStatement(AST::ReturnStatement &node) {
+    AddLocal(node.expression);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBreakStatement(AST::BreakStatement &node) {
+    AddLocal(node.count);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitContinueStatement(AST::ContinueStatement &node) {
+    AddLocal(node.count);
+    node.RecursiveSubVisit(*this);
+    return false;
+  }
+
+  bool VisitBraceOrParenInitializer(AST::BraceOrParenInitializer &node) {
+    for (auto &val : node.values) VisitInitializer(*val.second);
+    return false;
+  }
+
+  bool VisitAssignmentInitializer(AST::AssignmentInitializer &node) {
+    if (node.kind == AST::AssignmentInitializer::Kind::BRACE_INIT) {
+      VisitBraceOrParenInitializer(*std::get<AST::BraceOrParenInitNode>(node.initializer));
+    } else {
+      auto &expr = std::get<AST::PNode>(node.initializer);
+      AddLocal(expr);
+      expr->accept(*this);
+    }
+    return false;
+  }
+
+  bool VisitInitializer(AST::Initializer &node) {
+    if (node.kind == AST::Initializer::Kind::ASSIGN_EXPR) {
+      auto &init = std::get<AST::AssignmentInitNode>(node.initializer);
+      VisitAssignmentInitializer(*init);
+    } else if (node.kind == AST::Initializer::Kind::BRACE_INIT) {
+      auto &init = std::get<AST::BraceOrParenInitNode>(node.initializer);
+      VisitBraceOrParenInitializer(*init);
+    }
+    return false;
+  }
+
+ public:
+  DeclGatheringVisitor(const LanguageFrontend *language_fe, ParsedScope *pscope, const NameSet &scripts,
+                       CompileState *cs)
+      : lang(language_fe), parsed_scope(pscope), script_names(scripts), cs(cs) {}
+
+ private:
+  DeclGatheringVisitor *parent_ = nullptr;
+  /// Collection of names declared in this scope. Used to suppress
+  /// emitting local variable usage information for temporaries.
+  std::unordered_set<std::string> decls_;
+
+  bool Declared(const std::string &id) const {
+    if (decls_.find(id) != decls_.end()) return true;
+    if (parent_) return parent_->Declared(id);
+    return false;
+  }
+  std::unordered_set<std::string> &RootDecls() {
+    if (parent_) return parent_->RootDecls();
+    return decls_;
+  }
+
+  DeclGatheringVisitor(DeclGatheringVisitor *parent)
+      : lang(parent_->lang),
+        parsed_scope(parent_->parsed_scope),
+        script_names(parent_->script_names),
+        parent_(parent) {}
+};
+
+void collect_variables(const LanguageFrontend *lang, enigma::parsing::AST *ast, ParsedScope *parsed_scope,
+                       const NameSet &script_names, CompileState *cs) {
+  DeclGatheringVisitor visitor(lang, parsed_scope, script_names, cs);
+  ast->VisitNodes(visitor);
 }

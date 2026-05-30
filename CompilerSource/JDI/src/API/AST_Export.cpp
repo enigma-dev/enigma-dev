@@ -1,20 +1,20 @@
 /**
  * @file AST_Export.cpp
  * @brief Source implementing export functions for printing and rendering ASTs.
- * 
+ *
  * @section License
- * 
+ *
  * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for details.
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -22,52 +22,68 @@
 #include "AST.h"
 #include <General/svg_simple.h>
 
-#include <algorithm>
+#include <filesystem>
 
 using std::max;
 
 namespace jdi {
-  string AST::toString() const {
-    if (root) return root->toString();
-    return "";
-  }
+
+string AST::toString() const {
+  if (root) return root->toString();
+  return "";
 }
 
-namespace jdip
-{
-  /// A wrapper to \c SVG which generates IDs based on an internally-stored node count.
-  struct SVGrenderInfo {
-    SVG *svg;
-    AST_Node *cur;
-    int nodes_written;
-    
-    void draw_circle(int nid,int x,int y,int r,unsigned fill,unsigned stroke = 0xFF000000,int stroke_width = 2) { svg->draw_circle("Node"+svg->tostring(nid),x,y,r,fill,stroke,stroke_width); }
-    void draw_rectangle(int nid,int x1,int y1,int x2,int y2,unsigned fill,unsigned stroke = 0xFF000000,int stroke_width = 2) { svg->draw_rectangle("Node"+svg->tostring(nid),x1,y1,x2,y2,fill,stroke,stroke_width); }
-    void draw_line(int nid,char s_id,int x1,int y1,int x2,int y2,unsigned stroke = 0xFF000000,int stroke_width = 2) { svg->draw_line("Connector_"+svg->tostring(nid)+"_"+s_id,x1,y1,x2,y2,stroke,stroke_width); }
-    void draw_text(int nid,int cx,int bly,string t,unsigned fill = 0xFF000000) { svg->draw_text("Label_"+svg->tostring(nid),cx,bly,t,12,fill); }
-    
-    SVGrenderInfo(): svg(NULL), cur(NULL), nodes_written(0) {}
-    SVGrenderInfo(const char* fn): svg(new SVG(fn)), cur(NULL), nodes_written(0) {}
-    ~SVGrenderInfo() { delete svg; }
-  };
-  
-  //===========================================================================================================================
-  //=: Node Widths :===========================================================================================================
-  //===========================================================================================================================
-  
-  int AST_Node::own_width() { return content.length()*8 + 16; }
-  int AST_Node_Type::own_width() { return dec_type.toString().length()*8 + 16; }
-  int AST_Node_Definition::own_width() { return def->name.length()*8 + 16; }
-  int AST_Node_Subscript::own_width() { return 24; }
-  int AST_Node::own_height() { return own_width(); }
-  int AST_Node_Cast::own_height() { return 24; }
-  int AST_Node_Type::own_height() { return 24; }
-  int AST_Node_Definition::own_height() { return 24; }
-  
-  //===========================================================================================================================
-  //=: SVG Renderers :=========================================================================================================
-  //===========================================================================================================================
-  
+/// A wrapper to \c SVG which helps generate IDs for each node.
+/// The caller is meant to increment the internal node count after all entities
+/// for that node have been written to the SVG.
+struct SVGrenderInfo {
+  SVG *svg;
+  AST_Node *cur;
+  size_t nodes_written = 0;
+
+  void draw_circle(int nid, int x, int y, int r, unsigned fill,
+                   unsigned stroke = 0xFF000000, int stroke_width = 2) {
+    svg->draw_circle("Node"+std::to_string(nid),
+                     x, y, r, fill, stroke, stroke_width);
+  }
+  void draw_rectangle(int nid, int x1, int y1, int x2, int y2, unsigned fill,
+                      unsigned stroke = 0xFF000000,int stroke_width = 2) {
+    svg->draw_rectangle("Node" + std::to_string(nid),
+                        x1, y1, x2, y2, fill, stroke, stroke_width);
+  }
+  void draw_line(int nid,char s_id, int x1, int y1, int x2, int y2,
+                 unsigned stroke = 0xFF000000, int stroke_width = 2) {
+    svg->draw_line("Connector_" + std::to_string(nid) + "_" + s_id,
+                   x1, y1, x2, y2, stroke, stroke_width);
+  }
+  void draw_text(int nid, int cx, int bly, string text,
+                 unsigned fill = 0xFF000000) {
+    svg->draw_text("Label_" + std::to_string(nid), cx, bly, text, 12, fill);
+  }
+
+  SVGrenderInfo(): svg(nullptr), cur(nullptr) {}
+  SVGrenderInfo(std::filesystem::path fn):
+      svg(new SVG(fn)), cur(nullptr) {}
+  ~SVGrenderInfo() { delete svg; }
+};
+
+//===========================================================================================================================
+//=: Node Widths :===========================================================================================================
+//===========================================================================================================================
+
+int AST_Node::own_width() { return content.length()*8 + 16; }
+int AST_Node_Type::own_width() { return dec_type.toString().length()*8 + 16; }
+int AST_Node_Definition::own_width() { return def->name.length()*8 + 16; }
+int AST_Node_Subscript::own_width() { return 24; }
+int AST_Node::own_height() { return own_width(); }
+int AST_Node_Cast::own_height() { return 24; }
+int AST_Node_Type::own_height() { return 24; }
+int AST_Node_Definition::own_height() { return 24; }
+
+//===========================================================================================================================
+//=: SVG Renderers :=========================================================================================================
+//===========================================================================================================================
+
   void AST_Node::toSVG(int x, int y, SVGrenderInfo *svg)
   {
     const int nid = svg->nodes_written++;
@@ -90,7 +106,7 @@ namespace jdip
   {
     const int nid = svg->nodes_written++;
     int xx = x, yy = y+own_height()/2+16+(operand?operand->own_height()/2:0);
-    
+
     svg->draw_line(nid,'m',x,y,xx,yy);
     svg->draw_circle(nid,x,y,own_width()/2,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
     svg->draw_text(nid,x,y+4,content);
@@ -101,7 +117,7 @@ namespace jdip
   {
     const int nid = svg->nodes_written++;
     int xx = x, yy = y+own_height()/2+16+(operand?operand->own_height()/2:0);
-    
+
     int r = own_width()/2;
     svg->draw_line(nid,'m',x,y,xx,yy);
     svg->draw_rectangle(nid,x-r,y-12,x+r,y+12,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
@@ -113,7 +129,7 @@ namespace jdip
   {
     const int nid = svg->nodes_written++;
     int xx = x, yy = y+own_height()/2+16+(operand?operand->own_width()/2:0);
-    
+
     int r = own_width()/2;
     svg->draw_line(nid,'m',x,y,xx,yy);
     svg->draw_rectangle(nid,x-r,y-12,x+r,y+12,0xFFFFFFFF,svg->cur == this ? 0xFF00C000 : 0xFF000000,2);
@@ -216,7 +232,7 @@ namespace jdip
   {
     const int nid = svg->nodes_written++;
     int xx = x, yy = y+own_height()/2+16+(bound?bound->own_width()/2:0);
-    
+
     content = (position?"new() ":"new ") + alloc_type.toString();
     if (bound) content += "[]";
     int r = own_width()/2;
@@ -229,7 +245,7 @@ namespace jdip
   void AST_Node_delete::toSVG(int x, int y, SVGrenderInfo *svg) {
     const int nid = svg->nodes_written++;
     int xx = x, yy = y+own_height()/2+16+(operand?operand->own_height()/2:0);
-    
+
     content = array?"delete[]":"delete";
     int r = own_width()/2;
     svg->draw_line(nid,'m',x,y,xx,yy);
@@ -254,22 +270,20 @@ namespace jdip
     if (index)
       index->toSVG(rx,y2r,svg);
   }
-}
 
-namespace jdi {
-  
+
   //===========================================================================================================================
   //=: Base Call :=============================================================================================================
   //===========================================================================================================================
-  
-  void AST::writeSVG(const char* filename) {
-    jdip::SVGrenderInfo svg(filename);
-    svg.cur = NULL;
+
+  void AST::writeSVG(std::filesystem::path filename) {
+    jdi::SVGrenderInfo svg(filename);
+    svg.cur = nullptr;
     if (!svg.svg->is_open()) return;
-    
+
     int w, h;
-    
-    #ifdef DEBUG_MODE 
+
+    #ifdef DEBUG_MODE
       if (root)
         w = max(root->width(), (int)expression.length()*8)+8, h = root->height()+8 + 16;
       else
@@ -280,23 +294,21 @@ namespace jdi {
       else
         w = 8, h = 8;
     #endif
-    
+
     svg.svg->write_header(w,h);
     if (root)
       root->toSVG(w/2, root->own_height()/2+4, &svg);
-    #ifdef DEBUG_MODE 
+    #ifdef DEBUG_MODE
     svg.svg->draw_text("Expression",w/2,h-8,expression);
     #endif
     svg.svg->close();
   }
-}
 
-namespace jdip {
-  
+
   //===========================================================================================================================
   //=: Recursive Width/Height Resolvers :======================================================================================
   //===========================================================================================================================
-  
+
   int AST_Node            ::width()  { return own_width(); }
   int AST_Node_Binary     ::width()  { return 24 + (left?left->width():0) + (right?right->width():0); }
   int AST_Node_Unary      ::width()  { return operand?max(operand->width(),own_width()):own_width(); }
@@ -316,68 +328,81 @@ namespace jdip {
   int AST_Node_TempKeyInst::height() { return own_height(); }
   int AST_Node_Array      ::height() { int mh = 0; for (size_t i = 0; i < elements.size(); i++) mh = max(mh,elements[i]->height()); return own_width() + 16 + mh; }
   int AST_Node_Subscript  ::height() { return max((left?left->height():0), (index?index->height():0)) + 16 + own_height(); }
-  
-  
-  //===========================================================================================================================
-  //=: Basic Tree Print :======================================================================================================
-  //===========================================================================================================================
-  
-  string AST_Node::toString() const {
-    return content;
-  }
-  string AST_Node_Unary::toString() const {
-    return content + operand->toString();
-  }
-  string AST_Node_Binary::toString() const {
-    return "(" + (left? left->toString(): "...") + ") " + content + " (" + (right? right->toString() : "...") + ")";
-  }
-  string AST_Node_Ternary::toString() const {
-    return "(" + (exp?exp->toString():"...") + ")? (" + (left?left->toString():"...") + " : " + (right?right->toString():"...") + ")";
-  }
-  string AST_Node_Parameters::toString() const {
-    string res = "(" + (func?func->toString():"...") + ")(";
-    for (size_t i = 0; i < params.size(); ++i) { res += params[i]->toString(); if (i+1<params.size()) res += ", "; }
-    return res + ")";
-  }
-  string AST_Node_Cast::toString() const {
-    return "(" + cast_type.toString() + ")(" + operand->toString() + ")"; 
-  }
-  string AST_Node_Definition::toString() const {
-    return def? def->name : "...";
-  }
-  string AST_Node_Scope::toString() const {
-    return (left?left->toString() : "...") + "::" + (right?right->content:"???");
-  }
-  string AST_Node_sizeof::toString() const {
-    return "sizeof(" + operand->toString() + ")";
-  }
-  string AST_Node_Subscript::toString() const {
-    return "(" + (left? left->toString() : "...") + ")[" + (index? index->toString() : "...") + "]";
-  }
-  string AST_Node_Type::toString() const {
-    return dec_type.toString();
-  }
-  string AST_Node_Array::toString() const {
-    string res = "{ ";
-    for (size_t i = 0; i < elements.size(); ++i)
-      res += elements[i]->toString() + (i + 1 < elements.size()? ", " : " ");
-    return res + "}";
-  }
-  string AST_Node_new::toString() const {
-    string res = (position)? "new(" + position->toString() + ") " : "new ";
-    res += alloc_type.toString();
-    if (bound) res += "[" + bound->toString() + "]";
-    return res;
-  }
-  string AST_Node_delete::toString() const {
-    return (array?"delete ":"delete[] ") + operand->toString();
-  }
-  string AST_Node_TempInst::toString() const {
-    string res = temp? temp->toString() + "<" : "(<NULL TEMPLATE>)<";
-    for (size_t i = 0; i < params.size(); ++i) { res += params[i]->toString(); if (i+1<params.size()) res += ", "; }
-    return res + ">";
-  }
-  string AST_Node_TempKeyInst::toString() const {
-    return (temp? temp->name + "<" : "(<NULL TEMPLATE>)<") + key.toString() + ">";
-  }
+
+
+//===========================================================================================================================
+//=: Basic Tree Print :======================================================================================================
+//===========================================================================================================================
+
+string AST_Node::toString() const {
+  return content;
 }
+string AST_Node_Unary::toString() const {
+  return content + operand->toString();
+}
+string AST_Node_Binary::toString() const {
+  return "(" + (left? left->toString(): "...") + ") "
+         + content
+         + " (" + (right? right->toString() : "...") + ")";
+}
+string AST_Node_Ternary::toString() const {
+  return "(" + (exp ? exp->toString() : "...") + ") "
+         "? (" + (left?left->toString():"...") + ") "
+         ": (" + (right?right->toString():"...") + ")";
+}
+string AST_Node_Parameters::toString() const {
+  string res = "(" + (func?func->toString():"...") + ")(";
+  for (size_t i = 0; i < params.size(); ++i) {
+    res += params[i]->toString();
+    if (i + 1 < params.size()) res += ", ";
+  }
+  return res + ")";
+}
+string AST_Node_Cast::toString() const {
+  return "(" + cast_type.toString() + ")(" + operand->toString() + ")";
+}
+string AST_Node_Definition::toString() const {
+  return def? def->name : "...";
+}
+string AST_Node_Scope::toString() const {
+  return (left?left->toString() : "...") + "::" + (right?right->content:"???");
+}
+string AST_Node_sizeof::toString() const {
+  return "sizeof(" + operand->toString() + ")";
+}
+string AST_Node_Subscript::toString() const {
+  return "(" + (left? left->toString() : "...") + ")"
+         "[" + (index? index->toString() : "...") + "]";
+}
+string AST_Node_Type::toString() const {
+  return dec_type.toString();
+}
+string AST_Node_Array::toString() const {
+  string res = "{ ";
+  for (size_t i = 0; i < elements.size(); ++i)
+    res += elements[i]->toString() + (i + 1 < elements.size()? ", " : " ");
+  return res + "}";
+}
+string AST_Node_new::toString() const {
+  string res = (position)? "new(" + position->toString() + ") " : "new ";
+  res += alloc_type.toString();
+  if (bound) res += "[" + bound->toString() + "]";
+  return res;
+}
+string AST_Node_delete::toString() const {
+  return (array?"delete ":"delete[] ") + operand->toString();
+}
+string AST_Node_TempInst::toString() const {
+  string res = temp? temp->toString() + "<" : "(<nullptr TEMPLATE>)<";
+  for (size_t i = 0; i < params.size(); ++i) {
+    res += params[i]->toString();
+    if (i+1<params.size()) res += ", ";
+  }
+  return res + ">";
+}
+string AST_Node_TempKeyInst::toString() const {
+  return (temp ? temp->name + "<" : "(<nullptr TEMPLATE>)<")
+               + key.toString() + ">";
+}
+
+}  // namespace jdi

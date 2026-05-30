@@ -54,7 +54,7 @@ struct SpriteData : ProtoMessageInheritor<buffers::resources::Sprite> {
   std::vector<ImageData> image_data;
 
   SpriteData(const BaseProtoClass &sprite,
-             const std::string& name, const std::vector<ImageData>& subimages);
+             std::string_view name, const std::vector<ImageData>& subimages);
   SpriteData(const deprecated::JavaStruct::Sprite &sprite);
 };
 
@@ -63,7 +63,7 @@ struct SoundData : ProtoMessageInheritor<buffers::resources::Sound> {
   BinaryData audio;
 
   SoundData(const BaseProtoClass &sound,
-            const std::string& name, const BinaryData& data);
+            std::string_view name, const BinaryData& data);
   SoundData(const deprecated::JavaStruct::Sound &sound);
 };
 
@@ -73,7 +73,7 @@ struct BackgroundData : ProtoMessageInheritor<buffers::resources::Background> {
   bool legacy_transparency;
 
   BackgroundData(const BaseProtoClass &background,
-                 const std::string& name, const ImageData& image);
+                 std::string_view name, const ImageData& image);
   BackgroundData(const deprecated::JavaStruct::Background &background);
 };
 
@@ -96,44 +96,44 @@ struct FontData : ProtoMessageInheritor<buffers::resources::Font> {
   };
   std::vector<NormalizedRange> normalized_ranges;
 
-  FontData(const BaseProtoClass &font, const std::string& name);
+  FontData(const BaseProtoClass &font, std::string_view name);
   FontData(const deprecated::JavaStruct::Font &font);
 };
 
 struct PathData : ProtoMessageInheritor<buffers::resources::Path> {
   std::string name;
-  PathData(const BaseProtoClass &q, const std::string& name);
+  PathData(const BaseProtoClass &q, std::string_view name);
   PathData(const deprecated::JavaStruct::Path &path);
 };
 struct ScriptData : ProtoMessageInheritor<buffers::resources::Script> {
   std::string name;
-  ScriptData(const BaseProtoClass &q, const std::string& name);
+  ScriptData(const BaseProtoClass &q, std::string_view name);
   ScriptData(const deprecated::JavaStruct::Script &script);
 };
 struct ShaderData : ProtoMessageInheritor<buffers::resources::Shader> {
   std::string name;
-  ShaderData(const BaseProtoClass &q, const std::string& name);
+  ShaderData(const BaseProtoClass &q, std::string_view name);
   ShaderData(const deprecated::JavaStruct::Shader &shader);
 };
 struct TimelineData : ProtoMessageInheritor<buffers::resources::Timeline> {
   std::string name;
-  TimelineData(const BaseProtoClass &q, const std::string& name);
+  TimelineData(const BaseProtoClass &q, std::string_view name);
   TimelineData(const deprecated::JavaStruct::Timeline &timeline);
 };
 struct ObjectData : ProtoMessageInheritor<buffers::resources::Object> {
   std::string name;
-  ObjectData(const BaseProtoClass &q, const std::string& name);
+  ObjectData(const BaseProtoClass &q, std::string_view name);
   ObjectData(const deprecated::JavaStruct::GmObject &object, const ESLookup &lookup);
 };
 struct RoomData : ProtoMessageInheritor<buffers::resources::Room> {
   std::string name;
-  RoomData(const BaseProtoClass &q, const std::string& name);
+  RoomData(const BaseProtoClass &q, std::string_view name);
   RoomData(const deprecated::JavaStruct::Room &room, const ESLookup &lookup);
 };
 // TODO(Nabeel): Add this when you have Proto for Polygons
 // struct PolygonData : ProtoMessageInheritor<buffers::resources::Polygon> {
 //   std::string name;
-//   PolygonData(const BaseProtoClass &q, const std::string& name);
+//   PolygonData(const BaseProtoClass &q, std::string_view name);
 //   PolygonData(const deprecated::JavaStruct::Polygon &polygon, const ESLookup &lookup);
 // };
 

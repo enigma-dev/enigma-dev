@@ -40,6 +40,8 @@ namespace enigma
 {
   struct object_timelines : object_planar
   {
+    static constexpr unsigned char objtype = 0xAC;
+
     //Used as a global lookup for timeline moments. Filled at runtime.
     //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
     static std::vector< std::map<int, int> > timeline_moments_maps;
@@ -60,6 +62,11 @@ namespace enigma
     void advance_curr_timeline();
     void loop_curr_timeline();
     virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
+
+    // Serialization and deserialization
+    std::vector<std::byte> serialize() override;
+    std::size_t deserialize_self(std::byte *iter) override;
+    static std::pair<object_timelines, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma
 

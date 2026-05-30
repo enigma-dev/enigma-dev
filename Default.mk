@@ -21,9 +21,10 @@ endif
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+	$(DYLIB_FIX_COMMANDS)
 
 clean:
-	rm -rf $(TARGET) $(OBJ_DIR)
+	rm -rf $(TARGET) $(OBJ_DIR) .eobjs-asan
 
 # Create the object directories
 $(OBJ_DIRS):

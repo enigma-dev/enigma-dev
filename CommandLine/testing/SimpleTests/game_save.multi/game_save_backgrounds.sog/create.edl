@@ -1,0 +1,17 @@
+int bkg1 = background_add("../../data/sprite.png", false);
+int bkg2 = background_add("../../data/numbers.png", false);
+var buf = buffer_create(1, buffer_grow, 1);
+game_save_buffer(buf);
+buffer_save(buf, "/tmp/test.bin");
+background_delete(bkg1);
+buffer_delete(buf);
+buf = buffer_load("/tmp/test.bin");
+game_load_buffer(buf);
+gtest_assert_true(background_exists(bkg1));
+gtest_assert_true(background_exists(bkg2));
+gtest_assert_eq(background_get_width(bkg1), 256);
+gtest_assert_eq(background_get_height(bkg1), 64);
+gtest_assert_eq(background_get_width(bkg2), 24);
+gtest_assert_eq(background_get_height(bkg2), 8);
+
+game_end();

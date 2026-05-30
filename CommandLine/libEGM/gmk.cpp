@@ -49,7 +49,7 @@ namespace gmk_internal {
 
 static const std::string gmk_data = "gmk_data";
 
-static vector<std::string> tempFilesCreated;
+static vector<fs::path> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
   for (const std::filesystem::path &tempFile : tempFilesCreated) {
@@ -608,7 +608,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver, const std::string& name)
     sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
   
-  const std::filesystem::path fName = TempFileName(gmk_data)/(name + sound->file_extension());
+  const std::filesystem::path fName = TempFileName(gmk_data)/StrCat(name, sound->file_extension());
 
   if (ver == 440) {
     //-1 = no sound
@@ -831,7 +831,7 @@ struct PostponedAction {
 
 static std::vector<PostponedAction> postponedActions;
 
-int LoadActions(Decoder &dec, std::string* code, std::string eventName) {
+int LoadActions(Decoder &dec, std::string* code, std::string_view eventName) {
   int ver = dec.read4();
   if (ver != 400) {
     errStream << "Unsupported GMK actions version '" << ver <<

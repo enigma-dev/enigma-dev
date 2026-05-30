@@ -1,0 +1,22 @@
+# Arch Linux packages for ENIGMA CI (one per line; # comments ignored)
+base-devel
+git
+make
+boost
+yaml-cpp
+pugixml
+rapidjson
+protobuf
+grpc
+zlib
+glm
+libpng
+gtest
+lcov
+glew
+libxrandr
+libx11
+libxext
+libxinerama
+libxcursor 
+libxi

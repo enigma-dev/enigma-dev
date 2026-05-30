@@ -28,6 +28,7 @@
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
  #define DLLEXPORT extern "C" __declspec(dllexport)
  #include <windows.h>
+ #include "win32_macro_guard.h"
  #define sleep Sleep
 #else
  #define DLLEXPORT extern "C"
@@ -53,8 +54,6 @@
 using namespace std;
 
 #include "backend/JavaCallbacks.h"
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
 #include "compile_includes.h"
 #include "compile_common.h"
 #include "System/builtins.h"
@@ -111,7 +110,7 @@ inline void write_desktop_entry(const std::filesystem::path& fname, const GameDa
 inline void write_exe_info(const std::filesystem::path& codegen_directory, const GameData &game) {
   std::ofstream wto;
   const buffers::resources::General &gameSet = game.settings.general();
-  const string &gloss_version = game.settings.info().version();
+  std::string_view gloss_version = game.settings.info().version();
 
   wto.open((codegen_directory/"Preprocessor_Environment_Editable/Resources.rc").u8string().c_str(),ios_base::out);
   wto << license;
@@ -330,6 +329,12 @@ std::set<EventGroupKey> ListUsedEvents(
   return used_events;
 }
 
+static NameSet ScriptNames(const GameData &game) {
+  NameSet names;
+  for (auto &script : game.scripts) names.insert(script.name);
+  return names;
+}
+
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
   if (exe_filename) {
@@ -348,7 +353,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   ide_dia_open();
   cout << "Initialized." << endl;
 
-  CompileState state;
+  CompileState state(current_language, ScriptNames(game));
 
   // replace any spaces in ey name because make is trash
   string name = string_replace_all(compilerInfo.name, " ", "_");
@@ -410,6 +415,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
 
   // First, we make a space to put our globals.
   jdi::using_scope globals_scope("<ENIGMA Resources>", namespace_enigma_user);
+  namespace_enigma_user->use_namespace(&globals_scope);
 
   idpr("Copying resources",1);
 
@@ -506,7 +512,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   wto << "#define PRIMDEPTH2 6\n";
   wto << "#define AUTOLOCALS 0\n";
   wto << "#define MODE3DVARS 0\n";
-  wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
+  wto << "#define GM_COMPATIBILITY_VERSION " << compatibility_opts_.compliance_mode << "\n";
   wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
   wto << '\n';
   wto.close();
@@ -648,7 +654,7 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(game, state.parsed_rooms, &state.global_object, mode);
+  res = current_language->compile_writeRoomData(game, state, mode);
   irrr();
 
   edbg << "Writing shader data" << flushl;

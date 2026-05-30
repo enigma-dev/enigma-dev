@@ -1,0 +1,10 @@
+# Homebrew formulae for ENIGMA macOS CI (one per line)
+boost
+sdl2
+protobuf
+grpc
+pugixml
+yaml-cpp
+rapidjson
+googletest
+lcov

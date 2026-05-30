@@ -16,8 +16,6 @@
 **/
 
 #include "settings.h"
-#include "syntax/syncheck.h"
-#include "parser/parser.h"
 #include "backend/GameData.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
@@ -40,7 +38,7 @@ using namespace std;
     bool precompile; \
   }; "
 
-static string esc(string str) {
+static string esc(std::string_view str) {
   string res;
   res.reserve(str.length());
   for (size_t i = 0; i < str.length(); ++i) {
@@ -67,8 +65,8 @@ int lang_CPP::compile_writeShaderData(const GameData &game, ParsedScope *EGMglob
     while (idmax < shader.id()) {
       ++idmax, wto << "ShaderStruct(),\n";
     }
-    string vertexcode  =  shader->vertex_code();
-    string fragmentcode = shader->fragment_code();
+    std::string_view vertexcode  =  shader->vertex_code();
+    std::string_view fragmentcode = shader->fragment_code();
     //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "

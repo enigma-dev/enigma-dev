@@ -38,9 +38,9 @@ namespace enigma {
     void sort();
     void reverse();
     variant get(int) const;
-    varargs& operator,(variant);
+    varargs& operator,(::variant);
     varargs();
-    varargs(variant);
+    varargs(::variant);
     varargs(varargs&);
     ~varargs();
     #endif

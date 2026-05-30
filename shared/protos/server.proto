@@ -1,4 +1,5 @@
-syntax = "proto2";
+edition = "2023";
+
 package buffers;
 
 import "compiler.proto";

@@ -1,0 +1,56 @@
+var width = 8;
+var height = 8;
+var components = 4;
+
+var surf_test = surface_create(width, height);
+surface_set_target(surf_test);
+draw_set_color(c_red);
+draw_rectangle(0, 0, width, height, false);
+surface_reset_target();
+
+var buf = buffer_create(8, buffer_grow, 1);
+buffer_get_surface(buf, surf_test, 0);
+gtest_assert_eq(buffer_get_size(buf), width * height * components);
+
+for var i = 0; i < (width * height * components); i += 4 {
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+}
+buffer_delete(buf);
+
+buf = buffer_create(40, buffer_grow, 1);
+buffer_get_surface(buf, surf_test, 23);
+gtest_assert_eq(buffer_get_size(buf), width * height * components + 23);
+
+for var i = 0; i < 23; i++ {
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+}
+
+for var i = 0; i < (width * height * components); i += 4 {
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 0);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+    gtest_assert_eq(buffer_read(buf, buffer_u8), 255);
+}
+buffer_delete(buf);
+
+buf = buffer_create(8, buffer_wrap, 1);
+
+buffer_get_surface(buf, surf_test, 0);
+gtest_assert_eq(buffer_get_size(buf), 8);
+
+buf = buffer_create(8, buffer_fixed, 1);
+
+buffer_get_surface(buf, surf_test, 0);
+gtest_assert_eq(buffer_get_size(buf), 8);
+
+buf = buffer_create(8, buffer_fast, 1);
+
+buffer_get_surface(buf, surf_test, 0);
+gtest_assert_eq(buffer_get_size(buf), 8);
+
+buffer_delete(buf);
+
+game_end();

@@ -60,7 +60,7 @@ static std::filesystem::path lastcodegen_directory;
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 { 
-  pt pos = 0, spos;
+  size_t pos = 0, spos;
 
   /* Isolate the executable path and filename
   ***********************************************/
@@ -162,7 +162,7 @@ const char* establish_bearings(const char *compiler)
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
-    pt pos = 0;
+    size_t pos = 0;
     string idirstart = compilerInfo.searchdirs_start, idirend = compilerInfo.searchdirs_end;
     cout << "Searching for directories between \"" << idirstart << "\" and \"" << idirend << "\"" << endl;
     if (idirstart != "")
@@ -173,29 +173,30 @@ const char* establish_bearings(const char *compiler)
       }
       pos += idirstart.length();
     }
-  
-    jdi::builtin->add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
-    jdi::builtin->add_search_directory((enigma_root/"shared").u8string().c_str());
-    jdi::builtin->add_search_directory(codegen_directory.u8string().c_str());
+
+    auto &builtin = jdi::builtin_context();
+    builtin.add_search_directory((enigma_root/"ENIGMAsystem/SHELL").u8string().c_str());
+    builtin.add_search_directory((enigma_root/"shared").u8string().c_str());
+    builtin.add_search_directory(codegen_directory.u8string().c_str());
 
     while (is_useless(idirs[++pos]));
 
-    const pt endpos = (idirend != "")? idirs.find(idirend): string::npos;
+    const size_t endpos = (idirend != "")? idirs.find(idirend): string::npos;
     idirs = idirs.substr(pos, endpos-pos); //Assume the rest of the file is full of these
 
-    pt spos = 0;
+    size_t spos = 0;
     for (pos = 0; pos < idirs.length(); pos++)
     {
       if (idirs[pos] == '\r' or idirs[pos] == '\n')
       {
         idirs[pos] = '/';
-        jdi::builtin->add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
+        builtin.add_search_directory(idirs.substr(spos,pos-spos+(idirs[pos-1] != '/')));
         while (is_useless(idirs[++pos]));
         spos = pos--;
       }
     }
 
-    cout << "Toolchain returned " << jdi::builtin->search_dir_count() << " search directories:\n";
+    cout << "Toolchain returned " << builtin.search_dir_count() << " search directories:\n";
 
   /* Parse built-in #defines
   ****************************/
@@ -203,8 +204,8 @@ const char* establish_bearings(const char *compiler)
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory/"enigma_defines.txt").u8string().c_str());
-    jdi::builtin->add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
+    int res = builtin.parse_stream(macro_reader);
+    builtin.add_macro("_GLIBCXX_USE_CXX11_ABI", "0");
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

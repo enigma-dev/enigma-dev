@@ -41,6 +41,8 @@ namespace enigma
 {
   struct object_collisions: object_transform
   {
+    static constexpr unsigned char objtype = 0xAF;
+
     // Bit Mask
       int mask_index;
       bool solid;
@@ -70,6 +72,11 @@ namespace enigma
       object_collisions();
       object_collisions(unsigned, int);
       virtual ~object_collisions();
+
+    // Serialization and deserialization
+      std::vector<std::byte> serialize() override;
+      std::size_t deserialize_self(std::byte *iter) override;
+      static std::pair<object_collisions, std::size_t> deserialize(std::byte *iter);
   };
 } //namespace enigma
 

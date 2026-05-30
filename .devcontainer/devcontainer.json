@@ -1,0 +1,14 @@
+{
+  "name": "ENIGMA (Arch)",
+  "build": {
+    "dockerfile": "../CI/docker/Dockerfile.arch",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/enigma-dev",
+  "postCreateCommand": "chmod +x CI/github/*.sh && CI/github/build-emake.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-vscode.cpptools"]
+    }
+  }
+}

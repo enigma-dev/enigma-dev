@@ -8,30 +8,34 @@
 using namespace std;
 
 namespace jdi {
-  static definition n_abstract("<unspecified>", NULL, 0);
+  static definition n_abstract("<unspecified>", nullptr, 0);
   definition *arg_key::abstract = &n_abstract;
-  
-  definition *arg_key::new_definition(size_t index, string name, definition_scope* parent) const {
-    if (values[index].type == AKT_FULLTYPE)
-      return new definition_typed(name, parent, values[index].ft().def, values[index].ft().refs, values[index].ft().flags, DEF_TYPED | DEF_TYPENAME);
+
+  unique_ptr<definition> arg_key::make_definition(size_t index, string name, definition_scope* parent) const {
+    if (values[index].type == AKT_FULLTYPE) {
+      return make_unique<definition_typed>(name, parent, values[index].ft().def,
+                 values[index].ft().refs, values[index].ft().flags,
+                 DEF_TYPED | DEF_TYPENAME);
+    }
     if (values[index].type == AKT_VALUE) {
       value v = values[index].val();
       definition* type =
           v.type == VT_INTEGER? builtin_type__int    :
           v.type == VT_DOUBLE?  builtin_type__double :
           v.type == VT_STRING?  builtin_type__char   : builtin_type__void;
-      return new definition_valued(name, parent, type, 0, DEF_VALUED, v);
+      return make_unique<definition_valued>(name, parent, type,
+                                            0, DEF_VALUED, v);
     }
-    return NULL;
+    return nullptr;
   }
-  
+
   void arg_key::put_node(size_t argnum, const node &n) {
     if (n.type == AKT_FULLTYPE)
       put_type(argnum, n.ft());
     else
       put_value(argnum, n.val());
   }
-  
+
   string arg_key::toString() const {
     string str;
     bool c = false;
@@ -42,7 +46,7 @@ namespace jdi {
     }
     return str;
   }
-  
+
   bool arg_key::operator<(const arg_key& other) const {
     // cout << "Comparing (" << toString() << ") < (" << other.toString() << ")" << endl;
     {
@@ -75,7 +79,7 @@ namespace jdi {
       }
     } return false;
   }
-  
+
   void arg_key::mirror_types(definition_template *temp) {
     for (size_t i = 0; i < temp->params.size(); ++i)
       if (temp->params[i]->flags & DEF_TYPENAME) {
@@ -87,7 +91,7 @@ namespace jdi {
         values[i].type = AKT_VALUE;
       }
   }
-  
+
   void arg_key::put_final_type(size_t argnum, const full_type &type) { new (&values[argnum].data) full_type(); values[argnum].ft().copy(type); values[argnum].type = AKT_FULLTYPE; }
   void arg_key::swap_final_type(size_t argnum, full_type &type)      { new (&values[argnum].data) full_type(); values[argnum].ft().swap(type); values[argnum].type = AKT_FULLTYPE; }
   void arg_key::put_type(size_t argnum, const full_type &type) {
@@ -124,7 +128,7 @@ namespace jdi {
     new(&values[argnum].data) aug_value(val);
     values[argnum].type = AKT_VALUE;
   }
-  
+
   bool arg_key::is_abstract() const {
     for (const node* n = values; n != endv; ++n)
       if (n->is_abstract()) return true;
@@ -152,9 +156,9 @@ namespace jdi {
     }
     return true;
   }
-  
-  /// Default constructor; mark values NULL.
-  arg_key::arg_key(): values(NULL), endv(NULL) {}
+
+  /// Default constructor; mark values nullptr.
+  arg_key::arg_key(): values(nullptr), endv(nullptr) {}
   /// Construct with a size, reserving sufficient memory.
   arg_key::arg_key(size_t n): values(new node[n]), endv(values+n) {} // Word to the wise: Do not switch the order of this initialization.
   /// Construct from a ref_stack.
@@ -172,7 +176,7 @@ namespace jdi {
         asm("int3"); return;
       }
     #endif
-    
+
     const ref_stack::parameter_ct &p = ((ref_stack::node_func*)&n)->params;
     values = new node[p.size()]; endv = values + p.size();
     for (size_t i = 0; i < p.size(); ++i)
@@ -197,7 +201,7 @@ namespace jdi {
   }
   /// Destruct, freeing items.
   arg_key::~arg_key() { delete[] values; }
-  
+
   arg_key::node &arg_key::node::operator=(const node& other) {
     type = other.type;
     if (type == AKT_FULLTYPE)
@@ -206,28 +210,27 @@ namespace jdi {
       new(&data) aug_value(other.av());
     return *this;
   }
-  
+
   bool arg_key::node::is_abstract() const {
     return type == AKT_FULLTYPE?
       ft().def == abstract || !ft().def || (ft().def->flags & DEF_DEPENDENT)
     : val().type == VT_DEPENDENT;
   }
-  
+
   arg_key::node::~node() {
     if (type == AKT_FULLTYPE)
       ((full_type*)&data)->~full_type();
     else if (type == AKT_VALUE)
       ((aug_value*)&data)->~aug_value();
   }
-  
+
   bool arg_key::node::operator!=(const node &n) const {
     if (type != n.type) return true;
     if (type == AKT_FULLTYPE) return ft().def != abstract and n.ft().def != abstract and ft() != n.ft();
     return val().type != VT_DEPENDENT && n.val().type != VT_DEPENDENT && val() != n.val();
   }
-  
-  arg_key::aug_value::aug_value(): value(), ast(NULL) {}
+
+  arg_key::aug_value::aug_value(): value(), ast(nullptr) {}
   arg_key::aug_value::aug_value(const value &v, AST *n): value(v), ast(n) {}
-  arg_key::aug_value::aug_value(const aug_value &o): value(o), ast(o.ast? o.ast->duplicate() : NULL) {}
-  arg_key::aug_value::~aug_value() { delete ast; }
+  arg_key::aug_value::aug_value(const aug_value &o): value(o), ast(o.ast? o.ast->duplicate() : nullptr) {}
 }

@@ -18,7 +18,6 @@
 **/
 
 #include "settings.h"
-#include "parser/parser.h"
 #include "backend/GameData.h"
 #include "compiler/compile_common.h"
 #include "event_reader/event_parser.h"
@@ -34,7 +33,7 @@
 
 using namespace std;
 
-inline bool iscomment(const string &n) {
+inline bool iscomment(std::string_view n) {
   if (n.length() < 2 or n[0] != '/') return false;
   if (n[1] == '/') return true;
   if (n[1] != '*') return false;
@@ -113,6 +112,53 @@ static inline void declare_object_locals_class(std::ostream &wto,
   wto << "    std::map<string, var> *vmap;\n";
   wto << "    object_locals() {vmap = NULL;}\n";
   wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
+  wto << "\n    std::vector<std::byte> serialize() override {\n"
+         "      auto bytes = event_parent::serialize();\n"
+         "      std::size_t len = 0;\n"
+         "      if (vmap != nullptr) {\n"
+         "        resize_buffer_for(bytes, vmap->size());\n"
+         "        for (auto &[key, value] : *vmap) {\n"
+         "          enigma_internal_serialize(key, len, bytes);\n"
+         "          enigma_internal_serialize(value, len, bytes);\n"
+         "        }\n"
+         "        bytes.shrink_to_fit();\n"
+         "      } else {\n"
+         "        std::byte *iter = &bytes.back() + 1;\n"
+         "        bytes.resize(bytes.size() + sizeof(std::size_t));\n"
+         "        serialize_into<std::size_t>(iter, 0);\n"
+         "      }\n"
+         "      \n"
+         "      return bytes;\n"
+         "    }\n\n";
+
+  wto << "    std::size_t deserialize_self(std::byte *iter) override {\n"
+         "      auto len = event_parent::deserialize_self(iter);\n"
+         "      std::size_t map_size = 0;\n"
+         "      enigma_internal_deserialize(map_size, iter, len);\n"
+         "\n"
+         "      if (map_size != 0) {\n"
+         "        if (vmap == nullptr) {\n"
+         "          vmap = new std::map<string, var>;\n"
+         "        }\n"
+         "\n"
+         "        for (std::size_t i = 0; i < map_size; i++) {\n"
+         "          std::string key;\n"
+         "          var value;\n"
+         "          enigma_internal_deserialize(key, iter, len);\n"
+         "          enigma_internal_deserialize(value, iter, len);\n"
+         "          vmap->emplace(std::move(key), std::move(value));\n"
+         "        }\n"
+         "      }\n"
+         "\n"
+         "      return len;\n"
+         "    }\n\n";
+
+  wto << "    std::pair<object_locals, std::size_t> deserialize(std::byte *iter) {\n"
+         "      object_locals result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n\n";
+
   wto << "  };\n";
 }
 
@@ -134,8 +180,8 @@ static inline void write_extension_casts(std::ostream &wto,
 }
 
 // TODO(JoshDreamland): Burn this function into ash and launch the ashes into space
-static inline void compute_locals(language_adapter *lang, parsed_object *object, const string addls) {
-  pt pos;
+static inline void compute_locals(language_adapter *lang, parsed_object *object, std::string_view addls) {
+  size_t pos;
   string type, name, pres, sufs;
   for (pos = 0; pos < addls.length(); pos++)
   {
@@ -143,16 +189,16 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
     if (addls[pos] == ';') { object->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
     if (addls[pos] == ',') { object->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
     if (is_letter(addls[pos]) or addls[pos] == '$') {
-      const pt spos = pos;
+      const size_t spos = pos;
       while (is_letterdd(addls[++pos]));
-      string tn = addls.substr(spos,pos-spos);
+      string tn{addls.substr(spos,pos-spos)};
       (lang->find_typename(tn) ? type : name) = tn;
       pos--; continue;
     }
     if (addls[pos] == '*') { pres += '*'; continue; }
     if (addls[pos] == '[') {
       int cnt = 1;
-      const pt spos = pos;
+      const size_t spos = pos;
       while (cnt and ++pos < addls.length())
         if (addls[pos] == '[' or addls[pos] == '(') cnt++;
         else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
@@ -162,7 +208,7 @@ static inline void compute_locals(language_adapter *lang, parsed_object *object,
     if (addls[pos] == '=') {
       int cnt = 0;
 
-      pt spos = ++pos;
+      size_t spos = ++pos;
       while (is_useless(addls[spos])) spos++;
       pos = spos - 1;
 
@@ -212,17 +258,18 @@ static inline bool parent_declares(parsed_object *parent, const deciter decl) {
   return false;
 }
 
-static void write_object_locals(language_adapter *lang, std::ostream &wto,
+static std::vector<std::pair<std::string, dectrip>> write_object_locals(language_adapter *lang, std::ostream &wto,
                                 const ParsedScope *global,
                                 parsed_object *object) {
   wto << "    // Local variables\n    ";
   for (const ParsedEvent &pev : object->all_events) {
-    string addls = pev.ev_id.LocalDeclarations();
+    std::string_view addls = pev.ev_id.LocalDeclarations();
     if (addls.length()) {
       compute_locals(lang, object, addls);
     }
   }
 
+  std::vector<std::pair<std::string, dectrip>> locals;
   for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
     bool writeit = true; // Whether this "local" should be declared such
     if (parent_declares(object->parent, ii)) {
@@ -243,10 +290,87 @@ static void write_object_locals(language_adapter *lang, std::ostream &wto,
       }
     }
     if (writeit) {
+      locals.emplace_back(ii->first, ii->second);
       wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first
           << ii->second.suffix << ";\n    ";
     }
   }
+
+  if (!locals.empty()) {
+    for (auto &[name, type]: locals) {
+      wto << "\n    void deserialize_" << name << "(std::byte *iter, std::size_t len) {\n"
+          << "      enigma_internal_deserialize(" << name << ", iter, len);\n"
+             "    }\n";
+    }
+
+    wto << "\n    using Deserializer = void(OBJ_" << object->name << "::*)(std::byte *iter, std::size_t len);\n";
+    wto << "    const static std::unordered_map<std::string_view, Deserializer> deserializers;\n";
+  }
+
+  wto << "\n    std::vector<std::byte> serialize() override {\n"
+         "      auto bytes = " << (object->parent ? "OBJ_" + object->parent->name : "object_locals") << "::serialize();\n";
+  wto << "      std::size_t len = 0;\n\n";
+  if (!locals.empty()) {
+    wto << "      std::unordered_map<std::string, std::size_t> object_offsets{};\n";
+    wto << "      std::vector<std::byte> serialized_data{};\n";
+    wto << "      std::size_t offset = 0;\n\n";
+  }
+  wto << "      enigma_internal_serialize<unsigned char>(0xBB, len, bytes);\n";
+  for (auto &[name, type]: locals) {
+    wto << "      object_offsets[\"" << name << "\"] = offset;\n";
+    wto << "      enigma_internal_serialize(" << name << ", offset, serialized_data);\n";
+  }
+  if (!locals.empty()) {
+    wto << "      enigma_internal_serialize(object_offsets.size(), len, bytes);\n";
+    wto << "      for (auto &[name, offset]: object_offsets) {\n"
+           "        enigma_internal_serialize(name, len, bytes);\n"
+           "        enigma_internal_serialize(offset, len, bytes);\n"
+           "      }\n"
+           "      enigma_internal_serialize(serialized_data.size(), len, bytes);\n"
+           "      std::copy(serialized_data.begin(), serialized_data.end(), std::back_inserter(bytes));\n";
+    wto << "      bytes.shrink_to_fit();\n";
+  }
+  wto << "      return bytes;\n"
+         "    }\n";
+
+  wto << "\n    std::size_t deserialize_self(std::byte *iter) override {\n"
+         "      auto len = " << (object->parent ? "OBJ_" + object->parent->name : "object_locals") << "::deserialize_self(iter);\n";
+  wto << "      unsigned char type;\n";
+  wto << "      enigma_internal_deserialize(type, iter, len);\n";
+  if (!locals.empty()) {
+    wto << "      std::size_t objects_len = 0;\n";
+    wto << "      enigma_internal_deserialize(objects_len, iter, len);\n";
+    wto << "      std::unordered_map<std::string, std::size_t> object_offsets{};\n";
+    wto << "      for (std::size_t i = 0; i < objects_len; i++) {\n"
+           "        std::string name;\n"
+           "        enigma_internal_deserialize(name, iter, len);\n"
+           "        enigma_internal_deserialize(object_offsets[name], iter, len);\n"
+           "      }\n";
+    wto << "      std::unordered_map<std::size_t, Deserializer> intersection{};\n";
+    wto << "      for (auto &[name, offset]: object_offsets) {\n"
+           "        if (auto it = deserializers.find(name); it != deserializers.end()) {\n"
+           "          intersection.emplace(offset, it->second);\n"
+           "        }\n"
+           "      }\n"
+           "      std::size_t len_plus_offset = len;\n"
+           "      std::size_t total_offset = 0;\n"
+           "      enigma_internal_deserialize(total_offset, iter, len_plus_offset);\n";
+    wto << "      for (auto &[offset, deserializer]: intersection) {\n"
+           "        len_plus_offset = len + offset + sizeof(std::size_t); // + sizeof(std::size_t) for `total_offset'\n"
+           "        (this->*deserializer)(iter, len_plus_offset);\n"
+           "      }\n";
+    wto << "      len = len + total_offset + sizeof(std::size_t); // + sizeof(std::size_t) for `total_offset'\n\n";
+  }
+  wto << "      return len;\n"
+         "    }\n";
+
+  wto << "\n    std::pair<OBJ_" << object->name << ", std::size_t> deserialize(std::byte *iter) {\n"
+         "      OBJ_" << object->name << " result;\n"
+         "      auto len = result.deserialize_self(iter);\n"
+         "      return {std::move(result), len};\n"
+         "    }\n";
+
+  return locals;
 }
 
 static inline void write_object_scripts(std::ostream &wto, parsed_object *object, const CompileState &state) {
@@ -318,7 +442,7 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
   // versions of their parents' events
   for (parsed_object *object : objects) {
     for (ParsedEvent &pev : object->all_events) {
-      if  (!pev.code.empty()) {
+      if  (!pev.ast.empty()) {
         if (pev.ev_id.IsStacked()) {
           object->stacked_events.declare(&pev);
         } else {
@@ -346,7 +470,7 @@ static inline void generate_robertvecs(const ParsedObjectVec &objects) {
 static void write_object_events(std::ostream &wto, parsed_object *object) {
   for (const ParsedEvent &pev : object->all_events) {
     string evname = pev.ev_id.TrueFunctionName();
-    if (!pev.code.empty() || pev.ev_id.HasDefaultCode()) {
+    if (!pev.ast.empty() || pev.ev_id.HasDefaultCode()) {
       wto << "    variant myevent_" << evname << "();\n";
       if (pev.ev_id.HasSubCheck()) {
         wto << "    inline bool myevent_" << evname << "_subcheck();\n";
@@ -610,7 +734,7 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   }
   wto << "\n  {\n";
 
-  write_object_locals(lang, wto, &state.global_object, object);
+  auto locals = write_object_locals(lang, wto, &state.global_object, object);
   write_object_scripts(wto, object, state);
   write_object_timelines(wto, game, object, state.timeline_lookup);
   write_object_events(wto, object);
@@ -622,6 +746,14 @@ static void write_object_class_body(parsed_object* object, language_adapter *lan
   write_object_destructor(wto, object);
 
   wto << "  };\n";
+
+  if (!locals.empty()) {
+    wto << "\n  const std::unordered_map<std::string_view, OBJ_" << object->name << "::Deserializer> OBJ_" << object->name << "::deserializers{\n";
+    for (auto &[name, type] : locals) {
+      wto << "    std::pair{\"" << name << "\", &OBJ_" << object->name << "::deserialize_" << name << "},\n";
+    }
+    wto << "  };\n";
+  }
 }
 
 static inline void write_object_family(parsed_object* object, language_adapter *lang, std::ostream &wto, const GameData &game, const CompileState &state) {
@@ -679,7 +811,9 @@ static inline void write_object_declarations(
   wto << license;
   wto << "#include \"Universal_System/Object_Tiers/collisions_object.h\"\n";
   wto << "#include \"Universal_System/Object_Tiers/object.h\"\n\n";
-  wto << "#include <map>";
+  wto << "#include <map>\n";
+  wto << "#include <string_view>\n";
+  wto << "#include <unordered_map>";
 
   declare_scripts(wto, game, state);
 
@@ -706,7 +840,7 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
 static inline void write_timeline_implementations(ofstream& wto, const GameData &game, const CompileState &state);
 static inline void write_event_bodies(ofstream& wto, const GameData &game, int mode, const ParsedObjectVec &parsed_objects, const ScriptLookupMap &script_lookup, const TimelineLookupMap &timeline_lookup);
 static inline void write_global_script_array(ofstream &wto, const GameData &game, const CompileState &state);
-static inline void write_basic_constructor(ofstream &wto);
+static inline void write_basic_constructor(ofstream &wto, const CompileState &state);
 
 // [ CODEGEN FILE ] ------------------------------------------------------------
 // Object functionality: implements event routines and scripts declared earlier.
@@ -721,12 +855,15 @@ static inline void write_object_functionality(
   wto << "struct log_xor_helper { bool value; };" << endl;
   wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
   wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
-
+  wto << "#define with(x) \
+  for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); \
+      enigma::instance_event_iterator; \
+      enigma::instance_event_iterator = enigma::instance_event_iterator->next)" << endl;
   write_script_implementations(wto, game, state, mode);
   write_timeline_implementations(wto, game, state);
   write_event_bodies(wto, game, mode, state.parsed_objects, state.script_lookup, state.timeline_lookup);
   write_global_script_array(wto, game, state);
-  write_basic_constructor(wto);
+  write_basic_constructor(wto, state);
 
   wto.close();
 }
@@ -746,21 +883,9 @@ static inline void write_script_implementations(ofstream& wto, const GameData &g
       wto << "  enigma::debug_scope $current_scope(\"script '" << game.scripts[i].name << "'\");\n";
     }
     wto << "  ";
-    ParsedCode &upev = scr->global_code ? *scr->global_code : scr->code;
-
-    // TODO(JoshDreamland): Super-hacky
-    string override_code, override_synt;
-    if (upev.code.compare(0, 12, "with((self))") == 0) {
-      override_code = upev.code.substr(12);
-      override_synt = upev.synt.substr(12);
-    }
-    print_to_file(
-      override_code.empty() ? upev.code : override_code,
-      override_synt.empty() ? upev.synt : override_synt,
-      upev.strc,
-      upev.strs,
-      2,wto
-    );
+    // auto &ast = (scr->global_code ? *scr->global_code : scr->code).ast;
+    auto &ast = (scr->code).ast;
+    ast.WriteCppToStream(wto, 2, true);
     wto << "\n  return 0;\n}\n\n";
   }
 }
@@ -772,20 +897,10 @@ static inline void write_timeline_implementations(ofstream& wto, const GameData 
   for (const auto &tline : state.timeline_lookup) {\
     for (const auto &moment : tline.second.moments) {
       wto << "void TLINE_" << tline.first << "_MOMENT_" << moment.step << "() {\n";
-      ParsedCode& upev = moment.script->global_code
-          ? *moment.script->global_code : moment.script->code;
+      auto& ast = (moment.script->global_code
+          ? *moment.script->global_code : moment.script->code).ast;
 
-      string override_code, override_synt;
-      if (upev.code.compare(0, 12, "with((self))") == 0) {
-        override_code = upev.code.substr(12);
-        override_synt = upev.synt.substr(12);
-      }
-      print_to_file(
-          override_code.empty() ? upev.code : override_code,
-          override_synt.empty() ? upev.synt : override_synt,
-          upev.strc,
-          upev.strs,
-          2, wto);
+      ast.WriteCppToStream(wto, 2);
       wto << "\n}\n\n";
     }
   }
@@ -823,17 +938,16 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
   for (const ParsedEvent &event : object->all_events) {
     string evname = event.ev_id.TrueFunctionName();
 
-    // Inherit default code from object_locals. Don't generate the same default
-    // code for all objects.
-    if (event.code.empty()) continue;
-
+    // Inherit default code from object_locals.
+    // Don't generate the same default code for all objects.
+    if (event.ast.empty()) continue;
     bool defined_inherited = false;
 
     // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
     // for no reason 99% of the time, and it doesn't allow us to give any
     // feedback as to why a call to event_inherited() may not be valid.
     if (object->InheritsSpecifically(event.ev_id) &&
-        event.code.find("event_inherited") != std::string::npos) {
+        event.ast.lexer->GetCode().find("event_inherited") != std::string::npos) {
       wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
       defined_inherited = true;
     }
@@ -843,7 +957,7 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
     if (defined_inherited) {
       wto << "#undef event_inherited\n";
     }
-
+    
     if (event.ev_id.HasSubCheck()) {
       // Write event sub check code
       wto << "inline bool enigma::OBJ_" << object->name
@@ -859,18 +973,16 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
 }
 
 static void write_event_func(ofstream& wto, const ParsedEvent &event, string objname, string evname, int mode) {
-  std::string evfuncname = "myevent_" + evname;
-  wto << "variant enigma::OBJ_" << objname << "::" << evfuncname << "()\n{\n";
+  wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "() {\n";
   if (mode == emode_debug) {
-    wto << "  enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
+    wto << "  enigma::debug_scope $current_scope(\"event '" << evname
+        << "' for object '" << objname << "'\");\n";
   }
-  wto << "  ";
   if (!event.ev_id.UsesEventLoop())
-    wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+    wto << "  enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n";
   if (event.ev_id.HasConstantCode())
-    wto << event.ev_id.ConstantCode() << endl;
-
-  print_to_file(event.code,event.synt,event.strc,event.strs,2,wto);
+    PrintIndentedCode(wto, event.ev_id.ConstantCode(), 2);
+  event.ast.WriteCppToStream(wto, 2);
   wto << "\n  return 0;\n}\n\n";
 }
 
@@ -888,7 +1000,7 @@ static inline void write_object_script_funcs(ofstream& wto, const parsed_object 
       }
 
       wto << ")\n{\n  ";
-      print_to_file(subscr->second->code.code,subscr->second->code.synt,subscr->second->code.strc,subscr->second->code.strs,2,wto);
+      subscr->second->code.ast.WriteCppToStream(wto, 2, true);
       wto << "\n  return 0;\n}\n\n";
     }
   }
@@ -905,7 +1017,7 @@ static inline void write_object_timeline_funcs(ofstream& wto, const GameData &ga
         ParsedScript* scr = moment.script;
         wto << "void enigma::OBJ_" << t->name << "::TLINE_" << timit->first
             << "_MOMENT_" << moment.step << "() {\n";
-        print_to_file(scr->code.code, scr->code.synt, scr->code.strc, scr->code.strs, 2, wto);
+        scr->code.ast.WriteCppToStream(wto);
         wto << "}\n";
       }
       wto << "\n";
@@ -977,7 +1089,8 @@ static inline void write_global_script_array(ofstream &wto, const GameData &game
   wto << "  };\n  \n";
 }
 
-static inline void write_basic_constructor(ofstream &wto) {
+static inline void write_basic_constructor(ofstream &wto, const CompileState &state) {
+  auto &copts = state.parse_context.compatibility_opts;
   wto <<
       "  void constructor(object_basic* instance_b) {\n"
       "    //This is the universal create event code\n"
@@ -993,7 +1106,7 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->friction=0;\n    \n"
       "    \n"
       "    instance->timeline_index = -1;\n"
-      "    instance->timeline_running = " << (setting::compliance_mode <= setting::COMPL_GM7? "true" : "false") << ";\n"
+      "    instance->timeline_running = " << (copts.compliance_mode <= setting::COMPL_GM7 ? "true" : "false") << ";\n"
       "    instance->timeline_speed = 1;\n"
       "    instance->timeline_position = 0;\n"
       "    instance->timeline_loop = false;\n"

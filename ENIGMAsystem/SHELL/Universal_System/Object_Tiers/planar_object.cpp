@@ -28,8 +28,10 @@
 
 #include "Universal_System/var4.h"
 #include "object.h"
+#include "serialization.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "planar_object.h"
 
@@ -72,6 +74,62 @@ namespace enigma
 
   //This just needs implemented virtually so instance_destroy works.
   object_planar::~object_planar() {}
+
+  std::vector<std::byte> object_planar::serialize() {
+    std::vector<std::byte> bytes = object_basic::serialize();
+    std::size_t len = 0;
+
+    enigma_internal_serialize<unsigned char>(object_planar::objtype, len, bytes);
+    enigma_internal_serialize_many(len, bytes, x, y, xprevious, yprevious, xstart, ystart);
+#ifdef ISLOCAL_persistent
+    enigma_internal_serialize(persistent, len, bytes);
+#endif
+    enigma_internal_serialize_many(len, bytes, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+
+    bytes.shrink_to_fit();
+    return bytes;
+  }
+
+  std::size_t object_planar::deserialize_self(std::byte *iter) {
+    auto len = object_basic::deserialize_self(iter);
+
+    unsigned char type;
+    enigma_internal_deserialize(type, iter, len);
+    if (type != object_planar::objtype) {
+      DEBUG_MESSAGE("object_planar::deserialize_self: Object type '" + std::to_string(type) +
+                        "' does not match expected: " + std::to_string(object_planar::objtype),
+                    MESSAGE_TYPE::M_FATAL_ERROR);
+    }
+    enigma_internal_deserialize_many(iter, len, x, y, xprevious, yprevious, xstart, ystart);
+#ifdef ISLOCAL_persistent
+    enigma_internal_deserialize(persistent, iter, len);
+#endif
+    enigma_internal_deserialize_many(iter, len, direction, speed, hspeed, vspeed, gravity, gravity_direction, friction);
+
+    hspeed.vspd    = &vspeed.rval.d;
+    hspeed.dir     = &direction.rval.d;
+    hspeed.spd     = &speed.rval.d;
+
+    vspeed.hspd    = &hspeed.rval.d;
+    vspeed.dir     = &direction.rval.d;
+    vspeed.spd     = &speed.rval.d;
+
+    direction.spd  = &speed.rval.d;
+    direction.hspd = &hspeed.rval.d;
+    direction.vspd = &vspeed.rval.d;
+
+    speed.dir      = &direction.rval.d;
+    speed.hspd     = &hspeed.rval.d;
+    speed.vspd     = &vspeed.rval.d;
+
+    return len;
+  }
+
+  std::pair<object_planar, std::size_t> object_planar::deserialize(std::byte *iter) {
+    object_planar result;
+    auto len = result.deserialize_self(iter);
+    return {std::move(result), len};
+  }
 
   void propagate_locals(object_planar* instance)
   {

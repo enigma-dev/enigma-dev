@@ -244,8 +244,8 @@ struct variant;
 namespace enigma {
 
 template<typename T> struct VariantTypeEnabler
-    : MaybeEnabled<T, std::is_base_of<variant, T>::value> {};
-template<> struct VariantTypeEnabler<variant> : EnabledType<variant> {};
+    : MaybeEnabled<T, std::is_base_of<::variant, T>::value> {};
+template<> struct VariantTypeEnabler<::variant> : EnabledType<::variant> {};
 template<> struct VariantTypeEnabler<var> : EnabledType<var> {};
 
 }
@@ -268,6 +268,15 @@ std::string toString(double);
 
 using std::string;
 
+}
+
+namespace {
+template <typename T, typename U>
+T bit_cast(const U &value) {
+  T result;
+  std::memcpy(reinterpret_cast<void*>(&result), reinterpret_cast<const void*>(&value), sizeof(T));
+  return result;
+}
 }
 
 //▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚
@@ -562,24 +571,24 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
   // ===========================================================================
 
   template<typename T>
-  decltype(0LL << (int)*(T*)nullptr) operator<<(T x) const {
-    return (long long) rval.d << (int) x;
+  decltype(0ULL << (int)*(T*)nullptr) operator<<(T x) const {
+    return bit_cast<unsigned long long>(rval.d) << (int) x;
   }
   template<typename T>
-  decltype(0LL >> (int)*(T*)nullptr) operator>>(T x) const {
-    return (long long) rval.d >> (int) x;
+  decltype(0ULL >> (int)*(T*)nullptr) operator>>(T x) const {
+    return bit_cast<unsigned long long>(rval.d) >> (int) x;
   }
   template<typename T>
-  decltype(0LL & (long long)*(T*)nullptr) operator&(T x) const {
-    return (long long) rval.d & (long long) x;
+  decltype(0ULL & (long long)*(T*)nullptr) operator&(T x) const {
+    return bit_cast<unsigned long long>(rval.d) & (long long) x;
   }
   template<typename T>
-  decltype(0LL | (long long)*(T*)nullptr) operator|(T x) const {
-    return (long long) rval.d | (long long) x;
+  decltype(0ULL | (long long)*(T*)nullptr) operator|(T x) const {
+    return bit_cast<unsigned long long>(rval.d) | (long long) x;
   }
   template<typename T>
-  decltype(0LL | (long long)*(T*)nullptr) operator^(T x) const {
-    return (long long) rval.d ^ (long long) x;
+  decltype(0ULL | (long long)*(T*)nullptr) operator^(T x) const {
+    return bit_cast<unsigned long long>(rval.d) ^ (long long) x;
   }
 
   // Miscellanea
@@ -611,9 +620,9 @@ struct variant : enigma::variant_real_union, enigma::variant_string_wrapper {
 //██▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟█████████████████████████████████████████
 //▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞▚▞
 
-struct var : variant {
-  lua_table<variant> array1d;
-  lua_table<lua_table<variant>> array2d;
+struct var : ::variant {
+  lua_table<::variant> array1d;
+  lua_table<lua_table<::variant>> array2d;
 
   var() {}
   var(const var&) = default;
@@ -803,16 +812,16 @@ using ::var;
 using ::variant;
 typedef std::string std_string;
 
-static inline bool is_undefined(const variant &val) {
+static inline bool is_undefined(const ::variant &val) {
   return val.type == enigma_user::ty_undefined;
 }
-static inline bool is_real     (const variant &val) {
+static inline bool is_real     (const ::variant &val) {
   return val.type == enigma_user::ty_real;
 }
-static inline bool is_string   (const variant &val) {
+static inline bool is_string   (const ::variant &val) {
   return val.type == enigma_user::ty_string;
 }
-static inline bool is_ptr      (const variant &val) {
+static inline bool is_ptr      (const ::variant &val) {
   return val.type == enigma_user::ty_pointer;
 }
 
@@ -822,10 +831,10 @@ static inline bool is_ptr      (const variant &val) {
 
 namespace std {
 
-template<> class numeric_limits<var>: numeric_limits<double> {};
-template<> class numeric_limits<variant>: numeric_limits<double> {};
-template<> class numeric_limits<const var&>: numeric_limits<double> {};
-template<> class numeric_limits<const variant&>: numeric_limits<double> {};
+template<> class numeric_limits<::var>: numeric_limits<double> {};
+template<> class numeric_limits<::variant>: numeric_limits<double> {};
+template<> class numeric_limits<const ::var&>: numeric_limits<double> {};
+template<> class numeric_limits<const ::variant&>: numeric_limits<double> {};
 
 }  // namespace std
 
@@ -837,8 +846,8 @@ namespace enigma {
 //       between ArithmeticType and NumericType, as we've defined them.
 template<> struct ArithmeticTypeEnabler<const var&>
     : EnabledType<const var&>     {};
-template<> struct ArithmeticTypeEnabler<const variant&>
-    : EnabledType<const variant&> {};
+template<> struct ArithmeticTypeEnabler<const ::variant&>
+    : EnabledType<const ::variant&> {};
 
 }  // namespace enigma
 

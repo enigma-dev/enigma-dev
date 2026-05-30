@@ -52,7 +52,12 @@ struct Background {
   unsigned tileWidth, tileHeight;
   int hOffset, vOffset;
   int hSep, vSep;
-  
+
+  std::size_t byte_size() const noexcept;
+  std::vector<std::byte> serialize() const;
+  std::size_t deserialize_self(std::byte *iter);
+  static std::pair<Background, std::size_t> deserialize(std::byte *iter);
+
   // AssArray mandatory
   static const char* getAssetTypeName() { return "Background"; }
   bool isDestroyed() const { return _destroyed; }
