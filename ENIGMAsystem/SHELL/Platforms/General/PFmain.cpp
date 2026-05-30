@@ -93,6 +93,7 @@ std::string directory_get_special_path(int dtype) {
     case  3: { fid = FOLDERID_Music;     break; }
     case  4: { fid = FOLDERID_Pictures;  break; }
     case  5: { fid = FOLDERID_Videos;    break; }
+    case  6: { fid = FOLDERID_Public;    break; }
     default: { fid = FOLDERID_Desktop;   break; }
   }
   if (SUCCEEDED(SHGetKnownFolderPath(fid, KF_FLAG_CREATE | KF_FLAG_DONT_UNEXPAND, nullptr, &ptr))) {
@@ -105,13 +106,14 @@ std::string directory_get_special_path(int dtype) {
   sysdir_search_path_directory_t fid;
   sysdir_search_path_enumeration_state state;
   switch (dtype) {
-    case  0: { fid = SYSDIR_DIRECTORY_DESKTOP;   break; }
-    case  1: { fid = SYSDIR_DIRECTORY_DOCUMENT;  break; }
-    case  2: { fid = SYSDIR_DIRECTORY_DOWNLOADS; break; }
-    case  3: { fid = SYSDIR_DIRECTORY_MUSIC;     break; }
-    case  4: { fid = SYSDIR_DIRECTORY_PICTURES;  break; }
-    case  5: { fid = SYSDIR_DIRECTORY_MOVIES;    break; }
-    default: { fid = SYSDIR_DIRECTORY_DESKTOP;   break; }
+    case  0: { fid = SYSDIR_DIRECTORY_DESKTOP;       break; }
+    case  1: { fid = SYSDIR_DIRECTORY_DOCUMENT;      break; }
+    case  2: { fid = SYSDIR_DIRECTORY_DOWNLOADS;     break; }
+    case  3: { fid = SYSDIR_DIRECTORY_MUSIC;         break; }
+    case  4: { fid = SYSDIR_DIRECTORY_PICTURES;      break; }
+    case  5: { fid = SYSDIR_DIRECTORY_MOVIES;        break; }
+    case  6: { fid = SYSDIR_DIRECTORY_SHARED_PUBLIC; break; }
+    default: { fid = SYSDIR_DIRECTORY_DESKTOP;       break; }
   }
   state = sysdir_start_search_path_enumeration(fid, SYSDIR_DOMAIN_MASK_USER);
   while ((state = sysdir_get_next_search_path_enumeration(state, buf))) {
@@ -125,13 +127,14 @@ std::string directory_get_special_path(int dtype) {
   #elif !defined(__ANDROID__)
   std::string fid;
   switch (dtype) {
-    case  0: { fid = "XDG_DESKTOP_DIR=";   break; }
-    case  1: { fid = "XDG_DOCUMENTS_DIR="; break; }
-    case  2: { fid = "XDG_DOWNLOAD_DIR=";  break; }
-    case  3: { fid = "XDG_MUSIC_DIR=";     break; }
-    case  4: { fid = "XDG_PICTURES_DIR=";  break; }
-    case  5: { fid = "XDG_VIDEOS_DIR=";    break; }
-    default: { fid = "XDG_DESKTOP_DIR=";   break; }
+    case  0: { fid = "XDG_DESKTOP_DIR=";     break; }
+    case  1: { fid = "XDG_DOCUMENTS_DIR=";   break; }
+    case  2: { fid = "XDG_DOWNLOAD_DIR=";    break; }
+    case  3: { fid = "XDG_MUSIC_DIR=";       break; }
+    case  4: { fid = "XDG_PICTURES_DIR=";    break; }
+    case  5: { fid = "XDG_VIDEOS_DIR=";      break; }
+    case  6: { fid = "XDG_PUBLICSHARE_DIR="; break; }
+    default: { fid = "XDG_DESKTOP_DIR=";     break; }
   }
   if (filename_absolute(environment_get_variable("HOME")).empty()) return result;
   std::string conf = filename_addslash(environment_get_variable("HOME")) + ".config/user-dirs.dirs";
@@ -190,6 +193,10 @@ std::string directory_get_pictures_path() {
 
 std::string directory_get_videos_path() {
   return directory_get_special_path(5);
+}
+
+std::string directory_get_public_path() {
+  return directory_get_special_path(6);
 }
 
 } // anonymous namespace
@@ -282,6 +289,7 @@ void initialize_directory_globals() {
   enigma_user::music_directory = enigma_user::directory_get_music_path();
   enigma_user::pictures_directory = enigma_user::directory_get_pictures_path();
   enigma_user::videos_directory = enigma_user::directory_get_videos_path();
+  enigma_user::public_directory = enigma_user::directory_get_public_path();
   
   #if (defined(__APPLE__) && defined(__MACH__))
 
@@ -573,6 +581,7 @@ std::string downloads_directory = "";
 std::string music_directory = "";
 std::string pictures_directory = "";
 std::string videos_directory = "";
+std::string public_directory = "";
 std::string temp_directory = "";
 std::string game_save_id = "";
 std::string keyboard_string = "";
