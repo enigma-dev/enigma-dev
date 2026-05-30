@@ -24,6 +24,8 @@ else
 endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
+	override LDFLAGS += -lshell32 -lole32 -luuid
+	override LDLIBS += -lshell32 -lole32 -luuid
 	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 else
