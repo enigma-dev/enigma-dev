@@ -275,12 +275,14 @@ void initialize_directory_globals() {
   enigma_user::program_pathname  = ((execname) ? execname : "");
   enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
   enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
+  
   enigma_user::desktop_directory = enigma_user::directory_get_desktop_path();
   enigma_user::documents_directory = enigma_user::directory_get_documents_path();
   enigma_user::downloads_directory = enigma_user::directory_get_downloads_path();
   enigma_user::music_directory = enigma_user::directory_get_music_path();
   enigma_user::pictures_directory = enigma_user::directory_get_pictures_path();
   enigma_user::videos_directory = enigma_user::directory_get_videos_path();
+  
   #if (defined(__APPLE__) && defined(__MACH__))
 
   /*
@@ -313,8 +315,10 @@ void initialize_directory_globals() {
   }
 
   #endif
+  
   enigma_user::working_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::current_path(ec).u8string()));
   enigma_user::temp_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::temp_directory_path(ec).u8string()));
+  
   #if (defined(_WIN32) || defined(_WIN64))
   std::string localappdata = enigma_user::filename_absolute(enigma_user::environment_get_variable("LOCALAPPDATA"));
   if (localappdata.empty()) return; while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) { localappdata.pop_back(); } 
@@ -563,6 +567,12 @@ std::string working_directory = "";
 std::string program_directory = "";
 std::string program_pathname = "";
 std::string program_filename = "";
+std::string desktop_directory = "";
+std::string documents_directory = "";
+std::string downloads_directory = "";
+std::string music_directory = "";
+std::string pictures_directory = "";
+std::string videos_directory = "";
 std::string temp_directory = "";
 std::string game_save_id = "";
 std::string keyboard_string = "";
