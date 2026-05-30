@@ -317,7 +317,7 @@ void initialize_directory_globals() {
   const std::string resources_pname = contents_pname + "Resources/";             // = "/Path/To/YourAppBundle.app/Contents/Resources/";
 
   // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
-  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
+  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(enigma_user::filename_dir(resources_pname))) {
     // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
     enigma_user::set_working_directory(enigma_user::filename_absolute(enigma_user::filename_dir(resources_pname)));
   }
