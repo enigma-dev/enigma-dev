@@ -168,8 +168,6 @@ std::string directory_get_special_path(int dtype) {
   return result;
 }
 
-} // anonymous namespace
-
 std::string directory_get_desktop_path() {
   return directory_get_special_path(0);
 }
@@ -193,6 +191,8 @@ std::string directory_get_pictures_path() {
 std::string directory_get_videos_path() {
   return directory_get_special_path(5);
 }
+
+} // anonymous namespace
 
 std::string environment_get_variable(std::string name) {
   #if (defined(_WIN32) || defined(_WIN64))
@@ -275,6 +275,12 @@ void initialize_directory_globals() {
   enigma_user::program_pathname  = ((execname) ? execname : "");
   enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
   enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
+  enigma_user::desktop_directory = enigma_user::directory_get_desktop_path();
+  enigma_user::documents_directory = enigma_user::directory_get_documents_path();
+  enigma_user::downloads_directory = enigma_user::directory_get_downloads_path();
+  enigma_user::music_directory = enigma_user::directory_get_music_path();
+  enigma_user::pictures_directory = enigma_user::directory_get_pictures_path();
+  enigma_user::videos_directory = enigma_user::directory_get_videos_path();
   #if (defined(__APPLE__) && defined(__MACH__))
 
   /*
