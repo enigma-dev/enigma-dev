@@ -7,6 +7,7 @@ ifeq ($(TARGET-PLATFORM), Android)
 else
 	ifeq ($(TARGET-PLATFORM), Windows)
 		override LDFLAGS += -lshell32 -lole32 -luuid
+		override LDLIBS += -lshell32 -lole32 -luuid
 	endif
 	override CXXFLAGS += -IPlatforms/General/fileio
 	override CFLAGS += -IPlatforms/General/fileio
