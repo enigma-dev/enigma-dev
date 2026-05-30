@@ -13,9 +13,12 @@ gtest_assert_ne(directory_get_downloads_path(), "");
 gtest_assert_ne(directory_get_music_path(), "");
 gtest_assert_ne(directory_get_pictures_path(), "");
 gtest_assert_ne(directory_get_videos_path(), "");
+directory_create(working_directory + "poop");
 if (os_type == os_windows) {
-  gtest_assert_eq(filename_addslash("poop\boob"), "poop\boob\");
+  directory_create(working_directory + "poop\boob");
+  gtest_assert_eq(filename_addslash(working_directory + "poop\boob"), working_directory + "poop\boob\");
 } else {
-  gtest_assert_eq(filename_addslash("poop/boob"), "poop/boob/");
+  directory_create(working_directory + "poop/boob");
+  gtest_assert_eq(filename_addslash(working_directory + "poop/boob"), working_directory + "poop/boob/");
 }
 game_end();
