@@ -69,12 +69,13 @@ std::string filename_absolute(std::string fname) {
   }
   return shorten(result);
   #else
+  std::string result;
   char path[PATH_MAX];
   if (realpath(fname.c_str(), path)) {
     result = path;
   }
-  #endif
   return result;
+  #endif
 }
 
 namespace {
