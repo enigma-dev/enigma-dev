@@ -1,0 +1,10 @@
+directory_create(game_save_id);
+gtest_assert_ne(game_save_id, "");
+gtest_assert_true(set_working_directory(game_save_id));
+gtest_assert_ne(working_directory, "");
+gtest_assert_eq(working_directory, game_save_id);
+gtest_assert_ne(program_pathname, "");
+gtest_assert_ne(program_directory, "");
+gtest_assert_ne(program_filename, "");
+gtest_assert_ne(temp_directory, "");
+game_end();
