@@ -22,7 +22,6 @@
 #include "Platforms/General/PFmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/PFprogdir.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "Universal_System/mathnc.h" // enigma_user::clamp
@@ -75,20 +74,6 @@ static inline string add_slash(const string& dir) {
   if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
   return dir;
 }
-
-namespace enigma_user {
-
-bool set_working_directory(string dname) {
-  std::error_code ec;
-  std::filesystem::current_path(dname, ec);
-  if (ec.value() == 0) {
-    working_directory = add_slash(std::filesystem::current_path(ec).u8string());
-    return (ec.value() == 0);
-  }
-  return false;
-}
-
-} // namespace enigma_user
 
 namespace enigma {
 
@@ -173,21 +158,6 @@ void handleInput() { input_push(); }
 
 void destroyWindow() { DestroyWindow(enigma::hWnd); }
 
-void initialize_directory_globals() {
-  std::error_code ec;
-  const char *execname = __getexecname();
-  enigma_user::program_pathname  = ((execname) ? execname : "");
-  enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
-  enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
-  enigma_user::working_directory = add_slash(std::filesystem::current_path(ec).u8string());
-  enigma_user::temp_directory = add_slash(std::filesystem::temp_directory_path(ec).u8string());
-  std::string localappdata = enigma_user::environment_get_variable("LOCALAPPDATA");
-  while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) 
-  { localappdata.pop_back(); } std::filesystem::create_directories(localappdata, ec);
-  enigma_user::game_save_id = add_slash(enigma_user::environment_get_variable("LOCALAPPDATA")) + 
-  add_slash(std::to_string(enigma_user::game_id));
-}
-
 } // namespace enigma
 
 namespace enigma_user {
@@ -256,21 +226,6 @@ std::string filename_absolute(std::string fname) {
 
 std::string filename_join(std::string prefix, std::string suffix) {
   return add_slash(prefix) + suffix;
-}
-
-std::string environment_get_variable(std::string name) {
-  WCHAR buffer[1024];
-  tstring tstr_name = widen(name);
-  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
-  return shorten(buffer);
-}
-
-// deletes the environment variable if set to empty string
-bool environment_set_variable(const std::string &name, const std::string &value) {
-  tstring tstr_name = widen(name);
-  tstring tstr_value = widen(value);
-  if (value == "") return (SetEnvironmentVariableW(tstr_name.c_str(), NULL) != 0);
-  return (SetEnvironmentVariableW(tstr_name.c_str(), tstr_value.c_str()) != 0);
 }
 
 }  // namespace enigma_user
