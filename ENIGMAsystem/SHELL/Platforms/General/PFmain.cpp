@@ -298,15 +298,15 @@ void initialize_directory_globals() {
     *_ename = extension name - includes everything in bname at and following the period if one exists
   */
 
-  const string exe_pname = enigma_user::program_directory;                  // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
-  const string macos_dname = enigma_user::filename_dir(exe_pname);          // = "/Path/To/YourAppBundle.app/Contents/MacOS";
-  const string macos_bname = enigma_user::filename_name(macos_dname);       // = "MacOS";
-  const string contents_dname = enigma_user::filename_dir(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents";
-  const string contents_bname = enigma_user::filename_name(contents_dname); // = "Contents";
-  const string app_dname = enigma_user::filename_dir(contents_dname);       // = "/Path/To/YourAppBundle.app";
-  const string app_ename = enigma_user::filename_ext(app_dname);            // = ".app";
-  const string contents_pname = enigma_user::filename_path(macos_dname);    // = "/Path/To/YourAppBundle.app/Contents/";
-  const string resources_pname = contents_pname + "Resources/";             // = "/Path/To/YourAppBundle.app/Contents/Resources/";
+  const std::string exe_pname = enigma_user::program_directory;                  // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
+  const std::string macos_dname = enigma_user::filename_dir(exe_pname);          // = "/Path/To/YourAppBundle.app/Contents/MacOS";
+  const std::string macos_bname = enigma_user::filename_name(macos_dname);       // = "MacOS";
+  const std::string contents_dname = enigma_user::filename_dir(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents";
+  const std::string contents_bname = enigma_user::filename_name(contents_dname); // = "Contents";
+  const std::string app_dname = enigma_user::filename_dir(contents_dname);       // = "/Path/To/YourAppBundle.app";
+  const std::string app_ename = enigma_user::filename_ext(app_dname);            // = ".app";
+  const std::string contents_pname = enigma_user::filename_path(macos_dname);    // = "/Path/To/YourAppBundle.app/Contents/";
+  const std::string resources_pname = contents_pname + "Resources/";             // = "/Path/To/YourAppBundle.app/Contents/Resources/";
 
   // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
   if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
