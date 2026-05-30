@@ -16,8 +16,8 @@ gtest_assert_ne(public_directory, "");
 gtest_assert_ne(temp_directory, "");
 directory_create(working_directory + "poop");
 if (os_type == os_windows) {
-  directory_create(working_directory + "poop\\boob");
-  gtest_assert_eq(filename_addslash(working_directory + "poop\\boob"), working_directory + "poop\\boob\\");
+  directory_create(working_directory + "poop\boob");
+  gtest_assert_eq(filename_addslash(working_directory + "poop\boob"), working_directory + "poop\boob\");
 } else {
   directory_create(working_directory + "poop/boob");
   gtest_assert_eq(filename_addslash(working_directory + "poop/boob"), working_directory + "poop/boob/");
