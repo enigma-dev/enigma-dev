@@ -273,9 +273,42 @@ void initialize_directory_globals() {
   enigma_user::program_pathname  = ((execname) ? execname : "");
   enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
   enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
+  #if (defined(__APPLE__) && defined(__MACH__))
+
+  /*
+    This function will set the working directory to the app bundle's Resources folder 
+    like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
+    an app bundle. If the executable is not in an app bundle, use unix working directory
+    
+    ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id
+    
+    *_bname = base name - removes the full path from the string leaving just the file or folder name
+    *_dname = directory name - removes final slash and base name from full path to file or folder name
+    *_pname = path name - removes the base name from a full path while keeping the dir and final slash
+    *_ename = extension name - includes everything in bname at and following the period if one exists
+  */
+
+  bool success = false; 
+  const string exe_pname = enigma_user::program_directory;                  // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
+  const string macos_dname = enigma_user::filename_dir(exe_pname);          // = "/Path/To/YourAppBundle.app/Contents/MacOS";
+  const string macos_bname = enigma_user::filename_name(macos_dname);       // = "MacOS";
+  const string contents_dname = enigma_user::filename_dir(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents";
+  const string contents_bname = enigma_user::filename_name(contents_dname); // = "Contents";
+  const string app_dname = enigma_user::filename_dir(contents_dname);       // = "/Path/To/YourAppBundle.app";
+  const string app_ename = enigma_user::filename_ext(app_dname);            // = ".app";
+  const string contents_pname = enigma_user::filename_path(macos_dname);    // = "/Path/To/YourAppBundle.app/Contents/";
+  const string resources_pname = contents_pname + "Resources/";             // = "/Path/To/YourAppBundle.app/Contents/Resources/";
+
+  // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
+  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && directory_exists(resources_pname)) {
+    // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
+    success = enigma_user::set_working_directory(enigma_user::filename_absolute(resources_pname));
+  }
+
+  #endif
   enigma_user::working_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::current_path(ec).u8string()));
   enigma_user::temp_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::temp_directory_path(ec).u8string()));
-  #if defined(_WIN32)
+  #if (defined(_WIN32) || defined(_WIN64))
   std::string localappdata = enigma_user::filename_absolute(enigma_user::environment_get_variable("LOCALAPPDATA"));
   if (localappdata.empty()) return; while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) { localappdata.pop_back(); } 
   std::filesystem::create_directories(localappdata, ec); enigma_user::game_save_id = enigma_user::filename_addslash(localappdata) + 
