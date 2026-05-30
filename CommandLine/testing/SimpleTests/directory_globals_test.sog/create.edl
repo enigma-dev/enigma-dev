@@ -7,4 +7,15 @@ gtest_assert_ne(program_pathname, "");
 gtest_assert_ne(program_directory, "");
 gtest_assert_ne(program_filename, "");
 gtest_assert_ne(temp_directory, "");
+gtest_assert_ne(directory_get_desktop_path(), "");
+gtest_assert_ne(directory_get_documents_path(), "");
+gtest_assert_ne(directory_get_downloads_path(), "");
+gtest_assert_ne(directory_get_music_path(), "");
+gtest_assert_ne(directory_get_pictures_path(), "");
+gtest_assert_ne(directory_get_videos_path(), "");
+if (os_type == os_windows) {
+  gtest_assert_eq(filename_addslash("poop\boob"), "poop\boob\");
+} else {
+  gtest_assert_eq(filename_addslash("poop/boob"), "poop/boob/");
+}
 game_end();
