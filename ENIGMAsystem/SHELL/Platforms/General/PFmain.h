@@ -87,6 +87,7 @@ extern std::string downloads_directory;
 extern std::string music_directory;
 extern std::string pictures_directory;
 extern std::string videos_directory;
+extern std::string public_directory;
 extern std::string temp_directory;
 
 extern std::string keyboard_string;
