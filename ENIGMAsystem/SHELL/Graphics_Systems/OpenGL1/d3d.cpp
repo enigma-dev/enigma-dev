@@ -117,6 +117,13 @@ void graphics_state_flush() {
   glLineStipple(lineStippleScale,lineStipplePattern);
 
   (msaaEnabled?glEnable:glDisable)(GL_MULTISAMPLE);
+  (primitiveAaEnabled?glEnable:glDisable)(GL_LINE_SMOOTH);
+  (primitiveAaEnabled?glEnable:glDisable)(GL_POINT_SMOOTH);
+  if (primitiveAaEnabled) {
+    static const GLenum aahints[3] = {GL_NICEST, GL_FASTEST, GL_DONT_CARE};
+    glHint(GL_LINE_SMOOTH_HINT, aahints[primitiveAaHint % 3]);
+    glHint(GL_POINT_SMOOTH_HINT, aahints[primitiveAaHint % 3]);
+  }
   (d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glDepthFunc(depthoperators[d3dDepthOperator]);
   glDepthMask(d3dZWriteEnable);
