@@ -4544,6 +4544,17 @@ TEST(ParserTest, SemanticAnnotatorClassifiesDotAccess) {
   }
 }
 
+// `not` is a C++ alternative token; it prints as itself, but needs a
+// separator or it glues onto the operand (`notfoo`).
+TEST(ParserTest, WordNotPrintsSpaced) {
+  ParserTester test = ParserTester::CreateWithoutCpp("if (not a) b = 1;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  EXPECT_THAT(v.GetPrintedCode(), HasSubstr("not a"));
+}
+
 // GML's = compares in value position; only statement-position = assigns.
 // The annotator marks value-position = nodes and the printer emits ==.
 // The parse groups = at assignment precedence, but flat printing means the
