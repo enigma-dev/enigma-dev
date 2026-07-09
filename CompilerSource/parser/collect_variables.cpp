@@ -59,6 +59,16 @@ struct scope_ignore {
 #include "languages/language_adapter.h"
 #include "object_storage.h"
 
+// EDL_COLLECT_DEBUG=<name> traces where the collector harvests that name.
+// Pair with the source dump ExtractDeclarations emits under the same flag.
+static void debug_collect(const char *arm, const std::string &name,
+                          const enigma::parsing::Token &at) {
+  static const char *dbg = getenv("EDL_COLLECT_DEBUG");
+  if (dbg && name == dbg)
+    std::cerr << arm << " harvested `" << name << "' at " << at.line << ":"
+              << at.position << std::endl;
+}
+
 using enigma::parsing::AST;
 
 std::string GetFullType(const jdi::full_type &ft, std::string_view declared_name) {
@@ -186,6 +196,7 @@ class DeclGatheringVisitor : public AST::Visitor {
       return;
     }
     if (!lang->global_exists(name)) {
+      debug_collect("local", name, node->As<AST::IdentifierAccess>()->name);
       parsed_scope->locals[name] = dectrip("var");
       cs->add_dot_accessed_local(name);
     }
@@ -254,6 +265,7 @@ class DeclGatheringVisitor : public AST::Visitor {
       std::string name(node.name.content);
       if (node.lhs && node.lhs->type == AST::NodeType::IDENTIFIER &&
           node.lhs->As<AST::IdentifierAccess>()->name.content == "global") {
+        debug_collect("global-dot", name, node.name);
         parsed_scope->globals[name] = dectrip("var");
         parsed_scope->locals[name] = dectrip("var");
         cs->add_dot_accessed_local(name);

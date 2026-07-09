@@ -56,6 +56,8 @@ AST AST::Parse(std::string_view code, const ParseContext* ctex) {
 }
 
 void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs) {
+  if (getenv("EDL_COLLECT_DEBUG"))
+    std::cerr << "=== COLLECT SOURCE ===\n" << code << "\n=== END SOURCE ===\n";
   std::cout << "collecting variables..." << std::flush;
   const ParseContext &ctex = lexer->GetContext();
   collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs);

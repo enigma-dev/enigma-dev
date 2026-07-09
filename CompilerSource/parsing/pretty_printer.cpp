@@ -287,7 +287,12 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 }
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
-  print(node.operation.token);
+  // GML's word form would glue onto the operand (`notfoo`); print the symbol.
+  if (node.operation.type == TT_NOT) {
+    print("!");
+  } else {
+    print(node.operation.token);
+  }
   VISIT_AND_CHECK(node.operand);
   return true;
 }
