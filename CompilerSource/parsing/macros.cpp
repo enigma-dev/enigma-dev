@@ -109,7 +109,12 @@ vector<Macro::FuncComponent> Macro::Componentize(
     // -------------------------------------------------------------------------
     // -- Handle argument names, VA_LIST, VA_OPT. ------------------------------
     // -------------------------------------------------------------------------
-    if (tokens[i].type == TT_IDENTIFIER) {
+    // Parameters match by name: macro definitions are C++, where names like
+    // `repeat` are ordinary identifiers, but our lexer types them with the
+    // EDL keyword table. A keyword-typed token that names a parameter is a
+    // parameter reference all the same.
+    if (tokens[i].type == TT_IDENTIFIER ||
+        params_by_name.count(tokens[i].content)) {
       auto found = params_by_name.find(tokens[i].content);
       size_t arg_num = 0;
       if (found == params_by_name.end()) {
@@ -143,7 +148,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
     } else if (tokens[i].type == TTM_STRINGIFY) {
       size_t j = i;
       while (++j < tokens.size() && tokens[j].PreprocessesAway());
-      if (j >= tokens.size() || tokens[j].type != TT_IDENTIFIER) {
+      if (j >= tokens.size()) {
         herr->Error(tokens[i]) << "# must be followed by a parameter name";
         continue;
       }
