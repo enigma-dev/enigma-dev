@@ -39,30 +39,31 @@ bool SemanticAnnotator::VisitBinaryExpression(AST::BinaryExpression &node) {
   }
   // An assignment's right-hand side is statement-like in GML only for the
   // leftmost =; nested ones compare, which the set membership handles.
-  bool assigns = node.operation.type == TT_ASSIGN ||
-      (node.operation.type == TT_EQUALS && !node.lower_gml_equals);
-  if (assigns) check_void_rhs(node);
   return true;
 }
 
-// GML calls always have a value; a function with nothing to return yields
-// 0. C++ rejects the assignment outright, so wrap the call: `(call, 0)`.
-void SemanticAnnotator::check_void_rhs(AST::BinaryExpression &node) {
-  if (!node.right || node.right->type != AST::NodeType::FUNCTION_CALL) return;
-  auto *call = node.right->As<AST::FunctionCallExpression>();
-  if (call->function->type != AST::NodeType::IDENTIFIER) return;
-  auto *func = call->function->As<AST::IdentifierAccess>();
+// GML has no void: a call always has a value, and a function with nothing
+// to return yields 0. Any void call used as a value (anywhere but statement
+// position) gets wrapped `(call, 0)`; C++ would reject the use outright.
+void SemanticAnnotator::check_void_value(AST::FunctionCallExpression &node) {
+  if (statement_calls_.count(&node)) return;
+  if (node.function->type != AST::NodeType::IDENTIFIER) return;
+  auto *func = node.function->As<AST::IdentifierAccess>();
   if (!func->def || !frontend_->definition_returns_void(func->def)) return;
-  node.lower_void_rhs = true;
+  node.lower_void_value = true;
   herr_->Warning(func->name)
-      << "`" << func->name.content << "' returns no value; assigning 0";
+      << "`" << func->name.content << "' returns no value; using 0";
 }
 
 void SemanticAnnotator::mark_statement(const AST::PNode &stmt) {
   if (!stmt) return;
-  if (stmt->type != AST::NodeType::BINARY_EXPRESSION) return;
-  auto *bin = stmt->As<AST::BinaryExpression>();
-  if (bin->operation.type == TT_EQUALS) statement_equals_.insert(bin);
+  if (stmt->type == AST::NodeType::BINARY_EXPRESSION) {
+    auto *bin = stmt->As<AST::BinaryExpression>();
+    if (bin->operation.type == TT_EQUALS) statement_equals_.insert(bin);
+  } else if (stmt->type == AST::NodeType::FUNCTION_CALL) {
+    // A call at statement position discards its value; void is fine there.
+    statement_calls_.insert(stmt.get());
+  }
 }
 
 bool SemanticAnnotator::VisitCodeBlock(AST::CodeBlock &node) {
@@ -100,6 +101,7 @@ bool SemanticAnnotator::VisitWithStatement(AST::WithStatement &node) {
 
 bool SemanticAnnotator::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
   validate_call(node);
+  check_void_value(node);
   return true;
 }
 

@@ -62,7 +62,7 @@ class SemanticAnnotator : public AST::Visitor {
  private:
   void classify_access(AST::ScopeAccess &node);
   void validate_call(AST::FunctionCallExpression &node);
-  void check_void_rhs(AST::BinaryExpression &node);
+  void check_void_value(AST::FunctionCallExpression &node);
   void default_template_args(AST::DeclarationStatement &node);
   void record_locals(AST::DeclarationStatement &node);
   // Register a statement-position expression: if it is an = at its root,
@@ -77,6 +77,9 @@ class SemanticAnnotator : public AST::Visitor {
   bool gml_equals_;
   // Statement-position = nodes; every other = is a comparison.
   std::set<const AST::Node*> statement_equals_;
+  // Statement-position calls; their values are discarded, so a void callee
+  // needs no lowering there.
+  std::set<const AST::Node*> statement_calls_;
   // Locals declared with a class type (definition pages) in this AST, in
   // walk order. Flat per-event scoping for now; block scopes can refine it.
   std::unordered_map<std::string, jdi::definition*> struct_locals_;

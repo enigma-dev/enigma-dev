@@ -191,10 +191,6 @@ class AST {
     /// TT_EQUALS nodes and the printer emits ==.
     bool lower_gml_equals = false;
 
-    /// GML calls always have a value; assigning from a void-returning
-    /// function is legal there and yields 0. The annotator marks such
-    /// assignments and the printer wraps the call as `(call, 0)`.
-    bool lower_void_rhs = false;
 
     BASIC_NODE_ROUTINES(BinaryExpression);
 
@@ -207,6 +203,11 @@ class AST {
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
     PNode function;
     std::vector<PNode> arguments;
+
+    /// GML has no void: a function with nothing to return yields 0 in any
+    /// value position. The annotator marks void calls used as values
+    /// (anywhere but statement position) and the printer wraps `(call, 0)`.
+    bool lower_void_value = false;
 
     BASIC_NODE_ROUTINES(FunctionCallExpression);
 
