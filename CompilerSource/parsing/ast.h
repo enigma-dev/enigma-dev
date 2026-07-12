@@ -191,6 +191,11 @@ class AST {
     /// TT_EQUALS nodes and the printer emits ==.
     bool lower_gml_equals = false;
 
+    /// GML calls always have a value; assigning from a void-returning
+    /// function is legal there and yields 0. The annotator marks such
+    /// assignments and the printer wraps the call as `(call, 0)`.
+    bool lower_void_rhs = false;
+
     BASIC_NODE_ROUTINES(BinaryExpression);
 
     BinaryExpression(PNode left_, PNode right_, Operation operation_):

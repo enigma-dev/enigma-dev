@@ -231,6 +231,7 @@ class NullLanguageFrontend : public LanguageFrontend {
   int function_variadic_after(jdi::definition_function *) const final { return 0; }
   bool definition_is_function(jdi::definition *) const final { return false; }
   size_t definition_overload_count(jdi::definition *) const final { return 0; }
+  bool definition_returns_void(jdi::definition *) const final { return false; }
 
   NullLanguageFrontend(const setting::CompatibilityOptions c = {}):
       compatibility_opts_(c) {}

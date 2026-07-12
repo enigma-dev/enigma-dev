@@ -382,7 +382,10 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // (`var x[count]`): only the spine declares.
   bool saved_decl = in_declarator_;
   if (node.operation.type == TT_BEGINBRACKET) in_declarator_ = false;
+  // GML assignment from a void call yields 0; the annotator marked it.
+  if (node.lower_void_rhs) print("(");
   VISIT_AND_CHECK(node.right);
+  if (node.lower_void_rhs) print(", 0)");
   in_declarator_ = saved_decl;
 
   if (is_multi_dim) {

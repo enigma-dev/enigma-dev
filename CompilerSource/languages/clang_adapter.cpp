@@ -1202,6 +1202,10 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<jdi::definition
     }
 
     CXType return_type = clang_getResultType(func_type);
+    // CXType_Void is only the naked type; `void*` arrives as CXType_Pointer.
+    if (return_type.kind == CXType_Void) {
+      addflags |= jdi::DEF_RETURNS_VOID;
+    }
     jdi::definition* return_def =
         check_resolved_type(resolve_type_def(return_type, scope), "function return type", name);
 

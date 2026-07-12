@@ -59,3 +59,8 @@ gtest_assert_eq(hit, 1);
 fsum = 0;
 for (fi = 1 fi < 5 fi += 1) fsum += fi;
 gtest_assert_eq(fsum, 10);
+
+// GML: assigning from a void function yields 0.
+vl = ds_list_create();
+vr = ds_list_clear(vl);
+gtest_assert_eq(vr, 0);

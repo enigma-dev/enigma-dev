@@ -52,9 +52,12 @@ enum DEF_FLAGS {
   DEF_PROTECTED =    1 << 16, ///< This definition was declared as a protected member.
   DEF_INCOMPLETE =   1 << 17, ///< This definition was declared but not implemented.
   DEF_ATOMIC =       1 << 18, ///< This is a global definition for objects of a fixed size, such as primitives.
-  DEF_VARIADIC =     1 << 19  ///< This overload's signature ends in C-style varargs (stdarg `...`).
+  DEF_VARIADIC =     1 << 19, ///< This overload's signature ends in C-style varargs (stdarg `...`).
                               ///< Never set for C++11 parameter packs, which are a per-parameter
                               ///< property and can appear in non-terminal positions.
+  DEF_RETURNS_VOID = 1 << 20  ///< This overload returns plain void. Recorded at population time:
+                              ///< resolved return defs strip pointers, so `void` and `void*` are
+                              ///< otherwise indistinguishable in storage.
 };
 
 struct definition;

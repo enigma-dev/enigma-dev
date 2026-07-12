@@ -69,6 +69,9 @@ class LanguageFrontend {
   virtual void definition_parameter_bounds(jdi::definition *d,
                                            unsigned &min,
                                            unsigned &max) const = 0;
+  /// Whether every overload of this function returns plain void. GML calls
+  /// always have a value, so assignments from such calls need lowering.
+  virtual bool definition_returns_void(jdi::definition *d) const = 0;
 
   /// Create a script with the given name (and an assumed 16 parameters,
   /// all defaulted) to the given scope.
