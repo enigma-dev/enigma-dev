@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: Window Capture
+Identifier: WindowCapture
+Author: Samuel Venable
+Description: Allows the developer to capture OpenGL-based windows and render them to a surface on Windows platforms.
+Default: false
+Icon: wincapt.png
+
+Depends:
+  Build-Platforms: Windows
+Dependencies: None
