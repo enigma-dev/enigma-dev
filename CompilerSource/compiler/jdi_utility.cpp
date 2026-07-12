@@ -111,6 +111,16 @@ bool lang_CPP::definition_returns_void(definition *d) const {
   return true;
 }
 
+size_t lang_CPP::template_undefaulted_params(definition *d) const {
+  if (!(d->flags & DEF_TEMPLATE)) return 0;
+  definition_template *dt = (definition_template*) d;
+  size_t count = 0;
+  for (const auto &param : dt->params) {
+    if (!param->default_assignment) ++count;
+  }
+  return count;
+}
+
 bool lang_CPP::definition_is_function(definition *d) const {
   if (d->flags & DEF_FUNCTION) return true;
   if (d->flags & DEF_TEMPLATE) {

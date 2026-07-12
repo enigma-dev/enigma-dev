@@ -63,6 +63,7 @@ class SemanticAnnotator : public AST::Visitor {
   void classify_access(AST::ScopeAccess &node);
   void validate_call(AST::FunctionCallExpression &node);
   void check_void_rhs(AST::BinaryExpression &node);
+  void default_template_args(AST::DeclarationStatement &node);
   void record_locals(AST::DeclarationStatement &node);
   // Register a statement-position expression: if it is an = at its root,
   // that = assigns. Parents visit before children, so the registration is

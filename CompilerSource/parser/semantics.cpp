@@ -130,8 +130,24 @@ void SemanticAnnotator::validate_call(AST::FunctionCallExpression &node) {
 }
 
 bool SemanticAnnotator::VisitDeclarationStatement(AST::DeclarationStatement &node) {
+  default_template_args(node);
   record_locals(node);
   return true;
+}
+
+// EDL: a bare template name used as a type means the template with every
+// undefaulted argument filled by variant. An explicit argument list parses
+// as a TemplateId, which this leaves alone.
+void SemanticAnnotator::default_template_args(AST::DeclarationStatement &node) {
+  if (!node.clause || !node.clause->specifiers) return;
+  auto *spec = node.clause->specifiers.get();
+  if (spec->id_expression &&
+      spec->id_expression->type == AST::NodeType::TEMPLATE_ID) {
+    return;
+  }
+  jdi::definition *def = spec->Definition();
+  if (!def || !(def->flags & jdi::DEF_TEMPLATE)) return;
+  spec->default_template_args = frontend_->template_undefaulted_params(def);
 }
 
 // Locals declared with a class type get plain member access; everything

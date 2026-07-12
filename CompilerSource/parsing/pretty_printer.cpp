@@ -538,6 +538,15 @@ bool AST::CppPrettyPrinter::VisitTypeSpecifierSeq(AST::TypeSpecifierSeq &node) {
   if (node.id_expression) {
     VISIT_AND_CHECK(node.id_expression);
   }
+  // EDL: a bare template name fills its missing arguments with variant.
+  if (node.default_template_args > 0) {
+    print("<");
+    for (std::size_t i = 0; i < node.default_template_args; ++i) {
+      if (i) print(", ");
+      print("variant");
+    }
+    print(">");
+  }
   return true;
 }
 

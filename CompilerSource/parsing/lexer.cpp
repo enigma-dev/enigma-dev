@@ -232,6 +232,7 @@ class NullLanguageFrontend : public LanguageFrontend {
   bool definition_is_function(jdi::definition *) const final { return false; }
   size_t definition_overload_count(jdi::definition *) const final { return 0; }
   bool definition_returns_void(jdi::definition *) const final { return false; }
+  size_t template_undefaulted_params(jdi::definition *) const final { return 0; }
 
   NullLanguageFrontend(const setting::CompatibilityOptions c = {}):
       compatibility_opts_(c) {}

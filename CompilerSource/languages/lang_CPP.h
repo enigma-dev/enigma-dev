@@ -91,6 +91,8 @@ struct lang_CPP: language_adapter {
   void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max) const final;
   /// Whether every overload of this function returns plain void.
   bool definition_returns_void(jdi::definition *d) const final;
+  /// For a template, the number of parameters with no default argument.
+  size_t template_undefaulted_params(jdi::definition *d) const final;
 
   /// Create a script with the given name (and an assumed 16 parameters, all defaulted) to the given scope.
   void quickmember_script(jdi::definition_scope* scope, string name) final;

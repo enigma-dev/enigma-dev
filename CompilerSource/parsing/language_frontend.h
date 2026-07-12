@@ -72,6 +72,10 @@ class LanguageFrontend {
   /// Whether every overload of this function returns plain void. GML calls
   /// always have a value, so assignments from such calls need lowering.
   virtual bool definition_returns_void(jdi::definition *d) const = 0;
+  /// For a template, the number of parameters with no default argument.
+  /// EDL fills these with variant when a bare template name is used as a
+  /// type (`map a;` means map<variant, variant>). Zero for non-templates.
+  virtual size_t template_undefaulted_params(jdi::definition *d) const = 0;
 
   /// Create a script with the given name (and an assumed 16 parameters,
   /// all defaulted) to the given scope.

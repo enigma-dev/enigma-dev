@@ -20,4 +20,9 @@ string greeting = "hi";
 gtest_assert_eq(greeting, "hi");
 gtest_assert_eq(string(5), "5");
 
+// Bare template name: missing arguments default to variant.
+map defaults;
+defaults["str"] = 10.5;
+gtest_assert_eq(defaults["str"], 10.5);
+
 game_end();

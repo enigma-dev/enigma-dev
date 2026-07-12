@@ -302,6 +302,11 @@ class AST {
     PNode id_expression;
     std::unique_ptr<DeclSpecList> declspecs;
 
+    /// EDL: a bare template name used as a type fills its missing arguments
+    /// with variant (`map a;` means map<variant, variant>). The annotator
+    /// counts them; the printer appends the argument list.
+    std::size_t default_template_args = 0;
+
     BASIC_NODE_ROUTINES(TypeSpecifierSeq);
 
     // The base type this spec-seq denotes: the id-expression tree's definition
