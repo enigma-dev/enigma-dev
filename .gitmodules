@@ -1,0 +1,3 @@
+[submodule "ENIGMAsystem/SHELL/Widget_Systems/Native"]
+	path = ENIGMAsystem/SHELL/Widget_Systems/Native
+	url = https://github.com/samuelvenable/Native

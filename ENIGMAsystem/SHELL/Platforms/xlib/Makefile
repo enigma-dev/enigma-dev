@@ -2,17 +2,14 @@ include Platforms/General/Makefile
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/Linux/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/Linux/
 	override CFLAGS += -IPlatforms/xlib/Linux/
 else ifeq ($(OS), FreeBSD)
-	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/
 	override CFLAGS += -IPlatforms/xlib/BSD/
 else ifeq ($(OS), DragonFly)
-	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
 	SOURCES += $(wildcard Platforms/xlib/BSD/*.cpp)
 	override CXXFLAGS += -IPlatforms/xlib/BSD/
 	override CFLAGS += -IPlatforms/xlib/BSD/
@@ -25,4 +22,3 @@ override LDLIBS += $(shell pkg-config x11 --libs) -lz -lpthread
 ifeq ($(shell pkg-config --exists xrandr xinerama && echo yes),yes)
 	override LDLIBS += -lXrandr -lXinerama
 endif
-

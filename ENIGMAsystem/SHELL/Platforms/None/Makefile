@@ -1,9 +1,4 @@
 include Platforms/General/Makefile
 
-ifeq ($(OS), Linux)
-	SOURCES += $(wildcard Platforms/General/POSIX/Linux/*.cpp)
-else ifeq ($(OS), FreeBSD)
-	SOURCES += $(wildcard Platforms/General/POSIX/BSD/*.cpp)
-endif
-SOURCES += $(wildcard Platforms/None/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp) Platforms/General/PFshell/PFshell.cpp
+SOURCES += $(wildcard Platforms/None/*.cpp) Platforms/General/POSIX/main.cpp Platforms/General/POSIX/POSIXfilemanip.cpp Platforms/General/POSIX/POSIXthreads.cpp Platforms/General/PFshell/PFshell.cpp Platforms/General/POSIX/Utility.cpp
 override LDLIBS += -lz -lpthread

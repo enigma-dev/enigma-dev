@@ -28,6 +28,57 @@
 #include <functional>
 #include <vector>
 
+#if !defined(os_unknown)
+#define os_unknown -1
+#endif
+#if !defined(os_win32)
+#define os_win32 0
+#endif
+#if !defined(os_win64)
+#define os_win64 1
+#endif
+#if !defined(os_macosx)
+#define os_macosx 2
+#endif
+#if !defined(os_linux)
+#define os_linux 3
+#endif
+#if !defined(os_anroid)
+#define os_android 4
+#endif
+#if !defined(os_freebsd)
+#define os_freebsd 5
+#endif
+#if !defined(os_dragonfly)
+#define os_dragonfly 6
+#endif
+#if (defined(_WIN32) && !defined(_WIN64) && !defined(os_windows))
+#define os_windows os_win32
+#elif (defined(_WIN32) && defined(_WIN64) && !defined(os_windows))
+#define os_windows os_win64
+#elif !defined(os_windows)
+#define os_windows os_unknown
+#endif
+#if !defined(os_type)
+#if (defined(_WIN32) && !defined(_WIN64))
+#define os_type os_win32
+#elif (defined(_WIN32) && defined(_WIN64))
+#define os_type os_win64
+#elif (defined(__APPLE__) && defined(__MACH__))
+#define os_type os_macosx
+#elif defined(__linux__) && !defined(__ANDROID__)
+#define os_type os_linux
+#elif defined(__linux__) && defined(__ANDROID__)
+#define os_type os_android
+#elif defined(__FreeBSD__)
+#define os_type os_freebsd
+#elif defined(__DragonFly__)
+#define os_type os_dragonfly
+#else
+#define os_type os_unknown
+#endif
+#endif
+
 // window handle type
 #if GM_COMPATIBILITY_VERSION <= 81
 typedef unsigned long long window_t;
@@ -39,7 +90,6 @@ typedef void * window_t;
 typedef std::string wid_t;
 
 namespace enigma_user {
-  extern const int os_type;
   extern unsigned long current_time; // milliseconds since the start of the game
   extern unsigned long delta_time; // microseconds since the last step event
 }
