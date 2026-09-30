@@ -86,6 +86,7 @@ struct Precedence {
   constexpr static int kMin = 0;
 
   static std::unordered_map<TokenType, OperatorPrecedence> kBinaryPrec;
+  static std::unordered_map<TokenType, OperatorPrecedence> kGmlBinaryPrec;
   static std::unordered_map<TokenType, OperatorPrecedence> kUnaryPostfixPrec;
   static std::unordered_map<TokenType, OperatorPrecedence> kTernaryPrec;
   static std::unordered_map<TokenType, OperatorPrecedence> kSpecialPrec;

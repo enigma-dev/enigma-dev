@@ -300,10 +300,11 @@ void window_set_fullscreen(bool fullscreen) {
 }
 
 int window_set_cursor(int cursorID) {
-  if (cursorID == cr_none)
+  if (cursorID == cr_none) {
     SDL_ShowCursor(SDL_DISABLE);
-  else
-    SDL_ShowCursor(SDL_ENABLE);
+    return 1;
+  }
+  SDL_ShowCursor(SDL_ENABLE);
 
   if (cursorID <= 0 && cursorID >= cr_size_all && enigma::cursors[-cursorID] != nullptr) {
     SDL_SetCursor(enigma::cursors[-cursorID]);

@@ -242,7 +242,7 @@ inline void action_execute_script(string script,string argument0,string argument
 #define action_execute_script(script,argument0,argument1,argument2,argument3,argument4) script((argument0),(argument1),(argument2),(argument3),(argument4))
 
 inline void action_sleep(const double milliseconds, const int redraw) {
-    if (redraw) {screen_redraw();}
+    if (redraw) {screen_redraw(); screen_refresh();}
     sleep(milliseconds);
 }
 

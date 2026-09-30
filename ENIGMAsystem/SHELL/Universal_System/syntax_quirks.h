@@ -11,12 +11,16 @@
 #define repeat(x) for (int ENIGMA_REPEAT_VAR = (x); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
 #define mod %(variant)
 
+#include <cmath>
+
+// x div y is x/y truncated toward zero, computed in reals: int operands would
+// make 5 div 0.5 divide by zero.
 struct INTEGER_DIVISION
 {
-    int v;
-    explicit INTEGER_DIVISION(int a): v(a) {}
+    double v;
+    explicit INTEGER_DIVISION(double a): v(a) {}
 };
-template<typename real>  int operator/ (real x, INTEGER_DIVISION y) { return int(x)/y.v; }
-#define div /(INTEGER_DIVISION)(int)
+template<typename real> double operator/ (real x, INTEGER_DIVISION y) { return std::trunc(double(x)/y.v); }
+#define div /(INTEGER_DIVISION)(double)
 
 #define until(x) while(!(x))

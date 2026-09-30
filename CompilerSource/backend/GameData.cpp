@@ -503,7 +503,9 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
       break;
     }
     case TypeCase::kBackground: {
-      ImageData data = loadImageData(root.background().image(), error);
+      // GM8 allows a background with no image (filled at runtime).
+      ImageData data = root.background().image().empty()
+          ? ImageData(0, 0, nullptr, 0) : loadImageData(root.background().image(), error);
       if (error) return -3; // background load error
       gameData->backgrounds.emplace_back(root.background(), root.name(), data);
       break;
@@ -516,7 +518,7 @@ int FlattenTree(const buffers::TreeNode &root, GameData *gameData) {
     case TypeCase::kObject:   gameData->objects.emplace_back(root.object(), root.name()); break;
     case TypeCase::kRoom:     gameData->rooms.emplace_back(root.room(), root.name()); break;
     case TypeCase::kInclude:  /*gameData->includes.emplace_back(root.include());*/ break;
-    case TypeCase::kSettings: /*gameData->settings.emplace_back(root.settings());*/ break;
+    case TypeCase::kSettings: gameData->settings.MergeFrom(root.settings()); break;
     default: cout << "- Not transferring unknown " << root.name() << endl; break;
   }
 
@@ -532,6 +534,8 @@ int FlattenProto(const buffers::Project &proj, GameData *gameData) {
   cout << "Flattening tree." << endl;
 
   int ret = FlattenTree(proj.game().root(), gameData);
+  for (const auto &constant : proj.game().constants())
+    gameData->constants.emplace_back(std::string(constant.name()), std::string(constant.value()));
 
   if (ret)
     cout << "Transfer error, see log for details." << endl << endl;
@@ -610,5 +614,5 @@ GameData::GameData(deprecated::JavaStruct::EnigmaStruct *es,
 
 GameData::GameData(const buffers::Project &proj, const EventData* /*events*/):
     filename("") {
-  FlattenProto(proj, this);
+  transfer_error = FlattenProto(proj, this);
 }

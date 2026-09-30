@@ -187,6 +187,7 @@ DLLEXPORT int compileEGMf(deprecated::JavaStruct::EnigmaStruct *es, const char* 
 
 DLLEXPORT int compileProto(const buffers::Project *proj, const char* exe_filename, int mode) {
   GameData gameData(*proj, &current_language->event_data());
+  if (gameData.transfer_error) return gameData.transfer_error;
   return current_language->compile(gameData, exe_filename, mode);
 }
 
@@ -196,6 +197,13 @@ DLLEXPORT void ide_handles_game_launch() { run_game = false; }
 static bool redirect_make = true;
 DLLEXPORT void log_make_to_console() { redirect_make = false; }
 
+static bool is_identifier(const string &name) {
+  if (name.empty() || isdigit((unsigned char) name[0])) return false;
+  for (char c : name)
+    if (!isalnum((unsigned char) c) && c != '_') return false;
+  return true;
+}
+
 template<typename T> void write_resource_meta(ofstream &wto, const char *kind, vector<T> resources, bool gen_names = true) {
   int max = 0;
   stringstream swb;  // switch body
@@ -203,7 +211,9 @@ template<typename T> void write_resource_meta(ofstream &wto, const char *kind, v
          "  enum {  // " << kind << " names\n\n";
   for (const T &res : resources) {
     if (res.id() >= max) max = res.id() + 1;
-    wto << "    " << res.name << " = " << res.id() << ",\n";
+    // GM allows names code can't refer to (spaces); they get no enum entry.
+    if (is_identifier(res.name))
+      wto << "    " << res.name << " = " << res.id() << ",\n";
     swb << "      case " << res.id() << ": return \""  << res.name << "\";\n";
   }
   wto << "  };\n\n";
@@ -338,12 +348,15 @@ static NameSet ScriptNames(const GameData &game) {
 
 int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) {
   std::filesystem::path exename;
+  // fixes a dangling pointer. this only runs when the output name lacks the build extension, which in practice means windows
+  std::string exename_u8;
   if (exe_filename) {
     exename = exe_filename;
     const std::filesystem::path buildext = compilerInfo.exe_vars["BUILD-EXTENSION"];
     if (!string_ends_with(exename.u8string(), buildext.u8string())) {
       exename += buildext;
-      exe_filename = exename.u8string().c_str();
+      exename_u8 = exename.u8string();
+      exe_filename = exename_u8.c_str();
     }
   }
 
@@ -713,7 +726,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       idpr("Failed to write resources.",-1); return 12;
     }
 
-    write_res_helper(gameModule, resourceblock_start, game);
+    if (int err = write_res_helper(gameModule, resourceblock_start, game)) {
+      idpr("Failed to add resources.",-1); return err;
+    }
   }
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -814,7 +829,9 @@ int lang_CPP::compile(const GameData &game, const char* exe_filename, int mode) 
       idpr("Failed to add resources.",-1); return 13;
     }
 
-    write_res_helper(gameModule, resourceblock_start, game);
+    if (int err = write_res_helper(gameModule, resourceblock_start, game)) {
+      idpr("Failed to add resources.",-1); return err;
+    }
   }
 
 

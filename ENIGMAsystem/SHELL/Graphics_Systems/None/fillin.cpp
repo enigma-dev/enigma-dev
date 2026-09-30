@@ -55,6 +55,9 @@ namespace enigma
 {
 	void graphicssystem_initialize(){}
 
+	particles_implementation* particles_impl;
+	void set_particles_implementation(particles_implementation* part_impl) { particles_impl = part_impl; }
+
 	void graphics_set_viewport(float x, float y, float width, float height) {}
 
 	int graphics_create_texture(const RawImage&, bool mipmap, unsigned* fullwidth, unsigned* fullheight){return -1;}
@@ -70,17 +73,10 @@ namespace enigma
 
 	void graphics_delete_vertex_buffer_peer(int buffer) {}
 	void graphics_delete_index_buffer_peer(int buffer) {}
-	void graphics_replace_texture_alpha_from_texture(int, int) {}
-	int graphics_duplicate_texture(int, bool) { return -1; }
 
 	void scene_begin() {}
 	void scene_end() {}
-	void delete_tiles() {}
-	void load_tiles() {}
 
-	// Draw-side state normally owned by General/GSfont.cpp; the resource
-	// system pokes it when the active font is deleted.
-	int currentfont = -1;
 }
 
 namespace enigma_user
@@ -104,22 +100,8 @@ namespace enigma_user
 	void surface_reset_target(void){}
 	// Draw-API coverage for extensions that debug-draw (Paths,
 	// MotionPlanning): primitives, splines, and color state.
-	void draw_primitive_begin(int kind, int format){}
-	void draw_primitive_end(){}
-	void draw_vertex(gs_scalar x, gs_scalar y){}
-	void draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha){}
-	void draw_spline_begin(int mode){}
-	void draw_spline_vertex(gs_scalar x, gs_scalar y){}
-	void draw_bezier_quadratic_spline_end(){}
-	void draw_set_color(int col){}
-	void draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha){}
-	int draw_get_color(){return 0;}
-	int merge_color(int col1, int col2, double amount){return 0;}
 
 	int surface_get_target(){return -1;}
-	int surface_get_texture(int id){return -1;}
-	int surface_get_width(int id){return 0;}
-	int surface_get_height(int id){return 0;}
 	void surface_free(int id){}
 
 	int draw_get_msaa_maxlevel(){return 0;}
@@ -156,14 +138,21 @@ namespace enigma_user
 	void d3d_stencil_clear_value(int value) {}
 	void d3d_stencil_clear() {}
 	void d3d_set_software_vertex_processing(bool software){}
+	void screen_init() {}
 	void screen_redraw() {}
 	void screen_refresh() {}
-	void screen_init() {}
-	unsigned int string_width(variant str) { return 0; }
-	void draw_text(float, float, variant) {}
-	void draw_sprite_ext(int, int, float, float, float, float, double, int, float) {}
-	void draw_healthbar(float, float, float, float, float, int, int, int, int, bool, bool) {}
+	void screen_set_viewport(gs_scalar, gs_scalar, gs_scalar, gs_scalar) {}
+	void screen_reset_viewport() {}
+	void display_set_gui_size(unsigned int, unsigned int) {}
+	unsigned int display_get_gui_width() { return 0; }
+	unsigned int display_get_gui_height() { return 0; }
+	int screen_save(string) { return -1; }
+	int screen_save_part(string, unsigned, unsigned, unsigned, unsigned) { return -1; }
+	int background_create_from_screen(int, int, int, int, bool, bool, bool) { return -1; }
+	int sprite_create_from_screen(int, int, int, int, bool, bool, bool, int, int) { return -1; }
+	int sprite_create_from_screen(int, int, int, int, bool, bool, int, int) { return -1; }
+	void sprite_add_from_screen(int, int, int, int, int, bool, bool) {}
+	int draw_getpixel(int, int) { return 0; }
+	int draw_getpixel_ext(int, int) { return 0; }
   
-  uint32_t texture_get_pixel(int, unsigned int, unsigned int) {return 0;}
-  bool textures_equal(int, int) {return false;}
 }

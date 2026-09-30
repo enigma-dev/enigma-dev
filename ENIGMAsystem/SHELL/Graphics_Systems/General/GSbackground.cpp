@@ -24,6 +24,7 @@
 #include "Universal_System/Resources/backgrounds_internal.h"
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/math_consts.h"
+#include "Universal_System/compliance.h"
 
 #include <cstddef>
 #include <math.h>
@@ -106,8 +107,11 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
 
   draw_primitive_begin_texture(pr_trianglestrip, bck2d.textureID);
 
-  gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-            ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+  gs_scalar ulcx = x, ulcy = y;
+  if (enigma::gm8_compliance() && rot != 0) {  // GM8 turns about the center of pixel (x, y)
+    const double s = sin(rot), c = cos(rot);
+    ulcx += .5 - .5*c - .5*s, ulcy += .5 + .5*s - .5*c;
+  }
 
 	draw_vertex_texture_color(ulcx, ulcy, tbx, tby,color,alpha);
 	draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx+tbw, tby,color,alpha);
@@ -175,8 +179,7 @@ void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar 
   rot *= M_PI/180;
   const gs_scalar wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
-  gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-            ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+  gs_scalar ulcx = x, ulcy = y;
 
   draw_primitive_begin_texture(pr_trianglestrip, bck2d.textureID);
 	draw_vertex_texture_color(ulcx, ulcy, tbx1, tby1,c1,alpha);

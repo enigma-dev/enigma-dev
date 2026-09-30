@@ -212,8 +212,11 @@ namespace enigma_user
 
 			if (enigma_user::is_string(value))
 				encoding_accumulator << '\"' << enigma_user::toString(value) << '\"';
-			else 
-				encoding_accumulator << enigma_user::toString(value);
+			else {  // full precision, not GML string()'s two decimals
+				char num[32];
+				snprintf(num, sizeof num, "%.15g", (double) value);
+				encoding_accumulator << num;
+			}
 
 			key = enigma_user::ds_map_find_next(ds_map, key);
 			

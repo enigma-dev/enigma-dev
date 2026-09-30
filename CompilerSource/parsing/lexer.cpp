@@ -23,6 +23,7 @@
 
 #include <array>
 #include <memory>
+#include <utility>
 #include <initializer_list>
 
 namespace enigma {
@@ -201,6 +202,7 @@ static const setting::CompatibilityOptions kCppCompatibility {
   .use_cpp_literals = true,
   .use_cpp_escapes = true,
   .use_gml_equals = false,
+  .use_gml_precedence = false,
   .keyword_blacklist = "",
 };
 
@@ -374,7 +376,7 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
     }
   } else {
     for (size_t i = 1; i < lit.length() - 1; ++i) {
-      str_value += lit[i] == '#' ? '\n' : lit[i];
+      str_value += lit[i];
     }
   }
   return str_value;
@@ -584,10 +586,39 @@ bool Lexer::HandleMacro(std::string_view name) {
   return true;
 }
 
+// C++ words that are plain names in GML: they print as gml_<word>.
+static const std::map<std::string_view, std::string_view, std::less<>> kCppOnlyWords {
+  {"alignas", "gml_alignas"}, {"asm", "gml_asm"}, {"class", "gml_class"},
+  {"concept", "gml_concept"}, {"co_return", "gml_co_return"}, {"co_yield", "gml_co_yield"},
+  {"explicit", "gml_explicit"}, {"export", "gml_export"}, {"friend", "gml_friend"},
+  {"goto", "gml_goto"}, {"namespace", "gml_namespace"}, {"private", "gml_private"},
+  {"protected", "gml_protected"}, {"public", "gml_public"}, {"register", "gml_register"},
+  {"requires", "gml_requires"}, {"static_assert", "gml_static_assert"}, {"struct", "gml_struct"},
+  {"template", "gml_template"}, {"this", "gml_this"}, {"throw", "gml_throw"},
+  {"typeid", "gml_typeid"}, {"union", "gml_union"}, {"using", "gml_using"},
+  {"virtual", "gml_virtual"},
+};
+// Words later GML (GMS) or EDL give meaning, but GM8 doesn't: names only under GM8 compliance.
+static const std::set<std::string_view, std::less<>> kGm8PlainWords {
+  "auto", "catch", "const", "const_cast", "constexpr", "decltype", "delete", "dynamic_cast",
+  "enum", "extern", "inline", "mutable", "new", "noexcept", "nullptr", "operator",
+  "reinterpret_cast", "sizeof", "static", "static_cast", "try", "typedef", "typename", "volatile",
+};
 Token &Lexer::TranslateNameToken(Token &token) {
   std::string_view name = token.content;
 
-  // TODO(new parser): C++ keyword conflict handling deleted from here
+  if (context->compatibility_opts.use_gml_equals) {
+    if (auto w = kCppOnlyWords.find(name); w != kCppOnlyWords.end()) {
+      token.content = std::string(w->second);
+      token.type = TT_IDENTIFIER;
+      return token;
+    }
+    if (context->compatibility_opts.compliance_mode <= 81 && kGm8PlainWords.count(name)) {
+      token.content = "gml_" + std::string(name);
+      token.type = TT_IDENTIFIER;
+      return token;
+    }
+  }
 
   if (auto kw = keyword_lookup.find(name); kw != keyword_lookup.end()) {
     token.type = kw->second;
@@ -610,20 +641,65 @@ Token &Lexer::TranslateNameToken(Token &token) {
   return token;
 }
 
-Token Lexer::ReadToken() {
+Token Lexer::ReadExpandedToken() {
   if (!open_macros.empty()) {
     auto &macro = open_macros.back();
     if (macro.index >= macro.tokens.size()) {
       PopMacro();
-      return ReadToken();
+      return ReadExpandedToken();
     }
     return macro.tokens[macro.index++];
   }
   Token res = ReadRawToken();
   if (res.type == TT_IDENTIFIER) {
-    if (HandleMacro(res.content)) return ReadToken();
+    if (HandleMacro(res.content)) return ReadExpandedToken();
     return TranslateNameToken(res);
   }
+  return res;
+}
+
+// GML code uses `char` as a variable name. Keep it a type only where GML
+// couldn't use a name: before a declarator, cast or template argument list,
+// or after a specifier like `unsigned`.
+bool Lexer::GmlCharIsName(const Token &next) const {
+  if (prev_ == TT_DOT) return true;
+  if (prev_ == TT_DECLSPEC || prev_ == TT_S_NEW) return false;
+  switch (next.type) {
+    case TT_IDENTIFIER: case TT_TYPE_NAME: case TT_DECLSPEC:
+    case TT_STAR: case TT_AMPERSAND: case TT_BEGINPARENTH:
+    case TT_BEGINBRACE: case TT_SCOPEACCESS: case TT_ELLIPSES:
+      return false;
+    case TT_ENDPARENTH:
+      if (prev_ != TT_BEGINPARENTH) return true;
+      switch (prev2_) {
+        case TT_IDENTIFIER: case TT_S_IF: case TT_S_WHILE: case TT_S_SWITCH:
+        case TT_S_WITH: case TT_S_REPEAT: case TT_S_UNTIL:
+          return true;
+        default:
+          return false;
+      }
+    case TT_GREATER:
+      return prev_ != TT_LESS && prev_ != TT_COMMA;
+    case TT_COMMA:
+      return prev_ != TT_LESS;
+    default:
+      return true;
+  }
+}
+
+Token Lexer::ReadToken() {
+  Token res = lookahead_ ? *std::exchange(lookahead_, std::nullopt)
+                         : ReadExpandedToken();
+  if (res.type == TT_TYPE_NAME && context->compatibility_opts.use_gml_equals &&
+      res.content == "char") {
+    lookahead_ = ReadExpandedToken();
+    if (GmlCharIsName(*lookahead_)) {
+      res.content = "gml_char";
+      res.type = TT_IDENTIFIER;
+    }
+  }
+  prev2_ = prev_;
+  prev_ = res.type;
   return res;
 }
 

@@ -393,6 +393,8 @@ extern ParsedExtensionVec parsed_extensions;
 struct CompileState {
   //Locals that are inherited by all instances of all objects from the core system.
   DotLocalMap dot_accessed_locals;
+  // Names declared with globalvar anywhere in the game.
+  std::set<std::string> globalvar_names;
   ParsedObjectVec parsed_objects;
   ParsedScriptVec parsed_scripts;
   ParsedScriptVec parsed_tlines;

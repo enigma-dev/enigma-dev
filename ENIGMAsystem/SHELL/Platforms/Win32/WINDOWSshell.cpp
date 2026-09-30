@@ -30,7 +30,7 @@ using std::string;
 namespace enigma_insecure {
 
 void execute_program(string fname, string args, bool wait) {
-  SHELLEXECUTEINFOW lpExecInfo;
+  SHELLEXECUTEINFOW lpExecInfo = {};
   tstring tstr_fname = widen(fname);
   tstring tstr_args = widen(args);
   lpExecInfo.cbSize = sizeof(SHELLEXECUTEINFOW);
@@ -44,12 +44,11 @@ void execute_program(string fname, string args, bool wait) {
   lpExecInfo.lpDirectory = cDir;
   lpExecInfo.nShow = SW_SHOW;
   lpExecInfo.hInstApp = (HINSTANCE)SE_ERR_DDEFAIL;
-  ShellExecuteExW(&lpExecInfo);
+  if (!ShellExecuteExW(&lpExecInfo)) return;
+  // Pump messages while the program runs; anything but a message means it ended (or the wait failed).
   if (wait && lpExecInfo.hProcess != NULL) {
-    while (DWORD eventSignalId = MsgWaitForMultipleObjects(1, &lpExecInfo.hProcess, false, INFINITE, QS_ALLEVENTS)) {
-      if (eventSignalId == WAIT_OBJECT_0) break;
+    while (MsgWaitForMultipleObjects(1, &lpExecInfo.hProcess, false, INFINITE, QS_ALLEVENTS) == WAIT_OBJECT_0 + 1)
       enigma::handleEvents();
-    }
   }
   if (lpExecInfo.hProcess != NULL)
     CloseHandle(lpExecInfo.hProcess);

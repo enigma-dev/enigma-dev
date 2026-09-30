@@ -112,13 +112,20 @@ short mouse_vscrolls = 0;
 
 void io_handle() {
   enigma::input_push();
-  if (enigma::handleEvents() != 0) return;
+  if (enigma::handleEvents() != 0) {
+    game_end();
+    return;
+  }
   enigma::update_mouse_variables();
 }
 
 void io_clear() {
   for (int i = 0; i < 255; i++) enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = 0;
   for (int i = 0; i < 3; i++) enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+  keyboard_lastkey = keyboard_key = 0;
+  // GM8 clears the typed text and last button too.
+  keyboard_lastchar = keyboard_string = "";
+  mouse_button = mouse_lastbutton = 0;
 }
 
 bool keyboard_check(int key) {
@@ -165,7 +172,7 @@ bool keyboard_check_released(int key) {
 
 void keyboard_wait() {
   io_clear();
-  for (;;) {
+  while (!enigma::game_isending) {
     io_handle();
     for (int i = 0; i < 255; i++)
       if (enigma::keybdstatus[i]) {
@@ -260,7 +267,7 @@ bool mouse_check_button_released(int button) {
 void mouse_clear(const int button) { enigma::mousestatus[button - 1] = enigma::last_mousestatus[button - 1] = 0; }
 
 void mouse_wait() {
-  for (;;) {
+  while (!enigma::game_isending) {
     io_handle();
     for (int i = 0; i < 3; i++)
       if (enigma::mousestatus[i]) return;

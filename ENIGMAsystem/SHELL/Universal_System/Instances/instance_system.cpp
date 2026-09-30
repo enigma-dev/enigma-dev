@@ -28,6 +28,7 @@
 #include <stdio.h>
 
 #include "instance_system.h"
+#include "Universal_System/compliance.h"
 #include "instance_system_frontend.h"
 
 using namespace std;
@@ -161,8 +162,32 @@ namespace enigma
     return prev = a; // Either way, our last item is this item now.
   }
 
+  // GM8 runs an event object by object (by object_index), each object's instances
+  // in creation order. The new node goes after the last node of the nearest object
+  // at or before its own, found in object_tails.
+  inst_iter *event_iter::add_inst_by_object(object_basic* ninst)
+  {
+    if (!gm8_compliance()) return add_inst(ninst);
+    const int oid = ninst->object_index;
+    auto tail = object_tails.upper_bound(oid);
+    inst_iter *after = tail == object_tails.begin() ? this : std::prev(tail)->second;
+    inst_iter *a = new inst_iter(ninst, after->next, after);
+    if (after->next) after->next->prev = a;
+    else prev = a;
+    after->next = a;
+    return object_tails[oid] = a;
+  }
+
   void event_iter::unlink(inst_iter* which)
   {
+    if (!object_tails.empty()) {
+      const int oid = which->inst->object_index;
+      auto tail = object_tails.find(oid);
+      if (tail != object_tails.end() && tail->second == which) {
+        if (which->prev != this && which->prev->inst->object_index == oid) tail->second = which->prev;
+        else object_tails.erase(tail);
+      }
+    }
     if (which->prev) which->prev->next = which->next;
     if (which->next) which->next->prev = which->prev;
     if (prev == which) prev = which->prev; // If our last item is this, decrement our last item.

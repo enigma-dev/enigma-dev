@@ -92,6 +92,7 @@ std::vector<std::function<void()> > extension_draw_gui_after_hooks;
 
 unsigned gui_width = 0;
 unsigned gui_height = 0;
+bool gui_size_set = false;
 
 particles_implementation* particles_impl;
 void set_particles_implementation(particles_implementation* part_impl)
@@ -261,6 +262,7 @@ namespace enigma_user {
 void display_set_gui_size(unsigned int width, unsigned int height) {
   enigma::gui_width = width;
   enigma::gui_height = height;
+  enigma::gui_size_set = true;
 }
 
 unsigned int display_get_gui_width(){
@@ -337,6 +339,8 @@ void screen_refresh() {
 void screen_redraw()
 {
   enigma::scene_begin();
+  graphics_set_viewport(0, 0, window_get_width(), window_get_height());
+  draw_clear(window_get_color());
 
   if (!view_enabled)
   {
@@ -360,6 +364,12 @@ void screen_redraw()
       int vob = (int)view_object[vc];
       if (vob != -1)
         follow_object(vob, vc);
+    }
+
+    // GM8 stores views as integers; round after following, which can leave fractions.
+    for (int i = 0; i < 8; i++) {
+      view_xview[i] = nearbyint((double) view_xview[i]); view_yview[i] = nearbyint((double) view_yview[i]);
+      view_wview[i] = nearbyint((double) view_wview[i]); view_hview[i] = nearbyint((double) view_hview[i]);
     }
 
     //TODO: Possibly implement view option from Stupido to control which view clears the background
@@ -395,6 +405,10 @@ void screen_redraw()
   // Now process the sub event of draw called draw gui
   // It is for drawing GUI elements without view scaling and transformation
   screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+  if (!enigma::gui_size_set) {
+    enigma::gui_width = window_get_region_width();
+    enigma::gui_height = window_get_region_height();
+  }
   d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
   if (enigma::gui_used)
@@ -413,7 +427,11 @@ void screen_redraw()
   draw_batch_flush(batch_flush_deferred);
 
   if (sprite_exists(cursor_sprite)) {
-    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+    draw_sprite(cursor_sprite, 0,
+      (window_mouse_get_x() - (window_get_width() - window_get_region_width_scaled()) / 2.0)
+        * enigma::gui_width / window_get_region_width_scaled(),
+      (window_mouse_get_y() - (window_get_height() - window_get_region_height_scaled()) / 2.0)
+        * enigma::gui_height / window_get_region_height_scaled());
     // cursor sprite needs its own flush before this frame ends
     draw_batch_flush(batch_flush_deferred);
   }
@@ -423,9 +441,7 @@ void screen_redraw()
 
   enigma::scene_end();
 
-  // GM8.1 manual specifies that screen_redraw should call screen_refresh
-  // "The first function redraws the internal image and then refreshes the screen image."
-  screen_refresh();
+  // No refresh: a swap here leaves the back buffer undefined for screen_save.
 }
 
 int screen_save(string filename) { //Assumes native integers are little endian

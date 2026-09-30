@@ -87,8 +87,9 @@ namespace enigma
         //gtw = fw;
         glyphdata[i] = data;
 
-        // Here we calculate the bbox
-        if (!prop)
+        // Here we calculate the bbox. Without pixels (no graphics system) every
+        // glyph keeps its full cell.
+        if (!prop || !data)
            glyphmetrics[i].x = 0,   glyphmetrics[i].y = 0,
            glyphmetrics[i].w = gwm-1, glyphmetrics[i].h = ghm-1;
         else
@@ -98,7 +99,7 @@ namespace enigma
           for (int bx = 0; bx < gwm; bx++)
           for (int by = 0; by < ghm; by++)
           {
-            if (data[(by*gtw + bx)<<2]) // If this pixel isn't completely transparent
+            if (data[((by*gtw + bx)<<2) + 3]) // If this pixel isn't completely transparent (BGRA)
             {
               if (bx < glyphmetrics[i].x) glyphmetrics[i].x = bx;
               if (bx > glyphmetrics[i].w) glyphmetrics[i].w = bx; // Treat width as right for now
@@ -115,7 +116,10 @@ namespace enigma
         fg.x2 = glyphmetrics[i].w + 1; // And while w and h are still the right and bottom edge coordinates
         fg.y2 = glyphmetrics[i].h + 1;
 
-        fg.xs = glyphmetrics[i].w + sep; // This is just user-specified for sprite-loaded fonts
+        // GM8 advances a proportional glyph by its visible width - 1 + sep and draws its
+        // first visible column at the pen; a fixed glyph by the cell + sep (as OpenGMK).
+        fg.xs = (prop ? glyphmetrics[i].w - glyphmetrics[i].x : gwm) + sep;
+        if (prop) fg.x2 -= fg.x, fg.x = 0;
 
         glyphmetrics[i].w -= glyphmetrics[i].x - 1; // Fix width and height to be such
         glyphmetrics[i].h -= glyphmetrics[i].y - 1; // instead of right and bottom
@@ -124,6 +128,9 @@ namespace enigma
 
         fgr.glyphs.push_back(fg);
       }
+
+      // A character the font lacks draws as a space; with no space, GM8 advances by the first glyph.
+      font->space_width = gcount ? fgr.glyphs[0].xs : 0;
 
       list<unsigned int> boxes;
       for (unsigned i = 0; i < gcount; i++)
@@ -146,14 +153,15 @@ namespace enigma
         }
       }
 
-      unsigned char* bigtex = new unsigned char[w*h]();
+      unsigned char* bigtex = new unsigned char[w*h*4]();
       for (unsigned i = 0; i < gcount; i++)
       {
         fontglyph& fg = fgr.glyphs[i];
         // Copy the SpriteFont glyph image into the big texture we just allocated
-        for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
+        for (int yy = 0; glyphdata[i] && yy < glyphmetrics[i].h; yy++) {
           for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
-            bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = (glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+            for (int channel = 0; channel < 4; ++channel)
+            bigtex[4*(w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx) + channel] = (glyphdata[i])[4*(gtw*(glyphy[i] + yy) + xx + glyphx[i]) + channel];
           }
         }
         delete[] glyphdata[i]; // Delete the image data we just copied

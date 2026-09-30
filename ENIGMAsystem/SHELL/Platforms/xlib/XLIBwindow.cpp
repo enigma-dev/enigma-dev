@@ -30,6 +30,8 @@
 #include "XLIBwindow.h"  // Type insurance for non-mandatory functions
 #include "XLIBicon.h"
 
+#include <X11/Xatom.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <stdio.h>   //printf, NULL
@@ -114,6 +116,9 @@ bool initGameWindow()
   // Make the window
   win = XCreateWindow(disp, root, 0, 0, winw, winh, 0, vi->depth, InputOutput, vi->visual, valmask, &swa);
   set_net_wm_pid(win);
+  if (game_icon_size)
+    XChangeProperty(disp, win, XInternAtom(disp, "_NET_WM_ICON", False), XA_CARDINAL, 32, PropModeReplace,
+                    reinterpret_cast<const unsigned char *>(game_icon), game_icon_size);
   XMoveWindow(disp, win, (screen->width - winw) / 2, (screen->height - winh) / 2);
 
   //register CloseButton listener
@@ -684,8 +689,22 @@ bool keyboard_check_direct(int key) {
     return 1;
   }
 
-  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
-  return (keyState[key >> 3] & (1 << (key & 7)));
+  auto down = [&](KeySym sym) {
+    const KeyCode code = XKeysymToKeycode(enigma::x11::disp, sym);
+    return code && (keyState[code >> 3] & (1 << (code & 7)));
+  };
+  switch (key) {
+    case vk_shift:    return down(XK_Shift_L) || down(XK_Shift_R);
+    case vk_control:  return down(XK_Control_L) || down(XK_Control_R);
+    case vk_alt:      return down(XK_Alt_L) || down(XK_Alt_R);
+    case vk_lshift:   return down(XK_Shift_L);
+    case vk_rshift:   return down(XK_Shift_R);
+    case vk_lcontrol: return down(XK_Control_L);
+    case vk_rcontrol: return down(XK_Control_R);
+    case vk_lalt:     return down(XK_Alt_L);
+    case vk_ralt:     return down(XK_Alt_R);
+  }
+  return down(enigma::keyrmap[key]);
 }
 
 void clipboard_set_text(string text) {

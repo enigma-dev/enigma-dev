@@ -18,15 +18,128 @@
 #include "semantics.h"
 
 #include "object_storage.h"
+#include "parsing/precedence.h"
 
 namespace enigma::parsing {
+
+namespace {
+
+// Finds anything in an expression that can change state another operand
+// reads: calls (scripts touch instance and global variables), assignments,
+// increments, new/delete. In GML an = inside an operand compares.
+struct SideEffectFinder : AST::Visitor {
+  bool found = false;
+  bool Mark(bool side_effect) {
+    found = found || side_effect;
+    return !found;
+  }
+  bool VisitFunctionCallExpression(AST::FunctionCallExpression &) final { return Mark(true); }
+  bool VisitNewExpression(AST::NewExpression &) final { return Mark(true); }
+  bool VisitDeleteExpression(AST::DeleteExpression &) final { return Mark(true); }
+  bool VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) final {
+    return Mark(node.operation.type == TT_INCREMENT || node.operation.type == TT_DECREMENT);
+  }
+  bool VisitUnaryPostfixExpression(AST::UnaryPostfixExpression &node) final {
+    return Mark(node.operation.type == TT_INCREMENT || node.operation.type == TT_DECREMENT);
+  }
+  bool VisitBinaryExpression(AST::BinaryExpression &node) final {
+    const TokenType op = node.operation.type;
+    return Mark(op == TT_ASSIGN || op == TT_ASSOP);
+  }
+};
+
+bool HasSideEffects(AST::Node &node) {
+  SideEffectFinder finder;
+  node.RecurusiveVisit(finder);
+  return finder.found;
+}
+
+// C++ leaves the order of call arguments and most operands unspecified (GCC
+// goes right to left); GML evaluates left to right. Order matters once one
+// operand has side effects and another isn't a literal.
+bool OrderMatters(const std::vector<AST::Node *> &operands) {
+  for (std::size_t i = 0; i < operands.size(); ++i) {
+    if (!HasSideEffects(*operands[i])) continue;
+    for (std::size_t j = 0; j < operands.size(); ++j)
+      if (j != i && operands[j]->type != AST::NodeType::LITERAL) return true;
+  }
+  return false;
+}
+
+bool IsOrderedOperator(TokenType op) {
+  switch (op) {
+    case TT_PLUS: case TT_MINUS: case TT_STAR: case TT_SLASH: case TT_DIV: case TT_MOD:
+    case TT_PERCENT: case TT_LSH: case TT_RSH: case TT_AMPERSAND: case TT_CARET: case TT_PIPE:
+    case TT_XOR: case TT_LESS: case TT_LESSEQUAL: case TT_GREATER: case TT_GREATEREQUAL:
+    case TT_EQUALTO: case TT_NOTEQUAL:
+      return true;
+    default:
+      return false;
+  }
+}
+
+}  // namespace
+
+
+bool SemanticAnnotator::VisitIdentifierAccess(AST::IdentifierAccess &node) {
+  if (globalvars_ && globalvars_->count(std::string(node.name.content))) node.globalvar = true;
+  return true;
+}
 
 bool SemanticAnnotator::VisitScopeAccess(AST::ScopeAccess &node) {
   if (node.op.type == TT_DOT) classify_access(node);
   return true;
 }
 
+// Whether `op` binds looser than == (&& || ^^, and C++'s & | ^), so a
+// value-position = parsed above it must move below it.
+bool SemanticAnnotator::looser_than_equality(TokenType op) const {
+  if (op == TT_EQUALS || op == TT_ASSOP || op == TT_COMMA) return false;
+  const bool gml = frontend_ && frontend_->compatibility_opts().use_gml_precedence;
+  auto find = [&](TokenType t) -> const OperatorPrecedence * {
+    if (gml) if (auto it = Precedence::kGmlBinaryPrec.find(t); it != Precedence::kGmlBinaryPrec.end())
+      return &it->second;
+    auto it = Precedence::kBinaryPrec.find(t);
+    return it == Precedence::kBinaryPrec.end() ? nullptr : &it->second;
+  };
+  const OperatorPrecedence *p = find(op);  // a[i] and other non-binary operators: tight
+  return p && p->precedence > find(TT_EQUALTO)->precedence;
+}
+
 bool SemanticAnnotator::VisitBinaryExpression(AST::BinaryExpression &node) {
+  // GML's = compares except at statement position, at equality precedence;
+  // the parser grouped it at assignment precedence, so `a and b = c` came out
+  // as (a and b) = c. Push the = below a looser operand: (L = (c op d)) becomes
+  // ((L = c) op d), and ((a op b) = R) becomes (a op (b = R)). The moved =
+  // is visited, and fixed further, as a child. The parser already turns an if
+  // condition's root = into == (TT_EQUALTO) with the same grouping; a written
+  // == never has an unparenthesized looser operand, so fix those too.
+  if ((gml_equals_ && node.operation.type == TT_EQUALS && !statement_equals_.count(&node)) ||
+      node.operation.type == TT_EQUALTO) {
+    auto loose = [&](const AST::PNode &n) {
+      return n->type == AST::NodeType::BINARY_EXPRESSION &&
+             looser_than_equality(n->As<AST::BinaryExpression>()->operation.type);
+    };
+    const bool right = loose(node.right);
+    if (right || loose(node.left)) {
+      AST::PNode moved = std::move(right ? node.right : node.left);
+      auto *op = moved->As<AST::BinaryExpression>();
+      if (right) {  // node = (L = (c op d)): moved becomes (L = c), node becomes (moved op d)
+        AST::PNode d = std::move(op->right);
+        op->right = std::move(op->left);
+        op->left = std::move(node.left);
+        node.left = std::move(moved);
+        node.right = std::move(d);
+      } else {  // node = ((a op b) = R): moved becomes (b = R), node becomes (a op moved)
+        AST::PNode a = std::move(op->left);
+        op->left = std::move(op->right);
+        op->right = std::move(node.right);
+        node.right = std::move(moved);
+        node.left = std::move(a);
+      }
+      std::swap(node.operation, op->operation);
+    }
+  }
   // EDL's / is real division regardless of operand types; div is the
   // integer kind. C++ would truncate 1/4 to 0, so mark for lowering.
   if (node.operation.type == TT_SLASH) node.lower_real_division = true;
@@ -36,6 +149,24 @@ bool SemanticAnnotator::VisitBinaryExpression(AST::BinaryExpression &node) {
   if (gml_equals_ && node.operation.type == TT_EQUALS &&
       !statement_equals_.count(&node)) {
     node.lower_gml_equals = true;
+  }
+  if (gml_equals_ && IsOrderedOperator(node.operation.type) &&
+      OrderMatters({node.left.get(), node.right.get()})) {
+    node.evaluate_in_order = true;
+  }
+  if (gml_equals_ && node.operation.type == TT_BEGINBRACKET &&
+      node.right->type == AST::NodeType::BINARY_EXPRESSION) {
+    // a[i, j]: the two indices print as C++ call arguments.
+    auto *comma = node.right->As<AST::BinaryExpression>();
+    if (comma->operation.type == TT_COMMA && OrderMatters({comma->left.get(), comma->right.get()}))
+      node.evaluate_in_order = true;
+  }
+  // a[i()] = v(): GML evaluates the target's index before the value; C++17
+  // evaluates the right side of = first.
+  const TokenType op = node.operation.type;
+  if (gml_equals_ && (op == TT_ASSIGN || op == TT_ASSOP || (op == TT_EQUALS && !node.lower_gml_equals)) &&
+      HasSideEffects(*node.left) && node.right->type != AST::NodeType::LITERAL) {
+    node.evaluate_in_order = true;
   }
   // An assignment's right-hand side is statement-like in GML only for the
   // leftmost =; nested ones compare, which the set membership handles.
@@ -51,6 +182,11 @@ void SemanticAnnotator::mark_statement(const AST::PNode &stmt) {
 
 bool SemanticAnnotator::VisitCodeBlock(AST::CodeBlock &node) {
   for (auto &stmt : node.statements) mark_statement(stmt);
+  return true;
+}
+
+bool SemanticAnnotator::VisitSwitchStatement(AST::SwitchStatement &node) {
+  node.lower_gml_switch = gml_equals_;
   return true;
 }
 
@@ -84,6 +220,11 @@ bool SemanticAnnotator::VisitWithStatement(AST::WithStatement &node) {
 
 bool SemanticAnnotator::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
   validate_call(node);
+  if (gml_equals_ && node.arguments.size() > 1) {
+    std::vector<AST::Node *> arguments;
+    for (auto &arg : node.arguments) arguments.push_back(arg.get());
+    node.evaluate_in_order = OrderMatters(arguments);
+  }
   return true;
 }
 
@@ -147,11 +288,8 @@ void SemanticAnnotator::record_locals(AST::DeclarationStatement &node) {
 void SemanticAnnotator::classify_access(AST::ScopeAccess &node) {
   using AccessKind = AST::ScopeAccess::AccessKind;
   if (!node.lhs) return;  // `::name` global-scope id: not a dot access.
-  if (node.lhs->type != AST::NodeType::IDENTIFIER) {
-    node.access_kind = AccessKind::VARACCESS;
-    return;
-  }
-  const std::string &left = node.lhs->As<AST::IdentifierAccess>()->name.content;
+  const std::string left = node.lhs->type == AST::NodeType::IDENTIFIER
+      ? node.lhs->As<AST::IdentifierAccess>()->name.content : "";
   if (left == "global") {
     node.access_kind = AccessKind::GLOBAL;
   } else if (left == "local") {
@@ -175,10 +313,10 @@ namespace {
 // Annotates one AST; returns 1 if the pass left errors on it. Parse-phase
 // errors abort the compile before this pass runs, so any error present
 // afterward is semantic. `where` names the code for the diagnostic.
-int annotate(ParsedCode &code, const std::string &where) {
+int annotate(ParsedCode &code, const std::string &where, const std::set<std::string> *globalvars) {
   enigma::parsing::SemanticAnnotator annotator(
       &code.ast.herr, code.ast.lexer->GetContext().language_fe,
-      code.ast.lexer->GetContext().compatibility_opts.use_gml_equals);
+      code.ast.lexer->GetContext().compatibility_opts.use_gml_equals, globalvars);
   code.ast.VisitNodes(annotator);
   if (!code.ast.HasError()) return 0;
   std::cerr << "Semantic error in " << where << ":\n"
@@ -192,26 +330,26 @@ int annotate_semantics(CompileState &state) {
   int errors = 0;
   for (parsed_object *obj : state.parsed_objects)
     for (ParsedEvent &event : obj->all_events)
-      errors += annotate(event, "object `" + obj->name + "'");
+      errors += annotate(event, "object `" + obj->name + "'", &state.globalvar_names);
   for (ParsedScript *script : state.parsed_scripts) {
-    errors += annotate(script->code, "script `" + script->name + "'");
+    errors += annotate(script->code, "script `" + script->name + "'", &state.globalvar_names);
     if (script->global_code)
-      errors += annotate(*script->global_code, "script `" + script->name + "'");
+      errors += annotate(*script->global_code, "script `" + script->name + "'", &state.globalvar_names);
   }
   for (ParsedScript *tline : state.parsed_tlines) {
-    errors += annotate(tline->code, "timeline `" + tline->name + "'");
+    errors += annotate(tline->code, "timeline `" + tline->name + "'", &state.globalvar_names);
     if (tline->global_code)
-      errors += annotate(*tline->global_code, "timeline `" + tline->name + "'");
+      errors += annotate(*tline->global_code, "timeline `" + tline->name + "'", &state.globalvar_names);
   }
   for (parsed_room *room : state.parsed_rooms) {
     if (room->creation_code)
-      errors += annotate(*room->creation_code, "room `" + room->name + "' creation code");
+      errors += annotate(*room->creation_code, "room `" + room->name + "' creation code", &state.globalvar_names);
     for (auto &[id, icc] : room->instance_create_codes)
       if (icc.code)
-        errors += annotate(*icc.code, "instance creation code in room `" + room->name + "'");
+        errors += annotate(*icc.code, "instance creation code in room `" + room->name + "'", &state.globalvar_names);
     for (auto &[id, icc] : room->instance_precreate_codes)
       if (icc.code)
-        errors += annotate(*icc.code, "instance precreation code in room `" + room->name + "'");
+        errors += annotate(*icc.code, "instance precreation code in room `" + room->name + "'", &state.globalvar_names);
   }
   return errors;
 }

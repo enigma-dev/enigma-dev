@@ -71,7 +71,7 @@ namespace enigma
       virtual ::variant myevent_create();
       virtual ::variant myevent_gamestart();
       virtual ::variant myevent_gameend();
-      virtual ::variant myevent_closebutton();
+      virtual ::variant myevent_windowclose();
       virtual ::variant myevent_roomstart();
       virtual ::variant myevent_roomend();
       virtual ::variant myevent_destroy();

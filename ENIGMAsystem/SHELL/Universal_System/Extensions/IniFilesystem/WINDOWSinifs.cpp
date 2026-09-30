@@ -67,10 +67,10 @@ string ini_read_string(string section, string key, string defaultValue) {
 
 float ini_read_real(string section, string key, float defaultValue) {
   wchar_t res[255];
-  wchar_t def[255];
   tstring tstr_section = widen(section);
   tstring tstr_key = widen(key);
-  GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), def, res, 255, iniFilename.c_str());
+  if (!GetPrivateProfileStringW(tstr_section.c_str(), tstr_key.c_str(), L"", res, 255, iniFilename.c_str()))
+    return defaultValue;
   string result = shorten(res);
   return (float)atof(result.c_str());
 }

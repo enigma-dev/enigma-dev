@@ -479,12 +479,15 @@ int LoadSettings(Decoder &dec, Settings& set) {
   if (ver > 530) gfx->set_use_synchronization(dec.readBool());
   if (ver >= 800) dec.readBool(); // DISABLE_SCREENSAVERS
   gfx->set_allow_fullscreen_change(dec.readBool());
-  // LET_F1_SHOW_GAME_INFO, LET_ESC_END_GAME, LET_F5_SAVE_F6_LOAD
-  dec.readBool(); dec.readBool(); dec.readBool();
+  dec.readBool(); // LET_F1_SHOW_GAME_INFO
+  set.mutable_shortcuts()->set_let_escape_end_game(dec.readBool());
+  dec.readBool(); // LET_F5_SAVE_F6_LOAD
   if (ver == 530) dec.skip(8); //unknown bytes, both 0
   if (ver > 600) {
-    // LET_F9_SCREENSHOT, TREAT_CLOSE_AS_ESCAPE
-    dec.readBool(); dec.readBool();
+    dec.readBool(); // LET_F9_SCREENSHOT
+    win->set_treat_close_as_escape(dec.readBool());
+  } else {
+    win->set_treat_close_as_escape(true);
   }
   dec.read4(); // GAME_PRIORITY
   win->set_freeze_on_lose_focus(dec.readBool());
@@ -510,7 +513,11 @@ int LoadSettings(Decoder &dec, Settings& set) {
   dec.read4(); // LOAD_IMAGE_ALPHA
   dec.readBool(); // SCALE_PROGRESS_BAR
 
-  dec.skip(dec.read4()); // GAME_ICON
+  if (size_t icon_len = dec.read4()) { // GAME_ICON: a whole .ico file
+    fs::path icon = TempFileName("gmk_game_icon");
+    std::ofstream(icon, std::ios::binary).write(dec.read(icon_len).get(), icon_len);
+    gen->set_game_icon(icon.u8string());
+  }
 
   // DISPLAY_ERRORS, WRITE_TO_LOG, ABORT_ON_ERROR
   dec.readBool(); dec.readBool(); dec.readBool();
@@ -581,7 +588,7 @@ int LoadTriggers(Decoder &dec) {
   return 1;
 }
 
-int LoadConstants(Decoder &dec) {
+int LoadConstants(Decoder &dec, buffers::Game *game) {
   int ver = dec.read4();
   if (ver != 800) {
     errStream << "Unsupported GMK Constants version: " << ver << std::endl;
@@ -590,8 +597,9 @@ int LoadConstants(Decoder &dec) {
 
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
-    dec.readStr(); // constant name
-    dec.readStr(); // constant value
+    buffers::Constant *constant = game->add_constants();
+    constant->set_name(dec.readStr());
+    constant->set_value(dec.readStr());
   }
   dec.skip(8); //last changed
 
@@ -987,6 +995,8 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     background->set_hspeed(dec.read4());
     background->set_vspeed(dec.read4());
     background->set_stretch(dec.readBool());
+    background->set_alpha(1);
+    background->set_color(0xFFFFFF);
   }
 
   room->set_enable_views(dec.readBool());
@@ -1039,6 +1049,10 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver, const std::string& /*name*
     tile->set_depth(dec.read4());
     tile->set_id(dec.read4());
     tile->mutable_editor_settings()->set_locked(dec.readBool());
+    tile->set_xscale(1);
+    tile->set_yscale(1);
+    tile->set_alpha(1);
+    tile->set_color(0xFFFFFF);
   }
 
   dec.readBool(); // REMEMBER_WINDOW_SIZE
@@ -1306,9 +1320,11 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   Settings settings;
   if (!LoadSettings(dec, settings)) return nullptr;
 
+  auto proj = std::make_unique<buffers::Project>();
+  buffers::Game *game = proj->mutable_game();
   if (ver >= 800) {
     if (!LoadTriggers(dec)) return nullptr;
-    if (!LoadConstants(dec)) return nullptr;
+    if (!LoadConstants(dec, game)) return nullptr;
   }
 
   for (auto factory : groupFactories) {
@@ -1354,8 +1370,10 @@ std::unique_ptr<buffers::Project> GMKFileFormat::LoadProject(const fs::path& fNa
   for(auto&& a : postponedActions) a.Parse();
   postponedActions.clear();
 
-  auto proj = std::make_unique<buffers::Project>();
-  buffers::Game *game = proj->mutable_game();
+  TreeNode *settings_node = root->mutable_folder()->add_children();
+  settings_node->set_name("Game Settings");
+  *settings_node->mutable_settings() = std::move(settings);
+
   game->set_allocated_root(root.release());
   // ensure all temp data files are written and the paths are set in the protos
   dec.processTempFileFutures();

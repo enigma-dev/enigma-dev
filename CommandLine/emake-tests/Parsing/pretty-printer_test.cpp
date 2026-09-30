@@ -179,7 +179,7 @@ TEST(PrinterTest, test9) {
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
   code =
-      "{ int strange_name = (3); while(strange_name--){ int xx =12;  foo(12, fo(12), sizeof( int)); "
+      "{ int strange_name = enigma::gml_index((3)); while(strange_name-- > 0){ int xx =12;  foo(12, fo(12), sizeof( int)); "
       "while((2)){c--; "
       "c++; c*=2;}} }";
 
@@ -547,7 +547,7 @@ TEST(PrinterTest, test26) {
       "condition = (size_a > size_b) ? 1 : 0;result = (condition) ? size_a : size_b;outer = 1;do {"
       "inner = 1;do {inner++;} while (inner <= outer);outer++;} while (!(outer <= 3));result = (c > 10.0) ? ( "
       "int)c "
-      ": b; { int strange_name = 123; while(strange_name--){int * z = new (int), d = new (int), g; "
+      ": b; { int strange_name = enigma::gml_index(123); while(strange_name-- > 0){int * z = new (int), d = new (int), g; "
       "fn(alignof (int), sizeof 4, 12, x+x+(x++)-x*22); } }";
 
   ASSERT_TRUE(compare(code, printed));
@@ -989,7 +989,7 @@ TEST(PrinterTest, test42) {
   AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string printed = v.GetPrintedCode();
-  code = "while(i==1){i++;} while(!(i==1)) {i++;} { int strange_name =(4) ; while(strange_name--){i++;} }";
+  code = "while(i==1){i++;} while(!(i==1)) {i++;} { int strange_name =enigma::gml_index((4)) ; while(strange_name-- > 0){i++;} }";
 
   ASSERT_TRUE(compare(code, printed));
 }
@@ -1532,8 +1532,8 @@ TEST(PrinterTest, NestedRepeatLowering) {
   AST::CppPrettyPrinter v;
   ASSERT_TRUE(v.VisitCode(*block));
   std::string expected =
-      "{ int strange_name = (2); while(strange_name--) "
-      "{ int strange_name1 = (3); while(strange_name1--) i++; } }";
+      "{ int strange_name = enigma::gml_index((2)); while(strange_name-- > 0) "
+      "{ int strange_name1 = enigma::gml_index((3)); while(strange_name1-- > 0) i++; } }";
   ASSERT_TRUE(compare(expected, v.GetPrintedCode()));
 }
 

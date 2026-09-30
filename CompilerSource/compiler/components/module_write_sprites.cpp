@@ -80,7 +80,7 @@ int lang_CPP::module_write_sprites(const GameData &game, FILE *gameModule)
         return 14;
       }
     }
-    if (!(swidth and sheight and subCount)) {
+    if (subCount and !(swidth and sheight)) {
       user << "Subimages of sprite `" << game.sprites[i].name << "' have zero size." << flushl;
       return 14;
     }

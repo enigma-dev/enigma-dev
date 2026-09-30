@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <deque>
 #include <map>
+#include <optional>
 #include <string>
 
 namespace enigma {
@@ -112,6 +113,8 @@ class Lexer {
   // token type to match (e.g. to TT_TYPE_NAME or TT_FUNCTION).
   // Returns the given token, with modifications, by reference.
   Token &TranslateNameToken(Token &token);
+  Token ReadExpandedToken();
+  bool GmlCharIsName(const Token &next) const;
 
   size_t ComputeLineNumber(size_t lpos);
   CodeSnippet Mark(size_t pos, size_t length);
@@ -140,6 +143,9 @@ class Lexer {
   /// lifetime of the lexer itself. The reason a `std::unordered_set` is used is to deduplicate macros which stringify
   /// to the same string.
   Macro::StringifiedSet stringified_macros;
+
+  std::optional<Token> lookahead_;
+  TokenType prev_ = TT_ERROR, prev2_ = TT_ERROR;
   
   struct Options {
     bool use_escapes;  ///< Use C++-like escape sequences.

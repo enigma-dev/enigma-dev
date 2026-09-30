@@ -173,6 +173,7 @@ struct GameData {
 
   buffers::resources::GameInformation gameInfo;
   buffers::resources::Settings settings;
+  int transfer_error = 0;  // nonzero: resources after the failure are missing
 
   GameData(struct deprecated::JavaStruct::EnigmaStruct *es, const EventData* events);
   GameData(const buffers::Project &proj, const EventData* events);

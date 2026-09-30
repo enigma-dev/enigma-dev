@@ -74,6 +74,11 @@ namespace enigma
       unsigned int size;
       if (!fread_wrapper(&size,4,1,exe)){};
       
+      if (unpacked == 0) {
+        backgrounds.assign(bkgid, Background(0, 0, 0, 0, -1, useAsTileset, tileWidth, tileHeight, hOffset, vOffset, hSep, vSep));
+        continue;
+      }
+
       unsigned char* cpixels=new unsigned char[size+1];
       if (!cpixels)
       {

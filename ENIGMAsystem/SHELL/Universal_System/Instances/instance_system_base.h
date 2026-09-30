@@ -20,6 +20,7 @@
 #define INSTANCE_SYSTEM_BASE_h
 
 #include "Universal_System/Object_Tiers/object.h"
+#include <map>
 #include <string>
 
 namespace enigma
@@ -55,6 +56,8 @@ namespace enigma
     // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
     std::string name; // Event name
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
+    inst_iter *add_inst_by_object(object_basic* inst);  // GM8: keep the list in object order
+    std::map<int, inst_iter*> object_tails;  // add_inst_by_object: each object's last node
     void unlink(inst_iter*);
     event_iter(std::string name);
     event_iter();

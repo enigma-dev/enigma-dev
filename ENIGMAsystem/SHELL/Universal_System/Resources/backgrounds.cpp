@@ -18,6 +18,7 @@
 **/
 
 #include "backgrounds_internal.h"
+#include "Universal_System/roomsystem.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
@@ -64,6 +65,20 @@ Background background_add_helper(std::string filename, bool transparent, bool sm
 
 }
 
+namespace enigma {
+
+void sync_background_slots() {
+  using namespace enigma_user;
+  for (int i = 0; i < 8; i++) {
+    const int back = background_index[i];
+    const bool ok = backgrounds.exists(back);
+    background_width[i] = ok ? backgrounds.get(back).width : 0;
+    background_height[i] = ok ? backgrounds.get(back).height : 0;
+  }
+}
+
+}  // namespace enigma
+
 namespace enigma_user {
   
 int background_add(std::string filename, bool transparent, bool smooth, bool preload, bool mipmap) {
@@ -81,7 +96,9 @@ int background_create_color(unsigned w, unsigned h, int col, bool preload) {
 bool background_replace(int back, std::string filename, bool transparent, bool smooth, bool preload, bool free_texture,
                         bool mipmap) {
   backgrounds.get(back).FreeTexture();
-  return (backgrounds.replace(back, background_add_helper(filename, transparent, smooth, preload, mipmap)) != -1);
+  bool ok = backgrounds.replace(back, background_add_helper(filename, transparent, smooth, preload, mipmap)) != -1;
+  enigma::sync_background_slots();
+  return ok;
 }
 
 void background_save(int back, std::string fname) {

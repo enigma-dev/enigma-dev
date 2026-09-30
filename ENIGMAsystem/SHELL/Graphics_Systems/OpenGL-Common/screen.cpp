@@ -47,8 +47,8 @@ void scene_end() {
 unsigned char* graphics_copy_screen_pixels(unsigned* fullwidth, unsigned* fullheight, bool* flipped) {
   if (flipped) *flipped = true;
 
-  const int fw = enigma_user::window_get_region_width_scaled(),
-            fh = enigma_user::window_get_region_height_scaled();
+  const int fw = enigma_user::window_get_region_width(),
+            fh = enigma_user::window_get_region_height();
 
   *fullwidth = fw;
   *fullheight = fh;

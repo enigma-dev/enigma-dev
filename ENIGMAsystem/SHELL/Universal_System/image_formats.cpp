@@ -108,23 +108,6 @@ void image_remove_color(RawImage& in, Color oldColor) {
         && in.pxdata[index + 2] == oldColor.r
         ) {
           in.pxdata[index + 3] = 0;
-      } else {
-        unsigned int nw = (iw <= 0 ? iw : iw - 1),
-                     nh = (ih <= 0 ? ih : ih - 1);
-        float neighbors = 0, counted = 0;
-        for (; nh <= ih + 1 && nh < in.h; ++nh) {
-          for (; nw <= iw + 1 && nw < in.w; ++nw) {
-            ++counted;
-            int ni = (nh * in.w + nw) * 4;
-            if (
-                 in.pxdata[ni]     != oldColor.b
-              || in.pxdata[ni + 1] != oldColor.g
-              || in.pxdata[ni + 2] != oldColor.r
-              )
-              ++neighbors;
-          }
-        }
-        in.pxdata[index + 3] = static_cast<unsigned char>((neighbors/counted) * 255.0f);
       }
 
       index += 4;

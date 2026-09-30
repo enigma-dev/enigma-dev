@@ -5,6 +5,12 @@ package buffers;
 
 import "treenode.proto";
 
+message Constant {
+  string name = 1;
+  string value = 2;
+}
+
 message Game {
   TreeNode root = 1;
+  repeated Constant constants = 2;
 }

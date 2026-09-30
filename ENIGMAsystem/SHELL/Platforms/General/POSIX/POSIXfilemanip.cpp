@@ -23,10 +23,9 @@
 #include <string>
 
 #include <dirent.h>
+#include <fnmatch.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#define u_root 0
 
 using std::string;
 
@@ -75,30 +74,29 @@ int directory_delete(string dname) { return rmdir(dname.c_str()); }
 string file_find_next() {
   if (fff_dir_open == NULL) return "";
 
-  dirent* rd = readdir(fff_dir_open);
-  if (rd == NULL) return "";
-  string r = rd->d_name;
-
-  // Preliminary filter
-
   const int not_attrib = ~fff_attrib;
+  // Windows matches "*.*" against names without a dot too.
+  const string mask = fff_mask == "*.*" ? "*" : fff_mask;
+  while (dirent* rd = readdir(fff_dir_open)) {
+    string r = rd->d_name;
 
-  if (r == "." or r == ".."                                                      // Don't return ./ and
-      or ((r[0] == '.' or r[r.length() - 1] == '~') and not_attrib & fa_hidden)  // Filter hidden files
-  )
-    return file_find_next();
+    // "." and ".." are directories, returned with fa_directory as in GM8, not hidden files.
+    const bool dot_dir = r == "." or r == "..";
+    if (((r[0] == '.' and !dot_dir) or r[r.length() - 1] == '~') and not_attrib & fa_hidden  // Filter hidden files
+        or fnmatch(mask.c_str(), r.c_str(), FNM_CASEFOLD) != 0
+    )
+      continue;
 
-  struct stat sb;
-  const string fqfn = fff_path + r;
-  stat(fqfn.c_str(), &sb);
+    struct stat sb;
+    const string fqfn = fff_path + r;
+    if (stat(fqfn.c_str(), &sb) != 0) continue;  // gone since readdir
 
-  if ((sb.st_mode & S_IFDIR and not_attrib & fa_directory)          // Filter out/for directories
-      or (sb.st_uid == u_root and not_attrib & fa_sysfile)          // Filter system files
-      or (not_attrib & fa_readonly and access(fqfn.c_str(), W_OK))  // Filter read-only files
-  )
-    return file_find_next();
+    // POSIX has no system attribute; root ownership is not one.
+    if (sb.st_mode & S_IFDIR and not_attrib & fa_directory) continue;
 
-  return r;
+    return r;
+  }
+  return "";
 }
 string file_find_first(string name, int attrib) {
   if (fff_dir_open != NULL) closedir(fff_dir_open);

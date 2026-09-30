@@ -25,6 +25,7 @@
 #include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/math_consts.h"
+#include "Universal_System/compliance.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -40,6 +41,13 @@ using enigma::TexRect;
 inline gs_scalar rotx(gs_scalar qx, gs_scalar qy, gs_scalar rx, gs_scalar ry) { return ((qx) * rx - (qy) * ry); }
 inline gs_scalar roty(gs_scalar qx, gs_scalar qy, gs_scalar rx, gs_scalar ry) { return ((qx) * ry + (qy) * rx); }
 
+// GM8 turns a sprite about the center of pixel (x, y), not its corner.
+inline void gm8_pivot(gs_scalar &x, gs_scalar &y, gs_scalar rx, gs_scalar ry) {
+  if (!enigma::gm8_compliance() || (rx == 1 && ry == 0)) return;
+  x += .5 - rotx(.5, .5, rx, ry);
+  y += .5 - roty(.5, .5, rx, ry);
+}
+
 // implementation:
 namespace enigma
 {
@@ -47,6 +55,7 @@ namespace enigma
 void draw_sprite_pos_raw(const Sprite& spr2d, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar color, gs_scalar alpha)
 {
   alpha = CLAMP_ALPHAF(alpha);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi); 
@@ -69,6 +78,7 @@ void draw_sprite_pos_part_raw(const Sprite& spr2d, int subimg,
   gs_scalar color, gs_scalar alpha
 ) {
   alpha = CLAMP_ALPHAF(alpha);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi); 
@@ -116,6 +126,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
     rx = cos(rot), ry = sin(rot),
     x1 = -xscale * spr2d.xoffset, x2 = x1 + xscale * spr2d.width,
     y1 = -yscale * spr2d.yoffset, y2 = y1 + yscale * spr2d.height;
+  gm8_pivot(x, y, rx, ry);
   enigma::draw_sprite_pos_raw(spr2d,subimg,
     x + rotx(x1, y1, rx, ry), y + roty(x1, y1, rx, ry),
     x + rotx(x2, y1, rx, ry), y + roty(x2, y1, rx, ry),
@@ -142,6 +153,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 {
   const Sprite& spr2d = sprites.get(spr);
   alpha = CLAMP_ALPHAF(alpha);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
   rot *= M_PI / -180.0;
   
@@ -155,6 +167,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
     tby = texRect.y, tbh = (gs_scalar)spr2d.height / (gs_scalar)texRect.h,
     tx1 = tbx + left / tbw, tx2 = tx1 + width / tbw,
     ty1 = tby + top / tbh, ty2 = ty1 + height / tbh;
+  gm8_pivot(x, y, rx, ry);
   // VD: EGM's color blending is for some reason softer and I can't figure out why
   draw_primitive_begin_texture(pr_trianglestrip, spr2d.GetTexture(usi));
   draw_vertex_texture_color(x + rotx(x1, y1, rx, ry), y + roty(x1, y1, rx, ry), tx1,ty1, c1,alpha);
@@ -181,6 +194,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
   
   const TexRect& texRect = spr2d.GetTextureRect(usi);
@@ -202,6 +216,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   const Sprite& spr2d = sprites.get(spr);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi);
@@ -224,6 +239,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
 
   //Order x1,y1,x2,y2 correctly
@@ -348,6 +364,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color,
 {
   alpha=CLAMP_ALPHAF(alpha);
   const Sprite& spr2d = sprites.get(spr);
+  if (!spr2d.SubimageCount()) return;
   int usi = spr2d.ModSubimage(subimg);
 
   x = ((spr2d.xoffset+x)<0?0:spr2d.width)-fmod(spr2d.xoffset+x,spr2d.width);
@@ -387,6 +404,7 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 {
     alpha=CLAMP_ALPHAF(alpha);
     const Sprite& spr2d = sprites.get(spr);
+    if (!spr2d.SubimageCount()) return;
     int usi = spr2d.ModSubimage(subimg);
 
   const TexRect& texRect = spr2d.GetTextureRect(usi);

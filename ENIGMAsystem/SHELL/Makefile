@@ -192,12 +192,12 @@ $(OBJDIR)/%.o: %.m | $(OBJDIRS)
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) -I$(CODEGEN) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
 	@echo [$(WINDRES)] $<
-	@$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
+	@$(WINDRES) -o $@ -I. -I$(WORKDIR) -I$(CODEGEN) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
 	@$(MKDIR) -p $@

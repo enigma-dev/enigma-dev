@@ -108,6 +108,9 @@ namespace enigma
   // Game Settings variables. TODO: Remove; pass to a window_initialize() method.
   extern bool isSizeable, showBorder, showIcons, isFullScreen;
   extern bool treatCloseAsEscape; // TODO: Not implemented outside of Windows...
+  // Game icon as _NET_WM_ICON data (width, height, ARGB pixels per image); size 0 if none.
+  extern const unsigned long game_icon[];
+  extern const unsigned game_icon_size;
   extern int windowColor;
 }
 

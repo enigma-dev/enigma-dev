@@ -29,14 +29,28 @@ unsigned char* graphics_copy_screen_pixels(int x, int y, int width, int height, 
   if (flipped) *flipped = true;
 
   const int bpp = 4; // bytes per pixel
-  const int topY = enigma_user::window_get_region_height_scaled()-height-y;
+  using namespace enigma_user;
+  const double sx = double(window_get_region_width_scaled()) / window_get_region_width(),
+               sy = double(window_get_region_height_scaled()) / window_get_region_height();
+  const int ox = (window_get_width() - window_get_region_width_scaled()) / 2,
+            oy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  const int rw = width*sx < 1 ? 1 : int(width*sx + .5), rh = height*sy < 1 ? 1 : int(height*sy + .5);
+  const int rx = ox + int(x*sx + .5), ry = window_get_height() - (oy + int(y*sy + .5)) - rh;
+  unsigned char* raw = new unsigned char[rw*rh*bpp];
   unsigned char* pxdata = new unsigned char[width*height*bpp];
 
   GLint prevFbo;
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevFbo);
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  glReadPixels(x,topY,width,height,GL_BGRA,GL_UNSIGNED_BYTE,pxdata);
+  glReadPixels(rx,ry,rw,rh,GL_BGRA,GL_UNSIGNED_BYTE,raw);
+  for (int j = 0; j < height; j++)
+    for (int i = 0; i < width; i++) {
+      const int si = int(i*sx) < rw ? int(i*sx) : rw - 1, sj = int(j*sy) < rh ? int(j*sy) : rh - 1;
+      for (int c = 0; c < bpp; c++) pxdata[(j*width + i)*bpp + c] = raw[(sj*rw + si)*bpp + c];
+    }
+  delete[] raw;
+  for (int i = 3; i < width*height*bpp; i += bpp) pxdata[i] = 255;
   glBindFramebuffer(GL_READ_FRAMEBUFFER, prevFbo);
   return pxdata;
 }

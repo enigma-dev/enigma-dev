@@ -89,7 +89,8 @@ OptionsParser::OptionsParser() : _desc("Options")
   std::string def_platform, def_workdir, def_compiler;
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     def_platform = "Win32";
-    def_workdir = std::string(getenv("LOCALAPPDATA")) + "/ENIGMA/";
+    const char* local_app_data = getenv("LOCALAPPDATA");
+    def_workdir = std::string(local_app_data ? local_app_data : ".") + "/ENIGMA/";
     def_compiler = "gcc";
   #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
     def_platform = "Cocoa";
@@ -279,6 +280,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   int inherit_negatives = compilerSettings.has_inherit_negatives() ? compilerSettings.inherit_negatives() : 0;
   bool inherit_objects = compilerSettings.has_inherit_objects() ? compilerSettings.inherit_objects() : 0;
   bool automatic_semicolons = compilerSettings.has_automatic_semicolons() ? compilerSettings.automatic_semicolons() : 0;
+  int compliance_mode = compilerSettings.compliance_mode();
 
   std::string yaml;
   yaml += "%e-yaml\n";
@@ -297,6 +299,7 @@ std::string OptionsParser::APIyaml(const buffers::resources::Settings* currentCo
   yaml += "inherit-increment-from: " + std::to_string(inherit_increment) + "\n";
   yaml += "inherit-objects: " + std::string(inherit_objects ? "true" : "false") + "\n";
   yaml += "automatic-semicolons: " + std::string(automatic_semicolons ? "true" : "false") + "\n";
+  yaml += "compliance-mode: " + std::to_string(compliance_mode) + "\n";
   yaml += " \n";
   yaml += "target-audio: " + audio + "\n";
   yaml += "target-windowing: " + platform + "\n";
