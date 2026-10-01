@@ -40,6 +40,7 @@
 #include "Platforms/General/PFmain.h"
 
 #include "lives.h"
+#include "compliance.h"
 #include <string.h>
 
 namespace enigma_user
@@ -70,6 +71,8 @@ room_view_array_type
     view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
     view_yport, view_yview, view_angle;
 
+extern bool automatic_redraw;
+
 }
 
 namespace enigma
@@ -77,6 +80,7 @@ namespace enigma
 
   roomstruct** roomdata;
   roomstruct** roomorder;
+  extern int room_switching_id;
 
   void follow_object(int vob, size_t vc)
   {
@@ -292,6 +296,12 @@ namespace enigma
     // Fire the room start event for all persistent objects still kept alive and all the new instances
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomstart();
+    }
+
+    // GM8 draws the new room once before its first step.
+    if (gm8_compliance() && automatic_redraw && room_switching_id == -1) {
+      screen_redraw();
+      screen_refresh();
     }
   }
 

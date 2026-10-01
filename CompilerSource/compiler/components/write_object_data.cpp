@@ -510,8 +510,16 @@ static void implement_event_groups(std::ostream &wto, const parsed_object *objec
         << event_stack.event_key.BaseFunctionName();
     if (event_stack.event_key.HasDispatcher()) wto << "_dispatcher";
     wto << "() {\n";
-    for (ParsedEvent *event : event_stack) {
-      const auto &ev = event->ev_id;
+    // This override replaces the parent's, so it also runs inherited events.
+    std::map<Event, std::string> events;
+    for (ParsedEvent *event : event_stack) events.emplace(event->ev_id, "");
+    for (const parsed_object *p = object->parent; p; p = p->parent)
+      for (const ParsedEventGroup &group : p->stacked_events)
+        if (!(group.event_key < event_stack.event_key) &&
+            !(event_stack.event_key < group.event_key))
+          for (ParsedEvent *event : group)
+            events.emplace(event->ev_id, "OBJ_" + p->name + "::");
+    for (const auto &[ev, owner] : events) {
       // Use the full function name to call individual events in this stack.
       const string evname = ev.TrueFunctionName();
       int indent = 2;
@@ -520,12 +528,12 @@ static void implement_event_groups(std::ostream &wto, const parsed_object *objec
         if (ev.HasSubCheckExpression()) {
           wto << "  if (" << ev.SubCheckExpression() << ") {\n";
         } else {
-          wto << "  if (myevent_" + evname + "_subcheck()) {\n";
+          wto << "  if (" + owner + "myevent_" + evname + "_subcheck()) {\n";
         }
       }
       const std::string logic = ev.HasDispatcher()
-                                    ? ev.DispatcherCode("myevent_" + evname)
-                                    : "myevent_" + evname + "();";
+                                    ? ev.DispatcherCode(owner + "myevent_" + evname)
+                                    : owner + "myevent_" + evname + "();";
       PrintIndentedCode(wto, logic, indent);
       if (ev.HasSubCheck())
         wto << "  }\n";
@@ -691,7 +699,7 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
         wto << "      " << event.IteratorInitializeCode() << ";\n";
     } else {
       wto << "      ENOBJ_ITER_myevent_" << evname
-          << " = enigma::event_" << evname << "->add_inst(this);\n";
+          << " = enigma::event_" << evname << "->add_inst_by_object(this);\n";
     }
   }
   wto << "    }\n";
@@ -946,8 +954,12 @@ static void write_object_event_funcs(ofstream& wto, const parsed_object *const o
     // TODO(JoshDreamland): This is a pretty major hack; it's an extra line
     // for no reason 99% of the time, and it doesn't allow us to give any
     // feedback as to why a call to event_inherited() may not be valid.
-    if (object->InheritsSpecifically(event.ev_id) &&
-        event.ast.lexer->GetCode().find("event_inherited") != std::string::npos) {
+    bool ancestor_has_event = false;
+    for (const parsed_object *p = object; p->parent && !ancestor_has_event; p = p->parent)
+      ancestor_has_event = p->InheritsSpecifically(event.ev_id);
+    const std::string &code = event.ast.lexer->GetCode();
+    if (ancestor_has_event && (code.find("event_inherited") != std::string::npos ||
+                               code.find("action_inherited") != std::string::npos)) {
       wto << "#define event_inherited OBJ_" + object->parent->name + "::myevent_" + evname + "\n";
       defined_inherited = true;
     }

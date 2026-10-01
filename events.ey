@@ -94,7 +94,8 @@ Events:
       {
         xprevious = x;
         yprevious = y;
-        if (sprite_index != -1) {
+        // GM compliance advances the animation after drawing (AnimationUpdate).
+        if (sprite_index != -1 && !enigma::gm8_compliance()) {
           int imgnum = image_number;  // Special sauce happens here
           image_index = fmod(image_index + image_speed + imgnum, imgnum);
         }
@@ -413,11 +414,23 @@ Events:
     Description: "Window size has changed."
     Type: TriggerAll
 
+  - ID: AnimationUpdate
+    Name: "Animation update"
+    Description: "Internal event: GM8 advances image_index after drawing; passing the last subimage ends the animation."
+    Constant: |
+      if (enigma::gm8_compliance()) {
+        const int imgnum = sprite_index == -1 ? 0 : sprite_get_number(sprite_index);
+        image_index += image_speed;
+        animation_wrapped = image_index >= imgnum;  // every step with no sprite, as in GM8
+        if (animation_wrapped) image_index -= imgnum;
+      }
+
   - ID: AnimationEnd
     Name: "Animation End"
     Description: "Instance sprite has reached the last subimage."
     SubCheck: |
-      !(image_index + image_speed < sprite_get_number(sprite_index))
+      enigma::gm8_compliance() ? animation_wrapped
+                               : !(image_index + image_speed < sprite_get_number(sprite_index))
 
   - ID: RoomEnd
     Name: "Room End"
