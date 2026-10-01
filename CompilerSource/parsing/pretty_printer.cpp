@@ -17,6 +17,7 @@
 
 #include <JDI/src/System/builtins.h>
 #include "ast.h"
+#include "precedence.h"
 
 #include <iomanip>
 
@@ -90,7 +91,41 @@ struct DeclaredNameCollector : AST::Visitor {
 
 void AST::CppPrettyPrinter::CollectDeclaredNames(AST::Node &root) {
   DeclaredNameCollector collector(&declared_names_);
-  root.accept(collector);
+  root.RecurusiveVisit(collector);
+}
+
+namespace {
+bool IsHoistableVar(AST::DeclarationStatement &node) {
+  if (node.storage_class != AST::DeclarationStatement::StorageClass::TEMPORARY) return false;
+  if (!node.clause || !node.clause->specifiers) return false;
+  jdi::definition *def = node.clause->specifiers->to_jdi_fulltype().def;
+  if (!def || def->name != "var") return false;
+  for (auto &d : node.clause->declarators) {
+    if (d->name.content.empty()) return false;
+    if (d->declarator_expr && d->declarator_expr->type != AST::NodeType::IDENTIFIER) return false;
+    if (d->init && d->init->kind != AST::Initializer::Kind::ASSIGN) return false;
+  }
+  return true;
+}
+
+struct VarCollector : AST::Visitor {
+  std::set<std::string, std::less<>> *out;
+  explicit VarCollector(std::set<std::string, std::less<>> *out): out(out) {}
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) final {
+    if (IsHoistableVar(node))
+      for (auto &d : node.clause->declarators) out->insert(std::string(d->name.content));
+    return true;
+  }
+};
+}  // namespace
+
+void AST::CppPrettyPrinter::HoistVarDeclarations(AST::Node &root) {
+  VarCollector collector(&hoisted_vars_);
+  root.RecurusiveVisit(collector);
+  if (hoisted_vars_.empty()) return;
+  std::string decl = "    var";
+  for (const std::string &name : hoisted_vars_) decl += (decl.size() > 7 ? ", " : " ") + name;
+  print(decl + ";\n");
 }
 
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
@@ -287,7 +322,7 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 }
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
-  print(node.operation.token);
+  print(node.operation.type == TT_NOT ? "!" : node.operation.token);
   VISIT_AND_CHECK(node.operand);
   return true;
 }
@@ -334,14 +369,73 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
     print(")");
   }
 
+  // Bare names in the body belong to the iterated instance, so resolve them
+  // through self as script code does, not as members of this object.
+  const bool saved_is_script = is_script;
+  if (language_fe) is_script = true;
   VISIT_AND_CHECK(node.body);
+  is_script = saved_is_script;
   PrintSemiColon(node.body);
 
   return true;
 }
 
+// Whether C++ would regroup this operand when printed flat, as when the tree
+// was parsed with GML precedence (kGmlBinaryPrec).
+static bool NeedsParens(const AST::BinaryExpression &parent, const AST::Node &operand, bool right) {
+  if (operand.type != AST::NodeType::BINARY_EXPRESSION) return false;
+  const auto &child = static_cast<const AST::BinaryExpression &>(operand);
+  // Value-position = prints flat on purpose (see lower_gml_equals below).
+  if (parent.lower_gml_equals || child.lower_gml_equals) return false;
+  if (parent.operation.type == TT_BEGINBRACKET) return false;
+  auto p = Precedence::kBinaryPrec.find(parent.operation.type);
+  auto c = Precedence::kBinaryPrec.find(child.operation.type);
+  if (p == Precedence::kBinaryPrec.end() || c == Precedence::kBinaryPrec.end()) return false;
+  if (c->second.precedence != p->second.precedence) return c->second.precedence > p->second.precedence;
+  return right == (p->second.associativity == Associativity::LTR);
+}
+
 bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
-  VISIT_AND_CHECK(node.left);
+  const bool ordered = node.evaluate_in_order;
+  if (ordered) {
+    print("[&]() -> decltype(auto) { auto&& enigma_lhs = ");
+    VISIT_AND_CHECK(node.left);
+    print("; return ");
+  }
+  auto is_string_literal = [](const PNode &n) {
+    return n->type == AST::NodeType::LITERAL &&
+           static_cast<const AST::Literal &>(*n).value.type == TT_STRINGLIT;
+  };
+  // "a" + "b" would add two C++ pointers; make the left one a string.
+  const bool string_sum = node.operation.type == TT_PLUS &&
+                          is_string_literal(node.left) && is_string_literal(node.right);
+  auto visit_operand = [&](PNode &operand, bool right) {
+    if (string_sum && !right) {
+      print("std::string{");
+      if (!Visit(operand)) return false;
+      print("}");
+      return true;
+    }
+    if (ordered && !right) {
+      print("std::forward<decltype(enigma_lhs)>(enigma_lhs)");
+      return true;
+    }
+    const bool paren = NeedsParens(node, *operand, right);
+    if (paren) print("(");
+    if (!Visit(operand)) return false;
+    if (paren) print(")");
+    return true;
+  };
+  if (node.operation.type == TT_XOR) {  // C++ has no logical xor
+    print("(bool(");
+    if (!visit_operand(node.left, false)) return false;
+    print(") != bool(");
+    VISIT_AND_CHECK(node.right);
+    print("))");
+    if (ordered) print("; }()");
+    return true;
+  }
+  if (!visit_operand(node.left, false)) return false;
 
   std::string operation = node.operation.token;
   bool is_multi_dim = false;
@@ -375,7 +469,7 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // (`var x[count]`): only the spine declares.
   bool saved_decl = in_declarator_;
   if (node.operation.type == TT_BEGINBRACKET) in_declarator_ = false;
-  VISIT_AND_CHECK(node.right);
+  if (!visit_operand(node.right, true)) return false;
   in_declarator_ = saved_decl;
 
   if (is_multi_dim) {
@@ -383,11 +477,26 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   } else if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
+  if (ordered) print("; }()");
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
-  VISIT_AND_CHECK(node.function);
+  const bool ordered = node.evaluate_in_order;
+  if (ordered) {
+    print("[&]() -> decltype(auto) { ");
+    for (std::size_t i = 0; i < node.arguments.size(); i++) {
+      print("auto&& enigma_arg" + std::to_string(i) + " = ");
+      VISIT_AND_CHECK(node.arguments[i]);
+      print("; ");
+    }
+    print("return ");
+  }
+  // A called name is a function or script, never a variable to lower.
+  if (node.function->type == AST::NodeType::IDENTIFIER)
+    print(std::string(node.function->As<AST::IdentifierAccess>()->name.content));
+  else
+    VISIT_AND_CHECK(node.function);
   print("(");
 
   bool is_variadic = false;
@@ -407,7 +516,12 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
       print("(enigma::varargs(),");
       varargs_opened = true;
     }
-    VISIT_AND_CHECK(node.arguments[i]);
+    if (ordered) {
+      const std::string arg = "enigma_arg" + std::to_string(i);
+      print("std::forward<decltype(" + arg + ")>(" + arg + ")");
+    } else {
+      VISIT_AND_CHECK(node.arguments[i]);
+    }
     if (i < node.arguments.size() - 1) {
       print(", ");
     }
@@ -418,6 +532,7 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
   if (varargs_opened) print(")");
 
   print(")");
+  if (ordered) print("; }()");
   return true;
 }
 
@@ -657,6 +772,17 @@ bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
+  if (!hoisted_vars_.empty() && IsHoistableVar(node)) {
+    bool printed = false;
+    for (auto &entry : node.clause->declarators) {
+      if (!entry->init) continue;
+      if (printed) print(", ");
+      print(std::string(entry->name.content));
+      if (!VisitInitializer(*entry->init)) return false;
+      printed = true;
+    }
+    return true;
+  }
   bool is_global = node.storage_class == DeclarationStatement::StorageClass::GLOBAL;
   bool is_local = node.storage_class == DeclarationStatement::StorageClass::LOCAL;
   if (is_global || is_local) {
@@ -814,6 +940,33 @@ bool AST::CppPrettyPrinter::VisitDefaultStatement(AST::DefaultStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
+  if (node.lower_gml_switch) {
+    // Pick the first matching case by ==, then switch on its index so
+    // fallthrough and break keep their meaning.
+    print("{ const variant enigma_switch_value = (");
+    VISIT_AND_CHECK(node.expression);
+    print("); switch (");
+    int index = 0;
+    for (auto &stmt : node.body->statements) {
+      if (stmt->type != AST::NodeType::CASE) continue;
+      print("enigma_switch_value == (");
+      VISIT_AND_CHECK(stmt->As<AST::CaseStatement>()->value);
+      print(") ? " + std::to_string(++index) + " : ");
+    }
+    print("0) { ");
+    index = 0;
+    for (auto &stmt : node.body->statements) {
+      if (stmt->type == AST::NodeType::CASE) {
+        print("case " + std::to_string(++index) + ": ");
+        if (!VisitCodeBlock(*stmt->As<AST::CaseStatement>()->statements)) return false;
+        print(" ");
+      } else {
+        VISIT_AND_CHECK(stmt);
+      }
+    }
+    print("} }");
+    return true;
+  }
   print("switch(int(");
   VISIT_AND_CHECK(node.expression);
   print(")) ");

@@ -159,8 +159,8 @@ class DeclGatheringVisitor : public AST::Visitor {
   std::string CheckIfIdentifier(AST::PNode &node) {
     if (node->type == AST::NodeType::IDENTIFIER) {
       std::string name = node->As<AST::IdentifierAccess>()->name.content;
-      if (parsed_scope->declarations.find(name) != parsed_scope->declarations.end()) {
-        node->As<AST::IdentifierAccess>()->def = parsed_scope->declarations[name];
+      if (auto d = declared_.find(name); d != declared_.end()) {
+        node->As<AST::IdentifierAccess>()->def = d->second;
         return "";
       } else if (script_names.find(name) != script_names.end()) {
         if (node->type == AST::NodeType::FUNCTION_CALL) {
@@ -175,7 +175,10 @@ class DeclGatheringVisitor : public AST::Visitor {
 
   void AddLocal(AST::PNode &node) {
     if (!node) return;
-    std::string name = CheckIfIdentifier(node);
+    AddLocalName(CheckIfIdentifier(node));
+  }
+
+  void AddLocalName(const std::string &name) {
     if (name == "") return;
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
@@ -229,6 +232,7 @@ class DeclGatheringVisitor : public AST::Visitor {
       if (is_local) parsed_scope->locals[name] = dtrip;
       cs->add_dot_accessed_local(name);
       parsed_scope->declarations[name] = spec_def;
+      declared_[name] = spec_def;
     }
 
     for (const auto &entry : node.clause->declarators) {
@@ -271,10 +275,21 @@ class DeclGatheringVisitor : public AST::Visitor {
     return false;
   }
 
+  // A bare name in any other position (if/while conditions, unary operands,
+  // subscripts, ...) is also a variable use.
+  bool VisitIdentifierAccess(AST::IdentifierAccess &node) {
+    std::string name(node.name.content);
+    if (auto d = declared_.find(name); d != declared_.end())
+      node.def = d->second;
+    else if (!script_names.count(name))
+      AddLocalName(name);
+    return true;
+  }
+
   bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
     AddFunction(node);
-    for (auto &arg : node.arguments) AddLocal(arg);
-    node.RecursiveSubVisit(*this);
+    if (node.function->type != AST::NodeType::IDENTIFIER) node.function->RecurusiveVisit(*this);
+    for (auto &arg : node.arguments) arg->RecurusiveVisit(*this);
     return false;
   }
 
@@ -311,7 +326,7 @@ class DeclGatheringVisitor : public AST::Visitor {
       node.target->accept(*this);
     }
     for (auto &val : node.values) {
-      val->accept(*this);
+      val->RecurusiveVisit(*this);
     }
     return false;
   }
@@ -323,6 +338,9 @@ class DeclGatheringVisitor : public AST::Visitor {
 
  private:
   DeclGatheringVisitor *parent_ = nullptr;
+  /// Names declared in the code being visited (one event or script); a var in
+  /// one event doesn't make the name local in the object's other events.
+  std::unordered_map<std::string, jdi::definition*> declared_;
   /// Collection of names declared in this scope. Used to suppress
   /// emitting local variable usage information for temporaries.
   std::unordered_set<std::string> decls_;

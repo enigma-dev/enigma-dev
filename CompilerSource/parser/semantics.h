@@ -47,6 +47,7 @@ class SemanticAnnotator : public AST::Visitor {
   // places GML's = assigns (see mark_statement).
   bool VisitCodeBlock(AST::CodeBlock &node) final;
   bool VisitIfStatement(AST::IfStatement &node) final;
+  bool VisitSwitchStatement(AST::SwitchStatement &node) final;
   bool VisitForLoop(AST::ForLoop &node) final;
   bool VisitWhileLoop(AST::WhileLoop &node) final;
   bool VisitDoLoop(AST::DoLoop &node) final;
@@ -67,6 +68,7 @@ class SemanticAnnotator : public AST::Visitor {
   // that = assigns. Parents visit before children, so the registration is
   // in place before VisitBinaryExpression reaches the node.
   void mark_statement(const AST::PNode &stmt);
+  bool looser_than_equality(TokenType op) const;
 
   ErrorHandler *herr_;
   const LanguageFrontend *frontend_;

@@ -59,11 +59,6 @@ void PrintIndentedCode(std::ostream &wto, std::string_view code, int indent) {
 }
 
 static inline void declare_scripts(std::ostream &wto, const GameData &game, const CompileState &state) {
-  wto << "// Script identifiers\n";
-  for (size_t i = 0; i < game.scripts.size(); i++)
-    wto << "#define " << game.scripts[i].name << "(...) _SCR_" << game.scripts[i].name << "(__VA_ARGS__)\n";
-  wto << "\n\n";
-
   for (size_t i = 0; i < game.scripts.size(); i++) {
     ParsedScript* scr = state.parsed_scripts[i];
     const char* comma = "";
@@ -813,7 +808,7 @@ static inline void write_object_declarations(
   wto << "#include \"Universal_System/Object_Tiers/object.h\"\n\n";
   wto << "#include <map>\n";
   wto << "#include <string_view>\n";
-  wto << "#include <unordered_map>";
+  wto << "#include <unordered_map>\n";
 
   declare_scripts(wto, game, state);
 
@@ -832,7 +827,13 @@ static inline void write_object_declarations(
 
   wto << "namespace enigma {\n";
   write_object_data_structs(wto, state.parsed_objects);
-  wto << "}\n";
+  wto << "}\n\n";
+
+  // After the class bodies, so a script named like an engine member
+  // (serialize) doesn't rewrite the generated override.
+  wto << "// Script identifiers\n";
+  for (size_t i = 0; i < game.scripts.size(); i++)
+    wto << "#define " << game.scripts[i].name << "(...) _SCR_" << game.scripts[i].name << "(__VA_ARGS__)\n";
   wto.close();
 }
 
