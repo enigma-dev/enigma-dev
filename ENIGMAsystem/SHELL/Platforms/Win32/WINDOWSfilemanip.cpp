@@ -157,46 +157,35 @@ namespace enigma_user
 
 string file_find_next();
 
+// GM8: plain and read-only files always match; hidden, system and directory
+// entries ("." and ".." included) only when their bits are requested.
+static bool ff_wanted(const WIN32_FIND_DATA &f) {
+  const DWORD special = FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_DIRECTORY;
+  return !(f.dwFileAttributes & special & ~(DWORD) ff_attribs);
+}
+
 string file_find_first(string name,int attributes)
 {
   if (current_find != INVALID_HANDLE_VALUE)
   { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
 
   ff_attribs=attributes;
-
-  HANDLE d=FindFirstFile(name.c_str(),&found);
-  if (d==INVALID_HANDLE_VALUE) return "";
-  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-  {
-    if (FindNextFile(d,&found)==0)
-    return "";
-  }
-
-  current_find=d;
-  string res = found.cFileName;
-  if (res == "." || res == "..")
-    return file_find_next();
-  return res;
+  current_find = FindFirstFile(name.c_str(), &found);
+  if (current_find == INVALID_HANDLE_VALUE) return "";
+  return ff_wanted(found) ? string(found.cFileName) : file_find_next();
 }
 
 string file_find_next()
 {
   if (current_find==INVALID_HANDLE_VALUE) return "";
-  if (FindNextFile(current_find,&found)==0) return "";
-
-  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes)) {
-    if (FindNextFile(current_find,&found)==0)
-    return "";
-  }
-
-  string res = found.cFileName;
-  if (res == "." || res == "..")
-    return file_find_next();
-  return res;
+  while (FindNextFile(current_find, &found))
+    if (ff_wanted(found)) return found.cFileName;
+  return "";
 }
 
 int file_find_close() {
   FindClose(current_find);
+  current_find = INVALID_HANDLE_VALUE;
   return 0;
 }
 
