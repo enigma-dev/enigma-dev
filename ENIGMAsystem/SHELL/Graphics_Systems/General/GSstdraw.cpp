@@ -26,6 +26,7 @@
 #include <list>
 #include <math.h>
 #include <stdio.h>
+#include <utility>
 
 namespace {
 
@@ -185,17 +186,35 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
     draw_primitive_end();
 }
 
+// Outline as four 1px edge quads that don't overlap. Triangle coverage is
+// the same on every rasterizer; line endpoints are not (llvmpipe dropped the
+// top-right corner of a line strip through pixel centers).
+static void outline_rect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
+                         int c1, int c2, int c3, int c4, gs_scalar alpha) {
+  if (x2 < x1) { std::swap(x1, x2); std::swap(c1, c2); std::swap(c4, c3); }
+  if (y2 < y1) { std::swap(y1, y2); std::swap(c1, c4); std::swap(c2, c3); }
+  auto quad = [alpha](gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b, int tl, int tr, int br, int bl) {
+    draw_vertex_color(l, t, tl, alpha); draw_vertex_color(r, t, tr, alpha); draw_vertex_color(l, b, bl, alpha);
+    draw_vertex_color(r, t, tr, alpha); draw_vertex_color(r, b, br, alpha); draw_vertex_color(l, b, bl, alpha);
+  };
+  draw_primitive_begin(pr_trianglelist);
+  quad(x1, y1, x2 + 1, y1 + 1, c1, c2, c2, c1);
+  if (y2 > y1) quad(x1, y2, x2 + 1, y2 + 1, c4, c3, c3, c4);
+  if (y2 - y1 > 1) {
+    quad(x1, y1 + 1, x1 + 1, y2, c1, c1, c4, c4);
+    if (x2 > x1) quad(x2, y1 + 1, x2 + 1, y2, c2, c2, c3, c3);
+  }
+  draw_primitive_end();
+}
+
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
 {
   if (outline) {
-    draw_primitive_begin(pr_linestrip);
-    draw_vertex(x1, y1);
-    draw_vertex(x2, y1);
-    draw_vertex(x2, y2);
-    draw_vertex(x1, y2);
-    draw_vertex(x1, y1);
-    draw_primitive_end();
+    const int c = draw_get_color();
+    outline_rect(x1, y1, x2, y2, c, c, c, c, draw_get_alpha());
   } else {
+    if (x2 >= x1) x2 += 1; else x1 += 1;
+    if (y2 >= y1) y2 += 1; else y1 += 1;
     draw_primitive_begin(pr_trianglestrip);
     draw_vertex(x1, y1);
     draw_vertex(x2, y1);
@@ -249,14 +268,10 @@ void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 {
   gs_scalar alpha = draw_get_alpha();
   if (outline) {
-    draw_primitive_begin(pr_linestrip);
-    draw_vertex_color(x1, y1, c1, alpha);
-    draw_vertex_color(x2, y1, c2, alpha);
-    draw_vertex_color(x2, y2, c3, alpha);
-    draw_vertex_color(x1, y2, c4, alpha);
-    draw_vertex_color(x1, y1, c1, alpha);
-    draw_primitive_end();
+    outline_rect(x1, y1, x2, y2, c1, c2, c3, c4, alpha);
   } else {
+    if (x2 >= x1) x2 += 1; else x1 += 1;
+    if (y2 >= y1) y2 += 1; else y1 += 1;
     draw_primitive_begin(pr_trianglestrip);
     draw_vertex_color(x2, y1, c2, alpha);
     draw_vertex_color(x2, y2, c3, alpha);
