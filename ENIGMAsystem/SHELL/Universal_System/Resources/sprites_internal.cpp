@@ -5,6 +5,8 @@
 #include "Universal_System/Object_Tiers/graphics_object.h"
 #include "sprites_internal.h"
 
+#include <cmath>
+
 namespace enigma {
 
 AssetArray<Sprite> sprites;
@@ -36,7 +38,17 @@ void Sprite::SetTexture(int subimg, int textureID, TexRect texRect) {
 const int Sprite::ModSubimage(int subimg) const {
   if (SubimageCount() == 0) return 0;
   if (subimg >= 0) return subimg % SubimageCount();
-  return int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % SubimageCount();
+  return SubimageOf(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index);
+}
+
+// The subimage an image_index shows. image_index can leave the range (large or
+// negative image_speed); floor it and wrap, so -1 is the last subimage.
+int Sprite::SubimageOf(double image_index) const {
+  const double n = SubimageCount();
+  if (n == 0) return 0;
+  const double m = std::fmod(std::floor(image_index), n);
+  if (m != m) return 0;  // NaN or infinite index
+  return int(m < 0 ? m + n : m);
 }
 
 Sprite::Sprite(const Sprite& s) {

@@ -60,6 +60,7 @@ public:
   void FreeTextures() { for (std::pair<int, Subimage&> s : _subimages) s.second.FreeTexture(); }
   const int& GetTexture(int subimg) const { return _subimages.get(subimg).textureID; }
   const int ModSubimage(int subimg) const;
+  int SubimageOf(double image_index) const;  // floored, wrapped into range
   void SetTexture(int subimg, int textureID, TexRect texRect);
   const TexRect& GetTextureRect(int subimg) const { return _subimages.get(subimg).textureBounds; } 
   

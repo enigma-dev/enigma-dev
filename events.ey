@@ -96,7 +96,8 @@ Events:
         yprevious = y;
         if (sprite_index != -1) {
           int imgnum = image_number;  // Special sauce happens here
-          image_index = fmod(image_index + image_speed + imgnum, imgnum);
+          if (imgnum) image_index = fmod(image_index + image_speed + imgnum, imgnum);
+          else image_index += image_speed;
         }
       }
 

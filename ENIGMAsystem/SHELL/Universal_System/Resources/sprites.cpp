@@ -18,13 +18,17 @@
 **/
 
 #include "sprites_internal.h"
+#include "Universal_System/compliance.h"
 #include "Universal_System/image_formats.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
+#include <algorithm>
+#include <climits>
 #include <string>
+#include <vector>
 
 using enigma::Sprite;
 using enigma::sprites;
@@ -33,6 +37,31 @@ using enigma::Color;
 using enigma::RawImage;
 
 namespace {
+
+// GM8 smooth edges: each transparent pixel, in row order, takes 32 off the alpha of
+// the pixels around it that have at least 32 left (as OpenGMK's process_image).
+void smooth_edges(RawImage& img) {
+  const int w = img.w, h = img.h;
+  for (int y = 0; y < h; y++)
+    for (int x = 0; x < w; x++) {
+      if (img.pxdata[4 * (y * w + x) + 3]) continue;
+      for (int ny = std::max(y - 1, 0); ny < std::min(y + 2, h); ny++)
+        for (int nx = std::max(x - 1, 0); nx < std::min(x + 2, w); nx++) {
+          unsigned char &a = img.pxdata[4 * (ny * w + nx) + 3];
+          if (a >= 32) a -= 32;
+        }
+    }
+}
+
+// Grows [l, r] x [t, b] (inclusive) to the image's visible pixels.
+void grow_bbox(const RawImage& img, int& l, int& t, int& r, int& b) {
+  for (unsigned y = 0; y < img.h; y++)
+    for (unsigned x = 0; x < img.w; x++)
+      if (img.pxdata[4 * (y * img.w + x) + 3]) {
+        l = std::min(l, int(x)), r = std::max(r, int(x));
+        t = std::min(t, int(y)), b = std::max(b, int(y));
+      }
+}
 
 Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap) {
   std::vector<RawImage> imgs = enigma::image_load(filename);
@@ -44,21 +73,27 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
   
   unsigned cellwidth = ((imgs.size() > 1) ? imgs[0].w : imgs[0].w / imgnumb);
   Sprite ns(cellwidth, imgs[0].h, x_offset, y_offset);
-  ns.SetBBox(0, 0, cellwidth, imgs[0].h);
+  int l = INT_MAX, t = INT_MAX, r = -1, b = -1;
+  auto add = [&](RawImage& i) {
+    if (smooth) smooth_edges(i);
+    grow_bbox(i, l, t, r, b);
+    ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+  };
   
   if (imgs.size() == 1 && imgnumb > 1) {
     if (transparent) enigma::image_remove_color(imgs[0]);
   
     std::vector<RawImage> rawSubimages = enigma::image_split(imgs[0], imgnumb);
-    for (const RawImage& i : rawSubimages) {
-      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
-    }
+    for (RawImage& i : rawSubimages) add(i);
   } else {
     for (RawImage& i : imgs) {
       if (transparent) enigma::image_remove_color(i);
-      ns.AddSubimage(i, ((precise) ? enigma::ct_precise : enigma::ct_bbox), i.pxdata, mipmap);
+      add(i);
     }
   }
+  // right and bottom are inclusive, as for compiled sprites; nothing visible keeps the full cell.
+  if (r < 0) l = 0, t = 0, r = cellwidth - 1, b = imgs[0].h - 1;
+  ns.SetBBox(l, t, r - l, b - t);
   
   return ns;
 }
@@ -67,78 +102,101 @@ Sprite sprite_add_helper(std::string filename, int imgnumb, bool precise, bool t
 
 namespace enigma_user {
 
-int sprite_get_width(int sprid) { 
-  return sprites.get(sprid).width;
+int sprite_get_width(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
+  const Sprite &spr = sprites.get(sprid);
+  // GM8 reports a sprite with no subimages as 1x1.
+  if (spr.SubimageCount() == 0 && enigma::gm8_compliance()) return 1;
+  return spr.width;
 }
 
 int sprite_get_height(int sprid) {
-  return sprites.get(sprid).height;
+  if (!sprites.exists(sprid)) return -1;
+  const Sprite &spr = sprites.get(sprid);
+  // GM8 reports a sprite with no subimages as 1x1.
+  if (spr.SubimageCount() == 0 && enigma::gm8_compliance()) return 1;
+  return spr.height;
 }
 
 gs_scalar sprite_get_texture_width_factor(int sprid, int subimg) {
   const auto& spr2d = sprites.get(sprid);
+  if (!spr2d.SubimageCount()) return 0;
   return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).w;
 }
 
 gs_scalar sprite_get_texture_height_factor(int sprid, int subimg) {
   const auto& spr2d = sprites.get(sprid);
+  if (!spr2d.SubimageCount()) return 0;
   return spr2d.GetTextureRect(spr2d.ModSubimage(subimg)).h;
 }
 
 int sprite_get_bbox_bottom(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).bbox.bottom();
 }
 
 int sprite_get_bbox_left(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).bbox.left();
 }
 
 int sprite_get_bbox_right(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).bbox.right();
 }
 
 int sprite_get_bbox_top(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).bbox.top();
 }
 
 int sprite_get_bbox_mode(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).bbox_mode;
 }
 
 int sprite_get_bbox_bottom_relative(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   const Sprite& spr = sprites.get(sprid);
   return spr.bbox.bottom() - spr.yoffset;
 }
 
 int sprite_get_bbox_left_relative(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   const Sprite& spr = sprites.get(sprid);
   return spr.bbox.left() - spr.xoffset;
 }
 
 int sprite_get_bbox_right_relative(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   const Sprite& spr = sprites.get(sprid);
   return spr.bbox.right() - spr.xoffset;
 }
 
 int sprite_get_bbox_top_relative(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   const Sprite& spr = sprites.get(sprid);
   return spr.bbox.top() - spr.yoffset;
 }
 
 int sprite_get_number(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).SubimageCount();
 }
 
 int sprite_get_texture(int sprid, int subimage) {
   const auto& spr2d = sprites.get(sprid);
+  if (!spr2d.SubimageCount()) return -1;
   return spr2d.GetTexture(spr2d.ModSubimage(subimage));
 }
 
 int sprite_get_xoffset(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).xoffset;
 }
 
 int sprite_get_yoffset(int sprid) {
+  if (!sprites.exists(sprid)) return -1;
   return sprites.get(sprid).yoffset;
 }
 
@@ -147,7 +205,7 @@ int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent
 }
 
 int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap) {
-  return sprite_add(filename, imgnumb, false, transparent, smooth, false, x_offset, y_offset, mipmap);
+  return sprite_add(filename, imgnumb, true, transparent, smooth, false, x_offset, y_offset, mipmap);
 }
 
 bool sprite_replace(int ind, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload,
@@ -158,7 +216,7 @@ bool sprite_replace(int ind, std::string filename, int imgnumb, bool precise, bo
 
 bool sprite_replace(int ind, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset,
                     bool free_texture, bool mipmap) {
-  return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, false, x_offset, y_offset, free_texture, mipmap);
+  return sprite_replace(ind, filename, imgnumb, true, transparent, smooth, false, x_offset, y_offset, free_texture, mipmap);
 }
 
 bool sprite_exists(int spr) {

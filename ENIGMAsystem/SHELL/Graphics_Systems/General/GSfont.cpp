@@ -92,10 +92,11 @@ namespace enigma {
     // Use the width of the space glyph when available,
     // else use the backup.
     // FIXME: Find out why the width is not available on Linux.
+    const float backup = fnt.space_width > 0 ? fnt.space_width : fnt.height/3;
     if (!g.empty()) {
-      return g.xs > 1 ? g.xs : fnt.height/3;
+      return g.xs > 1 ? g.xs : backup;
     } else {
-      return fnt.height/3;
+      return backup;
     }
   }
 }
