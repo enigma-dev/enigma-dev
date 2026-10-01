@@ -17,6 +17,7 @@
 
 #include <JDI/src/System/builtins.h>
 #include "ast.h"
+#include "precedence.h"
 
 #include <iomanip>
 
@@ -44,6 +45,96 @@ AST::CppPrettyPrinter::CppPrettyPrinter(std::ofstream &ofs, const LanguageFronte
 }
 
 void AST::CppPrettyPrinter::print(std::string code) { *of << code; }
+
+bool AST::CppPrettyPrinter::GmlDialect() const {
+  return language_fe && language_fe->compatibility_opts().use_gml_equals;
+}
+
+bool AST::CppPrettyPrinter::Gm8Compliance() const {
+  return GmlDialect() && language_fe->compatibility_opts().compliance_mode <= 81;
+}
+
+// A value used as a truth value. GM8 counts a real as true when it is >= 0.5.
+bool AST::CppPrettyPrinter::VisitCondition(PNode &condition) {
+  if (!Gm8Compliance()) return Visit(condition);
+  // Own parentheses: `if` prints a parenthetical condition flush after itself.
+  print("(enigma::gml_truth(");
+  if (!Visit(condition)) return false;
+  print("))");
+  return true;
+}
+
+static bool NeedsParens(const AST::BinaryExpression &parent, const AST::Node &operand, bool right);
+
+// A variable read with no side effects: bound by value when operands are ordered.
+static bool IsPlainRead(const AST::Node &node) {
+  if (node.type == AST::NodeType::IDENTIFIER || node.type == AST::NodeType::SCOPE_ACCESS) return true;
+  return node.type == AST::NodeType::BINARY_EXPRESSION &&
+         static_cast<const AST::BinaryExpression &>(node).operation.type == TT_BEGINBRACKET &&
+         !static_cast<const AST::BinaryExpression &>(node).evaluate_in_order;
+}
+
+// The variable an assignment target names: `a` for both `a` and `a[i]`.
+static std::string_view AssignedName(const AST::Node &node) {
+  const AST::Node *root = &node;
+  if (root->type == AST::NodeType::BINARY_EXPRESSION &&
+      static_cast<const AST::BinaryExpression &>(*root).operation.type == TT_BEGINBRACKET)
+    root = static_cast<const AST::BinaryExpression &>(*root).left.get();
+  if (root->type != AST::NodeType::IDENTIFIER) return {};
+  return static_cast<const AST::IdentifierAccess &>(*root).name.content;
+}
+
+// Runtime hook for an assignment to a built-in array, or null.
+const char *AST::CppPrettyPrinter::AssignHook(const AST::Node &target) const {
+  // GM8 stores these view variables as integers: an assignment rounds.
+  static const std::set<std::string, std::less<>> kIntViews = {
+      "view_xview", "view_yview", "view_wview", "view_hview", "view_xport", "view_yport",
+      "view_wport", "view_hport", "view_hborder", "view_vborder", "view_hspeed", "view_vspeed"};
+  if (!GmlDialect()) return nullptr;
+  const std::string_view name = AssignedName(target);
+  if (name == "background_index") return "enigma::gml_background_index_assigned(";
+  if (Gm8Compliance() && kIntViews.count(name)) return "enigma::gml_round_view(";
+  return nullptr;
+}
+
+// a[i] / a[i, j] in GML: GM8 rounds indices; side-effecting indices bind left to right.
+bool AST::CppPrettyPrinter::PrintGmlSubscript(AST::BinaryExpression &node) {
+  std::vector<AST::PNode *> indices{&node.right};
+  if (node.right->type == AST::NodeType::BINARY_EXPRESSION) {
+    auto *comma = node.right->As<AST::BinaryExpression>();
+    if (comma->operation.type == TT_COMMA) indices = {&comma->left, &comma->right};
+  }
+  const bool gm8 = Gm8Compliance();
+  auto print_index = [&](AST::PNode &index) {
+    if (gm8) print("enigma::gml_index(");
+    if (!Visit(index)) return false;
+    if (gm8) print(")");
+    return true;
+  };
+  if (node.evaluate_in_order) {
+    print("[&]() -> decltype(auto) { ");
+    for (std::size_t i = 0; i < indices.size(); ++i) {
+      print("auto enigma_index" + std::to_string(i) + " = ");
+      if (!print_index(*indices[i])) return false;
+      print("; ");
+    }
+    print("return ");
+  }
+  const bool paren = NeedsParens(node, *node.left, false);
+  if (paren) print("(");
+  VISIT_AND_CHECK(node.left);
+  if (paren) print(")");
+  const bool multi = indices.size() > 1;
+  print(multi ? "(" : "[");
+  for (std::size_t i = 0; i < indices.size(); ++i) {
+    if (i) print(", ");
+    if (node.evaluate_in_order) print("enigma_index" + std::to_string(i));
+    else if (!print_index(*indices[i])) return false;
+  }
+  print(multi ? ")" : "]");
+  if (node.evaluate_in_order) print("; }()");
+  return true;
+}
 
 void AST::CppPrettyPrinter::PrintSemiColon(AST::PNode &node) {
   if (node->type != AST::NodeType::BLOCK && node->type != AST::NodeType::IF && node->type != AST::NodeType::FOR &&
@@ -90,7 +181,41 @@ struct DeclaredNameCollector : AST::Visitor {
 
 void AST::CppPrettyPrinter::CollectDeclaredNames(AST::Node &root) {
   DeclaredNameCollector collector(&declared_names_);
-  root.accept(collector);
+  root.RecurusiveVisit(collector);
+}
+
+namespace {
+bool IsHoistableVar(AST::DeclarationStatement &node) {
+  if (node.storage_class != AST::DeclarationStatement::StorageClass::TEMPORARY) return false;
+  if (!node.clause || !node.clause->specifiers) return false;
+  jdi::definition *def = node.clause->specifiers->to_jdi_fulltype().def;
+  if (!def || def->name != "var") return false;
+  for (auto &d : node.clause->declarators) {
+    if (d->name.content.empty()) return false;
+    if (d->declarator_expr && d->declarator_expr->type != AST::NodeType::IDENTIFIER) return false;
+    if (d->init && d->init->kind != AST::Initializer::Kind::ASSIGN) return false;
+  }
+  return true;
+}
+
+struct VarCollector : AST::Visitor {
+  std::set<std::string, std::less<>> *out;
+  explicit VarCollector(std::set<std::string, std::less<>> *out): out(out) {}
+  bool VisitDeclarationStatement(AST::DeclarationStatement &node) final {
+    if (IsHoistableVar(node))
+      for (auto &d : node.clause->declarators) out->insert(std::string(d->name.content));
+    return true;
+  }
+};
+}  // namespace
+
+void AST::CppPrettyPrinter::HoistVarDeclarations(AST::Node &root) {
+  VarCollector collector(&hoisted_vars_);
+  root.RecurusiveVisit(collector);
+  if (hoisted_vars_.empty()) return;
+  std::string decl = "    var";
+  for (const std::string &name : hoisted_vars_) decl += (decl.size() > 7 ? ", " : " ") + name;
+  print(decl + ";\n");
 }
 
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
@@ -287,7 +412,14 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 }
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
-  print(node.operation.token);
+  if (node.operation.type == TT_TILDE && GmlDialect()) {
+    print("enigma::gml_bitnot(");
+    VISIT_AND_CHECK(node.operand);
+    print(")");
+    return true;
+  }
+  print(node.operation.type == TT_NOT ? "!" : node.operation.token);
+  if (node.operation.type == TT_NOT || node.operation.type == TT_BANG) return VisitCondition(node.operand);
   VISIT_AND_CHECK(node.operand);
   return true;
 }
@@ -306,7 +438,21 @@ bool AST::CppPrettyPrinter::VisitDeleteExpression(AST::DeleteExpression &node) {
   return true;
 }
 
+namespace {
+// Counts an enclosing break/continue target while its body prints.
+struct TargetScope {
+  int &breaks, &continues;
+  bool loop;
+  TargetScope(int &b, int &c, bool loop) : breaks(b), continues(c), loop(loop) { ++breaks, continues += loop; }
+  ~TargetScope() { --breaks, continues -= loop; }
+};
+}  // namespace
+
 bool AST::CppPrettyPrinter::VisitBreakStatement(AST::BreakStatement &node) {
+  if (!break_targets_ && GmlDialect()) {  // GM8: outside any loop, break exits
+    print("return 0");
+    return true;
+  }
   print("break");
   if (node.count) {
     print(" ");
@@ -316,6 +462,10 @@ bool AST::CppPrettyPrinter::VisitBreakStatement(AST::BreakStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitContinueStatement(AST::ContinueStatement &node) {
+  if (!continue_targets_ && GmlDialect()) {  // GM8: outside any loop, continue exits
+    print("return 0");
+    return true;
+  }
   print("continue");
   if (node.count) {
     print(" ");
@@ -325,6 +475,7 @@ bool AST::CppPrettyPrinter::VisitContinueStatement(AST::ContinueStatement &node)
 }
 
 bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
+  TargetScope scope(break_targets_, continue_targets_, true);
   print("with");
   if (node.object->type != AST::NodeType::PARENTHETICAL) {
     print("(");
@@ -334,14 +485,128 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
     print(")");
   }
 
+  // Bare names in the body belong to the iterated instance, so resolve them
+  // through self as script code does, not as members of this object.
+  const bool saved_is_script = is_script;
+  if (language_fe) is_script = true;
   VISIT_AND_CHECK(node.body);
+  is_script = saved_is_script;
   PrintSemiColon(node.body);
 
   return true;
 }
 
+// Whether C++ would regroup this operand when printed flat, as when the tree
+// was parsed with GML precedence (kGmlBinaryPrec).
+static bool NeedsParens(const AST::BinaryExpression &parent, const AST::Node &operand, bool right) {
+  if (operand.type != AST::NodeType::BINARY_EXPRESSION) return false;
+  const auto &child = static_cast<const AST::BinaryExpression &>(operand);
+  // Value-position = prints flat on purpose (see lower_gml_equals below).
+  if (parent.lower_gml_equals || child.lower_gml_equals) return false;
+  if (parent.operation.type == TT_BEGINBRACKET) return false;
+  auto p = Precedence::kBinaryPrec.find(parent.operation.type);
+  auto c = Precedence::kBinaryPrec.find(child.operation.type);
+  if (p == Precedence::kBinaryPrec.end() || c == Precedence::kBinaryPrec.end()) return false;
+  if (c->second.precedence != p->second.precedence) return c->second.precedence > p->second.precedence;
+  return right == (p->second.associativity == Associativity::LTR);
+}
+
 bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
-  VISIT_AND_CHECK(node.left);
+  if (node.operation.type == TT_BEGINBRACKET && !in_declarator_ &&
+      (node.evaluate_in_order || Gm8Compliance())) {
+    return PrintGmlSubscript(node);
+  }
+  const bool ordered = node.evaluate_in_order;
+  const TokenType op_type = node.operation.type;
+  const bool assigns = op_type == TT_ASSIGN || op_type == TT_ASSOP ||
+                       (op_type == TT_EQUALS && !node.lower_gml_equals);
+  if (const char *hook = assigns && !in_assign_hook_ ? AssignHook(*node.left) : nullptr) {
+    in_assign_hook_ = true;
+    print(hook);
+    const bool ok = VisitBinaryExpression(node);
+    print(")");
+    in_assign_hook_ = false;
+    return ok;
+  }
+  // A plain read is copied (a later operand may change it); an assignment
+  // target stays a reference.
+  const bool copy_lhs = ordered && !assigns && IsPlainRead(*node.left);
+  if (ordered) {
+    print(std::string("[&]() -> decltype(auto) { ") + (copy_lhs ? "auto" : "auto&&") + " enigma_lhs = ");
+    VISIT_AND_CHECK(node.left);
+    print("; return ");
+  }
+  auto is_string_literal = [](const PNode &n) {
+    return n->type == AST::NodeType::LITERAL &&
+           static_cast<const AST::Literal &>(*n).value.type == TT_STRINGLIT;
+  };
+  // "a" + "b" would add two C++ pointers, "B" < "a" compare them; make the left
+  // one a string.
+  static const std::set<TokenType> kStringPairOps = {
+      TT_PLUS, TT_EQUALS, TT_EQUALTO, TT_NOTEQUAL, TT_LESS, TT_GREATER, TT_LESSEQUAL, TT_GREATEREQUAL};
+  const bool string_pair = kStringPairOps.count(node.operation.type) &&
+                           is_string_literal(node.left) && is_string_literal(node.right);
+  // GM8: && || ^^ take their operands' truth (>= 0.5).
+  const bool truth_operands = (node.operation.type == TT_AND || node.operation.type == TT_OR ||
+                               node.operation.type == TT_XOR) && Gm8Compliance();
+  auto print_operand = [&](PNode &operand, bool right) {
+    if (string_pair && !right) {
+      print("std::string{");
+      if (!Visit(operand)) return false;
+      print("}");
+      return true;
+    }
+    if (ordered && !right) {
+      print(copy_lhs ? "enigma_lhs" : "std::forward<decltype(enigma_lhs)>(enigma_lhs)");
+      return true;
+    }
+    const bool paren = NeedsParens(node, *operand, right);
+    if (paren) print("(");
+    if (!Visit(operand)) return false;
+    if (paren) print(")");
+    return true;
+  };
+  auto visit_operand = [&](PNode &operand, bool right) {
+    if (!truth_operands) return print_operand(operand, right);
+    print("enigma::gml_truth(");
+    if (!print_operand(operand, right)) return false;
+    print(")");
+    return true;
+  };
+  // GML bitwise operands are reals: a C++ `double & int` doesn't compile and an
+  // int `1 << 40` overflows. The helpers convert to 64-bit integers (GM8: rounding).
+  static const std::map<TokenType, std::string> kGmlBitwise = {
+      {TT_AMPERSAND, "enigma::gml_bitand("}, {TT_PIPE, "enigma::gml_bitor("},
+      {TT_CARET, "enigma::gml_bitxor("}, {TT_LSH, "enigma::gml_shl("}, {TT_RSH, "enigma::gml_shr("}};
+  if (auto op = kGmlBitwise.find(node.operation.type); op != kGmlBitwise.end() && GmlDialect()) {
+    print(op->second);
+    if (!visit_operand(node.left, false)) return false;
+    print(", ");
+    VISIT_AND_CHECK(node.right);
+    print(")");
+    if (ordered) print("; }()");
+    return true;
+  }
+  // GM8 computes both operands, left first, even when the left decides.
+  if (truth_operands) {
+    print("enigma::gml_both{");
+    if (!visit_operand(node.left, false)) return false;
+    print(", ");
+    if (!visit_operand(node.right, true)) return false;
+    print(node.operation.type == TT_AND ? "}.all()" : node.operation.type == TT_OR ? "}.any()" : "}.one()");
+    if (ordered) print("; }()");
+    return true;
+  }
+  if (node.operation.type == TT_XOR) {  // C++ has no logical xor
+    print("(bool(");
+    if (!visit_operand(node.left, false)) return false;
+    print(") != bool(");
+    VISIT_AND_CHECK(node.right);
+    print("))");
+    if (ordered) print("; }()");
+    return true;
+  }
+  if (!visit_operand(node.left, false)) return false;
 
   std::string operation = node.operation.token;
   bool is_multi_dim = false;
@@ -375,7 +640,7 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // (`var x[count]`): only the spine declares.
   bool saved_decl = in_declarator_;
   if (node.operation.type == TT_BEGINBRACKET) in_declarator_ = false;
-  VISIT_AND_CHECK(node.right);
+  if (!visit_operand(node.right, true)) return false;
   in_declarator_ = saved_decl;
 
   if (is_multi_dim) {
@@ -383,11 +648,31 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   } else if (node.operation.type == TT_BEGINBRACKET) {
     print("]");
   }
+  if (ordered) print("; }()");
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
-  VISIT_AND_CHECK(node.function);
+  const bool ordered = node.evaluate_in_order;
+  if (ordered) {
+    print("[&]() -> decltype(auto) { ");
+    for (std::size_t i = 0; i < node.arguments.size(); i++) {
+      // A plain read is copied: a later argument may change the variable.
+      print(std::string(IsPlainRead(*node.arguments[i]) ? "auto" : "auto&&") +
+            " enigma_arg" + std::to_string(i) + " = ");
+      VISIT_AND_CHECK(node.arguments[i]);
+      print("; ");
+    }
+    print("return ");
+  }
+  // A called name is a function or script, never a variable to lower.
+  // GML round() is GM8-aware (half to even); engine code keeps std::round.
+  if (node.function->type == AST::NodeType::IDENTIFIER) {
+    std::string name(node.function->As<AST::IdentifierAccess>()->name.content);
+    print(name == "round" && GmlDialect() ? "enigma::gml_round" : name);
+  }
+  else
+    VISIT_AND_CHECK(node.function);
   print("(");
 
   bool is_variadic = false;
@@ -407,7 +692,12 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
       print("(enigma::varargs(),");
       varargs_opened = true;
     }
-    VISIT_AND_CHECK(node.arguments[i]);
+    if (ordered) {
+      const std::string arg = "enigma_arg" + std::to_string(i);
+      print(IsPlainRead(*node.arguments[i]) ? arg : "std::forward<decltype(" + arg + ")>(" + arg + ")");
+    } else {
+      VISIT_AND_CHECK(node.arguments[i]);
+    }
     if (i < node.arguments.size() - 1) {
       print(", ");
     }
@@ -418,11 +708,12 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
   if (varargs_opened) print(")");
 
   print(")");
+  if (ordered) print("; }()");
   return true;
 }
 
 bool AST::CppPrettyPrinter::VisitTernaryExpression(AST::TernaryExpression &node) {
-  VISIT_AND_CHECK(node.condition);
+  if (!VisitCondition(node.condition)) return false;
   print(" ? ");
 
   VISIT_AND_CHECK(node.true_expression);
@@ -657,6 +948,17 @@ bool AST::CppPrettyPrinter::VisitNewExpression(AST::NewExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDeclarationStatement(AST::DeclarationStatement &node) {
+  if (!hoisted_vars_.empty() && IsHoistableVar(node)) {
+    bool printed = false;
+    for (auto &entry : node.clause->declarators) {
+      if (!entry->init) continue;
+      if (printed) print(", ");
+      print(std::string(entry->name.content));
+      if (!VisitInitializer(*entry->init)) return false;
+      printed = true;
+    }
+    return true;
+  }
   bool is_global = node.storage_class == DeclarationStatement::StorageClass::GLOBAL;
   bool is_local = node.storage_class == DeclarationStatement::StorageClass::LOCAL;
   if (is_global || is_local) {
@@ -745,7 +1047,7 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
     print("(");
   }
 
-  VISIT_AND_CHECK(node.condition);
+  if (!VisitCondition(node.condition)) return false;
 
   if (node.condition->type != AST::NodeType::PARENTHETICAL) {
     print(")");
@@ -772,13 +1074,14 @@ bool AST::CppPrettyPrinter::VisitIfStatement(AST::IfStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitForLoop(AST::ForLoop &node) {
+  TargetScope scope(break_targets_, continue_targets_, true);
   print("for(");
 
   // Omitted clauses are null.
   if (node.assignment) VISIT_AND_CHECK(node.assignment);
   print("; ");
 
-  if (node.condition) VISIT_AND_CHECK(node.condition);
+  if (node.condition && !VisitCondition(node.condition)) return false;
   print("; ");
 
   if (node.increment) VISIT_AND_CHECK(node.increment);
@@ -814,6 +1117,50 @@ bool AST::CppPrettyPrinter::VisitDefaultStatement(AST::DefaultStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
+  TargetScope scope(break_targets_, continue_targets_, false);
+  if (node.lower_gml_switch) {
+    // Pick the first matching case by ==, then switch on its index so
+    // fallthrough and break keep their meaning.
+    print("{ const variant enigma_switch_value = (");
+    VISIT_AND_CHECK(node.expression);
+    print("); switch (");
+    // GM8 checks labels in order, default included: reaching default matches,
+    // even when a later case would. Otherwise default is the no-match target.
+    const bool ordered_default = Gm8Compliance();
+    auto numbered = [&](const AST::PNode &stmt) {
+      return stmt->type == AST::NodeType::CASE ||
+             (ordered_default && stmt->type == AST::NodeType::DEFAULT);
+    };
+    int index = 0;
+    bool reached_default = false;
+    for (auto &stmt : node.body->statements) {
+      if (!numbered(stmt)) continue;
+      if (stmt->type == AST::NodeType::DEFAULT) {
+        print(std::to_string(++index));
+        reached_default = true;
+        break;
+      }
+      print("enigma_switch_value == (");
+      VISIT_AND_CHECK(stmt->As<AST::CaseStatement>()->value);
+      print(") ? " + std::to_string(++index) + " : ");
+    }
+    if (!reached_default) print("0");
+    print(") { ");
+    index = 0;
+    for (auto &stmt : node.body->statements) {
+      if (numbered(stmt)) {
+        print("case " + std::to_string(++index) + ": ");
+        auto &body = stmt->type == AST::NodeType::CASE ? stmt->As<AST::CaseStatement>()->statements
+                                                       : stmt->As<AST::DefaultStatement>()->statements;
+        if (!VisitCodeBlock(*body)) return false;
+        print(" ");
+      } else {
+        VISIT_AND_CHECK(stmt);
+      }
+    }
+    print("} }");
+    return true;
+  }
   print("switch(int(");
   VISIT_AND_CHECK(node.expression);
   print(")) ");
@@ -825,6 +1172,7 @@ bool AST::CppPrettyPrinter::VisitSwitchStatement(AST::SwitchStatement &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
+  TargetScope scope(break_targets_, continue_targets_, true);
   if (node.kind == AST::WhileLoop::Kind::REPEAT) {
     // Lower `repeat (N) body` to a counted while. The pair is braced so it
     // acts as ONE statement wherever the repeat sits (an unbraced loop or if
@@ -834,9 +1182,10 @@ bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
     std::string counter = "strange_name";
     if (repeat_depth_ > 0) counter += std::to_string(repeat_depth_);
     ++repeat_depth_;
-    print("{ int " + counter + " = ");
+    // The count converts like an index (GM8 rounds it); a negative one runs 0 times.
+    print("{ int " + counter + " = enigma::gml_index(");
     VISIT_AND_CHECK(node.condition);
-    print("; while(" + counter + "--) ");
+    print("); while(" + counter + "-- > 0) ");
     VISIT_AND_CHECK(node.body);
     PrintSemiColon(node.body);
     print(" }");
@@ -857,7 +1206,7 @@ bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
     }
   }
 
-  VISIT_AND_CHECK(node.condition);
+  if (!VisitCondition(node.condition)) return false;
 
   if (node.kind == AST::WhileLoop::Kind::UNTIL) {
     print(")");
@@ -874,6 +1223,7 @@ bool AST::CppPrettyPrinter::VisitWhileLoop(AST::WhileLoop &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitDoLoop(AST::DoLoop &node) {
+  TargetScope scope(break_targets_, continue_targets_, true);
   print("do");
 
   if (node.body->type != AST::NodeType::BLOCK) {
@@ -900,7 +1250,7 @@ bool AST::CppPrettyPrinter::VisitDoLoop(AST::DoLoop &node) {
     }
   }
 
-  VISIT_AND_CHECK(node.condition);
+  if (!VisitCondition(node.condition)) return false;
 
   if (node.is_until) {
     print(")");

@@ -1882,6 +1882,14 @@ std::unique_ptr<AST::Node> TryParseOperand() {
   return nullptr;
 }
 
+const OperatorPrecedence *BinaryPrecedence(TokenType type) {
+  if (lexer->GetContext().compatibility_opts.use_gml_precedence)
+    if (auto it = Precedence::kGmlBinaryPrec.find(type); it != Precedence::kGmlBinaryPrec.end())
+      return &it->second;
+  auto it = Precedence::kBinaryPrec.find(type);
+  return it == Precedence::kBinaryPrec.end() ? nullptr : &it->second;
+}
+
 static bool ShouldAcceptPrecedence(const OperatorPrecedence &prec,
                                    int target_prec) {
   return target_prec >= prec.precedence ||
@@ -1937,8 +1945,8 @@ std::unique_ptr<AST::Node> ParseExpression(int precedence, std::unique_ptr<AST::
     while (token.type != TT_ENDOFCODE) {
       if(token.type == TT_JS_ARROW){
         operand = TryParseLambdaExpression(std::move(operand));
-      } else if (auto find_binop = Precedence::kBinaryPrec.find(token.type); find_binop != Precedence::kBinaryPrec.end()) {
-        if (!ShouldAcceptPrecedence(find_binop->second, precedence)) {
+      } else if (const OperatorPrecedence *binop = BinaryPrecedence(token.type)) {
+        if (!ShouldAcceptPrecedence(*binop, precedence)) {
           break;
         }
         operand = TryParseBinaryExpression(precedence, std::move(operand));
@@ -1980,10 +1988,10 @@ std::unique_ptr<AST::Node> ParseExpression(int precedence, std::unique_ptr<AST::
 }
 
 std::unique_ptr<AST::Node> TryParseBinaryExpression(int precedence, std::unique_ptr<AST::Node> operand) {
-  while (map_contains(Precedence::kBinaryPrec, token.type) &&
-         precedence >= Precedence::kBinaryPrec[token.type].precedence && token.type != TT_ENDOFCODE) {
+  while (BinaryPrecedence(token.type) &&
+         precedence >= BinaryPrecedence(token.type)->precedence && token.type != TT_ENDOFCODE) {
     Token oper = token;
-    OperatorPrecedence rule = Precedence::kBinaryPrec[token.type];
+    OperatorPrecedence rule = *BinaryPrecedence(token.type);
     token = lexer->ReadToken(); // Consume the operator
 
     if(token.type == TT_ENDOFCODE || token.type == TT_SEMICOLON){ // there are more cases
@@ -2520,6 +2528,8 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
   if (token.type != TT_SEMICOLON && token.type != TT_ENDPARENTH) {
     incr = ParseExpression(Precedence::kAll);
   }
+  // GM8 accepts a trailing ; after the increment: for (i = 0; i < n; i += 1;)
+  if (is_conventional && token.type == TT_SEMICOLON) token = lexer->ReadToken();
 
   if (is_conventional) {
     require_token(TT_ENDPARENTH, "Expected closing parenthesis (')') after for-loop header");
@@ -2622,6 +2632,7 @@ std::unique_ptr<AST::ContinueStatement> ParseContinueStatement() {
 
 std::unique_ptr<AST::ReturnStatement> ParseExitStatement() {
   token = lexer->ReadToken();
+  MaybeConsumeSemicolon();
   return std::make_unique<AST::ReturnStatement>(nullptr, true);
 }
 

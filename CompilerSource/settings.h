@@ -75,6 +75,7 @@ struct CompatibilityOptions {
   bool use_cpp_literals = 0; //< Defines what language numeric literals are inherited from.         0 = GML, 1 = C++
   bool use_cpp_escapes =  0; //< Defines what language string escape sequences are inherited from.  0 = GML, 1 = C++
   bool use_gml_equals =   1; //< Whether = compares in value position (GML) instead of always assigning (C++).
+  bool use_gml_precedence = 1; //< GML operator precedence: & | ^ above comparisons; && || ^^ one level.
   bool use_incrementals = 0; //< Defines how operators ++ and -- are treated (assuming GM6).        0 = GML, 1 = C++
   bool inherit_objects =  0; //< Determines whether objects should automatically inherit locals and events from their parents
   bool strict_syntax =    0; //< Determines whether semicolons and parentheses should be inferred or if the user prefers strict syntax.

@@ -191,6 +191,10 @@ class AST {
     /// TT_EQUALS nodes and the printer emits ==.
     bool lower_gml_equals = false;
 
+    /// GML evaluates operands left to right; C++ leaves it unspecified.
+    /// Marked by the annotator where the order is observable.
+    bool evaluate_in_order = false;
+
     BASIC_NODE_ROUTINES(BinaryExpression);
 
     BinaryExpression(PNode left_, PNode right_, Operation operation_):
@@ -202,6 +206,8 @@ class AST {
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
     PNode function;
     std::vector<PNode> arguments;
+    /// As BinaryExpression::evaluate_in_order, for the arguments.
+    bool evaluate_in_order = false;
 
     BASIC_NODE_ROUTINES(FunctionCallExpression);
 
@@ -581,6 +587,8 @@ class AST {
     // Use @c std::size_t as vector addresses are not stable thus pointers can cause bugs
     std::unordered_map<ConstValue::HardwareValue, std::size_t> cases;
     std::optional<std::size_t> default_branch = std::nullopt;
+    // GML: cases compare with == in order and may be any expression.
+    bool lower_gml_switch = false;
 
     BASIC_NODE_ROUTINES(SwitchStatement);
   };
@@ -803,9 +811,21 @@ class AST {
     // the emitted function, so the script lowering must leave them alone
     // (`var` names shadow instance variables, and GML hoists them).
     std::set<std::string, std::less<>> declared_names_;
+    std::set<std::string, std::less<>> hoisted_vars_;
     // Set while printing a declarator: its identifiers are declared names,
     // never value reads, regardless of what the lowering knows about them.
     bool in_declarator_ = false;
+    // Enclosing statements `break` (loops, with, switch) and `continue`
+    // (loops, with) can target; with none, GML ends the script or event.
+    int break_targets_ = 0, continue_targets_ = 0;
+    // Printing an assignment wrapped in its AssignHook.
+    bool in_assign_hook_ = false;
+    // GML code (as opposed to EDL/C++), and GM8 compliance within it.
+    bool GmlDialect() const;
+    bool Gm8Compliance() const;
+    const char *AssignHook(const AST::Node &target) const;
+    bool VisitCondition(PNode &condition);
+    bool PrintGmlSubscript(BinaryExpression &node);
 
    public:
     CppPrettyPrinter();
@@ -813,6 +833,8 @@ class AST {
     CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script);
     // Pre-pass: collect declared names from the tree about to be printed.
     void CollectDeclaredNames(Node &root);
+    // GML `var` is scoped to the whole event or script: declare every one up front.
+    void HoistVarDeclarations(Node &root);
     void print(std::string code);
     void PrintSemiColon(PNode &node);
     std::string GetPrintedCode();

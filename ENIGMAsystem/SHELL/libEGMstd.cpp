@@ -21,6 +21,7 @@
 
 #include "libEGMstd.h"
 
+#include <cmath>
 #include <stdio.h>
 #include <sstream>
 #include <string>
@@ -49,9 +50,19 @@ string toString(unsigned long long n) { return string(buf,sprintf(buf,"%llu", n)
 #endif
 string toString(char n)               { return string(buf,sprintf(buf,"%d", n)); }
 string toString(char* n)              { return string(n); }
-string toString(float n)              { return string(buf,sprintf(buf,"%g", n)); }
-string toString(double n)             { return string(buf,sprintf(buf,"%g", n)); }
-string toString(long double n)        { return std::to_string(n); }
+// float (gs_scalar on some builds: image_index, x) and long double print like double.
+string toString(float n)              { return toString(double(n)); }
+// GML string() prints whole numbers bare and anything else with two decimals, in GM8
+// and GMS alike. Sized per call: a large whole number runs to hundreds of digits.
+string toString(double n) {
+  const char *fmt = std::floor(n) == n ? "%.0f" : "%.2f";
+  const int len = snprintf(nullptr, 0, fmt, n);
+  if (len <= 0) return string();
+  string s(len, ' ');
+  snprintf(&s[0], len + 1, fmt, n);
+  return s;
+}
+string toString(long double n)        { return toString(double(n)); }
 string toString(const void *n)        { return string(buf,sprintf(buf,"%p",  n)); }
 
 string toString()                                        { return string ();     }
