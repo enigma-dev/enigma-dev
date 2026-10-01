@@ -632,7 +632,7 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
   **   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
   **   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
   */
-  wto <<   "\n    OBJ_" <<  object->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)"
+  wto <<   "\n    OBJ_" <<  object->name << "(double enigma_genericconstructor_newinst_x = 0, double enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)"
       << ", const int enigma_genericobjid = " << object->id << ", bool handle = true)";
 
   if (object->parent) {

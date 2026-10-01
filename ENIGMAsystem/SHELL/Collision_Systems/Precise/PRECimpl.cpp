@@ -27,6 +27,7 @@
 #include "Universal_System/math_consts.h"
 
 #include "PRECimpl.h"
+#include "Universal_System/gml_ops.h" // round_half_even: MinGW's nearbyint is slow x87 code
 #include <cmath>
 #include <utility>
 
@@ -37,10 +38,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
         const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
 
-        *leftv   = (xsp ? lsc : rsc) + x + .5;
-        *rightv  = (xsp ? rsc : lsc) + x + .5;
-        *topv    = (ysp ? tsc : bsc) + y + .5;
-        *bottomv = (ysp ? bsc : tsc) + y + .5;
+        *leftv   = floor((xsp ? lsc : rsc) + .5) + enigma::round_half_even(x);
+        *rightv  = floor((xsp ? rsc : lsc) + .5) + enigma::round_half_even(x);
+        *topv    = floor((ysp ? tsc : bsc) + .5) + enigma::round_half_even(y);
+        *bottomv = floor((ysp ? bsc : tsc) + .5) + enigma::round_half_even(y);
     }
     else
     {
@@ -52,10 +53,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
-        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
-        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
-        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
+        *leftv   = floor(cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + .5) + enigma::round_half_even(x);
+        *rightv  = floor(cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + .5) + enigma::round_half_even(x);
+        *topv    = floor(cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + .5) + enigma::round_half_even(y);
+        *bottomv = floor(cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + .5) + enigma::round_half_even(y);
     }
 }
 
@@ -88,10 +89,10 @@ static bool precise_collision_single(int intersection_left, int intersection_rig
             {
 
                 //Test for single image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const int bx1 = (colindex - (int)enigma::round_half_even(x1));
+                const int by1 = (rowindex - (int)enigma::round_half_even(y1));
+                const int px1 = (int)floor((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)floor((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
                 if (p1) {
@@ -135,17 +136,17 @@ static bool precise_collision_pair(int intersection_left, int intersection_right
             {
 
                 //Test for first image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const int bx1 = (colindex - (int)enigma::round_half_even(x1));
+                const int by1 = (rowindex - (int)enigma::round_half_even(y1));
+                const int px1 = (int)floor((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)floor((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
                 //Test for second image.
-                const int bx2 = (colindex - x2);
-                const int by2 = (rowindex - y2);
-                const int px2 = (int)((bx2*cosa2 + by2*sina2)/xscale2 + xoffset2);
-                const int py2 = (int)((bx2*cosa90_2 + by2*sina90_2)/yscale2 + yoffset2);
+                const int bx2 = (colindex - (int)enigma::round_half_even(x2));
+                const int by2 = (rowindex - (int)enigma::round_half_even(y2));
+                const int px2 = (int)floor((bx2*cosa2 + by2*sina2)/xscale2 + xoffset2);
+                const int py2 = (int)floor((bx2*cosa90_2 + by2*sina90_2)/yscale2 + yoffset2);
                 const bool p2 = px2 >= 0 && py2 >= 0 && px2 < w2 && py2 < h2 && pixels2[py2*w2 + px2] != 0;
 
                 //Final test.
@@ -191,10 +192,10 @@ static bool precise_collision_line(int intersection_left, int intersection_right
                     continue;
                 }
                 // Test for single image.
-                const int bx1 = (gx - x1);
-                const int by1 = (gy - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const int bx1 = (gx - (int)enigma::round_half_even(x1));
+                const int by1 = (gy - (int)enigma::round_half_even(y1));
+                const int px1 = (int)floor((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)floor((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
                 if (p1) {
@@ -214,10 +215,10 @@ static bool precise_collision_line(int intersection_left, int intersection_right
                     continue;
                 }
                 // Test for single image.
-                const int bx1 = (gx - x1);
-                const int by1 = (gy - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const int bx1 = (gx - (int)enigma::round_half_even(x1));
+                const int by1 = (gy - (int)enigma::round_half_even(y1));
+                const int px1 = (int)floor((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)floor((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
                 if (p1) {
@@ -262,10 +263,10 @@ static bool precise_collision_ellipse(int intersection_left, int intersection_ri
                 if (px*px/rx_2 + py*py/ry_2 > 1.0) continue;
 
                 // Test for single image.
-                const int bx1 = (colindex - x1);
-                const int by1 = (rowindex - y1);
-                const int px1 = (int)((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
-                const int py1 = (int)((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
+                const int bx1 = (colindex - (int)enigma::round_half_even(x1));
+                const int by1 = (rowindex - (int)enigma::round_half_even(y1));
+                const int px1 = (int)floor((bx1*cosa1 + by1*sina1)/xscale1 + xoffset1);
+                const int py1 = (int)floor((bx1*cosa90_1 + by1*sina90_1)/yscale1 + yoffset1);
                 const bool p1 = px1 >= 0 && py1 >= 0 && px1 < w1 && py1 < h1 && pixels1[py1*w1 + px1] != 0;
 
                 if (p1) {

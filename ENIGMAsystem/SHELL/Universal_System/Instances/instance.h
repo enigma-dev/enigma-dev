@@ -36,7 +36,7 @@ namespace enigma
 {
 
 extern int destroycalls, createcalls;
-object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
+object_basic *instance_create_id(double x, double y,int object,int idg); //This is for use by the system only. Please leave be.
 void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 
 } //namespace enigma
@@ -44,8 +44,8 @@ void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 namespace enigma_user
 {
 
-enigma::instance_t instance_create(int x,int y,int object);
-enigma::instance_t instance_create_depth(int x,int y,int depth,int object);
+enigma::instance_t instance_create(double x, double y,int object);
+enigma::instance_t instance_create_depth(double x, double y,int depth,int object);
 void instance_deactivate_all(bool notme);
 void instance_activate_all();
 void instance_activate_object(int obj);

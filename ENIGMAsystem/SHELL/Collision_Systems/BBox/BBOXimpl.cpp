@@ -26,6 +26,7 @@
 
 #include "BBOXutil.h"
 #include "BBOXimpl.h"
+#include "Universal_System/gml_ops.h" // round_half_even: MinGW's nearbyint is slow x87 code
 #include <cmath>
 #include <floatcomp.h>
 
@@ -36,10 +37,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
         const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
 
-        *leftv   = (xsp ? lsc : rsc) + x + .5;
-        *rightv  = (xsp ? rsc : lsc) + x + .5;
-        *topv    = (ysp ? tsc : bsc) + y + .5;
-        *bottomv = (ysp ? bsc : tsc) + y + .5;
+        *leftv   = floor((xsp ? lsc : rsc) + .5) + enigma::round_half_even(x);
+        *rightv  = floor((xsp ? rsc : lsc) + .5) + enigma::round_half_even(x);
+        *topv    = floor((ysp ? tsc : bsc) + .5) + enigma::round_half_even(y);
+        *bottomv = floor((ysp ? bsc : tsc) + .5) + enigma::round_half_even(y);
     }
     else
     {
@@ -51,10 +52,10 @@ static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, 
                    q12 = (quad == 1 || quad == 2), q23 = (quad == 2 || quad == 3),
                    xs12 = xsp^q12, sx23 = xsp^q23, ys12 = ysp^q12, ys23 = ysp^q23;
 
-        *leftv   = cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + x + .5;
-        *rightv  = cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + x + .5;
-        *topv    = cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + y + .5;
-        *bottomv = cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + y + .5;
+        *leftv   = floor(cosa*(xs12 ? lsc : rsc) + sina*(ys23 ? tsc : bsc) + .5) + enigma::round_half_even(x);
+        *rightv  = floor(cosa*(xs12 ? rsc : lsc) + sina*(ys23 ? bsc : tsc) + .5) + enigma::round_half_even(x);
+        *topv    = floor(cosa*(ys12 ? tsc : bsc) - sina*(sx23 ? rsc : lsc) + .5) + enigma::round_half_even(y);
+        *bottomv = floor(cosa*(ys12 ? bsc : tsc) - sina*(sx23 ? lsc : rsc) + .5) + enigma::round_half_even(y);
     }
 }
 
