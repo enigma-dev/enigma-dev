@@ -374,7 +374,7 @@ std::string Lexer::ProcessLiteral(std::string lit, size_t spos) {
     }
   } else {
     for (size_t i = 1; i < lit.length() - 1; ++i) {
-      str_value += lit[i] == '#' ? '\n' : lit[i];
+      str_value += lit[i];
     }
   }
   return str_value;

@@ -194,6 +194,29 @@ int show_question_cancelable(string message) override {
   return show_question_helperfunc(message);
 }
 
+int show_message_ext(string message, string but1, string but2, string but3) override {
+  if (dialog_caption.empty())
+    dialog_caption = window_get_caption();
+  string labels[3] = {add_escaping(but1, true, "OK"), add_escaping(but2, false, ""), add_escaping(but3, false, "")};
+  string str_command = string("ans=$(zenity --info --title=\"") + add_escaping(dialog_caption, true, " ") +
+    string("\" --no-wrap --text=\"") + add_escaping(message, false, "") + string("\" --ok-label=\"") + labels[0] + "\"";
+  for (int i = 1; i < 3; i++)
+    if (!labels[i].empty()) str_command += string(" --extra-button=\"") + labels[i] + "\"";
+  str_command += string(");if [ $? = 0 ] ;then echo 1;");
+  for (int i = 1; i < 3; i++)
+    if (!labels[i].empty()) str_command += string("elif [ \"$ans\" = \"") + labels[i] + "\" ] ;then echo " + std::to_string(i + 1) + ";";
+  str_command += "else echo 0;fi";
+  return (int)strtod(create_shell_dialog(str_command).c_str(), NULL);
+}
+
+int show_menu(const std::vector<string> &items) override {
+  string str_command = "ans=$(zenity --list --hide-header --column=i --column=t --hide-column=1 --print-column=1";
+  for (size_t i = 0; i < items.size(); i++)
+    str_command += string(" ") + std::to_string(i) + " \"" + add_escaping(items[i], false, "") + "\"";
+  str_command += ");if [ -n \"$ans\" ] ;then echo $ans;else echo -1;fi";
+  return (int)strtod(create_shell_dialog(str_command).c_str(), NULL);
+}
+
 int show_attempt(string errortext) override {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;

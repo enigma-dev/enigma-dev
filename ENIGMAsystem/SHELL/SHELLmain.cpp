@@ -47,6 +47,9 @@
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
+#include "Universal_System/compliance.h"
+
+const int enigma::gm_compatibility_version = GM_COMPATIBILITY_VERSION;
 
 #include "Universal_System/Object_Tiers/collisions_object.h"
 

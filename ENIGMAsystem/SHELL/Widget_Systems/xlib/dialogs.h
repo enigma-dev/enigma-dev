@@ -16,6 +16,7 @@
 **/
 
 #include <string>
+#include <vector>
 
 #include "Widget_Systems/widgets_mandatory.h"
 
@@ -34,6 +35,10 @@ class CommandLineWidgetEngine {
   virtual bool show_question(std::string message) = 0;
   virtual int show_question_cancelable(std::string message) = 0;
   virtual int show_attempt(std::string errortext) = 0;
+  // Returns the button pressed, 1 to 3, or 0 if the dialog was closed.
+  virtual int show_message_ext(std::string message, std::string but1, std::string but2, std::string but3) = 0;
+  // Returns the index of the chosen item, or -1.
+  virtual int show_menu(const std::vector<std::string> &items) = 0;
   virtual void show_debug_message(std::string errortext, MESSAGE_TYPE type) = 0;
   virtual std::string get_string(std::string message, std::string def) = 0;
   virtual std::string get_password(std::string message, std::string def) = 0;

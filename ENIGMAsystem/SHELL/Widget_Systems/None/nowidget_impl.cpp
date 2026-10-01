@@ -21,6 +21,7 @@ using std::string;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/var4.h"
+#include "Universal_System/estring.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -82,7 +83,12 @@ namespace enigma_user {
 
 int show_message(const string &message)
 {
-  printf("show_message: %s\n", message.c_str());
+  printf("show_message: %s\n", enigma::gml_display_text(message).c_str());
+  return 0;
+}
+
+int show_message_ext(string message, string, string, string) {
+  printf("show_message_ext: %s\n", message.c_str());
   return 0;
 }
 
@@ -100,7 +106,7 @@ bool show_question(string str) {
   char answer = 0;
   while (answer != 'N' && answer != 'Y') {
     cout << endl << "[Y/N]:";
-    cin >> answer;
+    if (!(cin >> answer)) return false;  // no console (headless server): no
     answer = toupper(answer);
   }
   return (answer == 'Y');
@@ -137,3 +143,6 @@ double get_integer(string str, var def) {
 }
 
 }
+
+double show_menu(string, double def) { return def; }
+double show_menu_pos(double, double, string, double def) { return def; }

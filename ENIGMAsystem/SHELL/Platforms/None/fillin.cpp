@@ -106,6 +106,8 @@ int window_set_cursor(int c) {
   enigma::cursorInt = c;
   return 0;
 }
+int window_get_cursor() { return enigma::cursorInt; }
+bool keyboard_check_direct(int) { return false; }
 
 void clipboard_set_text(string text) {}
 string clipboard_get_text() { return ""; }

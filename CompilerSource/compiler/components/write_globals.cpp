@@ -104,6 +104,7 @@ int lang_CPP::compile_writeGlobals(const GameData &game,
   wto << "  bool showIcons = "          << wsets.show_icons() << ";" << endl;
   wto << "  bool freezeOnLoseFocus = "  << wsets.freeze_on_lose_focus() << ";" << endl;
   wto << "  bool treatCloseAsEscape = " << wsets.treat_close_as_escape() << ";" << endl;
+  wto << "  bool gml_hash_newlines = " << !compatibility_opts_.use_cpp_escapes << ";" << endl;
   wto << "  bool isFullScreen = " << wsets.start_in_fullscreen() << ";" << endl;
   wto << "  int viewScale = " << gsets.view_scale() << ";" << endl;
   wto << "  int windowColor = " << gsets.color_outside_room_region() << ";" << endl;

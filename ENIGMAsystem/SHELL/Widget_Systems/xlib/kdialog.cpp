@@ -205,6 +205,32 @@ int show_question_cancelable(string message) override {
   return show_question_helperfunc(message);
 }
 
+int show_message_ext(string message, string but1, string but2, string but3) override {
+  if (dialog_caption.empty())
+    dialog_caption = window_get_caption();
+  const string text = string(" \"") + add_escaping(message, false, "") + "\" ";
+  const string title = string("--title \"") + add_escaping(dialog_caption, true, "") + "\";";
+  string str_command;
+  if (but2.empty() && but3.empty()) {
+    str_command = "kdialog --msgbox" + text + "--ok-label \"" + add_escaping(but1, true, "OK") + "\" " + title +
+                  "if [ $? = 0 ] ;then echo 1;else echo 0;fi";
+  } else {
+    str_command = string("kdialog --") + (but3.empty() ? "yesno" : "yesnocancel") + text +
+                  "--yes-label \"" + add_escaping(but1, true, "OK") + "\" --no-label \"" + add_escaping(but2, false, "") + "\" " +
+                  (but3.empty() ? "" : "--cancel-label \"" + add_escaping(but3, false, "") + "\" ") + title +
+                  "echo $(($? + 1))";
+  }
+  return (int)strtod(create_shell_dialog(str_command).c_str(), NULL);
+}
+
+int show_menu(const std::vector<string> &items) override {
+  string str_command = "ans=$(kdialog --menu \"\"";
+  for (size_t i = 0; i < items.size(); i++)
+    str_command += string(" ") + std::to_string(i) + " \"" + add_escaping(items[i], false, "") + "\"";
+  str_command += ");if [ -n \"$ans\" ] ;then echo $ans;else echo -1;fi";
+  return (int)strtod(create_shell_dialog(str_command).c_str(), NULL);
+}
+
 int show_attempt(string errortext) override {
   if (error_caption.empty()) error_caption = "Error";
   string str_command;

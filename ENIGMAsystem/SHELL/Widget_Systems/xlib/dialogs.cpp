@@ -21,6 +21,7 @@
 #include <climits>
 
 #include <string>
+#include <atomic>
 #include <thread>
 #include <chrono>
 #include <vector>
@@ -31,6 +32,7 @@
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Widget_Systems/General/WSdialogs.h"
+#include "Widget_Systems/General/WSmenus.h"
 
 #include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
@@ -52,7 +54,8 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif CURRENT_PLATFORM_ID == OS_LINUX
-#include <proc/readproc.h>
+#include <dirent.h>
+#include <fstream>
 #elif CURRENT_PLATFORM_ID == OS_FREEBSD
 #include <sys/user.h>
 #include <libutil.h>
@@ -195,14 +198,22 @@ static std::vector<pid_t> PidFromPpid(pid_t parentProcId) {
     }
   }
   #elif CURRENT_PLATFORM_ID == OS_LINUX
-  PROCTAB *proc = openproc(PROC_FILLSTAT);
-  while (proc_t *proc_info = readproc(proc, nullptr)) {
-    if (proc_info->ppid == parentProcId) {
-      vec.push_back(proc_info->tgid);
+  if (DIR *proc = opendir("/proc")) {
+    while (dirent *entry = readdir(proc)) {
+      const pid_t pid = atoi(entry->d_name);
+      if (pid <= 0) continue;
+      std::ifstream stat_file(string("/proc/") + entry->d_name + "/stat");
+      string stat((std::istreambuf_iterator<char>(stat_file)), std::istreambuf_iterator<char>());
+      // pid (comm) state ppid ...; comm may itself contain spaces or ')'.
+      const size_t comm_end = stat.rfind(')');
+      if (comm_end == string::npos) continue;
+      char state;
+      pid_t ppid;
+      if (sscanf(stat.c_str() + comm_end + 1, " %c %d", &state, &ppid) == 2 && ppid == parentProcId)
+        vec.push_back(pid);
     }
-    freeproc(proc_info);
+    closedir(proc);
   }
-  closeproc(proc);
   #elif CURRENT_PLATFORM_ID == OS_FREEBSD
   int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
     for (int j = 0; j < cntp; j++) {
@@ -238,13 +249,23 @@ static pid_t PidFromPpidRecursive(pid_t parentProcId) {
   return parentProcId;
 }
 
+struct shell_dialog {
+  pid_t pid;
+  std::atomic<bool> done{false};
+};
+
 // set dialog transient; set title caption.
-static void *modify_shell_dialog(void *pid) {
+static void *modify_shell_dialog(void *arg) {
+  shell_dialog *dialog = (shell_dialog *)arg;
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr); Window wid;
-  pid_t child = PidFromPpidRecursive((pid_t)(std::intptr_t)pid);
+  pid_t child = PidFromPpidRecursive(dialog->pid);
   while (true) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    if (dialog->done) {  // answered before its window showed up
+      XCloseDisplay(display);
+      return nullptr;
+    }
     wid = WidFromTop(display);
     if (PidFromWid(display, wid) == child) {
       break;
@@ -262,6 +283,10 @@ static void *modify_shell_dialog(void *pid) {
 
 bool widget_system_initialize() {
   setenv("WAYLAND_DISPLAY", "", 1); // force xwayland fallback prevents bug.
+  // Toolkits pinned to Wayland (KDE sets GDK_BACKEND=wayland) find no display
+  // without WAYLAND_DISPLAY: the dialog exits at once and reads as "no".
+  setenv("GDK_BACKEND", "x11", 1);
+  setenv("QT_QPA_PLATFORM", "xcb", 1);
   // Defaults to the GUI toolkit (GTK+/Qt) that matches Desktop Environment.
   current_widget_engine = kwin_running() ? kdialog_widgets : zenity_widgets;
   return true;
@@ -270,15 +295,20 @@ bool widget_system_initialize() {
 string create_shell_dialog(string command) {
   string output; char buffer[BUFSIZ];
   int outfp = 0, infp = 0; ssize_t nRead = 0;
-  pid_t pid = ProcessCreate(command.c_str(), &infp, &outfp);
+  shell_dialog dialog;
+  dialog.pid = ProcessCreate(command.c_str(), &infp, &outfp);
   std::this_thread::sleep_for(std::chrono::milliseconds(100)); pthread_t thread;
-  pthread_create(&thread, nullptr, modify_shell_dialog, (void *)(std::intptr_t)pid);
+  pthread_create(&thread, nullptr, modify_shell_dialog, &dialog);
   while ((nRead = read(outfp, buffer, BUFSIZ)) > 0) {
     buffer[nRead] = '\0';
     output.append(buffer, nRead);
   }
-  pthread_cancel(thread);
-  while (output.back() == '\r' || output.back() == '\n')
+  // Stop and join, never cancel: a thread cancelled inside Xlib (e.g. in
+  // XCloseDisplay's GLX close hook) leaves a lock held, and the game's next
+  // GLX call waits on it forever.
+  dialog.done = true;
+  pthread_join(thread, nullptr);
+  while (!output.empty() && (output.back() == '\r' || output.back() == '\n'))
     output.pop_back();
   return output;
 }
@@ -306,41 +336,46 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 }
 
 int show_message(const string &message) {
-  return enigma::current_widget_engine->show_message(message);
+  return enigma::current_widget_engine->show_message(enigma::gml_display_text(message));
 }
 
 int show_message_cancelable(string message) {
-  return enigma::current_widget_engine->show_message_cancelable(message);
+  return enigma::current_widget_engine->show_message_cancelable(enigma::gml_display_text(message));
 }
 
 bool show_question(string message) {
-  return enigma::current_widget_engine->show_question(message);
+  return enigma::current_widget_engine->show_question(enigma::gml_display_text(message));
 }
 
 int show_question_cancelable(string message) {
-  return enigma::current_widget_engine->show_question_cancelable(message);
+  return enigma::current_widget_engine->show_question_cancelable(enigma::gml_display_text(message));
 }
 
 int show_attempt(string errortext) {
-  return enigma::current_widget_engine->show_attempt(errortext);
+  return enigma::current_widget_engine->show_attempt(enigma::gml_display_text(errortext));
 }
 
+int show_message_ext(string message, string but1, string but2, string but3) {
+  return enigma::current_widget_engine->show_message_ext(enigma::gml_display_text(message), but1, but2, but3);
+}
+
+
 string get_string(string message, string def) {
-  return enigma::current_widget_engine->get_string(message, def);
+  return enigma::current_widget_engine->get_string(enigma::gml_display_text(message), def);
 }
 
 string get_password(string message, string def) {
-  return enigma::current_widget_engine->get_password(message, def);
+  return enigma::current_widget_engine->get_password(enigma::gml_display_text(message), def);
 }
 
 double get_integer(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  return enigma::current_widget_engine->get_integer(message, val);
+  return enigma::current_widget_engine->get_integer(enigma::gml_display_text(message), val);
 }
 
 double get_passcode(string message, var def) {
   double val = (strtod(def.c_str(), NULL)) ? : (double)def;
-  return enigma::current_widget_engine->get_passcode(message, val);
+  return enigma::current_widget_engine->get_passcode(enigma::gml_display_text(message), val);
 }
 
 string get_open_filename(string filter, string fname) {
@@ -392,3 +427,18 @@ void message_set_caption(string title) {
 }
 
 } // namespace enigma_user
+
+double show_menu(string str, double def) {
+  std::vector<string> items;
+  for (size_t start = 0, bar;; start = bar + 1) {
+    bar = str.find('|', start);
+    items.push_back(str.substr(start, bar - start));
+    if (bar == string::npos) break;
+  }
+  const int choice = enigma::current_widget_engine->show_menu(items);
+  return choice < 0 ? def : choice;
+}
+
+double show_menu_pos(double, double, string str, double def) {
+  return show_menu(str, def);
+}

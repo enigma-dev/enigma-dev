@@ -26,6 +26,8 @@
 #include <vector>
 #include "var4.h"
 #include "estring.h"
+#include "compliance.h"
+#include "gml_ops.h"
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
@@ -81,6 +83,25 @@ static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
+
+namespace enigma {
+
+std::string gml_display_text(const std::string &text) {
+  if (!gml_hash_newlines || text.find('#') == std::string::npos) return text;
+  std::string out;
+  out.reserve(text.size());
+  for (size_t i = 0; i < text.size(); ++i) {
+    if (text[i] == '\\' && i + 1 < text.size() && text[i + 1] == '#') {
+      out += '#';
+      ++i;
+    } else {
+      out += text[i] == '#' ? '\n' : text[i];
+    }
+  }
+  return out;
+}
+
+}  // namespace enigma
 
 namespace enigma_user {
 
@@ -206,10 +227,11 @@ size_t string_pos(string substr,string str) {
 }
 
 string string_format(double val, unsigned tot, unsigned dec) {
-  std::vector<char> sbuf(19 + tot + dec);
-  sbuf[0] = 0;
-  sprintf(sbuf.data(), "%0*.*f", tot, dec, val);
-  return sbuf.data();
+  const int n = snprintf(nullptr, 0, "%0*.*f", tot, dec, val);
+  if (n <= 0) return "";
+  string res(n, '\0');
+  snprintf(res.data(), n + 1, "%0*.*f", tot, dec, val);
+  return res;
 }
 
 string string_copy(string str, int index, int count) {
@@ -232,13 +254,12 @@ char string_byte_at(string str, int index) {
   return str[n];
 }
 
-char string_char_at(string str,int index) {
+string string_char_at(string str, double index) {
+  // GM8 rounds the index; anything below 1 reads the first character.
+  if (enigma::gm8_compliance()) index = enigma::round_half_even(index);
   unsigned int n = index <= 1 ? 0 : (unsigned int)(index - 1);
-  #ifdef DEBUG_MODE
-    if (n > str.length())
-      DEBUG_MESSAGE("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", MESSAGE_TYPE::M_ERROR);
-  #endif
-  return str[n];
+  if (n >= str.length()) return "";
+  return string(1, str[n]);
 }
 
 string string_delete(string str,int index,int count) {

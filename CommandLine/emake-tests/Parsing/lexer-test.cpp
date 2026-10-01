@@ -209,7 +209,8 @@ TEST(LexerTest, Literals_2) {
   EXPECT_EQ(lex->ReadToken().type, TT_EQUALS);
   Token t = lex->ReadToken();
   EXPECT_EQ(t.type, TT_STRINGLIT);
-  EXPECT_EQ(t.content, "\n");
+  // # is a line break only when displayed (enigma::gml_display_text).
+  EXPECT_EQ(t.content, "#");
 }
 
 TEST(LexerTest, SingleQuoteIsStringInGml) {
