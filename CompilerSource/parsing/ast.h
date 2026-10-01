@@ -191,6 +191,10 @@ class AST {
     /// TT_EQUALS nodes and the printer emits ==.
     bool lower_gml_equals = false;
 
+    /// GML evaluates operands left to right; C++ leaves it unspecified.
+    /// Marked by the annotator where the order is observable.
+    bool evaluate_in_order = false;
+
     BASIC_NODE_ROUTINES(BinaryExpression);
 
     BinaryExpression(PNode left_, PNode right_, Operation operation_):
@@ -202,10 +206,27 @@ class AST {
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
     PNode function;
     std::vector<PNode> arguments;
+    /// As BinaryExpression::evaluate_in_order, for the arguments.
+    bool evaluate_in_order = false;
 
     BASIC_NODE_ROUTINES(FunctionCallExpression);
 
     FunctionCallExpression(PNode function_, std::vector<PNode> &&arguments_): function{std::move(function_)}, arguments{std::move(arguments_)} {}
+
+    /// For variable_local_exists, variable_global_exists and
+    /// variable_global_set called with a literal name: the function and the
+    /// variable name. GML resolves these at runtime; EDL lowers them.
+    std::optional<std::pair<std::string, std::string>> VariableNameCall() const {
+      if (function->type != NodeType::IDENTIFIER || arguments.empty() ||
+          arguments[0]->type != NodeType::LITERAL)
+        return std::nullopt;
+      std::string fn(static_cast<const IdentifierAccess &>(*function).name.content);
+      if (fn != "variable_local_exists" && fn != "variable_global_exists" && fn != "variable_global_set")
+        return std::nullopt;
+      const auto &lit = static_cast<const Literal &>(*arguments[0]).value;
+      if (lit.type != TT_STRINGLIT) return std::nullopt;
+      return std::make_pair(fn, std::get<std::string>(lit.value));
+    }
   };
 
   // Unary prefix expressions; generally top-level will be "++varname"
@@ -402,6 +423,8 @@ class AST {
     // reads non-null `def` as "emit the name verbatim" rather than wrapping it
     // in an EDL variable accessor.
     jdi::definition *def = nullptr;
+    // Declared with globalvar somewhere in the game: the name is global.NAME.
+    bool globalvar = false;
     // When this IdentifierAccess is the leaf of a declarator chain, `name.content`
     // may be empty — that encodes an *abstract* declarator (no name, e.g. the
     // type in `(int*)x` or an unnamed function parameter). Consumers that read
@@ -581,6 +604,8 @@ class AST {
     // Use @c std::size_t as vector addresses are not stable thus pointers can cause bugs
     std::unordered_map<ConstValue::HardwareValue, std::size_t> cases;
     std::optional<std::size_t> default_branch = std::nullopt;
+    // GML: cases compare with == in order and may be any expression.
+    bool lower_gml_switch = false;
 
     BASIC_NODE_ROUTINES(SwitchStatement);
   };
@@ -803,6 +828,7 @@ class AST {
     // the emitted function, so the script lowering must leave them alone
     // (`var` names shadow instance variables, and GML hoists them).
     std::set<std::string, std::less<>> declared_names_;
+    std::set<std::string, std::less<>> hoisted_vars_;
     // Set while printing a declarator: its identifiers are declared names,
     // never value reads, regardless of what the lowering knows about them.
     bool in_declarator_ = false;
@@ -813,6 +839,8 @@ class AST {
     CppPrettyPrinter(std::ofstream &ofs, const LanguageFrontend *lfe, bool is_script);
     // Pre-pass: collect declared names from the tree about to be printed.
     void CollectDeclaredNames(Node &root);
+    // GML `var` is scoped to the whole event or script: declare every one up front.
+    void HoistVarDeclarations(Node &root);
     void print(std::string code);
     void PrintSemiColon(PNode &node);
     std::string GetPrintedCode();

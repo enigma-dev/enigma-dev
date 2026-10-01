@@ -82,7 +82,7 @@ int lang_CPP::compile_writeObjAccess(const ParsedObjectVec &parsed_objects, cons
   "      if (*vmap == NULL)" << endl <<
   "        *vmap = new std::map<string, var>();" << endl <<
   "      if ((*vmap)->find(str) == (*vmap)->end())" << endl <<
-  "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
+  "        (*vmap)->insert(std::pair<string, var>(str, var()));" << endl <<
   "      return ((*vmap)->find(str))->second;" << endl <<
   "  }" << endl << endl;
 

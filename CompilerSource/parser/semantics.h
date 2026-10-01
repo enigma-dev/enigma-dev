@@ -36,10 +36,12 @@ namespace enigma::parsing {
 class SemanticAnnotator : public AST::Visitor {
  public:
   SemanticAnnotator(ErrorHandler *herr, const LanguageFrontend *frontend,
-                    bool gml_equals = true)
-      : herr_(herr), frontend_(frontend), gml_equals_(gml_equals) {}
+                    bool gml_equals = true,
+                    const std::set<std::string> *globalvars = nullptr)
+      : herr_(herr), frontend_(frontend), gml_equals_(gml_equals), globalvars_(globalvars) {}
 
   bool VisitScopeAccess(AST::ScopeAccess &node) final;
+  bool VisitIdentifierAccess(AST::IdentifierAccess &node) final;
   bool VisitBinaryExpression(AST::BinaryExpression &node) final;
   bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) final;
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) final;
@@ -47,6 +49,7 @@ class SemanticAnnotator : public AST::Visitor {
   // places GML's = assigns (see mark_statement).
   bool VisitCodeBlock(AST::CodeBlock &node) final;
   bool VisitIfStatement(AST::IfStatement &node) final;
+  bool VisitSwitchStatement(AST::SwitchStatement &node) final;
   bool VisitForLoop(AST::ForLoop &node) final;
   bool VisitWhileLoop(AST::WhileLoop &node) final;
   bool VisitDoLoop(AST::DoLoop &node) final;
@@ -67,12 +70,14 @@ class SemanticAnnotator : public AST::Visitor {
   // that = assigns. Parents visit before children, so the registration is
   // in place before VisitBinaryExpression reaches the node.
   void mark_statement(const AST::PNode &stmt);
+  bool looser_than_equality(TokenType op) const;
 
   ErrorHandler *herr_;
   const LanguageFrontend *frontend_;
   // GML dialect: = compares in value position. Off under C++ inheritance
   // (CompatibilityOptions::use_gml_equals).
   bool gml_equals_;
+  const std::set<std::string> *globalvars_;
   // Statement-position = nodes; every other = is a comparison.
   std::set<const AST::Node*> statement_equals_;
   // Locals declared with a class type (definition pages) in this AST, in

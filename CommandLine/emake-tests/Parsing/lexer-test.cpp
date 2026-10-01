@@ -229,3 +229,22 @@ TEST(LexerTest, SingleQuoteIsCharInCpp) {
   EXPECT_EQ(t.type, TT_CHARLIT);
   EXPECT_EQ(t.content, "a");
 }
+
+TEST(LexerTest, GmlCharIsAName) {
+  auto kinds = [](std::string code, bool cpp = false) {
+    LexerTester lex(std::move(code), cpp);
+    std::string out;
+    for (Token t = lex->ReadToken(); t.type != TT_ENDOFCODE; t = lex->ReadToken())
+      if (t.content == "char" || t.content == "gml_char")
+        out += (t.type == TT_TYPE_NAME ? "T:" : "N:") + std::string(t.content) + " ";
+    return out;
+  };
+  EXPECT_EQ(kinds("var char; char = string_char_at(s, 1); var i, char;"),
+            "N:gml_char N:gml_char N:gml_char ");
+  EXPECT_EQ(kinds("switch (char) {} if (char == 'a' or f(char)) str += char"),
+            "N:gml_char N:gml_char N:gml_char N:gml_char ");
+  EXPECT_EQ(kinds("x = other.char; y = 'a' <= char;"), "N:gml_char N:gml_char ");
+  EXPECT_EQ(kinds("char c; unsigned char u; x = (char) y; char *p; vector<char> v;"),
+            "T:char T:char T:char T:char T:char ");
+  EXPECT_EQ(kinds("char = 1;", true), "T:char ");
+}
