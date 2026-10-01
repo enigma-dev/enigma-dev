@@ -4496,6 +4496,31 @@ TEST(ParserTest, GmlWordOperators) {
   EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
 }
 
+TEST(ParserTest, GmlWordOperatorsPrint) {
+  ParserTester test = ParserTester::CreateWithoutCpp("if(not a) b = c xor d;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  std::string out = v.GetPrintedCode();
+  EXPECT_THAT(out, HasSubstr("!a"));
+  EXPECT_THAT(out, HasSubstr("(bool(c) != bool(d))"));
+}
+
+TEST(ParserTest, ExitElse) {
+  ParserTester test = ParserTester::CreateWithoutCpp("if (a) exit; else b = 1;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
+}
+
+TEST(ParserTest, ForTrailingSemicolon) {
+  ParserTester test = ParserTester::CreateWithoutCpp("for (i = 0; i < 3; i += 1;) x += i;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  EXPECT_EQ(test->current_token().type, TT_ENDOFCODE);
+}
+
 TEST(ParserTest, GmlDoUntil) {
   ParserTester test = ParserTester::CreateWithoutCpp("do x += 1 until (x > 3)");
   auto node = test->ParseCode();
@@ -4574,6 +4599,23 @@ TEST(ParserTest, GmlEqualsLowering) {
   AST::CppPrettyPrinter v2;
   ASSERT_TRUE(v2.VisitCode(*cpp_node->As<AST::CodeBlock>()));
   EXPECT_THAT(v2.GetPrintedCode(), Not(HasSubstr("==")));
+}
+
+// GML precedence: & | ^ bind tighter than comparisons; && || ^^ share one
+// level, left to right. The printer parenthesizes so C++ keeps that grouping.
+TEST(ParserTest, GmlOperatorPrecedence) {
+  ParserTester test = ParserTester::CreateWithoutCpp(
+      "r = a & b != c; s = a || b && c; t = a == b < c;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  SemanticAnnotator annotator(&test.herr, test.context->language_fe);
+  node->RecurusiveVisit(annotator);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  std::string out = v.GetPrintedCode();
+  EXPECT_THAT(out, HasSubstr("r = (a & b) != c"));
+  EXPECT_THAT(out, HasSubstr("s = (a || b) && c"));
+  EXPECT_THAT(out, HasSubstr("t = (a == b) < c"));
 }
 
 // EDL's / is real division: the annotator marks it and the printer coerces

@@ -60,6 +60,18 @@ std::unordered_map<TokenType, OperatorPrecedence> Precedence::kBinaryPrec{
     // TODO: TT_ kYield RTL
 };
 
+// GML (GM8) levels, tightest first: * / div mod, + -, << >>, & | ^, comparisons,
+// && || ^^. Overrides kBinaryPrec for these operators.
+std::unordered_map<TokenType, OperatorPrecedence> Precedence::kGmlBinaryPrec {
+    {TT_AMPERSAND,    {Precedence::kThreeWayComp,   Associativity::LTR}},
+    {TT_CARET,        {Precedence::kThreeWayComp,   Associativity::LTR}},
+    {TT_PIPE,         {Precedence::kThreeWayComp,   Associativity::LTR}},
+    {TT_EQUALTO,      {Precedence::kRelational,     Associativity::LTR}},
+    {TT_NOTEQUAL,     {Precedence::kRelational,     Associativity::LTR}},
+    {TT_AND,          {Precedence::kBoolOr,         Associativity::LTR}},
+    {TT_XOR,          {Precedence::kBoolOr,         Associativity::LTR}},
+};
+
 std::unordered_map<TokenType, OperatorPrecedence> Precedence::kUnaryPostfixPrec {
     {TT_INCREMENT,    {Precedence::kUnaryPostfix, Associativity::LTR}},
     {TT_DECREMENT,    {Precedence::kUnaryPostfix, Associativity::LTR}},

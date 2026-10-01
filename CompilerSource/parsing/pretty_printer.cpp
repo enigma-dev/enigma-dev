@@ -17,6 +17,7 @@
 
 #include <JDI/src/System/builtins.h>
 #include "ast.h"
+#include "precedence.h"
 
 #include <iomanip>
 
@@ -287,7 +288,7 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 }
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
-  print(node.operation.token);
+  print(node.operation.type == TT_NOT ? "!" : node.operation.token);
   VISIT_AND_CHECK(node.operand);
   return true;
 }
@@ -340,8 +341,38 @@ bool AST::CppPrettyPrinter::VisitWithStatement(AST::WithStatement &node) {
   return true;
 }
 
+// Whether C++ would regroup this operand when printed flat, as when the tree
+// was parsed with GML precedence (kGmlBinaryPrec).
+static bool NeedsParens(const AST::BinaryExpression &parent, const AST::Node &operand, bool right) {
+  if (operand.type != AST::NodeType::BINARY_EXPRESSION) return false;
+  const auto &child = static_cast<const AST::BinaryExpression &>(operand);
+  // Value-position = prints flat on purpose (see lower_gml_equals below).
+  if (parent.lower_gml_equals || child.lower_gml_equals) return false;
+  if (parent.operation.type == TT_BEGINBRACKET) return false;
+  auto p = Precedence::kBinaryPrec.find(parent.operation.type);
+  auto c = Precedence::kBinaryPrec.find(child.operation.type);
+  if (p == Precedence::kBinaryPrec.end() || c == Precedence::kBinaryPrec.end()) return false;
+  if (c->second.precedence != p->second.precedence) return c->second.precedence > p->second.precedence;
+  return right == (p->second.associativity == Associativity::LTR);
+}
+
 bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
-  VISIT_AND_CHECK(node.left);
+  auto visit_operand = [&](PNode &operand, bool right) {
+    const bool paren = NeedsParens(node, *operand, right);
+    if (paren) print("(");
+    if (!Visit(operand)) return false;
+    if (paren) print(")");
+    return true;
+  };
+  if (node.operation.type == TT_XOR) {  // C++ has no logical xor
+    print("(bool(");
+    VISIT_AND_CHECK(node.left);
+    print(") != bool(");
+    VISIT_AND_CHECK(node.right);
+    print("))");
+    return true;
+  }
+  if (!visit_operand(node.left, false)) return false;
 
   std::string operation = node.operation.token;
   bool is_multi_dim = false;
@@ -375,7 +406,7 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
   // (`var x[count]`): only the spine declares.
   bool saved_decl = in_declarator_;
   if (node.operation.type == TT_BEGINBRACKET) in_declarator_ = false;
-  VISIT_AND_CHECK(node.right);
+  if (!visit_operand(node.right, true)) return false;
   in_declarator_ = saved_decl;
 
   if (is_multi_dim) {
