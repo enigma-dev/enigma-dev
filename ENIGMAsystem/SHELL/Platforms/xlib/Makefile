@@ -15,8 +15,8 @@ else ifeq ($(OS), DragonFly)
 	override CFLAGS += -IPlatforms/xlib/BSD/
 endif
 SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*.cpp) Platforms/General/PFshell/PFshell.cpp
-override CXXFLAGS += $(shell pkg-config x11 --cflags)
-override CFLAGS += $(shell pkg-config x11 --cflags)
+override CXXFLAGS += $(shell pkg-config x11 --cflags) -std=c++17
+override CFLAGS += $(shell pkg-config x11 --cflags) -std=c++17
 override LDLIBS += $(shell pkg-config x11 --libs) -lz -lpthread
 # Xrandr is optional (see XDisplayGetters.cpp's fallback).
 ifeq ($(shell pkg-config --exists xrandr && echo yes),yes)
