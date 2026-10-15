@@ -18,7 +18,7 @@ SOURCES += $(wildcard Platforms/xlib/*.cpp) $(wildcard Platforms/General/POSIX/*
 override CXXFLAGS += $(shell pkg-config x11 --cflags)
 override CFLAGS += $(shell pkg-config x11 --cflags)
 override LDLIBS += $(shell pkg-config x11 --libs) -lz -lpthread
-# RandR/Xinerama are optional (see XDisplayGetters.cpp's fallback).
-ifeq ($(shell pkg-config --exists xrandr xinerama && echo yes),yes)
-	override LDLIBS += -lXrandr -lXinerama
+# Xrandr is optional (see XDisplayGetters.cpp's fallback).
+ifeq ($(shell pkg-config --exists xrandr && echo yes),yes)
+	override LDLIBS += -lXrandr
 endif
