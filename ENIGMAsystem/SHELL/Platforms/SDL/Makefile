@@ -6,7 +6,8 @@ endif
 
 SOURCES += $(wildcard Platforms/SDL/*.cpp) Platforms/General/POSIX/Utility.cpp
 
-override CXXFLAGS += -DENIGMA_PLATFORM_SDL
+override CXXFLAGS += -DENIGMA_PLATFORM_SDL -std=c++17
+override CFLAGS += -DENIGMA_PLATFORM_SDL -std=c++17
 
 ifneq ($(TARGET-PLATFORM), Android)
 	override CXXFLAGS += $(shell $(PKG-CONFIG) --cflags sdl2)
@@ -23,6 +24,8 @@ else
 endif
 
 ifeq ($(TARGET-PLATFORM), Windows)
+	override LDFLAGS += -lshell32 -lole32 -luuid
+	override LDLIBS += -lshell32 -lole32 -luuid
 	SOURCES += Platforms/Win32/WINDOWSfilemanip.cpp
 	SOURCES += Platforms/SDL/Win32/Window.cpp
 else
@@ -32,7 +35,6 @@ else
 	endif
 
 	SOURCES += Platforms/General/POSIX/POSIXfilemanip.cpp
-	SOURCES += Platforms/General/POSIX/POSIXdirectory.cpp
 	override LDLIBS += -lpthread
 
 	ifeq ($(TARGET-PLATFORM), MacOSX)

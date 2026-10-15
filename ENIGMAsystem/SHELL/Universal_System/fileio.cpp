@@ -160,12 +160,6 @@ bool file_text_eof(int fileid) { // Returns whether we reached the end of the fi
   return (enigma::files.get(fileid).fs.eof());
 }
 
-void load_info(const std::string& fname) {
-	int file = file_text_open_read(fname);
-	enigma::gameInfoText = file_text_read_all(file);
-	file_text_close(file);
-}
-
 // Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
 int file_bin_open(const std::string& fname, int mode) {
   // TODO: add other modes like trunc / append?
