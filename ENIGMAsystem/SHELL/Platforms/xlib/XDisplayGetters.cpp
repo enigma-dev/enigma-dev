@@ -45,7 +45,7 @@ typedef struct {
 } XRRCrtcInfoRectangle;
 
 XRRCrtcInfoRectangle XRRCrtcInfoGetPrimaryMonitorRectangle(Display *display) {
- #ifdef ENIGMA_XLIB_HAS_XRANDR
+#ifdef ENIGMA_XLIB_HAS_XRANDR
   XRRCrtcInfoRectangle rectangle = { 0, 0, 0, 0 };
   XRRScreenResources *screenRes = nullptr;
   RROutput primaryOutput = 0;
