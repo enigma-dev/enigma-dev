@@ -32,6 +32,6 @@
 
 namespace enigma {
   extern unsigned char keymap[512];
-}
+} // namespace enigma
 
 #endif
