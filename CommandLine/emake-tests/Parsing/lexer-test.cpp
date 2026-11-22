@@ -201,6 +201,50 @@ TEST(LexerTest, MacroParameterNamedAfterEdlKeyword) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
+// Other EDL words (GML's brace alias `begin`, word operators) are names in
+// a C++ macro definition too, and substitute like any parameter.
+TEST(LexerTest, MacroParametersNamedAfterEdlWords) {
+  for (const char *param : {"begin", "end", "div", "mod", "not", "then"}) {
+    SCOPED_TRACE(param);
+    LexerTester lex("PICK(7);", true);
+    AddMacro(lex, Macro("PICK", {param}, false,
+                        std::string("pick(") + param + ")", &lex.herr));
+    EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+    EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+    EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+    EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+    EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+  }
+}
+
+// A parameter named after another macro shadows it inside the body.
+// OUTER is defined first: AddMacro writes into the shared C++ context that
+// Macro's string constructor lexes with, so INNER would expand at definition.
+TEST(LexerTest, MacroParameterShadowsMacroName) {
+  LexerTester lex("OUTER(5);", true);
+  AddMacro(lex, Macro("OUTER", {"INNER"}, false, "(INNER)", &lex.herr));
+  AddMacro(lex, Macro("INNER", "999", &lex.herr));
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  Token t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_DECLITERAL);
+  EXPECT_EQ(t.content, "5");
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+// Stringizing a keyword-named parameter yields the argument's spelling.
+TEST(LexerTest, StringizeKeywordNamedParameter) {
+  LexerTester lex("STR(abc);", true);
+  AddMacro(lex, Macro("STR", {"repeat"}, false, "#repeat", &lex.herr));
+  Token t = lex->ReadToken();
+  EXPECT_EQ(t.type, TT_STRINGLIT);
+  EXPECT_EQ(t.content, "\"abc\"");
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
 TEST(LexerTest, VariadicMacroFunctions) {
   LexerTester lex("VAR_FUNC(ident, 123);", true);
   AddMacro(lex, Macro("VAR_FUNC", {"arg"}, true, "(arg)", &lex.herr));
