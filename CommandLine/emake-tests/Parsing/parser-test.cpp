@@ -4545,6 +4545,26 @@ TEST(ParserTest, SemanticAnnotatorClassifiesDotAccess) {
   }
 }
 
+// Built-in locals on a computed or chained instance go through the tier
+// accessor like any other built-in local; other names stay on varaccess.
+TEST(ParserTest, SemanticAnnotatorSharedLocalsOnComputedInstances) {
+  using AccessKind = AST::ScopeAccess::AccessKind;
+  ParserTester test = ParserTester::CreateWithSetUp("a = f(1).x; b = p.q.y; c = p.q.r;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  SemanticAnnotator annotator(&test.herr, test.context->language_fe);
+  node->RecurusiveVisit(annotator);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 3u);
+  const AccessKind expected[] = {AccessKind::SHARED, AccessKind::SHARED,
+                                 AccessKind::VARACCESS};
+  for (size_t i = 0; i < 3; ++i) {
+    auto *rhs = block->statements[i]->As<AST::BinaryExpression>()->right.get();
+    ASSERT_EQ(rhs->type, AST::NodeType::SCOPE_ACCESS);
+    EXPECT_EQ(rhs->As<AST::ScopeAccess>()->access_kind, expected[i]) << i;
+  }
+}
+
 // GML for-headers don't need semicolons between clauses; the expression
 // grammar bounds each one.
 TEST(ParserTest, ForHeaderOptionalSemicolons) {

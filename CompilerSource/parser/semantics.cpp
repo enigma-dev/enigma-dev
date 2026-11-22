@@ -176,13 +176,14 @@ void SemanticAnnotator::record_locals(AST::DeclarationStatement &node) {
 // prefixes, then locals declared with a definition-page class type (plain
 // member access), then everything else as an instance varaccess. A chained
 // or computed lhs (a.b.c, f(x).y) is an instance handle under GML
-// semantics, so it lowers through varaccess too; struct-typed chains are
-// future binder work.
+// semantics: built-in locals on it go through the tier accessor, anything
+// else through varaccess. Struct-typed chains are future binder work.
 void SemanticAnnotator::classify_access(AST::ScopeAccess &node) {
   using AccessKind = AST::ScopeAccess::AccessKind;
   if (!node.lhs) return;  // `::name` global-scope id: not a dot access.
+  bool shared = frontend_->is_shared_local(node.name.content);
   if (node.lhs->type != AST::NodeType::IDENTIFIER) {
-    node.access_kind = AccessKind::VARACCESS;
+    node.access_kind = shared ? AccessKind::SHARED : AccessKind::VARACCESS;
     return;
   }
   const std::string &left = node.lhs->As<AST::IdentifierAccess>()->name.content;
@@ -192,7 +193,7 @@ void SemanticAnnotator::classify_access(AST::ScopeAccess &node) {
     node.access_kind = AccessKind::LOCAL;
   } else if (struct_locals_.count(left)) {
     node.access_kind = AccessKind::MEMBER;
-  } else if (frontend_->is_shared_local(node.name.content)) {
+  } else if (shared) {
     // Built-in locals (x, y, speed...) are inherited by every instance
     // through the object tiers; access goes through the generated tier
     // accessor, never a per-name varaccess.
