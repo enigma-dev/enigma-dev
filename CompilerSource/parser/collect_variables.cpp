@@ -58,6 +58,7 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 #include "object_storage.h"
+#include "backend/ideprint.h"
 
 // EDL_COLLECT_DEBUG=<name> traces where the collector harvests that name.
 // Pair with the source dump ExtractDeclarations emits under the same flag.
@@ -65,8 +66,8 @@ static void debug_collect(const char *arm, const std::string &name,
                           const enigma::parsing::Token &at) {
   static const char *dbg = getenv("EDL_COLLECT_DEBUG");
   if (dbg && name == dbg)
-    std::cerr << arm << " harvested `" << name << "' at " << at.line << ":"
-              << at.position << std::endl;
+    edbg << arm << " harvested `" << name << "' at " << at.line << ":"
+         << at.position << flushl;
 }
 
 using enigma::parsing::AST;

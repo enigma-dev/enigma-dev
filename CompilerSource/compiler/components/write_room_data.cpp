@@ -36,9 +36,11 @@
 using namespace std;
 
 #include "backend/GameData.h"
+#include "backend/ideprint.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
+#undef flushl
 #define flushl '\n' << flush
 #define flushs flush
 
@@ -98,9 +100,9 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const CompileState &st
           instance.id() << ",MISSING!," <<
           instance.x() << "," <<
           instance.y() << "},*/";
-        std::cerr << "ROOM ERROR: room " << room.name << " instance "
-                  << instance.id() << " references a nonexistent object; "
-                  << "instance dropped." << std::endl;
+        user << "Warning: room `" << room.name << "' instance "
+             << instance.id() << " references a nonexistent object; "
+             << "instance dropped.\n";
       } else {
         wto << "{" <<
           instance.id() << "," <<
