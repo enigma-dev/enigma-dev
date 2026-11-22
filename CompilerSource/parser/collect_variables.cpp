@@ -166,26 +166,26 @@ class DeclGatheringVisitor : public AST::Visitor {
   const NameSet &script_names;
   CompileState *cs;
 
-  std::string CheckIfIdentifier(AST::PNode &node) {
-    if (node->type == AST::NodeType::IDENTIFIER) {
-      std::string name = node->As<AST::IdentifierAccess>()->name.content;
-      if (parsed_scope->declarations.find(name) != parsed_scope->declarations.end()) {
-        node->As<AST::IdentifierAccess>()->def = parsed_scope->declarations[name];
-        return "";
-      } else if (script_names.find(name) != script_names.end()) {
-        if (node->type == AST::NodeType::FUNCTION_CALL) {
-          parsed_scope->funcs[name] = node->As<AST::FunctionCallExpression>()->arguments.size();
-        }
-        return "";
-      } else
-        return name;
+  // Returns the name if it may need registering; declared names get their
+  // definition stamped and script names are skipped.
+  std::string CheckIdentifier(AST::IdentifierAccess &id) {
+    std::string name(id.name.content);
+    auto decl = parsed_scope->declarations.find(name);
+    if (decl != parsed_scope->declarations.end()) {
+      id.def = decl->second;
+      return "";
     }
-    return "";
+    if (script_names.find(name) != script_names.end()) return "";
+    return name;
   }
 
-  void AddLocal(AST::PNode &node) {
-    if (!node) return;
-    std::string name = CheckIfIdentifier(node);
+  std::string CheckIfIdentifier(AST::PNode &node) {
+    if (!node || node->type != AST::NodeType::IDENTIFIER) return "";
+    return CheckIdentifier(*node->As<AST::IdentifierAccess>());
+  }
+
+  void RegisterUse(AST::IdentifierAccess &id) {
+    std::string name = CheckIdentifier(id);
     if (name == "") return;
     if (lang->is_shared_local(name)) {
       parsed_scope->globallocals[name] = 0;
@@ -196,22 +196,20 @@ class DeclGatheringVisitor : public AST::Visitor {
       return;
     }
     if (!lang->global_exists(name)) {
-      debug_collect("local", name, node->As<AST::IdentifierAccess>()->name);
+      debug_collect("local", name, id.name);
       parsed_scope->locals[name] = dectrip("var");
       cs->add_dot_accessed_local(name);
     }
   }
 
+  void AddLocal(AST::PNode &node) {
+    if (node && node->type == AST::NodeType::IDENTIFIER)
+      RegisterUse(*node->As<AST::IdentifierAccess>());
+  }
 
   void AddFunction(AST::FunctionCallExpression &node) {
     std::string name = CheckIfIdentifier(node.function);
     if (name != "") parsed_scope->funcs[name] = node.arguments.size();
-  }
-
-  bool VisitCodeBlock(AST::CodeBlock &node) {
-    for (auto &stmt : node.statements) AddLocal(stmt);
-    node.RecursiveSubVisit(*this);
-    return false;
   }
 
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) {
@@ -250,10 +248,18 @@ class DeclGatheringVisitor : public AST::Visitor {
     return false;
   }
 
-  bool VisitBinaryExpression(AST::BinaryExpression &node) {
-    AddLocal(node.left);
-    AddLocal(node.right);
-    node.RecursiveSubVisit(*this);
+  // Every identifier the walk reaches in value position is a use. Visitors
+  // for nodes whose identifiers are not uses (callees, type names, lambda
+  // parameters, the global. prefix) keep the walk away from them.
+  bool VisitIdentifierAccess(AST::IdentifierAccess &node) {
+    RegisterUse(node);
+    return true;
+  }
+
+  bool VisitTypeSpecifierSeq(AST::TypeSpecifierSeq &) { return false; }
+
+  bool VisitLambdaExpression(AST::LambdaExpression &node) {
+    if (node.body) node.body->RecurusiveVisit(*this);
     return false;
   }
 
@@ -269,8 +275,8 @@ class DeclGatheringVisitor : public AST::Visitor {
         parsed_scope->globals[name] = dectrip("var");
         parsed_scope->locals[name] = dectrip("var");
         cs->add_dot_accessed_local(name);
+        return false;
       } else {
-        AddLocal(node.lhs);
         // Built-in tier locals route through the generated tier accessor,
         // not a per-name varaccess; keep them out of the dot map.
         if (!lang->is_shared_local(name)) {
@@ -285,8 +291,10 @@ class DeclGatheringVisitor : public AST::Visitor {
 
   bool VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
     AddFunction(node);
-    for (auto &arg : node.arguments) AddLocal(arg);
-    node.RecursiveSubVisit(*this);
+    if (node.function && node.function->type != AST::NodeType::IDENTIFIER)
+      node.function->RecurusiveVisit(*this);
+    for (auto &arg : node.arguments)
+      if (arg) arg->RecurusiveVisit(*this);
     return false;
   }
 
@@ -298,7 +306,6 @@ class DeclGatheringVisitor : public AST::Visitor {
       prev_locals.push_back(it->first);
     }
 
-    AddLocal(node.body);
     node.RecursiveSubVisit(*this);
 
     for (auto it = parsed_scope->locals.begin(); it != parsed_scope->locals.end();) {
@@ -318,13 +325,9 @@ class DeclGatheringVisitor : public AST::Visitor {
   }
 
   bool VisitInitializer(AST::Initializer &node) {
-    if (node.target) {
-      // Target is usually a type or identifier, not a variable usage in the expression sense
-      node.target->accept(*this);
-    }
-    for (auto &val : node.values) {
-      val->accept(*this);
-    }
+    // The target names a type (a functional cast or construction), not a use.
+    for (auto &val : node.values)
+      if (val) val->RecurusiveVisit(*this);
     return false;
   }
 

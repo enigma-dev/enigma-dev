@@ -2,6 +2,7 @@
 #include "parser-test-classes.h"
 #include <languages/lang_CPP.h>
 #include <parser/semantics.h>
+#include <parser/collect_variables.h>
 
 using namespace ::enigma::parsing;
 using namespace ::testing;
@@ -4665,6 +4666,29 @@ TEST(ParserTest, ScriptDeclaredLocalsPrintBare) {
   EXPECT_THAT(out, Not(HasSubstr("varaccess_t")));
   EXPECT_THAT(out, HasSubstr("t++"));
   EXPECT_THAT(out, HasSubstr("return t"));
+}
+
+// Instance variables read anywhere in value position are collected as
+// locals; callees and the global. prefix are not variable uses.
+TEST(ParserTest, CollectVariablesRegistersEveryRead) {
+  ParserTester test = ParserTester::CreateWithSetUp("");
+  AST ast = AST::Parse(
+      "if (alive) counter++; var a = speed_bonus; b = -gain; c = flag ? lo : hi;"
+      "while (busy) {} switch (mode) { case 1: break; } global.g = 1;"
+      "undefined_function(arg); return hp;",
+      test.context);
+  ASSERT_FALSE(ast.HasError());
+  ParsedScope scope;
+  NameSet no_scripts;
+  CompileState cs(const_cast<LanguageFrontend *>(test.context->language_fe), no_scripts);
+  collect_variables(test.context->language_fe, &ast, &scope, no_scripts, &cs);
+  for (const char *name : {"alive", "counter", "speed_bonus", "gain", "flag", "lo", "hi",
+                           "busy", "mode", "arg", "hp"}) {
+    EXPECT_TRUE(scope.locals.count(name)) << name;
+  }
+  EXPECT_FALSE(scope.locals.count("global"));
+  EXPECT_FALSE(scope.locals.count("undefined_function"));
+  EXPECT_TRUE(scope.globals.count("g"));
 }
 
 // The GM-idiom collision special: `foo = bar (100001).baz = qux` could read
