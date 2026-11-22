@@ -75,7 +75,10 @@ class LanguageFrontend {
   /// For a template, the number of parameters with no default argument.
   /// EDL fills these with variant when a bare template name is used as a
   /// type (`map a;` means map<variant, variant>). Zero for non-templates.
-  virtual size_t template_undefaulted_params(jdi::definition *d) const = 0;
+  /// Only type parameters can be filled; if an undefaulted parameter takes
+  /// a value, its name is stored in `value_param`.
+  virtual size_t template_undefaulted_params(jdi::definition *d,
+                                             std::string *value_param) const = 0;
 
   /// Create a script with the given name (and an assumed 16 parameters,
   /// all defaulted) to the given scope.

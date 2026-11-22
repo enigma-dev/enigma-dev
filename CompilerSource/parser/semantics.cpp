@@ -140,8 +140,10 @@ bool SemanticAnnotator::VisitDeclarationStatement(AST::DeclarationStatement &nod
 }
 
 // EDL: a bare template name used as a type means the template with every
-// undefaulted argument filled by variant. An explicit argument list parses
-// as a TemplateId, which this leaves alone.
+// undefaulted type argument filled by variant; defaulted ones are left to
+// C++. A parameter that takes a value has no sensible fill, so that is an
+// error. An explicit argument list parses as a TemplateId, which this
+// leaves alone.
 void SemanticAnnotator::default_template_args(AST::DeclarationStatement &node) {
   if (!node.clause || !node.clause->specifiers) return;
   auto *spec = node.clause->specifiers.get();
@@ -151,7 +153,17 @@ void SemanticAnnotator::default_template_args(AST::DeclarationStatement &node) {
   }
   jdi::definition *def = spec->Definition();
   if (!def || !(def->flags & jdi::DEF_TEMPLATE)) return;
-  spec->default_template_args = frontend_->template_undefaulted_params(def);
+  std::string value_param;
+  size_t fill = frontend_->template_undefaulted_params(def, &value_param);
+  if (!value_param.empty()) {
+    if (spec->id_expression && spec->id_expression->type == AST::NodeType::IDENTIFIER) {
+      herr_->Error(spec->id_expression->As<AST::IdentifierAccess>()->name)
+          << "Template `" << def->name << "' needs a value for its parameter `"
+          << value_param << "'; give its arguments explicitly";
+    }
+    return;
+  }
+  spec->default_template_args = fill;
 }
 
 // Locals declared with a class type get plain member access; everything

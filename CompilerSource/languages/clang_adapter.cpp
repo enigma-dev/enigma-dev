@@ -914,6 +914,28 @@ enum CXChildVisitResult ClangContext::visit_cursor(CXCursor cursor, CXCursor /* 
   return CXChildVisit_Recurse;
 }
 
+// True if the template parameter at `cursor` has a default argument: an `=`
+// outside any nested brackets among its tokens.
+static bool template_param_has_default(CXTranslationUnit tu, CXCursor cursor) {
+  CXToken *tokens = nullptr;
+  unsigned count = 0;
+  clang_tokenize(tu, clang_getCursorExtent(cursor), &tokens, &count);
+  bool found = false;
+  int depth = 0;
+  for (unsigned i = 0; i < count && !found; ++i) {
+    if (clang_getTokenKind(tokens[i]) != CXToken_Punctuation) continue;
+    CXString spelling = clang_getTokenSpelling(tu, tokens[i]);
+    std::string_view tok = clang_getCString(spelling);
+    if (tok == "<" || tok == "(" || tok == "[" || tok == "{") ++depth;
+    else if (tok == ">" || tok == ")" || tok == "]" || tok == "}") --depth;
+    else if (tok == ">>") depth -= 2;
+    else if (tok == "=" && depth == 0) found = true;
+    clang_disposeString(spelling);
+  }
+  clang_disposeTokens(tu, tokens, count);
+  return found;
+}
+
 void ClangContext::register_usr(CXCursor cursor, jdi::definition* def) {
   if (clang_Cursor_isNull(cursor) || !def) return;
   CXString usr = clang_getCursorUSR(cursor);
@@ -1081,6 +1103,11 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<jdi::definition
               auto param = std::make_unique<jdi::definition_tempparam>(
                   get_cursor_name(child), v->tmpl, pflags);
               param->cursor = child;
+              // libclang exposes no default for a type parameter, so look for
+              // a top-level `=` in the parameter's tokens. Presence only, as
+              // for function parameters: the value is left unevaluated.
+              if (template_param_has_default(v->ctx->tu_, child))
+                param->default_assignment = std::make_unique<jdi::AST>();
               // Register the parameter so dependent member types (a field of
               // type T, a T& return) resolve to the tempparam; instantiate()'s
               // remap keys the substitution map on those pointers.

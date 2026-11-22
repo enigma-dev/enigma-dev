@@ -4579,6 +4579,33 @@ TEST(ParserTest, ArgumentCountSkipsNonFunctionCallees) {
   node->RecurusiveVisit(annotator);  // test.herr fails the test on any error
 }
 
+// A bare template name fills only its undefaulted parameters, and only
+// type parameters can be filled with variant.
+TEST(ParserTest, TemplateFillCountsUndefaultedTypeParams) {
+  using jdi::definition_tempparam;
+  lang_CPP lang;
+  jdi::definition_template defaulted("ring", nullptr, jdi::DEF_TEMPLATE);
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "K", &defaulted, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "V", &defaulted, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  defaulted.params.back()->default_assignment = std::make_unique<jdi::AST>();
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "N", &defaulted, jdi::DEF_TEMPPARAM));
+  defaulted.params.back()->default_assignment = std::make_unique<jdi::AST>();
+  std::string value_param;
+  EXPECT_EQ(lang.template_undefaulted_params(&defaulted, &value_param), 1u);
+  EXPECT_EQ(value_param, "");
+
+  jdi::definition_template sized("arr", nullptr, jdi::DEF_TEMPLATE);
+  sized.params.push_back(std::make_unique<definition_tempparam>(
+      "T", &sized, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  sized.params.push_back(std::make_unique<definition_tempparam>(
+      "N", &sized, jdi::DEF_TEMPPARAM));
+  EXPECT_EQ(lang.template_undefaulted_params(&sized, &value_param), 2u);
+  EXPECT_EQ(value_param, "N");
+}
+
 // GML for-headers don't need semicolons between clauses; the expression
 // grammar bounds each one.
 TEST(ParserTest, ForHeaderOptionalSemicolons) {

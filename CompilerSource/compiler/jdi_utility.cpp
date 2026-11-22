@@ -111,12 +111,15 @@ bool lang_CPP::definition_returns_void(definition *d) const {
   return true;
 }
 
-size_t lang_CPP::template_undefaulted_params(definition *d) const {
+size_t lang_CPP::template_undefaulted_params(definition *d, std::string *value_param) const {
   if (!(d->flags & DEF_TEMPLATE)) return 0;
   definition_template *dt = (definition_template*) d;
   size_t count = 0;
   for (const auto &param : dt->params) {
-    if (!param->default_assignment) ++count;
+    if (param->default_assignment) continue;
+    ++count;
+    if (!(param->flags & DEF_TYPENAME) && value_param && value_param->empty())
+      *value_param = param->name;
   }
   return count;
 }

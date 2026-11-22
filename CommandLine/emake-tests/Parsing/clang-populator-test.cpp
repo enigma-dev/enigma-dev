@@ -51,6 +51,7 @@ int printf_like(const char* fmt, ...);
 
 template <typename T> T pick(T a, int n = 2);
 
+
 #define DEMO_PAREN_VALUE (demo_ns::Widget())
 #define DEMO_FUNC_MACRO(a, b) ((a) + (b))
 
@@ -62,6 +63,8 @@ class Box {
   int size() { return count; }
   T& at(int i);
 };
+template <typename K, typename V = Box<K>, int N = 3, long M = 0>
+class Holder {};
 )cpp";
 
 std::string WriteFixture() {
@@ -394,4 +397,23 @@ TEST(ClangSearchDirsTest, LaterParsesSeeNewSearchDirs) {
   after.parse_file(src.string());
   ASSERT_NE(after.get_global(), nullptr);
   EXPECT_NE(after.get_global()->find_local("from_new_search_dir"), nullptr);
+}
+
+// Template parameter defaults populate as presence sentinels; a value
+// parameter's type reference is not mistaken for a default.
+TEST_F(ClangPopulatorTest, TemplateParameterDefaults) {
+  jdi::definition_scope* global = ctx.get_global();
+  ASSERT_NE(global, nullptr);
+  auto* holder = dynamic_cast<jdi::definition_template*>(global->find_local("Holder"));
+  ASSERT_NE(holder, nullptr);
+  ASSERT_EQ(holder->params.size(), 4u);
+  EXPECT_EQ(holder->params[0]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[1]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[2]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[3]->default_assignment, nullptr);
+
+  auto* box = dynamic_cast<jdi::definition_template*>(global->find_local("Box"));
+  ASSERT_NE(box, nullptr);
+  ASSERT_EQ(box->params.size(), 1u);
+  EXPECT_EQ(box->params[0]->default_assignment, nullptr);
 }

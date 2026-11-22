@@ -25,4 +25,10 @@ map defaults;
 defaults["str"] = 10.5;
 gtest_assert_eq(defaults["str"], 10.5);
 
+// Defaulted template parameters are left to C++, value parameters included.
+ring buffer;
+buffer[1] = 2.5;
+gtest_assert_eq(buffer[7], 2.5);
+gtest_assert_eq(buffer(), sizeof(double) * 100 + 4);
+
 game_end();
