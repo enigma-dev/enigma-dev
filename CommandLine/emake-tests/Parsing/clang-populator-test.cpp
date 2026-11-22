@@ -48,6 +48,8 @@ void greet(int x, int y = 5);
 int printf_like(const char* fmt, ...);
 
 
+template <typename T> T pick(T a, int n = 2);
+
 #define DEMO_PAREN_VALUE (demo_ns::Widget())
 #define DEMO_FUNC_MACRO(a, b) ((a) + (b))
 
@@ -353,4 +355,20 @@ TEST_F(ClangPopulatorTest, ParenBodiedObjectMacroIsNotFunctionLike) {
   ASSERT_NE(func, macros.end());
   ASSERT_TRUE(func->second->parameters.has_value());
   EXPECT_EQ(*func->second->parameters, (std::vector<std::string>{"a", "b"}));
+}
+
+// Function templates expose no arguments through clang_Cursor_getArgument;
+// their parameters and defaults still populate, from the ParmDecl children.
+TEST_F(ClangPopulatorTest, FunctionTemplateParameters) {
+  jdi::definition_scope* global = ctx.get_global();
+  ASSERT_NE(global, nullptr);
+  auto* pick = dynamic_cast<jdi::definition_function*>(global->find_local("pick"));
+  ASSERT_NE(pick, nullptr);
+  ASSERT_EQ(pick->overloads.size(), 1u);
+  auto& node = pick->overloads.begin()->second->referencers.top();
+  ASSERT_EQ(node.paramcount(), 2u);
+  const jdi::ref_stack::parameter_ct& params =
+      ((jdi::ref_stack::node_func*)&node)->params;
+  EXPECT_EQ(params[0].default_value, nullptr);
+  EXPECT_NE(params[1].default_value, nullptr);
 }

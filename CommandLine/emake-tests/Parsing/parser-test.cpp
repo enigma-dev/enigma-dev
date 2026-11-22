@@ -4565,6 +4565,20 @@ TEST(ParserTest, SemanticAnnotatorSharedLocalsOnComputedInstances) {
   }
 }
 
+// Argument counts are checked only against functions: a callee whose
+// definition is a variable or type has no overload set.
+TEST(ParserTest, ArgumentCountSkipsNonFunctionCallees) {
+  ParserTester test = ParserTester::CreateWithSetUp("thing(1, 2, 3);");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  auto *call = node->As<AST::CodeBlock>()->statements[0]->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  jdi::definition thing("thing", nullptr, jdi::DEF_TYPED);
+  call->function->As<AST::IdentifierAccess>()->def = &thing;
+  SemanticAnnotator annotator(&test.herr, test.context->language_fe);
+  node->RecurusiveVisit(annotator);  // test.herr fails the test on any error
+}
+
 // GML for-headers don't need semicolons between clauses; the expression
 // grammar bounds each one.
 TEST(ParserTest, ForHeaderOptionalSemicolons) {

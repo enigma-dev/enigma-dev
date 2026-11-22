@@ -1146,8 +1146,18 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<jdi::definition
 
     CXType func_type = clang_getCursorType(cursor);
     int num_args = clang_Cursor_getNumArguments(cursor);
-    // Handle -1 return value (function templates, invalid cursors, etc.)
+    // Function templates answer -1 and expose no argument cursors; their
+    // ParmDecls are plain children.
+    std::vector<CXCursor> template_parms;
     if (num_args < 0) {
+      clang_visitChildren(
+          cursor,
+          [](CXCursor child, CXCursor, CXClientData out) {
+            if (clang_getCursorKind(child) == CXCursor_ParmDecl)
+              static_cast<std::vector<CXCursor>*>(out)->push_back(child);
+            return CXChildVisit_Continue;
+          },
+          &template_parms);
       num_args = clang_getNumArgTypes(func_type);
       if (num_args < 0) {
         num_args = 0;
@@ -1172,7 +1182,9 @@ void ClangContext::process_cursor(CXCursor cursor, std::function<jdi::definition
       // The default's VALUE stays unevaluated -- that is thin-node
       // territory, and bounds only need presence.
       jdi::AST *default_sentinel = nullptr;
-      CXCursor arg_cursor = clang_Cursor_getArgument(cursor, i);
+      CXCursor arg_cursor = size_t(i) < template_parms.size()
+                                ? template_parms[i]
+                                : clang_Cursor_getArgument(cursor, i);
       if (!clang_Cursor_isNull(arg_cursor)) {
         bool has_default = false;
         clang_visitChildren(

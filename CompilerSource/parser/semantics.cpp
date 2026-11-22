@@ -115,11 +115,13 @@ void SemanticAnnotator::validate_call(AST::FunctionCallExpression &node) {
   if (node.function->type != AST::NodeType::IDENTIFIER) return;
   auto *func = node.function->As<AST::IdentifierAccess>();
   jdi::definition *def = func->def;
-  if (!def) return;
+  // A variable or type callee (a functor, a construction) has no overload
+  // set to check against.
+  if (!def || !frontend_->definition_is_function(def)) return;
   unsigned int min = 0;
   unsigned int max = 0;
   frontend_->definition_parameter_bounds(def, min, max);
-  if (max == unsigned(-1)) return;
+  if (max == unsigned(-1) || min > max) return;
   if (node.arguments.size() < min) {
     herr_->Error(func->name)
         << "Too few arguments to `" << func->name.content << "': wanted at least "
