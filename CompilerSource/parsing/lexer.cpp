@@ -231,6 +231,8 @@ class NullLanguageFrontend : public LanguageFrontend {
   int function_variadic_after(jdi::definition_function *) const final { return 0; }
   bool definition_is_function(jdi::definition *) const final { return false; }
   size_t definition_overload_count(jdi::definition *) const final { return 0; }
+  bool definition_returns_void(jdi::definition *) const final { return false; }
+  size_t template_undefaulted_params(jdi::definition *, std::string *) const final { return 0; }
 
   NullLanguageFrontend(const setting::CompatibilityOptions c = {}):
       compatibility_opts_(c) {}
@@ -617,7 +619,14 @@ Token Lexer::ReadToken() {
       PopMacro();
       return ReadToken();
     }
-    return macro.tokens[macro.index++];
+    // Macro buffers hold raw tokens; names still need keyword and
+    // definition typing, same as names lexed straight from the code.
+    // Macro expansion itself is not re-attempted here: a function-like
+    // macro's arguments would be read from the code buffer, not the
+    // expansion being replayed.
+    Token res = macro.tokens[macro.index++];
+    if (res.type == TT_IDENTIFIER) return TranslateNameToken(res);
+    return res;
   }
   Token res = ReadRawToken();
   if (res.type == TT_IDENTIFIER) {

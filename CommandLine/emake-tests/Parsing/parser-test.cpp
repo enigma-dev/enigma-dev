@@ -2,6 +2,7 @@
 #include "parser-test-classes.h"
 #include <languages/lang_CPP.h>
 #include <parser/semantics.h>
+#include <parser/collect_variables.h>
 
 using namespace ::enigma::parsing;
 using namespace ::testing;
@@ -4544,6 +4545,92 @@ TEST(ParserTest, SemanticAnnotatorClassifiesDotAccess) {
   }
 }
 
+// Built-in locals on a computed or chained instance go through the tier
+// accessor like any other built-in local; other names stay on varaccess.
+TEST(ParserTest, SemanticAnnotatorSharedLocalsOnComputedInstances) {
+  using AccessKind = AST::ScopeAccess::AccessKind;
+  ParserTester test = ParserTester::CreateWithSetUp("a = f(1).x; b = p.q.y; c = p.q.r;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  SemanticAnnotator annotator(&test.herr, test.context->language_fe);
+  node->RecurusiveVisit(annotator);
+  auto *block = node->As<AST::CodeBlock>();
+  ASSERT_EQ(block->statements.size(), 3u);
+  const AccessKind expected[] = {AccessKind::SHARED, AccessKind::SHARED,
+                                 AccessKind::VARACCESS};
+  for (size_t i = 0; i < 3; ++i) {
+    auto *rhs = block->statements[i]->As<AST::BinaryExpression>()->right.get();
+    ASSERT_EQ(rhs->type, AST::NodeType::SCOPE_ACCESS);
+    EXPECT_EQ(rhs->As<AST::ScopeAccess>()->access_kind, expected[i]) << i;
+  }
+}
+
+// Argument counts are checked only against functions: a callee whose
+// definition is a variable or type has no overload set.
+TEST(ParserTest, ArgumentCountSkipsNonFunctionCallees) {
+  ParserTester test = ParserTester::CreateWithSetUp("thing(1, 2, 3);");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  auto *call = node->As<AST::CodeBlock>()->statements[0]->As<AST::FunctionCallExpression>();
+  ASSERT_EQ(call->function->type, AST::NodeType::IDENTIFIER);
+  jdi::definition thing("thing", nullptr, jdi::DEF_TYPED);
+  call->function->As<AST::IdentifierAccess>()->def = &thing;
+  SemanticAnnotator annotator(&test.herr, test.context->language_fe);
+  node->RecurusiveVisit(annotator);  // test.herr fails the test on any error
+}
+
+// A bare template name fills only its undefaulted parameters, and only
+// type parameters can be filled with variant.
+TEST(ParserTest, TemplateFillCountsUndefaultedTypeParams) {
+  using jdi::definition_tempparam;
+  lang_CPP lang;
+  jdi::definition_template defaulted("ring", nullptr, jdi::DEF_TEMPLATE);
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "K", &defaulted, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "V", &defaulted, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  defaulted.params.back()->default_assignment = std::make_unique<jdi::AST>();
+  defaulted.params.push_back(std::make_unique<definition_tempparam>(
+      "N", &defaulted, jdi::DEF_TEMPPARAM));
+  defaulted.params.back()->default_assignment = std::make_unique<jdi::AST>();
+  std::string value_param;
+  EXPECT_EQ(lang.template_undefaulted_params(&defaulted, &value_param), 1u);
+  EXPECT_EQ(value_param, "");
+
+  jdi::definition_template sized("arr", nullptr, jdi::DEF_TEMPLATE);
+  sized.params.push_back(std::make_unique<definition_tempparam>(
+      "T", &sized, jdi::DEF_TEMPPARAM | jdi::DEF_TYPENAME));
+  sized.params.push_back(std::make_unique<definition_tempparam>(
+      "N", &sized, jdi::DEF_TEMPPARAM));
+  EXPECT_EQ(lang.template_undefaulted_params(&sized, &value_param), 2u);
+  EXPECT_EQ(value_param, "N");
+}
+
+// GML for-headers don't need semicolons between clauses; the expression
+// grammar bounds each one.
+TEST(ParserTest, ForHeaderOptionalSemicolons) {
+  ParserTester test = ParserTester::CreateWithoutCpp(
+      "for (b = 1 b < 11 b += 1) c = c + b;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  std::string out = v.GetPrintedCode();
+  EXPECT_THAT(out, HasSubstr("b < 11"));
+  EXPECT_THAT(out, HasSubstr("b += 1"));
+}
+
+// `not` is a C++ alternative token; it prints as itself, but needs a
+// separator or it glues onto the operand (`notfoo`).
+TEST(ParserTest, WordNotPrintsSpaced) {
+  ParserTester test = ParserTester::CreateWithoutCpp("if (not a) b = 1;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  EXPECT_THAT(v.GetPrintedCode(), HasSubstr("not a"));
+}
+
 // GML's = compares in value position; only statement-position = assigns.
 // The annotator marks value-position = nodes and the printer emits ==.
 // The parse groups = at assignment precedence, but flat printing means the
@@ -4620,6 +4707,49 @@ TEST(ParserTest, DotChainsClassifyAndLower) {
   ASSERT_TRUE(v.VisitCode(*block));
   EXPECT_THAT(v.GetPrintedCode(),
               HasSubstr("enigma::varaccess_c(enigma::varaccess_b(a))"));
+}
+
+// In script mode, a `var` local is a C++ local of the emitted function: every
+// later use prints bare, never through the instance accessor.
+TEST(ParserTest, ScriptDeclaredLocalsPrintBare) {
+  ParserTester test = ParserTester::CreateWithSetUp("var t; t = 1; t++; return t;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  const char *path = "./CompilerSource/parsing/output-script.txt";
+  {
+    std::ofstream ofs(path);
+    AST::CppPrettyPrinter v(ofs, test.context->language_fe, true);
+    v.CollectDeclaredNames(*node);
+    ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  }
+  std::ifstream in(path);
+  std::string out((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  EXPECT_THAT(out, Not(HasSubstr("varaccess_t")));
+  EXPECT_THAT(out, HasSubstr("t++"));
+  EXPECT_THAT(out, HasSubstr("return t"));
+}
+
+// Instance variables read anywhere in value position are collected as
+// locals; callees and the global. prefix are not variable uses.
+TEST(ParserTest, CollectVariablesRegistersEveryRead) {
+  ParserTester test = ParserTester::CreateWithSetUp("");
+  AST ast = AST::Parse(
+      "if (alive) counter++; var a = speed_bonus; b = -gain; c = flag ? lo : hi;"
+      "while (busy) {} switch (mode) { case 1: break; } global.g = 1;"
+      "undefined_function(arg); return hp;",
+      test.context);
+  ASSERT_FALSE(ast.HasError());
+  ParsedScope scope;
+  NameSet no_scripts;
+  CompileState cs(const_cast<LanguageFrontend *>(test.context->language_fe), no_scripts);
+  collect_variables(test.context->language_fe, &ast, &scope, no_scripts, &cs);
+  for (const char *name : {"alive", "counter", "speed_bonus", "gain", "flag", "lo", "hi",
+                           "busy", "mode", "arg", "hp"}) {
+    EXPECT_TRUE(scope.locals.count(name)) << name;
+  }
+  EXPECT_FALSE(scope.locals.count("global"));
+  EXPECT_FALSE(scope.locals.count("undefined_function"));
+  EXPECT_TRUE(scope.globals.count("g"));
 }
 
 // The GM-idiom collision special: `foo = bar (100001).baz = qux` could read

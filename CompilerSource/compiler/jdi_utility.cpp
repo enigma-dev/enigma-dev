@@ -101,6 +101,29 @@ void lang_CPP::definition_parameter_bounds(definition *d, unsigned &min, unsigne
   iterate_overloads((definition_function*) d, min, max, enigma_type__varargs);
 }
 
+bool lang_CPP::definition_returns_void(definition *d) const {
+  if (!(d->flags & DEF_FUNCTION)) return false;
+  definition_function *df = (definition_function*) d;
+  if (df->overloads.empty()) return false;
+  for (const auto &overload_pair : df->overloads) {
+    if (!(overload_pair.second->flags & DEF_RETURNS_VOID)) return false;
+  }
+  return true;
+}
+
+size_t lang_CPP::template_undefaulted_params(definition *d, std::string *value_param) const {
+  if (!(d->flags & DEF_TEMPLATE)) return 0;
+  definition_template *dt = (definition_template*) d;
+  size_t count = 0;
+  for (const auto &param : dt->params) {
+    if (param->default_assignment) continue;
+    ++count;
+    if (!(param->flags & DEF_TYPENAME) && value_param && value_param->empty())
+      *value_param = param->name;
+  }
+  return count;
+}
+
 bool lang_CPP::definition_is_function(definition *d) const {
   if (d->flags & DEF_FUNCTION) return true;
   if (d->flags & DEF_TEMPLATE) {

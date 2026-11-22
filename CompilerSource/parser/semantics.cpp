@@ -42,11 +42,28 @@ bool SemanticAnnotator::VisitBinaryExpression(AST::BinaryExpression &node) {
   return true;
 }
 
+// GML has no void: a call always has a value, and a function with nothing
+// to return yields 0. Any void call used as a value (anywhere but statement
+// position) gets wrapped `(call, 0)`; C++ would reject the use outright.
+void SemanticAnnotator::check_void_value(AST::FunctionCallExpression &node) {
+  if (statement_calls_.count(&node)) return;
+  if (node.function->type != AST::NodeType::IDENTIFIER) return;
+  auto *func = node.function->As<AST::IdentifierAccess>();
+  if (!func->def || !frontend_->definition_returns_void(func->def)) return;
+  node.lower_void_value = true;
+  herr_->Warning(func->name)
+      << "`" << func->name.content << "' returns no value; using 0";
+}
+
 void SemanticAnnotator::mark_statement(const AST::PNode &stmt) {
   if (!stmt) return;
-  if (stmt->type != AST::NodeType::BINARY_EXPRESSION) return;
-  auto *bin = stmt->As<AST::BinaryExpression>();
-  if (bin->operation.type == TT_EQUALS) statement_equals_.insert(bin);
+  if (stmt->type == AST::NodeType::BINARY_EXPRESSION) {
+    auto *bin = stmt->As<AST::BinaryExpression>();
+    if (bin->operation.type == TT_EQUALS) statement_equals_.insert(bin);
+  } else if (stmt->type == AST::NodeType::FUNCTION_CALL) {
+    // A call at statement position discards its value; void is fine there.
+    statement_calls_.insert(stmt.get());
+  }
 }
 
 bool SemanticAnnotator::VisitCodeBlock(AST::CodeBlock &node) {
@@ -84,6 +101,7 @@ bool SemanticAnnotator::VisitWithStatement(AST::WithStatement &node) {
 
 bool SemanticAnnotator::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
   validate_call(node);
+  check_void_value(node);
   return true;
 }
 
@@ -97,11 +115,13 @@ void SemanticAnnotator::validate_call(AST::FunctionCallExpression &node) {
   if (node.function->type != AST::NodeType::IDENTIFIER) return;
   auto *func = node.function->As<AST::IdentifierAccess>();
   jdi::definition *def = func->def;
-  if (!def) return;
+  // A variable or type callee (a functor, a construction) has no overload
+  // set to check against.
+  if (!def || !frontend_->definition_is_function(def)) return;
   unsigned int min = 0;
   unsigned int max = 0;
   frontend_->definition_parameter_bounds(def, min, max);
-  if (max == unsigned(-1)) return;
+  if (max == unsigned(-1) || min > max) return;
   if (node.arguments.size() < min) {
     herr_->Error(func->name)
         << "Too few arguments to `" << func->name.content << "': wanted at least "
@@ -114,8 +134,36 @@ void SemanticAnnotator::validate_call(AST::FunctionCallExpression &node) {
 }
 
 bool SemanticAnnotator::VisitDeclarationStatement(AST::DeclarationStatement &node) {
+  default_template_args(node);
   record_locals(node);
   return true;
+}
+
+// EDL: a bare template name used as a type means the template with every
+// undefaulted type argument filled by variant; defaulted ones are left to
+// C++. A parameter that takes a value has no sensible fill, so that is an
+// error. An explicit argument list parses as a TemplateId, which this
+// leaves alone.
+void SemanticAnnotator::default_template_args(AST::DeclarationStatement &node) {
+  if (!node.clause || !node.clause->specifiers) return;
+  auto *spec = node.clause->specifiers.get();
+  if (spec->id_expression &&
+      spec->id_expression->type == AST::NodeType::TEMPLATE_ID) {
+    return;
+  }
+  jdi::definition *def = spec->Definition();
+  if (!def || !(def->flags & jdi::DEF_TEMPLATE)) return;
+  std::string value_param;
+  size_t fill = frontend_->template_undefaulted_params(def, &value_param);
+  if (!value_param.empty()) {
+    if (spec->id_expression && spec->id_expression->type == AST::NodeType::IDENTIFIER) {
+      herr_->Error(spec->id_expression->As<AST::IdentifierAccess>()->name)
+          << "Template `" << def->name << "' needs a value for its parameter `"
+          << value_param << "'; give its arguments explicitly";
+    }
+    return;
+  }
+  spec->default_template_args = fill;
 }
 
 // Locals declared with a class type get plain member access; everything
@@ -142,13 +190,14 @@ void SemanticAnnotator::record_locals(AST::DeclarationStatement &node) {
 // prefixes, then locals declared with a definition-page class type (plain
 // member access), then everything else as an instance varaccess. A chained
 // or computed lhs (a.b.c, f(x).y) is an instance handle under GML
-// semantics, so it lowers through varaccess too; struct-typed chains are
-// future binder work.
+// semantics: built-in locals on it go through the tier accessor, anything
+// else through varaccess. Struct-typed chains are future binder work.
 void SemanticAnnotator::classify_access(AST::ScopeAccess &node) {
   using AccessKind = AST::ScopeAccess::AccessKind;
   if (!node.lhs) return;  // `::name` global-scope id: not a dot access.
+  bool shared = frontend_->is_shared_local(node.name.content);
   if (node.lhs->type != AST::NodeType::IDENTIFIER) {
-    node.access_kind = AccessKind::VARACCESS;
+    node.access_kind = shared ? AccessKind::SHARED : AccessKind::VARACCESS;
     return;
   }
   const std::string &left = node.lhs->As<AST::IdentifierAccess>()->name.content;
@@ -158,7 +207,7 @@ void SemanticAnnotator::classify_access(AST::ScopeAccess &node) {
     node.access_kind = AccessKind::LOCAL;
   } else if (struct_locals_.count(left)) {
     node.access_kind = AccessKind::MEMBER;
-  } else if (frontend_->is_shared_local(node.name.content)) {
+  } else if (shared) {
     // Built-in locals (x, y, speed...) are inherited by every instance
     // through the object tiers; access goes through the generated tier
     // accessor, never a per-name varaccess.

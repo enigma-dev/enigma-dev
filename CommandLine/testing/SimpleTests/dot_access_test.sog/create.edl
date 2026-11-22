@@ -43,4 +43,10 @@ if (instance_number(test_object) == 1)
   buddy.y = 16;
   gtest_assert_eq(buddy.y, 16);
   gtest_assert_eq(self.y, 0);
+
+  // A computed instance reaches built-in locals through the same accessor.
+  gtest_assert_eq((buddy).y, 16);
+  gtest_assert_eq(instance_find(test_object, 1), buddy);
+  instance_find(test_object, 1).y = 20;
+  gtest_assert_eq(buddy.y, 20);
 }

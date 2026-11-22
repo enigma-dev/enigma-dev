@@ -90,7 +90,7 @@ ActionVectorSpan GetNextAction(const std::vector<buffers::resources::Action> &ac
     ActionVectorSpan body = GetNextAction(actions, index);
 
     // Consider the @c else of an if as part of its body
-    if ((index + 1) <= actions.size() && actions[index + 1].kind() == ActionKind::ACT_ELSE) {
+    if ((index + 1) < actions.size() && actions[index + 1].kind() == ActionKind::ACT_ELSE) {
       // Skip over the ACT_ELSE and set the index pointer to the first action of the else
       index += 2;
       body = GetNextAction(actions, index);

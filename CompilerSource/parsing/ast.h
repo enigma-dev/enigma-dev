@@ -191,6 +191,7 @@ class AST {
     /// TT_EQUALS nodes and the printer emits ==.
     bool lower_gml_equals = false;
 
+
     BASIC_NODE_ROUTINES(BinaryExpression);
 
     BinaryExpression(PNode left_, PNode right_, Operation operation_):
@@ -202,6 +203,11 @@ class AST {
   struct FunctionCallExpression : TypedNode<NodeType::FUNCTION_CALL> {
     PNode function;
     std::vector<PNode> arguments;
+
+    /// GML has no void: a function with nothing to return yields 0 in any
+    /// value position. The annotator marks void calls used as values
+    /// (anywhere but statement position) and the printer wraps `(call, 0)`.
+    bool lower_void_value = false;
 
     BASIC_NODE_ROUTINES(FunctionCallExpression);
 
@@ -296,6 +302,11 @@ class AST {
     std::size_t flags = 0;
     PNode id_expression;
     std::unique_ptr<DeclSpecList> declspecs;
+
+    /// EDL: a bare template name used as a type fills its missing arguments
+    /// with variant (`map a;` means map<variant, variant>). The annotator
+    /// counts them; the printer appends the argument list.
+    std::size_t default_template_args = 0;
 
     BASIC_NODE_ROUTINES(TypeSpecifierSeq);
 

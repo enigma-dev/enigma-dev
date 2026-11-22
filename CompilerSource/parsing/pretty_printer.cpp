@@ -18,6 +18,7 @@
 #include <JDI/src/System/builtins.h>
 #include "ast.h"
 
+#include <cctype>
 #include <iomanip>
 
 using namespace enigma::parsing;
@@ -80,7 +81,7 @@ struct DeclaredNameCollector : AST::Visitor {
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) final {
     if (node.clause) {
       for (auto &d : node.clause->declarators)
-        if (!d->name.content.empty()) out->insert(std::string(d->name.content));
+        if (d && !d->name.content.empty()) out->insert(std::string(d->name.content));
     }
     node.RecursiveSubVisit(*this);
     return false;
@@ -90,7 +91,7 @@ struct DeclaredNameCollector : AST::Visitor {
 
 void AST::CppPrettyPrinter::CollectDeclaredNames(AST::Node &root) {
   DeclaredNameCollector collector(&declared_names_);
-  root.accept(collector);
+  root.RecurusiveVisit(collector);
 }
 
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {
@@ -288,6 +289,12 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
   print(node.operation.token);
+  // Word operators (`not`) are valid C++ alternative tokens, but unlike
+  // symbols they need a separator or they glue onto the operand.
+  if (!node.operation.token.empty() &&
+      isalpha(static_cast<unsigned char>(node.operation.token.back()))) {
+    print(" ");
+  }
   VISIT_AND_CHECK(node.operand);
   return true;
 }
@@ -387,6 +394,8 @@ bool AST::CppPrettyPrinter::VisitBinaryExpression(AST::BinaryExpression &node) {
 }
 
 bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpression &node) {
+  // GML has no void: a void call in value position yields 0.
+  if (node.lower_void_value) print("(");
   VISIT_AND_CHECK(node.function);
   print("(");
 
@@ -418,6 +427,7 @@ bool AST::CppPrettyPrinter::VisitFunctionCallExpression(AST::FunctionCallExpress
   if (varargs_opened) print(")");
 
   print(")");
+  if (node.lower_void_value) print(", 0)");
   return true;
 }
 
@@ -527,6 +537,15 @@ bool AST::CppPrettyPrinter::VisitTypeSpecifierSeq(AST::TypeSpecifierSeq &node) {
   // definition's name.
   if (node.id_expression) {
     VISIT_AND_CHECK(node.id_expression);
+  }
+  // EDL: a bare template name fills its missing arguments with variant.
+  if (node.default_template_args > 0) {
+    print("<");
+    for (std::size_t i = 0; i < node.default_template_args; ++i) {
+      if (i) print(", ");
+      print("variant");
+    }
+    print(">");
   }
   return true;
 }

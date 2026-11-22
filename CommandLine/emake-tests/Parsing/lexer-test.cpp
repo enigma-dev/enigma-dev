@@ -169,6 +169,38 @@ TEST(LexerTest, MacroFunctions) {
   EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
 }
 
+// Names inside a macro expansion get the same keyword/definition typing as
+// names lexed straight from the code; `f(true)` through a wrapper macro must
+// not demote `true` to an identifier.
+TEST(LexerTest, MacroExpansionTranslatesNames) {
+  LexerTester lex("WRAP(true);", true);
+  AddMacro(lex, Macro("WRAP", {"arg"}, false, "(0, arg)", &lex.herr));
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_COMMA);
+  EXPECT_EQ(lex->ReadToken().type, TT_BOOLLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
+// A macro parameter may be named after an EDL keyword: the definition is
+// C++, where `repeat` is an ordinary identifier. GStextures.h's
+// `#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)`
+// is the live example; the keyword-typed token must still substitute.
+TEST(LexerTest, MacroParameterNamedAfterEdlKeyword) {
+  LexerTester lex("SETREP(1);", true);
+  AddMacro(lex, Macro("SETREP", {"repeat"}, false, "wrap(0, repeat)", &lex.herr));
+  EXPECT_EQ(lex->ReadToken().type, TT_IDENTIFIER);
+  EXPECT_EQ(lex->ReadToken().type, TT_BEGINPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_COMMA);
+  EXPECT_EQ(lex->ReadToken().type, TT_DECLITERAL);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDPARENTH);
+  EXPECT_EQ(lex->ReadToken().type, TT_SEMICOLON);
+  EXPECT_EQ(lex->ReadToken().type, TT_ENDOFCODE);
+}
+
 TEST(LexerTest, VariadicMacroFunctions) {
   LexerTester lex("VAR_FUNC(ident, 123);", true);
   AddMacro(lex, Macro("VAR_FUNC", {"arg"}, true, "(arg)", &lex.herr));

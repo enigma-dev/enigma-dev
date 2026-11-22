@@ -26,10 +26,11 @@
 namespace enigma {
 
 extern bool lineStippleEnable, msaaEnabled, alphaBlend, alphaTest;
+extern bool primitiveAaEnabled;
 extern unsigned short lineStipplePattern;
 extern unsigned char alphaTestRef;
 extern float drawPointSize, drawLineWidth;
-extern int drawFillMode, lineStippleScale;
+extern int drawFillMode, lineStippleScale, primitiveAaHint;
 
 void draw_set_state_dirty(bool dirty=true);
 bool draw_get_state_dirty();
@@ -46,7 +47,16 @@ namespace enigma_user
     rs_solid  // Normal render mode
   };
 
+  // GM8's primitive antialiasing hints. Values mirror the render-state
+  // hint constants (rs_nicest, rs_fastest, rs_dontcare).
+  enum {
+    pr_aa_nicest,
+    pr_aa_fastest,
+    pr_aa_dontcare,
+  };
+
   void draw_state_flush();
+  void draw_set_primitive_aa(bool enable, int quality);
   void draw_set_fill_mode(int fill);
   void draw_set_line_width(float value);
   void draw_set_point_size(float value);

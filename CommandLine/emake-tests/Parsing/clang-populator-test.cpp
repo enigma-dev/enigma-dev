@@ -7,7 +7,9 @@
 // is untouched); this suite is the only thing that drives it.
 
 #include <languages/clang_adapter.h>
+#include <parsing/macros.h>
 #include <Storage/definition.h>
+#include <System/builtins.h>
 #include <clang-c/Index.h>
 
 #include <gtest/gtest.h>
@@ -24,7 +26,7 @@ namespace {
 // Small fixture covering the T1 population surface: a namespace with a
 // nested class (two members + a method), a typedef, a two-value enum, a
 // global variable, an overloaded free function (one overload with a
-// defaulted parameter), and a class template.
+// defaulted parameter), a class template, and two macros.
 constexpr char kFixtureSource[] = R"cpp(
 namespace demo_ns {
   class Widget {
@@ -47,6 +49,12 @@ void greet(int x, int y = 5);
 int printf_like(const char* fmt, ...);
 
 
+template <typename T> T pick(T a, int n = 2);
+
+
+#define DEMO_PAREN_VALUE (demo_ns::Widget())
+#define DEMO_FUNC_MACRO(a, b) ((a) + (b))
+
 template <typename T>
 class Box {
  public:
@@ -55,6 +63,8 @@ class Box {
   int size() { return count; }
   T& at(int i);
 };
+template <typename K, typename V = Box<K>, int N = 3, long M = 0>
+class Holder {};
 )cpp";
 
 std::string WriteFixture() {
@@ -335,4 +345,75 @@ TEST(ClangPopulatorFullEngineProbe, DISABLED_FullEngineProbe) {
       std::cout << name << " flags: " << jdi::flagnames(def->flags) << std::endl;
     }
   }
+}
+
+// An object-like macro whose body starts with a paren is not function-like.
+TEST_F(ClangPopulatorTest, ParenBodiedObjectMacroIsNotFunctionLike) {
+  auto macros = ctx.get_macros();
+  auto value = macros.find("DEMO_PAREN_VALUE");
+  ASSERT_NE(value, macros.end());
+  EXPECT_FALSE(value->second->parameters.has_value());
+  EXPECT_FALSE(value->second->value.empty());
+
+  auto func = macros.find("DEMO_FUNC_MACRO");
+  ASSERT_NE(func, macros.end());
+  ASSERT_TRUE(func->second->parameters.has_value());
+  EXPECT_EQ(*func->second->parameters, (std::vector<std::string>{"a", "b"}));
+}
+
+// Function templates expose no arguments through clang_Cursor_getArgument;
+// their parameters and defaults still populate, from the ParmDecl children.
+TEST_F(ClangPopulatorTest, FunctionTemplateParameters) {
+  jdi::definition_scope* global = ctx.get_global();
+  ASSERT_NE(global, nullptr);
+  auto* pick = dynamic_cast<jdi::definition_function*>(global->find_local("pick"));
+  ASSERT_NE(pick, nullptr);
+  ASSERT_EQ(pick->overloads.size(), 1u);
+  auto& node = pick->overloads.begin()->second->referencers.top();
+  ASSERT_EQ(node.paramcount(), 2u);
+  const jdi::ref_stack::parameter_ct& params =
+      ((jdi::ref_stack::node_func*)&node)->params;
+  EXPECT_EQ(params[0].default_value, nullptr);
+  EXPECT_NE(params[1].default_value, nullptr);
+}
+
+// System search dirs come from the active compiler descriptor and can change
+// between parses (the IDE switching descriptors); each parse reads them anew.
+TEST(ClangSearchDirsTest, LaterParsesSeeNewSearchDirs) {
+  namespace fs = std::filesystem;
+  fs::path dir = fs::temp_directory_path() / "clang_search_dir_probe";
+  fs::create_directories(dir);
+  std::ofstream(dir / "search_dir_probe.h") << "int from_new_search_dir;\n";
+  fs::path src = fs::temp_directory_path() / "clang_search_dir_probe_main.hpp";
+  std::ofstream(src) << "#include <search_dir_probe.h>\n";
+
+  clang_adapter::ClangContext before;
+  before.parse_file(src.string());
+  ASSERT_NE(before.get_global(), nullptr);
+  EXPECT_EQ(before.get_global()->find_local("from_new_search_dir"), nullptr);
+
+  jdi::builtin_context().add_search_directory(dir.string());
+  clang_adapter::ClangContext after;
+  after.parse_file(src.string());
+  ASSERT_NE(after.get_global(), nullptr);
+  EXPECT_NE(after.get_global()->find_local("from_new_search_dir"), nullptr);
+}
+
+// Template parameter defaults populate as presence sentinels; a value
+// parameter's type reference is not mistaken for a default.
+TEST_F(ClangPopulatorTest, TemplateParameterDefaults) {
+  jdi::definition_scope* global = ctx.get_global();
+  ASSERT_NE(global, nullptr);
+  auto* holder = dynamic_cast<jdi::definition_template*>(global->find_local("Holder"));
+  ASSERT_NE(holder, nullptr);
+  ASSERT_EQ(holder->params.size(), 4u);
+  EXPECT_EQ(holder->params[0]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[1]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[2]->default_assignment, nullptr);
+  EXPECT_NE(holder->params[3]->default_assignment, nullptr);
+
+  auto* box = dynamic_cast<jdi::definition_template*>(global->find_local("Box"));
+  ASSERT_NE(box, nullptr);
+  ASSERT_EQ(box->params.size(), 1u);
+  EXPECT_EQ(box->params[0]->default_assignment, nullptr);
 }

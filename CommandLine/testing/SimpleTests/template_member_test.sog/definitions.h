@@ -9,3 +9,12 @@ struct map {
   V& at(K) { return slot; }
   V& operator[](K) { ++count; return slot; }
 };
+
+// Defaulted parameters, including one taking a value: a bare `ring` fills
+// only K, and C++ supplies the rest.
+template<typename K, typename V = double, int Capacity = 4>
+struct ring {
+  V slot;
+  V& operator[](K) { return slot; }
+  int operator()() { return sizeof(V) * 100 + Capacity; }
+};

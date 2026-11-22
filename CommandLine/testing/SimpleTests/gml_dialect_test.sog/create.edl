@@ -54,3 +54,16 @@ chain = eq = 3;
 gtest_assert_eq(chain, 1);
 if (eq = 4) hit = 2;
 gtest_assert_eq(hit, 1);
+
+// GML for-headers: clause separators are optional.
+fsum = 0;
+for (fi = 1 fi < 5 fi += 1) fsum += fi;
+gtest_assert_eq(fsum, 10);
+
+// GML has no void: a void call yields 0 in any value position.
+vl = ds_list_create();
+vr = ds_list_clear(vl);
+gtest_assert_eq(vr, 0);
+vr = ds_list_clear(vl) + 3;
+gtest_assert_eq(vr, 3);
+ds_list_clear(vl);  // statement position needs no lowering

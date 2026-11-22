@@ -37,10 +37,12 @@ bool drawStateDirty=false;
 namespace enigma {
 
 bool lineStippleEnable=false, msaaEnabled=true, alphaBlend=true, alphaTest=false;
+bool primitiveAaEnabled=false;
 unsigned short lineStipplePattern=0xFFFF;
 unsigned char alphaTestRef=0;
 float circleprecision=24, drawPointSize=1.0f, drawLineWidth=1.0f;
-int drawFillMode=enigma_user::rs_solid, lineStippleScale=1;
+int drawFillMode=enigma_user::rs_solid, lineStippleScale=1,
+    primitiveAaHint=enigma_user::pr_aa_dontcare;
 
 // handler for when a generic rendering state has changed
 void draw_set_state_dirty(bool dirty) { drawStateDirty = dirty; }
@@ -75,6 +77,12 @@ void draw_state_flush() {
 void draw_set_msaa_enabled(bool enable) {
   enigma::draw_set_state_dirty();
   enigma::msaaEnabled = enable;
+}
+
+void draw_set_primitive_aa(bool enable, int quality) {
+  enigma::draw_set_state_dirty();
+  enigma::primitiveAaEnabled = enable;
+  enigma::primitiveAaHint = quality;
 }
 
 void draw_enable_alphablend(bool enable) {
