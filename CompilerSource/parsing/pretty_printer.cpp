@@ -81,7 +81,7 @@ struct DeclaredNameCollector : AST::Visitor {
   bool VisitDeclarationStatement(AST::DeclarationStatement &node) final {
     if (node.clause) {
       for (auto &d : node.clause->declarators)
-        if (!d->name.content.empty()) out->insert(std::string(d->name.content));
+        if (d && !d->name.content.empty()) out->insert(std::string(d->name.content));
     }
     node.RecursiveSubVisit(*this);
     return false;
@@ -91,7 +91,7 @@ struct DeclaredNameCollector : AST::Visitor {
 
 void AST::CppPrettyPrinter::CollectDeclaredNames(AST::Node &root) {
   DeclaredNameCollector collector(&declared_names_);
-  root.accept(collector);
+  root.RecurusiveVisit(collector);
 }
 
 bool AST::CppPrettyPrinter::VisitIdentifierAccess(AST::IdentifierAccess &node) {

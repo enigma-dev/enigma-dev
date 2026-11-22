@@ -4647,6 +4647,26 @@ TEST(ParserTest, DotChainsClassifyAndLower) {
               HasSubstr("enigma::varaccess_c(enigma::varaccess_b(a))"));
 }
 
+// In script mode, a `var` local is a C++ local of the emitted function: every
+// later use prints bare, never through the instance accessor.
+TEST(ParserTest, ScriptDeclaredLocalsPrintBare) {
+  ParserTester test = ParserTester::CreateWithSetUp("var t; t = 1; t++; return t;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  const char *path = "./CompilerSource/parsing/output-script.txt";
+  {
+    std::ofstream ofs(path);
+    AST::CppPrettyPrinter v(ofs, test.context->language_fe, true);
+    v.CollectDeclaredNames(*node);
+    ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  }
+  std::ifstream in(path);
+  std::string out((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  EXPECT_THAT(out, Not(HasSubstr("varaccess_t")));
+  EXPECT_THAT(out, HasSubstr("t++"));
+  EXPECT_THAT(out, HasSubstr("return t"));
+}
+
 // The GM-idiom collision special: `foo = bar (100001).baz = qux` could read
 // as a call or as `bar` followed by a parenthesized statement. Ruling: a
 // name followed by ( is ALWAYS a function call; no newline heuristics, no
