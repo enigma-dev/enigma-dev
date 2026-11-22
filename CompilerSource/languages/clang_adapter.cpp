@@ -276,8 +276,10 @@ void ClangContext::add_define(const std::string& name, const std::string& value)
 }
 
 std::vector<const char*> ClangContext::build_args() {
-  static std::vector<std::string> system_include_strings;
-  static std::vector<const char*> system_include_args;
+  // Host arguments (clang's resource dir, the macOS SDK) are fixed for the
+  // process; compute them once.
+  static std::vector<std::string> host_args;
+  static bool host_args_ready = false;
 
   // Add C++ standard
   std::vector<const char*> args;
@@ -286,13 +288,13 @@ std::vector<const char*> ClangContext::build_args() {
   // truncate population of everything past the limit.
   args.push_back("-ferror-limit=0");
 
-  // Get system include paths (only compute once)
-  if (system_include_strings.empty()) {
+  if (!host_args_ready) {
+    host_args_ready = true;
     // clang's builtin headers (stddef.h, feature-detection intrinsics) come
     // from its resource directory; without it, libstdc++'s config macros
     // misdetect and its own headers self-contradict (the constexpr
     // redeclaration errors in <array>/<algorithmfwd>).
-    if (system_include_strings.empty()) {
+    {
       FILE* rd = popen("clang -print-resource-dir 2>/dev/null", "r");
       if (rd) {
         char buffer[512];
@@ -300,8 +302,8 @@ std::vector<const char*> ClangContext::build_args() {
           std::string dir = buffer;
           while (!dir.empty() && (dir.back() == '\n' || dir.back() == ' ')) dir.pop_back();
           if (!dir.empty()) {
-            system_include_strings.push_back("-resource-dir");
-            system_include_strings.push_back(dir);
+            host_args.push_back("-resource-dir");
+            host_args.push_back(dir);
           }
         }
         pclose(rd);
@@ -309,7 +311,7 @@ std::vector<const char*> ClangContext::build_args() {
     }
     #ifdef __APPLE__
       // macOS always uses clang, so add -stdlib=libc++
-      system_include_strings.push_back("-stdlib=libc++");
+      host_args.push_back("-stdlib=libc++");
       // Try to get SDK path
       std::string sdk_path = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk";
       FILE* pipe = popen("xcrun --show-sdk-path 2>/dev/null", "r");
@@ -329,8 +331,8 @@ std::vector<const char*> ClangContext::build_args() {
       }
 
       // Set the SDK root - this is the key to making clang find the right headers
-      system_include_strings.push_back("-isysroot");
-      system_include_strings.push_back(sdk_path);
+      host_args.push_back("-isysroot");
+      host_args.push_back(sdk_path);
 
       // Find the clang resource directory which contains builtin headers (stdarg.h, etc.)
       // This needs to be set via -resource-dir so clang looks there automatically
@@ -350,49 +352,40 @@ std::vector<const char*> ClangContext::build_args() {
         FILE* check = fopen((dir + "/include/stdarg.h").c_str(), "r");
         if (check) {
           fclose(check);
-          system_include_strings.push_back("-resource-dir");
-          system_include_strings.push_back(dir);
+          host_args.push_back("-resource-dir");
+          host_args.push_back(dir);
           break;
         }
       }
 
       // Add Homebrew include path for MacOSX
-      system_include_strings.push_back("-isystem");
-      system_include_strings.push_back("/opt/homebrew/include/");
+      host_args.push_back("-isystem");
+      host_args.push_back("/opt/homebrew/include/");
 
-      // Build the args vector from strings (strings persist in static storage)
-      for (const auto& str : system_include_strings) {
-        system_include_args.push_back(str.c_str());
-      }
-    #elif __linux__
-      // System include directories come from the ACTIVE compiler descriptor
-      // (Compilers/Linux/<compiler>.ey's Parser-Vars: `searchdirs`/`defines`),
-      // not from an independent popen scrape here. gcc_backend.cpp's
-      // establish_bearings already runs that descriptor's `searchdirs`
-      // command and registers the resulting directories into
-      // jdi::builtin_context() (System/builtins.h) -- and it does so from
-      // parse_ide_settings, the first thing lang_CPP::definitionsModified
-      // does, always before main_context->parse_file() reaches build_args().
-      // Reading the established list here (instead of re-querying clang++/g++
-      // on our own) means one descriptor governs both the codegen pipeline
-      // and this parse: point the IDE at a different .ey and both follow.
-      jdi::Context &builtin = jdi::builtin_context();
-      for (size_t i = 0; i < builtin.search_dir_count(); ++i) {
-        system_include_strings.push_back("-isystem");
-        system_include_strings.push_back(builtin.search_dir(i));
-      }
-
-      // Build the args vector from strings (strings persist in static storage)
-      for (const auto& str : system_include_strings) {
-        system_include_args.push_back(str.c_str());
-      }
-    #elif _WIN32
-      // Windows paths would go here
     #endif
   }
 
-  // Add system includes to args (pointers are valid because strings are static)
-  args.insert(args.end(), system_include_args.begin(), system_include_args.end());
+  system_args_ = host_args;
+#ifdef __linux__
+  // System include directories come from the ACTIVE compiler descriptor
+  // (Compilers/Linux/<compiler>.ey's Parser-Vars: `searchdirs`/`defines`),
+  // not from an independent popen scrape here. gcc_backend.cpp's
+  // establish_bearings already runs that descriptor's `searchdirs`
+  // command and registers the resulting directories into
+  // jdi::builtin_context() (System/builtins.h) -- and it does so from
+  // parse_ide_settings, the first thing lang_CPP::definitionsModified
+  // does, always before main_context->parse_file() reaches build_args().
+  // Reading the established list here (instead of re-querying clang++/g++
+  // on our own) means one descriptor governs both the codegen pipeline
+  // and this parse: point the IDE at a different .ey and both follow.
+  // Read on every parse, since the descriptor can change between them.
+  jdi::Context &builtin = jdi::builtin_context();
+  for (size_t i = 0; i < builtin.search_dir_count(); ++i) {
+    system_args_.push_back("-isystem");
+    system_args_.push_back(builtin.search_dir(i));
+  }
+#endif
+  for (const auto& str : system_args_) args.push_back(str.c_str());
 
   // Add quote include directories first (for -iquote, searched before -I for "" includes)
   // These are searched after the directory of the including file, but before -I directories

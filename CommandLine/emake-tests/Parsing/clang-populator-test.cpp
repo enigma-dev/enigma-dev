@@ -9,6 +9,7 @@
 #include <languages/clang_adapter.h>
 #include <parsing/macros.h>
 #include <Storage/definition.h>
+#include <System/builtins.h>
 #include <clang-c/Index.h>
 
 #include <gtest/gtest.h>
@@ -371,4 +372,26 @@ TEST_F(ClangPopulatorTest, FunctionTemplateParameters) {
       ((jdi::ref_stack::node_func*)&node)->params;
   EXPECT_EQ(params[0].default_value, nullptr);
   EXPECT_NE(params[1].default_value, nullptr);
+}
+
+// System search dirs come from the active compiler descriptor and can change
+// between parses (the IDE switching descriptors); each parse reads them anew.
+TEST(ClangSearchDirsTest, LaterParsesSeeNewSearchDirs) {
+  namespace fs = std::filesystem;
+  fs::path dir = fs::temp_directory_path() / "clang_search_dir_probe";
+  fs::create_directories(dir);
+  std::ofstream(dir / "search_dir_probe.h") << "int from_new_search_dir;\n";
+  fs::path src = fs::temp_directory_path() / "clang_search_dir_probe_main.hpp";
+  std::ofstream(src) << "#include <search_dir_probe.h>\n";
+
+  clang_adapter::ClangContext before;
+  before.parse_file(src.string());
+  ASSERT_NE(before.get_global(), nullptr);
+  EXPECT_EQ(before.get_global()->find_local("from_new_search_dir"), nullptr);
+
+  jdi::builtin_context().add_search_directory(dir.string());
+  clang_adapter::ClangContext after;
+  after.parse_file(src.string());
+  ASSERT_NE(after.get_global(), nullptr);
+  EXPECT_NE(after.get_global()->find_local("from_new_search_dir"), nullptr);
 }

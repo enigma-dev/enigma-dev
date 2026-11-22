@@ -89,6 +89,8 @@ private:
 
   // Build command line arguments for clang
   std::vector<const char*> build_args();
+  // Backing storage for the system arguments of the latest build_args().
+  std::vector<std::string> system_args_;
 
   // Initialize builtin primitive types (int, float, etc.)
   void init_builtin_types();
