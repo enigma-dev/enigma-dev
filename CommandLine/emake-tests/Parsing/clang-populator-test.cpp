@@ -7,6 +7,7 @@
 // is untouched); this suite is the only thing that drives it.
 
 #include <languages/clang_adapter.h>
+#include <parsing/macros.h>
 #include <Storage/definition.h>
 #include <clang-c/Index.h>
 
@@ -24,7 +25,7 @@ namespace {
 // Small fixture covering the T1 population surface: a namespace with a
 // nested class (two members + a method), a typedef, a two-value enum, a
 // global variable, an overloaded free function (one overload with a
-// defaulted parameter), and a class template.
+// defaulted parameter), a class template, and two macros.
 constexpr char kFixtureSource[] = R"cpp(
 namespace demo_ns {
   class Widget {
@@ -46,6 +47,9 @@ void greet(int x, int y = 5);
 
 int printf_like(const char* fmt, ...);
 
+
+#define DEMO_PAREN_VALUE (demo_ns::Widget())
+#define DEMO_FUNC_MACRO(a, b) ((a) + (b))
 
 template <typename T>
 class Box {
@@ -335,4 +339,18 @@ TEST(ClangPopulatorFullEngineProbe, DISABLED_FullEngineProbe) {
       std::cout << name << " flags: " << jdi::flagnames(def->flags) << std::endl;
     }
   }
+}
+
+// An object-like macro whose body starts with a paren is not function-like.
+TEST_F(ClangPopulatorTest, ParenBodiedObjectMacroIsNotFunctionLike) {
+  auto macros = ctx.get_macros();
+  auto value = macros.find("DEMO_PAREN_VALUE");
+  ASSERT_NE(value, macros.end());
+  EXPECT_FALSE(value->second->parameters.has_value());
+  EXPECT_FALSE(value->second->value.empty());
+
+  auto func = macros.find("DEMO_FUNC_MACRO");
+  ASSERT_NE(func, macros.end());
+  ASSERT_TRUE(func->second->parameters.has_value());
+  EXPECT_EQ(*func->second->parameters, (std::vector<std::string>{"a", "b"}));
 }

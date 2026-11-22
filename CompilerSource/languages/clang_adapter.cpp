@@ -1507,7 +1507,9 @@ void ClangContext::extract_macros() {
             std::string second_str = clang_getCString(second_token);
             clang_disposeString(second_token);
 
-            if (second_str == "(") {
+            // `#define f(x)` vs `#define v (x)`: only clang knows whether
+            // whitespace separated the name from the paren.
+            if (second_str == "(" && clang_Cursor_isMacroFunctionLike(cursor)) {
               is_function = true;
               // Extract parameters and track where ')' is found
               param_end_idx = 2;  // Start after '('
