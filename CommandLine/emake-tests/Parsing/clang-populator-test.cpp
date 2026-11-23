@@ -58,7 +58,7 @@ class Box {
 )cpp";
 
 std::string WriteFixture() {
-  std::filesystem::path path = std::filesystem::path("/tmp") / "clang_populator_test_fixture.hpp";
+  std::filesystem::path path = std::filesystem::temp_directory_path() / "clang_populator_test_fixture.hpp";
   std::ofstream out(path, std::ios::trunc);
   out << kFixtureSource;
   out.close();

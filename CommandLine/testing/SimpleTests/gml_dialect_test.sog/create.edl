@@ -54,3 +54,8 @@ chain = eq = 3;
 gtest_assert_eq(chain, 1);
 if (eq = 4) hit = 2;
 gtest_assert_eq(hit, 1);
+
+// GML for-headers: clause separators are optional.
+fsum = 0;
+for (fi = 1 fi < 5 fi += 1) fsum += fi;
+gtest_assert_eq(fsum, 10);

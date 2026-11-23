@@ -14,3 +14,5 @@ mingw-w64-x86_64-libpng
 mingw-w64-x86_64-zlib
 mingw-w64-x86_64-gtest
 mingw-w64-x86_64-lcov
+mingw-w64-x86_64-clang
+mingw-w64-x86_64-pkgconf

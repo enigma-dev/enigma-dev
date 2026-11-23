@@ -17,6 +17,7 @@
 
 #include "macros.h"
 
+#include <cctype>
 #include <cstring>
 #include <map>
 #include <string>
@@ -74,6 +75,17 @@ string Macro::ToString() const {
 constexpr char kConcatenationError[] =
     "Concatenation marker cannot appear at either end of a replacement list.";
 
+// Whether `tok` spells a name: macro definitions are C++, so a word our
+// lexer typed as an EDL keyword (`repeat`, `div`) is still a name there.
+static bool is_name_token(const Token &tok) {
+  std::string_view c = tok.content;
+  if (c.empty() || !(std::isalpha((unsigned char) c[0]) || c[0] == '_'))
+    return false;
+  for (char ch : c)
+    if (!(std::isalnum((unsigned char) ch) || ch == '_')) return false;
+  return true;
+}
+
 inline bool meaningful_span(const TokenVector &tokens, size_t b, size_t e) {
   for (auto i = b; i < e; ++i) {
     if (!tokens[i].PreprocessesAway()) return true;
@@ -109,7 +121,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
     // -------------------------------------------------------------------------
     // -- Handle argument names, VA_LIST, VA_OPT. ------------------------------
     // -------------------------------------------------------------------------
-    if (tokens[i].type == TT_IDENTIFIER) {
+    if (is_name_token(tokens[i])) {
       auto found = params_by_name.find(tokens[i].content);
       size_t arg_num = 0;
       if (found == params_by_name.end()) {
@@ -143,7 +155,7 @@ vector<Macro::FuncComponent> Macro::Componentize(
     } else if (tokens[i].type == TTM_STRINGIFY) {
       size_t j = i;
       while (++j < tokens.size() && tokens[j].PreprocessesAway());
-      if (j >= tokens.size() || tokens[j].type != TT_IDENTIFIER) {
+      if (j >= tokens.size() || !is_name_token(tokens[j])) {
         herr->Error(tokens[i]) << "# must be followed by a parameter name";
         continue;
       }

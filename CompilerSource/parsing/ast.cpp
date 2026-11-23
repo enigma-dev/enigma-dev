@@ -19,6 +19,7 @@
 #include "parser.h"
 #include "parser/collect_variables.h"  // collect_variables
 #include "macro_helper.h"
+#include "backend/ideprint.h"
 
 #include <string>
 #include <memory>
@@ -56,6 +57,8 @@ AST AST::Parse(std::string_view code, const ParseContext* ctex) {
 }
 
 void AST::ExtractDeclarations(ParsedScope *destination_scope, CompileState *cs) {
+  if (getenv("EDL_COLLECT_DEBUG"))
+    edbg << "=== COLLECT SOURCE ===\n" << std::string(code) << "\n=== END SOURCE ===\n";
   std::cout << "collecting variables..." << std::flush;
   const ParseContext &ctex = lexer->GetContext();
   collect_variables(ctex.language_fe, this, destination_scope, ctex.script_names, cs);
@@ -106,13 +109,8 @@ jdi::full_type AST::TypeSpecifierSeq::to_jdi_fulltype() {
   // separately from the AST declarator-expression-tree by the owning
   // DeclaratorClause (see DeclaratorClause::to_jdi_fulltype). Returned by value
   // because downstream callers `swap_in` the result into JDI structures.
-  //
-  // TODO(jdi2): `flags` is std::size_t, but jdi::full_type's flag-taking ctor
-  // takes `int` (even though its own `flags` field is unsigned long). The cast
-  // is intentionally omitted so the narrowing shows up as a build warning rather
-  // than being silenced; reconcile these flag widths when integrating the
-  // libclang-based JDI replacement (jdi2).
-  return {Definition(), flags};
+  // `flags` is a size_t bitmask; JDI stores flags as unsigned long.
+  return jdi::full_type(Definition(), flags);
 }
 
 // Combine the shared spec-seq with the i-th declarator's expression-tree into
@@ -123,9 +121,6 @@ jdi::full_type AST::DeclaratorClause::to_jdi_fulltype(std::size_t i) {
   jdi::ref_stack rt;
   if (i < declarators.size())
     walk_declarator_expr(declarators[i]->declarator_expr.get(), rt);
-  // TODO(jdi2): same flags-width narrowing as TypeSpecifierSeq::to_jdi_fulltype
-  // (here jdi::full_type's own `flags` is unsigned long, the ctor takes int). Cast
-  // omitted so it warns; reconcile during the jdi2 integration.
   return jdi::full_type{base.def, rt, base.flags};
 }
 
@@ -183,7 +178,6 @@ static bool arg_to_parameter(AST::Node *arg, jdi::ref_stack::parameter &out) {
     jdi::ref_stack rt;
     if (!walk_declarator_expr(arg, rt)) return false;
     jdi::full_type base = spec->to_jdi_fulltype();
-    // TODO(jdi2): flags-width narrowing (unsigned long -> int), as above. Cast omitted to warn.
     jdi::full_type ft{base.def, rt, base.flags};
     out.swap_in(ft);
     return true;

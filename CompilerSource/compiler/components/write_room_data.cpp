@@ -36,9 +36,11 @@
 using namespace std;
 
 #include "backend/GameData.h"
+#include "backend/ideprint.h"
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
 
+#undef flushl
 #define flushl '\n' << flush
 #define flushs flush
 
@@ -91,12 +93,24 @@ int lang_CPP::compile_writeRoomData(const GameData &game, const CompileState &st
     wto << "  std::vector<inst> insts_" << room.id() << " = {\n";
     int modme = 0;
     for (const auto &instance : room->instances()) {
-      wto << "{" <<
-        instance.id() << "," <<
-        instance.object_type() << "," <<
-        instance.x() << "," <<
-        instance.y() << "},";
+      if (instance.object_type().empty()) {
+        // Room data can reference an object that no longer exists; the bare
+        // id would not compile. Keep the row visible for debugging.
+        wto << "/*{" <<
+          instance.id() << ",MISSING!," <<
+          instance.x() << "," <<
+          instance.y() << "},*/";
+        user << "Warning: room `" << room.name << "' instance "
+             << instance.id() << " references a nonexistent object; "
+             << "instance dropped.\n";
+      } else {
+        wto << "{" <<
+          instance.id() << "," <<
+          instance.object_type() << "," <<
+          instance.x() << "," <<
+          instance.y() << "},";
         if (++modme % 16 == 0) wto << "\n        ";
+      }
       if (instance.id() > room_highinstid)
         room_highinstid = instance.id();
     }

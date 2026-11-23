@@ -65,8 +65,8 @@ namespace jdi {
 
     full_type(); ///< Default constructor.
     full_type(jdi::definition*); ///< Construct with only a definition.
-    full_type(jdi::definition* d, int f); ///< Construct with a definition and flags, but no refs.
-    full_type(jdi::definition*, const jdi::ref_stack&, int); ///< Construct from individual components. Copies the given \c ref_stack, so may be slow.
+    full_type(jdi::definition* d, unsigned long f); ///< Construct with a definition and flags, but no refs.
+    full_type(jdi::definition*, const jdi::ref_stack&, unsigned long); ///< Construct from individual components. Copies the given \c ref_stack, so may be slow.
     full_type(const full_type&); ///< Copy constructor. Makes a copy, so slowish.
     full_type &operator=(const full_type&) = delete;
     full_type &operator=(full_type&&);

@@ -8,3 +8,4 @@ yaml-cpp
 rapidjson
 googletest
 lcov
+llvm

@@ -4544,6 +4544,31 @@ TEST(ParserTest, SemanticAnnotatorClassifiesDotAccess) {
   }
 }
 
+// GML for-headers don't need semicolons between clauses; the expression
+// grammar bounds each one.
+TEST(ParserTest, ForHeaderOptionalSemicolons) {
+  ParserTester test = ParserTester::CreateWithoutCpp(
+      "for (b = 1 b < 11 b += 1) c = c + b;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  std::string out = v.GetPrintedCode();
+  EXPECT_THAT(out, HasSubstr("b < 11"));
+  EXPECT_THAT(out, HasSubstr("b += 1"));
+}
+
+// `not` is a C++ alternative token; it prints as itself, but needs a
+// separator or it glues onto the operand (`notfoo`).
+TEST(ParserTest, WordNotPrintsSpaced) {
+  ParserTester test = ParserTester::CreateWithoutCpp("if (not a) b = 1;");
+  auto node = test->ParseCode();
+  ASSERT_NE(node, nullptr);
+  AST::CppPrettyPrinter v;
+  ASSERT_TRUE(v.VisitCode(*node->As<AST::CodeBlock>()));
+  EXPECT_THAT(v.GetPrintedCode(), HasSubstr("not a"));
+}
+
 // GML's = compares in value position; only statement-position = assigns.
 // The annotator marks value-position = nodes and the printer emits ==.
 // The parse groups = at assignment precedence, but flat printing means the

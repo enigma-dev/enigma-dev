@@ -2512,11 +2512,22 @@ std::unique_ptr<AST::ForLoop> ParseForLoop() {
     is_conventional = false;
     token = lexer->ReadToken();
   }
-  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
+  // GML lets the clauses run together (`for (b = 1 b < 11 b += 1)`); the
+  // expression grammar bounds each clause, so the separators are optional
+  // outside strict mode.
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  } else if (mode == SyntaxMode::STRICT) {
+    require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop initializer");
+  }
   if (token.type != TT_SEMICOLON && token.type != TT_ENDPARENTH) {
     cond = TryParseControlExpression(SyntaxMode::GML);
   }
-  require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
+  if (token.type == TT_SEMICOLON) {
+    token = lexer->ReadToken();
+  } else if (mode == SyntaxMode::STRICT) {
+    require_token(TT_SEMICOLON, "Expected semicolon (';') after for-loop condition");
+  }
   if (token.type != TT_SEMICOLON && token.type != TT_ENDPARENTH) {
     incr = ParseExpression(Precedence::kAll);
   }

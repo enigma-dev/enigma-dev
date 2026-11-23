@@ -27,7 +27,7 @@ ifeq ($(TESTS), TRUE)
 	# -lclang: clang-populator-test.cpp (JDI2 T1) calls libclang functions
 	# (clang_Cursor_isNull, ...) directly. libcompileEGMf.so already depends
 	# on libclang, but the test binary references its symbols itself too.
-	LDFLAGS += -lpthread -lgtest_main -lgtest -lclang
+	LDFLAGS += -lpthread -lgtest_main -lgtest $(LIBCLANG_LIBS)
 else
 	TARGET = ../../emake
 	SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)

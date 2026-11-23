@@ -20,3 +20,4 @@ libxext
 libxinerama
 libxcursor 
 libxi
+clang

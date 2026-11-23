@@ -18,6 +18,7 @@
 #include <JDI/src/System/builtins.h>
 #include "ast.h"
 
+#include <cctype>
 #include <iomanip>
 
 using namespace enigma::parsing;
@@ -288,6 +289,12 @@ bool AST::CppPrettyPrinter::VisitUnaryPostfixExpression(AST::UnaryPostfixExpress
 
 bool AST::CppPrettyPrinter::VisitUnaryPrefixExpression(AST::UnaryPrefixExpression &node) {
   print(node.operation.token);
+  // Word operators (`not`) are valid C++ alternative tokens, but unlike
+  // symbols they need a separator or they glue onto the operand.
+  if (!node.operation.token.empty() &&
+      isalpha(static_cast<unsigned char>(node.operation.token.back()))) {
+    print(" ");
+  }
   VISIT_AND_CHECK(node.operand);
   return true;
 }

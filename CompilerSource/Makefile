@@ -16,7 +16,7 @@ endif
 
 PROTO_DIR := $(SHARED_SRC_DIR)/protos
 CXXFLAGS += -fPIC -I. -I./JDI/src -I$(SHARED_SRC_DIR) -I$(SHARED_SRC_DIR)/libpng-util -I$(PROTO_DIR)/$(OBJ_DIR) $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES)) $(PROTOBUF_CFLAGS) $(ZLIB_CFLAGS) $(FALLBACK_INC)
-LDFLAGS += -shared -L../ -Wl,-rpath,./ $(SHARED_LDFLAGS) -lProtocols $(PROTOBUF_LDFLAGS) $(PROTOBUF_LIBS) -lENIGMAShared $(ZLIB_LIBS) -lclang
+LDFLAGS += -shared -L../ -Wl,-rpath,./ $(SHARED_LDFLAGS) -lProtocols $(PROTOBUF_LDFLAGS) $(PROTOBUF_LIBS) -lENIGMAShared $(ZLIB_LIBS) $(LIBCLANG_LIBS)
 ifeq ($(OS), Linux)
 	LDFLAGS += -lstdc++fs
 endif
