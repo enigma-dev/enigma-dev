@@ -71,6 +71,17 @@ ifeq ($(OS), Darwin)
 		SHARED_LDFLAGS := -Wl,-undefined,dynamic_lookup
 	endif
 endif
+# libclang (JDI2). Homebrew's LLVM is keg-only; link its dylib by path so
+# its libc++ doesn't shadow the system one on the library search path.
+LIBCLANG_LIBS := -lclang
+ifeq ($(OS), Darwin)
+	LIBCLANG_PREFIX ?= $(shell brew --prefix llvm 2>/dev/null)
+	ifneq ($(LIBCLANG_PREFIX),)
+		CXXFLAGS += -isystem $(LIBCLANG_PREFIX)/include
+		LIBCLANG_LIBS := $(LIBCLANG_PREFIX)/lib/libclang.dylib -Wl,-rpath,$(LIBCLANG_PREFIX)/lib
+	endif
+endif
+
 # FreeBSD include and lib folders
 ifeq ($(OS), FreeBSD)
 	CXXFLAGS += -I/usr/local/include
