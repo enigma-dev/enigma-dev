@@ -12,7 +12,316 @@
 #include <chrono> // std::chrono::microseconds
 #include <thread> // sleep_for
 
+#include "Platforms/General/PFmain.h"
+#include "Platforms/General/fileio.h"
+#include "Platforms/General/PFfilemanip.h"
+#include "Universal_System/estring.h"
+#include "exepath/exepath.hpp"
+
+#if (defined(_WIN32) || defined(_WIN64))
+#include <windows.h>
+#include <shlobj.h>
+#include <knownfolders.h>
+#elif (defined(__APPLE__) && defined(__MACH__))
+#include <sysdir.h>
+#include <climits>
+#include <cstdlib>
+#include <cstdio>
+#else
+#include <climits>
+#include <cstdlib>
+#include <cstdio>
+#endif
+
+#include <filesystem>
+
+namespace enigma_user {
+
+std::string filename_addslash(const std::string& dir) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  if (!dir.empty() && *dir.rbegin() != '\\') return dir + '\\';
+  #else
+  if (!dir.empty() && *dir.rbegin() != '/') return dir + '/';
+  #endif
+  return dir;
+}
+
+std::string filename_join(std::string prefix, std::string suffix) {
+  return filename_addslash(prefix) + suffix;
+}
+
+std::string filename_absolute(std::string fname, bool must_exist) {
+  std::string result;
+  std::error_code ec;
+  if (must_exist) {
+    result = std::filesystem::canonical(fname, ec).u8string();
+  } else {
+    result = std::filesystem::weakly_canonical(fname, ec).u8string();
+  }
+  if (ec.value() == 0) {
+    return result;
+  }
+  return "";
+}
+
+namespace {
+
+std::string directory_get_special_path(int dtype) {
+  std::string result;
+  #if (defined(_WIN32) || defined(_WIN64))
+  wchar_t *ptr = nullptr;
+  KNOWNFOLDERID fid;
+  switch (dtype) {
+    case  0: { fid = FOLDERID_Desktop;   break; }
+    case  1: { fid = FOLDERID_Documents; break; }
+    case  2: { fid = FOLDERID_Downloads; break; }
+    case  3: { fid = FOLDERID_Music;     break; }
+    case  4: { fid = FOLDERID_Pictures;  break; }
+    case  5: { fid = FOLDERID_Videos;    break; }
+    case  6: { fid = FOLDERID_Public;    break; }
+    default: { fid = FOLDERID_Desktop;   break; }
+  }
+  if (SUCCEEDED(SHGetKnownFolderPath(fid, KF_FLAG_CREATE | KF_FLAG_DONT_UNEXPAND, nullptr, &ptr))) {
+    result = shorten(ptr); 
+    result = filename_addslash(filename_absolute(result));
+  }
+  CoTaskMemFree(ptr); 
+  #elif (defined(__APPLE__) && defined(__MACH__))
+  char buf[PATH_MAX];
+  sysdir_search_path_directory_t fid;
+  sysdir_search_path_enumeration_state state;
+  switch (dtype) {
+    case  0: { fid = SYSDIR_DIRECTORY_DESKTOP;       break; }
+    case  1: { fid = SYSDIR_DIRECTORY_DOCUMENT;      break; }
+    case  2: { fid = SYSDIR_DIRECTORY_DOWNLOADS;     break; }
+    case  3: { fid = SYSDIR_DIRECTORY_MUSIC;         break; }
+    case  4: { fid = SYSDIR_DIRECTORY_PICTURES;      break; }
+    case  5: { fid = SYSDIR_DIRECTORY_MOVIES;        break; }
+    case  6: { fid = SYSDIR_DIRECTORY_SHARED_PUBLIC; break; }
+    default: { fid = SYSDIR_DIRECTORY_DESKTOP;       break; }
+  }
+  state = sysdir_start_search_path_enumeration(fid, SYSDIR_DOMAIN_MASK_USER);
+  while ((state = sysdir_get_next_search_path_enumeration(state, buf))) {
+    if (buf[0] == '~') {
+      result = buf; 
+      result.replace(0, 1, environment_get_variable("HOME"));
+      result = filename_addslash(filename_absolute(result));
+      break;
+    }
+  }
+  #elif !defined(__ANDROID__)
+  std::string fid;
+  switch (dtype) {
+    case  0: { fid = "XDG_DESKTOP_DIR=";     break; }
+    case  1: { fid = "XDG_DOCUMENTS_DIR=";   break; }
+    case  2: { fid = "XDG_DOWNLOAD_DIR=";    break; }
+    case  3: { fid = "XDG_MUSIC_DIR=";       break; }
+    case  4: { fid = "XDG_PICTURES_DIR=";    break; }
+    case  5: { fid = "XDG_VIDEOS_DIR=";      break; }
+    case  6: { fid = "XDG_PUBLICSHARE_DIR="; break; }
+    default: { fid = "XDG_DESKTOP_DIR=";     break; }
+  }
+  if (filename_absolute(environment_get_variable("HOME")).empty()) return result;
+  std::string conf = filename_addslash(filename_absolute(environment_get_variable("HOME"))) + ".config/user-dirs.dirs";
+  if (file_exists(conf)) {
+    int dirs = file_text_open_read(conf);
+    if (dirs != -1) {
+      while (!file_text_eof(dirs)) {
+        std::string line = file_text_read_string(dirs);
+        file_text_readln(dirs);
+        size_t pos = line.find(fid, 0);
+        if (pos != std::string::npos) {
+          FILE *fp = popen(("echo " + line.substr(pos + fid.length())).c_str(), "r");
+          if (fp) {
+            char buf[PATH_MAX];
+            if (fgets(buf, sizeof(buf), fp)) {
+              std::string str = buf;
+              size_t pos = str.find("\n", strlen(buf) - 1);
+              if (pos != std::string::npos) {
+                str.replace(pos, 1, "");
+              }
+              if (!directory_exists(str)) {
+                directory_create(str);
+              }
+              result = filename_addslash(filename_absolute(str));
+            }
+            pclose(fp);
+          }
+        }
+      }
+      file_text_close(dirs);
+    }
+  }
+  #endif
+  return result;
+}
+
+std::string directory_get_desktop_path() {
+  return directory_get_special_path(0);
+}
+
+std::string directory_get_documents_path() {
+  return directory_get_special_path(1);
+}
+
+std::string directory_get_downloads_path() {
+  return directory_get_special_path(2);
+}
+
+std::string directory_get_music_path() {
+  return directory_get_special_path(3);
+}
+
+std::string directory_get_pictures_path() {
+  return directory_get_special_path(4);
+}
+
+std::string directory_get_videos_path() {
+  return directory_get_special_path(5);
+}
+
+std::string directory_get_public_path() {
+  return directory_get_special_path(6);
+}
+
+} // anonymous namespace
+
+std::string environment_get_variable(std::string name) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  std::string value; 
+  DWORD length = 0;
+  std::wstring u8name = widen(name);
+  if ((length = GetEnvironmentVariableW(u8name.c_str(), nullptr, 0)) != 0) {
+    wchar_t *buffer = new wchar_t[length]();
+    if (GetEnvironmentVariableW(u8name.c_str(), buffer, length) != 0) {
+      value = shorten(buffer);
+    }
+    delete[] buffer;
+  }
+  return value;
+  #else
+  char *value = getenv(name.c_str());
+  return value ? value : "";
+  #endif
+}
+
+bool environment_get_variable_exists(std::string name) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  std::wstring u8name = widen(name);
+  return (!(GetEnvironmentVariableW(u8name.c_str(), nullptr, 0) == 0 && 
+    GetLastError() == ERROR_ENVVAR_NOT_FOUND));
+  #else
+  return (getenv(name.c_str()) != nullptr);
+  #endif
+}
+
+bool environment_set_variable(std::string name, std::string value) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  std::wstring u8name = widen(name); 
+  std::wstring u8value = widen(value);
+  return (SetEnvironmentVariableW(u8name.c_str(), u8value.c_str()) != 0);
+  #else
+  return (setenv(name.c_str(), value.c_str(), 1) == 0);
+  #endif
+}
+
+bool environment_unset_variable(std::string name) {
+  #if (defined(_WIN32) || defined(_WIN64))
+  std::wstring u8name = widen(name);
+  return (SetEnvironmentVariableW(u8name.c_str(), nullptr) != 0);
+  #else
+  return (unsetenv(name.c_str()) == 0);
+  #endif
+}
+
+std::string environment_expand_variables(std::string str) {
+  if (str.find("${") == std::string::npos) return str;
+  std::string pre = str.substr(0, str.find("${"));
+  std::string post = str.substr(str.find("${") + 2);
+  if (post.find('}') == std::string::npos) return str;
+  std::string variable = post.substr(0, post.find('}'));
+  size_t pos = post.find('}') + 1; post = post.substr(pos);
+  std::string value = environment_get_variable(variable);
+  if (!environment_get_variable_exists(variable))
+    return str.substr(0, pos) + environment_expand_variables(str.substr(pos));
+  return environment_expand_variables(pre + value + post);
+}
+
+bool set_working_directory(std::string dname) {
+  std::error_code ec;
+  std::filesystem::current_path(dname, ec);
+  if (ec.value() == 0) {
+    working_directory = filename_addslash(std::filesystem::current_path(ec).u8string());
+    return (ec.value() == 0);
+  }
+  return false;
+}
+
+} // namespace enigma_user
+
 namespace enigma {
+
+void initialize_directory_globals() {
+  std::error_code ec;
+  enigma_user::program_pathname  = exepath::exepath();
+  enigma_user::program_directory = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_path(enigma_user::program_pathname) : "");
+  enigma_user::program_filename  = ((!enigma_user::program_pathname.empty()) ? enigma_user::filename_name(enigma_user::program_pathname) : "");
+  
+  enigma_user::desktop_directory = enigma_user::directory_get_desktop_path();
+  enigma_user::documents_directory = enigma_user::directory_get_documents_path();
+  enigma_user::downloads_directory = enigma_user::directory_get_downloads_path();
+  enigma_user::music_directory = enigma_user::directory_get_music_path();
+  enigma_user::pictures_directory = enigma_user::directory_get_pictures_path();
+  enigma_user::videos_directory = enigma_user::directory_get_videos_path();
+  enigma_user::public_directory = enigma_user::directory_get_public_path();
+  
+  #if (defined(__APPLE__) && defined(__MACH__))
+
+  /*
+    This function will set the working directory to the app bundle's Resources folder 
+    like GM4Mac 7.5, GMStudio 1.4, GMS 2.x and most Mac apps do, if the executable is in
+    an app bundle. If the executable is not in an app bundle, use unix working directory
+    
+    ONLY use working_directory for loading read-only included files! When SAVING, use game_save_id
+    
+    *_bname = base name - removes the full path from the string leaving just the file or folder name
+    *_dname = directory name - removes final slash and base name from full path to file or folder name
+    *_pname = path name - removes the base name from a full path while keeping the dir and final slash
+    *_ename = extension name - includes everything in bname at and following the period if one exists
+  */
+
+  const std::string exe_pname = enigma_user::program_directory;                  // = "/Path/To/YourAppBundle.app/Contents/MacOS/";
+  const std::string macos_dname = enigma_user::filename_dir(exe_pname);          // = "/Path/To/YourAppBundle.app/Contents/MacOS";
+  const std::string macos_bname = enigma_user::filename_name(macos_dname);       // = "MacOS";
+  const std::string contents_dname = enigma_user::filename_dir(macos_dname);     // = "/Path/To/YourAppBundle.app/Contents";
+  const std::string contents_bname = enigma_user::filename_name(contents_dname); // = "Contents";
+  const std::string app_dname = enigma_user::filename_dir(contents_dname);       // = "/Path/To/YourAppBundle.app";
+  const std::string app_ename = enigma_user::filename_ext(app_dname);            // = ".app";
+  const std::string contents_pname = enigma_user::filename_path(macos_dname);    // = "/Path/To/YourAppBundle.app/Contents/";
+  const std::string resources_pname = contents_pname + "Resources/";             // = "/Path/To/YourAppBundle.app/Contents/Resources/";
+
+  // if "/Path/To/YourAppBundle.app/Contents/MacOS/YourExe" and "/Path/To/YourAppBundle.app/Contents/Resources/" exists
+  if (macos_bname == "MacOS" && contents_bname == "Contents" && app_ename == ".app" && enigma_user::directory_exists(enigma_user::filename_dir(resources_pname))) {
+    // set working directory to "/Path/To/YourAppBundle.app/Contents/Resources/" and allow loading normal included files
+    enigma_user::set_working_directory(enigma_user::filename_absolute(enigma_user::filename_dir(resources_pname)));
+  }
+
+  #endif
+  
+  enigma_user::working_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::current_path(ec).u8string()));
+  enigma_user::temp_directory = enigma_user::filename_addslash(enigma_user::filename_absolute(std::filesystem::temp_directory_path(ec).u8string()));
+  
+  #if (defined(_WIN32) || defined(_WIN64))
+  std::string localappdata = enigma_user::filename_absolute(enigma_user::environment_get_variable("LOCALAPPDATA"));
+  if (localappdata.empty()) return; while (!localappdata.empty() && (*localappdata.rbegin() == '\\' || *localappdata.rbegin() == '/')) { localappdata.pop_back(); } 
+  std::filesystem::create_directories(localappdata, ec); enigma_user::game_save_id = enigma_user::filename_addslash(localappdata) + 
+    enigma_user::filename_addslash(std::to_string(enigma_user::game_id));
+  #else
+  std::string home = enigma_user::filename_addslash(enigma_user::filename_absolute(enigma_user::environment_get_variable("HOME"))); if (home.empty()) return; 
+  std::filesystem::create_directories(home + std::string(".config"), ec); enigma_user::game_save_id = home + std::string(".config/") + 
+    enigma_user::filename_addslash(std::to_string(enigma_user::game_id));
+  #endif
+}
 
 std::queue<std::map<std::string, variant>> posted_async_events;
 
@@ -248,6 +557,15 @@ int async_load;
 const int os_browser = browser_not_a_browser;
 std::string working_directory = "";
 std::string program_directory = "";
+std::string program_pathname = "";
+std::string program_filename = "";
+std::string desktop_directory = "";
+std::string documents_directory = "";
+std::string downloads_directory = "";
+std::string music_directory = "";
+std::string pictures_directory = "";
+std::string videos_directory = "";
+std::string public_directory = "";
 std::string temp_directory = "";
 std::string game_save_id = "";
 std::string keyboard_string = "";
