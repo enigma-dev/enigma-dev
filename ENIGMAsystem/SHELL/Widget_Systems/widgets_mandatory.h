@@ -1,5 +1,4 @@
-/** Copyright (C) 2008-2017 Josh Ventura
-*** Copyright (C) 2014 Robert B. Colton
+/** Copyright (C) 2026 Samuel Venable
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,11 +18,11 @@
 #ifndef ENIGMA_WIDGETS_MANDATORY_H
 #define ENIGMA_WIDGETS_MANDATORY_H
 
-#include "libEGMstd.h"
-
 #include <string>
 
-#define DEBUG_MESSAGE(msg, severity) ::enigma_user::show_debug_message((std::string) (msg) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
+#include "libEGMstd.h"
+
+#define DEBUG_MESSAGE(str, severity) ::enigma_user::show_debug_message((std::string) (str) + " | " __FILE__ ":" + std::to_string(__LINE__), (severity))
 
 enum MESSAGE_TYPE : int {
   /// Diagnostic information not indicative of a problem.
@@ -51,7 +50,8 @@ enum MESSAGE_TYPE : int {
 }; 
 
 namespace enigma {
-  
+
+  bool widget_system_initialize();
   inline std::string error_type(MESSAGE_TYPE t) {
     switch(t) {
       case M_INFO: return "INFO";
@@ -63,36 +63,30 @@ namespace enigma {
       default: return "ERROR";
     }
   }
-  
-  // This function is called at the beginning of the game to allow the widget system to load.
-  bool widget_system_initialize();
-  extern std::string gameInfoText, gameInfoCaption;
-  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
-}
+
+} // namespace enigma
 
 namespace enigma_user {
 
-bool show_question(std::string str);
+  void show_info();
+  inline void action_show_info() { 
+    show_info();
+  }
+  int show_message(std::string str);
+  template<typename T> int show_message(T str) { 
+    return show_message(enigma_user::toString(str));
+  }
+  inline int action_show_message(string str) {
+    return show_message(str);
+  }
+  int show_question(std::string str);
+  std::string get_string(std::string str, std::string def);
+  double get_integer(std::string str, double def);
+  int show_debug_message(std::string str, MESSAGE_TYPE type = M_INFO);
+  inline int show_error(std::string str, const bool abort) {
+    return show_debug_message(str, (abort) ? M_FATAL_USER_ERROR : M_USER_ERROR);
+  }
 
-void show_debug_message(std::string msg, MESSAGE_TYPE type = M_INFO);
-
-// This obviously displays an error message.
-// It should offer a button to end the game, and if not fatal, a button to ignore the error.
-inline void show_error(std::string msg, const bool fatal) {
-   show_debug_message(msg, (fatal) ? M_FATAL_USER_ERROR : M_USER_ERROR);
-}
-
-int show_message(const std::string &msg);
-template<typename T> int show_message(T msg) { return show_message(enigma_user::toString(msg)); }
-inline int action_show_message(string msg) {
-  return show_message(msg);
-}
-void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
-	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
-	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
-inline void action_show_info() { show_info(); }
-
-}
+} // namespace enigma_user
 
 #endif

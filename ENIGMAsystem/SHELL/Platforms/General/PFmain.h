@@ -79,7 +79,17 @@ namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
+extern std::string program_pathname;
+extern std::string program_filename;
+extern std::string desktop_directory;
+extern std::string documents_directory;
+extern std::string downloads_directory;
+extern std::string music_directory;
+extern std::string pictures_directory;
+extern std::string videos_directory;
+extern std::string public_directory;
 extern std::string temp_directory;
+
 extern std::string keyboard_string;
 extern double fps;
 extern unsigned long delta_time;
@@ -91,6 +101,16 @@ extern unsigned long current_time;
  * 
  */
 extern int async_load;
+
+std::string filename_addslash(const std::string& dir);
+std::string filename_join(std::string prefix, std::string suffix);
+std::string filename_absolute(std::string fname, bool must_exist = true);
+bool set_working_directory(std::string dname);
+std::string environment_get_variable(std::string name);
+bool environment_get_variable_exists(std::string name);
+bool environment_set_variable(std::string name, std::string value);
+bool environment_unset_variable(std::string name);
+std::string environment_expand_variables(std::string str);
 
 void sleep(int ms);
 unsigned long get_timer();  // number of microseconds since the game started
@@ -115,11 +135,6 @@ void url_open(std::string url);
 void action_webpage(const std::string& url);
 
 void set_program_priority(int value);
-std::string filename_absolute(std::string fname);
-std::string filename_join(std::string prefix, std::string suffix);
-std::string environment_get_variable(std::string name);
-bool environment_set_variable(const std::string& name, const std::string& value);
-bool set_working_directory(std::string dname);
 
 }  // namespace enigma_user
 
